@@ -1,0 +1,68 @@
+<div id="heading_and_link">
+  <h1>New search for images</h1>
+  <p>by <%= @image_search.user.login %></p>
+</div>
+
+<h3>Criteria:</h3>
+<% form_for @image_search do |f| %>
+  <table class="search_form">
+    <th><%= f.label :scan_procedures %></th>
+    <td><%= collection_select(:scan_procedure, :ids, ScanProcedure.find(:all, :order => 'codename ASC'), :id, :codename, {}, {:multiple =>  true}) %></td>
+  </table>
+  <table class="search_form">
+    <tr>
+      <th><%= f.label :enum %></th>
+      <td><%= f.text_field :enum %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :rmr %></th>
+      <td><%= f.text_field :rmr %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :series_description %></th>
+      <td><%= f.text_field :series_description %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :path %></th>
+      <td><%= f.text_field :path %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :scan_date_before %></th>
+      <td><%= f.date_select :latest_timestamp, :start_year => 1995, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :scan_date_after %></th>
+      <td><%= f.date_select :earliest_timestamp, :start_year => 1995, :include_blank => true %></td>
+    </tr>
+  </table>
+  <table class="search_form">
+    <tr>
+      <th><%= f.label :gender %></th>
+      <td><%= select :image_search, :gender, { "M" => 1, "F" => 2 }, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :minimum_age %></th>
+      <td><%= select :image_search, :min_age, (1..110).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_age %></th>
+      <td><%= select :image_search, :max_age, (1..110).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :minimum_education_years %></th>
+      <td><%= select :image_search, :min_ed_years, (0..25).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_education_years %></th>
+      <td><%= select :image_search, :max_ed_years, (0..25).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :apoe_status %></th>
+      <td><%= select :image_search, :apoe_status, { "negative" => 0, "positive" => 1 }, :include_blank => true %></td>
+    </tr>
+  </table>
+  
+  <%= clearing_br %>
+  <%= f.submit "Search" %>
+  
+<% end %>

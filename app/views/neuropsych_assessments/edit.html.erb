@@ -1,0 +1,28 @@
+<h1>Editing neuropsych_assessment</h1>
+
+<% form_for(@neuropsych_assessment) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :score %><br />
+    <%= f.text_field :score %>
+  </p>
+  <p>
+    <%= f.label :score_type %><br />
+    <%= f.text_field :score_type %>
+  </p>
+  <p>
+    <%= f.label :test_name %><br />
+    <%= f.text_field :test_name %>
+  </p>
+  <p>
+    <%= f.label :note %><br />
+    <%= f.text_area :note %>
+  </p>
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @neuropsych_assessment %> |
+<%= link_to 'Back', neuropsych_assessments_path %>

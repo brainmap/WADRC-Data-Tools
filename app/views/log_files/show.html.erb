@@ -1,0 +1,8 @@
+<h1><%= @log_file.filename %></h1>
+<table>
+<tr><td>Average Response Time (not including stimuli with no response)(s):</td><td><%= (@response_times.mean / 10.0).round/1000.0 %><tr/>
+<tr><td>Standard Deviation of Response Time(s):</td><td><%= (@response_times.std_dev / 10.0).round/1000.0 %><tr/>
+<tr><td>Median of Response Time(s):</td><td><%= (@response_times.median / 10.0).round/1000.0 %></tr>
+</table>
+<%# link_to 'Edit', edit_log_file_path(@log_file) %> 
+<%= link_to 'Back', log_files_path %>

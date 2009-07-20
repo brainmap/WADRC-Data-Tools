@@ -1,0 +1,32 @@
+<table id="scan_procedures_index_table" class="tabular">
+  <caption>Current Scan Procedures</caption>
+  
+  <thead>
+    <tr>
+      <th>Code Name</th>
+      <th>Description</th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tfoot><%= footer 3 %></tfoot>
+
+  <tbody>
+    <% @scan_procedures.each do |scan_procedure| %>
+    <tr>
+      <td><%= link_to(scan_procedure.codename, in_scan_procedure_path(scan_procedure)) %></td>
+      <td><%=h scan_procedure.description %></td>
+      <td>
+        <%= link_to '@', scan_procedure %>
+        <%= link_to '&', edit_scan_procedure_path(scan_procedure) %>
+        <%= link_to 'x', scan_procedure, :confirm => 'Are you sure?', :method => :delete %>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+  
+</table>
+
+<br />
+
+<%= link_to 'New scan procedure', new_scan_procedure_path %>

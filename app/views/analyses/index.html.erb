@@ -1,0 +1,34 @@
+<table id="analyses_index_table" class="tabular">
+  <caption>Current analyses</caption>
+  
+  <thead>
+    <tr>
+      <th>Author</th>
+      <th>Created on</th>
+      <th>Description</th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% for analysis in @analyses %>
+    <tr>
+      <td><%=h analysis.user.login unless analysis.user.nil? %></td>
+      <td><%=h analysis.created_at.to_s(:datetime_military) %></td>
+      <td><%=h analysis.description %></td>
+      <td>
+        <%= link_to 'view', analysis %>
+        <%= link_to 'edit', edit_analysis_path(analysis) %>
+        <%= link_to 'delete', analysis, :confirm => 'Are you sure?', :method => :delete %>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+  
+  <tfoot></tfoot>
+  
+</table>
+
+<br />
+
+<%= link_to 'New analysis', new_image_search_path %>

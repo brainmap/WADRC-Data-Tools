@@ -1,0 +1,34 @@
+<h1>Listing enrollments</h1>
+
+<table class="tabular">
+  <caption><%= pagination_info @enrollments %></caption>
+  <thead>
+    <tr>
+      <th>Enrollment date</th>
+      <th>Enum</th>
+      <th>Recruitment source</th>
+      <th></th>
+    </tr>
+  </thead>
+  
+  <tfoot><td colspan=4><%= will_paginate @enrollments %></td></tfoot>
+
+  <tbody>
+    <% for enrollment in @enrollments %>
+      <tr>
+        <td><%=h enrollment.enroll_date %></td>
+        <td><%=h enrollment.enum %></td>
+        <td><%=h enrollment.recruitment_source %></td>
+        <td>
+          <%= link_to 'Show', enrollment %>
+          <%= link_to 'Edit', edit_enrollment_path(enrollment) %>
+          <%= link_to 'Destroy', enrollment, :confirm => 'Are you sure?', :method => :delete %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br />
+
+<%= link_to 'New enrollment', new_enrollment_path %>

@@ -1,0 +1,25 @@
+<h1>Listing image_comments</h1>
+
+<table class='tabley'>
+  <tr>
+    <th>Name</th>
+    <th>Comment</th>
+	<th></th>
+  </tr>
+
+<% for image_comment in @image_comments %>
+  <tr>
+    <td><%=h image_comment.user.login %></td>
+    <td><%=h image_comment.comment %></td>
+    <td>
+		<%= link_to '@', image_comment %>
+    	<%= link_to '&', edit_image_comment_path(image_comment) %>
+    	<%= link_to 'x', image_comment, :confirm => 'Are you sure?', :method => :delete %>
+	</td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New image_comment', new_image_comment_path %>

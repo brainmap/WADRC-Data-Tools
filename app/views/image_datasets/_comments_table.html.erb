@@ -1,0 +1,18 @@
+
+<table id="comments_list" class="tabular">
+  <caption>Image Comments</caption>
+  <thead>
+    <tr><th>Name</th><th>Comment</th><th></th></tr>
+  </thead>
+  <tbody>
+    <%= '<tr><td colspan=3>No comments added yet</td></tr>' if image_comments.empty? %>
+    <% image_comments.each do |cmnt| %>
+      <tr>
+        <td><%=h cmnt.user.login %></td>
+        <td><%=h cmnt.comment %></td>
+        <td><%= link_to_remote('X', :url => image_comment_path(cmnt), :method => :delete) if current_user == cmnt.user %></td>
+      </tr>
+    <% end %>
+  </tbody>
+  <tfoot><%= footer 3 %></tfoot>
+</table>

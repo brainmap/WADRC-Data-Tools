@@ -1,0 +1,52 @@
+<h1>Editing participant <%= @participant.id %></h1>
+
+<% form_for(@participant) do |f| %>
+  <%= f.error_messages %>
+  <p>
+    <%= f.label :date_of_birth %><br />
+    <%= f.date_select :dob %><br />
+  </p>
+  <p>
+    <%= f.label :gender %><br />
+    <%= f.select(:gender, [['Male',1],['Female',2]]) %>
+  </p>
+  <p>
+    <%= f.label :quality_redflag %><br />
+    <%= f.select(:quality_redflag, [['No Flag',0],['Flag',1]]) %>
+  </p>
+  <p>
+    <%= f.label :wrap_number %><br />
+    <%= f.text_field :wrapnum %>
+  </p>
+  <p>
+    <%= f.label :wrap_enrollment %><br />
+    <%= f.select(:wrapenroll, [['No wrap',1],['Wrap',2]])%>
+  </p>
+  <p>
+    <%= f.label :years_of_education %><br />
+    <%= f.select(:ed_years, (1..20).to_a) %>
+  </p>
+  <p>
+    <%= f.label :apoe_allele_1 %><br />
+    <%= f.select(:apoe_e1, [['n/a',0],['e3',3],['e4',4]]) %>
+  </p>
+  <p>
+    <%= f.label :apoe_allele_2 %><br />
+    <%= f.select(:apoe_e2, [['n/a',0],['e3',3],['e4',4]]) %>
+  </p>
+  <p>
+    <%= f.label :apoe_processor %><br />
+    <%= f.text_field :apoe_processor %>
+  </p>
+  <p>
+    <%= f.label :notes %><br />
+    <%= f.text_area :note %>
+  </p>
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+  
+<% end %>
+
+<%= link_to 'Show', @participant %> |
+<%= link_to 'Back', participants_path %>

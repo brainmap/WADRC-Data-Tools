@@ -1,0 +1,67 @@
+<div id="heading_and_link">
+  <h1>Imaging Dataset:</h1>
+  <p>
+    <%= link_to 'view visit from whence it came', @image_dataset.visit %> •
+    <% if @image_dataset.visit.nil? or @image_dataset.visit.enrollment.nil? or @image_dataset.visit.enrollment.participant.nil? %>
+      no associated participant
+    <% else %>
+      <%= link_to('view participant', @image_dataset.visit.enrollment.participant) %>
+    <% end %>
+  </p>
+</div>
+
+
+<div id="dataset_details" class="two_col_left">
+  
+  <h3>Summary:</h3>
+  <div id="dataset_summary" class="sticky">
+	  <%= render :partial => 'dataset_summary', :locals => { :image_dataset => @image_dataset } %>
+	</div>
+	
+	<h3>Directory contents:</h3>
+  <div id="current_directory_contents" class="sticky">
+    <p>
+    <% fs = `ls #{@image_dataset.path}` %>
+    <% fs = fs.split %>
+    <%=h fs.first(10).join(" ") %>
+    <br />...<br />
+    <%= fs.last(10).join(" ") %>
+    </p>
+  </div>
+
+  <h3>Analyses that use this dataset:</h3>
+  <div id="analyses_list">
+    <%= render :partial => 'analyses_list', :locals => { :dataset => @image_dataset } %>
+  </div>
+  
+</div>
+
+
+<div id="dataset_extras" class="two_col_right">
+  
+
+
+  <div id="comments">
+    <%= render :partial => 'comments_table', :locals => { :image_dataset => @image_dataset, :image_comments => @image_comments } %>
+  </div>
+
+  <% if logged_in? %>
+    <p style="float:right; text-align:right"><%= slide_toggler('new_comment_box', 'Add new comment', 'Done adding comments') %></p>
+    <div id="new_comment_box" class="new_comment_box" style="display:none">
+      <%= render :partial => 'new_comment_box', :locals => { :image_dataset => @image_dataset, :image_comment => @image_comment, :current_user => current_user } %>
+    </div>
+  <% end %>
+  
+  <br />
+  
+  <div id="quality_checks">
+    <h3>Quality Checks:</h3>
+    <%= render :partial => 'quality_checks_list', :locals => { :quality_checks => @image_dataset.image_dataset_quality_checks } %>
+  </div>
+  
+  <p><%= link_to 'perform new quality check', new_image_dataset_image_dataset_quality_check_path(@image_dataset) %></p>
+
+</div>
+
+
+<%= clearing_br %>

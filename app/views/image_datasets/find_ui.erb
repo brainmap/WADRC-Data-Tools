@@ -1,0 +1,23 @@
+<% form_tag("/images/find_values") do %>
+
+
+  <p>
+    <%= label_tag :scan_number %>
+    <%= text_field_tag :scan_number %>
+  </p>
+  <p>
+    <%= label_tag :enum %>
+    <%= text_field_tag :enum %>
+  </p>
+  <p>
+    <%= label_tag :rmr %>
+    <%= text_field_tag :initials %>
+  </p>
+<%= submit_tag("Submit") %>
+
+<% end %>
+<hr/>
+<%= link_to 'Go to Protocols', protocols_path %>
+<br/>
+<%= link_to 'Go to Visits', visits_path %>
+<br/>

@@ -1,0 +1,36 @@
+<h1 style="display:inline">New Analysis: </h1>  <%= @analysis.timestamp %>
+
+<% form_for(@analysis) do |f| %>
+  <%= f.error_messages %>
+  
+  <div id="analyzer_bio" class="floating_left_column">
+    <h3>Analysis information:</h3>
+    <p>
+      <%= f.label :description %><br />
+      <%= f.text_field :description %>
+    </p>
+    <%= f.hidden_field :timestamp %>
+  </div>
+  
+  <div id="analysis_criteria" class="floating_right_column">
+    <h3>Search Criteria:</h3>
+    <p>
+      <%= f.label :start_date %><br />
+      <%= f.datetime_select :start_date %>
+    </p>
+    <p>
+      <%= f.label :end_date %><br />
+      <%= f.datetime_select :end_date %>
+    </p>
+    <p>
+      <%= f.label :series_description %><br />
+      <%= f.text_field :series_description %>
+    </p>
+  </div>
+  
+  <p style="clear:both">
+    <%= f.submit "Create" %>
+  </p>
+<% end %>
+
+<%= link_to 'Back', analyses_path %>

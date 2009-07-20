@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  assessment: MyString
+  note: MyString
+  user_id: 1
+  image_dataset_id: 1
+
+two:
+  assessment: MyString
+  note: MyString
+  user_id: 1
+  image_dataset_id: 1

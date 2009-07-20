@@ -1,0 +1,55 @@
+<table id="image_quality_checks_listings" class="tabular">
+  
+  <caption><%= pluralize(quality_checks.size, 'Image Quality Check') %></caption>
+  
+  <thead>
+    <tr>
+      <th>Reviewer</th>
+      <th><span class="vert">Incomplete Series</span></th>
+      <th><span class="vert">Garbled Series</span></th>
+      <th><span class="vert">FOV Cutoff</span></th>
+      <th><span class="vert">Field Inhomogeneity</span></th>
+      <th><span class="vert">Ghosting / Wrapping</span></th>
+      <th><span class="vert">Banding</span></th>
+      <th><span class="vert">Registration Risk</span></th>
+      <th><span class="vert">Motion Warning</span></th>
+      <th><span class="vert">Omnibus F</span></th>
+      <th><span class="vert">Spm Mask</span></th>
+      <th><span class="vert">Other Issues</span></th>
+      <th></th>
+    </tr>
+  </thead>
+  
+  <tfoot><%= footer 13 %></tfoot>
+  
+  <tbody>
+    <% if quality_checks.empty? %>
+      <tr><td colspan=13>No quality checks performed yet</td></tr>
+    <% else %>
+      <% for qc in quality_checks %>
+        <tr>
+          <td><%= qc.user.login %></td>
+          <td><%= qc.incomplete_series %></td>
+          <td><%= qc.garbled_series %></td>
+          <td><%= qc.fov_cutoff %></td>
+          <td><%= qc.field_inhomogeneity %></td>
+          <td><%= qc.ghosting_wrapping %></td>
+          <td><%= qc.banding %></td>
+          <td><%= qc.registration_risk %></td>
+          <td><%= qc.motion_warning %></td>
+          <td><%= qc.omnibus_f %></td>
+          <td><%= qc.spm_mask %></td>
+          <td><%= qc.other_issues %></td>
+          <td>
+            <%= link_to '@', qc %>
+            <%= link_to '&', edit_image_dataset_quality_check_path(qc) %>
+            <%= link_to 'x', qc, :confirm => 'Are you sure?', :method => :delete %>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+  
+
+  
+</table>

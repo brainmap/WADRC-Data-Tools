@@ -1,0 +1,10 @@
+<div id="heading_and_link">
+  <h1><%= @collection_title or "Visits" %>:</h1>
+  <p><%= link_to 'create new visit', new_visit_path %></p>
+</div>
+
+<%= render :partial=>'index', :locals => { :visits => @visits } %>
+
+<br />
+
+<%= render :partial => 'index_footer' %>

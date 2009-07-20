@@ -1,0 +1,11 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  image_dataset: one
+  excluded: 
+  exclusion_comment: 
+
+two:
+  image_dataset: two
+  excluded: 
+  exclusion_comment: 

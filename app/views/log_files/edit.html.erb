@@ -1,0 +1,12 @@
+<h1>Editing log_file</h1>
+
+<% form_for(@log_file) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @log_file %> |
+<%= link_to 'Back', log_files_path %>

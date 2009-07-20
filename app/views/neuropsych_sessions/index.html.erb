@@ -1,0 +1,24 @@
+<h1>Listing neuropsych sessions</h1>
+
+<table>
+  <tr>
+    <th>Date</th>
+    <th>Note</th>
+    <th>Procedure</th>
+  </tr>
+
+<% for neuropsych_session in @neuropsych_sessions %>
+  <tr>
+    <td><%=h neuropsych_session.date %></td>
+    <td><%=h neuropsych_session.note %></td>
+    <td><%=h neuropsych_session.procedure %></td>
+    <td><%= link_to 'Show', neuropsych_session %></td>
+    <td><%= link_to 'Edit', edit_neuropsych_session_path(neuropsych_session) %></td>
+    <td><%= link_to 'Destroy', neuropsych_session, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New neuropsych_session', new_neuropsych_session_path %>

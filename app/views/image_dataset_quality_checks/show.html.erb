@@ -1,0 +1,42 @@
+<div id="heading_and_link">
+  <h1>Image Quality Check</h1>
+  <p>created by <%=h @idqc.user.login %> on <%= Time.now.to_s(:ymdhms) %></p>
+</div>
+
+<h3>Image Summary:</h3>
+<div class="sticky">
+  <%= key_val_table('image_details', {
+    :rmr => @idqc.image_dataset.rmr,
+    :directory => @idqc.image_dataset.path,
+    :series_description => @idqc.image_dataset.series_description,
+    :date_of_acquisition => @idqc.image_dataset.timestamp,
+    :scanned_file => @idqc.image_dataset.scanned_file
+  })%>
+</div>
+
+<div class="two_col_left">
+  <h3>Image Quality Check:</h3>
+  <%= key_val_table('quality_check_details', {
+    :User => @idqc.user.login,
+    :Image_dataset => @idqc.image_dataset_id,
+    :incomplete_series => "#{@idqc.incomplete_series} – #{@idqc.incomplete_series_comment}",
+    :garbled_series => "#{@idqc.garbled_series} – #{@idqc.garbled_series_comment}",
+    :fov_cutoff => "#{@idqc.fov_cutoff} – #{@idqc.fov_cutoff_comment}",
+    :field_inhomogeneity => "#{@idqc.field_inhomogeneity} – #{@idqc.field_inhomogeneity_comment}",
+    :ghosting_wrapping => "#{@idqc.ghosting_wrapping} – #{@idqc.ghosting_wrapping_comment}",
+    :banding => "#{@idqc.banding} – #{@idqc.banding_comment}",
+    :registration_risk => "#{@idqc.registration_risk} – #{@idqc.registration_risk_comment}",
+    :motion_warning => "#{@idqc.motion_warning} – #{@idqc.motion_warning_comment}",
+    :omnibus_f => "#{@idqc.omnibus_f} – #{@idqc.omnibus_f_comment}",
+    :spm_mask => "#{@idqc.spm_mask} – #{@idqc.spm_mask_comment}",
+  })%>
+</div>
+
+<br style="clear:both" /><br />
+
+
+<%= link_to 'Edit', edit_image_dataset_quality_check_path(@idqc) %> |
+<%= link_to 'View image dataset', image_dataset_path(@idqc.image_dataset) %>
+
+<br>
+

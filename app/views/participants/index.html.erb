@@ -1,0 +1,48 @@
+<table id="participants_index_table" class="tabular">
+  <caption>Enrolled participants</caption>
+  
+  <thead>
+    <tr>
+    <th>DOB</th>
+    <th>Gender</th>
+    <th>Flag</th>
+    <th>Wrap Number</th>
+    <th>Wrap Enrollment</th>
+    <th>Years of Education</th>
+    <th>Notes</th>
+    <th>ApoE</th>
+    <th></th>
+    </tr>
+  </thead>
+  
+  <tfoot><%= footer(9) %></tfoot>
+
+  <tbody>
+    <% for p in @participants %>
+      <tr>
+        <td><%=h p.dob.year unless p.dob.nil? %></td>
+        <td><%=h p.gender == 2 ? "F" : "M" %></td>
+        <td style="color:red"><%= flag(p.quality_redflag) %></td>
+        <td><%=h p.wrapnum %></td>
+        <td><%=h p.wrapenrolled? %></td>
+        <td><%=h p.ed_years %></td>
+        <td>
+          <%= popup_note(p.note.nil? ? "" : "peek", "<p>#{p.note}</p>")%>
+        </td>
+        <td>
+          <%= popup_note(genetic_status(p.apoe_e1, p.apoe_e2), key_val_table('genetic_status_details', {
+            :Allele_1 => allele(p.apoe_e1),
+            :Allele_2 => allele(p.apoe_e2),
+            :Processor => p.apoe_processor
+          }))%>
+        </td>
+        <td><%= link_to "view", p %></td>
+      </tr>
+    <% end %>
+  </tbody>
+  
+</table>
+
+<br />
+
+<%# link_to 'New participant', new_participant_path %>

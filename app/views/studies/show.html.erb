@@ -1,0 +1,14 @@
+<h3>Name:</h3>
+<p><%=h @study.name %></p>
+
+<h3>Description:</h3>
+<div class="sticky">
+  <p><%= @study.description %></p>
+</div>
+
+<h3>Investigator:</h3>
+<p><%=h @study.investigator %></p>
+
+
+<%= link_to 'Edit', edit_study_path(@study) %> |
+<%= link_to 'Back', studies_path %>

@@ -1,0 +1,2 @@
+module LogFilesHelper
+end

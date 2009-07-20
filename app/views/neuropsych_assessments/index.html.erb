@@ -1,0 +1,26 @@
+<h1>Listing neuropsych_assessments</h1>
+
+<table>
+  <tr>
+    <th>Score</th>
+    <th>Score type</th>
+    <th>Test name</th>
+    <th>Note</th>
+  </tr>
+
+<% for neuropsych_assessment in @neuropsych_assessments %>
+  <tr>
+    <td><%=h neuropsych_assessment.score %></td>
+    <td><%=h neuropsych_assessment.score_type %></td>
+    <td><%=h neuropsych_assessment.test_name %></td>
+    <td><%=h neuropsych_assessment.note %></td>
+    <td><%= link_to 'Show', neuropsych_assessment %></td>
+    <td><%= link_to 'Edit', edit_neuropsych_assessment_path(neuropsych_assessment) %></td>
+    <td><%= link_to 'Destroy', neuropsych_assessment, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New neuropsych_assessment', new_neuropsych_assessment_path %>

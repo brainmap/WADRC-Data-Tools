@@ -1,0 +1,32 @@
+
+<h3>Enrollment Details</h3>
+<div class="sticky">
+<%= key_val_table('enrollment_details', {
+  :enrollment_date => @enrollment.enroll_date,
+  :enum => @enrollment.enum,
+  :recruitment_source => @enrollment.recruitment_source,
+  :study => @enrollment.recruitment_group.study.name,
+  :recruitment_group => @enrollment.recruitment_group.name
+})%>
+</div>
+
+<h3>Status</h3>
+<% if @enrollment.withdrawn? %>
+  <p>
+    <b>Witdrawn</b><br />
+    date: <%= @enrollment.withdrawl_date or "unknown" %><br />
+    reason: <%= @enrollment.withdrawl_reason or "unspecified" %>
+  </p>
+<% else %>
+  <p>Currently enrolled</p>
+<% end %>
+
+<h3>Visits</h3>
+<ul>
+  <% @enrollment.visits.each do |visit| %>
+    <li><%= link_to visit.date, visit %> in <%= visit.scan_procedure.codename %></li>
+  <% end %>
+</ul>
+
+<%= link_to 'Edit', edit_enrollment_path(@enrollment) %> |
+<%= link_to 'Back', enrollments_path %>

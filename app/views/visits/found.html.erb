@@ -1,0 +1,16 @@
+
+<div id='heading_and_link'>
+  <h1>Visit search criteria:</h1>
+  <p><%= link_to 'new visit search', find_visits_path %></p>
+</div>
+
+<%= render :partial => 'find_criteria', :locals => { :visit_search => @visit_search } %>
+
+<br style="clear:both" />
+
+<h1>Found visits:</h1>
+<%= render :partial => 'index', :locals => { :visits => @visits } %>
+
+<br />
+
+<%= render :partial => 'index_footer' %>

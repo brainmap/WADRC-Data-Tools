@@ -1,0 +1,105 @@
+class AnalysesController < ApplicationController
+  
+  PER_PAGE = 50
+  
+  before_filter :set_current_tab
+  
+  def set_current_tab
+    @current_tab = "analyses"
+  end
+  
+  # GET /analyses
+  # GET /analyses.xml
+  def index
+    @analyses = Analysis.find(:all, :include => [:user] )
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.xml  { render :xml => @analyses }
+    end
+  end
+
+  # GET /analyses/1
+  # GET /analyses/1.xml
+  def show
+    @analysis = Analysis.find(params[:id], :include => [:analysis_memberships, :image_datasets])
+    @all_analysis_members = @analysis.analysis_memberships
+    @paginated_analysis_members = @all_analysis_members.paginate(:page => params[:page], :per_page => PER_PAGE)
+    @total_count = @all_analysis_members.size
+    @author = @analysis.user
+    
+    respond_to do |format|
+      format.html # show.html.erb
+      format.xml  { render :xml => @analysis }
+    end
+  end
+
+  # GET /analyses/new
+  # GET /analyses/new.xml
+  def new
+    @analysis = Analysis.new
+    @analysis.timestamp = DateTime.now
+    @analysis.user = @current_user
+
+    respond_to do |format|
+      format.html # new.html.erb
+      format.xml  { render :xml => @analysis }
+    end
+  end
+
+  # GET /analyses/1/edit
+  def edit
+    @analysis = Analysis.find_by_id(params[:id], :include => [ { :analysis_memberships => :image_dataset } ] )
+  end
+
+  # POST /analyses
+  # POST /analyses.xml
+  def create
+    @analysis = Analysis.new(params[:analysis])
+    # @analysis.user = @current_user
+    # 
+    #   @analysis.datasets_in_analysis.each do |ds|
+    #     @analysis.analysis_memberships.build(:image_dataset_id => ds.id)
+    #   end
+
+    respond_to do |format|
+      if @analysis.save
+        flash[:notice] = 'Analysis was successfully created.'
+        format.html { redirect_to(@analysis) }
+        format.xml  { render :xml => @analysis, :status => :created, :location => @analysis }
+      else
+        format.html { render :action => "new" }
+        format.xml  { render :xml => @analysis.errors, :status => :unprocessable_entity }
+      end
+    end
+  end
+
+  # PUT /analyses/1
+  # PUT /analyses/1.xml
+  def update
+    @analysis = Analysis.find_by_id(params[:id], :include => [ :analysis_memberships => :image_dataset ] )
+    
+    Å respond_to do |format|
+       if @analysis.update_attributes(params[:analysis])
+         flash[:notice] = 'Analysis was successfully updated.'
+         format.html { redirect_to(@analysis) }
+         format.xml  { head :ok }
+       else
+         format.html { render :action => "edit" }
+         format.xml  { render :xml => @analysis.errors, :status => :unprocessable_entity }
+       end
+     end
+  end
+
+  # DELETE /analyses/1
+  # DELETE /analyses/1.xml
+  def destroy
+    @analysis = Analysis.find(params[:id])
+    @analysis.destroy
+
+    respond_to do |format|
+      format.html { redirect_to(analyses_url) }
+      format.xml  { head :ok }
+    end
+  end
+end

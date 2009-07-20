@@ -1,0 +1,11 @@
+<div id="heading_and_link">
+  <h1>All Image Datasets</h1>
+  <p><%= link_to 'search for images', new_image_search_path %></p>
+</div>
+
+<%= render :partial => 'image_datasets', :locals => { :image_datasets => @image_datasets, :total_count => @total_count } %>
+
+
+<br />
+
+<%#= link_to 'New image_dataset', new_image_dataset_path %>

@@ -1,0 +1,37 @@
+<td><%=h im_ds.rmr %></td>
+<td><%= link_to im_ds.series_description, im_ds %></td>
+<td>
+  <%= popup_note("peek", key_val_table("image_details", {
+    :Path => im_ds.path,
+    :Glob_pattern => im_ds.glob,
+    :Bold_reps => im_ds.bold_reps,
+    :Rep_time => im_ds.rep_time_hundredths,
+    :Slices_per_volume => im_ds.slices_per_volume,
+    :Scanned_file => im_ds.scanned_file
+  }))%>
+</td>
+<td>
+  <%= popup_note("peek", key_val_table("visit_details", {
+    :Visit_date => im_ds.visit.date,
+    :scan_procedure => im_ds.visit.scan_procedure.nil? ? nil : im_ds.visit.scan_procedure.codename,
+    :Scan_number => im_ds.visit.scan_number,
+    :Enum => im_ds.visit.enrollment.nil? ? nil : im_ds.visit.enrollment.enum,
+    :Initials => im_ds.visit.initials,
+    :RMR_Number => im_ds.visit.rmr,
+    :Assignee => im_ds.visit.user.nil? ? nil : im_ds.visit.user.login,
+    :Directory_Path => im_ds.visit.path,
+  })) %>
+</td>
+<td>
+  <%= popup_note("peek", key_val_table("participant_details", {
+    :birth_year => im_ds.visit.participant.dob.nil? ? "" : im_ds.visit.participant.dob.year,
+    :gender => gender(im_ds.visit.participant.gender),
+    :wrap_number => im_ds.visit.enrollment.nil? ? nil : im_ds.visit.enrollment.wrapnum,
+    :education_years => im_ds.visit.participant.ed_years,
+    :apoe_status => genetic_status(im_ds.visit.participant.apoe_e1, im_ds.visit.participant.apoe_e2),
+  })) unless im_ds.visit.participant.nil? %>
+</td>
+
+<td><%=h im_ds.timestamp.to_s(:ymdhms) %></td>
+<td><%= qc_popup_or_link_to_new(im_ds) %></td>
+<td><%=h im_ds.excluded_by_any_analyses? ? im_ds.analysis_memberships.out.size.to_s : "None" %></td>

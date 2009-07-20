@@ -1,0 +1,30 @@
+<table class="tabular">
+  <caption>All recruitment groups</caption>
+  <thead>
+    <tr>
+      <th>Study</th>
+      <th>Name</th>
+      <th>Description</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tfoot><%= footer 4 %></tfoot>
+  <tbody>
+    <% for recruitment_group in @recruitment_groups %>
+      <tr>
+        <td><%= link_to recruitment_group.study.name, recruitment_group.study %></td>
+        <td><%=h recruitment_group.name %></td>
+        <td><%= popup_note('description', recruitment_group.description) %></td>
+        <td>
+          <%= link_to 'Show', recruitment_group %>
+          <%= link_to 'Edit', edit_recruitment_group_path(recruitment_group) %>
+          <%= link_to 'Destroy', recruitment_group, :confirm => 'Are you sure?', :method => :delete %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br />
+
+<%= link_to 'New recruitment group', new_recruitment_group_path %>

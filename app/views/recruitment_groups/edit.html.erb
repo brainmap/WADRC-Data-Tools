@@ -1,0 +1,27 @@
+<div id="heading_and_link">
+  <h1>Editing recruitment group</h1>
+  <p>part of <%= @recruitment_group.study.name %> study</p>
+</div>
+
+<% form_for(@recruitment_group) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :name %><br />
+    <%= f.text_field :name %>
+  </p>
+  <p>
+    <%= f.label :description %><br />
+    <%= f.text_area :description %>
+  </p>
+  <p>
+    <%= f.label :study %><br />
+    <%= collection_select :recruitment_group, :study_id, Study.all, :id, :name, :include_blank => 'Select a study' %>
+  </p>
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @recruitment_group %> |
+<%= link_to 'Back', recruitment_groups_path %>

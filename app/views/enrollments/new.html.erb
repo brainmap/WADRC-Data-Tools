@@ -1,0 +1,35 @@
+<h1>New enrollment</h1>
+
+<% form_for(@enrollment) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :enroll_date %><br />
+    <%= f.date_select :enroll_date %>
+  </p>
+  <p>
+    <%= f.label :enum %><br />
+    <%= f.text_field :enum %>
+  </p>
+  <p>
+    <%= f.label :recruitment_source %><br />
+    <%= f.text_field :recruitment_source %>
+  </p>
+  <p>
+    <%= f.label :recruitment_group %><br />
+    <%= select :enrollment, :recruitment_group_id, 
+      RecruitmentGroup.all.collect { |rg| [ "#{rg.study.name} #{rg.name}", rg.id ] }, 
+      :include_blank => 'Select recruitment group' %>
+  </p>
+  <p>
+    <%= f.label :participant_id %><br />
+    <%= select :enrollment, :participant_id,
+      Participant.all.collect { |participant| [participant.id, participant.id] },
+      :include_blank => 'Select participant ID' %>
+  </p>
+  <p>
+    <%= f.submit "Create" %>
+  </p>
+<% end %>
+
+<%= link_to 'Back', enrollments_path %>

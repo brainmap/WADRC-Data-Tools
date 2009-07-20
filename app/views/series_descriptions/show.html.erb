@@ -1,0 +1,28 @@
+<p>
+  <b>Long description:</b>
+  <%=h @series_description.long_description %>
+</p>
+
+<p>
+  <b>Short description:</b>
+  <%=h @series_description.short_description %>
+</p>
+
+<p>
+  <b>Anat type:</b>
+  <%=h @series_description.anat_type %>
+</p>
+
+<p>
+  <b>Acq plane:</b>
+  <%=h @series_description.acq_plane %>
+</p>
+
+<p>
+  <b>Ignore:</b>
+  <%=h @series_description.ignore %>
+</p>
+
+
+<%= link_to 'Edit', edit_series_description_path(@series_description) %> |
+<%= link_to 'Back', series_descriptions_path %>

@@ -1,0 +1,18 @@
+<h1>Listing log_files</h1>
+
+<table>
+  <tr>
+  </tr>
+
+<% for log_file in @log_files %>
+  <tr>
+    <td><%= log_file.filename %></td><td><%= link_to 'Show Details', log_file %></td>
+    <td><%# link_to 'Edit', edit_log_file_path(log_file) %></td>
+    <td><%# link_to 'Destroy', log_file, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%# link_to 'New log_file', new_log_file_path %>

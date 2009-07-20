@@ -1,0 +1,18 @@
+<p>
+  <b>Date:</b>
+  <%=h @neuropsych_session.date %>
+</p>
+
+<p>
+  <b>Note:</b>
+  <%=h @neuropsych_session.note %>
+</p>
+
+<p>
+  <b>Procedure:</b>
+  <%=h @neuropsych_session.procedure %>
+</p>
+
+
+<%= link_to 'Edit', edit_neuropsych_session_path(@neuropsych_session) %> |
+<%= link_to 'Back', neuropsych_sessions_path %>

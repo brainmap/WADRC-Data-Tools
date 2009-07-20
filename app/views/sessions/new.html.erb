@@ -1,0 +1,19 @@
+<% form_tag session_path do -%>
+<table>
+  <tr>
+    <td><%= label :login, "Login" %></td>
+    <td><%= text_field_tag 'login' %></td>
+  </tr>
+  <tr>
+    <td><%= label :password, "Password" %></td>
+    <td><%= password_field_tag 'password' %></td>
+  </tr>
+  <tr>
+    <td><%= label :remember_me, "Remember Me" %></td>
+    <td><%= check_box_tag 'remember_me' %></td>
+  </tr>
+  <tr>
+    <td><%= submit_tag 'Log in' %></td>
+  </tr>
+</table>
+<% end -%>

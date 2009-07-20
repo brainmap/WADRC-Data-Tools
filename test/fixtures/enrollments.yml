@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  enroll_date: 2009-05-28
+  enum: MyString
+  recruitment_source: MyString
+  wrapnum: 1
+
+two:
+  enroll_date: 2009-05-28
+  enum: MyString
+  recruitment_source: MyString
+  wrapnum: 1

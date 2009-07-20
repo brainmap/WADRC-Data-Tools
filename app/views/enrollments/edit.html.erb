@@ -1,0 +1,30 @@
+<h1>Editing enrollment</h1>
+
+<% form_for(@enrollment) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :enroll_date %><br />
+    <%= f.date_select :enroll_date %>
+  </p>
+  <p>
+    <%= f.label :enum %><br />
+    <%= f.text_field :enum %>
+  </p>
+  <p>
+    <%= f.label :recruitment_source %><br />
+    <%= f.text_field :recruitment_source %>
+  </p>
+  <p>
+    <%= f.label :withdraw_enrollment? %>
+    <%= f.check_box :withdrawn  %><br />
+    <%= f.date_select :withdrawl_date  %><br />
+    <%= f.text_area :withdrawl_reason, :rows => 3  %>
+  </p>
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @enrollment %> |
+<%= link_to 'Back', enrollments_path %>

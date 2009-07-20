@@ -1,0 +1,11 @@
+<%= key_val_table('summary_table', {
+  :Rmr => image_dataset.rmr,
+  :Series_description => image_dataset.series_description, 
+  :Path => image_dataset.path,
+  :Glob => image_dataset.glob,
+  :Bold_reps => image_dataset.bold_reps,
+  :Rep_time => image_dataset.rep_time_hundredths,
+  :Slices_per_volume => image_dataset.slices_per_volume,
+  :Acquisition_date => image_dataset.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+  :scanned_file => image_dataset.scanned_file
+})%>

@@ -1,0 +1,13 @@
+<p>
+  <b>Name:</b>
+  <%=h @image_comment.user.login %>
+</p>
+
+<p>
+  <b>Comment:</b>
+  <%=h @image_comment.comment %>
+</p>
+
+
+<%= link_to 'Edit', edit_image_comment_path(@image_comment) %> |
+<%= link_to 'Back', image_comments_path %>

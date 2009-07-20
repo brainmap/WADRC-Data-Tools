@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  score: 9.99
+  score_type: MyString
+  test_name: MyString
+  note: MyText
+
+two:
+  score: 9.99
+  score_type: MyString
+  test_name: MyString
+  note: MyText

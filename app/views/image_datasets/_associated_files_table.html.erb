@@ -1,0 +1,47 @@
+<div class="table_holder">
+  
+  <h3>Member raw image files:</h3>
+  
+  <table class="associated_raw_image_files_table">
+
+    <tr>
+      <th>Filename</th>
+      <th>Header reader</th>
+      <th>File type</th>
+      <th>Timestamp</th>
+      <th>Source</th>
+      <th>Series</th>
+      <th>Gender</th>
+      <th>Slices</th>
+      <th>Thick</th>
+      <th>Gap</th>
+      <th>FOV</th>
+      <th>Acq x</th>
+      <th>Acq y</th>
+      <th>Rep time</th>
+      <th>Bold reps</th>
+    </tr>
+
+    <% rawims.each do |im| %>
+    <tr>
+      <td><%=h im.filename %></td>
+      <td><%=h im.header_reader %></td>
+      <td><%=h im.file_type %></td>
+      <td><%=h im.timestamp.to_s %></td>
+      <td><%=h im.source %></td>
+      <td><%=h im.series_description %></td>
+      <td><%=h im.gender %></td>
+      <td><%=h im.num_slices %></td>
+      <td><%=h im.slice_thickness %></td>
+      <td><%=h im.slice_spacing %></td>
+      <td><%=h im.reconstruction_diameter %></td>
+      <td><%=h im.acquisition_matrix_x %></td>
+      <td><%=h im.acquisition_matrix_y %></td>
+      <td><%=h im.rep_time %></td>
+      <td><%=h im.bold_reps %></td>
+    </tr>
+    <% end %>
+
+  </table>
+
+</div>

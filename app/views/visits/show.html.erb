@@ -1,0 +1,105 @@
+<div id="heading_and_link">
+  <h1>Visit</h1>
+  <p>
+    <%= link_to 'Edit visit', edit_visit_path(@visit) %> •
+    <% if @visit.enrollment.nil? %>
+      not enrolled • no participant
+    <% else %>
+      <%= link_to('view enrollment', @visit.enrollment) %> •
+      <% if @visit.enrollment.participant.nil? %>
+        no participant
+      <% else %>
+        <%= link_to('view participant', @visit.enrollment.participant) %>
+      <% end %>
+    <% end %>
+  </p>
+</div>
+
+<div id="leftcol" class="two_col_left">
+    
+  <h3>Data status:</h3><br /><br /><br />
+  <table id="visit_status" class="tabular">
+    <thead>
+      <tr>
+        <th><span class="dead_vert">Transfer Log</span></th>
+        <th><span class="dead_vert">Transfer MRI</span></th>
+        <th><span class="dead_vert">Transfer PET</span></th>
+        <th><span class="dead_vert">Check Imaging</span></th>
+        <th><span class="dead_vert">Radiology Outcome</span></th>
+        <th><span class="dead_vert">Check MR5 DVD</span></th>
+        <th><span class="dead_vert">Burn DICOM DVD</span></th>
+        <th><span class="dead_vert">Which DICOM DVD</span></th>
+        <th><span class="dead_vert">First Score</span></th>
+        <th><span class="dead_vert">Second Score</span></th>
+        <th><span class="dead_vert">Enter Info in DB</span></th>
+        <th><span class="dead_vert">Print NP Report</span></th>
+        <th><span class="dead_vert">Compile Folder</span></th>
+        <th><span class="dead_vert">Conference</span></th>
+      </tr>
+    </thead>
+    
+    <tfoot><%= footer(14) %></tfoot>
+    
+    <tbody>
+      <tr>
+        <%= show_bool(@visit.transfer_behavioral_log) %>
+        <%= show_bool(@visit.transfer_mri) %>
+        <%= show_bool(@visit.transfer_pet) %>
+        <%= show_bool(@visit.check_imaging) %>
+        <%= show_rad_review(@visit.radiology_outcome) %>
+        <%= show_bool(@visit.check_MR5_DVD) %>
+        <%= show_bool(@visit.burn_DICOM_DVD) %>
+        <%= show_which_dicom(@visit.dicom_dvd) %>
+        <%= show_bool(@visit.first_score) %>
+        <%= show_bool(@visit.second_score) %>
+        <%= show_bool(@visit.enter_info_in_db) %>
+        <%= show_bool(@visit.check_np) %>
+        <%= show_bool(@visit.compile_folder) %>
+        <%= show_bool(@visit.conference) %>
+      </tr>
+    </tbody>
+    
+  </table>
+
+
+  <h3>Visit details:</h3>
+  <div id="visit_details_note" class="sticky">
+    <%= key_val_table("visit_details", {
+      :Visit_date => @visit.date,
+      :scan_procedure => link_to(@visit.scan_procedure.codename, in_scan_procedure_path(@visit.scan_procedure)),
+      :Scan_number => @visit.scan_number,
+      :Enum => @visit.enrollment.nil? ? nil : link_to(@visit.enrollment.enum, @visit.enrollment),
+      :Initials => @visit.initials,
+      :RMR_Number => @visit.rmr,
+      :Assignee => @visit.user.nil? ? nil : @visit.user.login,
+      :Directory_Path => @visit.path,
+    }) %>
+  </div>
+
+</div>
+
+
+
+<div id="visit_status_report" class="two_col_right">
+
+  <h3>Notes:</h3>
+  <div id="notes" class="sticky">
+    <p><%=h @visit.notes.empty? ? "No notes entered for this visit" : @visit.notes %></p>
+  </div>
+
+</div>
+
+
+<br style="clear: both" /><br />
+
+
+<h3>Images acquired during visit:</h3>
+<% if @image_datasets.empty? %>
+  <p>No images associated with this visit</p>
+<% else %>
+  <%= render(:partial => 'image_datasets/image_datasets', :locals => {:image_datasets => @image_datasets} ) %>
+  <br />
+  <%= render(:partial => "lookup_radiology_button", :locals => {:rmr => @visit.rmr} ) %>
+<% end %>
+
+

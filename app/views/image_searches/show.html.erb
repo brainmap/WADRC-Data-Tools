@@ -1,0 +1,56 @@
+<h1>Image search results:</h1>
+
+<div class="two_col_left">
+  
+<h3>Search criteria</h3>
+  <div class="sticky">
+    <%= key_val_table('search_criteia_details', {
+      :Created_by => @image_search.user.login,
+      :Last_modified_on => @image_search.updated_at.to_date.inspect,
+      :enum => @image_search.enum,
+      :Rmr_number => @image_search.rmr,
+      :Series_description => @image_search.series_description,
+      :File_system_path => @image_search.path,
+      :Scan_date_after => @image_search.earliest_timestamp.nil? ? nil : @image_search.earliest_timestamp.to_date.inspect,
+      :Scan_date_before => @image_search.latest_timestamp.nil? ? nil : @image_search.latest_timestamp.to_date.inspect,
+      :gender => @image_search.gender_letter,
+      :minimum_age => @image_search.min_age,
+      :maximum_age => @image_search.max_age,
+      :minimim_education_years => @image_search.min_ed_years,
+      :maximum_education_years => @image_search.max_ed_years,
+      :apoe_status => @image_search.apoe_status_prompt,
+      :scan_procedures => @image_search.scan_procedure_names.join(", ")
+    })%>
+  </div>
+</div>
+
+
+<div class="two_col_right">
+  <h3>Create a new analysis from this search</h3>
+  
+  <% form_for @analysis do |f| -%>
+    <p><%= f.label :description, "Enter a description of your analysis:" %></p>
+    <p>
+    <%= f.text_field :description %>
+    <%= f.hidden_field :image_search_id, :value => @image_search.id %>
+    <%= f.hidden_field :user_id, :value => @image_search.user_id %>
+    
+    <% @analysis.analysis_memberships.each_with_index do |am,i| %>
+      <% fields_for "analysis[analysis_memberships_attributes][]", am do |amform| %>
+        <%= amform.hidden_field :image_dataset_id, :value => @all_image_matches[i].id %>
+      <% end -%>
+    <% end -%>
+    
+    <%= f.submit "Create Analysis", :disable_with => 'Creating...' %>
+    </p>
+  <% end -%>
+</div>
+
+
+<br style="clear:both" /><br />
+<hr />
+<br />
+
+<%= render :partial => 'image_datasets/image_datasets', 
+  :locals => { :image_datasets => @paginated_image_matches, :total_count => @total_count } 
+%>

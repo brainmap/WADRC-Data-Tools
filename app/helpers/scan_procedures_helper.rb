@@ -1,0 +1,2 @@
+module ScanProceduresHelper
+end

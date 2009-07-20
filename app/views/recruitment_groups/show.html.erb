@@ -1,0 +1,14 @@
+<div id="heading_and_link">
+  <h1>Recruitment Group</h1>
+  <p>part of <%= @recruitment_group.study.name %> study</p>
+</div>
+
+<h3>Name:</h3>
+<p><%=h @recruitment_group.name %></p>
+
+<h3>Description:</h3>
+<p><%=h @recruitment_group.description %></p>
+
+
+<%= link_to 'Edit', edit_recruitment_group_path(@recruitment_group) %> |
+<%= link_to 'Back', recruitment_groups_path %>

@@ -1,0 +1,9 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  withdrawl_date: 2009-05-28
+  reason: MyText
+
+two:
+  withdrawl_date: 2009-05-28
+  reason: MyText

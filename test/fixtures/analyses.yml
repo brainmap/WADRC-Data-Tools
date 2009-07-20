@@ -1,0 +1,17 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+analysis1:
+  user: aaron
+  timestamp: 2009-02-04 00:13:58
+  description: MyString
+  start_date: 2009-02-04 00:13:58
+  end_date: 2009-02-04 00:13:58
+  series_description: analysis1
+
+analysis2:
+  user: quentin
+  timestamp: 2009-02-04 00:13:58
+  description: MyString
+  start_date: 2009-02-04 00:13:58
+  end_date: 2009-02-04 00:13:58
+  series_description: analysis2

@@ -1,0 +1,66 @@
+<h1><%= "Analysis \"#{@analysis.description}\" <br /> created by #{@analysis.user.login} on #{@analysis.created_at.to_date.inspect}" %></h1>
+
+<% form_for @analysis do |f| %>
+  <%= submit_tag "Make an analysis directory", :disabled => true %>
+<% end %>
+
+<h3>Original search criteria:</h3>
+<div class="sticky">
+  <%= key_val_table('original_search_criteria', {
+    :enum => @analysis.image_search.enum,
+    :RMR_number => @analysis.image_search.rmr,
+    :Series_description => @analysis.image_search.series_description,
+    :Directory => @analysis.image_search.path,
+    :Scan_date_after => @analysis.image_search.earliest_timestamp.nil? ? nil : @analysis.image_search.earliest_timestamp.to_s(:datetime_military),
+    :Scan_date_before => @analysis.image_search.latest_timestamp.nil? ? nil : @analysis.image_search.latest_timestamp.to_s(:datetime_military),
+    :gender => @analysis.image_search.gender_letter,
+    :minimum_age => @analysis.image_search.min_age,
+    :maximum_age => @analysis.image_search.max_age,
+    :minimim_education_years => @analysis.image_search.min_ed_years,
+    :maximum_education_years => @analysis.image_search.max_ed_years,
+    :apoe_status => @analysis.image_search.apoe_status_prompt
+  })%>
+</div>
+
+<br />
+
+
+<table id="included_datasets_list" class="tabular">
+  <caption><%= pagination_info @paginated_analysis_members, :entry_name => 'Included image' %></caption>
+  
+  <thead>
+    <tr>
+      <th>Rmr</th>
+      <th>Series description</th>
+      <th>Imaging Details</th>
+      <th>Visit Details</th>
+      <th>Participant Details</th>
+      <th>Timestamp</th>
+      <th>Quality Check</th>
+      <th>Analysis<br />Exclusions</th>
+      <th>Exclude from<br />this Analysis</th>
+    </tr>
+  </thead>
+  
+  <tfoot><td colspan=9><%= will_paginate @paginated_analysis_members %></td></tfoot>
+  
+  <tbody>
+    <% @paginated_analysis_members.each do |am| %>
+    <tr>
+      <%= render :partial => 'image_datasets/im_ds', :locals => { :im_ds => am.image_dataset } %>
+      <% if am.excluded -%>
+        <td style="background-color:#FF9999;"><%= am.exclusion_comment %></td>
+      <% else -%>
+        <td><%=  link_to "exclude", :controller => "Analysis_Memberships", :id => am, :action => "edit" %></td>
+      <% end -%>
+    </tr>
+    <% end %>
+  </tbody>
+  
+</table>
+
+
+<p>
+<%= link_to 'Edit this analysis', edit_analysis_path(@analysis) %> |
+<%= link_to 'Back to all analyses', analyses_path %>
+</p>

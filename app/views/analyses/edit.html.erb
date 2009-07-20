@@ -1,0 +1,30 @@
+<h1>Editing analysis</h1>
+
+<p><%= "Created by #{@analysis.user.login} on #{@analysis.created_at.to_date.inspect}" %></p>
+
+<% form_for(@analysis) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :description %><br />
+    <%= f.text_field :description %>
+  </p>
+  <table>
+    <tr><th>RMR</th><th>Excluded?</th><th>Exclusion Comments</th></tr>
+    <% @analysis.analysis_memberships.each do |am| %>
+      <% fields_for "analysis[update_analysis_memberships_attributes][]", am  do |amform| %> 
+        <tr>
+          <td><%= am.image_dataset.rmr %></td>
+          <td><%= amform.check_box :excluded %></td>
+          <td><%= amform.text_field :exclusion_comment %></td>
+        <tr>
+      <% end %>
+    <% end %>
+  </table>
+  </p>
+
+
+  <p><%= f.submit "Update" %></p>
+<% end %>
+
+<%= link_to 'Back to this analysis', @analysis %>

@@ -1,0 +1,31 @@
+
+<table class="tabular">
+  <caption>Current Studies</caption>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Investigator</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tfoot><%= footer 4 %></tfoot>
+  <tbody>
+    <% for study in @studies %>
+      <tr>
+        <td><%=h study.name %></td>
+        <td><%= study.description.split('\r\n\r\n').first %></td>
+        <td><%=h study.investigator %></td>
+        <td>
+          <%= link_to 'Show', study %>
+          <%= link_to 'Edit', edit_study_path(study) %>
+          <%= link_to 'Destroy', study, :confirm => 'Are you sure?', :method => :delete %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br />
+
+<%= link_to 'New study', new_study_path %>

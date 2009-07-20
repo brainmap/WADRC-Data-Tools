@@ -1,0 +1,6 @@
+<h2><%= @user.login %></h2>
+
+<h3>My Analyses:</h3>
+<% @user.analyses.each do |analysis| %>
+  <%= link_to analysis.description, analysis %>
+<% end %>

@@ -1,0 +1,32 @@
+<div class="two_col_left">
+  <div class="sticky">
+    <%= key_val_table('find_parameters', {
+      :scan_procedures => visit_search['scan_procedure'].nil? ? "" : visit_search['scan_procedure'].join(', '),
+      :scan_number => visit_search['scan_number'],
+      :enum => visit_search['enum'],
+      :initials => visit_search['initials'],
+      :rmr => visit_search['rmr'],
+      :directory => visit_search['path'],
+      :rad_review => visit_search['rad_review'],
+      :transfer_mri => visit_search['transfer_mri'],
+      :transfer_pet => visit_search['transfer_pet'],
+      :transfer_behavioral_log => visit_search['transfer_behavioral_log']
+    })%>
+  </div>
+</div>
+
+<div class="two_col_right">
+  <div class="sticky">
+    <%= key_val_table('find_parameters', {
+      :check_image => visit_search['check_image'],
+      :check_mr5 => visit_search['check_mr5'],
+      :check_np => visit_search['check_np'],
+      :burn_dicom_dvd => visit_search['burn_dicom_dvd'],
+      :first_score => visit_search['first_score'],
+      :second_score => visit_search['second_score'],
+      :enter_info_in_db => visit_search['enter_info_in_db'],
+      :conference => visit_search['conference'],
+      :compile_folder => visit_search['compile_folder']
+    })%>
+  </div>
+</div>

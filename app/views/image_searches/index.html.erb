@@ -1,0 +1,50 @@
+<table id="list_of_image_searches" class="tabular">
+  <caption>Current image searches</caption>
+  
+  <thead>
+    <tr><th>User</th><th>Created on</th><th>Modified on</th><th>Search criteria</th><th></th></tr>
+  </thead>
+  
+  <tbody>
+    <% @image_searches.each do |is| %>
+      <tr>
+      
+        <td><%=h is.user.login unless is.user.nil? %></td>
+        <td><%=h is.created_at.to_s(:datetime_military) %></td>
+        <td><%=h is.updated_at.to_s(:datetime_military) %></td>
+      
+        <!-- This cell holds the search criteria which get rendered in a popup  -->
+        <td>
+          <%= popup_note('peek', key_val_table('search_criteria_popup', {
+            :Created_by => is.user.login,
+            :Last_modified_on => is.updated_at.to_date.inspect,
+            :enum => is.enum,
+            :RMR_number => is.rmr,
+            :Series_description => is.series_description,
+            :Directory => is.path,
+            :Earliest_timestamp => is.earliest_timestamp.nil? ? nil : is.earliest_timestamp.to_s(:datetime_military),
+            :Latest_timestamp => is.latest_timestamp.nil? ? nil : is.latest_timestamp.to_s(:datetime_military),
+            :gender => is.gender_letter,
+            :minimum_age => is.min_age,
+            :maximum_age => is.max_age,
+            :minimim_education_years => is.min_ed_years,
+            :maximum_education_years => is.max_ed_years,
+            :apoe_status => is.apoe_status_prompt
+          }))%>
+        </td>
+      
+        <td>
+          <%= link_to "view", is %>
+          <%= link_to "delete", is, :confirm => "Are you sure you want to delete this search?", :method => :delete %>
+        </td>
+      
+      </tr>
+    <% end -%>
+  </tbody>
+  
+  <tfoot></tfoot>
+</table>
+
+<br>
+
+<%= link_to "Create a new search", new_image_search_path %>

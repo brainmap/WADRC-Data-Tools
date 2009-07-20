@@ -1,0 +1,34 @@
+<div class="table_holder">
+
+<h1>Series Descriptions</h1>
+
+
+<table>
+  <tr>
+    <th>Long description</th>
+    <th>Short description</th>
+    <th>Anat type</th>
+    <th>Acquisition plane</th>
+	<th>Ignore</th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% for series_description in @series_descriptions %>
+  <tr>
+    <td><%=h series_description.long_description %></td>
+    <td><%=h series_description.short_description %></td>
+    <td><%=h series_description.anat_type %></td>
+    <td><%=h series_description.acq_plane %></td>
+    <td><%=h series_description.ignore %></td>
+    <td><%= link_to 'Edit', edit_series_description_path(series_description) %></td>
+    <td><%= link_to 'Delete', series_description, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+</div>
+
+<br />
+
+<%= link_to 'New series_description', new_series_description_path %>

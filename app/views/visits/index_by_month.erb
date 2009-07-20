@@ -1,0 +1,16 @@
+<div id="heading_and_link">
+  <h1><%= @title %>:</h1>  
+  <p<%= link_to "create new visit", new_visit_path %></p>
+</div>
+
+<%= render :partial => 'index_footer' %>
+
+<% @visits.sort_by(&:month).reverse.group_by(&:month).each do |month, visits| %>
+  <div id="month">
+    <%= render :partial => 'index', :locals => { :month => month, :visits => visits.sort_by(&:date).reverse } %>
+  </div><br /><br />
+<% end %>
+
+<br />
+
+<%= render :partial => 'index_footer' %>

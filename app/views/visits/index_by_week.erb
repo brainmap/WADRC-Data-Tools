@@ -1,0 +1,14 @@
+<div id="heading_and_link">
+  <h1><%= @title %>:</h1>  
+  <p<%= link_to "create new visit", new_visit_path %></p>
+</div>
+
+<% @visits.sort_by(&:week).reverse.group_by(&:week).each do |week, visits| %>
+  <div id="week">
+    <%= render :partial => 'index', :locals => { :week => week, :visits => visits.sort_by(&:date).reverse } %>
+  </div>
+<% end %>
+
+<br />
+
+<%= render :partial => 'index_footer' %>

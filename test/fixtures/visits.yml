@@ -1,0 +1,23 @@
+RMR123:
+    date: 2009-01-01
+    protocol: flair
+    scan_number: 123
+    enum: 456
+    initials: kk4
+    rmr: RMR123
+    rad_review: no
+    notes: A note
+    transfer_mri: yes
+    transfer_pet: yes
+    transfer_behavioral_log: n/a
+    check_imaging: no
+    check_np: yes
+    check_MR5_DVD: no
+    burn_DICOM_DVD: no
+    first_score: no
+    second_score: no
+    enter_info_in_db: no
+    conference: no
+    compile_folder: no
+    dicom_dvd: no
+    user: aaron

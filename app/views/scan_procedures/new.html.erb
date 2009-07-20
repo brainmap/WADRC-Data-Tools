@@ -1,0 +1,19 @@
+<h1>New scan procedure</h1>
+
+<% form_for(@scan_procedure) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :code_name %><br />
+    <%= f.text_field :codename %>
+  </p>
+  <p>
+    <%= f.label :description %><br />
+    <%= f.text_field :description %>
+  </p>
+  <p>
+    <%= f.submit "Create" %>
+  </p>
+<% end %>
+
+<%= link_to 'Back', scan_procedures_path %>

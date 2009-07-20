@@ -1,0 +1,18 @@
+<div id="heading_and_link">
+  <h1><%= @scan_procedure.codename %></h1>
+  <p>
+    <%= link_to(pluralize(@scan_procedure.visits.size,'visit'), in_scan_procedure_path(@scan_procedure)) %> 
+    underwent this scan procedure
+  </p>
+</div>
+
+<div class="sticky">
+  <%= key_val_table('scan_procedure_details', {
+    :code_name => @scan_procedure.codename,
+    :description => @scan_procedure.description
+  })%>
+</div>
+
+<p>
+<%= link_to 'Edit this scan procedure', edit_scan_procedure_path(@scan_procedure) %>
+</p>

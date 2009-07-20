@@ -1,0 +1,21 @@
+<h1>Set exclusion options:</h1>
+
+<% form_for(@analysis_membership) do |f| %>
+  <p>
+    <%= f.error_messages %>
+  </p>
+  <p>
+    <%= @analysis_membership.image_dataset.rmr %> <%= @analysis_membership.image_dataset.series_description %>
+  </p>
+  <p>
+    Excluded <%= f.check_box :excluded%>
+  </p>
+  <p>
+    Comment: <%= f.text_field :exclusion_comment %>
+  </p>
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+<% end %>
+
+<%= link_to 'Back', analysis_path(@analysis_membership.analysis) %>

@@ -1,0 +1,23 @@
+<p>
+  <b>Score:</b>
+  <%=h @neuropsych_assessment.score %>
+</p>
+
+<p>
+  <b>Score type:</b>
+  <%=h @neuropsych_assessment.score_type %>
+</p>
+
+<p>
+  <b>Test name:</b>
+  <%=h @neuropsych_assessment.test_name %>
+</p>
+
+<p>
+  <b>Note:</b>
+  <%=h @neuropsych_assessment.note %>
+</p>
+
+
+<%= link_to 'Edit', edit_neuropsych_assessment_path(@neuropsych_assessment) %> |
+<%= link_to 'Back', neuropsych_assessments_path %>
