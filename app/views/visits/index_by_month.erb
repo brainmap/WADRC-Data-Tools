@@ -5,9 +5,9 @@
 
 <%= render :partial => 'index_footer' %>
 
-<% @visits.sort_by(&:month).reverse.group_by(&:month).each do |month, visits| %>
+<% @visits.group_by(&:month).each do |month, visits| %>
   <div id="month">
-    <%= render :partial => 'index', :locals => { :month => month, :visits => visits.sort_by(&:date).reverse } %>
+    <%= render :partial => 'index', :locals => { :visits => visits, :paginated => false } %>
   </div><br /><br />
 <% end %>
 

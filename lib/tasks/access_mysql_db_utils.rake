@@ -1,10 +1,8 @@
 $:.push '/Users/kris/projects/ImageData/lib'
 
 require 'mysql'
-require 'raw_image_file'
-require 'raw_image_dataset'
-require 'visit_raw_data_directory'
 require 'lib/tasks/mysql_to_rails_lib'
+require 'visit_raw_data_directory'
 
 MYSQLSERVER = "jimbo"
 MYSQLUSER = "SQLAdmin"
@@ -20,13 +18,12 @@ namespace :db do
       associate_visits_to_participants_via_rmr(Visit.all)
     end
     
-    task :scan_raw_data, :directory do |t, args|
-      args.with_defaults(:directory => nil, :protocol_name => nil, :dbfile => RAILSDB)
-      puts "Scanning raw data from: #{args.directory} as part of protocol #{args.protocol_name}"
-      v = VisitRawDataDirectory.new(args.directory, args.protocol_name)
+    task :scan_raw_data, :directory, :scan_procedure_name do |t, args|
+      args.with_defaults(:directory => nil, :scan_procedure_name => nil, :dbfile => RAILSDB)
+      puts "Scanning raw data from: #{args.directory} as part of scan_procedure #{args.scan_procedure_name}"
+      v = VisitRawDataDirectory.new(args.directory, args.scan_procedure_name)
       v.scan
-      v.init_db(args.dbfile)
-      v.db_insert!
+      v.db_insert!(args.dbfile)
     end
     
   end
@@ -39,12 +36,12 @@ namespace :db do
     end
   end
   
-  namespace :protocols do
+  namespace :scan_procedures do
     task(:append_from_mysql => :environment) do
       mysqldb = Mysql.new(MYSQLSERVER,MYSQLUSER,MYSQLPASSWD,MYSQLDB)
       result = mysqldb.query("SELECT ProtocolName FROM lookup_studyprotocol")
       result.each do |row|
-        Protocol.create(:name => row[0])
+        ScanProcedure.create(:name => row[0])
       end
     end
   end

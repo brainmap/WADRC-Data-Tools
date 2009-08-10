@@ -14,6 +14,9 @@ Rails::Initializer.run do |config|
   # enables pagination
   config.gem 'mislav-will_paginate', :version => '~> 2.3.8', :lib => 'will_paginate', :source => 'http://gems.github.com'
   
+  # Tools for extracting imaging metadata
+  # config.gem 'brainmap-ImageData', :lib => 'image_data', :source => 'http://gems.github.com'
+  
   # Settings in config/environments/* take precedence over those specified here.
   # Application configuration should go into files in config/initializers
   # -- all .rb files in that directory are automatically loaded.

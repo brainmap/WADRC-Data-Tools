@@ -3,6 +3,7 @@ class Visit < ActiveRecord::Base
   
   validates_presence_of :date, :scan_procedure
   validates_uniqueness_of :rmr, :case_sensitive => false
+  
   belongs_to :scan_procedure
   has_many :image_datasets, :dependent => :destroy
   has_many :log_files

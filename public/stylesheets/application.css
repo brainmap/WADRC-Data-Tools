@@ -119,6 +119,12 @@ table.search_form th { text-align:right; font-weight:normal; }
 .hud_display { border: thick solid purple; background-color:yellow; -webkit-border-radius:10px; 
 	width:50em; top:10em; left:50%; margin-left:-25em; position:fixed; padding:2em; 
 }
+
+
+div.sidebar { float:left; width:300px; }
+div.adjacent-body { margin-left:320px; }
+#recent-imports-sidebar ul { list-style:none; padding:0; }
+
 NEWSTUFF {}
 
 

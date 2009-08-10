@@ -1,11 +1,8 @@
 $:.push '/Users/kris/projects/ImageData/lib'
 
-require 'mysql'
-require 'sqlite3'
-require 'raw_image_file'
-require 'raw_image_dataset'
-require 'visit_raw_data_directory'
-require 'lib/tasks/mysql_to_rails_lib'
+# require 'mysql'
+# require 'sqlite3'
+# require 'lib/tasks/mysql_to_rails_lib'
 
 MYSQLSERVER = "jimbo"
 MYSQLUSER = "SQLAdmin"

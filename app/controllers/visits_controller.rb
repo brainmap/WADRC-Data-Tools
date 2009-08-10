@@ -57,11 +57,10 @@ class VisitsController < ApplicationController
   
   # GET /visits/by_month
   def by_month
-    all_v = Visit.all
-    @visits = all_v.group_by(&:month)
+    @visits = Visit.all
     @title = "Visits by month"
     @collection_title = "Visits by month"
-    @total_count = all_v.size
+    @total_count = @visits.size
     
     render :template => "visits/index_by_month"
   end

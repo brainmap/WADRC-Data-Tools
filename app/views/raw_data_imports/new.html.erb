@@ -1,0 +1,30 @@
+<div style="overflow:hidden; clear:both;">
+<div id="recent-imports-sidebar" class="sidebar">
+	<h3>Recently Imported Visit Directories</h3>
+	<ul>
+		<% for visit in @recent_visits %>
+			<li><%= visit.path %></li>
+		<% end %>
+	</ul>
+</div>
+
+<div id="visit-import-body" class="adjacent-body">
+	<h3>Import a new raw data directory</h3>
+
+	<% form_tag :action => "create" do %>
+	  <p>
+	    <%= label :raw_data_import, :directory, "Directory" %><br />
+	    <%= text_field :raw_data_import, :directory %>
+	  </p>
+
+	  <p>
+	    <%= label :raw_data_import, :scan_procedure, "Scan Procedure" %><br />
+	    <%= collection_select :raw_data_import, :scan_procedure, ScanProcedure.all, :codename, :codename %>
+	  </p>
+
+	  <p>
+	    <%= submit_tag "Import" %>
+	  </p>
+	<% end %>
+</div>
+</div>

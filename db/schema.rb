@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20090603195733) do
+ActiveRecord::Schema.define(:version => 20090810193853) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -162,7 +162,7 @@ ActiveRecord::Schema.define(:version => 20090603195733) do
     t.integer  "ed_years"
     t.integer  "apoe_e1"
     t.integer  "apoe_e2"
-    t.integer  "gender"
+    t.string   "gender"
     t.string   "note"
     t.string   "apoe_processor"
     t.date     "dob"
@@ -246,6 +246,7 @@ ActiveRecord::Schema.define(:version => 20090603195733) do
     t.integer  "enrollment_id"
     t.string   "research_diagnosis"
     t.string   "consent_form_type"
+    t.string   "scanner_source"
   end
 
 end

@@ -34,6 +34,7 @@ ActionController::Routing::Routes.draw do |map|
   map.resources :image_comments, :only => [:index]
   map.resources :scan_procedures
   map.resources :log_files
+  map.resources :raw_data_imports
 
   map.signup '/signup', :controller => 'users', :action => 'new'
   map.login  '/login', :controller => 'sessions', :action => 'new'

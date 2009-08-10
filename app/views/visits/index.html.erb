@@ -1,6 +1,9 @@
 <div id="heading_and_link">
   <h1><%= @collection_title or "Visits" %>:</h1>
-  <p><%= link_to 'create new visit', new_visit_path %></p>
+  <p>
+		<%= link_to 'create new visit', new_visit_path %> |
+		<%= link_to 'import visit data', new_raw_data_import_path %>
+	</p>
 </div>
 
 <%= render :partial=>'index', :locals => { :visits => @visits } %>
