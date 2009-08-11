@@ -33,8 +33,10 @@ class ImageSearchesController < ApplicationController
     
     respond_to do |format|
       if @image_search.save
-        params['scan_procedure']['ids'].each do |scan_procedure_id|
-          @image_search.scan_procedures << ScanProcedure.find_by_id(scan_procedure_id)
+        unless params['scan_procedure'].nil?
+          params['scan_procedure']['ids'].each do |scan_procedure_id|
+            @image_search.scan_procedures << ScanProcedure.find_by_id(scan_procedure_id)
+          end
         end
         flash[:notice] = 'Image Search was successfully created.'
         format.html { redirect_to(@image_search) }
@@ -67,6 +69,7 @@ class ImageSearchesController < ApplicationController
   def new
     @image_search = ImageSearch.new
     @image_search.user = @current_user
+    @scanner_sources = Visit.scanner_sources
   end
   
   def import_to_analysis

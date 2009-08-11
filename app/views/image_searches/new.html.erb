@@ -34,6 +34,10 @@
       <th><%= f.label :scan_date_after %></th>
       <td><%= f.date_select :earliest_timestamp, :start_year => 1995, :include_blank => true %></td>
     </tr>
+		<tr>
+			<th><%= f.label :scanner_source %></th>
+			<td><%= select :image_search, :scanner_source, @scanner_sources, :include_blank => true %></td>
+		</tr>
   </table>
   <table class="search_form">
     <tr>

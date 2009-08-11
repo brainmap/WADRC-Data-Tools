@@ -23,7 +23,13 @@ namespace :db do
       puts "Scanning raw data from: #{args.directory} as part of scan_procedure #{args.scan_procedure_name}"
       v = VisitRawDataDirectory.new(args.directory, args.scan_procedure_name)
       v.scan
-      v.db_insert!(args.dbfile)
+      visit = Visit.find_or_initialize_by_rmr(v.rmr_number)
+      if visit.new_record? or visit.image_datasets.blank?
+        v.datasets.each do |d|
+          visit.image_datasets.build(d.attributes_for_active_record)
+        end
+      end
+      visit.save
     end
     
   end

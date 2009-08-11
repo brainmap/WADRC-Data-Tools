@@ -1,15 +1,20 @@
+require 'visit_raw_data_directory'
+
 class Visit < ActiveRecord::Base
   default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
   
   validates_presence_of :date, :scan_procedure
   validates_uniqueness_of :rmr, :case_sensitive => false
-  
+    
   belongs_to :scan_procedure
   has_many :image_datasets, :dependent => :destroy
   has_many :log_files
   belongs_to :user
   belongs_to :enrollment
   has_one :neuropsych_session
+  
+  accepts_nested_attributes_for :scan_procedure, 
+    :reject_if => proc { |attributes| ScanProcedure.find_by_codename(attributes['codename']).blank? }
   
   named_scope :complete, :conditions => { :compile_folder => 'yes' }
   named_scope :incomplete, :conditions => { :compile_folder => 'no' }
@@ -55,5 +60,13 @@ class Visit < ActiveRecord::Base
     find_conditions = [conditions.join(' AND '), *qualifiers]
     
     Visit.find(:all, :conditions => find_conditions)
+  end
+  
+  def self.scanner_sources
+    find_by_sql('select DISTINCT(scanner_source) from visits').map { |v| v.scanner_source }.compact
+  end
+  
+  def self.create_or_update_from_metamri(v)
+    
   end
 end

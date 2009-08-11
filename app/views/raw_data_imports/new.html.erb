@@ -18,7 +18,7 @@
 	  </p>
 
 	  <p>
-	    <%= label :raw_data_import, :scan_procedure, "Scan Procedure" %><br />
+	    <%= label :raw_data_import, :scan_procedure, "Is a member of Scan Procedure Group:" %><br />
 	    <%= collection_select :raw_data_import, :scan_procedure, ScanProcedure.all, :codename, :codename %>
 	  </p>
 

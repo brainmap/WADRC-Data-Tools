@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20090810193853) do
+ActiveRecord::Schema.define(:version => 20090810211957) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -108,6 +108,7 @@ ActiveRecord::Schema.define(:version => 20090810193853) do
     t.integer  "min_ed_years"
     t.integer  "max_ed_years"
     t.integer  "apoe_status"
+    t.string   "scanner_source"
   end
 
   create_table "image_searches_scan_procedures", :id => false, :force => true do |t|
@@ -162,7 +163,7 @@ ActiveRecord::Schema.define(:version => 20090810193853) do
     t.integer  "ed_years"
     t.integer  "apoe_e1"
     t.integer  "apoe_e2"
-    t.string   "gender"
+    t.integer  "gender"
     t.string   "note"
     t.string   "apoe_processor"
     t.date     "dob"

@@ -77,6 +77,10 @@ class ImageSearch < ActiveRecord::Base
       end
       conditions << "(" + spconditions.join(" OR ") + ")"
     end
+    unless scanner_source.empty?
+      conditions << "visits.scanner_source = ?"
+      qualifiers << "#{scanner_source}"
+    end
     conditions = conditions.join(" AND ")
     return [conditions, qualifiers]
   end
