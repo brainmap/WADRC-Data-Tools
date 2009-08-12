@@ -1,6 +1,6 @@
 $:.push '/Users/kris/projects/ImageData/lib'
 
-require 'mysql'
+# require 'mysql'
 require 'lib/tasks/mysql_to_rails_lib'
 require 'visit_raw_data_directory'
 

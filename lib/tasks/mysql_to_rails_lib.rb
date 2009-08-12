@@ -1,5 +1,5 @@
 require "rubygems"
-require "mysql"
+# require "mysql"
 require 'sqlite3'
 
 MYSQLSERVER = "jimbo"

@@ -20,12 +20,10 @@ class RawDataImportsController < ApplicationController
       flash[:notice] = "Awfully sorry, this raw data directory could not be scanned."
     end
     unless v.nil?
-      sp = ScanProcedure.find_by_codename(v.scan_procedure_name)
-      visit = Visit.find_or_create_by_rmr(v.attributes_for_active_record)
-      if visit.image_datasets.blank?
-        v.datasets.each do |d|
-          visit.image_datasets.build(d.attributes_for_active_record)
-        end
+      if Visit.update_or_create_by_metamri(v)
+        flash[:notice] = "Sucessfully imported raw data directory."
+      else
+        flash[:notice] = "Awfully sorry, this raw data directory could not be saved to the database."
       end
     end
     redirect_to root_url

@@ -26,7 +26,7 @@ def show_rad_review(field)
 end
 
 def show_which_dicom(field)
-  if field.empty? or field.nil?
+  if field.blank?
     "<td style='background-color: #eee; min-width: 1.5em; max-width: 1.5em;'>n/a</td>"
   else
     "<td style='background-color: #eee; min-width: 1.5em; max-width: 1.5em;'>#{field}</td>"

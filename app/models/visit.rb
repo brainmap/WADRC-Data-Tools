@@ -13,9 +13,6 @@ class Visit < ActiveRecord::Base
   belongs_to :enrollment
   has_one :neuropsych_session
   
-  accepts_nested_attributes_for :scan_procedure, 
-    :reject_if => proc { |attributes| ScanProcedure.find_by_codename(attributes['codename']).blank? }
-  
   named_scope :complete, :conditions => { :compile_folder => 'yes' }
   named_scope :incomplete, :conditions => { :compile_folder => 'no' }
   named_scope :recently_imported, :conditions => ["visits.created_at > ?", DateTime.now - 1.week]
@@ -67,6 +64,18 @@ class Visit < ActiveRecord::Base
   end
   
   def self.create_or_update_from_metamri(v)
+    sp = ScanProcedure.find_or_create_by_codename(v.scan_procedure_name)
     
+    visit = Visit.find_or_initialize_by_rmr(v.attributes_for_active_record)
+    visit.update_attributes(v.attributes_for_active_record) unless visit.new_record?
+    visit.scan_procedure = sp
+    
+    if visit.image_datasets.blank?
+      v.datasets.each do |d|
+        visit.image_datasets.build(d.attributes_for_active_record)
+      end
+    end
+    
+    visit.save
   end
 end

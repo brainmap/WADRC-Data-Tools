@@ -85,7 +85,7 @@
 
   <h3>Notes:</h3>
   <div id="notes" class="sticky">
-    <p><%=h @visit.notes.empty? ? "No notes entered for this visit" : @visit.notes %></p>
+    <p><%=h @visit.notes.blank? ? "No notes entered for this visit" : @visit.notes %></p>
   </div>
 
 </div>
