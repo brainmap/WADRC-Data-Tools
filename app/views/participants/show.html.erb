@@ -9,42 +9,52 @@
     <tr>
       <th>DOB</th>
       <th>Gender</th>
-      <th>Flag</th>
       <th>WrapNum</th>
-      <th>WrapEnroll</th>
       <th>Years of Education</th>
       <th>Notes</th>
       <th>APOE status</th>
       <th>APOEE1</th>
       <th>APOEE2</th>
       <th>APOE Processor</th>
+			<th>Access ID</th>
     </tr>
   </thead>
   
-  <tfoot><%= footer(11) %></tfoot>
+  <tfoot><%= footer(10) %></tfoot>
   
   </tbody>
     <tr>
-      <td><%=h @participant.dob.year unless @participant.dob.nil? %></td>
-      <td><%=h gender(@participant.gender) %></td>
-      <td><%=h flag(@participant.quality_redflag) %></td>
+      <td><%=h @participant.dob.year unless @participant.dob.blank? %></td>
+      <td><%=h @participant.gender_prompt %></td>
       <td><%=h @participant.wrapnum %></td>
-      <td><%=h wrap_enrollment(@participant.wrapenroll) %></td>
       <td><%=h @participant.ed_years %></td>
       <td>
         <%= popup_note('peek', "<p>#{@participant.note}</p>") unless @participant.note.nil? %>
       </td>
-      <td><%= genetic_status(@participant.apoe_e1, @participant.apoe_e2) %></td>
+      <td><%= @participant.genetic_status %></td>
       <td><%= allele(@participant.apoe_e1) %></td>
       <td><%= allele(@participant.apoe_e2) %></td>
       <td><%= @participant.apoe_processor %></td>
+			<td><%= @participant.access_id %></td>
     </tr>
   </tbody>
 
 </table>
 
-<h3>Visits:</h3>
-<p><%= @participant.visits.empty? ? "No visits associated with this participant" : "" %></p>
+<h3>Enrollments</h3>
+<%= content_tag(:p, "No enrollments for this participant") if @participant.enrollments.blank? %>
+<p>
+	<% @participant.enrollments.each do |e| %>
+		<%= link_to e.enum, e %>
+	<% end %>
+</p>
+
+<h3>Visits</h3>
+<%= content_tag(:p, "No visits associated with this participant") if @participant.visits.blank? %>
 <% @participant.visits.each do |v| %>
-  <p><%= link_to v.date.to_s(:long), v %> for <%= v.protocol.nil? ? "unknown protocol" : v.protocol.name %></p>
+	<p>
+		<%= link_to v.date.to_s(:long), v %> 
+		for <%= v.protocol.nil? ? "unknown protocol" : v.protocol.name %> 
+		with enum <%= link_to v.enrollment.enum, v.enrollment %>
+	</p>
 <% end -%>

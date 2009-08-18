@@ -1,5 +1,6 @@
 class Participant < ActiveRecord::Base
   has_many :enrollments
+  has_many :visits, :through => :enrollments
   
   def wrapenrolled?
     wrapnum.nil? ? "Not enrolled" : "Enrolled"

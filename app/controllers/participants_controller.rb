@@ -1,5 +1,7 @@
 class ParticipantsController < ApplicationController
   
+  PER_PAGE = 50
+  
   before_filter :set_current_tab
   
   def set_current_tab
@@ -9,7 +11,7 @@ class ParticipantsController < ApplicationController
   # GET /participants
   # GET /participants.xml
   def index
-    @participants = Participant.find(:all)
+    @participants = Participant.all.paginate(:page => params[:page], :per_page => PER_PAGE)
 
     respond_to do |format|
       format.html # index.html.erb

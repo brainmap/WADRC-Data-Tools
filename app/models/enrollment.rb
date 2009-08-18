@@ -3,7 +3,9 @@ class Enrollment < ActiveRecord::Base
   belongs_to :recruitment_group
   belongs_to :participant
   
+  validates_uniqueness_of :enum, :allow_nil => true
+  
   def withdrawn?
-    withdrawn
+    not withdrawl_reason.blank?
   end
 end

@@ -1,30 +1,26 @@
 <table id="participants_index_table" class="tabular">
-  <caption>Enrolled participants</caption>
+  <caption><%= pagination_info @participants %></caption>
   
   <thead>
     <tr>
-    <th>DOB</th>
-    <th>Gender</th>
-    <th>Flag</th>
-    <th>Wrap Number</th>
-    <th>Wrap Enrollment</th>
-    <th>Years of Education</th>
-    <th>Notes</th>
-    <th>ApoE</th>
-    <th></th>
+	    <th>DOB</th>
+	    <th>Gender</th>
+	    <th>Wrap Number</th>
+	    <th>Years of Education</th>
+	    <th>Notes</th>
+	    <th>ApoE</th>
+	    <th></th>
     </tr>
   </thead>
   
-  <tfoot><%= footer(9) %></tfoot>
+  <tfoot><td colspan=7><%= will_paginate @enrollments %></td></tfoot>
 
   <tbody>
     <% for p in @participants %>
       <tr>
         <td><%=h p.dob.year unless p.dob.nil? %></td>
-        <td><%=h p.gender == 2 ? "F" : "M" %></td>
-        <td style="color:red"><%= flag(p.quality_redflag) %></td>
+        <td><%=h p.gender_prompt %></td>
         <td><%=h p.wrapnum %></td>
-        <td><%=h p.wrapenrolled? %></td>
         <td><%=h p.ed_years %></td>
         <td>
           <%= popup_note(p.note.nil? ? "" : "peek", "<p>#{p.note}</p>")%>

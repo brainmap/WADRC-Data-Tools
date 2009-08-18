@@ -1,4 +1,4 @@
-require 'visit_raw_data_directory'
+require 'metamri'
 
 class Visit < ActiveRecord::Base
   default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
@@ -15,7 +15,7 @@ class Visit < ActiveRecord::Base
   
   named_scope :complete, :conditions => { :compile_folder => 'yes' }
   named_scope :incomplete, :conditions => { :compile_folder => 'no' }
-  named_scope :recently_imported, :conditions => ["visits.created_at > ?", DateTime.now - 1.week]
+  named_scope :recently_imported, :conditions => ["visits.updated_at > ?", DateTime.now - 1.week]
   named_scope :assigned_to, lambda { |user_id|
     { :conditions => { :user_id => user_id } }
   }
