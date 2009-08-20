@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20090818203859) do
+ActiveRecord::Schema.define(:version => 20090820211427) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -166,7 +166,7 @@ ActiveRecord::Schema.define(:version => 20090818203859) do
     t.date     "dob"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "wrapnum"
+    t.string   "wrapnum"
     t.integer  "access_id"
   end
 

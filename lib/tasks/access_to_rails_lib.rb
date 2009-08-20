@@ -46,6 +46,8 @@ end
 
 private
 
+# submits an SQL statement to the mysql server, returns the results as an ARRAY of hashes NOT the silly data structure 
+# that the mysql module gives to you by default.
 def query_mysql(sql)
   begin
     db = Mysql.new(MYSQLSERVER,MYSQLUSER,MYSQLPASSWD,MYSQLDB)

@@ -3,7 +3,7 @@ class Participant < ActiveRecord::Base
   has_many :visits, :through => :enrollments
   
   def wrapenrolled?
-    wrapnum.nil? ? "Not enrolled" : "Enrolled"
+    not wrapnum.blank?
   end
   
   def gender_prompt

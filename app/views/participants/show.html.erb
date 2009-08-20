@@ -54,7 +54,7 @@
 <% @participant.visits.each do |v| %>
 	<p>
 		<%= link_to v.date.to_s(:long), v %> 
-		for <%= v.protocol.nil? ? "unknown protocol" : v.protocol.name %> 
+		for <%= v.scan_procedure.blank? ? "unknown protocol" : v.scan_procedure.codename %> 
 		with enum <%= link_to v.enrollment.enum, v.enrollment %>
 	</p>
 <% end -%>

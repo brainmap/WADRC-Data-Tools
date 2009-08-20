@@ -47,14 +47,14 @@ class ImageDataset < ActiveRecord::Base
   end
   
   def participant_details_hash
-    if visit.nil? or visit.enrollment.nil?
+    if visit.blank? or visit.enrollment.blank?
       return nil
     else
       e = visit.enrollment
-      p = e.participant.nil? ? nil : e.participant
+      p = e.participant.blank? ? nil : e.participant
       return { :birth_year => (p.dob.year rescue nil),
         :gender => (p.gender_prompt rescue nil),
-        :wrap_number => e.wrapnum,
+        :wrap_number => p.wrapnum,
         :education_years => (p.ed_years rescue nil),
         :apoe_status => (p.genetic_status rescue nil)
       }

@@ -1,16 +1,14 @@
 $:.push '/Users/kris/projects/ImageData/lib'
 
-# require 'mysql'
-require 'lib/tasks/mysql_to_rails_lib'
-#require 'visit_raw_data_directory'
+require 'rubygems'
+require 'mysql'
+require 'lib/tasks/access_to_rails_lib'
 require 'metamri'
 
 MYSQLSERVER = "jimbo"
 MYSQLUSER = "SQLAdmin"
 MYSQLPASSWD = "57gyri/"
 MYSQLDB = "access"
-
-RAILSDB = 'db/development.sqlite3'
 
 namespace :db do
   
@@ -33,8 +31,7 @@ namespace :db do
       begin
         v.scan
       rescue Exception => e
-        v = nil
-        puts "Awfully sorry, this raw data directory could not be scanned."
+        v = nil; puts "Awfully sorry, this raw data directory could not be scanned."
       end
       unless v.nil?
         if Visit.create_or_update_from_metamri(v)
@@ -46,9 +43,8 @@ namespace :db do
     end
     
     task(:repopulate_participants => :environment) do
-      phashes = fetch_participants_from_mysql
       Participant.delete_all
-      phashes.each do |participant_hash|
+      fetch_participants_from_mysql.each do |participant_hash|
         Participant.new(participant_hash).save
       end
     end
