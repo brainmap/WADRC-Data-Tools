@@ -1,27 +1,23 @@
-set :application, "TransferScan"
-set :repository,  "file:///Data/vtrak1/SysAdmin/rails_repository/trunk/TransferScans"
+set :application, "WADRC-Data-Tools"
+set :host_server, "nelson.medicine.wisc.edu"
+role :app, host_server
+role :web, host_server
+role :db,  host_server, :primary => true
 
-# If you aren't deploying to /u/apps/#{application} on the target
-# servers (which is the default), you can specify the actual location
-# via the :deploy_to variable:
-# set :deploy_to, "/var/www/#{application}"
+set :user, "admin"
+set :group, "admin"
+set :deploy_to, "/Library/WebServer/WADRC-Data-Tools"
 
-set :deploy_to, "/Library/WebServer/TransferScans"
+set :scm, "git"
+set :repository, "git@github.com:brainmap/WADRC-Data-Tools.git"
+set :branch, "master"
 
 set :mongrel_cmd, "/usr/bin/mongrel_rails"
 set :mongrel_ports, "80"
 set :mongrel_pid, "tmp/pids/mongrel.pid"
 
-set :user, "admin"
-set :group, "admin"
 
-# If you aren't using Subversion to manage your source code, specify
-# your SCM below:
-# set :scm, :subversion
 
-role :app, "nelson"
-role :web, "nelson"
-role :db,  "nelson", :primary => true
 
 namespace :deploy do
 
