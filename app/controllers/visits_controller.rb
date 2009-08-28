@@ -104,6 +104,7 @@ class VisitsController < ApplicationController
   # GET /visits/1/edit
   def edit
     @visit = Visit.find(params[:id])
+    @visit.enrollment = Enrollment.new if @visit.enrollment.blank?
   end
 
   # POST /visits

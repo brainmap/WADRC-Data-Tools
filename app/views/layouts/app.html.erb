@@ -24,16 +24,7 @@
     </div>
     
     <div id="middle">
-      <div id="flash">
-        <% flash.each do |key, msg| %>
-        <%= content_tag :div, msg, :id => key %>
-        <% end %>
-      </div>
-      
       <div id="visit_index_main" class="main">
-
-
-
         <div id="visits_tab_bar" class="tabs">
           <ul>
             <li <%= "class=current" if @current_tab == "visits" %>>
@@ -61,6 +52,12 @@
         </div>
 
         <div id="visits_index_content" class="content">
+	
+	      <div id="flash">
+	        <% flash.each do |key, msg| %>
+	        <%= content_tag :div, msg, :id => key %>
+	        <% end %>
+	      </div>
       
         <%= yield %>
       

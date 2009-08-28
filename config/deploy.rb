@@ -1,3 +1,6 @@
+default_run_options[:pty] = true
+ssh_options[:paranoid] = false
+
 set :application, "WADRC-Data-Tools"
 set :host_server, "nelson.medicine.wisc.edu"
 role :app, host_server
@@ -9,6 +12,7 @@ set :group, "admin"
 set :deploy_to, "/Library/WebServer/WADRC-Data-Tools"
 
 set :scm, "git"
+set :git, "/usr/local/git/bin/git"
 set :repository, "git@github.com:brainmap/WADRC-Data-Tools.git"
 set :branch, "master"
 

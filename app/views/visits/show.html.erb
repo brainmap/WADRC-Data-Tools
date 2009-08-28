@@ -99,8 +99,9 @@
   <p>No images associated with this visit</p>
 <% else %>
   <%= render(:partial => 'image_datasets/image_datasets', :locals => {:image_datasets => @image_datasets} ) %>
-  <br />
-  <%= render(:partial => "lookup_radiology_button", :locals => {:rmr => @visit.rmr} ) %>
 <% end %>
+
+<h3>Check Radiology</h3>
+<%= render(:partial => "lookup_radiology_button", :locals => {:rmr => @visit.rmr} ) %>
 
 

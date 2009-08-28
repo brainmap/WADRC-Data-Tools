@@ -4,7 +4,7 @@
   
   <thead>
     <tr>
-      <th>Rmr</th>
+      <th>Directory</th>
       <th>Series description</th>
       <th>Imaging Details</th>
       <th>Visit Details</th>
@@ -19,9 +19,9 @@
   <tfoot><tr><td colspan=9><%= will_paginate image_datasets %></td></tr></tfoot>
 
   <tbody>
-    <% image_datasets.each do |im_ds| %>
+    <% image_datasets.sort_by(&:timestamp).each do |im_ds| %>
       <tr>
-        <td><%=h im_ds.rmr %></td>
+        <td><%=h im_ds.path_basename %></td>
         <td><%=h im_ds.series_description %></td>
         <td>
           <%= popup_note("peek", key_val_table("image_details", im_ds.details_hash))%>

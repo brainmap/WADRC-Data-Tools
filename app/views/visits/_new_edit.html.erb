@@ -1,3 +1,4 @@
+<% javascript_tag 'defaults' %>
 <div id="new_edit_form">
 
 <p>
@@ -21,10 +22,6 @@
       <%= f.text_field :scan_number %>
     </p>
     <p>
-      <%= f.label :enum %><br />
-      <%= collection_select(:visit, :enrollment_id, Enrollment.all, :id, :enum, :include_blank => "Select an enrollment enum") %>
-    </p>
-    <p>
       <%= f.label :initials %><br />
       <%= f.text_field :initials %>
     </p>
@@ -32,6 +29,13 @@
       <%= f.label :rmr %><br />
       <%= f.text_field :rmr %>
     </p>
+
+	<p>
+	  <%= f.label :enrollment_enum %>
+	  <%= f.text_field_with_auto_complete :enrollment_enum, {},
+		        { :method => :get, :url => enrollments_path(:format => :js), :param_name => 'search' } %>
+	</p>
+	
   </div>
 
   <div class="three_col_mid">

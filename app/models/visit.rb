@@ -13,6 +13,8 @@ class Visit < ActiveRecord::Base
   belongs_to :enrollment
   has_one :neuropsych_session
   
+  #accepts_nested_attributes_for :enrollment
+  
   named_scope :complete, :conditions => { :compile_folder => 'yes' }
   named_scope :incomplete, :conditions => { :compile_folder => 'no' }
   named_scope :recently_imported, :conditions => ["visits.updated_at > ?", DateTime.now - 1.week]
@@ -23,6 +25,13 @@ class Visit < ActiveRecord::Base
     { :conditions => { :scan_procedure_id => protocol_id } }
   }
   
+  def enrollment_enum
+    enrollment.enum unless enrollment.blank?
+  end
+  
+  def enrollment_enum=(enum)
+    self.enrollment = Enrollment.find_or_create_by_enum(enum) unless enum.blank?
+  end
   
   def week
     self.date.beginning_of_week

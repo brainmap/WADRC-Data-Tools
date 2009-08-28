@@ -11,11 +11,12 @@ class EnrollmentsController < ApplicationController
   # GET /enrollments
   # GET /enrollments.xml
   def index
-    @enrollments = Enrollment.all.paginate(:page => params[:page], :per_page => PER_PAGE)
+    @enrollments = Enrollment.enum_like(params[:search]).paginate(:page => params[:page], :per_page => PER_PAGE)
 
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => @enrollments }
+      format.js { render :action => 'index.js.erb'}
     end
   end
 

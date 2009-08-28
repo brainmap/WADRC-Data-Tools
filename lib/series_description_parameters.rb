@@ -1,0 +1,1 @@
+../../metamri/lib/series_description_parameters.rb

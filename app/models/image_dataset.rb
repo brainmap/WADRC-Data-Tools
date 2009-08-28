@@ -23,6 +23,10 @@ class ImageDataset < ActiveRecord::Base
     return false
   end
   
+  def path_basename
+    File.basename(path)
+  end
+  
   def details_hash
     { :Path => path,
       :Scanned_file => scanned_file,
@@ -54,7 +58,7 @@ class ImageDataset < ActiveRecord::Base
       p = e.participant.blank? ? nil : e.participant
       return { :birth_year => (p.dob.year rescue nil),
         :gender => (p.gender_prompt rescue nil),
-        :wrap_number => p.wrapnum,
+        :wrap_number => ( p.wrapnum rescue nil),
         :education_years => (p.ed_years rescue nil),
         :apoe_status => (p.genetic_status rescue nil)
       }
