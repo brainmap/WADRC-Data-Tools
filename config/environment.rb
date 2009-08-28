@@ -15,7 +15,7 @@ Rails::Initializer.run do |config|
   config.gem 'mislav-will_paginate', :version => '~> 2.3.8', :lib => 'will_paginate', :source => 'http://gems.github.com'
   
   # Tools for extracting imaging metadata
-  #config.gem 'brainmap-metamri', :lib => 'metamri', :source => 'http://gems.github.com'
+  config.gem 'brainmap-metamri', :lib => 'metamri', :source => 'http://gems.github.com'
   
   # enables smart searching
   config.gem 'searchlogic'

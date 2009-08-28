@@ -2,8 +2,8 @@
 
 require 'rubygems'
 require 'mysql'
-require 'lib/tasks/access_to_rails_lib'
-#require 'metamri'
+#require 'lib/tasks/access_to_rails_lib'
+require 'metamri'
 
 MYSQLSERVER = "jimbo"
 MYSQLUSER = "SQLAdmin"
