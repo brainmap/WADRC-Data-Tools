@@ -5,6 +5,8 @@ class Enrollment < ActiveRecord::Base
   
   validates_uniqueness_of :enum, :allow_nil => true
   
+  validates_format_of :enum, :with => /.*\d{3,}/
+  
   def withdrawn?
     not withdrawl_reason.blank?
   end
