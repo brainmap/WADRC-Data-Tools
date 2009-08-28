@@ -30,8 +30,13 @@ class Visit < ActiveRecord::Base
   end
   
   def enrollment_enum=(enum)
-    self.enrollment = Enrollment.find_or_create_by_enum(enum) unless enum.blank?
+  # Manually specify the Enum Validation as ending with at least 3 digit integers.
+  # This doesn't use the enrollment validations, which is not great style, but it works.
+    if enum =~ /.*\d{3,}/
+      self.enrollment = Enrollment.find_or_create_by_enum(enum) unless enum.blank?
+    end
   end
+  
   
   def week
     self.date.beginning_of_week
@@ -86,5 +91,14 @@ class Visit < ActiveRecord::Base
     end
     
     visit.save
+  end
+  
+  private
+  
+  def validate
+    puts enrollment_enum
+    if enrollment_enum.blank? 
+      errors.add_to_base "Enum not valid; it must end with at least 3 digits."
+    end
   end
 end
