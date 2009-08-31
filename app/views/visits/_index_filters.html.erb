@@ -1,0 +1,24 @@
+
+<div>
+  <p>
+    Filters:
+    <%= link_to "All", visits_path %>,
+    <%= link_to "Incomplete", incomplete_visits_path %>,
+    <%= link_to "Complete", complete_visits_path %>,
+    <%= link_to "Recent imports", recently_imported_visits_path %>,
+    <%= link_to "Search for visits", find_visits_path %>
+  </p>
+  
+  <% form_tag '/visits/in_scan_procedure' do %>
+    <%= submit_tag("In scan procedure") %>
+    <%= collection_select :scan_procedure, :id, ScanProcedure.all, :id, :codename, :prompt => 'choose scan procedure' %>
+  <% end %>
+  
+  <% form_tag '/visits/assigned_to_who' do %>
+    <%= submit_tag("Assigned to") %>
+    <%= collection_select :user, :login, User.all, :login, :login, :prompt => 'choose user' %>
+  <% end %>
+  
+</div>
+
+<br style="clear:both" />
