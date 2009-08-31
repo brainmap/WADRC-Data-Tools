@@ -1,5 +1,3 @@
-require '/Data/home/erik/NetBeansProjects/metamri/lib/metamri'
-
 class RawDataImportsController < ApplicationController
   
   def new
@@ -11,9 +9,9 @@ class RawDataImportsController < ApplicationController
   end
   
   def create
-    if validates_truthiness_of_directory(params[:raw_data_import][:directory])
-      v = VisitRawDataDirectory.new(params[:raw_data_import][:directory], params[:raw_data_import][:scan_procedure])
-      puts "#{params[:raw_data_import]} "
+    @visit_directory_to_scan = params[:raw_data_import][:directory].chomp(' ')
+    if validates_truthiness_of_directory(@visit_directory_to_scan)
+      v = VisitRawDataDirectory.new(@visit_directory_to_scan, params[:raw_data_import][:scan_procedure])
       puts "+++ Importing #{v.visit_directory} as part of #{v.scan_procedure_name} +++"
       begin
         v.scan
