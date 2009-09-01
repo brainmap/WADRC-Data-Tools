@@ -11,6 +11,7 @@ class Visit < ActiveRecord::Base
   has_many :log_files
   belongs_to :user
   belongs_to :enrollment
+  has_one :participant, :through => :enrollment
   has_one :neuropsych_session
   
   #accepts_nested_attributes_for :enrollment

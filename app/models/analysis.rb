@@ -1,6 +1,6 @@
 class Analysis < ActiveRecord::Base
   has_many :analysis_memberships, :dependent => :destroy
-  # has_many :image_datasets, :through => :analysis_memberships
+  has_many :image_datasets, :through => :analysis_memberships
   belongs_to :user
   belongs_to :image_search
   
