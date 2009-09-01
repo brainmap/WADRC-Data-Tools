@@ -1,0 +1,14 @@
+# Logfile created on Fri Aug 21 14:24:07 -0500 2009
+
+Processing VisitsController#index (for 144.92.151.229 at 2009-08-21 14:24:12) [GET]
+
+NoMethodError (undefined method `scan_procedure_id' for #<Visit:0x229c834>):
+  app/controllers/visits_controller.rb:14:in `index'
+
+Rendering /Data/home/erik/NetBeansProjects/WADRC-Data-Tools/public/500.html (500 Internal Server Error)
+
+
+Processing VisitsController#index (for 144.92.151.229 at 2009-08-21 14:25:00) [GET]
+Rendering template within layouts/app
+Rendering visits/index
+Completed in 534ms (View: 183, DB: 167) | 200 OK [http://nelson/visits]

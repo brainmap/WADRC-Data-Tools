@@ -1,9 +1,10 @@
 #$:.push '/Users/kris/projects/ImageData/lib'
 
 require 'rubygems'
-require 'mysql'
-#require 'lib/tasks/access_to_rails_lib'
 require 'metamri'
+require 'mysql'
+require 'lib/tasks/access_to_rails_lib'
+
 
 MYSQLSERVER = "jimbo"
 MYSQLUSER = "SQLAdmin"

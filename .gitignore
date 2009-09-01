@@ -1,4 +1,5 @@
 ._*
+*.log
 log/*.log
 tmp/**/*
 doc/api
