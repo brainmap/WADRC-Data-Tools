@@ -8,6 +8,13 @@ module ImageDatasetsHelper
   end
   
   def qc_popup_or_link_to_new(im_ds)
-    im_ds.image_dataset_quality_checks.empty? ? link_to_new_qc(im_ds) : link_to('view most recent', im_ds.image_dataset_quality_checks.last)
+    if im_ds.image_dataset_quality_checks.empty?
+      link_to_new_qc(im_ds)
+    else 
+      link_text = im_ds.image_dataset_quality_checks.last.failing_checks.empty? ? 'good' :  im_ds.image_dataset_quality_checks.last.failing_checks.to_a.join(', ')
+      link_to(link_text, im_ds.image_dataset_quality_checks.last)
+    end
   end
+  
+
 end
