@@ -14,6 +14,7 @@ MYSQLDB = "access"
 namespace :db do
   
   namespace :access do
+    desc "Assign an enrollment to a visit using ENUM info from the Access DB."
     task(:associate_enrollments_to_visits => :environment) do
       Visit.all.each do |v|
         enrollments = fetch_visit_enrollment(v)
