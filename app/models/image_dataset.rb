@@ -12,7 +12,7 @@ class ImageDataset < ActiveRecord::Base
   has_many :image_dataset_quality_checks, :dependent => :destroy
   has_one :log_file
   
-  validates_presence_of :visit_id, :path, :scanned_file
+  validates_presence_of :path, :scanned_file
   #validates_uniqueness_of :dataset_identifier
 
   def rep_time_hundredths
