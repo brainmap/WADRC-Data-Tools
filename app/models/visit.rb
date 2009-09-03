@@ -14,7 +14,7 @@ class Visit < ActiveRecord::Base
   has_one :participant, :through => :enrollment
   has_one :neuropsych_session
   
-  #accepts_nested_attributes_for :enrollment
+  accepts_nested_attributes_for :enrollment
   
   named_scope :complete, :conditions => { :compile_folder => 'yes' }
   named_scope :incomplete, :conditions => { :compile_folder => 'no' }
@@ -24,20 +24,7 @@ class Visit < ActiveRecord::Base
   }
   named_scope :in_scan_procedure, lambda { |protocol_id|
     { :conditions => { :scan_procedure_id => protocol_id } }
-  }
-  
-  def enrollment_enum
-    enrollment.enum unless enrollment.blank?
-  end
-  
-  def enrollment_enum=(enum)
-  # Manually specify the Enum Validation as ending with at least 3 digit integers.
-  # This doesn't use the enrollment validations, which is not great style, but it works.
-    if enum =~ /.*\d{3,}/
-      self.enrollment = Enrollment.find_or_create_by_enum(enum) unless enum.blank?
-    end
-  end
-  
+  }  
   
   def week
     self.date.beginning_of_week
@@ -87,19 +74,16 @@ class Visit < ActiveRecord::Base
     
     if visit.image_datasets.blank?
       v.datasets.each do |d|
-        visit.image_datasets.build(d.attributes_for_active_record)
+        begin
+          puts d.attributes_for_active_record
+          visit.image_datasets.build(d.attributes_for_active_record)
+        rescue Exception => e
+          puts "Error building image_dataset. #{e}"
+        end
       end
     end
     
-    visit.save
+    visit.save!
   end
   
-  private
-  
-  def validate
-    puts enrollment_enum
-    if enrollment_enum.blank? 
-      errors.add_to_base "Enum not valid; it must end with at least 3 digits."
-    end
-  end
 end

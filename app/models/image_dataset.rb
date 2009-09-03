@@ -12,7 +12,7 @@ class ImageDataset < ActiveRecord::Base
   has_many :image_dataset_quality_checks, :dependent => :destroy
   has_one :log_file
   
-  validates_presence_of :visit, :path, :scanned_file
+  validates_presence_of :visit_id, :path, :scanned_file
   #validates_uniqueness_of :dataset_identifier
 
   def rep_time_hundredths
@@ -78,17 +78,15 @@ class ImageDataset < ActiveRecord::Base
   
   private
   
-  def validate 
-    db_result = self.class.find(:first, :conditions => ['path = ? AND scanned_file = ?', self.path, self.scanned_file])
-    puts db_result
-    unless db_result.blank? # No Image Dataset was found with the dataset identifier, it's ok to save this.
-      unless db_result == self # Ensure uniqueness.
-        errors.add_to_base('Dataset path and file must be unique.') 
-      end
-    end
-  end 
-  
-
+  # def validate 
+  #   db_result = self.class.find(:first, :conditions => ['path = ? AND scanned_file = ?', self.path, self.scanned_file])
+  #   puts db_result
+  #   unless db_result.blank? # No Image Dataset was found with the dataset identifier, it's ok to save this.
+  #     unless db_result == self # Ensure uniqueness.
+  #       errors.add_to_base('Dataset path and file must be unique.') 
+  #     end
+  #   end
+  # end 
   
   
 end
