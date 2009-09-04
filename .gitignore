@@ -1,5 +1,3 @@
-._*
-*.log
 log/*.log
 tmp/**/*
 doc/api
@@ -13,3 +11,5 @@ lib/series_description.rb
 lib/visit_raw_data_directory.rb
 lib/CLUs
 *nfs*
+._*
+*.log

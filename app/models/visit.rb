@@ -83,7 +83,7 @@ class Visit < ActiveRecord::Base
       end
     end
     
-    visit.save!
+    visit.save
   end
   
 end
