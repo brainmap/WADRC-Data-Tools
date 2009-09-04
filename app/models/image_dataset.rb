@@ -11,6 +11,7 @@ class ImageDataset < ActiveRecord::Base
   # has_many :analyses, :through => :analysis_memberships
   has_many :image_dataset_quality_checks, :dependent => :destroy
   has_one :log_file
+  has_many :physiology_text_files
   
   validates_presence_of :path, :scanned_file
   #validates_uniqueness_of :dataset_identifier
