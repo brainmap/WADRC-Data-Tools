@@ -1,0 +1,20 @@
+<h1>Listing physiology_text_files</h1>
+
+<table>
+  <tr>
+    <th>Filepath</th>
+  </tr>
+
+<% @physiology_text_files.each do |physiology_text_file| %>
+  <tr>
+    <td><%=h physiology_text_file.filepath %></td>
+    <td><%= link_to 'Show', physiology_text_file %></td>
+    <td><%= link_to 'Edit', edit_physiology_text_file_path(physiology_text_file) %></td>
+    <td><%= link_to 'Destroy', physiology_text_file, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New physiology_text_file', new_physiology_text_file_path %>

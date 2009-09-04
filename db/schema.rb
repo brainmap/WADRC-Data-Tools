@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20090820211427) do
+ActiveRecord::Schema.define(:version => 20090904162510) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -168,6 +168,13 @@ ActiveRecord::Schema.define(:version => 20090820211427) do
     t.datetime "updated_at"
     t.string   "wrapnum"
     t.integer  "access_id"
+  end
+
+  create_table "physiology_text_files", :force => true do |t|
+    t.string   "filepath"
+    t.integer  "image_dataset_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "recruitment_groups", :force => true do |t|

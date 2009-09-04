@@ -1,0 +1,16 @@
+<h1>Editing physiology_text_file</h1>
+
+<% form_for(@physiology_text_file) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :filepath %><br />
+    <%= f.text_field :filepath %>
+  </p>
+  <p>
+    <%= f.submit 'Update' %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @physiology_text_file %> |
+<%= link_to 'Back', physiology_text_files_path %>

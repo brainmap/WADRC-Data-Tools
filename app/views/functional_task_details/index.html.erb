@@ -1,0 +1,18 @@
+<h1>Listing functional_task_details</h1>
+
+<table>
+  <tr>
+  </tr>
+
+<% @functional_task_details.each do |functional_task_detail| %>
+  <tr>
+    <td><%= link_to 'Show', functional_task_detail %></td>
+    <td><%= link_to 'Edit', edit_functional_task_detail_path(functional_task_detail) %></td>
+    <td><%= link_to 'Destroy', functional_task_detail, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New functional_task_detail', new_functional_task_detail_path %>
