@@ -11,7 +11,7 @@ class EnrollmentsController < ApplicationController
   # GET /enrollments
   # GET /enrollments.xml
   def index
-    @enrollments = Enrollment.enum_like(params[:search]).paginate(:page => params[:page], :per_page => PER_PAGE)
+    @enrollments = Enrollment.enum_like(params[:search]).paginate(:page => params[:page], :per_page => PER_PAGE).sort_by(&:enum)
 
     respond_to do |format|
       format.html # index.html.erb

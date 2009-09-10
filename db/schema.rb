@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20090904162510) do
+ActiveRecord::Schema.define(:version => 20090908191721) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -225,30 +225,22 @@ ActiveRecord::Schema.define(:version => 20090904162510) do
 
   create_table "visits", :force => true do |t|
     t.date     "date"
-    t.integer  "scan_procedure_id",                                        :null => false
+    t.integer  "scan_procedure_id",                                   :null => false
     t.integer  "scan_number"
     t.string   "initials"
     t.string   "rmr"
-    t.string   "radiology_outcome",                      :default => "no"
+    t.string   "radiology_outcome",                 :default => "no"
     t.string   "notes"
-    t.string   "transfer_mri",                           :default => "no"
-    t.string   "transfer_pet",                           :default => "no"
-    t.string   "transfer_behavioral_log",                :default => "no"
-    t.string   "check_imaging",                          :default => "no"
-    t.string   "check_np",                               :default => "no"
-    t.string   "check_MR5_DVD",                          :default => "no"
-    t.string   "burn_DICOM_DVD",                         :default => "no"
-    t.string   "first_score",                            :default => "no"
-    t.string   "second_score",                           :default => "no"
-    t.string   "enter_info_in_db",                       :default => "no"
-    t.string   "conference",                             :default => "no"
-    t.string   "compile_folder",                         :default => "no"
-    t.string   "dicom_dvd",                              :default => "no"
-    t.integer  "user_id",                 :limit => 255
+    t.string   "transfer_mri",                      :default => "no"
+    t.string   "transfer_pet",                      :default => "no"
+    t.string   "conference",                        :default => "no"
+    t.string   "compile_folder",                    :default => "no"
+    t.string   "dicom_dvd",                         :default => "no"
+    t.integer  "user_id",            :limit => 255
     t.string   "path"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text     "radiology_note",                         :default => "no"
+    t.text     "radiology_note",                    :default => "no"
     t.integer  "enrollment_id"
     t.string   "research_diagnosis"
     t.string   "consent_form_type"

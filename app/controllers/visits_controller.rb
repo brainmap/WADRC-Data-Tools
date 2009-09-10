@@ -94,6 +94,7 @@ class VisitsController < ApplicationController
   # GET /visits/new.xml
   def new
     @visit = Visit.new
+    @visit.enrollment = Enrollment.new
 
     respond_to do |format|
       format.html # new.html.erb
@@ -111,6 +112,7 @@ class VisitsController < ApplicationController
   # POST /visits.xml
   def create
     @visit = Visit.new(params[:visit])
+    @visit.enrollment = Enrollment.find_or_create_by_enum(params[:visit][:enrollment_attributes][:enum])
 
     respond_to do |format|
       if @visit.save
@@ -128,9 +130,15 @@ class VisitsController < ApplicationController
   # PUT /visits/1.xml
   def update
     @visit = Visit.find(params[:id])
+    enrollment = Enrollment.find_or_create_by_enum(params[:visit][:enrollment_attributes][:enum])
+    visit_attributes = params[:visit]
+    visit_attributes[:enrollment_id] = enrollment.id
+    visit_attributes[:enrollment_attributes] = enrollment.attributes
+    logger.info visit_attributes
+
 
     respond_to do |format|
-      if @visit.update_attributes(params[:visit])
+      if @visit.update_attributes(visit_attributes)
         flash[:notice] = 'visit was successfully updated.'
         format.html { redirect_to(@visit) }
         format.xml  { head :ok }
