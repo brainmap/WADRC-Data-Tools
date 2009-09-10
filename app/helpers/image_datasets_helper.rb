@@ -16,5 +16,11 @@ module ImageDatasetsHelper
     end
   end
   
+  def add_phys_link(name)
+    link_to_function name do |page|
+       page.insert_html :bottom, :phys_files_list, :partial => 'physiology_text_file', :object => PhysiologyTextFile.new
+    end
+  end
+  
 
 end

@@ -1,0 +1,9 @@
+<div class="phys_file">
+  <% fields_for_physiology_text_file(physiology_text_file) do |phys_form| %>
+    <p>
+      <%= phys_form.label :filepath %>
+    	<%= phys_form.file_field :filepath %>
+      <%= link_to_function 'X', "this.up('.phys_file').remove()" %>
+    </p>
+  <% end %>
+</div>

@@ -6,7 +6,7 @@ module ApplicationHelper
     options.each_pair do |k,v|
       kstring = k.to_s.gsub('_',' ').capitalize
       vstring = v.nil? ? "" : v.to_s
-      table += "<tr><th>#{kstring}:</th><td>#{vstring}</td></tr>"
+      table += "<tr><th>#{kstring}:</th><td>#{vstring}</td></tr>" unless v.blank?
     end
     table += '</table>'
     return table

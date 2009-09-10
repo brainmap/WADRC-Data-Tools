@@ -10,9 +10,9 @@ a:hover { background-color: #ffffbb; }
   margin: 0px; padding: 0em; padding-left: 2em;
   height: 50px;
 }
-#top_bar h1 { margin: 0; padding: 0; line-height: 1em; color:#117755; float: left; }
-#top_bar p { margin: 0; padding: 0; line-height: 2em; color:#117755; float: right; margin-right: 1em; }
-#top_bar a { margin: 0; padding: 0; color:#117755; }
+#top_bar h1 { margin: 0; padding: 0; line-height: 1em; color:#228866; float: left; }
+#top_bar p { margin: 0; padding: 0; line-height: 2em; color:#397; float: right; margin-right: 1em; }
+#top_bar a { margin: 0; padding: 0; color:#397; }
 
 .main { margin: 0 auto 1em auto; padding: 0; width: 1200px; }
 .main div.tabs { margin: 0; padding: 0; }
@@ -86,9 +86,10 @@ a:hover { background-color: #ffffbb; }
 
 .sticky_hole { position:relative; }
 .sticky_spawner { margin:0; padding:0; }
-.sticky_spawner:hover + .hidden_sticky { display: block; }
+.sticky_hole:hover { background-color: #ffffbb; }
+.sticky_hole:hover .hidden_sticky { display: block; }
 .sticky { background-color: #ffffbb; border: dotted thin; padding: 0.5em; }
-.hidden_sticky { display:none; position:absolute; right:-15em; top:1em; z-index:1000;
+.hidden_sticky { display:none; position:absolute; right:-15em; top:1.3em; z-index:1000;
 	background-color: #ffffbb; border: dotted thin; padding: 0.5em; min-width: 40em; }
 
 #flash { display: block; margin: 0 0 1em 3em; }

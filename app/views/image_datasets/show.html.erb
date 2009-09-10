@@ -1,6 +1,7 @@
 <div id="heading_and_link">
   <h1>Imaging Dataset:</h1>
   <p>
+    <%= link_to 'edit this dataset', edit_image_dataset_path(@image_dataset) %> •
     <%= link_to 'view visit from whence it came', @image_dataset.visit %> •
     <% if @image_dataset.visit.nil? or @image_dataset.visit.enrollment.nil? or @image_dataset.visit.enrollment.participant.nil? %>
       no associated participant
@@ -32,6 +33,15 @@
   <h3>Analyses that use this dataset:</h3>
   <div id="analyses_list">
     <%= render :partial => 'analyses_list', :locals => { :dataset => @image_dataset } %>
+  </div>
+  
+  <h3>Physiology Files</h3>
+  <div id="physiology-files-list">
+    <ul>
+      <% for pf in @image_dataset.physiology_text_files %>
+        <li><%= pf.filepath %></li>
+      <% end %>
+    </ul>
   </div>
   
 </div>
