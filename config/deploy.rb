@@ -8,6 +8,8 @@ set :user, "admin"
 set :group, "admin"
 set :deploy_to, "/Library/WebServer/WADRC-Data-Tools"
 
+
+set :scm_command, "/usr/local/git/bin/git"
 set :scm, "git"
 set :repository, "git@github.com:brainmap/WADRC-Data-Tools.git"
 set :branch, "master"
