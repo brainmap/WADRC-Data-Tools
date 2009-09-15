@@ -15,6 +15,8 @@ class ImageDataset < ActiveRecord::Base
   
   validates_presence_of :path, :scanned_file
   #validates_uniqueness_of :dataset_identifier
+  
+  accepts_nested_attributes_for :physiology_text_files
 
   def rep_time_hundredths
     (100 * rep_time).round / 100.0
