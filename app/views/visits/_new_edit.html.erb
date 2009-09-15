@@ -1,3 +1,4 @@
+<% javascript_tag 'defaults' %>
 <div id="new_edit_form">
 
 <p>
@@ -21,10 +22,6 @@
       <%= f.text_field :scan_number %>
     </p>
     <p>
-      <%= f.label :enum %><br />
-      <%= collection_select(:visit, :enrollment_id, Enrollment.all, :id, :enum, :include_blank => "Select an enrollment enum") %>
-    </p>
-    <p>
       <%= f.label :initials %><br />
       <%= f.text_field :initials %>
     </p>
@@ -32,6 +29,15 @@
       <%= f.label :rmr %><br />
       <%= f.text_field :rmr %>
     </p>
+
+	<p>
+		<% f.fields_for :enrollment do |e| %>
+			<%= e.label :enum %>
+			<%= e.text_field_with_auto_complete :enum, {},
+				        { :method => :get, :url => enrollments_path(:format => :js), :param_name => 'search' } %>
+		<% end %>
+	</p>
+	
   </div>
 
   <div class="three_col_mid">
@@ -39,10 +45,6 @@
       <tr>
         <td><%= f.label(:assignee) %></td>
         <td><%= select(:visit, :user_id, User.all.collect {|p| [ p.login, p.id ] }, { :include_blank => "Assign a lab member" }) %></td>
-      </tr>
-      <tr>
-        <td><%= f.label :Transfer_behavioral_log %></td>
-        <td><%= select :visit, :transfer_behavioral_log, ["no", "yes", "n/a"] %></td>
       </tr>
       <tr>
         <td><%= f.label :Transfer_MRI %></td>
@@ -53,40 +55,12 @@
         <td><%= select :visit, :transfer_pet, ["n/a", "no", "yes"] %></td>
       </tr>
       <tr>
-        <td><%= f.label :Check_Imaging %></td>
-        <td><%= select :visit, :check_imaging, ["no", "yes", "n/a"] %></td>
-      </tr>
-      <tr>
         <td><%= f.label :radiology_outcom %></td>
         <td><%= select :visit, :radiology_outcome, ["no", "Nm", "A-NF", "A-F", "n/a"] %></td>
       </tr>
       <tr>
-        <td><%= f.label :Check_MR5_DVD %></td>
-        <td><%= select :visit, :check_MR5_DVD, ["no", "yes", "n/a"] %></td>
-      </tr>
-      <tr>
-        <td><%= f.label :Burn_DICOM_DVD %></td>
-        <td><%= select :visit, :burn_DICOM_DVD, ["no", "yes", "n/a"] %></td>
-      </tr>
-      <tr>
         <td><%= f.label :Which_DICOM_DVD %></td>
         <td><%= f.text_field :dicom_dvd, :size => 6 %></td>
-      </tr>
-      <tr>
-        <td><%= f.label :First_Score %></td>
-        <td><%= select :visit, :first_score, ["no", "yes", "n/a"] %></td>
-      </tr>
-      <tr>
-        <td><%= f.label :Second_Score %></td>
-        <td><%= select :visit, :second_score, ["no", "yes", "n/a"] %></td>
-      </tr>
-      <tr>
-        <td><%= f.label :Enter_Info_In_DB %></td>
-        <td><%= select :visit, :enter_info_in_db, ["no", "yes", "n/a"] %></td>
-      </tr>
-      <tr>
-        <td><%= f.label :Print_NP_Report %></td>
-        <td><%= select :visit, :check_np, ["no", "yes", "n/a"] %></td>
       </tr>
       <tr>
         <td><%= f.label :Compile_Folder %></td>

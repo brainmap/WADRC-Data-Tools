@@ -5,9 +5,10 @@
 		<%= link_to 'import visit data', new_raw_data_import_path %>
 	</p>
 </div>
+<%= render :partial => 'index_filters' %>
 
 <%= render :partial=>'index', :locals => { :visits => @visits } %>
 
 <br />
 
-<%= render :partial => 'index_footer' %>
+<%= render :partial => 'index_filters' %>

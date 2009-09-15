@@ -1,3 +1,6 @@
+default_run_options[:pty] = true
+ssh_options[:paranoid] = false
+
 set :application, "WADRC-Data-Tools"
 set :host_server, "nelson.medicine.wisc.edu"
 role :app, host_server
@@ -11,6 +14,7 @@ set :deploy_to, "/Library/WebServer/WADRC-Data-Tools"
 
 set :scm_command, "/usr/local/git/bin/git"
 set :scm, "git"
+set :git, "/usr/local/git/bin/git"
 set :repository, "git@github.com:brainmap/WADRC-Data-Tools.git"
 set :branch, "master"
 
@@ -22,7 +26,13 @@ set :mongrel_pid, "tmp/pids/mongrel.pid"
 
 
 namespace :deploy do
-
+  # task :update_code
+  # task :symlink
+  
+  desc "Symlink shared configs and folders on each release."
+  task :symlink_shared do
+    run "ln -nfs #{shared_path}/db/transfer_scans_production.sqlite3 #{release_path}/db/transfer_scans_production.sqlite3"
+  end
   desc "Start Mongrels processes and add them to launchd."
   task :start, :roles => :app do
     mongrel_ports.each do |port|
@@ -46,4 +56,4 @@ namespace :deploy do
  
 end
 
-
+after 'deploy:symlink', 'deploy:symlink_shared'

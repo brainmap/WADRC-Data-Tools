@@ -1,5 +1,12 @@
 <h1>Image search results:</h1>
 
+<%= render :partial => 'image_datasets/image_datasets', 
+  :locals => { :image_datasets => @paginated_image_matches, :total_count => @total_count } 
+%>
+
+<br />
+
+
 <div class="two_col_left">
   
 <h3>Search criteria</h3>
@@ -46,11 +53,6 @@
   <% end -%>
 </div>
 
+<br style="clear:both;" />
 
-<br style="clear:both" /><br />
-<hr />
-<br />
 
-<%= render :partial => 'image_datasets/image_datasets', 
-  :locals => { :image_datasets => @paginated_image_matches, :total_count => @total_count } 
-%>

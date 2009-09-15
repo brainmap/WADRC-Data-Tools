@@ -11,12 +11,12 @@
   
   <% form_tag '/visits/in_scan_procedure' do %>
     <%= submit_tag("In scan procedure") %>
-    <%= collection_select :scan_procedure, :id, ScanProcedure.all, :id, :codename, :prompt => 'choose scan procedure' %>
+    <%= collection_select :scan_procedure, :id, ScanProcedure.all.sort_by(&:codename), :id, :codename, :prompt => 'choose scan procedure' %>
   <% end %>
   
   <% form_tag '/visits/assigned_to_who' do %>
     <%= submit_tag("Assigned to") %>
-    <%= collection_select :user, :login, User.all, :login, :login, :prompt => 'choose user' %>
+    <%= collection_select :user, :login, User.all.sort_by(&:login), :login, :login, :prompt => 'choose user' %>
   <% end %>
   
 </div>

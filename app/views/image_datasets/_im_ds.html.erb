@@ -26,7 +26,7 @@
   <%= popup_note("peek", key_val_table("participant_details", {
     :birth_year => im_ds.visit.participant.dob.nil? ? "" : im_ds.visit.participant.dob.year,
     :gender => gender(im_ds.visit.participant.gender),
-    :wrap_number => im_ds.visit.enrollment.nil? ? nil : im_ds.visit.enrollment.wrapnum,
+    :wrap_number => im_ds.visit.enrollment.nil? ? nil : im_ds.visit.participant.wrapnum,
     :education_years => im_ds.visit.participant.ed_years,
     :apoe_status => genetic_status(im_ds.visit.participant.apoe_e1, im_ds.visit.participant.apoe_e2),
   })) unless im_ds.visit.participant.nil? %>

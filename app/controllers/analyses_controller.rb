@@ -79,7 +79,7 @@ class AnalysesController < ApplicationController
   def update
     @analysis = Analysis.find_by_id(params[:id], :include => [ :analysis_memberships => :image_dataset ] )
     
-    Å respond_to do |format|
+    respond_to do |format|
        if @analysis.update_attributes(params[:analysis])
          flash[:notice] = 'Analysis was successfully updated.'
          format.html { redirect_to(@analysis) }

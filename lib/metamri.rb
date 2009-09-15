@@ -1,1 +1,0 @@
-../../metamri/lib/metamri.rb

@@ -11,7 +11,10 @@ class Visit < ActiveRecord::Base
   has_many :log_files
   belongs_to :user
   belongs_to :enrollment
+  has_one :participant, :through => :enrollment
   has_one :neuropsych_session
+  
+  accepts_nested_attributes_for :enrollment
   
   named_scope :complete, :conditions => { :compile_folder => 'yes' }
   named_scope :incomplete, :conditions => { :compile_folder => 'no' }
@@ -21,8 +24,7 @@ class Visit < ActiveRecord::Base
   }
   named_scope :in_scan_procedure, lambda { |protocol_id|
     { :conditions => { :scan_procedure_id => protocol_id } }
-  }
-  
+  }  
   
   def week
     self.date.beginning_of_week
@@ -72,10 +74,16 @@ class Visit < ActiveRecord::Base
     
     if visit.image_datasets.blank?
       v.datasets.each do |d|
-        visit.image_datasets.build(d.attributes_for_active_record)
+        begin
+          puts d.attributes_for_active_record
+          visit.image_datasets.build(d.attributes_for_active_record)
+        rescue Exception => e
+          puts "Error building image_dataset. #{e}"
+        end
       end
     end
     
     visit.save
   end
+  
 end

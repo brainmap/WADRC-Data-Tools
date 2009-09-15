@@ -1,9 +1,10 @@
-$:.push '/Users/kris/projects/ImageData/lib'
+#$:.push '/Users/kris/projects/ImageData/lib'
 
 require 'rubygems'
+require 'metamri'
 require 'mysql'
 require 'lib/tasks/access_to_rails_lib'
-require 'metamri'
+
 
 MYSQLSERVER = "jimbo"
 MYSQLUSER = "SQLAdmin"
@@ -13,6 +14,7 @@ MYSQLDB = "access"
 namespace :db do
   
   namespace :access do
+    desc "Assign an enrollment to a visit using ENUM info from the Access DB."
     task(:associate_enrollments_to_visits => :environment) do
       Visit.all.each do |v|
         enrollments = fetch_visit_enrollment(v)
@@ -24,7 +26,7 @@ namespace :db do
       end
     end
     
-    task :scan_raw_visit_data, :directory, :scan_procedure_name, :needs => :environment do |t, args|
+    task(:scan_raw_visit_data, :directory, :scan_procedure_name, :needs => :environment) do |t, args|
       args.with_defaults(:directory => nil, :scan_procedure_name => nil)
       puts "+++ Importing #{args.directory} as part of #{args.scan_procedure_name} +++"
       v = VisitRawDataDirectory.new(args.directory, args.scan_procedure_name)
@@ -49,16 +51,23 @@ namespace :db do
       end
     end
     
+=begin rdoc
+This task runs through each participant in the rails database, fetches related enrollments in the access database joined by the Access ID, 
+and updates or creates the related enrollment models in the rails DB."
+=end
+    desc "Create or update enrollments and thier relationships with participants from the access DB."
     task(:repopulate_enrollments => :environment) do
-      Enrollment.delete_all
+      #Enrollment.delete_all
       Participant.all.each do |p|
         fetch_participant_enrollments(p).each do |e|
-          p.enrollments.build(e)
+          en = Enrollment.find_or_create_by_enum(e['enum'])
+          en.update_attributes(e)
         end
         p.save
       end
     end
     
+    desc "Reset Participants and Enrollments from the Access Database."
     task :reset => [:repopulate_participants, :repopulate_enrollments, :associate_enrollments_to_visits]
   end
   

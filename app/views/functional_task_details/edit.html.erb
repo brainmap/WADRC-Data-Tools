@@ -1,0 +1,12 @@
+<h1>Editing functional_task_detail</h1>
+
+<% form_for(@functional_task_detail) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.submit 'Update' %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @functional_task_detail %> |
+<%= link_to 'Back', functional_task_details_path %>

@@ -12,17 +12,9 @@
       <th><span>Lab<br>Assignee</span></th>
       <th><span>RMR</span></th>
       <th><span class="vert">Directory Path</span></th>
-      <th><span class="vert">Transfer Log</span></th>
       <th><span class="vert">Transfer MRI</span></th>
       <th><span class="vert">Transfer PET</span></th>
-      <th><span class="vert">Check Imaging</span></th>
       <th><span class="vert">Radiology Outcome</span></th>
-      <th><span class="vert">Check MR5 DVD</span></th>
-      <th><span class="vert">Burn DICOM DVD</span></th>
-      <th><span class="vert">First Score</span></th>
-      <th><span class="vert">Second Score</span></th>
-      <th><span class="vert">Enter Info in DB</span></th>
-      <th><span class="vert">Print NP Report</span></th>
       <th><span class="vert">Compile Folder</span></th>
       <th><span class="vert">Conference</span></th>
       <th></th>
@@ -45,17 +37,9 @@
         <td><%= visit.user.login unless visit.user.nil? %></td>
         <td><%= visit.rmr %></td>
         <td><%= popup_note('peek', key_val_table('path_popup', { :Path => visit.path }))%></td>
-        <%= show_bool(visit.transfer_behavioral_log) %>
         <%= show_bool(visit.transfer_mri) %>
         <%= show_bool(visit.transfer_pet) %>
-        <%= show_bool(visit.check_imaging) %>
         <%= show_rad_review(visit.radiology_outcome) %>
-        <%= show_bool(visit.check_MR5_DVD) %>
-        <%= show_bool(visit.burn_DICOM_DVD) %>
-        <%= show_bool(visit.first_score) %>
-        <%= show_bool(visit.second_score) %>
-        <%= show_bool(visit.enter_info_in_db) %>
-        <%= show_bool(visit.check_np) %>
         <%= show_bool(visit.compile_folder) %>
         <%= show_bool(visit.conference) %>
         <td style="width: 4em;">

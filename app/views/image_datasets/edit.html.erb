@@ -19,10 +19,12 @@
     <%= f.label :timestamp %><br />
     <%= f.datetime_select :timestamp %>
   </p>
+  
   <p>
     <%= f.submit "Update" %>
   </p>
 <% end %>
 
+<br />
 <%= link_to 'Show', @image_dataset %> |
 <%= link_to 'Back', image_datasets_path %>

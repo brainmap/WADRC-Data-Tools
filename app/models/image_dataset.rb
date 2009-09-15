@@ -11,6 +11,12 @@ class ImageDataset < ActiveRecord::Base
   # has_many :analyses, :through => :analysis_memberships
   has_many :image_dataset_quality_checks, :dependent => :destroy
   has_one :log_file
+  has_many :physiology_text_files
+  
+  validates_presence_of :path, :scanned_file
+  #validates_uniqueness_of :dataset_identifier
+  
+  accepts_nested_attributes_for :physiology_text_files
 
   def rep_time_hundredths
     (100 * rep_time).round / 100.0
@@ -21,6 +27,10 @@ class ImageDataset < ActiveRecord::Base
       return true if am.excluded?
     end
     return false
+  end
+  
+  def path_basename
+    File.basename(path)
   end
   
   def details_hash
@@ -54,12 +64,32 @@ class ImageDataset < ActiveRecord::Base
       p = e.participant.blank? ? nil : e.participant
       return { :birth_year => (p.dob.year rescue nil),
         :gender => (p.gender_prompt rescue nil),
-        :wrap_number => p.wrapnum,
+        :wrap_number => ( p.wrapnum rescue nil),
         :education_years => (p.ed_years rescue nil),
         :apoe_status => (p.genetic_status rescue nil)
       }
     end
   end
+  
+  def dataset_identifier
+    File.join(path, scanned_file)
+  end
+  
+  def find_by_dataset_identifier(path, scanned_file)
+    self.class.find()
+  end
+  
+  private
+  
+  # def validate 
+  #   db_result = self.class.find(:first, :conditions => ['path = ? AND scanned_file = ?', self.path, self.scanned_file])
+  #   puts db_result
+  #   unless db_result.blank? # No Image Dataset was found with the dataset identifier, it's ok to save this.
+  #     unless db_result == self # Ensure uniqueness.
+  #       errors.add_to_base('Dataset path and file must be unique.') 
+  #     end
+  #   end
+  # end 
   
   
 end

@@ -24,22 +24,23 @@
   <%= f.hidden_field :user_id %>
   <%= f.hidden_field :image_dataset_id %>
   
+  <%= link_to 'Description of checks', 'http://hobbes/brainwiki/index.php5/List_of_Image_Quality_Checks' %>
   <div class="two_col_left">
     <h3>Reconstruction</h3>
     <p>
-      <%= f.label 'Is the series complete?' %>
+      <%= f.label 'Is the Series Complete?' %>
       <%= select :image_dataset_quality_check, :incomplete_series, ['Complete', 'Incomplete'], :default => 'Complete' %>
       <%= slide_toggler :image_dataset_quality_check_incomplete_series_comment %><br />
       <%= f.text_area :incomplete_series_comment, :rows => 3, :cols => 60, :style => "display:none" %>
     </p>
     <p>
-      <%= f.label 'Image grabled?' %>
+      <%= f.label 'Is the Series Garbled?' %>
       <%= select :image_dataset_quality_check, :garbled_series, qualopts, :default => 'Pass' %>
       <%= slide_toggler :image_dataset_quality_check_garbled_series_comment %><br />
       <%= f.text_area :garbled_series_comment, :rows => 3, :cols => 60, :style => "display:none" %>
     </p>
     <p>
-      <%= f.label 'FOV centered?' %>
+      <%= f.label 'Is the FOV cut off?' %>
       <%= select :image_dataset_quality_check, :fov_cutoff, qualopts, :default => 'Pass' %>
       <%= slide_toggler :image_dataset_quality_check_fov_cutoff_comment %><br />
       <%= f.text_area :fov_cutoff_comment, :rows => 3, :cols => 60, :style => "display:none" %>
