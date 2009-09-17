@@ -1,5 +1,5 @@
 <div id="heading_and_link">
-  <h1>Imaging Dataset:</h1>
+<h1>Imaging Dataset:</h1>
   <p>
     <%= link_to 'edit this dataset', edit_image_dataset_path(@image_dataset) %> •
     <%= link_to 'view visit from whence it came', @image_dataset.visit %> •
@@ -35,7 +35,7 @@
     <%= render :partial => 'analyses_list', :locals => { :dataset => @image_dataset } %>
   </div>
   
-  <h3>Physiology Files</h3>
+  <h3>Physiology Files:</h3>
   <div id="physiology-files-list">
     <ul>
       <% for pf in @image_dataset.physiology_text_files %>

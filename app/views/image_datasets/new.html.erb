@@ -19,7 +19,7 @@
     <%= f.label :timestamp %><br />
     <%= f.datetime_select :timestamp %>
   </p>
-  <p>Physiology Text Files</p>
+  <p>Physiology Text Files:</p>
   <div id="phys_files_list">
     <%= render :partial => 'physiology_text_file', :collection => @image_dataset.physiology_text_files %>
   </div>

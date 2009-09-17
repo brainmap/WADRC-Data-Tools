@@ -25,6 +25,7 @@ class PhysiologyTextFilesController < ApplicationController
   # GET /physiology_text_files/new.xml
   def new
     @physiology_text_file = PhysiologyTextFile.new
+    @physiology_text_file.file_path = File.join(File.expand_path('../', image_dataset.path), 'phys_data/')
 
     respond_to do |format|
       format.html # new.html.erb
@@ -58,15 +59,17 @@ class PhysiologyTextFilesController < ApplicationController
   # PUT /physiology_text_files/1.xml
   def update
     @physiology_text_file = PhysiologyTextFile.find(params[:id])
-
-    respond_to do |format|
-      if @physiology_text_file.update_attributes(params[:physiology_text_file])
-        flash[:notice] = 'PhysiologyTextFile was successfully updated.'
-        format.html { redirect_to(@physiology_text_file) }
-        format.xml  { head :ok }
-      else
-        format.html { render :action => "edit" }
-        format.xml  { render :xml => @physiology_text_file.errors, :status => :unprocessable_entity }
+    
+    if validates_truthiness_of_directory(@visit_directory_to_scan)
+      respond_to do |format|
+        if @physiology_text_file.update_attributes(params[:physiology_text_file])
+          flash[:notice] = 'PhysiologyTextFile was successfully updated.'
+          format.html { redirect_to(@physiology_text_file) }
+          format.xml  { head :ok }
+        else
+          format.html { render :action => "edit" }
+          format.xml  { render :xml => @physiology_text_file.errors, :status => :unprocessable_entity }
+        end
       end
     end
   end
@@ -81,5 +84,9 @@ class PhysiologyTextFilesController < ApplicationController
       format.html { redirect_to(physiology_text_files_url) }
       format.xml  { head :ok }
     end
+  end
+
+  def validates_truthiness_of_directory(dir)
+    dir =~ /Data\/vtrak1\/raw\//
   end
 end
