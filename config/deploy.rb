@@ -1,5 +1,5 @@
-default_run_options[:pty] = true
-ssh_options[:paranoid] = false
+#default_run_options[:pty] = true
+#ssh_options[:paranoid] = false
 
 set :application, "WADRC-Data-Tools"
 set :host_server, "nelson.medicine.wisc.edu"
@@ -49,8 +49,7 @@ namespace :deploy do
 
   desc "Restart Mongrel processes"
   task :restart, :roles => :app do
-    stop
-    start
+    sudo "periodic daily"
   end
  
 end
