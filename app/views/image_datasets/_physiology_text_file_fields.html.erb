@@ -1,0 +1,7 @@
+<p class="phys_file">
+	<%= physiology_text_file_fields.label :filepath %>
+	<%= physiology_text_file_fields.text_field :filepath, :size => 100 %>
+	<%= physiology_text_file_fields.label '_delete', 'Remove:' %>
+	<%= physiology_text_file_fields.check_box '_delete' %>
+	<%#= link_to_function 'X', "this.up('.phys_file').remove()" %>
+</p>

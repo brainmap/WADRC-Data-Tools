@@ -16,9 +16,9 @@ module ImageDatasetsHelper
     end
   end
   
-  def add_phys_link(name)
+  def add_phys_link(form, name)
     link_to_function name do |page|
-       page.insert_html :bottom, :phys_files_list, :partial => 'physiology_text_file', :object => PhysiologyTextFile.new
+       page.insert_html :bottom, :phys_files_list, :partial => 'physiology_text_file_fields', :object => form.fields_for(PhysiologyTextFile.new)
     end
   end
   

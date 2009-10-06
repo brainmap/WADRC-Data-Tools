@@ -12,7 +12,8 @@ set :group, "admin"
 set :deploy_to, "/Library/WebServer/WADRC-Data-Tools"
 
 set :scm, "git"
-set :git, "/usr/local/git/bin/git"
+#set :scm_command, "/usr/local/git/bin/git"
+set :git, "/usr/local/bin/git"
 set :repository, "git@github.com:brainmap/WADRC-Data-Tools.git"
 set :branch, "master"
 

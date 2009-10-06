@@ -1,8 +1,8 @@
 <div class="phys_file">
-  <% fields_for_physiology_text_file(physiology_text_file) do |phys_form| %>
+  <% fields_for "image_dataset[physiology_text_files_attributes][]", physiology_text_file do |physiology_text_file_fields| %>
     <p>
-      <%= phys_form.label :filepath %>
-    	<%= phys_form.file_field :filepath %>
+      <%= physiology_text_file_fields.label :filepath %>
+    	<%= physiology_text_file_fields.text_field :filepath %>
       <%= link_to_function 'X', "this.up('.phys_file').remove()" %>
     </p>
   <% end %>

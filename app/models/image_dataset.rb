@@ -11,10 +11,13 @@ class ImageDataset < ActiveRecord::Base
   # has_many :analyses, :through => :analysis_memberships
   has_many :image_dataset_quality_checks, :dependent => :destroy
   has_one :log_file
-  has_many :physiology_text_files
+
   
   validates_presence_of :path, :scanned_file
   #validates_uniqueness_of :dataset_identifier
+  
+  has_many :physiology_text_files
+  accepts_nested_attributes_for :physiology_text_files, :allow_destroy => true
 
   def rep_time_hundredths
     (100 * rep_time).round / 100.0
