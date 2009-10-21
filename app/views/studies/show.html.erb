@@ -1,13 +1,21 @@
-<h3>Name:</h3>
-<p><%=h @study.name %></p>
+<h2><%=h @study.name %></h2>
+<h3><%=h "#{@study.irb_number}: (#{@study.official_name})" %>: </h3>
 
-<h3>Description:</h3>
+<h3>General Description:</h3>
 <div class="sticky">
   <p><%= @study.description %></p>
 </div>
 
-<h3>Investigator:</h3>
-<p><%=h @study.investigator %></p>
+<dl>
+	<dt>Principle Investigator:</dt>
+	<dd><%=h @study.investigator %></dd>
+
+	<dt>Study Prefix:</dt>
+	<dd><%=h @study.prefix %></dd>
+
+	<dt>Raw Data Directory:</dt>
+	<dd><%=h @study.raw_directory %></dd>
+</dl>
 
 
 <%= link_to 'Edit', edit_study_path(@study) %> |
