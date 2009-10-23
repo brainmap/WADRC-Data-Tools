@@ -8,7 +8,7 @@ role :web, host_server
 role :db,  host_server, :primary => true
 
 set :user, "admin"
-set :group, "admin"
+set :group, "staff"
 set :deploy_to, "/Library/WebServer/WADRC-Data-Tools"
 
 set :scm, "git"
