@@ -1,0 +1,5 @@
+<% form_for @visit, :url => { :action => :send_confirmation, :id => @visit.id }  do |visit_form| %>
+	<%= visit_form.hidden_field :id %>
+	Send Visit Confirmation to: <%= text_field :email, :send_to  %>
+	<%= visit_form.submit "Send Visit Confirmation" %>
+<% end %>

@@ -160,4 +160,12 @@ class VisitsController < ApplicationController
       format.xml  { head :ok }
     end
   end
+  
+  # Send an Email About the Visit
+  def send_confirmation
+    @visit=Visit.find(params[:id])
+    VisitMailer.deliver_visit_confirmation(@visit, params[:email])
+    flash[:notice] = "Email was succesfully sent."
+    redirect_to @visit
+  end
 end

@@ -84,6 +84,9 @@ class Visit < ActiveRecord::Base
     end
     
     visit.save
+
+    return visit
+
   end
   
 end

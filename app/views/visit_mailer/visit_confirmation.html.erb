@@ -1,0 +1,20 @@
+---
+
+There's a New Visit on the Data Panda:
+
+---
+
+Visit Date: <%= @visit_date %>
+Enum: <%= @enrollment_enum %>
+RMR: <%= @rmr %>
+Raw Directory: <%= @visit_path %>
+
+Image Datasets:
+<% @image_datasets.sort_by(&:timestamp).each do |image_dataset| %>
+<%= File.basename(image_dataset.path) -%>: <%= image_dataset.series_description -%>
+<% end %>
+
+<%= @message %>
+---
+Added <%= @created_at %> by <%#= @user %>
+---
