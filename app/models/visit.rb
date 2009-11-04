@@ -72,16 +72,16 @@ class Visit < ActiveRecord::Base
     visit.update_attributes(v.attributes_for_active_record) unless visit.new_record?
     visit.scan_procedure = sp
     
-    if visit.image_datasets.blank?
-      v.datasets.each do |d|
+    # if visit.image_datasets.blank?
+      v.datasets.each do |dataset|
         begin
-          puts d.attributes_for_active_record
-          visit.image_datasets.build(d.attributes_for_active_record)
+          logger.info dataset.attributes_for_active_record
+          visit.image_datasets.build(dataset.attributes_for_active_record)
         rescue Exception => e
           puts "Error building image_dataset. #{e}"
         end
       end
-    end
+    # end
     
     visit.save
 

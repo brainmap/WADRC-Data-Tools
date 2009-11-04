@@ -82,15 +82,15 @@ class ImageDataset < ActiveRecord::Base
   
   private
   
-  # def validate 
-  #   db_result = self.class.find(:first, :conditions => ['path = ? AND scanned_file = ?', self.path, self.scanned_file])
-  #   puts db_result
-  #   unless db_result.blank? # No Image Dataset was found with the dataset identifier, it's ok to save this.
-  #     unless db_result == self # Ensure uniqueness.
-  #       errors.add_to_base('Dataset path and file must be unique.') 
-  #     end
-  #   end
-  # end 
+  def validate 
+    db_result = self.class.find(:first, :conditions => ['path = ? AND scanned_file = ?', self.path, self.scanned_file])
+    puts db_result
+    unless db_result.blank? # No Image Dataset was found with the dataset identifier, it's ok to save this.
+      unless db_result == self # Ensure uniqueness.
+        errors.add_to_base('Dataset path and file must be unique.') 
+      end
+    end
+  end 
   
   
 end
