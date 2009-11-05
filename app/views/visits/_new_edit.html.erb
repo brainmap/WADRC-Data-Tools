@@ -15,7 +15,7 @@
     </p>
     <p>
       <%= f.label :scan_procedure %>
-      <%= collection_select(:visit, :scan_procedure_id, ScanProcedure.all, :id, :codename, :include_blank => "Select a scan_procedure") %>
+      <%= collection_select(:visit, :scan_procedure_id, ScanProcedure.all.sort_by(&:codename), :id, :codename, :include_blank => "Select a scan_procedure") %>
     </p>
     <p>
       <%= f.label :scan_number %><br />
