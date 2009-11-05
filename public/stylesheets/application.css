@@ -124,6 +124,8 @@ table.search_form th { text-align:right; font-weight:normal; }
 
 #raw_data_imports { overflow:hidden; clear:both; padding: 40px; }
 #raw_data_imports div { margin-bottom: 20px; }
+
+#recent-imports-sidebar h3, li { color: #999; font-size: 12px;}
 #recent-imports-sidebar ul { list-style:none; padding:0; }
 
 
