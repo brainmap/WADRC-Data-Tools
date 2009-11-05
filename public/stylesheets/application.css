@@ -122,9 +122,10 @@ table.search_form th { text-align:right; font-weight:normal; }
 }
 
 
-div.sidebar { float:left; width:300px; }
-div.adjacent-body { margin-left:320px; }
+#raw_data_imports { overflow:hidden; clear:both; padding: 40px; }
+#raw_data_imports div { margin-bottom: 20px; }
 #recent-imports-sidebar ul { list-style:none; padding:0; }
+
 
 NEWSTUFF {}
 

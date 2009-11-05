@@ -1,30 +1,32 @@
-<div style="overflow:hidden; clear:both;">
-<div id="recent-imports-sidebar" class="sidebar">
-	<h3>Recently Imported Visit Directories</h3>
-	<ul>
-		<% for visit in @recent_visits %>
-			<li><%= visit.path %></li>
+<div id = "raw_data_imports">
+	<div id = "visit-import-body">
+		<h3>Import a new raw data directory:</h3>
+
+		<% form_tag :action => "create" do %>
+		  <p>
+		    <%= label :raw_data_import, :directory, "Directory" %><br />
+		    <%= text_field :raw_data_import, :directory %>
+		  </p>
+
+		  <p>
+		    <%= label :raw_data_import, :scan_procedure, "Is a member of Scan Procedure Group:" %><br />
+		    <%= collection_select :raw_data_import, :scan_procedure, ScanProcedure.all.sort_by(&:codename), :codename, :codename %>
+		  </p>
+
+		  <p>
+		    <%= submit_tag "Import!", :disable_with => "Importing.  Please wait..." %>
+		  </p>
 		<% end %>
-	</ul>
-</div>
+	</div>
+	<hr>
+	<div id="recent-imports-sidebar" class="adjacent-body">
+		<h3>Recently Imported Visit Directories:</h3>
+		<ul>
+			<% for visit in @recent_visits %>
+				<li><%= visit.path %></li>
+			<% end %>
+		</ul>
+	</div>
 
-<div id="visit-import-body" class="adjacent-body">
-	<h3>Import a new raw data directory</h3>
-
-	<% form_tag :action => "create" do %>
-	  <p>
-	    <%= label :raw_data_import, :directory, "Directory" %><br />
-	    <%= text_field :raw_data_import, :directory %>
-	  </p>
-
-	  <p>
-	    <%= label :raw_data_import, :scan_procedure, "Is a member of Scan Procedure Group:" %><br />
-	    <%= collection_select :raw_data_import, :scan_procedure, ScanProcedure.all, :codename, :codename %>
-	  </p>
-
-	  <p>
-	    <%= submit_tag "Import!", :disable_with => "Importing.  Please wait..." %>
-	  </p>
-	<% end %>
-</div>
+	
 </div>
