@@ -36,7 +36,7 @@
         <td><%= link_to(visit.enrollment.enum, visit.enrollment) unless visit.enrollment.nil? %></td>
         <td><%= visit.user.login unless visit.user.nil? %></td>
         <td><%= visit.rmr %></td>
-        <td><%= popup_note('peek', key_val_table('path_popup', { :Path => visit.path }))%></td>
+        <td><%= popup_note('peek', key_val_table('path_popup', { :Path => visit.path })) unless visit.path.blank? %></td>
         <%= show_bool(visit.transfer_mri) %>
         <%= show_bool(visit.transfer_pet) %>
         <%= show_rad_review(visit.radiology_outcome) %>
