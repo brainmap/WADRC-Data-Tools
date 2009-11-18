@@ -20,4 +20,23 @@ config.action_controller.perform_caching             = true
 # Disable delivery errors, bad email addresses will be ignored
 config.action_mailer.raise_delivery_errors = true
 
-config.action_mailer.delivery_method = :sendmail
+#config.action_mailer.delivery_method = :sendmail
+begin 
+  email_login = ENV['DATAPANDA_EMAIL_LOGIN']
+  email_password = ENV['DATAPANDA_EMAIL_PASSWORD']
+  raise(LoadError, "Missing email environment variables.") unless email_login && email_password
+rescue LoadError => load_error
+  puts load_error
+  puts "(in bash, set your login and password with: export DATAPANDA_EMAIL_LOGIN='ekk@medicine.wisc.edu'; export DATAPANDA_EMAIL_PASSWORD='yourpassword')"
+  puts "Sending Email will not be available until you export these variables and restart the server."
+end
+
+config.action_mailer.delivery_method = :smtp
+config.action_mailer.smtp_settings = {
+  :address        => 'pop.medicine.wisc.edu',
+  :port           => 25,
+  :authentication => :login,
+  :user_name      => email_login,
+  :password       => email_password,
+  :tls            => true
+}

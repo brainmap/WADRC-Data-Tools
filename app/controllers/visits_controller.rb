@@ -164,8 +164,12 @@ class VisitsController < ApplicationController
   # Send an Email About the Visit
   def send_confirmation
     @visit=Visit.find(params[:id])
-    VisitMailer.deliver_visit_confirmation(@visit, params[:email])
-    flash[:notice] = "Email was succesfully sent."
+    begin
+      VisitMailer.deliver_visit_confirmation(@visit, params[:email])
+      flash[:notice] = "Email was succesfully sent."
+    rescue LoadError => load_error
+      flash[:notice] = load_error
+    end
     redirect_to @visit
   end
 end
