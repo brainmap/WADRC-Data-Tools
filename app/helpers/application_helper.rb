@@ -28,7 +28,7 @@ module ApplicationHelper
   end
   
   def footer(width)
-    "<td>&npsp;</td>" * width
+    "<td>&nbsp;</td>" * width
   end
   
   def clearing_br

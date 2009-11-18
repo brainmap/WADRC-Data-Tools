@@ -14,7 +14,7 @@ class VisitMailer < ActionMailer::Base
       :message => visit.id, 
       :visit_date => visit.date, 
       :visit_path => visit.path,
-      :created_at => visit.created_at, 
+      :created_at => DateTime.now.to_formatted_s(:datetime_daymonthweek), 
       #:enrollment_enum => visit.enrollment.enum,
       :rmr => visit.rmr,
       :image_datasets => visit.image_datasets

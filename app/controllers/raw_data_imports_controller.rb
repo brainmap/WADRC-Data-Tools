@@ -1,7 +1,7 @@
 class RawDataImportsController < ApplicationController
   
   def new
-    @recent_visits = Visit.find(:all, :conditions => ['created_at > ?', 1.month.ago])
+    @recent_visits = Visit.find(:all, :conditions => ['created_at > ?', 1.month.ago]).reverse
     
     respond_to do |format|
       format.html # new.html.erb
