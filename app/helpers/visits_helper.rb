@@ -15,7 +15,7 @@ end
 
 def show_rad_review(field)
   if field == "n/a"
-    "<td style='background-color: #bbbbbb; min-width: 1.5em; max-width: 3em;'>n/a</td>"
+    "<td style='background-color: #cccccc; min-width: 1.5em; max-width: 3em;'>n/a</td>"
   elsif field == "no"                      
     "<td style='background-color: #ffbbbb; min-width: 1.5em; max-width: 3em;'>no</td>"
   elsif field == "yes"                     

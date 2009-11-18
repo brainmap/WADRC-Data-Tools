@@ -4,8 +4,8 @@ module ApplicationHelper
     return nil if options.nil?
     table = "<table class=\"key_value\" id=\"#{id}\">"
     options.each_pair do |k,v|
-      kstring = k.to_s.gsub('_',' ').capitalize
-      vstring = v.nil? ? "" : v.to_s
+      kstring = stringify_symbol(k).capitalize
+      vstring = v.blank? ? "" : v.to_s
       table += "<tr><th>#{kstring}:</th><td>#{vstring}</td></tr>" unless v.blank?
     end
     table += '</table>'
@@ -28,11 +28,11 @@ module ApplicationHelper
   end
   
   def footer(width)
-    "<td></td>" * width
+    "<td>&npsp;</td>" * width
   end
   
   def clearing_br
-    '<br style="clear:both" />'
+    '<br style="clear:both" >'
   end
   
   def gender(field)

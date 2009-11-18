@@ -21,7 +21,7 @@ class RawDataImportsController < ApplicationController
         flash[:error] = "Awfully sorry, this raw data directory could not be scanned. #{e}"
       end
       unless v.nil?
-        @visit = Visit.create_or_update_from_metamri(v)
+        @visit = Visit.create_or_update_from_metamri(v, created_by = current_user)
         unless @visit.new_record?
           flash[:notice] = "Sucessfully imported raw data directory."
           VisitMailer.deliver_visit_confirmation(@visit, {:send_to => "erik.kastman@gmail.com" })

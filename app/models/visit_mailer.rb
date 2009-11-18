@@ -10,7 +10,7 @@ class VisitMailer < ActionMailer::Base
     # allows access to @message and @sender_name
     # in the view
     body({
-      #:user => visit.user.login, 
+      :user => visit.created_by.login, 
       :message => visit.id, 
       :visit_date => visit.date, 
       :visit_path => visit.path,

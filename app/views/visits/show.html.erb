@@ -55,7 +55,8 @@
       :RMR_Number => @visit.rmr,
       :Assignee => @visit.user.nil? ? nil : @visit.user.login,
       :Directory_Path => @visit.path,
-			:Scanner_source => @visit.scanner_source
+			:Scanner_source => @visit.scanner_source,
+			:Created_by => @visit.created_by ? @visit.created_by.login : ''
     }) %>
   </div>
 

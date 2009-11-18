@@ -13,6 +13,7 @@ class Visit < ActiveRecord::Base
   belongs_to :enrollment
   has_one :participant, :through => :enrollment
   has_one :neuropsych_session
+  belongs_to :created_by, :class_name => "User"
   
   accepts_nested_attributes_for :enrollment
   
@@ -65,7 +66,9 @@ class Visit < ActiveRecord::Base
     find_by_sql('select DISTINCT(scanner_source) from visits').map { |v| v.scanner_source }.compact
   end
   
-  def self.create_or_update_from_metamri(v)
+  def self.create_or_update_from_metamri(v, created_by = nil)
+    created_by ||= User.first
+    
     sp = ScanProcedure.find_or_create_by_codename(v.scan_procedure_name)
     
     visit = Visit.find_or_initialize_by_rmr(v.attributes_for_active_record)
@@ -83,6 +86,7 @@ class Visit < ActiveRecord::Base
       end
     # end
     
+    visit.created_by = created_by
     visit.save
 
     return visit
