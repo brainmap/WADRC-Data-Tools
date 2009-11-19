@@ -1,15 +1,15 @@
 --- There's a New Visit on the Data Panda: ---
 
-Visit Date: <%= @visit_date %>
-Enum: <%= @enrollment_enum %>
-RMR: <%= @rmr %>
-Raw Directory: <%= @visit_path %>
+Visit Date: <%=h @visit_date %>
+RMR: <%=h @rmr %>
+Raw Directory: <%=h @visit_path %>
+<%=h "Enum: #{@enrollment_enum}" if @enrollment_enum %>
 
 Image Datasets:
 <% @image_datasets.sort_by(&:timestamp).each do |image_dataset| %>
-<%= File.basename(image_dataset.path) -%>: <%= image_dataset.series_description -%>
+<%= File.basename(image_dataset.path) -%>: <%=h image_dataset.series_description -%>
 <% end %>
 
 ---
-Added <%= @updated_at %> by <%= @user %>
+Added <%=h @updated_at %><%=h " by #{@user}" if @user%>
 ---

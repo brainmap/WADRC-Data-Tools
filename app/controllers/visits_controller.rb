@@ -168,7 +168,8 @@ class VisitsController < ApplicationController
       VisitMailer.deliver_visit_confirmation(@visit, params[:email])
       flash[:notice] = "Email was succesfully sent."
     rescue LoadError => load_error
-      flash[:notice] = load_error
+      logger.info load_error
+      flash[:error] = "Sorry, your email was not delivered: " + load_error.to_s
     end
     redirect_to @visit
   end
