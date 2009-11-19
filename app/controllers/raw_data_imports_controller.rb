@@ -1,7 +1,7 @@
 class RawDataImportsController < ApplicationController
   
   def new
-    @recent_visits = Visit.find(:all, :conditions => ['created_at > ?', 1.month.ago]).reverse
+    @recent_visits = Visit.find(:all, :conditions => ['created_at > ?', 1.month.ago])
     
     respond_to do |format|
       format.html # new.html.erb
@@ -24,7 +24,13 @@ class RawDataImportsController < ApplicationController
         @visit = Visit.create_or_update_from_metamri(v, created_by = current_user)
         unless @visit.new_record?
           flash[:notice] = "Sucessfully imported raw data directory."
-          VisitMailer.deliver_visit_confirmation(@visit, {:send_to => "erik.kastman@gmail.com" })
+          begin
+            VisitMailer.deliver_visit_confirmation(@visit)
+            flash[:notice] = flash[:notice].to_s + "; Email was succesfully sent."
+          rescue LoadError => load_error
+            logger.info load_error
+            flash[:error] = "Sorry, your email was not delivered: " + load_error.to_s
+          end
         else
           flash[:error] = "Awfully sorry, this raw data directory could not be saved to the database."
         end
