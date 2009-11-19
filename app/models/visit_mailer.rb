@@ -1,7 +1,7 @@
 class VisitMailer < ActionMailer::Base
   
-  def visit_confirmation(visit, email_params = { :send_to => "ekk@medicine.wisc.edu"}, sent_at = Time.now)
-    #raise(LoadError, "Mailer not configured.") unless self.class.smtp_configured?
+  def visit_confirmation(visit, email_params = { :send_to => "noreply_johnson_lab@medicine.wisc.edu"}, sent_at = Time.now)
+    raise(LoadError, "Unable to send to external email addresses without email credentials.") if !email_params[:send_to].ends_with?('@medicine.wisc.edu') unless self.class.smtp_credentialed?
 
     # Set Email Params
     recipients  email_params[:send_to]
@@ -28,8 +28,8 @@ class VisitMailer < ActionMailer::Base
     body(body_params)
   end
   
-  def self.smtp_configured?
-    !ActionMailer::Base.smtp_settings['user_name'].blank? && !ActionMailer::Base.smtp_settings['password'].blank?
+  def self.smtp_credentialed?
+    !ActionMailer::Base.smtp_settings[:user_name].blank? && !ActionMailer::Base.smtp_settings[:password].blank?
   end
   
 end

@@ -6,5 +6,5 @@ ActiveSupport::CoreExtensions::Time::Conversions::DATE_FORMATS.merge!(
    :datetime_short        => '%m/%d %I:%M',
    :ymdhms                => '%Y-%m-%d %H:%M:%S',
    :month_name            => '%B',
-   :datetime_daymonthweek => '%A, %B %dth, %Y at %I:%M%p'
+   :datetime_daymonthweek => lambda { |time| time.strftime("%A, %B #{time.day.ordinalize}, %Y at %I:%M%p")}
 )

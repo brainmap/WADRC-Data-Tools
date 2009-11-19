@@ -16,19 +16,20 @@ config.action_controller.perform_caching             = false
 # Don't care if the mailer can't send
 config.action_mailer.raise_delivery_errors = true
 
-# If you would like to add custom email login, you can do it with environment variables.
+# If you would like to add custom email credentials, you can do it with environment variables.
 # Set your login and password with DATAPANDA_EMAIL_LOGIN and DATAPANDA_EMAIL_PASSWORD
-# The medicine server is accepting Mail from workstations inside the medicine firewall 
-# without this login authentication, so it's not required, but allows for customization
-# should the need arise.
+# The medicine server will send to @medicine.wisc.edu email addresses without credentials,
+# but they are required to send mail to external email addresses.
 begin 
   email_login = ENV['DATAPANDA_EMAIL_LOGIN']
   email_password = ENV['DATAPANDA_EMAIL_PASSWORD']
   raise(LoadError, "Missing email environment variables.") unless email_login && email_password
 rescue LoadError => load_error
-  puts load_error
-  puts """If you would like to customize your email settings, set your login and password with:
-  export DATAPANDA_EMAIL_LOGIN='yourlogin@medicine.wisc.edu'; export DATAPANDA_EMAIL_PASSWORD='yourpassword')"""
+  puts "Warning: " + load_error.to_s
+  puts """If you would like to send mail to external addresses (i.e. those not ending with @medicine.wisc.edu), 
+set your login and password with: 
+export DATAPANDA_EMAIL_LOGIN='noreploy_johnson_lab@medicine.wisc.edu'; export DATAPANDA_EMAIL_PASSWORD='goodpassword')
+----"""
 end
 
 config.action_mailer.delivery_method = :smtp

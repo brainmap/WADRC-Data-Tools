@@ -1,5 +1,6 @@
-<% form_for @visit, :url => { :action => :send_confirmation, :id => @visit.id }  do |visit_form| %>
+<% form_for @visit, :url => { :action => :send_confirmation, :id => @visit.id }, :html => { :class => "send_confirmation_box" }  do |visit_form| %>
 	<%= visit_form.hidden_field :id %>
-	Send Visit Confirmation to: <%= text_field :email, :send_to  %>
-	<%= visit_form.submit "Send Visit Confirmation" %>
+	<h3>Send Visit Confirmation:</h3>
+	<%= text_field :email, :send_to, :value => "ekk@medicine.wisc.edu", :onfocus => "if ( $('email_send_to').value == $('email_send_to').defaultValue ) $('email_send_to').value = '' " %>
+	<%= image_submit_tag("send.jpg") %>
 <% end %>

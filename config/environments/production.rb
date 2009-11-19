@@ -20,11 +20,10 @@ config.action_controller.perform_caching             = true
 # Disable delivery errors, bad email addresses will be ignored
 config.action_mailer.raise_delivery_errors = true
 
-# If you would like to add custom email login, you can do it with environment variables.
+# If you would like to add custom email credentials, you can do it with environment variables.
 # Set your login and password with DATAPANDA_EMAIL_LOGIN and DATAPANDA_EMAIL_PASSWORD
-# The medicine server is accepting Mail from workstations inside the medicine firewall 
-# without this login authentication, so it's not required, but allows for customization
-# should the need arise.
+# The medicine server will send to @medicine.wisc.edu email addresses without credentials,
+# but they are required to send mail to external email addresses.
 begin 
   email_login = ENV['DATAPANDA_EMAIL_LOGIN']
   email_password = ENV['DATAPANDA_EMAIL_PASSWORD']
