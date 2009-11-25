@@ -236,10 +236,10 @@ ActiveRecord::Schema.define(:version => 20091116211349) do
     t.string   "radiology_outcome",                 :default => "no"
     t.string   "notes"
     t.string   "transfer_mri",                      :default => "no"
-    t.string   "transfer_pet",                      :default => "no"
+    t.string   "transfer_pet",                      :default => "n/a"
     t.string   "conference",                        :default => "no"
     t.string   "compile_folder",                    :default => "no"
-    t.string   "dicom_dvd",                         :default => "no"
+    t.string   "dicom_dvd"
     t.integer  "user_id",            :limit => 255
     t.string   "path"
     t.datetime "created_at"

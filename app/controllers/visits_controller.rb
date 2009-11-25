@@ -71,7 +71,12 @@ class VisitsController < ApplicationController
     @collection_title = "Found visits"
     @visit_search = params['visit_search']
     
-    render :template => "visits/found"
+    if @visits.count == 1
+      flash[:notice] = "Found 1 visit matching that search."
+      redirect_to @visits.first
+    else
+      render :template => "visits/found"
+    end
   end
   
   # GET /visits/find

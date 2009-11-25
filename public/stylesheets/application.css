@@ -130,6 +130,10 @@ table.search_form th { text-align:right; font-weight:normal; }
 
 .send_confirmation_box input { padding: 4px; font-size: 14px; color: #666; vertical-align: middle;}
 
+.index_filter { width: 400px; display: table;}
+
+.index_filter form>input, .index_filter form>select { display: table-cell; margin-right: 20px;}
+
 
 NEWSTUFF {}
 

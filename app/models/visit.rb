@@ -40,9 +40,16 @@ class Visit < ActiveRecord::Base
     
     params.each_pair do |k,v|
       unless v.empty?
-        if 'rmr enum path'.include?(k)
+        if 'rmr path'.include?(k)
           conditions << "#{k} LIKE ?"
           qualifiers << "%#{v}%"
+        elsif k == 'enum'
+          enum_conditions = []
+          v.each do |enum|
+            enum_conditions << 'enrollments.enum = ?' 
+            qualifiers << enum
+          end
+          conditions << "(" + enum_conditions.join(" OR ") + ")"
         elsif k == 'scan_procedure'
           scan_procedure_conditions = []
           v.each do |codename|
