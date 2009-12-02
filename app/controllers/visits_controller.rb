@@ -71,7 +71,7 @@ class VisitsController < ApplicationController
     @collection_title = "Found visits"
     @visit_search = params['visit_search']
     
-    if @visits.count == 1
+    if @visits.size == 1
       flash[:notice] = "Found 1 visit matching that search."
       redirect_to @visits.first
     else

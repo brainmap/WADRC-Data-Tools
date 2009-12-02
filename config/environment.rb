@@ -12,7 +12,7 @@ require File.join(File.dirname(__FILE__), 'boot')
 
 Rails::Initializer.run do |config|
   # enables pagination
-  config.gem 'mislav-will_paginate', :version => '~> 2.3.8', :lib => 'will_paginate', :source => 'http://gems.github.com'
+  config.gem 'mislav-will_paginate', :version => '~> 2.3.8', :lib => 'will_paginate'
   
   # Tools for extracting imaging metadata
   #config.gem 'brainmap-metamri', :lib => 'metamri', :source => 'http://gems.github.com'
