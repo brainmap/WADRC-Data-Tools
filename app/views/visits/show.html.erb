@@ -53,7 +53,8 @@
       :Enum => @visit.enrollment.nil? ? nil : link_to(@visit.enrollment.enum, @visit.enrollment),
       :Initials => @visit.initials,
       :RMR_Number => @visit.rmr,
-      :Assignee => @visit.user.nil? ? nil : @visit.user.login,
+      :Dicom_DVD => @visit.dicom_dvd,
+	  :Assignee => @visit.user.nil? ? nil : @visit.user.login,
       :Directory_Path => @visit.path,
 			:Scanner_source => @visit.scanner_source,
 			:Created_by => @visit.created_by ? @visit.created_by.login : ''
