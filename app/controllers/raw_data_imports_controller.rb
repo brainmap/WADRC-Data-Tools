@@ -12,8 +12,8 @@ class RawDataImportsController < ApplicationController
     @visit_directory_to_scan = params[:raw_data_import][:directory].chomp(' ')
     if validates_truthiness_of_directory(@visit_directory_to_scan)
       v = VisitRawDataDirectory.new(@visit_directory_to_scan, params[:raw_data_import][:scan_procedure])
-      puts "Current User: ", `whoami`
-      puts "+++ Importing #{v.visit_directory} as part of #{v.scan_procedure_name} +++"
+      logger.info "Current User: ", `whoami`
+      logger.info  "+++ Importing #{v.visit_directory} as part of #{v.scan_procedure_name} +++"
       begin
         v.scan
       rescue Exception => e
