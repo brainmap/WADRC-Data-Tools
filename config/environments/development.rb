@@ -28,7 +28,7 @@ rescue LoadError => load_error
   puts "Warning: " + load_error.to_s
   puts """If you would like to send mail to external addresses (i.e. those not ending with @medicine.wisc.edu), 
 set your login and password with: 
-export DATAPANDA_EMAIL_LOGIN='noreploy_johnson_lab@medicine.wisc.edu'; export DATAPANDA_EMAIL_PASSWORD='goodpassword')
+export DATAPANDA_EMAIL_LOGIN='noreply_johnson_lab@medicine.wisc.edu'; export DATAPANDA_EMAIL_PASSWORD='goodpassword')
 ----"""
 end
 
