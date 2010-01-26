@@ -17,7 +17,7 @@ set :git, "/usr/local/bin/git"
 set :repository, "git@github.com:brainmap/WADRC-Data-Tools.git"
 set :branch, "master"
 
-set :mongrel_cmd, "/usr/bin/mongrel_rails"
+set :mongrel_cmd, "/usr/local/bin/mongrel_rails"
 set :mongrel_ports, "80"
 set :mongrel_pid, "tmp/pids/mongrel.pid"
 
