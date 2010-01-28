@@ -5,17 +5,19 @@
     <tr>
       <th>Code Name</th>
       <th>Description</th>
+			<th>Total</th>
       <th></th>
     </tr>
   </thead>
 
-  <tfoot><%= footer 3 %></tfoot>
+  <tfoot><%= footer 4 %></tfoot>
 
   <tbody>
     <% @scan_procedures.each do |scan_procedure| %>
     <tr>
       <td><%= link_to(scan_procedure.codename, in_scan_procedure_path(scan_procedure)) %></td>
       <td><%=h scan_procedure.description %></td>
+			<td><%=h scan_procedure.visits.count %></td>
       <td>
         <%= link_to '@', scan_procedure %>
         <%= link_to '&', edit_scan_procedure_path(scan_procedure) %>

@@ -1,7 +1,7 @@
 class ImageDataset < ActiveRecord::Base
   
   default_includes = [:image_dataset_quality_checks, :analysis_memberships, {:visit => {:enrollment => :participant}}]
-  default_scope :include => default_includes, :order => 'image_datasets.timestamp DESC'
+  default_scope :include => default_includes, :order => 'image_datasets.timestamp DESC, image_datasets.path DESC'
   
   named_scope :excluded, :conditions => ['analysis_memberships.excluded = ?', true]
   
