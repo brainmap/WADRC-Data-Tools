@@ -3,15 +3,11 @@ class VisitsController < ApplicationController
   PER_PAGE = 50
   
   before_filter :set_current_tab
-  
-  def set_current_tab
-    @current_tab = "visits"
-  end
-  
+    
   # GET /visits
   # GET /visits.xml  
   def index
-    @visits = Visit.all.paginate(:page => params[:page], :per_page => PER_PAGE)
+    @visits = Visit.search(params[:search]).paginate(:page => params[:page], :per_page => PER_PAGE)
     @collection_title = 'All visits'
     
     respond_to do |format|
@@ -72,8 +68,13 @@ class VisitsController < ApplicationController
     @visit_search = params['visit_search']
     
     if @visits.size == 1
+      @visit = @visits.first
       flash[:notice] = "Found 1 visit matching that search."
-      redirect_to @visits.first
+      respond_to do |format|
+        format.xml  { render :xml => @visit }
+        format.html { redirect_to @visit }
+      end
+      
     else
       render :template => "visits/found"
     end
@@ -178,4 +179,11 @@ class VisitsController < ApplicationController
     end
     redirect_to @visit
   end
+  
+  private
+  
+  def set_current_tab
+    @current_tab = "visits"
+  end
+  
 end

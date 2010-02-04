@@ -1,11 +1,9 @@
 ActionController::Routing::Routes.draw do |map|
   map.resources :physiology_text_files
-
   map.resources :neuropsych_assessments
-
   map.resources :neuropsych_sessions
 
-  map.found_visits '/visits/found', :controller => 'visits', :action => 'found'
+  map.found_visits '/visits/found(.:format)', :controller => 'visits', :action => 'found'
   map.find_visits 'visits/find', :controller => 'visits', :action => 'find'
   map.complete '/visits/complete', :controller => 'visits', :action => 'index_by_scope', :scope => 'complete'
   map.incomplete '/visits/incomplete', :controller => 'visits', :action => 'index_by_scope', :scope => 'incomplete'
@@ -22,16 +20,20 @@ ActionController::Routing::Routes.draw do |map|
   map.resources :analysis_memberships
   map.resources :users
   map.resource :session
-  map.resources :visits, :collection => { 
-    :complete => :get, :incomplete => :get, :recently_imported => :get, :by_month => :get, :by_week => :get, :find => :get 
-  }
+  map.resources :visits, :collection => { :complete => :get, :incomplete => :get, :recently_imported => :get, :by_month => :get, :by_week => :get, :find => :get, :found => :get }, :shallow => true do |visit|
+    visit.resources :image_datasets, :shallow => true do |image_dataset|
+      image_dataset.resources :image_comments
+      image_dataset.resources :image_dataset_quality_checks
+    end
+  end
+    
   map.resources :raw_image_files
   map.resources :analyses
   map.resources :image_searches
-  map.resources :image_datasets, :shallow => true do |image_dataset|
-    image_dataset.resources :image_comments
-    image_dataset.resources :image_dataset_quality_checks
-  end
+  # map.resources :image_datasets, :shallow => true do |image_dataset|
+  #   image_dataset.resources :image_comments
+  #   image_dataset.resources :image_dataset_quality_checks
+  # end
   map.resources :image_dataset_quality_checks, :only => [:index]
   map.resources :image_comments, :only => [:index]
   map.resources :scan_procedures

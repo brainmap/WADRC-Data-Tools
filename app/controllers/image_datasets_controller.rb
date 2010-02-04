@@ -22,8 +22,17 @@ class ImageDatasetsController < ApplicationController
   # GET /image_datasets
   # GET /image_datasets.xml
   def index
-    @image_datasets = ImageDataset.all.paginate(:page => params[:page], :per_page => PER_PAGE)
-    @total_count = all_images.size
+    if params[:visit_id]
+      @image_datasets = ImageDataset.find_all_by_visit_id(params[:visit_id]).paginate(:page => params[:page], :per_page => PER_PAGE)
+      @visit = Visit.find(params[:visit_id])
+      @total_count = @image_datasets.count
+      @page_title = "All Image Datasets for Visit #{@visit.rmr}"
+    else
+      @image_datasets = ImageDataset.all.paginate(:page => params[:page], :per_page => PER_PAGE)
+      # @total_count = all_images.size # I'm not sure where this method is coming from, but it's breaking in ActiveResource
+      @total_count = ImageDataset.count
+      @page_title = "All Image Datasets"
+    end
     
     respond_to do |format|
       format.html # index.html.erb
