@@ -12,6 +12,10 @@
         <%= link_to('view participant', @visit.enrollment.participant) %>
       <% end %>
     <% end %>
+  <br /><br />	
+	<%=	link_to "<-- Older", @older_visit if @older_visit %>
+	<%= " #{@visit.rmr} " %>
+	<%=	link_to "Newer --> ", @newer_visit if @newer_visit %>
   </p>
 </div>
 

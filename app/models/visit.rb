@@ -26,7 +26,8 @@ class Visit < ActiveRecord::Base
   named_scope :in_scan_procedure, lambda { |protocol_id|
     { :conditions => { :scan_procedure_id => protocol_id } }
   }  
-  
+
+
   def week
     self.date.beginning_of_week
   end
@@ -99,5 +100,5 @@ class Visit < ActiveRecord::Base
     return visit
 
   end
-  
+
 end

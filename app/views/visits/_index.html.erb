@@ -9,7 +9,6 @@
       <th><span>Scan Procedure</span></th>
       <th><span>Scan<br>Number</span></th>
       <th><span>Enum</span></th>
-      <th><span>Lab<br>Assignee</span></th>
       <th><span>RMR</span></th>
       <th><span class="vert">Directory Path</span></th>
       <th><span class="vert">Transfer MRI</span></th>
@@ -34,7 +33,6 @@
         <td><%= visit.scan_procedure.nil? ? "None" : visit.scan_procedure.codename %></td>
         <td><%= visit.scan_number %></td>
         <td><%= link_to(visit.enrollment.enum, visit.enrollment) unless visit.enrollment.nil? %></td>
-        <td><%= visit.user.login unless visit.user.nil? %></td>
         <td><%= visit.rmr %></td>
         <td><%= popup_note('peek', key_val_table('path_popup', { :Path => visit.path })) unless visit.path.blank? %></td>
         <%= show_bool(visit.transfer_mri) %>

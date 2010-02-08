@@ -44,9 +44,14 @@ class ImageDatasetsController < ApplicationController
   # GET /image_datasets/1.xml
   def show
     @image_dataset = ImageDataset.find(params[:id])
+    @visit = @image_dataset.visit
+    @image_datasets = @visit.image_datasets
+    
     @image_comment = ImageComment.new
     @image_comments = @image_dataset.image_comments
-
+    @next_image_dataset = @image_datasets[@image_datasets.index(@image_dataset) - 1 ]
+    @previous_image_dataset = @image_datasets[@image_datasets.index(@image_dataset) + 1 ]
+   
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @image_dataset }

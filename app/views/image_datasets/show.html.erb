@@ -2,12 +2,16 @@
 <h1>Imaging Dataset:</h1>
   <p>
     <%= link_to 'edit this dataset', edit_image_dataset_path(@image_dataset) %> •
-    <%= link_to 'view visit from whence it came', @image_dataset.visit %> •
-    <% if @image_dataset.visit.nil? or @image_dataset.visit.enrollment.nil? or @image_dataset.visit.enrollment.participant.nil? %>
+    <%= link_to 'view visit from whence it came', @visit %> •
+    <% if @visit.nil? or @visit.enrollment.nil? or @visit.enrollment.participant.nil? %>
       no associated participant
     <% else %>
-      <%= link_to('view participant', @image_dataset.visit.enrollment.participant) %>
+      <%= link_to('view participant', @visit.enrollment.participant) %>
     <% end %>
+  <br /><br />	
+	<%=	link_to "<-- Previous", @previous_image_dataset unless @image_dataset == @image_datasets.last %>
+	<%= " #{@image_dataset.series_description} " %>
+	<%=	link_to "Next --> ", @next_image_dataset unless @image_dataset == @image_datasets.first %>
   </p>
 </div>
 
