@@ -1,6 +1,6 @@
 class ImageDatasetQualityCheck < ActiveRecord::Base
   PASSING_STATUSES = Set.new(%w(complete pass))
-  FAILING_STATUSES = Set.new( ["Incomplete","Mild","Severe","No activation"] )
+  FAILING_STATUSES = Set.new( ["Incomplete","Mild","Severe","Limited Activation","No activation"] )
   belongs_to :user
   belongs_to :image_dataset
   
