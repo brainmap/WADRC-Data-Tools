@@ -88,7 +88,7 @@ class VisitsController < ApplicationController
   # GET /visits/1.xml
   def show
     @visit = Visit.find_by_id(params[:id])
-    @newer_visit = Visit.date_greater_than(@visit.date).first
+    @newer_visit = Visit.date_greater_than(@visit.date).last
     @older_visit = Visit.date_less_than(@visit.date).first
     @image_datasets = @visit.image_datasets.paginate(:page => params[:page], :per_page => PER_PAGE)
 

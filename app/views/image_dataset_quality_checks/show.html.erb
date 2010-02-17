@@ -36,7 +36,8 @@
 
 
 <%= link_to 'Edit', edit_image_dataset_quality_check_path(@idqc) %> |
-<%= link_to 'View image dataset', image_dataset_path(@idqc.image_dataset) %>
+<%= link_to 'View image dataset', image_dataset_path(@idqc.image_dataset) %> |
+<%= link_to 'Delete', @idqc, :confirm => 'Are you sure?', :method => :delete %>
 
 <br>
 

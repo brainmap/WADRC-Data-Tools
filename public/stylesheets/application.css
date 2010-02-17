@@ -3,6 +3,8 @@ p, h1, h2, h3, th, td, table, tr, li, a, small { font-family: helvetica, arial, 
 a { text-decoration: none; font-weight: bold; border-bottom: dotted thin; }
 a:hover { background-color: #ffffbb; }
 
+table { word-wrap:break-word; }
+
 
 #top_bar { 
   background-image: url(/images/top_bar.png); 
@@ -26,8 +28,8 @@ a:hover { background-color: #ffffbb; }
 
 
 
-.key_value { text-align:left; font-size:small; }
-.key_value td { padding: 0 1em 0 1em; font-style: italic; }
+.key_value { text-align:left; font-size:small;  }
+.key_value td { padding: 0 1em 0 1em; font-style: italic;  }
 .key_value tr { background-color: transparent; }
 .key_value th { font-weight: bold; background-color:transparent; text-align:right; padding-right:1em; }
 
