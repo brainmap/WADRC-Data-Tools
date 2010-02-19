@@ -9,9 +9,9 @@
       <%= link_to('view participant', @visit.enrollment.participant) %>
     <% end %>
   <br /><br />	
-	<%=	link_to "<-- Previous", @previous_image_dataset unless @image_dataset == @image_datasets.last %>
+	<%=	link_to "&larr; Previous", @previous_image_dataset unless @image_dataset == @image_datasets.last %>
 	<%= " #{@image_dataset.series_description} " %>
-	<%=	link_to "Next --> ", @next_image_dataset unless @image_dataset == @image_datasets.first %>
+	<%=	link_to "Next &rarr; ", @next_image_dataset unless @image_dataset == @image_datasets.first %>
   </p>
 </div>
 

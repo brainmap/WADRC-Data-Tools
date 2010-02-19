@@ -13,9 +13,9 @@
       <% end %>
     <% end %>
   <br /><br />	
-	<%=	link_to "<-- Older", @older_visit if @older_visit %>
-	<%= " #{@visit.rmr} " %>
-	<%=	link_to "Newer --> ", @newer_visit if @newer_visit %>
+	<%= link_to "&larr; Older", @older_visit unless @older_visit.blank? %>
+	<%= " #{@visit.enrollment.nil? ? @visit.rmr : @visit.enrollment.enum} " %>
+	<%=	link_to "Newer &rarr;", @newer_visit unless @newer_visit.blank? %>
   </p>
 </div>
 
