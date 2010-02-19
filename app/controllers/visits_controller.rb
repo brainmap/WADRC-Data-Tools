@@ -91,6 +91,8 @@ class VisitsController < ApplicationController
     @newer_visit = Visit.date_greater_than(@visit.date).last
     @older_visit = Visit.date_less_than(@visit.date).first
     @image_datasets = @visit.image_datasets.paginate(:page => params[:page], :per_page => PER_PAGE)
+    @participant = @visit.try(:enrollment).try(:participant) 
+    @enum = @visit.try(:enrollment).try(:enum)
 
     respond_to do |format|
       format.html # show.html.erb

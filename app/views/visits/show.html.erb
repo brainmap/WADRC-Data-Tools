@@ -1,28 +1,20 @@
-<div id="heading_and_link">
-  <h1>Visit</h1>
-  <p>
-    <%= link_to 'Edit visit', edit_visit_path(@visit) %> •
-    <% if @visit.enrollment.nil? %>
-      not enrolled • no participant
-    <% else %>
-      <%= link_to('view enrollment', @visit.enrollment) %> •
-      <% if @visit.enrollment.participant.nil? %>
-        no participant
-      <% else %>
-        <%= link_to('view participant', @visit.enrollment.participant) %>
-      <% end %>
-    <% end %>
-  <br /><br />	
-	<%=	link_to "<-- Older", @older_visit if @older_visit %>
-	<%= " #{@visit.rmr} " %>
-	<%=	link_to "Newer --> ", @newer_visit if @newer_visit %>
-  </p>
+<span style="float:right"><%= link_to 'Edit visit', edit_visit_path(@visit) %></span>
+
+<div id="visit_heading">
+  <%=	link_to "&larr; Older", @older_visit if @older_visit %>
+  &nbsp;
+  <h1><%= @enum.nil? ? @visit.rmr : @enum %></h1>
+  <p class="date"><%= @visit.date.to_s(:long) %></p>
+  &nbsp;
+  <%=	link_to "Newer &rarr;", @newer_visit if @newer_visit %>
+  <br />
+  <p><%= @visit.path %></p>
 </div>
 
+
 <div id="leftcol" class="two_col_left">
-    
-  <h3>Data status:</h3><br /><br /><br />
-  <table id="visit_status" class="tabular">
+  <h3>Summary:</h3>
+  <table id="visit_status_table">
     <thead>
       <tr>
         <th>Transfer MRI</th>
@@ -32,9 +24,6 @@
         <th>Conference</th>
       </tr>
     </thead>
-    
-    <tfoot><%= footer(5) %></tfoot>
-    
     <tbody>
       <tr>
         <%= show_bool(@visit.transfer_mri) %>
@@ -44,24 +33,21 @@
         <%= show_bool(@visit.conference) %>
       </tr>
     </tbody>
-    
   </table>
-
-
-  <h3>Visit details:</h3>
+  
   <div id="visit_details_note" class="sticky">
     <%= key_val_table("visit_details", {
       :Visit_date => @visit.date,
       :scan_procedure => link_to(@visit.scan_procedure.codename, in_scan_procedure_path(@visit.scan_procedure)),
       :Scan_number => @visit.scan_number,
-      :Enum => @visit.enrollment.nil? ? nil : link_to(@visit.enrollment.enum, @visit.enrollment),
+      :Enum => @enum.nil? ? nil : link_to(@visit.enrollment.enum, @visit.enrollment),
       :Initials => @visit.initials,
       :RMR_Number => @visit.rmr,
-      :Dicom_DVD => @visit.dicom_dvd,
-	  :Assignee => @visit.user.nil? ? nil : @visit.user.login,
-      :Directory_Path => @visit.path,
-			:Scanner_source => @visit.scanner_source,
-			:Created_by => @visit.created_by ? @visit.created_by.login : ''
+      :Dicom_DVD => @visit.dicom_dvd == 'no' ? nil : @visit.dicom_dvd,
+      :Assignee => @visit.user.nil? ? nil : @visit.user.login,
+      :Scanner_source => @visit.scanner_source,
+      :Created_by => @visit.created_by ? @visit.created_by.login : '',
+      :Participant => @participant.nil? ? nil : link_to('view participant', @participant)
     }) %>
   </div>
 
@@ -73,7 +59,7 @@
 
   <h3>Notes:</h3>
   <div id="notes" class="sticky">
-    <p><%=h @visit.notes.blank? ? "No notes entered for this visit" : @visit.notes %></p>
+    <%= RedCloth.new(@visit.notes.blank? ? "No notes entered for this visit" : @visit.notes).to_html %>
   </div>
 
 </div>

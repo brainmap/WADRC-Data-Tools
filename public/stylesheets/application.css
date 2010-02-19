@@ -29,9 +29,11 @@ table { word-wrap:break-word; }
 
 
 .key_value { text-align:left; font-size:small;  }
-.key_value td { padding: 0 1em 0 1em; font-style: italic;  }
-.key_value tr { background-color: transparent; }
-.key_value th { font-weight: bold; background-color:transparent; text-align:right; padding-right:1em; }
+.key_value td { margin: 0; padding: 0; font-style: italic;  }
+.key_value tr { background-color: transparent; padding:0; margin:0; }
+.key_value th { font-weight: bold; background-color:transparent; text-align:right; 
+	padding-right:1em; padding-bottom:0.05em; margin:0;
+}
 
 
 
@@ -136,6 +138,17 @@ table.search_form th { text-align:right; font-weight:normal; }
 
 .index_filter form>input, .index_filter form>select { display: table-cell; margin-right: 20px;}
 
+
+#visit_heading * { display:inline; }
+#visit_heading h1 { font-size:32pt; }
+#visit_heading p.date { color:#555; font-size:14pt; }
+#visit_heading p { font-size:smaller; color:#888; }
+#visit_heading a { font-size:smaller; color:#888; border-bottom:none; }
+
+#visit_status_table { border-collapse:collapse; width:100%; }
+#visit_status_table tr { border:solid thin #888; }
+#visit_status_table th { font-weight:bold; font-size:smaller; color:#444; }
+#visit_status_table td { text-align:center; color:#444; }
 
 NEWSTUFF {}
 
