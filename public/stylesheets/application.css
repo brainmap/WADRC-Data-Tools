@@ -120,6 +120,10 @@ table.search_form { float:left; margin-right:1em; }
 table.search_form th { text-align:right; font-weight:normal; }
 
 .qual_check_label { min-width:40em; }
+.current_image_dataset td { font-weight: bold; font-style: italic; border: thin solid #006644; background-color: #006644; }
+.current_image_dataset td, .current_image_dataset a {color: #E5E5EE}
+.current_image_dataset a:hover { background-color: #5B8;}
+
 
 .hud_display { border: thick solid purple; background-color:yellow; -webkit-border-radius:10px; 
 	width:50em; top:10em; left:50%; margin-left:-25em; position:fixed; padding:2em; 
@@ -178,6 +182,8 @@ pre {
   background-color: red;
   display: table;
 }
+
+.warning { color: red; font-weight: bold; font-size: 18px;}
 
 #notice {
     color: green;

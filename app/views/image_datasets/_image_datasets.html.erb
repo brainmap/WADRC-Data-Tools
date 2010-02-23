@@ -7,40 +7,38 @@
       <th>Directory</th>
       <th>Series description</th>
       <th>Imaging Details</th>
-      <th>Visit Details</th>
-      <th>Participant Details</th>
       <th>Timestamp</th>
       <th>Quality Check</th>
       <th>Analysis Exclusions</th>
-      <th></th>
+      <!-- <th></th> -->
     </tr>
   </thead>
 
-  <tfoot><tr><td colspan=9><%= will_paginate image_datasets %></td></tr></tfoot>
+  <tfoot><tr><td colspan=7><%= will_paginate image_datasets %></td></tr></tfoot>
 
   <tbody>
-    <% image_datasets.sort_by(&:timestamp).each do |im_ds| %>
+    <% image_datasets.each do |im_ds| %>
       <tr>
         <td><%=h im_ds.path_basename %></td>
-        <td><%=h im_ds.series_description %></td>
+        <td><%= link_to im_ds.series_description, im_ds %></td>
         <td>
           <%= popup_note("peek", key_val_table("image_details", im_ds.details_hash))%>
         </td>
-        <td>
-          <%= popup_note("peek", key_val_table("visit_details", im_ds.visit_details_hash)) %>
+        <!-- <td>
+          <%#= popup_note("peek", key_val_table("visit_details", im_ds.visit_details_hash)) %>
         </td>
         <td>
-          <%= popup_note("peek", key_val_table("participant_details", im_ds.participant_details_hash)) %>
-        </td>
+          <%#= popup_note("peek", key_val_table("participant_details", im_ds.participant_details_hash)) %>
+        </td> -->
         
         <td><%=h im_ds.timestamp.to_s(:ymdhms) %></td>
         <td><%= qc_popup_or_link_to_new(im_ds) %></td>
         <td><%=h im_ds.excluded_by_any_analyses? ? im_ds.analysis_memberships.out.size.to_s : "None" %></td>
-        <td>
-          <%= link_to 'view', im_ds %>
+        <!-- <td>
+          <%#= link_to 'view', im_ds %>
           <%#= link_to '&', edit_image_dataset_path(im_ds) %>
           <%#= link_to 'X', im_ds, :confirm => 'Are you sure?', :method => :delete %>
-        </td>
+        </td> -->
       </tr>
     <% end %>
   </tbody>

@@ -1,0 +1,31 @@
+<table id='image_datasets_index_table' class="tabular">
+  
+  <caption><%= pagination_info image_datasets %></caption>
+  
+  <thead>
+    <tr>
+      <th>Directory</th>
+      <th>Series description</th>
+      <th>Quality Check</th>
+			<!-- <th>View</th> -->
+    </tr>
+  </thead>
+
+  <tfoot><tr><td colspan=3><%= will_paginate image_datasets %></td></tr></tfoot>
+
+  <tbody>
+    <% image_datasets.each do |im_ds| %>
+      <tr <%= "class='current_image_dataset'" if im_ds == @image_dataset %>>
+        <td><%=h im_ds.path_basename %></td>
+        <td><%= link_to im_ds.series_description, im_ds %></td>
+        <td><%= qc_popup_or_link_to_new(im_ds) %></td>
+        <!-- <td>
+          <%#= link_to 'view', im_ds %>
+          <%#= link_to '&', edit_image_dataset_path(im_ds) %>
+          <%#= link_to 'X', im_ds, :confirm => 'Are you sure?', :method => :delete %>
+        </td> -->
+      </tr>
+    <% end %>
+  </tbody>
+
+</table>

@@ -10,7 +10,7 @@ class ImageDatasetQualityCheck < ActiveRecord::Base
       puts self[name]
       unless name.blank?
         if FAILING_STATUSES.include?(self[name])
-          failing_checks << name
+          failing_checks << name.capitalize.gsub("_", " ")
         end
       end
     end

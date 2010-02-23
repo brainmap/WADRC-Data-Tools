@@ -20,4 +20,9 @@
 
 <br /><hr />
 
-<%= render :partial => 'new_edit' %>
+
+<div style="width:50%">
+	<% form_for @image_dataset_quality_check do |f| %>
+		<%= render :partial => 'new_edit', :locals => { :f => f } %>
+	<% end %>
+</div>

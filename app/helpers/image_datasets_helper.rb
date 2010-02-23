@@ -1,6 +1,6 @@
 module ImageDatasetsHelper  
   def link_to_new_qc(im_ds)
-    link_to "perform", new_image_dataset_image_dataset_quality_check_path(im_ds)
+    link_to "New Check", new_image_dataset_image_dataset_quality_check_path(im_ds)
   end
   
   def link_to_edit_qc(qc)
@@ -11,7 +11,7 @@ module ImageDatasetsHelper
     if im_ds.image_dataset_quality_checks.empty?
       link_to_new_qc(im_ds)
     else 
-      link_text = im_ds.image_dataset_quality_checks.last.failing_checks.empty? ? 'good' :  im_ds.image_dataset_quality_checks.last.failing_checks.to_a.join(', ')
+      link_text = im_ds.image_dataset_quality_checks.last.failing_checks.empty? ? 'Good' :  im_ds.image_dataset_quality_checks.last.failing_checks.to_a.join(', ')
       link_to(link_text, im_ds.image_dataset_quality_checks.last)
     end
   end
@@ -22,5 +22,20 @@ module ImageDatasetsHelper
     end
   end
   
+  def directory_list(path)
+    output = ''
+    list = `ls #{path}`
+    list = list.split
+
+    if list.blank?
+      output = "<span class='warning'>Warning: No files in this directory on vtrak!</span>"
+    else
+      output = list.first(10).join(" ")
+      output << '<br>...<br>'
+      output << list.last(10).join(" ")
+    end
+    
+    return output
+  end
 
 end

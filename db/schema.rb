@@ -11,18 +11,6 @@
 
 ActiveRecord::Schema.define(:version => 20091116211349) do
 
-  create_table "addresses", :force => true do |t|
-    t.string   "line1"
-    t.string   "line2"
-    t.string   "street"
-    t.string   "city"
-    t.string   "state"
-    t.string   "zip"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.integer  "person_id"
-  end
-
   create_table "analyses", :force => true do |t|
     t.string   "description"
     t.datetime "created_at"
@@ -40,20 +28,6 @@ ActiveRecord::Schema.define(:version => 20091116211349) do
     t.datetime "updated_at"
   end
 
-  create_table "authorships", :force => true do |t|
-    t.integer  "person_id"
-    t.integer  "publication_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "blurbs", :force => true do |t|
-    t.string   "permalink"
-    t.text     "content"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "enrollments", :force => true do |t|
     t.date     "enroll_date"
     t.string   "enum"
@@ -63,18 +37,6 @@ ActiveRecord::Schema.define(:version => 20091116211349) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.text     "withdrawl_reason"
-  end
-
-  create_table "events", :force => true do |t|
-    t.string   "title"
-    t.text     "body"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.string   "image_file_name"
-    t.string   "image_content_type"
-    t.integer  "image_file_size"
-    t.datetime "image_updated_at"
-    t.date     "date"
   end
 
   create_table "image_comments", :force => true do |t|
@@ -154,16 +116,6 @@ ActiveRecord::Schema.define(:version => 20091116211349) do
     t.datetime "updated_at"
   end
 
-  create_table "job_advertisements", :force => true do |t|
-    t.string   "title"
-    t.text     "body"
-    t.string   "pvl"
-    t.integer  "responder_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.string   "opp_type"
-  end
-
   create_table "log_file_entries", :force => true do |t|
     t.string   "filename"
     t.string   "stimulus_type"
@@ -204,15 +156,6 @@ ActiveRecord::Schema.define(:version => 20091116211349) do
     t.datetime "updated_at"
   end
 
-  create_table "pages", :force => true do |t|
-    t.integer  "parent_id"
-    t.string   "title"
-    t.text     "content"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.string   "permalink"
-  end
-
   create_table "participants", :force => true do |t|
     t.integer  "ed_years"
     t.integer  "apoe_e1"
@@ -227,52 +170,11 @@ ActiveRecord::Schema.define(:version => 20091116211349) do
     t.integer  "access_id"
   end
 
-  create_table "people", :force => true do |t|
-    t.string   "first_name"
-    t.string   "last_name"
-    t.string   "middle_initial"
-    t.string   "job_title"
-    t.integer  "address_id"
-    t.string   "office_phone"
-    t.string   "office_phone_ext"
-    t.string   "lab_phone"
-    t.string   "lab_phone_ext"
-    t.string   "fax"
-    t.string   "email"
-    t.text     "brief_bio"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.string   "degree"
-    t.string   "photo_file_name"
-    t.string   "photo_content_type"
-    t.integer  "photo_file_size"
-    t.text     "long_bio"
-    t.string   "group"
-    t.string   "web_address"
-  end
-
-  create_table "personnel_groups", :force => true do |t|
-    t.string   "name"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "physiology_text_files", :force => true do |t|
     t.string   "filepath"
     t.integer  "image_dataset_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-  end
-
-  create_table "publications", :force => true do |t|
-    t.string   "title"
-    t.string   "journal_info"
-    t.text     "abstract"
-    t.date     "publication_date"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.string   "pmid"
-    t.string   "authors_info"
   end
 
   create_table "recruitment_groups", :force => true do |t|
@@ -310,13 +212,6 @@ ActiveRecord::Schema.define(:version => 20091116211349) do
     t.string   "irb_number"
     t.string   "prefix"
     t.string   "raw_directory"
-  end
-
-  create_table "study_descriptions", :force => true do |t|
-    t.string   "title"
-    t.text     "body"
-    t.datetime "created_at"
-    t.datetime "updated_at"
   end
 
   create_table "users", :force => true do |t|

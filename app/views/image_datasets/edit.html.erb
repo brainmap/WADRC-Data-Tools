@@ -1,24 +1,28 @@
-<h1>Editing image_dataset</h1>
+<h1>Editing Image Dataset</h1>
+
+<p>
+	<%=h @image_dataset.path %> <br />
+	<%=h @image_dataset.rmr %> <br />
+	<%=h @image_dataset.series_description %> <br />
+	<%=h @image_dataset.timestamp %>
+</p>
 
 <% form_for(@image_dataset, :multipart => true) do |f| %>
   <%= f.error_messages %>
 
-  <p>
+  <!-- <p>
     <%= f.label :rmr %><br />
     <%= f.text_field :rmr %>
   </p>
   <p>
     <%= f.label :series_description %><br />
     <%= f.text_field :series_description %>
-  </p>
-  <p>
-    <%= f.label :path %><br />
-    <%= f.text_field :path %>
-  </p>
+  </p> 
   <p>
     <%= f.label :timestamp %><br />
     <%= f.datetime_select :timestamp %>
   </p>
+-->
 
 	<p>Physiology Text Files</p>
   <div id="phys_files_list">

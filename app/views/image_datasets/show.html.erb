@@ -1,7 +1,7 @@
 <div id="heading_and_link">
 <h1>Imaging Dataset:</h1>
   <p>
-    <%= link_to 'edit this dataset', edit_image_dataset_path(@image_dataset) %> •
+    <%#= link_to 'edit this dataset', edit_image_dataset_path(@image_dataset) %>
     <%= link_to 'view visit from whence it came', @visit %> •
     <% if @visit.nil? or @visit.enrollment.nil? or @visit.enrollment.participant.nil? %>
       no associated participant
@@ -9,9 +9,9 @@
       <%= link_to('view participant', @visit.enrollment.participant) %>
     <% end %>
   <br /><br />	
-	<%=	link_to "&larr; Previous", @previous_image_dataset unless @image_dataset == @image_datasets.last %>
+	<%=	link_to "&larr; Previous", @previous_image_dataset unless @image_dataset == @image_datasets.first %>
 	<%= " #{@image_dataset.series_description} " %>
-	<%=	link_to "Next &rarr; ", @next_image_dataset unless @image_dataset == @image_datasets.first %>
+	<%=	link_to "Next &rarr; ", @next_image_dataset unless @image_dataset == @image_datasets.last %>
   </p>
 </div>
 
@@ -25,13 +25,7 @@
 	
 	<h3>Directory contents:</h3>
   <div id="current_directory_contents" class="sticky">
-    <p>
-    <% fs = `ls #{@image_dataset.path}` %>
-    <% fs = fs.split %>
-    <%=h fs.first(10).join(" ") %>
-    <br />...<br />
-    <%= fs.last(10).join(" ") %>
-    </p>
+		<p><%= directory_list(@image_dataset.path) %></p>
   </div>
 
   <h3>Analyses that use this dataset:</h3>
@@ -77,5 +71,8 @@
 
 </div>
 
+<%= clearing_br %>
+
+<%= render :partial => 'image_datasets/streamlined_table', :locals => {:image_datasets => @image_datasets} %>
 
 <%= clearing_br %>
