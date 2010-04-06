@@ -1,8 +1,7 @@
-
 Feature: View And Edit Participant Visits
   In order to lookup participant visits
   As a guest to the website
-  I want to be able to find visits that have occured.
+  I want to be able to find visits that have occurred.
   
   Background:
     Given the following visit records
@@ -15,5 +14,3 @@ Feature: View And Edit Participant Visits
     When I go to the homepage
     Then I should see "All visits"
     And I should see "rmr01"
-    
-  

@@ -1,4 +1,6 @@
 ActionController::Routing::Routes.draw do |map|
+  map.resources :helps
+
   map.resources :physiology_text_files
   map.resources :neuropsych_assessments
   map.resources :neuropsych_sessions

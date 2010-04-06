@@ -45,6 +45,9 @@
             <li <%= "class=current" if @current_tab == "image_searches" %>>
               <%= link_to "ImageSearch", image_searches_path %>
             </li>
+        	<li <%= "class=current" if @current_tab == "helps" %>>
+          	  <%= link_to "Help", helps_path %>
+        	</li>
             <!-- <li <%= "class=current" if @current_tab == "log_files" %>>
               <%= link_to("Log files", log_files_path) %>
             </li> -->

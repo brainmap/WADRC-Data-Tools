@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100324183513) do
+ActiveRecord::Schema.define(:version => 20100406204117) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -37,6 +37,11 @@ ActiveRecord::Schema.define(:version => 20100324183513) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.text     "withdrawl_reason"
+  end
+
+  create_table "helps", :force => true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "image_comments", :force => true do |t|
