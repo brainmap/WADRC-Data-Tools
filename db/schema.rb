@@ -43,7 +43,7 @@ ActiveRecord::Schema.define(:version => 20100408230520) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "question"
-    t.string   "answer"
+    t.text     "answer"
   end
 
   create_table "image_comments", :force => true do |t|

@@ -1,7 +1,7 @@
 class AddQuestionToHelps < ActiveRecord::Migration
   def self.up
     add_column :helps, :question, :string
-    add_column :helps, :answer, :string
+    add_column :helps, :answer, :text
   end
 
   def self.down
