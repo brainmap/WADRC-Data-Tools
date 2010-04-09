@@ -1,3 +1,6 @@
+<h2><%=h @help.question %></h2>
+<p> <%= RedCloth.new(@help.answer).to_html %></p>
 
 <%= link_to 'Edit', edit_help_path(@help) %> |
-<%= link_to 'Back', helps_path %>
+<%= link_to 'Back', helps_path %> |
+<%= link_to 'Destroy', @help, :confirm => 'Are you sure?', :method => :delete %>

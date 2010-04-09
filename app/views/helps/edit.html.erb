@@ -1,11 +1,14 @@
 <h1>Editing help</h1>
 
-<% form_for(@help) do |f| %>
-  <%= f.error_messages %>
+<h2><%=h @help.question %></h2>
 
-  <p>
-    <%= f.submit 'Update' %>
-  </p>
+<div style="width:50%">
+	<% form_for @help do |f| %>
+		<%= render :partial => 'new_edit', :locals => { :f => f } %>
+</div>
+<p>
+	<%= f.submit 'Update' %>
+</p>
 <% end %>
 
 <%= link_to 'Show', @help %> |

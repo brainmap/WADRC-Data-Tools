@@ -1,16 +1,13 @@
 <h1>Listing helps</h1>
 
 <table>
-  <tr>
-  </tr>
-
-<% @helps.each do |help| %>
-  <tr>
-    <td><%= link_to 'Show', help %></td>
-    <td><%= link_to 'Edit', edit_help_path(help) %></td>
-    <td><%= link_to 'Destroy', help, :confirm => 'Are you sure?', :method => :delete %></td>
-  </tr>
-<% end %>
+  <tbody>
+    <% for help in @helps %>
+      <tr>
+        <td><%=link_to "#{help.question}", help%></td>
+      </tr>
+    <% end %>
+  </tbody>
 </table>
 
 <br />
