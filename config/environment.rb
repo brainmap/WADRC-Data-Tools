@@ -19,8 +19,10 @@ Rails::Initializer.run do |config|
   
   # enables smart searching
   config.gem 'searchlogic'
-  
+  # enables textile markup
   config.gem 'RedCloth'
+  # enables easy form building
+  config.gem 'formtastic'
   
   # Settings in config/environments/* take precedence over those specified here.
   # Application configuration should go into files in config/initializers

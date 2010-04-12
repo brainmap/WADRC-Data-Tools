@@ -1,7 +1,7 @@
 <h1>New help</h1>
 
 <div style="width:50%">
-	<% form_for @help do |f| %>
+	<% semantic_form_for @help do |f| %>
 		<%= render :partial => 'new_edit', :locals => { :f => f } %>
 </div>
 <p>
