@@ -6,9 +6,6 @@
 	<% semantic_form_for @help do |f| %>
 		<%= render :partial => 'new_edit', :locals => { :f => f } %>
 </div>
-<p>
-	<%= f.submit 'Update' %>
-</p>
 <% end %>
 
 <%= link_to 'Show', @help %> |
