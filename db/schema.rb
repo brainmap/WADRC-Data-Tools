@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100408230520) do
+ActiveRecord::Schema.define(:version => 20100412233449) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -221,6 +221,19 @@ ActiveRecord::Schema.define(:version => 20100408230520) do
     t.string   "irb_number"
     t.string   "prefix"
     t.string   "raw_directory"
+  end
+
+  create_table "taggings", :force => true do |t|
+    t.integer  "help_id"
+    t.integer  "tag_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "tags", :force => true do |t|
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "users", :force => true do |t|
