@@ -2,7 +2,7 @@ body { background-image: url(/images/bkgd.png); background-repeat: repeat-both; 
 p, h1, h2, h3, th, td, table, tr, li, a, small, blockquote, dl { font-family: helvetica, arial, sans-serif; color: #444; }
 a { text-decoration: none; font-weight: bold; border-bottom: dotted thin; }
 a:hover { background-color: #ffffbb; }
-blockquote { font-style: italic; }
+blockquote { font-style: italic; color: #777; }
 dt { font-weight: bold; }
 table { word-wrap:break-word; }
 
@@ -26,6 +26,7 @@ table { word-wrap:break-word; }
 .main div.tabs li:hover { background-color: #ffffcc; }
 .main div.content { margin: 0; padding: 1em; clear: left; 
 	background-color: #eee; border: solid thin; }
+.main div.content > blockquote > p { color: #777; }
 
 .key_value { text-align:left; font-size:small;  }
 .key_value td { margin: 0; padding: 0; font-style: italic;  }
