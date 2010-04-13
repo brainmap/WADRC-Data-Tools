@@ -1,6 +1,13 @@
+<span style="float:right">
+	<%= link_to 'Back to all help', helps_path %>
+</span>
+
 <h2><%=h @help.question %></h2>
 <%= RedCloth.new(@help.answer).to_html %>
+<p>Tags: <%=h @help.tag_names %></p>
 
+<br style="clear:both" /><br />
+
+<p> Last Modified: <%=h @help.updated_at.to_s(:datetime_military) %></p>
 <%= link_to 'Edit', edit_help_path(@help) %> |
-<%= link_to 'Back', helps_path %> |
-<%= link_to 'Destroy', @help, :confirm => 'Are you sure?', :method => :delete %>
+<%= link_to 'Delete', @help, :confirm => 'Are you sure?', :method => :delete %>
