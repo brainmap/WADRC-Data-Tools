@@ -8,5 +8,5 @@
 </div>
 <% end %>
 
-<%= link_to 'Show', @help %> |
-<%= link_to 'Back', helps_path %>
+<%= link_to 'Cancel', @help %> |
+<%= link_to 'Delete this help', @help, :confirm => 'Are you sure you want to delete this help?', :method => :delete %>

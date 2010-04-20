@@ -1,16 +1,23 @@
-<span style="float:right">
-	<%= link_to 'Back to all help', helps_path %>
-</span>
+<div id="help_sidebar">
+	<p><%= link_to 'Edit this help', edit_help_path(@help) %><p>
+	<ul>
+	    <% for tag in Tag.find (:all, :order => 'name') %>
+	      <li><% link_to h(tag.name), tag_path(tag) %></li>
+	    <% end %>
+	</ul>
+</div>
 
-<h1><%=h @help.question %></h1>
-<h3>Answer:</h3>
-<%= RedCloth.new(@help.answer).to_html %>
-<h3>Tags:</h3>
-<%=h @help.tag_names %>
-<h3>Related Help:</h3>
+<div id="help_content">
+	<h1><%=h @help.question %></h1>
+	<%= RedCloth.new(@help.answer).to_html %>
 
-<br style="clear:both" /><br />
+	<div id="help_details" class="sticky">
+		<%= key_val_table("help_details", {
+			:Tags => @help.tag_names,
+			:Created => @help.created_at.to_s(:long),
+			:Last_Modified => @help.updated_at == @help.created_at ? nil : @help.updated_at.to_s(:long)		
+		})%>
+	</div>
 
-<p> Last Modified: <%=h @help.updated_at.to_s(:long) %></p>
-<%= link_to 'Edit', edit_help_path(@help) %> |
-<%= link_to 'Delete', @help, :confirm => 'Are you sure?', :method => :delete %>
+	<h3>Related Help:</h3>
+</div>

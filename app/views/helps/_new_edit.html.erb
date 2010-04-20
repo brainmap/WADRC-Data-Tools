@@ -1,6 +1,6 @@
 <% f.inputs do %>
 	<%= f.input :question %>
-	<%= f.input :answer, :hint => "Can use Textile Markup" %>
-	<%= f.input :tag_names %>
+	<%= f.input :answer, :hint => "Answers can use Textile markup." %>
+	<%= f.input :tag_names, :label => "Tags", :hint => "Separate tags with a space. E.g., 'tag1 tag2 tag3'" %>
 <% end %>
 <%= f.buttons %>
