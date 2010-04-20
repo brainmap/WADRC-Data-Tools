@@ -1,4 +1,11 @@
 class HelpsController < ApplicationController
+
+  before_filter :set_current_tab
+  
+  def set_current_tab
+    @current_tab = "helps"
+  end
+
   # GET /helps
   # GET /helps.xml
   def index
