@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100324183513) do
+ActiveRecord::Schema.define(:version => 20100426215601) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -73,6 +73,8 @@ ActiveRecord::Schema.define(:version => 20100324183513) do
     t.text     "spm_mask_comment"
     t.text     "other_issues"
     t.text     "field_inhomogeneity_comment"
+    t.string   "nos_concerns"
+    t.text     "nos_concerns_comment"
   end
 
   create_table "image_datasets", :force => true do |t|
