@@ -73,8 +73,6 @@ ActiveRecord::Schema.define(:version => 20100324183513) do
     t.text     "spm_mask_comment"
     t.text     "other_issues"
     t.text     "field_inhomogeneity_comment"
-    t.string   "rf_noise"
-    t.text     "rf_noise_comment"
   end
 
   create_table "image_datasets", :force => true do |t|
