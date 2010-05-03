@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100426215601) do
+ActiveRecord::Schema.define(:version => 20100427151145) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -90,6 +90,10 @@ ActiveRecord::Schema.define(:version => 20100426215601) do
     t.integer  "bold_reps"
     t.integer  "slices_per_volume"
     t.string   "scanned_file"
+    t.string   "thumbnail_file_name"
+    t.string   "thumbnail_content_type"
+    t.integer  "thumbnail_file_size"
+    t.datetime "thumbnail_updated_at"
   end
 
   create_table "image_searches", :force => true do |t|

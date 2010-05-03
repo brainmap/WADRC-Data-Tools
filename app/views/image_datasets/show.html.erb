@@ -1,5 +1,5 @@
 <div id="heading_and_link">
-<h1>Imaging Dataset:</h1>
+<h1><%= @image_dataset.series_description %></h1>
   <p>
     <%#= link_to 'edit this dataset', edit_image_dataset_path(@image_dataset) %>
     <%= link_to 'view visit from whence it came', @visit %> •
@@ -8,12 +8,17 @@
     <% else %>
       <%= link_to('view participant', @visit.enrollment.participant) %>
     <% end %>
-  <br /><br />	
-	<%=	link_to "&larr; Previous", @previous_image_dataset unless @image_dataset == @image_datasets.first %>
-	<%= " #{@image_dataset.series_description} " %>
-	<%=	link_to "Next &rarr; ", @next_image_dataset unless @image_dataset == @image_datasets.last %>
-  </p>
+	</p>
+	<div class="next-previous-links">
+		<%=	link_to "&larr; Previous", @previous_image_dataset unless @image_dataset == @image_datasets.first %>
+		<%=	link_to "Next &rarr; ", @next_image_dataset unless @image_dataset == @image_datasets.last %>	
+	</div>
+
+	<div style="margin: 10px auto;">
+		<%= link_to image_tag(@image_dataset.thumbnail.url(:large)), @image_dataset.thumbnail.url  %>
+	</div>
 </div>
+
 
 
 <div id="dataset_details" class="two_col_left">

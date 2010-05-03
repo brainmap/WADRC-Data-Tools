@@ -4,7 +4,8 @@
   
   <thead>
     <tr>
-      <th>Directory</th>
+      <%= "<th>&nbsp;</th>"  if include_thumbnails %>
+			<th>Directory</th>
       <th>Series description</th>
       <th>Imaging Details</th>
       <th>Timestamp</th>
@@ -19,7 +20,8 @@
   <tbody>
     <% image_datasets.each do |im_ds| %>
       <tr>
-        <td><%=h im_ds.path_basename %></td>
+        <%= "<td>#{image_tag im_ds.thumbnail.url(:medium)}</th>"  if include_thumbnails %>
+				<td><%=h im_ds.path_basename %></td>
         <td><%= link_to im_ds.series_description, im_ds %></td>
         <td>
           <%= popup_note("peek", key_val_table("image_details", im_ds.details_hash))%>

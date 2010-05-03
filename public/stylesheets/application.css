@@ -26,8 +26,6 @@ table { word-wrap:break-word; }
 .main div.content { margin: 0; padding: 1em; clear: left; 
 	background-color: #eee; border: solid thin; }
 
-
-
 .key_value { text-align:left; font-size:small;  }
 .key_value td { margin: 0; padding: 0; font-style: italic;  }
 .key_value tr { background-color: transparent; padding:0; margin:0; }
@@ -109,9 +107,11 @@ table { word-wrap:break-word; }
 .three_col_mid { float: left; padding-right: 1em; width:35%; }
 .three_col_right { float: left; padding-right: 0; width:35%; }
 
-#heading_and_link { display: block; margin: 1em 0 2em 0; }
+#heading_and_link { display: block; margin: 1em 0 2em 0; border-bottom: thin black solid; }
 #heading_and_link h1 { display: inline; margin-right: 0.3em; }
 #heading_and_link p { display: inline; margin-right: 0.3em; }
+
+.next-previous-links { float: right;}
 
 .image_search_form th { text-align:right; font-weight:normal; padding-right:1em;}
 .visit_footer th { text-align:right; font-weight:normal; padding:0; margin:0; }

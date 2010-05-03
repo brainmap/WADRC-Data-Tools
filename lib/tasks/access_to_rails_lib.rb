@@ -1,6 +1,10 @@
 require "rubygems"
-require "mysql"
 require 'sqlite3'
+begin
+  require "mysql"
+rescue LoadError => e
+  puts e
+end
 
 MYSQLSERVER = "jimbo"
 MYSQLUSER = "SQLAdmin"

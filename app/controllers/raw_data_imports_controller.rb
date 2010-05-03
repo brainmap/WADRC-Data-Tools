@@ -1,3 +1,4 @@
+require 'metamri'
 class RawDataImportsController < ApplicationController
   
   def new
@@ -30,6 +31,9 @@ class RawDataImportsController < ApplicationController
           rescue LoadError => load_error
             logger.info load_error
             flash[:error] = "Sorry, your email was not delivered: " + load_error.to_s
+          rescue Timeout::Error => timeout_error
+            logger.info timeout_error
+            flash[:error] = "Sorry, mail took too long to be delivered: " + timeout_error.to_s
           end
         else
           flash[:error] = "Awfully sorry, this raw data directory could not be saved to the database."

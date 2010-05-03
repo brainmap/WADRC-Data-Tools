@@ -72,7 +72,7 @@
 <% if @image_datasets.empty? %>
   <p>No images associated with this visit</p>
 <% else %>
-  <%= render(:partial => 'image_datasets/image_datasets', :locals => {:image_datasets => @image_datasets} ) %>
+  <%= render(:partial => 'image_datasets/image_datasets', :locals => {:image_datasets => @image_datasets, :include_thumbnails => true} ) %>
 <% end %>
 
 <h3>Check Radiology</h3>

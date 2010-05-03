@@ -1,3 +1,4 @@
+load '~/code/metamri/lib/metamri.rb'
 require 'metamri'
 
 class Visit < ActiveRecord::Base
@@ -83,19 +84,28 @@ class Visit < ActiveRecord::Base
     visit.update_attributes(v.attributes_for_active_record) unless visit.new_record?
     visit.scan_procedure = sp
     
-    # if visit.image_datasets.blank?
-      v.datasets.each do |dataset|
+    thumbnails = []
+    v.datasets.each do |dataset|
+      begin
+        # Note: Using Metamri#RawImageDatasetThumbnail Directly
         begin
-          logger.info dataset.attributes_for_active_record
-          visit.image_datasets.build(dataset.attributes_for_active_record)
-        rescue Exception => e
-          puts "Error building image_dataset. #{e}"
+          thumbnails << File.open(RawImageDatasetThumbnail.new(dataset).thumbnail)
+          visit.image_datasets.build(dataset.attributes_for_active_record(:thumb => thumbnails.last))
+        rescue StandardError, ScriptError => e
+          puts e
+          visit.image_datasets.build(dataset.attributes_for_active_record)  
         end
+      rescue Exception => e
+        puts "Error building image_dataset. #{e}"
+        raise e
       end
-    # end
+    end
     
     visit.created_by = created_by
+    puts visit.image_datasets
     visit.save
+    
+    # thumbnails.each { |thumb| thumb.close }
 
     return visit
 

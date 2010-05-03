@@ -1,8 +1,12 @@
 #$:.push '/Users/kris/projects/ImageData/lib'
 
 require 'rubygems'
-require 'metamri'
-require 'mysql'
+begin
+  require 'metamri'
+  require 'mysql'
+rescue LoadError => e
+  puts e
+end
 require 'lib/tasks/access_to_rails_lib'
 
 
