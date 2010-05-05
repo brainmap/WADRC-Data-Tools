@@ -1,0 +1,9 @@
+<h2>Helps tagged with <%= params[:id] %></h2>
+
+<ul>
+	<% @helps.each do |help| %>
+		<li>
+			<%= link_to help.question, :action => 'show', :id => help.id %>
+		</li>
+	<% end %>
+</ul>

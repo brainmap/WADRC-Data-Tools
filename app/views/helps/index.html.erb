@@ -4,7 +4,9 @@
   <tbody>
     <% for help in @helps %>
       <tr>
-        <td><%=link_to "#{help.question}", help%></td>
+        <td>
+			<%=link_to "#{help.question}", help%>
+		</td>
       </tr>
     <% end %>
   </tbody>

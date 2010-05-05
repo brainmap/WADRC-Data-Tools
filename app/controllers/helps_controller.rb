@@ -5,7 +5,15 @@ class HelpsController < ApplicationController
   def set_current_tab
     @current_tab = "helps"
   end
+  
+  def tag
+    @helps = Help.find_tagged_with params[:id]
+  end
 
+  def tag_cloud
+    @tags = Help.tag_counts
+  end
+  
   # GET /helps
   # GET /helps.xml
   def index

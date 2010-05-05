@@ -1,10 +1,5 @@
 <div id="help_sidebar">
-	<p><%= link_to 'Edit this help', edit_help_path(@help) %><p>
-	<ul>
-	    <% for tag in Tag.find (:all, :order => 'name') %>
-	      <li><% link_to h(tag.name), tag_path(tag) %></li>
-	    <% end %>
-	</ul>
+	<p><%= link_to 'Edit this help', edit_help_path(@help) %></p>
 </div>
 
 <div id="help_content">
@@ -13,7 +8,7 @@
 
 	<div id="help_details" class="sticky">
 		<%= key_val_table("help_details", {
-			:Tags => @help.tag_names,
+			:Tags => help_tag_links(@help),
 			:Created => @help.created_at.to_s(:long),
 			:Last_Modified => @help.updated_at == @help.created_at ? nil : @help.updated_at.to_s(:long)		
 		})%>

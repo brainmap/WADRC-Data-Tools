@@ -97,5 +97,6 @@ module ApplicationHelper
     end
   end
   
+  include TagsHelper
   
 end
