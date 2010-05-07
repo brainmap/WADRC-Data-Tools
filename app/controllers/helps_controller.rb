@@ -18,6 +18,7 @@ class HelpsController < ApplicationController
   # GET /helps.xml
   def index
     @helps = Help.all
+    @tags = Tag.counts
 
     respond_to do |format|
       format.html # index.html.erb
@@ -29,6 +30,7 @@ class HelpsController < ApplicationController
   # GET /helps/1.xml
   def show
     @help = Help.find(params[:id])
+    @tags = Tag.counts
 
     respond_to do |format|
       format.html # show.html.erb
