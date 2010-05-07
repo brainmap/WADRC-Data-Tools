@@ -19,24 +19,15 @@ def for_all_attachments
   names = obtain_attachments
   ids   = klass.connection.select_values(klass.send(:construct_finder_sql, :select => 'id'))
 
-  ids.each do |id|
+  ids[1000..-1].each do |id|
     instance = klass.find(id)
-    names.each do |name|
-      begin
-        t =  instance.send(:create_thumbnail)
-        puts t
-        instance.send("#{name}=", File.open(t))
-        instance.save
-      rescue StandardError => e
-        puts e
-      end
-      
+    names.each do |name|      
       result = if instance.send("#{ name }?")
                  yield(instance, name)
                else
                  true
                end
-      print result; puts result ? "." : "x"; $stdout.flush
+      print result ? "." : "x"; $stdout.flush
     end
   end
   puts " Done."
@@ -93,18 +84,18 @@ namespace :paperclip do
       outcomes = []
       for_all_attachments do |instance, name|
         begin
-          new_thumb = instance.send(:create_thumbnail)
-          outcomes << [instance.id, new_thumb ? "Created thumbnail for #{instance.send(:path)}, using #{new_thumb}" : "Skipping #{instance.send(:path)}"]
-          instance.send("#{name}=", File.open(new_thumb.to_s))
+          new_thumbnail_image = instance.send(:create_thumbnail)
+          puts new_thumbnail_image
           result = instance.save
+          outcomes << [instance.id,  result ? "Created thumbnail for #{instance.send(:path)}, using #{new_thumbnail_image}" : "Skipped #{instance.send(:path)}"]
           errors << [instance.id, "#{instance.send(:path)} - #{instance.errors}"] unless instance.errors.blank?
-          result
+          result ? true : false
         rescue StandardError, ScriptError => e
           errors << [instance.id, "#{instance.send(:path)} - #{e}"]
           false
         end
       end
-      errors.each{|e| puts "#{e.first}: #{e.last.respond_to?(:full_messages) ? full_messages.inspect : e.last.to_s}" }
+      errors.each{|error| puts "#{error.first}: #{error.last.respond_to?(:full_messages) ? full_messages.inspect : error.last.to_s}" }
       outcomes.each{|outcome| puts "#{outcome.first}: #{outcome.last}"}
     end
   end

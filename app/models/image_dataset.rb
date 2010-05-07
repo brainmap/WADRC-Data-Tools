@@ -12,7 +12,7 @@ class ImageDataset < ActiveRecord::Base
   has_many :image_dataset_quality_checks, :dependent => :destroy
   has_one :log_file
   
-  has_attached_file :thumbnail, :styles => { :large => "900x900>", :medium => "300x300>", :thumb => "100x100>" }
+  has_attached_file :thumbnail, :styles => { :large => "900x900>", :medium => "300x300>", :thumb => "100x100" }
 
   
   validates_presence_of :path, :scanned_file
@@ -91,24 +91,27 @@ class ImageDataset < ActiveRecord::Base
       file_to_scan = File.join(path, scanned_file)
     elsif File.exist?("#{File.join(path, scanned_file)}.bz2") # Then scanned file is currently zipped
       original_zip_status = true
-      file_to_scan = Pathname.new("#{File.join(path, scanned_file)}.bz2").local_copy.to_s
+      file_to_scan = Pathname.new("#{File.join(path, scanned_file)}.bz2").local_copy(Dir.mktmpdir).to_s
     else
       raise StandardError, "Could not find file #{File.join(path, scanned_file)} on filesystem."
     end
+    
+    # puts "original_zip_status: #{original_zip_status}"
+    # puts "file_to_scan: #{file_to_scan}"
 
     ds = RawImageDataset.new(path, RawImageFile.new(file_to_scan))
-    
-    thumbnail = RawImageDatasetThumbnail.new(ds).create_thumbnail
-    raise StandardError, "Could not create thumbnail for #{File.join(path, scanned_file)}" unless File.exists?(thumbnail)
-    
-    return thumbnail
+    png_path = RawImageDatasetThumbnail.new(ds).create_thumbnail
+    tf = File.open(png_path)
+    self.thumbnail = tf
+    raise StandardError, "Could not create thumbnail for #{File.join(path, scanned_file)}" unless File.exists?(png_path)
+    return png_path
   end
   
   private
   
   def validate 
     db_result = self.class.find(:first, :conditions => ['path = ? AND scanned_file = ?', self.path, self.scanned_file])
-    puts db_result
+    # puts db_result
     unless db_result.blank? # No Image Dataset was found with the dataset identifier, it's ok to save this.
       unless db_result == self # Ensure uniqueness.
         errors.add_to_base('Dataset path and file must be unique.') 
