@@ -11,18 +11,21 @@
 require File.join(File.dirname(__FILE__), 'boot')
 
 Rails::Initializer.run do |config|
-  # enables pagination
+  # Enable pagination
   config.gem 'will_paginate'
   
-  # Tools for extracting imaging metadata
-  #config.gem 'brainmap-metamri', :lib => 'metamri', :source => 'http://gems.github.com'
-  
-  # enables smart searching
+  # Enable smart searching
   config.gem 'searchlogic'
-  
+
+  # Enable pretty markup.
   config.gem 'RedCloth'
   
+  # Enable image thumbnails.
   config.gem 'paperclip', :lib => 'paperclip'
+  
+  # Tools for extracting imaging metadata
+  # load '~/code/metamri/lib/metamri.rb'
+  config.gem 'metamri'
   
   # Settings in config/environments/* take precedence over those specified here.
   # Application configuration should go into files in config/initializers

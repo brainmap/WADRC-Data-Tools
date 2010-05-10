@@ -1,6 +1,3 @@
-# load '~/code/metamri/lib/metamri.rb'
-require 'metamri'
-
 class Visit < ActiveRecord::Base
   default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
   
