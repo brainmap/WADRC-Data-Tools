@@ -1,4 +1,4 @@
-load '~/code/metamri/lib/metamri.rb'
+# load '~/code/metamri/lib/metamri.rb'
 require 'metamri'
 
 class Visit < ActiveRecord::Base
