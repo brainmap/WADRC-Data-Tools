@@ -19,7 +19,7 @@ def for_all_attachments
   names = obtain_attachments
   ids   = klass.connection.select_values(klass.send(:construct_finder_sql, :select => 'id'))
 
-  ids[1000..-1].each do |id|
+  ids.each do |id|
     instance = klass.find(id)
     names.each do |name|      
       result = if instance.send("#{ name }?")
@@ -102,7 +102,6 @@ namespace :paperclip do
       for_all_attachables do |instance, name|
         begin
           new_thumbnail_image = instance.send(:create_thumbnail)
-          puts new_thumbnail_image
           result = instance.save
           outcomes << [instance.id,  result ? "Created thumbnail for #{instance.send(:path)}, using #{new_thumbnail_image}" : "Skipped #{instance.send(:path)}"]
           errors << [instance.id, "#{instance.send(:path)} - #{instance.errors}"] unless instance.errors.blank?
