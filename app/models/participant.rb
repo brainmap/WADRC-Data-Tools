@@ -1,6 +1,7 @@
 class Participant < ActiveRecord::Base
   has_many :enrollments
   has_many :visits, :through => :enrollments
+  acts_as_reportable
   
   def wrapenrolled?
     not wrapnum.blank?

@@ -33,6 +33,22 @@ def for_all_attachments
   puts " Done."
 end
 
+def for_all_attachables
+  klass = obtain_class
+  names = obtain_attachments
+  ids   = klass.connection.select_values(klass.send(:construct_finder_sql, :select => 'id'))
+
+  ids.each do |id|
+    instance = klass.find(id)
+    names.each do |name|      
+      result = yield(instance, name)
+      print result ? "." : "x"; $stdout.flush
+    end
+  end
+  puts " Done."
+end
+
+
 namespace :paperclip do
   desc "Refreshes both metadata and thumbnails."
   task :refresh => ["paperclip:refresh:metadata", "paperclip:refresh:thumbnails"]
@@ -82,7 +98,8 @@ namespace :paperclip do
     task :recreate => :environment do
       errors = []
       outcomes = []
-      for_all_attachments do |instance, name|
+
+      for_all_attachables do |instance, name|
         begin
           new_thumbnail_image = instance.send(:create_thumbnail)
           puts new_thumbnail_image

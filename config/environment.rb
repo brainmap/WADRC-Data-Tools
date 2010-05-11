@@ -10,6 +10,7 @@
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
 
+
 Rails::Initializer.run do |config|
   # enables pagination
   config.gem 'will_paginate'
@@ -23,6 +24,14 @@ Rails::Initializer.run do |config|
   config.gem 'RedCloth'
   
   config.gem 'paperclip', :lib => 'paperclip'
+  
+  # Tools for extracting imaging metadata
+  # load '~/code/metamri/lib/metamri.rb'
+  config.gem 'metamri'
+  
+  # Tools for Reporting
+  config.gem 'ruport'
+  require 'ruport/acts_as_reportable'
   
   # Settings in config/environments/* take precedence over those specified here.
   # Application configuration should go into files in config/initializers

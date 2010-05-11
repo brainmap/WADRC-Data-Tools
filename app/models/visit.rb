@@ -27,6 +27,8 @@ class Visit < ActiveRecord::Base
   named_scope :in_scan_procedure, lambda { |protocol_id|
     { :conditions => { :scan_procedure_id => protocol_id } }
   }  
+  
+  acts_as_reportable
 
 
   def week
@@ -102,10 +104,7 @@ class Visit < ActiveRecord::Base
     end
     
     visit.created_by = created_by
-    puts visit.image_datasets
-    visit.save
-    
-    # thumbnails.each { |thumb| thumb.close }
+    visit.save    
 
     return visit
 

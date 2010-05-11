@@ -20,6 +20,8 @@ class ImageDataset < ActiveRecord::Base
   
   has_many :physiology_text_files
   accepts_nested_attributes_for :physiology_text_files, :allow_destroy => true
+  
+  acts_as_reportable
 
   def rep_time_hundredths
     (100 * rep_time).round / 100.0
