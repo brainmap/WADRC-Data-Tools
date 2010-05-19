@@ -18,12 +18,12 @@ MYSQLDB = "access"
 namespace :db do
   
   namespace :access do
-    desc "Assign an enrollment to a visit using ENUM info from the Access DB."
+    desc "Assign an enrollment to a visit using enumber info from the Access DB."
     task(:associate_enrollments_to_visits => :environment) do
       Visit.all.each do |v|
         enrollments = fetch_visit_enrollment(v)
         unless enrollments.blank?
-          e = Enrollment.find_by_enum(enrollments.first['enum'])
+          e = Enrollment.find_by_enumber(enrollments.first['enumber'])
           v.enrollment = e
         end
         v.save
@@ -56,19 +56,64 @@ namespace :db do
     end
     
 =begin rdoc
-This task runs through each participant in the rails database, fetches related enrollments in the access database joined by the Access ID, 
-and updates or creates the related enrollment models in the rails DB."
+This task runs through each participant in the rails database, fetches related 
+enrollments in the access database joined by the Access ID, and updates or 
+creates the related enrollment models in the rails DB."
 =end
     desc "Create or update enrollments and thier relationships with participants from the access DB."
     task(:repopulate_enrollments => :environment) do
       #Enrollment.delete_all
       Participant.all.each do |p|
         fetch_participant_enrollments(p).each do |e|
-          en = Enrollment.find_or_create_by_enum(e['enum'])
+					en = Enrollment.find_or_create_by_enumber(e['enumber'])
+					en.participant = p
           en.update_attributes(e)
         end
         p.save
       end
+    end
+    
+=begin rdoc
+=end
+    desc "Normalize Enumbers"
+    task(:normalize_enumbers => :environment) do
+      # substitutions = [
+      #         [/^15/, 'tbiva0'],
+      #         [/^1(?!\5)/, 'tbi'], 
+      #         [/^25/, 'wrp0'],
+      #         [/^2(?!\5)/, 'alz'],
+      #         [/^4/, 'pc'],
+      #         [/^5/, 'awr']
+      #       ]
+      
+      errors = []; outcomes = []
+      Enrollment.all.each do |e|
+        e.enumber = convert_enumber_to_alpha(e.enumber)
+        
+        unless e.changed?
+          outcomes << [e.id, "Skipped #{e.enumber}"]
+          next
+        end
+        
+        if existing_enrollment = Enrollment.find_by_enumber(e.enumber)
+          outcomes << [e.id, "Updated #{existing_enrollment.id} with #{e.id}"]
+          if existing_enrollment.update_attributes(e.attributes)
+            outcomes << [e.id, "Saved #{existing_enrollment.enumber}"]
+          else
+            errors << [existing_enrollment.id, existing_enrollment.errors]
+          end
+          e.destroy
+        else
+          if e.save
+            outcomes << [e.id, "Saved #{e.id} in place: #{e.enumber}"]
+          else
+            errors << [e.id, e.errors]
+          end
+        end
+      end
+
+      outcomes.each{|outcome| puts "#{outcome.first}: #{outcome.last}"}
+      errors.each{|error| puts "#{error.first}: #{error.last.full_messages.inspect}" }
     end
     
     desc "Reset Participants and Enrollments from the Access Database."

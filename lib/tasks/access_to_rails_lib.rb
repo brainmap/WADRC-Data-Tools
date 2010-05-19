@@ -24,25 +24,25 @@ def fetch_visit_enrollment(visit)
   query_mysql(sql_find_enrollments_by_rmr(visit.rmr))
 end
 
-def convert_enum_to_alpha(enum)
-  if enum =~ /^10|^11|^12/
-    'tbi' + enum[1..-1]
-  elsif enum =~ /^15/
-    'tbiva0' + enum[2..-1]
-  elsif enum =~ /^20|^21|^22/
-    'alz' + enum[1..-1]
-  elsif enum =~ /^25/
-    'wrp0' + enum[2..-1]
-  elsif enum =~ /^3/
-    'cpr' + enum[1..-1]
-  elsif enum =~ /^4/
-    'pc' + enum[1..-1]
-  elsif enum =~ /^5/
-    'awr' + enum[1..-1]
-  elsif enum =~ /^9/
-    'pil' + enum[1..-1]
+def convert_enumber_to_alpha(enumber)
+  if enumber =~ /^1(?!5)/
+    'tbi' + enumber[1..-1]
+  elsif enumber =~ /^15/
+    'tbiva0' + enumber[2..-1]
+  elsif enumber =~ /^2(?!5)/
+    'alz' + enumber[1..-1]
+  elsif enumber =~ /^25/
+    'wrp0' + enumber[2..-1]
+  elsif enumber =~ /^3/
+    'cpr' + enumber[1..-1]
+  elsif enumber =~ /^4/
+    'pc' + enumber[1..-1]
+  elsif enumber =~ /^5/
+    'awr' + enumber[1..-1]
+  elsif enumber =~ /^9/
+    'pil' + enumber[1..-1]
   else
-    enum
+    enumber
   end
 end
 
@@ -54,7 +54,7 @@ private
 # that the mysql module gives to you by default.
 def query_mysql(sql)
   begin
-    db = Mysql.new(MYSQLSERVER,MYSQLUSER,MYSQLPASSWD,MYSQLDB)
+    db = Mysql.connect(MYSQLSERVER,MYSQLUSER,MYSQLPASSWD,MYSQLDB)
     result = db.query(sql)
     results_array = Array.new
     result.each_hash { |h| results_array << h }
@@ -70,7 +70,7 @@ def query_mysql(sql)
 end
 
 def sql_find_participants_matching_rmr(rmr)
-  "SELECT tblprotocol.fkDBID, tblprotocol.ENUM, ProtocolName
+  "SELECT tblprotocol.fkDBID, tblprotocol.enumber, ProtocolName
   FROM tblscan_new 
   JOIN tblvisittable ON fkVisitID = pkVisitID 
   JOIN tblprotocol ON fkProtocolID = pkProtocolID 
@@ -78,10 +78,12 @@ def sql_find_participants_matching_rmr(rmr)
   WHERE tblscan_new.RMR = '#{rmr}'"
 end
 
+# Ensure columns are listed AS their rails attribute names so that the reuults
+# hash returned by the MySQL query can be used for Rails Model updates.
 def sql_find_enrollments_by_rmr(rmr)
   "SELECT
   e.enrolldate AS enroll_date,
-  e.ENUM AS enum,
+  e.enum AS enumber,
   e.Recruitsource AS recruitment_source,
   e.WithdrawalReason AS withdrawl_reason
   FROM tblscan_new s
@@ -111,7 +113,7 @@ end
 def sql_find_enrollments_for_participant(dbid)
   "SELECT
   e.enrolldate AS enroll_date,
-  e.ENUM AS enum,
+  e.enum AS enumber,
   e.Recruitsource AS recruitment_source,
   e.WithdrawalReason AS withdrawl_reason
   FROM tblprotocol e

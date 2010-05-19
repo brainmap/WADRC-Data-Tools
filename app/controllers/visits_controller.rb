@@ -95,7 +95,7 @@ class VisitsController < ApplicationController
    
     @image_datasets = @visit.image_datasets.paginate(:page => params[:page], :per_page => PER_PAGE)
     @participant = @visit.try(:enrollment).try(:participant) 
-    @enum = @visit.try(:enrollment).try(:enum)
+    @enumber = @visit.try(:enrollment).try(:enumber)
 
     respond_to do |format|
       format.html # show.html.erb
@@ -125,7 +125,7 @@ class VisitsController < ApplicationController
   # POST /visits.xml
   def create
     @visit = Visit.new(params[:visit])
-    @visit.enrollment = Enrollment.find_or_create_by_enum(params[:visit][:enrollment_attributes][:enum])
+    @visit.enrollment = Enrollment.find_or_create_by_enumber(params[:visit][:enrollment_attributes][:enumber])
 
     respond_to do |format|
       if @visit.save
@@ -143,7 +143,7 @@ class VisitsController < ApplicationController
   # PUT /visits/1.xml
   def update
     @visit = Visit.find(params[:id])
-    enrollment = Enrollment.find_or_create_by_enum(params[:visit][:enrollment_attributes][:enum])
+    enrollment = Enrollment.find_or_create_by_enumber(params[:visit][:enrollment_attributes][:enumber])
     visit_attributes = params[:visit]
     visit_attributes[:enrollment_id] = enrollment.id
     visit_attributes[:enrollment_attributes] = enrollment.attributes

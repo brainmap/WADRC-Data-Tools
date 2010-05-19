@@ -36,9 +36,9 @@ class ImageSearch < ActiveRecord::Base
       conditions << "timestamp < ?"
       qualifiers << "#{latest_timestamp}"
     end
-    unless enum.empty?
-      conditions << "enrollments.enum LIKE ?"
-      qualifiers << "%#{enum}%"
+    unless enumber.empty?
+      conditions << "enrollments.enumber LIKE ?"
+      qualifiers << "%#{enumber}%"
     end
     unless gender.nil?
       conditions << "participants.gender = ?"

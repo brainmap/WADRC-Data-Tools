@@ -22,7 +22,7 @@ class VisitMailer < ActionMailer::Base
     
     # Optional Body Params
     body_params['user'] = visit.created_by.login if visit.created_by
-    body_params['enrollment_enum'] = visit.enrollment.enum if visit.enrollment
+    body_params['enrollment_enumber'] = visit.enrollment.enumber if visit.enrollment
     
     # Set Body Params
     body(body_params)

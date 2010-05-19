@@ -53,7 +53,7 @@ class ImageDataset < ActiveRecord::Base
       :visit_date => visit.date,
       :scan_procedure => (visit.scan_procedure.codename rescue nil),
       :Scan_number => visit.scan_number,
-      :Enum => (visit.enrollment.enum rescue nil),
+      :enumber => (visit.enrollment.enumber rescue nil),
       :Initials => visit.initials,
       :RMR_Number => visit.rmr,
       :Assignee => (visit.user.login rescue nil),
@@ -107,6 +107,23 @@ class ImageDataset < ActiveRecord::Base
     self.thumbnail = tf
     raise StandardError, "Could not create thumbnail for #{File.join(path, scanned_file)}" unless File.exists?(png_path)
     return png_path
+  end
+  
+  def self.report
+    File.open('dump.csv', 'w') do |f| 
+      f.puts report_table(:all,
+        :except => [:timestamp, :created_at, :updated_at, :id, :rep_time, :glob, :thumbnail_file_name, :bold_reps, :thumbnail_file_size, :thumbnail_content_type, :thumbnail_updated_at, :slices_per_volume, "scanned_file", "visit_id"], 
+        :conditions => "series_description LIKE '%DTI%' AND series_description NOT LIKE '%GW3D%'", 
+        # :limit => 500,
+        :include => { 
+          :visit => { :methods => :age_at_visit, :only => [:scanner_source, :date], :include => {
+            :enrollment => {:only => [:enumber], :include => { 
+              :participant => { :methods => :genetic_status, :only => [:gender, :wrapnum, :ed_years], :conditions => "wrapnum IS NOT NULL OR wrapnum <> ''" } 
+            }}
+          }} 
+        }
+      ).to_csv
+    end
   end
   
   private

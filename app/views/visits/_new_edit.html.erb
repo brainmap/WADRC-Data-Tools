@@ -32,8 +32,8 @@
 
 	<p>
 		<% f.fields_for :enrollment do |e| %>
-			<%= e.label :enum %>
-			<%= e.text_field_with_auto_complete :enum, {},
+			<%= e.label :enumber %>
+			<%= e.text_field_with_auto_complete :enumber, {},
 				        { :method => :get, :url => enrollments_path(:format => :js), :param_name => 'search' } %>
 		<% end %>
 	</p>

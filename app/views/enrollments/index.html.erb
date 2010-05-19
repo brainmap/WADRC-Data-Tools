@@ -5,7 +5,7 @@
   <thead>
     <tr>
       <th>Enrollment date</th>
-      <th>Enum</th>
+      <th>enumber</th>
       <th>Recruitment source</th>
       <th></th>
     </tr>
@@ -17,7 +17,7 @@
     <% for enrollment in @enrollments %>
       <tr>
         <td><%=h enrollment.enroll_date %></td>
-        <td><%=h enrollment.enum %></td>
+        <td><%=h enrollment.enumber %></td>
         <td><%=h enrollment.recruitment_source %></td>
         <td>
           <%= link_to 'Show', enrollment %>

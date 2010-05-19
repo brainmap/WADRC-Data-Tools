@@ -3,7 +3,7 @@
 <div class="sticky">
 <%= key_val_table('enrollment_details', {
   :enrollment_date => @enrollment.enroll_date,
-  :enum => @enrollment.enum,
+  :enumber => @enrollment.enumber,
   :recruitment_source => @enrollment.recruitment_source,
   :study => @enrollment.recruitment_group.blank? ? '' : @enrollment.recruitment_group.study.name,
   :recruitment_group => @enrollment.recruitment_group.blank? ? '' : @enrollment.recruitment_group.name
@@ -28,7 +28,7 @@
   <% end %>
 </ul>
 
-<p><%= link_to 'go to participant', @enrollment.participant %></p>
+<p><%= link_to 'go to participant', @enrollment.participant if @enrollment.participant %></p>
 
 <div style="text-align:right">
 	<%= link_to 'edit', edit_enrollment_path(@enrollment) %> |

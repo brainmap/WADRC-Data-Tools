@@ -57,22 +57,22 @@ namespace :db do
       end
     end
     
-    namespace :enums do
+    namespace :enumbers do
       
       task(:convert_to_alpha => :environment) do
         Visit.all.each do |v|
-          puts "Converting #{v.enum} to #{convert_enum_to_alpha(v.enum)}"
-          v.enum = convert_enum_to_alpha(v.enum)
+          puts "Converting #{v.enumber} to #{convert_enumber_to_alpha(v.enumber)}"
+          v.enumber = convert_enumber_to_alpha(v.enumber)
           v.save
         end
       end
       
       task(:strip_trailing_underscores => :environment) do
         Visit.all.each do |v|
-          unless v.enum.nil?
-            if v.enum =~ /_.$/
-              puts "Converting  #{v.enum} to #{v.enum.split("_").first}"
-              v.enum = v.enum.split("_").first
+          unless v.enumber.nil?
+            if v.enumber =~ /_.$/
+              puts "Converting  #{v.enumber} to #{v.enumber.split("_").first}"
+              v.enumber = v.enumber.split("_").first
               v.save
             end
           end
@@ -81,10 +81,10 @@ namespace :db do
       
       task(:pull_from_path => :environment) do
         Visit.all.each do |v|
-          if v.enum.nil? or v.enum.empty?
+          if v.enumber.nil? or v.enumber.empty?
             unless v.path.nil? or v.path.empty?
-              puts "Setting enum for #{v.path} to #{File.basename(v.path).split("_").first}"
-              v.enum = File.basename(v.path).split("_").first
+              puts "Setting enumber for #{v.path} to #{File.basename(v.path).split("_").first}"
+              v.enumber = File.basename(v.path).split("_").first
               v.save
             end
           end

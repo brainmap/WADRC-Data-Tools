@@ -45,7 +45,7 @@
 <%= content_tag(:p, "No enrollments for this participant") if @participant.enrollments.blank? %>
 <p>
 	<% @participant.enrollments.each do |e| %>
-		<%= link_to e.enum, e %>
+		<%= link_to e.enumber, e %>
 	<% end %>
 </p>
 
@@ -55,6 +55,6 @@
 	<p>
 		<%= link_to v.date.to_s(:long), v %> 
 		for <%= v.scan_procedure.blank? ? "unknown protocol" : v.scan_procedure.codename %> 
-		with enum <%= link_to v.enrollment.enum, v.enrollment %>
+		with enumber <%= link_to v.enrollment.enumber, v.enrollment %>
 	</p>
 <% end -%>

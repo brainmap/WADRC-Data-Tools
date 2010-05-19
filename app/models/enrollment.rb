@@ -3,9 +3,9 @@ class Enrollment < ActiveRecord::Base
   belongs_to :recruitment_group
   belongs_to :participant
   
-  validates_uniqueness_of :enum, :allow_nil => true
+  validates_uniqueness_of :enumber, :allow_nil => true
   
-  validates_format_of :enum, :with => /.*\d{3,}\Z/, :message => "Enum must end with at least 3 digits to be valid."
+  validates_format_of :enumber, :with => /.*\d{3,}\Z/, :message => "must end with at least 3 digits to be valid."
   
   acts_as_reportable
   

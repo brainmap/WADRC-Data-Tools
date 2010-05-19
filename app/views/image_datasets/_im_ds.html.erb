@@ -15,7 +15,7 @@
     :Visit_date => im_ds.visit.date,
     :scan_procedure => im_ds.visit.scan_procedure.nil? ? nil : im_ds.visit.scan_procedure.codename,
     :Scan_number => im_ds.visit.scan_number,
-    :Enum => im_ds.visit.enrollment.nil? ? nil : im_ds.visit.enrollment.enum,
+    :enumber => im_ds.visit.enrollment.nil? ? nil : im_ds.visit.enrollment.enumber,
     :Initials => im_ds.visit.initials,
     :RMR_Number => im_ds.visit.rmr,
     :Assignee => im_ds.visit.user.nil? ? nil : im_ds.visit.user.login,

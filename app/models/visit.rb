@@ -44,13 +44,13 @@ class Visit < ActiveRecord::Base
         if 'rmr path'.include?(k)
           conditions << "#{k} LIKE ?"
           qualifiers << "%#{v}%"
-        elsif k == 'enum'
-          enum_conditions = []
-          v.each do |enum|
-            enum_conditions << 'enrollments.enum = ?' 
-            qualifiers << enum
+        elsif k == 'enumber'
+          enumber_conditions = []
+          v.each do |enumber|
+            enumber_conditions << 'enrollments.enumber = ?' 
+            qualifiers << enumber
           end
-          conditions << "(" + enum_conditions.join(" OR ") + ")"
+          conditions << "(" + enumber_conditions.join(" OR ") + ")"
         elsif k == 'scan_procedure'
           scan_procedure_conditions = []
           v.each do |codename|
@@ -105,6 +105,18 @@ class Visit < ActiveRecord::Base
 
     return visit
 
+  end
+  
+  def age_at_visit
+    unless enrollment.nil?
+      unless enrollment.participant.nil?
+        unless enrollment.participant.dob.nil?
+          dob = enrollment.participant.dob
+        end
+      end
+    end
+    
+    date.year - dob.year - ((date.month > dob.month || (date.month == dob.month && date.day >= dob.day)) ? 0 :1 ) unless dob.nil?
   end
 
 end

@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100427151145) do
+ActiveRecord::Schema.define(:version => 20100514142853) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -30,7 +30,7 @@ ActiveRecord::Schema.define(:version => 20100427151145) do
 
   create_table "enrollments", :force => true do |t|
     t.date     "enroll_date"
-    t.string   "enum"
+    t.string   "enumber"
     t.string   "recruitment_source"
     t.integer  "recruitment_group_id"
     t.integer  "participant_id"
