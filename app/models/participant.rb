@@ -17,13 +17,14 @@ class Participant < ActiveRecord::Base
     end
   end
   
-  def genetic_status
+  def genetic_status(format = :csv)
+    prefix = (format == :html) ? "&epsilon;4 " : "e4 "
     if apoe_e1 == 4 or apoe_e2 == 4
-      "&epsilon;4 +"
+      if format == :csv then "1" else "#{prefix}+" end
     elsif apoe_e1 == nil or apoe_e1 == 0 or apoe_e2 == nil or apoe_e2 == 0
       ""
     else
-      "&epsilon;4 –"
+      if format == :csv then "0" else "#{prefix}-" end
     end
   end
 end
