@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100514142853) do
+ActiveRecord::Schema.define(:version => 20100609173225) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -105,7 +105,7 @@ ActiveRecord::Schema.define(:version => 20100514142853) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "user_id"
-    t.string   "enum"
+    t.string   "enumber"
     t.integer  "gender"
     t.integer  "min_age"
     t.integer  "max_age"

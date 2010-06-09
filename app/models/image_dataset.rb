@@ -1,3 +1,9 @@
+begin
+  require 'metamri/raw_image_dataset_thumbnail'
+rescue LoadError => e
+  puts "Problem with Thumbnail Creation using Metamri. #{e}"
+end
+
 class ImageDataset < ActiveRecord::Base
   
   default_includes = [:image_dataset_quality_checks, :analysis_memberships, {:visit => {:enrollment => :participant}}]

@@ -36,7 +36,8 @@ end
 
 config.action_mailer.delivery_method = :smtp
 config.action_mailer.smtp_settings = {
-  :address        => 'pop.medicine.wisc.edu',
+  # :address        => 'pop.medicine.wisc.edu',
+  :address        => '128.104.208.42',
   :port           => 25,
   :authentication => :login,
   :user_name      => email_login,
