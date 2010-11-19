@@ -44,3 +44,7 @@ config.action_mailer.smtp_settings = {
   :password       => email_password,
   :tls            => true
 }
+
+# Tools for extracting imaging metadata
+# load '~/code/metamri/lib/metamri.rb'
+config.gem 'metamri'

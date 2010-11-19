@@ -2,7 +2,8 @@ class ImageDatasetQualityChecksController < ApplicationController
   # GET /image_dataset_quality_checks
   # GET /image_dataset_quality_checks.xml
   def index
-    @image_dataset_quality_checks = ImageDatasetQualityCheck.find(:all)
+    @image_dataset = ImageDataset.find(params[:image_dataset_id]) if params[:image_dataset_id]
+    @image_dataset_quality_checks = @image_dataset ? @image_dataset.image_dataset_quality_checks : ImageDatasetQualityCheck.find(:all)
 
     respond_to do |format|
       format.html # index.html.erb
@@ -17,7 +18,7 @@ class ImageDatasetQualityChecksController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.xml  { render :xml => @image_dataset_quality_check }
+      format.xml  { render :xml => @idqc }
     end
   end
 

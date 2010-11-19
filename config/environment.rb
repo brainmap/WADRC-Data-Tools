@@ -25,8 +25,9 @@ Rails::Initializer.run do |config|
   config.gem 'paperclip', :lib => 'paperclip'
   
   # Tools for extracting imaging metadata
+  # Loaded independently in development and production environments.
   # load '~/code/metamri/lib/metamri.rb'
-  config.gem 'metamri'
+  # config.gem 'metamri'
   
   # Tools for Reporting
   config.gem 'ruport'
