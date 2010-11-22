@@ -29,7 +29,7 @@
   <tbody>
     <% visits.each do |visit| %>
       <tr>
-        <td><%= visit.date.to_s(:datetime_military) %></td>
+        <td><%= link_to visit.date.to_s(:datetime_military), visit %></td>
         <td><%= visit.scan_procedure.nil? ? "None" : visit.scan_procedure.codename %></td>
         <td><%= visit.scan_number %></td>
         <td><%= link_to(visit.enrollment.enumber, visit.enrollment) unless visit.enrollment.nil? %></td>
