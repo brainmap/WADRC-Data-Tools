@@ -13,7 +13,7 @@ require File.join(File.dirname(__FILE__), 'boot')
 
 Rails::Initializer.run do |config|
   # Enable pagination
-  config.gem 'will_paginate'
+  config.gem 'will_paginate', :version => '2.3.12'
   
   # Enable smart searching
   config.gem 'searchlogic'
