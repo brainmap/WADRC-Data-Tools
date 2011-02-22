@@ -2,7 +2,7 @@ class Visit < ActiveRecord::Base
   default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
   
   validates_presence_of :date, :scan_procedure
-  validates_uniqueness_of :rmr, :case_sensitive => false
+  # validates_uniqueness_of :rmr, :case_sensitive => false
     
   belongs_to :scan_procedure
   has_many :image_datasets, :dependent => :destroy
