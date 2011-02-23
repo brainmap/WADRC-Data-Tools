@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100609173225) do
+ActiveRecord::Schema.define(:version => 20110223184530) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -94,6 +94,8 @@ ActiveRecord::Schema.define(:version => 20100609173225) do
     t.string   "thumbnail_content_type"
     t.integer  "thumbnail_file_size"
     t.datetime "thumbnail_updated_at"
+    t.string   "dicom_series_uid"
+    t.text     "dicom_taghash"
   end
 
   create_table "image_searches", :force => true do |t|
@@ -256,6 +258,7 @@ ActiveRecord::Schema.define(:version => 20100609173225) do
     t.string   "consent_form_type"
     t.string   "scanner_source"
     t.integer  "created_by_id"
+    t.string   "dicom_study_uid"
   end
 
 end

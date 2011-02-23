@@ -17,6 +17,9 @@ class ImageDataset < ActiveRecord::Base
   # has_many :analyses, :through => :analysis_memberships
   has_many :image_dataset_quality_checks, :dependent => :destroy
   has_one :log_file
+  # Allow the DICOM UID to be blank for PFile Datasets, otherwise enforce uniqueness
+  validates_uniqueness_of :dicom_series_uid, :case_sensitive => false, :unless => Proc.new {|dataset| dataset.dicom_series_uid.blank?}
+  
   
   has_attached_file :thumbnail, :styles => { :large => "900x900>", :medium => "300x300>", :thumb => "100x100" }
 
@@ -26,6 +29,8 @@ class ImageDataset < ActiveRecord::Base
   
   has_many :physiology_text_files
   accepts_nested_attributes_for :physiology_text_files, :allow_destroy => true
+  
+  serialize :dicom_taghash
   
   acts_as_reportable
 

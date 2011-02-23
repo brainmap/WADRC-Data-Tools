@@ -2,7 +2,8 @@ class Visit < ActiveRecord::Base
   default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
   
   validates_presence_of :date, :scan_procedure
-  # validates_uniqueness_of :rmr, :case_sensitive => false
+  # Allow the DICOM UID to be blank for visits without Scans
+  validates_uniqueness_of :dicom_study_uid, :case_sensitive => false, :unless => Proc.new {|visit| visit.dicom_study_uid.blank?}
     
   belongs_to :scan_procedure
   has_many :image_datasets, :dependent => :destroy
@@ -79,20 +80,30 @@ class Visit < ActiveRecord::Base
     
     sp = ScanProcedure.find_or_create_by_codename(v.scan_procedure_name)
     
-    visit = Visit.find_or_initialize_by_rmr(v.attributes_for_active_record)
+    visit = Visit.find_or_initialize_by_dicom_study_uid(v.attributes_for_active_record)
     visit.update_attributes(v.attributes_for_active_record) unless visit.new_record?
     visit.scan_procedure = sp
     
-    thumbnails = []
+    # For each dataset in the RawVisitDataDirectory...
     v.datasets.each do |dataset|
       begin
+        # Initialize Thumbnail (or nil)
         # Note: Using Metamri#RawImageDatasetThumbnail Directly
-        begin
-          thumbnails << File.open(RawImageDatasetThumbnail.new(dataset).thumbnail)
-          visit.image_datasets.build(dataset.attributes_for_active_record(:thumb => thumbnails.last))
+        begin 
+          thumb = File.open(RawImageDatasetThumbnail.new(dataset).thumbnail)
         rescue StandardError, ScriptError => e
           puts e
-          visit.image_datasets.build(dataset.attributes_for_active_record)  
+          thumb = nil
+        end          
+
+        # Test to see if this dataset already exists and grab it if so, otherwise build it fresh.
+        data = visit.image_datasets.select {|ds| ds.dicom_series_uid == dataset.dicom_series_uid }.first
+        attrs = dataset.attributes_for_active_record(:thumb => thumb)
+        
+        unless data.blank?
+          data.update_attributes(attrs)
+        else
+          visit.image_datasets.build(attrs)  
         end
       rescue Exception => e
         puts "Error building image_dataset. #{e}"
