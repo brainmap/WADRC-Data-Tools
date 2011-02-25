@@ -80,9 +80,14 @@ class Visit < ActiveRecord::Base
     
     sp = ScanProcedure.find_or_create_by_codename(v.scan_procedure_name)
     
-    visit = Visit.find_or_initialize_by_dicom_study_uid(v.attributes_for_active_record)
-    visit.update_attributes(v.attributes_for_active_record) unless visit.new_record?
-    visit.scan_procedure = sp
+    # We need to handle Old Studies involving GE I-Files, which don't have any true UID
+    visit_attrs = v.attributes_for_active_record.merge(:scan_procedure => sp)
+    if visit_attrs[:dicom_study_uid]
+      visit = Visit.find_or_initialize_by_dicom_study_uid(visit_attrs)
+    else
+      visit = Visit.find_or_initialize_by_rmr(visit_attrs)
+    end
+    visit.update_attributes(visit_attrs) unless visit.new_record?
     
     # For each dataset in the RawVisitDataDirectory...
     v.datasets.each do |dataset|
@@ -94,7 +99,7 @@ class Visit < ActiveRecord::Base
         rescue StandardError, ScriptError => e
           puts e
           thumb = nil
-        end          
+        end
 
         # Test to see if this dataset already exists and grab it if so, otherwise build it fresh.
         data = visit.image_datasets.select {|ds| ds.dicom_series_uid == dataset.dicom_series_uid }.first
@@ -119,15 +124,45 @@ class Visit < ActiveRecord::Base
   end
   
   def age_at_visit
+    return age_from_dicom_info[:age] unless age_from_dicom_info[:age].blank?
+
     unless enrollment.nil?
       unless enrollment.participant.nil?
         unless enrollment.participant.dob.nil?
-          dob = enrollment.participant.dob
+          participant_dob = enrollment.participant.dob
         end
       end
     end
     
-    date.year - dob.year - ((date.month > dob.month || (date.month == dob.month && date.day >= dob.day)) ? 0 :1 ) unless dob.nil?
+    dob = age_from_dicom_info[:dob] ||= participant_dob
+
+    unless dob.blank?
+      date.year - dob.year - ((date.month > dob.month || (date.month == dob.month && date.day >= dob.day)) ? 0 :1 ) unless dob.nil?
+    end
+  end
+  
+  def age_from_dicom_info
+    @age_info ||= {}
+    return @age_info unless @age_info.blank?
+    
+    image_datasets.each do |dataset|
+      if tags = dataset.dicom_taghash
+        @age_info[:age] = tags['0010,1010'][:value].blank? ? nil : tags['0010,1010'][:value].to_i
+        @age_info[:dob] = tags['0010,0030'][:value].blank? ? nil : DateTime.parse(tags['0010,0030'][:value])
+      end
+    end
+    return @age_info
+  end
+  
+  def find_first_dicom_study_uid
+    uid = ''
+    image_datasets.each do |dataset|
+      tags = dataset.dicom_taghash
+      unless tags.blank?
+        uid = tags['0020,000D'][:value] unless tags['0020,000D'][:value].blank?
+      end
+    end
+    return uid
   end
 
 end

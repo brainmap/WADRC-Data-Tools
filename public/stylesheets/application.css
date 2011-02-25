@@ -154,12 +154,11 @@ table.search_form th { text-align:right; font-weight:normal; }
 #visit_status_table th { font-weight:bold; font-size:smaller; color:#444; }
 #visit_status_table td { text-align:center; color:#444; }
 
-NEWSTUFF {}
+#dicom_taghash td { vertical-align: top; }
+.uid {color: #888; font-size: smaller;}
 
 
-
-
-
+/* NEWSTUFF {} */
 
 pre {
   background-color: #eee;

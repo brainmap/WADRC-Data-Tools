@@ -37,6 +37,12 @@
   <div id="analyses_list">
     <%= render :partial => 'analyses_list', :locals => { :dataset => @image_dataset } %>
   </div>
+
+	<h3>DICOM Header</h3>
+	<div id="dicom_taghash">
+		<%= render :partial => 'dicom_taghash', :locals => { :dataset => @image_dataset }%>
+	</div>
+		
   
   <!-- <h3>Physiology Files:</h3>
   <div id="physiology-files-list">

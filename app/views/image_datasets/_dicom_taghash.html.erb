@@ -1,0 +1,16 @@
+<% if dataset.dicom_taghash.blank? %>
+<p><%= "DICOM header not available." %></p>
+<% else %>
+	<table class="tabular">
+		<tr>
+			<th>Name</th> <th>Tag</th> <th>Value</th>
+		</tr>
+	<% dataset.dicom_taghash.sort_by{|k,v| k}.each do |tag,info| -%>
+		<tr>
+			<td><%= tag %></td>
+			<td><%= info[:name] %></td>
+			<td><strong><%= info[:value] %></strong></td>
+		</tr>
+	<% end %>
+	</table>
+<% end %>

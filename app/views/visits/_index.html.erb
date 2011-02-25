@@ -20,11 +20,11 @@
     </tr>
   </thead>
   
-  <tfoot><td colspan=21>
+  <tfoot><tr><td colspan=21>
 		<% if paginated %>
     	<%= @visit_search.nil? ? will_paginate(visits) : will_paginate(visits, :params => { :visit_search => @visit_search }) %>
 		<% end %>
-  </td></tfoot>
+  </td></tr></tfoot>
   
   <tbody>
     <% visits.each do |visit| %>

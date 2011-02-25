@@ -81,3 +81,4 @@
 
 <%= render(:partial => "visit_confirmation") %>
 
+<%= content_tag :p, "STUDY UID: %s" % @visit.dicom_study_uid, :class => "uid" if @visit.dicom_study_uid %>
