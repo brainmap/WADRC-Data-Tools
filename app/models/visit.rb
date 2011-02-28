@@ -92,12 +92,15 @@ class Visit < ActiveRecord::Base
     # For each dataset in the RawVisitDataDirectory...
     v.datasets.each do |dataset|
       begin
+        # Skip directories that are links.
+        next if File.symlink? dataset.directory
+        
         # Initialize Thumbnail (or nil)
         # Note: Using Metamri#RawImageDatasetThumbnail Directly
         begin 
           thumb = File.open(RawImageDatasetThumbnail.new(dataset).thumbnail)
         rescue StandardError, ScriptError => e
-          puts e
+          logger.debug e
           thumb = nil
         end
 
@@ -124,6 +127,7 @@ class Visit < ActiveRecord::Base
   end
   
   def age_at_visit
+    pp "age", age_from_dicom_info
     return age_from_dicom_info[:age] unless age_from_dicom_info[:age].blank?
 
     unless enrollment.nil?
@@ -148,7 +152,7 @@ class Visit < ActiveRecord::Base
     image_datasets.each do |dataset|
       if tags = dataset.dicom_taghash
         @age_info[:age] = tags['0010,1010'][:value].blank? ? nil : tags['0010,1010'][:value].to_i
-        @age_info[:dob] = tags['0010,0030'][:value].blank? ? nil : DateTime.parse(tags['0010,0030'][:value])
+        @age_info[:dob] = tags['0010,0030'][:value].blank? ? nil : begin DateTime.parse(tags['0010,0030'][:value]) rescue ArgumentError; nil end
       end
     end
     return @age_info

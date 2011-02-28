@@ -5,7 +5,7 @@ namespace :dicom do
     @updated = []
     @error = []
     ImageDataset.all.each do |dataset|
-    # dataset = ImageDataset.find_by_id 17122
+    # dataset = ImageDataset.find(4768)
       begin
         # Ensure that a sample DICOM image is available and unzipped.
         Pathname.new(dataset.path.to_s).first_dicom do |dcm|
@@ -15,9 +15,9 @@ namespace :dicom do
           # Initialize Thumbnail (or nil)
           # Note: Using Metamri#RawImageDatasetThumbnail Directly
           begin 
-            thumb = nil #File.open(RawImageDatasetThumbnail.new(meta_dataset).thumbnail)
+            thumb = File.open(RawImageDatasetThumbnail.new(meta_dataset).thumbnail)
           rescue StandardError, ScriptError => e
-            puts e
+            Rails.logger.debug e
             thumb = nil
           end
           dataset.update_attributes(meta_dataset.attributes_for_active_record(:thumb => thumb))
@@ -26,19 +26,22 @@ namespace :dicom do
             @updated << {:id => dataset.id, :path => dataset.path}
             print '.'
           else
-            @error << {:id => dataset.id, :path => dataset.path, :errors => dataset.errors}
+            conflict = ImageDataset.find_by_dicom_series_uid(meta_dataset.dicom_series_uid)
+            @error << {:id => dataset.id, :path => dataset.path, :errors => dataset.errors, :conflicts_with => conflict}
             print 'x'
           end
+          thumb.close if thumb
         end
         STDOUT.flush
       rescue StandardError => e
         @error << {:id => dataset.id, :path => dataset.path, :errors => e}
-        print 'x'
+        print '*'; STDOUT.flush
         # raise e
       end
-      
     end
+    
     puts; pp @updated, @error
+    puts "Updated %i datasets and had errors on %i datasets." % [@updated.size, @error.size]
   end
   
   desc "Refresh Visit DICOM Study UIDs."
@@ -46,7 +49,6 @@ namespace :dicom do
     @updated = []
     @error = []
     Visit.all.each do |visit|
-    #visit = Visit.find_by_path '/Data/vtrak1/raw/carlson.sharp.visit1/shp00034_1396_12102010'
       visit.dicom_study_uid = visit.find_first_dicom_study_uid
       if visit.save
         @updated << {:id => visit.id, :path => visit.path }
@@ -58,6 +60,23 @@ namespace :dicom do
       STDOUT.flush
     end
     puts; pp @updated, @error
+  end
+  
+  desc "Cleanup datasets that are not on the filesystem."
+  task(:cleanup_datasets => :environment) do
+    @expired_datasets = []
+    ImageDataset.all.each do |dataset|
+      unless dataset.valid_path?
+        @expired_datasets << dataset
+        print '*'
+      else
+        print '.'
+      end
+      STDOUT.flush
+    end
+    @expired_datasets.collect {|ds| ds.delete}
+    puts; puts "Found %i expired datasets." % @expired_datasets.size
+    # @expired_datasets.map {|ds| ds.delete}
   end
   
 end

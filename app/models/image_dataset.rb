@@ -137,6 +137,17 @@ class ImageDataset < ActiveRecord::Base
     end
   end
   
+  def valid_path?
+    File.exists?(path) and not symlink_in_path?
+  end
+  
+  def symlink_in_path?
+    Pathname.new(path).ascend do |trunk|
+      return true if File.symlink? trunk 
+    end
+    return false
+  end
+  
   private
   
   def validate 
@@ -147,6 +158,9 @@ class ImageDataset < ActiveRecord::Base
         errors.add_to_base('Dataset path and file must be unique.') 
       end
     end
+    
+    # Also check to make sure the path exists and is not a symlink.
+    errors.add :base, "Path must exist and not be a symlink" unless valid_path?
   end 
   
   
