@@ -36,7 +36,7 @@ class ImageDatasetsController < ApplicationController
     
     respond_to do |format|
       format.html # index.html.erb
-      format.xml  { render :xml => @image_datasets }
+      format.xml  { render :text => @image_datasets.to_xml(:except => [:dicom_taghash])}
     end
   end
 
