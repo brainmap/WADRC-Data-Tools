@@ -7,7 +7,8 @@ class VisitsController < ApplicationController
   # GET /visits
   # GET /visits.xml  
   def index
-    @visits = Visit.search(params[:search]).paginate(:page => params[:page], :per_page => PER_PAGE)
+    # @visits = Visit.search(params[:search]).paginate(:page => params[:page], :per_page => PER_PAGE)
+    @visits = Visit.all
     @collection_title = 'All visits'
     
     respond_to do |format|
@@ -93,7 +94,7 @@ class VisitsController < ApplicationController
     @older_visit = idx + 1 >= @visits.size ? nil : @visits[idx + 1]
     @newer_visit = idx - 1 < 0 ? nil : @visits[idx - 1]
    
-    @image_datasets = @visit.image_datasets.paginate(:page => params[:page], :per_page => PER_PAGE)
+    @image_datasets = @visit.image_datasets# .paginate(:page => params[:page], :per_page => PER_PAGE)
     @participant = @visit.try(:enrollment).try(:participant) 
     @enumber = @visit.try(:enrollment).try(:enumber)
 

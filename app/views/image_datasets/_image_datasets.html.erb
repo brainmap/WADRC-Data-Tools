@@ -2,11 +2,11 @@
   
 	<%# Set thumbnail display defualt  %>
   <% include_thumbnails = false if include_thumbnails.nil? %>
-	<caption><%= pagination_info image_datasets %></caption>
+	<caption><%#= pagination_info image_datasets %></caption>
   
   <thead>
     <tr>
-      <%= "<th>&nbsp;</th>"  if include_thumbnails %>
+      <%= "<th>&nbsp;</th>".html_safe  if include_thumbnails %>
 			<th>Directory</th>
       <th>Series description</th>
       <th>Imaging Details</th>
@@ -17,12 +17,12 @@
     </tr>
   </thead>
 
-  <tfoot><tr><td colspan=7><%= will_paginate image_datasets %></td></tr></tfoot>
+  <tfoot><tr><td colspan=7><%#= will_paginate image_datasets %></td></tr></tfoot>
 
   <tbody>
     <% image_datasets.each do |im_ds| %>
       <tr>
-        <%= "<td>#{image_tag im_ds.thumbnail.url(:thumb)}</td>"  if include_thumbnails %>
+        <%= "<td>#{image_tag im_ds.thumbnail.url(:thumb)}</td>".html_safe  if include_thumbnails %>
 				<td><%=h im_ds.path_basename %></td>
         <td><%= link_to im_ds.series_description, im_ds %></td>
         <td>

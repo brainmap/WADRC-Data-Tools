@@ -67,7 +67,7 @@
   </div>
 
   <% if logged_in? %>
-    <p style="float:right; text-align:right"><%= slide_toggler('new_comment_box', 'Add new comment', 'Done adding comments') %></p>
+    <p style="float:right; text-align:right"><%= slide_toggler('new_comment_box', 'Add new comment', 'Done adding comments').html_safe %></p>
     <div id="new_comment_box" class="new_comment_box" style="display:none">
       <%= render :partial => 'new_comment_box', :locals => { :image_dataset => @image_dataset, :image_comment => @image_comment, :current_user => current_user } %>
     </div>

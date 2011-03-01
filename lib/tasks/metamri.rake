@@ -4,8 +4,8 @@ namespace :dicom do
   task(:refresh_datasets => :environment) do
     @updated = []
     @error = []
+    recreate_thumbnails = true
     ImageDataset.all.each do |dataset|
-    # dataset = ImageDataset.find(4768)
       begin
         # Ensure that a sample DICOM image is available and unzipped.
         Pathname.new(dataset.path.to_s).first_dicom do |dcm|
@@ -14,23 +14,30 @@ namespace :dicom do
           meta_dataset = RawImageDataset.new(dataset.path, [raw_file])
           # Initialize Thumbnail (or nil)
           # Note: Using Metamri#RawImageDatasetThumbnail Directly
-          begin 
-            thumb = File.open(RawImageDatasetThumbnail.new(meta_dataset).thumbnail)
-          rescue StandardError, ScriptError => e
-            Rails.logger.debug e
-            thumb = nil
+          begin
+            begin
+              if recreate_thumbnails
+                thumb = File.open(RawImageDatasetThumbnail.new(meta_dataset).thumbnail)
+                attr_options = {:thumb => thumb}
+              end
+            rescue StandardError, ScriptError => e
+              Rails.logger.debug e
+            end
+            # Default options to a blank hash if not set above.
+            attr_options ||= {}
+            
+            if dataset.update_attributes(meta_dataset.attributes_for_active_record(attr_options))
+              @updated << {:id => dataset.id, :path => dataset.path}
+              print '.'
+            else
+              conflict = ImageDataset.find_by_dicom_series_uid(meta_dataset.dicom_series_uid)
+              @error << {:id => dataset.id, :path => dataset.path, :errors => dataset.errors, :conflicts_with => conflict}
+              print 'x'
+            end
+          ensure
+            # Be sure to close the thumbnail even if an error occured.
+            thumb.close if thumb.respond_to? :close
           end
-          dataset.update_attributes(meta_dataset.attributes_for_active_record(:thumb => thumb))
-          
-          if dataset.save
-            @updated << {:id => dataset.id, :path => dataset.path}
-            print '.'
-          else
-            conflict = ImageDataset.find_by_dicom_series_uid(meta_dataset.dicom_series_uid)
-            @error << {:id => dataset.id, :path => dataset.path, :errors => dataset.errors, :conflicts_with => conflict}
-            print 'x'
-          end
-          thumb.close if thumb
         end
         STDOUT.flush
       rescue StandardError => e

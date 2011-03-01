@@ -5,7 +5,7 @@
     <tr><th>Name</th><th>Comment</th><th></th></tr>
   </thead>
   <tbody>
-    <%= '<tr><td colspan=3>No comments added yet</td></tr>' if image_comments.empty? %>
+    <%= '<tr><td colspan=3>No comments added yet</td></tr>'.html_safe if image_comments.empty? %>
     <% image_comments.each do |cmnt| %>
       <tr>
         <td><%=h cmnt.user.login %></td>

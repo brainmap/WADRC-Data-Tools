@@ -1,6 +1,6 @@
 <table id='image_datasets_index_table' class="tabular">
   
-  <caption><%= pagination_info image_datasets %></caption>
+  <caption><%#= pagination_info image_datasets %></caption>
   
   <thead>
     <tr>
@@ -11,7 +11,7 @@
     </tr>
   </thead>
 
-  <tfoot><tr><td colspan=3><%= will_paginate image_datasets %></td></tr></tfoot>
+  <tfoot><tr><td colspan=3><%#= will_paginate image_datasets %></td></tr></tfoot>
 
   <tbody>
     <% image_datasets.each do |im_ds| %>

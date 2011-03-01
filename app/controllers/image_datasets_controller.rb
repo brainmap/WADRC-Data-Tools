@@ -23,7 +23,7 @@ class ImageDatasetsController < ApplicationController
   # GET /image_datasets.xml
   def index
     if params[:visit_id]
-      @image_datasets = ImageDataset.find_all_by_visit_id(params[:visit_id]).paginate(:page => params[:page], :per_page => PER_PAGE)
+      @image_datasets = ImageDataset.find_all_by_visit_id(params[:visit_id])# .paginate(:page => params[:page], :per_page => PER_PAGE)
       @visit = Visit.find(params[:visit_id])
       @total_count = @image_datasets.count
       @page_title = "All Image Datasets for Visit #{@visit.rmr}"
@@ -45,7 +45,7 @@ class ImageDatasetsController < ApplicationController
   def show
     @image_dataset = ImageDataset.find(params[:id])
     @visit = @image_dataset.visit
-    @image_datasets = @visit.image_datasets.paginate(:page => params[:page], :per_page => PER_PAGE)
+    @image_datasets = @visit.image_datasets# .paginate(:page => params[:page], :per_page => PER_PAGE)
     
     @image_comment = ImageComment.new
     @image_comments = @image_dataset.image_comments

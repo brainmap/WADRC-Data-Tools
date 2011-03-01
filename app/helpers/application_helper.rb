@@ -9,9 +9,9 @@ module ApplicationHelper
       table += "<tr><th>#{kstring}:</th><td>#{vstring}</td></tr>" unless v.blank?
     end
     table += '</table>'
-    return table
+    return table.html_safe
   end
-  
+
   def popup_note(prompt, content, options={})
     return nil if content.nil?
     styles = ""
@@ -24,17 +24,17 @@ module ApplicationHelper
     popup += "<a class=\"sticky_spawner\">#{prompt.to_s}</a>"
     popup += "<div class=\"hidden_sticky\" style=\"#{styles}\">#{content}</div>"
     popup += "</div>"
-    return popup
+    return popup.html_safe
   end
-  
+
   def footer(width)
-    "<td>&nbsp;</td>" * width
+    ("<td>&nbsp;</td>" * width).html_safe
   end
-  
+
   def clearing_br
-    '<br style="clear:both" >'
+    '<br style="clear:both" >'.html_safe
   end
-  
+
   def gender(field)
     if field == 1
       return "M"
@@ -44,21 +44,21 @@ module ApplicationHelper
       return "unknown"
     end
   end
-  
+
   def wrap_enrollment(field)
     field == -1 ? "wrap" : "nowrap"
   end
-  
+
   def genetic_status(a1, a2)
     if a1 == 4 or a2 == 4
-      "&epsilon;4 +"
+      "&epsilon;4 +".html_safe
     elsif a1 == nil or a1 == 0 or a2 == nil or a2 == 0
       ""
     else
-      "&epsilon;4 –"
+      "&epsilon;4 –".html_safe
     end
   end
-  
+
   def pagination_info(collection, options = {})
     entry_name = options[:entry_name] ||
       (collection.empty?? 'entry' : collection.first.class.name.underscore.sub('_', ' '))
@@ -77,7 +77,7 @@ module ApplicationHelper
       ]
     end
   end
-  
+
   def stringify_symbol(symbol)
     symbol.to_s.gsub('_',' ')
   end
@@ -85,10 +85,10 @@ module ApplicationHelper
   def slide_toggler(element_id, label = image_tag('comment_bubble.gif'), alt_label = label)
     link_to_function(label, nil, :id => "#{element_id}_toggler", 
         :onclick => "this.innerHTML = this.innerHTML == '#{label}' ? '#{alt_label}' : '#{label}';") do |page|
-      page.visual_effect :toggle_blind, element_id, :duration => 0.3
-    end
+          page.visual_effect :toggle_blind, element_id, :duration => 0.3
+        end
   end
-  
+
   def spawn(element_id, content)
     return nil if content.empty?
     link_to_function(image_tag("comment_bubble.gif"), nil, :id => 'spawner_icon') do |page|
@@ -96,6 +96,6 @@ module ApplicationHelper
       page.visual_effect :toggle_blind, element_id, :duration => 0.3
     end
   end
-  
-  
+
+
 end

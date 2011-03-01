@@ -1,36 +1,42 @@
 module VisitsHelper
   def show_bool(field)
-    if field == "yes"
+    html = case field
+    when "yes"
       "<td style='background-color: #bbffbb; min-width: 1.5em; max-width: 3em;'>yes</td>"
-    elsif field == "no"                      
+    when "no"
       "<td style='background-color: #ffbbbb; min-width: 1.5em; max-width: 3em;'>no</td>"
-    elsif field == "n/a"                     
+    when "n/a"
       "<td style='background-color: #cccccc; min-width: 1.5em; max-width: 3em;'>n/a</td>"
-    else
+    else 
       "<td>#{field}</td>"
     end
+    return html.html_safe
   end
 
 end
 
 def show_rad_review(field)
-  if field == "n/a"
+  html = case 
+  when "n/a"
     "<td style='background-color: #cccccc; min-width: 1.5em; max-width: 3em;'>n/a</td>"
-  elsif field == "no"                      
+  when "no"
     "<td style='background-color: #ffbbbb; min-width: 1.5em; max-width: 3em;'>no</td>"
-  elsif field == "yes"                     
+  when "yes"
     "<td style='background-color: #bbffbb; min-width: 1.5em; max-width: 3em;'>yes</td>"
   else
     "<td style='background-color: #eee; min-width: 1.5em; max-width: 3em;'>#{field}</td>"
   end
+  return html.html_safe
 end
 
 def show_which_dicom(field)
-  if field.blank?
+  html = case field
+  when :blank?
     "<td style='background-color: #eee; min-width: 1.5em; max-width: 1.5em;'>n/a</td>"
   else
     "<td style='background-color: #eee; min-width: 1.5em; max-width: 1.5em;'>#{field}</td>"
   end
+  return html.html_safe
 end
 
 # This produces a small form to POST the RMR number of a visit to the radiology
