@@ -21,7 +21,9 @@ class ImageDataset < ActiveRecord::Base
   validates_uniqueness_of :dicom_series_uid, :case_sensitive => false, :unless => Proc.new {|dataset| dataset.dicom_series_uid.blank?}
   
   
-  has_attached_file :thumbnail, :styles => { :large => "900x900>", :medium => "300x300>", :thumb => "100x100" }
+  has_attached_file :thumbnail, 
+    :styles => { :large => "900x900>", :medium => "300x300>", :thumb => "100x100" },
+    :default_url => "/images/missing-sag.gif"
 
   
   validates_presence_of :path, :scanned_file
