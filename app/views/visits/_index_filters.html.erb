@@ -3,10 +3,10 @@
   <p>
     Filters:
     <%= link_to "All", visits_path %>,
-    <%#= link_to "Incomplete", incomplete_visits_path %>,
-    <%#= link_to "Complete", complete_visits_path %>,
-    <%#= link_to "Recent imports", recently_imported_visits_path %>,
-    <%#= link_to "Search for visits", find_visits_path %>
+    <%= link_to "Incomplete", incomplete_visits_path %>,
+    <%= link_to "Complete", complete_visits_path %>,
+    <%= link_to "Recent imports", recently_imported_visits_path %>,
+		<%= link_to "Search for visits", find_visits_path %>
   </p>
   
   <%= form_tag '/visits/in_scan_procedure' do %>

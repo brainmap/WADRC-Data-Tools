@@ -1,27 +1,27 @@
 <%# paginated = true unless paginated == false %>
 <table class="tabular">
   
-  <caption><%= pluralize(@total_visits, 'visit') %><%#= paginated ? pagination_info(visits) : pluralize(visits.length, 'visit') %></caption>
+  <caption><%= pluralize(visits.count, 'visit') %><%#= paginated ? pagination_info(visits) : pluralize(visits.length, 'visit') %></caption>
   
   <thead>
     <tr>
-      <th><span>Date</span></th>
-      <th><span>Scan Procedure</span></th>
-      <th><span>Scan<br>Number</span></th>
-      <th><span>enumber</span></th>
-      <th><span>RMR</span></th>
-      <th><span class="vert">Directory Path</span></th>
-      <th><span class="vert">Transfer MRI</span></th>
-      <th><span class="vert">Transfer PET</span></th>
-      <th><span class="vert">Radiology Outcome</span></th>
-      <th><span class="vert">Compile Folder</span></th>
-      <th><span class="vert">Conference</span></th>
+      <th><span><%= sort_link @search, :date %></span></th>
+      <th><span><%#= sort_link @search, :scan_procedure %>Scan Procedure</span></th>
+      <th><span><%= sort_link @search, :scan_number %></span></th>
+      <th><span><%#= sort_link @search, :enrollments_number %>Enrollment</span></th>
+      <th><span><%= sort_link @search, :rmr %></span></th>
+      <th><span class="vert"><%= sort_link @search, :path, "Directory Path" %></span></th>
+      <th><span class="vert"><%= sort_link @search, :transfer_mri %></span></th>
+      <th><span class="vert"><%= sort_link @search, :transfer_pet %></span></th>
+      <th><span class="vert"><%= sort_link @search, :radiology_outcome %></span></th>
+      <th><span class="vert"><%= sort_link @search, :compile_folder %></span></th>
+      <th><span class="vert"><%= sort_link @search, :conference %></span></th>
       <th></th>
     </tr>
   </thead>
   
   <tfoot><tr><td colspan=21>
-		 <%= paginate @visits %> 
+		 <%= paginate visits %> 
 		<%# if paginated %>
     	<%#= @visit_search.nil? ? will_paginate(visits) : will_paginate(visits, :params => { :visit_search => @visit_search }) %>
 		<%# end %>

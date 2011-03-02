@@ -1,5 +1,13 @@
 <h1>Search for Visits</h1>
 
+<%= form_for @search do |f| %>
+	<p>
+    <%= f.label :rmr_contains, "RMR:" %>
+    <%= f.text_field :rmr_contains %>
+  </p>
+	<p class="button"><%= f.submit "Find Visits" %></p>
+<% end %>
+
 <%= form_tag("/visits/found") do %>
   <table class="search_form">
     <tr>
@@ -88,6 +96,6 @@
 
   <br style="clear:both" \>
 
-  <%= submit_tag("Find Visits") %>
+  <%#= submit_tag("Find Visits") %>
 
 <% end %>

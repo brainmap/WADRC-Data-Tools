@@ -1,7 +1,7 @@
 <h1>Listing enrollments</h1>
 
 <table class="tabular">
-  <caption><%= pagination_info @enrollments %></caption>
+  <caption><%= pluralize(@enrollments.size, 'enrollment') %></caption>
   <thead>
     <tr>
       <th>Enrollment date</th>
@@ -11,7 +11,7 @@
     </tr>
   </thead>
   
-  <tfoot><td colspan=4><%= will_paginate @enrollments %></td></tfoot>
+  <tfoot><td colspan=4><%= paginate @enrollments %></td></tfoot>
 
   <tbody>
     <% for enrollment in @enrollments %>

@@ -1,5 +1,5 @@
 class Visit < ActiveRecord::Base
-  default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
+  # default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
   
   validates_presence_of :date, :scan_procedure
   # Allow the DICOM UID to be blank for visits without Scans
@@ -16,9 +16,9 @@ class Visit < ActiveRecord::Base
   
   accepts_nested_attributes_for :enrollment
   
-  scope :complete, :conditions => { :compile_folder => 'yes' }
-  scope :incomplete, :conditions => { :compile_folder => 'no' }
-  scope :recently_imported, :conditions => ["visits.updated_at > ?", DateTime.now - 1.week]
+  scope :complete, where(:compile_folder => "yes")
+  scope :incomplete, where(:compile_folder => "no")
+  scope :recently_imported, where(:created_at.gt => 1.week.ago)
   scope :assigned_to, lambda { |user_id|
     { :conditions => { :user_id => user_id } }
   }

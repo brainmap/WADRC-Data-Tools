@@ -5,8 +5,8 @@ class VisitsController < ApplicationController
   # GET /visits.xml  
   def index
     # @visits = Visit.search(params[:search]).paginate(:page => params[:page], :per_page => PER_PAGE)
-    @visits = Visit.page(params[:page])
-    @total_visits = Visit.count
+    @search = Visit.search(params[:search])
+    @visits = @search.relation.page(params[:page])
     @collection_title = 'All visits'
     
     respond_to do |format|
@@ -17,7 +17,8 @@ class VisitsController < ApplicationController
 
   # GET /visits/:scope
   def index_by_scope
-    @visits = Visit.send(params[:scope]).paginate(:page => params[:page], :per_page => PER_PAGE)
+    @search = Visit.send(params[:scope]).search(params[:search])
+    @visits = @search.relation.page(params[:page])
     @collection_title = "All #{params[:scope].to_s.gsub('_',' ')} visits"
     render :template => "visits/index"
   end
@@ -62,7 +63,7 @@ class VisitsController < ApplicationController
   
   # GET /visits/found
   def found
-    @visits = Visit.find_by_search_params(params['visit_search']).paginate(:page => params[:page], :per_page => PER_PAGE)
+    @visits = Visit.find_by_search_params(params['visit_search']).page(params[:page])
     @collection_title = "Found visits"
     @visit_search = params['visit_search']
     
@@ -81,6 +82,7 @@ class VisitsController < ApplicationController
   
   # GET /visits/find
   def find
+    @search = Visit.search(params[:search])
   end
 
   # GET /visits/1

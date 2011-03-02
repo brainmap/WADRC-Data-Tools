@@ -5,15 +5,18 @@ gem 'rails', '~>3.0.4'
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
+gem 'metamri', :path => '~/code/metamri'
+
 gem 'builder', '~>2.1.2'
 gem 'sqlite3', '~>1.3.3'
 gem 'RedCloth', '4.0'
 gem 'paperclip', '~>2.3.8'
-gem 'metamri', '~>0.2.3'
 gem 'ruport', '~>1.6.3'
 gem 'acts_as_reportable'
 gem 'kaminari'
-
+gem 'meta_where'
+gem 'meta_search'
+gem 'rmagick'
 
 # Use unicorn as the web server
 # gem 'unicorn'
@@ -42,4 +45,5 @@ group :development, :test do
   gem 'webrat'
   gem 'autotest-rails'
   gem 'factory_girl_rails', '~>1.0.1'
+  gem 'chronic'
 end

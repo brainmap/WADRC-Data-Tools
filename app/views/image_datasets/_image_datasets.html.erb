@@ -10,7 +10,6 @@
 			<th>Directory</th>
       <th>Series description</th>
       <th>Imaging Details</th>
-      <th>Timestamp</th>
       <th>Quality Check</th>
       <th>Analysis Exclusions</th>
       <!-- <th></th> -->
@@ -34,8 +33,6 @@
         <td>
           <%#= popup_note("peek", key_val_table("participant_details", im_ds.participant_details_hash)) %>
         </td> -->
-        
-        <td><%=h im_ds.timestamp.to_s(:ymdhms) %></td>
         <td><%= qc_popup_or_link_to_new(im_ds) %></td>
         <td><%=h im_ds.excluded_by_any_analyses? ? im_ds.analysis_memberships.out.size.to_s : "None" %></td>
         <!-- <td>

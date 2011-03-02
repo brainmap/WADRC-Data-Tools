@@ -1,7 +1,5 @@
 class EnrollmentsController < ApplicationController
   
-  PER_PAGE = 50
-  
   before_filter :set_current_tab
   
   def set_current_tab
@@ -11,7 +9,14 @@ class EnrollmentsController < ApplicationController
   # GET /enrollments
   # GET /enrollments.xml
   def index
-    @enrollments = Enrollment.enumber_like(params[:search]).sort_by(&:enumber).paginate(:page => params[:page], :per_page => PER_PAGE)
+    # Hack for Autocomplete Enrollment Number AJAX Search
+    if params[:search].kind_of? String
+      search_hash = {:enumber_contains => params[:search]}
+    else
+      search_hash = params[:search]
+    end
+    @search = Enrollment.search(search_hash).relation.page(params[:page])
+    @enrollments = @search
     
     respond_to do |format|
       format.html # index.html.erb

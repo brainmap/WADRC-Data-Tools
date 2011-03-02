@@ -3,11 +3,11 @@ WADRCDataTools::Application.routes.draw do
   resources :neuropsych_assessments
   resources :neuropsych_sessions
   
-  match '/visits/found(.:format)', :controller => 'visits', :action => 'found', :as => :found_visits
-  match 'visits/find', :controller => 'visits', :action => 'find', :as => :find_visits
-  match '/visits/complete', :controller => 'visits', :action => 'index_by_scope', :scope => 'complete', :as => :complete
-  match '/visits/incomplete', :controller => 'visits', :action => 'index_by_scope', :scope => 'incomplete', :as => :incomplete
-  match '/visits/recently_imported', :controller => 'visits', :action => 'index_by_scope', :scope => 'recently_imported', :as => :recently_imported
+  match '/visits/found(.:format)', :to => 'visits#found', :as => :found_visits
+  match '/visits/find', :to => 'visits#find', :as => :find_visits
+  match '/visits/complete', :to => 'visits#index_by_scope', :scope => 'complete', :as => :complete_visits
+  match '/visits/incomplete', :to => 'visits#index_by_scope', :scope => 'incomplete', :as => :incomplete_visits
+  match '/visits/recently_imported', :to => 'visits#index_by_scope', :scope => 'recently_imported', :as => :recently_imported_visits
   match '/visits/assigned_to/:user_login', :controller => 'visits', :action => 'index_by_user_id', :as => :assigned_to
   match '/visits/in_scan_procedure/:scan_procedure_id', :controller => 'visits', :action => 'index_by_scan_procedure', :as => :in_scan_procedure
   
