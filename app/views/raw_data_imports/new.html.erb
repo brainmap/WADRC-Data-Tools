@@ -2,7 +2,7 @@
 	<div id = "visit-import-body">
 		<h3>Import a new raw data directory:</h3>
 
-		<% form_tag :action => "create" do %>
+		<%= form_tag :action => "create" do %>
 		  <p>
 		    <%= label :raw_data_import, :directory, "Directory" %><br />
 		    <%= text_field :raw_data_import, :directory %>

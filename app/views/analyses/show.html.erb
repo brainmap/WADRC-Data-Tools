@@ -1,6 +1,6 @@
 <h1><%= "Analysis \"#{@analysis.description}\" <br /> created by #{@analysis.user.login} on #{@analysis.created_at.to_date.inspect}" %></h1>
 
-<% form_for @analysis do |f| %>
+<%= form_for @analysis do |f| %>
   <%= submit_tag "Make an analysis directory", :disabled => true %>
 <% end %>
 

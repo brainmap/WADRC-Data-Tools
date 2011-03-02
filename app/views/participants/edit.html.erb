@@ -1,6 +1,6 @@
 <h1>Editing participant <%= @participant.id %></h1>
 
-<% form_for(@participant) do |f| %>
+<%= form_for(@participant) do |f| %>
   <%= f.error_messages %>
   <p>
     <%= f.label :date_of_birth %><br />

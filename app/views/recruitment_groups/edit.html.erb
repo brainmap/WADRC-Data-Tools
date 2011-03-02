@@ -3,7 +3,7 @@
   <p>part of <%= @recruitment_group.study.name %> study</p>
 </div>
 
-<% form_for(@recruitment_group) do |f| %>
+<%= form_for(@recruitment_group) do |f| %>
   <%= f.error_messages %>
 
   <p>

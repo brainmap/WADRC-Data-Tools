@@ -16,15 +16,17 @@ class Visit < ActiveRecord::Base
   
   accepts_nested_attributes_for :enrollment
   
-  named_scope :complete, :conditions => { :compile_folder => 'yes' }
-  named_scope :incomplete, :conditions => { :compile_folder => 'no' }
-  named_scope :recently_imported, :conditions => ["visits.updated_at > ?", DateTime.now - 1.week]
-  named_scope :assigned_to, lambda { |user_id|
+  scope :complete, :conditions => { :compile_folder => 'yes' }
+  scope :incomplete, :conditions => { :compile_folder => 'no' }
+  scope :recently_imported, :conditions => ["visits.updated_at > ?", DateTime.now - 1.week]
+  scope :assigned_to, lambda { |user_id|
     { :conditions => { :user_id => user_id } }
   }
-  named_scope :in_scan_procedure, lambda { |protocol_id|
+  scope :in_scan_procedure, lambda { |protocol_id|
     { :conditions => { :scan_procedure_id => protocol_id } }
   }  
+  
+  paginates_per 5
   
   acts_as_reportable
 

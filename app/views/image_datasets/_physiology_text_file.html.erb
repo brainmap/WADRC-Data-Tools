@@ -1,5 +1,5 @@
 <div class="phys_file">
-  <% fields_for "image_dataset[physiology_text_files_attributes][]", physiology_text_file do |physiology_text_file_fields| %>
+  <%= fields_for "image_dataset[physiology_text_files_attributes][]", physiology_text_file do |physiology_text_file_fields| %>
     <p>
       <%= physiology_text_file_fields.label :filepath %>
     	<%= physiology_text_file_fields.text_field :filepath %>

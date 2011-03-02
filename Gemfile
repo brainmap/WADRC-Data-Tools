@@ -12,6 +12,7 @@ gem 'paperclip', '~>2.3.8'
 gem 'metamri', '~>0.2.3'
 gem 'ruport', '~>1.6.3'
 gem 'acts_as_reportable'
+gem 'kaminari'
 
 
 # Use unicorn as the web server
@@ -39,6 +40,6 @@ group :development, :test do
   gem 'cucumber'
   gem 'cucumber-rails'
   gem 'webrat'
-  gem 'autotest'
+  gem 'autotest-rails'
   gem 'factory_girl_rails', '~>1.0.1'
 end

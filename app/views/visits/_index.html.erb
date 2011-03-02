@@ -1,7 +1,7 @@
 <%# paginated = true unless paginated == false %>
 <table class="tabular">
   
-  <caption><%#= paginated ? pagination_info(visits) : pluralize(visits.length, 'visit') %></caption>
+  <caption><%= pluralize(@total_visits, 'visit') %><%#= paginated ? pagination_info(visits) : pluralize(visits.length, 'visit') %></caption>
   
   <thead>
     <tr>
@@ -21,6 +21,7 @@
   </thead>
   
   <tfoot><tr><td colspan=21>
+		 <%= paginate @visits %> 
 		<%# if paginated %>
     	<%#= @visit_search.nil? ? will_paginate(visits) : will_paginate(visits, :params => { :visit_search => @visit_search }) %>
 		<%# end %>

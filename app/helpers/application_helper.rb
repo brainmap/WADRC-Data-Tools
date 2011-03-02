@@ -59,24 +59,24 @@ module ApplicationHelper
     end
   end
 
-  def pagination_info(collection, options = {})
-    entry_name = options[:entry_name] ||
-      (collection.empty?? 'entry' : collection.first.class.name.underscore.sub('_', ' '))
-
-    if collection.total_pages < 2
-      case collection.size
-      when 0; "No #{entry_name.pluralize} found"
-      when 1; "<b>1</b> #{entry_name.capitalize}"
-      else;   "<b>#{collection.size}</b> #{entry_name.capitalize.pluralize}"
-      end
-    else
-      %{#{entry_name.capitalize.pluralize} <b>%d&nbsp;-&nbsp;%d</b> of <b>%d</b>} % [
-        collection.offset + 1,
-        collection.offset + collection.length,
-        collection.total_entries
-      ]
-    end
-  end
+  # def pagination_info(collection, options = {})
+  #   entry_name = options[:entry_name] ||
+  #     (collection.empty?? 'entry' : collection.first.class.name.underscore.sub('_', ' '))
+  # 
+  #   if collection.total_pages < 2
+  #     case collection.size
+  #     when 0; "No #{entry_name.pluralize} found"
+  #     when 1; "<b>1</b> #{entry_name.capitalize}"
+  #     else;   "<b>#{collection.size}</b> #{entry_name.capitalize.pluralize}"
+  #     end
+  #   else
+  #     %{#{entry_name.capitalize.pluralize} <b>%d&nbsp;-&nbsp;%d</b> of <b>%d</b>} % [
+  #       collection.offset + 1,
+  #       collection.offset + collection.length,
+  #       collection.total_entries
+  #     ]
+  #   end
+  # end
 
   def stringify_symbol(symbol)
     symbol.to_s.gsub('_',' ')

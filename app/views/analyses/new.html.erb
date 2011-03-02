@@ -1,6 +1,6 @@
 <h1 style="display:inline">New Analysis: </h1>  <%= @analysis.timestamp %>
 
-<% form_for(@analysis) do |f| %>
+<%= form_for(@analysis) do |f| %>
   <%= f.error_messages %>
   
   <div id="analyzer_bio" class="floating_left_column">

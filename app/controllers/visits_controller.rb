@@ -1,14 +1,12 @@
 class VisitsController < ApplicationController
-  
-  PER_PAGE = 50
-  
   before_filter :set_current_tab
     
   # GET /visits
   # GET /visits.xml  
   def index
     # @visits = Visit.search(params[:search]).paginate(:page => params[:page], :per_page => PER_PAGE)
-    @visits = Visit.all
+    @visits = Visit.page(params[:page])
+    @total_visits = Visit.count
     @collection_title = 'All visits'
     
     respond_to do |format|

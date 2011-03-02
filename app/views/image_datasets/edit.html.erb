@@ -7,7 +7,7 @@
 	<%=h @image_dataset.timestamp %>
 </p>
 
-<% form_for(@image_dataset, :multipart => true) do |f| %>
+<%= form_for(@image_dataset, :multipart => true) do |f| %>
   <%= f.error_messages %>
 
   <!-- <p>
@@ -27,12 +27,12 @@
 	<p>Physiology Text Files</p>
   <div id="phys_files_list">
 		<%#= render :partial => 'physiology_text_file', :collection => @image_dataset.physiology_text_files, :locals => {:form => f} %>
-		<% f.fields_for(:physiology_text_files) do |physiology_text_file_fields| %>
+		<%= f.fields_for(:physiology_text_files) do |physiology_text_file_fields| %>
 			<%= render :partial => 'physiology_text_file_fields', :object => physiology_text_file_fields %>
 	  <% end %>
   </div>
   <%#= add_phys_link "Add phys file" %>
-  <% f.fields_for(:physiology_text_files, @image_dataset.physiology_text_files.build) do |new_physiology_text_file_fields| %>
+  <%= f.fields_for(:physiology_text_files, @image_dataset.physiology_text_files.build) do |new_physiology_text_file_fields| %>
  		<%= link_to_function "Add phys file" do |page|
 			page.insert_html :bottom, :phys_files_list, :partial => 'physiology_text_file_fields', :object => new_physiology_text_file_fields 
   	end %>

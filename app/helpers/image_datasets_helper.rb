@@ -35,7 +35,7 @@ module ImageDatasetsHelper
       output << list.last(10).join(" ")
     end
     
-    return output
+    return output.html_safe
   end
 
 end

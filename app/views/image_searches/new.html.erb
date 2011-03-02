@@ -4,7 +4,7 @@
 </div>
 
 <h3>Criteria:</h3>
-<% form_for @image_search do |f| %>
+<%= form_for @image_search do |f| %>
   <table class="search_form">
     <th><%= f.label :scan_procedures %></th>
     <td><%= collection_select(:scan_procedure, :ids, ScanProcedure.find(:all, :order => 'codename ASC'), :id, :codename, {}, {:multiple =>  true}) %></td>

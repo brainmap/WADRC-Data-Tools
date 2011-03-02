@@ -4,7 +4,7 @@ class Analysis < ActiveRecord::Base
   belongs_to :user
   belongs_to :image_search
   
-  named_scope :created_by, lambda { |user_id|
+  scope :created_by, lambda { |user_id|
     { :conditions => { :user_id => user_id } }
   }
 

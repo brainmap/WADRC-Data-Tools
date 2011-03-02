@@ -35,7 +35,7 @@
 <div class="two_col_right">
   <h3>Create a new analysis from this search</h3>
   
-  <% form_for @analysis do |f| -%>
+  <%= form_for @analysis do |f| -%>
     <p><%= f.label :description, "Enter a description of your analysis:" %></p>
     <p>
     <%= f.text_field :description %>
@@ -43,7 +43,7 @@
     <%= f.hidden_field :user_id, :value => @image_search.user_id %>
     
     <% @analysis.analysis_memberships.each_with_index do |am,i| %>
-      <% fields_for "analysis[analysis_memberships_attributes][]", am do |amform| %>
+      <%= fields_for "analysis[analysis_memberships_attributes][]", am do |amform| %>
         <%= amform.hidden_field :image_dataset_id, :value => @all_image_matches[i].id %>
       <% end -%>
     <% end -%>

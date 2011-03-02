@@ -6,7 +6,7 @@
   <tt><%= @visit.path.nil? ? 'directory unknown' : @visit.path %></tt>
 </p>
 
-<% form_for(@visit) do |f| %>
+<%= form_for(@visit) do |f| %>
   <%= f.error_messages %>
   <div class="three_col_left">
     <p>
@@ -31,7 +31,7 @@
     </p>
 
 	<p>
-		<% f.fields_for :enrollment do |e| %>
+		<%= f.fields_for :enrollment do |e| %>
 			<%= e.label :enumber %>
 			<%= e.text_field_with_auto_complete :enumber, {},
 				        { :method => :get, :url => enrollments_path(:format => :js), :param_name => 'search' } %>

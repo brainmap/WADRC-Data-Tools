@@ -60,7 +60,7 @@
 
   <h3>Notes:</h3>
   <div id="notes" class="sticky">
-    <%= RedCloth.new(@visit.notes.blank? ? "No notes entered for this visit" : @visit.notes).to_html %>
+    <%= RedCloth.new(@visit.notes.blank? ? "No notes entered for this visit" : @visit.notes).to_html.html_safe %>
   </div>
 
 </div>
