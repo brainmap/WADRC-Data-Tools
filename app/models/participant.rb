@@ -1,6 +1,8 @@
 class Participant < ActiveRecord::Base
   has_many :enrollments
   has_many :visits, :through => :enrollments
+  
+  validates_uniqueness_of :access_id, :allow_nil => true
   acts_as_reportable
   
   def wrapenrolled?

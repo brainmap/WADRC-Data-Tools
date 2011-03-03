@@ -11,7 +11,8 @@ class ParticipantsController < ApplicationController
   # GET /participants
   # GET /participants.xml
   def index
-    @participants = Participant.all.paginate(:page => params[:page], :per_page => PER_PAGE)
+    @search = Participant.search(params[:search])
+    @participants = @search.relation.page(params[:page])
 
     respond_to do |format|
       format.html # index.html.erb

@@ -7,3 +7,21 @@ end
 Factory.define :scan_procedure do |f|
   f.sequence(:codename) { |n| "johnson.procedure#{n}"}
 end
+
+Factory.define :user do |f|
+  f.sequence(:login) { |n| "foo#{n}" }
+  f.password "foobar"
+  f.password_confirmation { |u| u.password }
+  f.sequence(:email) { |n| "foo#{n}@example.com" }
+end
+
+Factory.define :enrollment do |f|
+  f.sequence(:enumber) { |n| "enumber00#{n}" }
+  f.enroll_date Date.today
+end
+
+Factory.define :participant do |f|
+  f.sequence(:access_id) { |n| "#{n}" }
+  f.wrapnum
+  f.gender
+end

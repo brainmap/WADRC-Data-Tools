@@ -1,5 +1,5 @@
 <table id="participants_index_table" class="tabular">
-  <caption><%= pagination_info @participants %></caption>
+  <!-- <caption><%= pluralize @participants.count, 'participants' %></caption> -->
   
   <thead>
     <tr>
@@ -13,7 +13,7 @@
     </tr>
   </thead>
   
-  <tfoot><td colspan=7><%= will_paginate @enrollments %></td></tfoot>
+  <tfoot><td colspan=7><%= paginate @participants %></td></tfoot>
 
   <tbody>
     <% for p in @participants %>

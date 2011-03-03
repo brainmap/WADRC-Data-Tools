@@ -46,4 +46,5 @@ group :development, :test do
   gem 'autotest-rails'
   gem 'factory_girl_rails', '~>1.0.1'
   gem 'chronic'
+  gem 'launchy'
 end

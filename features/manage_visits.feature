@@ -1,4 +1,3 @@
-
 Feature: View And Edit Participant Visits
   In order to lookup participant visits
   As a guest to the website
@@ -53,14 +52,18 @@ Feature: View And Edit Participant Visits
     Then I should see "rmr01"
     And I should see "1 visit"
     
-
-
+  Scenario Outline: Sort Visits
+    Given I am not logged in
+    When I go to the homepage
+    And I follow "<sort_by>"
+    And I should see "<top>" within the 1st row
+    And I should see "<bottom>" within the 3rd row
+    When I follow "<sort_by>"
+    Then I should see "<bottom>" within the 1st row
+    And I should see "<top>" within the 3rd row
     
-    
-    
-    # And I select "Incomplete" from "scan_procedure_id"
-    # And I press "commit"
-    # Then I should see "All visits"
-    # And I should see "rmr01"
-
+    Examples:
+		 | sort_by  | top         | bottom      |
+		 | RMR      | rmr01       | rmr03       |
+		 | Date     | 2009-01-01  | 2011-03-02  |
   
