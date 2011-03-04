@@ -28,7 +28,7 @@ class RawDataImportsController < ApplicationController
           begin
             VisitMailer.deliver_visit_confirmation(@visit)
             flash[:notice] = flash[:notice].to_s + "; Email was succesfully sent."
-          rescue LoadError => load_error
+          rescue Errno::ECONNREFUSED, LoadError => load_error
             logger.info load_error
             flash[:error] = "Sorry, your email was not delivered: " + load_error.to_s
           rescue Timeout::Error => timeout_error

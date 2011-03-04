@@ -1,5 +1,6 @@
 class Visit < ActiveRecord::Base
   # default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
+  default_scope :order => 'date DESC'
   
   validates_presence_of :date, :scan_procedure
   # Allow the DICOM UID to be blank for visits without Scans
@@ -26,7 +27,7 @@ class Visit < ActiveRecord::Base
     { :conditions => { :scan_procedure_id => protocol_id } }
   }  
   
-  paginates_per 5
+  paginates_per 50
   
   acts_as_reportable
 
@@ -129,7 +130,6 @@ class Visit < ActiveRecord::Base
   end
   
   def age_at_visit
-    pp "age", age_from_dicom_info
     return age_from_dicom_info[:age] unless age_from_dicom_info[:age].blank?
 
     unless enrollment.nil?

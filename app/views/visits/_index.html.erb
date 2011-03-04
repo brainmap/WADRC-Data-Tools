@@ -6,9 +6,9 @@
   <thead>
     <tr>
       <th><span><%= sort_link @search, :date %></span></th>
-      <th><span><%#= sort_link @search, :scan_procedure %>Scan Procedure</span></th>
+      <th><span><%= sort_link @search, :scan_procedure_codename, "Scan Procdedure" %></span></th>
       <th><span><%= sort_link @search, :scan_number %></span></th>
-      <th><span><%#= sort_link @search, :enrollments_number %>Enrollment</span></th>
+      <th><span><%= sort_link @search, :enrollment_enumber, "Enroll Number" %></span></th>
       <th><span><%= sort_link @search, :rmr %></span></th>
       <th><span class="vert"><%= sort_link @search, :path, "Directory Path" %></span></th>
       <th><span class="vert"><%= sort_link @search, :transfer_mri %></span></th>

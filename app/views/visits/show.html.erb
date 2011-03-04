@@ -1,12 +1,12 @@
 <span style="float:right"><%= link_to 'Edit visit', edit_visit_path(@visit) %></span>
 
 <div id="visit_heading">
-  <%=	link_to "&larr; Older", @older_visit if @older_visit %>
+  <%=	link_to "&larr; Older".html_safe, @older_visit if @older_visit %>
   &nbsp;
   <h1><%= @enumber.nil? ? @visit.rmr : @enumber %></h1>
   <p class="date"><%= @visit.date.to_s(:long) %></p>
   &nbsp;
-  <%=	link_to "Newer &rarr;", @newer_visit if @newer_visit %>
+  <%=	link_to "Newer &rarr;".html_safe, @newer_visit if @newer_visit %>
   <br />
   <p><%= @visit.path %></p>
 </div>

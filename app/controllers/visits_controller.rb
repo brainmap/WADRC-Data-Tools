@@ -5,7 +5,12 @@ class VisitsController < ApplicationController
   # GET /visits.xml  
   def index
     # @visits = Visit.search(params[:search]).paginate(:page => params[:page], :per_page => PER_PAGE)
-    @search = Visit.search(params[:search])
+    # Remove default scope if sorting has been requested.
+    if !params[:search].blank? && !params[:search][:meta_sort].blank?
+      @search = Visit.unscoped.search(params[:search])
+    else
+      @search = Visit.search(params[:search])
+    end
     @visits = @search.relation.page(params[:page])
     @collection_title = 'All visits'
     
