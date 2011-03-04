@@ -6,9 +6,13 @@ Feature: View And Edit Participant Visits
   Background:
     Given the following visit records
       | date                  | rmr   | compile_folder  | created_at  |
-      | 01-01-2009            | rmr01 | yes             | 3 years ago | 
+      | 01-01-2009            | rmr01 | yes             | 3 years ago |
       | 01-01-2011            | rmr02 | no              | 1 year ago  |
       | Yesterday             | rmr03 | yes             | 1 day ago   |
+    And the following scan_procedure records
+      | codename    |
+      | procedure1  |
+      | procedure2  |
   
   
   Scenario: Go to the Visits Index
@@ -52,18 +56,25 @@ Feature: View And Edit Participant Visits
     Then I should see "rmr01"
     And I should see "1 visit"
     
+  Scenario: View Scan Procedures
+    Given I am not logged in
+    When I go to the homepage
+    And I select "procedure1" from "scan_procedure_id"
+    And I press "In scan procedure"
+    And I should see "All visits enrolled in procedure1"
+    
   Scenario Outline: Sort Visits
     Given I am not logged in
     When I go to the homepage
     And I follow "<sort_by>"
-    And I should see "<top>" within the 1st row
-    And I should see "<bottom>" within the 3rd row
+    And I should <action> "<top>" within the 1st row
+    And I should <action> "<bottom>" within the 3rd row
     When I follow "<sort_by>"
-    Then I should see "<bottom>" within the 1st row
-    And I should see "<top>" within the 3rd row
+    Then I should <action> "<bottom>" within the 1st row
+    And I should <action> "<top>" within the 3rd row
     
     Examples:
-		 | sort_by  | top         | bottom      |
-		 | RMR      | rmr01       | rmr03       |
-		 | Date     | 2009-01-01  | 2011-03-02  |
+		 | sort_by  | action        | top         | bottom      |
+		 | RMR      | see           | rmr01       | rmr03       |
+		 | Date     | see the date  | 2009-01-01  | Yesterday   |
   

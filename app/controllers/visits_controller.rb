@@ -48,8 +48,9 @@ class VisitsController < ApplicationController
   end
 
   def index_by_scan_procedure
-    sp = ScanProcedure.find_by_id(params[:scan_procedure_id])
-    @visits = Visit.in_scan_procedure(sp).paginate(:page => params[:page], :per_page => PER_PAGE)
+    # sp = ScanProcedure.find_by_id(params[:scan_procedure_id])
+    @search = Visit.where(:scan_procedure_id => params[:scan_procedure_id]).search(params[:search])
+    @visits = @search.relation.page(params[:page])
     
     @collection_title = "All visits enrolled in #{ScanProcedure.find_by_id(params[:scan_procedure_id]).codename}"
     

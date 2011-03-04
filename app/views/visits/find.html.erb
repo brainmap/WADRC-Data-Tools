@@ -5,6 +5,30 @@
     <%= f.label :rmr_contains, "RMR:" %>
     <%= f.text_field :rmr_contains %>
   </p>
+	<p>
+		<%= f.label :scan_procedure_codename_contains_any, "Scan Procedure" %>
+		<%#= f.collection_select :scan_procedure_codename_contains_any, ScanProcedure.find(:all, :order => 'codename ASC'), :codename, :codename, {}, {:multiple => true}  %>
+		<div style="height: 140px; width: 280px; overflow-y: scroll; border: thin black solid; background-color: #D6D6D6;">
+			<ul style="list-style: none; padding-left: 10px; margin-top: 10px;">
+				<%= f.collection_checks :scan_procedure_codename_contains_any, ScanProcedure.find(:all, :order => 'codename ASC'), :codename, :codename do |sp| %>
+				<li>
+					<%= sp.box %>
+					<%= sp.label %>
+				</li>
+				<% end %>
+			</ul>
+		</div>
+	</p>
+	<p>
+		<%= f.label :enrollment_enumber_like, "ENUM: "%>
+		<%= f.text_field :enrollment_enumber_like, :size => 15 %><br/>
+		<%= f.label :path_like %>
+		<%= f.text_field :path_like %><br/>
+		<%= f.label :radiology_outcome_like %>
+		<%= f.text_field :radiology_outcome_like %><br/>
+		<%= f.label :initials_like %>
+		<%= f.text_field :initials_like %>
+	</p>
 	<p class="button"><%= f.submit "Find Visits" %></p>
 <% end %>
 

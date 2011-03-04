@@ -170,5 +170,20 @@ class Visit < ActiveRecord::Base
     end
     return uid
   end
+  
+  def initials
+    initials_from_dicom_info
+  end
+  
+  def initials_from_dicom_info
+    @initials ||= ''
+    return @initials unless @initials.blank?
+    
+    image_datasets.each do |dataset|
+      if tags = dataset.dicom_taghash
+        @initials = tags['0010,0010'][:value] unless tags['0010,0010'][:value].blank?
+      end
+    end
+  end
 
 end
