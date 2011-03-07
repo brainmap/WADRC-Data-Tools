@@ -2,14 +2,9 @@
 
 <%= form_for @search do |f| %>
 	<p>
-    <%= f.label :rmr_contains, "RMR:" %>
-    <%= f.text_field :rmr_contains %>
-  </p>
-	<p>
-		<%= f.label :scan_procedure_codename_contains_any, "Scan Procedure" %>
-		<%#= f.collection_select :scan_procedure_codename_contains_any, ScanProcedure.find(:all, :order => 'codename ASC'), :codename, :codename, {}, {:multiple => true}  %>
-		<div style="height: 140px; width: 280px; overflow-y: scroll; border: thin black solid; background-color: #D6D6D6;">
-			<ul style="list-style: none; padding-left: 10px; margin-top: 10px;">
+		<%= f.label :scan_procedure_codename_contains_any, "Scan Procedure:" %>
+		<div id="scan_procedure_list">
+			<ul>
 				<%= f.collection_checks :scan_procedure_codename_contains_any, ScanProcedure.find(:all, :order => 'codename ASC'), :codename, :codename do |sp| %>
 				<li>
 					<%= sp.box %>
@@ -20,19 +15,46 @@
 		</div>
 	</p>
 	<p>
-		<%= f.label :enrollment_enumber_like, "ENUM: "%>
-		<%= f.text_field :enrollment_enumber_like, :size => 15 %><br/>
-		<%= f.label :path_like %>
-		<%= f.text_field :path_like %><br/>
-		<%= f.label :radiology_outcome_like %>
-		<%= f.text_field :radiology_outcome_like %><br/>
-		<%= f.label :initials_like %>
-		<%= f.text_field :initials_like %>
+    <%= f.label :rmr_contains, "RMR:" %>
+    <%= f.text_field :rmr_contains %>
+  </p>
+	<p>
+		<%= f.label :enrollment_enumber_like, "ENUM:" %>
+		<%= f.text_field :enrollment_enumber_like, :size => 25 %>
+	</p>
+	<p>
+		<%= f.label :path_like, "Path:" %>
+		<%= f.text_field :path_like, :size => 25 %>
+	</p>	
+	<p>
+		<%= f.label :initials_like, "Initials:" %>
+		<%= f.text_field :initials_like, :size => 25 %>
+	</p>
+	<p>
+		<%= f.label :radiology_outcome_like, "Radiology:" %>
+		<%= f.select :radiology_outcome_like, Visit::RADIOLOGY_OUTCOMES, :include_blank => true %><br/>
+	</p>
+	<p>
+		<%= f.label :transfer_mri_like, "Transfer MRI:" %>
+		<%= f.select :transfer_mri_like, Visit::PROGRESS_CHOICES, :include_blank => true %><br/>
+	</p>
+	<p>
+		<%= f.label :transfer_pet_like, "Transfer PET:" %>
+		<%= f.select :transfer_mri_like, Visit::PROGRESS_CHOICES, :include_blank => true %><br/>
+	</p>
+
+	<p>
+		<%= f.label :compile_folder_like, "Compile Folder:" %>
+		<%= f.select :compile_folder_like, Visit::PROGRESS_CHOICES, :include_blank => true %><br/>
+	</p>
+	<p>
+		<%= f.label :conference_like, "Conference:" %>
+		<%= f.select :conference_like, Visit::PROGRESS_CHOICES, :include_blank => true %><br/>
 	</p>
 	<p class="button"><%= f.submit "Find Visits" %></p>
 <% end %>
 
-<%= form_tag("/visits/found") do %>
+<!-- <%= form_tag("/visits/found") do %>
   <table class="search_form">
     <tr>
       <th><%= label_tag :scan_procedure %></th>
@@ -122,4 +144,4 @@
 
   <%#= submit_tag("Find Visits") %>
 
-<% end %>
+<% end %> -->

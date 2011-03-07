@@ -1,4 +1,7 @@
 class Visit < ActiveRecord::Base
+  RADIOLOGY_OUTCOMES = %w{no Nm A-F A-NF n/a}
+  PROGRESS_CHOICES = %w{no yes n/s}
+  
   # default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
   default_scope :order => 'date DESC'
   
@@ -14,6 +17,9 @@ class Visit < ActiveRecord::Base
   has_one :participant, :through => :enrollment
   has_one :neuropsych_session
   belongs_to :created_by, :class_name => "User"
+  
+  validates_inclusion_of :radiology_outcome, :in => RADIOLOGY_OUTCOMES
+  validates_inclusion_of :transfer_mri, :transfer_pet, :conference, :compile_folder, :in => PROGRESS_CHOICES
   
   accepts_nested_attributes_for :enrollment
   
