@@ -10,7 +10,7 @@
       <tr>
         <td><%=h cmnt.user.login %></td>
         <td><%= cmnt.comment %></td>
-        <td><%= link_to_remote('X', :url => image_comment_path(cmnt), :method => :delete) if current_user == cmnt.user %></td>
+        <td><%= link_to('X', image_comment_path(cmnt), :method => :delete) if current_user == cmnt.user %></td>
       </tr>
     <% end %>
   </tbody>

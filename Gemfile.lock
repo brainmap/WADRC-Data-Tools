@@ -1,8 +1,8 @@
 PATH
   remote: ~/code/metamri
   specs:
-    metamri (0.2.3)
-      dicom
+    metamri (0.2.4)
+      dicom (>= 0.8)
       sqlite3-ruby
 
 GEM
