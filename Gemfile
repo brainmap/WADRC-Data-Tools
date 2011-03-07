@@ -4,8 +4,11 @@ gem 'rails', '~>3.0.4'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
-
-gem 'metamri', :path => '~/code/metamri'
+if ENV['RAILS_ENVIRONMENT'] == "production"
+  gem 'metamri'
+else
+  gem 'metamri', :path => '~/code/metamri'
+end
 
 gem 'builder', '~>2.1.2'
 gem 'sqlite3', '~>1.3.3'
