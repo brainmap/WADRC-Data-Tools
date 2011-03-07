@@ -16,7 +16,7 @@ module VisitsHelper
 end
 
 def show_rad_review(field)
-  html = case 
+  html = case field
   when "n/a"
     "<td style='background-color: #cccccc; min-width: 1.5em; max-width: 3em;'>n/a</td>"
   when "no"
