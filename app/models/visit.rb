@@ -1,6 +1,6 @@
 class Visit < ActiveRecord::Base
   RADIOLOGY_OUTCOMES = %w{no Nm A-F A-NF n/a}
-  PROGRESS_CHOICES = %w{no yes n/s}
+  PROGRESS_CHOICES = %w{no yes n/a}
   
   # default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
   default_scope :order => 'date DESC'
@@ -44,40 +44,6 @@ class Visit < ActiveRecord::Base
   
   def month
     self.date.beginning_of_month
-  end
-  
-  def Visit.find_by_search_params(params)
-    conditions = []; qualifiers = []
-    
-    params.each_pair do |k,v|
-      unless v.empty?
-        if 'rmr path'.include?(k)
-          conditions << "#{k} LIKE ?"
-          qualifiers << "%#{v}%"
-        elsif k == 'enumber'
-          enumber_conditions = []
-          v.each do |enumber|
-            enumber_conditions << 'enrollments.enumber = ?' 
-            qualifiers << enumber
-          end
-          conditions << "(" + enumber_conditions.join(" OR ") + ")"
-        elsif k == 'scan_procedure'
-          scan_procedure_conditions = []
-          v.each do |codename|
-            scan_procedure_conditions << 'scan_procedures.codename = ?'
-            qualifiers << codename
-          end
-          conditions << "(" + scan_procedure_conditions.join(" OR ") + ")"
-        else
-          conditions << "#{k} = ?"
-          qualifiers << v
-        end
-      end
-    end
-    
-    find_conditions = [conditions.join(' AND '), *qualifiers]
-    
-    Visit.find(:all, :conditions => find_conditions)
   end
   
   def self.scanner_sources
@@ -190,6 +156,8 @@ class Visit < ActiveRecord::Base
         @initials = tags['0010,0010'][:value] unless tags['0010,0010'][:value].blank?
       end
     end
+    
+    return @initials
   end
 
 end

@@ -1,7 +1,7 @@
 begin
   require 'metamri/raw_image_dataset_thumbnail'
 rescue LoadError => e
-  puts "Problem with Thumbnail Creation using Metamri. #{e}"
+  puts "Problem loading Metamri for Thumbnail Creation. #{e}"
 end
 
 class ImageDataset < ActiveRecord::Base

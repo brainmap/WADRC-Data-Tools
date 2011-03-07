@@ -22,5 +22,32 @@ WADRCDataTools::Application.configure do
 
   # Only use best-standards-support built into browsers
   config.action_dispatch.best_standards_support = :builtin
+  
+  # If you would like to add custom email credentials, you can do it with environment variables.
+  # Set your login and password with DATAPANDA_EMAIL_LOGIN and DATAPANDA_EMAIL_PASSWORD
+  # The medicine server will send to @medicine.wisc.edu email addresses without credentials,
+  # but they are required to send mail to external email addresses.
+  begin 
+    email_login = ENV['DATAPANDA_EMAIL_LOGIN']
+    email_password = ENV['DATAPANDA_EMAIL_PASSWORD']
+    raise(LoadError, "Missing email environment variables.") unless email_login && email_password
+  rescue LoadError => load_error
+    puts "Warning: " + load_error.to_s
+    puts """If you would like to send mail to external addresses (i.e. those not ending with @medicine.wisc.edu), 
+  set your login and password with: 
+  export DATAPANDA_EMAIL_LOGIN='noreply_johnson_lab@medicine.wisc.edu'; export DATAPANDA_EMAIL_PASSWORD='goodpassword')
+  ----"""
+  end
+
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    :address        => 'pop.medicine.wisc.edu',
+    :port           => 25,
+    :authentication => :login,
+    :user_name      => email_login,
+    :password       => email_password,
+    :tls            => true
+  }
+  
 end
 
