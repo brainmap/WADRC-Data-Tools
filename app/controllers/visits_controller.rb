@@ -101,8 +101,8 @@ class VisitsController < ApplicationController
     @newer_visit = idx - 1 < 0 ? nil : @visits[idx - 1]
    
     @image_datasets = @visit.image_datasets# .paginate(:page => params[:page], :per_page => PER_PAGE)
-    @participant = @visit.try(:enrollment).try(:participant) 
-    @enumber = @visit.try(:enrollment).try(:enumber)
+    @participant = @visit.try(:enrollments).first.try(:participant) 
+    @enumbers = @visit.enrollments
 
     respond_to do |format|
       format.html # show.html.erb
@@ -125,7 +125,7 @@ class VisitsController < ApplicationController
   # GET /visits/1/edit
   def edit
     @visit = Visit.find(params[:id])
-    @visit.enrollment = Enrollment.new if @visit.enrollment.blank?
+    @visit.enrollments.build # if @visit.enrollments.blank?
   end
 
   # POST /visits
@@ -150,15 +150,9 @@ class VisitsController < ApplicationController
   # PUT /visits/1.xml
   def update
     @visit = Visit.find(params[:id])
-    enrollment = Enrollment.find_or_create_by_enumber(params[:visit][:enrollment_attributes][:enumber])
-    visit_attributes = params[:visit]
-    visit_attributes[:enrollment_id] = enrollment.id
-    visit_attributes[:enrollment_attributes] = enrollment.attributes
-    logger.info visit_attributes
-
 
     respond_to do |format|
-      if @visit.update_attributes(visit_attributes)
+      if @visit.update_attributes(params[:visit])
         flash[:notice] = 'visit was successfully updated.'
         format.html { redirect_to(@visit) }
         format.xml  { head :ok }

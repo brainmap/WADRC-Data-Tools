@@ -26,7 +26,7 @@ class RawDataImportsController < ApplicationController
         unless @visit.new_record?
           flash[:notice] = "Sucessfully imported raw data directory."
           begin
-            VisitMailer.deliver_visit_confirmation(@visit)
+            PandaMailer.visit_confirmation(@visit, {:send_to => "noreply_johnson_lab@medicine.wisc.edu"}).deliver
             flash[:notice] = flash[:notice].to_s + "; Email was succesfully sent."
           rescue Errno::ECONNREFUSED, LoadError => load_error
             logger.info load_error
@@ -36,7 +36,8 @@ class RawDataImportsController < ApplicationController
             flash[:error] = "Sorry, mail took too long to be delivered: " + timeout_error.to_s
           end
         else
-          flash[:error] = "Awfully sorry, this raw data directory could not be saved to the database."
+          logger.info @visit.errors
+          flash[:error] = "Awfully sorry, this raw data directory could not be saved to the database. #{@visit.errors}"
         end
       end
       redirect_to root_url

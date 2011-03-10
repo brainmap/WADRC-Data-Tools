@@ -17,7 +17,7 @@ end
 
 Factory.define :enrollment do |f|
   f.sequence(:enumber) { |n| "enumber00#{n}" }
-  f.enroll_date Date.today
+  f.enroll_date
 end
 
 Factory.define :participant do |f|

@@ -10,6 +10,12 @@ module NavigationHelpers
     
     when /the home\s?page/
       '/'
+      
+    when /the visit page for "(.*)"/i
+      visit_path(Visit.find_by_rmr($1))
+    
+    when /the edit visit page for visit "(.*)"/i
+      edit_visit_path(Visit.find_by_rmr($1))
     
     # Add more mappings here.
     # Here is an example that pulls values out of the Regexp:

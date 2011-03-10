@@ -29,7 +29,6 @@ class LogFilesController < ApplicationController
          # One of the quantities is not a number, do nothing.
       end
     end
-    puts @response_times.inspect
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @log_file }

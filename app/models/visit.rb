@@ -13,7 +13,6 @@ class Visit < ActiveRecord::Base
   has_many :image_datasets, :dependent => :destroy
   has_many :log_files
   belongs_to :user
-  belongs_to :enrollment
   has_one :participant, :through => :enrollment
   has_one :neuropsych_session
   belongs_to :created_by, :class_name => "User"
@@ -21,8 +20,12 @@ class Visit < ActiveRecord::Base
   validates_inclusion_of :radiology_outcome, :in => RADIOLOGY_OUTCOMES
   validates_inclusion_of :transfer_mri, :transfer_pet, :conference, :compile_folder, :in => PROGRESS_CHOICES
   
-  accepts_nested_attributes_for :enrollment
-  
+  has_many :enrollment_visit_memberships
+  has_many :enrollments, :through => :enrollment_visit_memberships, :uniq => true
+  accepts_nested_attributes_for :enrollments, :reject_if => :all_blank, :allow_destroy => true
+  before_validation :find_or_initialize_enrollments
+    
+    
   scope :complete, where(:compile_folder => "yes")
   scope :incomplete, where(:compile_folder => "no")
   scope :recently_imported, where(:created_at.gt => 1.week.ago)
@@ -34,6 +37,8 @@ class Visit < ActiveRecord::Base
   }  
   
   paginates_per 50
+  
+  delegate :enumber, :to => :enrollment, :prefix => true
   
   acts_as_reportable
 
@@ -50,21 +55,28 @@ class Visit < ActiveRecord::Base
     find_by_sql('select DISTINCT(scanner_source) from visits').map { |v| v.scanner_source }.compact
   end
   
+  # V is a Metamri VisitRawDataDirectory Object that has already been created 
+  # and v.scan 'ed, so it has datasets.
   def self.create_or_update_from_metamri(v, created_by = nil)
     created_by ||= User.first
     
     sp = ScanProcedure.find_or_create_by_codename(v.scan_procedure_name)
     
+    # Build an ActiveRecord Visit object using available attributes from metamri.
+    # Find or initialize by 
     # We need to handle Old Studies involving GE I-Files, which don't have any true UID
-    visit_attrs = v.attributes_for_active_record.merge(:scan_procedure => sp)
+    visit_attrs = v.attributes_for_active_record.merge(:scan_procedure_id.to_s => sp.id)
     if visit_attrs[:dicom_study_uid]
       visit = Visit.find_or_initialize_by_dicom_study_uid(visit_attrs)
     else
       visit = Visit.find_or_initialize_by_rmr(visit_attrs)
     end
-    visit.update_attributes(visit_attrs) unless visit.new_record?
+    visit.attributes.merge!(visit_attrs)
+    visit.scan_procedure = sp
+
     
-    # For each dataset in the RawVisitDataDirectory...
+    # We have to zip up the metamri datasets and the activerecord visit datasets
+    # For each dataset in the VisitRawDataDirectory...
     v.datasets.each do |dataset|
       begin
         # Skip directories that are links.
@@ -72,30 +84,50 @@ class Visit < ActiveRecord::Base
         
         # Initialize Thumbnail (or nil)
         # Note: Using Metamri#RawImageDatasetThumbnail Directly
-        begin 
-          thumb = File.open(RawImageDatasetThumbnail.new(dataset).thumbnail)
+        metamri_attr_options = {}
+        begin
+          metamri_attr_options[:thumb] = File.open(RawImageDatasetThumbnail.new(dataset).thumbnail)
         rescue StandardError, ScriptError => e
           logger.debug e
-          thumb = nil
         end
 
-        # Test to see if this dataset already exists and grab it if so, otherwise build it fresh.
-        data = visit.image_datasets.select {|ds| ds.dicom_series_uid == dataset.dicom_series_uid }.first
-        attrs = dataset.attributes_for_active_record(:thumb => thumb)
+        # Test to see if this dataset already exists and grab it if so,
+        # otherwise build it fresh. This fails if the image dataset exists but
+        # is not associated with the visit, since it's essentially scoping
+        # inside the visit. Fix this by just querying ImageDataset directly and
+        # update. 
+        # 
+        # This will not reassociate the dataset with the current visit.
+        # 
+        # data = visit.image_datasets.select {|ds| ds.dicom_series_uid.to_s == dataset.dicom_series_uid.to_s }.first
+        data = ImageDataset.where(:dicom_series_uid => dataset.dicom_series_uid).first
+        meta_attrs = dataset.attributes_for_active_record(metamri_attr_options)
         
-        unless data.blank?
-          data.update_attributes(attrs)
+        # If the ActiveRecord Visit (visit) has a dataset that already matches the metamri dataset (dataset) on dicom_series_uid, then use it and update its params.  Otherwise, build a new one.
+        unless data.blank? # AKA data.kind_of? ImageDataset
+          logger.debug "updating dataset #{data.id} with new metamri attributes"
+          data.attributes.merge!(meta_attrs)
+          if data.valid?
+            visit.image_datasets << data
+          else
+            raise StandardError, "Image Dataset #{data.path} not valid: #{e}"
+          end
         else
-          visit.image_datasets.build(attrs)  
+          logger.debug "building fresh visit.image_datasets.build(#{meta_attrs})"
+          visit.image_datasets.build(meta_attrs)  
         end
+        
+
       rescue Exception => e
         puts "Error building image_dataset. #{e}"
         raise e
+      ensure
+        metamri_attr_options[:thumb].close if metamri_attr_options.kind_of? File
       end
     end
     
     visit.created_by = created_by
-    visit.save    
+    visit.save
 
     return visit
 
@@ -104,15 +136,17 @@ class Visit < ActiveRecord::Base
   def age_at_visit
     return age_from_dicom_info[:age] unless age_from_dicom_info[:age].blank?
 
-    unless enrollment.nil?
-      unless enrollment.participant.nil?
-        unless enrollment.participant.dob.nil?
-          participant_dob = enrollment.participant.dob
+    unless enrollments.blank?
+      enrollments.each do |enrollment|
+        unless enrollment.participant.blank?
+          unless enrollment.participant.dob.blank?
+            participant_dob = enrollment.participant.dob
+          end
         end
       end
     end
     
-    dob = age_from_dicom_info[:dob] ||= participant_dob
+    dob = age_from_dicom_info[:dob] ||= participant_dob ||= nil
 
     unless dob.blank?
       date.year - dob.year - ((date.month > dob.month || (date.month == dob.month && date.day >= dob.day)) ? 0 :1 ) unless dob.nil?
@@ -158,6 +192,49 @@ class Visit < ActiveRecord::Base
     end
     
     return @initials
+  end
+  
+  # Run before validations. Fixes the many-to-many association between visits
+  # and enrollments from the nested_attributes enrollment_params hash passed in
+  # by the controller. This prevents duplicate many-to-many records and looks up
+  # the correct enrollment instead of creating a new one or updating one from a
+  # previous scope.
+  # 
+  # 1) Clear out old enrollments.
+  # 2) Look up existing Enrollments and EnrollmentVisitMemberships
+  # 3) If the enrollment doesn't exist yet or is not linked to this visit,
+  #    add it back into the enrollments array.  That way all enrollments 
+  #    will be properly validated and linked.
+  # 
+  # From the Rails Rdoc when using nested attributes: 
+  # If the hash contains an id key that matches an already associated record,
+  # the matching record will be modified This means that if an id is present
+  # for nested attributes, it will try to find the old record, but it will
+  # only do so within the old scope. What we want is to replace the old
+  # records with new ones.
+  def find_or_initialize_enrollments
+    original_enrollments = enrollments.dup
+    enrollments.clear
+    original_enrollments.each_with_index do |original_enrollment, i|
+      enrollment = Enrollment.find_or_create_by_enumber(original_enrollment.enumber)
+      memberships = enrollment_visit_memberships.where(:enrollment_id => enrollment.id)
+      # If the enrollment was marked for destruction, get rid of the 
+      # linking membership.  (Not the enrollment itself).
+      if original_enrollment.marked_for_destruction?
+        memberships.each {|membership| membership.delete}
+      # If there's not already an existing membership between these two, create one.
+      # If the membership already exists, we don't have to worry about it, so don't
+      # even add it back into enrollments.
+      elsif memberships.empty?
+        # Since the enrollment has been found new, we need to do some monkey-ing
+        # around to rebuild the has-and-belons-to-many relation.
+        enrollments[i] = enrollment
+        enrollments[i].visits << self 
+      elsif enrollment.marked_for_deletion?
+        memberships.first.delete        
+      end
+
+    end
   end
 
 end

@@ -7,7 +7,6 @@ class ImageDatasetQualityCheck < ActiveRecord::Base
   def failing_checks
     failing_checks = Set.new
     self.attribute_names.each do |name|
-      puts self[name]
       unless name.blank?
         if FAILING_STATUSES.include?(self[name])
           failing_checks << name.capitalize.gsub("_", " ")

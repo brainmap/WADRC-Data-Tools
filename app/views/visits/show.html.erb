@@ -3,7 +3,7 @@
 <div id="visit_heading">
   <%=	link_to "&larr; Older".html_safe, @older_visit if @older_visit %>
   &nbsp;
-  <h1><%= @enumber.nil? ? @visit.rmr : @enumber %></h1>
+  <h1><%= @enumbers.blank? ? @visit.rmr : @enumbers.collect{|e| e.enumber }.join(", ") %></h1>
   <p class="date"><%= @visit.date.to_s(:long) %></p>
   &nbsp;
   <%=	link_to "Newer &rarr;".html_safe, @newer_visit if @newer_visit %>

@@ -13,6 +13,12 @@ Feature: View And Edit Participant Visits
       | codename    |
       | procedure1  |
       | procedure2  |
+    And the following user record
+      | login | password  |
+      | admin | secret    |
+    And the following enrollment record
+      | enumber |
+      | enumber001 |
   
   
   Scenario: Go to the Visits Index
@@ -55,6 +61,36 @@ Feature: View And Edit Participant Visits
     And I press "Find Visits"
     Then I should see "rmr01"
     And I should see "1 visit"
+    
+  Scenario: View a Visit
+    Given I am not logged in
+    When I go to the homepage
+    Then I should see "2009-01-01"
+    And I follow "2009-01-01"
+    Then I should be on the visit page for "rmr01"
+    And I should see "rmr01"
+    And I should see "2009-01-01"
+    And I should see "January 1, 2009"
+
+  Scenario: Edit a Visit with new enumber
+    Given I am logged in as "admin" with password "secret"
+    When I go to the edit visit page for visit "rmr01"
+    Then I should see "Editing visit"
+    And I fill in "enumber" with "enumber999"
+    And I press "Edit visit"
+    Then I should be on the visit page for "rmr01"
+    And I should see "enumber999"
+
+  
+  Scenario: Edit a Visit with existing enumber
+    Given I am logged in as "admin" with password "secret"
+    When I go to the edit visit page for visit "rmr01"
+    Then I should see "Editing visit"
+    And I fill in "enumber" with "enumber001"
+    And I press "Edit visit"
+    Then I should be on the visit page for "rmr01"
+    And I should see "enumber001"
+    
     
   Scenario: View Scan Procedures
     Given I am not logged in

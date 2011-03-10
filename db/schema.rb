@@ -1,15 +1,16 @@
-# This file is auto-generated from the current state of the database. Instead of editing this file, 
-# please use the migrations feature of Active Record to incrementally modify your database, and
-# then regenerate this schema definition.
+# This file is auto-generated from the current state of the database. Instead
+# of editing this file, please use the migrations feature of Active Record to
+# incrementally modify your database, and then regenerate this schema definition.
 #
-# Note that this schema.rb definition is the authoritative source for your database schema. If you need
-# to create the application database on another system, you should be using db:schema:load, not running
-# all the migrations from scratch. The latter is a flawed and unsustainable approach (the more migrations
+# Note that this schema.rb definition is the authoritative source for your
+# database schema. If you need to create the application database on another
+# system, you should be using db:schema:load, not running all the migrations
+# from scratch. The latter is a flawed and unsustainable approach (the more migrations
 # you'll amass, the slower it'll run and the greater likelihood for issues).
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110223184530) do
+ActiveRecord::Schema.define(:version => 20110310192652) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -24,6 +25,13 @@ ActiveRecord::Schema.define(:version => 20110223184530) do
     t.integer  "image_dataset_id"
     t.boolean  "excluded",          :default => false
     t.string   "exclusion_comment"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "enrollment_visit_memberships", :force => true do |t|
+    t.integer  "enrollment_id"
+    t.integer  "visit_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -97,6 +105,8 @@ ActiveRecord::Schema.define(:version => 20110223184530) do
     t.string   "dicom_series_uid"
     t.text     "dicom_taghash"
   end
+
+  add_index "image_datasets", ["dicom_series_uid"], :name => "index_image_datasets_on_dicom_series_uid", :unique => true
 
   create_table "image_searches", :force => true do |t|
     t.string   "rmr"
@@ -253,7 +263,6 @@ ActiveRecord::Schema.define(:version => 20110223184530) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.text     "radiology_note",                    :default => "no"
-    t.integer  "enrollment_id"
     t.string   "research_diagnosis"
     t.string   "consent_form_type"
     t.string   "scanner_source"

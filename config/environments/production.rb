@@ -71,5 +71,5 @@ WADRCDataTools::Application.configure do
     :password       => email_password,
     :tls            => true
   }
-  
+  config.action_mailer.default_url_options = {:host => 'nelson'}
 end

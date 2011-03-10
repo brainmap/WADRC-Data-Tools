@@ -1,0 +1,15 @@
+--- There's a New Visit on the Data Panda ---
+
+Visit Date: <%= @visit.date %>
+RMR: <%= @visit.rmr %>
+Raw Directory: <%= @visit.path %>
+<%= "enumber: #{@visit.enrollment_enumber}" unless @visit.enrollment.blank? %>
+
+Image Datasets:
+<% @visit.image_datasets.sort_by(&:timestamp).each do |image_dataset| %>
+<%= File.basename(image_dataset.path) -%>: <%= image_dataset.series_description -%>
+<% end %>
+
+---
+<%= "Added %s " % @visit.updated_at.to_formatted_s(:datetime_daymonthweek) %> <%= "by #{@username}" if @username %>
+---

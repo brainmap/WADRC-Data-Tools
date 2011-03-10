@@ -18,16 +18,15 @@ class ImageDataset < ActiveRecord::Base
   has_many :image_dataset_quality_checks, :dependent => :destroy
   has_one :log_file
   # Allow the DICOM UID to be blank for PFile Datasets, otherwise enforce uniqueness
-  validates_uniqueness_of :dicom_series_uid, :case_sensitive => false, :unless => Proc.new {|dataset| dataset.dicom_series_uid.blank?}
-  
+  validates_uniqueness_of :dicom_series_uid, :case_sensitive => false, :unless => Proc.new {|dataset| dataset.dicom_series_uid.blank?}, :message => "Series UID must be unique."
   
   has_attached_file :thumbnail, 
     :styles => { :large => "900x900>", :medium => "300x300>", :thumb => "100x100" },
     :default_url => "/images/missing-sag.gif"
 
   
-  validates_presence_of :path, :scanned_file
-  #validates_uniqueness_of :dataset_identifier
+  validates_presence_of :scanned_file
+  # validates_uniqueness_of :dataset_identifier
   
   has_many :physiology_text_files
   accepts_nested_attributes_for :physiology_text_files, :allow_destroy => true
@@ -35,6 +34,9 @@ class ImageDataset < ActiveRecord::Base
   serialize :dicom_taghash
   
   acts_as_reportable
+  
+  # Note - Path is NOT unique (due to PFiles)
+  # validates :path, :filesytem_format => true
 
   def rep_time_hundredths
     (100 * rep_time).round / 100.0
@@ -138,32 +140,5 @@ class ImageDataset < ActiveRecord::Base
       ).to_csv
     end
   end
-  
-  def valid_path?
-    File.exists?(path) and not symlink_in_path?
-  end
-  
-  def symlink_in_path?
-    Pathname.new(path).ascend do |trunk|
-      return true if File.symlink? trunk 
-    end
-    return false
-  end
-  
-  private
-  
-  def validate 
-    db_result = self.class.find(:first, :conditions => ['path = ? AND scanned_file = ?', self.path, self.scanned_file])
-    # puts db_result
-    unless db_result.blank? # No Image Dataset was found with the dataset identifier, it's ok to save this.
-      unless db_result == self # Ensure uniqueness.
-        errors.add_to_base('Dataset path and file must be unique.') 
-      end
-    end
-    
-    # Also check to make sure the path exists and is not a symlink.
-    errors.add :base, "Path must exist and not be a symlink" unless valid_path?
-  end 
-  
-  
+
 end

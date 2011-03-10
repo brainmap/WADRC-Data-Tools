@@ -17,6 +17,14 @@
       <%= f.label :scan_procedure %>
       <%= collection_select(:visit, :scan_procedure_id, ScanProcedure.all.sort_by(&:codename), :id, :codename, :include_blank => "Select a scan_procedure") %>
     </p>
+		<p>
+			<% ScanProcedure.all.each do |scan_procedure| %>
+				<div>
+					<%= check_box_tag :scan_procedure_ids, scan_procedure.id, @visit.scan_procedures.include?(procedure), :name => 'visit[scan_procedure_ids][]' %>
+					<%= label_tag :scan_procedure_ids, scan_procedure.codename %>
+				</div>
+			<% end %>
+		</p>
     <p>
       <%= f.label :scan_number %><br />
       <%= f.text_field :scan_number %>
@@ -30,13 +38,16 @@
       <%= f.text_field :rmr %>
     </p>
 
-	<p>
-		<%= f.fields_for :enrollment do |e| %>
+		<%= f.fields_for :enrollments do |e| %>
+		<p>
 			<%= e.label :enumber %>
+			<%= e.check_box :_destroy unless e.object.new_record?  %>
+			<%= e.label :_destroy, "Remove?" unless e.object.new_record? %>
 			<%= e.text_field_with_auto_complete :enumber, {},
 				        { :method => :get, :url => enrollments_path(:format => :js), :param_name => 'search' } %>
+		</p>
 		<% end %>
-	</p>
+
 	
   </div>
 

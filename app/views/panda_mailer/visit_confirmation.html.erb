@@ -1,0 +1,16 @@
+<h1>There's a New Visit on the Data Panda</h1>
+
+<p><strong>Visit Date:</strong> <%= @visit.date %></p>
+<p><strong>RMR:</strong> <%= @visit.rmr %></p>
+<p><strong>Raw Directory:</strong> <%= @visit.path %></p>
+<p><%= "<strong>enumber:</strong> #{@visit.enrollment_enumber}" unless @visit.enrollment.blank? %></p>
+
+<h2>Image Datasets:</h2>
+<ul>
+	<% @visit.image_datasets.sort_by(&:timestamp).each do |image_dataset| %>
+	<li><%= File.basename(image_dataset.path) -%>: <%= image_dataset.series_description -%></li>
+	<% end %>
+</ul>
+
+
+<p><%= "Added %s " % @visit.updated_at.to_formatted_s(:datetime_daymonthweek) %> <%= "by #{@username}" if @username %></p>
