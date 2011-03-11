@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110310192652) do
+ActiveRecord::Schema.define(:version => 20110310231239) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -210,6 +210,11 @@ ActiveRecord::Schema.define(:version => 20110310192652) do
     t.string   "description"
   end
 
+  create_table "scan_procedures_visits", :id => false, :force => true do |t|
+    t.integer "scan_procedure_id"
+    t.integer "visit_id"
+  end
+
   create_table "series_descriptions", :force => true do |t|
     t.string   "long_description"
     t.string   "short_description"
@@ -247,7 +252,6 @@ ActiveRecord::Schema.define(:version => 20110310192652) do
 
   create_table "visits", :force => true do |t|
     t.date     "date"
-    t.integer  "scan_procedure_id",                                   :null => false
     t.integer  "scan_number"
     t.string   "initials"
     t.string   "rmr"

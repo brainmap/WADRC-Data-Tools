@@ -38,7 +38,7 @@
   <div id="visit_details_note" class="sticky">
     <%= key_val_table("visit_details", {
       :Visit_date => @visit.date,
-      :scan_procedure => link_to(@visit.scan_procedure.codename, in_scan_procedure_path(@visit.scan_procedure)),
+      :scan_procedure => @visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe,
       :Scan_number => @visit.scan_number,
       :enumber => @enumber.nil? ? nil : link_to(@visit.enrollment.enumber, @visit.enrollment),
       :Initials => @visit.initials,

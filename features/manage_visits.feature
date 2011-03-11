@@ -90,6 +90,15 @@ Feature: View And Edit Participant Visits
     And I press "Edit visit"
     Then I should be on the visit page for "rmr01"
     And I should see "enumber001"
+
+  Scenario: Edit a Visit with a bad enumber
+    Given I am logged in as "admin" with password "secret"
+    When I go to the edit visit page for visit "rmr01"
+    Then I should see "Editing visit"
+    And I fill in "enumber" with "enumber"
+    And I press "Edit visit"
+    Then I should be on the visit page for "rmr01"
+    And I should see "Enrollment invalid"  
     
     
   Scenario: View Scan Procedures

@@ -5,11 +5,11 @@ class Visit < ActiveRecord::Base
   # default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
   default_scope :order => 'date DESC'
   
-  validates_presence_of :date, :scan_procedure
+  validates_presence_of :date
   # Allow the DICOM UID to be blank for visits without Scans
   validates_uniqueness_of :dicom_study_uid, :case_sensitive => false, :unless => Proc.new {|visit| visit.dicom_study_uid.blank?}
-    
-  belongs_to :scan_procedure
+  
+  has_and_belongs_to_many :scan_procedures
   has_many :image_datasets, :dependent => :destroy
   has_many :log_files
   belongs_to :user
@@ -23,7 +23,7 @@ class Visit < ActiveRecord::Base
   has_many :enrollment_visit_memberships
   has_many :enrollments, :through => :enrollment_visit_memberships, :uniq => true
   accepts_nested_attributes_for :enrollments, :reject_if => :all_blank, :allow_destroy => true
-  before_validation :find_or_initialize_enrollments
+  before_validation :lookup_enrollments
     
     
   scope :complete, where(:compile_folder => "yes")
@@ -212,11 +212,15 @@ class Visit < ActiveRecord::Base
   # for nested attributes, it will try to find the old record, but it will
   # only do so within the old scope. What we want is to replace the old
   # records with new ones.
-  def find_or_initialize_enrollments
+  def lookup_enrollments
     original_enrollments = enrollments.dup
     enrollments.clear
     original_enrollments.each_with_index do |original_enrollment, i|
       enrollment = Enrollment.find_or_create_by_enumber(original_enrollment.enumber)
+      unless enrollment.valid?
+        errors.add(:enrollments, "Enrollment invalid")
+        raise ActiveRecord::Rollback
+      end
       memberships = enrollment_visit_memberships.where(:enrollment_id => enrollment.id)
       # If the enrollment was marked for destruction, get rid of the 
       # linking membership.  (Not the enrollment itself).
@@ -235,6 +239,7 @@ class Visit < ActiveRecord::Base
       end
 
     end
+
   end
 
 end
