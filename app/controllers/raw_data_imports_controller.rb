@@ -28,7 +28,7 @@ class RawDataImportsController < ApplicationController
           begin
             PandaMailer.visit_confirmation(@visit, {:send_to => "noreply_johnson_lab@medicine.wisc.edu"}).deliver
             flash[:notice] = flash[:notice].to_s + "; Email was succesfully sent."
-          rescue Errno::ECONNREFUSED, LoadError => load_error
+          rescue Errno::ECONNREFUSED, LoadError, OpenSSL::SSL::SSLError => load_error
             logger.info load_error
             flash[:error] = "Sorry, your email was not delivered: " + load_error.to_s
           rescue Timeout::Error => timeout_error
