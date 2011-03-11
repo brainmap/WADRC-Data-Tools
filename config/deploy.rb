@@ -19,6 +19,8 @@ set :git, "/usr/local/bin/git"
 set :repository, "git@github.com:brainmap/WADRC-Data-Tools.git"
 set :branch, "master"
 
+default_environment['PATH'] = "/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin"
+default_environment['RAILS_ENV'] = "production"
 
 namespace :deploy do
   desc "Symlink shared configs and folders on each release."
