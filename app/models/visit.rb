@@ -55,6 +55,10 @@ class Visit < ActiveRecord::Base
     find_by_sql('select DISTINCT(scanner_source) from visits').map { |v| v.scanner_source }.compact
   end
   
+  def enrollment_list
+    enrollments.collect {|enroll| enroll.enumber }.join(", ")
+  end
+  
   # V is a Metamri VisitRawDataDirectory Object that has already been created 
   # and v.scan 'ed, so it has datasets.
   def self.create_or_update_from_metamri(v, created_by = nil)
@@ -63,16 +67,15 @@ class Visit < ActiveRecord::Base
     sp = ScanProcedure.find_or_create_by_codename(v.scan_procedure_name)
     
     # Build an ActiveRecord Visit object using available attributes from metamri.
-    # Find or initialize by 
     # We need to handle Old Studies involving GE I-Files, which don't have any true UID
-    visit_attrs = v.attributes_for_active_record.merge(:scan_procedure_id.to_s => sp.id)
+    visit_attrs = v.attributes_for_active_record.merge(:scan_procedure_ids => [sp.id])
     if visit_attrs[:dicom_study_uid]
       visit = Visit.find_or_initialize_by_dicom_study_uid(visit_attrs)
     else
       visit = Visit.find_or_initialize_by_rmr(visit_attrs)
     end
     visit.attributes.merge!(visit_attrs)
-    visit.scan_procedure = sp
+    visit.scan_procedures = [sp]
 
     
     # We have to zip up the metamri datasets and the activerecord visit datasets

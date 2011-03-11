@@ -3,7 +3,7 @@
 <p><strong>Visit Date:</strong> <%= @visit.date %></p>
 <p><strong>RMR:</strong> <%= @visit.rmr %></p>
 <p><strong>Raw Directory:</strong> <%= @visit.path %></p>
-<p><%= "<strong>enumber:</strong> #{@visit.enrollment_enumber}" unless @visit.enrollment.blank? %></p>
+<p><%= "<strong>enumber(s):</strong> #{@visit.enrollments_list}" unless @visit.enrollments.blank? %></p>
 
 <h2>Image Datasets:</h2>
 <ul>

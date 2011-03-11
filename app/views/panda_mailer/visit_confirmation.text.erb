@@ -3,7 +3,7 @@
 Visit Date: <%= @visit.date %>
 RMR: <%= @visit.rmr %>
 Raw Directory: <%= @visit.path %>
-<%= "enumber: #{@visit.enrollment_enumber}" unless @visit.enrollment.blank? %>
+<%= "enumber(s): #{@visit.enrollments_list}" unless @visit.enrollments.blank? %>
 
 Image Datasets:
 <% @visit.image_datasets.sort_by(&:timestamp).each do |image_dataset| %>

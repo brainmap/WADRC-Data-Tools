@@ -19,7 +19,10 @@ set :git, "/usr/local/bin/git"
 set :repository, "git@github.com:brainmap/WADRC-Data-Tools.git"
 set :branch, "master"
 
+# Used to find git & bundler in path
 default_environment['PATH'] = "/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin"
+
+# Bundler depends on this to use the gem version of metamri
 default_environment['RAILS_ENV'] = "production"
 
 namespace :deploy do
