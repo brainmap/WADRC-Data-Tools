@@ -49,7 +49,11 @@ class VisitsController < ApplicationController
 
   def index_by_scan_procedure
     # sp = ScanProcedure.find_by_id(params[:scan_procedure_id])
-    @search = Visit.joins(:scan_procedures).where(:scan_procedures => {:id => params[:scan_procedure_id]}).search(params[:search])
+    if !params[:search].blank? && !params[:search][:meta_sort].blank?
+      @search = Visit.unscoped.includes(:scan_procedures).where(:scan_procedures => {:id => params[:scan_procedure_id]}).search(params[:search])
+    else
+      @search = Visit.includes(:scan_procedures).where(:scan_procedures => {:id => params[:scan_procedure_id]}).search
+    end
     @visits = @search.relation.page(params[:page])
     
     @collection_title = "All visits enrolled in #{ScanProcedure.find_by_id(params[:scan_procedure_id]).codename}"
