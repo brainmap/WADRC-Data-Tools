@@ -45,7 +45,7 @@ class ImageDatasetsController < ApplicationController
   def show
     @image_dataset = ImageDataset.find(params[:id])
     @visit = @image_dataset.visit
-    @image_datasets = @visit.image_datasets# .paginate(:page => params[:page], :per_page => PER_PAGE)
+    @image_datasets = @visit.image_datasets
     
     @image_comment = ImageComment.new
     @image_comments = @image_dataset.image_comments
