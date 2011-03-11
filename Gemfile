@@ -46,6 +46,7 @@ group :development, :test do
   gem 'cucumber'
   gem 'cucumber-rails'
   gem 'webrat'
+  gem 'pickle'
   gem 'autotest-rails'
   gem 'factory_girl_rails', '~>1.0.1'
   gem 'chronic'

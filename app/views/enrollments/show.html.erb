@@ -24,7 +24,7 @@
 <%= content_tag(:p, "No visits for this enrollment") if @enrollment.visits.blank? %>
 <ul>
   <% @enrollment.visits.each do |visit| %>
-    <li><%= link_to visit.date, visit %> in <%= visit.scan_procedure.codename %></li>
+    <li><%= link_to visit.date, visit %> in <%= visit.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
   <% end %>
 </ul>
 
