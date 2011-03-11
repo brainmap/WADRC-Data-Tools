@@ -13,7 +13,7 @@ class Visit < ActiveRecord::Base
   has_many :image_datasets, :dependent => :destroy
   has_many :log_files
   belongs_to :user
-  has_one :participant, :through => :enrollment
+  # has_one :participant, :through => :enrollment  # Defined manually because of has_many :enrollments
   has_one :neuropsych_session
   belongs_to :created_by, :class_name => "User"
   
@@ -41,6 +41,16 @@ class Visit < ActiveRecord::Base
   delegate :enumber, :to => :enrollment, :prefix => true
   
   acts_as_reportable
+  
+  def participant
+    @participant ||= nil
+    return @participant if @participant
+
+    unless enrollments.blank?
+      enrollments.each {|enrollment| @participant = @enrollment.participant unless @enrollment.participant.blank? }
+    end
+    return @participant
+  end
 
 
   def week

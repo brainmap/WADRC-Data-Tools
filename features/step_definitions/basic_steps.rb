@@ -24,3 +24,8 @@ Then /^(?:|I )should see "([^\"]*)" within the (\d+)(?:st|nd|rd|th) row$/ do |te
     end
   end
 end
+
+Then /^I fill in "([^\"]*)" with MRI Data from "([^\"]*)"$/ do |field, value|
+  path = File.join($MRI_DATA, value)
+  fill_in(field, :with => path)
+end

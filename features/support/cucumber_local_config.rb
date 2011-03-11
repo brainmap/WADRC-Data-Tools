@@ -4,3 +4,4 @@
 # #   :source => "http://gems.github.com"
 # 
 require "#{Rails.root}/spec/factories"
+require "#{Rails.root}/spec/spec_helper"

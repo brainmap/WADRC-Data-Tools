@@ -25,3 +25,11 @@ Factory.define :participant do |f|
   f.wrapnum
   f.gender
 end
+
+Factory.define :image_dataset do |f|
+  f.series_description
+  f.sequence(:scanned_file) {|n| "#{n}.dcm"}
+  f.path "/path/to/dataset"
+  f.rep_time 2000
+  f.timestamp Date.today
+end

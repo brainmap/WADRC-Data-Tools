@@ -13,7 +13,7 @@ Feature: Import MRI Visits
     When I go to the homepage
     And I follow "import visit data"
     Then I should see "Import a new raw data directory"
-    And I fill in "Directory" with "/Data/vtrak1/raw/test/fixtures/rpipe/johnson.merit220.visit1/mrt00000"
+    And I fill in "Directory" with MRI Data from "johnson.merit220.visit1/mrt00000"
     And I press "Import!"
     Then I should see "Sucessfully imported raw data directory"
     And I should see "Email was succesfully sent"
