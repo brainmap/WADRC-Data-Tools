@@ -1,3 +1,5 @@
+require 'bundler/capistrano'
+
 #default_run_options[:pty] = true
 #ssh_options[:paranoid] = false
 
@@ -25,16 +27,15 @@ namespace :deploy do
     # run "ln -nfs #{shared_path}/system #{release_path}/public/system"
   end
 
-  desc "Restart Apache Passenger"
-  task :restart, :roles => :app do
-    run "touch #{current_path}/tmp/restart.txt"
+  # If you are using Passenger mod_rails uncomment this:
+  # if you're still using the script/reapear helper you will need
+  # these http://github.com/rails/irs_process_scripts
+  task :start do ; end
+  task :stop do ; end
+  task :restart, :roles => :app, :except => { :no_release => true } do
+    run "#{try_sudo} touch #{File.join(current_path,'tmp','restart.txt')}"
   end
-  
-  [:start, :stop].each do |t|
-    desc "#{t} task is a no-op with mod_rails"
-    task t, :roles => :app do ; end
-  end
- 
+
 end
 
 after 'deploy:symlink', 'deploy:symlink_shared'
