@@ -65,7 +65,7 @@ class Visit < ActiveRecord::Base
     find_by_sql('select DISTINCT(scanner_source) from visits').map { |v| v.scanner_source }.compact
   end
   
-  def enrollment_list
+  def enrollments_list
     enrollments.collect {|enroll| enroll.enumber }.join(", ")
   end
   

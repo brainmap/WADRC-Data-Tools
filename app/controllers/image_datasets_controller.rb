@@ -28,7 +28,8 @@ class ImageDatasetsController < ApplicationController
       @total_count = @image_datasets.count
       @page_title = "All Image Datasets for Visit #{@visit.rmr}"
     else
-      @image_datasets = ImageDataset.all.paginate(:page => params[:page], :per_page => PER_PAGE)
+      @search = ImageDataset.search(params[:search])
+      @image_datasets = @search.relation.page(params[:page]).per(50)
       # @total_count = all_images.size # I'm not sure where this method is coming from, but it's breaking in ActiveResource
       @total_count = ImageDataset.count
       @page_title = "All Image Datasets"
