@@ -42,7 +42,7 @@ class RawDataImportsController < ApplicationController
       end
       redirect_to root_url
     else
-      flash[:error] = "Invalid raw data directory, please check your path and try again."
+      flash[:error] = "Invalid raw data directory #{@visit_directory_to_scan}, please check your path and try again."
       redirect_to new_raw_data_import_path
     end
   end

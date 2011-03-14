@@ -3,10 +3,10 @@
   <p>
     <%#= link_to 'edit this dataset', edit_image_dataset_path(@image_dataset) %>
     <%= link_to 'view visit from whence it came', @visit %> •
-    <% if @visit.participant.blank? %>
+    <% if @image_dataset.participant.blank? %>
       no associated participant
     <% else %>
-      <%= link_to('view participant', @visit.participant) %>
+      <%= link_to('view participant', @image_dataset.participant) %>
     <% end %>
 	</p>
 	<div class="next-previous-links">

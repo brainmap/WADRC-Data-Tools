@@ -47,7 +47,7 @@ class Visit < ActiveRecord::Base
     return @participant if @participant
 
     unless enrollments.blank?
-      enrollments.each {|enrollment| @participant = @enrollment.participant unless @enrollment.participant.blank? }
+      enrollments.each {|enrollment| @participant = enrollment.participant unless enrollment.participant.blank? }
     end
     return @participant
   end
@@ -129,7 +129,6 @@ class Visit < ActiveRecord::Base
           logger.debug "building fresh visit.image_datasets.build(#{meta_attrs})"
           visit.image_datasets.build(meta_attrs)  
         end
-        
 
       rescue Exception => e
         puts "Error building image_dataset. #{e}"

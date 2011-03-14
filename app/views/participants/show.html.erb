@@ -54,7 +54,7 @@
 <% @participant.visits.each do |v| %>
 	<p>
 		<%= link_to v.date.to_s(:long), v %> 
-		for <%= v.scan_procedure.blank? ? "unknown protocol" : v.scan_procedure.codename %> 
-		with enumber <%= link_to v.enrollment.enumber, v.enrollment %>
+		for <%= v.scan_procedures.blank? ? "unknown protocol" : v.scan_procedures.collect{|sp| sp.codename}.join(", ") %> 
+		with enumber <%= v.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %>
 	</p>
 <% end -%>

@@ -33,6 +33,8 @@ class ImageDataset < ActiveRecord::Base
   
   serialize :dicom_taghash
   
+  delegate :participant, :to => :visit
+  
   acts_as_reportable
   
   # Note - Path is NOT unique (due to PFiles)
