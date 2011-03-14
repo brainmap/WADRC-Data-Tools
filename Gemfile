@@ -5,7 +5,7 @@ gem 'rails', '~>3.0.4'
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 if ENV['RAILS_ENV'] == "production"
-  gem 'metamri'
+  gem 'metamri', '~>0.2.5'
 else
   gem 'metamri', :path => '~/code/metamri'
 end
