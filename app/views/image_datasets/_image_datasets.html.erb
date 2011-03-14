@@ -2,7 +2,7 @@
   
 	<%# Set thumbnail display defualt  %>
   <% include_thumbnails = false if include_thumbnails.nil? %>
-	<caption><%= pluralize @total_count, 'datasets' %></caption>
+	<caption><%= pluralize image_datasets.count, 'datasets' %></caption>
   
   <thead>
     <tr>
@@ -16,7 +16,7 @@
     </tr>
   </thead>
 
-  <tfoot><tr><td colspan=7><%= paginate image_datasets %></td></tr></tfoot>
+  <tfoot><tr><td colspan=7><%= paginate image_datasets if image_datasets.respond_to? :current_page %></td></tr></tfoot>
 
   <tbody>
     <% image_datasets.each do |im_ds| %>
