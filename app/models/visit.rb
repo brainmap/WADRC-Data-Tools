@@ -117,6 +117,7 @@ class Visit < ActiveRecord::Base
           data = ImageDataset.where(:dicom_series_uid => dataset.dicom_series_uid).first
         elsif dataset.pfile? or dataset.geifile?
           data = ImageDataset.where(:path.matches => dataset.directory, :scanned_file.matches => dataset.scanned_file).first
+        else raise StandardError, "Could not identify type of datset #{File.join(dataset.directory, datset.scanned_file)}"
         end
           
         meta_attrs = dataset.attributes_for_active_record(metamri_attr_options)
