@@ -103,7 +103,7 @@ class ImageDataset < ActiveRecord::Base
   
   def create_thumbnail
     # Only available for Dicoms - Done through glob.
-    raise StandardError, "#{scanned_file} is not a DICOM image." if (scanned_file =~ /P.*\.7/ || scanned_file =~ /^I\./ || glob == nil)
+    raise StandardError, "#{scanned_file} is not a DICOM image." if dicom?
     
     if File.exist?(File.join(path, scanned_file))
       original_zip_status = false
@@ -126,8 +126,20 @@ class ImageDataset < ActiveRecord::Base
     return png_path
   end
   
+  def dicom?
+    !pfile? and !geifile? and !(glob == nil)
+  end
+  
+  def pfile?
+    scanned_file =~ /P.*\.7/
+  end
+  
+  def geifile?
+    scanned_file =~ /^I\./
+  end
+  
   def self.report
-    File.open('dump.csv', 'w') do |f| 
+    File.open('dump.csv', 'w') do |f|
       f.puts report_table(:all,
         :except => [:timestamp, :created_at, :updated_at, :id, :rep_time, :glob, :thumbnail_file_name, :bold_reps, :thumbnail_file_size, :thumbnail_content_type, :thumbnail_updated_at, :slices_per_volume, "scanned_file", "visit_id"], 
         :conditions => "series_description LIKE '%DTI%' AND series_description NOT LIKE '%GW3D%'", 

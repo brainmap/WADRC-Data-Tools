@@ -113,7 +113,12 @@ class Visit < ActiveRecord::Base
         # This will not reassociate the dataset with the current visit.
         # 
         # data = visit.image_datasets.select {|ds| ds.dicom_series_uid.to_s == dataset.dicom_series_uid.to_s }.first
-        data = ImageDataset.where(:dicom_series_uid => dataset.dicom_series_uid).first
+        if dataset.dicom?
+          data = ImageDataset.where(:dicom_series_uid => dataset.dicom_series_uid).first
+        elsif dataset.pfile? or dataset.geifile?
+          data = ImageDataset.where(:path.matches => dataset.directory, :scanned_file.matches => dataset.scanned_file).first
+        end
+          
         meta_attrs = dataset.attributes_for_active_record(metamri_attr_options)
         
         # If the ActiveRecord Visit (visit) has a dataset that already matches the metamri dataset (dataset) on dicom_series_uid, then use it and update its params.  Otherwise, build a new one.
