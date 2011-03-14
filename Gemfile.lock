@@ -89,7 +89,7 @@ GEM
       activerecord (~> 3.0.0)
       activesupport (~> 3.0.0)
       arel (~> 2.0.7)
-    metamri (0.2.4)
+    metamri (0.2.5)
       dicom
       sqlite3-ruby
     mime-types (1.16)
@@ -178,7 +178,7 @@ DEPENDENCIES
   launchy
   meta_search
   meta_where
-  metamri
+  metamri (~> 0.2.5)
   paperclip (~> 2.3.8)
   pickle
   rails (~> 3.0.4)
