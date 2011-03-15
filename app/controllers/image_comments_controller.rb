@@ -8,7 +8,7 @@ class ImageCommentsController < ApplicationController
   
   # GET /image_comments GET /image_comments.xml
   def index
-    @image_comments = ImageComment.find(:all)
+    @image_comments = ImageComment.all
 
     respond_to do |format|
       format.html # index.html.erb

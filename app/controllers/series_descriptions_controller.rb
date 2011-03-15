@@ -2,7 +2,7 @@ class SeriesDescriptionsController < ApplicationController
   # GET /series_descriptions
   # GET /series_descriptions.xml
   def index
-    @series_descriptions = SeriesDescription.find(:all)
+    @series_descriptions = SeriesDescription.all
 
     respond_to do |format|
       format.html # index.html.erb

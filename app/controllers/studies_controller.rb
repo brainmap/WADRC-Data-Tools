@@ -2,7 +2,7 @@ class StudiesController < ApplicationController
   # GET /studies
   # GET /studies.xml
   def index
-    @studies = Study.find(:all)
+    @studies = Study.all
 
     respond_to do |format|
       format.html # index.html.erb

@@ -7,7 +7,7 @@
 <%= form_for @image_search do |f| %>
   <table class="search_form">
     <th><%= f.label :scan_procedures %></th>
-    <td><%= collection_select(:scan_procedure, :ids, ScanProcedure.find(:all, :order => 'codename ASC'), :id, :codename, {}, {:multiple =>  true}) %></td>
+    <td><%= collection_select(:scan_procedure, :ids, ScanProcedure.order(:codename), :id, :codename, {}, {:multiple =>  true}) %></td>
   </table>
   <table class="search_form">
     <tr>

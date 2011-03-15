@@ -5,7 +5,7 @@
 		<%= f.label :scan_procedures_codename_contains_any, "Scan Procedure:" %>
 		<div id="scan_procedure_list">
 			<ul>
-				<%= f.collection_checks :scan_procedures_codename_contains_any, ScanProcedure.find(:all, :order => 'codename ASC'), :codename, :codename do |sp| %>
+				<%= f.collection_checks :scan_procedures_codename_contains_any, ScanProcedure.order(:codename), :codename, :codename do |sp| %>
 				<li>
 					<%= sp.box %>
 					<%= sp.label %>

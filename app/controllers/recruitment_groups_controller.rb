@@ -2,7 +2,7 @@ class RecruitmentGroupsController < ApplicationController
   # GET /recruitment_groups
   # GET /recruitment_groups.xml
   def index
-    @recruitment_groups = RecruitmentGroup.find(:all)
+    @recruitment_groups = RecruitmentGroup.all
 
     respond_to do |format|
       format.html # index.html.erb

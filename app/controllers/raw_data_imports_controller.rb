@@ -2,7 +2,7 @@ require 'metamri'
 class RawDataImportsController < ApplicationController
   
   def new
-    @recent_visits = Visit.find(:all, :conditions => ['created_at > ?', 1.month.ago])
+    @recent_visits = Visit.where(:created_at.lt => 1.month.ago).all
     
     respond_to do |format|
       format.html # new.html.erb

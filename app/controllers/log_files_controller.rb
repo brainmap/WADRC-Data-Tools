@@ -7,7 +7,7 @@ class LogFilesController < ApplicationController
   # GET /log_files
   # GET /log_files.xml
   def index
-    @log_files = LogFile.find(:all)
+    @log_files = LogFile.all
 
     respond_to do |format|
       format.html # index.html.erb
@@ -25,7 +25,7 @@ class LogFilesController < ApplicationController
         s = Kernel.Float(e.stimulus_time)
         r = Kernel.Float(e.response_time)
         @response_times << r - s
-      rescue Exception
+      rescue StandardError
          # One of the quantities is not a number, do nothing.
       end
     end

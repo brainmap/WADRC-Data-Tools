@@ -11,7 +11,7 @@ class AnalysesController < ApplicationController
   # GET /analyses
   # GET /analyses.xml
   def index
-    @analyses = Analysis.find(:all, :include => [:user] )
+    @analyses = Analysis.includes(:user).all
 
     respond_to do |format|
       format.html # index.html.erb
@@ -22,9 +22,9 @@ class AnalysesController < ApplicationController
   # GET /analyses/1
   # GET /analyses/1.xml
   def show
-    @analysis = Analysis.find(params[:id], :include => [:analysis_memberships, :image_datasets])
+    @analysis = Analysis.includes(:analysis_memberships).includes(:image_datasets).find(params[:id])
     @all_analysis_members = @analysis.analysis_memberships
-    @paginated_analysis_members = @all_analysis_members.paginate(:page => params[:page], :per_page => PER_PAGE)
+    @paginated_analysis_members = @all_analysis_members.page(params[:page]).per(50)
     @total_count = @all_analysis_members.size
     @author = @analysis.user
     

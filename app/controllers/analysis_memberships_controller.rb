@@ -2,7 +2,7 @@ class AnalysisMembershipsController < ApplicationController
   # GET /analysis_memberships
   # GET /analysis_memberships.xml
   def index
-    @analysis_memberships = AnalysisMembership.find(:all)
+    @analysis_memberships = AnalysisMembership.all
 
     respond_to do |format|
       format.html # index.html.erb

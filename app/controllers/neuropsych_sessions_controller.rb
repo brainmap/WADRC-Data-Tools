@@ -2,7 +2,7 @@ class NeuropsychSessionsController < ApplicationController
   # GET /neuropsych_sessions
   # GET /neuropsych_sessions.xml
   def index
-    @neuropsych_sessions = NeuropsychSession.find(:all)
+    @neuropsych_sessions = NeuropsychSession.all
 
     respond_to do |format|
       format.html # index.html.erb

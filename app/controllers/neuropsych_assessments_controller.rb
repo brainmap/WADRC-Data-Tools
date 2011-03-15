@@ -2,7 +2,7 @@ class NeuropsychAssessmentsController < ApplicationController
   # GET /neuropsych_assessments
   # GET /neuropsych_assessments.xml
   def index
-    @neuropsych_assessments = NeuropsychAssessment.find(:all)
+    @neuropsych_assessments = NeuropsychAssessment.all
 
     respond_to do |format|
       format.html # index.html.erb

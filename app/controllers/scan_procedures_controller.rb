@@ -9,7 +9,7 @@ class ScanProceduresController < ApplicationController
   # GET /scan_procedures
   # GET /scan_procedures.xml
   def index
-    @scan_procedures = ScanProcedure.find(:all, :order => 'codename')
+    @scan_procedures = ScanProcedure.order(:codename).all
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => @scan_procedures }

@@ -3,7 +3,7 @@ class ImageDatasetQualityChecksController < ApplicationController
   # GET /image_dataset_quality_checks.xml
   def index
     @image_dataset = ImageDataset.find(params[:image_dataset_id]) if params[:image_dataset_id]
-    @image_dataset_quality_checks = @image_dataset ? @image_dataset.image_dataset_quality_checks : ImageDatasetQualityCheck.find(:all, :include => :user)
+    @image_dataset_quality_checks = @image_dataset ? @image_dataset.image_dataset_quality_checks : ImageDatasetQualityCheck.includes(:user).all
 
     respond_to do |format|
       format.html # index.html.erb

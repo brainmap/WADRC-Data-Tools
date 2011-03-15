@@ -14,11 +14,11 @@ class ImageSearchesController < ApplicationController
   
   def show
     @image_search = ImageSearch.find_by_id(params[:id])
-    @all_image_matches = @image_search.matching_images
-    @paginated_image_matches = @all_image_matches
-    @total_count = @all_image_matches.size
-    @analysis = Analysis.new
-    @total_count.times { @analysis.analysis_memberships.build }
+    # @all_image_matches = @image_search.matching_images
+    # @paginated_image_matches = @all_image_matches
+    # @total_count = @all_image_matches.size
+    # @analysis = Analysis.new
+    # @total_count.times { @analysis.analysis_memberships.build }
 
     respond_to do |format|
       format.html # show.html.erb

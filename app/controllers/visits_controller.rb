@@ -4,7 +4,6 @@ class VisitsController < ApplicationController
   # GET /visits
   # GET /visits.xml  
   def index
-    # @visits = Visit.search(params[:search]).paginate(:page => params[:page], :per_page => PER_PAGE)
     # Remove default scope if sorting has been requested.
     if !params[:search].blank? && !params[:search][:meta_sort].blank?
       @search = Visit.unscoped.search(params[:search])
@@ -34,9 +33,9 @@ class VisitsController < ApplicationController
   
   # GET /visits/assigned_to/:user_login
   def index_by_user_id
-    @visits = Visit.assigned_to(
-      User.find_by_login(params[:user_login]).id
-    ).paginate(:page => params[:page], :per_page => PER_PAGE)
+    @user = User.find_by_login(params[:user_login])
+    @search = Visit.assigned_to(@user.id).search
+    @visits = @search.relation.page(params[:page])
     
     @collection_title = "All visits assigned to #{params[:user_login]}"
     
@@ -99,12 +98,13 @@ class VisitsController < ApplicationController
   # GET /visits/1.xml
   def show
     @visit = Visit.find_by_id(params[:id])
-    @visits = Visit.find(:all, :conditions => { :date => @visit.date-1.month..@visit.date+1.month } )
+    # Grab the visits within 1 month +- visit date for "previous" and "back" hack.
+    @visits = Visit.where(:date => @visit.date-1.month..@visit.date+1.month).all
     idx = @visits.index(@visit)
     @older_visit = idx + 1 >= @visits.size ? nil : @visits[idx + 1]
     @newer_visit = idx - 1 < 0 ? nil : @visits[idx - 1]
    
-    @image_datasets = @visit.image_datasets# .paginate(:page => params[:page], :per_page => PER_PAGE)
+    @image_datasets = @visit.image_datasets.page(params[:page])
     @participant = @visit.try(:enrollments).first.try(:participant) 
     @enumbers = @visit.enrollments
 
