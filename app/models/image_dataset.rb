@@ -32,6 +32,7 @@ class ImageDataset < ActiveRecord::Base
   accepts_nested_attributes_for :physiology_text_files, :allow_destroy => true
   
   serialize :dicom_taghash
+  attr_unsearchable :dicom_taghash
   
   delegate :participant, :to => :visit
   
@@ -115,9 +116,6 @@ class ImageDataset < ActiveRecord::Base
       raise StandardError, "Could not find file #{File.join(path, scanned_file)} on filesystem."
     end
     
-    # puts "original_zip_status: #{original_zip_status}"
-    # puts "file_to_scan: #{file_to_scan}"
-
     ds = RawImageDataset.new(path, RawImageFile.new(file_to_scan))
     png_path = RawImageDatasetThumbnail.new(ds).create_thumbnail
     tf = File.open(png_path)

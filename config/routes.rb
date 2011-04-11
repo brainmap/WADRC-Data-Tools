@@ -20,11 +20,11 @@ WADRCDataTools::Application.routes.draw do
   resources :analysis_memberships
   resources :users
   resource :session
-  resources :visits, :shallow => true do #|visit| #:collection => { :complete => :get, :incomplete => :get, :recently_imported => :get, :by_month => :get, :by_week => :get, :find => :get, :found => :get }, 
-    resources :image_datasets, :shallow => true do # |image_dataset|
-      resources :image_comments,:image_dataset_quality_checks
-    end
+  resources :image_datasets, :shallow => true do # |image_dataset|
+    resources :image_comments,:image_dataset_quality_checks
   end
+  
+  resources :visits
     
   resources :raw_image_files
   resources :analyses

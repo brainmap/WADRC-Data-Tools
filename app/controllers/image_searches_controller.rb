@@ -14,10 +14,11 @@ class ImageSearchesController < ApplicationController
   
   def show
     @image_search = ImageSearch.find_by_id(params[:id])
+    @paginated_image_matches = ImageDataset.limit(10).includes(:visit => :enrollments).includes(:analysis_memberships).all
     # @all_image_matches = @image_search.matching_images
     # @paginated_image_matches = @all_image_matches
     # @total_count = @all_image_matches.size
-    # @analysis = Analysis.new
+    @analysis = Analysis.new
     # @total_count.times { @analysis.analysis_memberships.build }
 
     respond_to do |format|
