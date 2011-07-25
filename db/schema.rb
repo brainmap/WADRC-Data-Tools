@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110310231239) do
+ActiveRecord::Schema.define(:version => 20110725213148) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -272,6 +272,7 @@ ActiveRecord::Schema.define(:version => 20110310231239) do
     t.string   "scanner_source"
     t.integer  "created_by_id"
     t.string   "dicom_study_uid"
+    t.date     "compiled_at"
   end
 
 end

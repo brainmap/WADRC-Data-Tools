@@ -185,11 +185,11 @@ class VisitsController < ApplicationController
   def send_confirmation
     @visit=Visit.find(params[:id])
     begin
-      PandaMailer.visit_confirmation(@visit, {:send_to => params[:email]}).deliver
+      PandaMailer.visit_confirmation(@visit, params[:email]).deliver
       flash[:notice] = "Email was succesfully sent."
     rescue StandardError => error
       logger.info error
-      flash[:error] = "Sorry, your email was not delivered: " + load_error.to_s
+      flash[:error] = "Sorry, your email was not delivered: " + error.to_s
     end
     redirect_to @visit
   end

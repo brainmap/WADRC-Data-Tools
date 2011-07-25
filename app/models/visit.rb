@@ -24,6 +24,7 @@ class Visit < ActiveRecord::Base
   has_many :enrollments, :through => :enrollment_visit_memberships, :uniq => true
   accepts_nested_attributes_for :enrollments, :reject_if => :all_blank, :allow_destroy => true
   before_validation :lookup_enrollments
+  before_validation :update_compiled_at_date, :if => Proc.new {|v| v.compile_folder_changed? }
     
     
   scope :complete, where(:compile_folder => "yes")
@@ -258,6 +259,10 @@ class Visit < ActiveRecord::Base
 
     end
 
+  end
+  
+  def update_compiled_at_date
+    self.compiled_at = Time.zone.now
   end
 
 end
