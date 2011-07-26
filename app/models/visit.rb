@@ -35,7 +35,9 @@ class Visit < ActiveRecord::Base
   }
   scope :in_scan_procedure, lambda { |protocol_id|
     { :conditions => { :scan_procedure_id => protocol_id } }
-  }  
+  }
+  
+  scope :without_enrollments, where("id NOT IN (SELECT visit_id FROM enrollment_visit_memberships)")
   
   paginates_per 50
   
@@ -212,6 +214,103 @@ class Visit < ActiveRecord::Base
     
     return @initials
   end
+  
+  def assign_enrollments
+    puts enum = infer_enrollments
+    unless enum.blank?
+      e = Enrollment.find_or_create_by_enumber(enum)
+      puts e.enumber
+      enrollments << e
+    end
+  end
+    
+  
+  def infer_enrollments
+    if aic = rmr_aiclike?
+      study = ''
+    elsif rmr_datelike?
+      study = ''
+    elsif rmr_digits.length == 4
+      study = rmr_number_enum
+    else
+      study = rmr_study
+    end
+    study ||= ''
+    study.downcase!
+    guess = (study.present? && normed_rmr_digits.present?) ? study + normed_rmr_digits : ''
+    # {:rmr => rmr, :guess => guess, :enrollments_list => enrollments_list, :best => enrollments_list.present? ? enrollments_list : guess}
+  end
+  
+  def rmr_agreement(list, guess)
+    list.include?(guess) ? true : false
+  end
+  
+  def rmr_aiclike?
+    match = /aic(\d+)/i.match(rmr)
+    match[1] if match
+  end
+  
+  def rmr_datelike?
+    return false unless rmr_digits.length > 4
+    begin
+      date = case rmr_digits
+      when /^(\d{1,2})(\d{1,2})(\d{2})$/
+        Date.civil($3.to_i + 2000, $1.to_i, $2.to_i)
+      when /^(\d{1,2})(\d{1,2})(\d{4})$/
+        Date.civil($3.to_i, $1.to_i, $2.to_i)
+      else
+        Date.parse(rmr_digits)
+      end
+    
+      (1990...Date.today.year).include? date.year
+    rescue ArgumentError
+      false
+    end
+    
+  end
+  
+  
+  def rmr_study
+    match = /([a-z]+)\d*/.match(rmr)
+    # Egad, this is ghastly - Hard-code our scanner tech's initials.
+    match = /(?:RMR)?(?:MA)?(?:RF)?([A-z]{3})(?:MRI)?/.match(rmr) unless match
+    match ? match[1] : ''
+  end
+  
+  def rmr_number_enum
+    case rmr_digits.first.to_i
+    when 1
+      return 'tbi'
+    when 2
+      return 'alz'
+    when 4
+      return 'pc'
+    else
+      return nil
+    end
+  end
+  
+  def match_by_rmr_digits?(mri_scan)
+    other_match = /(\d+)/.match(mri_scan.study_rmr)
+    other_digits = other_match ? other_match[1] : ''
+    sorted_digits = [rmr_digits, other_digits].sort_by(&:size)
+    # Ensure that the index of an empty string is nil, not 0.
+    index = other_digits.blank? ? nil : sorted_digits[1].index(sorted_digits[0])
+    [index, rmr_digits, other_digits]
+  end
+  
+  def rmr_digits
+    /(\d+)/.match(rmr) ? /(\d+)/.match(rmr)[1] : ''
+  end
+  
+  def normed_rmr_digits
+    rmr_digits.length == 4 ? rmr_digits[1..-1] : rmr_digits
+  end
+  
+  def spaceship_message(mri_scan)
+    "%s <=> %s (%.3f)" % [rmr, mri_scan.study_rmr]
+  end
+  
   
   # Run before validations. Fixes the many-to-many association between visits
   # and enrollments from the nested_attributes enrollment_params hash passed in

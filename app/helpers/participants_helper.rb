@@ -1,3 +1,4 @@
+# coding: utf-8
 module ParticipantsHelper
   def flag(field)
     field == 0 ? "" : "x"

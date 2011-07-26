@@ -1,6 +1,10 @@
 <div id="search">
-	<%= form_for @search do |f| %>
-		<%= f.text_field :path_contains %>
+	<%= simple_form_for @search do |f| %>
+		<%= f.input :path_contains, :required => false %>
+		<%= f.input :series_description_contains, :required => false %>
+		<%= f.input :rmr_contains, :required => false %>
+		<%= f.input :visit_id_eq, :required => false %>
+		<%= f.button :submit %>
 	<% end %>
 </div>
 

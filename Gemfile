@@ -2,6 +2,9 @@ source 'http://rubygems.org'
 
 gem 'rails', '~>3.0.4'
 
+# gem 'sqlite3', '~>1.3.3'
+gem 'mysql2', '~>0.2.0'
+
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 if ENV['RAILS_ENV'] == "production"
@@ -11,8 +14,8 @@ else
 end
 
 gem 'builder', '~>2.1.2'
-gem 'sqlite3', '~>1.3.3'
-gem 'RedCloth', '4.0'
+gem 'RedCloth', '~>4.2.7'
+# gem 'bluecloth', '~>2.1.0'
 gem 'paperclip', '~>2.3.8'
 gem 'ruport', '~>1.6.3'
 gem 'acts_as_reportable'
@@ -20,6 +23,7 @@ gem 'kaminari'
 gem 'meta_where'
 gem 'meta_search'
 gem 'rmagick'
+gem 'simple_form'
 
 # Use unicorn as the web server
 # gem 'unicorn'
@@ -41,15 +45,20 @@ gem 'capistrano', '~>2.5.19'
 # put test-only gems in this group so their generators
 # and rake tasks are available in development mode:
 group :development, :test do
-  gem 'rspec', '~>2.4'
-  gem 'rspec-rails', '~>2.4'
-  gem 'cucumber'
-  gem 'cucumber-rails'
+  gem 'rspec', '~>2.4.0'
+  gem 'rspec-rails', '~>2.4.0'
+  # gem 'gherkin', '~>2.1.5'
+  # gem 'cucumber', '~>0.7.3'
+  gem 'cucumber-rails', '~>0.4.1'
+  # gem 'capybara'
   gem 'webrat'
+  gem 'database_cleaner'
   gem 'pickle'
   gem 'autotest-rails'
   gem 'factory_girl_rails', '~>1.0.1'
   gem 'chronic'
   gem 'launchy'
   gem 'timecop'
+  gem 'sqlite3-ruby', :require => 'sqlite3'
+  gem 'hirb', '~>0.4.5'
 end

@@ -1,7 +1,4 @@
 class ImageDatasetsController < ApplicationController
-  
-  PER_PAGE = 50
-  
   before_filter :set_current_tab
   
   def set_current_tab
@@ -22,7 +19,13 @@ class ImageDatasetsController < ApplicationController
   # GET /image_datasets
   # GET /image_datasets.xml
   def index
-    # if params[:visit_id]
+    if params[:visit_id]
+      @visit = Visit.find(params[:visit_id])
+      @search = @visit.image_datasets.search(params[:search])
+      @image_datasets = @search.relation.page(params[:page]).per(50).all
+      @total_count = @image_datasets.count
+      @page_title = "All Image Datasets for Visit #{@visit.rmr}"
+    else
     #   @image_datasets = ImageDataset.find_all_by_visit_id(params[:visit_id])# .paginate(:page => params[:page], :per_page => PER_PAGE)
     #   @visit = Visit.find(params[:visit_id])
     #   @total_count = @image_datasets.count
@@ -33,7 +36,7 @@ class ImageDatasetsController < ApplicationController
       # @total_count = all_images.size # I'm not sure where this method is coming from, but it's breaking in ActiveResource
       @total_count = ImageDataset.count
       @page_title = "All Image Datasets"
-    # end
+    end
     
     respond_to do |format|
       format.html # index.html.erb

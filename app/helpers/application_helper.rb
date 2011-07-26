@@ -1,3 +1,4 @@
+# coding: utf-8
 # Methods added to this helper will be available to all templates in the application.
 module ApplicationHelper
   def key_val_table(id, options)
@@ -55,7 +56,7 @@ module ApplicationHelper
     elsif a1 == nil or a1 == 0 or a2 == nil or a2 == 0
       ""
     else
-      "&epsilon;4 –".html_safe
+      "&epsilon;4 +".html_safe
     end
   end
 
