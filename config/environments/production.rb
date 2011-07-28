@@ -71,4 +71,10 @@ WADRCDataTools::Application.configure do
     :tls            => true
   }
   config.action_mailer.default_url_options = {:host => 'nelson'}
+  
+  config.middleware.use ExceptionNotifier,
+    :email_prefix => "[Exception] ",
+    :sender_address => %{"Exception Notifier" <noreply_johnson_lab@medicine.wisc.edu>},
+    :exception_recipients => %w{noreply_johnson_lab@madison.wisc.edu}
+    
 end
