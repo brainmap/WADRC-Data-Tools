@@ -3,6 +3,7 @@ class PandaMailer < ActionMailer::Base
   default :from => "noreply_johnson_lab@medicine.wisc.edu"
   
   def visit_confirmation(visit, email_params)
+    email_params.symbolize_keys!
     raise(StandardError, "Unable to send to external email addresses without email credentials.") if !email_params['send_to'].end_with?('@medicine.wisc.edu') unless self.class.smtp_credentialed?
     @visit = visit
     @username = visit.created_by.login if visit.created_by
