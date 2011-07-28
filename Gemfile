@@ -8,7 +8,7 @@ gem 'mysql2', '~>0.2.0'
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 if ENV['RAILS_ENV'] == "production"
-  gem 'metamri', '~>0.2.5'
+  gem 'metamri', '~>0.2.8'
 else
   gem 'metamri', :path => '~/code/metamri'
 end
