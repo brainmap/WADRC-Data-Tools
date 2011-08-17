@@ -118,7 +118,7 @@ class VisitsController < ApplicationController
   # GET /visits/new.xml
   def new
     @visit = Visit.new
-    @visit.enrollment = Enrollment.new
+    @visit.enrollments << Enrollment.new
 
     respond_to do |format|
       format.html # new.html.erb
