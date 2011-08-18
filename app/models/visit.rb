@@ -198,12 +198,12 @@ class Visit < ActiveRecord::Base
     return uid
   end
   
-  def initials
-    initials_from_dicom_info
+  def initials_from_dicom_or_model
+    initials.blank? ? initials_from_dicom_info : initials
   end
   
   def initials_from_dicom_info
-    @initials ||= ''
+    @initials ||= nil
     return @initials unless @initials.blank?
     
     image_datasets.each do |dataset|
@@ -331,30 +331,37 @@ class Visit < ActiveRecord::Base
   # only do so within the old scope. What we want is to replace the old
   # records with new ones.
   def lookup_enrollments
-    original_enrollments = enrollments.dup
+    enrollments_from_params = enrollments.dup
     enrollments.clear
-    original_enrollments.each_with_index do |original_enrollment, i|
-      enrollment = Enrollment.find_or_create_by_enumber(original_enrollment.enumber)
+    enrollments_from_params.each do |enrollment_from_params|
+      enrollment = Enrollment.find_or_initialize_by_enumber(enrollment_from_params.enumber)
       unless enrollment.valid?
-        errors.add(:enrollments, "Enrollment invalid")
+        errors.add(:enrollments, "Enrollment invalid for #{enrollment.enumber}")
         raise ActiveRecord::Rollback
       end
-      memberships = enrollment_visit_memberships.where(:enrollment_id => enrollment.id)
+      # 
       # If the enrollment was marked for destruction, get rid of the 
       # linking membership.  (Not the enrollment itself).
-      if original_enrollment.marked_for_destruction?
-        memberships.each {|membership| membership.delete}
+      # Otherwise, add the enrollment to the list of enrollments for this visit.
+      if enrollment_from_params.marked_for_destruction?
+        enrollment_visit_memberships.where(:enrollment_id => enrollment.id, :visit_id => id).delete
+      else
+        enrollments << enrollment        
+      end
+      
+
+        
       # If there's not already an existing membership between these two, create one.
       # If the membership already exists, we don't have to worry about it, so don't
       # even add it back into enrollments.
-      elsif memberships.empty?
-        # Since the enrollment has been found new, we need to do some monkey-ing
-        # around to rebuild the has-and-belons-to-many relation.
-        enrollments[i] = enrollment
-        enrollments[i].visits << self 
-      elsif enrollment.marked_for_deletion?
-        memberships.first.delete        
-      end
+      # elsif memberships.empty?
+      #   # Since the enrollment has been found new, we need to do some monkey-ing
+      #   # around to rebuild the has-and-belongs-to-many relation.
+      #   enrollments[i] = enrollment
+      #   enrollments[i].visits << self 
+      # elsif enrollment.marked_for_deletion?
+      #   memberships.first.delete        
+      # end
 
     end
 

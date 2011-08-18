@@ -27,6 +27,7 @@ Feature: View Visits
     And I fill in "enumber" with "enumber999"
     And I press "Edit visit"
     Then I should be on the visit's page
+    And I should see "visit was successfully updated"
     And I should see "enumber999"
 
   
@@ -39,6 +40,7 @@ Feature: View Visits
     And I fill in "enumber" with "enumber001"
     And I press "Edit visit"
     Then I should be on the visit's page
+    And I should see "visit was successfully updated"  
     And I should see "enumber001"
 
   Scenario: Edit a Visit with a bad enumber
@@ -48,7 +50,22 @@ Feature: View Visits
     And I fill in "enumber" with "enumber"
     And I press "Edit visit"
     Then I should be on the visit's page
+    And I should not see "visit was successfully updated"
     And I should see "Enrollment invalid"  
+    
+  Scenario: Create a visit
+    Given I am logged in as "admin" with password "secret"
+    And an enrollment exists with enumber: "enumber001"
+    When I go to the new visit page
+    Then I should see "New Visit"
+    And I select "2011-8-18" as the date
+    And I fill in "enumber" with "enumber001"
+    And I fill in "initials" with "abc"
+    And I press "create visit"
+    Then I should see "visit was successfully created"
+    And I should see "enumber001"
+    And I should see "2011-08-18"
+    And I should see "abc"
     
   Scenario: View Scan Procedures
     Given I am not logged in

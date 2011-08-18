@@ -136,7 +136,6 @@ class VisitsController < ApplicationController
   # POST /visits.xml
   def create
     @visit = Visit.new(params[:visit])
-    @visit.enrollment = Enrollment.find_or_create_by_enumber(params[:visit][:enrollment_attributes][:enumber])
 
     respond_to do |format|
       if @visit.save
