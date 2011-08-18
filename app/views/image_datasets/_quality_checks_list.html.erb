@@ -4,7 +4,7 @@
   <% for qc in quality_checks %>
     <div class="sticky">
       <div style="float:right; text-align:right">
-        <small>checked by <%= qc.user.login %></small><br />
+        <small>checked by <%= qc.user.login %> at <%= qc.created_at.to_s(:ymdhms) %></small><br />
         <%= link_to('edit', edit_image_dataset_quality_check_path(qc)) if current_user == qc.user %> |
 				<%= link_to('delete', qc, :confirm => 'Are you sure?', :method => :delete) %>
       </div>
@@ -14,7 +14,7 @@
         :fov_cutoff => "#{qc.fov_cutoff} – #{qc.fov_cutoff_comment}",
         :field_inhomogeneity => "#{qc.field_inhomogeneity} – #{qc.field_inhomogeneity_comment}",
         :ghosting_wrapping => "#{qc.ghosting_wrapping} – #{qc.ghosting_wrapping_comment}",
-        :banding => "#{qc.banding} – #{qc.banding}",
+        :banding => "#{qc.banding} – #{qc.banding_comment}",
         :registration_risk => "#{qc.registration_risk} – #{qc.registration_risk_comment}",
         :nos_concerns => "#{qc.nos_concerns} – #{qc.nos_concerns_comment}",
         :motion_warning => "#{qc.motion_warning} – #{qc.motion_warning_comment}",

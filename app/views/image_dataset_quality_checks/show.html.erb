@@ -1,6 +1,6 @@
 <div id="heading_and_link">
   <h1>Image Quality Check</h1>
-  <p>created by <%=h @idqc.user.login %> on <%= Time.now.to_s(:ymdhms) %></p>
+  <p>created by <%=h @idqc.user.login %> on <%= @idqc.created_at.to_s(:ymdhms) %></p>
 </div>
 
 <h3>Image Summary:</h3>
