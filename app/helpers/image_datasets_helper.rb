@@ -11,7 +11,7 @@ module ImageDatasetsHelper
     if im_ds.image_dataset_quality_checks.empty?
       link_to_new_qc(im_ds)
     else 
-      link_text = im_ds.image_dataset_quality_checks.last.failing_checks.empty? ? 'Good' :  im_ds.image_dataset_quality_checks.last.failing_checks.to_a.join(', ')
+      link_text = im_ds.image_dataset_quality_checks.last.failing_checks.empty? ? 'Good' :  im_ds.image_dataset_quality_checks.last.failing_checks_list
       link_to(link_text, im_ds.image_dataset_quality_checks.last)
     end
   end

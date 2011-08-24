@@ -5,6 +5,7 @@ rescue LoadError => e
 end
 
 class ImageDataset < ActiveRecord::Base
+  EXCLUDED_REPORT_ATTRIBUTES = [:dicom_taghash, :created_at, :updated_at, :visit_id, :thumbnail_file_name, :thumbnail_file_size, :thumbnail_content_type, :thumbnail_updated_at]
   
   # default_includes = [:image_dataset_quality_checks, :analysis_memberships, {:visit => {:enrollment => :participant}}]
   default_scope :order => 'image_datasets.timestamp ASC, image_datasets.path ASC' # :include => default_includes, 
@@ -36,6 +37,8 @@ class ImageDataset < ActiveRecord::Base
   
   delegate :participant, :to => :visit
   
+  # Note: As of 8/24/2011, default excludes (:except => :id) are not working.
+  # Use the Class Constant ImageDataset::EXCLUDED_REPORT_ATTRIBUTES instead.
   acts_as_reportable
   
   # Note - Path is NOT unique (due to PFiles)
@@ -134,6 +137,13 @@ class ImageDataset < ActiveRecord::Base
   
   def geifile?
     scanned_file =~ /^I\./
+  end
+  
+  def self.csv_download(datasets)
+    datasets.report_table (:all, 
+      :except => ImageDataset::EXCLUDED_REPORT_ATTRIBUTES, 
+      :include => :image_dataset_quality_checks
+    ).to_csv
   end
   
   def self.report

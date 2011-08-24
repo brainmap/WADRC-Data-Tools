@@ -4,6 +4,8 @@ class ImageDatasetQualityCheck < ActiveRecord::Base
   belongs_to :user
   belongs_to :image_dataset
   
+  acts_as_reportable :methods => :failing_checks_list
+  
   def failing_checks
     failing_checks = Set.new
     self.attribute_names.each do |name|
@@ -14,6 +16,10 @@ class ImageDatasetQualityCheck < ActiveRecord::Base
       end
     end
     return failing_checks
+  end
+  
+  def failing_checks_list
+    failing_checks.to_a.join(', ')
   end
 
 end

@@ -182,6 +182,9 @@ pre {
  margin: 1em;
  color: #222;
 }
+
+.download_csv { padding-left: 18px; background-image: url(/images/paper-icon.png); background-repeat: no-repeat;}
+
 .fieldWithErrors {
   padding: 2px;
   background-color: red;

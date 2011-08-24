@@ -32,7 +32,8 @@ class ImageDatasetsController < ApplicationController
     #   @page_title = "All Image Datasets for Visit #{@visit.rmr}"
     # else
       @search = ImageDataset.search(params[:search])
-      @image_datasets = @search.relation.page(params[:page]).per(50).all
+      # Don't paginate datasets on CSV download.
+      @image_datasets = params[:format] ? @search.relation : @search.relation.page(params[:page])
       # @total_count = all_images.size # I'm not sure where this method is coming from, but it's breaking in ActiveResource
       @total_count = ImageDataset.count
       @page_title = "All Image Datasets"
@@ -41,6 +42,7 @@ class ImageDatasetsController < ApplicationController
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :text => @image_datasets.to_xml(:except => [:dicom_taghash])}
+      format.csv  { render :csv => ImageDataset.csv_download(@image_datasets) }
     end
   end
 
