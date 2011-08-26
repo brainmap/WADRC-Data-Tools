@@ -72,8 +72,14 @@ class Visit < ActiveRecord::Base
     enrollments.collect {|enroll| enroll.enumber }.join(", ")
   end
   
-  # V is a Metamri VisitRawDataDirectory Object that has already been created 
-  # and v.scan 'ed, so it has datasets.
+  # Create or update an ActiveRecord Visit model using attributes from
+  # a metamri VisitRawDataDirectory
+  # 
+  # === Arguments
+  # 
+  # * <tt>v</tt> -- Metamri::VisitRawDataDirectory. A VisitRawDataDirectory that has already been initialized and v.scan'ed, so it has datasets.
+  # * <tt>created_by</tt> -- WADRC-Data-Tools::User. An optional user who will be credited with creating the Visit.
+  # 
   def self.create_or_update_from_metamri(v, created_by = nil)
     created_by ||= User.first
     
@@ -120,7 +126,7 @@ class Visit < ActiveRecord::Base
           data = ImageDataset.where(:dicom_series_uid => dataset.dicom_series_uid).first
         elsif dataset.pfile? or dataset.geifile?
           data = ImageDataset.where(:path.matches => dataset.directory, :scanned_file.matches => dataset.scanned_file).first
-        else raise StandardError, "Could not identify type of datset #{File.join(dataset.directory, datset.scanned_file)}"
+        else raise StandardError, "Could not identify type of dataset #{File.join(dataset.directory, datset.scanned_file)}"
         end
           
         meta_attrs = dataset.attributes_for_active_record(metamri_attr_options)
@@ -135,15 +141,16 @@ class Visit < ActiveRecord::Base
             raise StandardError, "Image Dataset #{data.path} not valid: #{e}"
           end
         else
-          logger.debug "building fresh visit.image_datasets.build(#{meta_attrs})"
-          visit.image_datasets.build(meta_attrs)  
+          logger.debug "building fresh visit. image_datasets.build(#{meta_attrs})"
+          visit.image_datasets.build(meta_attrs)
+          logger.debug(visit.image_datasets.last.errors.inspect) unless visit.image_datasets.last.valid?
         end
 
       rescue Exception => e
         puts "Error building image_dataset. #{e}"
         raise e
       ensure
-        metamri_attr_options[:thumb].close if metamri_attr_options.kind_of? File
+        metamri_attr_options[:thumb].close if metamri_attr_options[:thumb].kind_of? File
       end
     end
     

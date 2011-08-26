@@ -18,6 +18,13 @@ MYSQLDB = "access"
 namespace :db do
   
   namespace :access do
+    desc "Infer Enrollments"
+    task(:infer_enrollments => :environment) do
+      Visit.without_enrollments.each do |v|
+        v.assign_enrollments
+      end
+    end
+    
     desc "Assign an enrollment to a visit using enumber info from the Access DB."
     task(:associate_enrollments_to_visits => :environment) do
       Visit.all.each do |v|

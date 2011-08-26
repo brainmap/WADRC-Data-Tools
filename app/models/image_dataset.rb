@@ -139,11 +139,15 @@ class ImageDataset < ActiveRecord::Base
     scanned_file =~ /^I\./
   end
   
-  def self.csv_download(datasets)
-    datasets.report_table (:all, 
+  def self.csv_download(datasets, include_options = {})
+    datasets.report_table(:all, 
       :except => ImageDataset::EXCLUDED_REPORT_ATTRIBUTES, 
-      :include => :image_dataset_quality_checks
+      :include => include_options
     ).to_csv
+  end
+  
+  def dataset_uid
+    dicom_series_uid || image_uid
   end
   
   def self.report

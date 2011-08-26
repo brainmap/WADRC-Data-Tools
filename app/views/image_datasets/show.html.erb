@@ -43,15 +43,18 @@
 		<%= render :partial => 'dicom_taghash', :locals => { :dataset => @image_dataset }%>
 	</div>
 	<%= clearing_br %>
-	
+
+	<%= content_tag :p, "SERIES UID: %s" % @image_dataset.dicom_series_uid, :class => "uid" if @image_dataset.dicom_series_uid %>
+	<%= content_tag :p, "IMAGE UID: %s" % @image_dataset.image_uid, :class => "uid" if @image_dataset.image_uid %>
+	<%= content_tag :p, "DATASET UID: %s" % @image_dataset.dataset_uid, :class => "uid" if @image_dataset.dataset_uid %>
 		
   
   <!-- <h3>Physiology Files:</h3>
   <div id="physiology-files-list">
     <ul>
-      <% for pf in @image_dataset.physiology_text_files %>
-        <li><%= pf.filepath %></li>
-      <% end %>
+      <%# for pf in @image_dataset.physiology_text_files %>
+        <li><%#= pf.filepath %></li>
+      <%# end %>
     </ul>
   </div> -->
   

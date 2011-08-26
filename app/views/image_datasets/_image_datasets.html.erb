@@ -2,7 +2,7 @@
   
 	<%# Set thumbnail display defualt  %>
   <% include_thumbnails = false if include_thumbnails.nil? %>
-	<caption><%= pluralize image_datasets.count, 'datasets' %></caption>
+	<caption><%= pluralize image_datasets.total_count, 'datasets' %></caption>
   
   <thead>
     <tr>

@@ -1,5 +1,48 @@
+require 'etc'
+
 # Poll DICOM images to verify metadata in the Database.
 namespace :dicom do
+  
+  desc "Import a visit. with DIR=dir"
+  task(:import_visit => :environment) do
+    dir = ENV['DIR']
+    raise ArgumentError, "Visit Directory: #{dir} doesn't appear to be a directory. Use `DIR=/Data/vtrak1/raw/data/subj01 rake dicom:import_visit`" unless File.directory? dir
+    metamri_visit = VisitRawDataDirectory.new(dir)
+    metamri_visit.scan
+    
+    user = User.find_by_login(Etc.getlogin)
+    
+    Visit.create_or_update_from_metamri(metamri_visit, user)
+  end
+  
+  desc "Import a study directory. with DIR=dir"
+  task(:import_study => :environment) do
+    study = ENV['DIR']
+    raise ArgumentError, "Study Directory: #{study} doesn't appear to be a directory. Use `DIR=/Data/vtrak1/raw/data/ rake dicom:import_visit`" unless File.directory? study
+    user = User.find_by_login(Etc.getlogin)
+
+    Pathname.new(study).entries.each do |dir|
+      next if dir.to_s =~ /^\./
+      next if File.symlink? dir
+      visit_dir = File.join(study, dir)
+      
+      begin
+        metamri_visit = VisitRawDataDirectory.new(visit_dir)
+        metamri_visit.scan
+        Visit.create_or_update_from_metamri(metamri_visit, user)
+      rescue StandardError => e
+        puts "There was a problem scanning a dataset in #{visit_dir}... skipping."
+        puts "Exception message: #{e.message}"
+        Rails.logger.error "There was a problem scanning a dataset in #{visit_dir}... skipping."
+        Rails.logger.error "Exception message: #{e.message}"
+        Rails.logger.error e.backtrace
+        raise e
+      ensure
+        v = nil
+      end
+    end
+  end
+  
   desc "Refresh ImageDataset information from the filesystem."
   task(:refresh_datasets => :environment) do
     @updated = []

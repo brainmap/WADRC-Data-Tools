@@ -32,17 +32,37 @@ class ImageDatasetsController < ApplicationController
     #   @page_title = "All Image Datasets for Visit #{@visit.rmr}"
     # else
       @search = ImageDataset.search(params[:search])
-      # Don't paginate datasets on CSV download.
-      @image_datasets = params[:format] ? @search.relation : @search.relation.page(params[:page])
+      
+      # Set pagination and reporting options depending on the requested format
+      # (ie Don't paginate datasets on CSV download.)
+      if params[:format]
+        @image_datasets = @search.relation
+        
+        # Eventually, we'll be able to set exactly what we want included in the 
+        # report from the web interface. For now, we'll do it programatically 
+        # here in the controller.
+        light_include_options = :image_dataset_quality_checks
+        heavy_include_options = {
+          :image_dataset_quality_checks => {:except => [:id]},
+          :visit => {:methods => :age_at_visit, :only => [:scanner_source, :date], :include => {
+            :enrollments => {:only => [:enumber], :include => { 
+              :participant => { :methods => :genetic_status, :only => [:gender, :wrapnum, :ed_years] }
+            }}
+          }}
+        }
+      else
+        @image_datasets = @search.relation.page(params[:page])
+      end
+      
       # @total_count = all_images.size # I'm not sure where this method is coming from, but it's breaking in ActiveResource
       @total_count = ImageDataset.count
       @page_title = "All Image Datasets"
     end
-    
+        
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :text => @image_datasets.to_xml(:except => [:dicom_taghash])}
-      format.csv  { render :csv => ImageDataset.csv_download(@image_datasets) }
+      format.csv  { render :csv => ImageDataset.csv_download(@image_datasets, heavy_include_options) }
     end
   end
 
