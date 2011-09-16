@@ -8,7 +8,7 @@
 	    <th>Wrap Number</th>
 	    <th>Years of Education</th>
 	    <th>Notes</th>
-	    <th>ApoE</th>
+	    <!-- <th>ApoE</th> -->
 	    <th></th>
     </tr>
   </thead>
@@ -25,13 +25,13 @@
         <td>
           <%= popup_note(p.note.nil? ? "" : "peek", "<p>#{p.note}</p>")%>
         </td>
-        <td>
-          <%= popup_note(genetic_status(p.apoe_e1, p.apoe_e2), key_val_table('genetic_status_details', {
+        <!-- <td>
+          <%#= popup_note(genetic_status(p.apoe_e1, p.apoe_e2), key_val_table('genetic_status_details', {
             :Allele_1 => allele(p.apoe_e1),
             :Allele_2 => allele(p.apoe_e2),
             :Processor => p.apoe_processor
           }))%>
-        </td>
+        </td> -->
         <td><%= link_to "view", p %></td>
       </tr>
     <% end %>
