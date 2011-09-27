@@ -19,7 +19,6 @@ WADRCDataTools::Application.routes.draw do
   resources :participants
   resources :analysis_memberships
   resources :users
-  resource :session
   resources :image_datasets, :shallow => true do # |image_dataset|
     resources :image_comments,:image_dataset_quality_checks
   end
@@ -39,13 +38,7 @@ WADRCDataTools::Application.routes.draw do
   resources :log_files
   resources :raw_data_imports
 
-  match '/signup', :controller => 'users', :action => 'new', :as => :signup
-  match '/login', :controller => 'sessions', :action => 'new', :as => :login
-  match '/logout', :controller => 'sessions', :action => 'destroy', :as => :logout
-
   root :to => "visits#index"
-
-  match ':controller(/:action(/:id(.:format)))'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

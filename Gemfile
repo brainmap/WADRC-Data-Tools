@@ -25,6 +25,7 @@ gem 'meta_search'
 gem 'rmagick'
 gem 'simple_form'
 gem 'exception_notification', "~> 2.4.1", :require => 'exception_notifier'
+gem 'clearance'
 
 # Use unicorn as the web server
 # gem 'unicorn'

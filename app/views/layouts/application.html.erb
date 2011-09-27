@@ -14,12 +14,12 @@
     <div id="top_bar">
       <h1 id="page_title">WADRC Imaging Data Tools</h1>
       <p id="user-info">
-        <% if logged_in? %>
-          Hi, <strong><%=h current_user.login %></strong> | <%= link_to 'Logout', logout_path %>
+        <% if signed_in? %>
+          Hi, <strong><%=h current_user.login %></strong> | <%= link_to 'Sign Out', sign_out_path, :method => :delete %>
         <% else %>
-          Howdy, <strong>stranger.</strong> | 
-          <%= link_to 'Login', login_path %>
-          <%= link_to 'Sign Up', signup_path %>
+          Howdy, <strong>stranger.</strong> 
+          <%= link_to 'Sign In', sign_in_path %>
+          <%= link_to 'Sign Up', sign_up_path %>
         <% end %>
       </p>
     </div>
@@ -40,14 +40,14 @@
             <li <%= "class=current" if @current_tab == "scan_procedures" %>>
               <%= link_to "ScanProcedures", scan_procedures_path %>
             </li>
-            <li <%= "class=current" if @current_tab == "analyses" %>>
-              <%= link_to "Analyses", analyses_path %>
-            </li>
+            <!-- <li <%#= "class=current" if @current_tab == "analyses" %>>
+              <%#= link_to "Analyses", analyses_path %>
+            </li> -->
             <li <%= "class=current" if @current_tab == "image_datasets" %>>
               <%= link_to "Image Dataset Search", image_datasets_path %>
             </li>
-            <!-- <li <%= "class=current" if @current_tab == "log_files" %>>
-              <%= link_to("Log files", log_files_path) %>
+            <!-- <li <%#= "class=current" if @current_tab == "log_files" %>>
+              <%#= link_to("Log files", log_files_path) %>
             </li> -->
           </ul>
         </div>

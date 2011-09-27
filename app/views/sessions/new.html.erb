@@ -1,24 +1,30 @@
-<%= form_tag session_path do -%>
+<%= form_for :session, :url => session_path do |form| -%>
 
 <%= image_tag 'wadrc_logo.png' %><br/>
 <h1>Sorry, you must be logged in to continue.</h1>
-<p>This login is <em>only</em> for the Panda, <strong>not</strong> your Novel or Linux login.</p>
+<p>This login is <em>only</em> for the Panda, <strong>not</strong> your Novel or Linux login. Contact Jen for signup information.</p>
 
 <table>
   <tr>
-    <td><%= label :login, "Login" %></td>
-    <td><%= text_field_tag 'login' %></td>
+    <td><%= form.label :email, "Email" %></td>
+    <td><%= form.text_field 'email' %></td>
   </tr>
   <tr>
-    <td><%= label :password, "Password" %></td>
-    <td><%= password_field_tag 'password' %></td>
+    <td><%= form.label :password, "Password" %></td>
+    <td><%= form.password_field 'password' %></td>
   </tr>
   <tr>
-    <td><%= label :remember_me, "Remember Me" %></td>
-    <td><%= check_box_tag 'remember_me' %></td>
+    <td><%= form.label :remember_me, "Remember Me" %></td>
+    <td><%= form.check_box 'remember_me' %></td>
   </tr>
   <tr>
-    <td><%= submit_tag 'Log in' %></td>
+    <td><%= form.submit 'Log in' %></td>
   </tr>
 </table>
+
+<ul>
+	<li>
+		<%= link_to 'Forgot password?', new_password_path %>
+	</li>
+</ul>
 <% end -%>
