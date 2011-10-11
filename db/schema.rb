@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110725213148) do
+ActiveRecord::Schema.define(:version => 20110927233623) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -104,6 +104,7 @@ ActiveRecord::Schema.define(:version => 20110725213148) do
     t.datetime "thumbnail_updated_at"
     t.string   "dicom_series_uid"
     t.text     "dicom_taghash"
+    t.string   "image_uid"
   end
 
   add_index "image_datasets", ["dicom_series_uid"], :name => "index_image_datasets_on_dicom_series_uid", :unique => true
@@ -132,6 +133,15 @@ ActiveRecord::Schema.define(:version => 20110725213148) do
     t.integer  "scan_procedure_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "invites", :force => true do |t|
+    t.string   "firstname"
+    t.string   "lastname"
+    t.string   "email"
+    t.string   "invite_code", :limit => 40
+    t.datetime "invited_at"
+    t.datetime "redeemed_at"
   end
 
   create_table "log_file_entries", :force => true do |t|
@@ -248,7 +258,12 @@ ActiveRecord::Schema.define(:version => 20110725213148) do
     t.datetime "remember_token_expires_at"
     t.string   "first_name"
     t.string   "last_name"
+    t.string   "encrypted_password",        :limit => 128
+    t.string   "confirmation_token",        :limit => 128
   end
+
+  add_index "users", ["email"], :name => "index_users_on_email"
+  add_index "users", ["remember_token"], :name => "index_users_on_remember_token"
 
   create_table "visits", :force => true do |t|
     t.date     "date"

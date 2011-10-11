@@ -1,4 +1,6 @@
 WADRCDataTools::Application.routes.draw do
+  resources :invites
+
   resources :physiology_text_files
   resources :neuropsych_assessments
   resources :neuropsych_sessions
@@ -37,6 +39,9 @@ WADRCDataTools::Application.routes.draw do
   resources :scan_procedures
   resources :log_files
   resources :raw_data_imports
+
+  match '/send_invitation/:id' => 'invites#send_invitation', :as => 'send_invitation'
+  match '/signup/:invite_code' => 'users#new', :as => 'redeem_invitation'
 
   root :to => "visits#index"
 

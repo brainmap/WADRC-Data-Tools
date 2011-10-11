@@ -2,7 +2,7 @@
 
 <%= image_tag 'wadrc_logo.png' %><br/>
 <h1>Sorry, you must be logged in to continue.</h1>
-<p>This login is <em>only</em> for the Panda, <strong>not</strong> your Novel or Linux login. Contact Jen for signup information.</p>
+<p>This login is <em>only</em> for the Panda, <strong>not</strong> your Novell or Linux login. Contact <%= link_to 'Jen', 'http://www.brainmap.wisc.edu/people/39-J-Oh', :target => '_blank' %> for signup information.</p>
 
 <table>
   <tr>
@@ -12,10 +12,6 @@
   <tr>
     <td><%= form.label :password, "Password" %></td>
     <td><%= form.password_field 'password' %></td>
-  </tr>
-  <tr>
-    <td><%= form.label :remember_me, "Remember Me" %></td>
-    <td><%= form.check_box 'remember_me' %></td>
   </tr>
   <tr>
     <td><%= form.submit 'Log in' %></td>

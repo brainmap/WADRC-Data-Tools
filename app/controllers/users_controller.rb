@@ -1,53 +1,25 @@
-class UsersController < ApplicationController
+class UsersController < Clearance::UsersController
+  # include Clearance::UsersController
+  
+    # Override and add in a check for invitation code
+    def create
+      @user = User.new params[:user]
+      invite_code = params[:invite_code]
+      @invite = Invite.find_redeemable(invite_code)
 
-  skip_before_filter :login_required
-
-  def index 
-    @users = User.all
-  end
-
-  # render new.rhtml
-  def new
-  end
-
-  def create
-    cookies.delete :auth_token
-    # protects against session fixation attacks, wreaks havoc with 
-    # request forgery protection.
-    # uncomment at your own risk
-    # reset_session
-    @user = User.new(params[:user])
-    @user.save
-    if @user.errors.empty?
-      self.current_user = @user
-      redirect_back_or_default('/')
-      flash[:notice] = "Thanks for signing up!"
-    else
-      render :action => 'new'
+      if invite_code && @invite
+        if @user.save
+          @invite.redeemed!
+          flash[:notice] = "Successfully signed up!. " <<
+                           "Now all you have to do is sign in and Panda away!"
+          redirect_to sign_in_path
+        else
+          render :action => "new"
+        end
+      else
+        flash.now[:notice] = "Sorry, that code is not redeemable"
+        render :action => "new"
+      end
     end
-  end
-
-  def show
-    @user = User.find(params[:id])
-  end
-  
-  def edit
-    @user = User.find(params[:id])
-  end
-  
-  def update
-    @user = User.find(params[:id])
-    
-    respond_to do |format|
-       if @user.update_attributes(params[:user])
-         flash[:notice] = 'User was successfully updated.'
-         format.html { redirect_to(@user) }
-         format.xml  { head :ok }
-       else
-         format.html { render :action => "edit" }
-         format.xml  { render :xml => @user.errors, :status => :unprocessable_entity }
-       end
-     end
-  end
 
 end

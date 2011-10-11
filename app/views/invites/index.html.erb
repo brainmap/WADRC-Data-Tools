@@ -1,0 +1,21 @@
+<h1>Listing invites</h1>
+
+<table>
+  <tr>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @invites.each do |invite| %>
+  <tr>
+		<td><%= invite.invited? ? "Invited" : link_to('Invite', send_invitation_path(invite), {:confirm => 'Send invitation?', :method => :post}) %></td>
+    <td><%= invite.email %></td>
+    <td><%= link_to 'Destroy', invite, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Invite', new_invite_path %>
