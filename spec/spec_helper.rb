@@ -7,7 +7,9 @@ require 'rspec/rails'
 # in spec/support/ and its subdirectories.
 Dir[Rails.root.join("spec/support/**/*.rb")].each {|f| require f}
 
-$MRI_DATA = ENV['MRI_DATA'] || '/Data/vtrak1/raw/test/fixtures/rpipe'
+# $MRI_DATA = ENV['MRI_DATA'] || '/Data/vtrak1/raw/test/fixtures/rpipe'
+$MRI_DATA = ENV['MRI_DATA'] || '/Volumes/team*/raw/test/fixtures/rpipe'
+
 
 RSpec.configure do |config|
   # == Mock Framework

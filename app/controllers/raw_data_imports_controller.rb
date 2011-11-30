@@ -48,7 +48,8 @@ class RawDataImportsController < ApplicationController
   end
   
   def validates_truthiness_of_directory(dir)
-    File.directory?(dir) # =~ /^\/Data\/vtrak1\/raw\//
+  ####  File.directory?(dir) # =~ /^\/Data\/vtrak1\/raw\//
+        File.directory?(dir) # =~ /^\/Volumes\/team*\/raw\//
   end
 
 end

@@ -87,6 +87,7 @@ class PhysiologyTextFilesController < ApplicationController
   end
 
   def validates_truthiness_of_directory(dir)
-    dir =~ /Data\/vtrak1\/raw\//
+    # dir =~ /Data\/vtrak1\/raw\//
+     dir =~ /Volumes\/team*\/raw\//
   end
 end
