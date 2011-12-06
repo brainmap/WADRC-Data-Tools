@@ -1,5 +1,4 @@
 source 'http://rubygems.org'
-#   hmmmm
 gem 'rails', '~>3.0.4'
 
 # gem 'sqlite3', '~>1.3.3'
@@ -30,6 +29,9 @@ gem 'exception_notification', "~> 2.4.1", :require => 'exception_notifier'
 
 # Use unicorn as the web server
 # gem 'unicorn'
+
+gem 'jquery-rails'
+gem "devise", ">= 1.4.9"
 
 # Deploy with Capistrano
 gem 'capistrano', '~>2.5.19'
