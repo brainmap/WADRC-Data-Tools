@@ -44,7 +44,7 @@
       :Initials => @visit.initials_from_dicom_or_model,
       :RMR_Number => @visit.rmr,
       :Dicom_DVD => @visit.dicom_dvd == 'no' ? nil : @visit.dicom_dvd,
-      :Assignee => @visit.user.nil? ? nil : @visit.user.login,
+      :Assignee => @visit.user.nil? ? nil : @visit.user.username,
       :Scanner_source => @visit.scanner_source,
       :Created_by => @visit.created_by ? @visit.created_by.login : '',
       :Participant => @participant.nil? ? nil : link_to('view participant', @participant),

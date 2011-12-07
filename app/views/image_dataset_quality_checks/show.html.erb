@@ -1,6 +1,6 @@
 <div id="heading_and_link">
   <h1>Image Quality Check</h1>
-  <p>created by <%=h @idqc.user.login %> on <%= @idqc.created_at.to_s(:ymdhms) %></p>
+  <p>created by <%=h @idqc.user.username %> on <%= @idqc.created_at.to_s(:ymdhms) %></p>
 </div>
 
 <h3>Image Summary:</h3>
@@ -17,7 +17,7 @@
 <div class="two_col_left">
   <h3>Image Quality Check:</h3>
   <%= key_val_table('quality_check_details', {
-    :User => @idqc.user.login,
+    :User => @idqc.user.username,
     :Image_dataset => @idqc.image_dataset_id,
     :incomplete_series => "#{@idqc.incomplete_series} – #{@idqc.incomplete_series_comment}",
     :garbled_series => "#{@idqc.garbled_series} – #{@idqc.garbled_series_comment}",

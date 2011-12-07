@@ -40,7 +40,7 @@ class ImageDatasetQualityChecksController < ApplicationController
     @image_dataset_quality_check = ImageDatasetQualityCheck.find(params[:id])
     @image_dataset = @image_dataset_quality_check.image_dataset
     # respond_to do |format|
-    #       if (@current_user.login != @image_dataset_quality_check.user.login)
+    #       if (@current_user.username != @image_dataset_quality_check.user.username)
     #         flash[:notice] = 'Only the creator of an image quality check can edit it.'
     #         redirect_to(image_dataset_quality_checks_path)
     #       else

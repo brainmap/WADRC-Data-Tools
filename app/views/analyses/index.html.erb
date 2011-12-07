@@ -13,7 +13,7 @@
   <tbody>
     <% for analysis in @analyses %>
     <tr>
-      <td><%=h analysis.user.login unless analysis.user.nil? %></td>
+      <td><%=h analysis.user.username unless analysis.user.nil? %></td>
       <td><%=h analysis.created_at.to_s(:datetime_military) %></td>
       <td><%=h analysis.description %></td>
       <td>

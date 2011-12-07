@@ -77,7 +77,7 @@ class ImageDataset < ActiveRecord::Base
       :enumber => (visit.enrollment.enumber rescue nil),
       :Initials => visit.initials,
       :RMR_Number => visit.rmr,
-      :Assignee => (visit.user.login rescue nil),
+      :Assignee => (visit.user.username rescue nil),
       :Directory_Path => visit.path
     }
   end

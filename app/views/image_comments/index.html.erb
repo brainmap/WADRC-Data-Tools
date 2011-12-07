@@ -9,7 +9,7 @@
 
 <% for image_comment in @image_comments %>
   <tr>
-    <td><%=h image_comment.user.login %></td>
+    <td><%=h image_comment.user.username %></td>
     <td><%=h image_comment.comment %></td>
     <td>
 		<%= link_to '@', image_comment %>

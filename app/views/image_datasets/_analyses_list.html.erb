@@ -1,7 +1,7 @@
 <p><%= "No analyses currently use this dataset" if dataset.analysis_memberships.empty? %></p>
 <% dataset.analysis_memberships.each do |am| -%>
   <p>
-    <%= link_to "#{am.analysis.description} by #{am.analysis.user.login} (#{am.analysis.created_at.to_date.inspect})", am.analysis %>
+    <%= link_to "#{am.analysis.description} by #{am.analysis.user.username} (#{am.analysis.created_at.to_date.inspect})", am.analysis %>
     <%= "<strong> (excluded)</strong>" if am.excluded? %>
   </p>
 <% end -%>

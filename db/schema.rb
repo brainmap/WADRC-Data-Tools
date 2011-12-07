@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110927233623) do
+ActiveRecord::Schema.define(:version => 20111206195644) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -248,8 +248,7 @@ ActiveRecord::Schema.define(:version => 20110927233623) do
   end
 
   create_table "users", :force => true do |t|
-    t.string   "login"
-    t.string   "email"
+    t.string   "username"
     t.string   "crypted_password",          :limit => 40
     t.string   "salt",                      :limit => 40
     t.datetime "created_at"
@@ -258,7 +257,20 @@ ActiveRecord::Schema.define(:version => 20110927233623) do
     t.datetime "remember_token_expires_at"
     t.string   "first_name"
     t.string   "last_name"
+    t.string   "email",                                    :default => "", :null => false
+    t.string   "encrypted_password",        :limit => 128, :default => "", :null => false
+    t.string   "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.integer  "sign_in_count",                            :default => 0
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string   "current_sign_in_ip"
+    t.string   "last_sign_in_ip"
   end
+
+# Could not dump table "users_bak" because of following StandardError
+#   Unknown type '' for column 'id'
 
   create_table "visits", :force => true do |t|
     t.date     "date"

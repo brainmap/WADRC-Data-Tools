@@ -29,7 +29,7 @@
     <% else %>
       <% for qc in quality_checks %>
         <tr>
-          <td><%= qc.user.login %></td>
+          <td><%= qc.user.username %></td>
           <td><%= qc.incomplete_series %></td>
           <td><%= qc.garbled_series %></td>
           <td><%= qc.fov_cutoff %></td>

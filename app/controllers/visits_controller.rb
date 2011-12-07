@@ -28,7 +28,7 @@ class VisitsController < ApplicationController
   end
   
   def assigned_to_who
-    redirect_to assigned_to_path( :user_login => params[:user][:login] )
+    redirect_to assigned_to_path( :user_login => params[:user][:username] )
   end
   
   # GET /visits/assigned_to/:user_login

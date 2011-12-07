@@ -13,14 +13,14 @@
     <% @image_searches.each do |is| %>
       <tr>
       
-        <td><%=h is.user.login unless is.user.nil? %></td>
+        <td><%=h is.user.username unless is.user.nil? %></td>
         <td><%=h is.created_at.to_s(:datetime_military) %></td>
         <td><%=h is.updated_at.to_s(:datetime_military) %></td>
       
         <!-- This cell holds the search criteria which get rendered in a popup  -->
         <td>
           <%= popup_note('peek', key_val_table('search_criteria_popup', {
-            :Created_by => is.user.login,
+            :Created_by => is.user.username,
             :Last_modified_on => is.updated_at.to_date.inspect,
             :enumber => is.enumber,
             :RMR_number => is.rmr,

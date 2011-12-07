@@ -1,17 +1,25 @@
 require 'digest/sha1'
 class User < ActiveRecord::Base
-  # Virtual attribute for the unencrypted password
-  attr_accessor :password
+  # Include default devise modules. Others available are:
+  # :token_authenticatable, :encryptable, :confirmable, :lockable, :timeoutable and :omniauthable
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :trackable, :validatable
 
-  validates_presence_of     :login, :email
+  # prevents a user from submitting a crafted form that bypasses activation
+  # Setup accessible (or protected) attributes for your model
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :username, :first_name,:last_name, :initials
+  # Virtual attribute for the unencrypted password
+  attr_accessor :login
+
+  validates_presence_of     :username, :email
   validates_presence_of     :password,                   :if => :password_required?
   validates_presence_of     :password_confirmation,      :if => :password_required?
   validates_length_of       :password, :within => 4..40, :if => :password_required?
   validates_confirmation_of :password,                   :if => :password_required?
-  validates_length_of       :login,    :within => 3..40
+  validates_length_of       :username,    :within => 3..40
   validates_length_of       :email,    :within => 3..100
-  validates_uniqueness_of   :login, :email, :case_sensitive => false
-  before_save :encrypt_password
+  validates_uniqueness_of   :username, :email, :case_sensitive => false
+  # before_save :encrypt_password
 
   has_many :analyses, :dependent => :destroy
   has_many :image_comments, :dependent => :destroy
@@ -20,10 +28,9 @@ class User < ActiveRecord::Base
   
   has_many :image_dataset_quality_checks
   
-  # prevents a user from submitting a crafted form that bypasses activation
-  # anything else you want your user to change should be added here.
-  attr_accessible :login, :email, :password, :password_confirmation, :first_name, :last_name, :initials
 
+
+=begin
   # Authenticates a user by their login name and unencrypted password.  Returns the user or nil.
   def self.authenticate(login, password)
     u = find_by_login(login) # need to get the salt
@@ -85,6 +92,6 @@ class User < ActiveRecord::Base
     def password_required?
       crypted_password.blank? || !password.blank?
     end
-    
+=end    
     
 end

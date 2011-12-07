@@ -12,7 +12,7 @@
 <h3>Search criteria</h3>
   <div class="sticky">
     <%= key_val_table('search_criteia_details', {
-      :Created_by => @image_search.user.login,
+      :Created_by => @image_search.user.username,
       :Last_modified_on => @image_search.updated_at.to_date.inspect,
       :enumber => @image_search.enumber,
       :Rmr_number => @image_search.rmr,

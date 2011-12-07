@@ -1,15 +1,25 @@
 class UsersController < ApplicationController
 
-  skip_before_filter :login_required
+  #skip_before_filter :username_required
+    before_filter :authenticate_user!
 
   def index 
     @users = User.all
+  end
+  def show
+    @user = User.find(params[:id])
+  end
+  
+  def self.find_for_authentication(conditions)
+    login = conditions.delete(:login)
+    where(conditions).where(["login = :value OR email = :value", { :value => login }]).first
   end
 
   # render new.rhtml
   def new
   end
-
+  
+=begin
   def create
     cookies.delete :auth_token
     # protects against session fixation attacks, wreaks havoc with 
@@ -49,5 +59,6 @@ class UsersController < ApplicationController
        end
      end
   end
+=end
 
 end

@@ -8,7 +8,7 @@
     <%= '<tr><td colspan=3>No comments added yet</td></tr>'.html_safe if image_comments.empty? %>
     <% image_comments.each do |cmnt| %>
       <tr>
-        <td><%=h cmnt.user.login %></td>
+        <td><%=h cmnt.user.username %></td>
         <td><%= cmnt.comment %></td>
         <td><%= link_to('X', image_comment_path(cmnt), :method => :delete) if current_user == cmnt.user %></td>
       </tr>

@@ -1,4 +1,6 @@
 WADRCDataTools::Application.routes.draw do
+  devise_for :users
+
   resources :physiology_text_files
   resources :neuropsych_assessments
   resources :neuropsych_sessions
@@ -19,7 +21,7 @@ WADRCDataTools::Application.routes.draw do
   resources :participants
   resources :analysis_memberships
   resources :users
-  resource :session
+#  resource :session
   resources :image_datasets, :shallow => true do # |image_dataset|
     resources :image_comments,:image_dataset_quality_checks
   end
@@ -39,9 +41,9 @@ WADRCDataTools::Application.routes.draw do
   resources :log_files
   resources :raw_data_imports
 
-  match '/signup', :controller => 'users', :action => 'new', :as => :signup
-  match '/login', :controller => 'sessions', :action => 'new', :as => :login
-  match '/logout', :controller => 'sessions', :action => 'destroy', :as => :logout
+####  match '/signup', :controller => 'users', :action => 'new', :as => :signup
+####  match '/login', :controller => 'sessions', :action => 'new', :as => :username
+####  match '/logout', :controller => 'sessions', :action => 'destroy', :as => :logout
 
   root :to => "visits#index"
 

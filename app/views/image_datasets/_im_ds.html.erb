@@ -18,7 +18,7 @@
     :enumber => im_ds.visit.enrollment.nil? ? nil : im_ds.visit.enrollment.enumber,
     :Initials => im_ds.visit.initials,
     :RMR_Number => im_ds.visit.rmr,
-    :Assignee => im_ds.visit.user.nil? ? nil : im_ds.visit.user.login,
+    :Assignee => im_ds.visit.user.nil? ? nil : im_ds.visit.user.username,
     :Directory_Path => im_ds.visit.path,
   })) %>
 </td>

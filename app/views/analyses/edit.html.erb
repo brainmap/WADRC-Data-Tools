@@ -1,6 +1,6 @@
 <h1>Editing analysis</h1>
 
-<p><%= "Created by #{@analysis.user.login} on #{@analysis.created_at.to_date.inspect}" %></p>
+<p><%= "Created by #{@analysis.user.username} on #{@analysis.created_at.to_date.inspect}" %></p>
 
 <%= form_for(@analysis) do |f| %>
   <%= f.error_messages %>
