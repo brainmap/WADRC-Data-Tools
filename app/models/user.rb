@@ -2,8 +2,8 @@ require 'digest/sha1'
 class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :token_authenticatable, :encryptable, :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable
+  devise :ldap_authenticatable,  :rememberable, :trackable,:registerable, :recoverable
+  # removed :registerable, :recoverable, :validatable
 
   # prevents a user from submitting a crafted form that bypasses activation
   # Setup accessible (or protected) attributes for your model
