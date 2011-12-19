@@ -1,0 +1,30 @@
+<%= simple_form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f| %>
+
+<%= image_tag 'wadrc_logo.png' %><br/>
+<h1>Sorry, you must be logged in to continue.</h1>
+<p>This login is the <em>same</em> for the Panda, <strong>and</strong> your Novel or Linux login.</p>
+
+
+    <table>
+	  <tr>
+	    <td><%= f.label :username, :label => 'Login'   %></td>
+	    <td><%= f.input_field :username, :required => true, :autofocus => true,  :size=> 20 %></td>
+	  </tr>
+	  <tr>
+	    <td><%= f.label :password, :label => 'Password'   %>	</td>
+ <td><%= f.input_field :password, :required => true ,   :size => 20 %></td>
+	  </tr>
+	  <tr>
+	    <td><%= f.label :password, :label => 'Remember me' if devise_mapping.rememberable?  %>	</td>
+    <td><%= f.input_field :remember_me, :as => :boolean if devise_mapping.rememberable? %></td>
+  </tr>
+  <tr>
+    <td><%= f.button :submit, "Log in" %></td>
+  </tr>
+  </table>
+
+
+<% end %>
+<!--
+<%= render :partial => "devise/shared/links" %>
+-->
