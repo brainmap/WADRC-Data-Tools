@@ -31,21 +31,21 @@ development:
   # <<: *AUTHORIZATIONS
 
 test:
-  host: ldap1.medicine.wisc.edu
-  port: 636
-  attribute: cn
-  base: o=uwmedicine, dc=esc
-  admin_user: cn=admin, dc=esc
-  admin_password: admin_password
-  ssl: simple_tls
+    host: ldap1.medicine.wisc.edu
+    port: 636
+    attribute: cn
+    base: o=uwmedicine
+    admin_user: cn=admin, dc=esc
+    admin_password: admin_password
+    ssl: simple_tls
   # <<: *AUTHORIZATIONS
 
 production:
-  host: ldap1.medicine.wisc.edu
-  port: 636
-  attribute: cn
-  base: o=uwmedicine, dc=esc
-  admin_user: cn=admin, dc=esc
-  admin_password: admin_password
-  ssl: simple_tls
+    host: ldap1.medicine.wisc.edu
+    port: 636
+    attribute: cn
+    base: o=uwmedicine
+    admin_user: cn=admin, dc=esc
+    admin_password: admin_password
+    ssl: simple_tls
   # <<: *AUTHORIZATIONS
