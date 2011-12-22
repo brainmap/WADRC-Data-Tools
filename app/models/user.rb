@@ -12,8 +12,8 @@ class User < ActiveRecord::Base
   attr_accessor :login
 
   validates_presence_of     :username, :email
-  validates_presence_of     :password,                   :if => :password_required?
-  validates_presence_of     :password_confirmation,      :if => :password_required?
+#  validates_presence_of     :password,                   :if => :password_required?
+#  validates_presence_of     :password_confirmation,      :if => :password_required?
   validates_length_of       :password, :within => 4..40, :if => :password_required?
   validates_confirmation_of :password,                   :if => :password_required?
   validates_length_of       :username,    :within => 3..40
@@ -80,7 +80,7 @@ class User < ActiveRecord::Base
   def recently_activated?
     @activated
   end
-
+=end  
   protected
     # before filter 
     def encrypt_password
@@ -92,6 +92,6 @@ class User < ActiveRecord::Base
     def password_required?
       crypted_password.blank? || !password.blank?
     end
-=end    
+  
     
 end

@@ -8,7 +8,7 @@ class ImageDatasetsController < ApplicationController
   def check_image_quality
     @image_dataset = ImageDataset.find(params[:id])
     @qc = ImageDatasetQualityCheck.new
-    @qc.user = @current_user
+    @qc.user = current_user
     @qc.image_dataset = @image_dataset
     
     respond_to do |format|
@@ -104,7 +104,7 @@ class ImageDatasetsController < ApplicationController
   # POST /image_datasets.xml
   def create
     @image_dataset = ImageDataset.new(params[:image_dataset])
-
+    @image_dataset.user = current_user
     respond_to do |format|
       if @image_dataset.save
         flash[:notice] = 'ImageDataset was successfully created.'

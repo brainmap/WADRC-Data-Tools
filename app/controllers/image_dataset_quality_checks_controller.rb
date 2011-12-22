@@ -27,7 +27,7 @@ class ImageDatasetQualityChecksController < ApplicationController
   def new
     @image_dataset = ImageDataset.find(params[:image_dataset_id])
     @image_dataset_quality_check = @image_dataset.image_dataset_quality_checks.build
-    @image_dataset_quality_check.user = @current_user
+    @image_dataset_quality_check.user = current_user
 
     respond_to do |format|
       format.html # new.html.erb
@@ -54,6 +54,7 @@ class ImageDatasetQualityChecksController < ApplicationController
   def create
     @image_dataset = ImageDataset.find(params[:image_dataset_id])
     @image_dataset_quality_check = ImageDatasetQualityCheck.new(params[:image_dataset_quality_check])
+    @image_dataset_quality_check.user = current_user
 
     respond_to do |format|
       if @image_dataset_quality_check.save

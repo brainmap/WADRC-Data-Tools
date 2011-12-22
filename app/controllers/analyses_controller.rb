@@ -56,7 +56,7 @@ class AnalysesController < ApplicationController
   # POST /analyses.xml
   def create
     @analysis = Analysis.new(params[:analysis])
-    # @analysis.user = @current_user
+    @analysis.user = current_user
     # 
     #   @analysis.datasets_in_analysis.each do |ds|
     #     @analysis.analysis_memberships.build(:image_dataset_id => ds.id)

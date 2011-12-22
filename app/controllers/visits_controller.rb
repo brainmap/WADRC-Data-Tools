@@ -119,7 +119,7 @@ class VisitsController < ApplicationController
   def new
     @visit = Visit.new
     @visit.enrollments << Enrollment.new
-
+    @visit.user = current_user
     respond_to do |format|
       format.html # new.html.erb
       format.xml  { render :xml => @visit }
@@ -136,7 +136,7 @@ class VisitsController < ApplicationController
   # POST /visits.xml
   def create
     @visit = Visit.new(params[:visit])
-
+    @visit.user = current_user
     respond_to do |format|
       if @visit.save
         flash[:notice] = 'visit was successfully created.'

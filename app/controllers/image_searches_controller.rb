@@ -29,7 +29,7 @@ class ImageSearchesController < ApplicationController
   
   def create
     @image_search = ImageSearch.new(params[:image_search])
-    @image_search.user = @current_user
+    @image_search.user = current_user
     @image_search.scan_procedures = Array.new
     
     respond_to do |format|
@@ -69,7 +69,7 @@ class ImageSearchesController < ApplicationController
 
   def new
     @image_search = ImageSearch.new
-    @image_search.user = @current_user
+    @image_search.user = current_user
     @scanner_sources = Visit.scanner_sources
   end
   

@@ -29,6 +29,7 @@ class ImageCommentsController < ApplicationController
   # GET /image_comments/new GET /image_comments/new.xml
   def new
     @image_comment = ImageComment.new
+    @image_comment.user = current_user
 
     respond_to do |format|
       format.html # new.html.erb
@@ -44,7 +45,7 @@ class ImageCommentsController < ApplicationController
   def create
     @image_dataset = ImageDataset.find(params[:image_dataset_id])
     @image_comment = @image_dataset.image_comments.build(params[:image_comment])
-    @image_comment.user = @current_user
+    @image_comment.user = current_user
 
     respond_to do |format|
       if @image_comment.save
