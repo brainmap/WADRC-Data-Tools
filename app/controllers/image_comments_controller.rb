@@ -46,22 +46,31 @@ class ImageCommentsController < ApplicationController
     @image_dataset = ImageDataset.find(params[:image_dataset_id])
     @image_comment = @image_dataset.image_comments.build(params[:image_comment])
     @image_comment.user = current_user
-
+    
     respond_to do |format|
-      if @image_comment.save
-        format.html { redirect_to @image_dataset }
-        format.js
-      else
-        format.html { redirect_to @image_dataset }
-        format.js do
-          render :update do |page|
-            page.redirect_to @image_dataset
-          end
-        end
+      format.html { redirect_to(@image_dataset) }
+      format.js
+      format.xml  { head :ok }
+    end
+# got rid of the rjs error, but doing a double render/redirect and still not reloading the page
+#  problems where in  image_comments controller but need image_datasets show
+# copied the 4 lines above from destroy
+
+#    respond_to do |format|
+#      if @image_comment.save
+#        format.html { redirect_to @image_dataset }
+#        format.js
+#      else
+#       format.html { redirect_to @image_dataset }
+#        format.js do
+#          render :update do |page|
+#            format.redirect_to @image_dataset
+#          end
+#        end
         # #flash[:error] = @image_comment.errors.full_messages.to_sentence
         # #format.html { redirect_to @image }
-      end
-    end
+#      end
+#    end
   end
   # POST /image_comments POST /image_comments.xml
   #  def create
