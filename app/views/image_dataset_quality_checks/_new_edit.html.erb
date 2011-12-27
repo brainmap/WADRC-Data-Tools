@@ -1,72 +1,59 @@
-<script type="text/javascript">
-function toggle3(showHideDiv) {
-	var ele = document.getElementById(showHideDiv);
 
-	if(ele.style.display == "block") {
-    		ele.style.display = "none";	
-  	}
-	else {
-		ele.style.display = "block";
-	}
-	//alert(showHideDiv)
-}
-
-</script>
 
   <% qualopts = ['Pass','Mild','Moderate','Severe'] %>
   <%= f.error_messages %>
   <%= f.hidden_field :user_id %>
   <%= f.hidden_field :image_dataset_id %>
-  
-	<a  href="javascript:toggle3('incomplete_series_comment');" ><%= image_tag('comment_bubble.gif')%></a><br>
-     <div id="incomplete_series_comment" style="display: none;">
-    <%= f.text_area :incomplete_series_comment, :rows => 3, :cols => 60, :style => "display:none" %></div>
+
+
   <div>
     <h3>Reconstruction</h3>
     <p>
       <%= f.label 'Is the Series Complete?' %>
       <%= select :image_dataset_quality_check, :incomplete_series, ['Complete', 'Incomplete'], :default => 'Complete' %>
       <a id="myHeader1" href="javascript:toggle2('incomplete_series_comment','myHeader2');" ><%= image_tag('comment_bubble.gif')%></a><br>
-	       <div id="incomplete_series_comment" style="display:none;">
-      <%= f.text_area :incomplete_series_comment, :rows => 3, :cols => 60, :style => "display:none" %></div>
+	<div id="incomplete_series_comment" style="display: none;">
+		 <%= f.text_area :incomplete_series_comment, :rows => 3, :cols => 60 %></div>
     </p>
     <p>
       <%= f.label 'Is the Series Garbled?' %>
       <%= select :image_dataset_quality_check, :garbled_series, qualopts, :default => 'Pass' %>
       <a id="myHeader1" href="javascript:toggle2('garbled_series_comment','myHeader2');" ><%= image_tag('comment_bubble.gif')%></a><br>
 	       <div id="garbled_series_comment" style="display: none;">
-      <%= f.text_area :garbled_series_comment, :rows => 3, :cols => 60, :style => "display:none" %></div>
+      <%= f.text_area :garbled_series_comment, :rows => 3, :cols => 60 %></div>
     </p>
     <p>
       <%= f.label 'Is the FOV cut off?' %>
       <%= select :image_dataset_quality_check, :fov_cutoff, qualopts, :default => 'Pass' %>
       <a id="myHeader1" href="javascript:toggle2('fov_cutoff_comment','myHeader2');" ><%= image_tag('comment_bubble.gif')%></a><br>
-	       <div id="fov_cutoff_comment" style="display: none;">
-      <%= f.text_area :fov_cutoff_comment, :rows => 3, :cols => 60, :style => "display:none" %></div>
+	<div id="fov_cutoff_comment" style="display: none;">
+		 <%= f.text_area :fov_cutoff_comment, :rows => 3, :cols => 60 %></div>
+
+
     </p>
     <hr />
-  
+
     <h3>Artifacts</h3>
     <p>
       <%= f.label 'Field inhomogeneity?'%>
       <%= select :image_dataset_quality_check, :field_inhomogeneity, qualopts, :default => 'Pass' %>
       <a id="myHeader1" href="javascript:toggle2('field_inhomogeneity_comment','myHeader2');" ><%= image_tag('comment_bubble.gif')%></a><br>
 	       <div id="field_inhomogeneity_comment" style="display: none;">
-      <%= f.text_area :field_inhomogeneity_comment, :rows => 3, :cols => 60, :style => "display:none" %></div>
+      <%= f.text_area :field_inhomogeneity_comment, :rows => 3, :cols => 60 %></div>
     </p>
     <p>
       <%= f.label 'Ghosting or wrapping?'%>
       <%= select :image_dataset_quality_check, :ghosting_wrapping, qualopts, :default => 'Pass' %>
       <a id="myHeader1" href="javascript:toggle2('ghosting_wrapping_comment','myHeader2');" ><%= image_tag('comment_bubble.gif')%></a><br>
 	       <div id="ghosting_wrapping_comment" style="display: none;">
-      <%= f.text_area :ghosting_wrapping_comment, :rows => 3, :cols => 60, :style => "display:none" %></div>
+      <%= f.text_area :ghosting_wrapping_comment, :rows => 3, :cols => 60 %></div>
     </p>
     <p>
       <%= f.label 'Visible banding?'%>
       <%= select :image_dataset_quality_check, :banding, qualopts, :default => 'Pass' %>
       <a id="myHeader1" href="javascript:toggle2('banding_comment','myHeader2');" ><%= image_tag('comment_bubble.gif')%></a><br>
 	       <div id="banding_comment" style="display: none;">
-      <%= f.text_area :banding_comment, :rows => 3, :cols => 60, :style => "display:none" %></div>
+      <%= f.text_area :banding_comment, :rows => 3, :cols => 60 %></div>
     </p>
     <hr />
 
@@ -76,14 +63,14 @@ function toggle3(showHideDiv) {
       <%= select :image_dataset_quality_check, :registration_risk, qualopts, :default => 'Pass' %>
       <a id="myHeader1" href="javascript:toggle2('registration_risk_comment','myHeader2');" ><%= image_tag('comment_bubble.gif')%></a><br>
 	       <div id="registration_risk_comment" style="display: none;">
-      <%= f.text_area :registration_risk_comment, :rows => 3, :cols => 60, :style => "display:none" %></div>
+      <%= f.text_area :registration_risk_comment, :rows => 3, :cols => 60 %></div>
     </p>
     <p>
       <%= f.label 'Not Otherwise Specified (NOS) concerns (e.g., other artifacts)?'%>
       <%= select :image_dataset_quality_check, :nos_concerns, ['NA', 'Pass', 'Mild', 'Moderate', 'Severe'], :default => 'NA' %>
       <a id="myHeader1" href="javascript:toggle2('nos_concerns_comment','myHeader2');" ><%= image_tag('comment_bubble.gif')%></a><br>
 	       <div id="nos_concerns_comment" style="display: none;">
-      <%= f.text_area :nos_concerns_comment, :rows => 3, :cols => 60, :style => "display:none" %></div>
+      <%= f.text_area :nos_concerns_comment, :rows => 3, :cols => 60 %></div>
     </p>
     <hr />
   
@@ -93,21 +80,21 @@ function toggle3(showHideDiv) {
       <%= select :image_dataset_quality_check, :motion_warning, ['NA', 'Pass','No pass'], :default => 'NA' %>
       <a id="myHeader1" href="javascript:toggle2('motion_warning_comment','myHeader2');" ><%= image_tag('comment_bubble.gif')%></a><br>
 	       <div id="motion_warning_comment" style="display: none;">
-      <%= f.text_area :motion_warning_comment, :rows => 3, :cols => 60, :style => "display:none" %></div>
+      <%= f.text_area :motion_warning_comment, :rows => 3, :cols => 60 %></div>
     </p>
     <p>
       <%= f.label 'Omnibus F activation?' %>
       <%= select :image_dataset_quality_check, :omnibus_f, ['NA','Shows activation','Limited Activation','No activation'], :default => 'NA' %>
       <a id="myHeader1" href="javascript:toggle2('omnibus_f_comment','myHeader2');" ><%= image_tag('comment_bubble.gif')%></a><br>
 	       <div id="omnibus_f_comment" style="display: none;">
-      <%= f.text_area :omnibus_f_comment, :rows => 3, :cols => 60, :style => "display:none" %></div>
+      <%= f.text_area :omnibus_f_comment, :rows => 3, :cols => 60 %></div>
     </p>
     <p>
       <%= f.label 'SPM mask quality?' %>
       <%= select :image_dataset_quality_check, :spm_mask, ['NA', 'Pass', 'Mild', 'Moderate', 'Severe'], :default => 'NA' %>
       <a id="myHeader1" href="javascript:toggle2('spm_mask_comment','myHeader2');" ><%= image_tag('comment_bubble.gif')%></a><br>
 	       <div id="spm_mask_comment" style="display: none;">
-      <%= f.text_area :spm_mask_comment, :rows => 3, :cols => 60, :style => "display:none" %></div>
+      <%= f.text_area :spm_mask_comment, :rows => 3, :cols => 60 %></div>
     </p>
     <hr />
   
