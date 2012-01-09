@@ -65,7 +65,7 @@
     <table>
       <tr>
         <td><%= f.label(:assignee) %></td>
-        <td><%= select(:visit, :user_id, User.all.collect {|p| [ p.login, p.id ] }, { :include_blank => "Assign a lab member" }) %></td>
+        <td><%= select(:visit, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Assign a lab member" }) %></td>
       </tr>
       <tr>
         <td><%= f.label :Transfer_MRI %></td>

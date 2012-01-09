@@ -1,4 +1,5 @@
-class ScanProceduresController < ApplicationController
+class ScanProceduresController <  AuthorizedController #  ApplicationController
+load_and_authorize_resource
   
   before_filter :set_current_tab
   

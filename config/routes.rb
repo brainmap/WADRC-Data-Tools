@@ -1,4 +1,8 @@
 WADRCDataTools::Application.routes.draw do
+  resources :protocol_roles
+
+  resources :protocols
+
   devise_for :users
 
   resources :physiology_text_files

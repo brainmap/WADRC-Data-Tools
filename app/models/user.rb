@@ -27,8 +27,11 @@ class User < ActiveRecord::Base
   has_many :image_searches, :dependent => :destroy
   
   has_many :image_dataset_quality_checks
+  has_many :protocol_roles
   
-
+  def username_name
+    "#{self.first_name} #{self.last_name} #{self.username}"
+  end
 
 =begin
   # Authenticates a user by their login name and unencrypted password.  Returns the user or nil.

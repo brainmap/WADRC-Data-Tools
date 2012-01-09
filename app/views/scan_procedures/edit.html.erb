@@ -12,6 +12,10 @@
     <%= f.text_field :description %>
   </p>  
   <p>
+	<%= f.label :protocol_id %><br />
+    <%= collection_select :scan_procedure, :protocol_id, Protocol.all.sort_by(&:id), :id, :name, :prompt => 'choose a protocol' %>
+  </p>
+  <p>
     <%= f.submit "Update" %>
   </p>
 <% end %>

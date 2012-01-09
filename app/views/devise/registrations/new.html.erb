@@ -6,6 +6,9 @@
   <div class="inputs">
 	<%= f.input :username, :required => true, :autofocus => true %>
     <%= f.input :email, :required => true  %>
+<%= f.input :first_name %>
+<%= f.input :last_name %>
+ <%= f.label :role %> :  <%= collection_select :user, :role, Role.all.sort_by(&:role), :role, :description, :prompt => 'choose a role' %>
     <%= f.input :password, :required => true %>
      <%= f.input :password_confirmation, :required => true %>
   </div>

@@ -6,6 +6,11 @@ class ApplicationController < ActionController::Base
 
 #   include AuthenticatedSystem
  before_filter :authenticate_user!
+ 
+ rescue_from CanCan::AccessDenied do |exception|
+   flash[:error] = exception.message
+   redirect_to root_url
+ end 
   # deny_access unless signed_in? or format is "xml" 
   # list_visits from metamri doesn't have validation 
   # how can limit what the xml format can do? 

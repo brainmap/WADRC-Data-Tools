@@ -33,6 +33,7 @@ gem 'exception_notification', "~> 2.4.1", :require => 'exception_notifier'
 gem 'jquery-rails'
 gem "devise", ">= 1.4.9"
 gem "devise_ldap_authenticatable"
+gem "cancan"
 
 # Deploy with Capistrano
 gem 'capistrano', '~>2.5.19'

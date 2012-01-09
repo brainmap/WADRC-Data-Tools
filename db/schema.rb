@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20111206195644) do
+ActiveRecord::Schema.define(:version => 20120109163709) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -205,10 +205,34 @@ ActiveRecord::Schema.define(:version => 20111206195644) do
     t.datetime "updated_at"
   end
 
+  create_table "protocol_roles", :force => true do |t|
+    t.integer  "user_id"
+    t.integer  "protocol_id"
+    t.string   "role"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "protocols", :force => true do |t|
+    t.string   "name"
+    t.string   "abbr"
+    t.string   "path"
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "recruitment_groups", :force => true do |t|
     t.string   "name"
     t.text     "description"
     t.integer  "study_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "roles", :force => true do |t|
+    t.string   "role"
+    t.string   "description"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -218,6 +242,7 @@ ActiveRecord::Schema.define(:version => 20111206195644) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "description"
+    t.integer  "protocol_id"
   end
 
   create_table "scan_procedures_visits", :id => false, :force => true do |t|
@@ -267,7 +292,11 @@ ActiveRecord::Schema.define(:version => 20111206195644) do
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
+    t.string   "role"
   end
+
+  add_index "users", ["email"], :name => "index_users_on_email", :unique => true
+  add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true
 
 # Could not dump table "users_bak" because of following StandardError
 #   Unknown type '' for column 'id'

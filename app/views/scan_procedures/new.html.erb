@@ -12,8 +12,14 @@
     <%= f.text_field :description %>
   </p>
   <p>
+	<%= f.label :protocol_id %><br />
+    <%= collection_select :scan_procedure, :protocol_id, Protocol.all.sort_by(&:id), :id, :name, :prompt => 'choose a protocol' %>
+  </p>
+  <p>
     <%= f.submit "Create" %>
   </p>
 <% end %>
 
-<%= link_to 'Back', scan_procedures_path %>
+<%= link_to 'Back', scan_procedures_path %> | 
+<%= link_to 'List Protocols', protocols_path %> |
+<%= link_to 'New Protocol', new_protocol_path %>
