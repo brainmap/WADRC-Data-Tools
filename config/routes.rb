@@ -17,6 +17,7 @@ WADRCDataTools::Application.routes.draw do
   match '/visits/assigned_to/:user_login', :controller => 'visits', :action => 'index_by_user_id', :as => :assigned_to
   match '/visits/in_scan_procedure/:scan_procedure_id', :controller => 'visits', :action => 'index_by_scan_procedure', :as => :in_scan_procedure
   
+  
   resources :studies
   resources :recruitment_groups
   resources :withdrawls
