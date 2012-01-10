@@ -12,6 +12,18 @@ module ApplicationHelper
     table += '</table>'
     return table.html_safe
   end
+  
+  def key_val_table_ordered (id,vals)
+    return nil if vals.empty?
+    table = "<table class=\"key_value\" id=\"#{id}\">"
+    vals.each do |k,v|
+      kstring = stringify_symbol(k).capitalize
+      vstring = v.blank? ? "" : v.to_s
+      table += "<tr><th>#{kstring}:</th><td>#{vstring}</td></tr>" unless v.blank?
+    end
+    table += '</table>'
+    return table.html_safe
+  end  
 
   def popup_note(prompt, content, options={})
     return nil if content.nil?

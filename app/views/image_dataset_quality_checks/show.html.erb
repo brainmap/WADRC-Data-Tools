@@ -16,7 +16,7 @@
 
 <div class="two_col_left">
   <h3>Image Quality Check:</h3>
-  <%= key_val_table('quality_check_details', {
+  <!-- key_val_table('quality_check_details', {
     :User => @idqc.user.username,
     :Image_dataset => @idqc.image_dataset_id,
     :incomplete_series => "#{@idqc.incomplete_series} – #{@idqc.incomplete_series_comment}",
@@ -31,7 +31,24 @@
     :omnibus_f => "#{@idqc.omnibus_f} – #{@idqc.omnibus_f_comment}",
     :spm_mask => "#{@idqc.spm_mask} – #{@idqc.spm_mask_comment}",
 		:other_issues => "#{@idqc.other_issues}"
-  })%>
+  })  -->
+
+  <%= key_val_table_ordered('quality_check_details', [
+    [:User, @idqc.user.username],
+    [:Image_dataset , @idqc.image_dataset_id],
+    [:incomplete_series , "#{@idqc.incomplete_series} – #{@idqc.incomplete_series_comment}"],
+    [:garbled_series , "#{@idqc.garbled_series} – #{@idqc.garbled_series_comment}"],
+    [:fov_cutoff , "#{@idqc.fov_cutoff} – #{@idqc.fov_cutoff_comment}"],
+    [:field_inhomogeneity , "#{@idqc.field_inhomogeneity} – #{@idqc.field_inhomogeneity_comment}"],
+    [:ghosting_wrapping , "#{@idqc.ghosting_wrapping} – #{@idqc.ghosting_wrapping_comment}"],
+    [:banding , "#{@idqc.banding} – #{@idqc.banding_comment}"],
+    [:registration_risk , "#{@idqc.registration_risk} – #{@idqc.registration_risk_comment}"],
+    [:nos_concerns , "#{@idqc.nos_concerns} – #{@idqc.nos_concerns_comment}"],
+    [:motion_warning , "#{@idqc.motion_warning} – #{@idqc.motion_warning_comment}"],
+    [:omnibus_f , "#{@idqc.omnibus_f} – #{@idqc.omnibus_f_comment}"],
+    [:spm_mask , "#{@idqc.spm_mask} – #{@idqc.spm_mask_comment}"],
+    [:other_issues , "#{@idqc.other_issues}"]
+  ])%>
 </div>
 
 <br style="clear:both" /><br />
