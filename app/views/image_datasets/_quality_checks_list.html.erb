@@ -8,7 +8,7 @@
         <%= link_to('edit', edit_image_dataset_quality_check_path(qc)) if current_user == qc.user %> |
 				<%= link_to('delete', qc, :confirm => 'Are you sure?', :method => :delete) %>
       </div>
-      <%= key_val_table('qc_details', {
+      <!-- key_val_table('qc_details', {
         :incomplete_series => "#{qc.incomplete_series} – #{qc.incomplete_series_comment}",
         :garbled_series => "#{qc.garbled_series} – #{qc.garbled_series_comment}",
         :fov_cutoff => "#{qc.fov_cutoff} – #{qc.fov_cutoff_comment}",
@@ -21,7 +21,22 @@
         :omnibus_f => "#{qc.omnibus_f} – #{qc.omnibus_f_comment}",
         :spm_mask => "#{qc.spm_mask} – #{qc.spm_mask_comment}",
         :other_issues => qc.other_issues, 
-      })%>
+      }) -->
+
+	  <%= key_val_table_ordered('qc_details', [
+	    [:incomplete_series , "#{qc.incomplete_series} – #{qc.incomplete_series_comment}"],
+        [:garbled_series , "#{qc.garbled_series} – #{qc.garbled_series_comment}"],
+        [:fov_cutoff , "#{qc.fov_cutoff} – #{qc.fov_cutoff_comment}"],
+        [:field_inhomogeneity , "#{qc.field_inhomogeneity} – #{qc.field_inhomogeneity_comment}"],
+        [:ghosting_wrapping , "#{qc.ghosting_wrapping} – #{qc.ghosting_wrapping_comment}"],
+        [:banding , "#{qc.banding} – #{qc.banding_comment}"],
+        [:registration_risk , "#{qc.registration_risk} – #{qc.registration_risk_comment}"],
+        [:nos_concerns , "#{qc.nos_concerns} – #{qc.nos_concerns_comment}"],
+        [:motion_warning , "#{qc.motion_warning} – #{qc.motion_warning_comment}"],
+        [:omnibus_f , "#{qc.omnibus_f} – #{qc.omnibus_f_comment}"],
+        [:spm_mask , "#{qc.spm_mask} – #{qc.spm_mask_comment}"],
+        [:other_issues , qc.other_issues]
+	  ])%>
     </div>
     <br />
   <% end%>
