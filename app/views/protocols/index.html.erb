@@ -1,0 +1,29 @@
+<h1>Listing protocols</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Abbr</th>
+    <th>Path</th>
+    <th>Description</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @protocols.each do |protocol| %>
+  <tr>
+    <td><%= protocol.name %></td>
+    <td><%= protocol.abbr %></td>
+    <td><%= protocol.path %></td>
+    <td><%= protocol.description %></td>
+    <td><%= link_to 'Show', protocol %></td>
+    <td><%= link_to 'Edit', edit_protocol_path(protocol) %></td>
+    <td><%= link_to 'Destroy', protocol, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Protocol', new_protocol_path %>

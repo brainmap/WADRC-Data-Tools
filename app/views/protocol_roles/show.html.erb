@@ -1,0 +1,20 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>User:</b>
+  <%= @protocol_role.user.username_name %>
+</p>
+
+<p>
+  <b>Protocol:</b>
+  <%= @protocol_role.protocol.name %>
+</p>
+
+<p>
+  <b>Role:</b>
+  <%= @protocol_role.role %>
+</p>
+
+
+<%= link_to 'Edit', edit_protocol_role_path(@protocol_role) %> |
+<%= link_to 'Back', protocol_roles_path %>

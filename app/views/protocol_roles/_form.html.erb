@@ -1,0 +1,31 @@
+<%= form_for(@protocol_role) do |f| %>
+  <% if @protocol_role.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@protocol_role.errors.count, "error") %> prohibited this protocol_role from being saved:</h2>
+
+      <ul>
+      <% @protocol_role.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :user_id %><br />
+    <!--  f.text_field :user_id -->
+<%=  collection_select :protocol_role, :user_id, User.all.sort_by(&:username_name), :id, :username_name, :prompt => 'choose a user' %>
+  </div>
+  <div class="field">
+    <%= f.label :protocol_id %><br />
+    <!-- f.text_field :protocol_id -->
+<%= collection_select :protocol_role, :protocol_id, Protocol.all.sort_by(&:id), :id, :name, :prompt => 'choose a protocol' %>
+  </div>
+  <div class="field">
+    <%= f.label :role %><br />
+    <!--  f.text_field :role --><%= collection_select :protocol_role, :role, Role.all.sort_by(&:role), :role, :description, :prompt => 'choose a role' %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,33 @@
+<h1>Listing protocol_roles</h1>
+<!-- add user search -->
+<%= form_tag '/protocol_roles/index' do %>
+  <%= collection_select :protocol_role, :user_id, User.all.sort_by(&:username_name), :id, :username_name, :prompt => 'choose user' %>
+<%= collection_select :protocol_role, :protocol_id, Protocol.all.sort_by(&:id), :id, :name, :prompt => 'choose a protocol' %>
+  <%= submit_tag("Search") %>
+<% end %>
+
+<table>
+  <tr>
+    <th>User</th>
+    <th>Protocol</th>
+    <th>Role</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @protocol_roles.each do |protocol_role| %>
+  <tr>
+    <td><%=  protocol_role.user.username_name %></td>
+    <td><%= protocol_role.protocol.name %></td>
+    <td><%= protocol_role.role %></td>
+    <td><%= link_to 'Show', protocol_role %></td>
+    <td><%= link_to 'Edit', edit_protocol_role_path(protocol_role) %></td>
+    <td><%= link_to 'Destroy', protocol_role, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Protocol role', new_protocol_role_path %>
