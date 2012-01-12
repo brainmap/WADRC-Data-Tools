@@ -15,7 +15,7 @@
   <% end %>
   
   <%= form_tag '/visits/assigned_to_who' do %>
-    <%= collection_select :user, :username, User.all.sort_by(&:username), :username, :username, :prompt => 'choose user' %>
+    <%= collection_select :user, :username, User.all.sort_by(&:username_name), :id, :username_name, :prompt => 'choose user' %>
     <%= submit_tag("Assigned to") %>
   <% end %>
   

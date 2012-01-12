@@ -32,6 +32,9 @@ class User < ActiveRecord::Base
   def username_name
     "#{self.first_name} #{self.last_name} #{self.username}"
   end
+  
+  
+  
 
 =begin
   # Authenticates a user by their login name and unencrypted password.  Returns the user or nil.

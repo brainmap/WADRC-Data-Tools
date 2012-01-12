@@ -1,13 +1,23 @@
+<%
+@var = current_user
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+edit_count =@var.edit_low_scan_procedure_array.length 
+edit_count = edit_count -1 
+%>
+
 <div id="heading_and_link">
   <h1><%= @collection_title or "Visits" %>:</h1>
-  <p>
+<% if edit_count > 0 %> 
+ <p>
 		<%= link_to 'create new visit', new_visit_path %> |
 		<%= link_to 'import visit data', new_raw_data_import_path %>
 	</p>
+<% end %>
 </div>
-<%= render :partial => 'index_filters' %>
+<%= render :partial => 'index_filters', :locals => { :edit_count => edit_count} %>
 
-<%= render :partial=>'index', :locals => { :visits => @visits } %>
+<%= render :partial=>'index', :locals => { :visits => @visits, :edit_count => edit_count } %>
 
 <br>
 

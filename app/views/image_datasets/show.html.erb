@@ -1,3 +1,10 @@
+<%
+@var = current_user
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+edit_count =@var.edit_low_scan_procedure_array.length 
+edit_count = edit_count -1 
+%>
 <div id="heading_and_link">
 <h1><%= @image_dataset.series_description %></h1>
   <p>
@@ -65,20 +72,20 @@
   <div id="comments">
     <%= render :partial => 'comments_table', :locals => { :image_dataset => @image_dataset, :image_comments => @image_comments } %>
   </div>
-
+  <% if edit_count > 0 %>
     <p style="float:right; text-align:right"><a id="myHeader1" href="javascript:togglecomment('new_comment_box','myHeader1','Add new comment', 'Done adding comments');" >Add new Comment</a></p>
 	<div id="new_comment_box" style="display: none;">
 		 <%= render :partial => 'new_comment_box', :locals => { :image_dataset => @image_dataset, :image_comment => @image_comment, :current_user => current_user } %></div>
   <!-- still giving an rjs error in the update -->
   <br />
-  
+  <% end %>
   <div id="quality_checks">
     <h3>Quality Checks:</h3>
-    <%= render :partial => 'quality_checks_list', :locals => { :quality_checks => @image_dataset.image_dataset_quality_checks } %>
+    <%= render :partial => 'quality_checks_list', :locals => { :quality_checks => @image_dataset.image_dataset_quality_checks, :edit_count => edit_count } %>
   </div>
-  
+  <% if edit_count > 0 %>
   <p><%= link_to 'perform new quality check', new_image_dataset_image_dataset_quality_check_path(@image_dataset) %></p>
-
+  <% end %>
 </div>
 
 <%= clearing_br %>

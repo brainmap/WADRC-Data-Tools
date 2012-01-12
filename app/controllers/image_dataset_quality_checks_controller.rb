@@ -1,4 +1,5 @@
-class ImageDatasetQualityChecksController < ApplicationController
+class ImageDatasetQualityChecksController < AuthorizedController #  ApplicationController
+   load_and_authorize_resource
   # GET /image_dataset_quality_checks
   # GET /image_dataset_quality_checks.xml
   def index

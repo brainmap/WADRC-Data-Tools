@@ -1,5 +1,13 @@
+<%
+@var = current_user
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+edit_count =@var.edit_low_scan_procedure_array.length 
+edit_count = edit_count -1 
+%>
+<% if edit_count > 0 %>
 <span style="float:right"><%= link_to 'Edit visit', edit_visit_path(@visit) %></span>
-
+<% end %>
 <div id="visit_heading">
   <%=	link_to "&larr; Older".html_safe, @older_visit if @older_visit %>
   &nbsp;
@@ -73,7 +81,7 @@
 <% if @image_datasets.empty? %>
   <p>No images associated with this visit</p>
 <% else %>
-  <%= render(:partial => 'image_datasets/image_datasets', :locals => {:image_datasets => @image_datasets, :include_thumbnails => true} ) %>
+  <%= render(:partial => 'image_datasets/image_datasets', :locals => {:image_datasets => @image_datasets, :include_thumbnails => true, :edit_count => edit_count} ) %>
 <% end %>
 
 <h3>Check Radiology</h3>

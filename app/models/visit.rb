@@ -350,8 +350,11 @@ class Visit < ActiveRecord::Base
       # If the enrollment was marked for destruction, get rid of the 
       # linking membership.  (Not the enrollment itself).
       # Otherwise, add the enrollment to the list of enrollments for this visit.
+      
       if enrollment_from_params.marked_for_destruction?
-        enrollment_visit_memberships.where(:enrollment_id => enrollment.id, :visit_id => id).delete
+##    the enrollment_visit_membership seems to be deleted --- not sure why or how
+## this line was causing an error -- when removed the error went away and the delete occurred
+ #  enrollment_visit_memberships.where(:enrollment_id => enrollment.id, :visit_id => id).delete   
       else
         enrollments << enrollment        
       end

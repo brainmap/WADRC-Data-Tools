@@ -1,3 +1,10 @@
+<%
+@var = current_user
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+edit_count =@var.edit_low_scan_procedure_array.length 
+edit_count = edit_count -1 
+%>
 <div id="heading_and_link">
   <h1>Image Quality Check</h1>
   <p>created by <%=h @idqc.user.username %> on <%= @idqc.created_at.to_s(:ymdhms) %></p>
@@ -53,11 +60,14 @@
 
 <br style="clear:both" /><br />
 
-
+<% if edit_count > 0 %>
 <%= link_to 'Edit', edit_image_dataset_quality_check_path(@idqc) %> |
+<% end %>
 <%= link_to 'View image dataset', image_dataset_path(@idqc.image_dataset) %> |
-<%= link_to 'View visit', visit_path(@idqc.image_dataset.visit) %> |
+<%= link_to 'View visit', visit_path(@idqc.image_dataset.visit) %> 
+<% if edit_count > 0 %>|
 <%= link_to 'Delete', @idqc, :confirm => 'Are you sure?', :method => :delete %>
+<% end %>
 
 <br>
 

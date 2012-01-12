@@ -1,4 +1,5 @@
-class ImageDatasetsController < ApplicationController
+class ImageDatasetsController < AuthorizedController #  ApplicationController
+   load_and_authorize_resource
   before_filter :set_current_tab
   
   def set_current_tab
@@ -20,7 +21,9 @@ class ImageDatasetsController < ApplicationController
   # GET /image_datasets.xml
   def index
     if params[:visit_id]
-      @visit = Visit.find(params[:visit_id])
+       @var = current_user
+      scan_procedure_array =@var.view_low_scan_procedure_array
+      @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:visit_id])
       @search = @visit.image_datasets.search(params[:search])
       @image_datasets = @search.relation.page(params[:page]).per(50).all
       @total_count = @image_datasets.count

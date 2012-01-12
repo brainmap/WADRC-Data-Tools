@@ -1,6 +1,13 @@
 module ImageDatasetsHelper  
   def link_to_new_qc(im_ds)
+    @var = current_user
+    # assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+    # apply limit protocol  on create , edit in create form  
+    edit_count =@var.edit_low_scan_procedure_array.length 
+    edit_count = edit_count -1
+    if edit_count > 0 
     link_to "New Check", new_image_dataset_image_dataset_quality_check_path(im_ds)
+    end
   end
   
   def link_to_edit_qc(qc)
