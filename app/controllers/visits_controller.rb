@@ -11,8 +11,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # GET /visits
   # GET /visits.xml  
   def index
-     @var = current_user
-    scan_procedure_array =@var.view_low_scan_procedure_array
+
+    scan_procedure_array =current_user[:view_low_scan_procedure_array]
     # Remove default scope if sorting has been requested.
     if !params[:search].blank? && !params[:search][:meta_sort].blank?
       @search = Visit.unscoped.search(params[:search]) 
@@ -30,8 +30,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
 
   # GET /visits/:scope
   def index_by_scope
-     @var = current_user
-    scan_procedure_array =@var.view_low_scan_procedure_array
+
+    scan_procedure_array =current_user[:view_low_scan_procedure_array]
     @search = Visit.send(params[:scope]).search(params[:search])
     @visits = @search.relation.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
     @collection_title = "All #{params[:scope].to_s.gsub('_',' ')} visits"
@@ -44,8 +44,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
   
   # GET /visits/assigned_to/:user_login
   def index_by_user_id
-     @var = current_user
-    scan_procedure_array =@var.view_low_scan_procedure_array
+
+    scan_procedure_array =current_user[:view_low_scan_procedure_array]
     
     @user = User.find(params[:user_login])
     @search = Visit.assigned_to(@user.id).search
@@ -62,8 +62,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
 
   def index_by_scan_procedure  
 
-     @var = current_user
-    scan_procedure_array =@var.view_low_scan_procedure_array
+
+    scan_procedure_array =current_user[:view_low_scan_procedure_array]
     # sp = ScanProcedure.find_by_id(params[:scan_procedure_id])
     if !params[:search].blank? && !params[:search][:meta_sort].blank?
       @search = Visit.unscoped.includes(:scan_procedures).where(:scan_procedures => {:id => params[:scan_procedure_id]}).search(params[:search])
@@ -81,8 +81,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
   
   # GET /visits/by_month
   def by_month
-     @var = current_user
-    scan_procedure_array =@var.view_low_scan_procedure_array
+
+    scan_procedure_array =current_user[:view_low_scan_procedure_array]
     @visits = Visit.relation.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).all
     @title = "Visits by month"
     @collection_title = "Visits by month"
@@ -93,8 +93,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
   
   # GET /visits/found
   def found
-     @var = current_user
-    scan_procedure_array =@var.view_low_scan_procedure_array    
+
+    scan_procedure_array =current_user[:view_low_scan_procedure_array]   
     @visits = Visit.find_by_search_params(params['visit_search']).where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
     @collection_title = "Found visits"
     @visit_search = params['visit_search']
@@ -117,16 +117,14 @@ class VisitsController <  AuthorizedController #  ApplicationController
   
   # GET /visits/find
   def find
-     @var = current_user
-    scan_procedure_array =@var.view_low_scan_procedure_array
+    scan_procedure_array =current_user[:view_low_scan_procedure_array]
     @search = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).search(params[:search])
   end
 
   # GET /visits/1
   # GET /visits/1.xml
   def show
-     @var = current_user
-    scan_procedure_array =@var.view_low_scan_procedure_array
+    scan_procedure_array =current_user[:view_low_scan_procedure_array]
   
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find_by_id(params[:id])
     # Grab the visits within 1 month +- visit date for "previous" and "back" hack.
@@ -159,8 +157,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
 
   # GET /visits/1/edit
   def edit
-     @var = current_user
-    scan_procedure_array =@var.edit_low_scan_procedure_array    
+    scan_procedure_array =current_user[:edit_low_scan_procedure_array ]   
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @visit.enrollments.build # if @visit.enrollments.blank?
   end
@@ -185,8 +182,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # PUT /visits/1
   # PUT /visits/1.xml
   def update
-     @var = current_user
-    scan_procedure_array =@var.edit_low_scan_procedure_array
+    scan_procedure_array =current_user[:edit_low_scan_procedure_array]
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     # HTML Checkbox Hack to remove all if none were checked.
     attributes = {'scan_procedure_ids' => []}.merge(params[:visit] || {})
@@ -206,8 +202,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # DELETE /visits/1
   # DELETE /visits/1.xml
   def destroy
-     @var = current_user
-    scan_procedure_array =@var.edit_low_scan_procedure_array
+    
+    scan_procedure_array =current_user[:edit_low_scan_procedure_array]
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @visit.destroy
 

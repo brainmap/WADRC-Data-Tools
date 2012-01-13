@@ -1,5 +1,5 @@
-class ImageDatasetsController < AuthorizedController #  ApplicationController
-   load_and_authorize_resource
+class ImageDatasetsController < ApplicationController # AuthorizedController #  ApplicationController
+#   load_and_authorize_resource
   before_filter :set_current_tab
   
   def set_current_tab
@@ -7,7 +7,8 @@ class ImageDatasetsController < AuthorizedController #  ApplicationController
   end
   
   def check_image_quality
-    @image_dataset = ImageDataset.find(params[:id])
+   scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @qc = ImageDatasetQualityCheck.new
     @qc.user = current_user
     @qc.image_dataset = @image_dataset
@@ -21,8 +22,7 @@ class ImageDatasetsController < AuthorizedController #  ApplicationController
   # GET /image_datasets.xml
   def index
     if params[:visit_id]
-       @var = current_user
-      scan_procedure_array =@var.view_low_scan_procedure_array
+      scan_procedure_array =current_user[:view_low_scan_procedure_array]
       @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:visit_id])
       @search = @visit.image_datasets.search(params[:search])
       @image_datasets = @search.relation.page(params[:page]).per(50).all
@@ -34,7 +34,7 @@ class ImageDatasetsController < AuthorizedController #  ApplicationController
     #   @total_count = @image_datasets.count
     #   @page_title = "All Image Datasets for Visit #{@visit.rmr}"
     # else
-      @search = ImageDataset.search(params[:search])
+      @search = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).search(params[:search])
       
       # Set pagination and reporting options depending on the requested format
       # (ie Don't paginate datasets on CSV download.)
@@ -72,7 +72,9 @@ class ImageDatasetsController < AuthorizedController #  ApplicationController
   # GET /image_datasets/1
   # GET /image_datasets/1.xml
   def show
-    @image_dataset = ImageDataset.find(params[:id])
+   puts "=============="+ current_user.view_low_scan_procedure_array.to_s
+    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @visit = @image_dataset.visit
     @image_datasets = @visit.image_datasets
     
@@ -100,7 +102,8 @@ class ImageDatasetsController < AuthorizedController #  ApplicationController
 
   # GET /image_datasets/1/edit
   def edit
-    @image_dataset = ImageDataset.find(params[:id])
+    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
   end
 
   # POST /image_datasets
@@ -123,7 +126,8 @@ class ImageDatasetsController < AuthorizedController #  ApplicationController
   # PUT /image_datasets/1
   # PUT /image_datasets/1.xml
   def update
-    @image_dataset = ImageDataset.find(params[:id])
+    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
     respond_to do |format|
       if @image_dataset.update_attributes(params[:image_dataset])
@@ -140,7 +144,8 @@ class ImageDatasetsController < AuthorizedController #  ApplicationController
   # DELETE /image_datasets/1
   # DELETE /image_datasets/1.xml
   def destroy
-    @image_dataset = ImageDataset.find(params[:id])
+    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @image_dataset.destroy
 
     respond_to do |format|

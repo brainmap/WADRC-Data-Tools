@@ -14,6 +14,7 @@ class Ability
     user ||= User.new # guest user (not logged in)
  # can :manage, :all
    
+   ## HASHES ALSO SET IN app/models/user.rb
   # make list of roles
   @roles_in_pr  =  user.protocol_roles.find_by_sql("SELECT DISTINCT role from protocol_roles where user_id = "+(user.id).to_s)
   # loop thru each role
@@ -349,7 +350,7 @@ class Ability
       scan_procedure_array << p2.id
       end    
       
-  if user.role == "Admin_High"
+  if user.role == "2Admin_High"
       can :manage, :all
    # can :manage, Protocol
   #  can :manage , ScanProcedure

@@ -7,7 +7,9 @@ class User < ActiveRecord::Base
 
   # prevents a user from submitting a crafted form that bypasses activation
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :password, :password_confirmation, :remember_me, :username, :first_name,:last_name, :initials
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :username, :first_name,:last_name, :initials,
+         :view_low_scan_procedure_array, :edit_low_scan_procedure_array, :admin_low_scan_procedure_array, :admin_high_scan_procedure_array,
+         :view_low_protocol_array, :edit_low_protocol_array, :edit_high_protocol_array,:admin_low_protocol_array, :admin_high_protocol_array
   # Virtual attribute for the unencrypted password
   attr_accessor :login
 
@@ -33,8 +35,300 @@ class User < ActiveRecord::Base
     "#{self.first_name} #{self.last_name} #{self.username}"
   end
   
+  def view_low_scan_procedure_array
+    var = set_edit_view_array('view_low_scan_procedure_array')
+    "#{var}"
+  end
+  def edit_low_scan_procedure_array
+      var = set_edit_view_array('edit_low_scan_procedure_array')
+      "#{var}"
+  end  
+  def admin_low_scan_procedure_array
+       var = set_edit_view_array('admin_low_scan_procedure_array')
+       "#{var}"
+  end
+  def admin_high_scan_procedure_array
+        var = set_edit_view_array('admin_high_scan_procedure_array')
+        "#{var}"
+  end
+  def view_low_protocol_array
+         var = set_edit_view_array('view_low_protocol_array')
+         "#{var}"
+  end
+  def edit_low_protocol_array
+          var = set_edit_view_array('edit_low_protocol_array')
+          "#{var}"
+  end
+  def edit_high_protocol_array
+           var = set_edit_view_array('')
+           "#{var}"
+  end
+  def admin_low_protocol_array
+            var = set_edit_view_array('admin_low_protocol_array')
+            "#{var}"
+  end
+  def admin_high_protocol_array
+             var = set_edit_view_array('admin_high_protocol_array')
+             "#{var}"
+  end
   
+    def set_edit_view_array(field)
+      user = self
+      # make list of roles
+      @roles_in_pr  =  user.protocol_roles.find_by_sql("SELECT DISTINCT role from protocol_roles where user_id = "+(user.id).to_s)
+      # loop thru each role
+
+      # error where unioning null arrays 
+      self[:view_low_scan_procedure_array] = [-1]
+      self[:edit_low_scan_procedure_array] = [-1]
+      self[:admin_low_scan_procedure_array] = [-1]
+      self[:admin_high_scan_procedure_array] = [-1]
+
+      self[:view_low_protocol_array] = [-1]
+      self[:edit_low_protocol_array] = [-1]
+      self[:edit_high_protocol_array] = [-1]
+      self[:admin_low_protocol_array] = [-1]
+      self[:admin_high_protocol_array] = [-1]
+      
+       @roles_in_pr.each do |p| 
+          if p.role == "Edit_High"
+            # loop thru protocols and grant perms 
+             protocol_array = []
+            @current_self_protocol = self.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(self.id).to_s)
+            @current_self_protocol.each do |p2|
+              protocol_array << p2.protocol_id
+              end
+            self[:edit_high_protocol_array] = protocol_array
+            protocol_list = protocol_array*","
+            scan_procedure_array = []
+            @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+            @current_self_scan_procedure.each do |p2|
+              scan_procedure_array << p2.id
+              end
+            self[:edit_high_scan_procedure_array] = scan_procedure_array
+          end
+
+          if p.role == "Edit_Medium"
+             # loop thru protocols and grant perms 
+              protocol_array = []
+             @current_self_protocol = self.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(self.id).to_s)
+             @current_self_protocol.each do |p2|
+               protocol_array << p2.protocol_id
+               end
+             self[:edit_medium_protocol_array] = protocol_array
+             protocol_list = protocol_array*","
+             scan_procedure_array = []
+             @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+             @current_self_scan_procedure.each do |p2|
+               scan_procedure_array << p2.id
+               end
+             self[:edit_me3dium_scan_procedure_array] = scan_procedure_array
+          end
+
+          if p.role == "Edit_Low"
+             # loop thru protocols and grant perms 
+              protocol_array = []
+             @current_self_protocol = self.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(self.id).to_s)
+             @current_self_protocol.each do |p2|
+               protocol_array << p2.protocol_id
+               end
+             self[:edit_low_protocol_array] = protocol_array
+             protocol_list = protocol_array*","
+             scan_procedure_array = []
+             @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+
+             @current_self_scan_procedure.each do |p2|
+               scan_procedure_array << p2.id
+               end
+             self[:edit_low_scan_procedure_array] = scan_procedure_array
+          end      
+
+          if p.role == "View_High"
+             # loop thru protocols and grant perms 
+              protocol_array = []
+             @current_self_protocol = self.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(self.id).to_s)
+             @current_self_protocol.each do |p2|
+               protocol_array << p2.protocol_id
+               end
+             self[:view_high_protocol_array] = protocol_array
+             protocol_list = protocol_array*","
+             scan_procedure_array = []
+             @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+             @current_self_scan_procedure.each do |p2|
+               scan_procedure_array << p2.id
+               end
+             self[:view_high_scan_procedure_array] = scan_procedure_array
+          end  
+
+          if p.role == "View_Medium"
+             # loop thru protocols and grant perms 
+              protocol_array = []
+             @current_self_protocol = self.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(self.id).to_s)
+             @current_self_protocol.each do |p2|
+               protocol_array << p2.protocol_id
+               end
+             self[:view_medium_protocol_array] = protocol_array
+             protocol_list = protocol_array*","
+             scan_procedure_array = []
+             @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+             @current_self_scan_procedure.each do |p2|
+               scan_procedure_array << p2.id
+               end
+             self[:view_medium_scan_procedure_array] = scan_procedure_array
+          end
+
+          if p.role == "View_Low"
+             # loop thru protocols and grant perms 
+              protocol_array = []
+             @current_self_protocol = self.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(self.id).to_s)
+             @current_self_protocol.each do |p2|
+               protocol_array << p2.protocol_id
+               end
+             self[:view_low_protocol_array] = protocol_array
+             protocol_list = protocol_array*","
+             scan_procedure_array = []
+             @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+             @current_self_scan_procedure.each do |p2|
+               scan_procedure_array << p2.id
+               end
+             self[:view_low_scan_procedure_array] = scan_procedure_array
+          end      
+
+          if p.role == "Admin_High"
+             # loop thru protocols and grant perms 
+              protocol_array = []
+             @current_self_protocol = self.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(self.id).to_s)
+             @current_self_protocol.each do |p2|
+               protocol_array << p2.protocol_id
+               end
+             self[:admin_high_protocol_array] = protocol_array
+             protocol_list = protocol_array*","
+             scan_procedure_array = []
+             @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+             @current_self_scan_procedure.each do |p2|
+               scan_procedure_array << p2.id
+               end
+             self[:admin_high_scan_procedure_array] = scan_procedure_array
+          end   
+
+          if p.role == "Admin_Medium"
+             # loop thru protocols and grant perms 
+              protocol_array = []
+             @current_self_protocol = self.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(self.id).to_s)
+             @current_self_protocol.each do |p2|
+               protocol_array << p2.protocol_id
+               end
+             self[:admin_medium_protocol_array] = protocol_array
+             protocol_list = protocol_array*","
+             scan_procedure_array = []
+             @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+             @current_self_scan_procedure.each do |p2|
+               scan_procedure_array << p2.id
+               end
+             self[:admin_medium_scan_procedure_array] = scan_procedure_array
+          end
+
+          if p.role == "Admin_Low"
+             # loop thru protocols and grant perms 
+              protocol_array = []
+             @current_self_protocol = self.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(self.id).to_s)
+             @current_self_protocol.each do |p2|
+               protocol_array << p2.protocol_id
+               end
+             self[:admin_low_protocol_array] = protocol_array
+             protocol_list = protocol_array*","
+             scan_procedure_array = []
+             @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+             @current_self_scan_procedure.each do |p2|
+               scan_procedure_array << p2.id
+               end
+             self[:admin_low_scan_procedure_array] = scan_procedure_array     
+          end      
+      end   
   
+       # get list of all protocol and scan_procedure
+         protocol_array =[]
+       @current_self_protocol = self.protocol_roles.find_by_sql("SELECT distinct id from protocols")
+       @current_self_protocol.each do |p2|
+         protocol_array << p2.id
+         end
+         protocol_list = protocol_array*","
+         scan_procedure_array = []
+         @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+         @current_self_scan_procedure.each do |p2|
+           scan_procedure_array << p2.id
+           end    
+
+       if self.role == "Admin_High"
+         self[:admin_high_scan_procedure_array] = scan_procedure_array
+         self[:admin_high_protocol_array] = protocol_array
+       elsif self.role  == "Admin_Medium"
+         self[:admin_medium_scan_procedure_array] = scan_procedure_array
+         self[:admin_medium_protocol_array] = protocol_array  
+       elsif self.role  == "Admin_Low"
+         self[:admin_low_scan_procedure_array] = scan_procedure_array
+         self[:admin_low_protocol_array] = protocol_array
+       elsif self.role  == "Edit_High"
+         self[edit_high_scan_procedure_array] = scan_procedure_array
+         self[:edit_high_protocol_array] = protocol_array
+
+       elsif self.role  == "Edit_Medium"
+         self[:edit_medium_scan_procedure_array] = scan_procedure_array
+         self[:edit_medium_protocol_array] = protocol_array  
+       elsif self.role  == "Edit_Low"
+         self[:edit_low_scan_procedure_array] = scan_procedure_array
+         self[:edit_low_protocol_array] = protocol_array
+       elsif self.role  == "View_High"
+         self[:view_high_scan_procedure_array] = scan_procedure_array
+         self[:view_high_protocol_array] = protocol_array    
+       elsif self.role  == "View_Medium"
+         self[:view_medium_scan_procedure_array] = scan_procedure_array
+         self[:view_medium_protocol_array] = protocol_array
+       elsif self.role == "View_Low"
+         self[:view_low_scan_procedure_array] = scan_procedure_array
+         self[:view_low_protocol_array] = protocol_array
+       end
+
+       # populate sum of arrays --- admin-> edit
+             # admin-> edit -> view 
+             # driver is edit_low_,  view_low
+           # merging nulls arrays 
+           # poplate first self array with -1, pick up new procedures as go along?
+
+       self[:edit_low_scan_procedure_array] = self[:edit_low_scan_procedure_array] | self[:admin_low_scan_procedure_array] | self[:admin_high_scan_procedure_array]
+       self[:view_low_scan_procedure_array] = self[:edit_low_scan_procedure_array] | self[:view_low_scan_procedure_array]
+
+       # also protocol
+       self[:edit_low_protocol_array] = self[:edit_low_protocol_array] | self[:admin_low_protocol_array] | self[:admin_high_protocol_array]
+       self[:view_low_protocol_array] = self[:edit_low_protocol_array] | self[:view_low_protocol_array] 
+
+      #  self[:edit_low_scan_procedure_array] = [-1]
+      #  self[:edit_low_protocol_array] = [-1]
+      # self[:view_low_scan_procedure_array] =[-1,-2,-3]
+
+     if(field == 'view_low_scan_procedure_array')
+       return self[:view_low_scan_procedure_array]
+      elsif(field == 'edit_low_scan_procedure_array')
+        return self[:edit_low_scan_procedure_array]
+      elsif(field == 'admin_low_scan_procedure_array')
+        return self[:admin_low_scan_procedure_array]
+      elsif(field == 'admin_high_scan_procedure_array')
+        return self[:admin_high_scan_procedure_array]
+      elsif(field == 'view_low_protocol_array')
+        return self[:view_low_protocol_array]
+      elsif(field == 'edit_low_protocol_array')
+        return self[:edit_low_protocol_array]
+      elsif(field == 'edit_high_protocol_array')
+        return self[:edit_high_protocol_array]
+      elsif(field == 'admin_low_protocol_array')
+        return self[:admin_low_protocol_array]
+      elsif(field == 'admin_high_protocol_array')
+        return self[:admin_high_protocol_array]
+      else
+        var = [-1]
+        return var
+      end
+    end
 
 =begin
   # Authenticates a user by their login name and unencrypted password.  Returns the user or nil.
