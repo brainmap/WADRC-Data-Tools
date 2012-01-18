@@ -21,6 +21,41 @@ class UsersController < ApplicationController
   def new
   end
   
+  def update_role
+
+   if !params[:user].nil? 
+    @user = User.find(params[:user][:id])
+    var = "update users set role='"+params[:user][:role]+"' where id="+params[:user][:id]
+    connection = ActiveRecord::Base.connection();
+    results = connection.execute("update users set role='"+params[:user][:role]+"' where id="+params[:user][:id])
+  
+    respond_to do |format|
+         flash[:notice] = 'User was successfully updated.'
+         format.html { redirect_to('/users/update_role') }
+         format.xml  { head :ok }
+     end
+   end
+
+  end
+  
+  def control
+      render :template => "users/control"
+  end
+
+  def add_user
+    if !params[:user].nil? 
+     var = "insert into users(username,email,last_name,first_name,role) values('"+params[:user][:username]+"','"+params[:user][:email]+"','"+params[:user][:last_name]+"','"+params[:user][:first_name]+"','"+params[:user][:role]+"')"
+    connection = ActiveRecord::Base.connection();
+     results = connection.execute(var)
+
+     respond_to do |format|
+          flash[:notice] = 'User was successfully updated.'
+          format.html { redirect_to('/protocol_roles') }
+          format.xml  { head :ok }
+      end
+    end
+     # render :template => "/users/add_user"
+  end  
 =begin
   def create
     cookies.delete :auth_token

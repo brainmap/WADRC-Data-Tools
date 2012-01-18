@@ -9,11 +9,15 @@ class ImageSearchesController < ApplicationController
   end
   
   def index
+
     @image_searches = ImageSearch.all
   end
   
   def show
-    @image_search = ImageSearch.find_by_id(params[:id])
+    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ')
+  # could have a search without a scan_procedure_id?  
+    @image_search = ImageSearch.where("image_searches.id in (select image_search_id from image_searches_scan_procedures where scan_procedure_id in (?))", scan_procedure_array).find_by_id(params[:id])
+
     @paginated_image_matches = ImageDataset.limit(10).includes(:visit => :enrollments).includes(:analysis_memberships).all
     # @all_image_matches = @image_search.matching_images
     # @paginated_image_matches = @all_image_matches
@@ -51,7 +55,8 @@ class ImageSearchesController < ApplicationController
   end
   
   def destroy
-    @image_search = ImageSearch.find(params[:id])
+    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ')
+    @image_search = ImageSearch.where("image_searches.id in (select image_search_id from image_searches_scan_procedures where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     unless @image_search.analyses.empty?
       flash[:notice] = 'Image Search could not be deleted because it is in use by active analyses.'
       redirect_to(image_searches_url)
@@ -74,7 +79,8 @@ class ImageSearchesController < ApplicationController
   end
   
   def import_to_analysis
-    @image_search = ImageSearch.find_by_id(params[:id])
+    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ')
+    @image_search = ImageSearch.where("image_searches.id in (select image_search_id from image_searches_scan_procedures where scan_procedure_id in (?))", scan_procedure_array).find_by_id(params[:id])
     @image_matches = @image_search.matching_images
     @analysis = Analysis.new
     @analysis.image_search = @image_search

@@ -1,5 +1,7 @@
-<h1>Image search results:</h1>
 
+
+<h1>Image search results:</h1>
+<!-- problem with image_searches --- need total_count from image_datasets-->
 <%= render :partial => 'image_datasets/image_datasets', 
   :locals => { :image_datasets => @paginated_image_matches, :total_count => @total_count, :include_thumbnails => true } 
 %>

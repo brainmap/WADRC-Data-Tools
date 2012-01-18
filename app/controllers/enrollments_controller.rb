@@ -9,13 +9,15 @@ class EnrollmentsController < ApplicationController
   # GET /enrollments
   # GET /enrollments.xml
   def index
+       scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ')
     # Hack for Autocomplete Enrollment Number AJAX Search
     if params[:search].kind_of? String
       search_hash = {:enumber_contains => params[:search]}
     else
       search_hash = params[:search]
     end
-    @search = Enrollment.search(search_hash).relation.page(params[:page])
+    @search = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
+     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).search(search_hash).relation.page(params[:page])
     @enrollments = @search
     
     respond_to do |format|
@@ -28,7 +30,9 @@ class EnrollmentsController < ApplicationController
   # GET /enrollments/1
   # GET /enrollments/1.xml
   def show
-    @enrollment = Enrollment.find(params[:id])
+    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ')
+    @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
+     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
 
     respond_to do |format|
       format.html # show.html.erb
@@ -49,7 +53,9 @@ class EnrollmentsController < ApplicationController
 
   # GET /enrollments/1/edit
   def edit
-    @enrollment = Enrollment.find(params[:id])
+    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ')
+    @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
+     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
     
   end
 
@@ -73,7 +79,9 @@ class EnrollmentsController < ApplicationController
   # PUT /enrollments/1
   # PUT /enrollments/1.xml
   def update
-    @enrollment = Enrollment.find(params[:id])
+    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ')
+    @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
+     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
 
     respond_to do |format|
       if @enrollment.update_attributes(params[:enrollment])
@@ -90,7 +98,9 @@ class EnrollmentsController < ApplicationController
   # DELETE /enrollments/1
   # DELETE /enrollments/1.xml
   def destroy
-    @enrollment = Enrollment.find(params[:id])
+    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ')
+    @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
+     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
     @enrollment.destroy
 
     respond_to do |format|

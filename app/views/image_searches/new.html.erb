@@ -7,7 +7,8 @@
 <%= form_for @image_search do |f| %>
   <table class="search_form">
     <th><%= f.label :scan_procedures %></th>
-    <td><%= collection_select(:scan_procedure, :ids, ScanProcedure.order(:codename), :id, :codename, {}, {:multiple =>  true}) %></td>
+    <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ') %>
+    <td><%= collection_select(:scan_procedure, :ids, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename, {}, {:multiple =>  true}) %></td>
   </table>
   <table class="search_form">
     <tr>

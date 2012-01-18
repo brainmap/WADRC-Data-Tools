@@ -14,8 +14,8 @@ class Ability
     user ||= User.new # guest user (not logged in)
  # can :manage, :all
    
-   ## HASHES ALSO SET IN app/models/user.rb
-  # make list of roles
+   ## HASHES ALSO SET IN app/models/user.rb  -- transfering from user to set value here
+  # make list of roles  -- 
   @roles_in_pr  =  user.protocol_roles.find_by_sql("SELECT DISTINCT role from protocol_roles where user_id = "+(user.id).to_s)
   # loop thru each role
 
@@ -36,20 +36,22 @@ class Ability
       if p.role == "Edit_High"
         # loop thru protocols and grant perms 
          protocol_array = []
-        @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
-        @current_user_protocol.each do |p2|
-          protocol_array << p2.protocol_id
-          end
+      #  @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
+      #  @current_user_protocol.each do |p2|
+      #    protocol_array << p2.protocol_id
+      #    end
+        protocol_array =  (user.edit_high_protocol_array).split(' ')         
         user[:edit_high_protocol_array] = protocol_array
         
         can [:read, :modify], Protocol do |p3| protocol_array.include?p3.try(:id)
         end
         protocol_list = protocol_array*","
         scan_procedure_array = []
-        @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
-        @current_user_scan_procedure.each do |p2|
-          scan_procedure_array << p2.id
-          end
+#        @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+#        @current_user_scan_procedure.each do |p2|
+#          scan_procedure_array << p2.id
+#          end
+          scan_procedure_array  = (user.edit_high_scan_procedure_array).split(' ') 
         user[:edit_high_scan_procedure_array] = scan_procedure_array
         
        can [:read, :modify] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -69,21 +71,23 @@ class Ability
       if p.role == "Edit_Medium"
          # loop thru protocols and grant perms 
           protocol_array = []
-         @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
-         @current_user_protocol.each do |p2|
-           protocol_array << p2.protocol_id
-           end
+#         @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
+#         @current_user_protocol.each do |p2|
+#           protocol_array << p2.protocol_id
+#           end
+        protocol_array =  (user.edit_medium_protocol_array).split(' ') 
          user[:edit_medium_protocol_array] = protocol_array
 
          can [:read, :modify], Protocol do |p3| protocol_array.include?p3.try(:id)
          end
          protocol_list = protocol_array*","
          scan_procedure_array = []
-         @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
-         @current_user_scan_procedure.each do |p2|
-           scan_procedure_array << p2.id
-           end
-         user[:edit_me3dium_scan_procedure_array] = scan_procedure_array
+#         @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+#         @current_user_scan_procedure.each do |p2|
+#           scan_procedure_array << p2.id
+#           end
+          scan_procedure_array  = (user.edit_medium_scan_procedure_array).split(' ') 
+         user[:edit_medium_scan_procedure_array] = scan_procedure_array
 
         can [:read, :modify] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
          end 
@@ -102,21 +106,23 @@ class Ability
       if p.role == "Edit_Low"
          # loop thru protocols and grant perms 
           protocol_array = []
-         @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
-         @current_user_protocol.each do |p2|
-           protocol_array << p2.protocol_id
-           end
+    #     @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
+    #     @current_user_protocol.each do |p2|
+    #       protocol_array << p2.protocol_id
+    #       end
+         protocol_array =  (user.edit_low_protocol_array).split(' ') 
          user[:edit_low_protocol_array] = protocol_array
 
          can [:read, :modify], Protocol do |p3| protocol_array.include?p3.try(:id)
          end
          protocol_list = protocol_array*","
          scan_procedure_array = []
-         @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+    #     @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
 
-         @current_user_scan_procedure.each do |p2|
-           scan_procedure_array << p2.id
-           end
+     #    @current_user_scan_procedure.each do |p2|
+    #       scan_procedure_array << p2.id
+    #       end
+        scan_procedure_array = (user.edit_low_scan_procedure_array).split(' ')
          user[:edit_low_scan_procedure_array] = scan_procedure_array
 
         can [:read, :modify] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -136,20 +142,22 @@ class Ability
       if p.role == "View_High"
          # loop thru protocols and grant perms 
           protocol_array = []
-         @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
-         @current_user_protocol.each do |p2|
-           protocol_array << p2.protocol_id
-           end
+   #      @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
+  #       @current_user_protocol.each do |p2|
+  #         protocol_array << p2.protocol_id
+  #         end
+        protocol_array =  (user.view_high_protocol_array).split(' ') 
          user[:view_high_protocol_array] = protocol_array
 
          can [:read], Protocol do |p3| protocol_array.include?p3.try(:id)
          end
          protocol_list = protocol_array*","
          scan_procedure_array = []
-         @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
-         @current_user_scan_procedure.each do |p2|
-           scan_procedure_array << p2.id
-           end
+#         @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+#         @current_user_scan_procedure.each do |p2|
+#           scan_procedure_array << p2.id
+#           end
+          scan_procedure_array  = (user.view_high_scan_procedure_array).split(' ') 
          user[:view_high_scan_procedure_array] = scan_procedure_array
 
         can [:read] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -169,20 +177,22 @@ class Ability
       if p.role == "View_Medium"
          # loop thru protocols and grant perms 
           protocol_array = []
-         @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
-         @current_user_protocol.each do |p2|
-           protocol_array << p2.protocol_id
-           end
+#         @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
+#         @current_user_protocol.each do |p2|
+#           protocol_array << p2.protocol_id
+#           end
+         protocol_array =  (user.view_medium_protocol_array).split(' ') 
          user[:view_medium_protocol_array] = protocol_array
 
          can [:read], Protocol do |p3| protocol_array.include?p3.try(:id)
          end
          protocol_list = protocol_array*","
          scan_procedure_array = []
-         @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
-         @current_user_scan_procedure.each do |p2|
-           scan_procedure_array << p2.id
-           end
+#         @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+#         @current_user_scan_procedure.each do |p2|
+#           scan_procedure_array << p2.id
+#           end
+          scan_procedure_array  = (user.view_medium_scan_procedure_array).split(' ') 
          user[:view_medium_scan_procedure_array] = scan_procedure_array
 
         can [:read] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -203,20 +213,22 @@ class Ability
       if p.role == "View_Low"
          # loop thru protocols and grant perms 
           protocol_array = []
-         @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
-         @current_user_protocol.each do |p2|
-           protocol_array << p2.protocol_id
-           end
+      #   @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
+      #   @current_user_protocol.each do |p2|
+      #     protocol_array << p2.protocol_id
+      #     end
+         protocol_array = (user.view_low_protocol_array).split(' ') 
          user[:view_low_protocol_array] = protocol_array
-
+         
          can [:read], Protocol do |p3| protocol_array.include?p3.try(:id)
          end
          protocol_list = protocol_array*","
-         scan_procedure_array = []
-         @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
-         @current_user_scan_procedure.each do |p2|
-           scan_procedure_array << p2.id
-           end
+  #       scan_procedure_array = []
+  #       @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+  #       @current_user_scan_procedure.each do |p2|
+  #         scan_procedure_array << p2.id
+  #         end
+          scan_procedure_array = (user.view_low_scan_procedure_array).split(' ') 
          user[:view_low_scan_procedure_array] = scan_procedure_array
 
         can [:read] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -228,7 +240,7 @@ class Ability
            visit_array << p2.visit_id
            end         
          visit_array = []
-         can [:read, :modify] , Visit do |p3|  visit_array.include?p3.try(:id)
+         can [:read] , Visit do |p3|  visit_array.include?p3.try(:id)
           end         
          #   participant?
                  
@@ -237,20 +249,22 @@ class Ability
       if p.role == "Admin_High"
          # loop thru protocols and grant perms 
           protocol_array = []
-         @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
-         @current_user_protocol.each do |p2|
-           protocol_array << p2.protocol_id
-           end
+   #      @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
+  #       @current_user_protocol.each do |p2|
+  #         protocol_array << p2.protocol_id
+  #         end
+          protocol_array  = (user.admin_high_protocol_array).split(' ')
          user[:admin_high_protocol_array] = protocol_array
 
          can [:read, :modify], Protocol do |p3| protocol_array.include?p3.try(:id)
          end
          protocol_list = protocol_array*","
          scan_procedure_array = []
-         @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
-         @current_user_scan_procedure.each do |p2|
-           scan_procedure_array << p2.id
-           end
+  #       @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+  #       @current_user_scan_procedure.each do |p2|
+  #         scan_procedure_array << p2.id
+  #         end
+        scan_procedure_array = (user.admin_high_scan_procedure_array).split(' ')   
          user[:admin_high_scan_procedure_array] = scan_procedure_array
 
         can [:read, :modify] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -271,20 +285,22 @@ class Ability
       if p.role == "Admin_Medium"
          # loop thru protocols and grant perms 
           protocol_array = []
-         @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
-         @current_user_protocol.each do |p2|
-           protocol_array << p2.protocol_id
-           end
+#         @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
+#         @current_user_protocol.each do |p2|
+#           protocol_array << p2.protocol_id
+#           end
+          protocol_array  = (user.admin_medium_protocol_array).split(' ')
          user[:admin_medium_protocol_array] = protocol_array
 
          can [:read, :modify], Protocol do |p3| protocol_array.include?p3.try(:id)
          end
          protocol_list = protocol_array*","
          scan_procedure_array = []
-         @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
-         @current_user_scan_procedure.each do |p2|
-           scan_procedure_array << p2.id
-           end
+#         @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+#         @current_user_scan_procedure.each do |p2|
+#           scan_procedure_array << p2.id
+#           end
+          scan_procedure_array  = (user.admin_medium_scan_procedure_array).split(' ') 
          user[:admin_medium_scan_procedure_array] = scan_procedure_array
 
         can [:read, :modify] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -305,20 +321,22 @@ class Ability
       if p.role == "Admin_Low"
          # loop thru protocols and grant perms 
           protocol_array = []
-         @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
-         @current_user_protocol.each do |p2|
-           protocol_array << p2.protocol_id
-           end
+ #        @current_user_protocol = user.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(user.id).to_s)
+#         @current_user_protocol.each do |p2|
+#           protocol_array << p2.protocol_id
+#           end
+        protocol_array  = (user.admin_low_protocol_array).split(' ')   
          user[:admin_low_protocol_array] = protocol_array
 
          can [:read, :modify], Protocol do |p3| protocol_array.include?p3.try(:id)
          end
          protocol_list = protocol_array*","
          scan_procedure_array = []
-         @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
-         @current_user_scan_procedure.each do |p2|
-           scan_procedure_array << p2.id
-           end
+  #       @current_user_scan_procedure = user.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
+  #       @current_user_scan_procedure.each do |p2|
+  #         scan_procedure_array << p2.id
+  #         end
+          scan_procedure_array  = (user.admin_low_scan_procedure_array).split(' ') 
          user[:admin_low_scan_procedure_array] = scan_procedure_array
 
         can [:read, :modify] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -350,7 +368,7 @@ class Ability
       scan_procedure_array << p2.id
       end    
       
-  if user.role == "2Admin_High"
+  if user.role == "Admin_High"
       can :manage, :all
    # can :manage, Protocol
   #  can :manage , ScanProcedure

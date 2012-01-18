@@ -7,9 +7,8 @@ class User < ActiveRecord::Base
 
   # prevents a user from submitting a crafted form that bypasses activation
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :password, :password_confirmation, :remember_me, :username, :first_name,:last_name, :initials,
-         :view_low_scan_procedure_array, :edit_low_scan_procedure_array, :admin_low_scan_procedure_array, :admin_high_scan_procedure_array,
-         :view_low_protocol_array, :edit_low_protocol_array, :edit_high_protocol_array,:admin_low_protocol_array, :admin_high_protocol_array
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :username, :first_name,:last_name, :initials
+
   # Virtual attribute for the unencrypted password
   attr_accessor :login
 
@@ -29,12 +28,19 @@ class User < ActiveRecord::Base
   has_many :image_searches, :dependent => :destroy
   
   has_many :image_dataset_quality_checks
-  has_many :protocol_roles
+  has_many :protocol_roles, :dependent => :destroy
+  
+
   
   def username_name
     "#{self.first_name} #{self.last_name} #{self.username}"
   end
   
+  def username_name_role
+    "#{self.role} #{self.first_name} #{self.last_name} #{self.username} "
+  end
+  # having trouble setting the returned array as an array, showing as a user. string
+  # so just treating as string - joining array on ' ' to make string, then converting back to array after retrieval
   def view_low_scan_procedure_array
     var = set_edit_view_array('view_low_scan_procedure_array')
     "#{var}"
@@ -43,14 +49,37 @@ class User < ActiveRecord::Base
       var = set_edit_view_array('edit_low_scan_procedure_array')
       "#{var}"
   end  
+=begin # hiding calls since not using yet
   def admin_low_scan_procedure_array
        var = set_edit_view_array('admin_low_scan_procedure_array')
        "#{var}"
   end
-  def admin_high_scan_procedure_array
-        var = set_edit_view_array('admin_high_scan_procedure_array')
-        "#{var}"
+  def view_medium_scan_procedure_array
+    var = set_edit_view_array('view_medium_scan_procedure_array')
+    "#{var}"
   end
+  def edit_medium_scan_procedure_array
+      var = set_edit_view_array('edit_medium_scan_procedure_array')
+      "#{var}"
+  end  
+  def admin_medium_scan_procedure_array
+       var = set_edit_view_array('admin_medium_scan_procedure_array')
+       "#{var}"
+  end
+  def view_high_scan_procedure_array
+    var = set_edit_view_array('view_high_scan_procedure_array')
+    "#{var}"
+  end
+  def edit_high_scan_procedure_array
+      var = set_edit_view_array('edit_high_scan_procedure_array')
+      "#{var}"
+  end 
+=end 
+  def admin_high_scan_procedure_array
+       var = set_edit_view_array('admin_high_scan_procedure_array')
+       "#{var}"
+  end
+  
   def view_low_protocol_array
          var = set_edit_view_array('view_low_protocol_array')
          "#{var}"
@@ -59,18 +88,38 @@ class User < ActiveRecord::Base
           var = set_edit_view_array('edit_low_protocol_array')
           "#{var}"
   end
-  def edit_high_protocol_array
-           var = set_edit_view_array('')
-           "#{var}"
-  end
+=begin    # hiding calls since not using yet
   def admin_low_protocol_array
             var = set_edit_view_array('admin_low_protocol_array')
             "#{var}"
+  end  
+  def view_medium_protocol_array
+         var = set_edit_view_array('view_medium_protocol_array')
+         "#{var}"
   end
+  def edit_medium_protocol_array
+          var = set_edit_view_array('edit_medium_protocol_array')
+          "#{var}"
+  end
+  def admin_medium_protocol_array
+            var = set_edit_view_array('admin_medium_protocol_array')
+            "#{var}"
+  end
+  
+  def view_high_protocol_array
+         var = set_edit_view_array('view_high_protocol_array')
+         "#{var}"
+  end
+  def edit_high_protocol_array
+          var = set_edit_view_array('edit_high_protocol_array')
+          "#{var}"
+  end
+=end
   def admin_high_protocol_array
-             var = set_edit_view_array('admin_high_protocol_array')
-             "#{var}"
+            var = set_edit_view_array('admin_high_protocol_array')
+            "#{var}"
   end
+  
   
     def set_edit_view_array(field)
       user = self
@@ -259,7 +308,7 @@ class User < ActiveRecord::Base
            scan_procedure_array << p2.id
            end    
 
-       if self.role == "Admin_High"
+       if self.role == "2Admin_High"
          self[:admin_high_scan_procedure_array] = scan_procedure_array
          self[:admin_high_protocol_array] = protocol_array
        elsif self.role  == "Admin_Medium"
@@ -304,29 +353,47 @@ class User < ActiveRecord::Base
 
       #  self[:edit_low_scan_procedure_array] = [-1]
       #  self[:edit_low_protocol_array] = [-1]
-      # self[:view_low_scan_procedure_array] =[-1,-2,-3]
+     #  self[:view_low_scan_procedure_array] =[-1,-2,-3]
 
      if(field == 'view_low_scan_procedure_array')
-       return self[:view_low_scan_procedure_array]
+       return self[:view_low_scan_procedure_array].join(' ')
       elsif(field == 'edit_low_scan_procedure_array')
-        return self[:edit_low_scan_procedure_array]
+        return self[:edit_low_scan_procedure_array].join(' ')
       elsif(field == 'admin_low_scan_procedure_array')
-        return self[:admin_low_scan_procedure_array]
-      elsif(field == 'admin_high_scan_procedure_array')
-        return self[:admin_high_scan_procedure_array]
+        return self[:admin_low_scan_procedure_array].join(' ')
+      elsif(field == 'view_medium_scan_procedure_array')
+        return self[:view_medium_scan_procedure_array].join(' ')
+       elsif(field == 'edit_medium_scan_procedure_array')
+         return self[:edit_low_scan_procedure_array].join(' ')
+       elsif(field == 'admin_medium_scan_procedure_array')
+         return self[:admin_medium_scan_procedure_array].join(' ')        
+       elsif(field == 'view_high_scan_procedure_array')
+         return self[:view_high_scan_procedure_array].join(' ')
+        elsif(field == 'edit_high_scan_procedure_array')
+          return self[:edit_high_scan_procedure_array].join(' ')
+        elsif(field == 'admin_high_scan_procedure_array')
+          return self[:admin_high_scan_procedure_array].join(' ')
       elsif(field == 'view_low_protocol_array')
-        return self[:view_low_protocol_array]
+        return self[:view_low_protocol_array].join(' ')
       elsif(field == 'edit_low_protocol_array')
-        return self[:edit_low_protocol_array]
-      elsif(field == 'edit_high_protocol_array')
-        return self[:edit_high_protocol_array]
+        return self[:edit_low_protocol_array].join(' ')
       elsif(field == 'admin_low_protocol_array')
-        return self[:admin_low_protocol_array]
+        return self[:admin_low_protocol_array].join(' ')
+      elsif(field == 'view_medium_protocol_array')
+        return self[:view_medium_protocol_array].join(' ')
+      elsif(field == 'edit_medium_protocol_array')
+        return self[:edit_medium_protocol_array].join(' ')
+      elsif(field == 'admin_medium_protocol_array')
+        return self[:admin_medium_protocol_array].join(' ')        
+      elsif(field == 'view_high_protocol_array')
+        return self[:view_high_protocol_array].join(' ')
+      elsif(field == 'edit_high_protocol_array')
+        return self[:edit_high_protocol_array].join(' ')
       elsif(field == 'admin_high_protocol_array')
-        return self[:admin_high_protocol_array]
+        return self[:admin_high_protocol_array].join(' ')
       else
         var = [-1]
-        return var
+        return var.join(' ')
       end
     end
 

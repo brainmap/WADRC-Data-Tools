@@ -13,6 +13,9 @@ edit_count = edit_count -1
 		<%= link_to 'import visit data', new_raw_data_import_path %>
 	</p>
 <% end %>
+<% if current_user.role == 'Admin_High'%>
+ | <%= link_to('Protocol Access and Users', control_path) %>
+<% end %>
 </div>
 <%= render :partial => 'index_filters', :locals => { :edit_count => edit_count} %>
 

@@ -1,3 +1,10 @@
+<%
+@var = current_user
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+edit_count =@var.edit_low_scan_procedure_array.split(' ').length 
+edit_count = edit_count -1 
+%>
 <h1>Listing enrollments</h1>
 
 <table class="tabular">
@@ -21,8 +28,10 @@
         <td><%=h enrollment.recruitment_source %></td>
         <td>
           <%= link_to 'Show', enrollment %>
+<% if edit_count >30 %>
           <%= link_to 'Edit', edit_enrollment_path(enrollment) %>
           <%= link_to 'Destroy', enrollment, :confirm => 'Are you sure?', :method => :delete %>
+<% end %>
         </td>
       </tr>
     <% end %>
@@ -30,5 +39,6 @@
 </table>
 
 <br />
-
+<% if edit_count > 30 %>
 <%= link_to 'New enrollment', new_enrollment_path %>
+<% end %>

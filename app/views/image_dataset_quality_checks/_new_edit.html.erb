@@ -1,4 +1,10 @@
-
+<%
+@var = current_user
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+edit_count =@var.edit_low_scan_procedure_array.split(' ').length 
+edit_count = edit_count -1 
+%>
 
   <% qualopts = ['Pass','Mild','Moderate','Severe'] %>
   <%= f.error_messages %>
@@ -157,6 +163,7 @@
     <h3>Comment on other issues</h3>
     <p><%= f.text_area :other_issues, :rows => 3, :cols => 60 %></p>
   </div>
-  
+  <% if edit_count > 0 %>
   <p><%= f.submit "Submit quality check" %></p>
+<% end %>
 	<%= link_to 'Description of checks', 'http://hobbes/brainwiki/index.php5/List_of_Image_Quality_Checks', :target => '_blank' %>

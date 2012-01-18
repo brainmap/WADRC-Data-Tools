@@ -23,6 +23,7 @@ class ParticipantsController < ApplicationController
   # GET /participants/1
   # GET /participants/1.xml
   def show
+    
     @participant = Participant.find(params[:id])
 
     respond_to do |format|

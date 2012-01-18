@@ -1,8 +1,9 @@
 WADRCDataTools::Application.routes.draw do
+  
   resources :protocol_roles
-
   resources :protocols
-
+   match '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user
+   # want to use adminrole limited add user form instead of devise
   devise_for :users
 
   resources :physiology_text_files
@@ -17,7 +18,13 @@ WADRCDataTools::Application.routes.draw do
   match '/visits/assigned_to/:user_login', :controller => 'visits', :action => 'index_by_user_id', :as => :assigned_to
   match '/visits/in_scan_procedure/:scan_procedure_id', :controller => 'visits', :action => 'index_by_scan_procedure', :as => :in_scan_procedure
   
+  match '/users/update_role', :controller => 'users', :action => 'update_role', :as => :update_role
+  match '/users/control', :controller => 'users', :action => 'control', :as => :control
+  match '/users/add_user', :controller => 'users', :action => 'add_user', :as => :add_user
+#  match '/users/edit_user', :controller => 'users', :action => 'edit_user', :as => :edit_user
+  # moved up to get precidance over devise sign_upmatch '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user
   
+    
   resources :studies
   resources :recruitment_groups
   resources :withdrawls
@@ -32,7 +39,7 @@ WADRCDataTools::Application.routes.draw do
   end
   
   resources :visits
-    
+  resources :roles
   resources :raw_image_files
   resources :analyses
   resources :image_searches
@@ -45,6 +52,8 @@ WADRCDataTools::Application.routes.draw do
   resources :scan_procedures
   resources :log_files
   resources :raw_data_imports
+  
+  
 
 ####  match '/signup', :controller => 'users', :action => 'new', :as => :signup
 ####  match '/login', :controller => 'sessions', :action => 'new', :as => :username

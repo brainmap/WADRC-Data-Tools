@@ -1,3 +1,10 @@
+<%
+@var = current_user
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+edit_count =@var.edit_low_scan_procedure_array.split(' ').length 
+edit_count = edit_count -1 
+%> 
 <h1>Editing enrollment</h1>
 
 <%= form_for(@enrollment) do |f| %>
@@ -19,9 +26,11 @@
     <%= f.label :withdraw_enrollment? %><br />
     <%= f.text_area :withdrawl_reason, :rows => 3  %>
   </p>
+  <% if edit_count > 0 %>
   <p>
     <%= f.submit "Update" %>
   </p>
+   <% end %>
 <% end %>
 
 <%= link_to 'Show', @enrollment %> |

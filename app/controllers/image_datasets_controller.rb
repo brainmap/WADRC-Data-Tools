@@ -7,7 +7,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
   end
   
   def check_image_quality
-   scan_procedure_array =current_user[:view_low_scan_procedure_array]
+   scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ')
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @qc = ImageDatasetQualityCheck.new
     @qc.user = current_user
@@ -21,8 +21,8 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
   # GET /image_datasets
   # GET /image_datasets.xml
   def index
+    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ')
     if params[:visit_id]
-      scan_procedure_array =current_user[:view_low_scan_procedure_array]
       @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:visit_id])
       @search = @visit.image_datasets.search(params[:search])
       @image_datasets = @search.relation.page(params[:page]).per(50).all
@@ -72,8 +72,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
   # GET /image_datasets/1
   # GET /image_datasets/1.xml
   def show
-   puts "=============="+ current_user.view_low_scan_procedure_array.to_s
-    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ')
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @visit = @image_dataset.visit
     @image_datasets = @visit.image_datasets
@@ -102,7 +101,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
 
   # GET /image_datasets/1/edit
   def edit
-    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ')
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
   end
 
@@ -126,7 +125,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
   # PUT /image_datasets/1
   # PUT /image_datasets/1.xml
   def update
-    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ')
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
     respond_to do |format|
@@ -144,7 +143,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
   # DELETE /image_datasets/1
   # DELETE /image_datasets/1.xml
   def destroy
-    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ')
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @image_dataset.destroy
 
