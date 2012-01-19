@@ -22,6 +22,7 @@ class AnalysesController < ApplicationController
   # GET /analyses/1
   # GET /analyses/1.xml
   def show
+
     @analysis = Analysis.includes(:analysis_memberships).includes(:image_datasets).find(params[:id])
     @all_analysis_members = @analysis.analysis_memberships
     @paginated_analysis_members = @all_analysis_members.page(params[:page]).per(50)

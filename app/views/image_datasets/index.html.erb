@@ -2,8 +2,10 @@
 	<%= simple_form_for @search do |f| %>
 		<%= f.input :path_contains, :required => false %>
 		<%= f.input :series_description_contains, :required => false %>
-		<%= f.input :rmr_contains, :required => false %>
+		<%= f.input :rmr_contains, :required => false %
 		<%= f.input :visit_id_eq, :required => false %>
+
+		
 		<%= f.button :submit, "Search Image Datasets" %>
 	<% end %>
 </div>
@@ -13,6 +15,7 @@
   <p><%= link_to 'search for images', new_image_search_path %></p>
 	<p><%= link_to 'download csv (this may take a while!)', image_datasets_path(:search => params[:search], :format => :csv), :class => 'download_csv' %></p>
 </div>
-
+<% if !params[:search].nil?%>
 <%= render :partial => 'image_datasets', :locals => { :image_datasets => @image_datasets, :total_count => @total_count } %>
 <br />
+<% end %>

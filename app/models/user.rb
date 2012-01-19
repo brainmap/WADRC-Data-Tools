@@ -308,7 +308,7 @@ class User < ActiveRecord::Base
            scan_procedure_array << p2.id
            end    
 
-       if self.role == "2Admin_High"
+       if self.role == "Admin_High"
          self[:admin_high_scan_procedure_array] = scan_procedure_array
          self[:admin_high_protocol_array] = protocol_array
        elsif self.role  == "Admin_Medium"
