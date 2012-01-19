@@ -56,6 +56,26 @@ class UsersController < ApplicationController
     end
      # render :template => "/users/add_user"
   end  
+
+  def edit_user
+    if !params[:user].nil?   && params[:user][:last_name].blank?
+      @user = User.find(params[:user][:id])
+         render :template => "/users/edit_user"  
+    elsif !params[:user].nil?  && !params[:user][:last_name].nil? 
+     var = "update users set email='"+params[:user][:email]+"',last_name='"+params[:user][:last_name]+"',first_name='"+params[:user][:first_name]+"' where id = "+params[:user][:id]+" "
+    connection = ActiveRecord::Base.connection();
+     results = connection.execute(var)
+
+     respond_to do |format|
+          flash[:notice] = 'User was successfully updated.'
+          format.html { redirect_to('/users/control') }
+          format.xml  { head :ok }
+      end
+    end
+
+     # render :template => "/users/add_user"
+  end  
+  
 =begin
   def create
     cookies.delete :auth_token

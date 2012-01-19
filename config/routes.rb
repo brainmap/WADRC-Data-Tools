@@ -21,7 +21,7 @@ WADRCDataTools::Application.routes.draw do
   match '/users/update_role', :controller => 'users', :action => 'update_role', :as => :update_role
   match '/users/control', :controller => 'users', :action => 'control', :as => :control
   match '/users/add_user', :controller => 'users', :action => 'add_user', :as => :add_user
-#  match '/users/edit_user', :controller => 'users', :action => 'edit_user', :as => :edit_user
+  match '/users/edit_user', :controller => 'users', :action => 'edit_user', :as => :edit_user
   # moved up to get precidance over devise sign_upmatch '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user
   
     
