@@ -1,0 +1,45 @@
+<% if current_user.role == 'Admin_High'%>
+	
+<%= link_to('Update user GLOBAL role', update_role_path) %><br>
+The users are ordered by "PRESENT ROLE"- Name . <br>
+This role is applied to all protocols, and allows access to all protocols<br>
+Most users have a blank/null global role.<br>	
+Still need to add edit form for users other fields.<br><br>
+
+<%= link_to('Update user PROTOCOL specific role', protocol_roles_path) %><br>
+Search by the user or protocol. <br>
+This role is applied only to individual protocol.<br>
+A user can have multiple roles for a specific protocol. These roles are applied 
+in a cumulative manner. The edit role also allows viewing.<br><br>
+
+
+
+<%= link_to('Add roles', '/roles') %> <br><br>
+
+
+<%= link_to('Add protocol', '/protocols') %>  <br><br>
+
+<%= link_to('Add user', '/users/add_user') %>  <br>
+Enter the new users ldap login, Fisrt Name, Last Name, and Email. <br>
+Add protocol roles - default is "edit lower level fields" for all protocols which are needed.<br><br>
+
+<%= link_to('Edit and delete user', '/users/edit_user') %>  <br>
+
+
+ 
+
+
+
+	
+	
+	
+	
+<%else %>	
+
+	
+	
+	
+	
+	
+	
+<% end %>
