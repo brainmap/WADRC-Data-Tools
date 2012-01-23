@@ -36,6 +36,8 @@ ActiveRecord::Schema.define(:version => 20120109163709) do
     t.datetime "updated_at"
   end
 
+  add_index "enrollment_visit_memberships", ["visit_id", "enrollment_id"], :name => "index_enrollment_visit_memberships_on_visit_id_enrollment_id"
+
   create_table "enrollments", :force => true do |t|
     t.date     "enroll_date"
     t.string   "enumber"
@@ -47,6 +49,8 @@ ActiveRecord::Schema.define(:version => 20120109163709) do
     t.text     "withdrawl_reason"
   end
 
+  add_index "enrollments", ["id", "participant_id"], :name => "index_enrollments_on_id_participant_id"
+
   create_table "image_comments", :force => true do |t|
     t.integer  "image_dataset_id", :null => false
     t.text     "comment"
@@ -54,6 +58,8 @@ ActiveRecord::Schema.define(:version => 20120109163709) do
     t.datetime "updated_at"
     t.integer  "user_id"
   end
+
+  add_index "image_comments", ["image_dataset_id", "id"], :name => "index_image_comments_on_image_dataset_id_id"
 
   create_table "image_dataset_quality_checks", :force => true do |t|
     t.integer  "user_id"
@@ -108,6 +114,7 @@ ActiveRecord::Schema.define(:version => 20120109163709) do
   end
 
   add_index "image_datasets", ["dicom_series_uid"], :name => "index_image_datasets_on_dicom_series_uid", :unique => true
+  add_index "image_datasets", ["visit_id", "id"], :name => "index_image_datasets_on_visit_id_id"
 
   create_table "image_searches", :force => true do |t|
     t.string   "rmr"
@@ -245,10 +252,14 @@ ActiveRecord::Schema.define(:version => 20120109163709) do
     t.integer  "protocol_id"
   end
 
+  add_index "scan_procedures", ["protocol_id", "id"], :name => "index_scan_procedures_on_protocol_id_id"
+
   create_table "scan_procedures_visits", :id => false, :force => true do |t|
     t.integer "scan_procedure_id"
     t.integer "visit_id"
   end
+
+  add_index "scan_procedures_visits", ["scan_procedure_id", "visit_id"], :name => "index_scan_procedures_visits_on_scan_procedure_id_visit_id"
 
   create_table "series_descriptions", :force => true do |t|
     t.string   "long_description"
@@ -325,5 +336,7 @@ ActiveRecord::Schema.define(:version => 20120109163709) do
     t.string   "dicom_study_uid"
     t.date     "compiled_at"
   end
+
+  add_index "visits", ["id"], :name => "index_visits_on_id"
 
 end

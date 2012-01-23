@@ -34,8 +34,27 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
     #   @total_count = @image_datasets.count
     #   @page_title = "All Image Datasets for Visit #{@visit.rmr}"
     # else
-      @search = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).search(params[:search])
-      
+      # where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).
+  #   params.delete(nil)  
+=begin      
+      if params[:serach][:path_contains].blank? 
+         params[:search][:path_contains].delete
+      end
+      if params[:serach][:series_description_contains].blank? 
+         params[:serach][:series_description_contains].delete
+      end
+      if params[:serach][:rmr_contains].blank? 
+        params[:serach][:rmr_contains].delete
+      end
+      if params[:serach][:visit_id_eq].blank? 
+        params[:serach][:visit_id_eq].delete
+      end
+=end
+
+#      @search = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).search(params[:search])
+       @search = ImageDataset.find(28147)
+####      @search = ImageDataset.search(params[:search])
+
       # Set pagination and reporting options depending on the requested format
       # (ie Don't paginate datasets on CSV download.)
       if params[:format]
@@ -55,6 +74,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
         }
       else
         @image_datasets = @search.relation.page(params[:page])
+
       end
       
       # @total_count = all_images.size # I'm not sure where this method is coming from, but it's breaking in ActiveResource
@@ -81,7 +101,6 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
     @image_comments = @image_dataset.image_comments
     @next_image_dataset = @image_datasets[@image_datasets.index(@image_dataset) + 1 ]
     @previous_image_dataset = @image_datasets[@image_datasets.index(@image_dataset) - 1 ]
-   
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @image_dataset }

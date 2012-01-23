@@ -16,16 +16,16 @@ class ImageSearchesController < ApplicationController
   def show
     # change so go from analyses request params --. direct to image dataset search but return VISITS 
     
-#    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ')
+    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ')
   # could have a search without a scan_procedure_id?  
- #   @image_search = ImageSearch.where("image_searches.id in (select image_search_id from image_searches_scan_procedures where scan_procedure_id in (?))", scan_procedure_array).find_by_id(params[:id])
+    @image_search = ImageSearch.where("image_searches.id in (select image_search_id from image_searches_scan_procedures where scan_procedure_id in (?))", scan_procedure_array).find_by_id(params[:id])
  
-    @image_search = ImageSearch.find_by_id(params[:id])
+ #   @image_search = ImageSearch.find_by_id(params[:id])
 
-     params[:search][:gender] = @image_search.gender
+
      # ??? need to take imagesearch values and search image_dataset to make ImageDataset ? 
       # from image_dataset search in index
-     # @search = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).search(params[:search])
+      @search = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).search(params[:search])
     # image_searches_scan_procedures
      @paginated_image_matches = ImageDataset.limit(10).includes(:visit => :enrollments).includes(:analysis_memberships).all
     
@@ -76,7 +76,7 @@ class ImageSearchesController < ApplicationController
     end
     
     @image_search.destroy
-
+1
     respond_to do |format|
       flash[:notice] = 'Image Search was successfully deleted.'
       format.html { redirect_to(image_searches_url) }
@@ -92,8 +92,8 @@ class ImageSearchesController < ApplicationController
   
   def import_to_analysis
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ')
-#    @image_search = ImageSearch.where("image_searches.id in (select image_search_id from image_searches_scan_procedures where scan_procedure_id in (?))", scan_procedure_array).find_by_id(params[:id])
-    @image_search = ImageSearch.find_by_id(params[:id])
+    @image_search = ImageSearch.where("image_searches.id in (select image_search_id from image_searches_scan_procedures where scan_procedure_id in (?))", scan_procedure_array).find_by_id(params[:id])
+#    @image_search = ImageSearch.find_by_id(params[:id])
     @image_matches = @image_search.matching_images
     @analysis = Analysis.new
     @analysis.image_search = @image_search
