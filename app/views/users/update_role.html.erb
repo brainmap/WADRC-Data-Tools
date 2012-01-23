@@ -1,0 +1,31 @@
+
+<h2>Edit User global role </h2>
+<%= current_user.role %>= current role
+<% if current_user.role == 'Admin_High'%>
+
+<%= error_messages_for :user %>
+<%= form_for :user do |f| -%>
+
+  <div class="inputs">
+	<%= collection_select :user, :id, User.all.sort_by(&:username_name_role), :id, :username_name_role, :prompt => 'choose a user' %>
+
+
+ <%= f.label :role %> :  <%= collection_select :user, :role, Role.all.sort_by(&:role), :role, :description, :prompt => 'choose a role' %>
+   
+  </div>
+
+  <div class="actions">
+ <p><%= submit_tag 'Update Role' %></p>
+  </div>
+<% end %>
+
+<h3>Cancel the account</h3>
+
+<p>Unhappy? <%= link_to "Cancel my account", registration_path(User), :confirm => "Are you sure?", :method => :delete %>.</p>
+- Safer to update global role to blank, and remove all the protocol roles.
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>
+
+
+<%= link_to "Back", :back %>

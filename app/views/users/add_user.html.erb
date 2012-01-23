@@ -1,0 +1,24 @@
+<h2>Add User</h2>
+<% if current_user.role == 'Admin_High'%>
+<%= error_messages_for :user %>
+<%= form_for :user do |f| -%>
+  <!-- = f.error_notification -->
+
+  <div class="inputs">
+	<table><tr><td>
+	<%= f.label :username %></td><td><%= f.text_field :username, :required => true, :autofocus => true %>
+    </td></tr><tr><td><%= f.label :email %></td><td><%= f.text_field :email, :required => true  %>
+</td></tr><tr><td><%= f.label :first_name %></td><td><%= f.text_field :first_name %>
+</td></tr><tr><td><%= f.label :last_name%></td><td><%= f.text_field :last_name %>
+ </td></tr><tr><td><%= f.label :role %> </td><td>  <%= collection_select :user, :role, Role.all.sort_by(&:role), :role, :description, :prompt => 'choose a role' %>
+	</td></tr></table>
+  </div>
+
+  <div class="actions">
+    <%= f.submit "Add User" %>
+
+  </div>
+<% end %>
+
+
+<% end %>

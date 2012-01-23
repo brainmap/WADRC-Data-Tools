@@ -1,0 +1,36 @@
+<h2>Edit User</h2>
+<% if current_user.role == 'Admin_High'%>
+<%= error_messages_for :user %>
+<%= form_for :user do |f| -%>
+  <!-- = f.error_notification -->
+
+  <div class="inputs">
+	<% if !params[:user].nil?   &&  !params[:user][:id].nil? %>
+	<% @user	 = User.find(params[:user][:id])%>
+	  <div class="actions">
+	    <%= f.submit "Edit User" %><br>
+	<!-- = link_to "Delete user", registration_path(user), :confirm => "Are you sure?", :method => :delete -->.
+	  </div>
+	<% else%>
+	<% @user = nil %>
+	  <div class="actions">
+	    <%= f.submit "Retrieve Selected User" %><br>
+	<!-- = link_to "Delete user", registration_path(user), :confirm => "Are you sure?", :method => :delete -->.
+
+	  </div>
+	<% end %>
+
+	<table><tr><td>
+	<%= f.label :username %></td><td><%= collection_select :user, :id, User.all.sort_by(&:username_name), :id, :username_name_role,:prompt => 'choose a user' %>
+		
+    </td></tr><tr><td><%= f.label :email %></td><td><%= f.text_field :email  %>
+</td></tr><tr><td><%= f.label :first_name %></td><td><%= f.text_field :first_name %>
+</td></tr><tr><td><%= f.label :last_name%></td><td><%= f.text_field :last_name %>
+	</td></tr></table>
+  </div>
+
+
+<% end %>
+
+<br> No delete users yet -- much better to just remove all the user rights -- user.role and protocol roles.
+<% end %>
