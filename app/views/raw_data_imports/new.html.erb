@@ -10,7 +10,7 @@
 
 		  <p>
 		    <%= label :raw_data_import, :scan_procedure, "Is a member of Scan Procedure Group:" %><br />
-		<% scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ') %>
+		<% scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i) %>
 		    <%= collection_select :raw_data_import, :scan_procedure, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).all.sort_by(&:codename), :codename, :codename %>
 		  </p>
 

@@ -1,10 +1,11 @@
 <h1>Listing protocol_roles</h1>
 <!-- add user search -->
 <%= form_tag '/protocol_roles/index' do %>
-  <%= collection_select :protocol_role, :user_id, User.all.sort_by(&:username_name), :id, :username_name, :prompt => 'choose user' %>
+  <%= collection_select :protocol_role, :user_id, User.where(" users.username not like '%left%' ").all.sort_by(&:username_name), :id, :username_name, :prompt => 'choose user' %>
 <%= collection_select :protocol_role, :protocol_id, Protocol.all.sort_by(&:id), :id, :name, :prompt => 'choose a protocol' %>
   <%= submit_tag("Search") %>
 <% end %>
+
 
 <table>
   <tr>
@@ -27,6 +28,7 @@
   </tr>
 <% end %>
 </table>
+
 
 <br />
 

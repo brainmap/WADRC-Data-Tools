@@ -20,16 +20,16 @@ class Ability
   # loop thru each role
 
   # error where unioning null arrays 
-  user[:view_low_scan_procedure_array] = [-1]
-  user[:edit_low_scan_procedure_array] = [-1]
-  user[:admin_low_scan_procedure_array] = [-1]
-  user[:admin_high_scan_procedure_array] = [-1]
+  user[:view_low_scan_procedure_array] = [0]
+  user[:edit_low_scan_procedure_array] = [0]
+  user[:admin_low_scan_procedure_array] = [0]
+  user[:admin_high_scan_procedure_array] = [0]
   
-  user[:view_low_protocol_array] = [-1]
-  user[:edit_low_protocol_array] = [-1]
-  user[:edit_high_protocol_array] = [-1]
-  user[:admin_low_protocol_array] = [-1]
-  user[:admin_high_protocol_array] = [-1]
+  user[:view_low_protocol_array] = [0]
+  user[:edit_low_protocol_array] = [0]
+  user[:edit_high_protocol_array] = [0]
+  user[:admin_low_protocol_array] = [0]
+  user[:admin_high_protocol_array] = [0]
   
 
    @roles_in_pr.each do |p| 
@@ -40,7 +40,7 @@ class Ability
       #  @current_user_protocol.each do |p2|
       #    protocol_array << p2.protocol_id
       #    end
-        protocol_array =  (user.edit_high_protocol_array).split(' ')         
+        protocol_array =  (user.edit_high_protocol_array).split(' ').map(&:to_i)         
         user[:edit_high_protocol_array] = protocol_array
         
         can [:read, :modify], Protocol do |p3| protocol_array.include?p3.try(:id)
@@ -51,7 +51,7 @@ class Ability
 #        @current_user_scan_procedure.each do |p2|
 #          scan_procedure_array << p2.id
 #          end
-          scan_procedure_array  = (user.edit_high_scan_procedure_array).split(' ') 
+          scan_procedure_array  = (user.edit_high_scan_procedure_array).split(' ').map(&:to_i) 
         user[:edit_high_scan_procedure_array] = scan_procedure_array
         
        can [:read, :modify] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -75,7 +75,7 @@ class Ability
 #         @current_user_protocol.each do |p2|
 #           protocol_array << p2.protocol_id
 #           end
-        protocol_array =  (user.edit_medium_protocol_array).split(' ') 
+        protocol_array =  (user.edit_medium_protocol_array).split(' ').map(&:to_i) 
          user[:edit_medium_protocol_array] = protocol_array
 
          can [:read, :modify], Protocol do |p3| protocol_array.include?p3.try(:id)
@@ -86,7 +86,7 @@ class Ability
 #         @current_user_scan_procedure.each do |p2|
 #           scan_procedure_array << p2.id
 #           end
-          scan_procedure_array  = (user.edit_medium_scan_procedure_array).split(' ') 
+          scan_procedure_array  = (user.edit_medium_scan_procedure_array).split(' ').map(&:to_i) 
          user[:edit_medium_scan_procedure_array] = scan_procedure_array
 
         can [:read, :modify] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -110,7 +110,7 @@ class Ability
     #     @current_user_protocol.each do |p2|
     #       protocol_array << p2.protocol_id
     #       end
-         protocol_array =  (user.edit_low_protocol_array).split(' ') 
+         protocol_array =  (user.edit_low_protocol_array).split(' ').map(&:to_i) 
          user[:edit_low_protocol_array] = protocol_array
 
          can [:read, :modify], Protocol do |p3| protocol_array.include?p3.try(:id)
@@ -122,7 +122,7 @@ class Ability
      #    @current_user_scan_procedure.each do |p2|
     #       scan_procedure_array << p2.id
     #       end
-        scan_procedure_array = (user.edit_low_scan_procedure_array).split(' ')
+        scan_procedure_array = (user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
          user[:edit_low_scan_procedure_array] = scan_procedure_array
 
         can [:read, :modify] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -146,7 +146,7 @@ class Ability
   #       @current_user_protocol.each do |p2|
   #         protocol_array << p2.protocol_id
   #         end
-        protocol_array =  (user.view_high_protocol_array).split(' ') 
+        protocol_array =  (user.view_high_protocol_array).split(' ').map(&:to_i) 
          user[:view_high_protocol_array] = protocol_array
 
          can [:read], Protocol do |p3| protocol_array.include?p3.try(:id)
@@ -157,7 +157,7 @@ class Ability
 #         @current_user_scan_procedure.each do |p2|
 #           scan_procedure_array << p2.id
 #           end
-          scan_procedure_array  = (user.view_high_scan_procedure_array).split(' ') 
+          scan_procedure_array  = (user.view_high_scan_procedure_array).split(' ').map(&:to_i) 
          user[:view_high_scan_procedure_array] = scan_procedure_array
 
         can [:read] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -181,7 +181,7 @@ class Ability
 #         @current_user_protocol.each do |p2|
 #           protocol_array << p2.protocol_id
 #           end
-         protocol_array =  (user.view_medium_protocol_array).split(' ') 
+         protocol_array =  (user.view_medium_protocol_array).split(' ').map(&:to_i) 
          user[:view_medium_protocol_array] = protocol_array
 
          can [:read], Protocol do |p3| protocol_array.include?p3.try(:id)
@@ -192,7 +192,7 @@ class Ability
 #         @current_user_scan_procedure.each do |p2|
 #           scan_procedure_array << p2.id
 #           end
-          scan_procedure_array  = (user.view_medium_scan_procedure_array).split(' ') 
+          scan_procedure_array  = (user.view_medium_scan_procedure_array).split(' ').map(&:to_i) 
          user[:view_medium_scan_procedure_array] = scan_procedure_array
 
         can [:read] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -217,7 +217,7 @@ class Ability
       #   @current_user_protocol.each do |p2|
       #     protocol_array << p2.protocol_id
       #     end
-         protocol_array = (user.view_low_protocol_array).split(' ') 
+         protocol_array = (user.view_low_protocol_array).split(' ').map(&:to_i) 
          user[:view_low_protocol_array] = protocol_array
          
          can [:read], Protocol do |p3| protocol_array.include?p3.try(:id)
@@ -228,7 +228,7 @@ class Ability
   #       @current_user_scan_procedure.each do |p2|
   #         scan_procedure_array << p2.id
   #         end
-          scan_procedure_array = (user.view_low_scan_procedure_array).split(' ') 
+          scan_procedure_array = (user.view_low_scan_procedure_array).split(' ').map(&:to_i) 
          user[:view_low_scan_procedure_array] = scan_procedure_array
 
         can [:read] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -253,7 +253,7 @@ class Ability
   #       @current_user_protocol.each do |p2|
   #         protocol_array << p2.protocol_id
   #         end
-          protocol_array  = (user.admin_high_protocol_array).split(' ')
+          protocol_array  = (user.admin_high_protocol_array).split(' ').map(&:to_i)
          user[:admin_high_protocol_array] = protocol_array
 
          can [:read, :modify], Protocol do |p3| protocol_array.include?p3.try(:id)
@@ -264,7 +264,7 @@ class Ability
   #       @current_user_scan_procedure.each do |p2|
   #         scan_procedure_array << p2.id
   #         end
-        scan_procedure_array = (user.admin_high_scan_procedure_array).split(' ')   
+        scan_procedure_array = (user.admin_high_scan_procedure_array).split(' ').map(&:to_i)   
          user[:admin_high_scan_procedure_array] = scan_procedure_array
 
         can [:read, :modify] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -289,7 +289,7 @@ class Ability
 #         @current_user_protocol.each do |p2|
 #           protocol_array << p2.protocol_id
 #           end
-          protocol_array  = (user.admin_medium_protocol_array).split(' ')
+          protocol_array  = (user.admin_medium_protocol_array).split(' ').map(&:to_i)
          user[:admin_medium_protocol_array] = protocol_array
 
          can [:read, :modify], Protocol do |p3| protocol_array.include?p3.try(:id)
@@ -300,7 +300,7 @@ class Ability
 #         @current_user_scan_procedure.each do |p2|
 #           scan_procedure_array << p2.id
 #           end
-          scan_procedure_array  = (user.admin_medium_scan_procedure_array).split(' ') 
+          scan_procedure_array  = (user.admin_medium_scan_procedure_array).split(' ').map(&:to_i) 
          user[:admin_medium_scan_procedure_array] = scan_procedure_array
 
         can [:read, :modify] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)
@@ -325,7 +325,7 @@ class Ability
 #         @current_user_protocol.each do |p2|
 #           protocol_array << p2.protocol_id
 #           end
-        protocol_array  = (user.admin_low_protocol_array).split(' ')   
+        protocol_array  = (user.admin_low_protocol_array).split(' ').map(&:to_i)   
          user[:admin_low_protocol_array] = protocol_array
 
          can [:read, :modify], Protocol do |p3| protocol_array.include?p3.try(:id)
@@ -336,7 +336,7 @@ class Ability
   #       @current_user_scan_procedure.each do |p2|
   #         scan_procedure_array << p2.id
   #         end
-          scan_procedure_array  = (user.admin_low_scan_procedure_array).split(' ') 
+          scan_procedure_array  = (user.admin_low_scan_procedure_array).split(' ').map(&:to_i) 
          user[:admin_low_scan_procedure_array] = scan_procedure_array
 
         can [:read, :modify] , ScanProcedure do |p3|  scan_procedure_array.include?p3.try(:id)

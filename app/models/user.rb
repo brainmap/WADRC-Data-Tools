@@ -128,16 +128,16 @@ class User < ActiveRecord::Base
       # loop thru each role
 
       # error where unioning null arrays 
-      self[:view_low_scan_procedure_array] = [-1]
-      self[:edit_low_scan_procedure_array] = [-1]
-      self[:admin_low_scan_procedure_array] = [-1]
-      self[:admin_high_scan_procedure_array] = [-1]
+      self[:view_low_scan_procedure_array] = [0]
+      self[:edit_low_scan_procedure_array] = [0]
+      self[:admin_low_scan_procedure_array] = [0]
+      self[:admin_high_scan_procedure_array] = [0]
 
-      self[:view_low_protocol_array] = [-1]
-      self[:edit_low_protocol_array] = [-1]
-      self[:edit_high_protocol_array] = [-1]
-      self[:admin_low_protocol_array] = [-1]
-      self[:admin_high_protocol_array] = [-1]
+      self[:view_low_protocol_array] = [0]
+      self[:edit_low_protocol_array] = [0]
+      self[:edit_high_protocol_array] = [0]
+      self[:admin_low_protocol_array] = [0]
+      self[:admin_high_protocol_array] = [0]
       
        @roles_in_pr.each do |p| 
           if p.role == "Edit_High"
@@ -342,10 +342,9 @@ class User < ActiveRecord::Base
              # admin-> edit -> view 
              # driver is edit_low_,  view_low
            # merging nulls arrays 
-           # poplate first self array with -1, pick up new procedures as go along?
-
+           # poplate first self array with 0, pick up new procedures as go along?
        self[:edit_low_scan_procedure_array] = self[:edit_low_scan_procedure_array] | self[:admin_low_scan_procedure_array] | self[:admin_high_scan_procedure_array]
-       self[:view_low_scan_procedure_array] = self[:edit_low_scan_procedure_array] | self[:view_low_scan_procedure_array]
+       self[:view_low_scan_procedure_array] = self[:edit_low_scan_procedure_array] | self[:view_low_scan_procedure_array] 
 
        # also protocol
        self[:edit_low_protocol_array] = self[:edit_low_protocol_array] | self[:admin_low_protocol_array] | self[:admin_high_protocol_array]

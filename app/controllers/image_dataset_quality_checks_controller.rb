@@ -3,7 +3,7 @@ class ImageDatasetQualityChecksController < ApplicationController # AuthorizedCo
   # GET /image_dataset_quality_checks
   # GET /image_dataset_quality_checks.xml
   def index
-    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ')
+    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:image_dataset_id]) if params[:image_dataset_id]
     @image_dataset_quality_checks = @image_dataset ? @image_dataset.image_dataset_quality_checks : ImageDatasetQualityCheck.includes(:user).all
 
@@ -16,7 +16,7 @@ class ImageDatasetQualityChecksController < ApplicationController # AuthorizedCo
   # GET /image_dataset_quality_checks/1
   # GET /image_dataset_quality_checks/1.xml
   def show
-    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ')
+    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @idqc = ImageDatasetQualityCheck.where("image_dataset_quality_checks.image_dataset_id in ( select image_datasets.id from image_datasets where image_datasets.visit_id in 
               (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)))", scan_procedure_array).find(params[:id])
 
@@ -29,7 +29,7 @@ class ImageDatasetQualityChecksController < ApplicationController # AuthorizedCo
   # GET /image_dataset_quality_checks/new
   # GET /image_dataset_quality_checks/new.xml
   def new
-    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ')
+    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:image_dataset_id])
     @image_dataset_quality_check = @image_dataset.image_dataset_quality_checks.build
     @image_dataset_quality_check.user = current_user
@@ -42,7 +42,7 @@ class ImageDatasetQualityChecksController < ApplicationController # AuthorizedCo
 
   # GET /image_dataset_quality_checks/1/edit
   def edit
-    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ')
+    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @image_dataset_quality_check = ImageDatasetQualityCheck.where("image_dataset_quality_checks.image_dataset_id in ( select image_datasets.id from image_datasets where image_datasets.visit_id in 
               (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)))", scan_procedure_array).find(params[:id])
   # .where("image_dataset_quality_checks.image_dataset_id in ( select image_dataset_id from image_datasets where image_datasets.visit_id in 
@@ -62,7 +62,7 @@ class ImageDatasetQualityChecksController < ApplicationController # AuthorizedCo
   # POST /image_dataset_quality_checks
   # POST /image_dataset_quality_checks.xml
   def create
-    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ')
+    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:image_dataset_id])
     @image_dataset_quality_check = ImageDatasetQualityCheck.new(params[:image_dataset_quality_check])
     @image_dataset_quality_check.user = current_user
@@ -82,7 +82,7 @@ class ImageDatasetQualityChecksController < ApplicationController # AuthorizedCo
   # PUT /image_dataset_quality_checks/1
   # PUT /image_dataset_quality_checks/1.xml
   def update
-    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ')
+    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @image_dataset_quality_check = ImageDatasetQualityCheck.where("image_dataset_quality_checks.image_dataset_id in ( select image_datasets.id from image_datasets where image_datasets.visit_id in 
               (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)))", scan_procedure_array).find(params[:id])
 
@@ -101,7 +101,7 @@ class ImageDatasetQualityChecksController < ApplicationController # AuthorizedCo
   # DELETE /image_dataset_quality_checks/1
   # DELETE /image_dataset_quality_checks/1.xml
   def destroy
-    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ')
+    scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @image_dataset_quality_check = ImageDatasetQualityCheck.where("image_dataset_quality_checks.image_dataset_id in ( select image_datasets.id from image_datasets where image_datasets.visit_id in 
               (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)))", scan_procedure_array).find(params[:id])
     im_ds = @image_dataset_quality_check.image_dataset

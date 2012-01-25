@@ -10,7 +10,7 @@ load_and_authorize_resource
   # GET /scan_procedures
   # GET /scan_procedures.xml
   def index
-    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ')
+    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
     @scan_procedures = ScanProcedure.where("scan_procedures.id in (?)", scan_procedure_array).order(:codename).all
     respond_to do |format|
       format.html # index.html.erb
@@ -21,7 +21,7 @@ load_and_authorize_resource
   # GET /scan_procedures/1
   # GET /scan_procedures/1.xml
   def show
-    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ')
+    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
     @scan_procedure = ScanProcedure.where("scan_procedures.id in (?)", scan_procedure_array).find(params[:id])
 
     respond_to do |format|

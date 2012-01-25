@@ -182,11 +182,21 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # PUT /visits/1
   # PUT /visits/1.xml
   def update
-    scan_procedure_array =current_user[:edit_low_scan_procedure_array]
+     scan_procedure_array =current_user[:edit_low_scan_procedure_array]
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
-    # HTML Checkbox Hack to remove all if none were checked.
-    attributes = {'scan_procedure_ids' => []}.merge(params[:visit] || {})
 
+    # hiding the protocols in checkbox which user not have access to, if any add in to attributes before update
+    @scan_procedures = ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_visits where visit_id = "+params[:id]+" and scan_procedure_id not in (?))",  scan_procedure_array ).all
+    if @scan_procedures.count > 0
+       scan_procedure_array = []
+       @scan_procedures.each do |p2|
+         scan_procedure_array << p2.id
+       end    
+       params[:visit][:scan_procedure_ids] = params[:visit][:scan_procedure_ids] | scan_procedure_array   
+    end
+     # HTML Checkbox Hack to remove all if none were checked.
+    attributes = {'scan_procedure_ids' => []}.merge(params[:visit] || {} )
+    
     respond_to do |format|
       if @visit.update_attributes(attributes)
         flash[:notice] = 'visit was successfully updated.'

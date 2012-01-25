@@ -6,7 +6,7 @@ load_and_authorize_resource
      @catch = params[:protocol_role]
 
     if params[:protocol_role].blank?
-    @protocol_roles = ProtocolRole.all
+    @protocol_roles = ProtocolRole.where("user_id = "+current_user.id.to_s)
   else
     if !params[:protocol_role][:user_id].blank? && params[:protocol_role][:protocol_id].blank?
     @protocol_roles = ProtocolRole.where("user_id in  (?)", params[:protocol_role][:user_id]).all  
