@@ -34,6 +34,9 @@ gem 'jquery-rails'
 gem "devise", ">= 1.4.9"
 gem "devise_ldap_authenticatable"
 gem "cancan"
+gem "mechanize"
+gem "hpricot"
+
 
 # Deploy with Capistrano
 gem 'capistrano', '~>2.5.19'

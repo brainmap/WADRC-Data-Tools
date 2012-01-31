@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120109163709) do
+ActiveRecord::Schema.define(:version => 20120126200720) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -225,6 +225,25 @@ ActiveRecord::Schema.define(:version => 20120109163709) do
     t.string   "abbr"
     t.string   "path"
     t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "radiology_comments", :force => true do |t|
+    t.integer  "visit_id"
+    t.string   "rmr"
+    t.integer  "scan_number"
+    t.string   "rmr_rad"
+    t.integer  "scan_number_rad"
+    t.string   "editable_flag"
+    t.string   "rad_path"
+    t.string   "q1_flag"
+    t.string   "q2_flag"
+    t.string   "comment_html_1"
+    t.string   "comment_html_2"
+    t.string   "comment_text_1"
+    t.string   "comment_text_2"
+    t.date     "load_date"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

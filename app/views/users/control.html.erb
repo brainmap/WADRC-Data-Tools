@@ -24,6 +24,20 @@ Enter the new users ldap login, Fisrt Name, Last Name, and Email. <br>
 Add protocol roles - default is "edit lower level fields" for all protocols which are needed.<br><br>
 
 <%= link_to('Edit and delete user', '/users/edit_user') %>  <br>
+It is better to remove all the protocol roles from a user instead of deleting the user,<br>
+so objects created by the user are identifiable. If a user leave UW Health, they will not be able to login<br>
+since they will not be in the DOM Ldap server.
+<br><br>
+
+
+ <%= link_to('Edit Radiology Comment links', '/radiology_comments?radiology_comment=""') %>  <br>
+The rad_path retrieves the radiology comments linked to a visit. Harvesting of the rad_path
+from the Radiology website is dependent on a RMR and scan_number. If the RMR or scan_number
+were wrong when the scans were reviewed, the rad_rmr, rad_scan_number and the correct rad_path
+can be entered. If the comment_html_* and comment_text_* fields are emptied, the correct 
+radiology comment for the visit will be retrieved.
+<br><br>
+
 
 
  

@@ -11,6 +11,7 @@ class Visit < ActiveRecord::Base
   
   has_and_belongs_to_many :scan_procedures
   has_many :image_datasets, :dependent => :destroy
+  has_many :radiology_comments, :dependent => :destroy
   has_many :log_files
   belongs_to :user
   # has_one :participant, :through => :enrollment  # Defined manually because of has_many :enrollments

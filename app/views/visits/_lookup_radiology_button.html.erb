@@ -1,3 +1,10 @@
+<% @radiology_comments = RadiologyComment.where(" radiology_comments.visit_id in (?)",@visit.id).all %>
+<%
+     @radiology_comments.each do |r| %>
+	  <%=r.comment_html_1.try(:html_safe)%><%=r.comment_html_2.try(:html_safe) %><%=r.comment_html_3.try(:html_safe) %><%=r.comment_html_4.try(:html_safe) %><%=r.comment_html_5.try(:html_safe) %><br><br>
+<%	 end   %>
+<br>
+<br>
 <%= form_tag "https://www.radiology.wisc.edu/intranet/research/neuroResearchScans/scanList.php", :target => "_blank" do -%>
 	<%= hidden_field_tag("origin", "searchForm") %>
 	<%= hidden_field_tag("subjID",rmr) %>

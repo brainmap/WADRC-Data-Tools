@@ -84,7 +84,7 @@ edit_count = edit_count -1
   <%= render(:partial => 'image_datasets/image_datasets', :locals => {:image_datasets => @image_datasets, :include_thumbnails => true, :edit_count => edit_count} ) %>
 <% end %>
 
-<h3>Check Radiology</h3>
+<!-- <h3>Check Radiology</h3> -->
 <%= render(:partial => "lookup_radiology_button", :locals => {:rmr => @visit.rmr} ) %>
 
 <%= render(:partial => "visit_confirmation") %>

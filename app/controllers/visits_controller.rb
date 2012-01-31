@@ -236,6 +236,50 @@ class VisitsController <  AuthorizedController #  ApplicationController
     redirect_to @visit
   end
   
+  def visit_search
+    # possible params
+    # scan_procedures_visits.scan_procedures_id
+    # visits.rmr
+    # visits.path
+    # visits.date scan date before = latest_timestamp(1i)(2i)(3i)
+    # visits.date scan date after  = earliest_timestamp(1i)(2i)(3i)
+    
+    #enrollment_visit_memberships.enrollment_id enrollments.enumber
+    
+
+    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    # Remove default scope if sorting has been requested.
+    @search = Visit.search(params[:search]) 
+      if !params[:visit_search][:scan_procedure_id].blank?
+         @search =Visit.where(" visits.id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedures_visits.scan_procedure_id in (?))",params[:visit_search][:scan_procedure_id])
+      end
+      
+      if !params[:visit_search][:enumber].blank?
+         @search =Visit.where(" visits.id in (select enrollment_visit_memberships.visit_id from enrollment_visit_memberships where enrollment_visit_memberships.enrollment_id in
+              (select enrollments.id from enrollments where enumber in (?)))",params[:visit_search][:enumber])
+      end      
+
+      if !params[:visit_search][:rmr].blank? && params[:visit_search][:path].blank? && params[:visit_search][:latest_timestamp].blank? && params[:visit_search][:earliest_timestamp].blank?
+          @search = @search.where(" visits.rmr in (?)",params[:visit_search][:rmr])
+      elsif params[:visit_search][:rmr].blank? && !params[:visit_search][:path].blank? && params[:visit_search][:latest_timestamp].blank? && params[:visit_search][:earliest_timestamp].blank?
+              var ="%"+params[:visit_search][:path]+"%"
+             @search = @search.where(" visits.path LIKE ? ",var)
+      elsif !params[:visit_search][:rmr].blank? && !params[:visit_search][:path].blank? && params[:visit_search][:latest_timestamp].blank? && params[:visit_search][:earliest_timestamp].blank?
+            var ="%"+params[:visit_search][:path]+"%"
+            @search = @search.where(" visits.path LIKE ? and visits.rmr in (?) ",var,params[:visit_search][:rmr])
+      end
+
+       #  build expected date format --- between, >, < 
+       
+      
+
+    @visits =  @search.where(" visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
+    @collection_title = 'All visits'
+    render :template => "visits/visit_search"
+    
+  end
+  
+  
   private
   
   def set_current_tab
