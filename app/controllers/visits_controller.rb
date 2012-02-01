@@ -237,7 +237,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
   end
   
   def visit_search
-    # possible params
+    # possible params -- visits fields just get added as AND statements
+    #   other table fields should be grouped into one lower level IN select 
     # scan_procedures_visits.scan_procedures_id
     # visits.rmr
     # visits.path
@@ -246,7 +247,11 @@ class VisitsController <  AuthorizedController #  ApplicationController
     
     #enrollment_visit_memberships.enrollment_id enrollments.enumber
     
-
+    
+    
+   if params[:visit_search].nil?
+        params[:visit_search] =Hash.new  
+   end
     scan_procedure_array =current_user[:view_low_scan_procedure_array]
     # Remove default scope if sorting has been requested.
     @search = Visit.search(params[:search]) 
@@ -270,15 +275,56 @@ class VisitsController <  AuthorizedController #  ApplicationController
       end
 
        #  build expected date format --- between, >, < 
-       
+       v_date_latest =""
+       #want all three date parts
       
+       if !params[:visit_search]["#{'latest_timestamp'}(1i)"].blank? && !params[:visit_search]["#{'latest_timestamp'}(2i)"].blank? && !params[:visit_search]["#{'latest_timestamp'}(3i)"].blank?
+            v_date_latest = params[:visit_search]["#{'latest_timestamp'}(1i)"] +"-"+params[:visit_search]["#{'latest_timestamp'}(2i)"]+"-"+params[:visit_search]["#{'latest_timestamp'}(3i)"]
+       end
+
+       v_date_earliest =""
+       #want all three date parts
+  
+       if !params[:visit_search]["#{'earliest_timestamp'}(1i)"].blank? && !params[:visit_search]["#{'earliest_timestamp'}(2i)"].blank? && !params[:visit_search]["#{'earliest_timestamp'}(3i)"].blank?
+             v_date_earliest = params[:visit_search]["#{'earliest_timestamp'}(1i)"] +"-"+params[:visit_search]["#{'earliest_timestamp'}(2i)"]+"-"+params[:visit_search]["#{'earliest_timestamp'}(3i)"]
+        end
+
+       if v_date_latest.length>0 && v_date_earliest.length >0
+         @search = @search.where(" visits.date between ? and ? ",v_date_earliest,v_date_latest)
+       elsif v_date_latest.length>0
+         @search = @search.where(" visits.date < ?  ",v_date_earliest)
+       elsif  v_date_earliest.length >0
+         @search = @search.where(" visits.date > ? ",v_date_latest)
+        end
+     
 
     @visits =  @search.where(" visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
+  
+    ### LOOK WHERE TITLE IS SHOWING UP
     @collection_title = 'All visits'
-    render :template => "visits/visit_search"
+    
+    
+#    light_include_options = :image_dataset_quality_checks
+#    heavy_include_options = {
+#      :image_dataset_quality_checks => {:except => [:id]},
+#      :visit => {:methods => :age_at_visit, :only => [:scanner_source, :date], :include => {
+#        :enrollments => {:only => [:enumber], :include => { 
+#          :participant => { :methods => :genetic_status, :only => [:gender, :wrapnum, :ed_years] }
+#        }}
+#      }}
+#    }
+### if Radiology - pass in params -- do same seach, but call differ respond_to
+### add radiology_comments, image_dataset comment, and image_dataset_quality_check columns to visit?
+### define what field go out
+#     light_include_options = :visit
+   
+    respond_to do |format|
+      format.html {render :template => "visits/visit_search"}
+      format.csv  { render :csv => @visits.csv_download(@search) }  
+    end
+#    render :template => "visits/visit_search"
     
   end
-  
   
   private
   

@@ -1,6 +1,11 @@
+<% if current_user.role == 'Admin_High'%>
 <h1>Editing protocol_role</h1>
 
 <%= render 'form' %>
 
 <%= link_to 'Show', @protocol_role %> |
 <%= link_to 'Back', protocol_roles_path %>
+
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

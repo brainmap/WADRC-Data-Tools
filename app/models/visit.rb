@@ -1,7 +1,12 @@
 class Visit < ActiveRecord::Base
   RADIOLOGY_OUTCOMES = %w{no Nm A-F A-NF n/a}
   PROGRESS_CHOICES = %w{no yes n/a}
-  
+    EXCLUDED_REPORT_ATTRIBUTES = [:user_id ]
+    # Note: As of 8/24/2011, default excludes (:except => :id) are not working.
+    # Use the Class Constant ImageDataset::EXCLUDED_REPORT_ATTRIBUTES instead.
+    acts_as_reportable
+    
+    
   # default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
   default_scope :order => 'date DESC'
   
@@ -12,6 +17,7 @@ class Visit < ActiveRecord::Base
   has_and_belongs_to_many :scan_procedures
   has_many :image_datasets, :dependent => :destroy
   has_many :radiology_comments, :dependent => :destroy
+
   has_many :log_files
   belongs_to :user
   # has_one :participant, :through => :enrollment  # Defined manually because of has_many :enrollments
@@ -380,6 +386,13 @@ class Visit < ActiveRecord::Base
   
   def update_compiled_at_date
     self.compiled_at = Time.zone.now
+  end
+
+  def self.csv_download(visits, include_options = {})
+    visits.report_table(:all, 
+      :except => Visit::EXCLUDED_REPORT_ATTRIBUTES, 
+      :include => include_options
+    ).to_csv
   end
 
 end

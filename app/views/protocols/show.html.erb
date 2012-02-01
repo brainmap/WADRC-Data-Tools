@@ -1,5 +1,5 @@
 <p id="notice"><%= notice %></p>
-
+<% if current_user.role == 'Admin_High'%>
 <p>
   <b>Name:</b>
   <%= @protocol.name %>
@@ -23,3 +23,7 @@
 
 <%= link_to 'Edit', edit_protocol_path(@protocol) %> |
 <%= link_to 'Back', protocols_path %>
+
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>
