@@ -35,8 +35,8 @@
             <li <%= "class=current" if @current_tab == "scan_procedures" %>>
               <%= link_to "ScanProcedures", scan_procedures_path %>
             </li>
-            <li <%= "class=current" if @current_tab == "analyses" %>>
-              <%= link_to "Analyses", analyses_path %>
+            <li <%= "class=current" if @current_tab == "visit_search" %>>
+              <%= link_to "Visit Search/Export", visit_search_path %>
             </li>
             <li <%= "class=current" if @current_tab == "image_datasets" %>>
               <%= link_to "Image Dataset Search", image_datasets_path %>

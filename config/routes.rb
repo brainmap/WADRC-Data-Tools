@@ -20,6 +20,7 @@ WADRCDataTools::Application.routes.draw do
   match '/visits/assigned_to/:user_login', :controller => 'visits', :action => 'index_by_user_id', :as => :assigned_to
   match '/visits/in_scan_procedure/:scan_procedure_id', :controller => 'visits', :action => 'index_by_scan_procedure', :as => :in_scan_procedure
   match '/visits/visit_search' , :controller => 'visits', :action => 'visit_search', :as =>:visit_search
+  match '/visit_search' , :controller => 'visits', :action => 'visit_search', :as =>:visit_search
   
   match '/users/update_role', :controller => 'users', :action => 'update_role', :as => :update_role
   match '/users/control', :controller => 'users', :action => 'control', :as => :control

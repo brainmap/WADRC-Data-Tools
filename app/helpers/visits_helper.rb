@@ -44,7 +44,7 @@ end
 # This creates a form (the only way I know of POSTing) so it cannot be embedded
 # in other forms.
 def lookup_radiology_button(rmr)
-  form_tag("http://www.radiology.wisc.edu/intranet/research/neuroResearchScans/scanList.php")
+  form_tag("https://www.radiology.wisc.edu/protected/neuroResearchScans/scanList.php")
   hidden_field_tag("origin", "searchForm")
   hidden_field_tag("subjID",@visit.rmr)
   submit_tag("Check Radiology Site")

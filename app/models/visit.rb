@@ -1,7 +1,7 @@
 class Visit < ActiveRecord::Base
   RADIOLOGY_OUTCOMES = %w{no Nm A-F A-NF n/a}
   PROGRESS_CHOICES = %w{no yes n/a}
-    EXCLUDED_REPORT_ATTRIBUTES = [:user_id ]
+    EXCLUDED_REPORT_ATTRIBUTES = [:user_id ,:initials]
     # Note: As of 8/24/2011, default excludes (:except => :id) are not working.
     # Use the Class Constant ImageDataset::EXCLUDED_REPORT_ATTRIBUTES instead.
     acts_as_reportable
@@ -391,6 +391,13 @@ class Visit < ActiveRecord::Base
   def self.csv_download(visits, include_options = {})
     visits.report_table(:all, 
       :except => Visit::EXCLUDED_REPORT_ATTRIBUTES, 
+      :include => include_options
+    ).to_csv
+  end
+  
+  def self.csv_download_limit(visits, include_options = {}, exclude_options = {})
+    visits.report_table(:all, 
+      :except => exclude_options, 
       :include => include_options
     ).to_csv
   end

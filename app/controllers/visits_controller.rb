@@ -302,8 +302,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
   
     ### LOOK WHERE TITLE IS SHOWING UP
     @collection_title = 'All visits'
-    
-    
+ 
+   
 #    light_include_options = :image_dataset_quality_checks
 #    heavy_include_options = {
 #      :image_dataset_quality_checks => {:except => [:id]},
@@ -313,14 +313,55 @@ class VisitsController <  AuthorizedController #  ApplicationController
 #        }}
 #      }}
 #    }
+=begin
+light_include_options = :image_dataset_quality_checks
+merged_comment_html
+label_not_null_comments
+scan_procedure_name
+
+radiology_comments_options = {
+  :visit => {:methods => :age_at_visit, :only => [:id,:scanner_source, :rmr, :date,:note], :include => {
+    :radiology_comment =>{:only => [:comment_html_1, :comment_html_2]},
+    :image_dataset_quality_checks =>{ :only => [:id]},
+    :image_dataset =>{:image_dataset_comment => { :only =>[:comment]}}
+    :enrollments => {:only => [:enumber], :include => { 
+      :participant => { :methods => :genetic_status, :only => [:gender, :wrapnum, :ed_years] }
+    }}
+  }}
+}
+=end
+# use methods for radiology_comments, image_dataset comment and image dataset quailty check comments
+radiology_comments_options = {
+      :radiology_comments => { :methods => :combined_radiology_comments ,:only =>[:q1_flag ]    }
+}
+#      :image_datasets => { :only => [:series_description] }
+# }
+
+limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:dicom_dvd,:compile_folder,:id,
+                  :created_at, :updated_at, :research_diagnosis, :consent_form_type, :created_by_id, :dicom_study_uid,:compiled_at]
+
+
+
 ### if Radiology - pass in params -- do same seach, but call differ respond_to
 ### add radiology_comments, image_dataset comment, and image_dataset_quality_check columns to visit?
 ### define what field go out
 #     light_include_options = :visit
+# if format.csv
+  puts "=====params="+params[:visit_search].to_s
+# end   
    
     respond_to do |format|
       format.html {render :template => "visits/visit_search"}
-      format.csv  { render :csv => @visits.csv_download(@search) }  
+      if !params[:visit_search][:include_radiology_comment].try(:length).nil?
+         if params[:visit_search][:include_radiology_comment] == "1"
+           
+            format.csv  { render :csv => @visits.csv_download_limit(@search,radiology_comments_options,limit_visits) }
+         else
+            format.csv  { render :csv => @visits.csv_download(@search) }
+         end
+      else
+        format.csv  { render :csv => @visits.csv_download(@search) }
+      end  
     end
 #    render :template => "visits/visit_search"
     
