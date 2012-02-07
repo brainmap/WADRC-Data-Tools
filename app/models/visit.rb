@@ -8,7 +8,7 @@ class Visit < ActiveRecord::Base
     
     
   # default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
-  default_scope :order => 'date DESC'
+  default_scope :order => 'date DESC' 
   
   validates_presence_of :date
   # Allow the DICOM UID to be blank for visits without Scans

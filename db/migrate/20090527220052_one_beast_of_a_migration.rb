@@ -11,7 +11,7 @@ class OneBeastOfAMigration < ActiveRecord::Migration
       t.text   :banding_comment, :registration_risk_comment, :motion_warning_comment, :omnibus_f_comment, :spm_mask_comment
       t.text   :other_issues
     end
-    
+=begin
     change_table :protocols do |t|
       t.remove :investigator
       t.remove :study
@@ -23,7 +23,7 @@ class OneBeastOfAMigration < ActiveRecord::Migration
       t.decimal :version
     end
     rename_table :protocols, :scan_procedures
-    
+=end  
     change_table :visits do |t|
       t.remove :enum
       

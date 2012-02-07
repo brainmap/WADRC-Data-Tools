@@ -349,6 +349,8 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:di
         export_record = visit_search_path(:visit_search => params[:visit_search], :format => :csv)
         export_record.gsub!('%28','(')
         export_record.gsub!('%29',')')
+
+        
         #current_user.id.to_s 
         # add export_log
 
