@@ -1,0 +1,185 @@
+<div id="heading_and_link">
+  <h1>Search Visits</h1>
+</p>
+</div>
+
+<h3>Criteria:</h3>
+
+<%= form_for 'visit_search' do |f| %>
+  <table class="search_form">
+    <th><%= f.label :scan_procedures %></th>
+    <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
+    <td><%= collection_select(:visit_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename, {}, {:multiple =>  true}) %></td>
+  </table>
+
+  <table class="search_form">
+
+    <tr>
+      <th><%= f.label :enumber %></th>
+      <td><%= f.text_field :enumber %></td>
+    </tr>
+
+    <tr>
+      <th><%= f.label :rmr %></th>
+      <td><%= f.text_field :rmr %></td>
+    </tr>
+<!--
+    <tr>
+      <th><%= f.label :series_description %></th>
+      <td><%= f.text_field :series_description %></td>
+    </tr>
+-->
+    <tr>
+      <th><%= f.label :path %></th>
+      <td><%= f.text_field :path %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :scan_date_before %></th>
+      <td><%= f.date_select "latest_timestamp", :start_year => 1995, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :scan_date_after %></th>
+      <td><%= f.date_select :earliest_timestamp, :start_year => 1995, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :radiology_comments %></th>
+      <td><%= f.check_box :include_radiology_comment %></td>
+    </tr>
+  </table>
+
+<!-- 
+  <table class="search_form">
+    <tr>
+      <th><%= f.label :gender %></th>
+      <td><%= select :image_search, :gender, { "M" => 1, "F" => 2 }, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :minimum_age %></th>
+      <td><%= select :image_search, :min_age, (1..110).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_age %></th>
+      <td><%= select :image_search, :max_age, (1..110).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :minimum_education_years %></th>
+      <td><%= select :image_search, :min_ed_years, (0..25).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_education_years %></th>
+      <td><%= select :image_search, :max_ed_years, (0..25).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :apoe_status %></th>
+      <td><%= select :image_search, :apoe_status, { "negative" => 0, "positive" => 1 }, :include_blank => true %></td>
+    </tr>
+  </table>
+-->
+  
+  <%= clearing_br %>
+  <%= f.submit "Search" %>
+  
+<% end %>
+
+<%= link_to 'download csv of this search (this may take a while!)', visit_search_path(:visit_search => params[:visit_search], :format => :csv), :class => 'download_csv' %></p>
+<table class="tabular">
+  
+  <caption><%= pluralize(@visits.total_count, 'visit') %><%#= paginated ? pagination_info(@visits) : pluralize(@visits.length, 'visit') %></caption>
+<%
+=begin
+%>
+  <thead>
+    <tr>
+      <th><span><%= sort_link @search, :date %></span></th>
+      <th><span><%= sort_link @search, :scan_procedures_codename, "Scan Procedure" %></span></th>
+      <th><span><%= sort_link @search, :scan_number %></span></th>
+      <th><span><%= sort_link @search, :enrollments_enumber, "Enroll Number" %></span></th>
+      <th><span><%= sort_link @search, :rmr %></span></th>
+      <th><span class="vert"><%= sort_link @search, :path, "Directory Path" %></span></th>
+      <th><span class="vert"><%= sort_link @search, :transfer_mri %></span></th>
+      <th><span class="vert"><%= sort_link @search, :transfer_pet %></span></th>
+      <th><span class="vert"><%= sort_link @search, :radiology_outcome %></span></th>
+      <th><span class="vert"><%= sort_link @search, :compile_folder %></span></th>
+      <th><span class="vert"><%= sort_link @search, :conference %></span></th>
+      <th></th>
+    </tr>
+  </thead>
+<%
+=end
+
+v_include_radiology_comments = "0"
+if !params[:visit_search][:include_radiology_comment].try(:length).nil?   
+  v_include_radiology_comments = params[:visit_search][:include_radiology_comment]
+end
+%>
+  <thead>
+    <tr>
+      <th><span>Date</span></th>
+      <th><span>Scan Procedure</span></th>
+      <th><span>Scan Number</span></th>
+      <th><span>Enroll Number</span></th>
+      <th><span>RMR</span></th>
+      <th><span class="vert">Directory Path</span></th>
+<% if v_include_radiology_comments == "1" %>
+     <th colspan ="6" ><span>Radiology Comments</span></th>
+<% else %>
+      <th><span class="vert">Transfer mri</span></th>
+      <th><span class="vert">Transfer Pet</span></th>
+      <th><span class="vert">Radiology Outcome</span></th>
+      <th><span class="vert">Compile Folder</span></th>
+      <th><span class="vert">Conference</span></th>
+      <th></th>
+<% end %>
+    </tr>
+  </thead>
+  
+  <tfoot><tr><td colspan=21>
+		 <%= paginate @visits %> 
+		<%# if paginated %>
+    	<%#= @visit_search.nil? ? will_paginate(@visits) : will_paginate(@visits, :params => { :visit_search => @visit_search }) %>
+		<%# end %>
+  </td></tr></tfoot>
+  
+  <tbody>
+    <% @visits.each do |visit| %>
+      <tr>
+        <td><%= link_to visit.date.to_s(:datetime_military), visit %></td>
+        <td><%= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
+        <td><%= visit.scan_number %></td>
+        <td><%= visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
+        <td><%= visit.rmr %></td>
+        <td><%= popup_note('peek', key_val_table('path_popup', { :Path => visit.path })) unless visit.path.blank? %></td>
+<% if v_include_radiology_comments == "1" %>
+       <td colspan ="6">
+
+<%  visit.radiology_comments.each do |r|  %>
+	       <% @radiology_comment =RadiologyComment.find(r.try(:id)) %>
+	        <%= @radiology_comment.combined_radiology_comments_html.html_safe %><br>
+	  <%  end %> 
+                     </td>
+	
+	
+<% else %>
+        <%= show_bool(visit.transfer_mri) %>
+        <%= show_bool(visit.transfer_pet) %>
+        <%= show_rad_review(visit.radiology_outcome) %>
+        <%= show_bool(visit.compile_folder) %>
+        <%= show_bool(visit.conference) %>
+<% end %>
+        <td style="width: 6em;">
+          <%= link_to 'show', visit %>
+          <%#= link_to 'X', visit, :confirm => "Are you sure you want to delete this visit?", :method => :delete %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+  
+</table>
+
+<!--
+ADD BACK IN HEADER ORDER BY
+EXPORT FILE
+ADD RADIOLOGY, dataset comments, and quality comment VERSION
+EXPORT radiology text filter
+
+-->
