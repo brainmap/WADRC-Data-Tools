@@ -1,7 +1,5 @@
 WADRCDataTools::Application.routes.draw do
   
-  resources :radiology_comments
-
   resources :protocol_roles
   resources :protocols
    match '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user
@@ -41,6 +39,7 @@ WADRCDataTools::Application.routes.draw do
   resources :image_datasets, :shallow => true do # |image_dataset|
     resources :image_comments,:image_dataset_quality_checks
   end
+  resources :radiology_comments
   
   resources :visits
   resources :roles

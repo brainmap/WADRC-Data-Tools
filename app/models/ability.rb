@@ -431,7 +431,7 @@ class Ability
   
   can [:read] , User
   can [:read] , Role
-  can [:read, :modify] , RadiologyComment  
+#  can [:read, :modify] , RadiologyComment  
   can [:read, :modify] , ProtocolRole
   can [:read, :modify] , Participant
   can [:read, :modify] , ImageSearch
