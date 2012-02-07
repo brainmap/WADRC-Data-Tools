@@ -1,4 +1,5 @@
 class AddColumnsToProtocols < ActiveRecord::Migration
+=begin
   def self.up
     add_column :protocols, :investigator, :string
     add_column :protocols, :study, :string
@@ -12,4 +13,5 @@ class AddColumnsToProtocols < ActiveRecord::Migration
     remove_column :protocols, :visit_number
     remove_column :protocols, :procedure
   end
+=end
 end
