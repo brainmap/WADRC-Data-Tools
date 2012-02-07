@@ -1,0 +1,55 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Listing radiology_comments</h1>
+<%= form_tag '/radiology_comments/index' do %>
+RMR: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<%= text_field_tag "radiology_comment[rmr]" %><br>
+<%= collection_select :radiology_comment, :protocol_id, Protocol.all.sort_by(&:id), :id, :name, :prompt => 'choose a protocol' %>
+  <%= submit_tag("Search") %>
+<% end %>
+
+<table   class="tabular">
+  <tr>
+    <th>Visit</th>
+    <th>Rmr</th>
+    <th>Scan number</th>
+    <th>Rmr rad</th>
+    <th>Scan number rad</th>
+    <th>Editable flag</th>
+    <th>Rad path</th>
+    <th>Q1 flag</th>
+    <th>Q2 flag</th>
+    <th>Comment html 1 & 2 & 3 & 4</th>
+    <th>Comment text 1 & 2</th>
+    <th>Load date</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @radiology_comments.each do |radiology_comment| %>
+  <tr>
+    <td><%= radiology_comment.visit_id %></td>
+    <td><%= radiology_comment.rmr %></td>
+    <td><%= radiology_comment.scan_number %></td>
+    <td><%= radiology_comment.rmr_rad %></td>
+    <td><%= radiology_comment.scan_number_rad %></td>
+    <td><%= radiology_comment.editable_flag %></td>
+    <td><%= radiology_comment.rad_path %></td>
+    <td><%= radiology_comment.q1_flag %></td>
+    <td><%= radiology_comment.q2_flag %></td>
+    <td ><table ><tr><td><%=radiology_comment.comment_html_1.try(:html_safe)%><%=radiology_comment.comment_html_2.try(:html_safe) %><%=radiology_comment.comment_html_3.try(:html_safe) %><%=radiology_comment.comment_html_4.try(:html_safe) %><%=radiology_comment.comment_html_5.try(:html_safe) %></td></tr></table></td>
+    <td><%= radiology_comment.comment_text_1%><%=radiology_comment.comment_text_2 %><%=radiology_comment.comment_text_3 %><%=radiology_comment.comment_text_4 %><%=radiology_comment.comment_text_5 %></td>
+    <td><%= radiology_comment.load_date %></td>
+    <td><%= link_to 'Show', radiology_comment %></td>
+    <td><%= link_to 'Edit', edit_radiology_comment_path(radiology_comment) %></td>
+    <td><%= link_to 'Destroy', radiology_comment, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Radiology comment', new_radiology_comment_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

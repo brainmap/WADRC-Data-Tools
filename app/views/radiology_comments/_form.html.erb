@@ -1,0 +1,98 @@
+<%= form_for(@radiology_comment) do |f| %>
+  <% if @radiology_comment.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@radiology_comment.errors.count, "error") %> prohibited this radiology_comment from being saved:</h2>
+
+      <ul>
+      <% @radiology_comment.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :visit_id %><br />
+    <%= f.text_field :visit_id %>
+  </div>
+  <div class="field">
+    <%= f.label :rmr %><br />
+    <%= f.text_field :rmr %>
+  </div>
+  <div class="field">
+    <%= f.label :scan_number %><br />
+    <%= f.text_field :scan_number %>
+  </div>
+  <div class="field">
+    <%= f.label :rmr_rad %><br />
+    <%= f.text_field :rmr_rad %>
+  </div>
+  <div class="field">
+    <%= f.label :scan_number_rad %><br />
+    <%= f.text_field :scan_number_rad %>
+  </div>
+  <div class="field">
+    <%= f.label :editable_flag %><br />
+    <%= f.text_field :editable_flag %>
+  </div>
+  <div class="field">
+    <%= f.label :rad_path %><br />
+    <%= f.text_field :rad_path %>
+  </div>
+  <div class="field">
+    <%= f.label :q1_flag %><br />
+    <%= f.text_field :q1_flag %>
+  </div>
+  <div class="field">
+    <%= f.label :q2_flag %><br />
+    <%= f.text_field :q2_flag %>
+  </div>
+  <div class="field">
+    <%= f.label :comment_html_1 %><br />
+    <%= f.text_field :comment_html_1 %>
+  </div>
+  <div class="field">
+    <%= f.label :comment_html_2 %><br />
+    <%= f.text_field :comment_html_2 %>
+  </div>
+  <div class="field">
+    <%= f.label :comment_html_3 %><br />
+    <%= f.text_field :comment_html_3 %>
+  </div>
+  <div class="field">
+    <%= f.label :comment_html_4 %><br />
+    <%= f.text_field :comment_html_4 %>
+  </div>
+  <div class="field">
+    <%= f.label :comment_html_5 %><br />
+    <%= f.text_field :comment_html_5 %>
+  </div>
+  <div class="field">
+    <%= f.label :comment_text_1 %><br />
+    <%= f.text_field :comment_text_1 %>
+  </div>
+  <div class="field">
+    <%= f.label :comment_text_2 %><br />
+    <%= f.text_field :comment_text_2 %>
+  </div>
+  <div class="field">
+    <%= f.label :comment_text_3 %><br />
+    <%= f.text_field :comment_text_3 %>
+  </div>
+  <div class="field">
+    <%= f.label :comment_text_4 %><br />
+    <%= f.text_field :comment_text_4 %>
+  </div>
+  <div class="field">
+    <%= f.label :comment_text_5 %><br />
+    <%= f.text_field :comment_text_5 %>
+  </div>
+
+  <div class="field">
+    <%= f.label :load_date %><br />
+    <%= f.date_select :load_date %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

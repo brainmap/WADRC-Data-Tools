@@ -1,0 +1,77 @@
+<p id="notice"><%= notice %></p>
+<% if current_user.role == 'Admin_High'%>
+<p>
+  <b>Visit:</b>
+  <%= @radiology_comment.visit_id %>
+</p>
+
+<p>
+  <b>Rmr:</b>
+  <%= @radiology_comment.rmr %>
+</p>
+
+<p>
+  <b>Scan number:</b>
+  <%= @radiology_comment.scan_number %>
+</p>
+
+<p>
+  <b>Rmr rad:</b>
+  <%= @radiology_comment.rmr_rad %>
+</p>
+
+<p>
+  <b>Scan number rad:</b>
+  <%= @radiology_comment.scan_number_rad %>
+</p>
+
+<p>
+  <b>Editable flag:</b>
+  <%= @radiology_comment.editable_flag %>
+</p>
+
+<p>
+  <b>Rad path:</b>
+  <%= @radiology_comment.rad_path %>
+</p>
+
+<p>
+  <b>Q1 flag:</b>
+  <%= @radiology_comment.q1_flag %>
+</p>
+
+<p>
+  <b>Q2 flag:</b>
+  <%= @radiology_comment.q2_flag %>
+</p>
+
+<p>
+  <b>Comment html 1:</b>
+  <%=@radiology_comment.comment_html_1.try(:html_safe)%><%=@radiology_comment.comment_html_2.try(:html_safe) %><%=@radiology_comment.comment_html_3.try(:html_safe) %><%=@radiology_comment.comment_html_4.try(:html_safe) %><%=@radiology_comment.comment_html_5.try(:html_safe) %>
+<br>
+
+</p>
+
+
+
+<p>
+  <b>Comment text 1:</b>
+  <%= @radiology_comment.comment_text_1 %>
+</p>
+
+<p>
+  <b>Comment text 2:</b>
+  <%= @radiology_comment.comment_text_2 %>
+</p>
+
+<p>
+  <b>Load date:</b>
+  <%= @radiology_comment.load_date %>
+</p>
+
+
+<%= link_to 'Edit', edit_radiology_comment_path(@radiology_comment) %> |
+<%= link_to 'Back', radiology_comments_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

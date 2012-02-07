@@ -1,0 +1,10 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Editing radiology_comment</h1>
+
+<%= render 'form' %>
+
+<%= link_to 'Show', @radiology_comment %> |
+<%= link_to 'Back', radiology_comments_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>
