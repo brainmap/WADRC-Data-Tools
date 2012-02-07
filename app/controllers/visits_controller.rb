@@ -346,16 +346,18 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:di
 ### add radiology_comments, image_dataset comment, and image_dataset_quality_check columns to visit?
 ### define what field go out
 #     light_include_options = :visit
-# if format.csv
-  puts "=====params="+params[:visit_search].to_s
-# end   
-   
+        export_record = visit_search_path(:visit_search => params[:visit_search], :format => :csv)
+        export_record.gsub!('%28','(')
+        export_record.gsub!('%29',')')
+        #current_user.id.to_s 
+        # add export_log
+
     respond_to do |format|
       format.html {render :template => "visits/visit_search"}
       if !params[:visit_search][:include_radiology_comment].try(:length).nil?
          if params[:visit_search][:include_radiology_comment] == "1"
            
-            format.csv  { render :csv => @visits.csv_download_limit(@search,radiology_comments_options,limit_visits) }
+            format.csv  {   render :csv => @visits.csv_download_limit(@search,radiology_comments_options,limit_visits) }
          else
             format.csv  { render :csv => @visits.csv_download(@search) }
          end
