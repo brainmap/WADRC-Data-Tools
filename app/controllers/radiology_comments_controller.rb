@@ -244,6 +244,8 @@ puts "============ visit_id ="+r.visit_id.to_s
 
          doc_string = doc_string.gsub('</div> <div id="col2">',' ')
          doc_string = doc_string.gsub('<div id="col1" align="right">','<div id="col1" align="left">')
+         
+         # split out header info
 
          if !doc_string.index('<b>Radiologist Comments</b>').blank? 
            start_index = doc_string.index("<b>Radiologist Comments</b>")-2
@@ -262,6 +264,8 @@ puts "============ visit_id ="+r.visit_id.to_s
          doc_sub_string = doc_string[start_index..end_index]
          # some pages have slight difference in start index - leaving a ">"
         doc_sub_string = doc_sub_string.gsub('> <br/> <b>Radiologist Comments',' <br/> <b>Radiologist Comments')
+        doc_sub_string = doc_sub_string.gsub('> <br/> <h4>Radiologist Comments</h4','<b>Radiologist Comments</b>')
+        doc_sub_string = doc_sub_string.gsub('iv> <br/> <h4>Radiologist Comments</','<b>Radiologist Comments</b>')
          # escape the ' in doc_sub_string
          if doc_sub_string.length > 0
             comment_html_2 = ""
