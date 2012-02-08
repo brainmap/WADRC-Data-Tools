@@ -261,11 +261,11 @@ class VisitsController <  AuthorizedController #  ApplicationController
       
       if !params[:visit_search][:enumber].blank?
          @search =Visit.where(" visits.id in (select enrollment_visit_memberships.visit_id from enrollment_visit_memberships where enrollment_visit_memberships.enrollment_id in
-              (select enrollments.id from enrollments where enumber in (?)))",params[:visit_search][:enumber])
+              (select enrollments.id from enrollments where lower(enumber) in (lower(?))))",params[:visit_search][:enumber])
       end      
 
       if !params[:visit_search][:rmr].blank? && params[:visit_search][:path].blank? && params[:visit_search][:latest_timestamp].blank? && params[:visit_search][:earliest_timestamp].blank?
-          @search = @search.where(" visits.rmr in (?)",params[:visit_search][:rmr])
+          @search = @search.where(" lower(visits.rmr) in (lower(?))",params[:visit_search][:rmr])
       elsif params[:visit_search][:rmr].blank? && !params[:visit_search][:path].blank? && params[:visit_search][:latest_timestamp].blank? && params[:visit_search][:earliest_timestamp].blank?
               var ="%"+params[:visit_search][:path]+"%"
              @search = @search.where(" visits.path LIKE ? ",var)
@@ -279,22 +279,22 @@ class VisitsController <  AuthorizedController #  ApplicationController
        #want all three date parts
       
        if !params[:visit_search]["#{'latest_timestamp'}(1i)"].blank? && !params[:visit_search]["#{'latest_timestamp'}(2i)"].blank? && !params[:visit_search]["#{'latest_timestamp'}(3i)"].blank?
-            v_date_latest = params[:visit_search]["#{'latest_timestamp'}(1i)"] +"-"+params[:visit_search]["#{'latest_timestamp'}(2i)"]+"-"+params[:visit_search]["#{'latest_timestamp'}(3i)"]
+            v_date_latest = params[:visit_search]["#{'latest_timestamp'}(1i)"] +"-"+params[:visit_search]["#{'latest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:visit_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
        end
 
        v_date_earliest =""
        #want all three date parts
   
        if !params[:visit_search]["#{'earliest_timestamp'}(1i)"].blank? && !params[:visit_search]["#{'earliest_timestamp'}(2i)"].blank? && !params[:visit_search]["#{'earliest_timestamp'}(3i)"].blank?
-             v_date_earliest = params[:visit_search]["#{'earliest_timestamp'}(1i)"] +"-"+params[:visit_search]["#{'earliest_timestamp'}(2i)"]+"-"+params[:visit_search]["#{'earliest_timestamp'}(3i)"]
+             v_date_earliest = params[:visit_search]["#{'earliest_timestamp'}(1i)"] +"-"+params[:visit_search]["#{'earliest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:visit_search]["#{'earliest_timestamp'}(3i)"].rjust(2,"0")
         end
 
        if v_date_latest.length>0 && v_date_earliest.length >0
          @search = @search.where(" visits.date between ? and ? ",v_date_earliest,v_date_latest)
        elsif v_date_latest.length>0
-         @search = @search.where(" visits.date < ?  ",v_date_earliest)
+         @search = @search.where(" visits.date < ?  ",v_date_latest)
        elsif  v_date_earliest.length >0
-         @search = @search.where(" visits.date > ? ",v_date_latest)
+         @search = @search.where(" visits.date > ? ",v_date_earliest)
         end
      
 
