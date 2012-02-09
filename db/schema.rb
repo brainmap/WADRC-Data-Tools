@@ -249,6 +249,7 @@ ActiveRecord::Schema.define(:version => 20120126200720) do
     t.string   "comment_header_html_3"
     t.string   "comment_header_html_4"
     t.string   "comment_header_html_5"   
+    t.string   "comment_header_html_6"  
     t.string   "comment_text_1"
     t.string   "comment_text_2"
     t.string   "comment_text_3"

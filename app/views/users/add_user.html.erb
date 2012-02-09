@@ -12,7 +12,7 @@
 </td></tr><tr><td><%= f.label :last_name%></td><td><%= f.text_field :last_name %>
  </td></tr><tr><td><%= f.label :role %> </td><td>  <%= collection_select :user, :role, Role.all.sort_by(&:role), :role, :description, :prompt => 'choose a role' %>
 	</td></tr></table>
-  </div>
+  </div>Leave the role BLANK unless the users should have global access.
 
   <div class="actions">
     <%= f.submit "Add User" %>

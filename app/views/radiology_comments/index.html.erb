@@ -18,8 +18,9 @@ RMR: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <th>Rad path</th>
     <th>Q1 flag</th>
     <th>Q2 flag</th>
-    <th>Comment html 1 & 2 & 3 & 4</th>
-    <th>Comment text 1 & 2</th>
+    <th>Comment html 1 & 2 & 3 & 4 & 5</th>
+    <th>Comment header html 1 & 2 & 3 & 4 & 5 & 6</th>
+    <th>Comment text 1 & 2 & 3 & 4 & 5</th>
     <th>Load date</th>
     <th></th>
     <th></th>
@@ -39,7 +40,7 @@ RMR: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <td><%= radiology_comment.q2_flag %></td>
     <td ><table ><tr><td><%=radiology_comment.comment_html_1.try(:html_safe)%><%=radiology_comment.comment_html_2.try(:html_safe) %><%=radiology_comment.comment_html_3.try(:html_safe) %><%=radiology_comment.comment_html_4.try(:html_safe) %><%=radiology_comment.comment_html_5.try(:html_safe) %></td></tr></table></td>
 <td><table><tr><td>
-	  <%=radiology_comment.comment_header_html_1.try(:html_safe)%><%=radiology_comment.comment_header_html_2.try(:html_safe) %><%=radiology_comment.comment_header_html_3.try(:html_safe) %><%=radiology_comment.comment_header_html_4.try(:html_safe) %><%=radiology_comment.comment_header_html_5.try(:html_safe) %>
+	  <%=radiology_comment.comment_header_html_1.try(:html_safe)%><%=radiology_comment.comment_header_html_2.try(:html_safe) %><%=radiology_comment.comment_header_html_3.try(:html_safe) %><%=radiology_comment.comment_header_html_4.try(:html_safe)%><%=radiology_comment.comment_header_html_5.try(:html_safe) %><%=radiology_comment.comment_header_html_6.try(:html_safe) %>
 	</td></tr></table>
 	</td>
 

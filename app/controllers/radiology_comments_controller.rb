@@ -2,25 +2,27 @@ class RadiologyCommentsController < ApplicationController
   # GET /radiology_comments
   # GET /radiology_comments.xml
   def index
+    radiology_comments =RadiologyComment.find(:all)
     if params[:radiology_comment].try(:length).nil?
          params[:radiology_comment] =""
     end
     if params[:load_paths].try(:length).nil?
-       #puts "==== top of if ==0"+params[:load_paths].try(:length).to_s
     else
       # months back
-     load_paths(params[:load_paths])
+     radiology_comments[0].load_paths(params[:load_paths])
       puts "========= in else  load_paths "+params[:load_paths]
     end
 
     if params[:load_comments].try(:length).nil?
     else
-     load_comments(params[:load_comments])
+       radiology_comments =RadiologyComment.find(:all)
+     radiology_comments[0].load_comments(params[:load_comments])
        # delete, load months back
       puts "========= load_comments ="+params[:load_comments]
-      load_text
+      radiology_comments[0].load_text
     end    
-    load_text # only updating if null 
+    
+    radiology_comments[0].load_text # only updating if null 
     scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
      #@catch = params[:radiology_comment]
      past_time = Time.new - 3.month
@@ -139,6 +141,8 @@ class RadiologyCommentsController < ApplicationController
     end
   end
   
+    # moved to model
+=begin
   def load_paths(v_months_back)
     # pass in how far back to go, default is 3 month for visit date
     # select visit_id, rmr, scan_number from visits where visits.date > sysdate - 3 months
@@ -194,15 +198,16 @@ class RadiologyCommentsController < ApplicationController
        end   
     end
   end 
-  
+
   def load_comments(v_months_back)
        agent = Mechanize.new
        # Comment_html_1 only 500 long
         past_time = Time.new - (v_months_back.to_i).month
           v_past_date = past_time.strftime("%Y-%m-%d")
        @radiology_comments = RadiologyComment.where(" trim(radiology_comments.rad_path) is not null and  (radiology_comments.comment_html_1 is null
+                      OR radiology_comments.comment_header_html_1 is null
                      OR radiology_comments.visit_id in (select visits.id from visits where visits.date >  '"+v_past_date+"' )  ) " )
-       #                     OR radiology_comments.comment_header_html_1 is null
+
        @radiology_comments.each do |r|
           # sleep for a minute or so to not seem like scripts
            sleep(97)
@@ -238,6 +243,9 @@ puts "============ visit_id ="+r.visit_id.to_s
          doc_string = doc_string.gsub('href="editAgeGender.php?editAgeGenderScanID=','"')
          
          doc_string = doc_string.gsub('https://www.radiology.wisc.edu/images/icons','/images')
+         
+         doc_string = doc_string.gsub('edit age/gender <img src="/images/edit.gif" border="0" /></a> | <a href="https://www.radiology.wisc.edu/login.php">login to access advanced editing</a> (application administrator only)','')
+         doc_string = doc_string.gsub('edit age/gender <img src="/images/edit.gif" border="0" />','')
          
          doc_string = doc_string.gsub('https://www.radiology.wisc.edu/images/icons/checkbox.gif','/images/checkbox.gif')
          doc_string = doc_string.gsub('https://www.radiology.wisc.edu/images/icons/checkedbox.gif','/images/checkedbox.gif')
@@ -334,6 +342,11 @@ puts "============ visit_id ="+r.visit_id.to_s
             if doc_header_string.length > 1997 
                comment_header_html_5 = doc_header_string[1998..2496]
             end
+
+            comment_header_html_6 = ""
+            if doc_header_string.length > 2497 
+               comment_header_html_6 = doc_header_string[2497..2996]
+            end
             
 
             
@@ -343,6 +356,7 @@ puts "============ visit_id ="+r.visit_id.to_s
              comment_header_html_1 = '"+doc_header_string[0..498]+
              "',comment_header_html_2 = '"+comment_header_html_2+"', comment_header_html_3 = '"+comment_header_html_3+"',
               comment_header_html_4 = '"+comment_header_html_4+"',  comment_header_html_5 = '"+comment_header_html_5+"'  ,
+                comment_header_html_6 = '"+comment_header_html_6+"'  ,
               comment_text_1=null,comment_text_2=null,comment_text_3=null,comment_text_4=null,
               comment_text_5 =null,q1_flag= null
                    where radiology_comments.rad_path ='"+r.rad_path+"'    "
@@ -353,7 +367,7 @@ puts "============ visit_id ="+r.visit_id.to_s
         end 
 
   end
-  
+
   def load_text
 
     sql = "select id,comment_html_1,comment_html_2,comment_html_3,comment_html_4,comment_html_5
@@ -445,7 +459,7 @@ puts "============ visit_id ="+r.visit_id.to_s
             
      
   end
-  
-  
+=end  
+
   
 end
