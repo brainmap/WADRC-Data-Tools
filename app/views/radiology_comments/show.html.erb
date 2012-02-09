@@ -52,17 +52,17 @@
 
 </p>
 
-
+<p>
+  <b>Comment header 2:</b>
+  <%=@radiology_comment.comment_header_html_1.try(:html_safe)%><%=@radiology_comment.comment_header_html_2.try(:html_safe) %><%=@radiology_comment.comment_header_html_3.try(:html_safe) %><%=@radiology_comment.comment_header_html_4.try(:html_safe) %><%=@radiology_comment.comment_header_html_5.try(:html_safe) %>
+</p>
 
 <p>
   <b>Comment text 1:</b>
-  <%= @radiology_comment.comment_text_1 %>
+  <%= @radiology_comment.comment_text_1 %><%= @radiology_comment.comment_text_2 %><%= @radiology_comment.comment_text_3 %><%= @radiology_comment.comment_text_4 %><%= @radiology_comment.comment_text_5 %>
 </p>
 
-<p>
-  <b>Comment text 2:</b>
-  <%= @radiology_comment.comment_text_2 %>
-</p>
+
 
 <p>
   <b>Load date:</b>

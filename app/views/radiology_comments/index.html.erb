@@ -38,6 +38,11 @@ RMR: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <td><%= radiology_comment.q1_flag %></td>
     <td><%= radiology_comment.q2_flag %></td>
     <td ><table ><tr><td><%=radiology_comment.comment_html_1.try(:html_safe)%><%=radiology_comment.comment_html_2.try(:html_safe) %><%=radiology_comment.comment_html_3.try(:html_safe) %><%=radiology_comment.comment_html_4.try(:html_safe) %><%=radiology_comment.comment_html_5.try(:html_safe) %></td></tr></table></td>
+<td><table><tr><td>
+	  <%=radiology_comment.comment_header_html_1.try(:html_safe)%><%=radiology_comment.comment_header_html_2.try(:html_safe) %><%=radiology_comment.comment_header_html_3.try(:html_safe) %><%=radiology_comment.comment_header_html_4.try(:html_safe) %><%=radiology_comment.comment_header_html_5.try(:html_safe) %>
+	</td></tr></table>
+	</td>
+
     <td><%= radiology_comment.comment_text_1%><%=radiology_comment.comment_text_2 %><%=radiology_comment.comment_text_3 %><%=radiology_comment.comment_text_4 %><%=radiology_comment.comment_text_5 %></td>
     <td><%= radiology_comment.load_date %></td>
     <td><%= link_to 'Show', radiology_comment %></td>

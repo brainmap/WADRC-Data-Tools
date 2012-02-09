@@ -202,7 +202,7 @@ class RadiologyCommentsController < ApplicationController
           v_past_date = past_time.strftime("%Y-%m-%d")
        @radiology_comments = RadiologyComment.where(" trim(radiology_comments.rad_path) is not null and  (radiology_comments.comment_html_1 is null
                      OR radiology_comments.visit_id in (select visits.id from visits where visits.date >  '"+v_past_date+"' )  ) " )
-       
+       #                     OR radiology_comments.comment_header_html_1 is null
        @radiology_comments.each do |r|
           # sleep for a minute or so to not seem like scripts
            sleep(97)
@@ -223,7 +223,20 @@ puts "============ visit_id ="+r.visit_id.to_s
                      doc_string = doc_string.gsub("  "," ")
 
 #chomp ?
-
+         doc_string = doc_string.gsub('<img src="https://www.radiology.wisc.edu//images/icons/mailto.jpg" border="0" ></a>','')
+         doc_string = doc_string.gsub('<img src="https://www.radiology.wisc.edu//images/icons/mailto.jpg" border="0" />','')
+         doc_string = doc_string.gsub('href="mailto:','"')
+         doc_string = doc_string.gsub('href=mailto:','')
+         doc_string = doc_string.gsub("href='editStudyDetails.php?studyID","")
+         doc_string = doc_string.gsub('href="editStudyDetails.php?studyID=','"')
+         doc_string = doc_string.gsub('href="editStudyDetails.php?studyID=','"')
+         doc_string = doc_string.gsub("| <a href='https://www.radiology.wisc.edu/login.php'>login to access advanced editing</a> (application administrator only","")
+         doc_string = doc_string.gsub("'>edit age/gender <img src='https://www.radiology.wisc.edu/images/icons/edit.gif' border=0","")
+         doc_string = doc_string.gsub('edit age/gender <img src="/images/edit.gif" border="0" /></a> | <a href="https://www.radiology.wisc.edu/login.php">login to access advanced editing</a> (application administrator only)</p>','')
+         doc_string = doc_string.gsub('| <a href="https://www.radiology.wisc.edu/login.php">login to access advanced editing</a> (application administrator only)','')
+         doc_string = doc_string.gsub("href='editAgeGender.php?editAgeGenderScanID=","")
+         doc_string = doc_string.gsub('href="editAgeGender.php?editAgeGenderScanID=','"')
+         
          doc_string = doc_string.gsub('https://www.radiology.wisc.edu/images/icons','/images')
          
          doc_string = doc_string.gsub('https://www.radiology.wisc.edu/images/icons/checkbox.gif','/images/checkbox.gif')
@@ -246,6 +259,19 @@ puts "============ visit_id ="+r.visit_id.to_s
          doc_string = doc_string.gsub('<div id="col1" align="right">','<div id="col1" align="left">')
          
          # split out header info
+          if !doc_string.index('<b>Scan Details</b><span class="subtitle"> (entered into system').blank?
+            header_start_index =doc_string.index('<b>Scan Details</b><span class="subtitle"> (entered into system')+3
+          end
+          
+          if !doc_string.index('<a name="radiologistReview"></a>').blank? 
+             header_end_index =doc_string.index('<a name="radiologistReview"></a>')+3
+          elsif   !doc_string.index('<b>Radiologist Comments</b>').blank? 
+              header_end_index = doc_string.index("<b>Radiologist Comments</b>")-2
+          else
+              header_end_index = doc_string.index("<h4>Radiologist Comments</h4>")-2  
+          end
+          
+          
 
          if !doc_string.index('<b>Radiologist Comments</b>').blank? 
            start_index = doc_string.index("<b>Radiologist Comments</b>")-2
@@ -261,12 +287,14 @@ puts "============ visit_id ="+r.visit_id.to_s
             end_index	=doc_string.index("If this scan has been updated:")+3
          end
          doc_string = doc_string.gsub("'","''")
+         doc_header_string = doc_string[header_start_index..header_end_index]
          doc_sub_string = doc_string[start_index..end_index]
          # some pages have slight difference in start index - leaving a ">"
         doc_sub_string = doc_sub_string.gsub('> <br/> <b>Radiologist Comments',' <br/> <b>Radiologist Comments')
         doc_sub_string = doc_sub_string.gsub('> <br/> <h4>Radiologist Comments</h4','<b>Radiologist Comments</b>')
         doc_sub_string = doc_sub_string.gsub('iv> <br/> <h4>Radiologist Comments</','<b>Radiologist Comments</b>')
          # escape the ' in doc_sub_string
+
          if doc_sub_string.length > 0
             comment_html_2 = ""
             if doc_sub_string.length > 499 
@@ -287,9 +315,34 @@ puts "============ visit_id ="+r.visit_id.to_s
                comment_html_5 = doc_sub_string[1998..2496]
             end  
             
+            # header
+            comment_header_html_2 = ""
+            if doc_header_string.length > 499 
+               comment_header_html_2 = doc_header_string[499..998]
+            end 
+            comment_header_html_3 = ""
+            if doc_header_string.length > 998 
+               comment_header_html_3 = doc_header_string[999..1497]
+            end
+            
+            comment_header_html_4 = ""
+            if doc_header_string.length > 1497 
+               comment_header_html_4 = doc_header_string[1498..1997]
+            end  
+            
+            comment_header_html_5 = ""
+            if doc_header_string.length > 1997 
+               comment_header_html_5 = doc_header_string[1998..2496]
+            end
+            
+
+            
             sql = "update radiology_comments set comment_html_1 = '"+doc_sub_string[0..498]+
             "',comment_html_2 = '"+comment_html_2+"', comment_html_3 = '"+comment_html_3+"',
              comment_html_4 = '"+comment_html_4+"',  comment_html_5 = '"+comment_html_5+"'  ,
+             comment_header_html_1 = '"+doc_header_string[0..498]+
+             "',comment_header_html_2 = '"+comment_header_html_2+"', comment_header_html_3 = '"+comment_header_html_3+"',
+              comment_header_html_4 = '"+comment_header_html_4+"',  comment_header_html_5 = '"+comment_header_html_5+"'  ,
               comment_text_1=null,comment_text_2=null,comment_text_3=null,comment_text_4=null,
               comment_text_5 =null,q1_flag= null
                    where radiology_comments.rad_path ='"+r.rad_path+"'    "

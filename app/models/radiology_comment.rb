@@ -29,6 +29,7 @@ class RadiologyComment < ActiveRecord::Base
     return var
   end
   
+  
   # change to html
   def combined_radiology_comments_html
     var =''
@@ -49,6 +50,31 @@ class RadiologyComment < ActiveRecord::Base
   end
     return var
   end  
+
   
- 
+  # change to html
+  def combined_radiology_header_comments_html
+    var =''
+   if !comment_header_html_1.blank?
+     var = var + comment_header_html_1
+   end
+  if !comment_header_html_2.blank?
+      var = var + comment_header_html_2
+  end 
+  if !comment_header_header_html_3.blank?
+      var = var + comment_header_html_3
+  end
+  if !comment_header_html_4.blank?
+      var = var + comment_header_html_4
+  end
+  if !comment_header_html_5.blank?
+      var = var + comment_header_html_5
+  end
+    return var
+  end  
+  
+  def radiology_link
+       var ='<a href="https://www.radiology.wisc.edu/protected/neuroResearchScans/'+rad_path+'" target="_blank">Radiology Site</a>'
+       return var
+  end
 end
