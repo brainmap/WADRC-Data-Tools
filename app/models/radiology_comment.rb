@@ -144,9 +144,8 @@ class RadiologyComment < ActiveRecord::Base
         past_time = Time.new - (v_months_back.to_i).month
           v_past_date = past_time.strftime("%Y-%m-%d")
        @radiology_comments = RadiologyComment.where(" trim(radiology_comments.rad_path) is not null and  (radiology_comments.comment_html_1 is null
-                      OR radiology_comments.comment_header_html_1 is null
                      OR radiology_comments.visit_id in (select visits.id from visits where visits.date >  '"+v_past_date+"' )  ) " )
-
+#                      OR radiology_comments.comment_header_html_1 is null
        @radiology_comments.each do |r|
           # sleep for a minute or so to not seem like scripts
            sleep(97)

@@ -152,13 +152,16 @@ end
         <td><%= popup_note('peek', key_val_table('path_popup', { :Path => visit.path })) unless visit.path.blank? %></td>
 <% if v_include_radiology_comments == "1" %>
        <td colspan ="6">
-
+<% v_radiology_comment ="N"%>
 <%  visit.radiology_comments.each do |r|  %>
 	       <% @radiology_comment =RadiologyComment.find(r.try(:id)) %>
 	        <%= @radiology_comment.combined_radiology_comments_html.html_safe %><br>
+	        <% v_radiology_comment = "Y" %>
 	  <%  end %> 
                      </td>
-<td><%= @radiology_comment.radiology_link.html_safe %></td>
+<td><%= if v_radiology_comment == "Y" 
+	   @radiology_comment.radiology_link.html_safe
+	end  %></td>
 	
 	
 <% else %>
