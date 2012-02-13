@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120126200720) do
+ActiveRecord::Schema.define(:version => 20111206195644) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -239,26 +239,29 @@ ActiveRecord::Schema.define(:version => 20120126200720) do
     t.string   "rad_path"
     t.string   "q1_flag"
     t.string   "q2_flag"
-    t.string   "comment_html_1"
-    t.string   "comment_html_2"
-    t.string   "comment_html_3"
-    t.string   "comment_html_4"
-    t.string   "comment_html_5"   
-    t.string   "comment_header_html_1"
-    t.string   "comment_header_html_2"
-    t.string   "comment_header_html_3"
-    t.string   "comment_header_html_4"
-    t.string   "comment_header_html_5"   
-    t.string   "comment_header_html_6"  
-    t.string   "comment_text_1"
-    t.string   "comment_text_2"
-    t.string   "comment_text_3"
-    t.string   "comment_text_4"
-    t.string   "comment_text_5"
+    t.string   "comment_html_1",        :limit => 500
+    t.string   "comment_html_2",        :limit => 500
+    t.string   "comment_text_1",        :limit => 500
+    t.string   "comment_text_2",        :limit => 500
     t.date     "load_date"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "comment_html",          :limit => 500
+    t.string   "comment_html_3",        :limit => 500
+    t.string   "comment_text_3",        :limit => 500
+    t.string   "comment_html_4",        :limit => 500
+    t.string   "comment_html_5",        :limit => 500
+    t.string   "comment_text_4",        :limit => 500
+    t.string   "comment_text_5",        :limit => 500
+    t.string   "comment_header_html_1", :limit => 500
+    t.string   "comment_header_html_2", :limit => 500
+    t.string   "comment_header_html_3", :limit => 500
+    t.string   "comment_header_html_4", :limit => 500
+    t.string   "comment_header_html_5", :limit => 500
+    t.string   "comment_header_html_6", :limit => 500
   end
+
+  add_index "radiology_comments", ["visit_id"], :name => "ind_radiology_comments_visit_id"
 
   create_table "recruitment_groups", :force => true do |t|
     t.string   "name"
