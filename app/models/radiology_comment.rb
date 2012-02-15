@@ -335,7 +335,7 @@ puts "============ visit_id ="+r.visit_id.to_s
              var = var.gsub('<img src="/images/radioButton_clicked.gif" />','Y=')
              var = var.gsub('<img src="/images/checkbox.gif" />','N=')
              var = var.gsub('<img src="/images/checkedbox.gif" />','Y=')
-             var = var.gsub('<br/>','\n')
+             var = var.gsub('<br/>','char(10)')
              var = var.gsub('<b>','')
              var = var.gsub('</b>','')
              
@@ -356,7 +356,8 @@ puts "============ visit_id ="+r.visit_id.to_s
               var = var.gsub('<div class="bottomright">','')
                var = var.gsub('<div class="bottomleft">','') 
               
-              var.gsub!('\n',"\n")
+            var.gsub!('\n',"char(10)")
+            var.gsub!("\n","char(10)")
                    
              var = var.gsub("'","''")
              comment_text_1 = var[0..498]
@@ -383,16 +384,26 @@ puts "============ visit_id ="+r.visit_id.to_s
                  end
               end
              
-              sql_update = sql = "update radiology_comments set comment_text_1 = '"+comment_text_1+
+              sql_update = "update radiology_comments set comment_text_1 = '"+comment_text_1+
               "',comment_text_2 = '"+comment_text_2+"', comment_text_3 = '"+comment_text_3+"',
                comment_text_4 = '"+comment_text_4+"',  comment_text_5 = '"+comment_text_5+"',
                  q1_flag ='"+v_q1_flag+"'  
                      where radiology_comments.id = "+row.id.to_s
                      
-  # puts "====="+sql_update               
+#   puts "====="+sql_update               
                      
               connection = ActiveRecord::Base.connection();
             results = connection.execute(sql_update)
+            
+            sql_update = "update radiology_comments 
+            set      comment_text_1= replace(comment_text_1,'char(10)',char(10)),
+             comment_text_2= replace(comment_text_2,'char(10)',char(10)),
+              comment_text_3= replace(comment_text_3,'char(10)',char(10)),
+               comment_text_4= replace(comment_text_4,'char(10)',char(10)),
+                comment_text_5= replace(comment_text_5,'char(10)',char(10))"
+                
+                  connection = ActiveRecord::Base.connection();
+                results = connection.execute(sql_update)
                      
           end  
             

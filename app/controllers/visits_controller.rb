@@ -353,7 +353,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:di
         
         #current_user.id.to_s 
         # add export_log
-
+  @current_tab = "visit_search"
     respond_to do |format|
       format.html {render :template => "visits/visit_search"}
       if !params[:visit_search][:include_radiology_comment].try(:length).nil?
