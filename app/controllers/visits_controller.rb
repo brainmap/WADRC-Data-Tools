@@ -259,9 +259,15 @@ class VisitsController <  AuthorizedController #  ApplicationController
          @search =Visit.where(" visits.id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedures_visits.scan_procedure_id in (?))",params[:visit_search][:scan_procedure_id])
       end
       
+      if !params[:visit_search][:series_description].blank?
+         var = "%"+params[:visit_search][:series_description].downcase+"%"
+         @search =Visit.where(" visits.id in (select image_datasets.visit_id from image_datasets
+          where lower(image_datasets.series_description) like ? )", var)
+      end
+      
       if !params[:visit_search][:enumber].blank?
-         @search =Visit.where(" visits.id in (select enrollment_visit_memberships.visit_id from enrollment_visit_memberships where enrollment_visit_memberships.enrollment_id in
-              (select enrollments.id from enrollments where lower(enumber) in (lower(?))))",params[:visit_search][:enumber])
+         @search =Visit.where(" visits.id in (select enrollment_visit_memberships.visit_id from enrollment_visit_memberships,enrollments
+          where enrollment_visit_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower(?)))",params[:visit_search][:enumber])
       end      
 
       if !params[:visit_search][:rmr].blank? && params[:visit_search][:path].blank? && params[:visit_search][:latest_timestamp].blank? && params[:visit_search][:earliest_timestamp].blank?
