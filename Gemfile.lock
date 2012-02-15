@@ -211,6 +211,7 @@ GEM
       rack (>= 1.0)
       rack-test (>= 0.5.3)
     webrobots (0.0.13)
+    yaml_db (0.2.2)
 
 PLATFORMS
   ruby
@@ -250,3 +251,4 @@ DEPENDENCIES
   sqlite3-ruby
   timecop
   webrat
+  yaml_db
