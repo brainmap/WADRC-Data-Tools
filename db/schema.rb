@@ -302,7 +302,7 @@ ActiveRecord::Schema.define(:version => 20111206195644) do
     t.string   "acq_plane"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text     "ignore",            :default => "Don't Ignore"
+    t.string     "ignore",            :default => "Don't Ignore"
   end
 
   create_table "studies", :force => true do |t|
@@ -343,9 +343,6 @@ ActiveRecord::Schema.define(:version => 20111206195644) do
   add_index "users", ["email"], :name => "index_users_on_email", :unique => true
   add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true
 
-# Could not dump table "users_bak" because of following StandardError
-#   Unknown type '' for column 'id'
-
   create_table "visits", :force => true do |t|
     t.date     "date"
     t.integer  "scan_number"
@@ -362,7 +359,7 @@ ActiveRecord::Schema.define(:version => 20111206195644) do
     t.string   "path"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text     "radiology_note",                    :default => "no"
+    t.string     "radiology_note",                    :default => "no"
     t.string   "research_diagnosis"
     t.string   "consent_form_type"
     t.string   "scanner_source"
