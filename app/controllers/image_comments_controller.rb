@@ -101,9 +101,11 @@ class ImageCommentsController < ApplicationController
   # PUT /image_comments/1 PUT /image_comments/1.xml
   def update
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
-    @image_comment = ImageComment.where("image_comments.image_dataset_id in ( select image_datasets.id from image_datasets where image_datasets.visit_id in 
-              (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)))", scan_procedure_array).find(params[:id])
-
+ #   @image_comment = ImageComment.where("image_comments.image_dataset_id in ( select image_datasets.id from image_datasets where image_datasets.visit_id in 
+ #              (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)))", scan_procedure_array).find(params[:id])
+      @image_comment = ImageComment.where("image_comments.image_dataset_id in ( select image_datasets.id from image_datasets, scan_procedures_visits
+             where image_datasets.visit_id = scan_procedures_visits.visit_id and  scan_procedures_visits.scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+                        
     respond_to do |format|
       if @image_comment.update_attributes(params[:image_comment])
         flash[:notice] = 'Image Comment was successfully updated.'
@@ -119,8 +121,13 @@ class ImageCommentsController < ApplicationController
   # DELETE /image_comments/1 DELETE /image_comments/1.xml
   def destroy
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
-    @image_comment = ImageComment.where("image_comments.image_dataset_id in ( select image_datasets.id from image_datasets where image_datasets.visit_id in 
-              (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)))", scan_procedure_array).find(params[:id])
+#    @image_comment = ImageComment.where("image_comments.image_dataset_id in ( select image_datasets.id from image_datasets where image_datasets.visit_id in 
+#              (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)))", scan_procedure_array).find(params[:id])
+    @image_comment = ImageComment.where("image_comments.image_dataset_id in ( select image_datasets.id from image_datasets, scan_procedures_visits 
+             where image_datasets.visit_id =scan_procedures_visits.visit_id and scan_procedures_visits.scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+
+              
+              
     @image_dataset = @image_comment.image_dataset
     @image_comment.destroy
 

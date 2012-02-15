@@ -12,8 +12,17 @@ class ParticipantsController < ApplicationController
   # GET /participants.xml
   def index
     scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
-    @search = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
-     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).search(params[:search])
+#    @search = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
+#     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).search(params[:search])
+     
+#     @search = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id
+#      from enrollment_visit_memberships, scan_procedures_visits
+#      where enrollment_visit_memberships.visit_id = scan_procedures_visits.visit_id and scan_procedures_visits.scan_procedure_id in (?))) ", scan_procedure_array).search(params[:search])
+ 
+ @search = Participant.where(" participants.id in ( select participant_id from enrollments,enrollment_visit_memberships, scan_procedures_visits
+      where enrollments.id = enrollment_visit_memberships.enrollment_id
+     and  enrollment_visit_memberships.visit_id = scan_procedures_visits.visit_id and scan_procedures_visits.scan_procedure_id in (?)) ", scan_procedure_array).search(params[:search])
+           
     @participants = @search.relation.page(params[:page])
 
     respond_to do |format|
@@ -26,8 +35,11 @@ class ParticipantsController < ApplicationController
   # GET /participants/1.xml
   def show
     scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
-    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
-     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
+#    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
+#     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
+     
+     @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships, scan_procedures_visits
+           where enrollment_visit_memberships.visit_id = scan_procedures_visits.visit_id and scan_procedures_visits.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
 
     respond_to do |format|
       format.html # show.html.erb
@@ -49,8 +61,11 @@ class ParticipantsController < ApplicationController
   # GET /participants/1/edit
   def edit
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
-    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
-     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
+#    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
+#     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
+     @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in 
+     (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships,scan_procedures_visits
+      where enrollment_visit_memberships.visit_id = scan_procedures_visits.visit_id and  scan_procedures_visits.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
   end
 
   # POST /participants
@@ -74,8 +89,10 @@ class ParticipantsController < ApplicationController
   # PUT /participants/1.xml
   def update
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
-    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
-     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
+#    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
+#     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
+     @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships, scan_procedures_visits
+                 where enrollment_visit_memberships.visit_id  =  scan_procedures_visits.visit_id and  scan_procedures_visits.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
 
     respond_to do |format|
       if @participant.update_attributes(params[:participant])
@@ -93,8 +110,12 @@ class ParticipantsController < ApplicationController
   # DELETE /participants/1.xml
   def destroy
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
-    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
-     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
+#    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
+#     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
+     
+     @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in 
+     (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships, scan_procedures_visits
+      where enrollment_visit_memberships.visit_id = scan_procedures_visits.visit_id and  scan_procedures_visits.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id]) 
     @participant.destroy
 
     respond_to do |format|
