@@ -3,7 +3,7 @@ gem 'rails', '~>3.0.4'
 
 # gem 'sqlite3', '~>1.3.3'
 gem 'mysql2', '~>0.2.0'
-
+gem "yaml_db"
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'

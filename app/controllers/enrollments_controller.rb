@@ -16,8 +16,11 @@ class EnrollmentsController < ApplicationController
     else
       search_hash = params[:search]
     end
-    @search = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
-     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).search(search_hash).relation.page(params[:page])
+#    @search = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
+#     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).search(search_hash).relation.page(params[:page])
+     @search = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships,scan_procedures_visits
+        where enrollment_visit_memberships.visit_id = scan_procedures_visits.visit_id and  scan_procedures_visits.scan_procedure_id in (?)) ", scan_procedure_array).search(search_hash).relation.page(params[:page]) 
+     
     @enrollments = @search
     
     respond_to do |format|
