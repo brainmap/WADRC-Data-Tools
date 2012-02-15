@@ -19,8 +19,10 @@ class ImageCommentsController < ApplicationController
   # GET /image_comments/1 GET /image_comments/1.xml
   def show
     scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
-    @image_comment = ImageComment.where("image_comments.image_dataset_id in ( select image_datasets.id from image_datasets where image_datasets.visit_id in 
-              (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)))", scan_procedure_array).find(params[:id])
+#    @image_comment = ImageComment.where("image_comments.image_dataset_id in ( select image_datasets.id from image_datasets where image_datasets.visit_id in 
+#              (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)))", scan_procedure_array).find(params[:id])
+    @image_comment = ImageComment.where("image_comments.image_dataset_id in ( select image_datasets.id from image_datasets,scan_procedures_visits
+         where image_datasets.visit_id = scan_procedures_visits.visit_id and scan_procedures_visits.scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
     respond_to do |format|
       format.html # show.html.erb
@@ -42,8 +44,10 @@ class ImageCommentsController < ApplicationController
   # GET /image_comments/1/edit
   def edit
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
-    @image_comment = ImageComment.where("image_comments.image_dataset_id in ( select image_datasets.id from image_datasets where image_datasets.visit_id in 
-              (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)))", scan_procedure_array).find(params[:id])
+#    @image_comment = ImageComment.where("image_comments.image_dataset_id in ( select image_datasets.id from image_datasets where image_datasets.visit_id in 
+#              (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)))", scan_procedure_array).find(params[:id])
+    @image_comment = ImageComment.where("image_comments.image_dataset_id in ( select image_datasets.id from image_datasets,scan_procedures_visits
+          where image_datasets.visit_id = scan_procedures_visits.visit_id and scan_procedures_visits.scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
   end
 
   def create
