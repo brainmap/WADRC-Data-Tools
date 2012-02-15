@@ -34,8 +34,8 @@
     reconnect: false
     database: panda_production
     pool: 5
-    username: XXXXXXXX
-    password: XXXXXXXX
+    username: XXXXXXXXyyyy
+    password: XXXXXXXXyyyy
     socket: /tmp/mysql.sock  
   
 
