@@ -336,6 +336,12 @@ puts "============ visit_id ="+r.visit_id.to_s
              var = var.gsub('<img src="/images/checkbox.gif" />','N=')
              var = var.gsub('<img src="/images/checkedbox.gif" />','Y=')
              var = var.gsub('<br/>','char(10)')
+             var = var.gsub('<BR/>','char(10)')
+             var = var.gsub('<br />','char(10)')
+             var = var.gsub('<BR />','char(10)')
+             var = var.gsub('<br>','char(10)')
+             var = var.gsub('<BR>','char(10)')
+             
              var = var.gsub('<b>','')
              var = var.gsub('</b>','')
              
@@ -358,7 +364,17 @@ puts "============ visit_id ="+r.visit_id.to_s
               
             var.gsub!('\n',"char(10)")
             var.gsub!("\n","char(10)")
-                   
+            
+            # remove leading white space
+            var = var.strip
+            # remove leading line return
+            var = var.sub('char(10)',"")
+             var = var.sub("char(10)","")
+             # char(10) is spanning line break
+             var = var.gsub('char(10)',"\n")
+             var = var.gsub("char(10)","\n")
+             # seems to be getting line breaks ok and remove first line break
+                    
              var = var.gsub("'","''")
              comment_text_1 = var[0..498]
              
@@ -404,6 +420,7 @@ puts "============ visit_id ="+r.visit_id.to_s
                 
                   connection = ActiveRecord::Base.connection();
                 results = connection.execute(sql_update)
+     
                      
           end  
             
