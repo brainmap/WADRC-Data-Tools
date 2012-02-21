@@ -1,0 +1,15 @@
+class CreateProtocolRoles < ActiveRecord::Migration
+  def self.up
+    create_table :protocol_roles do |t|
+      t.integer :user_id
+      t.integer :protocol_id
+      t.string :role
+
+      t.timestamps
+    end
+  end
+
+  def self.down
+    drop_table :protocol_roles
+  end
+end

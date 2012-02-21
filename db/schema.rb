@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20111206195644) do
+ActiveRecord::Schema.define(:version => 20120221162659) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -100,7 +100,7 @@ ActiveRecord::Schema.define(:version => 20111206195644) do
     t.datetime "updated_at"
     t.integer  "visit_id"
     t.string   "glob"
-    t.decimal  "rep_time"
+    t.decimal  "rep_time",               :precision => 10, :scale => 0
     t.integer  "bold_reps"
     t.integer  "slices_per_volume"
     t.string   "scanned_file"
@@ -172,8 +172,221 @@ ActiveRecord::Schema.define(:version => 20111206195644) do
     t.integer  "visit_id"
   end
 
+  create_table "lookup_bvmtpercentiles", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_cogstatuses", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_cohorts", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_consentcohorts", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_consentforms", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_demographichandednesses", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_demographicincomes", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_demographicmaritalstatuses", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_demographicrelativerelationships", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_diagnoses", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_drugclasses", :force => true do |t|
+    t.string   "epodrugclass"
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_drugcodes", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_drugfreqs", :force => true do |t|
+    t.string   "frequency"
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_drugunits", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_eligibility_ineligibilities", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_eligibilityoutcomes", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_ethnicities", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_famhxes", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_genders", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_hardwares", :force => true do |t|
+    t.string   "hardwaretype"
+    t.string   "hardwaregroup"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_imagingplanes", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_letterlabels", :force => true do |t|
+    t.string   "description"
+    t.integer  "protocol_id"
+    t.integer  "doccategory"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_pettracers", :force => true do |t|
+    t.string   "name"
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_rads", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_recruitsources", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_relationships", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_scantasks", :force => true do |t|
+    t.string   "description"
+    t.string   "name"
+    t.string   "pulse_sequence_code"
+    t.string   "bold_reps"
+    t.integer  "task_code"
+    t.integer  "set_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_sets", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_sources", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_statuses", :force => true do |t|
+    t.string   "description"
+    t.integer  "status_type"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_switchboards", :force => true do |t|
+    t.string   "description"
+    t.integer  "item_number"
+    t.string   "command"
+    t.string   "argument"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_truthtables", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_visitfrequencies", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "neuropsych_assessments", :force => true do |t|
-    t.decimal  "score"
+    t.decimal  "score",                 :precision => 10, :scale => 0
     t.string   "score_type"
     t.string   "test_name"
     t.text     "note"
@@ -302,7 +515,7 @@ ActiveRecord::Schema.define(:version => 20111206195644) do
     t.string   "acq_plane"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string     "ignore",            :default => "Don't Ignore"
+    t.string   "ignore",            :default => "Don't Ignore"
   end
 
   create_table "studies", :force => true do |t|
@@ -348,18 +561,18 @@ ActiveRecord::Schema.define(:version => 20111206195644) do
     t.integer  "scan_number"
     t.string   "initials"
     t.string   "rmr"
-    t.string   "radiology_outcome",                 :default => "no"
+    t.string   "radiology_outcome",  :default => "no"
     t.string   "notes"
-    t.string   "transfer_mri",                      :default => "no"
-    t.string   "transfer_pet",                      :default => "no"
-    t.string   "conference",                        :default => "no"
-    t.string   "compile_folder",                    :default => "no"
-    t.string   "dicom_dvd",                         :default => "no"
-    t.integer  "user_id",            :limit => 255
+    t.string   "transfer_mri",       :default => "no"
+    t.string   "transfer_pet",       :default => "no"
+    t.string   "conference",         :default => "no"
+    t.string   "compile_folder",     :default => "no"
+    t.string   "dicom_dvd",          :default => "no"
+    t.integer  "user_id"
     t.string   "path"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string     "radiology_note",                    :default => "no"
+    t.string   "radiology_note",     :default => "no"
     t.string   "research_diagnosis"
     t.string   "consent_form_type"
     t.string   "scanner_source"

@@ -1,0 +1,37 @@
+class CreateRadiologyComments < ActiveRecord::Migration
+  def self.up
+    create_table :radiology_comments do |t|
+      t.integer :visit_id
+      t.string :rmr
+      t.integer :scan_number
+      t.string :rmr_rad
+      t.integer :scan_number_rad
+      t.string :editable_flag
+      t.string :rad_path
+      t.string :q1_flag
+      t.string :q2_flag
+      t.string :comment_html_1, :size => 500
+      t.string :comment_html_2, :size => 500
+      t.string :comment_html_3, :size => 500
+      t.string :comment_html_4, :size => 500
+      t.string :comment_html_5, :size => 500
+      t.string :comment_header_html_1, :size => 500
+      t.string :comment_header_html_2, :size => 500
+      t.string :comment_header_html_3, :size => 500
+      t.string :comment_header_html_4, :size => 500
+      t.string :comment_header_html_5, :size => 500
+      t.string :comment_test_1, :size => 500
+      t.string :comment_text_2, :size => 500
+      t.string :comment_text_3, :size => 500
+      t.string :comment_text_4, :size => 500
+      t.string :comment_text_5, :size => 500
+      t.date :load_date
+
+      t.timestamps
+    end
+  end
+
+  def self.down
+    drop_table :radiology_comments
+  end
+end

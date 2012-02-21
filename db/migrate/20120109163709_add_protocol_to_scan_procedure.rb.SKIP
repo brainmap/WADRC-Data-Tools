@@ -1,0 +1,9 @@
+class AddProtocolToScanProcedure < ActiveRecord::Migration
+  def self.up
+    add_column :scan_procedures, :protocol_id, :integer
+  end
+
+  def self.down
+    remove_column :scan_procedures, :protocol_id
+  end
+end

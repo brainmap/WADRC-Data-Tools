@@ -1,5 +1,75 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :lookup_switchboards
+
+  resources :lookup_visitfrequencies
+
+  resources :lookup_truthtables
+
+  resources :lookup_statuses
+
+  resources :lookup_sources
+
+  resources :lookup_sets
+
+  resources :lookup_scantasks
+
+  resources :lookup_imagingplanes
+
+  resources :lookup_relationships
+
+  resources :lookup_recruitsources
+
+  resources :lookup_pettracers
+
+  resources :lookup_rads
+
+  resources :lookup_pettraces
+
+  resources :lookup_letterlabels
+
+  resources :lookup_hardwares
+
+  resources :lookup_genders
+
+  resources :lookup_famhxes
+
+  resources :lookup_ethnicities
+
+  resources :lookup_eligibilityoutcomes
+
+  resources :lookup_eligibility_ineligibilities
+
+  resources :lookup_drugunits
+
+  resources :lookup_drugfreqs
+
+  resources :lookup_drugcodes
+
+  resources :lookup_drugclasses
+
+  resources :lookup_demographicmaritalstatuses
+
+  resources :lookup_diagnoses
+
+  resources :lookup_demographicrelativerelationships
+
+  resources :lookup_demographicmaritialstatuses
+
+  resources :lookup_demographicincomes
+
+  resources :lookup_demographichandednesses
+
+  resources :lookup_consentforms
+
+  resources :lookup_consentcohorts
+
+  resources :lookup_cohorts
+
+  resources :lookup_cogstatuses
+
+  resources :lookup_bvmtpercentiles
+
   resources :protocol_roles
   resources :protocols
    match '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user
