@@ -1,0 +1,27 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Listing lookup_relationships</h1>
+
+<table>
+  <tr>
+    <th>Description</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @lookup_relationships.each do |lookup_relationship| %>
+  <tr>
+    <td><%= lookup_relationship.description %></td>
+    <td><%= link_to 'Show', lookup_relationship %></td>
+    <td><%= link_to 'Edit', edit_lookup_relationship_path(lookup_relationship) %></td>
+    <td><%= link_to 'Destroy', lookup_relationship, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Lookup relationship', new_lookup_relationship_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

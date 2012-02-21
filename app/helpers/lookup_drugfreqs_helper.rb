@@ -1,0 +1,2 @@
+module LookupDrugfreqsHelper
+end

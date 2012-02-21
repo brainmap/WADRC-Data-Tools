@@ -1,0 +1,28 @@
+<% if current_user.role == 'Admin_High'%>
+
+<h1>Listing lookup_eligibility_ineligibilities</h1>
+
+<table>
+  <tr>
+    <th>Description</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @lookup_eligibility_ineligibilities.each do |lookup_eligibility_ineligibility| %>
+  <tr>
+    <td><%= lookup_eligibility_ineligibility.description %></td>
+    <td><%= link_to 'Show', lookup_eligibility_ineligibility %></td>
+    <td><%= link_to 'Edit', edit_lookup_eligibility_ineligibility_path(lookup_eligibility_ineligibility) %></td>
+    <td><%= link_to 'Destroy', lookup_eligibility_ineligibility, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Lookup eligibility ineligibility', new_lookup_eligibility_ineligibility_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

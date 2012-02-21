@@ -1,0 +1,10 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Editing lookup_consentcohort</h1>
+
+<%= render 'form' %>
+
+<%= link_to 'Show', @lookup_consentcohort %> |
+<%= link_to 'Back', lookup_consentcohorts_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

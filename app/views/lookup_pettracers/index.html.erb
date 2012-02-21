@@ -1,0 +1,29 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Listing lookup_pettracers</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Description</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @lookup_pettracers.each do |lookup_pettracer| %>
+  <tr>
+    <td><%= lookup_pettracer.name %></td>
+    <td><%= lookup_pettracer.description %></td>
+    <td><%= link_to 'Show', lookup_pettracer %></td>
+    <td><%= link_to 'Edit', edit_lookup_pettracer_path(lookup_pettracer) %></td>
+    <td><%= link_to 'Destroy', lookup_pettracer, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Lookup pettracer', new_lookup_pettracer_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

@@ -1,0 +1,15 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Description:</b>
+  <%= @lookup_status.description %>
+</p>
+
+<p>
+  <b>Status type:</b>
+  <%= @lookup_status.status_type %>
+</p>
+
+
+<%= link_to 'Edit', edit_lookup_status_path(@lookup_status) %> |
+<%= link_to 'Back', lookup_statuses_path %>

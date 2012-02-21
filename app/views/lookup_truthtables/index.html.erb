@@ -1,0 +1,29 @@
+<% if current_user.role == 'Admin_High'%>
+
+<h1>Listing lookup_truthtables</h1>
+
+<table>
+  <tr>
+    <th>Description</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @lookup_truthtables.each do |lookup_truthtable| %>
+  <tr>
+    <td><%= lookup_truthtable.description %></td>
+    <td><%= link_to 'Show', lookup_truthtable %></td>
+    <td><%= link_to 'Edit', edit_lookup_truthtable_path(lookup_truthtable) %></td>
+    <td><%= link_to 'Destroy', lookup_truthtable, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Lookup truthtable', new_lookup_truthtable_path %>
+
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

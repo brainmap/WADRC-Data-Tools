@@ -1,0 +1,2 @@
+module LookupTruthtablesHelper
+end

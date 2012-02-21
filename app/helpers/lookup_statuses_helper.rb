@@ -1,0 +1,2 @@
+module LookupStatusesHelper
+end

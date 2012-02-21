@@ -1,0 +1,30 @@
+<% if current_user.role == 'Admin_High'%>
+
+<h1>Listing lookup_drugclasses</h1>
+
+<table>
+  <tr>
+    <th>Epodrugclass</th>
+    <th>Description</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @lookup_drugclasses.each do |lookup_drugclass| %>
+  <tr>
+    <td><%= lookup_drugclass.epodrugclass %></td>
+    <td><%= lookup_drugclass.description %></td>
+    <td><%= link_to 'Show', lookup_drugclass %></td>
+    <td><%= link_to 'Edit', edit_lookup_drugclass_path(lookup_drugclass) %></td>
+    <td><%= link_to 'Destroy', lookup_drugclass, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Lookup drugclass', new_lookup_drugclass_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

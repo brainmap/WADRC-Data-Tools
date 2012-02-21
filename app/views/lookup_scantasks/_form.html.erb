@@ -1,0 +1,41 @@
+<%= form_for(@lookup_scantask) do |f| %>
+  <% if @lookup_scantask.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@lookup_scantask.errors.count, "error") %> prohibited this lookup_scantask from being saved:</h2>
+
+      <ul>
+      <% @lookup_scantask.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :description %><br />
+    <%= f.text_field :description %>
+  </div>
+  <div class="field">
+    <%= f.label :name %><br />
+    <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :pulse_sequence_code %><br />
+    <%= f.text_field :pulse_sequence_code %>
+  </div>
+  <div class="field">
+    <%= f.label :bold_reps %><br />
+    <%= f.text_field :bold_reps %>
+  </div>
+  <div class="field">
+    <%= f.label :task_code %><br />
+    <%= f.text_field :task_code %>
+  </div>
+  <div class="field">
+    <%= f.label :set_id %><br />
+    <%= f.text_field :set_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

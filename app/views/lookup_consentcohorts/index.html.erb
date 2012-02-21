@@ -1,0 +1,27 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Listing lookup_consentcohorts</h1>
+
+<table>
+  <tr>
+    <th>Description</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @lookup_consentcohorts.each do |lookup_consentcohort| %>
+  <tr>
+    <td><%= lookup_consentcohort.description %></td>
+    <td><%= link_to 'Show', lookup_consentcohort %></td>
+    <td><%= link_to 'Edit', edit_lookup_consentcohort_path(lookup_consentcohort) %></td>
+    <td><%= link_to 'Destroy', lookup_consentcohort, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Lookup consentcohort', new_lookup_consentcohort_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

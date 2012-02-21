@@ -1,0 +1,2 @@
+module LookupDiagnosesHelper
+end

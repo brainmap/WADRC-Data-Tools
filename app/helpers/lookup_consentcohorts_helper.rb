@@ -1,0 +1,2 @@
+module LookupConsentcohortsHelper
+end

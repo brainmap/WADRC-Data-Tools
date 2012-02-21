@@ -1,0 +1,37 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Listing lookup_scantasks</h1>
+
+<table>
+  <tr>
+    <th>Description</th>
+    <th>Name</th>
+    <th>Pulse sequence code</th>
+    <th>Bold reps</th>
+    <th>Task code</th>
+    <th>Set</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @lookup_scantasks.each do |lookup_scantask| %>
+  <tr>
+    <td><%= lookup_scantask.description %></td>
+    <td><%= lookup_scantask.name %></td>
+    <td><%= lookup_scantask.pulse_sequence_code %></td>
+    <td><%= lookup_scantask.bold_reps %></td>
+    <td><%= lookup_scantask.task_code %></td>
+    <td><%= lookup_scantask.set_id %></td>
+    <td><%= link_to 'Show', lookup_scantask %></td>
+    <td><%= link_to 'Edit', edit_lookup_scantask_path(lookup_scantask) %></td>
+    <td><%= link_to 'Destroy', lookup_scantask, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Lookup scantask', new_lookup_scantask_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

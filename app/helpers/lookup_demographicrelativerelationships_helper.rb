@@ -1,0 +1,2 @@
+module LookupDemographicrelativerelationshipsHelper
+end

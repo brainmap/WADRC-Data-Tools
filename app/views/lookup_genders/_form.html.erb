@@ -1,0 +1,21 @@
+<%= form_for(@lookup_gender) do |f| %>
+  <% if @lookup_gender.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@lookup_gender.errors.count, "error") %> prohibited this lookup_gender from being saved:</h2>
+
+      <ul>
+      <% @lookup_gender.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :description %><br />
+    <%= f.text_field :description %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

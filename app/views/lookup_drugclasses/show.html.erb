@@ -1,0 +1,15 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Epodrugclass:</b>
+  <%= @lookup_drugclass.epodrugclass %>
+</p>
+
+<p>
+  <b>Description:</b>
+  <%= @lookup_drugclass.description %>
+</p>
+
+
+<%= link_to 'Edit', edit_lookup_drugclass_path(@lookup_drugclass) %> |
+<%= link_to 'Back', lookup_drugclasses_path %>

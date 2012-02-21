@@ -1,0 +1,28 @@
+<% if current_user.role == 'Admin_High'%>
+
+<h1>Listing lookup_imagingplanes</h1>
+
+<table>
+  <tr>
+    <th>Description</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @lookup_imagingplanes.each do |lookup_imagingplane| %>
+  <tr>
+    <td><%= lookup_imagingplane.description %></td>
+    <td><%= link_to 'Show', lookup_imagingplane %></td>
+    <td><%= link_to 'Edit', edit_lookup_imagingplane_path(lookup_imagingplane) %></td>
+    <td><%= link_to 'Destroy', lookup_imagingplane, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Lookup imagingplane', new_lookup_imagingplane_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

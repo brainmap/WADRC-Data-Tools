@@ -1,0 +1,31 @@
+<% if current_user.role == 'Admin_High'%>
+
+<h1>Listing lookup_statuses</h1>
+
+<table>
+  <tr>
+    <th>Description</th>
+    <th>Status type</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @lookup_statuses.each do |lookup_status| %>
+  <tr>
+    <td><%= lookup_status.description %></td>
+    <td><%= lookup_status.status_type %></td>
+    <td><%= link_to 'Show', lookup_status %></td>
+    <td><%= link_to 'Edit', edit_lookup_status_path(lookup_status) %></td>
+    <td><%= link_to 'Destroy', lookup_status, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Lookup status', new_lookup_status_path %>
+
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

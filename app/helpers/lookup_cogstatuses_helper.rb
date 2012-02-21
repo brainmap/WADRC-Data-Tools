@@ -1,0 +1,2 @@
+module LookupCogstatusesHelper
+end

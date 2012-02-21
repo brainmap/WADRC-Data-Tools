@@ -1,0 +1,21 @@
+<%= form_for(@lookup_eligibility_ineligibility) do |f| %>
+  <% if @lookup_eligibility_ineligibility.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@lookup_eligibility_ineligibility.errors.count, "error") %> prohibited this lookup_eligibility_ineligibility from being saved:</h2>
+
+      <ul>
+      <% @lookup_eligibility_ineligibility.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :description %><br />
+    <%= f.text_field :description %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

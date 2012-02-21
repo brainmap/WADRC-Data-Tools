@@ -1,0 +1,35 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Description:</b>
+  <%= @lookup_scantask.description %>
+</p>
+
+<p>
+  <b>Name:</b>
+  <%= @lookup_scantask.name %>
+</p>
+
+<p>
+  <b>Pulse sequence code:</b>
+  <%= @lookup_scantask.pulse_sequence_code %>
+</p>
+
+<p>
+  <b>Bold reps:</b>
+  <%= @lookup_scantask.bold_reps %>
+</p>
+
+<p>
+  <b>Task code:</b>
+  <%= @lookup_scantask.task_code %>
+</p>
+
+<p>
+  <b>Set:</b>
+  <%= @lookup_scantask.set_id %>
+</p>
+
+
+<%= link_to 'Edit', edit_lookup_scantask_path(@lookup_scantask) %> |
+<%= link_to 'Back', lookup_scantasks_path %>

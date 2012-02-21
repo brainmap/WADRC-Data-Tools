@@ -1,0 +1,18 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Name:</b>
+  <%= @lookup_pettracer.name %>
+</p>
+
+<p>
+  <b>Description:</b>
+  <%= @lookup_pettracer.description %>
+</p>
+
+
+<%= link_to 'Edit', edit_lookup_pettracer_path(@lookup_pettracer) %> |
+<%= link_to 'Back', lookup_pettracers_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>
