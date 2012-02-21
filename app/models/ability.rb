@@ -442,6 +442,41 @@ class Ability
   can [:read, :modify] , Enrollment
   can [:read, :modify] , AnalysisMembership
   can [:read, :modify] , Analysis
+  
+
+    can [:read] ,LookupBvmtpercentile
+    can [:read] ,LookupCogstatus
+    can [:read] ,LookupCohort
+    can [:read] ,LookupConsentcohort
+    can [:read] ,LookupConsentform
+    can [:read] ,LookupDemographichandedness
+    can [:read] ,LookupDemographicincome
+    can [:read] ,LookupDemographicmaritalstatus
+    can [:read] ,LookupDemographicrelativerelationship
+    can [:read] ,LookupDiagnosis
+    can [:read] ,LookupDrugclass
+    can [:read] ,LookupDrugcode
+    can [:read] ,LookupDrugfreq
+    can [:read] ,LookupDrugunit
+    can [:read] ,LookupEligibilityIneligibility
+    can [:read] ,LookupEligibilityoutcome
+    can [:read] ,LookupEthnicity
+    can [:read] ,LookupFamhx
+    can [:read] ,LookupGender
+    can [:read] ,LookupHardware
+    can [:read] ,LookupImagingplane
+    can [:read] ,LookupLetterlabel
+    can [:read] ,LookupPettracer
+    can [:read] ,LookupRad
+    can [:read] ,LookupRecruitsource
+    can [:read] ,LookupRelationship
+    can [:read] ,LookupScantask
+    can [:read] ,LookupSet
+    can [:read] ,LookupSource
+    can [:read] ,LookupStatus
+    can [:read] ,LookupSwitchboard
+    can [:read] ,LookupTruthtable
+    can [:read] ,LookupVisitfrequency
 
 
     ### can :update Comment do |comment|

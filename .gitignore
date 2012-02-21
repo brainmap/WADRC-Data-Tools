@@ -18,3 +18,5 @@ lib/CLUs
 ._*
 *.log
 public/system/**/*
+config/database.yml
+config/ldap.yml
