@@ -310,7 +310,9 @@ puts "============ visit_id ="+r.visit_id.to_s
   def load_text
 
     sql = "select id,comment_html_1,comment_html_2,comment_html_3,comment_html_4,comment_html_5
-            from radiology_comments where comment_html_1 is not null and comment_text_1 is null"
+            from radiology_comments where comment_html_1 is not null and (comment_text_1 is null or trim(q1_flag) is null or trim(q1_flag) ='' )"
+            # comment_text_1 might have pre-review text
+            
             connection = ActiveRecord::Base.connection();
             results = connection.execute(sql)
             @results = RadiologyComment.find_by_sql(sql)
