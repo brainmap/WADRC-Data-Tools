@@ -166,7 +166,12 @@ puts "============ visit_id ="+r.visit_id.to_s
                     doc_string = doc_string.gsub("  "," ")
                      doc_string = doc_string.gsub("  "," ")
 
-#chomp ?
+#chomp ?  href="scanDetails.php?req=editTop&editTopScanID=
+         doc_string = doc_string.gsub('(opens in a new window)','')
+         doc_string = doc_string.gsub('href="https://www.radiology.wisc.edu/protected/neuroResearchScans/scanDetails_compare.php?comparisonSubjID=','"')
+         doc_string = doc_string.gsub('onclick="return popitup(','')
+         
+         doc_string = doc_string.gsub("'https://www.radiology.wisc.edu/protected/neuroResearchScans/scanDetails_compare.php?comparisonSubjID=","('")
          doc_string = doc_string.gsub('<img src="https://www.radiology.wisc.edu//images/icons/mailto.jpg" border="0" ></a>','')
          doc_string = doc_string.gsub('<img src="https://www.radiology.wisc.edu//images/icons/mailto.jpg" border="0" />','')
          doc_string = doc_string.gsub('href="mailto:','"')
@@ -174,6 +179,11 @@ puts "============ visit_id ="+r.visit_id.to_s
          doc_string = doc_string.gsub("href='editStudyDetails.php?studyID","")
          doc_string = doc_string.gsub('href="editStudyDetails.php?studyID=','"')
          doc_string = doc_string.gsub('href="editStudyDetails.php?studyID=','"')
+         doc_string = doc_string.gsub('href="scanDetails.php?req=editTop&editTopScanID=','"')
+         doc_string = doc_string.gsub('href="scanDelete.php?deleteID=','"')
+         doc_string = doc_string.gsub('delete this scan <img src="/images/deleteEntry.gif" border="0" />','')
+         doc_string = doc_string.gsub("return confirm('Are you sure you want to delete this scan?')","")
+         doc_string = doc_string.gsub('onclick=""','')         
          doc_string = doc_string.gsub("| <a href='https://www.radiology.wisc.edu/login.php'>login to access advanced editing</a> (application administrator only","")
          doc_string = doc_string.gsub("'>edit age/gender <img src='https://www.radiology.wisc.edu/images/icons/edit.gif' border=0","")
          doc_string = doc_string.gsub('edit age/gender <img src="/images/edit.gif" border="0" /></a> | <a href="https://www.radiology.wisc.edu/login.php">login to access advanced editing</a> (application administrator only)</p>','')
