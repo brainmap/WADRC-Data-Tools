@@ -225,10 +225,13 @@ class VisitsController <  AuthorizedController #  ApplicationController
     participant_id =""
     enumber_array = []
     # make hash of enums
+     blank_participant_id ="N"
     enroll.each do |e|
        enumber_array << e.enumber
        if !e.participant_id.blank?
            participant_id = e.participant_id
+       else
+           blank_participant_id ="Y"
        end
     end
     # what if there are two participant_id's -- multiple enrollments
@@ -239,21 +242,46 @@ class VisitsController <  AuthorizedController #  ApplicationController
       if rmr[0..5] == "RMRaic" && is_a_number?(rmr[6..11]) && rmr.length == 12
            reggieid = rmr[6..11]
            @participant = Participant.where(" reggieid in (?)",reggieid)
-           participant_id = @participant[0].id.to_s
-           if participant_id.blank?
-            # look for participant_id associated with enumber
-             @participant = Participant.where(" participants.id in (select enrollments.participant_id  from  enrollments where enumber  in (?))",enumber_array)
-            
-            
-           else
-             puts "   not blank iiiiiiiiiiii"+participant_id
-           end
-
+           participant_id = @participant[0].try(:id).to_s
       end
-      #@participant = Participant.where(" reggieid in (?)",)
-      
-      # get other participants from other enumber
+      if participant_id.blank?
+            # look for participant_id associated with enumber
+            @participant = Participant.where(" participants.id in (select enrollments.participant_id  from  enrollments where enumber  in (?))",enumber_array)
+            participant_id = @participant[0].try(:id).to_s           
+      end
+      # if still blank, and good rmr format, insert new partipant
+      if participant_id.blank? && rmr[0..5] == "RMRaic" && is_a_number?(rmr[6..11]) && rmr.length == 12
+          # do insert , get participant_id
+           
+           @participant = Participant.new
+           @participant.reggieid = rmr[6..11]
+           @participant.save
+          participant_id = @participant.id
+      end
+          # participant_id was blank, now, if not blank, update enrollments where participant_id is null
+      if !participant_id.blank?
+         sql = "UPDATE enrollments set enrollments.participant_id = "+participant_id.to_s+" WHERE enrollments.participant_id is NULL AND
+                          enrollments.id 
+                            IN (select  enrollment_visit_memberships.enrollment_id  FROM enrollment_visit_memberships
+                                WHERE enrollment_visit_memberships.visit_id = "+params[:id]+ " )"
+
+                           
+          connection = ActiveRecord::Base.connection();
+          results = connection.execute(sql)          
+      end      
     end
+    if  blank_participant_id == "Y"
+      if !participant_id.blank?
+         sql = "UPDATE enrollments set enrollments.participant_id = 2606 WHERE enrollments.participant_id is NULL AND
+                          enrollments.id 
+                            IN (select  enrollment_visit_memberships.enrollment_id  FROM enrollment_visit_memberships
+                                WHERE enrollment_visit_memberships.visit_id = 832 )"
+
+         # problems with multiple participants - even the same one for a visit                  
+           connection = ActiveRecord::Base.connection();
+           results = connection.execute(sql)          
+      end      
+    end 
     
     
   end
