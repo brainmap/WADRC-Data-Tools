@@ -160,6 +160,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
     scan_procedure_array =current_user[:edit_low_scan_procedure_array ]   
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @visit.enrollments.build # if @visit.enrollments.blank?
+    
+    
   end
 
   # POST /visits
@@ -197,8 +199,13 @@ class VisitsController <  AuthorizedController #  ApplicationController
      # HTML Checkbox Hack to remove all if none were checked.
     attributes = {'scan_procedure_ids' => []}.merge(params[:visit] || {} )
     
+    @enumbers = @visit.enrollments
+    set_participant_in_enrollment(@visit.rmr, @enumbers)
+
     respond_to do |format|
       if @visit.update_attributes(attributes)
+
+        
         flash[:notice] = 'visit was successfully updated.'
         format.html { redirect_to(@visit) }
         format.xml  { head :ok }
@@ -208,6 +215,55 @@ class VisitsController <  AuthorizedController #  ApplicationController
       end
     end
   end
+  
+  def set_participant_in_enrollment( rmr, enroll)
+    # loop thru each enrollment, check for participant_id
+    # if not populated, look for other participant_id based on
+    # last 6 digits of rmr = RMRaic
+    # other participant_id for the enumber
+    
+    participant_id =""
+    enumber_array = []
+    # make hash of enums
+    enroll.each do |e|
+       enumber_array << e.enumber
+       if !e.participant_id.blank?
+           participant_id = e.participant_id
+       end
+    end
+    # what if there are two participant_id's -- multiple enrollments
+
+    if participant_id.blank?
+      # if rmr starts with RMRaic and last 6 chars are digits
+      # look for a participant with this reggieID
+      if rmr[0..5] == "RMRaic" && is_a_number?(rmr[6..11]) && rmr.length == 12
+           reggieid = rmr[6..11]
+           @participant = Participant.where(" reggieid in (?)",reggieid)
+           participant_id = @participant[0].id.to_s
+           if participant_id.blank?
+            # look for participant_id associated with enumber
+             @participant = Participant.where(" participants.id in (select enrollments.participant_id  from  enrollments where enumber  in (?))",enumber_array)
+            
+            
+           else
+             puts "   not blank iiiiiiiiiiii"+participant_id
+           end
+
+      end
+      #@participant = Participant.where(" reggieid in (?)",)
+      
+      # get other participants from other enumber
+    end
+    
+    
+  end
+
+  def is_a_number?(s)
+
+    s.to_s.match(/\A[+-]?\d+?(\.\d+)?\Z/) == nil ? false : true
+
+  end  
+  
 
   # DELETE /visits/1
   # DELETE /visits/1.xml

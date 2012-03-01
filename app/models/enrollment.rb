@@ -9,8 +9,7 @@ class Enrollment < ActiveRecord::Base
   validates_format_of :enumber, :with => /.*\d{3,}\Z/, :message => "must end with at least 3 digits to be valid."
   
   acts_as_reportable
-  
-  
+
   def withdrawn?
     not withdrawl_reason.blank?
   end
