@@ -6,6 +6,7 @@
 	    <th>DOB</th>
 	    <th>Gender</th>
 	    <th>Wrap Number</th>
+		<th>ReggieID</th>
 	    <th>Years of Education</th>
 	    <th>Notes</th>
 	    <!-- <th>ApoE</th> -->
@@ -21,6 +22,7 @@
         <td><%=h p.dob.year unless p.dob.nil? %></td>
         <td><%=h p.gender_prompt %></td>
         <td><%=h p.wrapnum %></td>
+        <td><%=h p.reggieid %></td>
         <td><%=h p.ed_years %></td>
         <td>
           <%= popup_note(p.note.nil? ? "" : "peek", "<p>#{p.note}</p>")%>
