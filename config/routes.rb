@@ -1,5 +1,7 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :employees
+
   resources :lookup_refs
 
   resources :lookup_switchboards

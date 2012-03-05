@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120305183334) do
+ActiveRecord::Schema.define(:version => 20120305214855) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -25,6 +25,18 @@ ActiveRecord::Schema.define(:version => 20120305183334) do
     t.integer  "image_dataset_id"
     t.boolean  "excluded",          :default => false
     t.string   "exclusion_comment"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "employees", :force => true do |t|
+    t.string   "first_name"
+    t.string   "mi"
+    t.string   "last_name"
+    t.string   "status"
+    t.string   "initials"
+    t.integer  "lookup_status_id"
+    t.integer  "user_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

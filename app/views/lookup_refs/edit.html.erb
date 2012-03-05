@@ -1,6 +1,9 @@
+<% if current_user.role == 'Admin_High'%>
 <h1>Editing lookup_ref</h1>
 
 <%= render 'form' %>
-
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>
 <%= link_to 'Show', @lookup_ref %> |
 <%= link_to 'Back', lookup_refs_path %>

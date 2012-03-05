@@ -3,7 +3,7 @@
 <%= form_tag '/radiology_comments/index' do %>
 RMR: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <%= text_field_tag "radiology_comment[rmr]" %><br>
-<%= collection_select :radiology_comment, :protocol_id, Protocol.all.sort_by(&:id), :id, :name, :prompt => 'choose a protocol' %>
+<%= collection_select :radiology_comment, :protocol_id, Protocol.all.sort_by(&:name), :id, :name, :prompt => 'choose a protocol' %>
   <%= submit_tag("Search") %>
 <% end %>
 
