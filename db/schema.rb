@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120221162659) do
+ActiveRecord::Schema.define(:version => 20120305183334) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -328,6 +328,15 @@ ActiveRecord::Schema.define(:version => 20120221162659) do
     t.datetime "updated_at"
   end
 
+  create_table "lookup_refs", :force => true do |t|
+    t.integer  "ref_value"
+    t.string   "description"
+    t.integer  "display_order"
+    t.string   "label"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "lookup_relationships", :force => true do |t|
     t.string   "description"
     t.datetime "created_at"
@@ -416,6 +425,23 @@ ActiveRecord::Schema.define(:version => 20120221162659) do
     t.datetime "updated_at"
     t.string   "wrapnum"
     t.integer  "access_id"
+    t.integer  "reggieid"
+  end
+
+  create_table "participants_bak_20120229", :id => false, :force => true do |t|
+    t.integer  "id",             :default => 0, :null => false
+    t.integer  "ed_years"
+    t.integer  "apoe_e1"
+    t.integer  "apoe_e2"
+    t.integer  "gender"
+    t.string   "note"
+    t.string   "apoe_processor"
+    t.date     "dob"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "wrapnum"
+    t.integer  "access_id"
+    t.integer  "reggieid"
   end
 
   create_table "physiology_text_files", :force => true do |t|
@@ -530,6 +556,51 @@ ActiveRecord::Schema.define(:version => 20120221162659) do
     t.string   "raw_directory"
   end
 
+  create_table "t_access_panda_match_20120227", :id => false, :force => true do |t|
+    t.integer "pkProtocolid_access",                  :default => 0, :null => false
+    t.string  "access_enum",                                         :null => false
+    t.integer "fkDBID"
+    t.string  "panda_enumber"
+    t.integer "participant_id"
+    t.integer "enrollment_id",                        :default => 0, :null => false
+    t.string  "withdrawlReason_access", :limit => 50
+    t.string  "withdrawl_reason_panda"
+    t.integer "reggieID_access"
+    t.string  "rmr_panda",              :limit => 50
+    t.string  "wrapnum_access",         :limit => 5
+    t.string  "wrapnum_panda",          :limit => 50
+    t.string  "initials_access",        :limit => 50
+    t.string  "initials_panda",         :limit => 50
+    t.date    "dob_access"
+    t.date    "dob_panda"
+    t.integer "gender_access"
+    t.integer "gender_panda"
+    t.integer "apoee1_access"
+    t.integer "apoee1_panda"
+    t.integer "apoee2_access"
+    t.integer "apoee2_panda"
+    t.string  "apoe_processor_access",  :limit => 50
+    t.string  "apoe_processor_panda"
+    t.string  "apoe_note_access"
+    t.string  "apoe_note_panda"
+    t.integer "ed_years_access"
+    t.integer "ed_years_panda"
+  end
+
+  create_table "t_new_participants_20120229", :id => false, :force => true do |t|
+    t.string  "rmr"
+    t.string  "initials"
+    t.integer "enrollment_id"
+    t.integer "participant_id"
+  end
+
+  create_table "t_protocol_access_panda_map", :id => false, :force => true do |t|
+    t.integer "pkprotocoltypeid",               :default => 0, :null => false
+    t.string  "protocolname",     :limit => 50
+    t.integer "protocol_id",                    :default => 0, :null => false
+    t.string  "name"
+  end
+
   create_table "users", :force => true do |t|
     t.string   "username"
     t.string   "crypted_password",          :limit => 40
@@ -561,18 +632,18 @@ ActiveRecord::Schema.define(:version => 20120221162659) do
     t.integer  "scan_number"
     t.string   "initials"
     t.string   "rmr"
-    t.string   "radiology_outcome",  :default => "no"
-    t.string   "notes"
-    t.string   "transfer_mri",       :default => "no"
-    t.string   "transfer_pet",       :default => "no"
-    t.string   "conference",         :default => "no"
-    t.string   "compile_folder",     :default => "no"
-    t.string   "dicom_dvd",          :default => "no"
+    t.string   "radiology_outcome",                  :default => "no"
+    t.string   "notes",              :limit => 2000
+    t.string   "transfer_mri",                       :default => "no"
+    t.string   "transfer_pet",                       :default => "no"
+    t.string   "conference",                         :default => "no"
+    t.string   "compile_folder",                     :default => "no"
+    t.string   "dicom_dvd",                          :default => "no"
     t.integer  "user_id"
     t.string   "path"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "radiology_note",     :default => "no"
+    t.string   "radiology_note",                     :default => "no"
     t.string   "research_diagnosis"
     t.string   "consent_form_type"
     t.string   "scanner_source"

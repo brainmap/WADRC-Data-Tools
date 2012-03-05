@@ -1,0 +1,29 @@
+<h1>Listing lookup_refs</h1>
+
+<table>
+  <tr>
+    <th>Ref value</th>
+    <th>Description</th>
+    <th>Display order</th>
+    <th>Label</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @lookup_refs.each do |lookup_ref| %>
+  <tr>
+    <td><%= lookup_ref.ref_value %></td>
+    <td><%= lookup_ref.description %></td>
+    <td><%= lookup_ref.display_order %></td>
+    <td><%= lookup_ref.label %></td>
+    <td><%= link_to 'Show', lookup_ref %></td>
+    <td><%= link_to 'Edit', edit_lookup_ref_path(lookup_ref) %></td>
+    <td><%= link_to 'Destroy', lookup_ref, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Lookup ref', new_lookup_ref_path %>

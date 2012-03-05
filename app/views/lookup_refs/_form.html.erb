@@ -1,0 +1,33 @@
+<%= form_for(@lookup_ref) do |f| %>
+  <% if @lookup_ref.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@lookup_ref.errors.count, "error") %> prohibited this lookup_ref from being saved:</h2>
+
+      <ul>
+      <% @lookup_ref.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :ref_value %><br />
+    <%= f.text_field :ref_value %>
+  </div>
+  <div class="field">
+    <%= f.label :description %><br />
+    <%= f.text_field :description %>
+  </div>
+  <div class="field">
+    <%= f.label :display_order %><br />
+    <%= f.text_field :display_order %>
+  </div>
+  <div class="field">
+    <%= f.label :label %><br />
+    <%= f.text_field :label %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

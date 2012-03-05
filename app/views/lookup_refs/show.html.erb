@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Ref value:</b>
+  <%= @lookup_ref.ref_value %>
+</p>
+
+<p>
+  <b>Description:</b>
+  <%= @lookup_ref.description %>
+</p>
+
+<p>
+  <b>Display order:</b>
+  <%= @lookup_ref.display_order %>
+</p>
+
+<p>
+  <b>Label:</b>
+  <%= @lookup_ref.label %>
+</p>
+
+
+<%= link_to 'Edit', edit_lookup_ref_path(@lookup_ref) %> |
+<%= link_to 'Back', lookup_refs_path %>

@@ -1,5 +1,7 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :lookup_refs
+
   resources :lookup_switchboards
 
   resources :lookup_visitfrequencies
