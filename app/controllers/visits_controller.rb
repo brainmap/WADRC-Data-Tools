@@ -345,7 +345,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
       
       if !params[:visit_search][:series_description].blank?
          var = "%"+params[:visit_search][:series_description].downcase+"%"
-         @search =Visit.where(" visits.id in (select image_datasets.visit_id from image_datasets
+         @search =@search.where(" visits.id in (select image_datasets.visit_id from image_datasets
           where lower(image_datasets.series_description) like ? )", var)
       end
       
