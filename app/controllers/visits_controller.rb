@@ -340,7 +340,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     # Remove default scope if sorting has been requested.
     @search = Visit.search(params[:search]) 
       if !params[:visit_search][:scan_procedure_id].blank?
-         @search =Visit.where(" visits.id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedures_visits.scan_procedure_id in (?))",params[:visit_search][:scan_procedure_id])
+         @search =@search.where(" visits.id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedures_visits.scan_procedure_id in (?))",params[:visit_search][:scan_procedure_id])
       end
       
       if !params[:visit_search][:series_description].blank?
@@ -350,7 +350,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
       end
       
       if !params[:visit_search][:enumber].blank?
-         @search =Visit.where(" visits.id in (select enrollment_visit_memberships.visit_id from enrollment_visit_memberships,enrollments
+         @search =@search.where(" visits.id in (select enrollment_visit_memberships.visit_id from enrollment_visit_memberships,enrollments
           where enrollment_visit_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower(?)))",params[:visit_search][:enumber])
       end      
 
