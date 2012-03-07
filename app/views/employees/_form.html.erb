@@ -1,0 +1,53 @@
+<% 
+
+v_status = {"Employed"=>"Employed", "Terminated"=>"Terminated",""=>""}
+
+%>
+
+<%= form_for(@employee) do |f| %>
+  <% if @employee.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@employee.errors.count, "error") %> prohibited this employee from being saved:</h2>
+
+      <ul>
+      <% @employee.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :first_name %><br />
+    <%= f.text_field :first_name %>
+  </div>
+  <div class="field">
+    <%= f.label :mi %><br />
+    <%= f.text_field :mi %>
+  </div>
+  <div class="field">
+    <%= f.label :last_name %><br />
+    <%= f.text_field :last_name %>
+  </div>
+  <div class="field">
+    <%= f.label :status %><br />
+ <%= f.select :status, options_for_select(v_status, @employee.status),
+	              {:prompt => 'Select a status'}  %>
+  </div>
+  <div class="field">
+    <%= f.label :initials %><br />
+    <%= f.text_field :initials %>
+  </div>
+  <div class="field">
+    <%= f.label :lookup_status_id %><br />
+<%= collection_select :employee, :lookup_status_id, LookupStatus.all.sort_by(&:description), :id, :description, {:prompt => 'Select a status'} %>
+
+  </div>
+  <div class="field">
+    <%= f.label :user_id %><br />
+<%= collection_select :employee, :user_id, User.all.sort_by(&:username_name), :id, :username_name,{:prompt => 'Select a user'} %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

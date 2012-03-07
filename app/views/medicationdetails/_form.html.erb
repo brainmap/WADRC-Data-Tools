@@ -1,0 +1,46 @@
+<% 
+
+v_prescription = {"OTC"=>"0", "Prescription"=>"1",""=>"0"}
+v_exclusionclass = {"0"=>"0", "1"=>"1","2"=>"2", "3"=>"3"}
+
+%>
+<%= form_for(@medicationdetail) do |f| %>
+  <% if @medicationdetail.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@medicationdetail.errors.count, "error") %> prohibited this medicationdetail from being saved:</h2>
+
+      <ul>
+      <% @medicationdetail.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :genericname %><br />
+    <%= f.text_field :genericname %>
+  </div>
+  <div class="field">
+    <%= f.label :brandname %><br />
+    <%= f.text_field :brandname %>
+  </div>
+  <div class="field">
+    <%= f.label :lookup_drug_class_id %><br />
+<%= collection_select :medicationdetail, :lookup_drugclass_id, LookupDrugclass.all.sort_by(&:description), :id, :description, {:prompt => 'Select a Drug Class'} %>
+
+  </div>
+  <div class="field">
+    <%= f.label :prescription %><br />
+ <%= f.select :prescription, options_for_select(v_prescription, @medicationdetail.prescription),
+	              {:prompt => 'Select a OTC vs Prescription'}  %>
+  </div>
+  <div class="field">
+    <%= f.label :exclusion_class %><br />
+ <%= f.select :exclusionclass, options_for_select(v_exclusionclass, @medicationdetail.exclusionclass),
+	              {:prompt => 'Select an Exclusion Class'}  %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,31 @@
+<h1>Listing medicationdetails</h1>
+
+<table>
+  <tr>
+    <th>Genericname</th>
+    <th>Brandname</th>
+    <th>Lookup drugclass</th>
+    <th>Prescription</th>
+    <th>Exclusionclass</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @medicationdetails.each do |medicationdetail| %>
+  <tr>
+    <td><%= medicationdetail.genericname %></td>
+    <td><%= medicationdetail.brandname %></td>
+    <td><%= medicationdetail.lookup_drugclass.try(:description) %></td>
+    <td><%= medicationdetail.prescription %></td>
+    <td><%= medicationdetail.exclusionclass %></td>
+    <td><%= link_to 'Show', medicationdetail %></td>
+    <td><%= link_to 'Edit', edit_medicationdetail_path(medicationdetail) %></td>
+    <td><%= link_to 'Destroy', medicationdetail, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Medicationdetail', new_medicationdetail_path %>

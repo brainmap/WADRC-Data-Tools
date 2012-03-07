@@ -1,0 +1,42 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>First name:</b>
+  <%= @employee.first_name %>
+</p>
+
+<p>
+  <b>Mi:</b>
+  <%= @employee.mi %>
+</p>
+
+<p>
+  <b>Last name:</b>
+  <%= @employee.last_name %>
+</p>
+
+<p>
+  <b>Status:</b>
+  <%= @employee.status %>
+</p>
+
+<p>
+  <b>Initials:</b>
+  <%= @employee.initials %>
+</p>
+
+<p>
+  <b>Lookup status:</b>
+   <%= @employee.lookup_status.try(:description)%>
+</p>
+
+<p>
+  <b>User:</b>
+  <%= @employee.user.try(:username_name)%>
+
+
+</p>
+
+
+<%= link_to 'Edit', edit_employee_path(@employee) %> |
+<%= link_to 'Back', employees_path %>

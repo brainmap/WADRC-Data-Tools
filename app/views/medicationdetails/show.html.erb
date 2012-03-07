@@ -1,0 +1,31 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Genericname:</b>
+  <%= @medicationdetail.genericname %>
+</p>
+
+<p>
+  <b>Brandname:</b>
+  <%= @medicationdetail.brandname %>
+</p>
+
+<p>
+  <b>Lookup drugclass:</b>
+  <%= @medicationdetail.lookup_drugclass.try(:description) %><br>
+
+</p>
+
+<p>
+  <b>Prescription:</b>
+  <%= @medicationdetail.prescription %>
+</p>
+
+<p>
+  <b>Exclusionclass:</b>
+  <%= @medicationdetail.exclusionclass %>
+</p>
+
+
+<%= link_to 'Edit', edit_medicationdetail_path(@medicationdetail) %> |
+<%= link_to 'Back', medicationdetails_path %>
