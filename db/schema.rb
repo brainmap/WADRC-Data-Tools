@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120305214855) do
+ActiveRecord::Schema.define(:version => 20120307191811) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -244,13 +244,6 @@ ActiveRecord::Schema.define(:version => 20120305214855) do
     t.datetime "updated_at"
   end
 
-  create_table "lookup_drugclasses", :force => true do |t|
-    t.string   "epodrugclass"
-    t.string   "description"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "lookup_drugcodes", :force => true do |t|
     t.string   "description"
     t.datetime "created_at"
@@ -402,6 +395,16 @@ ActiveRecord::Schema.define(:version => 20120305214855) do
 
   create_table "lookup_visitfrequencies", :force => true do |t|
     t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "medicationdetails", :force => true do |t|
+    t.string   "genericname"
+    t.string   "brandname"
+    t.integer  "lookup_drugclass_id"
+    t.integer  "prescription"
+    t.integer  "exclusionclass"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

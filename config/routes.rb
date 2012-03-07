@@ -1,5 +1,7 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :medicationdetails
+
   resources :employees
 
   resources :lookup_refs
