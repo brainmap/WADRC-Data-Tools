@@ -1,0 +1,25 @@
+<%= form_for(@questionform_question) do |f| %>
+  <% if @questionform_question.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@questionform_question.errors.count, "error") %> prohibited this questionform_question from being saved:</h2>
+
+      <ul>
+      <% @questionform_question.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :questionform_id %><br />
+<%= collection_select :questionform_question, :questionform_id, Questionform.all.sort_by(&:display_order), :id, :description,{:prompt => 'Select a Question Form'} %>
+  </div>
+  <div class="field">
+    <%= f.label :question_id %><br />
+<%= collection_select :questionform_question, :question_id, Question.all.sort_by(&:display_order), :id, :description,{:prompt => 'Select a Question'} %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

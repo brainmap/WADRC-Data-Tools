@@ -1,0 +1,21 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Questionform:</b>
+  <%= @questionform_scan_procedure.questionform_id %>
+</p>
+
+<p>
+  <b>Scan procedure:</b>
+  <%= @questionform_scan_procedure.scan_procedure_id %>
+</p>
+
+<p>
+  <b>Include exclude:</b>
+  <%= @questionform_scan_procedure.include_exclude %>
+</p>
+
+
+<%= link_to 'Edit', edit_questionform_scan_procedure_path(@questionform_scan_procedure) %> |
+<%= link_to 'Back', questionform_scan_procedures_path %> |
+<%= link_to('Question Forms Base', questionformbase_path) %>

@@ -1,0 +1,27 @@
+<h1>Listing question_scan_procedures</h1>
+
+<table>
+  <tr>
+    <th>Question</th>
+    <th>Scan procedure</th>
+    <th>Include exclude</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @question_scan_procedures.each do |question_scan_procedure| %>
+  <tr>
+    <td><%= question_scan_procedure.question_id %></td>
+    <td><%= question_scan_procedure.scan_procedure_id %></td>
+    <td><%= question_scan_procedure.include_exclude %></td>
+    <td><%= link_to 'Show', question_scan_procedure %></td>
+    <td><%= link_to 'Edit', edit_question_scan_procedure_path(question_scan_procedure) %></td>
+    <td><%= link_to 'Destroy', question_scan_procedure, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Question scan procedure', new_question_scan_procedure_path %>

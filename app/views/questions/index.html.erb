@@ -1,0 +1,77 @@
+<h1>Listing questions</h1>
+
+<table>
+  <tr>
+    <th>Heading 1</th>
+    <th>Phrase a 1</th>
+    <th>Value type 1</th>
+    <th>Ref table a 1</th>
+    <th>Ref table b 1</th>
+    <th>Phrase b 1</th>
+    <th>Phrase c 1</th>
+    <th>Required y n 1</th>
+    <th>Heading 2</th>
+    <th>Phrase a 2</th>
+    <th>Value type 2</th>
+    <th>Ref table a 2</th>
+    <th>Ref table b 2</th>
+    <th>Phrase b 2</th>
+    <th>Phrase c 2</th>
+    <th>Required y n 2</th>
+    <th>Heading 3</th>
+    <th>Phrase a 3</th>
+    <th>Value type 3</th>
+    <th>Ref table a 3</th>
+    <th>Ref table b 3</th>
+    <th>Phrase b 3</th>
+    <th>Phrase c 3</th>
+    <th>Required y n 3</th>
+    <th>Display order</th>
+    <th>Status</th>
+    <th>Parent question</th>
+    <th>Description</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @questions.each do |question| %>
+  <tr>
+    <td><%= question.heading_1 %></td>
+    <td><%= question.phrase_a_1 %></td>
+    <td><%= question.value_type_1 %></td>
+    <td><%= question.ref_table_a_1 %></td>
+    <td><%= question.ref_table_b_1 %></td>
+    <td><%= question.phrase_b_1 %></td>
+    <td><%= question.phrase_c_1 %></td>
+    <td><%= question.required_y_n_1 %></td>
+    <td><%= question.heading_2 %></td>
+    <td><%= question.phrase_a_2 %></td>
+    <td><%= question.value_type_2 %></td>
+    <td><%= question.ref_table_a_2 %></td>
+    <td><%= question.ref_table_b_2 %></td>
+    <td><%= question.phrase_b_2 %></td>
+    <td><%= question.phrase_c_2 %></td>
+    <td><%= question.required_y_n_2 %></td>
+    <td><%= question.heading_3 %></td>
+    <td><%= question.phrase_a_3 %></td>
+    <td><%= question.value_type_3 %></td>
+    <td><%= question.ref_table_a_3 %></td>
+    <td><%= question.ref_table_b_3 %></td>
+    <td><%= question.phrase_b_3 %></td>
+    <td><%= question.phrase_c_3 %></td>
+    <td><%= question.required_y_n_3 %></td>
+    <td><%= question.display_order %></td>
+    <td><%= question.status %></td>
+    <td><%= question.parent_question_id %></td>
+    <td><%= question.description %></td>
+    <td><%= link_to 'Show', question %></td>
+    <td><%= link_to 'Edit', edit_question_path(question) %></td>
+    <td><%= link_to 'Destroy', question, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Question', new_question_path %>

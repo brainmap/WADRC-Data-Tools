@@ -1,0 +1,26 @@
+<h1>Listing questionform_questions</h1>
+
+<table>
+  <tr>
+    <th>Questionform</th>
+    <th>Question</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @questionform_questions.each do |questionform_question| %>
+  <tr>
+    <td><%= questionform_question.questionform_id %></td>
+    <td><%= questionform_question.question_id %></td>
+    <td><%= link_to 'Show', questionform_question %></td>
+    <td><%= link_to 'Edit', edit_questionform_question_path(questionform_question) %></td>
+    <td><%= link_to 'Destroy', questionform_question, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Questionform question', new_questionform_question_path %> |
+<%= link_to('Question Forms Base', questionformbase_path) %>

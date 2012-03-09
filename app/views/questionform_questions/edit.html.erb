@@ -1,0 +1,12 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Editing questionform_question</h1>
+
+<%= render 'form' %>
+
+<%= link_to 'Show', @questionform_question %> |
+<%= link_to 'Back', questionform_questions_path %>
+
+<%else %>	
+	
+	
+<% end %>

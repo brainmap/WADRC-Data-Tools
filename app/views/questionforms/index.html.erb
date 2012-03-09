@@ -1,0 +1,32 @@
+<h1>Listing questionforms</h1>
+
+<table>
+  <tr>
+    <th>Description</th>
+    <th>Long description</th>
+    <th>Display order</th>
+    <th>Parent questionform</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @questionforms.each do |questionform| %>
+  <tr>
+    <td><%= questionform.description %></td>
+    <td><%= questionform.long_description %></td>
+    <td><%= questionform.display_order %></td>
+    <td><%= if !questionform.parent_questionform_id.blank?
+	Questionform.find(questionform.parent_questionform_id).description
+	end %></td>
+    <td><%= link_to 'Show', questionform %></td>
+    <td><%= link_to 'Edit', edit_questionform_path(questionform) %></td>
+    <td><%= link_to 'Destroy', questionform, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Questionform', new_questionform_path %> |
+<%= link_to('Question Forms Base', questionformbase_path) %>

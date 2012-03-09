@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Description:</b>
+  <%= @questionform.description %>
+</p>
+
+<p>
+  <b>Long description:</b>
+  <%= @questionform.long_description %>
+</p>
+
+<p>
+  <b>Display order:</b>
+  <%= @questionform.display_order %>
+</p>
+
+<p>
+  <b>Parent questionform:</b>
+  <%= if !@questionform.parent_questionform_id.blank?
+	Questionform.find(@questionform.parent_questionform_id).description
+	end %>
+</p>
+
+
+<%= link_to 'Edit', edit_questionform_path(@questionform) %> |
+<%= link_to 'Back', questionforms_path %> | 
+<%= link_to('Question Forms Scan Procedures', '/questionform_scan_procedures') %> |
+<%= link_to('Question Forms Base', questionformbase_path) %>

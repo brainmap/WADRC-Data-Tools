@@ -1,0 +1,20 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Question:</b>
+  <%= @question_scan_procedure.question_id %>
+</p>
+
+<p>
+  <b>Scan procedure:</b>
+  <%= @question_scan_procedure.scan_procedure_id %>
+</p>
+
+<p>
+  <b>Include exclude:</b>
+  <%= @question_scan_procedure.include_exclude %>
+</p>
+
+
+<%= link_to 'Edit', edit_question_scan_procedure_path(@question_scan_procedure) %> |
+<%= link_to 'Back', question_scan_procedures_path %>

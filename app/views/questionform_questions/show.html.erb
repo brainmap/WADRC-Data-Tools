@@ -1,0 +1,16 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Questionform:</b>
+  <%= @questionform_question.questionform_id %>
+</p>
+
+<p>
+  <b>Question:</b>
+  <%= @questionform_question.question_id %>
+</p>
+
+
+<%= link_to 'Edit', edit_questionform_question_path(@questionform_question) %> |
+<%= link_to 'Back', questionform_questions_path %> |
+<%= link_to('Question Forms Base', questionformbase_path) %>

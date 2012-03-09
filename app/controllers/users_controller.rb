@@ -41,6 +41,10 @@ class UsersController < ApplicationController
   def control
       render :template => "users/control"
   end
+  
+  def questionformbase
+      render :template => "users/questionform"
+  end
 
   def add_user
     if !params[:user].nil? 

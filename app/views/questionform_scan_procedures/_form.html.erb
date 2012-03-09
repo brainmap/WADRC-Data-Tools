@@ -1,0 +1,35 @@
+<%
+v_exclude_include = {"Exclude"=>"exclude", "Include"=>"include"}
+%>
+<%= form_for(@questionform_scan_procedure) do |f| %>
+  <% if @questionform_scan_procedure.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@questionform_scan_procedure.errors.count, "error") %> prohibited this questionform_scan_procedure from being saved:</h2>
+
+      <ul>
+      <% @questionform_scan_procedure.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :questionform_id %><br />
+	
+<%= collection_select :questionform_scan_procedure, :questionform_id, Questionform.all.sort_by(&:display_order), :id, :description,{:prompt => 'Select a Question Form'} %>
+
+  </div>
+  <div class="field">
+    <%= f.label :scan_procedure_id %><br />
+<%= collection_select :questionform_scan_procedure, :scan_procedure_id, ScanProcedure.all.sort_by(&:codename), :id, :codename,{:prompt => 'Select a Scan Procedure'} %>
+  </div>
+  <div class="field">
+    <%= f.label :include_exclude %><br />
+ <%= f.select :include_exclude, options_for_select(v_exclude_include, @questionform_scan_procedure.include_exclude),
+	              {:prompt => 'Select whether to exclude or include this question form for this scan procedure'}  %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

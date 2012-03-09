@@ -1,5 +1,19 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :question_scan_procedures
+
+  resources :questionform_scan_procedures
+
+  resources :question_scan_protocols
+
+  resources :questionform_questions
+
+  resources :questions
+
+  resources :questionform_scan_protocols
+
+  resources :questionforms
+
   resources :medicationdetails
 
   resources :employees
@@ -98,6 +112,7 @@ WADRCDataTools::Application.routes.draw do
   
   match '/users/update_role', :controller => 'users', :action => 'update_role', :as => :update_role
   match '/users/control', :controller => 'users', :action => 'control', :as => :control
+  match '/users/questionformbase', :controller => 'users', :action => 'questionformbase', :as => :questionformbase
   match '/users/add_user', :controller => 'users', :action => 'add_user', :as => :add_user
   match '/users/edit_user', :controller => 'users', :action => 'edit_user', :as => :edit_user
   # moved up to get precidance over devise sign_upmatch '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user

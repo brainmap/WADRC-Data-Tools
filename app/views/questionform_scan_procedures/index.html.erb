@@ -1,0 +1,28 @@
+<h1>Listing questionform_scan_procedures</h1>
+
+<table>
+  <tr>
+    <th>Questionform</th>
+    <th>Scan procedure</th>
+    <th>Include exclude</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @questionform_scan_procedures.each do |questionform_scan_procedure| %>
+  <tr>
+    <td><%= questionform_scan_procedure.questionform_id %></td>
+    <td><%= questionform_scan_procedure.scan_procedure_id %></td>
+    <td><%= questionform_scan_procedure.include_exclude %></td>
+    <td><%= link_to 'Show', questionform_scan_procedure %></td>
+    <td><%= link_to 'Edit', edit_questionform_scan_procedure_path(questionform_scan_procedure) %></td>
+    <td><%= link_to 'Destroy', questionform_scan_procedure, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Questionform scan procedure', new_questionform_scan_procedure_path %> |
+<%= link_to('Question Forms Base', questionformbase_path) %>

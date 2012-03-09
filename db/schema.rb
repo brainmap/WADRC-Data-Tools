@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120307191811) do
+ActiveRecord::Schema.define(:version => 20120308201018) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -239,6 +239,13 @@ ActiveRecord::Schema.define(:version => 20120307191811) do
   end
 
   create_table "lookup_diagnoses", :force => true do |t|
+    t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lookup_drugclasses", :force => true do |t|
+    t.string   "epodrugclass"
     t.string   "description"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -479,6 +486,70 @@ ActiveRecord::Schema.define(:version => 20120307191811) do
     t.string   "abbr"
     t.string   "path"
     t.string   "description"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "question_scan_procedures", :force => true do |t|
+    t.integer  "question_id"
+    t.integer  "scan_procedure_id"
+    t.string   "include_exclude"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "questionform_questions", :force => true do |t|
+    t.integer  "questionform_id"
+    t.integer  "question_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "questionform_scan_procedures", :force => true do |t|
+    t.integer  "questionform_id"
+    t.integer  "scan_procedure_id"
+    t.string   "include_exclude"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "questionforms", :force => true do |t|
+    t.string   "description"
+    t.string   "long_description"
+    t.integer  "display_order"
+    t.integer  "parent_questionform_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "questions", :force => true do |t|
+    t.string   "heading_1"
+    t.string   "phrase_a_1"
+    t.string   "value_type_1"
+    t.string   "ref_table_a_1"
+    t.string   "ref_table_b_1"
+    t.string   "phrase_b_1"
+    t.string   "phrase_c_1"
+    t.string   "required_y_n_1"
+    t.string   "heading_2"
+    t.string   "phrase_a_2"
+    t.string   "value_type_2"
+    t.string   "ref_table_a_2"
+    t.string   "ref_table_b_2"
+    t.string   "phrase_b_2"
+    t.string   "phrase_c_2"
+    t.string   "required_y_n_2"
+    t.string   "heading_3"
+    t.string   "phrase_a_3"
+    t.string   "value_type_3"
+    t.string   "ref_table_a_3"
+    t.string   "ref_table_b_3"
+    t.string   "phrase_b_3"
+    t.string   "phrase_c_3"
+    t.string   "required_y_n_3"
+    t.integer  "display_order"
+    t.string   "status"
+    t.integer  "parent_question_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
