@@ -110,6 +110,8 @@ module ApplicationHelper
       page.visual_effect :toggle_blind, element_id, :duration => 0.3
     end
   end
+  
+
 
 
 end

@@ -5,7 +5,12 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
 
 #   include AuthenticatedSystem
- before_filter :authenticate_user!
+ before_filter :authenticate_user! 
+ 
+# respond_to do |format|
+#   format.html  before_filter :authenticate_user!
+#    format.xml  {      }
+# end
  
 # rescue_from CanCan::AccessDenied do |exception|
 #   flash[:error] = exception.message
@@ -22,9 +27,6 @@ class ApplicationController < ActionController::Base
   
   # without super getting error frm params
   # super has to be callled from in a procedure -- 
-  # so can't just add unless after :username_required
-####  def login_required
-####      super unless params[:format] == 'xml'
-####  end
-  
+
+
 end
