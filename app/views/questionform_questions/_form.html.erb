@@ -17,7 +17,11 @@
   </div>
   <div class="field">
     <%= f.label :question_id %><br />
-<%= collection_select :questionform_question, :question_id, Question.all.sort_by(&:display_order), :id, :description,{:prompt => 'Select a Question'} %>
+<%= collection_select :questionform_question, :question_id, Question.all.sort_by(&:description), :id, :description,{:prompt => 'Select a Question'} %>
+  </div>
+  <div class="field">
+    <%= f.label :display_order %><br />
+    <%= f.text_field :display_order %>
   </div>
   <div class="actions">
     <%= f.submit %>

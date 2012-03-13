@@ -12,8 +12,8 @@
 
 <% @question_scan_procedures.each do |question_scan_procedure| %>
   <tr>
-    <td><%= question_scan_procedure.question_id %></td>
-    <td><%= question_scan_procedure.scan_procedure_id %></td>
+    <td><%= Question.find(question_scan_procedure.question_id).description %></td><td align=center></td>
+    <td><%= ScanProcedure.find(question_scan_procedure.scan_procedure_id).codename%></td>
     <td><%= question_scan_procedure.include_exclude %></td>
     <td><%= link_to 'Show', question_scan_procedure %></td>
     <td><%= link_to 'Edit', edit_question_scan_procedure_path(question_scan_procedure) %></td>

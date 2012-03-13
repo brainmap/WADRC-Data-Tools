@@ -2,12 +2,16 @@
 
 <p>
   <b>Questionform:</b>
-  <%= @questionform_question.questionform_id %>
+  <%= Questionform.find(@questionform_question.questionform_id).description %>
 </p>
 
 <p>
   <b>Question:</b>
-  <%= @questionform_question.question_id %>
+  <%= 	Question.find(@questionform_question.question_id).description %>
+</p>
+<p>
+  <b>Display order:</b>
+  <%= @questionform_question.display_order %>
 </p>
 
 

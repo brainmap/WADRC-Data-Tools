@@ -3,11 +3,11 @@
 <p>
   <b>Question:</b>
   <%= @question_scan_procedure.question_id %>
+ <%= 	Question.find(@question_scan_procedure.question_id).description %>
 </p>
 
 <p>
-  <b>Scan procedure:</b>
-  <%= @question_scan_procedure.scan_procedure_id %>
+  <b>Scan procedure:</b><%= ScanProcedure.find(@question_scan_procedure.scan_procedure_id).codename%>
 </p>
 
 <p>

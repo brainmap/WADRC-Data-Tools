@@ -1,3 +1,6 @@
+<%
+v_exclude_include = {"Exclude"=>"exclude", "Include"=>"include"}
+%>
 <%= form_for(@question_scan_procedure) do |f| %>
   <% if @question_scan_procedure.errors.any? %>
     <div id="error_explanation">
@@ -13,15 +16,16 @@
 
   <div class="field">
     <%= f.label :question_id %><br />
-    <%= f.text_field :question_id %>
+<%= collection_select :question_scan_procedure, :question_id, Question.all.sort_by(&:description), :id, :description,{:prompt => 'Select a Question'} %>
   </div>
   <div class="field">
     <%= f.label :scan_procedure_id %><br />
-    <%= f.text_field :scan_procedure_id %>
+<%= collection_select :question_scan_procedure, :scan_procedure_id, ScanProcedure.all.sort_by(&:codename), :id, :codename,{:prompt => 'Select a Scan Procedure'} %>
   </div>
   <div class="field">
     <%= f.label :include_exclude %><br />
-    <%= f.text_field :include_exclude %>
+ <%= f.select :include_exclude, options_for_select(v_exclude_include, @question_scan_procedure.include_exclude),
+	              {:prompt => 'Select whether to exclude or include this question for this scan procedure'}  %>
   </div>
   <div class="actions">
     <%= f.submit %>

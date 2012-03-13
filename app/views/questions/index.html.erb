@@ -2,6 +2,11 @@
 
 <table>
   <tr>
+    <th></th>
+    <th></th>
+    <th></th>
+	<th>Description</th>
+    <th>Value Link</th>
     <th>Heading 1</th>
     <th>Phrase a 1</th>
     <th>Value type 1</th>
@@ -10,6 +15,7 @@
     <th>Phrase b 1</th>
     <th>Phrase c 1</th>
     <th>Required y n 1</th>
+    <th>JS 1</th>
     <th>Heading 2</th>
     <th>Phrase a 2</th>
     <th>Value type 2</th>
@@ -18,6 +24,7 @@
     <th>Phrase b 2</th>
     <th>Phrase c 2</th>
     <th>Required y n 2</th>
+    <th>JS 2</th>
     <th>Heading 3</th>
     <th>Phrase a 3</th>
     <th>Value type 3</th>
@@ -26,17 +33,18 @@
     <th>Phrase b 3</th>
     <th>Phrase c 3</th>
     <th>Required y n 3</th>
-    <th>Display order</th>
+    <th>JS 3</th>
     <th>Status</th>
     <th>Parent question</th>
-    <th>Description</th>
-    <th></th>
-    <th></th>
-    <th></th>
   </tr>
 
 <% @questions.each do |question| %>
   <tr>
+	<td><%= link_to 'Show', question %></td>
+    <td><%= link_to 'Edit', edit_question_path(question) %></td>
+    <td><%= link_to 'Destroy', question, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= question.description %></td>
+    <td><%= question.value_link %></td>
     <td><%= question.heading_1 %></td>
     <td><%= question.phrase_a_1 %></td>
     <td><%= question.value_type_1 %></td>
@@ -45,6 +53,7 @@
     <td><%= question.phrase_b_1 %></td>
     <td><%= question.phrase_c_1 %></td>
     <td><%= question.required_y_n_1 %></td>
+    <td><%= question.js_1 %></td>
     <td><%= question.heading_2 %></td>
     <td><%= question.phrase_a_2 %></td>
     <td><%= question.value_type_2 %></td>
@@ -53,6 +62,7 @@
     <td><%= question.phrase_b_2 %></td>
     <td><%= question.phrase_c_2 %></td>
     <td><%= question.required_y_n_2 %></td>
+    <td><%= question.js_2 %></td>
     <td><%= question.heading_3 %></td>
     <td><%= question.phrase_a_3 %></td>
     <td><%= question.value_type_3 %></td>
@@ -61,13 +71,11 @@
     <td><%= question.phrase_b_3 %></td>
     <td><%= question.phrase_c_3 %></td>
     <td><%= question.required_y_n_3 %></td>
-    <td><%= question.display_order %></td>
+    <td><%= question.js_3 %></td>
     <td><%= question.status %></td>
     <td><%= question.parent_question_id %></td>
-    <td><%= question.description %></td>
-    <td><%= link_to 'Show', question %></td>
-    <td><%= link_to 'Edit', edit_question_path(question) %></td>
-    <td><%= link_to 'Destroy', question, :confirm => 'Are you sure?', :method => :delete %></td>
+
+
   </tr>
 <% end %>
 </table>

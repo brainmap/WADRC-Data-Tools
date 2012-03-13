@@ -501,6 +501,7 @@ ActiveRecord::Schema.define(:version => 20120308201018) do
   create_table "questionform_questions", :force => true do |t|
     t.integer  "questionform_id"
     t.integer  "question_id"
+     t.float  "display_order"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -547,7 +548,6 @@ ActiveRecord::Schema.define(:version => 20120308201018) do
     t.string   "phrase_b_3"
     t.string   "phrase_c_3"
     t.string   "required_y_n_3"
-    t.integer  "display_order"
     t.string   "status"
     t.integer  "parent_question_id"
     t.datetime "created_at"

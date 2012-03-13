@@ -4,6 +4,8 @@ v_value_type = {"dropdown"=>"dropdown", "dropdown_multiple"=>"dropdown_multiple"
 	
 v_status = {"Active"=>"active","InActive"=>"inactive"}
 v_required_yn = {"Required"=>"required","Not Required"=>"not_required"}
+
+v_value_link ={"appointment"=>"appointment", "visit"=>"visit", "parrticipant"=>"participant","enrollment"=>"enrollment"}
 %>
 
 <%= form_for(@question) do |f| %>
@@ -21,6 +23,11 @@ v_required_yn = {"Required"=>"required","Not Required"=>"not_required"}
   <div class="field">
     <%= f.label :description %><br />
     <%= f.text_field :description %>
+  </div>
+  <div class="field">
+    <%= f.label :value_link %><br />
+ <%= f.select :value_link, options_for_select(v_value_link, @question.value_link),
+	              {:prompt => 'Select a value link'}  %>
   </div>
   <div class="field">
     <%= f.label :heading_1 %><br />
@@ -57,6 +64,10 @@ v_required_yn = {"Required"=>"required","Not Required"=>"not_required"}
 	              {:prompt => 'Select required/not required'}  %>
   </div>
   <div class="field">
+    <%= f.label :js_1 %><br />
+    <%= f.text_field :js_1 %>
+  </div>
+  <div class="field">
     <%= f.label :heading_2 %><br />
     <%= f.text_field :heading_2 %>
   </div>
@@ -89,6 +100,10 @@ v_required_yn = {"Required"=>"required","Not Required"=>"not_required"}
     <%= f.label :required_y_n_2 %><br />
  <%= f.select :required_y_n_2, options_for_select(v_required_yn, @question.required_y_n_2),
 	              {:prompt => 'Select required/not required'}  %>
+  </div>
+  <div class="field">
+    <%= f.label :js_2 %><br />
+    <%= f.text_field :js_2 %>
   </div>
   <div class="field">
     <%= f.label :heading_3 %><br />
@@ -125,8 +140,8 @@ v_required_yn = {"Required"=>"required","Not Required"=>"not_required"}
 	              {:prompt => 'Select required/not required'}  %>
   </div>
   <div class="field">
-    <%= f.label :display_order %><br />
-    <%= f.text_field :display_order %>
+    <%= f.label :js_3 %><br />
+    <%= f.text_field :js_3 %>
   </div>
   <div class="field">
     <%= f.label :status %><br />
@@ -135,7 +150,7 @@ v_required_yn = {"Required"=>"required","Not Required"=>"not_required"}
   </div>
   <div class="field">
     <%= f.label :parent_question_id %><br />
-    <%= f.text_field :parent_question_id %>
+<%= collection_select :question, :parent_question_id, Question.all.sort_by(&:description), :id, :description,{:prompt => 'Select a Parent Question'} %>
   </div>
 
   <div class="actions">
