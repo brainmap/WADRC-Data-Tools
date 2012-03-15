@@ -31,6 +31,15 @@ class QuestionformsController < ApplicationController
       format.xml  { render :xml => @questionform }
     end
   end
+  
+  def displayform
+    
+     render :template => "questionforms/displayform"
+  end
+  
+  def editform
+     render :template => "questionforms/editform"
+  end
 
   # GET /questionforms/1/edit
   def edit

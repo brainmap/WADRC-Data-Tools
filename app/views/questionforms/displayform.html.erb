@@ -1,0 +1,142 @@
+
+<%
+ @questionform_questions = QuestionformQuestion.where(" questionform_id = ?",params[:id]).sort_by(&:display_order)
+%>
+<!--- HOW TO NAME THE FORM --->
+<!--- WHAT SHOULD BE THE ACTION --->
+<% form_for(:questionform_question , :html => { :id => "{params[:id]}" }) do |f| %>
+
+<table>
+	<!---   NEED ONE FOR QUESTION AND ONE TO DISPLAY DATA --->
+    <% @questionform_questions.each do |qfq| 
+	@question = Question.find(qfq.question_id)
+	# pass @question to draw_question
+	     %>
+	<tr><td>
+	<!--- NEED TO ALIGN TOP  --->
+	  <%if !@question.heading_1.blank? %>
+		<B><%=  @question.heading_1 %></B> <br>
+	   <% end %>
+	  <%if !@question.phrase_a_1.blank? %>
+		<%=  @question.phrase_a_1 %>  
+	  <% end %>	
+	  <%if !@question.phrase_b_1.blank? %>
+		<%=  @question.phrase_b_1 %>  
+	  <% end %>
+
+	  <%if !@question.value_type_1.blank?   # follow order in array in question form edit
+	      if @question.value_type_1 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
+          <!--- NOT SURE HOW TO TIE question to data  --->
+		<%= f.text_area(:question_id,:value => "aaaaaa", :size => '60x7') %>
+		<% elsif @question.value_type_1 == "dropdown"
+		    if @question.ref_table_a_1 == "LOOKUP_REFS"  ## use ref_table_b_1 %>
+<!----   NEED TO GET THE NAME FOR THE DROPODOWN ID -->
+				<%= collection_select :question,:description, LookupRef.where("label = ?",@question.ref_table_b_1).sort_by(&:display_order),
+			    	:ref_value, :description,{:prompt => 'Select a Parent Question'} %>
+			<%	else   %>
+				NEED select from <%= @question.ref_table_b_1 %>
+		     <%   end   %>
+		<% elsif @question.value_type_1 == "text_10"  %>
+		 <%= f.text_field :question_id, :size=>"10" %>	
+		<% elsif @question.value_type_1 == "text_20"  %>
+		 <%= f.text_field :question_id, :size=>"20" %>	
+		<% elsif @question.value_type_1 == "text_30"  %>
+		 <%= f.text_field :question_id, :size=>"30" %>	
+		<% elsif @question.value_type_1 == "text_50"  %>
+		 <%= f.text_field :question_id, :size=>"50" %>	
+		<% elsif @question.value_type_1 == "text_70"  %>
+		 <%= f.text_field :question_id, :size=>"70" %>	
+		<% elsif @question.value_type_1 == "text_90"  %>
+		 <%= f.text_field :question_id, :size=>"90" %>
+		<%  end %>
+	  <% end %>
+	  <%if !@question.phrase_c_1.blank? %>
+		<%=  @question.phrase_c_1 %>  
+	  <% end %>
+
+
+	  <%if !@question.heading_2.blank? %>
+		<B><%=  @question.heading_2 %></B> <br>
+	   <% end %>
+	  <%if !@question.phrase_a_2.blank? %>
+		<%=  @question.phrase_a_2 %>  
+	  <% end %>	
+	  <%if !@question.phrase_b_2.blank? %>
+		<%=  @question.phrase_b_2 %>  
+	  <% end %>
+	  <%if !@question.value_type_2.blank?   # follow order in array in question form edit
+	      if @question.value_type_2 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
+          <!--- NOT SURE HOW TO TIE question to data  --->
+		<%= f.text_area(:question_id,:value => "aaaaaa", :size => '60x7') %>
+		<% elsif @question.value_type_2 == "dropdown"
+		    if @question.ref_table_a_2 == "LOOKUP_REFS"  ## use ref_table_b_2 %>
+<!----   NEED TO GET THE NAME FOR THE DROPODOWN ID -->
+				<%= collection_select :question,:description, LookupRef.where("label = ?",@question.ref_table_b_2).sort_by(&:display_order),
+			    	:ref_value, :description,{:prompt => 'Select a Parent Question'} %>
+			<%	else   %>
+				NEED select from <%= @question.ref_table_b_2 %>
+		     <%   end   %>
+		<% elsif @question.value_type_2 == "text_10"  %>
+		 <%= f.text_field :question_id, :size=>"10" %>
+  		<% elsif @question.value_type_2 == "text_20"  %>
+		 <%= f.text_field :question_id, :size=>"20" %>	
+		<% elsif @question.value_type_2 == "text_30"  %>
+		 <%= f.text_field :question_id, :size=>"30" %>	
+		<% elsif @question.value_type_2 == "text_50"  %>
+		 <%= f.text_field :question_id, :size=>"50" %>	
+		<% elsif @question.value_type_2 == "text_70"  %>
+		 <%= f.text_field :question_id, :size=>"70" %>	
+		<% elsif @question.value_type_2 == "text_90"  %>
+		 <%= f.text_field :question_id, :size=>"90" %>
+		<%  end %>	
+	  <% end %>
+	  <%if !@question.phrase_c_2.blank? %>
+		<%=  @question.phrase_c_2 %>  
+	  <% end %>
+
+	  <%if !@question.heading_3.blank? %>
+		<B><%=  @question.heading_3 %></B> <br>
+	   <% end %>
+	  <%if !@question.phrase_a_3.blank? %>
+		<%=  @question.phrase_a_3 %>  
+	  <% end %>	
+	  <%if !@question.phrase_b_3.blank? %>
+		<%=  @question.phrase_b_3 %>  
+	  <% end %>
+	  <%if !@question.value_type_3.blank?   # follow order in array in question form edit
+	      if @question.value_type_3 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
+          <!--- NOT SURE HOW TO TIE question to data  --->
+		<%= f.text_area(:question_id,:value => "aaaaaa", :size => '60x7') %>
+		<% elsif @question.value_type_3 == "dropdown"
+		    if @question.ref_table_a_3 == "LOOKUP_REFS"  ## use ref_table_b_3 %>
+<!----   NEED TO GET THE NAME FOR THE DROPODOWN ID -->
+				<%= collection_select :question,:description, LookupRef.where("label = ?",@question.ref_table_b_3).sort_by(&:display_order),
+			    	:ref_value, :description,{:prompt => 'Select a Parent Question'} %>
+			<%	else   %>
+				NEED select from <%= @question.ref_table_b_3 %>
+		     <%   end   %>
+		<% end %>
+		<% elsif @question.value_type_3 == "text_30"  %>
+		 <%= f.text_field :question_id, :size=>"10" %>
+	 	<% elsif @question.value_type_3 == "text_20"  %>
+		 <%= f.text_field :question_id, :size=>"20" %>	
+		<% elsif @question.value_type_3 == "text_30"  %>
+		 <%= f.text_field :question_id, :size=>"30" %>	
+		<% elsif @question.value_type_3 == "text_50"  %>
+		 <%= f.text_field :question_id, :size=>"50" %>	
+		<% elsif @question.value_type_3 == "text_70"  %>
+		 <%= f.text_field :question_id, :size=>"70" %>	
+		<% elsif @question.value_type_3 == "text_90"  %>
+		 <%= f.text_field :question_id, :size=>"90" %>
+		<%  end %>	
+	  <%if !@question.phrase_c_3.blank? %>
+		<%=  @question.phrase_c_3 %>  
+	  <% end %>
+
+	
+	  
+	</tr></td>	
+	<% end %>
+</table>
+
+<% end %>
