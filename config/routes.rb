@@ -119,6 +119,8 @@ WADRCDataTools::Application.routes.draw do
   match '/questionform/editform/:id', :controller=>'questionforms',:action=>'editform', :as => :editform
   # moved up to get precidance over devise sign_upmatch '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user
   
+   match '/question/clone/:id', :controller=>'questions',:action=>'clone', :as => :clone
+  
     
   resources :studies
   resources :recruitment_groups

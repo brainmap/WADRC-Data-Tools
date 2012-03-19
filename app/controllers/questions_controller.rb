@@ -37,6 +37,24 @@ class QuestionsController < ApplicationController
     @question = Question.find(params[:id])
   end
 
+  def clone 
+    @question_original = Question.find(params[:id])
+    @question_original.description =   @question_original.description+"_CLONE"
+    @question =  @question_original.clone
+    
+ respond_to do |format|
+   if @question.save
+      params[:id] = @question.id
+     format.html { redirect_to(edit_question_path(@question), :notice => 'Question was successfully created.') }
+     format.xml  { render :xml => @question, :status => :created, :location => @question }
+    else
+        format.html { render :action => "new" }
+        format.xml  { render :xml => @question.errors, :status => :unprocessable_entity }
+      end
+    end
+   
+  end
+
   # POST /questions
   # POST /questions.xml
   def create

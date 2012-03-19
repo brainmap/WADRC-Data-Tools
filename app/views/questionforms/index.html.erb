@@ -2,6 +2,7 @@
 
 <table>
   <tr>
+	<th></th>
     <th>Description</th>
     <th>Long description</th>
     <th>Display order</th>
@@ -13,6 +14,7 @@
 
 <% @questionforms.each do |questionform| %>
   <tr>
+	<td><%= link_to 'Display Form/Questions', '/questionforms/displayform/'+questionform.id.to_s %> </td>
     <td><%= questionform.description %></td>
     <td><%= questionform.long_description %></td>
     <td><%= questionform.display_order %></td>

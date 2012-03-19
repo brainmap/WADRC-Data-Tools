@@ -31,10 +31,13 @@
 		<% elsif @question.value_type_1 == "dropdown"
 		    if @question.ref_table_a_1 == "LOOKUP_REFS"  ## use ref_table_b_1 %>
 <!----   NEED TO GET THE NAME FOR THE DROPODOWN ID -->
+<!--- HOW TO SET DEFAULT VALUE? --->
 				<%= collection_select :question,:description, LookupRef.where("label = ?",@question.ref_table_b_1).sort_by(&:display_order),
-			    	:ref_value, :description,{:prompt => 'Select a Parent Question'} %>
+			    	:ref_value, :description, {:include_blank => @question.prompt_1} %>
 			<%	else   %>
-				NEED select from <%= @question.ref_table_b_1 %>
+<!--- NEED TO ALWAYS USE MODEL NAMES --->
+			  	<%= collection_select :question,:description, ((@question.ref_table_a_1).constantize).all.sort_by(&:description),
+			    	:id, :description, {:include_blank => @question.prompt_1} %>
 		     <%   end   %>
 		<% elsif @question.value_type_1 == "text_10"  %>
 		 <%= f.text_field :question_id, :size=>"10" %>	
@@ -48,6 +51,15 @@
 		 <%= f.text_field :question_id, :size=>"70" %>	
 		<% elsif @question.value_type_1 == "text_90"  %>
 		 <%= f.text_field :question_id, :size=>"90" %>
+		<% elsif @question.value_type_1 == "checkbox"  %>
+		 checkbox
+		<% elsif @question.value_type_1 == "checkbox_multiple"  %>
+		 checkbox multiple
+		<% elsif @question.value_type_1 == "radio"  %>
+		 radio 
+		<% elsif @question.value_type_1 == "radio_multiple"  %>
+		 radio button multiple
+		
 		<%  end %>
 	  <% end %>
 	  <%if !@question.phrase_c_1.blank? %>
@@ -72,9 +84,10 @@
 		    if @question.ref_table_a_2 == "LOOKUP_REFS"  ## use ref_table_b_2 %>
 <!----   NEED TO GET THE NAME FOR THE DROPODOWN ID -->
 				<%= collection_select :question,:description, LookupRef.where("label = ?",@question.ref_table_b_2).sort_by(&:display_order),
-			    	:ref_value, :description,{:prompt => 'Select a Parent Question'} %>
+			    	:ref_value, :description,{:include_blank => @question.prompt_2} %>
 			<%	else   %>
-				NEED select from <%= @question.ref_table_b_2 %>
+		  	<%= collection_select :question,:description, ((@question.ref_table_a_2).constantize).all.sort_by(&:description),
+		    	:id, :description, {:include_blank => @question.prompt_2} %>
 		     <%   end   %>
 		<% elsif @question.value_type_2 == "text_10"  %>
 		 <%= f.text_field :question_id, :size=>"10" %>
@@ -111,9 +124,10 @@
 		    if @question.ref_table_a_3 == "LOOKUP_REFS"  ## use ref_table_b_3 %>
 <!----   NEED TO GET THE NAME FOR THE DROPODOWN ID -->
 				<%= collection_select :question,:description, LookupRef.where("label = ?",@question.ref_table_b_3).sort_by(&:display_order),
-			    	:ref_value, :description,{:prompt => 'Select a Parent Question'} %>
+			    	:ref_value, :description,{:include_blank => @question.prompt_3} %>
 			<%	else   %>
-				NEED select from <%= @question.ref_table_b_3 %>
+		  	<%= collection_select :question,:description, ((@question.ref_table_a_3).constantize).all.sort_by(&:description),
+		    	:id, :description, {:include_blank => @question.prompt_3} %>
 		     <%   end   %>
 		<% end %>
 		<% elsif @question.value_type_3 == "text_30"  %>

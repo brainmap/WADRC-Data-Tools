@@ -1,14 +1,20 @@
 <%
-v_value_type = {"dropdown"=>"dropdown", "dropdown_multiple"=>"dropdown_multiple", "radio"=>"radio", "radio_multiple"=>"radio_multiple",
-	 "checkbox"=>"checkbox", "checkbox_multiple"=>"checkbox_multiple", "text"=>"text","text_10"=>"text_10",	"text_20"=>"text_20","text_30"=>"text_30",
-	"text_50"=>"text_50","text_70"=>"text_70","text_90"=>"text_90", "textarea"=>"textarea", "textarea_3x60"=>"textarea_3x60"}
+#v_value_type = {"dropdown"=>"dropdown", "dropdown_multiple"=>"dropdown_multiple", "radio"=>"radio", "radio_multiple"=>"radio_multiple",
+#	 "checkbox"=>"checkbox", "checkbox_multiple"=>"checkbox_multiple", "text"=>"text","text_10"=>"text_10",	"text_20"=>"text_20","text_30"=>"text_30",
+#	"text_50"=>"text_50","text_70"=>"text_70","text_90"=>"text_90", "textarea"=>"textarea", "textarea_3x60"=>"textarea_3x60"}
+	
+v_value_type =	[["dropdown","dropdown"],["dropdown_multiple","dropdown_multiple"],["radio","radio"],["radio_multiple","radio_multiple"],
+		 ["checkbox","checkbox"],["checkbox_multiple","checkbox_multiple"],["text","text"],["text_10","text_10"],	["text_20","text_20"],["text_30","text_30"],
+		["text_50","text_50"],["text_70","text_70"],["text_90","text_90"],["textarea","textarea"],["textarea_3x60","textarea_3x60"]]
+	
 	
 v_status = {"Active"=>"active","InActive"=>"inactive"}
 v_required_yn = {"Required"=>"required","Not Required"=>"not_required"}
 
 v_value_link ={"appointment"=>"appointment", "visit"=>"visit", "parrticipant"=>"participant","enrollment"=>"enrollment"}
+v_global_update = {"Y"=>"Y","N"=>"N"}
 %>
-
+The question can have up to three parts.<br>
 <%= form_for(@question) do |f| %>
   <% if @question.errors.any? %>
     <div id="error_explanation">
@@ -23,132 +29,190 @@ v_value_link ={"appointment"=>"appointment", "visit"=>"visit", "parrticipant"=>"
   <% end %>
   <div class="field">
     <%= f.label :description %><br />
-    <%= f.text_field :description %>
+    <%= f.text_field :description, :size=>120 %>
   </div>
+<table width="80%" ><tr><td>
   <div class="field">
     <%= f.label :value_link %><br />
  <%= f.select :value_link, options_for_select(v_value_link, @question.value_link),
 	              {:prompt => 'Select a value link'}  %>
   </div>
+</td><td>
   <div class="field">
-    <%= f.label :heading_1 %><br />
-    <%= f.text_field :heading_1 %>
+    <%= f.label :global_update %><br />
+ <%= f.select :global_update, options_for_select(v_global_update, @question.global_update),
+	              {:prompt => 'Select if updates should be global'}  %>
   </div>
-  <div class="field">
-    <%= f.label :phrase_a_1 %><br />
-    <%= f.text_field :phrase_a_1 %>
-  </div>
-  <div class="field">
-    <%= f.label :value_type_1 %><br />
- <%= f.select :value_type_1, options_for_select(v_value_type, @question.value_type_1),
-	              {:prompt => 'Select a question type'}  %>
-  </div>
-  <div class="field">
-    <%= f.label :ref_table_a_1 %><br />
-    <%= f.text_field :ref_table_a_1 %>
-  </div>
-  <div class="field">
-    <%= f.label :ref_table_b_1 %><br />
-    <%= f.text_field :ref_table_b_1 %>
-  </div>
-  <div class="field">
-    <%= f.label :phrase_b_1 %><br />
-    <%= f.text_field :phrase_b_1 %>
-  </div>
-  <div class="field">
-    <%= f.label :phrase_c_1 %><br />
-    <%= f.text_field :phrase_c_1 %>
-  </div>
-  <div class="field">
-    <%= f.label :required_y_n_1 %><br />
- <%= f.select :required_y_n_1, options_for_select(v_required_yn, @question.required_y_n_1),
-	              {:prompt => 'Select required/not required'}  %>
-  </div>
-  <div class="field">
-    <%= f.label :js_1 %><br />
-    <%= f.text_field :js_1 %>
-  </div>
-  <div class="field">
-    <%= f.label :heading_2 %><br />
-    <%= f.text_field :heading_2 %>
-  </div>
-  <div class="field">
-    <%= f.label :phrase_a_2 %><br />
-    <%= f.text_field :phrase_a_2 %>
-  </div>
-  <div class="field">
-    <%= f.label :value_type_2 %><br />
- <%= f.select :value_type_2, options_for_select(v_value_type, @question.value_type_2),
-	              {:prompt => 'Select a question type for the second part of the question'}  %>
-  </div>
-  <div class="field">
-    <%= f.label :ref_table_a_2 %><br />
-    <%= f.text_field :ref_table_a_2 %>
-  </div>
-  <div class="field">
-    <%= f.label :ref_table_b_2 %><br />
-    <%= f.text_field :ref_table_b_2 %>
-  </div>
-  <div class="field">
-    <%= f.label :phrase_b_2 %><br />
-    <%= f.text_field :phrase_b_2 %>
-  </div>
-  <div class="field">
-    <%= f.label :phrase_c_2 %><br />
-    <%= f.text_field :phrase_c_2 %>
-  </div>
-  <div class="field">
-    <%= f.label :required_y_n_2 %><br />
- <%= f.select :required_y_n_2, options_for_select(v_required_yn, @question.required_y_n_2),
-	              {:prompt => 'Select required/not required'}  %>
-  </div>
-  <div class="field">
-    <%= f.label :js_2 %><br />
-    <%= f.text_field :js_2 %>
-  </div>
-  <div class="field">
-    <%= f.label :heading_3 %><br />
-    <%= f.text_field :heading_3 %>
-  </div>
-  <div class="field">
-    <%= f.label :phrase_a_3 %><br />
-    <%= f.text_field :phrase_a_3 %>
-  </div>
-  <div class="field">
-    <%= f.label :value_type_3 %><br />
- <%= f.select :value_type_3, options_for_select(v_value_type, @question.value_type_3),
-	              {:prompt => 'Select a question type for the third part of the question'}  %>
-  </div>
-  <div class="field">
-    <%= f.label :ref_table_a_3 %><br />
-    <%= f.text_field :ref_table_a_3 %>
-  </div>
-  <div class="field">
-    <%= f.label :ref_table_b_3 %><br />
-    <%= f.text_field :ref_table_b_3 %>
-  </div>
-  <div class="field">
-    <%= f.label :phrase_b_3 %><br />
-    <%= f.text_field :phrase_b_3 %>
-  </div>
-  <div class="field">
-    <%= f.label :phrase_c_3 %><br />
-    <%= f.text_field :phrase_c_3 %>
-  </div>
-  <div class="field">
-    <%= f.label :required_y_n_3 %><br />
- <%= f.select :required_y_n_3, options_for_select(v_required_yn, @question.required_y_n_3),
-	              {:prompt => 'Select required/not required'}  %>
-  </div>
-  <div class="field">
-    <%= f.label :js_3 %><br />
-    <%= f.text_field :js_3 %>
-  </div>
+</td><td>
   <div class="field">
     <%= f.label :status %><br />
  <%= f.select :status, options_for_select(v_status, @question.status),
 	              {:prompt => 'Select question status'}  %>
   </div>
+</td></tr></table>
+<hr width="90%" size="5" noshade>
+  <div class="field">
+    <%= f.label :heading_1 %><br />
+    <%= f.text_field :heading_1 , :size=>120 %>
+  </div>
+  <div class="field">
+    <%= f.label :phrase_a_1 %><br />
+    <%= f.text_field :phrase_a_1 , :size=>120 %>
+  </div>
+<table width="100%" ><tr><td>
+  <div class="field">
+    <%= f.label :value_type_1 %><br />
+ <%= f.select :value_type_1, options_for_select(v_value_type, @question.value_type_1),
+	              {:prompt => 'Select a question type'}  %>
+  </div>
+</td><td>
+  <div class="field">
+    <%= f.label :required_y_n_1 %><br />
+ <%= f.select :required_y_n_1, options_for_select(v_required_yn, @question.required_y_n_1),
+	              {:prompt => 'Select required/not required'}  %>
+  </div>	
+</td><td>	
+  <div class="field">
+    <%= f.label :ref_table_a_1 %><br />
+    <%= f.text_field :ref_table_a_1 %>
+  </div>
+</td><td>
+  <div class="field">
+    <%= f.label :ref_table_b_1 %><br />
+    <%= f.text_field :ref_table_b_1 %>
+  </div>
+</td></tr></table>
+<table width="100%" ><tr><td>
+  <div class="field">
+    <%= f.label :phrase_b_1 %><br />
+    <%= f.text_field :phrase_b_1, :size=>60  %>
+  </div>
+</td><td>
+  <div class="field">
+    <%= f.label :phrase_c_1 %><br />
+    <%= f.text_field :phrase_c_1, :size=>60  %>
+  </div>
+</td></tr></table>
+<table width="100%" ><tr><td>
+  <div class="field">
+    <%= f.label :js_1 %><br />
+    <%= f.text_field :js_1, :size=>60  %>
+  </div>
+</td><td>
+  <div class="field">
+    <%= f.label :prompt_1 %><br />
+    <%= f.text_field :prompt_1, :size=>60  %>
+  </div>
+</td></tr></table>
+<hr width="90%" size="5" noshade>
+  <div class="field">
+    <%= f.label :heading_2 %><br />
+    <%= f.text_field :heading_2 , :size=>120 %>
+  </div>
+  <div class="field">
+    <%= f.label :phrase_a_2 %><br />
+    <%= f.text_field :phrase_a_2 , :size=>120 %>
+  </div>
+<table width="100%" ><tr><td>
+  <div class="field">
+    <%= f.label :value_type_2 %><br />
+ <%= f.select :value_type_2, options_for_select(v_value_type, @question.value_type_2),
+	              {:prompt => 'Select a question type for the second part of the question'}  %>
+  </div>
+</td><td>
+	<div class="field">
+    <%= f.label :required_y_n_2 %><br />
+ <%= f.select :required_y_n_2, options_for_select(v_required_yn, @question.required_y_n_2),
+	              {:prompt => 'Select required/not required'}  %>
+  </div>
+</td><td>
+  <div class="field">
+    <%= f.label :ref_table_a_2 %><br />
+    <%= f.text_field :ref_table_a_2 %>
+  </div>
+</td><td>
+  <div class="field">
+    <%= f.label :ref_table_b_2 %><br />
+    <%= f.text_field :ref_table_b_2 %>
+  </div>
+</td></tr></table>
+<table width="100%" ><tr><td>
+  <div class="field">
+    <%= f.label :phrase_b_2 %><br />
+    <%= f.text_field :phrase_b_2, :size=>60 %>
+  </div>
+</td><td>
+  <div class="field">
+    <%= f.label :phrase_c_2 %><br />
+    <%= f.text_field :phrase_c_2, :size=>60 %>
+  </div>
+</td></tr></table>
+<table width="100%" ><tr><td>
+  <div class="field">
+    <%= f.label :js_2 %><br />
+    <%= f.text_field :js_2, :size=>60 %>
+  </div>
+</td><td>
+  <div class="field">
+    <%= f.label :prompt_2 %><br />
+    <%= f.text_field :prompt_2, :size=>60 %>
+  </div>
+</td></tr></table>
+<hr width="90%" size="5" noshade>
+  <div class="field">
+    <%= f.label :heading_3 %><br />
+    <%= f.text_field :heading_3 , :size=>120 %>
+  </div>
+  <div class="field">
+    <%= f.label :phrase_a_3 %><br />
+    <%= f.text_field :phrase_a_3, :size=>120  %>
+  </div>
+<table width="100%" ><tr><td>
+  <div class="field">
+    <%= f.label :value_type_3 %><br />
+ <%= f.select :value_type_3, options_for_select(v_value_type, @question.value_type_3),
+	              {:prompt => 'Select a question type for the third part of the question'}  %>
+  </div>
+</td><td>
+	  <div class="field">
+	    <%= f.label :required_y_n_3 %><br />
+	 <%= f.select :required_y_n_3, options_for_select(v_required_yn, @question.required_y_n_3),
+		              {:prompt => 'Select required/not required'}  %>
+	  </div>
+	</td><td>
+  <div class="field">
+    <%= f.label :ref_table_a_3 %><br />
+    <%= f.text_field :ref_table_a_3 %>
+  </div>
+</td><td>
+  <div class="field">
+    <%= f.label :ref_table_b_3 %><br />
+    <%= f.text_field :ref_table_b_3 %>
+  </div>
+</td></tr></table>
+<table width="100%" ><tr><td>
+  <div class="field">
+    <%= f.label :phrase_b_3 %><br />
+    <%= f.text_field :phrase_b_3, :size=>60 %>
+  </div>
+</td><td>
+  <div class="field">
+    <%= f.label :phrase_c_3 %><br />
+    <%= f.text_field :phrase_c_3 , :size=>60%>
+  </div>
+</td></tr></table>
+<table width="100%" ><tr><td>
+  <div class="field">
+    <%= f.label :js_3 %><br />
+    <%= f.text_field :js_3, :size=>60 %>
+  </div>
+</td><td>
+  <div class="field">
+    <%= f.label :prompt_3 %><br />
+    <%= f.text_field :prompt_3 , :size=>60%>
+  </div>
+</td></tr></table>
+<hr width="90%" size="5" noshade>
   <div class="field">
     <%= f.label :parent_question_id %><br />
 <%= collection_select :question, :parent_question_id, Question.all.sort_by(&:description), :id, :description,{:prompt => 'Select a Parent Question'} %>
