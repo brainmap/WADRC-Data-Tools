@@ -184,7 +184,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # PUT /visits/1
   # PUT /visits/1.xml
   def update
-     scan_procedure_array =current_user[:edit_low_scan_procedure_array]
+     scan_procedure_array =current_user[:edit_low_scan_procedure_array] 
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
     # hiding the protocols in checkbox which user not have access to, if any add in to attributes before update
@@ -296,8 +296,11 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # DELETE /visits/1
   # DELETE /visits/1.xml
   def destroy
-    
-    scan_procedure_array =current_user[:edit_low_scan_procedure_array]
+     @user = current_user
+  # not sure why :edit_low_scan_procedure_array is getting lost, could because permissions on user and ability
+  # can also get edit_low_scan_procedure_array from user, but its got spaces 
+   #  scan_procedure_array =@user[:edit_low_scan_procedure_array]
+    scan_procedure_array =(@user.edit_low_scan_procedure_array).split(' ').map(&:to_i) 
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @visit.destroy
 

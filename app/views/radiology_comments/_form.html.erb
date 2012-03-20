@@ -13,35 +13,42 @@
 
   <div class="field">
     <%= f.label :visit_id %><br />
-    <%= f.text_field :visit_id %>
+    <%= f.text_field :visit_id %>   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Enter the visit_id
   </div>
   <div class="field">
     <%= f.label :rmr %><br />
-    <%= f.text_field :rmr %>
+    <%= f.text_field :rmr %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Enter the RMR which is used on the Radiology site.
   </div>
   <div class="field">
     <%= f.label :scan_number %><br />
-    <%= f.text_field :scan_number %>
+    <%= f.text_field :scan_number %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Enter the scan number which is used on the Radiology site.
   </div>
   <div class="field">
     <%= f.label :rmr_rad %><br />
-    <%= f.text_field :rmr_rad %>
+    <%= f.text_field :rmr_rad %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; If there is a difference between the Panda and the Radiology site RMR, enter the Panda RMR.
+ <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; If they are the same, leave blank.
   </div>
   <div class="field">
     <%= f.label :scan_number_rad %><br />
-    <%= f.text_field :scan_number_rad %>
+    <%= f.text_field :scan_number_rad %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; If there is a difference between the Panda and the Radiology site scan number, enter the Panda scan number. 
+ <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If they are the same, leave blank.
   </div>
   <div class="field">
     <%= f.label :editable_flag %><br />
-    <%= f.text_field :editable_flag %>
+    <%= f.text_field :editable_flag %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Leave blank.
   </div>
   <div class="field">
     <%= f.label :rad_path %><br />
-    <%= f.text_field :rad_path %>
+    <%= f.text_field :rad_path %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; This locks in the visit to the Radiology scan.<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Enter   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <b>scanDetails.php?scanID=####</b>   
+<br>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    from the url of the report on the Radiology site.<br>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The Radiology comments will be harvested the next weekday morning.
   </div>
   <div class="field">
     <%= f.label :q1_flag %><br />
-    <%= f.text_field :q1_flag %>
+    <%= f.text_field :q1_flag %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Leave everything else blank.
   </div>
   <div class="field">
     <%= f.label :q2_flag %><br />
