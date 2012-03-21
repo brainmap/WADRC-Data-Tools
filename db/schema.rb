@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120308201018) do
+ActiveRecord::Schema.define(:version => 20120321194548) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -490,6 +490,28 @@ ActiveRecord::Schema.define(:version => 20120308201018) do
     t.datetime "updated_at"
   end
 
+  create_table "q_data", :force => true do |t|
+    t.integer  "q_data_form_id"
+    t.integer  "question_id"
+    t.integer  "value_link"
+    t.string   "value_1"
+    t.string   "value_2"
+    t.string   "value_3"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "q_data_forms", :force => true do |t|
+    t.integer  "questionform_id"
+    t.integer  "participant_id"
+    t.integer  "visit_id"
+    t.integer  "appointment_id"
+    t.integer  "protocol_id"
+    t.integer  "enrollment_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "question_scan_procedures", :force => true do |t|
     t.integer  "question_id"
     t.integer  "scan_procedure_id"
@@ -501,9 +523,9 @@ ActiveRecord::Schema.define(:version => 20120308201018) do
   create_table "questionform_questions", :force => true do |t|
     t.integer  "questionform_id"
     t.integer  "question_id"
-     t.float  "display_order"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.float    "display_order"
   end
 
   create_table "questionform_scan_procedures", :force => true do |t|
@@ -552,6 +574,18 @@ ActiveRecord::Schema.define(:version => 20120308201018) do
     t.integer  "parent_question_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "description",        :limit => 200
+    t.string   "js_1"
+    t.string   "js_2"
+    t.string   "js_3"
+    t.string   "value_link"
+    t.string   "prompt_1"
+    t.string   "prompt_2"
+    t.string   "prompt_3"
+    t.string   "global_update",      :limit => 50
+    t.string   "default_val_1"
+    t.string   "default_val_2"
+    t.string   "default_val_3"
   end
 
   create_table "radiology_comments", :force => true do |t|

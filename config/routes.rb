@@ -1,5 +1,9 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :q_data
+
+  resources :q_data_forms
+
   resources :question_scan_procedures
 
   resources :questionform_scan_procedures
@@ -117,6 +121,7 @@ WADRCDataTools::Application.routes.draw do
   match '/users/edit_user', :controller => 'users', :action => 'edit_user', :as => :edit_user
   match '/questionform/displayform/:id', :controller=>'questionforms',:action=>'displayform', :as => :displayform
   match '/questionform/editform/:id', :controller=>'questionforms',:action=>'editform', :as => :editform
+    match '/questionform/question_enter', :controller=>'questionforms',:action=>'question_enter', :as => :question_enter
   # moved up to get precidance over devise sign_upmatch '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user
   
    match '/question/clone/:id', :controller=>'questions',:action=>'clone', :as => :clone

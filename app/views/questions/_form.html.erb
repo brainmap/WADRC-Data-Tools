@@ -1,10 +1,10 @@
 <%
-#v_value_type = {"dropdown"=>"dropdown", "dropdown_multiple"=>"dropdown_multiple", "radio"=>"radio", "radio_multiple"=>"radio_multiple",
-#	 "checkbox"=>"checkbox", "checkbox_multiple"=>"checkbox_multiple", "text"=>"text","text_10"=>"text_10",	"text_20"=>"text_20","text_30"=>"text_30",
+#v_value_type = {"dropdown"=>"dropdown", "dropdown_multiple"=>"dropdown_multiple", "radio"=>"radio", 
+#	 "checkbox"=>"checkbox", "text"=>"text","text_10"=>"text_10",	"text_20"=>"text_20","text_30"=>"text_30",
 #	"text_50"=>"text_50","text_70"=>"text_70","text_90"=>"text_90", "textarea"=>"textarea", "textarea_3x60"=>"textarea_3x60"}
 	
-v_value_type =	[["dropdown","dropdown"],["dropdown_multiple","dropdown_multiple"],["radio","radio"],["radio_multiple","radio_multiple"],
-		 ["checkbox","checkbox"],["checkbox_multiple","checkbox_multiple"],["text","text"],["text_10","text_10"],	["text_20","text_20"],["text_30","text_30"],
+v_value_type =	[["dropdown","dropdown"],["dropdown_multiple","dropdown_multiple"],["radio_in_line","radio_in_line"],["radio_1_col","radio_1_col"],
+		 ["checkbox_in_line","checkbox_in_line"],["checkbox_1_col","checkbox_1_col"],["text","text"],["text_10","text_10"],	["text_20","text_20"],["text_30","text_30"],
 		["text_50","text_50"],["text_70","text_70"],["text_90","text_90"],["textarea","textarea"],["textarea_3x60","textarea_3x60"]]
 	
 	
@@ -81,6 +81,11 @@ The question can have up to three parts.<br>
     <%= f.label :ref_table_b_1 %><br />
     <%= f.text_field :ref_table_b_1 %>
   </div>
+</td><td>
+  <div class="field">
+    <%= f.label :default_val_1 %><br />
+    <%= f.text_field :default_val_1 %>
+  </div>
 </td></tr></table>
 <table width="100%" ><tr><td>
   <div class="field">
@@ -135,6 +140,11 @@ The question can have up to three parts.<br>
     <%= f.label :ref_table_b_2 %><br />
     <%= f.text_field :ref_table_b_2 %>
   </div>
+</td><td>
+  <div class="field">
+    <%= f.label :default_val_2 %><br />
+    <%= f.text_field :default_val_2 %>
+  </div>
 </td></tr></table>
 <table width="100%" ><tr><td>
   <div class="field">
@@ -171,7 +181,7 @@ The question can have up to three parts.<br>
   <div class="field">
     <%= f.label :value_type_3 %><br />
  <%= f.select :value_type_3, options_for_select(v_value_type, @question.value_type_3),
-	              {:prompt => 'Select a question type for the third part of the question'}  %>
+	              {:prompt => 'Select a question type'}  %>
   </div>
 </td><td>
 	  <div class="field">
@@ -188,6 +198,11 @@ The question can have up to three parts.<br>
   <div class="field">
     <%= f.label :ref_table_b_3 %><br />
     <%= f.text_field :ref_table_b_3 %>
+  </div>
+</td><td>
+  <div class="field">
+    <%= f.label :default_val_3 %><br />
+    <%= f.text_field :default_val_3 %>
   </div>
 </td></tr></table>
 <table width="100%" ><tr><td>

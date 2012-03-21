@@ -89,4 +89,29 @@ class QuestionformsController < ApplicationController
       format.xml  { head :ok }
     end
   end
+  
+  def question_enter
+    # NEED TO GET THE PARAMETERS, 
+    #questionform_id
+    #q_data_form_id 
+    # questionform[1textarea_1]  = params["questionform"]["1textarea_1"]
+    # 1dropdown_3[ref_value] = params["1dropdown_3"]["ref_value"]  --- question_id = 3
+    # questionform[2text_3] = params["questionform"]["2text_3"]   ---part 2 question_id = 3
+    # questionform[1dropdown_3]
+    #1checkbox_6 ?????  -- just getting one checkbox with params["1checkbox_6"]
+    # 1radio_5
+puts "AAAAAAAAAAAAAA==="+params["1checkbox_6"][0] .to_s+"AAAAAAAAAAAAAA==="+params["1checkbox_6"][3] .to_s
+    
+    # GET NAME OF PARAMETER --> question_id, [part 1, 2, 3]
+    # insert or update
+    # global update
+    # redirect to original form or saved page
+     @questionform = Questionform.find(params[:questionform_id])
+
+    respond_to do |format|
+      format.html { redirect_to(@questionform, :notice => 'Questionform was successfully updated.') }
+      format.xml  { render :xml => @questionforms }
+    end    
+  end
+  
 end
