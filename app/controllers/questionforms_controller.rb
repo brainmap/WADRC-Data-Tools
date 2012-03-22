@@ -94,19 +94,30 @@ class QuestionformsController < ApplicationController
     # NEED TO GET THE PARAMETERS, 
     #questionform_id
     #q_data_form_id 
-    # questionform[1textarea_1]  = params["questionform"]["1textarea_1"]
-    # 1dropdown_3[ref_value] = params["1dropdown_3"]["ref_value"]  --- question_id = 3
-    # questionform[2text_3] = params["questionform"]["2text_3"]   ---part 2 question_id = 3
-    # questionform[1dropdown_3]
-    #1checkbox_6 ?????  -- just getting one checkbox with params["1checkbox_6"]
-    # 1radio_5
-puts "AAAAAAAAAAAAAA==="+params["1checkbox_6"][0] .to_s+"AAAAAAAAAAAAAA==="+params["1checkbox_6"][3] .to_s
-    
-    # GET NAME OF PARAMETER --> question_id, [part 1, 2, 3]
-    # insert or update
-    # global update
+    #get participant_id, visit_id, appointment_id from form level and insert into q_data
+
+    # insert or update   if the q_data_forms.id is null
+    # insert or update if q_data.id is null
+    # global update or base_table.base_column update with value_link
     # redirect to original form or saved page
-     @questionform = Questionform.find(params[:questionform_id])
+    
+    # GET THE QUESTUIONS
+    question_list = params["question_id"]
+    question_list.each do |q_id| 
+      if !params["value_1"][q_id].blank? 
+        #params["value_1"][q_id].to_a.join(',')
+      end
+      if !params["value_2"][q_id].blank? 
+        #params["value_2"][q_id].to_a.join(',')
+      end
+      if !params["value_3"][q_id].blank? 
+        #params["value_3"][q_id].to_a.join(',')
+      end
+
+    end
+    
+    
+     @questionform = Questionform.find(params["questionform_id"])
 
     respond_to do |format|
       format.html { redirect_to(@questionform, :notice => 'Questionform was successfully updated.') }

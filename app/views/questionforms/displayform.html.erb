@@ -1,21 +1,20 @@
-
+<!-- get values from q_data, q_data_form for this value_link-form-questions, populate form elements -->
 <%
  @questionform_questions = QuestionformQuestion.where(" questionform_id = ?",params[:id]).sort_by(&:display_order)
 %>
-<!--- HOW TO NAME THE FORM --->
-<!--- WHAT SHOULD BE THE ACTION --->
-<% form_for( "questionform",:url => { :controller=>"questionform",:action => "question_enter" } ,  :html => { :id => params[:id] }) do |f| %>
-<!---- THIS WILL CHANGE TO questionform_id   --->
+<% form_tag( "/questionform/question_enter",:url => { :controller=>"questionform",:action => "question_enter" } ,  :html => { :id => params[:id] }) do |f| %>
+<!-- THIS WILL CHANGE TO questionform_id   -->
 <%= hidden_field_tag(:questionform_id, params[:id]) %>
 <%= hidden_field_tag(:q_data_form_id, params[:q_data_form_id]) %>
+<%     # get the distinct value_link type from the questions in this form -- make dropdowns %>
+<%    # scan_procedure id --- access control, limit participants, visits, etc%>
 <table>
-	<!---   NEED ONE FOR QUESTION AND ONE TO DISPLAY DATA --->
     <% @questionform_questions.each do |qfq| 
 	@question = Question.find(qfq.question_id)
-	# pass @question to draw_question
+			# pass @question to draw_question
 	     %>
 	<tr><td>
-	<!--- NEED TO ALIGN TOP  --->
+	<%= hidden_field_tag("question_id[]", @question.id) %>
 	  <%if !@question.heading_1.blank? %>
 		<B><%=  @question.heading_1 %></B> <br>
 	   <% end %>
@@ -25,34 +24,30 @@
 	  <%if !@question.phrase_b_1.blank? %>
 		<%=  @question.phrase_b_1 %>  
 	  <% end %>
-
 	  <%if !@question.value_type_1.blank?   # follow order in array in question form edit
 	      if @question.value_type_1 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
           <!--- NOT SURE HOW TO TIE question to data  --->
-		<%= f.text_area("1textarea_"+@question.id.to_s,:value => "aaaaaa", :size => '60x7') %>
+		<%= text_area_tag("value_1["+@question.id.to_s+"][]", "",:size => '60x7') %>
 		<% elsif @question.value_type_1 == "dropdown"
 		    if @question.ref_table_a_1 == "LOOKUP_REFS"  ## use ref_table_b_1 %>
-<!----   NEED TO GET THE NAME FOR THE DROPODOWN ID -->
-<!--- HOW TO SET DEFAULT VALUE? --->
-				<%= collection_select :questionform,"1dropdown_"+@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_1).sort_by(&:display_order),
+				<%= collection_select "value_1",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_1).sort_by(&:display_order),
 			    	:ref_value, :description, {:include_blank => @question.prompt_1} %>
 			<%	else   %>
-<!--- NEED TO ALWAYS USE MODEL NAMES --->
-			  	<%= collection_select :questionform,"1dropdown_"+@question.id.to_s, ((@question.ref_table_a_1).constantize).all.sort_by(&:description),
-			    	:id, :description, {:include_blank => @question.prompt_1} %>
+			  	<%= collection_select "value_1",@question.id.to_s, ((@question.ref_table_a_1).constantize).all.sort_by(&:description),
+			    	:id, :description, {:include_blank => @question.prompt_1} %>			
 		     <%   end   %>
 		<% elsif @question.value_type_1 == "text_10"  %>
-		 <%= f.text_field "1text_"+@question.id.to_s, :size=>"10" %>	
+		 <%= text_field_tag "value_1["+@question.id.to_s+"][]","" , :size=>10 %>	
 		<% elsif @question.value_type_1 == "text_20"  %>
-		 <%= f.text_field "1text_"+@question.id.to_s, :size=>"20" %>	
+		 <%= text_field_tag "value_1["+@question.id.to_s+"][]","" , :size=>20 %>	
 		<% elsif @question.value_type_1 == "text_30"  %>
-		 <%= f.text_field "1text_"+@question.id.to_s, :size=>"30" %>	
+		 <%= text_field_tag "value_1["+@question.id.to_s+"][]","" , :size=>30 %>	
 		<% elsif @question.value_type_1 == "text_50"  %>
-		 <%= f.text_field "1text_"+@question.id.to_s, :size=>"50" %>	
+		 <%= text_field_tag "value_1["+@question.id.to_s+"][]", options=>{:size=>50} %>	
 		<% elsif @question.value_type_1 == "text_70"  %>
-		 <%= f.text_field "1text_"+@question.id.to_s, :size=>"70" %>	
+		 <%= text_field_tag "value_1["+@question.id.to_s+"][]","" , :size=>70 %>	
 		<% elsif @question.value_type_1 == "text_90"  %>
-		 <%= f.text_field "1text_"+@question.id.to_s, :size=>"90" %>								
+		 <%= text_field_tag "value_1["+@question.id.to_s+"][]","" , :size=>90 %>								
 		<% elsif @question.value_type_1 == "checkbox_1_col"  %>
 		   <% if @question.ref_table_a_1 == "LOOKUP_REFS" 
 			     sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_1+"' order by display_order"
@@ -60,14 +55,14 @@
               results = connection.execute(sql)
 			    %>
 	          <% results.each do |theme| %>
-                <br><%= check_box_tag '1checkbox_'+@question.id.to_s, theme[0], @theme == theme[0] %>
+                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0], @theme == theme[0] %>
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-                <br><%= check_box_tag '1checkbox_'+@question.id.to_s, theme.id, @theme == theme.id %>
+                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id, @theme == theme.id %>
 	              <%= (theme.description) %>
 	          <% end %>
 	        <% end %>	
@@ -78,18 +73,17 @@
              results = connection.execute(sql)
 			    %>
 	          <% results.each do |theme| %>
-               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag '1checkbox_'+@question.id.to_s, theme[0], @theme == theme[0] %>
+               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0], @theme == theme[0] %>
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag '1checkbox_'+@question.id.to_s, theme.id, @theme == theme.id %>
+               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id, @theme == theme.id %>
 	              <%= (theme.description) %>
 	          <% end %>
 	        <% end %>
-	
 		<% elsif @question.value_type_1 == "radio_1_col"  %>
 		   <% if @question.ref_table_a_1 == "LOOKUP_REFS" 
 			     sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_1+"' order by display_order"
@@ -97,14 +91,14 @@
                  results = connection.execute(sql)
 			    %>
 	          <% results.each do |theme| %>
-                   <br><%= radio_button_tag '1radio_'+@question.id.to_s, theme[0], @theme == theme[0] %>
+                   <br><%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme[0], @theme == theme[0] %>
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-                   <br><%= radio_button_tag '1radio_'+@question.id.to_s, theme.id, @theme == theme.id %>
+                   <br><%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme.id, @theme == theme.id %>
 	              <%= (theme.description) %>
 	          <% end %>
 	        <% end %>		
@@ -115,25 +109,23 @@
                  results = connection.execute(sql)
 			    %>
 	          <% results.each do |theme| %>
-                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag '1radio_'+@question.id.to_s, theme[0], @theme == theme[0] %>
+                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme[0], @theme == theme[0] %>
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag '1radio_'+@question.id.to_s, theme.id, @theme == theme.id %>
+                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme.id, @theme == theme.id %>
 	              <%= (theme.description) %>
 	          <% end %>
 	        <% end %>		
-		<%  end %>
-		
+		<%  end %>		
 	  <% end %>
 	  <%if !@question.phrase_c_1.blank? %>
 		<%=  @question.phrase_c_1 %>  
 	  <% end %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
 	  <%if !@question.heading_2.blank? %>
 		<B><%=  @question.heading_2 %></B> <br>
 	   <% end %>
@@ -142,37 +134,30 @@
 	  <% end %>	
 	  <%if !@question.phrase_b_2.blank? %>
 		<%=  @question.phrase_b_2 %>  
-	  <% end %>
-	
+	  <% end %>	
 		  <%if !@question.value_type_2.blank?   # follow order in array in question form edit
 		      if @question.value_type_2 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
-	          <!--- NOT SURE HOW TO TIE question to data  --->
-			<%= f.text_area("2textarea_"+@question.id.to_s,:value => "aaaaaa", :size => '60x7') %>
+			<%= f.text_area_tag("value_2["+@question.id.to_s+"][]", "",:size => '60x7') %>
 			<% elsif @question.value_type_2 == "dropdown"
 			    if @question.ref_table_a_2 == "LOOKUP_REFS"  ## use ref_table_b_2 %>
-	<!----   NEED TO GET THE NAME FOR THE DROPODOWN ID -->
-	<!--- HOW TO SET DEFAULT VALUE? --->
-					<%= collection_select :questionform,"2dropdown_"+@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_2).sort_by(&:display_order),
+					<%= collection_select "value_2",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_2).sort_by(&:display_order),
 				    	:ref_value, :description, {:include_blank => @question.prompt_2} %>
 				<%	else   %>
-	<!--- NEED TO ALWAYS USE MODEL NAMES --->
-				  	<%= collection_select :questionform,"2dropdown_"+@question.id.to_s, ((@question.ref_table_a_2).constantize).all.sort_by(&:description),
+				  	<%= collection_select "value_2",@question.id.to_s, ((@question.ref_table_a_2).constantize).all.sort_by(&:description),
 				    	:id, :description, {:include_blank => @question.prompt_2} %>
 			     <%   end   %>
 			<% elsif @question.value_type_2 == "text_10"  %>
-			 <%= f.text_field "2text_"+@question.id.to_s, :size=>"10" %>	
+			 <%= text_field_tag "value_2["+@question.id.to_s+"][]","" , :size=>10 %>	
 			<% elsif @question.value_type_2 == "text_20"  %>
-			 <%= f.text_field "2text_"+@question.id.to_s, :size=>"20" %>	
+			 <%= text_field_tag "value_2["+@question.id.to_s+"][]","" , :size=>20 %>	
 			<% elsif @question.value_type_2 == "text_30"  %>
-			 <%= f.text_field "2text_"+@question.id.to_s, :size=>"30" %>	
+			 <%= text_field_tag "value_2["+@question.id.to_s+"][]","" , :size=>30 %>	
 			<% elsif @question.value_type_2 == "text_50"  %>
-			 <%= f.text_field "2text_"+@question.id.to_s, :size=>"50" %>	
+			 <%= text_field_tag "value_2["+@question.id.to_s+"][]", options=>{:size=>50} %>	
 			<% elsif @question.value_type_2 == "text_70"  %>
-			 <%= f.text_field "2text_"+@question.id.to_s, :size=>"70" %>	
+			 <%= text_field_tag "value_2["+@question.id.to_s+"][]","" , :size=>70 %>	
 			<% elsif @question.value_type_2 == "text_90"  %>
-			 <%= f.text_field "2text_"+@question.id.to_s, :size=>"90" %>
-
-
+			 <%= text_field_tag "value_2["+@question.id.to_s+"][]","" , :size=>90 %>
 			<% elsif @question.value_type_2 == "checkbox_1_col"  %>
 		   		<% if @question.ref_table_a_2 == "LOOKUP_REFS" 
 			     	sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_2+"' order by display_order"
@@ -180,14 +165,14 @@
               		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag '2checkbox_'+@question.id.to_s, theme[0], @theme == theme[0] %>
+                		<br><%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme[0], @theme == theme[0] %>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_2).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag '2checkbox_'+@question.id.to_s, theme.id, @theme == theme.id %>
+                		<br><%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme.id, @theme == theme.id %>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>
@@ -198,14 +183,14 @@
            		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag '2checkbox_'+@question.id.to_s, theme[0], @theme == theme[0] %>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme[0], @theme == theme[0] %>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_2).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag '2checkbox_'+@question.id.to_s, theme.id, @theme == theme.id %>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme.id, @theme == theme.id %>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>
@@ -216,18 +201,17 @@
 	                 results = connection.execute(sql)
 				    %>
 		          <% results.each do |theme| %>
-	                   <br><%= radio_button_tag '2radio_'+@question.id.to_s, theme[0], @theme == theme[0] %>
+	                   <br><%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme[0], @theme == theme[0] %>
 		              <%= theme[1].humanize %>
 		          <% end %>
 			   <% else 
 			         results = ((@question.ref_table_a_2).constantize).all.sort_by(&:description)
 			       %>
 		          <% results.each do |theme| %>
-	                   <br><%= radio_button_tag '2radio_'+@question.id.to_s, theme.id, @theme == theme.id %>
+	                   <br><%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme.id, @theme == theme.id %>
 		              <%= (theme.description) %>
 		          <% end %>
-		        <% end %>				
-		
+		        <% end %>						
 			<% elsif @question.value_type_2 == "radio_in_line"  %>
 			   <% if @question.ref_table_a_2 == "LOOKUP_REFS" 
 				     sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_2+"' order by display_order"
@@ -235,14 +219,14 @@
 	                 results = connection.execute(sql)
 				    %>
 		          <% results.each do |theme| %>
-	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag '2radio_'+@question.id.to_s, theme[0], @theme == theme[0] %>
+	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme[0], @theme == theme[0] %>
 		              <%= theme[1].humanize %>
 		          <% end %>
 			   <% else 
 			         results = ((@question.ref_table_a_2).constantize).all.sort_by(&:description)
 			       %>
 		          <% results.each do |theme| %>
-	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag '2radio_'+@question.id.to_s, theme.id, @theme == theme.id %>
+	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme.id, @theme == theme.id %>
 		              <%= (theme.description) %>
 		          <% end %>
 		        <% end %>				
@@ -265,30 +249,27 @@
 		  <%if !@question.value_type_3.blank?   # follow order in array in question form edit
 		      if @question.value_type_3 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
 	          <!--- NOT SURE HOW TO TIE question to data  --->
-			<%= f.text_area("3textarea_"+@question.id.to_s,:value => "aaaaaa", :size => '60x7') %>
+			<%= f.text_area_tag("value_3["+@question.id.to_s+"][]","",:size => '60x7') %>
 			<% elsif @question.value_type_3 == "dropdown"
 			    if @question.ref_table_a_3 == "LOOKUP_REFS"  ## use ref_table_b_3 %>
-	<!----   NEED TO GET THE NAME FOR THE DROPODOWN ID -->
-	<!--- HOW TO SET DEFAULT VALUE? --->
-					<%= collection_select :questionform,"3dropdown_"+@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_3).sort_by(&:display_order),
+					<%= collection_select "value_3",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_3).sort_by(&:display_order),
 				    	:ref_value, :description, {:include_blank => @question.prompt_3} %>
 				<%	else   %>
-	<!--- NEED TO ALWAYS USE MODEL NAMES --->
-				  	<%= collection_select :questionform,"3dropdown_"+@question.id.to_s, ((@question.ref_table_a_3).constantize).all.sort_by(&:description),
+				  	<%= collection_select "value_3",@question.id.to_s, ((@question.ref_table_a_3).constantize).all.sort_by(&:description),
 				    	:id, :description, {:include_blank => @question.prompt_3} %>
 			     <%   end   %>
 			<% elsif @question.value_type_3 == "text_10"  %>
-			 <%= f.text_field "3text_"+@question.id.to_s, :size=>"10" %>	
+			 <%= text_field_tag "value_3["+@question.id.to_s+"][]","" , :size=>10 %>	
 			<% elsif @question.value_type_3 == "text_20"  %>
-			 <%= f.text_field "3text_"+@question.id.to_s, :size=>"20" %>	
+			 <%= text_field_tag "value_3["+@question.id.to_s+"][]","" , :size=>20 %>	
 			<% elsif @question.value_type_3 == "text_30"  %>
-			 <%= f.text_field "3text_"+@question.id.to_s, :size=>"30" %>	
+			 <%= text_field_tag "value_3["+@question.id.to_s+"][]","" , :size=>30 %>	
 			<% elsif @question.value_type_3 == "text_50"  %>
-			 <%= f.text_field "3text_"+@question.id.to_s, :size=>"50" %>	
+			 <%= text_field_tag "value_3["+@question.id.to_s+"][]", options=>{:size=>50} %>	
 			<% elsif @question.value_type_3 == "text_70"  %>
-			 <%= f.text_field "3text_"+@question.id.to_s, :size=>"70" %>	
+			 <%= text_field_tag "value_3["+@question.id.to_s+"][]","" , :size=>70 %>	
 			<% elsif @question.value_type_3 == "text_90"  %>
-			 <%= f.text_field "3text_"+@question.id.to_s, :size=>"90" %>
+			 <%= text_field_tag "value_3["+@question.id.to_s+"][]","" , :size=>90 %>
 			<% elsif @question.value_type_3 == "checkbox_1_col"  %>
 		    	<% if @question.ref_table_a_3 == "LOOKUP_REFS" 
 			     	sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_3+"' order by display_order"
@@ -296,14 +277,14 @@
               		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag '3checkbox_'+@question.id.to_s, theme[0], @theme == theme[0] %>
+                		<br><%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme[0], @theme == theme[0] %>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_3).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag '3checkbox_'+@question.id.to_s, theme.id, @theme == theme.id %>
+                		<br><%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme.id, @theme == theme.id %>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>
@@ -314,14 +295,14 @@
            		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag '3checkbox_'+@question.id.to_s, theme[0], @theme == theme[0] %>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme[0], @theme == theme[0] %>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_3).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag '3checkbox_'+@question.id.to_s, theme.id, @theme == theme.id %>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme.id, @theme == theme.id %>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>          
@@ -332,18 +313,17 @@
 	                 results = connection.execute(sql)
 				    %>
 		          <% results.each do |theme| %>
-	                   <br><%= radio_button_tag '3radio_'+@question.id.to_s, theme[0], @theme == theme[0] %>
+	                   <br><%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme[0], @theme == theme[0] %>
 		              <%= theme[1].humanize %>
 		          <% end %>
 			   <% else 
 			         results = ((@question.ref_table_a_3).constantize).all.sort_by(&:description)
 			       %>
 		          <% results.each do |theme| %>
-	                   <br><%= radio_button_tag '3radio_'+@question.id.to_s, theme.id, @theme == theme.id %>
+	                   <br><%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme.id, @theme == theme.id %>
 		              <%= (theme.description) %>
 		          <% end %>
 		        <% end %>
-       
          	<% elsif @question.value_type_3 == "radio_in_line"  %>
 			   <% if @question.ref_table_a_3 == "LOOKUP_REFS" 
 				     sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_3+"' order by display_order"
@@ -351,26 +331,22 @@
 	                 results = connection.execute(sql)
 				    %>
 		          <% results.each do |theme| %>
-	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag '3radio_'+@question.id.to_s, theme[0], @theme == theme[0] %>
+	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme[0], @theme == theme[0] %>
 		              <%= theme[1].humanize %>
 		          <% end %>
 			   <% else 
 			         results = ((@question.ref_table_a_3).constantize).all.sort_by(&:description)
 			       %>
 		          <% results.each do |theme| %>
-	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag '3radio_'+@question.id.to_s, theme.id, @theme == theme.id %>
+	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme.id, @theme == theme.id %>
 		              <%= (theme.description) %>
 		          <% end %>
 		        <% end %>
 			<%  end %>
 		  <% end %>		
-		
 	  <%if !@question.phrase_c_3.blank? %>
 		<%=  @question.phrase_c_3 %>  
-	  <% end %>
-
-	
-	  
+	  <% end %>	  
 	</td></tr>	
 	<% end %>
 </table>
