@@ -97,6 +97,16 @@ The question can have up to three parts.<br>
 <%= f.select :global_update_1, options_for_select(v_global_update, @question.global_update_1),
 	              {:prompt => 'Select if updates should be global'}  %>
  </div>
+</td><td>
+	  <div class="field">
+	    <%= f.label :access_table_1 %><br />
+	    <%= f.text_field :access_table_1 %>
+	  </div>
+	</td><td>
+		<div class="field">
+		  <%= f.label :access_column_1 %><br />
+		  <%= f.text_field :access_column_1 %>
+		 </div>
 </td></tr></table>
 <table width="100%" ><tr><td>
   <div class="field">
@@ -173,6 +183,16 @@ The question can have up to three parts.<br>
 <%= f.select :global_update_2, options_for_select(v_global_update, @question.global_update_2),
 	              {:prompt => 'Select if updates should be global'}  %>
  </div>
+</td><td>
+	  <div class="field">
+	    <%= f.label :access_table_2 %><br />
+	    <%= f.text_field :access_table_2 %>
+	  </div>
+	</td><td>
+		<div class="field">
+		  <%= f.label :access_column_2 %><br />
+		  <%= f.text_field :access_column_2 %>
+		 </div>
 </td></tr></table>
 <table width="100%" ><tr><td>
   <div class="field">
@@ -249,7 +269,17 @@ The question can have up to three parts.<br>
 <%= f.select :global_update_3, options_for_select(v_global_update, @question.global_update_3),
 	              {:prompt => 'Select if updates should be global'}  %>
  </div>
-</td></tr></table>
+</td><td>
+	  <div class="field">
+	    <%= f.label :access_table_3 %><br />
+	    <%= f.text_field :access_table_3 %>
+	  </div>
+	</td><td>
+		<div class="field">
+		  <%= f.label :access_column_3 %><br />
+		  <%= f.text_field :access_column_3 %>
+		 </div>
+	</td></tr></table>
 <table width="100%" ><tr><td>
   <div class="field">
     <%= f.label :phrase_b_3 %><br />
