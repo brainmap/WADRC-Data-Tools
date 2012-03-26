@@ -61,7 +61,9 @@ class Visit < ActiveRecord::Base
     end
     return @participant
   end
-
+  def rmr_scan_date
+    "#{self.rmr} #{self.scan_number} #{self.date}"
+  end
 
   def week
     self.date.beginning_of_week

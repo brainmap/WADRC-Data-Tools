@@ -95,6 +95,13 @@ class QuestionformsController < ApplicationController
     #questionform_id
     #q_data_form_id 
     #get participant_id, visit_id, appointment_id from form level and insert into q_data
+    #params["questionform_id"]
+    #params["q_data_form_id"]
+    #params["value_link"]["participant_id"]
+    #params["value_link"]["visit_id"]
+    #params["value_link"]["enrollment_id"]
+    #params["value_link"]["appointment_id"]
+    #params["value_link"]["scan_procedures"]
 
     # insert or update   if the q_data_forms.id is null
     # insert or update if q_data.id is null
@@ -104,18 +111,19 @@ class QuestionformsController < ApplicationController
     # GET THE QUESTUIONS
     question_list = params["question_id"]
     question_list.each do |q_id| 
+
       if !params["value_1"][q_id].blank? 
-        #params["value_1"][q_id].to_a.join(',')
+        puts "AAAAAAAAAAAAAAAAAA= "+params["value_1"][q_id].to_a.join(',')
       end
       if !params["value_2"][q_id].blank? 
-        #params["value_2"][q_id].to_a.join(',')
+        puts "BBBBBBBBBBBBBBBBBBBB="+params["value_2"][q_id].to_a.join(',')
       end
       if !params["value_3"][q_id].blank? 
-        #params["value_3"][q_id].to_a.join(',')
+    #    puts "CCCCCCCCCCCCCCCCC="+params["value_3"][q_id].to_a.join(',')
       end
 
     end
-    
+
     
      @questionform = Questionform.find(params["questionform_id"])
 

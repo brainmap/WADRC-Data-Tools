@@ -6,7 +6,32 @@
 <!-- THIS WILL CHANGE TO questionform_id   -->
 <%= hidden_field_tag(:questionform_id, params[:id]) %>
 <%= hidden_field_tag(:q_data_form_id, params[:q_data_form_id]) %>
-<%     # get the distinct value_link type from the questions in this form -- make dropdowns %>
+<%= hidden_field_tag("value_1[-1]","") %>
+<%= hidden_field_tag("value_2[-1]","") %>
+<%= hidden_field_tag("value_3[-1]","") %>
+<%     # get the distinct value_link type from the questions in this form -- make dropdowns 
+    sql = "select distinct value_link from questions where value_link is not null and value_link != '' and
+                      questions.id in (select question_id from questionform_questions where questionform_id = "+params[:id]+")"
+    connection = ActiveRecord::Base.connection();
+    results = connection.execute(sql) %>
+<%    results.each do |vl|  
+     if vl.try(:to_s) == "participant"   %>
+	  	<%= collection_select "value_link","participant_id", Participant.all,
+	    	:id, :reggieid, {:include_blank => "Select a participant"} %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <% elsif vl.try(:to_s) == "visit"   %>
+			<%= collection_select "value_link","visit_id", Visit.all.sort_by(&:rmr_scan_date),
+				:id, :rmr_scan_date, {:include_blank => "Select a visit"} %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <% elsif vl.try("to_s") == "enrollment"   %>
+			<%= collection_select "value_link","enrollment_id", Enrollment.all.sort_by(&:enumber),
+				:id, :enumber, {:include_blank => "Select an enrollment"} %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;			
+	<% elsif  vl.try("to_s") == "scan_procedure"   %>
+			<%= collection_select "value_link","scan_procedure_id", ScanProcedure.all.sort_by(&:codename),
+				:id, :codename, {:include_blank => "Select a scan_procedure"} %>
+<%	  end %>
+  <% end %>
 <%    # scan_procedure id --- access control, limit participants, visits, etc%>
 <table>
     <% @questionform_questions.each do |qfq| 
