@@ -1,0 +1,33 @@
+<h1>Listing q_data</h1>
+
+<table>
+  <tr>
+    <th>Q data form</th>
+    <th>Question</th>
+    <th>Value link</th>
+    <th>Value 1</th>
+    <th>Value 2</th>
+    <th>Value 3</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @q_data.each do |q_datum| %>
+  <tr>
+    <td><%= q_datum.q_data_form_id %></td>
+    <td><%= q_datum.question_id %></td>
+    <td><%= q_datum.value_link %></td>
+    <td><%= q_datum.value_1 %></td>
+    <td><%= q_datum.value_2 %></td>
+    <td><%= q_datum.value_3 %></td>
+    <td><%= link_to 'Show', q_datum %></td>
+    <td><%= link_to 'Edit', edit_q_datum_path(q_datum) %></td>
+    <td><%= link_to 'Destroy', q_datum, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Q datum', new_q_datum_path %>

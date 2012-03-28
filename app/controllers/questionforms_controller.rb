@@ -91,37 +91,71 @@ class QuestionformsController < ApplicationController
   end
   
   def question_enter
-    # NEED TO GET THE PARAMETERS, 
-    #questionform_id
-    #q_data_form_id 
-    #get participant_id, visit_id, appointment_id from form level and insert into q_data
-    #params["questionform_id"]
-    #params["q_data_form_id"]
-    #params["value_link"]["participant_id"]
-    #params["value_link"]["visit_id"]
-    #params["value_link"]["enrollment_id"]
-    #params["value_link"]["appointment_id"]
-    #params["value_link"]["scan_procedures"]
-
+   # params["q_data_form_id"] = "9"
+    if params["q_data_form_id"].length > 0
+      @q_data_form = QDataForm.find(params["q_data_form_id"])
+    else
+      @q_data_form = QDataForm.new()
+    end
+    @q_data_form.participant_id = params["value_link"]["participant_id"]
+    @q_data_form.visit_id = params["value_link"]["visit_id"]
+    @q_data_form.enrollment_id = params["value_link"]["enrollment_id"]
+    @q_data_form.appointment_id = params["value_link"]["appointment_id"]
+    @q_data_form.scan_procedure_id = params["value_link"]["scan_procedure_id"]
+    @q_data_form.questionform_id = params["questionform_id"]
+    @q_data_form.user = current_user
+    if params["q_data_form_id"].length > 0
+      @q_data_form.update_attributes(@q_data_form)
+    else
+      @q_data_form.save
+    end
+   
     # insert or update   if the q_data_forms.id is null
     # insert or update if q_data.id is null
     # global update or base_table.base_column update with value_link
     # redirect to original form or saved page
     
-    # GET THE QUESTUIONS
+    # loop thru questions
     question_list = params["question_id"]
     question_list.each do |q_id| 
+      @question = Question.find(q_id)
+      if !@question.value_type_1.blank? || !@question.value_type_2.blank? ||  !@question.value_type_3.blank? # exclude phrase only questions
+        v_value_link = "-1"
+        if params["q_data_id"][q_id].length  > 0
+          @q_data = QDatum.find(params["q_data_id"][q_id])
+        else
+          @q_data = QDatum.new()
+        end        
+        
+        if @question.value_link == "participant"
+            v_value_link =  params["value_link"]["participant_id"]
+        elsif   @question.value_link == "visit"
+            v_value_link =  params["value_link"]["visit_id"]
+        elsif  @question.value_link == "enrollment"
+            v_value_link =  params["value_link"]["enrollment_id"]
+        elsif   @question.value_link == "appointment"
+            v_value_link =  params["value_link"]["appointment_id"]
+        end
+        @q_data.value_link = v_value_link
+        @q_data.q_data_form_id = @q_data_form.id
+        @q_data.question_id = q_id
+                 
+        if !params["value_1"][q_id].blank? 
+          @q_data.value_1 = params["value_1"][q_id].to_a.join(',')
+        end
+        if !params["value_2"][q_id].blank? 
+          @q_data.value_2 = params["value_2"][q_id].to_a.join(',')
+        end
+        if !params["value_3"][q_id].blank? 
+          @q_data.value_3 = params["value_3"][q_id].to_a.join(',')
+        end
 
-      if !params["value_1"][q_id].blank? 
-        puts "AAAAAAAAAAAAAAAAAA= "+params["value_1"][q_id].to_a.join(',')
+        if params["q_data_id"][q_id].length  > 0
+          @q_data.update_attributes(@q_data)
+        else
+          @q_data.save
+        end
       end
-      if !params["value_2"][q_id].blank? 
-        puts "BBBBBBBBBBBBBBBBBBBB="+params["value_2"][q_id].to_a.join(',')
-      end
-      if !params["value_3"][q_id].blank? 
-    #    puts "CCCCCCCCCCCCCCCCC="+params["value_3"][q_id].to_a.join(',')
-      end
-
     end
 
     

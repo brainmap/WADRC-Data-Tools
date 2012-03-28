@@ -1,0 +1,35 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Q data form:</b>
+  <%= @q_datum.q_data_form_id %>
+</p>
+
+<p>
+  <b>Question:</b>
+  <%= @q_datum.question_id %>
+</p>
+
+<p>
+  <b>Value link:</b>
+  <%= @q_datum.value_link %>
+</p>
+
+<p>
+  <b>Value 1:</b>
+  <%= @q_datum.value_1 %>
+</p>
+
+<p>
+  <b>Value 2:</b>
+  <%= @q_datum.value_2 %>
+</p>
+
+<p>
+  <b>Value 3:</b>
+  <%= @q_datum.value_3 %>
+</p>
+
+
+<%= link_to 'Edit', edit_q_datum_path(@q_datum) %> |
+<%= link_to 'Back', q_data_path %>

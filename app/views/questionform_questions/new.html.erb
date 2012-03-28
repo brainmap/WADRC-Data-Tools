@@ -1,4 +1,4 @@
-<% if current_user.role == 'Admin_High'%>
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
 <h1>New questionform_question</h1>
 
 <%= render 'form' %>

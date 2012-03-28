@@ -1,0 +1,35 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Questionform:</b>
+  <%= @q_data_form.questionform_id %>
+</p>
+
+<p>
+  <b>Participant:</b>
+  <%= @q_data_form.participant_id %>
+</p>
+
+<p>
+  <b>Visit:</b>
+  <%= @q_data_form.visit_id %>
+</p>
+
+<p>
+  <b>Appointment:</b>
+  <%= @q_data_form.appointment_id %>
+</p>
+
+<p>
+  <b>Protocol:</b>
+  <%= @q_data_form.scan_procedure_id %>
+</p>
+
+<p>
+  <b>Enrollment:</b>
+  <%= @q_data_form.enrollment_id %>
+</p>
+
+
+<%= link_to 'Edit', edit_q_data_form_path(@q_data_form) %> |
+<%= link_to 'Back', q_data_forms_path %>

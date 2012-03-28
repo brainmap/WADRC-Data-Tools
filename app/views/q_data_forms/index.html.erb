@@ -1,0 +1,33 @@
+<h1>Listing q_data_forms</h1>
+
+<table>
+  <tr>
+    <th>Questionform</th>
+    <th>Participant</th>
+    <th>Visit</th>
+    <th>Appointment</th>
+    <th>Protocol</th>
+    <th>Enrollment</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @q_data_forms.each do |q_data_form| %>
+  <tr>
+    <td><%= q_data_form.questionform_id %></td>
+    <td><%= q_data_form.participant_id %></td>
+    <td><%= q_data_form.visit_id %></td>
+    <td><%= q_data_form.appointment_id %></td>
+    <td><%= q_data_form.scan_procedure_id %></td>
+    <td><%= q_data_form.enrollment_id %></td>
+    <td><%= link_to 'Show', q_data_form %></td>
+    <td><%= link_to 'Edit', edit_q_data_form_path(q_data_form) %></td>
+    <td><%= link_to 'Destroy', q_data_form, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Q data form', new_q_data_form_path %>
