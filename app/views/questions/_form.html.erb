@@ -130,6 +130,17 @@ The question can have up to three parts.<br>
     <%= f.text_field :prompt_1, :size=>60  %>
   </div>
 </td></tr></table>
+<table width="100%" ><tr><td>
+	  <div class="field">
+	    <%= f.label :col_span_1 %><br />
+	    <%= f.text_field :col_span_1 %>
+	  </div>
+	</td><td>
+		<div class="field">
+		  <%= f.label :align_1 %><br />
+		  <%= f.text_field :align_1 %>
+		 </div>
+	</td></tr></table>
 <hr width="90%" size="5" noshade>
   <div class="field">
     <%= f.label :heading_2 %><br />
@@ -143,7 +154,7 @@ The question can have up to three parts.<br>
   <div class="field">
     <%= f.label :value_type_2 %><br />
  <%= f.select :value_type_2, options_for_select(v_value_type, @question.value_type_2),
-	              {:prompt => 'Select a question type for the second part of the question'}  %>
+	              {:prompt => 'Select a 2nd question type'}  %>
   </div>
 </td><td>
 	<div class="field">
@@ -216,6 +227,17 @@ The question can have up to three parts.<br>
     <%= f.text_field :prompt_2, :size=>60 %>
   </div>
 </td></tr></table>
+<table width="100%" ><tr><td>
+	  <div class="field">
+	    <%= f.label :col_span_2 %><br />
+	    <%= f.text_field :col_span_2 %>
+	  </div>
+	</td><td>
+		<div class="field">
+		  <%= f.label :align_2 %><br />
+		  <%= f.text_field :align_2 %>
+		 </div>
+	</td></tr></table>
 <hr width="90%" size="5" noshade>
   <div class="field">
     <%= f.label :heading_3 %><br />
@@ -229,7 +251,7 @@ The question can have up to three parts.<br>
   <div class="field">
     <%= f.label :value_type_3 %><br />
  <%= f.select :value_type_3, options_for_select(v_value_type, @question.value_type_3),
-	              {:prompt => 'Select a question type'}  %>
+	              {:prompt => 'Select a 3rd question type'}  %>
   </div>
 </td><td>
 	  <div class="field">
@@ -302,6 +324,17 @@ The question can have up to three parts.<br>
     <%= f.text_field :prompt_3 , :size=>60%>
   </div>
 </td></tr></table>
+<table width="100%" ><tr><td>
+	  <div class="field">
+	    <%= f.label :col_span_3 %><br />
+	    <%= f.text_field :col_span_3 %>
+	  </div>
+	</td><td>
+		<div class="field">
+		  <%= f.label :align_3 %><br />
+		  <%= f.text_field :align_3 %>
+		 </div>
+	</td></tr></table>
 <hr width="90%" size="5" noshade>
   <div class="field">
     <%= f.label :parent_question_id %><br />

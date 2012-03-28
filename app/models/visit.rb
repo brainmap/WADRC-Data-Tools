@@ -62,9 +62,14 @@ class Visit < ActiveRecord::Base
     return @participant
   end
   def rmr_scan_date
-    "#{self.rmr} #{self.scan_number} #{self.date}"
+    "#{self.rmr} #{self.scan_number} #{Date.strptime(self.date.to_s).strftime('%m/%d/%Y')}  "
   end
-
+ # the enumber collection adds 3x load time
+  def rmr_scan_date_enroll_collection
+    "#{self.rmr}  # #{self.scan_number} #{Date.strptime(self.date.to_s).strftime('%m/%d/%Y')} -- #{self.enrollments.collect {|e| e.enumber }.join(", ")}"
+  end
+  
+  
   def week
     self.date.beginning_of_week
   end

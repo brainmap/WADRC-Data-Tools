@@ -13,20 +13,20 @@
 
 <% form_tag( "/questionform/question_enter",:url => { :controller=>"questionform",:action => "question_enter" } ,  :html => { :id => params[:id] }) do |f| %>
 <!-- THIS WILL CHANGE TO questionform_id   -->
-<%= hidden_field_tag(:questionform_id, params[:id]) %>
-<%= hidden_field_tag(:q_data_form_id, params[:q_data_form_id]) %>
-
-
-<% # putting in placeholders for value_* arrays so less problem with evaluating nulls %>
-<%= hidden_field_tag("value_1[-1]","") %>
-<%= hidden_field_tag("value_2[-1]","") %>
-<%= hidden_field_tag("value_3[-1]","") %>
+	<%= hidden_field_tag(:questionform_id, params[:id]) %>
+	<%= hidden_field_tag(:q_data_form_id, params[:q_data_form_id]) %>
+	<% # putting in placeholders for value_* arrays so less problem with evaluating nulls %>
+	<%= hidden_field_tag("value_1[-1]","") %>
+	<%= hidden_field_tag("value_2[-1]","") %>
+	<%= hidden_field_tag("value_3[-1]","") %>
 <%     # get the distinct value_link type from the questions in this form -- make dropdowns 
     sql = "select distinct value_link from questions where value_link is not null and value_link != '' and
                       questions.id in (select question_id from questionform_questions where questionform_id = "+params[:id]+")"
     connection = ActiveRecord::Base.connection();
-    results = connection.execute(sql) %>
+    results = connection.execute(sql) 
+     value_link_array = [] %>
 <%    results.each do |vl|  
+	  value_link_array << vl.try(:to_s)
      if vl.try(:to_s) == "participant"   %> Participant: 
 	  	<%= collection_select "value_link","participant_id", Participant.all,
 	    	:id, :reggieid, options={ :selected => @q_data_form.participant_id.to_i,:include_blank => "Select a participant" } %>
@@ -45,6 +45,7 @@
 <%	  end %>
   <% end %>
 <%    # scan_procedure id --- access control, limit participants, visits, etc%>
+<%   # want to use value_link_array.include? make different dropdown - include visit-participant-enroll in one dropdown, and resplit to the different parts   %>
 <table>
     <% @questionform_questions.each do |qfq| 
 	@question = Question.find(qfq.question_id)
