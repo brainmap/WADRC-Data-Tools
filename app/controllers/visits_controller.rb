@@ -389,7 +389,22 @@ class VisitsController <  AuthorizedController #  ApplicationController
        elsif  v_date_earliest.length >0
          @search = @search.where(" visits.date > ? ",v_date_earliest)
         end
-     
+
+        if !params[:visit_search][:gender].blank?
+           @search =@search.where(" visits.id in (select enrollment_visit_memberships.visit_id from participants,  enrollment_visit_memberships, enrollments
+            where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+                   and participants.gender is not NULL and participants.gender in (?) )", params[:visit_search][:gender])
+        end   
+        # visit.age_at_visit
+        if !params[:visit_search][:min_age].blank? &&  !params[:visit_search][:max_age].blank?
+    
+        elsif  !params[:visit_search][:min_age].blank?
+          
+        elsif  !params[:visit_search][:max_age].blank?
+          
+        end
+        
+          
 
     @visits =  @search.where(" visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
   

@@ -48,20 +48,24 @@
     </tr>
   </table>
 
-<!-- 
+
   <table class="search_form">
     <tr>
       <th><%= f.label :gender %></th>
-      <td><%= select :image_search, :gender, { "M" => 1, "F" => 2 }, :include_blank => true %></td>
+      <td><%= select :visit_search, :gender, { "M" => 1, "F" => 2 }, :include_blank => true %></td>
     </tr>
+  </table>
+<!--
     <tr>
       <th><%= f.label :minimum_age %></th>
-      <td><%= select :image_search, :min_age, (1..110).to_a, :include_blank => true %></td>
+      <td><%= select :visit_search, :min_age, (1..110).to_a, :include_blank => true %></td>
     </tr>
     <tr>
       <th><%= f.label :maximum_age %></th>
-      <td><%= select :image_search, :max_age, (1..110).to_a, :include_blank => true %></td>
+      <td><%= select :visit_search, :max_age, (1..110).to_a, :include_blank => true %></td>
     </tr>
+  </table>
+
     <tr>
       <th><%= f.label :minimum_education_years %></th>
       <td><%= select :image_search, :min_ed_years, (0..25).to_a, :include_blank => true %></td>
