@@ -333,9 +333,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     # visits.date scan date after  = earliest_timestamp(1i)(2i)(3i)
     
     #enrollment_visit_memberships.enrollment_id enrollments.enumber
-    
-    @search =[]
-    @visits = []
+
     
    if params[:visit_search].nil?
         params[:visit_search] =Hash.new  
