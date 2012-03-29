@@ -70,7 +70,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     else
       @search = Visit.includes(:scan_procedures).where(:scan_procedures => {:id => params[:scan_procedure_id]}).search
     end
-    @visits =  @search.relation.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
+    @visits =  @search.relation.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])   
     
     @collection_title = "All visits enrolled in #{ScanProcedure.find_by_id(params[:scan_procedure_id]).codename}"
     
@@ -334,7 +334,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
     
     #enrollment_visit_memberships.enrollment_id enrollments.enumber
     
-    
+    @search =[]
+    @visits = []
     
    if params[:visit_search].nil?
         params[:visit_search] =Hash.new  
@@ -395,17 +396,10 @@ class VisitsController <  AuthorizedController #  ApplicationController
             where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
                    and participants.gender is not NULL and participants.gender in (?) )", params[:visit_search][:gender])
         end   
-        # visit.age_at_visit
-        if !params[:visit_search][:min_age].blank? &&  !params[:visit_search][:max_age].blank?
-              
-        elsif  !params[:visit_search][:min_age].blank?
-          
-        elsif  !params[:visit_search][:max_age].blank?
-          
-        end
+
         
     @visits =  @search.where(" visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
-  
+
     ### LOOK WHERE TITLE IS SHOWING UP
     @collection_title = 'All visits'
  

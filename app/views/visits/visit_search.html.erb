@@ -54,17 +54,16 @@
       <th><%= f.label :gender %></th>
       <td><%= select :visit_search, :gender, { "M" => 1, "F" => 2 }, :include_blank => true %></td>
     </tr>
-   </table>
+  </table>
 <!--
     <tr>
       <th><%= f.label :minimum_age %></th>
-      <td><%= select :visit_search, :min_age, (1..110).to_a, :include_blank => true %></td>
+      <td><%= select :visit_search, :min_age, (1..110).to_a, :include_blank => true %><B> (the age search is slow) </B></td>
     </tr>
     <tr>
       <th><%= f.label :maximum_age %></th>
       <td><%= select :visit_search, :max_age, (1..110).to_a, :include_blank => true %></td>
     </tr>
-  </table>
 
     <tr>
       <th><%= f.label :minimum_education_years %></th>
