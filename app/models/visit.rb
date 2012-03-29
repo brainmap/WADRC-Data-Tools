@@ -5,7 +5,7 @@ class Visit < ActiveRecord::Base
     # Note: As of 8/24/2011, default excludes (:except => :id) are not working.
     # Use the Class Constant ImageDataset::EXCLUDED_REPORT_ATTRIBUTES instead.
     acts_as_reportable
-    
+
     
   # default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
   default_scope :order => 'date DESC' 
@@ -175,6 +175,7 @@ class Visit < ActiveRecord::Base
 
   end
   
+
   def age_at_visit
     return age_from_dicom_info[:age] unless age_from_dicom_info[:age].blank?
 

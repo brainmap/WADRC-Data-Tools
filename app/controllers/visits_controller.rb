@@ -397,15 +397,13 @@ class VisitsController <  AuthorizedController #  ApplicationController
         end   
         # visit.age_at_visit
         if !params[:visit_search][:min_age].blank? &&  !params[:visit_search][:max_age].blank?
-    
+              
         elsif  !params[:visit_search][:min_age].blank?
           
         elsif  !params[:visit_search][:max_age].blank?
           
         end
         
-          
-
     @visits =  @search.where(" visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
   
     ### LOOK WHERE TITLE IS SHOWING UP

@@ -50,7 +50,16 @@
     <% @questionform_questions.each do |qfq| 
 	@question = Question.find(qfq.question_id)
 			# pass @question to draw_question
-			params["q_data_id["+qfq.question_id.to_s+"]"] = "" #"33" 	
+			params["q_data_id["+qfq.question_id.to_s+"]"] = "" #"33" 
+		  if params["q_data_form_id"].length > 0  # get this q_data_form_id / question_id ==> assuming no duplicate question_id in one form
+			sql = "select distinct q_data.id from q_data where q_data_form_id ="+params["q_data_form_id"]+" and 
+			       q_data.question_id  ="+@question.id.to_s
+		    connection = ActiveRecord::Base.connection();
+		    results = connection.execute(sql)
+		    results.each do |id|
+				params["q_data_id["+qfq.question_id.to_s+"]"] =  id.try(:to_s)
+			end
+		  end	
 		  if params["q_data_id["+qfq.question_id.to_s+"]"].length > 0 
 		   @q_data = QDatum.find(params["q_data_id["+qfq.question_id.to_s+"]"])
 		  else
@@ -75,8 +84,14 @@
 		<%=  @question.phrase_b_1 %>  
 	  <% end %>
 	  <%if !@question.value_type_1.blank?   # follow order in array in question form edit
+			val_array =[]
+			if !@q_data.value_1.blank?
+				val_array = @q_data.value_1.split(',')
+			end
 		 
 	      if @question.value_type_1 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
+	         <%= draw_text_area(@question.id,"1","60x7", @question.default_val_1,@q_data.value_1) %>
+	      <% elsif @question.value_type_1 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
 	         <%= draw_text_area(@question.id,"1","60x7", @question.default_val_1,@q_data.value_1) %>
 		<% elsif @question.value_type_1 == "dropdown"
 		    if @question.ref_table_a_1 == "LOOKUP_REFS"  ## use ref_table_b_1 %>
@@ -106,14 +121,14 @@
               results = connection.execute(sql)
 			    %>
 	          <% results.each do |theme| %>
-                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0], @q_data.value_1.to_i  == theme[0] %>
+                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0],  val_array.include?( theme[0].to_s) %> 
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id,  @q_data.value_1.to_i == theme.id %>
+                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id,  val_array.include?( theme.id.to_s) %>
 	              <%= (theme.description) %>
 	          <% end %>
 	        <% end %>	
@@ -124,14 +139,14 @@
              results = connection.execute(sql)
 			    %>
 	          <% results.each do |theme| %>
-               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0], @q_data.value_1.to_i  == theme[0] %>
+               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0], val_array.include?( theme[0].to_s) %>
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id, @q_data.value_1.to_i == theme.id %>
+               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id, val_array.include?( theme.id.to_s) %>
 	              <%= (theme.description) %>
 	          <% end %>
 	        <% end %>
@@ -188,7 +203,13 @@
 		<%=  @question.phrase_b_2 %>  
 	  <% end %>	
 		  <%if !@question.value_type_2.blank?   # follow order in array in question form edit
+			val_array =[]
+			if !@q_data.value_2.blank?
+				val_array = @q_data.value_2.split(',')
+			end
 		     if @question.value_type_2 == "textarea"   # walk thru each value_type --- get each disoplay value  %>			
+	         <%= draw_text_area(@question.id,"2","60x7", @question.default_val_2,@q_data.value_2) %>
+	        <% elsif @question.value_type_2 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
 	         <%= draw_text_area(@question.id,"2","60x7", @question.default_val_2,@q_data.value_2) %>
 			<% elsif @question.value_type_2 == "dropdown"
 			    if @question.ref_table_a_2 == "LOOKUP_REFS"  ## use ref_table_b_2 %>
@@ -217,14 +238,14 @@
               		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme[0], @q_data.value_2.to_i  == theme[0] %>
+                		<br><%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme[0],  val_array.include?( theme[0].to_s) %>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_2).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme.id,  @q_data.value_2.to_i == theme.id %>
+                		<br><%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme.id,  val_array.include?( theme.id.to_s) %>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>
@@ -235,14 +256,14 @@
            		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme[0], @q_data.value_2.to_i  == theme[0] %>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme[0],  val_array.include?( theme[0].to_s) %>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_2).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme.id,  @q_data.value_2.to_i == theme.id %>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme.id,  val_array.include?( theme.id.to_s) %>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>
@@ -299,8 +320,14 @@
 	  <% end %>
 	
 		  <%if !@question.value_type_3.blank?   # follow order in array in question form edit
+			val_array =[]
+			if !@q_data.value_3.blank?
+				val_array = @q_data.value_3.split(',')
+			end
 		      if @question.value_type_3 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
 	           <%= draw_text_area(@question.id,"3","60x7", @question.default_val_3,@q_data.value_3) %>
+	        <% elsif @question.value_type_3 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
+	         <%= draw_text_area(@question.id,"3","60x7", @question.default_val_3,@q_data.value_3) %>
 			<% elsif @question.value_type_3 == "dropdown"
 			    if @question.ref_table_a_3 == "LOOKUP_REFS"  ## use ref_table_b_3 %>
 					<%= collection_select "value_3",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_3).sort_by(&:display_order),
@@ -328,14 +355,14 @@
               		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme[0], @q_data.value_3.to_i  == theme[0] %>
+                		<br><%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme[0],  val_array.include?( theme[0].to_s)%>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_3).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme.id,  @q_data.value_3.to_i == theme.id %>
+                		<br><%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme.id, val_array.include?( theme.id.to_s) %>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>
@@ -346,14 +373,14 @@
            		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme[0], @q_data.value_3.to_i  == theme[0] %>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme[0], val_array.include?( theme[0].to_s) %>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_3).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme.id,  @q_data.value_3.to_i == theme.id %>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme.id,  val_array.include?( theme.id.to_s)%>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>          
