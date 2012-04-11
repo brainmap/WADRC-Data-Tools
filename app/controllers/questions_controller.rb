@@ -55,6 +55,7 @@ class QuestionsController < ApplicationController
    
   end
 
+
   # POST /questions
   # POST /questions.xml
   def create

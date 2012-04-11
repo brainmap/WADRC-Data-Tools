@@ -4,6 +4,7 @@
   <tr>
 	<th></th>
     <th>Description</th>
+    <th>Entrance Page Type</th>
     <th>Long description</th>
     <th>Display order</th>
     <th>Parent questionform</th>
@@ -16,6 +17,7 @@
   <tr>
 	<td><%= link_to 'Display Form/Questions', '/questionforms/displayform/'+questionform.id.to_s %> </td>
     <td><%= questionform.description %></td>
+    <td><%= questionform.entrance_page_type %></td>
     <td><%= questionform.long_description %></td>
     <td><%= questionform.display_order %></td>
     <td><%= if !questionform.parent_questionform_id.blank?

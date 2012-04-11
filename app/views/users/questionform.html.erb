@@ -1,4 +1,4 @@
-<% if current_user.role == 'Admin_High'%>
+<% if current_user.role == 'Admin_High'  or current_user.role == 'Admin_Low'%>
 
 <%= link_to('Question Forms', '/questionforms') %> <br>
 <%= link_to('Question Forms Scan Procedures', '/questionform_scan_procedures') %> <br>

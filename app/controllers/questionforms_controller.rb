@@ -89,6 +89,7 @@ class QuestionformsController < ApplicationController
       format.xml  { head :ok }
     end
   end
+
   
   def question_enter
    # params["q_data_form_id"] = "9"

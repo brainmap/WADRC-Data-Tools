@@ -1,5 +1,16 @@
 <!-- get values from q_data, q_data_form for this value_link-form-questions, populate form elements -->
 <%
+# in the question writing part, there are three repititions, val_1, val_2, val_3
+# and a if statement for each type of form element
+# for the form elements driven by a database table, there is one version for simple lookup table - id, description
+#   and a second version for the composite lookup_refs table - ref_value, description based on what the reference label column is
+#    the syntax for the form element is slightly different
+# the different form elements should be encapulated into a function
+# until then, be sure to edit the form element in all 3 parts of the question (val_1, val_2, val_3)
+# and each form element
+# and each of the twp parts of the form elements
+%>
+<%
  @questionform_questions = QuestionformQuestion.where(" questionform_id = ?",params[:id]).sort_by(&:display_order)
    params["q_data_form_id"] = "" #"17"
   if params["q_data_form_id"].length > 0 

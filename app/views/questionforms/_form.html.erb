@@ -1,3 +1,8 @@
+<%
+v_entrance_page_type =[["scan_procedure","scan_procedure"],["scan_procedure, visit","scan_procedure, visit"],["scan_procedure, participant","scan_procedure, participant"],
+               ["participant","participant"],["visit","visit"]]
+%>
+
 <%= form_for(@questionform) do |f| %>
   <% if @questionform.errors.any? %>
     <div id="error_explanation">
@@ -15,6 +20,13 @@
     <%= f.label :description %><br />
     <%= f.text_field :description %>
   </div>
+  <div class="field">
+    <%= f.label :entrance_page_type %><br />
+ <%= f.select :entrance_page_type, options_for_select(v_entrance_page_type, @questionform.entrance_page_type),
+	              {:prompt => 'Select an entrance page type'}  %>
+  </div>
+
+
   <div class="field">
     <%= f.label :long_description %><br />
     <%= f.text_area :long_description %>
