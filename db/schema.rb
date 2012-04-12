@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120321194548) do
+ActiveRecord::Schema.define(:version => 20120405183613) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -501,15 +501,18 @@ ActiveRecord::Schema.define(:version => 20120321194548) do
     t.datetime "updated_at"
   end
 
+  add_index "q_data", ["value_link", "question_id", "q_data_form_id"], :name => "ind_q_data"
+
   create_table "q_data_forms", :force => true do |t|
     t.integer  "questionform_id"
     t.integer  "participant_id"
     t.integer  "visit_id"
     t.integer  "appointment_id"
-    t.integer  "protocol_id"
+    t.integer  "scan_procedure_id"
     t.integer  "enrollment_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "user_id"
   end
 
   create_table "question_scan_procedures", :force => true do |t|
@@ -528,6 +531,8 @@ ActiveRecord::Schema.define(:version => 20120321194548) do
     t.float    "display_order"
   end
 
+  add_index "questionform_questions", ["questionform_id"], :name => "ind_qform_questions"
+
   create_table "questionform_scan_procedures", :force => true do |t|
     t.integer  "questionform_id"
     t.integer  "scan_procedure_id"
@@ -543,6 +548,7 @@ ActiveRecord::Schema.define(:version => 20120321194548) do
     t.integer  "parent_questionform_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "entrance_page_type"
   end
 
   create_table "questions", :force => true do |t|
@@ -582,11 +588,33 @@ ActiveRecord::Schema.define(:version => 20120321194548) do
     t.string   "prompt_1"
     t.string   "prompt_2"
     t.string   "prompt_3"
-    t.string   "global_update",      :limit => 50
     t.string   "default_val_1"
     t.string   "default_val_2"
     t.string   "default_val_3"
+    t.string   "base_table_1"
+    t.string   "base_column_1"
+    t.string   "base_table_2"
+    t.string   "base_column_2"
+    t.string   "base_table_3"
+    t.string   "base_column_3"
+    t.string   "global_update_1",    :limit => 50
+    t.string   "global_update_2",    :limit => 50
+    t.string   "global_update_3",    :limit => 50
+    t.string   "access_table_1"
+    t.string   "access_column_1"
+    t.string   "access_table_2"
+    t.string   "access_column_2"
+    t.string   "access_table_3"
+    t.string   "access_column_3"
+    t.string   "col_span_1"
+    t.string   "col_span_2"
+    t.string   "col_span_3"
+    t.string   "align_1"
+    t.string   "align_2"
+    t.string   "align_3"
   end
+
+  add_index "questions", ["id", "status"], :name => "ind_questions"
 
   create_table "radiology_comments", :force => true do |t|
     t.integer  "visit_id"
@@ -707,6 +735,21 @@ ActiveRecord::Schema.define(:version => 20120321194548) do
     t.integer "ed_years_panda"
   end
 
+  create_table "t_map_visit", :id => false, :force => true do |t|
+    t.integer  "access_protocolid",                   :default => 0, :null => false
+    t.integer  "access_id"
+    t.string   "access_enum",                                        :null => false
+    t.datetime "access_visit_date"
+    t.integer  "access_visit_id",                     :default => 0, :null => false
+    t.integer  "access_appointment_id",               :default => 0, :null => false
+    t.string   "access_rmr",                                         :null => false
+    t.integer  "panda_visit_id"
+    t.date     "panda_date"
+    t.string   "panda_initials",        :limit => 20
+    t.string   "panda_rmr",             :limit => 50
+    t.string   "access_initials",       :limit => 20
+  end
+
   create_table "t_new_participants_20120229", :id => false, :force => true do |t|
     t.string  "rmr"
     t.string  "initials"
@@ -746,6 +789,19 @@ ActiveRecord::Schema.define(:version => 20120321194548) do
 
   add_index "users", ["email"], :name => "index_users_on_email", :unique => true
   add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true
+
+  create_table "vgroups", :force => true do |t|
+    t.date     "vgroup_date"
+    t.integer  "participant_id"
+    t.string   "note"
+    t.string   "transfer_mri"
+    t.string   "transfer_pet"
+    t.string   "blood_draw"
+    t.string   "np_testing"
+    t.string   "lumbar_punture"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "visits", :force => true do |t|
     t.date     "date"

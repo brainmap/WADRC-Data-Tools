@@ -1,0 +1,37 @@
+<h1>Listing vgroups</h1>
+
+<table>
+  <tr>
+    <th>Vgroup date</th>
+    <th>Participant</th>
+    <th>Note</th>
+    <th>Transfer mri</th>
+    <th>Transfer pet</th>
+    <th>Blood draw</th>
+    <th>Np testing</th>
+    <th>Lumbar punture</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @vgroups.each do |vgroup| %>
+  <tr>
+    <td><%= vgroup.vgroup_date %></td>
+    <td><%= vgroup.participant_id %></td>
+    <td><%= vgroup.note %></td>
+    <td><%= vgroup.transfer_mri %></td>
+    <td><%= vgroup.transfer_pet %></td>
+    <td><%= vgroup.blood_draw %></td>
+    <td><%= vgroup.np_testing %></td>
+    <td><%= vgroup.lumbar_punture %></td>
+    <td><%= link_to 'Show', vgroup %></td>
+    <td><%= link_to 'Edit', edit_vgroup_path(vgroup) %></td>
+    <td><%= link_to 'Destroy', vgroup, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Vgroup', new_vgroup_path %>

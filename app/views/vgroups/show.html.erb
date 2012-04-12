@@ -1,0 +1,45 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Vgroup date:</b>
+  <%= @vgroup.vgroup_date %>
+</p>
+
+<p>
+  <b>Participant:</b>
+  <%= @vgroup.participant_id %>
+</p>
+
+<p>
+  <b>Note:</b>
+  <%= @vgroup.note %>
+</p>
+
+<p>
+  <b>Transfer mri:</b>
+  <%= @vgroup.transfer_mri %>
+</p>
+
+<p>
+  <b>Transfer pet:</b>
+  <%= @vgroup.transfer_pet %>
+</p>
+
+<p>
+  <b>Blood draw:</b>
+  <%= @vgroup.blood_draw %>
+</p>
+
+<p>
+  <b>Np testing:</b>
+  <%= @vgroup.np_testing %>
+</p>
+
+<p>
+  <b>Lumbar punture:</b>
+  <%= @vgroup.lumbar_punture %>
+</p>
+
+
+<%= link_to 'Edit', edit_vgroup_path(@vgroup) %> |
+<%= link_to 'Back', vgroups_path %>

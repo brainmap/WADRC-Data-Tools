@@ -11,7 +11,7 @@
 
 <div id="heading_and_link">
   <h1><%=h @page_title %></h1>
-  <p><%= link_to 'search for images', new_image_search_path %></p>
+  <p><%= link_to 'search for images',  image_datasets_path %></p>
 	<p><%= link_to 'download csv (this may take a while!)', image_datasets_path(:search => params[:search], :format => :csv), :class => 'download_csv' %></p>
 </div>
 

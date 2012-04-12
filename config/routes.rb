@@ -1,5 +1,7 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :vgroups
+
   resources :q_data
 
   resources :q_data_forms
