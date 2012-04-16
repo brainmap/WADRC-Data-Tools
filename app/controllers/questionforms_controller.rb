@@ -25,7 +25,7 @@ class QuestionformsController < ApplicationController
   # GET /questionforms/new.xml
   def new
     @questionform = Questionform.new
-
+    @questionform.display_order = 0
     respond_to do |format|
       format.html # new.html.erb
       format.xml  { render :xml => @questionform }
@@ -50,7 +50,7 @@ class QuestionformsController < ApplicationController
   # POST /questionforms.xml
   def create
     @questionform = Questionform.new(params[:questionform])
-
+    
     respond_to do |format|
       if @questionform.save
         format.html { redirect_to(@questionform, :notice => 'Questionform was successfully created.') }

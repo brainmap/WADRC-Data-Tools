@@ -2,7 +2,8 @@ class QuestionformQuestionsController < ApplicationController
   # GET /questionform_questions
   # GET /questionform_questions.xml
   def index
-    @questionform_questions = QuestionformQuestion.all
+    # WANT TO SORT BY QUESTIONFORM DESC , NOT BY ID
+    @questionform_questions = QuestionformQuestion.all.sort_by(&:questionform_id).sort_by(&:display_order)
 
     respond_to do |format|
       format.html # index.html.erb
@@ -40,6 +41,16 @@ class QuestionformQuestionsController < ApplicationController
   # POST /questionform_questions
   # POST /questionform_questions.xml
   def create
+    sql ="select ifnull(max(display_order),0) display_order from questionform_questions where questionform_id = "+params[:questionform_question][:questionform_id]
+    connection = ActiveRecord::Base.connection();
+    results = connection.execute(sql)
+    temp_display_order = 0
+    results.each do |vl| 
+      temp_display_order = vl[0]
+    end
+    if params[:questionform_question][:display_order].blank?
+      params[:questionform_question][:display_order] = (temp_display_order + 1).to_s
+    end
     @questionform_question = QuestionformQuestion.new(params[:questionform_question])
 
     respond_to do |format|

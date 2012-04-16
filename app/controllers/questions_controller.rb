@@ -25,7 +25,10 @@ class QuestionsController < ApplicationController
   # GET /questions/new.xml
   def new
     @question = Question.new
-
+    @question.global_update_1 ='N'
+    @question.global_update_2 ='N'
+    @question.global_update_3 ='N'
+    @question.status = 'active'
     respond_to do |format|
       format.html # new.html.erb
       format.xml  { render :xml => @question }

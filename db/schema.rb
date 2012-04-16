@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120405183613) do
+ActiveRecord::Schema.define(:version => 20120412210643) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -25,6 +25,16 @@ ActiveRecord::Schema.define(:version => 20120405183613) do
     t.integer  "image_dataset_id"
     t.boolean  "excluded",          :default => false
     t.string   "exclusion_comment"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "appointments", :force => true do |t|
+    t.date     "appointment_date"
+    t.integer  "vgroup_id"
+    t.string   "comment"
+    t.string   "appointment_type"
+    t.integer  "employee_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -711,10 +721,14 @@ ActiveRecord::Schema.define(:version => 20120405183613) do
     t.string  "panda_enumber"
     t.integer "participant_id"
     t.integer "enrollment_id",                        :default => 0, :null => false
-    t.string  "withdrawlReason_access", :limit => 50
-    t.string  "withdrawl_reason_panda"
+    t.integer "fkdbid_panda"
     t.integer "reggieID_access"
     t.string  "rmr_panda",              :limit => 50
+    t.string  "rmr_access_1",           :limit => 50
+    t.string  "rmr_access_2",           :limit => 50
+    t.string  "rmr_access_3",           :limit => 50
+    t.string  "rmr_access_4",           :limit => 50
+    t.string  "rmr_access_5",           :limit => 50
     t.string  "wrapnum_access",         :limit => 5
     t.string  "wrapnum_panda",          :limit => 50
     t.string  "initials_access",        :limit => 50
@@ -723,6 +737,8 @@ ActiveRecord::Schema.define(:version => 20120405183613) do
     t.date    "dob_panda"
     t.integer "gender_access"
     t.integer "gender_panda"
+    t.string  "withdrawlReason_access", :limit => 50
+    t.string  "withdrawl_reason_panda"
     t.integer "apoee1_access"
     t.integer "apoee1_panda"
     t.integer "apoee2_access"
@@ -733,6 +749,101 @@ ActiveRecord::Schema.define(:version => 20120405183613) do
     t.string  "apoe_note_panda"
     t.integer "ed_years_access"
     t.integer "ed_years_panda"
+    t.string  "rmr_access_6",           :limit => 50
+    t.integer "new_participant_id"
+  end
+
+  create_table "t_map_vgroup_tblVisitTable_mriscan", :id => false, :force => true do |t|
+    t.integer  "pkMriScanID",                                 :default => 0,     :null => false
+    t.integer  "fkAppointmentID"
+    t.string   "RMR",                                                            :null => false
+    t.integer  "MriTech"
+    t.datetime "MriStartTime"
+    t.datetime "MriEndTime"
+    t.integer  "Goggles",                                     :default => 0
+    t.integer  "ButtonBox",                                   :default => 0
+    t.boolean  "CompletedMriFast",                            :default => false
+    t.string   "ArchiveDVD",            :limit => 50
+    t.integer  "pkVisitID",                                   :default => 0,     :null => false
+    t.integer  "fkProtocolID",                                                   :null => false
+    t.datetime "VisitDate"
+    t.datetime "PCVisitDate2"
+    t.integer  "VisitNumber",                                 :default => 1
+    t.integer  "ResearchDiagnosis"
+    t.integer  "CognitiveStatus"
+    t.integer  "FamHx"
+    t.boolean  "CompletedScan",                               :default => false
+    t.datetime "LastEdited"
+    t.string   "ScanNote"
+    t.boolean  "EnteredScan",                                 :default => false
+    t.datetime "EnteredScanDate"
+    t.integer  "EnteredScanWho"
+    t.boolean  "CompetedVitalsAndMeds",                       :default => false
+    t.string   "VitalsAndMedsNote"
+    t.boolean  "EnteredVitals",                               :default => false
+    t.datetime "EnteredVMDate"
+    t.integer  "EnteredVitalsWho"
+    t.boolean  "CompletedBloodDraw",                          :default => false
+    t.string   "BloodDrawNote"
+    t.boolean  "EnteredBlood",                                :default => false
+    t.datetime "EnteredBloodDate"
+    t.integer  "EnteredBloodWho"
+    t.boolean  "CompletedNPTesting",                          :default => false
+    t.string   "NPTestingNote"
+    t.boolean  "EnteredNP",                                   :default => false
+    t.datetime "EnteredNPDate"
+    t.integer  "EnteredNPWho"
+    t.boolean  "SimulationScan",                              :default => false
+    t.string   "SimulationScanNote"
+    t.string   "RadiologyNote",         :limit => 75
+    t.boolean  "EnteredRadiology",                            :default => false
+    t.datetime "EnteredRadiologyDate"
+    t.integer  "EnteredRadiologyWho"
+    t.boolean  "FurtherStudies",                              :default => false
+    t.integer  "ClinicDx",                                    :default => 0
+    t.integer  "StudyDx",                                     :default => 0
+    t.boolean  "CompletedFast",                               :default => false
+    t.string   "FastNote"
+    t.boolean  "CompletedPetScan",                            :default => false
+    t.string   "PetScanNote"
+    t.boolean  "EnteredPetScan",                              :default => false
+    t.datetime "EnteredPetScanDate"
+    t.integer  "EnteredPetScanWho"
+    t.boolean  "CompletedLP",                                 :default => false
+    t.string   "LPNote"
+    t.boolean  "EnteredLP",                                   :default => false
+    t.datetime "EnteredLPDate"
+    t.integer  "EnteredLPWho"
+    t.integer  "pkAppointmentID",                             :default => 0,     :null => false
+    t.integer  "fkVisitID",                                                      :null => false
+    t.datetime "AppointmentDate"
+    t.text     "AppointmentComment",    :limit => 2147483647
+    t.integer  "Researcher"
+    t.integer  "pkProtocolID",                                :default => 0,     :null => false
+    t.integer  "fkDBID"
+    t.string   "ENUM",                                                           :null => false
+    t.integer  "DX",                                                             :null => false
+    t.integer  "ConsentCohort"
+    t.integer  "Cohort",                                      :default => 0
+    t.integer  "ResearchDX"
+    t.integer  "ResearchDX_Cohort"
+    t.integer  "fkProtocolTypeID"
+    t.integer  "RESEARCH"
+    t.string   "dem notes",             :limit => 50
+    t.datetime "enrolldate"
+    t.integer  "fkSubjectStatusID",                           :default => 3
+    t.string   "WithdrawalReason",      :limit => 50
+    t.string   "Recruitsource",         :limit => 50
+    t.boolean  "REPSUP",                                      :default => false
+    t.boolean  "CompletedEligibility",                        :default => false
+    t.boolean  "EnteredEligibility",                          :default => false
+    t.boolean  "CompletedDemo&Meds",                          :default => false
+    t.boolean  "EnteredDemo",                                 :default => false
+    t.boolean  "EnteredMeds",                                 :default => false
+    t.string   "PCScreenNum",           :limit => 50
+    t.boolean  "SelfControlSet",                              :default => false
+    t.integer  "ConsentForm",                                 :default => 0
+    t.integer  "vgroup_id"
   end
 
   create_table "t_map_visit", :id => false, :force => true do |t|
@@ -801,6 +912,7 @@ ActiveRecord::Schema.define(:version => 20120405183613) do
     t.string   "lumbar_punture"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "user_id"
   end
 
   create_table "visits", :force => true do |t|
@@ -826,6 +938,9 @@ ActiveRecord::Schema.define(:version => 20120405183613) do
     t.integer  "created_by_id"
     t.string   "dicom_study_uid"
     t.date     "compiled_at"
+    t.integer  "vgroup_id"
+    t.integer  "appointment_id"
+    t.integer  "temp_fkMRIscanid"
   end
 
   add_index "visits", ["id"], :name => "index_visits_on_id"
