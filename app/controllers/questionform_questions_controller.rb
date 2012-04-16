@@ -3,7 +3,7 @@ class QuestionformQuestionsController < ApplicationController
   # GET /questionform_questions.xml
   def index
     # WANT TO SORT BY QUESTIONFORM DESC , NOT BY ID
-    @questionform_questions = QuestionformQuestion.all.sort_by(&:questionform_id).sort_by(&:display_order)
+    @questionform_questions = QuestionformQuestion.all(:order =>'questionform_id,display_order')
 
     respond_to do |format|
       format.html # index.html.erb
