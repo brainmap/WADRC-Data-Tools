@@ -1,5 +1,17 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :neuropsyches
+
+  resources :vitals
+
+  resources :petscans
+
+  resources :lumbarpuncture_results
+
+  resources :lookup_lumbarpunctures
+
+  resources :lumbarpunctures
+
   resources :appointments
 
   resources :vgroups

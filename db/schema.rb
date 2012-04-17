@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120412210643) do
+ActiveRecord::Schema.define(:version => 20120417204311) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -331,6 +331,14 @@ ActiveRecord::Schema.define(:version => 20120412210643) do
     t.datetime "updated_at"
   end
 
+  create_table "lookup_lumbarpunctures", :force => true do |t|
+    t.string   "description"
+    t.string   "units"
+    t.string   "range"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "lookup_pettracers", :force => true do |t|
     t.string   "name"
     t.string   "description"
@@ -416,6 +424,26 @@ ActiveRecord::Schema.define(:version => 20120412210643) do
     t.datetime "updated_at"
   end
 
+  create_table "lumbarpuncture_results", :force => true do |t|
+    t.integer  "lumbarpuncture_id"
+    t.integer  "lookup_lumbarpuncture_id"
+    t.integer  "value"
+    t.string   "value_string"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "lumbarpunctures", :force => true do |t|
+    t.integer  "appointment_id"
+    t.string   "completedlpfast"
+    t.integer  "lp_examp_md_id"
+    t.string   "lpsucess"
+    t.string   "lpabnormality"
+    t.string   "lpfollownote",    :limit => 2000
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "medicationdetails", :force => true do |t|
     t.string   "genericname"
     t.string   "brandname"
@@ -441,6 +469,12 @@ ActiveRecord::Schema.define(:version => 20120412210643) do
     t.text     "note"
     t.string   "procedure"
     t.integer  "visit_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "neuropsyches", :force => true do |t|
+    t.integer  "appointment_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -474,6 +508,19 @@ ActiveRecord::Schema.define(:version => 20120412210643) do
     t.string   "wrapnum"
     t.integer  "access_id"
     t.integer  "reggieid"
+  end
+
+  create_table "petscans", :force => true do |t|
+    t.integer  "appointment_id"
+    t.integer  "lookup_pettracer_id"
+    t.string   "EcatFilename"
+    t.float    "netinjecteddose"
+    t.string   "units"
+    t.string   "range"
+    t.date     "injecttiontime"
+    t.date     "scanstarttime"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "physiology_text_files", :force => true do |t|
@@ -944,5 +991,15 @@ ActiveRecord::Schema.define(:version => 20120412210643) do
   end
 
   add_index "visits", ["id"], :name => "index_visits_on_id"
+
+  create_table "vitals", :force => true do |t|
+    t.integer  "appointment_id"
+    t.integer  "bp_systol"
+    t.integer  "bp_diastol"
+    t.integer  "pulse"
+    t.integer  "bloodglucose"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
 end

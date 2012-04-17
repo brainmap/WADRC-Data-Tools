@@ -112,6 +112,9 @@
 			  	<%= collection_select "value_1",@question.id.to_s, ((@question.ref_table_a_1).constantize).all.sort_by(&:description),
 			    	:id, :description, {:include_blank => @question.prompt_1,:selected => (@q_data.value_1 or @question.default_val_1)} %>			
 		     <%   end   %>
+		<% elsif @question.value_type_1 == "text_5"  %>
+			<% #question_id, value_number,size %>
+			   <%= draw_text_field(@question.id,"1",5, @question.default_val_1,@q_data.value_1) %>
 		<% elsif @question.value_type_1 == "text_10"  %>
 		<% #question_id, value_number,size %>
 		   <%= draw_text_field(@question.id,"1",10, @question.default_val_1,@q_data.value_1) %>	
