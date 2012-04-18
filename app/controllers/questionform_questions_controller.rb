@@ -2,8 +2,21 @@ class QuestionformQuestionsController < ApplicationController
   # GET /questionform_questions
   # GET /questionform_questions.xml
   def index
-    # WANT TO SORT BY QUESTIONFORM DESC , NOT BY ID
-    @questionform_questions = QuestionformQuestion.all(:order =>'questionform_id,display_order')
+    # default to most recently edited form
+    if params[:questionform_question].blank?
+      @questionform_questions = QuestionformQuestion.find_by_sql("select questionforms.description,questionform_questions.id,questionform_questions.questionform_id,questionform_questions.question_id,
+             questionform_questions.display_order
+             from questionform_questions, questionforms where questionform_questions.questionform_id=questionforms.id
+             and questionform_questions.questionform_id in (select distinct questionform_id from questionform_questions where updated_at in (select max(updated_at) from questionform_questions))
+              order by questionforms.description, questionform_questions.display_order ")
+    else  
+      @questionform_questions = QuestionformQuestion.find_by_sql("select questionforms.description,questionform_questions.id,questionform_questions.questionform_id,questionform_questions.question_id,
+             questionform_questions.display_order
+             from questionform_questions, questionforms where questionform_questions.questionform_id=questionforms.id
+             and questionform_questions.questionform_id in ("+params[:questionform_question][:questionform_id]+")
+              order by questionforms.description, questionform_questions.display_order ")
+    end
+  
 
     respond_to do |format|
       format.html # index.html.erb

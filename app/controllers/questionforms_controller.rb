@@ -2,7 +2,7 @@ class QuestionformsController < ApplicationController
   # GET /questionforms
   # GET /questionforms.xml
   def index
-    @questionforms = Questionform.all
+    @questionforms = Questionform.all(:order =>'entrance_page_type,display_order,description')
 
     respond_to do |format|
       format.html # index.html.erb

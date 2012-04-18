@@ -1,7 +1,14 @@
+
+
+<%= form_tag '/questionform_questions/index' do %>
+  <%= collection_select :questionform_question,  :questionform_id, Questionform.all(:order =>'entrance_page_type,display_order,description'), :id, :description,{:prompt => 'Select a Form to show the linked Questions'} %>
+  <%= submit_tag("Search") %>
+<% end %>
+
 <h1>Listing questionform_questions</h1>
 
 <table>
-  <tr>
+  <tr><th>Edit this question</th>
     <th>Questionform</th><th> | </th>
     <th>Question</th>
     <th>Display order</th>
@@ -12,6 +19,7 @@
 
 <% @questionform_questions.each do |questionform_question| %>
   <tr>
+	<td><a href="/questions/<%=questionform_question.question_id %>/edit" target="new">Edit question</a></td>
     <td><%= Questionform.find(questionform_question.questionform_id).description %></td><td align=center> | </td>
     <td><%= 	Question.find(questionform_question.question_id).description %></td>
     <td><%= questionform_question.display_order %></td>
