@@ -436,8 +436,8 @@ ActiveRecord::Schema.define(:version => 20120417204311) do
   create_table "lumbarpunctures", :force => true do |t|
     t.integer  "appointment_id"
     t.string   "completedlpfast"
-    t.integer  "lp_examp_md_id"
-    t.string   "lpsucess"
+    t.integer  "lp_exam_md_id"
+    t.string   "lpsuccess"
     t.string   "lpabnormality"
     t.string   "lpfollownote",    :limit => 2000
     t.datetime "created_at"

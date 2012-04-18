@@ -68,7 +68,9 @@ class QuestionformQuestionsController < ApplicationController
 
     respond_to do |format|
       if @questionform_question.save
-        format.html { redirect_to(@questionform_question, :notice => 'Questionform question was successfully created.') }
+        #format.html { redirect_to(@questionform_question, :notice => 'Questionform question was successfully created.') }
+        #@questionform_question.display_order = @questionform_question.display_order +1
+        format.html{ redirect_to('/questionform_questions/new', :notice => 'Questionform question was successfully created.')}
         format.xml  { render :xml => @questionform_question, :status => :created, :location => @questionform_question }
       else
         format.html { render :action => "new" }
