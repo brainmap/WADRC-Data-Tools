@@ -21,7 +21,7 @@
 # need front porch --- need consitant participant with enrollment with appointment with visit -- derive other values from one selection
 # just display -- rederive, even with hidden field
 %>
-
+<b><%= Questionform.find(params[:id]).long_description%></b><br>
 <% form_tag( "/questionform/question_enter",:url => { :controller=>"questionform",:action => "question_enter" } ,  :html => { :id => params[:id] }) do |f| %>
 <!-- THIS WILL CHANGE TO questionform_id   -->
 	<%= hidden_field_tag(:questionform_id, params[:id]) %>

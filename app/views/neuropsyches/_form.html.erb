@@ -1,0 +1,21 @@
+<%= form_for(@neuropsych) do |f| %>
+  <% if @neuropsych.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@neuropsych.errors.count, "error") %> prohibited this neuropsych from being saved:</h2>
+
+      <ul>
+      <% @neuropsych.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :appointment_id %><br />
+    <%= f.text_field :appointment_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

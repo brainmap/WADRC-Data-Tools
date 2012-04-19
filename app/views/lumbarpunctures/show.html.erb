@@ -1,0 +1,35 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Appointment:</b>
+  <%= @lumbarpuncture.appointment_id %>
+</p>
+
+<p>
+  <b>Completedlpfast:</b>
+  <%= @lumbarpuncture.completedlpfast %>
+</p>
+
+<p>
+  <b>Lp examp md:</b>
+  <%= @lumbarpuncture.lp_exam_md_id %>
+</p>
+
+<p>
+  <b>Lpsuccess:</b>
+  <%= @lumbarpuncture.lpsuccess %>
+</p>
+
+<p>
+  <b>Lpabnormality:</b>
+  <%= @lumbarpuncture.lpabnormality %>
+</p>
+
+<p>
+  <b>Lpfollownote:</b>
+  <%= @lumbarpuncture.lpfollownote %>
+</p>
+
+
+<%= link_to 'Edit', edit_lumbarpuncture_path(@lumbarpuncture) %> |
+<%= link_to 'Back', lumbarpunctures_path %>

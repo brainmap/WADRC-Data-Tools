@@ -1,0 +1,29 @@
+<h1>Listing lumbarpuncture_results</h1>
+
+<table>
+  <tr>
+    <th>Lumbarpuncture</th>
+    <th>Lookup lumbarpuncture</th>
+    <th>Value</th>
+    <th>Value string</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @lumbarpuncture_results.each do |lumbarpuncture_result| %>
+  <tr>
+    <td><%= lumbarpuncture_result.lumbarpuncture_id %></td>
+    <td><%= lumbarpuncture_result.lookup_lumbarpuncture_id %></td>
+    <td><%= lumbarpuncture_result.value %></td>
+    <td><%= lumbarpuncture_result.value_string %></td>
+    <td><%= link_to 'Show', lumbarpuncture_result %></td>
+    <td><%= link_to 'Edit', edit_lumbarpuncture_result_path(lumbarpuncture_result) %></td>
+    <td><%= link_to 'Destroy', lumbarpuncture_result, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Lumbarpuncture result', new_lumbarpuncture_result_path %>

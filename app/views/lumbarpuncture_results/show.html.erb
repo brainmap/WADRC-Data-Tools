@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Lumbarpuncture:</b>
+  <%= @lumbarpuncture_result.lumbarpuncture_id %>
+</p>
+
+<p>
+  <b>Lookup lumbarpuncture:</b>
+  <%= @lumbarpuncture_result.lookup_lumbarpuncture_id %>
+</p>
+
+<p>
+  <b>Value:</b>
+  <%= @lumbarpuncture_result.value %>
+</p>
+
+<p>
+  <b>Value string:</b>
+  <%= @lumbarpuncture_result.value_string %>
+</p>
+
+
+<%= link_to 'Edit', edit_lumbarpuncture_result_path(@lumbarpuncture_result) %> |
+<%= link_to 'Back', lumbarpuncture_results_path %>

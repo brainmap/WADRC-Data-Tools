@@ -1,0 +1,45 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Appointment:</b>
+  <%= @petscan.appointment_id %>
+</p>
+
+<p>
+  <b>Lookup pettracer:</b>
+  <%= @petscan.lookup_pettracer_id %>
+</p>
+
+<p>
+  <b>Ecatfilename:</b>
+  <%= @petscan.EcatFilename %>
+</p>
+
+<p>
+  <b>Netinjecteddose:</b>
+  <%= @petscan.netinjecteddose %>
+</p>
+
+<p>
+  <b>Units:</b>
+  <%= @petscan.units %>
+</p>
+
+<p>
+  <b>Range:</b>
+  <%= @petscan.range %>
+</p>
+
+<p>
+  <b>Injecttiontime:</b>
+  <%= @petscan.injecttiontime %>
+</p>
+
+<p>
+  <b>Scanstarttime:</b>
+  <%= @petscan.scanstarttime %>
+</p>
+
+
+<%= link_to 'Edit', edit_petscan_path(@petscan) %> |
+<%= link_to 'Back', petscans_path %>

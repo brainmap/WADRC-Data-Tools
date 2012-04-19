@@ -1,0 +1,49 @@
+<%= form_for(@petscan) do |f| %>
+  <% if @petscan.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@petscan.errors.count, "error") %> prohibited this petscan from being saved:</h2>
+
+      <ul>
+      <% @petscan.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :appointment_id %><br />
+    <%= f.text_field :appointment_id %>
+  </div>
+  <div class="field">
+    <%= f.label :lookup_pettracer_id %><br />
+    <%= f.text_field :lookup_pettracer_id %>
+  </div>
+  <div class="field">
+    <%= f.label :EcatFilename %><br />
+    <%= f.text_field :EcatFilename %>
+  </div>
+  <div class="field">
+    <%= f.label :netinjecteddose %><br />
+    <%= f.text_field :netinjecteddose %>
+  </div>
+  <div class="field">
+    <%= f.label :units %><br />
+    <%= f.text_field :units %>
+  </div>
+  <div class="field">
+    <%= f.label :range %><br />
+    <%= f.text_field :range %>
+  </div>
+  <div class="field">
+    <%= f.label :injecttiontime %><br />
+    <%= f.date_select :injecttiontime %>
+  </div>
+  <div class="field">
+    <%= f.label :scanstarttime %><br />
+    <%= f.date_select :scanstarttime %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

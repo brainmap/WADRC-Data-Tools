@@ -1,0 +1,29 @@
+<%= form_for(@lookup_lumbarpuncture) do |f| %>
+  <% if @lookup_lumbarpuncture.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@lookup_lumbarpuncture.errors.count, "error") %> prohibited this lookup_lumbarpuncture from being saved:</h2>
+
+      <ul>
+      <% @lookup_lumbarpuncture.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :description %><br />
+    <%= f.text_field :description %>
+  </div>
+  <div class="field">
+    <%= f.label :units %><br />
+    <%= f.text_field :units %>
+  </div>
+  <div class="field">
+    <%= f.label :range %><br />
+    <%= f.text_field :range %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

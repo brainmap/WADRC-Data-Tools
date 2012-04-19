@@ -1,0 +1,2 @@
+module NeuropsychesHelper
+end

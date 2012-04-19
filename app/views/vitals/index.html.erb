@@ -1,0 +1,31 @@
+<h1>Listing vitals</h1>
+
+<table>
+  <tr>
+    <th>Appointment</th>
+    <th>Bp systol</th>
+    <th>Bp diastol</th>
+    <th>Pulse</th>
+    <th>Bloodglucose</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @vitals.each do |vital| %>
+  <tr>
+    <td><%= vital.appointment_id %></td>
+    <td><%= vital.bp_systol %></td>
+    <td><%= vital.bp_diastol %></td>
+    <td><%= vital.pulse %></td>
+    <td><%= vital.bloodglucose %></td>
+    <td><%= link_to 'Show', vital %></td>
+    <td><%= link_to 'Edit', edit_vital_path(vital) %></td>
+    <td><%= link_to 'Destroy', vital, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Vital', new_vital_path %>

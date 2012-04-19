@@ -1,0 +1,2 @@
+module VitalsHelper
+end

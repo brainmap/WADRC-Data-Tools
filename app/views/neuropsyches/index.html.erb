@@ -1,0 +1,23 @@
+<h1>Listing neuropsyches</h1>
+
+<table>
+  <tr>
+    <th>Appointment</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @neuropsyches.each do |neuropsych| %>
+  <tr>
+    <td><%= neuropsych.appointment_id %></td>
+    <td><%= link_to 'Show', neuropsych %></td>
+    <td><%= link_to 'Edit', edit_neuropsych_path(neuropsych) %></td>
+    <td><%= link_to 'Destroy', neuropsych, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Neuropsych', new_neuropsych_path %>

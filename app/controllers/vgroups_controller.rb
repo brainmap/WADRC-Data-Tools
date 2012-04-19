@@ -68,6 +68,10 @@ class VgroupsController < ApplicationController
       end
     end
   end
+  
+  def home
+      render :template => "vgroups/home"
+  end
 
   # DELETE /vgroups/1
   # DELETE /vgroups/1.xml

@@ -14,8 +14,6 @@ WADRCDataTools::Application.routes.draw do
 
   resources :appointments
 
-  resources :vgroups
-
   resources :q_data
 
   resources :q_data_forms
@@ -141,8 +139,9 @@ WADRCDataTools::Application.routes.draw do
   # moved up to get precidance over devise sign_upmatch '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user
   
    match '/question/clone/:id', :controller=>'questions',:action=>'clone', :as => :clone
+   match '/vgroups/home', :controller => 'vgroups', :action => 'home', :as => :home
   
-    
+   resources :vgroups
   resources :studies
   resources :recruitment_groups
   resources :withdrawls

@@ -1,0 +1,30 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Appointment:</b>
+  <%= @vital.appointment_id %>
+</p>
+
+<p>
+  <b>Bp systol:</b>
+  <%= @vital.bp_systol %>
+</p>
+
+<p>
+  <b>Bp diastol:</b>
+  <%= @vital.bp_diastol %>
+</p>
+
+<p>
+  <b>Pulse:</b>
+  <%= @vital.pulse %>
+</p>
+
+<p>
+  <b>Bloodglucose:</b>
+  <%= @vital.bloodglucose %>
+</p>
+
+
+<%= link_to 'Edit', edit_vital_path(@vital) %> |
+<%= link_to 'Back', vitals_path %>

@@ -1,0 +1,18 @@
+require 'spec_helper'
+
+describe "neuropsyches/new.html.erb" do
+  before(:each) do
+    assign(:neuropsych, stub_model(Neuropsych,
+      :appointment_id => 1
+    ).as_new_record)
+  end
+
+  it "renders new neuropsych form" do
+    render
+
+    # Run the generator again with the --webrat flag if you want to use webrat matchers
+    assert_select "form", :action => neuropsyches_path, :method => "post" do
+      assert_select "input#neuropsych_appointment_id", :name => "neuropsych[appointment_id]"
+    end
+  end
+end

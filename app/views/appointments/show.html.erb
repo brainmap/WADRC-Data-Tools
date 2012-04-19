@@ -1,0 +1,30 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Appointment date:</b>
+  <%= @appointment.appointment_date %>
+</p>
+
+<p>
+  <b>Vgroup:</b>
+  <%= @appointment.vgroup_id %>
+</p>
+
+<p>
+  <b>Comment:</b>
+  <%= @appointment.comment %>
+</p>
+
+<p>
+  <b>Appointment type:</b>
+  <%= @appointment.appointment_type %>
+</p>
+
+<p>
+  <b>Employee:</b>
+  <%= @appointment.employee_id %>
+</p>
+
+
+<%= link_to 'Edit', edit_appointment_path(@appointment) %> |
+<%= link_to 'Back', appointments_path %>
