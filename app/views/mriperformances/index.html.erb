@@ -1,0 +1,27 @@
+<h1>Listing mriperformances</h1>
+
+<table>
+  <tr>
+    <th>Mriscantask</th>
+    <th>Hitpercentage</th>
+    <th>Accuracypercentage</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @mriperformances.each do |mriperformance| %>
+  <tr>
+    <td><%= mriperformance.mriscantask_id %></td>
+    <td><%= mriperformance.hitpercentage %></td>
+    <td><%= mriperformance.accuracypercentage %></td>
+    <td><%= link_to 'Show', mriperformance %></td>
+    <td><%= link_to 'Edit', edit_mriperformance_path(mriperformance) %></td>
+    <td><%= link_to 'Destroy', mriperformance, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Mriperformance', new_mriperformance_path %>

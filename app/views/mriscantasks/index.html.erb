@@ -1,0 +1,49 @@
+<h1>Listing mriscantasks</h1>
+
+<table>
+  <tr>
+    <th>Visit</th>
+    <th>Lookup set</th>
+    <th>Lookup scantask</th>
+    <th>Preday</th>
+    <th>Task order</th>
+    <th>Moved</th>
+    <th>Eyecontact</th>
+    <th>Logfilerecorded</th>
+    <th>P file</th>
+    <th>Tasknote</th>
+    <th>Reps</th>
+    <th>Scandate</th>
+    <th>Has concerns</th>
+    <th>Concerns</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @mriscantasks.each do |mriscantask| %>
+  <tr>
+    <td><%= mriscantask.visit_id %></td>
+    <td><%= mriscantask.lookup_set_id %></td>
+    <td><%= mriscantask.lookup_scantask_id %></td>
+    <td><%= mriscantask.preday %></td>
+    <td><%= mriscantask.task_order %></td>
+    <td><%= mriscantask.moved %></td>
+    <td><%= mriscantask.eyecontact %></td>
+    <td><%= mriscantask.logfilerecorded %></td>
+    <td><%= mriscantask.p_file %></td>
+    <td><%= mriscantask.tasknote %></td>
+    <td><%= mriscantask.reps %></td>
+    <td><%= mriscantask.scandate %></td>
+    <td><%= mriscantask.has_concerns %></td>
+    <td><%= mriscantask.concerns %></td>
+    <td><%= link_to 'Show', mriscantask %></td>
+    <td><%= link_to 'Edit', edit_mriscantask_path(mriscantask) %></td>
+    <td><%= link_to 'Destroy', mriscantask, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Mriscantask', new_mriscantask_path %>

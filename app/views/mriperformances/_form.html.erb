@@ -1,0 +1,29 @@
+<%= form_for(@mriperformance) do |f| %>
+  <% if @mriperformance.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@mriperformance.errors.count, "error") %> prohibited this mriperformance from being saved:</h2>
+
+      <ul>
+      <% @mriperformance.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :mriscantask_id %><br />
+    <%= f.text_field :mriscantask_id %>
+  </div>
+  <div class="field">
+    <%= f.label :hitpercentage %><br />
+    <%= f.text_field :hitpercentage %>
+  </div>
+  <div class="field">
+    <%= f.label :accuracypercentage %><br />
+    <%= f.text_field :accuracypercentage %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,73 @@
+<%= form_for(@mriscantask) do |f| %>
+  <% if @mriscantask.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@mriscantask.errors.count, "error") %> prohibited this mriscantask from being saved:</h2>
+
+      <ul>
+      <% @mriscantask.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :visit_id %><br />
+    <%= f.text_field :visit_id %>
+  </div>
+  <div class="field">
+    <%= f.label :lookup_set_id %><br />
+    <%= f.text_field :lookup_set_id %>
+  </div>
+  <div class="field">
+    <%= f.label :lookup_scantask_id %><br />
+    <%= f.text_field :lookup_scantask_id %>
+  </div>
+  <div class="field">
+    <%= f.label :preday %><br />
+    <%= f.text_field :preday %>
+  </div>
+  <div class="field">
+    <%= f.label :task_order %><br />
+    <%= f.text_field :task_order %>
+  </div>
+  <div class="field">
+    <%= f.label :moved %><br />
+    <%= f.text_field :moved %>
+  </div>
+  <div class="field">
+    <%= f.label :eyecontact %><br />
+    <%= f.text_field :eyecontact %>
+  </div>
+  <div class="field">
+    <%= f.label :logfilerecorded %><br />
+    <%= f.text_field :logfilerecorded %>
+  </div>
+  <div class="field">
+    <%= f.label :p_file %><br />
+    <%= f.text_field :p_file %>
+  </div>
+  <div class="field">
+    <%= f.label :tasknote %><br />
+    <%= f.text_field :tasknote %>
+  </div>
+  <div class="field">
+    <%= f.label :reps %><br />
+    <%= f.text_field :reps %>
+  </div>
+  <div class="field">
+    <%= f.label :scandate %><br />
+    <%= f.date_select :scandate %>
+  </div>
+  <div class="field">
+    <%= f.label :has_concerns %><br />
+    <%= f.text_field :has_concerns %>
+  </div>
+  <div class="field">
+    <%= f.label :concerns %><br />
+    <%= f.text_field :concerns %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
