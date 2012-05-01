@@ -30,7 +30,7 @@
               <%= link_to "Enrollments", enrollments_path %>
             </li>
             <li <%= "class=current" if @current_tab == "participants" %>>
-              <%= link_to("Participants", participants_path) %>
+              <%= link_to("Participants", participant_search_path) %>
             </li>
             <li <%= "class=current" if @current_tab == "scan_procedures" %>>
               <%= link_to "ScanProcedures", scan_procedures_path %>

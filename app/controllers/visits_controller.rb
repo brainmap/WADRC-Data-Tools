@@ -169,6 +169,17 @@ class VisitsController <  AuthorizedController #  ApplicationController
   def create
     @visit = Visit.new(params[:visit])
     @visit.user = current_user
+    if @visit.appointment_id.blank?
+       @appointment = Appointment.create
+       @appointment.appointment_type ='mri'
+       @appointment.appointment_date = @visit.date
+       @vgroup = Vgroup.create
+       @vgroup.vgroup_date = @visit.date
+       @vgroup.save
+       @appointment.vgroup_id = @vgroup.id
+       @appointment.save
+       @visit.appointment_id = @appointment.id
+    end
     respond_to do |format|
       if @visit.save
         flash[:notice] = 'MRI appt was successfully created.'
@@ -289,7 +300,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
   def is_a_number?(s)
 
     s.to_s.match(/\A[+-]?\d+?(\.\d+)?\Z/) == nil ? false : true
-
+1
   end  
   
 
@@ -338,7 +349,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
    if params[:visit_search].nil?
         params[:visit_search] =Hash.new  
    end
-    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    #scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
     # Remove default scope if sorting has been requested.
     @search = Visit.search(params[:search]) 
       if !params[:visit_search][:scan_procedure_id].blank?
@@ -394,6 +406,27 @@ class VisitsController <  AuthorizedController #  ApplicationController
             where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
                    and participants.gender is not NULL and participants.gender in (?) )", params[:visit_search][:gender])
         end   
+
+
+        if !params[:visit_search][:min_age].blank? && params[:visit_search][:max_age].blank?
+            @search = @search.where("  visits.id in (select enrollment_visit_memberships.visit_id from participants,  enrollment_visit_memberships, enrollments, scan_procedures_visits,visits
+                               where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                            and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id 
+                            and visits.id = enrollment_visit_memberships.visit_id
+                            and floor(DATEDIFF(visits.date,participants.dob)/365.25) >= ?   )",params[:visit_search][:min_age])
+        elsif params[:visit_search][:min_age].blank? && !params[:visit_search][:max_age].blank?
+             @search = @search.where("  visits.id in (select enrollment_visit_memberships.visit_id from participants,  enrollment_visit_memberships, enrollments, scan_procedures_visits,visits
+                             where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                         and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id 
+                         and visits.id = enrollment_visit_memberships.visit_id
+                         and floor(DATEDIFF(visits.date,participants.dob)/365.25) <= ?   )",params[:visit_search][:max_age])
+        elsif !params[:visit_search][:min_age].blank? && !params[:visit_search][:max_age].blank?
+           @search = @search.where("  visits.id in (select enrollment_visit_memberships.visit_id from participants,  enrollment_visit_memberships, enrollments, scan_procedures_visits,visits
+                           where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                       and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id 
+                       and visits.id = enrollment_visit_memberships.visit_id
+                       and floor(DATEDIFF(visits.date,participants.dob)/365.25) between ? and ?   )",params[:visit_search][:min_age],params[:visit_search][:max_age])
+        end
 
         
     @visits =  @search.where(" visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])

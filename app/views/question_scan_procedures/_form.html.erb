@@ -16,16 +16,16 @@ v_exclude_include = {"Exclude"=>"exclude", "Include"=>"include"}
 
   <div class="field">
     <%= f.label :question_id %><br />
-<%= collection_select :question_scan_procedure, :question_id, Question.all.sort_by(&:description), :id, :description,{:prompt => 'Select a Question'} %>
+<%= collection_select :question_scan_procedure, :question_id, Question.all.sort_by(&:description), :id, :description,{:prompt => 'Select a Question'},{:required => true}  %>
   </div>
   <div class="field">
     <%= f.label :scan_procedure_id %><br />
-<%= collection_select :question_scan_procedure, :scan_procedure_id, ScanProcedure.all.sort_by(&:codename), :id, :codename,{:prompt => 'Select a Scan Procedure'} %>
+<%= collection_select :question_scan_procedure, :scan_procedure_id, ScanProcedure.all.sort_by(&:codename), :id, :codename,{:prompt => 'Select a Scan Procedure'},{:required => true}  %>
   </div>
   <div class="field">
     <%= f.label :include_exclude %><br />
  <%= f.select :include_exclude, options_for_select(v_exclude_include, @question_scan_procedure.include_exclude),
-	              {:prompt => 'Select whether to exclude or include this question for this scan procedure'}  %>
+	              {:prompt => 'Select whether to exclude or include this question for this scan procedure'},{:required => true}   %>
   </div>
   <div class="actions">
     <%= f.submit %>
