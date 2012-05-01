@@ -20,7 +20,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
       @search = Visit.search(params[:search]) 
     end
     @visits = @search.relation.where(" visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
-    @collection_title = 'All visits'
+    @collection_title = 'All MRI appts'
     
     respond_to do |format|
       format.html # index.html.erb
@@ -34,7 +34,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     scan_procedure_array =current_user[:view_low_scan_procedure_array]
     @search = Visit.send(params[:scope]).search(params[:search])
     @visits = @search.relation.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
-    @collection_title = "All #{params[:scope].to_s.gsub('_',' ')} visits"
+    @collection_title = "All #{params[:scope].to_s.gsub('_',' ')} MRI appts"
     render :template => "visits/index"
   end
   
@@ -51,7 +51,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     @search = Visit.assigned_to(@user.id).search
     @visits = @search.relation.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
     
-    @collection_title = "All visits assigned " # to #{params[:user_login]}"
+    @collection_title = "All MRI appts assigned " # to #{params[:user_login]}"
     @visits = nil
     render :template => "visits/index"
   end
@@ -72,7 +72,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     end
     @visits =  @search.relation.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])   
     
-    @collection_title = "All visits enrolled in #{ScanProcedure.find_by_id(params[:scan_procedure_id]).codename}"
+    @collection_title = "All MRI appts enrolled in #{ScanProcedure.find_by_id(params[:scan_procedure_id]).codename}"
     
     
     render :template => "visits/index"
@@ -85,7 +85,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     scan_procedure_array =current_user[:view_low_scan_procedure_array]
     @visits = Visit.relation.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).all
     @title = "Visits by month"
-    @collection_title = "Visits by month"
+    @collection_title = "MRI appts by month"
     @total_count = @visits.size
     
     render :template => "visits/index_by_month"
@@ -96,12 +96,12 @@ class VisitsController <  AuthorizedController #  ApplicationController
 
     scan_procedure_array =current_user[:view_low_scan_procedure_array]   
     @visits = Visit.find_by_search_params(params['visit_search']).where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
-    @collection_title = "Found visits"
+    @collection_title = "Found MRI appts"
     @visit_search = params['visit_search']
     
     if @visits.size == 1
       @visit = @visits.first
-      flash[:notice] = "Found 1 visit matching that search."
+      flash[:notice] = "Found 1 MRI appt matching that search."
       respond_to do |format|
         format.xml  { render :xml => @visit }
         format.html { redirect_to @visit }
@@ -171,7 +171,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     @visit.user = current_user
     respond_to do |format|
       if @visit.save
-        flash[:notice] = 'visit was successfully created.'
+        flash[:notice] = 'MRI appt was successfully created.'
         format.html { redirect_to(@visit) }
         format.xml  { render :xml => @visit, :status => :created, :location => @visit }
       else
@@ -399,7 +399,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     @visits =  @search.where(" visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
 
     ### LOOK WHERE TITLE IS SHOWING UP
-    @collection_title = 'All visits'
+    @collection_title = 'All MRI appts'
  
    
 #    light_include_options = :image_dataset_quality_checks

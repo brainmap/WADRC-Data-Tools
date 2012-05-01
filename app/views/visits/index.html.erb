@@ -6,7 +6,7 @@ edit_count = edit_count -1
 %>
 
 <div id="heading_and_link">
-  <h1><%= @collection_title or "Visits" %>:</h1>
+  <h1><%= @collection_title or "MRI appts" %>:</h1>
 <% if edit_count > 0 %> 
  <p>
 		<%= link_to 'create new MRI appt', new_visit_path %> |
