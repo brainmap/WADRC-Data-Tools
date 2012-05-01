@@ -1,5 +1,5 @@
 <div id="heading_and_link">
-  <h1>Search Visits</h1>
+  <h1>Search MRI appt</h1>
 </p>
 </div>
 
@@ -88,7 +88,7 @@
 <%= link_to 'download csv of this search (this may take a while!)', visit_search_path(:visit_search => params[:visit_search], :format => :csv), :class => 'download_csv' %></p>
 <table class="tabular">
   
-  <caption><%= pluralize(@visits.total_count, 'visit') %><%#= paginated ? pagination_info(@visits) : pluralize(@visits.length, 'visit') %></caption>
+  <caption><%= pluralize(@visits.total_count, 'MRI appt') %><%#= paginated ? pagination_info(@visits) : pluralize(@visits.length, 'MRI appt') %></caption>
 <%
 =begin
 %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120417204311) do
+ActiveRecord::Schema.define(:version => 20120419184511) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -439,9 +439,10 @@ ActiveRecord::Schema.define(:version => 20120417204311) do
     t.integer  "lp_exam_md_id"
     t.string   "lpsuccess"
     t.string   "lpabnormality"
-    t.string   "lpfollownote",    :limit => 2000
+    t.string   "lpfollownote",            :limit => 2000
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "temp_fklumbarpunctureid"
   end
 
   create_table "medicationdetails", :force => true do |t|
@@ -450,6 +451,36 @@ ActiveRecord::Schema.define(:version => 20120417204311) do
     t.integer  "lookup_drugclass_id"
     t.integer  "prescription"
     t.integer  "exclusionclass"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "mriperformances", :force => true do |t|
+    t.integer  "mriscantask_id"
+    t.float    "hitpercentage"
+    t.float    "accuracypercentage"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "temp_fkscandataid"
+    t.integer  "temp_enum"
+    t.integer  "temp_fkperfomancesummaryid"
+  end
+
+  create_table "mriscantasks", :force => true do |t|
+    t.integer  "visit_id"
+    t.integer  "lookup_set_id"
+    t.integer  "lookup_scantask_id"
+    t.integer  "preday"
+    t.integer  "task_order"
+    t.integer  "moved"
+    t.integer  "eyecontact"
+    t.integer  "logfilerecorded"
+    t.string   "p_file"
+    t.string   "tasknote"
+    t.integer  "reps"
+    t.date     "scandate"
+    t.integer  "has_concerns"
+    t.string   "concerns"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -521,6 +552,7 @@ ActiveRecord::Schema.define(:version => 20120417204311) do
     t.date     "scanstarttime"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "temp_fkpetscanid"
   end
 
   create_table "physiology_text_files", :force => true do |t|

@@ -1,4 +1,4 @@
-<h1>Search for Visits</h1>
+<h1>Search for MRI appts</h1>
 
 <%= form_for @search do |f| %>
 	<p>
@@ -51,7 +51,7 @@
 		<%= f.label :conference_like, "Conference:" %>
 		<%= f.select :conference_like, Visit::PROGRESS_CHOICES, :include_blank => true %><br/>
 	</p>
-	<p class="button"><%= f.submit "Find Visits" %></p>
+	<p class="button"><%= f.submit "Find MRI appts" %></p>
 <% end %>
 
 <!-- <%= form_tag("/visits/found") do %>

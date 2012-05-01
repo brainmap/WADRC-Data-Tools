@@ -2,7 +2,7 @@
 
 <table class="tabular">
   
-  <caption><%= pluralize(visits.total_count, 'visit') %><%#= paginated ? pagination_info(visits) : pluralize(visits.length, 'visit') %></caption>
+  <caption><%= pluralize(visits.total_count, 'MRI appt') %><%#= paginated ? pagination_info(visits) : pluralize(visits.length, 'MRI appt') %></caption>
   
   <thead>
     <tr>
@@ -47,7 +47,7 @@
 <% if edit_count > 0 %>
           <%= link_to 'edit', edit_visit_path(visit) %>
 <% end %>
-          <%#= link_to 'X', visit, :confirm => "Are you sure you want to delete this visit?", :method => :delete %>
+          <%#= link_to 'X', visit, :confirm => "Are you sure you want to delete this MRI appt?", :method => :delete %>
         </td>
       </tr>
     <% end %>

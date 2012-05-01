@@ -24,7 +24,7 @@
         <div id="visits_tab_bar" class="tabs">
           <ul>
             <li <%= "class=current" if @current_tab == "visits" %>>
-              <%= link_to "Visits", visits_path %>
+              <%= link_to "MRI appts", visits_path %>
             </li>
             <li <%= "class=current" if @current_tab == "enrollments" %>>
               <%= link_to "Enrollments", enrollments_path %>
@@ -36,7 +36,7 @@
               <%= link_to "ScanProcedures", scan_procedures_path %>
             </li>
             <li <%= "class=current" if @current_tab == "visit_search" %>>
-              <%= link_to "Visit Search/Export", visit_search_path %>
+              <%= link_to "MRI appt Search/Export", visit_search_path %>
             </li>
             <li <%= "class=current" if @current_tab == "image_datasets" %>>
               <%= link_to "Image Dataset Search", image_datasets_path %>

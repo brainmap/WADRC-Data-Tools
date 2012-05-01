@@ -6,7 +6,7 @@ edit_count =current_user[:edit_low_scan_procedure_array].length
 edit_count = edit_count -1 
 %>
 <% if edit_count > 0 %>
-<span style="float:right"><%= link_to 'Edit visit', edit_visit_path(@visit) %></span>
+<span style="float:right"><%= link_to 'Edit MRI appt', edit_visit_path(@visit) %></span>
 <% end %>
 <div id="visit_heading">
   <%=	link_to "&larr; Older".html_safe, @older_visit if @older_visit %>
@@ -45,7 +45,7 @@ edit_count = edit_count -1
   
   <div id="visit_details_note" class="sticky">
     <%= key_val_table("visit_details", {
-      :Visit_date => @visit.date,
+      :MRI_appt_date => @visit.date,
       :scan_procedure => @visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe,
       :Scan_number => @visit.scan_number,
       :enumber => @enumber.nil? ? nil : link_to(@visit.enrollment.enumber, @visit.enrollment),
@@ -77,9 +77,9 @@ edit_count = edit_count -1
 <br style="clear: both" /><br />
 
 
-<h3>Images acquired during visit:</h3>
+<h3>Images acquired during MRI appt:</h3>
 <% if @image_datasets.empty? %>
-  <p>No images associated with this visit</p>
+  <p>No images associated with this MRI appt</p>
 <% else %>
   <%= render(:partial => 'image_datasets/image_datasets', :locals => {:image_datasets => @image_datasets, :include_thumbnails => true, :edit_count => edit_count} ) %>
 <% end %>

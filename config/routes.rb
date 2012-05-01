@@ -1,5 +1,9 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :mriperformances
+
+  resources :mriscantasks
+
   resources :neuropsyches
 
   resources :vitals
