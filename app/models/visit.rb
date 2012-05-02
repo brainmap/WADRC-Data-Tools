@@ -169,7 +169,21 @@ class Visit < ActiveRecord::Base
     end
     
     visit.created_by = created_by
+    
+    if visit.appointment_id.blank?
+       appointment = Appointment.create
+       appointment.appointment_type ='mri'
+       appointment.appointment_date = visit.date
+       vgroup = Vgroup.create
+       vgroup.vgroup_date = visit.date
+       vgroup.save
+       appointment.vgroup_id = vgroup.id
+       appointment.save
+       visit.appointment_id = appointment.id
+    end    
+    
     visit.save
+
 
     return visit
 
