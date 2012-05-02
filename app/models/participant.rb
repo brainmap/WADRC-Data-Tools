@@ -5,6 +5,9 @@ class Participant < ActiveRecord::Base
   acts_as_reportable
   
   EXCLUDED_REPORT_ATTRIBUTES = [:dob ,:apoe_e1,:apoe_e2,:created_at,:updated_at,:access_id]
+  
+  paginates_per 50 
+  
   def visits
     @visits ||= []
     return @visits unless @visits.blank?

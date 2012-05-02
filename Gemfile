@@ -39,6 +39,7 @@ gem "mechanize"
 gem "hpricot"
 
 
+
 # Deploy with Capistrano
 gem 'capistrano', '~>2.5.19'
 

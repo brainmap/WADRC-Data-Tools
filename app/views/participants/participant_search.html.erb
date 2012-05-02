@@ -1,0 +1,158 @@
+<div id="heading_and_link">
+  <h1>Search Participant</h1>
+</p>
+</div>
+
+<h3>Criteria:</h3>
+
+<%= form_for 'participant_search' do |f| %>
+<!--
+  <table class="search_form">
+	<tr>
+    <th><%= f.label :scan_procedures %></th>
+    <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
+    <td><%= collection_select(:participant_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename, {}, {:multiple =>  true}) %></td>
+  </tr></table>
+-->
+<table class="search_form">
+	<tr><td><%= f.label :scan_procedures %><br>
+	<div id="scan_procedure_list">
+	<ul>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_visits where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
+		<li>
+			<%#= f.fields_for scan_procedure do |scan_fields| %>
+				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
+				<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
+			<%# end %>
+		</li>
+		<li>
+			<%= check_box_tag "visit_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'participant_search[scan_procedure_id][]' %>
+			<%= label_tag '', scan_procedure.codename %>
+		</li>
+	<% end %>
+	</ul>
+	</div>
+	
+	  </td></tr></table>
+<!-- visits/find.html.erb has a nice checkbox -- from some metasearch plugin?  -->
+  <table class="search_form">
+
+    <tr>
+      <th><%= f.label :enumber %></th>
+      <td><%= f.text_field :enumber %></td>
+    </tr>
+
+    <tr>
+      <th>RMR</th>
+      <td><%= f.text_field :rmr %></td>
+    </tr>
+    <tr>
+      <th>Reggie ID</th>
+      <td><%= f.text_field :reggieid %></td>
+    </tr>
+    <tr>
+      <th>Wrap Number</th>
+      <td><%= f.text_field :wrapnum %></td>
+    </tr>
+
+    <tr>
+      <th><%= f.label :scan_date_before %></th>
+      <td><%= f.date_select "latest_timestamp", :start_year => 1995, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :scan_date_after %></th>
+      <td><%= f.date_select :earliest_timestamp, :start_year => 1995, :include_blank => true %></td>
+    </tr>
+  </table>
+
+
+  <table class="search_form">
+    <tr>
+      <th><%= f.label :gender %></th>
+      <td><%= select :participant_search, :gender, { "M" => 1, "F" => 2 }, :include_blank => true %></td>
+    </tr>
+
+    <tr>
+      <th><%= f.label :minimum_age %></th>
+      <td><%= select :participant_search, :min_age, (1..110).to_a, :include_blank => true %><B> (the age at visit date) </B></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_age %></th>
+      <td><%= select :participant_search, :max_age, (1..110).to_a, :include_blank => true %></td>
+    </tr>
+  </table>
+<!--
+    <tr>
+      <th><%= f.label :minimum_education_years %></th>
+      <td><%= select :image_search, :min_ed_years, (0..25).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_education_years %></th>
+      <td><%= select :image_search, :max_ed_years, (0..25).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :apoe_status %></th>
+      <td><%= select :image_search, :apoe_status, { "negative" => 0, "positive" => 1 }, :include_blank => true %></td>
+    </tr>
+  </table>
+-->
+  
+  <%= clearing_br %>
+  <%= f.submit "Search" %>
+  
+<% end %>
+
+<%= link_to 'download csv of this search (this may take a while!)', participant_search_path(:participant_search => params[:participant_search], :format => :csv), :class => 'download_csv' %></p>
+
+
+<table id="participants_index_table" class="tabular">
+	<caption><%= pluralize(@participants.total_count, 'Participant') %><%#= paginated ? pagination_info(@participants) : pluralize(@participants.length, 'Participant') %></caption>
+  <!-- <caption><%= pluralize @participants.count, 'participants' %></caption> -->
+  
+  <thead>
+    <tr>
+	    <th>DOB</th>
+	    <th>Gender</th>
+	    <th>Wrap Number</th>
+		<th>ReggieID</th>
+	    <th>Years of Education</th>
+	    <th>Notes</th>
+	    <th>Enroll Number</th>
+	    <!-- <th>ApoE</th> -->
+	    <th></th>
+    </tr>
+  </thead>
+  
+  <tfoot><td colspan=7><%= paginate @participants %></td></tfoot>
+
+  <tbody>
+    <% for p in @participants %>
+      <tr>
+        <td><%=h p.dob.year unless p.dob.nil? %></td>
+        <td><%=h p.gender_prompt %></td>
+        <td><%=h p.wrapnum %></td>
+        <td><%=h p.reggieid %></td>
+        <td><%=h p.ed_years %></td>
+        <td>
+          <%= popup_note(p.note.nil? ? "" : "peek", "<p>#{p.note}</p>")%>
+        </td>
+        <td>
+	      <%= p.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %>
+	    </td>
+        <!-- <td>
+          <%#= popup_note(genetic_status(p.apoe_e1, p.apoe_e2), key_val_table('genetic_status_details', {
+            :Allele_1 => allele(p.apoe_e1),
+            :Allele_2 => allele(p.apoe_e2),
+            :Processor => p.apoe_processor
+          }))%>
+        </td> -->
+        <td><%= link_to "view", p %></td>
+      </tr>
+    <% end %>
+  </tbody>
+  
+</table>
+
+<br />
+
+<%# link_to 'New participant', new_participant_path %>

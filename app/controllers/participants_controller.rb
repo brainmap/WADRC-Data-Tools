@@ -224,11 +224,11 @@ class ParticipantsController < ApplicationController
                         and floor(DATEDIFF(visits.date,participants.dob)/365.25) between ? and ?   )",params[:participant_search][:min_age],params[:participant_search][:max_age])
          end
 
-        @participants  =  @search.where(" participants.id in     (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments, scan_procedures_visits
+        @search  =  @search.where(" participants.id in     (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments, scan_procedures_visits
                                where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                             and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id
-                            and scan_procedures_visits.scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
-
+                            and Scan_procedures_visits.scan_procedure_id in (?))", scan_procedure_array)
+       @participants  =  @search.page(params[:page]) 
 
         ### LOOK WHERE TITLE IS SHOWING UP
         @collection_title = 'All participants'

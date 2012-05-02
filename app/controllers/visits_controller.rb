@@ -216,7 +216,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     respond_to do |format|
       if @visit.update_attributes(attributes)
 
-        
+        4
         flash[:notice] = 'visit was successfully updated.'
         format.html { redirect_to(@visit) }
         format.xml  { head :ok }
@@ -429,8 +429,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
         end
 
         
-    @visits =  @search.where(" visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
-
+    @search =  @search.where(" visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array)
+    @visits =  @search.page(params[:page])
     ### LOOK WHERE TITLE IS SHOWING UP
     @collection_title = 'All MRI appts'
  
