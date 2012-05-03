@@ -25,6 +25,7 @@ class User < ActiveRecord::Base
   has_many :analyses, :dependent => :destroy
   has_many :image_comments, :dependent => :destroy
   has_many :visits
+    has_many :vgroups
   has_many :q_data_forms
   has_many :image_searches, :dependent => :destroy
   

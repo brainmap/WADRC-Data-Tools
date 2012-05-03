@@ -1,5 +1,7 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :scan_procedures_vgroups
+
   resources :mriperformances
 
   resources :mriscantasks
@@ -145,7 +147,14 @@ WADRCDataTools::Application.routes.draw do
   # moved up to get precidance over devise sign_upmatch '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user
   
    match '/question/clone/:id', :controller=>'questions',:action=>'clone', :as => :clone
+   
    match '/vgroups/home', :controller => 'vgroups', :action => 'home', :as => :home
+   match '/vgroups/complete', :to => 'vgroups#index_by_scope', :scope => 'complete', :as => :complete_vgroups
+   match '/vgroups/incomplete', :to => 'vgroups#index_by_scope', :scope => 'incomplete', :as => :incomplete_vgroups
+   match '/vgroups/recently_imported', :to => 'vgroups#index_by_scope', :scope => 'recently_imported', :as => :recently_imported_vgroups
+   match '/vgroups/assigned_to/:user_login', :controller => 'vgroups', :action => 'index_by_user_id', :as => :assigned_to_vgroup
+   match '/vgroups/in_scan_procedure/:scan_procedure_id', :controller => 'vgroups', :action => 'index_by_scan_procedure', :as => :in_scan_procedure_vgroup
+   match '/vgroups/vgroup_search' , :controller => 'vgroups', :action => 'vgroup_search', :as =>:vgroup_search
   
    resources :vgroups
   resources :studies

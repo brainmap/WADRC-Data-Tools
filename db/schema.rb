@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120419184511) do
+ActiveRecord::Schema.define(:version => 20120502164017) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -461,8 +461,6 @@ ActiveRecord::Schema.define(:version => 20120419184511) do
     t.float    "accuracypercentage"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "temp_fkscandataid"
-    t.integer  "temp_enum"
     t.integer  "temp_fkperfomancesummaryid"
   end
 
@@ -483,6 +481,8 @@ ActiveRecord::Schema.define(:version => 20120419184511) do
     t.string   "concerns"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "temp_fkscandataid"
+    t.integer  "temp_enum"
   end
 
   create_table "neuropsych_assessments", :force => true do |t|
@@ -763,6 +763,13 @@ ActiveRecord::Schema.define(:version => 20120419184511) do
   end
 
   add_index "scan_procedures", ["protocol_id", "id"], :name => "index_scan_procedures_on_protocol_id_id"
+
+  create_table "scan_procedures_vgroups", :force => true do |t|
+    t.integer  "scan_procedure_id"
+    t.integer  "vgroup_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "scan_procedures_visits", :id => false, :force => true do |t|
     t.integer "scan_procedure_id"

@@ -211,6 +211,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     attributes = {'scan_procedure_ids' => []}.merge(params[:visit] || {} )
     
     @enumbers = @visit.enrollments
+    # also want to set participant in vgroup
     set_participant_in_enrollment(@visit.rmr, @enumbers)
 
     respond_to do |format|
@@ -294,6 +295,16 @@ class VisitsController <  AuthorizedController #  ApplicationController
       end      
     end 
     
+    # check if vgroup.participant_id is blank 
+    if !participant_id.blank?
+      # HOW TO DO THE CHAINED FIND?
+       @vgroup = Vgroup.find(Appointment.find(Visit.find(params[:id]).appointment_id).vgroup_id)
+       if @vgroup.participant_id.blank?
+         @vgroup.participant_id = participant_id
+         @vgroup.save
+       end
+       
+    end
     
   end
 

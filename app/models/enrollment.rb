@@ -2,6 +2,9 @@ class Enrollment < ActiveRecord::Base
   has_many :enrollment_visit_memberships
   has_many :visits, :through => :enrollment_visit_memberships, :uniq => true
   
+#  has_many :enrollment_vgroup_memberships
+#  has_many :vgroups, :through => :enrollment_vgroup_memberships, :uniq => true
+  
   belongs_to :recruitment_group
   belongs_to :participant
   
