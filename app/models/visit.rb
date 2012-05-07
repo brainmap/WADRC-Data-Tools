@@ -71,7 +71,6 @@ class Visit < ActiveRecord::Base
     "#{self.rmr}  # #{self.scan_number} #{Date.strptime(self.date.to_s).strftime('%m/%d/%Y')} -- #{self.enrollments.collect {|e| e.enumber }.join(", ")}"
   end
   
-  
   def week
     self.date.beginning_of_week
   end
@@ -181,6 +180,9 @@ class Visit < ActiveRecord::Base
        vgroup.save
        appointment.vgroup_id = vgroup.id
        appointment.save
+       vital = Vital.new
+       vital.appointment_id = appointment.id
+       vital.save
        visit.appointment_id = appointment.id
     end    
     

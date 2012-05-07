@@ -92,6 +92,36 @@
         <td><%= select :visit, :conference, ["no", "yes", "n/a"] %></td>
       </tr>
     </table>
+<%     @vitals = Vital.where("vitals.appointment_id in (?)",@visit.appointment_id)     
+       @vitals.each do |v|  # could have multiples? %>
+    <br><br><br> <table>
+	<tr><td><%= f.label :Pulse %> </td>
+		<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6) %></td></tr>
+	<tr><td><%= f.label :BP_Systol %> </td>
+		<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6) %></td></tr>
+	<tr><td><%= f.label :BP_Diastol %> </td>
+		<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6) %></td></tr>
+	<tr><td><%= f.label :Blood_Glucose %> </td>
+		<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6) %></td></tr>
+	 </tr></table>    
+	<%=  hidden_field_tag( 'vital_id',v.id) %>
+         
+<%       end
+      if @vitals.blank?
+	    v = Vital.new
+ %>
+ <br><br><br> <table>
+	<tr><td><%= f.label :Pulse %> </td>
+		<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6) %></td></tr>
+	<tr><td><%= f.label :BP_Systol %> </td>
+		<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6) %></td></tr>
+	<tr><td><%= f.label :BP_Diastol %> </td>
+		<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6) %></td></tr>
+	<tr><td><%= f.label :Blood_Glucose %> </td>
+		<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6) %></td></tr>
+	 </tr></table>
+<%   end %>
+
   </div>
   <div class="three_col_right">
     <p>

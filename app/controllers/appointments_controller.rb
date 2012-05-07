@@ -42,9 +42,13 @@ class AppointmentsController < ApplicationController
   # POST /appointments.xml
   def create
     @appointment = Appointment.new(params[:appointment])
-
+    
+    
     respond_to do |format|
       if @appointment.save
+        @vital = Vital.new
+        @vital.appointment_id = @appointment.id
+        @vital.save
         format.html { redirect_to(@appointment, :notice => 'Appointment was successfully created.') }
         format.xml  { render :xml => @appointment, :status => :created, :location => @appointment }
       else

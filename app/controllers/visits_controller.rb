@@ -175,9 +175,13 @@ class VisitsController <  AuthorizedController #  ApplicationController
        @appointment.appointment_date = @visit.date
        @vgroup = Vgroup.create
        @vgroup.vgroup_date = @visit.date
+        @vgroup.rmr = @visit.rmr
        @vgroup.save
        @appointment.vgroup_id = @vgroup.id
        @appointment.save
+       @vital = Vital.new
+       @vital.appointment_id = @appointment.id
+       @vital.save
        @visit.appointment_id = @appointment.id
     end
     respond_to do |format|
@@ -213,6 +217,35 @@ class VisitsController <  AuthorizedController #  ApplicationController
     @enumbers = @visit.enrollments
     # also want to set participant in vgroup
     set_participant_in_enrollment(@visit.rmr, @enumbers)
+   if params[:pulse].blank?  
+     params[:pulse]=991 
+   end
+   if params[:bp_systol].blank?  
+     params[:bp_systol]=991 
+   end
+   if params[:bp_diastol].blank?  
+     params[:bp_diastol]=991 
+   end
+   if params[:bloodglucose].blank?  
+     params[:bloodglucose]=991 
+   end
+      
+    if !params[:vital_id].blank?
+      @vital = Vital.find(params[:vital_id])
+      @vital.pulse = params[:pulse]
+      @vital.bp_systol = params[:bp_systol]
+      @vital.bp_diastol = params[:bp_diastol]
+      @vital.bloodglucose = params[:bloodglucose]
+      @vital.save
+    else
+      @vital = Vital.new
+      @vital.appointment_id = @visit.id
+      @vital.pulse = params[:pulse]
+      @vital.bp_systol = params[:bp_systol]
+      @vital.bp_diastol = params[:bp_diastol]
+      @vital.bloodglucose = params[:bloodglucose]
+      @vital.save      
+    end
 
     respond_to do |format|
       if @visit.update_attributes(attributes)
@@ -345,6 +378,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
     redirect_to @visit
   end
   
+  
+  
   def visit_search
     # possible params -- visits fields just get added as AND statements
     #   other table fields should be grouped into one lower level IN select 
@@ -355,7 +390,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     # visits.date scan date after  = earliest_timestamp(1i)(2i)(3i)
     
     #enrollment_visit_memberships.enrollment_id enrollments.enumber
-
+   params["search_criteria"] =""
     
    if params[:visit_search].nil?
         params[:visit_search] =Hash.new  
@@ -366,27 +401,34 @@ class VisitsController <  AuthorizedController #  ApplicationController
     @search = Visit.search(params[:search]) 
       if !params[:visit_search][:scan_procedure_id].blank?
          @search =@search.where(" visits.id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedures_visits.scan_procedure_id in (?))",params[:visit_search][:scan_procedure_id])
+         @scan_procedures = ScanProcedure.where("id in (?)",params[:visit_search][:scan_procedure_id])
+         params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
       end
       
       if !params[:visit_search][:series_description].blank?
          var = "%"+params[:visit_search][:series_description].downcase+"%"
          @search =@search.where(" visits.id in (select image_datasets.visit_id from image_datasets
           where lower(image_datasets.series_description) like ? )", var)
+          params["search_criteria"] = params["search_criteria"] +", Series description "+params[:visit_search][:series_description]
       end
       
       if !params[:visit_search][:enumber].blank?
          @search =@search.where(" visits.id in (select enrollment_visit_memberships.visit_id from enrollment_visit_memberships,enrollments
           where enrollment_visit_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower(?)))",params[:visit_search][:enumber])
+          params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:visit_search][:enumber]
       end      
 
       if !params[:visit_search][:rmr].blank? && params[:visit_search][:path].blank? && params[:visit_search][:latest_timestamp].blank? && params[:visit_search][:earliest_timestamp].blank?
           @search = @search.where(" lower(visits.rmr) in (lower(?))",params[:visit_search][:rmr])
+          params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:visit_search][:rmr]
       elsif params[:visit_search][:rmr].blank? && !params[:visit_search][:path].blank? && params[:visit_search][:latest_timestamp].blank? && params[:visit_search][:earliest_timestamp].blank?
               var ="%"+params[:visit_search][:path]+"%"
              @search = @search.where(" visits.path LIKE ? ",var)
+             params["search_criteria"] = params["search_criteria"] +", Path "+params[:visit_search][:path]
       elsif !params[:visit_search][:rmr].blank? && !params[:visit_search][:path].blank? && params[:visit_search][:latest_timestamp].blank? && params[:visit_search][:earliest_timestamp].blank?
             var ="%"+params[:visit_search][:path]+"%"
             @search = @search.where(" visits.path LIKE ? and visits.rmr in (?) ",var,params[:visit_search][:rmr])
+            params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:visit_search][:rmr]+", Path "+params[:visit_search][:path]
       end
 
        #  build expected date format --- between, >, < 
@@ -406,16 +448,24 @@ class VisitsController <  AuthorizedController #  ApplicationController
 
        if v_date_latest.length>0 && v_date_earliest.length >0
          @search = @search.where(" visits.date between ? and ? ",v_date_earliest,v_date_latest)
+         params["search_criteria"] = params["search_criteria"] +",  visit date between "+v_date_earliest+" and "+v_date_latest
        elsif v_date_latest.length>0
          @search = @search.where(" visits.date < ?  ",v_date_latest)
+          params["search_criteria"] = params["search_criteria"] +",  visit date before "+v_date_latest
        elsif  v_date_earliest.length >0
          @search = @search.where(" visits.date > ? ",v_date_earliest)
+          params["search_criteria"] = params["search_criteria"] +",  visit date after "+v_date_earliest
         end
 
         if !params[:visit_search][:gender].blank?
            @search =@search.where(" visits.id in (select enrollment_visit_memberships.visit_id from participants,  enrollment_visit_memberships, enrollments
             where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
                    and participants.gender is not NULL and participants.gender in (?) )", params[:visit_search][:gender])
+            if params[:visit_search][:gender] == 1
+               params["search_criteria"] = params["search_criteria"] +",  sex is Male"
+            elsif params[:visit_search][:gender] == 2
+               params["search_criteria"] = params["search_criteria"] +",  sex is Female"
+            end
         end   
 
 
@@ -425,20 +475,25 @@ class VisitsController <  AuthorizedController #  ApplicationController
                             and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id 
                             and visits.id = enrollment_visit_memberships.visit_id
                             and floor(DATEDIFF(visits.date,participants.dob)/365.25) >= ?   )",params[:visit_search][:min_age])
+            params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:visit_search][:min_age]
         elsif params[:visit_search][:min_age].blank? && !params[:visit_search][:max_age].blank?
              @search = @search.where("  visits.id in (select enrollment_visit_memberships.visit_id from participants,  enrollment_visit_memberships, enrollments, scan_procedures_visits,visits
                              where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                          and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id 
                          and visits.id = enrollment_visit_memberships.visit_id
                          and floor(DATEDIFF(visits.date,participants.dob)/365.25) <= ?   )",params[:visit_search][:max_age])
+            params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:visit_search][:max_age]
         elsif !params[:visit_search][:min_age].blank? && !params[:visit_search][:max_age].blank?
            @search = @search.where("  visits.id in (select enrollment_visit_memberships.visit_id from participants,  enrollment_visit_memberships, enrollments, scan_procedures_visits,visits
                            where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                        and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id 
                        and visits.id = enrollment_visit_memberships.visit_id
                        and floor(DATEDIFF(visits.date,participants.dob)/365.25) between ? and ?   )",params[:visit_search][:min_age],params[:visit_search][:max_age])
+          params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:visit_search][:min_age]+" and "+params[:visit_search][:max_age]
         end
-
+        # trim leading ","
+        params["search_criteria"] = params["search_criteria"].sub(", ","")
+        # pass to download file?
         
     @search =  @search.where(" visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array)
     @visits =  @search.page(params[:page])

@@ -1,7 +1,9 @@
 class PetscansController < ApplicationController
   # GET /petscans
   # GET /petscans.xml
+ 
   def index
+     @current_tab = "petscans"
     @petscans = Petscan.all
 
     respond_to do |format|
@@ -13,6 +15,7 @@ class PetscansController < ApplicationController
   # GET /petscans/1
   # GET /petscans/1.xml
   def show
+     @current_tab = "petscans"
     @petscan = Petscan.find(params[:id])
 
     respond_to do |format|
@@ -34,12 +37,14 @@ class PetscansController < ApplicationController
 
   # GET /petscans/1/edit
   def edit
+     @current_tab = "petscans"
     @petscan = Petscan.find(params[:id])
   end
 
   # POST /petscans
   # POST /petscans.xml
   def create
+     @current_tab = "petscans"
     @petscan = Petscan.new(params[:petscan])
 
     respond_to do |format|

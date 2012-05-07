@@ -23,8 +23,26 @@
       <div id="visit_index_main" class="main">
         <div id="visits_tab_bar" class="tabs">
           <ul>
+            <li <%= "class=current" if @current_tab == "vgroups" %>>
+              <%= link_to "Visits", home_path %>
+            </li>
             <li <%= "class=current" if @current_tab == "visits" %>>
-              <%= link_to "MRI appts", visits_path %>
+              <%= link_to "MRI", visits_path %>
+            </li>
+            <li <%= "class=current" if @current_tab == "visit_search" %>>
+              <%= link_to "MRI", visit_search_path %>
+            </li>
+            <li <%= "class=current" if @current_tab == "image_datasets" %>>
+              <%= link_to "Image Datasets", image_datasets_path %>
+            </li>
+            <li <%= "class=current" if @current_tab == "petscans" %>>
+              <%= link_to "PetScan", petscans_path %>
+            </li>
+            <li <%= "class=current" if @current_tab == "lumbarpunctures" %>>
+              <%= link_to "LP", lumbarpunctures_path %>
+            </li>
+            <li <%= "class=current" if @current_tab == "appointments" %>>
+              <%= link_to "All Appts", appointments_path %>
             </li>
             <li <%= "class=current" if @current_tab == "enrollments" %>>
               <%= link_to "Enrollments", enrollments_path %>
@@ -34,12 +52,6 @@
             </li>
             <li <%= "class=current" if @current_tab == "scan_procedures" %>>
               <%= link_to "ScanProcedures", scan_procedures_path %>
-            </li>
-            <li <%= "class=current" if @current_tab == "visit_search" %>>
-              <%= link_to "MRI appt Search/Export", visit_search_path %>
-            </li>
-            <li <%= "class=current" if @current_tab == "image_datasets" %>>
-              <%= link_to "Image Dataset Search", image_datasets_path %>
             </li>
             <!-- <li <%= "class=current" if @current_tab == "log_files" %>>
               <%= link_to("Log files", log_files_path) %>
