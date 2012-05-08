@@ -1,73 +1,90 @@
-<% 
-vgroup = Vgroup.find(Appointment.find(@petscan.appointment_id).vgroup_id)
-participant = nil
-if !vgroup.participant_id.blank?
-	Participant.find(vgroup.participant_id) %>
-	
-	<%= participant.enrollments.collect {|e| e.enumber}.join(", ").html_safe %>
+<%
 
-<% end
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+ edit_low_scan_procedure_array = []
+edit_low_scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+edit_count =edit_low_scan_procedure_array.length 
+edit_count = edit_count -1 
 %>
 
+<% if edit_count > 0 %>
+<span style="float:right"><%= link_to 'Edit Petscan appt', edit_petscan_path(@petscan) %></span>
+<% end %>
+<div id="visit_heading">
+  <%=	link_to "&larr; Older".html_safe, @older_petscan if @older_petscan %>
+  &nbsp;
+  <h1><%= @enumbers.blank? ? @vgroup.rmr : @enumbers.collect{|e| e.enumber }.join(", ") %></h1>
+  <p class="date"><%= @appointment.appointment_date.to_s(:long) %></p>
+  &nbsp;
+  <%=	link_to "Newer &rarr;".html_safe, @newer_petscan if @newer_petscan %>
+  <br />
+  <p><%= @petscan.ecatfilename %></p>
+</div>
 
-<p id="notice"><%= notice %></p>
-Initials, enrollment from vgroup, rmr from vgroup<br>
-multiple petscans on one display page -- one on edit
-<table width="80%">
-	<tr><td align="left" width="10%"><b>Tracer:</b></td><td align="right" width="30%"><%= LookupPettracer.find(@petscan.lookup_pettracer_id).description%></td><td align="right" width="10%"><b>Pulse:</b><td></td></tr>
-	<tr><td align="left"><b>PET Scan Date:</b></td><td align="right"><%= Appointment.find(@petscan.appointment_id).appointment_date%></td><td align="right" width="10%"><b>BP Systol:</b><td></td></tr>
-	<tr><td align="left"><b>Researcher:</b></td><td align="right"></td><td align="right" width="10%"><b>BP Diastol:</b><td></td></tr>
-	<tr><td align="left"><b>Net Injected Dose:</b></td><td align="right"><%= @petscannetinjecteddose%></td><td align="right" width="10%"><b>Blood Glucose:</b><td></td></tr>
-	<tr><td align="left"><b>Units:</b></td><td align="right"><%= @petscan.units%></td></tr>
-	<tr><td align="left"><b>Range:</b></td><td align="right"><%= @petscan.range%></td></tr>
-	<tr><td align="left"><b>Injection Time:</b></td><td align="right"><%= @petscan.injecttiontime%></td></tr>
-	<tr><td align="left"><b>Scan Start Time:</b></td><td align="right"><%= @petscan.scanstarttime%></td></tr>
-	<tr><td align="left"><b>Ecat Filename:</b></td><td align="right"><%= @petscan.EcatFilename%></td></tr>
+
+<div id="leftcol" class="two_col_left">
+  <h3>Summary:</h3>
+  
+  <div id="visit_details_note" class="sticky">
+    <%= key_val_table("visit_details", {
+      :Petscan_appt_date => @appointment.appointment_date,
+      :Tracer => LookupPettracer.find(@petscan.lookup_pettracer_id).name_description.html_safe,
+      :Net_Injected_Dose => @petscan.netinjecteddose,
+      :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
+      :RMR_Number => @vgroup.rmr,
+      :Units =>  @petscan.units,
+      :Range =>  @petscan.range,
+      :Injection_time => @petscan.injecttiontime.nil? ? nil : @petscan.injecttiontime.utc.hour.to_s.rjust(2,'0')+":"+@petscan.injecttiontime.min.to_s.rjust(2,'0'),
+      :Scanner_Start_time => @petscan.scanstarttime.nil? ? nil : @petscan.scanstarttime.utc.hour.to_s.rjust(2,'0')+":"+@petscan.scanstarttime.min.to_s.rjust(2,'0'),
+      :Participant => @participant.nil? ? nil : link_to('view participant', @participant)
+    }) %>
+  </div>
+
+  <div id="visit_details_note" class="sticky">
+    <%= key_val_table("visit_details", {
+      :Petscan_completed => @petscan.completedpetscan == 0 ? "No" : "Yes" ,
+      :Petscan_entered =>  @petscan.enteredpetscan== 0 ? "No" : "Yes",
+      :Petscan_entered_date =>  @petscan.enteredpetscandate,
+      :Petscan_entered_by => Employee.find(@petscan.enteredpetscanwho).name
+    }) %>
+  </div>
+
+</div>
+
+
+
+<div id="visit_status_report" class="two_col_right">
+
+  <h3>Notes:</h3>
+  <div id="notes" class="sticky">
+	<%=  RedCloth.new(@appointment.comment.blank? ? "No comment entered for this petscan" : @appointment.comment).to_html.html_safe 
+            %><br>
+    <%=  RedCloth.new(@petscan.petscan_note.blank? ? "No notes entered for this petscan" : @petscan.petscan_note).to_html.html_safe 
+            %>
+  </div> <small>(move note into comment?)</small>
+<% @vital =  Vital.where("appointment_id in (?) ",@petscan.appointment_id).first
+ if !@vital.blank?
+	 vital = Vital.find(@vital.id) 
+	if ( ((vital.pulse.blank?? 911 :vital.pulse) < 911) or
+		      ((vital.bp_systol.blank?? 911 :vital.bp_systol) < 911 ) or 
+		        ( (vital.bp_diastol.blank?? 911 :vital.bp_diastol) < 911) or 
+		           ((vital.bloodglucose.blank?? 911 :vital.bloodglucose) < 911)  )%>
 	
-	<tr><td align="left"><b>PET Scan Note:</b></td><td align="right" colspan="3"></td></tr>
-	
-</table>
-<!--
-<p>
-  <b>Appointment:</b>
-  <%= @petscan.appointment_id %>
-</p>
+<h4>Vitals:</h4>
+<div id="vital" class="sticky">
+     <%= vital.pulse==991 ?  "" :("Pulse: "+vital.pulse.to_s+"<br>").html_safe %>
+     <%= vital.bp_systol==991 ?  "" :("BP Systol: "+vital.bp_systol.to_s+"<br>").html_safe %>
+     <%= vital.bp_diastol==991 ?  "" :("PBP Diastol: "+vital.bp_diastol.to_s+"<br>").html_safe %>
+     <%= vital.bloodglucose==991 ?  "" :("Blood Glucose: "+vital.bloodglucose.to_s+"<br>").html_safe %>
+</div>
 
-<p>
-  <b>Lookup pettracer:</b>
-  <%= @petscan.lookup_pettracer_id %>
-</p>
+<%    end 
+  end %>
+</div>
 
-<p>
-  <b>Ecatfilename:</b>
-  <%= @petscan.EcatFilename %>
-</p>
 
-<p>
-  <b>Netinjecteddose:</b>
-  <%= @petscan.netinjecteddose %>
-</p>
+<br style="clear: both" /><br />
 
-<p>
-  <b>Units:</b>
-  <%= @petscan.units %>
-</p>
 
-<p>
-  <b>Range:</b>
-  <%= @petscan.range %>
-</p>
 
-<p>
-  <b>Injecttiontime:</b>
-  <%= @petscan.injecttiontime %>
-</p>
-
-<p>
-  <b>Scanstarttime:</b>
-  <%= @petscan.scanstarttime %>
-</p>
--->
-
-<%= link_to 'Edit', edit_petscan_path(@petscan) %> |
-<%= link_to 'Back', petscans_path %>

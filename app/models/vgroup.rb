@@ -18,5 +18,19 @@ class Vgroup < ActiveRecord::Base
   
   has_many :appointments,  :class_name =>"Appointment",:dependent => :destroy
 
+  def participant
+    @participant ||= nil
+    return @participant if @participant
+    if !self.participant_id.blank?
+      @participant = Participant.find(self.participant_id)
+    end
+    return @participant
+  end
+  
+  def enrollments
+    @visit = Visit.where("visits.appointment_id in (select appointments.id from appointments where appointments.vgroup_id in (?))",self.id).first
+    @enrollments = @visit.enrollments # @visit.blank? ? "" : @visit.enrollments.collect {|e| e.enumber }.join(", ")
+    return @enrollments
+  end
      
 end

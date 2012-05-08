@@ -544,7 +544,7 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
   create_table "petscans", :force => true do |t|
     t.integer  "appointment_id"
     t.integer  "lookup_pettracer_id"
-    t.string   "EcatFilename"
+    t.string   "ecatfilename"
     t.float    "netinjecteddose"
     t.string   "units"
     t.string   "range"

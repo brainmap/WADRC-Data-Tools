@@ -1,0 +1,117 @@
+<%
+v_yes_no_display = [["Yes","1"], ["No","0"]]
+%>
+
+<% javascript_tag 'defaults' %>
+<div id="new_edit_form">
+
+<!-- Directory path? -->
+<%= form_for(@petscan) do |f| %>
+  <%= f.error_messages %>
+  <div class="three_col_left">
+    <p>
+      <%= f.label :date %><br />
+      <%= date_select :appointment, :appointment_date, :include_blank => true, :end_year => Time.now.year + 1 %><br />
+    </p>
+    <p>
+      <%= f.label :Ecat_Filename %><br />
+      <%= f.text_field :ecatfilename %>
+    </p>
+    <p>
+      <%= f.label :Tracer %><br />
+     <%= select(:petscan, :lookup_pettracer_id, LookupPettracer.all.sort_by(&:name).collect {|p| [ p.name_description, p.id ] }, { :include_blank => "Select a tracer" }) %>
+
+    </p>
+    <p>
+      <%= f.label :Net_Injected_Dose %><br />
+      <%= f.text_field :netinjecteddose ,:size => 10 %>
+    </p>
+    <p>
+      <%= f.label :units %><br />
+      <%= f.text_field :units ,:size => 6%>
+    </p>
+    <p>
+      <%= f.label :range %><br />
+      <%= f.text_field :range,:size => 6 %>
+    </p>
+    <p>
+      <%= f.label :Injection_time %><br />
+      <%= select_time  (@petscan.injecttiontime.try(:utc) ,:field_name =>'injectiont][', :include_blank => true )%><br />
+    </p>
+
+    <p>
+      <%= f.label :Scan_Start_time %><br />
+      <%= select_time( @petscan.scanstarttime.try(:utc),:field_name =>'scanstartt][', :include_blank => true) %><br />
+    </p>
+
+	
+  </div>
+  <div class="three_col_mid">
+    <table>
+      <tr>
+        <td><%= f.label :Entered_by%></td>
+        <td><%= select(:petscan, :enteredpetscanwho, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Scan Entered By" }) %></td>
+      </tr>
+      <tr>
+        <td><%= f.label :Petscan_Entered %></td>
+        <td><%= f.select :enteredpetscan, options_for_select(v_yes_no_display, @petscan.enteredpetscan),
+						              {:prompt => 'Select if the petscan has been entered'} %>
+	</td>
+      </tr>
+      <tr>
+        <td><%= f.label :Petscan_Completed %></td>
+        <td><%= f.select :completedpetscan, options_for_select(v_yes_no_display, @petscan.completedpetscan),
+							              {:prompt => 'Select if the petscan has been entered'} %></td>
+      </tr>
+      <tr>
+        <td><%= f.label :Date_Petscan_Entered %>   </td>
+        <td><%= date_select :petscan, :enteredpetscandate, :include_blank => true, :end_year => Time.now.year + 1 %></td>
+      </tr>
+  
+    </table>
+<%     @vitals = Vital.where("vitals.appointment_id in (?)",@petscan.appointment_id)     
+       @vitals.each do |v|  # could have multiples? %>
+    <br><br><br> <table>
+	<tr><td><%= f.label :Pulse %> </td>
+		<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6) %></td></tr>
+	<tr><td><%= f.label :BP_Systol %> </td>
+		<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6) %></td></tr>
+	<tr><td><%= f.label :BP_Diastol %> </td>
+		<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6) %></td></tr>
+	<tr><td><%= f.label :Blood_Glucose %> </td>
+		<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6) %></td></tr>
+	 </tr></table>    
+	<%=  hidden_field_tag( 'vital_id',v.id) %>
+         
+<%       end
+      if @vitals.blank?
+	    v = Vital.new
+ %>
+ <br><br><br> <table>
+	<tr><td><%= f.label :Pulse %> </td>
+		<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6) %></td></tr>
+	<tr><td><%= f.label :BP_Systol %> </td>
+		<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6) %></td></tr>
+	<tr><td><%= f.label :BP_Diastol %> </td>
+		<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6) %></td></tr>
+	<tr><td><%= f.label :Blood_Glucose %> </td>
+		<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6) %></td></tr>
+	 </tr></table>
+<%   end %>
+
+  </div>
+  <div class="three_col_right">
+    <p>
+      <%= f.label :Notes %><br/>
+      <%= text_area( :appointment,:comment,:value=>@appointment.comment ) %><br />
+    </p>
+    <%= @petscan.petscan_note.try(:html_safe)%>
+  </div>
+
+  <br style="clear:both" />
+  
+  <%= f.submit form_action %>
+
+<% end %>
+
+</div>

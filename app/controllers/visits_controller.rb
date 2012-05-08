@@ -128,7 +128,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
   
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find_by_id(params[:id])
     # Grab the visits within 1 month +- visit date for "previous" and "back" hack.
-    @visits = Visit.where(:date => @visit.date-1.month..@visit.date+1.month).all
+    @visits = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).where(:date => @visit.date-1.month..@visit.date+1.month).all
     idx = @visits.index(@visit)
     @older_visit = idx + 1 >= @visits.size ? nil : @visits[idx + 1]
     @newer_visit = idx - 1 < 0 ? nil : @visits[idx - 1]
@@ -239,7 +239,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
       @vital.save
     else
       @vital = Vital.new
-      @vital.appointment_id = @visit.id
+      @vital.appointment_id = @visit.appointment_id
       @vital.pulse = params[:pulse]
       @vital.bp_systol = params[:bp_systol]
       @vital.bp_diastol = params[:bp_diastol]
@@ -249,7 +249,10 @@ class VisitsController <  AuthorizedController #  ApplicationController
 
     respond_to do |format|
       if @visit.update_attributes(attributes)
-
+        @appointment = Appointment.find(@visit.appointment_id)
+        @appointment.appointment_date = @visit.date
+        @appointment.save
+     
         4
         flash[:notice] = 'visit was successfully updated.'
         format.html { redirect_to(@visit) }
