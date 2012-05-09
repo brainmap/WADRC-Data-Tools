@@ -142,7 +142,7 @@ class VgroupsController < ApplicationController
     else
       @search = Vgroup.search(params[:search]) 
     end
-    @vgroups = @search.relation.where(" vgroups.id in (select Vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
+    @vgroups = @search.relation.where(" vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
     @collection_title = 'All Visits'
     
     respond_to do |format|

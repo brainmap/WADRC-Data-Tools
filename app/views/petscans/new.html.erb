@@ -1,5 +1,5 @@
+<%   @current_tab = "petscans"
+%>
 <h1>New petscan</h1>
 
-<%= render 'form' %>
-
-<%= link_to 'Back', petscans_path %>
+<%= render :partial => 'new_edit', :locals => { :form_action => 'Create Petscan appt'} %>

@@ -13,6 +13,8 @@
       <th><span class="vert">Appointments</span></th>
       <th><span class="vert">MRI Scan</span></th>
       <th><span class="vert">Pet Scan</span></th>
+      <th><span class="vert">status</span></th>
+      <th><span class="vert">status</span></th>
       <th><span class="vert">Lumbar Puncture</span></th>
       <th><span class="vert">NeuroP</span></th>
 	  <th><span class="vert">Lab</span></th>
@@ -36,8 +38,9 @@
   
   <tbody>
     <% vgroups.each do |vgroup| %>
-   <%  a =  vgroup.appointments
-         a_array = a.to_a
+
+   <%  @a =  Appointment.where("vgroup_id in (?)",vgroup.id)
+        a_array =@a.to_a
        @visits = Visit.where("appointment_id in (?) ",a_array)
          visit = nil
          @visits.each do |v| 
@@ -53,10 +56,12 @@
         <td><%= visit.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
         <td><%= visit.blank? ? "" :visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
         <td><%= visit.blank? ? "" : visit.rmr %></td>
-     <td><%= a.blank? ?  "None" :	a.collect{|sp| link_to("appt",appointment_path(sp))}.join(", ").html_safe %><br>
+     <td><%= @a.blank? ?  "None" :	@a.collect{|sp| link_to("appt",appointment_path(sp))}.join(", ").html_safe %><br>
 	CHANGE TO LINK TO vgroup page of appt</td>
     <td><%= @visits.blank? ?  "None" :	@visits.collect{|sp| link_to("mri scan",visit_path(sp))}.join(", ").html_safe %></td>
     <td><%= @petscans.blank? ?  "None" :	@petscans.collect{|sp| link_to("pet scan",petscan_path(sp))}.join(", ").html_safe %></td>
+    <td><%= @petscans.blank? ?  "-" :	@petscans.collect{|sp| sp.completedpetscan==1 ? "C": (sp.enteredpetscan==1 ? "+": "-")}.join(", ").html_safe %></td>
+    <td>New Petscan-- pass in vgroup_id</td>
 	<td><%= @lumbarpunctures.blank? ?  "None" :	@lumbarpunctures.collect{|sp| link_to("lp",lumbarpuncture_path(sp))}.join(", ").html_safe %></td>
 <!--       <td><= vgroup.appointments.blank? ? "None" : vgroup.appointmets.sort_by(&:codename).collect {|sp| sp.appointment_type}.join(", ").html_safe %></td>
  

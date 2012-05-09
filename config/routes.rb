@@ -134,6 +134,8 @@ WADRCDataTools::Application.routes.draw do
   match '/visits/visit_search' , :controller => 'visits', :action => 'visit_search', :as =>:visit_search
   match '/visit_search' , :controller => 'visits', :action => 'visit_search', :as =>:visit_search
   
+    match '/petscan_search' , :controller => 'petscans', :action => 'petscan_search', :as =>:petscan_search
+  
     match '/participant_search' , :controller => 'participants', :action => 'participant_search', :as =>:participant_search
   
   match '/users/update_role', :controller => 'users', :action => 'update_role', :as => :update_role

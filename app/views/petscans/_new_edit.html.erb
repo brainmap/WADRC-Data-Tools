@@ -1,7 +1,6 @@
 <%
 v_yes_no_display = [["Yes","1"], ["No","0"]]
 %>
-
 <% javascript_tag 'defaults' %>
 <div id="new_edit_form">
 
@@ -36,12 +35,12 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
     </p>
     <p>
       <%= f.label :Injection_time %><br />
-      <%= select_time  (@petscan.injecttiontime.try(:utc) ,:field_name =>'injectiont][', :include_blank => true )%><br />
+      <%= select_time  (@petscan.injecttiontime ,:field_name =>'injectiont][', :include_blank => true )%><br />
     </p>
 
     <p>
       <%= f.label :Scan_Start_time %><br />
-      <%= select_time( @petscan.scanstarttime.try(:utc),:field_name =>'scanstartt][', :include_blank => true) %><br />
+      <%= select_time( @petscan.scanstarttime,:field_name =>'scanstartt][', :include_blank => true) %><br />
     </p>
 
 	
@@ -69,6 +68,9 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
       </tr>
   
     </table>
+  <% if !params[:new_appointment_id].blank?%>
+       <%=  hidden_field_tag( 'new_appointment_id',params[:new_appointment_id]) %>
+  <% end %>
 <%     @vitals = Vital.where("vitals.appointment_id in (?)",@petscan.appointment_id)     
        @vitals.each do |v|  # could have multiples? %>
     <br><br><br> <table>
@@ -109,7 +111,7 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
   </div>
 
   <br style="clear:both" />
-  
+
   <%= f.submit form_action %>
 
 <% end %>

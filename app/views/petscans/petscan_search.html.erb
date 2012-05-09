@@ -1,0 +1,219 @@
+<%   @current_tab = "petscans"
+%>
+
+<%
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+ edit_low_scan_procedure_array = []
+edit_low_scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+edit_count =edit_low_scan_procedure_array.length 
+edit_count = edit_count -1
+
+%>
+
+<div id="heading_and_link">
+  <h1>Petscan appts:</h1>
+<% if edit_count > 0 %> 
+<% end %>
+</p>
+</div>
+
+<B>Criteria: </b><%= params["search_criteria"] %>
+
+
+<%= form_for 'petscan_search' do |f| %>
+<!--
+  <table class="search_form">
+	
+    <th><%= f.label :scan_procedures %></th>
+    <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
+    <td><%= collection_select(:petscan_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename, {}, {:multiple =>  true}) %></td>
+  </table>
+-->
+<table class="search_form">
+	<tr><td><%= f.label :scan_procedures %><br>
+	<div id="scan_procedure_list">
+	<ul>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
+		<li>
+			<%#= f.fields_for scan_procedure do |scan_fields| %>
+				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
+				<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
+			<%# end %>
+		</li>
+		<li>
+			<%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'petscan_search[scan_procedure_id][]' %>
+			<%= label_tag '', scan_procedure.codename %>
+		</li>
+	<% end %>
+	</ul>
+	</div>
+
+	  </td></tr></table>
+
+<!-- visits/find.html.erb has a nice checkbox -- from some metasearch plugin?  -->
+  <table class="search_form">
+
+    <tr>
+      <th><%= f.label :enumber %></th>
+      <td><%= f.text_field :enumber %></td>
+    </tr>
+
+    <tr>
+      <th>RMR</th>
+      <td><%= f.text_field :rmr %></td>
+    </tr>
+
+    <tr>
+      <th><%= f.label :Ecat_filename %></th>
+      <td><%= f.text_field :ecatfilename %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :scan_date_before %></th>
+      <td><%= f.date_select "latest_timestamp", :start_year => 1995, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :scan_date_after %></th>
+      <td><%= f.date_select :earliest_timestamp, :start_year => 1995, :include_blank => true %></td>
+    </tr>
+  </table>
+
+
+  <table class="search_form">
+    <tr>
+      <th><%= f.label :gender %></th>
+      <td><%= select :petscan_search, :gender, { "M" => 1, "F" => 2 }, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :minimum_age %></th>
+      <td><%= select :petscan_search, :min_age, (1..110).to_a, :include_blank => true %><B> (the age at visit) </B></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_age %></th>
+      <td><%= select :petscan_search, :max_age, (1..110).to_a, :include_blank => true %></td>
+    </tr>
+  </table>
+<!--
+    <tr>
+      <th><%= f.label :minimum_education_years %></th>
+      <td><%= select :image_search, :min_ed_years, (0..25).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_education_years %></th>
+      <td><%= select :image_search, :max_ed_years, (0..25).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :apoe_status %></th>
+      <td><%= select :image_search, :apoe_status, { "negative" => 0, "positive" => 1 }, :include_blank => true %></td>
+    </tr>
+  </table>
+-->
+  
+  <%= clearing_br %>
+  <%= f.submit "Search" %>
+  
+<% end %>
+
+<!-- = link_to 'download csv of this search (this may take a while!)', petscan_path(:petscan_search => params[:petscan_search], :format => :csv ), :class => 'download_csv' %></p>
+-->
+<table class="tabular">
+  
+  <caption><%= pluralize(@petscans.total_count, 'Petscan appt') %><%#= paginated ? pagination_info(@petscans) : pluralize(@petscans.length, 'Petscan appt') %></caption>
+  <thead>
+    <tr>
+      <th><span>Date</span></th>
+      <th><span>Scan Procedure</span></th>
+      <th><span>Enroll Number</span></th>
+      <th><span>RMR</span></th>
+      <th><span class="vert">Tracer</span></th>
+      <th><span class="vert">Status</span></th>
+      <th><span class="vert">EcatFilename</span></th>
+      <th><span class="vert">NetInjectedDose</span></th>
+      <th><span class="vert">InjectionTime</span></th>
+      <th><span class="vert">ScanStartTime</span></th>
+      <th></th>
+<% if edit_count > 0 %>
+       <th></th>
+<% end %>
+      <th></th>
+    </tr>
+  </thead>
+
+
+  <tfoot><tr><td colspan=21>
+		 <%= paginate @petscans %> 
+		<%# if paginated %>
+    	<%#= @petscan_search.nil? ? will_paginate(@petscans) : will_paginate(@petscans, :params => { :petscan_search => @petscan_search }) %>
+		<%# end %>
+  </td></tr></tfoot>
+
+  <tbody>
+    <% @petscans.each do |petscan| %>
+       <%    appointment = Appointment.find(petscan.appointment_id) 
+             vgroup = Vgroup.find(appointment.vgroup_id)
+        %>
+      <tr>
+        <td><%= link_to appointment.appointment_date.to_s(:datetime_military), petscan %></td>
+        <td><%= vgroup.scan_procedures.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
+        <td><%= vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
+        <td><%= vgroup.rmr %></td>
+        <td><%= petscan.lookup_pettracer_id.blank? ? nil : LookupPettracer.find(petscan.lookup_pettracer_id).name.html_safe %></td>
+        <td><%= petscan.completedpetscan==1 ? "Completed": (petscan.enteredpetscan==1 ? "Entered" : "")%></td>
+	    <td><%= petscan.ecatfilename %></td>
+	    <td><%= petscan.netinjecteddose %></td>
+	    <td><%= petscan.injecttiontime.nil? ? nil : petscan.injecttiontime.hour.to_s.rjust(2,'0')+":"+petscan.injecttiontime.min.to_s.rjust(2,'0')%></td>
+	    <td><%= petscan.scanstarttime.nil? ? nil : petscan.scanstarttime.hour.to_s.rjust(2,'0')+":"+petscan.scanstarttime.min.to_s.rjust(2,'0')%></td>
+        <td style="width: 6em;">
+          <%= link_to 'show', petscan %>
+		  <% if edit_count > 0 %>
+		          <%= link_to 'edit', edit_petscan_path(petscan) %>
+		  <% end %>
+        </td>
+       <td><%= link_to  'New', new_petscan_path+"/"+vgroup.id.to_s %></td>
+      </tr>
+    <% end %>
+  </tbody>
+
+</table>
+
+<!--
+<h1>Listing petscans</h1>
+
+<table>
+  <tr>
+    <th>Appointment</th>
+    <th>Lookup pettracer</th>
+    <th>Ecatfilename</th>
+    <th>Netinjecteddose</th>
+    <th>Units</th>
+    <th>Range</th>
+    <th>Injecttiontime</th>
+    <th>Scanstarttime</th>
+    <th></th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+< @petscans.each do |petscan| %>
+  <tr>
+    <td><= petscan.appointment_id %></td>
+    <td><= petscan.lookup_pettracer_id %></td>
+    <td><= petscan.ecatfilename %></td>
+    <td><= petscan.netinjecteddose %></td>
+    <td><= petscan.units %></td>
+    <td><= petscan.range %></td>
+    <td><= petscan.injecttiontime %></td>
+    <td><= petscan.scanstarttime %></td>
+    <td><= link_to 'Show', petscan %></td>
+    <td><= link_to 'Edit', edit_petscan_path(petscan) %></td>
+    <td><= link_to 'Destroy', petscan, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td>New (pass vgroup_id) </td>
+  </tr>
+< end %>
+</table>
+
+<br />
+
+
+-->

@@ -7,6 +7,8 @@ edit_low_scan_procedure_array =  (current_user.edit_low_scan_procedure_array).sp
 edit_count =edit_low_scan_procedure_array.length 
 edit_count = edit_count -1 
 %>
+<%   @current_tab = "petscans"
+%>
 
 <% if edit_count > 0 %>
 <span style="float:right"><%= link_to 'Edit Petscan appt', edit_petscan_path(@petscan) %></span>
@@ -29,14 +31,14 @@ edit_count = edit_count -1
   <div id="visit_details_note" class="sticky">
     <%= key_val_table("visit_details", {
       :Petscan_appt_date => @appointment.appointment_date,
-      :Tracer => LookupPettracer.find(@petscan.lookup_pettracer_id).name_description.html_safe,
+      :Tracer => @petscan.lookup_pettracer_id.nil? ? nil : LookupPettracer.find(@petscan.lookup_pettracer_id).name_description.html_safe,
       :Net_Injected_Dose => @petscan.netinjecteddose,
       :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
       :RMR_Number => @vgroup.rmr,
       :Units =>  @petscan.units,
       :Range =>  @petscan.range,
-      :Injection_time => @petscan.injecttiontime.nil? ? nil : @petscan.injecttiontime.utc.hour.to_s.rjust(2,'0')+":"+@petscan.injecttiontime.min.to_s.rjust(2,'0'),
-      :Scanner_Start_time => @petscan.scanstarttime.nil? ? nil : @petscan.scanstarttime.utc.hour.to_s.rjust(2,'0')+":"+@petscan.scanstarttime.min.to_s.rjust(2,'0'),
+      :Injection_time => @petscan.injecttiontime.nil? ? nil : @petscan.injecttiontime.hour.to_s.rjust(2,'0')+":"+@petscan.injecttiontime.min.to_s.rjust(2,'0'),
+      :Scanner_Start_time => @petscan.scanstarttime.nil? ? nil : @petscan.scanstarttime.hour.to_s.rjust(2,'0')+":"+@petscan.scanstarttime.min.to_s.rjust(2,'0'),
       :Participant => @participant.nil? ? nil : link_to('view participant', @participant)
     }) %>
   </div>
@@ -46,12 +48,11 @@ edit_count = edit_count -1
       :Petscan_completed => @petscan.completedpetscan == 0 ? "No" : "Yes" ,
       :Petscan_entered =>  @petscan.enteredpetscan== 0 ? "No" : "Yes",
       :Petscan_entered_date =>  @petscan.enteredpetscandate,
-      :Petscan_entered_by => Employee.find(@petscan.enteredpetscanwho).name
+      :Petscan_entered_by => @petscan.enteredpetscanwho.nil? ? nil : Employee.find(@petscan.enteredpetscanwho).name
     }) %>
   </div>
 
 </div>
-
 
 
 <div id="visit_status_report" class="two_col_right">
