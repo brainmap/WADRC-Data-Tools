@@ -53,6 +53,10 @@ class Visit < ActiveRecord::Base
   delegate :enumber, :to => :enrollment, :prefix => true
   
   acts_as_reportable
+  def appointment
+      @appointment =Appointment.find(self.appointment_id)
+      return @appointment
+  end
   
   def participant
     @participant ||= nil

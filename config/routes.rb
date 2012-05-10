@@ -135,6 +135,7 @@ WADRCDataTools::Application.routes.draw do
   match '/visit_search' , :controller => 'visits', :action => 'visit_search', :as =>:visit_search
   
     match '/petscan_search' , :controller => 'petscans', :action => 'petscan_search', :as =>:petscan_search
+    match '/lumbarpuncture_search' , :controller => 'lumbarpunctures', :action => 'lumbarpuncture_search', :as =>:lumbarpuncture_search
   
     match '/participant_search' , :controller => 'participants', :action => 'participant_search', :as =>:participant_search
   
@@ -188,6 +189,16 @@ WADRCDataTools::Application.routes.draw do
   resources :log_files
   resources :raw_data_imports
   
+  #CHANGED HERE!!!!!
+#  resources :vgroups, :shallow => true do
+#    resources :appointments
+#  end
+  
+  resources :appointments, :shallow => true do
+    resources :petscans
+    resources :lumbarpunctures
+    resources :visits
+  end
   
 
 ####  match '/signup', :controller => 'users', :action => 'new', :as => :signup

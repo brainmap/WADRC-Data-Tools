@@ -1,6 +1,9 @@
-<h1>Editing lumbarpuncture</h1>
 
-<%= render 'form' %>
 
-<%= link_to 'Show', @lumbarpuncture %> |
-<%= link_to 'Back', lumbarpunctures_path %>
+<%   @current_tab = "lumbarpunctures"
+%>
+<h1>Editing Lumbar Puncture appt</h1>
+
+<%= render :partial => 'new_edit', :locals => { :form_action => 'Edit Lumbar Puncture appt'} %>
+
+<br /><%= link_to 'Back to this Lumbar Puncture appt', @lumbarpuncture %> | <%= link_to 'Delete this Lumbar Puncture appt', @lumbarpuncture, :confirm => "Are you sure you want to delete this Lumbar Puncture appt?", :method => :delete %>

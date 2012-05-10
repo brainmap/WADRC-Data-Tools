@@ -1,5 +1,7 @@
-<h1>New lumbarpuncture</h1>
 
-<%= render 'form' %>
 
-<%= link_to 'Back', lumbarpunctures_path %>
+<%   @current_tab = "lumbarpunctures"
+%>
+<h1>New Lumbar Puncture Appt</h1>
+
+<%= render :partial => 'new_edit', :locals => { :form_action => 'Create Lumbar Puncture appt'} %>

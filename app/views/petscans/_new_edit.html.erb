@@ -68,8 +68,8 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
       </tr>
   
     </table>
-  <% if !params[:new_appointment_id].blank?%>
-       <%=  hidden_field_tag( 'new_appointment_id',params[:new_appointment_id]) %>
+  <% if !params[:new_appointment_vgroup_id].blank?%>
+       <%=  hidden_field_tag( 'new_appointment_vgroup_id',params[:new_appointment_vgroup_id]) %>
   <% end %>
 <%     @vitals = Vital.where("vitals.appointment_id in (?)",@petscan.appointment_id)     
        @vitals.each do |v|  # could have multiples? %>

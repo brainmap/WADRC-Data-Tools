@@ -1,35 +1,94 @@
-<p id="notice"><%= notice %></p>
+<%
 
-<p>
-  <b>Appointment:</b>
-  <%= @lumbarpuncture.appointment_id %>
-</p>
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+ edit_low_scan_procedure_array = []
+edit_low_scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+edit_count =edit_low_scan_procedure_array.length 
+edit_count = edit_count -1 
+%>
+<%   @current_tab = "lumbarpunctures"
+%>
 
-<p>
-  <b>Completedlpfast:</b>
-  <%= @lumbarpuncture.completedlpfast %>
-</p>
+<% if edit_count > 0 %>
+<span style="float:right"><%= link_to 'Edit Lumbarpuncture appt', edit_lumbarpuncture_path(@lumbarpuncture) %></span>
+<% end %>
+<div id="visit_heading">
+  <%=	link_to "&larr; Older".html_safe, @older_lumbarpuncture if @older_lumbarpuncture %>
+  &nbsp;
+  <h1><%= @enumbers.blank? ? @vgroup.rmr : @enumbers.collect{|e| e.enumber }.join(", ") %></h1>
+  <p class="date"><%= @appointment.appointment_date.to_s(:long) %></p>
+  &nbsp;
+  <%=	link_to "Newer &rarr;".html_safe, @newer_lumbarpuncture if @newer_lumbarpuncture %>
+  <br />
 
-<p>
-  <b>Lp examp md:</b>
-  <%= @lumbarpuncture.lp_exam_md_id %>
-</p>
-
-<p>
-  <b>Lpsuccess:</b>
-  <%= @lumbarpuncture.lpsuccess %>
-</p>
-
-<p>
-  <b>Lpabnormality:</b>
-  <%= @lumbarpuncture.lpabnormality %>
-</p>
-
-<p>
-  <b>Lpfollownote:</b>
-  <%= @lumbarpuncture.lpfollownote %>
-</p>
+</div>
 
 
-<%= link_to 'Edit', edit_lumbarpuncture_path(@lumbarpuncture) %> |
-<%= link_to 'Back', lumbarpunctures_path %>
+<div id="leftcol" class="two_col_left">
+  <h3>Summary:</h3>
+  
+  <div id="visit_details_note" class="sticky">
+    <%= key_val_table("visit_details", {
+      :Lumbarpuncture_appt_date => @appointment.appointment_date,
+      :MD_for_Lumbarpuncture => @lumbarpuncture.lp_exam_md_id.nil? ? nil : Employee.find(@lumbarpuncture.lp_exam_md_id).name,
+      :LP_Fast_Completed => @lumbarpuncture.completedlpfast == 1 ? "Yes" : "No",
+      :LP_Successful => @lumbarpuncture.lpsuccess == 1 ? "Yes" : "No",
+      :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
+      :RMR_Number => @vgroup.rmr,
+      :LP_Abnormality_Found =>  @lumbarpuncture.lpabnormality == 1 ? "Yes" : "No" ,
+      :Participant => @participant.nil? ? nil : link_to('view participant', @participant)
+    }) %>
+  </div>
+
+  <div id="visit_details_note" class="sticky">
+    <%= key_val_table("visit_details", {
+      :Lumbarpuncture_completed => @lumbarpuncture.completedlumbarpuncture == 1 ? "Yes" : "No" ,
+      :Lumbarpuncture_entered =>  @lumbarpuncture.enteredlumbarpuncture == 1 ? "Yes" : "No",
+      :Lumbarpuncture_entered_date =>  @lumbarpuncture.enteredlumbarpuncturedate,
+      :Lumbarpuncture_entered_by => @lumbarpuncture.enteredlumbarpuncturewho.nil? ? nil : Employee.find(@lumbarpuncture.enteredlumbarpuncturewho).name
+    }) %>
+  </div>
+
+</div>
+
+
+<div id="visit_status_report" class="two_col_right">
+
+  <h3>Notes:</h3>
+  <div id="notes" class="sticky">
+	<%=  RedCloth.new(@appointment.comment.blank? ? "No comment entered for this lumbarpuncture" : @appointment.comment).to_html.html_safe 
+            %><br>
+    <%=  RedCloth.new(@lumbarpuncture.lumbarpuncture_note.blank? ? "No notes entered for this lumbarpuncture" : @lumbarpuncture.lumbarpuncture_note).to_html.html_safe 
+            %>
+  </div>
+  <h3>Comments on follow-up symptoms:</h3>
+  <div id="notes" class="sticky">
+	<%=  RedCloth.new(@lumbarpuncture.lpfollownote.blank? ? "No follow up comment entered for this lumbarpuncture" : @lumbarpuncture.lpfollownote).to_html.html_safe 
+            %>
+  </div>
+<% @vital =  Vital.where("appointment_id in (?) ",@lumbarpuncture.appointment_id).first
+ if !@vital.blank?
+	 vital = Vital.find(@vital.id) 
+	if ( ((vital.pulse.blank?? 911 :vital.pulse) < 911) or
+		      ((vital.bp_systol.blank?? 911 :vital.bp_systol) < 911 ) or 
+		        ( (vital.bp_diastol.blank?? 911 :vital.bp_diastol) < 911) or 
+		           ((vital.bloodglucose.blank?? 911 :vital.bloodglucose) < 911)  )%>
+	
+<h4>Vitals:</h4>
+<div id="vital" class="sticky">
+     <%= vital.pulse==991 ?  "" :("Pulse: "+vital.pulse.to_s+"<br>").html_safe %>
+     <%= vital.bp_systol==991 ?  "" :("BP Systol: "+vital.bp_systol.to_s+"<br>").html_safe %>
+     <%= vital.bp_diastol==991 ?  "" :("PBP Diastol: "+vital.bp_diastol.to_s+"<br>").html_safe %>
+     <%= vital.bloodglucose==991 ?  "" :("Blood Glucose: "+vital.bloodglucose.to_s+"<br>").html_safe %>
+</div>
+
+<%    end 
+  end %>
+</div>
+
+
+<br style="clear: both" /><br />
+
+
+

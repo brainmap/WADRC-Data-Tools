@@ -2,7 +2,8 @@ class VgroupsController < ApplicationController
   # GET /vgroups
   # GET /vgroups.xml
   def index
-    @vgroups = Vgroup.all
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    @vgroups = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).all
 
     respond_to do |format|
       format.html # index.html.erb
@@ -13,7 +14,8 @@ class VgroupsController < ApplicationController
   # GET /vgroups/1
   # GET /vgroups/1.xml
   def show
-    @vgroup = Vgroup.find(params[:id])
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
     respond_to do |format|
       format.html # show.html.erb
@@ -34,7 +36,8 @@ class VgroupsController < ApplicationController
 
   # GET /vgroups/1/edit
   def edit
-    @vgroup = Vgroup.find(params[:id])
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
   end
 
   # POST /vgroups
@@ -56,7 +59,8 @@ class VgroupsController < ApplicationController
   # PUT /vgroups/1
   # PUT /vgroups/1.xml
   def update
-    @vgroup = Vgroup.find(params[:id])
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
     respond_to do |format|
       if @vgroup.update_attributes(params[:vgroup])
@@ -155,7 +159,8 @@ class VgroupsController < ApplicationController
   # DELETE /vgroups/1
   # DELETE /vgroups/1.xml
   def destroy
-    @vgroup = Vgroup.find(params[:id])
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @vgroup.destroy
 
     respond_to do |format|

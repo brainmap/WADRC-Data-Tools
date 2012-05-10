@@ -117,8 +117,8 @@ class PetscansController < ApplicationController
                                                and scan_procedure_id in (?))", scan_procedure_array)
 
 
-    @petscans = @search
     @petscans =  @search.page(params[:page])
+
     ### LOOK WHERE TITLE IS SHOWING UP
     @collection_title = 'All Petscan appts'
 
@@ -163,15 +163,17 @@ class PetscansController < ApplicationController
   # GET /petscans/new
   # GET /petscans/new.xml
   def new
+    @current_tab = "petscans"
     @petscan = Petscan.new
     vgroup_id = params[:id]
+    params[:new_appointment_vgroup_id] = vgroup_id
     @appointment = Appointment.new
     @appointment.vgroup_id = vgroup_id
     @appointment.appointment_date = (Vgroup.find(vgroup_id)).vgroup_date
     @appointment.appointment_type ='pet_scan'
-    @appointment.save
+#    @appointment.save  --- save in create step
+
     @petscan.appointment_id = @appointment.id
-    params[:new_appointment_id] = @appointment.id  
     respond_to do |format|
       format.html # new.html.erb
       format.xml  { render :xml => @petscan }
@@ -193,8 +195,9 @@ class PetscansController < ApplicationController
   # POST /petscans.xml
   def create
      @current_tab = "petscans"
+     scan_procedure_array = []
+     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @petscan = Petscan.new(params[:petscan])
-    @petscan.appointment_id = params[:new_appointment_id]
     
     params[:date][:injectiont][0]="1899"
     params[:date][:injectiont][1]="12"
@@ -213,17 +216,25 @@ class PetscansController < ApplicationController
       scanstarttime =  params[:date][:scanstartt][0]+"-"+params[:date][:scanstartt][1]+"-"+params[:date][:scanstartt][2]+" "+params[:date][:scanstartt][3]+":"+params[:date][:scanstartt][4]
       @petscan.scanstarttime = scanstarttime
     end  
-
-    @appointment = Appointment.find(@petscan.appointment_id)
-    @appointment.comment = params[:appointment][:comment]
+    
     appointment_date = nil
     if !params[:appointment]["#{'appointment_date'}(1i)"].blank? && !params[:appointment]["#{'appointment_date'}(2i)"].blank? && !params[:appointment]["#{'appointment_date'}(3i)"].blank?
          appointment_date = params[:appointment]["#{'appointment_date'}(1i)"] +"-"+params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")+"-"+params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
     end
+    
+    vgroup_id =params[:new_appointment_vgroup_id]
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(vgroup_id)
+    @appointment = Appointment.new
+    @appointment.vgroup_id = vgroup_id
+    @appointment.appointment_type ='pet_scan'
     @appointment.appointment_date =appointment_date
+    @appointment.comment = params[:appointment][:comment]
     @appointment.save
+    @petscan.appointment_id = @appointment.id
+
     respond_to do |format|
       if @petscan.save
+        # @appointment.save
         if !params[:vital_id].blank?
           @vital = Vital.find(params[:vital_id])
           @vital.pulse = params[:pulse]
@@ -252,7 +263,6 @@ class PetscansController < ApplicationController
   # PUT /petscans/1
   # PUT /petscans/1.xml
   def update
-    
     scan_procedure_array = []
     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
      
@@ -299,7 +309,7 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
       @vital.bloodglucose = params[:bloodglucose]
       @vital.save      
     end
-puts "BBBBBBBBBBBBBBBBB"
+
     respond_to do |format|
       if @petscan.update_attributes(params[:petscan])
         @appointment = Appointment.find(@petscan.appointment_id)

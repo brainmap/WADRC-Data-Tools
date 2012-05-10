@@ -1,0 +1,114 @@
+<%
+v_yes_no_display = [["Yes","1"], ["No","0"]]
+%>
+<% javascript_tag 'defaults' %>
+<div id="new_edit_form">
+
+<!-- Directory path? -->
+<%= form_for(@lumbarpuncture) do |f| %>
+  <%= f.error_messages %>
+  <div class="three_col_left">
+    <p>
+      <%= f.label :date %><br />
+      <%= date_select :appointment, :appointment_date, :include_blank => true, :end_year => Time.now.year + 1 %><br />
+    </p>
+    <p>
+       MD for LP<br />
+       <%= select(:lumbarpuncture, :lp_exam_md_id, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "LP done by MD" }) %>
+	
+    </p>
+    <p><table width="10"><tr><td width="80" nowrap>
+      <%= f.label :Fast_Completed %>&nbsp;&nbsp;&nbsp;</td><td width="10">
+		<%= f.select :completedlpfast, options_for_select(v_yes_no_display, @lumbarpuncture.completedlpfast),
+							              {:prompt => 'Select if the lumbarpuncture fast was completed'} %></td></tr>
+     <tr><td>
+      LP Successful&nbsp;&nbsp;&nbsp;</td><td>
+	<%= f.select :lpsuccess, options_for_select(v_yes_no_display, @lumbarpuncture.lpsuccess),
+						              {:prompt => 'Select if the lumbarpuncture was successful'} %></td></tr>
+    <tr><td nowrap>
+      LP Abnormality Found&nbsp;&nbsp;&nbsp;</td><td>
+		<%= f.select :lpabnormality, options_for_select(v_yes_no_display, @lumbarpuncture.lpabnormality),
+							              {:prompt => 'Select if the lumbarpuncture was abnormal'} %></td></tr></table>
+    <p>
+	<p>
+	  <%= f.label :Notes %><br/>
+	  <%= text_area( :appointment,:comment,:value=>@appointment.comment ) %><br />
+	 </p>
+	
+  </div>
+  <div class="three_col_mid">
+  <table>
+    <tr>
+      <td><%= f.label :Entered_by%></td>
+      <td><%= select(:lumbarpuncture, :enteredlumbarpuncturewho, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Lumbar Puncture Entered By" }) %></td>
+    </tr>
+    <tr>
+      <td><%= f.label :lumbarpuncture_Entered %></td>
+      <td><%= f.select :enteredlumbarpuncture, options_for_select(v_yes_no_display, @lumbarpuncture.enteredlumbarpuncture),
+						              {:prompt => 'Select if the lumbarpuncture has been entered'} %>
+	</td>
+    </tr>
+    <tr>
+      <td><%= f.label :lumbarpuncture_Completed %></td>
+      <td><%= f.select :completedlumbarpuncture, options_for_select(v_yes_no_display, @lumbarpuncture.completedlumbarpuncture),
+							              {:prompt => 'Select if the lumbarpuncture has been entered'} %></td>
+    </tr>
+    <tr>
+      <td><%= f.label :Date_lumbarpuncture_Entered %>   </td>
+      <td nowrap><%= date_select :lumbarpuncture, :enteredlumbarpuncturedate, :include_blank => true, :end_year => Time.now.year + 1 %></td>
+    </tr>
+
+  </table>
+
+
+  </div>
+  <div class="three_col_right">
+ 
+	  <% if !params[:new_appointment_vgroup_id].blank?%>
+	       <%=  hidden_field_tag( 'new_appointment_vgroup_id',params[:new_appointment_vgroup_id]) %>
+	  <% end %>
+	<%     @vitals = Vital.where("vitals.appointment_id in (?)",@lumbarpuncture.appointment_id)     
+	       @vitals.each do |v|  # could have multiples? %>
+	    <table>
+		<tr><td><%= f.label :Pulse %> </td>
+			<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6) %></td></tr>
+		<tr><td><%= f.label :BP_Systol %> </td>
+			<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6) %></td></tr>
+		<tr><td><%= f.label :BP_Diastol %> </td>
+			<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6) %></td></tr>
+		<tr><td><%= f.label :Blood_Glucose %> </td>
+			<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6) %></td></tr>
+		 </tr></table>    
+		<%=  hidden_field_tag( 'vital_id',v.id) %>
+
+	<%       end
+	      if @vitals.blank?
+		    v = Vital.new
+	 %>
+	  <table>
+		<tr><td><%= f.label :Pulse %> </td>
+			<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6) %></td></tr>
+		<tr><td><%= f.label :BP_Systol %> </td>
+			<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6) %></td></tr>
+		<tr><td><%= f.label :BP_Diastol %> </td>
+			<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6) %></td></tr>
+		<tr><td><%= f.label :Blood_Glucose %> </td>
+			<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6) %></td></tr>
+		 </tr></table>
+	<%   end %>	
+	<br><br><br><br>
+	<p>
+      <%= f.label :Comments_on_follow_up_symptoms %><br/>
+      <%= text_area( :lumbarpuncture,:lpfollownote ) %><br />
+    </p>
+    <%= @lumbarpuncture.lumbarpuncture_note.try(:html_safe)%>
+
+  </div>
+
+  <br style="clear:both" />
+
+  <%= f.submit form_action %>
+
+<% end %>
+
+</div>
