@@ -12,10 +12,13 @@
       <th><span><%= sort_link @search, :rmr %></span></th>
       <th><span class="vert">Appointments</span></th>
       <th><span class="vert">MRI Scan</span></th>
+      <th><span class="vert">new</span></th>
       <th><span class="vert">Pet Scan</span></th>
       <th><span class="vert">status</span></th>
-      <th><span class="vert">status</span></th>
+      <th><span class="vert">new</span></th>
       <th><span class="vert">Lumbar Puncture</span></th>
+      <th><span class="vert">status</span></th>
+      <th><span class="vert">new</span></th>
       <th><span class="vert">NeuroP</span></th>
 	  <th><span class="vert">Lab</span></th>
 	  <th><span class="vert">Demographics</span></th>
@@ -57,16 +60,18 @@
         <td><%= visit.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
         <td><%= visit.blank? ? "" :visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
         <td><%= visit.blank? ? "" : visit.rmr %></td>
-     <td><%= @a.blank? ?  "None" :	@a.collect{|sp| link_to("appt",appointment_path(sp))}.join(", ").html_safe %>
-	<%= # vgroup.appointments.collect { |sp| link_to("appt",appointment_path(sp)) }.join(", ").html_safe  # second way of making coolection
-	%>
-	
-	CHANGE TO LINK TO vgroup page of appt</td>
+     <td><%= #@a.blank? ?  "None" :	@a.collect{|sp| link_to("appt",appointment_path(sp))}.join(", ").html_safe 
+             # vgroup.appointments.collect { |sp| link_to("appt",appointment_path(sp)) }.join(", ").html_safe  # second way of making coolection
+	%><%= link_to 'Appts', vgroup %></td>
     <td><%= @visits.blank? ?  "None" :	@visits.collect{|sp| link_to("mri scan",visit_path(sp))}.join(", ").html_safe %></td>
+    <td><%= link_to  'add-MRI', new_visit_path+"/"+vgroup.id.to_s %></td>
     <td><%= @petscans.blank? ?  "None" :	@petscans.collect{|sp| link_to("pet scan",petscan_path(sp))}.join(", ").html_safe %></td>
     <td><%= @petscans.blank? ?  "-" :	@petscans.collect{|sp| sp.completedpetscan==1 ? "C": (sp.enteredpetscan==1 ? "+": "-")}.join(", ").html_safe %></td>
-    <td>New Petscan-- pass in vgroup_id</td>
+    <td><%= link_to  'add-Petscan', new_petscan_path+"/"+vgroup.id.to_s %></td>
 	<td><%= @lumbarpunctures.blank? ?  "None" :	@lumbarpunctures.collect{|sp| link_to("lp",lumbarpuncture_path(sp))}.join(", ").html_safe %></td>
+	<td><%= @lumbarpunctures.blank? ?  "-" :	@lumbarpunctures.collect{|sp| sp.completedlumbarpuncture==1 ? "C": (sp.enteredlumbarpuncture==1 ? "+": "-")}.join(", ").html_safe %></td>
+    <td><%= link_to  'add-LP', new_lumbarpuncture_path+"/"+vgroup.id.to_s %></td>
+    
 <!--       <td><= vgroup.appointments.blank? ? "None" : vgroup.appointmets.sort_by(&:codename).collect {|sp| sp.appointment_type}.join(", ").html_safe %></td>
  
         <td><= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
@@ -82,7 +87,6 @@
         <= show_bool(visit.conference) %>
 -->
         <td style="width: 6em;">
-          <%= link_to 'show', vgroup %>
 <% if edit_count > 0 %>
           <%= link_to 'edit', edit_vgroup_path(vgroup) %>
 <% end %>

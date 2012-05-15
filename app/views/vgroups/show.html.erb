@@ -1,22 +1,86 @@
+<%
+@var = current_user
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+edit_count =@var.edit_low_scan_procedure_array.split(' ').length 
+edit_count = edit_count -1 
+@current_tab = "vgroups"
+@a =  Appointment.where("vgroup_id in (?)",@vgroup.id)
+        a_array =@a.to_a
+       @visits = Visit.where("appointment_id in (?) ",a_array)
+         visit = nil
+         @visits.each do |v| 
+	       visit = v
+	     end
+	   # CHANGE TO GET rmr,enroll,scan_protocol from vgroup
+	       @petscans = Petscan.where("appointment_id in (?) ",a_array)
+	       @lumbarpunctures = Lumbarpuncture.where("appointment_id in (?) ",a_array)
+%>
+
 <p id="notice"><%= notice %></p>
-
-<p>
-  <b>Vgroup date:</b>
+<h3>Vgroup:</h3>
+<table width="100%"  class="tabular"><tr><td>
+<b>Vgroup date:</b>
   <%= @vgroup.vgroup_date %>
-</p>
-
-<p>
-  <b>Participant:</b>
-  <%= @vgroup.participant_id %>
-</p>
-<p>
-  <b>RMR:</b>
-  <%= @vgroup.rmr %>
-</p>
-<p>
-  <b>Note:</b>
+</td><td>
+	<b>Scan Procedure:</b><br>
+    <%= visit.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(",<br>").html_safe %> 
+</td><td>
+	<b>Enroll Number:</b><br>
+	<%= visit.blank? ? "" :visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(",<br>").html_safe %>
+	
+</td><td>
+	<b>RMR:</b>
+  <%= visit.blank? ? "" : visit.rmr %>
+</td><td>
+	<b>Participant Reggie_id:</b><br>
+	<%= @vgroup.participant_id.blank? ? "how to add participant" : Participant.find(@vgroup.participant_id).reggieid%>
+	
+	
+</td></tr>
+<tr><td colspan=5 align="left">
+  <b>Note:</b><br>
   <%= @vgroup.note %>
-</p>
+</td></tr>
+<tr><td colspan=4  align="left">
+	<b>MRI:</b>    <%= visit.blank? ? "None" :""%></td><td align="right"> <%= link_to  'New-MRI', new_visit_path+"/"+@vgroup.id.to_s %></td></tr>
+	<tr><td colspan=5>	<table>
+	<% @visits.each do |v| 
+		@appointment = Appointment.find(v.appointment_id) %>
+	<tr><td><%= @appointment.appointment_date%></td><td><%= link_to("show",visit_path(v) )%></td><td><%= edit_count>0 ? link_to("edit",edit_visit_path(v) ) :"" %></td>
+		</tr>
+	<% end %> </table>
+	</td></tr>
+<tr><td colspan=4  align="left">
+	<b>Petscan: </b><%= @petscans.blank? ? "None" :""%></td><td align="right"><%= link_to  'New-Petscan', new_petscan_path+"/"+@vgroup.id.to_s %></b></td></tr>
+<tr><td colspan=5  align="left"><table width="80%">
+	<% @petscans.each do |p|  
+		@appointment = Appointment.find(p.appointment_id) %>
+	<tr><td  align="left" width="10%"><%= @appointment.appointment_date%></td>
+		<td  align="left" width="10%"><%= link_to("show",petscan_path(p) )%></td>
+		<td  align="left" width="10%"><%= edit_count>0 ? link_to("edit",edit_petscan_path(p) ) :"" %></td>
+		<td><%=p.lookup_pettracer_id.nil? ? nil : LookupPettracer.find(p.lookup_pettracer_id).name_description.html_safe %></td>
+		<td><%= p.completedpetscan==1 ? "Completed" :(p.enteredpetscan==1 ? "Entered" : " ")%> </td>
+		</tr>
+		<tr><td colspan="5"><%= @appointment.comment %>
+		</td></tr>
+	<%end %> </table>	
+</td></tr>
+<tr><td colspan=4  align="left">
+	<b>Lumbar Puncture: </b><%= @lumbarpunctures.blank? ? "None" :""%></td><td align="right"> <%= link_to  'New-LP', new_lumbarpuncture_path+"/"+@vgroup.id.to_s %></b></td></tr>
+<tr><td colspan=5  align="left"><table  width="80%">
+	<% @lumbarpunctures.each do |lp|
+	   @appointment = Appointment.find(lp.appointment_id)	%>
+	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%></td>
+		<td  align="left" width="10%"><%= link_to("show",lumbarpuncture_path(lp) )%></td>
+		<td  align="left" width="10%"><%= edit_count>0 ? link_to("edit",edit_lumbarpuncture_path(lp) ) :"" %></td>
+		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+		<td><%= lp.completedlumbarpuncture==1 ? "Completed" :(lp.enteredlumbarpuncture==1 ? "Entered" : " ")%> </td>
+		</tr>
+		<tr><td colspan="5"><%= @appointment.comment %>
+		</td></tr>
+	<%end %>  </table>		
+</td></tr></table>
 
 <p>
   <b>Transfer mri:</b>

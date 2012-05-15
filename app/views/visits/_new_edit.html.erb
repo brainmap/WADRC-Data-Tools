@@ -110,6 +110,9 @@
       if @vitals.blank?
 	    v = Vital.new
  %>
+ <% if !params[:new_appointment_vgroup_id].blank?%>
+      <%=  hidden_field_tag( 'new_appointment_vgroup_id',params[:new_appointment_vgroup_id]) %>
+ <% end %>
  <br><br><br> <table>
 	<tr><td><%= f.label :Pulse %> </td>
 		<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6) %></td></tr>

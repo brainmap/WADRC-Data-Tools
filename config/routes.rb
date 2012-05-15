@@ -200,6 +200,9 @@ WADRCDataTools::Application.routes.draw do
     resources :visits
   end
   
+  resources :lumbarpunctures, :shallow => true do
+    resources :lumbarpuncture_results
+  end
 
 ####  match '/signup', :controller => 'users', :action => 'new', :as => :signup
 ####  match '/login', :controller => 'sessions', :action => 'new', :as => :username

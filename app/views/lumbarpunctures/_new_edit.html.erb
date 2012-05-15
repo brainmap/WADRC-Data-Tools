@@ -59,8 +59,24 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
     </tr>
 
   </table>
-
-
+ <br><br><br><br>
+  <table><tr><td>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+	<%= f.label :Markers %><br/>
+	<%    @lumbarpuncture_results = LumbarpunctureResult.where("lumbarpuncture_results.lumbarpuncture_id in (?)",@lumbarpuncture.id)		    
+    lp_results_array = []
+    lp_results_id_array = []
+    @lumbarpuncture_results.each do |lp_results|   # COULD BE SCAN PROTOCOL SPECIFIC???
+	      lp_results_array[lp_results.lookup_lumbarpuncture_id] = lp_results.value
+	      lp_results_id_array[lp_results.lookup_lumbarpuncture_id] = lp_results.id
+	end
+	   LookupLumbarpuncture.all.sort_by(&:description).each do |lookup_lp|    %>
+		<li>
+			<%=  text_field_tag( 'lookup_lumbarpuncture_ids',lp_results_array[lookup_lp.id], :size => 6, :name => 'lookup_lumbarpuncture_id['+lookup_lp.id.to_s+']') %>
+			<%= label_tag '', lookup_lp.description %>
+		</li>
+	<% end %>
+	
+  </td></tr></table>	
   </div>
   <div class="three_col_right">
  

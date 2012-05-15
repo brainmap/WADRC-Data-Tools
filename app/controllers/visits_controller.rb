@@ -146,6 +146,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # GET /visits/new
   # GET /visits/new.xml
   def new
+    vgroup_id = params[:id]
+    params[:new_appointment_vgroup_id] = vgroup_id
     @visit = Visit.new
     @visit.enrollments << Enrollment.new
     @visit.user = current_user
@@ -173,8 +175,12 @@ class VisitsController <  AuthorizedController #  ApplicationController
        @appointment = Appointment.create
        @appointment.appointment_type ='mri'
        @appointment.appointment_date = @visit.date
-       @vgroup = Vgroup.create
-       @vgroup.vgroup_date = @visit.date
+       if !params[:new_appointment_vgroup_id].blank?
+         @vgroup = Vgroup.find(params[:new_appointment_vgroup_id])
+       else
+         @vgroup = Vgroup.create
+         @vgroup.vgroup_date = @visit.date
+       end
         @vgroup.rmr = @visit.rmr
        @vgroup.save
        @appointment.vgroup_id = @vgroup.id

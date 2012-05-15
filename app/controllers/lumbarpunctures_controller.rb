@@ -101,6 +101,8 @@ class LumbarpuncturesController < ApplicationController
 
     respond_to do |format|
       if @lumbarpuncture.save
+        
+        
         # @appointment.save
         if !params[:vital_id].blank?
           @vital = Vital.find(params[:vital_id])
@@ -117,7 +119,20 @@ class LumbarpuncturesController < ApplicationController
           @vital.bp_diastol = params[:bp_diastol]
           @vital.bloodglucose = params[:bloodglucose]
           @vital.save      
-        end        
+        end    
+        
+        if !params[:lookup_lumbarpuncture_id].blank?
+          LookupLumbarpuncture.all.each do |lookup_lp|
+              val = nil
+              val = params[:lookup_lumbarpuncture_id][lookup_lp.id.to_s].to_s
+              sql = "INSERT INTO lumbarpuncture_results (lumbarpuncture_id,lookup_lumbarpuncture_id,value) VALUES ("+@lumbarpuncture.id.to_s+","+lookup_lp.id.to_s+",'"+val+"')
+                    ON DUPLICATE KEY UPDATE value='"+val+"' "
+              ActiveRecord::Base.connection.insert_sql sql
+              # insert or update?
+          end
+        else
+           # update to null or delete?
+        end   
 
         format.html { redirect_to(@lumbarpuncture, :notice => 'Lumbarpuncture was successfully created.') }
         format.xml  { render :xml => @lumbarpuncture, :status => :created, :location => @lumbarpuncture }
@@ -161,6 +176,19 @@ class LumbarpuncturesController < ApplicationController
           @vital.bloodglucose = params[:bloodglucose]
           @vital.save      
         end
+        
+        if !params[:lookup_lumbarpuncture_id].blank?
+          LookupLumbarpuncture.all.each do |lookup_lp|
+              val = nil
+              val = params[:lookup_lumbarpuncture_id][lookup_lp.id.to_s].to_s
+              sql = "INSERT INTO lumbarpuncture_results (lumbarpuncture_id,lookup_lumbarpuncture_id,value) VALUES ("+@lumbarpuncture.id.to_s+","+lookup_lp.id.to_s+",'"+val+"')
+                    ON DUPLICATE KEY UPDATE value='"+val+"' "
+              ActiveRecord::Base.connection.insert_sql sql
+              # insert or update?
+          end
+        else
+           # update to null or delete?
+        end
 
         respond_to do |format|
           if @lumbarpuncture.update_attributes(params[:lumbarpuncture])
@@ -168,6 +196,8 @@ class LumbarpuncturesController < ApplicationController
             @appointment.comment = params[:appointment][:comment]
             @appointment.appointment_date =appointment_date
             @appointment.save
+            
+           
 
         format.html { redirect_to(@lumbarpuncture, :notice => 'Lumbarpuncture was successfully updated.') }
         format.xml  { head :ok }
