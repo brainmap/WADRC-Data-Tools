@@ -41,6 +41,9 @@
             <li <%= "class=current" if @current_tab == "lumbarpunctures" %>>
               <%= link_to "LP", lumbarpuncture_search_path %>
             </li>
+            <li <%= "class=current" if @current_tab == "blooddraws" %>>
+              <%= link_to "LabHealth", blooddraw_search_path %>
+            </li>
             <li <%= "class=current" if @current_tab == "appointments" %>>
               <%= link_to "All Appts", appointments_path %>
             </li>

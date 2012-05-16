@@ -19,15 +19,11 @@
       <th><span class="vert">Lumbar Puncture</span></th>
       <th><span class="vert">status</span></th>
       <th><span class="vert">new</span></th>
+      <th><span class="vert">Lab Health</span></th>
+      <th><span class="vert">status</span></th>
+      <th><span class="vert">new</span></th>
       <th><span class="vert">NeuroP</span></th>
-	  <th><span class="vert">Lab</span></th>
 	  <th><span class="vert">Demographics</span></th>
-      <th><span class="vert"><%= sort_link @search, :path, "Directory Path" %></span></th>
-      <th><span class="vert"><%= sort_link @search, :transfer_mri %></span></th>
-      <th><span class="vert"><%= sort_link @search, :transfer_pet %></span></th>
-      <th><span class="vert"><%= sort_link @search, :radiology_outcome %></span></th>
-      <th><span class="vert"><%= sort_link @search, :compile_folder %></span></th>
-      <th><span class="vert"><%= sort_link @search, :conference %></span></th>
       <th></th>
     </tr>
   </thead>
@@ -52,7 +48,7 @@
    # CHANGE TO GET rmr,enroll,scan_protocol from vgroup
        @petscans = Petscan.where("appointment_id in (?) ",a_array)
        @lumbarpunctures = Lumbarpuncture.where("appointment_id in (?) ",a_array)
-
+       @blooddraws = Blooddraw.where("appointment_id in (?) ",a_array)
      %>
 
       <tr>
@@ -71,6 +67,10 @@
 	<td><%= @lumbarpunctures.blank? ?  "None" :	@lumbarpunctures.collect{|sp| link_to("lp",lumbarpuncture_path(sp))}.join(", ").html_safe %></td>
 	<td><%= @lumbarpunctures.blank? ?  "-" :	@lumbarpunctures.collect{|sp| sp.completedlumbarpuncture==1 ? "C": (sp.enteredlumbarpuncture==1 ? "+": "-")}.join(", ").html_safe %></td>
     <td><%= link_to  'add-LP', new_lumbarpuncture_path+"/"+vgroup.id.to_s %></td>
+
+	<td><%= @blooddraws.blank? ?  "None" :	@blooddraws.collect{|sp| link_to("lab",blooddraw_path(sp))}.join(", ").html_safe %></td>
+	<td><%= @blooddraws.blank? ?  "-" :	@blooddraws.collect{|sp| sp.completedblooddraw==1 ? "C": (sp.enteredblood==1 ? "+": "-")}.join(", ").html_safe %></td>
+    <td><%= link_to  'add-Lab', new_blooddraw_path+"/"+vgroup.id.to_s %></td>
     
 <!--       <td><= vgroup.appointments.blank? ? "None" : vgroup.appointmets.sort_by(&:codename).collect {|sp| sp.appointment_type}.join(", ").html_safe %></td>
  

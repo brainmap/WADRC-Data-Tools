@@ -1,5 +1,7 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :blooddraws
+
   resources :scan_procedures_vgroups
 
   resources :mriperformances
@@ -136,6 +138,7 @@ WADRCDataTools::Application.routes.draw do
   
     match '/petscan_search' , :controller => 'petscans', :action => 'petscan_search', :as =>:petscan_search
     match '/lumbarpuncture_search' , :controller => 'lumbarpunctures', :action => 'lumbarpuncture_search', :as =>:lumbarpuncture_search
+    match '/blooddraw_search' , :controller => 'blooddraws', :action => 'blooddraw_search', :as =>:blooddraw_search
   
     match '/participant_search' , :controller => 'participants', :action => 'participant_search', :as =>:participant_search
   

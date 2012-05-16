@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120502164017) do
+ActiveRecord::Schema.define(:version => 20120515194308) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -37,6 +37,13 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
     t.integer  "employee_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "temp_visit_id"
+  end
+
+  create_table "blooddraws", :force => true do |t|
+    t.integer  "appointment_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "employees", :force => true do |t|
@@ -50,6 +57,15 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  create_table "enrollment_vgroup_memberships", :force => true do |t|
+    t.integer  "enrollment_id"
+    t.integer  "vgroup_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "enrollment_vgroup_memberships", ["vgroup_id", "enrollment_id"], :name => "index_enrollment_vgroup_memberships_on_vgroup_id_enrollment_id"
 
   create_table "enrollment_visit_memberships", :force => true do |t|
     t.integer  "enrollment_id"
@@ -433,17 +449,27 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
     t.datetime "updated_at"
   end
 
+  add_index "lumbarpuncture_results", ["lumbarpuncture_id", "lookup_lumbarpuncture_id"], :name => "ind_lookup_lp_id", :unique => true
+  add_index "lumbarpuncture_results", ["lumbarpuncture_id"], :name => "ind_lumbar_results"
+
   create_table "lumbarpunctures", :force => true do |t|
     t.integer  "appointment_id"
-    t.string   "completedlpfast"
+    t.integer  "completedlpfast",                           :default => 0
     t.integer  "lp_exam_md_id"
-    t.string   "lpsuccess"
-    t.string   "lpabnormality"
-    t.string   "lpfollownote",            :limit => 2000
+    t.integer  "lpsuccess",                                 :default => 0
+    t.integer  "lpabnormality",                             :default => 0
+    t.string   "lpfollownote",              :limit => 2000
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "temp_fklumbarpunctureid"
+    t.integer  "completedlumbarpuncture",                   :default => 0
+    t.integer  "enteredlumbarpuncture",                     :default => 0
+    t.datetime "enteredlumbarpuncturedate"
+    t.integer  "enteredlumbarpuncturewho"
+    t.string   "lumbarpuncture_note"
   end
+
+  add_index "lumbarpunctures", ["appointment_id"], :name => "ind_lumbarpunctures_appt"
 
   create_table "medicationdetails", :force => true do |t|
     t.string   "genericname"
@@ -463,6 +489,8 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
     t.datetime "updated_at"
     t.integer  "temp_fkperfomancesummaryid"
   end
+
+  add_index "mriperformances", ["mriscantask_id"], :name => "ind_mriperformances_mriscantask"
 
   create_table "mriscantasks", :force => true do |t|
     t.integer  "visit_id"
@@ -484,6 +512,8 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
     t.integer  "temp_fkscandataid"
     t.integer  "temp_enum"
   end
+
+  add_index "mriscantasks", ["visit_id"], :name => "ind_mriscantasks_visit"
 
   create_table "neuropsych_assessments", :force => true do |t|
     t.decimal  "score",                 :precision => 10, :scale => 0
@@ -509,6 +539,8 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "neuropsyches", ["appointment_id"], :name => "ind_neuropsyches_appt"
 
   create_table "participants", :force => true do |t|
     t.integer  "ed_years"
@@ -548,12 +580,19 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
     t.float    "netinjecteddose"
     t.string   "units"
     t.string   "range"
-    t.date     "injecttiontime"
-    t.date     "scanstarttime"
+    t.datetime "injecttiontime"
+    t.datetime "scanstarttime"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "temp_fkpetscanid"
+    t.string   "petscan_note"
+    t.integer  "completedpetscan",    :default => 0
+    t.integer  "enteredpetscan",      :default => 0
+    t.date     "enteredpetscandate"
+    t.integer  "enteredpetscanwho"
   end
+
+  add_index "petscans", ["appointment_id"], :name => "ind_petscans_appt"
 
   create_table "physiology_text_files", :force => true do |t|
     t.string   "filepath"
@@ -764,12 +803,12 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
 
   add_index "scan_procedures", ["protocol_id", "id"], :name => "index_scan_procedures_on_protocol_id_id"
 
-  create_table "scan_procedures_vgroups", :force => true do |t|
-    t.integer  "scan_procedure_id"
-    t.integer  "vgroup_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+  create_table "scan_procedures_vgroups", :id => false, :force => true do |t|
+    t.integer "scan_procedure_id"
+    t.integer "vgroup_id"
   end
+
+  add_index "scan_procedures_vgroups", ["scan_procedure_id", "vgroup_id"], :name => "index_scan_procedures_vgroups_on_scan_procedure_id_vgroup_id"
 
   create_table "scan_procedures_visits", :id => false, :force => true do |t|
     t.integer "scan_procedure_id"
@@ -800,6 +839,16 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
     t.string   "raw_directory"
   end
 
+  create_table "t_access_lab_health", :id => false, :force => true do |t|
+    t.integer "pklabhealthid",   :default => 0, :null => false
+    t.integer "fkvisitid",       :default => 0
+    t.integer "enum"
+    t.integer "appointment_id"
+    t.integer "panda_visit_id"
+    t.integer "panda_vgroup_id"
+    t.date    "visit_date"
+  end
+
   create_table "t_access_panda_match_20120227", :id => false, :force => true do |t|
     t.integer "pkProtocolid_access",                  :default => 0, :null => false
     t.string  "access_enum",                                         :null => false
@@ -815,6 +864,7 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
     t.string  "rmr_access_3",           :limit => 50
     t.string  "rmr_access_4",           :limit => 50
     t.string  "rmr_access_5",           :limit => 50
+    t.string  "rmr_access_6",           :limit => 50
     t.string  "wrapnum_access",         :limit => 5
     t.string  "wrapnum_panda",          :limit => 50
     t.string  "initials_access",        :limit => 50
@@ -835,7 +885,6 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
     t.string  "apoe_note_panda"
     t.integer "ed_years_access"
     t.integer "ed_years_panda"
-    t.string  "rmr_access_6",           :limit => 50
     t.integer "new_participant_id"
   end
 
@@ -930,6 +979,7 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
     t.boolean  "SelfControlSet",                              :default => false
     t.integer  "ConsentForm",                                 :default => 0
     t.integer  "vgroup_id"
+    t.integer  "panda_participant_id"
   end
 
   create_table "t_map_visit", :id => false, :force => true do |t|
@@ -990,7 +1040,7 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
   create_table "vgroups", :force => true do |t|
     t.date     "vgroup_date"
     t.integer  "participant_id"
-    t.string   "note"
+    t.string   "note",           :limit => 2000
     t.string   "transfer_mri"
     t.string   "transfer_pet"
     t.string   "blood_draw"
@@ -999,6 +1049,7 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "user_id"
+    t.string   "rmr",            :limit => 50
   end
 
   create_table "visits", :force => true do |t|
@@ -1029,14 +1080,15 @@ ActiveRecord::Schema.define(:version => 20120502164017) do
     t.integer  "temp_fkMRIscanid"
   end
 
+  add_index "visits", ["appointment_id"], :name => "ind_visits_appt"
   add_index "visits", ["id"], :name => "index_visits_on_id"
 
   create_table "vitals", :force => true do |t|
     t.integer  "appointment_id"
-    t.integer  "bp_systol"
-    t.integer  "bp_diastol"
-    t.integer  "pulse"
-    t.integer  "bloodglucose"
+    t.integer  "bp_systol",      :default => 991
+    t.integer  "bp_diastol",     :default => 991
+    t.integer  "pulse",          :default => 991
+    t.integer  "bloodglucose",   :default => 991
     t.datetime "created_at"
     t.datetime "updated_at"
   end

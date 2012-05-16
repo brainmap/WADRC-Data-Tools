@@ -1,0 +1,205 @@
+<%   @current_tab = "blooddraws"
+%>
+
+<%
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+ edit_low_scan_procedure_array = []
+edit_low_scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+edit_count =edit_low_scan_procedure_array.length 
+edit_count = edit_count -1
+
+%>
+
+<div id="heading_and_link">
+  <h1>Blooddraw appts:</h1>
+<% if edit_count > 0 %> 
+<% end %>
+</p>
+</div>
+
+<B>Criteria: </b><%= params["search_criteria"] %>
+
+
+<%= form_for 'blooddraw_search' do |f| %>
+<!--
+  <table class="search_form">
+	
+    <th><%= f.label :scan_procedures %></th>
+    <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
+    <td><%= collection_select(:blooddraw_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename, {}, {:multiple =>  true}) %></td>
+  </table>
+-->
+<table class="search_form">
+	<tr><td><%= f.label :scan_procedures %><br>
+	<div id="scan_procedure_list">
+	<ul>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
+		<li>
+			<%#= f.fields_for scan_procedure do |scan_fields| %>
+				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
+				<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
+			<%# end %>
+		</li>
+		<li>
+			<%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'blooddraw_search[scan_procedure_id][]' %>
+			<%= label_tag '', scan_procedure.codename %>
+		</li>
+	<% end %>
+	</ul>
+	</div>
+
+	  </td></tr></table>
+
+<!-- visits/find.html.erb has a nice checkbox -- from some metasearch plugin?  -->
+  <table class="search_form">
+
+    <tr>
+      <th><%= f.label :enumber %></th>
+      <td><%= f.text_field :enumber %></td>
+    </tr>
+
+    <tr>
+      <th>RMR</th>
+      <td><%= f.text_field :rmr %></td>
+    </tr>
+
+    <tr>
+      <th><%= f.label :scan_date_before %></th>
+      <td><%= f.date_select "latest_timestamp", :start_year => 1995, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :scan_date_after %></th>
+      <td><%= f.date_select :earliest_timestamp, :start_year => 1995, :include_blank => true %></td>
+    </tr>
+  </table>
+
+
+  <table class="search_form">
+    <tr>
+      <th><%= f.label :gender %></th>
+      <td><%= select :blooddraw_search, :gender, { "M" => 1, "F" => 2 }, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :minimum_age %></th>
+      <td><%= select :blooddraw_search, :min_age, (1..110).to_a, :include_blank => true %><B> (the age at visit) </B></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_age %></th>
+      <td><%= select :blooddraw_search, :max_age, (1..110).to_a, :include_blank => true %></td>
+    </tr>
+  </table>
+<!--
+    <tr>
+      <th><%= f.label :minimum_education_years %></th>
+      <td><%= select :image_search, :min_ed_years, (0..25).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_education_years %></th>
+      <td><%= select :image_search, :max_ed_years, (0..25).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :apoe_status %></th>
+      <td><%= select :image_search, :apoe_status, { "negative" => 0, "positive" => 1 }, :include_blank => true %></td>
+    </tr>
+  </table>
+-->
+  
+  <%= clearing_br %>
+  <%= f.submit "Search" %>
+  
+<% end %>
+
+<!-- = link_to 'download csv of this search (this may take a while!)', blooddraw_path(:blooddraw_search => params[:blooddraw_search], :format => :csv ), :class => 'download_csv' %></p>
+-->
+<table class="tabular">
+  
+  <caption><%= pluralize(@blooddraws.total_count, 'Blooddraw appt') %><%#= paginated ? pagination_info(@blooddraws) : pluralize(@blooddraws.length, 'Blooddraw appt') %></caption>
+  <thead>
+    <tr>
+      <th><span>Date</span></th>
+      <th><span>Scan Procedure</span></th>
+      <th><span>Enroll Number</span></th>
+      <th><span>RMR</span></th>
+      <th><span class="vert">Status</span></th>
+      <th></th>
+<% if edit_count > 0 %>
+       <th></th>
+<% end %>
+      <th></th>
+    </tr>
+  </thead>
+
+
+  <tfoot><tr><td colspan=21>
+		 <%= paginate @blooddraws %> 
+		<%# if paginated %>
+    	<%#= @blooddraw_search.nil? ? will_paginate(@blooddraws) : will_paginate(@blooddraws, :params => { :blooddraw_search => @blooddraw_search }) %>
+		<%# end %>
+  </td></tr></tfoot>
+
+  <tbody>
+    <% @blooddraws.each do |blooddraw| %>
+       <%    appointment = Appointment.find(blooddraw.appointment_id) 
+             vgroup = Vgroup.find(appointment.vgroup_id)
+        %>
+      <tr>
+        <td><%= link_to appointment.appointment_date.to_s(:datetime_military), blooddraw %></td>
+        <td><%= vgroup.scan_procedures.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
+        <td><%= vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
+        <td><%= vgroup.rmr %></td>
+        <td><%= blooddraw.completedblooddraw==1 ? "Completed": (blooddraw.enteredblood==1 ? "Entered" : "")%></td>
+        <td style="width: 6em;">
+          <%= link_to 'show', blooddraw %>
+		  <% if edit_count > 0 %>
+		          <%= link_to 'edit', edit_blooddraw_path(blooddraw) %>
+		  <% end %>
+        </td>
+       <td><%= link_to  'New', new_blooddraw_path+"/"+vgroup.id.to_s %></td>
+      </tr>
+    <% end %>
+  </tbody>
+
+</table>
+
+<!--
+<h1>Listing blooddraws</h1>
+
+<table>
+  <tr>
+    <th>Appointment</th>
+    <th>Lookup pettracer</th>
+    <th>Ecatfilename</th>
+    <th>Netinjecteddose</th>
+    <th>Units</th>
+    <th>Range</th>
+    <th>Injecttiontime</th>
+    <th>Scanstarttime</th>
+    <th></th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+< @blooddraws.each do |blooddraw| %>
+  <tr>
+    <td><= blooddraw.appointment_id %></td>
+    <td><= blooddraw.lookup_pettracer_id %></td>
+    <td><= blooddraw.ecatfilename %></td>
+    <td><= blooddraw.netinjecteddose %></td>
+    <td><= blooddraw.units %></td>
+    <td><= blooddraw.range %></td>
+    <td><= blooddraw.injecttiontime %></td>
+    <td><= blooddraw.scanstarttime %></td>
+    <td><= link_to 'Show', blooddraw %></td>
+    <td><= link_to 'Edit', edit_blooddraw_path(blooddraw) %></td>
+    <td><= link_to 'Destroy', blooddraw, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td>New (pass vgroup_id) </td>
+  </tr>
+< end %>
+</table>
+
+<br />
+
+
+-->

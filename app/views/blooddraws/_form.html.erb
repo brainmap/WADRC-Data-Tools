@@ -1,0 +1,21 @@
+<%= form_for(@blooddraw) do |f| %>
+  <% if @blooddraw.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@blooddraw.errors.count, "error") %> prohibited this blooddraw from being saved:</h2>
+
+      <ul>
+      <% @blooddraw.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :appointment_id %><br />
+    <%= f.text_field :appointment_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

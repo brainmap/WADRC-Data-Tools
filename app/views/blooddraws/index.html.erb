@@ -1,0 +1,23 @@
+<h1>Listing blooddraws</h1>
+
+<table>
+  <tr>
+    <th>Appointment</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @blooddraws.each do |blooddraw| %>
+  <tr>
+    <td><%= blooddraw.appointment_id %></td>
+    <td><%= link_to 'Show', blooddraw %></td>
+    <td><%= link_to 'Edit', edit_blooddraw_path(blooddraw) %></td>
+    <td><%= link_to 'Destroy', blooddraw, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Blooddraw', new_blooddraw_path %>

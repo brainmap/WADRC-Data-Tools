@@ -15,6 +15,7 @@ edit_count = edit_count -1
 	   # CHANGE TO GET rmr,enroll,scan_protocol from vgroup
 	       @petscans = Petscan.where("appointment_id in (?) ",a_array)
 	       @lumbarpunctures = Lumbarpuncture.where("appointment_id in (?) ",a_array)
+	       @blooddraws = Blooddraw.where("appointment_id in (?) ",a_array)
 %>
 
 <p id="notice"><%= notice %></p>
@@ -80,33 +81,21 @@ edit_count = edit_count -1
 		<tr><td colspan="5"><%= @appointment.comment %>
 		</td></tr>
 	<%end %>  </table>		
+<tr><td colspan=4  align="left">
+	<b>Lab Health: </b><%= @blooddraws.blank? ? "None" :""%></td><td align="right"> <%= link_to  'New-Lab', new_blooddraw_path+"/"+@vgroup.id.to_s %></b></td></tr>
+<tr><td colspan=5  align="left"><table  width="80%">
+	<% @blooddraws.each do |bd|
+	   @appointment = Appointment.find(bd.appointment_id)	%>
+	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%></td>
+		<td  align="left" width="10%"><%= link_to("show",blooddraw_path(bd) )%></td>
+		<td  align="left" width="10%"><%= edit_count>0 ? link_to("edit",edit_blooddraw_path(bd) ) :"" %></td>
+		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+		<td><%= bd.completedblooddraw==1 ? "Completed" :(bd.enteredblood==1 ? "Entered" : " ")%> </td>
+		</tr>
+		<tr><td colspan="5"><%= @appointment.comment %>
+		</td></tr>
+	<%end %>  </table>		
 </td></tr></table>
-
-<p>
-  <b>Transfer mri:</b>
-  <%= @vgroup.transfer_mri %>
-</p>
-
-<p>
-  <b>Transfer pet:</b>
-  <%= @vgroup.transfer_pet %>
-</p>
-
-<p>
-  <b>Blood draw:</b>
-  <%= @vgroup.blood_draw %>
-</p>
-
-<p>
-  <b>Np testing:</b>
-  <%= @vgroup.np_testing %>
-</p>
-
-<p>
-  <b>Lumbar punture:</b>
-  <%= @vgroup.lumbar_punture %>
-</p>
-
 
 <%= link_to 'Edit', edit_vgroup_path(@vgroup) %> |
 <%= link_to 'Back', vgroups_path %>
