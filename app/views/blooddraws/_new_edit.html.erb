@@ -1,0 +1,54 @@
+<%
+v_yes_no_display = [["Yes","1"], ["No","0"]]
+%>
+<% javascript_tag 'defaults' %>
+<div id="new_edit_form">
+
+<!-- Directory path? -->
+<%= form_for(@blooddraw) do |f| %>
+  <%= f.error_messages %>
+  <div class="three_col_left">
+    <p>
+      <%= f.label :date %><br />
+      <%= date_select :appointment, :appointment_date, :include_blank => true, :end_year => Time.now.year + 1 %><br />
+    </p>	
+  </div>
+  <div class="three_col_mid">
+    <table>
+      <tr>
+        <td><%= f.label :Entered_by%></td>
+        <td><%= select(:blooddraw, :enteredbloodwho, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Scan Entered By" }) %></td>
+      </tr>
+      <tr>
+        <td><%= f.label :Blooddraw_Entered %></td>
+        <td><%= f.select :enteredblood, options_for_select(v_yes_no_display, @blooddraw.enteredblood),
+						              {:prompt => 'Select if the blooddraw has been entered'} %>
+	</td>
+      </tr>
+      <tr>
+        <td><%= f.label :Blooddraw_Completed %></td>
+        <td><%= f.select :completedblooddraw, options_for_select(v_yes_no_display, @blooddraw.completedblooddraw),
+							              {:prompt => 'Select if the blooddraw has been entered'} %></td>
+      </tr>
+      <tr>
+        <td><%= f.label :Date_Blooddraw_Entered %>   </td>
+        <td><%= date_select :blooddraw, :enteredblooddate, :include_blank => true, :end_year => Time.now.year + 1 %></td>
+      </tr>
+  
+    </table>
+  </div>
+  <div class="three_col_right">
+    <p>
+      <%= f.label :Notes %><br/>
+      <%= text_area( :appointment,:comment,:value=>@appointment.comment ) %><br />
+    </p>
+    <%= @blooddraw.blooddrawnote.try(:html_safe)%>
+  </div>
+
+  <br style="clear:both" />
+
+  <%= f.submit form_action %>
+
+<% end %>
+
+</div>

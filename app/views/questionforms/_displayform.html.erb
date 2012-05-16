@@ -11,17 +11,24 @@
 # and each of the twp parts of the form elements
 %>
 <%
- @questionform_questions = QuestionformQuestion.where(" questionform_id = ?",params[:id]).sort_by(&:display_order)
-   params["q_data_form_id"] = "" #"17"
-  if params["q_data_form_id"].length > 0 
-   @q_data_form = QDataForm.find(params["q_data_form_id"])
+ params[:id] = @questionform.id.to_s
+
+ @questionform_questions = QuestionformQuestion.where(" question_id not in (select question_id from question_scan_procedures)
+                                                           or (question_id in 
+                                                                   (select question_id from question_scan_procedures where  include_exclude ='include' and scan_procedure_id in (?))
+                                                                and
+                                                             question_id not in 
+                                        (select question_id from question_scan_procedures where include_exclude ='exclude' and scan_procedure_id in (?)))",
+                                                   @scanprocedures,@scanprocedures).where(" questionform_id = ?",params[:id]).sort_by(&:display_order)
+  if !@q_data_form.blank?
+   #@q_data_form = QDataForm.find(params[:q_data_form_id])
   else
    @q_data_form = QDataForm.new
   end
+ params[:q_data_form_id] = @q_data_form.id.to_s
 # need front porch --- need consitant participant with enrollment with appointment with visit -- derive other values from one selection
 # just display -- rederive, even with hidden field
 %>
-<b><%= Questionform.find(params[:id]).long_description%></b><br>
 <% form_tag( "/questionform/question_enter",:url => { :controller=>"questionform",:action => "question_enter" } ,  :html => { :id => params[:id] }) do |f| %>
 <!-- THIS WILL CHANGE TO questionform_id   -->
 	<%= hidden_field_tag(:questionform_id, params[:id]) %>
@@ -38,25 +45,12 @@
      value_link_array = [] %>
 <%    results.each do |vl|  
 	  value_link_array << vl.try(:to_s)
-     if vl.try(:to_s) == "participant"   %> Participant: 
-	  	<%= collection_select "value_link","participant_id", Participant.all,
-	    	:id, :reggieid, options={ :selected => @q_data_form.participant_id.to_i,:include_blank => "Select a participant" } %>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   <% elsif vl.try(:to_s) == "visit"   %> Visit: 
-			<%= collection_select "value_link","visit_id", Visit.all.sort_by(&:rmr_scan_date),
-				:id, :rmr_scan_date, {:include_blank => "Select a visit", :selected => @q_data_form.visit_id } %>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   <% elsif vl.try(:to_s) == "appointment"   %><!-- Appointment: 
-			<%= collection_select "value_link","appointment_id", Visit.all.sort_by(&:rmr_scan_date),
-				:id, :rmr_scan_date, {:include_blank => "Select an appointment", :selected => @q_data_form.appointment_id } %>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   -->
-   <% elsif vl.try("to_s") == "enrollment"   %> Enrollment: 
-			<%= collection_select "value_link","enrollment_id", Enrollment.all.sort_by(&:enumber),
-				:id, :enumber, {:include_blank => "Select an enrollment", :selected => @q_data_form.enrollment_id } %>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;			
-	<% elsif  vl.try("to_s") == "scan_procedure"   %> Scan Procedure: 
-			<%= collection_select "value_link","scan_procedure_id", ScanProcedure.all.sort_by(&:codename),
-				:id, :codename, {:include_blank => "Select a scan_procedure", :selected => @q_data_form.scan_procedure_id } %>
+     if vl.try(:to_s) == "participant"   %> 
+             <%= hidden_field_tag("value_1[-1]","") %> <%= hidden_field_tag("value_link[participant_id]",params[:participant_id]) %>
+   <% elsif vl.try(:to_s) == "visit"   %> <%= hidden_field_tag("value_link[visit_id]",params[:visit_id]) %>
+   <% elsif vl.try(:to_s) == "appointment"   %><%= hidden_field_tag("value_link[appointment_id]",@appointment.id.to_s) %>
+   <% elsif vl.try("to_s") == "enrollment"   %> <%= hidden_field_tag("value_link[enrollment_id]",params[:enrollment_id]) %>			
+	<% elsif  vl.try("to_s") == "scan_procedure"   %> <%= hidden_field_tag("value_link[scan_procedure_id]",params[:escan_procedure_id]) %>
 <%	  end %>
   <% end %>
 <%    # scan_procedure id --- access control, limit participants, visits, etc%>
@@ -66,8 +60,8 @@
 	@question = Question.find(qfq.question_id)
 			# pass @question to draw_question
 			params["q_data_id["+qfq.question_id.to_s+"]"] = "" #"33" 
-		  if params["q_data_form_id"].length > 0  # get this q_data_form_id / question_id ==> assuming no duplicate question_id in one form
-			sql = "select distinct q_data.id from q_data where q_data_form_id ="+params["q_data_form_id"]+" and 
+		  if !@q_data_form.blank?  # get this q_data_form_id / question_id ==> assuming no duplicate question_id in one form
+			sql = "select distinct q_data.id from q_data where q_data_form_id ="+@q_data_form.id.to_s+" and 
 			       q_data.question_id  ="+@question.id.to_s
 		    connection = ActiveRecord::Base.connection();
 		    results = connection.execute(sql)
@@ -93,7 +87,7 @@
 		<B><%=  @question.heading_1 %></B> <br>
 	   <% end %>
 	  <%if !@question.phrase_a_1.blank? %>
-		<%=  @question.phrase_a_1 %>  
+		<b><%=  @question.phrase_a_1 %></b>  
 	  <% end %>	
 	  <%if !@question.phrase_b_1.blank? %>
 		<%=  @question.phrase_b_1 %>  
@@ -105,9 +99,9 @@
 			end
 		 
 	      if @question.value_type_1 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
-	         <%= draw_text_area(@question.id,"1","60x7", @question.default_val_1,@q_data.value_1) %>
+	         <%= @q_data.value_1 %>
 	      <% elsif @question.value_type_1 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
-	         <%= draw_text_area(@question.id,"1","60x7", @question.default_val_1,@q_data.value_1) %>
+	         <%=  @q_data.value_1 %>
 		<% elsif @question.value_type_1 == "dropdown"
 		    if @question.ref_table_a_1 == "LOOKUP_REFS"  ## use ref_table_b_1 %>
 				<%= collection_select "value_1",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_1).sort_by(&:display_order),
@@ -118,20 +112,20 @@
 		     <%   end   %>
 		<% elsif @question.value_type_1 == "text_5"  %>
 			<% #question_id, value_number,size %>
-			<%= draw_text_field(@question.id,"1",5, @question.default_val_1,@q_data.value_1) %>
+			<%= @q_data.value_1 %>
 		<% elsif @question.value_type_1 == "text_10"  %>
 		<% #question_id, value_number,size %>
-		   <%= draw_text_field(@question.id,"1",10, @question.default_val_1,@q_data.value_1) %>	
+		   <%= @q_data.value_1 %>	
 		<% elsif @question.value_type_1 == "text_20"  %>
-		   <%= draw_text_field(@question.id,"1",20, @question.default_val_1,@q_data.value_1) %>	
+		   <%= @q_data.value_1 %>	
 		<% elsif @question.value_type_1 == "text_30"  %>
-		   <%= draw_text_field(@question.id,"1",30, @question.default_val_1,@q_data.value_1) %>	
+		   <%= @q_data.value_1 %>	
 		<% elsif @question.value_type_1 == "text_50"  %>
-		   <%= draw_text_field(@question.id,"1",50, @question.default_val_1,@q_data.value_1) %>
+		   <%= @q_data.value_1 %>
 		<% elsif @question.value_type_1 == "text_70"  %>
-		   <%= draw_text_field(@question.id,"1",70, @question.default_val_1,@q_data.value_1) %>	
+		   <%= @q_data.value_1 %>	
 		<% elsif @question.value_type_1 == "text_90"  %>
-		   <%= draw_text_field(@question.id,"1",90, @question.default_val_1,@q_data.value_1) %>								
+		   <%= @q_data.value_1 %>								
 		<% elsif @question.value_type_1 == "checkbox_1_col"  %>
 		   <% if @question.ref_table_a_1 == "LOOKUP_REFS" 
 			     sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_1+"' order by display_order"
@@ -214,7 +208,7 @@
 		<B><%=  @question.heading_2 %></B> <br>
 	   <% end %>
 	  <%if !@question.phrase_a_2.blank? %>
-		<%=  @question.phrase_a_2 %>  
+		<b><%=  @question.phrase_a_2 %></b>  
 	  <% end %>	
 	  <%if !@question.phrase_b_2.blank? %>
 		<%=  @question.phrase_b_2 %>  
@@ -225,9 +219,9 @@
 				val_array = @q_data.value_2.split(',')
 			end
 		     if @question.value_type_2 == "textarea"   # walk thru each value_type --- get each disoplay value  %>			
-	         <%= draw_text_area(@question.id,"2","60x7", @question.default_val_2,@q_data.value_2) %>
+	         <%=@q_data.value_2%>
 	        <% elsif @question.value_type_2 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
-	         <%= draw_text_area(@question.id,"2","60x7", @question.default_val_2,@q_data.value_2) %>
+	         <%= @q_data.value_2 %>
 			<% elsif @question.value_type_2 == "dropdown"
 			    if @question.ref_table_a_2 == "LOOKUP_REFS"  ## use ref_table_b_2 %>
 					<%= collection_select "value_2",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_2).sort_by(&:display_order),
@@ -238,19 +232,19 @@
 			     <%   end   %>
 			<% elsif @question.value_type_2 == "text_5"  %>
 						<% #question_id, value_number,size %>
-				<%= draw_text_field(@question.id,"2",5, @question.default_val_2,@q_data.value_2) %>
+				<%= @q_data.value_2 %>
 			<% elsif @question.value_type_2 == "text_10"  %>
-			  <%= draw_text_field(@question.id,"2",10, @question.default_val_2,@q_data.value_2) %>	
+			  <%= @q_data.value_2 %>	
 			<% elsif @question.value_type_2 == "text_20"  %>
-			  <%= draw_text_field(@question.id,"2",20, @question.default_val_2,@q_data.value_2) %>	
+			  <%= @q_data.value_2 %>	
 			<% elsif @question.value_type_2 == "text_30"  %>
-			   <%= draw_text_field(@question.id,"2",30, @question.default_val_2,@q_data.value_2) %>
+			   <%= @q_data.value_2 %>
 			<% elsif @question.value_type_2 == "text_50"  %>
-			   <%= draw_text_field(@question.id,"2",50, @question.default_val_2,@q_data.value_2) %>
+			   <%= @q_data.value_2 %>
 			<% elsif @question.value_type_2 == "text_70"  %>
-			   <%= draw_text_field(@question.id,"2",70, @question.default_val_2,@q_data.value_2) %>	
+			   <%= @q_data.value_2 %>	
 			<% elsif @question.value_type_2 == "text_90"  %>
-			   <%= draw_text_field(@question.id,"2",90, @question.default_val_2,@q_data.value_2) %>
+			   <%= @q_data.value_2 %>
 			<% elsif @question.value_type_2 == "checkbox_1_col"  %>
 		   		<% if @question.ref_table_a_2 == "LOOKUP_REFS" 
 			     	sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_2+"' order by display_order"
@@ -333,7 +327,7 @@
 		<B><%=  @question.heading_3 %></B> <br>
 	   <% end %>
 	  <%if !@question.phrase_a_3.blank? %>
-		<%=  @question.phrase_a_3 %>  
+		<b><%=  @question.phrase_a_3 %> </b> 
 	  <% end %>	
 	  <%if !@question.phrase_b_3.blank? %>
 		<%=  @question.phrase_b_3 %>  
@@ -345,9 +339,9 @@
 				val_array = @q_data.value_3.split(',')
 			end
 		      if @question.value_type_3 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
-	           <%= draw_text_area(@question.id,"3","60x7", @question.default_val_3,@q_data.value_3) %>
+	           <%= @q_data.value_3 %>
 	        <% elsif @question.value_type_3 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
-	         <%= draw_text_area(@question.id,"3","60x7", @question.default_val_3,@q_data.value_3) %>
+	         <%= @q_data.value_3 %>
 			<% elsif @question.value_type_3 == "dropdown"
 			    if @question.ref_table_a_3 == "LOOKUP_REFS"  ## use ref_table_b_3 %>
 					<%= collection_select "value_3",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_3).sort_by(&:display_order),
@@ -357,19 +351,19 @@
 				    	:id, :description, {:include_blank => @question.prompt_3,:selected => (@q_data.value_3 or @question.default_val_3)} %>
 			     <%   end   %>
 			<% elsif @question.value_type_3 == "text_5"  %>
-					 <%= draw_text_field(@question.id,"3",5, @question.default_val_3,@q_data.value_3) %>
+					 <%= @q_data.value_3 %>
 			<% elsif @question.value_type_3 == "text_10"  %>
-				   <%= draw_text_field(@question.id,"3",10, @question.default_val_3,@q_data.value_3) %>	
+				   <%= @q_data.value_3 %>	
 			<% elsif @question.value_type_3 == "text_20"  %>
-					<%= draw_text_field(@question.id,"3",20, @question.default_val_3,@q_data.value_3) %>	
+					<%= @q_data.value_3 %>	
 			<% elsif @question.value_type_3 == "text_30"  %>
-					<%= draw_text_field(@question.id,"3",30, @question.default_val_3,@q_data.value_3) %>	
+					<%= @q_data.value_3 %>	
 			<% elsif @question.value_type_3 == "text_50"  %>
-					<%= draw_text_field(@question.id,"3",50, @question.default_val_3,@q_data.value_3) %>
+					<%= @q_data.value_3 %>
 			<% elsif @question.value_type_3 == "text_70"  %>
-					<%= draw_text_field(@question.id,"3",70, @question.default_val_3,@q_data.value_3) %>	
+					<%= @q_data.value_3 %>	
 			<% elsif @question.value_type_3 == "text_90"  %>
-					<%= draw_text_field(@question.id,"3",90, @question.default_val_3,@q_data.value_3) %>
+					@q_data.value_3 %>
 			<% elsif @question.value_type_3 == "checkbox_1_col"  %>
 		    	<% if @question.ref_table_a_3 == "LOOKUP_REFS" 
 			     	sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_3+"' order by display_order"
@@ -450,5 +444,4 @@
 	</td></tr>	
 	<% end %>
 </table>
-<%= submit_tag("Enter") %>
 <% end %>

@@ -16,7 +16,7 @@ class LumbarpuncturesController < ApplicationController
 
     @current_tab = "lumbarpunctures"
     scan_procedure_array = []
-    scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+    scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
      
     @lumbarpuncture = Lumbarpuncture.where("lumbarpunctures.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
@@ -218,7 +218,7 @@ class LumbarpuncturesController < ApplicationController
        end
 
        scan_procedure_array = []
-       scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)   
+       scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)   
 
   #    @lumbarpunctures = Lumbarpuncture.where("lumbarpunctures.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
   #                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 

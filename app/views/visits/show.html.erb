@@ -56,9 +56,17 @@ edit_count = edit_count -1
       :Scanner_source => @visit.scanner_source,
       :Created_by => @visit.created_by ? @visit.created_by.login : '',
       :Participant => @participant.nil? ? nil : link_to('view participant', @participant),
-			:Age_at_Visit => @visit.age_at_visit
+			:Age_at_Visit => @visit.age_at_visit,
+	 :Archive_Dvd =>@visit.archivedvd,
+	 :MRI_Tech =>@visit.mritech.blank? ? "" : Employee.find(@visit.mritech).name,
+	:Scan_Start_Time =>@visit.mristarttime.nil? ? nil : @visit.mristarttime.hour.to_s.rjust(2,'0')+":"+@visit.mristarttime.min.to_s.rjust(2,'0'),
+	:Scan_End_Time =>@visit.mriendtime.nil? ? nil : @visit.mriendtime.hour.to_s.rjust(2,'0')+":"+@visit.mriendtime.min.to_s.rjust(2,'0')
     }) %>
   </div>
+
+
+
+
 
 </div>
 
@@ -103,7 +111,39 @@ edit_count = edit_count -1
 
 <!-- <h3>Check Radiology</h3> -->
 <%= render(:partial => "lookup_radiology_button", :locals => {:rmr => @visit.rmr} ) %>
-
+<br>
+<div >
+	<table  class="tabular_no_shade"><tr><th>Scan Task</th><th>Set</th><th>Order</th><th>LogFile Recorded</th><th>P_file</th>
+		<th>Reps</th><th>Moved</th><th>Eye Contact</th><th>Preday</th></tr>
+		<tr><th colspan=9 align="left">Task Note</th</tr>
+		<tr><th colspan=9 align="left">Concerns</th</tr>
+	<% @mriscantask.each do |mst|%>
+	<tr><td><%= mst.lookup_scantask_id.blank? ? "" : LookupScantask.find(mst.lookup_scantask_id).description %>      </td>
+		<td><%= LookupSet.find(mst.lookup_set_id).description %>      </td>
+		<td><%= mst.task_order.try(:to_s)%>      </td>
+		<td><%= mst.logfilerecorded==(-1) ? "Yes" : "No"%>      </td>
+		<td><%= mst.p_file%>      </td>
+		<td><%= mst.reps.try(:to_s)%>      </td>
+		<td><%= mst.moved==(-1) ? "Yes" : "No"%>      </td>
+		<td><%= mst.eyecontact ==(-1) ? "Yes" : "No"%>      </td>
+		<td><%= mst.preday.try(:to_s)%>      </td>		
+		</tr>
+		<% if !mst.tasknote.blank? %>
+		<tr><td colspan=9  align="left"> <%= mst.tasknote%> </td></tr>
+		<% end %>
+		<% if !mst.concerns.blank? or mst.has_concerns==(1) %>
+		<tr><td><%= mst.has_concerns==(1) ? "Has Concerns" : ""%></td><td colspan=8  align="left"> <%= mst.concerns%> </td></tr>
+		<% end %>
+		<% @mriperformances = Mriperformance.where("mriscantask_id in (?)",mst.id)
+		   @mriperformances.each do |mp|
+		%>
+		<tr><td>------</td><td>Hit: <%= mp.hitpercentage.try(:to_s)%></td><td>Acc: <%= mp.accuracypercentage.try(:to_s)%><td><td colspan="7"></tr>
+		<% end%>
+		
+	
+	<% end %>
+	</table>
+</div>
 <%= render(:partial => "visit_confirmation") %>
 
 <%= content_tag :p, "STUDY UID: %s" % @visit.dicom_study_uid, :class => "uid" if @visit.dicom_study_uid %>

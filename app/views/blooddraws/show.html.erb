@@ -1,10 +1,66 @@
-<p id="notice"><%= notice %></p>
+<%
 
-<p>
-  <b>Appointment:</b>
-  <%= @blooddraw.appointment_id %>
-</p>
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+ edit_low_scan_procedure_array = []
+edit_low_scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+edit_count =edit_low_scan_procedure_array.length 
+edit_count = edit_count -1 
+%>
+<%   @current_tab = "blooddraws"
+%>
+
+<% if edit_count > 0 %>
+<span style="float:right"><%= link_to 'Edit Lab Health appt', edit_blooddraw_path(@blooddraw) %></span>
+<% end %>
+<div id="visit_heading">
+  <%=	link_to "&larr; Older".html_safe, @older_blooddraw if @older_blooddraw %>
+  &nbsp;
+  <h1><%= @enumbers.blank? ? @vgroup.rmr : @enumbers.collect{|e| e.enumber }.join(", ") %></h1>
+  <p class="date"><%= @appointment.appointment_date.to_s(:long) %></p>
+  &nbsp;
+  <%=	link_to "Newer &rarr;".html_safe, @newer_blooddraw if @newer_blooddraw %>
+  <br />
+</div>
 
 
-<%= link_to 'Edit', edit_blooddraw_path(@blooddraw) %> |
-<%= link_to 'Back', blooddraws_path %>
+<div id="leftcol" class="two_col_left">
+  <h3>Summary:</h3>
+  
+  <div id="visit_details_note" class="sticky">
+    <%= key_val_table("visit_details", {
+      :Blooddraw_appt_date => @appointment.appointment_date,
+      :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
+      :RMR_Number => @vgroup.rmr,
+     :Participant => @participant.nil? ? nil : link_to('view participant', @participant)
+    }) %>
+  </div>
+
+  <div id="visit_details_note" class="sticky">
+    <%= key_val_table("visit_details", {
+      :Blooddraw_completed => @blooddraw.completedblooddraw == 1 ? "Yes" : "No" ,
+      :Blooddraw_entered =>  @blooddraw.enteredblood == 1 ? "Yes" : "No",
+      :Blooddraw_entered_date =>  @blooddraw.enteredblooddate,
+      :Blooddraw_entered_by => @blooddraw.enteredbloodwho.nil? ? nil : Employee.find(@blooddraw.enteredbloodwho).name
+    }) %>
+  </div>
+
+</div>
+
+
+<div id="visit_status_report" class="two_col_right">
+
+  <h3>Notes:</h3>
+  <div id="notes" class="sticky">
+	<%=  RedCloth.new(@appointment.comment.blank? ? "No comment entered for this blooddraw" : @appointment.comment).to_html.html_safe 
+            %><br>
+    <%=  RedCloth.new(@blooddraw.blooddrawnote.blank? ? "No notes entered for this blooddraw" : @blooddraw.blooddrawnote).to_html.html_safe 
+            %>
+  </div> 
+
+
+</div>
+
+
+<br style="clear: both" /><br />
+<%= render :partial => 'questionforms/displayform', :locals => { } %>

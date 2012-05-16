@@ -11,17 +11,25 @@
 # and each of the twp parts of the form elements
 %>
 <%
- @questionform_questions = QuestionformQuestion.where(" questionform_id = ?",params[:id]).sort_by(&:display_order)
-   params["q_data_form_id"] = "" #"17"
-  if params["q_data_form_id"].length > 0 
-   @q_data_form = QDataForm.find(params["q_data_form_id"])
+ params[:id] = @questionform.id.to_s
+ @questionform_questions = QuestionformQuestion.where(" question_id not in (select question_id from question_scan_procedures)
+                                                           or (question_id in 
+                                                                   (select question_id from question_scan_procedures where  include_exclude ='include' and scan_procedure_id in (?))
+                                                                and
+                                                             question_id not in 
+                                        (select question_id from question_scan_procedures where include_exclude ='exclude' and scan_procedure_id in (?)))",
+                                                   @scanprocedures,@scanprocedures).where(" questionform_id = ?",params[:id]).sort_by(&:display_order)
+
+
+  if !@q_data_form.blank?
+   #@q_data_form = QDataForm.find(params[:q_data_form_id])
   else
    @q_data_form = QDataForm.new
   end
+ params[:q_data_form_id] = @q_data_form.id.to_s
 # need front porch --- need consitant participant with enrollment with appointment with visit -- derive other values from one selection
 # just display -- rederive, even with hidden field
 %>
-<b><%= Questionform.find(params[:id]).long_description%></b><br>
 <% form_tag( "/questionform/question_enter",:url => { :controller=>"questionform",:action => "question_enter" } ,  :html => { :id => params[:id] }) do |f| %>
 <!-- THIS WILL CHANGE TO questionform_id   -->
 	<%= hidden_field_tag(:questionform_id, params[:id]) %>
@@ -38,25 +46,12 @@
      value_link_array = [] %>
 <%    results.each do |vl|  
 	  value_link_array << vl.try(:to_s)
-     if vl.try(:to_s) == "participant"   %> Participant: 
-	  	<%= collection_select "value_link","participant_id", Participant.all,
-	    	:id, :reggieid, options={ :selected => @q_data_form.participant_id.to_i,:include_blank => "Select a participant" } %>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   <% elsif vl.try(:to_s) == "visit"   %> Visit: 
-			<%= collection_select "value_link","visit_id", Visit.all.sort_by(&:rmr_scan_date),
-				:id, :rmr_scan_date, {:include_blank => "Select a visit", :selected => @q_data_form.visit_id } %>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   <% elsif vl.try(:to_s) == "appointment"   %><!-- Appointment: 
-			<%= collection_select "value_link","appointment_id", Visit.all.sort_by(&:rmr_scan_date),
-				:id, :rmr_scan_date, {:include_blank => "Select an appointment", :selected => @q_data_form.appointment_id } %>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   -->
-   <% elsif vl.try("to_s") == "enrollment"   %> Enrollment: 
-			<%= collection_select "value_link","enrollment_id", Enrollment.all.sort_by(&:enumber),
-				:id, :enumber, {:include_blank => "Select an enrollment", :selected => @q_data_form.enrollment_id } %>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;			
-	<% elsif  vl.try("to_s") == "scan_procedure"   %> Scan Procedure: 
-			<%= collection_select "value_link","scan_procedure_id", ScanProcedure.all.sort_by(&:codename),
-				:id, :codename, {:include_blank => "Select a scan_procedure", :selected => @q_data_form.scan_procedure_id } %>
+     if vl.try(:to_s) == "participant"   %> 
+             <%= hidden_field_tag("value_1[-1]","") %> <%= hidden_field_tag("value_link[participant_id]",params[:participant_id]) %>
+   <% elsif vl.try(:to_s) == "visit"   %> <%= hidden_field_tag("value_link[visit_id]",params[:visit_id]) %>
+   <% elsif vl.try(:to_s) == "appointment"   %><%= hidden_field_tag("value_link[appointment_id]",@appointment.id.to_s) %>
+   <% elsif vl.try("to_s") == "enrollment"   %> <%= hidden_field_tag("value_link[enrollment_id]",params[:enrollment_id]) %>			
+	<% elsif  vl.try("to_s") == "scan_procedure"   %> <%= hidden_field_tag("value_link[scan_procedure_id]",params[:escan_procedure_id]) %>
 <%	  end %>
   <% end %>
 <%    # scan_procedure id --- access control, limit participants, visits, etc%>
@@ -66,8 +61,8 @@
 	@question = Question.find(qfq.question_id)
 			# pass @question to draw_question
 			params["q_data_id["+qfq.question_id.to_s+"]"] = "" #"33" 
-		  if params["q_data_form_id"].length > 0  # get this q_data_form_id / question_id ==> assuming no duplicate question_id in one form
-			sql = "select distinct q_data.id from q_data where q_data_form_id ="+params["q_data_form_id"]+" and 
+		  if !@q_data_form.blank?  # get this q_data_form_id / question_id ==> assuming no duplicate question_id in one form
+			sql = "select distinct q_data.id from q_data where q_data_form_id ="+@q_data_form.id.to_s+" and 
 			       q_data.question_id  ="+@question.id.to_s
 		    connection = ActiveRecord::Base.connection();
 		    results = connection.execute(sql)

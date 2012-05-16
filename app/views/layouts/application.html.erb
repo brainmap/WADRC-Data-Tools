@@ -27,9 +27,6 @@
               <%= link_to "Visits", home_path %>
             </li>
             <li <%= "class=current" if @current_tab == "visits" %>>
-              <%= link_to "MRI", visits_path %>
-            </li>
-            <li <%= "class=current" if @current_tab == "visit_search" %>>
               <%= link_to "MRI", visit_search_path %>
             </li>
             <li <%= "class=current" if @current_tab == "image_datasets" %>>
@@ -43,9 +40,6 @@
             </li>
             <li <%= "class=current" if @current_tab == "blooddraws" %>>
               <%= link_to "LabHealth", blooddraw_search_path %>
-            </li>
-            <li <%= "class=current" if @current_tab == "appointments" %>>
-              <%= link_to "All Appts", appointments_path %>
             </li>
             <li <%= "class=current" if @current_tab == "enrollments" %>>
               <%= link_to "Enrollments", enrollments_path %>

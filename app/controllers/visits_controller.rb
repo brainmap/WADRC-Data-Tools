@@ -136,6 +136,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     @image_datasets = @visit.image_datasets.page(params[:page])
     @participant = @visit.try(:enrollments).first.try(:participant) 
     @enumbers = @visit.enrollments
+    @mriscantask = Mriscantask.where("visit_id in (?)",@visit.id)
 
     respond_to do |format|
       format.html # show.html.erb
@@ -169,6 +170,23 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # POST /visits
   # POST /visits.xml
   def create
+            params[:date][:mristartt][0]="1899"
+             params[:date][:mristartt][1]="12"
+             params[:date][:mristartt][2]="30"       
+             mristarttime = nil
+            if !params[:date][:mristartt][0].blank? && !params[:date][:mristartt][1].blank? && !params[:date][:mristartt][2].blank? && !params[:date][:mristartt][3].blank? && !params[:date][:mristartt][4].blank?
+        mristarttime =  params[:date][:mristartt][0]+"-"+params[:date][:mristartt][1]+"-"+params[:date][:mristartt][2]+" "+params[:date][:mristartt][3]+":"+params[:date][:mristartt][4]
+             params[:visit][:mristarttime] = mristarttime
+            end
+
+         params[:date][:mriendt][0]="1899"
+         params[:date][:mriendt][1]="12"
+         params[:date][:mriendt][2]="30"       
+          mriendtime = nil
+        if !params[:date][:mriendt][0].blank? && !params[:date][:mriendt][1].blank? && !params[:date][:mriendt][2].blank? && !params[:date][:mriendt][3].blank? && !params[:date][:mriendt][4].blank?
+    mriendtime =  params[:date][:mriendt][0]+"-"+params[:date][:mriendt][1]+"-"+params[:date][:mriendt][2]+" "+params[:date][:mriendt][3]+":"+params[:date][:mriendt][4]
+         params[:visit][:mriendtime] = mriendtime
+        end
     @visit = Visit.new(params[:visit])
     @visit.user = current_user
     if @visit.appointment_id.blank?
@@ -190,6 +208,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
        @vital.save
        @visit.appointment_id = @appointment.id
     end
+    
+    
     respond_to do |format|
       if @visit.save
         flash[:notice] = 'MRI appt was successfully created.'
@@ -207,6 +227,24 @@ class VisitsController <  AuthorizedController #  ApplicationController
   def update
      scan_procedure_array =current_user[:edit_low_scan_procedure_array] 
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+
+             params[:date][:mristartt][0]="1899"
+             params[:date][:mristartt][1]="12"
+             params[:date][:mristartt][2]="30"       
+             mristarttime = nil
+            if !params[:date][:mristartt][0].blank? && !params[:date][:mristartt][1].blank? && !params[:date][:mristartt][2].blank? && !params[:date][:mristartt][3].blank? && !params[:date][:mristartt][4].blank?
+        mristarttime =  params[:date][:mristartt][0]+"-"+params[:date][:mristartt][1]+"-"+params[:date][:mristartt][2]+" "+params[:date][:mristartt][3]+":"+params[:date][:mristartt][4]
+             params[:visit][:mristarttime] = mristarttime
+            end
+
+         params[:date][:mriendt][0]="1899"
+         params[:date][:mriendt][1]="12"
+         params[:date][:mriendt][2]="30"       
+          mriendtime = nil
+        if !params[:date][:mriendt][0].blank? && !params[:date][:mriendt][1].blank? && !params[:date][:mriendt][2].blank? && !params[:date][:mriendt][3].blank? && !params[:date][:mriendt][4].blank?
+    mriendtime =  params[:date][:mriendt][0]+"-"+params[:date][:mriendt][1]+"-"+params[:date][:mriendt][2]+" "+params[:date][:mriendt][3]+":"+params[:date][:mriendt][4]
+         params[:visit][:mriendtime] = mriendtime
+        end
 
     # hiding the protocols in checkbox which user not have access to, if any add in to attributes before update
     @scan_procedures = ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_visits where visit_id = "+params[:id]+" and scan_procedure_id not in (?))",  scan_procedure_array ).all
@@ -252,7 +290,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
       @vital.bloodglucose = params[:bloodglucose]
       @vital.save      
     end
-
+         
+        
     respond_to do |format|
       if @visit.update_attributes(attributes)
         @appointment = Appointment.find(@visit.appointment_id)

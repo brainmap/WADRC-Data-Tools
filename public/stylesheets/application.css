@@ -88,6 +88,58 @@ table { word-wrap:break-word; }
 }
 
 
+.tabular_no_shade { margin:0 0 1em 0; font-size:80%; }
+.tabular_no_shade { border-collapse:collapse; margin:0; clear:left; width:100%; text-align:center;}
+.tabular_no_shade > caption { background:#006644; color:#228866; font-weight:bold; letter-spacing:0.2em;
+	text-align:left; font-size:300%; margin-bottom:-0.6em; padding:0.2em 0.2em 0.2em 0.4em;
+	-webkit-border-radius:10px;
+	-moz-border-radius:10px;
+}
+.tabular_no_shade > thead > tr > th { background:#006644; color:white; font-weight:normal; padding: 1em; }
+.tabular_no_shade > thead a { color: white; font-weight: normal; border-bottom: none;}
+.tabular_no_shade > thead a:hover { background: inherit; text-decoration: underline;}
+.tabular_no_shade > tbody > tr { border-bottom: solid thin; }
+.tabular_no_shade > tbody > tr:nth-child(even) { background-color: #eee; }
+.tabular_no_shade > tbody > tr:nth-child(odd) { background-color: #eee; }
+.tabular_no_shade > tbody > tr:hover { background-color:#55bb88; }
+.tabular_no_shade > tbody > tr > td, th { padding: 0.3em 0.5em 0.3em 0.5em; }
+.tabular_no_shade > tfoot { background:#006644; }
+.tabular_no_shade > tfoot > tr > td { padding:0.3em; color:white; }
+.tabular_no_shade > tfoot a { color:#339977; font-size:120%; }
+.comment_cell { max-width: 25em; }
+
+.tabular_no_shade thead .vert {
+	font-size:90%;
+	text-align: left;
+	position:absolute;
+	/* IE-only DX filter */
+	writing-mode: tb-rl;
+	filter: flipv fliph;
+	/* Safari/Chrome function */
+	-webkit-transform: rotate(320deg) translate(0px,1em);
+	-webkit-transform-origin: 0 0;
+	/* works in latest FX builds */
+	-moz-transform: rotate(320deg) translate(0px,1em);
+	-moz-transform-origin: 0 0;
+}
+
+.tabular_no_shade thead .dead_vert {
+	font-size:90%;
+	font-weight:bold;
+	text-align: left;
+	color:#333;
+	position:absolute;
+	/* IE-only DX filter */
+	writing-mode: tb-rl;
+	filter: flipv fliph;
+	/* Safari/Chrome function */
+	-webkit-transform: translate(0px,5px) rotate(270deg);
+	-webkit-transform-origin: 0 0;
+	/* works in latest FX builds */
+	-moz-transform: translate(0px,5px) rotate(270deg);
+	-moz-transform-origin: 0 0;
+}
+
 .sticky_hole { position:relative; }
 .sticky_spawner { margin:0; padding:0; }
 .sticky_hole:hover { background-color: #ffffbb; }

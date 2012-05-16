@@ -84,6 +84,10 @@
         <td><%= f.text_field :dicom_dvd, :size => 6 %></td>
       </tr>
       <tr>
+        <td><%= f.label :Archive_DVD %></td>
+        <td><%= f.text_field :archivedvd, :size => 6 %></td>
+      </tr>
+      <tr>
         <td><%= f.label :Compile_Folder %></td>
         <td><%= select :visit, :compile_folder, ["no", "yes", "n/a"] %></td>
       </tr>
@@ -91,6 +95,19 @@
         <td><%= f.label :Conference %></td>
         <td><%= select :visit, :conference, ["no", "yes", "n/a"] %></td>
       </tr>
+	<tr>
+      <td><%= f.label(:mritech) %></td>
+      <td><%= select(:visit, :mritech, Employee.all.sort_by(&:name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Select MRI Tech" }) %></td>
+    </tr>
+	<tr>
+      <td><%= f.label(:Scan_Start_Time) %></td>
+      <td> <%= select_time( @visit.mristarttime,:field_name =>'mristartt][', :include_blank => true) %></td>
+    </tr>
+	<tr>
+      <td><%= f.label(:Scan_End_Time) %></td>
+      <td> <%= select_time( @visit.mriendtime,:field_name =>'mriendt][', :include_blank => true) %></td>
+    </tr>
+
     </table>
 <%     @vitals = Vital.where("vitals.appointment_id in (?)",@visit.appointment_id)     
        @vitals.each do |v|  # could have multiples? %>
@@ -124,6 +141,8 @@
 		<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6) %></td></tr>
 	 </tr></table>
 <%   end %>
+
+
 
   </div>
   <div class="three_col_right">

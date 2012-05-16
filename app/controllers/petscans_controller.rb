@@ -11,7 +11,7 @@ class PetscansController < ApplicationController
      end
      
      scan_procedure_array = []
-     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)   
+     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)   
      
 #    @petscans = Petscan.where("petscans.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
 #                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
@@ -133,7 +133,7 @@ class PetscansController < ApplicationController
   def show
     @current_tab = "petscans"
     scan_procedure_array = []
-    scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+    scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
      
     @petscan = Petscan.where("petscans.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 

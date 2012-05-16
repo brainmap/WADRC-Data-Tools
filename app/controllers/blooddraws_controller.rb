@@ -11,7 +11,7 @@ class BlooddrawsController < ApplicationController
       end
 
       scan_procedure_array = []
-      scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)   
+      scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)   
 
  #    @blooddraws = Blooddraw.where("blooddraws.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
  #                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
@@ -138,7 +138,7 @@ class BlooddrawsController < ApplicationController
 
     @current_tab = "blooddraws"
      scan_procedure_array = []
-     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
 
      @blooddraw = Blooddraw.where("blooddraws.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                        appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
@@ -158,7 +158,26 @@ class BlooddrawsController < ApplicationController
      @vgroup = Vgroup.find(@appointment.vgroup_id)
      @participant = @vgroup.try(:participant)
      @enumbers = @vgroup.enrollments
+     
+     @appointment = Appointment.find(@blooddraw.appointment_id)
+     @q_data_form = QDataForm.where("questionform_id=12 and appointment_id in (?)",@appointment.id)
+     @q_data_form = @q_data_form[0]
+     #params[:appointment_id] = @blooddraw.appointment_id
+     @questionform =Questionform.find(12)
 
+     # NEED SCAN PROC ARRAY FOR VGROUP  --- change to vgroup!!
+
+      @a =  Appointment.where("vgroup_id in (?)",@appointment.vgroup_id)
+         a_array =@a.to_a
+        @visits = Visit.where("appointment_id in (?) ",a_array)
+          visit = nil
+          @visits.each do |v| 
+ 	       visit = v
+ 	     end  
+ 	  sp_list = visit.scan_procedures.collect {|sp| sp.id}.join(",")
+ 	  sp_array =[]
+ 	  sp_array = sp_list.split(',').map(&:to_i)
+ 	  @scanprocedures = ScanProcedure.where("id in (?)",sp_array)
 
     respond_to do |format|
       format.html # show.html.erb
@@ -196,6 +215,25 @@ class BlooddrawsController < ApplicationController
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @appointment = Appointment.find(@blooddraw.appointment_id)
+    @q_data_form = QDataForm.where("questionform_id=12 and appointment_id in (?)",@appointment.id)
+    @q_data_form = @q_data_form[0]
+    #params[:appointment_id] = @blooddraw.appointment_id
+    @questionform =Questionform.find(12)
+
+    # NEED SCAN PROC ARRAY FOR VGROUP  --- change to vgroup!!
+  
+     @a =  Appointment.where("vgroup_id in (?)",@appointment.vgroup_id)
+        a_array =@a.to_a
+       @visits = Visit.where("appointment_id in (?) ",a_array)
+         visit = nil
+         @visits.each do |v| 
+	       visit = v
+	     end  
+	  sp_list = visit.scan_procedures.collect {|sp| sp.id}.join(",")
+	  sp_array =[]
+	  sp_array = sp_list.split(',').map(&:to_i)
+	  @scanprocedures = ScanProcedure.where("id in (?)",sp_array)
+
   end
 
   # POST /blooddraws
