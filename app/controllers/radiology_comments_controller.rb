@@ -143,7 +143,7 @@ class RadiologyCommentsController < ApplicationController
   
     # moved to model
 =begin
-  def load_paths(v_months_back)
+  def load_paths(v_months_back)  # THIS HAS BEEN MOVED TO MODEL!!!!!!!!!!
     # pass in how far back to go, default is 3 month for visit date
     # select visit_id, rmr, scan_number from visits where visits.date > sysdate - 3 months
     # and visits.id not in (select visit_id from radiology_comments where rad_path is not null) 
@@ -199,7 +199,7 @@ class RadiologyCommentsController < ApplicationController
     end
   end 
 
-  def load_comments(v_months_back)
+  def load_comments(v_months_back)   # THIS HAS BEEN MOVED TO MODEL!!!!!!!!!!
        agent = Mechanize.new
        # Comment_html_1 only 500 long
         past_time = Time.new - (v_months_back.to_i).month
@@ -207,6 +207,8 @@ class RadiologyCommentsController < ApplicationController
        @radiology_comments = RadiologyComment.where(" trim(radiology_comments.rad_path) is not null and  (radiology_comments.comment_html_1 is null
                       OR radiology_comments.comment_header_html_1 is null
                      OR radiology_comments.visit_id in (select visits.id from visits where visits.date >  '"+v_past_date+"' )  ) " )
+                     
+
 
        @radiology_comments.each do |r|
           # sleep for a minute or so to not seem like scripts
@@ -217,6 +219,7 @@ puts "============ visit_id ="+r.visit_id.to_s
          @response = page.content
          doc = Hpricot(@response)
          doc_string = doc.to_s
+
              doc_string = doc_string.gsub("<br />","<br/> ")
               doc_string = doc_string.gsub(/\s+/, " ").strip
                doc_string = doc_string.gsub('&quot;','"')
@@ -265,17 +268,21 @@ puts "============ visit_id ="+r.visit_id.to_s
 
          doc_string = doc_string.gsub('</div> <div id="col2">',' ')
          doc_string = doc_string.gsub('<div id="col1" align="right">','<div id="col1" align="left">')
-         
+
+       
          # split out header info
           if !doc_string.index('<b>Scan Details</b><span class="subtitle"> (entered into system').blank?
             header_start_index =doc_string.index('<b>Scan Details</b><span class="subtitle"> (entered into system')+3
           end
           
           if !doc_string.index('<a name="radiologistReview"></a>').blank? 
+
              header_end_index =doc_string.index('<a name="radiologistReview"></a>')+3
           elsif   !doc_string.index('<b>Radiologist Comments</b>').blank? 
+
               header_end_index = doc_string.index("<b>Radiologist Comments</b>")-2
           else
+
               header_end_index = doc_string.index("<h4>Radiologist Comments</h4>")-2  
           end
           
@@ -368,7 +375,7 @@ puts "============ visit_id ="+r.visit_id.to_s
 
   end
 
-  def load_text
+  def load_text   # THIS HAS BEEN MOVED TO MODEL!!!!!!!!!!
 
     sql = "select id,comment_html_1,comment_html_2,comment_html_3,comment_html_4,comment_html_5
             from radiology_comments where comment_html_1 is not null and comment_text_1 is null"

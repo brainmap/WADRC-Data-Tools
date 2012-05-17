@@ -163,7 +163,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     scan_procedure_array =current_user[:edit_low_scan_procedure_array ]   
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @visit.enrollments.build # if @visit.enrollments.blank?
-    
+     @mriscantask = Mriscantask.where("visit_id in (?)",@visit.id)
     
   end
 

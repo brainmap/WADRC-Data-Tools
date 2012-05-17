@@ -25,7 +25,10 @@ v_entrance_page_type =[["scan_procedure","scan_procedure"],["scan_procedure, vis
  <%= f.select :entrance_page_type, options_for_select(v_entrance_page_type, @questionform.entrance_page_type),
 	              {:prompt => 'Select an entrance page type'}  %>
   </div>
-
+  <div class="field">
+    <%= f.label :target_page %><br />
+    <%= f.text_field :target_page %>
+  </div>
 
   <div class="field">
     <%= f.label :long_description %><br />

@@ -80,7 +80,8 @@ class RadiologyComment < ActiveRecord::Base
        var ='<a href="https://www.radiology.wisc.edu/protected/neuroResearchScans/'+rad_path+'" target="_blank">Radiology Site</a>'
        return var
   end
-  
+
+
   
     def load_paths(v_months_back)
       # pass in how far back to go, default is 3 month for visit date
@@ -138,6 +139,7 @@ class RadiologyComment < ActiveRecord::Base
       end
     end
   
+
   def load_comments(v_months_back)
        agent = Mechanize.new
        # Comment_html_1 only 500 long
@@ -147,6 +149,8 @@ class RadiologyComment < ActiveRecord::Base
                      OR radiology_comments.comment_header_html_1 is null
                      OR radiology_comments.visit_id in (select visits.id from visits where visits.date >  '"+v_past_date+"' )  ) " )
 #                      OR radiology_comments.comment_header_html_1 is null
+
+      @radiology_comments = RadiologyComment.where(" trim(radiology_comments.rad_path) is not null and radiology_comments.id = 1106")
        @radiology_comments.each do |r|
           # sleep for a minute or so to not seem like scripts
            sleep(97)
@@ -214,42 +218,55 @@ puts "============ visit_id ="+r.visit_id.to_s
 
          doc_string = doc_string.gsub('</div> <div id="col2">',' ')
          doc_string = doc_string.gsub('<div id="col1" align="right">','<div id="col1" align="left">')
-         
+        
          # split out header info
           if !doc_string.index('<b>Scan Details</b><span class="subtitle"> (entered into system').blank?
             header_start_index =doc_string.index('<b>Scan Details</b><span class="subtitle"> (entered into system')+3
+          else
+            header_start_index =0
           end
           
           if !doc_string.index('<a name="radiologistReview"></a>').blank? 
              header_end_index =doc_string.index('<a name="radiologistReview"></a>')+3
           elsif   !doc_string.index('<b>Radiologist Comments</b>').blank? 
               header_end_index = doc_string.index("<b>Radiologist Comments</b>")-2
-          else
-              header_end_index = doc_string.index("<h4>Radiologist Comments</h4>")-2  
+          elsif !doc_string.index("<h4>Radiologist Comments</h4>").blank?
+              header_end_index = doc_string.index("<h4>Radiologist Comments</h4>")-2 
+          else 
+              header_end_index = 1    
           end
           
-          
+         
 
          if !doc_string.index('<b>Radiologist Comments</b>').blank? 
            start_index = doc_string.index("<b>Radiologist Comments</b>")-2
-         else
+         elsif !start_index = doc_string.index("<h4>Radiologist Comments</h4>").blank?
            start_index = doc_string.index("<h4>Radiologist Comments</h4>")-2  
+         else
+           start_index = 0
          end
        
          if !doc_string.index('<form name="modReview"').blank? 
             end_index =doc_string.index('<form name="modReview"')+3
          elsif !doc_string.index('You must be logged in to submit or modify a review').blank?
             end_index	=doc_string.index("You must be logged in to submit or modify a review")+3
-        else    
+         elsif !doc_string.index("If this scan has been updated:").blank?
             end_index	=doc_string.index("If this scan has been updated:")+3
+         else
+          end_index = 1497
          end
-         doc_string = doc_string.gsub("'","''")
+         
+         doc_string = doc_string.gsub("'","`")
          doc_header_string = doc_string[header_start_index..header_end_index]
          doc_sub_string = doc_string[start_index..end_index]
          # some pages have slight difference in start index - leaving a ">"
-        doc_sub_string = doc_sub_string.gsub('> <br/> <b>Radiologist Comments',' <br/> <b>Radiologist Comments')
-        doc_sub_string = doc_sub_string.gsub('> <br/> <h4>Radiologist Comments</h4','<b>Radiologist Comments</b>')
-        doc_sub_string = doc_sub_string.gsub('iv> <br/> <h4>Radiologist Comments</','<b>Radiologist Comments</b>')
+         doc_sub_string = doc_sub_string.gsub('<br/> <h4>Radiologist Comments</h4>','<b>Radiologist Comments</b>')
+         doc_sub_string = doc_sub_string.gsub('> <br/> <b>Radiologist Comments',' <br/> <b>Radiologist Comments')
+         doc_sub_string = doc_sub_string.gsub('> <br/> <h4>Radiologist Comments</h4','<b>Radiologist Comments</b>')
+         doc_sub_string = doc_sub_string.gsub('iv> <br/> <h4>Radiologist Comments</','<b>Radiologist Comments</b>')
+         doc_sub_string = doc_sub_string.gsub('> <b>Radiologist Comments</b>','<b>Radiologist Comments</b>')
+          doc_sub_string = doc_sub_string.gsub('> <h4>Radiologist Comments</h4>','<b>Radiologist Comments</b>')
+
          # escape the ' in doc_sub_string
 
          if doc_sub_string.length > 0
@@ -310,13 +327,19 @@ puts "============ visit_id ="+r.visit_id.to_s
               comment_text_5 =null,q1_flag= null
                    where radiology_comments.rad_path ='"+r.rad_path+"'    "
             connection = ActiveRecord::Base.connection();
-            results = connection.execute(sql)         
-                               
-          end                
-        end 
-
+            begin            
+               results = connection.execute(sql)    
+             rescue
+               puts "ERROR!!!!!!!!! with "+sql
+             end
+                 
+            sql = "commit"
+            connection.execute(sql)
+                              
+          end      
+       end
   end
-  
+
   def load_text
 
     sql = "select id,comment_html_1,comment_html_2,comment_html_3,comment_html_4,comment_html_5
@@ -328,6 +351,7 @@ puts "============ visit_id ="+r.visit_id.to_s
             @results = RadiologyComment.find_by_sql(sql)
                   
           @results.each do |row|
+  puts " radiology_comments.id ="+row.id.to_s
             comment_text_1 =""
             comment_text_2 =""
             comment_text_3 =""
@@ -387,7 +411,7 @@ puts "============ visit_id ="+r.visit_id.to_s
              var = var.gsub("char(10)","\n")
              # seems to be getting line breaks ok and remove first line break
                     
-             var = var.gsub("'","''")
+             var = var.gsub("'","`")
              comment_text_1 = var[0..498]
              
               # escape the ' in var
@@ -422,6 +446,8 @@ puts "============ visit_id ="+r.visit_id.to_s
                      
               connection = ActiveRecord::Base.connection();
             results = connection.execute(sql_update)
+            sql = "commit"
+            connection.execute(sql)
             
             sql_update = "update radiology_comments 
             set      comment_text_1= replace(comment_text_1,'char(10)',char(10)),
@@ -432,12 +458,14 @@ puts "============ visit_id ="+r.visit_id.to_s
                 
                   connection = ActiveRecord::Base.connection();
                 results = connection.execute(sql_update)
+                sql = "commit"
+                connection.execute(sql)
      
                      
           end  
             
      
   end
-    
+
   
 end

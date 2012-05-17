@@ -150,9 +150,48 @@
       <%= f.label :notes %><br/>
       <%= f.text_area :notes %><br />
     </p>
-
+<br><br><br><%= f.submit form_action %>
   </div>
+<div ><!--  NEED TO ADDRESS CHILDREN FIELDS IN FOORM
+                    NAME THE FIELDS WITH [][]
+                    +INCLUDE HIDDEN FIELD OF ID?
+             --- THEN CHECK FOR image_dataset_id  -- ADD LATER
+              -->
+	
+		<table  class="tabular_no_shade"><tr><th>Scan Task</th><th>Set</th><th>Order</th><th>LogFile Recorded</th><th>P_file</th>
+			<th>Reps</th><th>Moved</th><th>Eye Contact</th><th>Preday</th></tr>
+			<tr><th colspan=4 align="left">Task Note</th><th colspan=5 align="left">Concerns</th</tr>
 
+	<% if !@mriscantask.blank?  %>
+
+		<% @mriscantask.each do |mst|%>
+		<tr><td><!-- = select(:mriscantask, :lookup_scantask_id, LookupScantask.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :include_blank => "Select a scan task" }) %> -->  </td>
+			<td><!-- = select(:mriscantask, :lookup_set_id, LookupSet.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :include_blank => "Select a set" }) %>  --> </td>
+	<td><!-- = select( :mriscantask,:task_order, [['',''],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['6','6'],['7','7'],['8','8'],['9','9'],['10','10'],['-1','-1']], { :include_blank => "Select order" } ) %> -->
+			  </td>
+			<td><!-- %= select(:mriscantask, :logfilerecorded,[['No',"0"],["Yes","-1"]],{ :include_blank => "Log?" })  %>  --></td>
+			<td><%=  text_field_tag( 'p_file',mst.p_file, :size => 6) %>  </td>      </td>
+			<td><%=  text_field_tag( 'reps',mst.reps.try(:to_s), :size => 6) %>  </td>  </td>
+			<td><!-- %= select(:mriscantask, :moved,[['No',"0"],["Yes","-1"]],{ :include_blank => "MOved?" })  %>  -->     </td>
+			<td><!-- %= select(:mriscantask, :eyecontact,[['No',"0"],["Yes","-1"]],{ :include_blank => "Eyecontact?" })  %>  -->    </td>
+			<td><%=  text_field_tag( 'preday',mst.preday.try(:to_s), :size => 6) %>  </td>		
+			</tr>
+			<tr><td colspan=4  align="left"> <%= mst.tasknote%>
+				<%= f.label :Task_Note %> <%=  text_field_tag( 'tasknote',mst.tasknote, :size => 60) %>  </td>
+			<td colspan="5" align="left">	<!-- %= select(:mriscantask, :has_concerns,[['No',"0"],["Yes","1"]],{ :include_blank => "Has Concerns?" })  %>  --> 
+			 &nbsp;&nbsp;&nbsp;
+				<%= f.label :Concerns %> <%=  text_field_tag( 'concerns',mst.concerns, :size => 60) %>  </td></tr>
+			<% @mriperformances = Mriperformance.where("mriscantask_id in (?)",mst.id)
+			   @mriperformances.each do |mp|%>
+			<tr><td>------</td><td>Hit: <%=  text_field_tag( 'hitpercentage',mp.hitpercentage.try(:to_s), :size => 6) %></td><td>Acc: <%=  text_field_tag( 'accuracypercentage',mp.accuracypercentage.try(:to_s), :size => 6) %>
+          <td><td colspan="7"></tr>
+			<% end
+		 end 
+	<% end %>
+ADD A FEW ROWS OF BLANKS!!! for existing and for new 
+	</table>
+
+</div>
   <br style="clear:both" />
   
   <%= f.submit form_action %>
