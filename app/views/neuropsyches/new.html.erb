@@ -1,5 +1,5 @@
-<h1>New neuropsych</h1>
+<%   @current_tab = "neuropsyches"
+%>
+<h1>New Neuro Psych Appt</h1>
 
-<%= render 'form' %>
-
-<%= link_to 'Back', neuropsyches_path %>
+<%= render :partial => 'new_edit', :locals => { :form_action => 'Create Neuro Psych appt'} %>

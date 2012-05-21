@@ -53,7 +53,7 @@ class LumbarpuncturesController < ApplicationController
         @appointment = Appointment.new
         @appointment.vgroup_id = vgroup_id
         @appointment.appointment_date = (Vgroup.find(vgroup_id)).vgroup_date
-        @appointment.appointment_type ='pet_scan'
+        @appointment.appointment_type ='lumbar_puncture'
     #    @appointment.save  --- save in create step
 
         @lumbarpuncture.appointment_id = @appointment.id
@@ -93,7 +93,7 @@ class LumbarpuncturesController < ApplicationController
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(vgroup_id)
     @appointment = Appointment.new
     @appointment.vgroup_id = vgroup_id
-    @appointment.appointment_type ='pet_scan'
+    @appointment.appointment_type ='lumbar_puncture'
     @appointment.appointment_date =appointment_date
     @appointment.comment = params[:appointment][:comment]
     @appointment.save
@@ -342,7 +342,7 @@ class LumbarpuncturesController < ApplicationController
     @lumbarpuncture.destroy
 
     respond_to do |format|
-      format.html { redirect_to(lumbarpunctures_url) }
+      format.html { redirect_to(lumbarpuncture_search_path) }
       format.xml  { head :ok }
     end
   end

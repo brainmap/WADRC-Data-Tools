@@ -41,14 +41,17 @@
             <li <%= "class=current" if @current_tab == "blooddraws" %>>
               <%= link_to "LabHealth", blooddraw_search_path %>
             </li>
+            <li <%= "class=current" if @current_tab == "neuropsyches" %>>
+              <%= link_to "Neuro", neuropsych_search_path %>
+            </li>
             <li <%= "class=current" if @current_tab == "enrollments" %>>
-              <%= link_to "Enrollments", enrollments_path %>
+              <%= link_to "Enroll", enrollments_path %>
             </li>
             <li <%= "class=current" if @current_tab == "participants" %>>
-              <%= link_to("Participants", participant_search_path) %>
+              <%= link_to("Particip", participant_search_path) %>
             </li>
             <li <%= "class=current" if @current_tab == "scan_procedures" %>>
-              <%= link_to "ScanProcedures", scan_procedures_path %>
+              <%= link_to "ScanProc", scan_procedures_path %>
             </li>
             <!-- <li <%= "class=current" if @current_tab == "log_files" %>>
               <%= link_to("Log files", log_files_path) %>

@@ -165,29 +165,37 @@
 	<% if !@mriscantask.blank?  %>
 
 		<% @mriscantask.each do |mst|%>
-		<tr><td><!-- = select(:mriscantask, :lookup_scantask_id, LookupScantask.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :include_blank => "Select a scan task" }) %> -->  </td>
-			<td><!-- = select(:mriscantask, :lookup_set_id, LookupSet.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :include_blank => "Select a set" }) %>  --> </td>
-	<td><!-- = select( :mriscantask,:task_order, [['',''],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['6','6'],['7','7'],['8','8'],['9','9'],['10','10'],['-1','-1']], { :include_blank => "Select order" } ) %> -->
+		<% if !mst.image_dataset_id.blank?%>
+		<tr><td colsapn="9" align = "left"><b><%= ImageDataset.find(mst.image_dataset_id).series_description %></b></td><tr>
+		<% end %>
+		<tr><td><%= select("mriscantask[lookup_scantask_id]",mst.id, LookupScantask.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :selected =>mst.lookup_scantask_id.try(:to_s),:include_blank => "Select a scan task" } )%>   
+			<%=  hidden_field_tag( "mriscantask[mriscantask_id][]",mst.id.to_s) %>
+			<%=  hidden_field_tag( "mriscantask[image_dataset_id]",mst.image_dataset_id.to_s) %>
+			</td>
+			<td><%= select("mriscantask[lookup_set_id]",mst.id, LookupSet.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, {:selected =>mst.lookup_set_id.try(:to_s), :include_blank => "Select a set" }) %> </td>
+	<td><%= select( "mriscantask[task_order]",mst.id, [['',''],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['6','6'],['7','7'],['8','8'],['9','9'],['10','10'],['-1','-1']], { :selected =>mst.task_order.try(:to_s), :include_blank => "Select order" } ) %>
 			  </td>
-			<td><!-- %= select(:mriscantask, :logfilerecorded,[['No',"0"],["Yes","-1"]],{ :include_blank => "Log?" })  %>  --></td>
-			<td><%=  text_field_tag( 'p_file',mst.p_file, :size => 6) %>  </td>      </td>
-			<td><%=  text_field_tag( 'reps',mst.reps.try(:to_s), :size => 6) %>  </td>  </td>
-			<td><!-- %= select(:mriscantask, :moved,[['No',"0"],["Yes","-1"]],{ :include_blank => "MOved?" })  %>  -->     </td>
-			<td><!-- %= select(:mriscantask, :eyecontact,[['No',"0"],["Yes","-1"]],{ :include_blank => "Eyecontact?" })  %>  -->    </td>
-			<td><%=  text_field_tag( 'preday',mst.preday.try(:to_s), :size => 6) %>  </td>		
+			<td><%= select("mriscantask[logfilerecorded]",mst.id,[['No',"0"],["Yes","-1"]],{ :selected =>mst.logfilerecorded.try(:to_s), :include_blank => "Log?" })  %>  </td>
+			<td><%=  text_field_tag("mriscantask[p_file]["+mst.id.to_s+"]",mst.p_file, :size => 6) %>  </td>      </td>
+			<td><%=  text_field_tag( "mriscantask[reps]["+mst.id.to_s+"]",mst.reps.try(:to_s), :size => 6) %>  </td>  </td>
+			<td><%= select("mriscantask[moved]",mst.id,[['No',"0"],["Yes","-1"]],{:selected =>mst.moved.try(:to_s), :include_blank => "Moved?" })  %>      </td>
+			<td><%= select("mriscantask[eyecontact]",mst.id,[['No',"0"],["Yes","-1"]],{:selected =>mst.eyecontact.try(:to_s), :include_blank => "Eyecontact?" })  %>     </td>
+			<td><%=  text_field_tag( "mriscantask[preday]["+mst.id.to_s+"]",mst.preday.try(:to_s), :size => 6) %>  </td>		
 			</tr>
-			<tr><td colspan=4  align="left"> <%= mst.tasknote%>
-				<%= f.label :Task_Note %> <%=  text_field_tag( 'tasknote',mst.tasknote, :size => 60) %>  </td>
-			<td colspan="5" align="left">	<!-- %= select(:mriscantask, :has_concerns,[['No',"0"],["Yes","1"]],{ :include_blank => "Has Concerns?" })  %>  --> 
+			<tr><td colspan=4  align="left"> 
+				<%= f.label :Task_Note %> <%=  text_field_tag( "mriscantask[tasknote]["+mst.id.to_s+"]",mst.tasknote, :size => 60) %>  </td>
+			<td colspan="5" align="left">	<%= select("mriscantask[has_concerns]",mst.id,[['No',"0"],["Yes","1"]],{ :selected =>mst.has_concerns.try(:to_s),:include_blank => "Has Concerns?" })  %>  
 			 &nbsp;&nbsp;&nbsp;
-				<%= f.label :Concerns %> <%=  text_field_tag( 'concerns',mst.concerns, :size => 60) %>  </td></tr>
+				<%= f.label :Concerns %> <%=  text_field_tag( "mriscantask[concerns]["+mst.id.to_s+"]",mst.concerns, :size => 60) %>  </td></tr>
 			<% @mriperformances = Mriperformance.where("mriscantask_id in (?)",mst.id)
 			   @mriperformances.each do |mp|%>
-			<tr><td>------</td><td>Hit: <%=  text_field_tag( 'hitpercentage',mp.hitpercentage.try(:to_s), :size => 6) %></td><td>Acc: <%=  text_field_tag( 'accuracypercentage',mp.accuracypercentage.try(:to_s), :size => 6) %>
+			<tr><td>------</td><td>Hit: <%=  text_field_tag( "mriperformance[hitpercentage]["+mp.id.to_s+"]",mp.hitpercentage.try(:to_s), :size => 6) %></td>
+				<td>Acc: <%=  text_field_tag( "mriperformance[accuracypercentage]["+mp.id.to_s+"]",mp.accuracypercentage.try(:to_s), :size => 6) %>
+					 <%=  hidden_field_tag( "mriperformance[mriperformance_id][]",mp.id.to_s) %>
           <td><td colspan="7"></tr>
 			<% end
 		 end 
-	<% end %>
+	 end %>
 ADD A FEW ROWS OF BLANKS!!! for existing and for new 
 	</table>
 

@@ -337,7 +337,7 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
     @petscan.destroy
 
     respond_to do |format|
-      format.html { redirect_to(petscans_url) }
+      format.html { redirect_to(petscan_search_path) }
       format.xml  { head :ok }
     end
   end

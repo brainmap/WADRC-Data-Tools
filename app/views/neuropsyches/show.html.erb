@@ -1,10 +1,66 @@
-<p id="notice"><%= notice %></p>
+<%
 
-<p>
-  <b>Appointment:</b>
-  <%= @neuropsych.appointment_id %>
-</p>
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+ edit_low_scan_procedure_array = []
+edit_low_scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+edit_count =edit_low_scan_procedure_array.length 
+edit_count = edit_count -1 
+%>
+<%   @current_tab = "neuropsyches"
+%>
+
+<% if edit_count > 0 %>
+<span style="float:right"><%= link_to 'Edit Lab Health appt', edit_neuropsych_path(@neuropsych) %></span>
+<% end %>
+<div id="visit_heading">
+  <%=	link_to "&larr; Older".html_safe, @older_neuropsych if @older_neuropsych %>
+  &nbsp;
+  <h1><%= @enumbers.blank? ? @vgroup.rmr : @enumbers.collect{|e| e.enumber }.join(", ") %></h1>
+  <p class="date"><%= @appointment.appointment_date.to_s(:long) %></p>
+  &nbsp;
+  <%=	link_to "Newer &rarr;".html_safe, @newer_neuropsych if @newer_neuropsych %>
+  <br />
+</div>
 
 
-<%= link_to 'Edit', edit_neuropsych_path(@neuropsych) %> |
-<%= link_to 'Back', neuropsyches_path %>
+<div id="leftcol" class="two_col_left">
+  <h3>Summary:</h3>
+  
+  <div id="visit_details_note" class="sticky">
+    <%= key_val_table("visit_details", {
+      :Blooddraw_appt_date => @appointment.appointment_date,
+      :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
+      :RMR_Number => @vgroup.rmr,
+     :Participant => @participant.nil? ? nil : link_to('view participant', @participant)
+    }) %>
+  </div>
+
+  <div id="visit_details_note" class="sticky">
+    <%= key_val_table("visit_details", {
+      :Blooddraw_completed => @neuropsych.completedneuropsych == 1 ? "Yes" : "No" ,
+      :Blooddraw_entered =>  @neuropsych.enteredneuropsych == 1 ? "Yes" : "No",
+      :Blooddraw_entered_date =>  @neuropsych.enteredneuropsychdate,
+      :Blooddraw_entered_by => @neuropsych.enteredneuropsychwho.nil? ? nil : Employee.find(@neuropsych.enteredneuropsychwho).name
+    }) %>
+  </div>
+
+</div>
+
+
+<div id="visit_status_report" class="two_col_right">
+
+  <h3>Notes:</h3>
+  <div id="notes" class="sticky">
+	<%=  RedCloth.new(@appointment.comment.blank? ? "No comment entered for this Neuro Psych" : @appointment.comment).to_html.html_safe 
+            %><br>
+    <%=  RedCloth.new(@neuropsych.neuropsychnote.blank? ? "No notes entered for this Neuro Psych" : @neuropsych.neuropsychnote).to_html.html_safe 
+            %>
+  </div> 
+
+
+</div>
+
+
+<br style="clear: both" /><br />
+<%= render :partial => 'questionforms/displayform', :locals => { } %>

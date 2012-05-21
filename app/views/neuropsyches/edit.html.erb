@@ -1,6 +1,10 @@
-<h1>Editing neuropsych</h1>
+<%   @current_tab = "neuropsyches"
+%>
+<h1>Editing Neuro Psych appt</h1>
 
-<%= render 'form' %>
+<%= render :partial => 'new_edit', :locals => { :form_action => 'Edit Neuro Psych appt'} %>
+<br><hr span="70%">
 
-<%= link_to 'Show', @neuropsych %> |
-<%= link_to 'Back', neuropsyches_path %>
+<%= render :partial => 'questionforms/editform', :locals => { :form_action => 'Edit Neuro Psych values'} %>
+
+<br /><%= link_to 'Back to this Neuro Psych appt', @neuropsych %> | <%= link_to 'Delete this Neuro Psych appt', @neuropsych, :confirm => "Are you sure you want to delete this Neuro Psych appt?", :method => :delete %>

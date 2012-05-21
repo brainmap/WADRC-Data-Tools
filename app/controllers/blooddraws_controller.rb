@@ -137,6 +137,7 @@ class BlooddrawsController < ApplicationController
   def show
 
     @current_tab = "blooddraws"
+     q_form_id = 12
      scan_procedure_array = []
      scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
 
@@ -160,10 +161,10 @@ class BlooddrawsController < ApplicationController
      @enumbers = @vgroup.enrollments
      
      @appointment = Appointment.find(@blooddraw.appointment_id)
-     @q_data_form = QDataForm.where("questionform_id=12 and appointment_id in (?)",@appointment.id)
+     @q_data_form = QDataForm.where("questionform_id="+ q_form_id.to_s+" and appointment_id in (?)",@appointment.id)
      @q_data_form = @q_data_form[0]
      #params[:appointment_id] = @blooddraw.appointment_id
-     @questionform =Questionform.find(12)
+     @questionform =Questionform.find(q_form_id)
 
      # NEED SCAN PROC ARRAY FOR VGROUP  --- change to vgroup!!
 
@@ -175,6 +176,7 @@ class BlooddrawsController < ApplicationController
  	       visit = v
  	     end  
  	  sp_list = visit.scan_procedures.collect {|sp| sp.id}.join(",")
+
  	  sp_array =[]
  	  sp_array = sp_list.split(',').map(&:to_i)
  	  @scanprocedures = ScanProcedure.where("id in (?)",sp_array)
@@ -195,7 +197,7 @@ class BlooddrawsController < ApplicationController
         @appointment = Appointment.new
         @appointment.vgroup_id = vgroup_id
         @appointment.appointment_date = (Vgroup.find(vgroup_id)).vgroup_date
-        @appointment.appointment_type ='pet_scan'
+        @appointment.appointment_type ='blood_draw'
     #    @appointment.save  --- save in create step
 
         @blooddraw.appointment_id = @appointment.id
@@ -254,11 +256,16 @@ class BlooddrawsController < ApplicationController
   @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(vgroup_id)
   @appointment = Appointment.new
   @appointment.vgroup_id = vgroup_id
-  @appointment.appointment_type ='pet_scan'
+  @appointment.appointment_type ='blood_draw'
   @appointment.appointment_date =appointment_date
   @appointment.comment = params[:appointment][:comment]
   @appointment.save
   @blooddraw.appointment_id = @appointment.id
+
+  @q_data_form = QDataForm.new
+  @q_data_form.appointment_id = @appointment.id
+  @q_data_form.questionform_id = 12
+  @q_data_form.save
 
   respond_to do |format|
     if @blooddraw.save
@@ -280,7 +287,7 @@ class BlooddrawsController < ApplicationController
         @vital.save      
       end        
   
-        format.html { redirect_to(@blooddraw, :notice => 'Blooddraw was successfully created.') }
+        format.html { redirect_to(@blooddraw, :notice => 'Lab Health was successfully created.') }
         format.xml  { render :xml => @blooddraw, :status => :created, :location => @blooddraw }
       else
         format.html { render :action => "new" }
@@ -329,7 +336,7 @@ class BlooddrawsController < ApplicationController
             @appointment.comment = params[:appointment][:comment]
             @appointment.appointment_date =appointment_date
             @appointment.save
-        format.html { redirect_to(@blooddraw, :notice => 'Blooddraw was successfully updated.') }
+        format.html { redirect_to(@blooddraw, :notice => 'Lab Health was successfully updated.') }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }
@@ -350,7 +357,7 @@ class BlooddrawsController < ApplicationController
     @blooddraw.destroy
 
     respond_to do |format|
-      format.html { redirect_to(blooddraws_url) }
+      format.html { redirect_to(blooddraw_search_path) }
       format.xml  { head :ok }
     end
   end

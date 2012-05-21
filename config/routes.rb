@@ -4,10 +4,6 @@ WADRCDataTools::Application.routes.draw do
 
   resources :scan_procedures_vgroups
 
-  resources :mriperformances
-
-  resources :mriscantasks
-
   resources :neuropsyches
 
   resources :vitals
@@ -139,6 +135,7 @@ WADRCDataTools::Application.routes.draw do
     match '/petscan_search' , :controller => 'petscans', :action => 'petscan_search', :as =>:petscan_search
     match '/lumbarpuncture_search' , :controller => 'lumbarpunctures', :action => 'lumbarpuncture_search', :as =>:lumbarpuncture_search
     match '/blooddraw_search' , :controller => 'blooddraws', :action => 'blooddraw_search', :as =>:blooddraw_search
+    match '/neuropsych_search' , :controller => 'neuropsyches', :action => 'neuropsych_search', :as =>:neuropsych_search
   
     match '/participant_search' , :controller => 'participants', :action => 'participant_search', :as =>:participant_search
   
@@ -177,7 +174,11 @@ WADRCDataTools::Application.routes.draw do
   end
   resources :radiology_comments
   
-  resources :visits
+  resources :visits, :shallow => true do
+    resources :mriscantasks, :shallow => true do
+      resources :mriperformances
+    end
+  end
   resources :roles
   resources :raw_image_files
   resources :analyses

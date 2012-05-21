@@ -1,4 +1,4 @@
-<%   @current_tab = "blooddraws"
+<%   @current_tab = "neuropsyches"
 %>
 
 <%
@@ -12,7 +12,7 @@ edit_count = edit_count -1
 %>
 
 <div id="heading_and_link">
-  <h1>Lab Health appts:</h1>
+  <h1>Neuro Psych appts:</h1>
 <% if edit_count > 0 %> 
 <% end %>
 </p>
@@ -21,13 +21,13 @@ edit_count = edit_count -1
 <B>Criteria: </b><%= params["search_criteria"] %>
 
 
-<%= form_for 'blooddraw_search' do |f| %>
+<%= form_for 'neuropsych_search' do |f| %>
 <!--
   <table class="search_form">
 	
     <th><%= f.label :scan_procedures %></th>
     <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
-    <td><%= collection_select(:blooddraw_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename, {}, {:multiple =>  true}) %></td>
+    <td><%= collection_select(:neuropsych_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename, {}, {:multiple =>  true}) %></td>
   </table>
 -->
 <table class="search_form">
@@ -42,7 +42,7 @@ edit_count = edit_count -1
 			<%# end %>
 		</li>
 		<li>
-			<%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'blooddraw_search[scan_procedure_id][]' %>
+			<%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'neuropsych_search[scan_procedure_id][]' %>
 			<%= label_tag '', scan_procedure.codename %>
 		</li>
 	<% end %>
@@ -78,15 +78,15 @@ edit_count = edit_count -1
   <table class="search_form">
     <tr>
       <th><%= f.label :gender %></th>
-      <td><%= select :blooddraw_search, :gender, { "M" => 1, "F" => 2 }, :include_blank => true %></td>
+      <td><%= select :neuropsych_search, :gender, { "M" => 1, "F" => 2 }, :include_blank => true %></td>
     </tr>
     <tr>
       <th><%= f.label :minimum_age %></th>
-      <td><%= select :blooddraw_search, :min_age, (1..110).to_a, :include_blank => true %><B> (the age at visit) </B></td>
+      <td><%= select :neuropsych_search, :min_age, (1..110).to_a, :include_blank => true %><B> (the age at visit) </B></td>
     </tr>
     <tr>
       <th><%= f.label :maximum_age %></th>
-      <td><%= select :blooddraw_search, :max_age, (1..110).to_a, :include_blank => true %></td>
+      <td><%= select :neuropsych_search, :max_age, (1..110).to_a, :include_blank => true %></td>
     </tr>
   </table>
 <!--
@@ -110,11 +110,11 @@ edit_count = edit_count -1
   
 <% end %>
 
-<!-- = link_to 'download csv of this search (this may take a while!)', blooddraw_path(:blooddraw_search => params[:blooddraw_search], :format => :csv ), :class => 'download_csv' %></p>
+<!-- = link_to 'download csv of this search (this may take a while!)', neuropsych_path(:neuropsych_search => params[:neuropsych_search], :format => :csv ), :class => 'download_csv' %></p>
 -->
 <table class="tabular">
   
-  <caption><%= pluralize(@blooddraws.total_count, 'Blooddraw appt') %><%#= paginated ? pagination_info(@blooddraws) : pluralize(@blooddraws.length, 'Blooddraw appt') %></caption>
+  <caption><%= pluralize(@neuropsyches.total_count, 'Neuropsych appt') %><%#= paginated ? pagination_info(@neuropsyches) : pluralize(@neuropsyches.length, 'Neuropsych appt') %></caption>
   <thead>
     <tr>
       <th><span>Date</span></th>
@@ -132,30 +132,30 @@ edit_count = edit_count -1
 
 
   <tfoot><tr><td colspan=21>
-		 <%= paginate @blooddraws %> 
+		 <%= paginate @neuropsyches %> 
 		<%# if paginated %>
-    	<%#= @blooddraw_search.nil? ? will_paginate(@blooddraws) : will_paginate(@blooddraws, :params => { :blooddraw_search => @blooddraw_search }) %>
+    	<%#= @neuropsych_search.nil? ? will_paginate(@neuropsyches) : will_paginate(@neuropsyches, :params => { :neuropsych_search => @neuropsych_search }) %>
 		<%# end %>
   </td></tr></tfoot>
 
   <tbody>
-    <% @blooddraws.each do |blooddraw| %>
-       <%    appointment = Appointment.find(blooddraw.appointment_id) 
+    <% @neuropsyches.each do |neuropsych| %>
+       <%    appointment = Appointment.find(neuropsych.appointment_id) 
              vgroup = Vgroup.find(appointment.vgroup_id)
         %>
       <tr>
-        <td><%= link_to appointment.appointment_date.to_s(:datetime_military), blooddraw %></td>
+        <td><%= link_to appointment.appointment_date.to_s(:datetime_military), neuropsych %></td>
         <td><%= vgroup.scan_procedures.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
         <td><%= vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
         <td><%= vgroup.rmr %></td>
-        <td><%= blooddraw.completedblooddraw==1 ? "Completed": (blooddraw.enteredblood==1 ? "Entered" : "")%></td>
+        <td><%= neuropsych.completedneuropsych==1 ? "Completed": (neuropsych.enteredneuropsych==1 ? "Entered" : "")%></td>
         <td style="width: 6em;">
-          <%= link_to 'show', blooddraw %>
+          <%= link_to 'show', neuropsych %>
 		  <% if edit_count > 0 %>
-		          <%= link_to 'edit', edit_blooddraw_path(blooddraw) %>
+		          <%= link_to 'edit', edit_neuropsych_path(neuropsych) %>
 		  <% end %>
         </td>
-       <td><%= link_to  'New', new_blooddraw_path+"/"+vgroup.id.to_s %></td>
+       <td><%= link_to  'New', new_neuropsych_path+"/"+vgroup.id.to_s %></td>
       </tr>
     <% end %>
   </tbody>
@@ -163,7 +163,7 @@ edit_count = edit_count -1
 </table>
 
 <!--
-<h1>Listing blooddraws</h1>
+<h1>Listing neuropsyches</h1>
 
 <table>
   <tr>
@@ -181,19 +181,19 @@ edit_count = edit_count -1
     <th></th>
   </tr>
 
-< @blooddraws.each do |blooddraw| %>
+< @neuropsyches.each do |neuropsych| %>
   <tr>
-    <td><= blooddraw.appointment_id %></td>
-    <td><= blooddraw.lookup_pettracer_id %></td>
-    <td><= blooddraw.ecatfilename %></td>
-    <td><= blooddraw.netinjecteddose %></td>
-    <td><= blooddraw.units %></td>
-    <td><= blooddraw.range %></td>
-    <td><= blooddraw.injecttiontime %></td>
-    <td><= blooddraw.scanstarttime %></td>
-    <td><= link_to 'Show', blooddraw %></td>
-    <td><= link_to 'Edit', edit_blooddraw_path(blooddraw) %></td>
-    <td><= link_to 'Destroy', blooddraw, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><= neuropsych.appointment_id %></td>
+    <td><= neuropsych.lookup_pettracer_id %></td>
+    <td><= neuropsych.ecatfilename %></td>
+    <td><= neuropsych.netinjecteddose %></td>
+    <td><= neuropsych.units %></td>
+    <td><= neuropsych.range %></td>
+    <td><= neuropsych.injecttiontime %></td>
+    <td><= neuropsych.scanstarttime %></td>
+    <td><= link_to 'Show', neuropsych %></td>
+    <td><= link_to 'Edit', edit_neuropsych_path(neuropsych) %></td>
+    <td><= link_to 'Destroy', neuropsych, :confirm => 'Are you sure?', :method => :delete %></td>
     <td>New (pass vgroup_id) </td>
   </tr>
 < end %>

@@ -166,10 +166,18 @@ class QuestionformsController < ApplicationController
     @blooddraw = Blooddraw.where("appointment_id in (?)",params["value_link"]["appointment_id"])
     var = '/blooddraws/'+@blooddraw[0].id.to_s
 
- respond_to do |format|
-   format.html { redirect_to( var, :notice => 'Questionform was successfully updated.' )}
-   format.xml  { render :xml => @questionforms }
- end
+    respond_to do |format|
+      format.html { redirect_to( var, :notice => 'Questionform was successfully updated.' )}
+      format.xml  { render :xml => @questionforms }
+    end
+  elsif params["questionform_id"] == "13"   #  need the taget page plus the neuropsych object based on appointment_id -- need to know its an Appointment object
+      @neuropsych = Neuropsych.where("appointment_id in (?)",params["value_link"]["appointment_id"])
+      var = '/neuropsyches/'+@neuropsych[0].id.to_s
+
+      respond_to do |format|
+        format.html { redirect_to( var, :notice => 'Questionform was successfully updated.' )}
+        format.xml  { render :xml => @questionforms }
+      end
   else
     respond_to do |format|
       format.html { redirect_to(@questionform, :notice => 'Questionform was successfully updated.') }

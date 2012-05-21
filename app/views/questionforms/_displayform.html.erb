@@ -20,12 +20,16 @@
                                                              question_id not in 
                                         (select question_id from question_scan_procedures where include_exclude ='exclude' and scan_procedure_id in (?)))",
                                                    @scanprocedures,@scanprocedures).where(" questionform_id = ?",params[:id]).sort_by(&:display_order)
+
+   puts "id= "+params[:id] 
   if !@q_data_form.blank?
    #@q_data_form = QDataForm.find(params[:q_data_form_id])
   else
-   @q_data_form = QDataForm.new
+    # THIS WILL FAIL IF NO q_data_form already exisit
+   @q_data_form = QDataForm.new 
   end
  params[:q_data_form_id] = @q_data_form.id.to_s
+puts "q_data_form_id="+params[:q_data_form_id]
 # need front porch --- need consitant participant with enrollment with appointment with visit -- derive other values from one selection
 # just display -- rederive, even with hidden field
 %>
