@@ -3,6 +3,7 @@
 <%   @current_tab = "lumbarpunctures"
 %>
 <h1>Editing Lumbar Puncture appt</h1>
+<h3><%= @enumbers.blank? ? @vgroup.rmr : @enumbers.collect{|e| e.enumber }.join(", ") %></h3>
 
 <%= render :partial => 'new_edit', :locals => { :form_action => 'Edit Lumbar Puncture appt'} %>
 

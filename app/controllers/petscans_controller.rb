@@ -189,6 +189,8 @@ class PetscansController < ApplicationController
                                        appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                        and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
      @appointment = Appointment.find(@petscan.appointment_id) 
+     @vgroup = Vgroup.find(@appointment.vgroup_id)
+     @enumbers = @vgroup.enrollments
   end
 
   # POST /petscans

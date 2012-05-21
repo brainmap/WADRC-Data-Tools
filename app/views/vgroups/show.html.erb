@@ -16,6 +16,7 @@ edit_count = edit_count -1
 	       @petscans = Petscan.where("appointment_id in (?) ",a_array)
 	       @lumbarpunctures = Lumbarpuncture.where("appointment_id in (?) ",a_array)
 	       @blooddraws = Blooddraw.where("appointment_id in (?) ",a_array)
+	       @neuropsyches = Neuropsych.where("appointment_id in (?) ",a_array)
 %>
 
 <p id="notice"><%= notice %></p>
@@ -91,6 +92,21 @@ edit_count = edit_count -1
 		<td  align="left" width="10%"><%= edit_count>0 ? link_to("edit",edit_blooddraw_path(bd) ) :"" %></td>
 		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 		<td><%= bd.completedblooddraw==1 ? "Completed" :(bd.enteredblood==1 ? "Entered" : " ")%> </td>
+		</tr>
+		<tr><td colspan="5"><%= @appointment.comment %>
+		</td></tr>
+	<%end %>  </table>		
+</td></tr>
+<tr><td colspan=4  align="left">
+	<b>Neuro Psych: </b><%= @neuropsyches.blank? ? "None" :""%></td><td align="right"> <%= link_to  'New-NP', new_neuropsych_path+"/"+@vgroup.id.to_s %></b></td></tr>
+<tr><td colspan=5  align="left"><table  width="80%">
+	<% @neuropsyches.each do |np|
+	   @appointment = Appointment.find(np.appointment_id)	%>
+	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%></td>
+		<td  align="left" width="10%"><%= link_to("show",neuropsych_path(np) )%></td>
+		<td  align="left" width="10%"><%= edit_count>0 ? link_to("edit",edit_neuropsych_path(np) ) :"" %></td>
+		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+		<td><%= np.completedneuropsych==1 ? "Completed" :(np.enteredneuropsych==1 ? "Entered" : " ")%> </td>
 		</tr>
 		<tr><td colspan="5"><%= @appointment.comment %>
 		</td></tr>

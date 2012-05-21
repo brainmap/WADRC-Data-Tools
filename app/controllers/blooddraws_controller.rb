@@ -209,7 +209,7 @@ class BlooddrawsController < ApplicationController
 
   # GET /blooddraws/1/edit
   def edit
-
+    q_form_id = 12
     @current_tab = "blooddraws"
     scan_procedure_array = []
     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
@@ -217,10 +217,12 @@ class BlooddrawsController < ApplicationController
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @appointment = Appointment.find(@blooddraw.appointment_id)
-    @q_data_form = QDataForm.where("questionform_id=12 and appointment_id in (?)",@appointment.id)
+    @vgroup = Vgroup.find(@appointment.vgroup_id)
+    @enumbers = @vgroup.enrollments
+    @q_data_form = QDataForm.where("questionform_id="+q_form_id.to_s+" and appointment_id in (?)",@appointment.id)
     @q_data_form = @q_data_form[0]
     #params[:appointment_id] = @blooddraw.appointment_id
-    @questionform =Questionform.find(12)
+    @questionform =Questionform.find(q_form_id)
 
     # NEED SCAN PROC ARRAY FOR VGROUP  --- change to vgroup!!
   
@@ -242,6 +244,7 @@ class BlooddrawsController < ApplicationController
   # POST /blooddraws.xml
   def create
    @current_tab = "blooddraws"
+   q_form_id = 12
    scan_procedure_array = []
    scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
   @blooddraw = Blooddraw.new(params[:blooddraw])
@@ -264,7 +267,7 @@ class BlooddrawsController < ApplicationController
 
   @q_data_form = QDataForm.new
   @q_data_form.appointment_id = @appointment.id
-  @q_data_form.questionform_id = 12
+  @q_data_form.questionform_id = q_form_id
   @q_data_form.save
 
   respond_to do |format|

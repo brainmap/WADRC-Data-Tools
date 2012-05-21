@@ -1,8 +1,8 @@
 class NeuropsychesController < ApplicationController
   
   
-    def blooddraw_search
-       @current_tab = "blooddraws"
+    def neuropsych_search
+       @current_tab = "europsyches"
        params["search_criteria"] =""
 
        if params[:neuropsych_search].nil?
@@ -18,8 +18,8 @@ class NeuropsychesController < ApplicationController
   #     sql = "select * from neuropsyches inner join  appointments on appointments.id = neuropsyches.appointment_id order by appointment_date desc"
   #      @search = Blooddraw.find_by_sql(sql)
   #     @search = Blooddraw.where("neuropsyches.appointment_id in (select appointments.id from appointments)").all
-        @search = Blooddraw.search(params[:search])    # parms search makes something which works with where?
-
+        @search = Neuropsych.search(params[:search])    # parms search makes something which works with where?
+        @search =@search.where("neuropsyches.appointment_id in (select appointment_id from q_data_forms)")
         if !params[:neuropsych_search][:scan_procedure_id].blank?
            @search =@search.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                                   appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
@@ -209,16 +209,21 @@ class NeuropsychesController < ApplicationController
   # GET /neuropsyches/1/edit
   def edit
     @current_tab = "neuropsyches"
+    q_form_id = 13
     scan_procedure_array = []
     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @neuropsych = Neuropsych.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @appointment = Appointment.find(@neuropsych.appointment_id)
-    @q_data_form = QDataForm.where("questionform_id=13 and appointment_id in (?)",@appointment.id)
+    
+    @vgroup = Vgroup.find(@appointment.vgroup_id)
+    @enumbers = @vgroup.enrollments
+    
+    @q_data_form = QDataForm.where("questionform_id="+q_form_id.to_s+" and appointment_id in (?)",@appointment.id)
     @q_data_form = @q_data_form[0]
     #params[:appointment_id] = @neuropsych.appointment_id
-    @questionform =Questionform.find(13)
+    @questionform =Questionform.find(q_form_id)
 
     # NEED SCAN PROC ARRAY FOR VGROUP  --- change to vgroup!!
   
@@ -239,6 +244,7 @@ class NeuropsychesController < ApplicationController
   # POST /neuropsyches.xml
   def create
      @current_tab = "neuropsyches"
+     q_form_id = 13
      scan_procedure_array = []
      scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @neuropsych = Neuropsych.new(params[:neuropsych])
@@ -260,7 +266,7 @@ class NeuropsychesController < ApplicationController
     @neuropsych.appointment_id = @appointment.id
     @q_data_form = QDataForm.new
     @q_data_form.appointment_id = @appointment.id
-    @q_data_form.questionform_id = 13
+    @q_data_form.questionform_id = q_form_id
     @q_data_form.save
     respond_to do |format|
       if @neuropsych.save

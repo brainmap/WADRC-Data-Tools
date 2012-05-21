@@ -1,7 +1,7 @@
 <%   @current_tab = "blooddraws"
 %>
 <h1>Editing Lab Health appt</h1>
-
+<h3><%= @enumbers.blank? ? @vgroup.rmr : @enumbers.collect{|e| e.enumber }.join(", ") %></h3>
 <%= render :partial => 'new_edit', :locals => { :form_action => 'Edit Blooddraw appt'} %>
 <br><hr span="70%">
 
