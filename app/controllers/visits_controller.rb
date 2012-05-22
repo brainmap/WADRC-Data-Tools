@@ -290,8 +290,114 @@ class VisitsController <  AuthorizedController #  ApplicationController
       @vital.bloodglucose = params[:bloodglucose]
       @vital.save      
     end
-         
+       
+    # get all mriscantask[mriscantask_id][]
+    #  if < 0 => insert if some field not null
+    #  mriperformance[mriperformance_id][]  get all ---> if < 0 ==> insert if some field not null
+                #e.g. name="mriperformance[mriperformance_id][]" value="-3" 
+    						#name="mriperformance[mriscantask_id][-3]"  value="-22"  
+    						
+    						
+    mriscantask_id_array = params[:mriscantask][:mriscantask_id]  
+    mriscantask_id_array.each do |mri_id|
+      mri_id_int = mri_id.to_i
+      if mri_id_int < 0 
+        if !params[:mriscantask][:lookup_set_id][mri_id].blank? or 
+           !params[:mriscantask][:lookup_scantask_id][mri_id].blank? or 
+              !params[:mriscantask][:preday][mri_id].blank? or 
+                 !params[:mriscantask][:task_order][mri_id].blank? or 
+                    !params[:mriscantask][:moved][mri_id].blank? or 
+                       !params[:mriscantask][:eyecontact][mri_id].blank? or 
+                          !params[:mriscantask][:logfilerecorded][mri_id].blank? or 
+                              !params[:mriscantask][:p_file][mri_id].blank? or 
+                                  !params[:mriscantask][:tasknote][mri_id].blank? or 
+                                      !params[:mriscantask][:reps][mri_id].blank? or 
+                                          !params[:mriscantask][:has_concerns][mri_id].blank? or 
+                                              !params[:mriscantask][:concerns][mri_id].blank? or 
+                                                  !params[:mriscantask][:image_dataset_id][mri_id].blank? 
+            @mriscantask = Mriscantask.new
+            @mriscantask.lookup_set_id = params[:mriscantask][:lookup_set_id][mri_id]
+            if !params[:mriscantask][:lookup_scantask_id][mri_id].blank?
+              @mriscantask.lookup_scantask_id = params[:mriscantask][:lookup_scantask_id][mri_id]
+            end
+            @mriscantask.preday = params[:mriscantask][:preday][mri_id]
+            @mriscantask.task_order = params[:mriscantask][:task_order][mri_id]
+            @mriscantask.moved = params[:mriscantask][:moved][mri_id]
+            @mriscantask.eyecontact = params[:mriscantask][:eyecontact][mri_id]
+            @mriscantask.logfilerecorded = params[:mriscantask][:logfilerecorded][mri_id]
+            @mriscantask.p_file = params[:mriscantask][:p_file][mri_id]
+            @mriscantask.tasknote = params[:mriscantask][:tasknote][mri_id]
+            @mriscantask.reps = params[:mriscantask][:reps][mri_id]
+            @mriscantask.has_concerns = params[:mriscantask][:has_concerns][mri_id]
+            @mriscantask.concerns = params[:mriscantask][:concerns][mri_id]
+            @mriscantask.image_dataset_id = params[:mriscantask][:image_dataset_id][mri_id]
+            @mriscantask.visit_id = @visit.id
+            @mriscantask.save
+            # get the acc and hit
+            if !params[:mriscantask][:mriperformance_id][mri_id].blank?
+              mp_id =  params[:mriscantask][:mriperformance_id][mri_id]
+              mp_id_int = mp_id.to_i
+
+              if mp_id_int < 0
+                if !params[:mriperformance][:hitpercentage][mp_id].blank? or
+                    !params[:mriperformance][:accuracypercentage][mp_id].blank?
+                    @mriperformance = Mriperformance.new
+                    @mriperformance.hitpercentage =params[:mriperformance][:hitpercentage][mp_id]
+                    @mriperformance.accuracypercentage =params[:mriperformance][:accuracypercentage][mp_id]
+                    @mriperformance.mriscantask_id =@mriscantask.id
+                    @mriperformance.save          
+                end 
+              else
+                @mriperformance = Mriperformance.find(mp_id)
+                @mriperformance.hitpercentage =params[:mriperformance][:hitpercentage][mp_id]
+                @mriperformance.accuracypercentage =params[:mriperformance][:accuracypercentage][mp_id]
+                @mriperformance.save
+              end
+             end
+          end
+      else
+puts "BBBBBBBBBBBBBBBBB"
+        @mriscantask = Mriscantask.find(mri_id_int)
+        @mriscantask.lookup_set_id = params[:mriscantask][:lookup_set_id][mri_id]
+        if !params[:mriscantask][:lookup_scantask_id][mri_id].blank?
+             @mriscantask.lookup_scantask_id = params[:mriscantask][:lookup_scantask_id][mri_id]
+        end
+        @mriscantask.preday = params[:mriscantask][:preday][mri_id]
+        @mriscantask.task_order = params[:mriscantask][:task_order][mri_id]
+        @mriscantask.moved = params[:mriscantask][:moved][mri_id]
+        @mriscantask.eyecontact = params[:mriscantask][:eyecontact][mri_id]
+        @mriscantask.logfilerecorded = params[:mriscantask][:logfilerecorded][mri_id]
+        @mriscantask.p_file = params[:mriscantask][:p_file][mri_id]
+        @mriscantask.tasknote = params[:mriscantask][:tasknote][mri_id]
+        @mriscantask.reps = params[:mriscantask][:reps][mri_id]
+        @mriscantask.has_concerns = params[:mriscantask][:has_concerns][mri_id]
+        @mriscantask.concerns = params[:mriscantask][:concerns][mri_id]
+        @mriscantask.image_dataset_id = params[:mriscantask][:image_dataset_id][mri_id]
+        @mriscantask.save
+        # get the acc and hit
         
+        if !params[:mriscantask][:mriperformance_id][mri_id].blank?
+          mp_id =  params[:mriscantask][:mriperformance_id][mri_id]
+          mp_id_int = mp_id.to_i
+puts "AAAAAAAAAAAAA"+params[:mriscantask][:mriperformance_id][mri_id]
+          if mp_id_int < 0
+            if !params[:mriperformance][:hitpercentage][mp_id].blank? or
+                !params[:mriperformance][:accuracypercentage][mp_id].blank?
+                @mriperformance = Mriperformance.new
+                @mriperformance.hitpercentage =params[:mriperformance][:hitpercentage][mp_id]
+                @mriperformance.accuracypercentage =params[:mriperformance][:accuracypercentage][mp_id]
+                @mriperformance.mriscantask_id =@mriscantask.id
+                @mriperformance.save          
+            end 
+          else
+            @mriperformance = Mriperformance.find(mp_id)
+            @mriperformance.hitpercentage =params[:mriperformance][:hitpercentage][mp_id]
+            @mriperformance.accuracypercentage =params[:mriperformance][:accuracypercentage][mp_id]
+            @mriperformance.save
+          end
+         end
+      end
+    end         
     respond_to do |format|
       if @visit.update_attributes(attributes)
         @appointment = Appointment.find(@visit.appointment_id)

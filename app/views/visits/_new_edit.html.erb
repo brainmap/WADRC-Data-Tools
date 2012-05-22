@@ -113,13 +113,13 @@
        @vitals.each do |v|  # could have multiples? %>
     <br><br><br> <table>
 	<tr><td><%= f.label :Pulse %> </td>
-		<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6) %></td></tr>
+		<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 	<tr><td><%= f.label :BP_Systol %> </td>
-		<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6) %></td></tr>
+		<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 	<tr><td><%= f.label :BP_Diastol %> </td>
-		<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6) %></td></tr>
+		<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 	<tr><td><%= f.label :Blood_Glucose %> </td>
-		<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6) %></td></tr>
+		<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 	 </tr></table>    
 	<%=  hidden_field_tag( 'vital_id',v.id) %>
          
@@ -132,13 +132,13 @@
  <% end %>
  <br><br><br> <table>
 	<tr><td><%= f.label :Pulse %> </td>
-		<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6) %></td></tr>
+		<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 	<tr><td><%= f.label :BP_Systol %> </td>
-		<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6) %></td></tr>
+		<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 	<tr><td><%= f.label :BP_Diastol %> </td>
-		<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6) %></td></tr>
+		<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 	<tr><td><%= f.label :Blood_Glucose %> </td>
-		<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6) %></td></tr>
+		<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 	 </tr></table>
 <%   end %>
 
@@ -162,7 +162,9 @@
 			<th>Reps</th><th>Moved</th><th>Eye Contact</th><th>Preday</th></tr>
 			<tr><th colspan=4 align="left">Task Note</th><th colspan=5 align="left">Concerns</th</tr>
 
-	<% if !@mriscantask.blank?  %>
+	<%   v_mriscantask_id = 0
+	     v_mriperformance_id = 0
+	   if !@mriscantask.blank?  %>
 
 		<% @mriscantask.each do |mst|%>
 		<% if !mst.image_dataset_id.blank?%>
@@ -170,14 +172,14 @@
 		<% end %>
 		<tr><td><%= select("mriscantask[lookup_scantask_id]",mst.id, LookupScantask.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :selected =>mst.lookup_scantask_id.try(:to_s),:include_blank => "Select a scan task" } )%>   
 			<%=  hidden_field_tag( "mriscantask[mriscantask_id][]",mst.id.to_s) %>
-			<%=  hidden_field_tag( "mriscantask[image_dataset_id]",mst.image_dataset_id.to_s) %>
+			<%=  hidden_field_tag( "mriscantask[image_dataset_id]["+mst.id.to_s+"]",mst.image_dataset_id.to_s) %>
 			</td>
 			<td><%= select("mriscantask[lookup_set_id]",mst.id, LookupSet.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, {:selected =>mst.lookup_set_id.try(:to_s), :include_blank => "Select a set" }) %> </td>
 	<td><%= select( "mriscantask[task_order]",mst.id, [['',''],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['6','6'],['7','7'],['8','8'],['9','9'],['10','10'],['-1','-1']], { :selected =>mst.task_order.try(:to_s), :include_blank => "Select order" } ) %>
 			  </td>
 			<td><%= select("mriscantask[logfilerecorded]",mst.id,[['No',"0"],["Yes","-1"]],{ :selected =>mst.logfilerecorded.try(:to_s), :include_blank => "Log?" })  %>  </td>
 			<td><%=  text_field_tag("mriscantask[p_file]["+mst.id.to_s+"]",mst.p_file, :size => 6) %>  </td>      </td>
-			<td><%=  text_field_tag( "mriscantask[reps]["+mst.id.to_s+"]",mst.reps.try(:to_s), :size => 6) %>  </td>  </td>
+			<td><%=  text_field_tag( "mriscantask[reps]["+mst.id.to_s+"]",mst.reps.try(:to_s), :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %>  </td>  </td>
 			<td><%= select("mriscantask[moved]",mst.id,[['No',"0"],["Yes","-1"]],{:selected =>mst.moved.try(:to_s), :include_blank => "Moved?" })  %>      </td>
 			<td><%= select("mriscantask[eyecontact]",mst.id,[['No',"0"],["Yes","-1"]],{:selected =>mst.eyecontact.try(:to_s), :include_blank => "Eyecontact?" })  %>     </td>
 			<td><%=  text_field_tag( "mriscantask[preday]["+mst.id.to_s+"]",mst.preday.try(:to_s), :size => 6) %>  </td>		
@@ -189,15 +191,76 @@
 				<%= f.label :Concerns %> <%=  text_field_tag( "mriscantask[concerns]["+mst.id.to_s+"]",mst.concerns, :size => 60) %>  </td></tr>
 			<% @mriperformances = Mriperformance.where("mriscantask_id in (?)",mst.id)
 			   @mriperformances.each do |mp|%>
-			<tr><td>------</td><td>Hit: <%=  text_field_tag( "mriperformance[hitpercentage]["+mp.id.to_s+"]",mp.hitpercentage.try(:to_s), :size => 6) %></td>
-				<td>Acc: <%=  text_field_tag( "mriperformance[accuracypercentage]["+mp.id.to_s+"]",mp.accuracypercentage.try(:to_s), :size => 6) %>
+			<tr><td>------</td><td>Hit: <%=  text_field_tag( "mriperformance[hitpercentage]["+mp.id.to_s+"]",mp.hitpercentage.try(:to_s), :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td>
+				<td>Acc: <%=  text_field_tag( "mriperformance[accuracypercentage]["+mp.id.to_s+"]",mp.accuracypercentage.try(:to_s), :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %>
+		<%=  hidden_field_tag( "mriscantask[mriperformance_id]["+mst.id.to_s+"]",mp.id.to_s) %>
 					 <%=  hidden_field_tag( "mriperformance[mriperformance_id][]",mp.id.to_s) %>
           <td><td colspan="7"></tr>
 			<% end
 		 end 
 	 else %>
-ADD A FEW ROWS OF BLANKS!!! for existing and for new 
+	<% 	   @image_datasets = ImageDataset.where("visit_id in (?)",@visit.id).sort_by(&:id) 
+          @image_datasets.each do |img_dt_set| 
+	             v_mriscantask_id = v_mriscantask_id - 1   %>
+            <tr><td colsapn="9" align = "left"><b><%= img_dt_set.series_description %></b></td><tr>
+				<tr><td><%= select("mriscantask[lookup_scantask_id]",v_mriscantask_id, LookupScantask.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :include_blank => "Select a scan task" } )%>   
+					<%=  hidden_field_tag( "mriscantask[mriscantask_id][]",v_mriscantask_id.to_s) %>
+					<%=  hidden_field_tag( "mriscantask[image_dataset_id]["+v_mriscantask_id.to_s+"]",img_dt_set.id.to_s) %>
+					</td>
+<td><%= select("mriscantask[lookup_set_id]",v_mriscantask_id, LookupSet.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :include_blank => "Select a set" }) %> </td>
+<td><%= select( "mriscantask[task_order]",v_mriscantask_id, [['',''],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['6','6'],['7','7'],['8','8'],['9','9'],['10','10'],['-1','-1']], { :include_blank => "Select order" } ) %></td>
+					<td><%= select("mriscantask[logfilerecorded]",v_mriscantask_id,[['No',"0"],["Yes","-1"]],{  :include_blank => "Log?" })  %>  </td>
+					<td><%=  text_field_tag("mriscantask[p_file]["+v_mriscantask_id.to_s+"]","", :size => 6) %>  </td>      </td>
+					<td><%=  text_field_tag( "mriscantask[reps]["+v_mriscantask_id.to_s+"]","", :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %>  </td>  </td>
+					<td><%= select("mriscantask[moved]",v_mriscantask_id,[['No',"0"],["Yes","-1"]],{ :include_blank => "Moved?" })  %>      </td>
+					<td><%= select("mriscantask[eyecontact]",v_mriscantask_id,[['No',"0"],["Yes","-1"]],{ :include_blank => "Eyecontact?" })  %>     </td>
+					<td><%=  text_field_tag( "mriscantask[preday]["+v_mriscantask_id.to_s+"]","", :size => 6) %>  </td>		
+					</tr>
+					<tr><td colspan=4  align="left"> 
+						<%= f.label :Task_Note %> <%=  text_field_tag( "mriscantask[tasknote]["+v_mriscantask_id.to_s+"]","", :size => 60) %>  </td>
+					<td colspan="5" align="left">	<%= select("mriscantask[has_concerns]",v_mriscantask_id,[['No',"0"],["Yes","1"]],{ :include_blank => "Has Concerns?" })  %>  
+					 &nbsp;&nbsp;&nbsp;
+						<%= f.label :Concerns %> <%=  text_field_tag( "mriscantask[concerns]["+v_mriscantask_id.to_s+"]","", :size => 60) %>  </td></tr>
+					<% if img_dt_set.series_description.downcase.include? "task" 
+						     v_mriperformance_id = v_mriperformance_id -1 %>
+					<tr><td>------</td><td>Hit: <%=  text_field_tag( "mriperformance[hitpercentage]["+v_mriperformance_id.to_s+"]","", :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td>
+						<td>Acc: <%=  text_field_tag( "mriperformance[accuracypercentage]["+v_mriperformance_id.to_s+"]","", :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %>
+							 <%=  hidden_field_tag( "mriscantask[mriperformance_id]["+v_mriscantask_id.to_s+"]",v_mriperformance_id.to_s) %>
+							 <%=  hidden_field_tag( "mriperformance[mriscantask_id]["+v_mriperformance_id.to_s+"]",v_mriscantask_id.to_s) %>
+		          <td><td colspan="7"></tr>		
+					
+					
+					<% end %>	
+         <% end %>	
 	<% end %>
+	   <% (1..3).each do |i|  
+	             v_mriscantask_id = v_mriscantask_id - 1  
+	             v_mriperformance_id = v_mriperformance_id -1 %>
+            <tr><td colsapn="9" align = "left"><b>New row <%= i.to_s %>:</b></td><tr>
+				<tr><td><%= select("mriscantask[lookup_scantask_id]",v_mriscantask_id, LookupScantask.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :include_blank => "Select a scan task" } )%>   
+					<%=  hidden_field_tag( "mriscantask[mriscantask_id][]",v_mriscantask_id.to_s) %>
+					<%=  hidden_field_tag( "mriscantask[image_dataset_id]["+v_mriscantask_id.to_s+"]","") %>
+					</td>
+<td><%= select("mriscantask[lookup_set_id]",v_mriscantask_id, LookupSet.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :include_blank => "Select a set" }) %> </td>
+<td><%= select( "mriscantask[task_order]",v_mriscantask_id, [['',''],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['6','6'],['7','7'],['8','8'],['9','9'],['10','10'],['-1','-1']], { :include_blank => "Select order" } ) %></td>
+					<td><%= select("mriscantask[logfilerecorded]",v_mriscantask_id,[['No',"0"],["Yes","-1"]],{  :include_blank => "Log?" })  %>  </td>
+					<td><%=  text_field_tag("mriscantask[p_file]["+v_mriscantask_id.to_s+"]","", :size => 6) %>  </td>      </td>
+					<td><%=  text_field_tag( "mriscantask[reps]["+v_mriscantask_id.to_s+"]","", :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %>  </td>  </td>
+					<td><%= select("mriscantask[moved]",v_mriscantask_id,[['No',"0"],["Yes","-1"]],{ :include_blank => "Moved?" })  %>      </td>
+					<td><%= select("mriscantask[eyecontact]",v_mriscantask_id,[['No',"0"],["Yes","-1"]],{ :include_blank => "Eyecontact?" })  %>     </td>
+					<td><%=  text_field_tag( "mriscantask[preday]["+v_mriscantask_id.to_s+"]","", :size => 6) %>  </td>		
+					</tr>
+					<tr><td colspan=4  align="left"> 
+						<%= f.label :Task_Note %> <%=  text_field_tag( "mriscantask[tasknote]["+v_mriscantask_id.to_s+"]","", :size => 60) %>  </td>
+					<td colspan="5" align="left">	<%= select("mriscantask[has_concerns]",v_mriscantask_id,[['No',"0"],["Yes","1"]],{ :include_blank => "Has Concerns?" })  %>  
+					 &nbsp;&nbsp;&nbsp;
+						<%= f.label :Concerns %> <%=  text_field_tag( "mriscantask[concerns]["+v_mriscantask_id.to_s+"]","", :size => 60) %>  </td></tr>
+					<tr><td>------</td><td>Hit: <%=  text_field_tag( "mriperformance[hitpercentage]["+v_mriperformance_id.to_s+"]","", :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td>
+						<td>Acc: <%=  text_field_tag( "mriperformance[accuracypercentage]["+v_mriperformance_id.to_s+"]","", :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %>
+							 <%=  hidden_field_tag( "mriscantask[mriperformance_id]["+v_mriscantask_id.to_s+"]",v_mriperformance_id.to_s) %>
+							 <%=  hidden_field_tag( "mriperformance[mriscantask_id]["+v_mriperformance_id.to_s+"]",v_mriscantask_id.to_s) %>
+		          <td><td colspan="7"></tr>				  
+       <% end %>
 
 	</table>
 

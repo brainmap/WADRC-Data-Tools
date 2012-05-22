@@ -119,7 +119,7 @@ edit_count = edit_count -1
 		<tr><th colspan=9 align="left">Concerns</th</tr>
 	<% @mriscantask.each do |mst|%>
 	<tr><td><%= mst.lookup_scantask_id.blank? ? "" : LookupScantask.find(mst.lookup_scantask_id).description %>      </td>
-		<td><%= LookupSet.find(mst.lookup_set_id).description %>      </td>
+		<td><%= mst.lookup_set_id.blank? ? "" :LookupSet.find(mst.lookup_set_id).description %>      </td>
 		<td><%= mst.task_order.try(:to_s)%>      </td>
 		<td><%= mst.logfilerecorded==(-1) ? "Yes" : "No"%>      </td>
 		<td><%= mst.p_file%>      </td>

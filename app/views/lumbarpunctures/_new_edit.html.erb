@@ -71,7 +71,7 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
 	end
 	   LookupLumbarpuncture.all.sort_by(&:description).each do |lookup_lp|    %>
 		<li>
-			<%=  text_field_tag( 'lookup_lumbarpuncture_ids',lp_results_array[lookup_lp.id], :size => 6, :name => 'lookup_lumbarpuncture_id['+lookup_lp.id.to_s+']') %>
+			<%=  text_field_tag( 'lookup_lumbarpuncture_ids',lp_results_array[lookup_lp.id], :size => 6, :name => 'lookup_lumbarpuncture_id['+lookup_lp.id.to_s+']',:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %>
 			<%= label_tag '', lookup_lp.description %>
 		</li>
 	<% end %>
@@ -87,13 +87,13 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
 	       @vitals.each do |v|  # could have multiples? %>
 	    <table>
 		<tr><td><%= f.label :Pulse %> </td>
-			<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6) %></td></tr>
+			<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 		<tr><td><%= f.label :BP_Systol %> </td>
-			<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6) %></td></tr>
+			<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 		<tr><td><%= f.label :BP_Diastol %> </td>
-			<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6) %></td></tr>
+			<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 		<tr><td><%= f.label :Blood_Glucose %> </td>
-			<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6) %></td></tr>
+			<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 		 </tr></table>    
 		<%=  hidden_field_tag( 'vital_id',v.id) %>
 
@@ -103,13 +103,13 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
 	 %>
 	  <table>
 		<tr><td><%= f.label :Pulse %> </td>
-			<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6) %></td></tr>
+			<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 		<tr><td><%= f.label :BP_Systol %> </td>
-			<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6) %></td></tr>
+			<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 		<tr><td><%= f.label :BP_Diastol %> </td>
-			<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6) %></td></tr>
+			<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 		<tr><td><%= f.label :Blood_Glucose %> </td>
-			<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6) %></td></tr>
+			<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 		 </tr></table>
 	<%   end %>	
 	<br><br><br><br>
