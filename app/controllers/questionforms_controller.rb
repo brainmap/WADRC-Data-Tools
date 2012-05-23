@@ -156,6 +156,54 @@ class QuestionformsController < ApplicationController
         else
           @q_data.save
         end
+        if @question.global_update_1 == "Y" and  !params["value_1"][q_id].blank? 
+          sql = "update q_data set value_1 = '"+@q_data.value_1+"'
+                   where question_id = "+@q_data.question_id.to_s+"
+                   and value_link ="+@q_data.value_link.to_s
+          connection = ActiveRecord::Base.connection();        
+          results = connection.execute(sql)
+                   
+          if !@question.base_table_1.blank? and !@question.base_column_1.blank?
+            sql ="update  "+@question.base_table_1+"
+                  set "+@question.base_table_1+"."+@question.base_column_1+" = '"+@q_data.value_1+"'
+                  where "+@question.value_link+"s.id = "+@q_data.value_link.to_s
+              connection = ActiveRecord::Base.connection();        
+              results = connection.execute(sql)
+          end
+        end
+        
+        if @question.global_update_2 == "Y" and  !params["value_2"][q_id].blank? 
+          sql = "update q_data set value_2 = '"+@q_data.value_2+"'
+                   where question_id = "+@q_data.question_id.to_s+"
+                   and value_link ="+@q_data.value_link.to_s
+          connection = ActiveRecord::Base.connection();        
+          results = connection.execute(sql)
+                   
+          if !@question.base_table_2.blank? and !@question.base_column_2.blank?
+            sql ="update  "+@question.base_table_2+"
+                  set "+@question.base_table_2+"."+@question.base_column_2+" = '"+@q_data.value_2+"'
+                  where "+@question.value_link+"s.id = "+@q_data.value_link.to_s
+              connection = ActiveRecord::Base.connection();        
+              results = connection.execute(sql)
+          end
+        end        
+        
+        if @question.global_update_3 == "Y" and  !params["value_3"][q_id].blank? 
+          sql = "update q_data set value_3 = '"+@q_data.value_3+"'
+                   where question_id = "+@q_data.question_id.to_s+"
+                   and value_link ="+@q_data.value_link.to_s
+          connection = ActiveRecord::Base.connection();        
+          results = connection.execute(sql)
+                   
+          if !@question.base_table_3.blank? and !@question.base_column_3.blank?
+            sql ="update  "+@question.base_table_3+"
+                  set "+@question.base_table_3+"."+@question.base_column_3+" = '"+@q_data.value_3+"'
+                  where "+@question.value_link+"s.id = "+@q_data.value_link.to_s
+              connection = ActiveRecord::Base.connection();        
+              results = connection.execute(sql)
+          end
+        end        
+        
       end
     end
 

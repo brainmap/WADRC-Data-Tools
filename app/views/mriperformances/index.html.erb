@@ -1,3 +1,4 @@
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
 <h1>Listing mriperformances</h1>
 
 <table>
@@ -25,3 +26,7 @@
 <br />
 
 <%= link_to 'New Mriperformance', new_mriperformance_path %>
+<%else %>	
+	
+	
+<% end %>

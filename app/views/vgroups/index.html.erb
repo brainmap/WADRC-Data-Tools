@@ -1,3 +1,4 @@
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
 <h1>Listing vgroups</h1>
 
 <table>
@@ -37,3 +38,7 @@
 <br />
 
 <%= link_to 'New Vgroup', new_vgroup_path %>
+<%else %>	
+	
+	
+<% end %>

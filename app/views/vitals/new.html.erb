@@ -1,5 +1,11 @@
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
 <h1>New vital</h1>
 
 <%= render 'form' %>
 
 <%= link_to 'Back', vitals_path %>
+
+<%else %>	
+	
+	
+<% end %>

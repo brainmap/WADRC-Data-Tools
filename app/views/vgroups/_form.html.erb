@@ -17,7 +17,7 @@
   </div>
   <div class="field">
     <%= f.label :participant_id %><br />
-    <%= f.text_field :participant_id %>
+<%= select(:vgroup, :participant_id, Enrollment.all.sort_by(&:enumber).collect {|p| [ p.enumber, p.participant_id ] }, { :include_blank => "Select  a participant" }) %>
   </div>
 
   <div class="field">
@@ -28,27 +28,8 @@
     <%= f.label :note %><br />
     <%= f.text_field :note %>
   </div>
-  <div class="field">
-    <%= f.label :transfer_mri %><br />
-    <%= f.text_field :transfer_mri %>
-  </div>
-  <div class="field">
-    <%= f.label :transfer_pet %><br />
-    <%= f.text_field :transfer_pet %>
-  </div>
-  <div class="field">
-    <%= f.label :blood_draw %><br />
-    <%= f.text_field :blood_draw %>
-  </div>
-  <div class="field">
-    <%= f.label :np_testing %><br />
-    <%= f.text_field :np_testing %>
-  </div>
-  <div class="field">
-    <%= f.label :lumbar_punture %><br />
-    <%= f.text_field :lumbar_punture %>
-  </div>
   <div class="actions">
     <%= f.submit %>
   </div>
 <% end %>
+

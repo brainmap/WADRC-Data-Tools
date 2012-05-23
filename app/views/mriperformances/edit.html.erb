@@ -1,6 +1,11 @@
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
 <h1>Editing mriperformance</h1>
 
 <%= render 'form' %>
 
 <%= link_to 'Show', @mriperformance %> |
 <%= link_to 'Back', mriperformances_path %>
+<%else %>	
+	
+	
+<% end %><strong></strong>

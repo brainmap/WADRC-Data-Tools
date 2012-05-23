@@ -1,3 +1,4 @@
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
 <h1>Listing appointments</h1>
 
 <table>
@@ -29,3 +30,8 @@
 <br />
 
 <%= link_to 'New Appointment', new_appointment_path %>
+<%else %>	
+	
+	
+<% end %>
+

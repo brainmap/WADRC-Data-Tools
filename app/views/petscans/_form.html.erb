@@ -1,3 +1,5 @@
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
+
 <%= form_for(@petscan) do |f| %>
   <% if @petscan.errors.any? %>
     <div id="error_explanation">
@@ -46,4 +48,10 @@
   <div class="actions">
     <%= f.submit %>
   </div>
+<% end %>
+
+
+<%else %>	
+	
+	
 <% end %>
