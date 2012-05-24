@@ -262,6 +262,7 @@ class BlooddrawsController < ApplicationController
   @appointment.appointment_type ='blood_draw'
   @appointment.appointment_date =appointment_date
   @appointment.comment = params[:appointment][:comment]
+  @appointment.user = current_user
   @appointment.save
   @blooddraw.appointment_id = @appointment.id
 

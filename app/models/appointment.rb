@@ -1,6 +1,7 @@
 class Appointment < ActiveRecord::Base
   
   belongs_to :vgroup
+  belongs_to :user
   
   has_many :visits, :class_name =>"Visit",:dependent => :destroy
   has_many :petscans, :class_name =>"Petscan",:dependent => :destroy

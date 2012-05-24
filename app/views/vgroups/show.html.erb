@@ -4,6 +4,7 @@
 # apply limit protocol  on create , edit in create form  
 edit_count =@var.edit_low_scan_procedure_array.split(' ').length 
 edit_count = edit_count -1 
+
 @current_tab = "vgroups"
 @a =  Appointment.where("vgroup_id in (?)",@vgroup.id)
         a_array =@a.to_a
@@ -29,14 +30,14 @@ edit_count = edit_count -1
     <%= visit.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(",<br>").html_safe %> 
 </td><td>
 	<b>Enroll Number:</b><br>
-	<%= visit.blank? ? "" :visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(",<br>").html_safe %>
+	<%= visit.blank? ? "": visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(",<br>").html_safe %>
 	
 </td><td>
 	<b>RMR:</b>
-  <%= visit.blank? ? "" : visit.rmr %>
+  <%= visit.blank? ? (@vgroup.rmr.blank? ? "" : @vgroup.rmr   ) : visit.rmr %>
 </td><td>
 	<b>Participant Reggie_id:</b><br>
-	<%= @vgroup.participant_id.blank? ? "how to add participant" : Participant.find(@vgroup.participant_id).reggieid%>
+	<%= @vgroup.participant_id.blank? ? "" : Participant.find(@vgroup.participant_id).reggieid%>
 	
 	
 </td></tr>
@@ -45,7 +46,10 @@ edit_count = edit_count -1
   <%= @vgroup.note %>
 </td></tr>
 <tr><td colspan=4  align="left">
-	<b>MRI:</b>    <%= visit.blank? ? "None" :""%></td><td align="right"> <%= link_to  'New-MRI', new_visit_path+"/"+@vgroup.id.to_s %></td></tr>
+	<b>MRI:</b>    <%= visit.blank? ? "None" :""%></td><td align="right"> 
+<% if edit_count > 0 %>
+	<%= link_to  'New-MRI', new_visit_path+"/"+@vgroup.id.to_s %>
+<% end %></td></tr>
 	<tr><td colspan=5>	<table>
 	<% @visits.each do |v| 
 		@appointment = Appointment.find(v.appointment_id) %>
@@ -54,7 +58,9 @@ edit_count = edit_count -1
 	<% end %> </table>
 	</td></tr>
 <tr><td colspan=4  align="left">
-	<b>Petscan: </b><%= @petscans.blank? ? "None" :""%></td><td align="right"><%= link_to  'New-Petscan', new_petscan_path+"/"+@vgroup.id.to_s %></b></td></tr>
+	<b>Petscan: </b><%= @petscans.blank? ? "None" :""%></td><td align="right">
+<% if edit_count > 0 %>
+	<%= link_to  'New-Petscan', new_petscan_path+"/"+@vgroup.id.to_s %><% end %></b></td></tr>
 <tr><td colspan=5  align="left"><table width="80%">
 	<% @petscans.each do |p|  
 		@appointment = Appointment.find(p.appointment_id) %>
@@ -69,7 +75,10 @@ edit_count = edit_count -1
 	<%end %> </table>	
 </td></tr>
 <tr><td colspan=4  align="left">
-	<b>Lumbar Puncture: </b><%= @lumbarpunctures.blank? ? "None" :""%></td><td align="right"> <%= link_to  'New-LP', new_lumbarpuncture_path+"/"+@vgroup.id.to_s %></b></td></tr>
+	<b>Lumbar Puncture: </b><%= @lumbarpunctures.blank? ? "None" :""%></td><td align="right">
+<% if edit_count > 0 %>
+	<%= link_to  'New-LP', new_lumbarpuncture_path+"/"+@vgroup.id.to_s %>
+<% end %></b></td></tr>
 <tr><td colspan=5  align="left"><table  width="80%">
 	<% @lumbarpunctures.each do |lp|
 	   @appointment = Appointment.find(lp.appointment_id)	%>
@@ -83,7 +92,10 @@ edit_count = edit_count -1
 		</td></tr>
 	<%end %>  </table>		
 <tr><td colspan=4  align="left">
-	<b>Lab Health: </b><%= @blooddraws.blank? ? "None" :""%></td><td align="right"> <%= link_to  'New-Lab', new_blooddraw_path+"/"+@vgroup.id.to_s %></b></td></tr>
+	<b>Lab Health: </b><%= @blooddraws.blank? ? "None" :""%></td><td align="right">
+<% if edit_count > 0 %>
+	<%= link_to  'New-Lab', new_blooddraw_path+"/"+@vgroup.id.to_s %>
+<% end %></b></td></tr>
 <tr><td colspan=5  align="left"><table  width="80%">
 	<% @blooddraws.each do |bd|
 	   @appointment = Appointment.find(bd.appointment_id)	%>
@@ -98,7 +110,10 @@ edit_count = edit_count -1
 	<%end %>  </table>		
 </td></tr>
 <tr><td colspan=4  align="left">
-	<b>Neuro Psych: </b><%= @neuropsyches.blank? ? "None" :""%></td><td align="right"> <%= link_to  'New-NP', new_neuropsych_path+"/"+@vgroup.id.to_s %></b></td></tr>
+	<b>Neuro Psych: </b><%= @neuropsyches.blank? ? "None" :""%></td><td align="right"> 
+<% if edit_count > 0 %>
+	<%= link_to  'New-NP', new_neuropsych_path+"/"+@vgroup.id.to_s %>
+<% end %></b></td></tr>
 <tr><td colspan=5  align="left"><table  width="80%">
 	<% @neuropsyches.each do |np|
 	   @appointment = Appointment.find(np.appointment_id)	%>
@@ -112,6 +127,7 @@ edit_count = edit_count -1
 		</td></tr>
 	<%end %>  </table>		
 </td></tr></table>
-
-<%= link_to 'Edit', edit_vgroup_path(@vgroup) %> |
-<%= link_to 'Back', vgroups_path %>
+<% if edit_count > 0 %>
+	<%= link_to 'Edit', edit_vgroup_path(@vgroup) %> |
+<% end %>
+<%= link_to 'Back', home_path %>

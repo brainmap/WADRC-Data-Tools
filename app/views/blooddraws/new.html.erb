@@ -1,5 +1,14 @@
-<%   @current_tab = "blooddraws"
+<%
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+ edit_low_scan_procedure_array = []
+edit_low_scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+edit_count =edit_low_scan_procedure_array.length 
+edit_count = edit_count -1
+   @current_tab = "blooddraws"
 %>
+<% if edit_count > 0 %>
 <h1>New Lab Health Appt</h1>
 
 <%= render :partial => 'new_edit', :locals => { :form_action => 'Create Lab Health appt'} %>
+<% end %>

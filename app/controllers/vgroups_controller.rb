@@ -36,7 +36,7 @@ class VgroupsController < ApplicationController
 
   # GET /vgroups/1/edit
   def edit
-    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
   end
 
@@ -44,7 +44,7 @@ class VgroupsController < ApplicationController
   # POST /vgroups.xml
   def create
     @vgroup = Vgroup.new(params[:vgroup])
-
+ 
     respond_to do |format|
       if @vgroup.save
         format.html { redirect_to(@vgroup, :notice => 'Vgroup was successfully created.') }
@@ -59,7 +59,7 @@ class VgroupsController < ApplicationController
   # PUT /vgroups/1
   # PUT /vgroups/1.xml
   def update
-    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
     respond_to do |format|
@@ -159,7 +159,7 @@ class VgroupsController < ApplicationController
   # DELETE /vgroups/1
   # DELETE /vgroups/1.xml
   def destroy
-    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @vgroup.destroy
 

@@ -1,8 +1,16 @@
-
+<%
+@var = current_user
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+edit_count =@var.edit_low_scan_procedure_array.split(' ').length 
+edit_count = edit_count -1 
+@current_tab = "vgroups"
+%>
+<% if edit_count > 0 %>
 <h1>Editing vgroup</h1>
 
 <%= render 'form' %>
-
+<% end %>
 <%= link_to 'Show', @vgroup %> |
-<%= link_to 'Back', vgroups_path %>
+<%= link_to 'Back', home_path %>
 

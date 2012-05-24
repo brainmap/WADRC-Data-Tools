@@ -169,7 +169,10 @@ edit_count = edit_count -1
 		          <%= link_to 'edit', edit_petscan_path(petscan) %>
 		  <% end %>
         </td>
-       <td><%= link_to  'New', new_petscan_path+"/"+vgroup.id.to_s %></td>
+       <td>
+<% if edit_count > 0 %>
+	<%= link_to  'New', new_petscan_path+"/"+vgroup.id.to_s %>
+<% end %></td>
       </tr>
     <% end %>
   </tbody>

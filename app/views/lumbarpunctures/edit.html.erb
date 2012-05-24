@@ -1,10 +1,20 @@
 
 
-<%   @current_tab = "lumbarpunctures"
+<%  # assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+ edit_low_scan_procedure_array = []
+edit_low_scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+edit_count =edit_low_scan_procedure_array.length 
+edit_count = edit_count -1
+ @current_tab = "lumbarpunctures"
 %>
+<% if edit_count > 0 %>
 <h1>Editing Lumbar Puncture appt</h1>
 <h3><%= @enumbers.blank? ? @vgroup.rmr : @enumbers.collect{|e| e.enumber }.join(", ") %></h3>
 
 <%= render :partial => 'new_edit', :locals => { :form_action => 'Edit Lumbar Puncture appt'} %>
-
-<br /><%= link_to 'Back to this Lumbar Puncture appt', @lumbarpuncture %> | <%= link_to 'Delete this Lumbar Puncture appt', @lumbarpuncture, :confirm => "Are you sure you want to delete this Lumbar Puncture appt?", :method => :delete %>
+<% end %>
+<br /><%= link_to 'Back to this Lumbar Puncture appt', @lumbarpuncture %> 
+<% if edit_count > 0 %>
+| <%= link_to 'Delete this Lumbar Puncture appt', @lumbarpuncture, :confirm => "Are you sure you want to delete this Lumbar Puncture appt?", :method => :delete %>
+<% end %>

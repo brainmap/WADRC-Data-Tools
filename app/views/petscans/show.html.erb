@@ -63,7 +63,7 @@ edit_count = edit_count -1
             %><br>
     <%=  RedCloth.new(@petscan.petscan_note.blank? ? "No notes entered for this petscan" : @petscan.petscan_note).to_html.html_safe 
             %>
-  </div> <small>(move note into comment?)</small>
+  </div>
 <% @vital =  Vital.where("appointment_id in (?) ",@petscan.appointment_id).first
  if !@vital.blank?
 	 vital = Vital.find(@vital.id) 

@@ -1,7 +1,19 @@
-<%   @current_tab = "petscans"
+<%
+
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+ edit_low_scan_procedure_array = []
+edit_low_scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+edit_count =edit_low_scan_procedure_array.length 
+edit_count = edit_count -1 
+
+   @current_tab = "petscans"
 %>
+<% if edit_count > 0 %>
 <h1>Editing Petscan appt</h1>
 <h3><%= @enumbers.blank? ? @vgroup.rmr : @enumbers.collect{|e| e.enumber }.join(", ") %></h3>
 <%= render :partial => 'new_edit', :locals => { :form_action => 'Edit Petscan appt'} %>
-
-<br /><%= link_to 'Back to this Petscan appt', @petscan %> | <%= link_to 'Delete this Petscan appt', @petscan, :confirm => "Are you sure you want to delete this Petscan appt?", :method => :delete %>
+<% end %>
+<br /><%= link_to 'Back to this Petscan appt', @petscan %> <% if edit_count > 0 %>
+| <%= link_to 'Delete this Petscan appt', @petscan, :confirm => "Are you sure you want to delete this Petscan appt?", :method => :delete %>
+<% end %>

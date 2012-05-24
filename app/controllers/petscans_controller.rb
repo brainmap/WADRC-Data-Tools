@@ -231,6 +231,7 @@ class PetscansController < ApplicationController
     @appointment.appointment_type ='pet_scan'
     @appointment.appointment_date =appointment_date
     @appointment.comment = params[:appointment][:comment]
+    @appointment.user = current_user
     @appointment.save
     @petscan.appointment_id = @appointment.id
 

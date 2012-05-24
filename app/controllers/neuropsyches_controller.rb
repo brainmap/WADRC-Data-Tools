@@ -262,6 +262,7 @@ class NeuropsychesController < ApplicationController
     @appointment.appointment_type ='neuropsych'
     @appointment.appointment_date =appointment_date
     @appointment.comment = params[:appointment][:comment]
+    @appointment.user = current_user
     @appointment.save
     @neuropsych.appointment_id = @appointment.id
     @q_data_form = QDataForm.new

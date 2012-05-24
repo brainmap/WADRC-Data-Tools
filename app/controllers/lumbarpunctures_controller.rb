@@ -97,6 +97,7 @@ class LumbarpuncturesController < ApplicationController
     @appointment.appointment_type ='lumbar_puncture'
     @appointment.appointment_date =appointment_date
     @appointment.comment = params[:appointment][:comment]
+    @appointment.user = current_user
     @appointment.save
     @lumbarpuncture.appointment_id = @appointment.id
 

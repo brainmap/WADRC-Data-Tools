@@ -150,7 +150,7 @@ class QuestionformsController < ApplicationController
         if !params["value_3"][q_id].blank? 
           @q_data.value_3 = params["value_3"][q_id].to_a.join(',')
         end
-
+    if v_value_link != "-1"
         if params["q_data_id"][q_id].length  > 0
           @q_data.update_attributes(@q_data)
         else
@@ -164,9 +164,15 @@ class QuestionformsController < ApplicationController
           results = connection.execute(sql)
                    
           if !@question.base_table_1.blank? and !@question.base_column_1.blank?
+            if @question.base_table_1 == "appointments" or @question.base_table_1 == "participants" 
+              sql ="update  "+@question.base_table_1+"
+                    set "+@question.base_table_1+"."+@question.base_column_1+" = '"+@q_data.value_1+"'
+                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s              
+            else
             sql ="update  "+@question.base_table_1+"
                   set "+@question.base_table_1+"."+@question.base_column_1+" = '"+@q_data.value_1+"'
-                  where "+@question.value_link+"s.id = "+@q_data.value_link.to_s
+                  where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+            end
               connection = ActiveRecord::Base.connection();        
               results = connection.execute(sql)
           end
@@ -180,10 +186,16 @@ class QuestionformsController < ApplicationController
           results = connection.execute(sql)
                    
           if !@question.base_table_2.blank? and !@question.base_column_2.blank?
+            if @question.base_table_2 == "appointments" or @question.base_table_2 == "participants" 
+              sql ="update  "+@question.base_table_2+"
+                    set "+@question.base_table_2+"s."+@question.base_column_2+" = '"+@q_data.value_2+"'
+                    where "+@question.value_link+".id = "+@q_data.value_link.to_s              
+            else
             sql ="update  "+@question.base_table_2+"
                   set "+@question.base_table_2+"."+@question.base_column_2+" = '"+@q_data.value_2+"'
-                  where "+@question.value_link+"s.id = "+@q_data.value_link.to_s
-              connection = ActiveRecord::Base.connection();        
+                  where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+            end
+              connection = ActiveRecord::Base.connection();      
               results = connection.execute(sql)
           end
         end        
@@ -196,14 +208,20 @@ class QuestionformsController < ApplicationController
           results = connection.execute(sql)
                    
           if !@question.base_table_3.blank? and !@question.base_column_3.blank?
+            if @question.base_table_3 == "appointments" or @question.base_table_3 == "participants" 
+              sql ="update  "+@question.base_table_3+"
+                    set "+@question.base_table_3+"."+@question.base_column_3+" = '"+@q_data.value_3+"'
+                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s              
+            else
             sql ="update  "+@question.base_table_3+"
                   set "+@question.base_table_3+"."+@question.base_column_3+" = '"+@q_data.value_3+"'
-                  where "+@question.value_link+"s.id = "+@q_data.value_link.to_s
+                  where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+             end
               connection = ActiveRecord::Base.connection();        
               results = connection.execute(sql)
           end
         end        
-        
+       end  
       end
     end
 

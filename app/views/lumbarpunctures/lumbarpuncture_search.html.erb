@@ -7,7 +7,7 @@
  edit_low_scan_procedure_array = []
 edit_low_scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
 edit_count =edit_low_scan_procedure_array.length 
-edit_count = edit_count -1
+edit_count =   edit_count -1
 
 %>
 
@@ -143,7 +143,10 @@ edit_count = edit_count -1
 		          <%= link_to 'edit', edit_lumbarpuncture_path(lumbarpuncture) %>
 		  <% end %>
         </td>
-       <td><%= link_to  'New', new_lumbarpuncture_path+"/"+vgroup.id.to_s %></td>
+       <td>
+<% if edit_count > 0 %>
+	<%= link_to  'New', new_lumbarpuncture_path+"/"+vgroup.id.to_s %>
+<% end %></td>
       </tr>
     <% end %>
   </tbody>

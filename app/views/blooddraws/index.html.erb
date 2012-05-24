@@ -1,3 +1,4 @@
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
 <h1>Listing blooddraws</h1>
 
 <table>
@@ -21,3 +22,6 @@
 <br />
 
 <%= link_to 'New Blooddraw', new_blooddraw_path %>
+
+
+<% end %>

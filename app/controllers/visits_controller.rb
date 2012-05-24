@@ -202,6 +202,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
         @vgroup.rmr = @visit.rmr
        @vgroup.save
        @appointment.vgroup_id = @vgroup.id
+       @appointment.user = current_user
        @appointment.save
        @vital = Vital.new
        @vital.appointment_id = @appointment.id
@@ -291,6 +292,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
       @vital.save      
     end
        
+    # THIS SHOULD ALL BE CONDENSED ===> do it the ruby way
     # get all mriscantask[mriscantask_id][]
     #  if < 0 => insert if some field not null
     #  mriperformance[mriperformance_id][]  get all ---> if < 0 ==> insert if some field not null
@@ -356,7 +358,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
              end
           end
       else
-puts "BBBBBBBBBBBBBBBBB"
+
         @mriscantask = Mriscantask.find(mri_id_int)
         @mriscantask.lookup_set_id = params[:mriscantask][:lookup_set_id][mri_id]
         if !params[:mriscantask][:lookup_scantask_id][mri_id].blank?
@@ -379,7 +381,7 @@ puts "BBBBBBBBBBBBBBBBB"
         if !params[:mriscantask][:mriperformance_id][mri_id].blank?
           mp_id =  params[:mriscantask][:mriperformance_id][mri_id]
           mp_id_int = mp_id.to_i
-puts "AAAAAAAAAAAAA"+params[:mriscantask][:mriperformance_id][mri_id]
+
           if mp_id_int < 0
             if !params[:mriperformance][:hitpercentage][mp_id].blank? or
                 !params[:mriperformance][:accuracypercentage][mp_id].blank?
@@ -403,8 +405,40 @@ puts "AAAAAAAAAAAAA"+params[:mriscantask][:mriperformance_id][mri_id]
         @appointment = Appointment.find(@visit.appointment_id)
         @appointment.appointment_date = @visit.date
         @appointment.save
-     
-        4
+        @vgroup = Vgroup.find(@appointment.vgroup_id)
+        @vgroup.rmr = @visit.rmr
+ #       @vgroup.enrollments = @visit.enrollments
+        if !@visit.enrollments.blank?
+          sql = "Delete from enrollment_vgroup_memberships where vgroup_id ="+@vgroup.id.to_s
+          connection = ActiveRecord::Base.connection();        
+          results = connection.execute(sql)
+          @visit.enrollments.each do |e|
+            sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+e.id.to_s+")"
+            connection = ActiveRecord::Base.connection();        
+            results = connection.execute(sql)
+          end 
+          
+        else
+          sql = "Delete from enrollment_vgroup_memberships where vgroup_id ="+@vgroup.id.to_s
+          connection = ActiveRecord::Base.connection();        
+          results = connection.execute(sql)
+        end
+         if !@visit.scan_procedures.blank?
+           sql = "Delete from scan_procedures_vgroups where vgroup_id ="+@vgroup.id.to_s
+           connection = ActiveRecord::Base.connection();        
+           results = connection.execute(sql)
+           @visit.scan_procedures.each do |sp|  
+             sql = "Insert into scan_procedures_vgroups(vgroup_id,scan_procedure_id) values("+@vgroup.id.to_s+","+sp.id.to_s+")"
+             connection = ActiveRecord::Base.connection();        
+             results = connection.execute(sql)        
+           end   
+         else
+           sql = "Delete from scan_procedures_vgroups where vgroup_id ="+@vgroup.id.to_s
+           connection = ActiveRecord::Base.connection();        
+           results = connection.execute(sql)
+         end
+        @vgroup.save
+   #     4
         flash[:notice] = 'visit was successfully updated.'
         format.html { redirect_to(@visit) }
         format.xml  { head :ok }

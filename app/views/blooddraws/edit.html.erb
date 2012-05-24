@@ -1,5 +1,13 @@
-<%   @current_tab = "blooddraws"
+<% 
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+ edit_low_scan_procedure_array = []
+edit_low_scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+edit_count =edit_low_scan_procedure_array.length 
+edit_count = edit_count -1
+  @current_tab = "blooddraws"
 %>
+<% if edit_count > 0 %>
 <h1>Editing Lab Health appt</h1>
 <h3><%= @enumbers.blank? ? @vgroup.rmr : @enumbers.collect{|e| e.enumber }.join(", ") %></h3>
 <%= render :partial => 'new_edit', :locals => { :form_action => 'Edit Blooddraw appt'} %>
@@ -8,3 +16,5 @@
 <%= render :partial => 'questionforms/editform', :locals => { :form_action => 'Edit Lab Health values'} %>
 
 <br /><%= link_to 'Back to this Lab Health appt', @blooddraw %> | <%= link_to 'Delete this Lab Health appt', @blooddraw, :confirm => "Are you sure you want to delete this Lab Health appt?", :method => :delete %>
+
+<% end %>

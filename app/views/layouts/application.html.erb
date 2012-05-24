@@ -20,7 +20,11 @@
     </div>
     
     <div id="middle">
-      <div id="visit_index_main" class="main">
+	   <%  if @current_tab == "vgroups" %>
+      <div id="visit_index_main" class="main_vgroup">
+	   <% else %>
+	      <div id="visit_index_main" class="main">
+		<% end %>
         <div id="visits_tab_bar" class="tabs">
           <ul>
             <li <%= "class=current" if @current_tab == "vgroups" %>>
@@ -58,9 +62,7 @@
             </li> -->
           </ul>
         </div>
-
         <div id="visits_index_content" class="content">
-	
 	      <div id="flash">
 	        <% flash.each do |key, msg| %>
 	        <%= content_tag :div, msg, :id => key %>

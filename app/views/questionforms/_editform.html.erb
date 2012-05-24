@@ -97,9 +97,9 @@
 			val_array =[]
 			if !@q_data.value_1.blank?
 				val_array = @q_data.value_1.split(',')
-			end
-		 
-	      if @question.value_type_1 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
+			end %>
+		 	<%= hidden_field_tag("value_link["+@question.id.to_s+"][]",@q_data.value_link) %>
+	     <% if @question.value_type_1 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
 	         <%= draw_text_area(@question.id,"1","60x7", @question.default_val_1,@q_data.value_1) %>
 	      <% elsif @question.value_type_1 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
 	         <%= draw_text_area(@question.id,"1","60x7", @question.default_val_1,@q_data.value_1) %>

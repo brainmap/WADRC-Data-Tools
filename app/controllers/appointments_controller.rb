@@ -25,8 +25,6 @@ class AppointmentsController < ApplicationController
   # GET /appointments/new.xml
   def new
     @appointment = Appointment.new
-
-
     respond_to do |format|
       format.html # new.html.erb
       format.xml  { render :xml => @appointment }
@@ -42,8 +40,7 @@ class AppointmentsController < ApplicationController
   # POST /appointments.xml
   def create
     @appointment = Appointment.new(params[:appointment])
-    
-    
+  
     respond_to do |format|
       if @appointment.save
         @vital = Vital.new
