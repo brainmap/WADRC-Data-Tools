@@ -41,6 +41,11 @@ edit_count = edit_count -1
 	
 	
 </td></tr>
+<tr><td><B>Cognitive Status</B><br><%= !@vgroup.cognitivestatus.blank? ? LookupCogstatus.find(@vgroup.cognitivestatus).description : ""%>
+</td>
+   <td><B>FamHx</B><br><%= @vgroup.famhx %> <% # WHAT DO 2 and 3 equal !@vgroup.famhx.blank? ? LookupRef.where("label ='fam_hx' and ref_value in (?)",@vgroup.famhx) : ""
+                                            %></td>
+<td colspan=3></td>
 <tr><td colspan=5 align="left">
   <b>Note:</b><br>
   <%= @vgroup.note %>
