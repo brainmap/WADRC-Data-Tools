@@ -139,7 +139,8 @@
 		<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 	<tr><td><%= f.label :Blood_Glucose %> </td>
 		<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-	 </tr></table>
+	 </tr>
+	</table>
 <%   end %>
 
 
@@ -152,6 +153,9 @@
     </p>
 <br><br><br><%= f.submit form_action %>
   </div>
+<br>&nbsp;____________<br>
+    <%= RedCloth.new(@appointment.comment.blank? ? "" : @appointment.comment).to_html.html_safe %>
+ 
 <div ><!--  NEED TO ADDRESS CHILDREN FIELDS IN FOORM
                     NAME THE FIELDS WITH [][]
                     +INCLUDE HIDDEN FIELD OF ID?
