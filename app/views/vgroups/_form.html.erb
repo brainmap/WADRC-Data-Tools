@@ -26,16 +26,6 @@
     <%= f.text_field :rmr %>
   </div>
   <div class="field">
-    <%= f.label :cognitivestatus %><br />
-<%= select(:vgroup, :cognitivestatus,  LookupCogstatus.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :include_blank => "Select  the cognitive status" }) %>
-
-  </div>
-  <div class="field">
-    <%= f.label :famhx %><br />
-<%= f.text_field :famhx,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}" %>
-
-  </div>
-  <div class="field">
     <%= f.label :note %><br />
     <%= f.text_field :note %>
   </div>
