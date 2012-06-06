@@ -11,7 +11,7 @@ edit_count =  edit_count -1
 %>
 
 <% if edit_count > 0 %>
-<span style="float:right"><%= link_to 'Edit Lumbarpuncture appt', edit_lumbarpuncture_path(@lumbarpuncture) %></span>
+<span style="float:right"><%= link_to 'Edit Lumbarpuncture appt', edit_lumbarpuncture_path(@lumbarpuncture) %> | <%= link_to 'Vgroup', Vgroup.find(@appointment.vgroup_id) %></span>
 <% end %>
 <div id="visit_heading">
   <%=	link_to "&larr; Older".html_safe, @older_lumbarpuncture if @older_lumbarpuncture %>

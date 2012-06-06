@@ -1,12 +1,16 @@
 <% javascript_tag 'defaults' %>
 <div id="new_edit_form">
-
+<%= form_for(@visit) do |f| %>
 <p>
   Directory path<br />
+<% if @appointment.blank? %>
+<%= f.text_field :path %>
+<% else %>
   <tt><%= @visit.path.nil? ? 'directory unknown' : @visit.path %></tt>
+<% end %>
 </p>
 
-<%= form_for(@visit) do |f| %>
+
   <%= f.error_messages %>
   <div class="three_col_left">
     <p>
@@ -154,7 +158,9 @@
 <br><br><br><%= f.submit form_action %>
   </div>
 <br>&nbsp;____________<br>
+<% if !@appointment.blank? %>
     <%= RedCloth.new(@appointment.comment.blank? ? "" : @appointment.comment).to_html.html_safe %>
+<% end %>
  
 <div ><!--  NEED TO ADDRESS CHILDREN FIELDS IN FOORM
                     NAME THE FIELDS WITH [][]

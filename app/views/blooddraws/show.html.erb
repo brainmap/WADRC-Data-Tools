@@ -11,7 +11,7 @@ edit_count = edit_count -1
 %>
 
 <% if edit_count > 0 %>
-<span style="float:right"><%= link_to 'Edit Lab Health appt', edit_blooddraw_path(@blooddraw) %></span>
+<span style="float:right"><%= link_to 'Edit Lab Health appt', edit_blooddraw_path(@blooddraw) %> | <%= link_to 'Vgroup', Vgroup.find(@appointment.vgroup_id) %></span>
 <% end %>
 <div id="visit_heading">
   <%=	link_to "&larr; Older".html_safe, @older_blooddraw if @older_blooddraw %>

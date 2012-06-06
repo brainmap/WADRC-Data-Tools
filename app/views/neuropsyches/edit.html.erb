@@ -15,5 +15,6 @@ edit_count = edit_count -1
 <%= render :partial => 'questionforms/editform', :locals => { :form_action => 'Edit Neuro Psych values'} %>
 
 <br /><%= link_to 'Back to this Neuro Psych appt', @neuropsych %> | <%= link_to 'Delete this Neuro Psych appt', @neuropsych, :confirm => "Are you sure you want to delete this Neuro Psych appt?", :method => :delete %>
+ | <%= link_to 'Vgroup', Vgroup.find(@appointment.vgroup_id) %>
 
 <% end %>

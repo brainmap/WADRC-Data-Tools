@@ -341,6 +341,11 @@ class LumbarpuncturesController < ApplicationController
     @lumbarpuncture = Lumbarpuncture.where("lumbarpunctures.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    
+    if @lumbarpuncture.appointment_id > 3156 # sure appointment_id not used by any other
+       @appointment = Appointment.find(@lumbarpuncture.appointment_id)
+       @appointment.destroy
+    end
     @lumbarpuncture.destroy
 
     respond_to do |format|

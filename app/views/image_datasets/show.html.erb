@@ -10,7 +10,7 @@ edit_count = edit_count -1
 <h1><%= @image_dataset.series_description %></h1>
   <p>
     <%#= link_to 'edit this dataset', edit_image_dataset_path(@image_dataset) %>
-    <%= link_to 'view visit from whence it came', @visit %> •
+    <%= link_to 'view MRI from whence it came', @visit %> •
     <% if @image_dataset.participant.blank? %>
       no associated participant
     <% else %>

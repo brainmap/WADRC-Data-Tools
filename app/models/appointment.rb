@@ -8,6 +8,7 @@ class Appointment < ActiveRecord::Base
   has_many :neuropsyches,:dependent => :destroy
   has_many :lumbarpunctures,:dependent => :destroy
   has_many :blooddraws,:dependent => :destroy
+  has_many :vitals,:dependent => :destroy
   
  # has_many :vitals,:class_name =>"Vital",:dependent => :destroy
 

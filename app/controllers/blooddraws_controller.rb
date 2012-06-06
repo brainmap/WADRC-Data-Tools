@@ -358,6 +358,13 @@ class BlooddrawsController < ApplicationController
     @blooddraw = Blooddraw.where("blooddraws.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+
+
+    if @blooddraw.appointment_id > 3156 # sure appointment_id not used by any other
+       @appointment = Appointment.find(@blooddraw.appointment_id)
+       @appointment.destroy
+    end
+                                       
     @blooddraw.destroy
 
     respond_to do |format|

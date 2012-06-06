@@ -358,6 +358,11 @@ class NeuropsychesController < ApplicationController
     @neuropsych = Neuropsych.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    
+    if @neuropsych.appointment_id > 3156 # sure appointment_id not used by any other
+       @appointment = Appointment.find(@neuropsych.appointment_id)
+       @appointment.destroy
+    end
     @neuropsych.destroy
 
     respond_to do |format|

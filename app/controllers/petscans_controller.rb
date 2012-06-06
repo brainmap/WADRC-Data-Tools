@@ -337,6 +337,15 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
     @petscan = Petscan.where("petscans.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    if @petscan.appointment_id > 3156 # sure appointment_id not used by any other
+       @appointment = Appointment.find(@petscan.appointment_id)
+       @appointments = Appointment.where("vgroup_id in (?)",@appointment.vgroup_id)
+       if @appointments.length < 2 # sure appointment_id not used by any other
+          @vgroup = Vgroup.find(@appointment.vgroup_id)
+          @vgroup.destroy
+       end
+       @appointment.destroy
+    end
     @petscan.destroy
 
     respond_to do |format|

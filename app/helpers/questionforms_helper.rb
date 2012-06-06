@@ -4,7 +4,14 @@ module QuestionformsHelper
     
      if p_js_array.include?("numeric")
         text_field_tag "value_"+p_value_number+"["+p_question_id.to_s+"][]",(p_value.try(:strip) or p_default_value) , :size=>p_size, :onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}"
-     else
+                                                                                
+     elsif p_js_array.include?("calculated_bmi")
+            text_field_tag "value_"+p_value_number+"["+p_question_id.to_s+"][]",(p_value.try(:strip) or p_default_value) , :size=>p_size, 
+            :onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value ='';t3 =document.getElementById('value_3_"+p_question_id.to_s+"_');t3.value=''}
+                          else{t1 =document.getElementById('value_1_"+p_question_id.to_s+"_');t2 =document.getElementById('value_2_"+p_question_id.to_s+"_');
+                                 t3 =document.getElementById('value_3_"+p_question_id.to_s+"_');t3.value= Math.round(t2.value/((0.0254*t1.value)*(0.0254*t1.value)))}"
+         
+    else
          text_field_tag "value_"+p_value_number+"["+p_question_id.to_s+"][]",(p_value.try(:strip) or p_default_value) , :size=>p_size 
       end
   end

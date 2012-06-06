@@ -16,4 +16,5 @@ edit_count = edit_count -1
 <% end %>
 <br /><%= link_to 'Back to this Petscan appt', @petscan %> <% if edit_count > 0 %>
 | <%= link_to 'Delete this Petscan appt', @petscan, :confirm => "Are you sure you want to delete this Petscan appt?", :method => :delete %>
+ | <%= link_to 'Vgroup', Vgroup.find(@appointment.vgroup_id) %>
 <% end %>

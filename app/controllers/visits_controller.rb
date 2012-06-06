@@ -545,6 +545,17 @@ class VisitsController <  AuthorizedController #  ApplicationController
    #  scan_procedure_array =@user[:edit_low_scan_procedure_array]
     scan_procedure_array =(@user.edit_low_scan_procedure_array).split(' ').map(&:to_i) 
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    
+    
+    if @visit.appointment_id > 3156 # sure appointment_id not used by any other
+       @appointment = Appointment.find(@visit.appointment_id)
+       @appointments = Appointment.where("vgroup_id in (?)",@appointment.vgroup_id)
+       if @appointments.length < 2 # sure appointment_id not used by any other
+          @vgroup = Vgroup.find(@appointment.vgroup_id)
+          @vgroup.destroy
+       end
+       @appointment.destroy
+    end
     @visit.destroy
 
     respond_to do |format|

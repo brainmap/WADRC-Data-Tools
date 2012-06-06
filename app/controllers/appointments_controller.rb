@@ -75,6 +75,8 @@ class AppointmentsController < ApplicationController
   # DELETE /appointments/1.xml
   def destroy
     @appointment = Appointment.find(params[:id])
+    # check if last appointment for a vgroup   
+    
     @appointment.destroy
 
     respond_to do |format|
