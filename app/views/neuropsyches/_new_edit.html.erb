@@ -20,18 +20,18 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
         <td><%= select(:neuropsych, :enteredneuropsychwho, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Scan Entered By" }) %></td>
       </tr>
       <tr>
-        <td><%= f.label :Blooddraw_Entered %></td>
+        <td><%= f.label :Neuropsych_Entered %></td>
         <td><%= f.select :enteredneuropsych, options_for_select(v_yes_no_display, @neuropsych.enteredneuropsych),
 						              {:prompt => 'Select if the neuropsych has been entered'} %>
 	</td>
       </tr>
       <tr>
-        <td><%= f.label :Blooddraw_Completed %></td>
+        <td><%= f.label :Neuropsych_Completed %></td>
         <td><%= f.select :completedneuropsych, options_for_select(v_yes_no_display, @neuropsych.completedneuropsych),
 							              {:prompt => 'Select if the neuropsych has been entered'} %></td>
       </tr>
       <tr>
-        <td><%= f.label :Date_Blooddraw_Entered %>   </td>
+        <td><%= f.label :Date_Neuropsych_Entered %>   </td>
         <td><%= date_select :neuropsych, :enteredneuropsychdate, :include_blank => true, :end_year => Time.now.year + 1 %></td>
       </tr>
   
