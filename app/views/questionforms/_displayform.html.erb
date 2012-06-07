@@ -129,6 +129,8 @@ puts "q_data_form_id="+params[:q_data_form_id]
 		<% elsif @question.value_type_1 == "text_70"  %>
 		   <%= @q_data.value_1 %>	
 		<% elsif @question.value_type_1 == "text_90"  %>
+		   <%= @q_data.value_1 %>
+		<% elsif @question.value_type_1 == "date"  %>
 		   <%= @q_data.value_1 %>								
 		<% elsif @question.value_type_1 == "checkbox_1_col"  %>
 		   <% if @question.ref_table_a_1 == "LOOKUP_REFS" 
@@ -137,14 +139,14 @@ puts "q_data_form_id="+params[:q_data_form_id]
               results = connection.execute(sql)
 			    %>
 	          <% results.each do |theme| %>
-                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0],  val_array.include?( theme[0].to_s) %> 
+                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0],   checked=val_array.include?( theme[0].to_s) %> 
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id,  val_array.include?( theme.id.to_s) %>
+                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id,   checked=val_array.include?( theme.id.to_s) %>
 	              <%= (theme.description) %>
 	          <% end %>
 	        <% end %>	
@@ -155,14 +157,14 @@ puts "q_data_form_id="+params[:q_data_form_id]
              results = connection.execute(sql)
 			    %>
 	          <% results.each do |theme| %>
-               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0], val_array.include?( theme[0].to_s) %>
+               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0],  checked=val_array.include?( theme[0].to_s) %>
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id, val_array.include?( theme.id.to_s) %>
+               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id,  checked=val_array.include?( theme.id.to_s) %>
 	              <%= (theme.description) %>
 	          <% end %>
 	        <% end %>
@@ -249,6 +251,8 @@ puts "q_data_form_id="+params[:q_data_form_id]
 			   <%= @q_data.value_2 %>	
 			<% elsif @question.value_type_2 == "text_90"  %>
 			   <%= @q_data.value_2 %>
+			<% elsif @question.value_type_2 == "date"  %>
+			   <%= @q_data.value_2 %>
 			<% elsif @question.value_type_2 == "checkbox_1_col"  %>
 		   		<% if @question.ref_table_a_2 == "LOOKUP_REFS" 
 			     	sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_2+"' order by display_order"
@@ -256,14 +260,14 @@ puts "q_data_form_id="+params[:q_data_form_id]
               		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme[0],  val_array.include?( theme[0].to_s) %>
+                		<br><%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme[0],   checked=val_array.include?( theme[0].to_s) %>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_2).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme.id,  val_array.include?( theme.id.to_s) %>
+                		<br><%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme.id,   checked=val_array.include?( theme.id.to_s) %>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>
@@ -274,14 +278,14 @@ puts "q_data_form_id="+params[:q_data_form_id]
            		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme[0],  val_array.include?( theme[0].to_s) %>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme[0],   checked=val_array.include?( theme[0].to_s) %>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_2).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme.id,  val_array.include?( theme.id.to_s) %>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme.id,   checked=val_array.include?( theme.id.to_s) %>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>
@@ -367,7 +371,9 @@ puts "q_data_form_id="+params[:q_data_form_id]
 			<% elsif @question.value_type_3 == "text_70"  %>
 					<%= @q_data.value_3 %>	
 			<% elsif @question.value_type_3 == "text_90"  %>
-					@q_data.value_3 %>
+					<%= @q_data.value_3 %>
+			<% elsif @question.value_type_3 == "date"  %>
+					<%= @q_data.value_3 %>
 			<% elsif @question.value_type_3 == "checkbox_1_col"  %>
 		    	<% if @question.ref_table_a_3 == "LOOKUP_REFS" 
 			     	sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_3+"' order by display_order"
@@ -375,14 +381,14 @@ puts "q_data_form_id="+params[:q_data_form_id]
               		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme[0],  val_array.include?( theme[0].to_s)%>
+                		<br><%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme[0],   checked=val_array.include?( theme[0].to_s)%>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_3).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme.id, val_array.include?( theme.id.to_s) %>
+                		<br><%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme.id,  checked=val_array.include?( theme.id.to_s) %>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>
@@ -393,14 +399,14 @@ puts "q_data_form_id="+params[:q_data_form_id]
            		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme[0], val_array.include?( theme[0].to_s) %>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme[0],  checked=val_array.include?( theme[0].to_s) %>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_3).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme.id,  val_array.include?( theme.id.to_s)%>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme.id,   checked=val_array.include?( theme.id.to_s)%>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>          

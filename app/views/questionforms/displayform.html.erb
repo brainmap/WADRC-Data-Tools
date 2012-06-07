@@ -131,7 +131,10 @@
 		<% elsif @question.value_type_1 == "text_70"  %>
 		   <%= draw_text_field(@question.id,"1",70, @question.default_val_1,@q_data.value_1) %>	
 		<% elsif @question.value_type_1 == "text_90"  %>
-		   <%= draw_text_field(@question.id,"1",90, @question.default_val_1,@q_data.value_1) %>								
+		   <%= draw_text_field(@question.id,"1",90, @question.default_val_1,@q_data.value_1) %>	
+		<% elsif @question.value_type_1 == "date"  %>
+			<% #question_id, value_number,size   NEED TO CHANGE!!!%>
+			<%= draw_text_field(@question.id,"1",10, @question.default_val_1,@q_data.value_1) %>							
 		<% elsif @question.value_type_1 == "checkbox_1_col"  %>
 		   <% if @question.ref_table_a_1 == "LOOKUP_REFS" 
 			     sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_1+"' order by display_order"
@@ -139,14 +142,14 @@
               results = connection.execute(sql)
 			    %>
 	          <% results.each do |theme| %>
-                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0],  val_array.include?( theme[0].to_s) %> 
+                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0],  checked=val_array.include?( theme[0].to_s) %> 
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id,  val_array.include?( theme.id.to_s) %>
+                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id,  checked=val_array.include?( theme.id.to_s) %>
 	              <%= (theme.description) %>
 	          <% end %>
 	        <% end %>	
@@ -157,14 +160,14 @@
              results = connection.execute(sql)
 			    %>
 	          <% results.each do |theme| %>
-               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0], val_array.include?( theme[0].to_s) %>
+               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0], checked=val_array.include?( theme[0].to_s) %>
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id, val_array.include?( theme.id.to_s) %>
+               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id, checked=val_array.include?( theme.id.to_s) %>
 	              <%= (theme.description) %>
 	          <% end %>
 	        <% end %>
@@ -251,6 +254,8 @@
 			   <%= draw_text_field(@question.id,"2",70, @question.default_val_2,@q_data.value_2) %>	
 			<% elsif @question.value_type_2 == "text_90"  %>
 			   <%= draw_text_field(@question.id,"2",90, @question.default_val_2,@q_data.value_2) %>
+			<% elsif @question.value_type_2 == "date"  %>
+			   <%= draw_text_field(@question.id,"2",10, @question.default_val_2,@q_data.value_2) %>
 			<% elsif @question.value_type_2 == "checkbox_1_col"  %>
 		   		<% if @question.ref_table_a_2 == "LOOKUP_REFS" 
 			     	sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_2+"' order by display_order"
@@ -370,6 +375,8 @@
 					<%= draw_text_field(@question.id,"3",70, @question.default_val_3,@q_data.value_3) %>	
 			<% elsif @question.value_type_3 == "text_90"  %>
 					<%= draw_text_field(@question.id,"3",90, @question.default_val_3,@q_data.value_3) %>
+			<% elsif @question.value_type_3 == "date"  %>
+					<%= draw_text_field(@question.id,"3",10, @question.default_val_3,@q_data.value_3) %>
 			<% elsif @question.value_type_3 == "checkbox_1_col"  %>
 		    	<% if @question.ref_table_a_3 == "LOOKUP_REFS" 
 			     	sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_3+"' order by display_order"
