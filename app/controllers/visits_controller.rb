@@ -135,7 +135,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     @image_datasets = @visit.image_datasets.page(params[:page])
     @participant = @visit.try(:enrollments).first.try(:participant) 
     @enumbers = @visit.enrollments
-    @mriscantask = Mriscantask.where("visit_id in (?)",@visit.id)
+    @mriscantask = Mriscantask.where("visit_id in (?) and (lookup_set_id not in (8) or lookup_set_id is NULL)",@visit.id)
     @appointment = Appointment.find(@visit.appointment_id)
 
     respond_to do |format|
@@ -163,7 +163,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     scan_procedure_array =current_user[:edit_low_scan_procedure_array ]   
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @visit.enrollments.build # if @visit.enrollments.blank?
-    @mriscantask = Mriscantask.where("visit_id in (?)",@visit.id)
+    @mriscantask = Mriscantask.where("visit_id in (?) and (lookup_set_id not in (8) or lookup_set_id is NULL)",@visit.id)
     @appointment = Appointment.find(@visit.appointment_id)
   end
 

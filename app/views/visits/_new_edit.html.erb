@@ -176,7 +176,14 @@
 	     v_mriperformance_id = 0
 	   if !@mriscantask.blank?  %>
 
-		<% @mriscantask.each do |mst|%>
+		<% v_header_count = 0 
+		  @mriscantask.each do |mst|
+					v_header_count = v_header_count + 1 
+			 if v_header_count > 3
+				 v_header_count = 0 %>
+				<tr><th>Scan Series</th><th>Set</th><th>Order</th><th>LogFile Recorded</th><th>P_file</th>
+					<th>Reps</th><th>Moved</th><th>Eye Contact</th><th>Preday</th></tr>				
+			<% end%>
 		<% if !mst.image_dataset_id.blank?%>
 		<tr><td colsapn="9" align = "left"><b><%= ImageDataset.find(mst.image_dataset_id).series_description %></b></td><tr>
 		<% end %>
@@ -199,15 +206,31 @@
 			<td colspan="5" align="left">	<%= select("mriscantask[has_concerns]",mst.id,[['No',"0"],["Yes","1"]],{ :selected =>mst.has_concerns.try(:to_s),:include_blank => "Has Concerns?" })  %>  
 			 &nbsp;&nbsp;&nbsp;
 				<%= f.label :Concerns %> <%=  text_field_tag( "mriscantask[concerns]["+mst.id.to_s+"]",mst.concerns, :size => 60) %>  </td></tr>
-			<% @mriperformances = Mriperformance.where("mriscantask_id in (?)",mst.id)
-			   @mriperformances.each do |mp|%>
+			<% mriperformance_flag=0
+			    @mriperformances = Mriperformance.where("mriscantask_id in (?)",mst.id)
+			   @mriperformances.each do |mp|
+				  mriperformance_flag=1 %>
 			<tr><td>------</td><td>Hit: <%=  text_field_tag( "mriperformance[hitpercentage]["+mp.id.to_s+"]",mp.hitpercentage.try(:to_s), :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td>
 				<td>Acc: <%=  text_field_tag( "mriperformance[accuracypercentage]["+mp.id.to_s+"]",mp.accuracypercentage.try(:to_s), :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %>
 		<%=  hidden_field_tag( "mriscantask[mriperformance_id]["+mst.id.to_s+"]",mp.id.to_s) %>
 					 <%=  hidden_field_tag( "mriperformance[mriperformance_id][]",mp.id.to_s) %>
           <td><td colspan="7"></tr>
-			<% end
-		 end 
+			<% end %>
+			<% if !mst.lookup_scantask_id.blank?
+				  @lookup_scantask = LookupScantask.find(mst.lookup_scantask_id) %>
+			<%   if (mriperformance_flag == 0 and  @lookup_scantask.set_id < 8 ) 
+							     v_mriperformance_id = v_mriperformance_id -1 %>
+				<tr><td>------</td><td>Hit: <%=  text_field_tag( "mriperformance[hitpercentage]["+v_mriperformance_id.to_s+"]","", :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td>
+							<td>Acc: <%=  text_field_tag( "mriperformance[accuracypercentage]["+v_mriperformance_id.to_s+"]","", :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %>
+								 <%=  hidden_field_tag( "mriscantask[mriperformance_id]["+mst.id.to_s+"]",v_mriperformance_id.to_s) %>
+								 <%=  hidden_field_tag( "mriperformance[mriscantask_id]["+v_mriperformance_id.to_s+"]",mst.id.to_s) 
+								     # seems flipped around between existing id>0 and new id <0 , but different array might be used in new vs exisiting
+								 %>
+			          <td><td colspan="7"></tr>				
+			<%	 end  
+			   end %>		
+			
+	<%	 end 
 	 else %>
 	<% 	   @image_datasets = ImageDataset.where("visit_id in (?)",@visit.id).sort_by(&:id) 
           @image_datasets.each do |img_dt_set| 
@@ -231,7 +254,7 @@
 					<td colspan="5" align="left">	<%= select("mriscantask[has_concerns]",v_mriscantask_id,[['No',"0"],["Yes","1"]],{ :include_blank => "Has Concerns?" })  %>  
 					 &nbsp;&nbsp;&nbsp;
 						<%= f.label :Concerns %> <%=  text_field_tag( "mriscantask[concerns]["+v_mriscantask_id.to_s+"]","", :size => 60) %>  </td></tr>
-					<% if img_dt_set.series_description.downcase.include? "task" 
+		<% if img_dt_set.series_description.downcase.include? "task"
 						     v_mriperformance_id = v_mriperformance_id -1 %>
 					<tr><td>------</td><td>Hit: <%=  text_field_tag( "mriperformance[hitpercentage]["+v_mriperformance_id.to_s+"]","", :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td>
 						<td>Acc: <%=  text_field_tag( "mriperformance[accuracypercentage]["+v_mriperformance_id.to_s+"]","", :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %>
