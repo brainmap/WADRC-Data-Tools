@@ -32,7 +32,6 @@ class User < ActiveRecord::Base
   has_many :image_dataset_quality_checks
   has_many :protocol_roles, :dependent => :destroy
   
-
   
   def username_name
     "#{self.first_name} #{self.last_name} #{self.username}"

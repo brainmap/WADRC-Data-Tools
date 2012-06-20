@@ -49,3 +49,4 @@ def lookup_radiology_button(rmr)
   hidden_field_tag("subjID",@visit.rmr)
   submit_tag("Check Radiology Site")
 end
+

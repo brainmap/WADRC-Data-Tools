@@ -1,31 +1,34 @@
 class VisitsController <  AuthorizedController #  ApplicationController
+
     load_resource
-     load_and_authorize_resource  :only => [:show, :edit, :update]  #-- causes problems with the searches, but seems to be needed for the edit, show
-    
+    load_and_authorize_resource  :only => [ :show, :edit, :update]  #-- causes problems with the searches, but seems to be needed for the edit, show
+
     
     # to get the ussr scan_procedure array in
     # added in below by find
   
     before_filter :set_current_tab
+    
+
   # GET /visits
   # GET /visits.xml  
   def index
 
-    scan_procedure_array =current_user[:view_low_scan_procedure_array]
-    # Remove default scope if sorting has been requested.
-    if !params[:search].blank? && !params[:search][:meta_sort].blank?
-      @search = Visit.unscoped.search(params[:search]) 
-    else
-      @search = Visit.search(params[:search]) 
+     scan_procedure_array =current_user[:view_low_scan_procedure_array]
+     # Remove default scope if sorting has been requested.
+     if !params[:search].blank? && !params[:search][:meta_sort].blank?
+       @search = Visit.unscoped.search(params[:search]) 
+     else
+       @search = Visit.search(params[:search]) 
+     end
+     @visits = @search.relation.where(" visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
+     @collection_title = 'All MRI appts'
     end
-    @visits = @search.relation.where(" visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
-    @collection_title = 'All MRI appts'
-    
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => @visits }
     end
-  end
+
 
   # GET /visits/:scope
   def index_by_scope
@@ -588,6 +591,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     # visits.date scan date before = latest_timestamp(1i)(2i)(3i)
     # visits.date scan date after  = earliest_timestamp(1i)(2i)(3i)
     
+   
     #enrollment_visit_memberships.enrollment_id enrollments.enumber
    params["search_criteria"] =""
     

@@ -91,6 +91,8 @@ class Visit < ActiveRecord::Base
     enrollments.collect {|enroll| enroll.enumber }.join(", ")
   end
   
+  
+  
   # Create or update an ActiveRecord Visit model using attributes from
   # a metamri VisitRawDataDirectory
   # 

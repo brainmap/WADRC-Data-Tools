@@ -5,7 +5,9 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
 
 #   include AuthenticatedSystem
- before_filter :authenticate_user! 
+   # need to skip if json and search and path_contains -- set a userid
+   before_filter :authenticate_user! 
+
  
 # respond_to do |format|
 #   format.html  before_filter :authenticate_user!

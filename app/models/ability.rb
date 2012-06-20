@@ -12,6 +12,7 @@ class Ability
     # Define abilities for the passed in user here. For example:
     #
     user ||= User.new # guest user (not logged in)
+
  # can :manage, :all
    
    ## HASHES ALSO SET IN app/models/user.rb  -- transfering from user to set value here
