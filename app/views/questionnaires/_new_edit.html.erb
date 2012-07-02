@@ -17,7 +17,7 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
     <table>
       <tr>
         <td><%= f.label :Entered_by%></td>
-        <td><%= select(:questionnaire, :enteredquestionnairewho, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Scan Entered By" }) %></td>
+        <td><%= select(:questionnaire, :enteredquestionnairewho, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Questionnaire Entered By" }) %></td>
       </tr>
       <tr>
         <td><%= f.label :Questionnaire_Entered %></td>
@@ -27,7 +27,7 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
       </tr>
       <tr>
         <td><%= f.label :Questionnaire_Completed %></td>
-        <td><%= f.select :completedquestionnaire, options_for_select(v_yes_no_display, @questionnaire.completedneuropsych),
+        <td><%= f.select :completedquestionnaire, options_for_select(v_yes_no_display, @questionnaire.completedquestionnaire),
 							              {:prompt => 'Select if the questionnaire has been entered'} %></td>
       </tr>
       <tr>

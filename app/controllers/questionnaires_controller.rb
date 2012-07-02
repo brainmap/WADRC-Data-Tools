@@ -137,7 +137,7 @@ class QuestionnairesController < ApplicationController
   # GET /questionnaires/1.xml
   def show
     @current_tab = "questionnaires"
-    q_form_id = 13
+    q_form_id = 14
      scan_procedure_array = []
      scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
 
@@ -210,7 +210,7 @@ class QuestionnairesController < ApplicationController
   # GET /questionnaires/1/edit
   def edit
     @current_tab = "questionnaires"
-    q_form_id = 13
+    q_form_id = 14
     scan_procedure_array = []
     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @questionnaire = Questionnaire.where("questionnaires.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
@@ -245,7 +245,7 @@ class QuestionnairesController < ApplicationController
   # POST /questionnaires.xml
   def create
      @current_tab = "questionnaires"
-     q_form_id = 13
+     q_form_id = 14
      scan_procedure_array = []
      scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @questionnaire = Questionnaire.new(params[:questionnaire])

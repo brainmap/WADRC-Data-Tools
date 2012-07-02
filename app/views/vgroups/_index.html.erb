@@ -35,6 +35,11 @@
       <th><span class="vert">status</span></th>
 <% if edit_count > 0 %>
       <th><span class="vert">new</span></th>
+<% end %>
+      <th><span class="vert">Questionnaire</span></th>
+      <th><span class="vert">status</span></th>
+<% if edit_count > 0 %>
+      <th><span class="vert">new</span></th>
 	  <th><span class="vert">Vgroup edit</span></th>
 <% end %>
       <th></th>
@@ -62,6 +67,7 @@
        @petscans = Petscan.where("appointment_id in (?) ",a_array)
        @lumbarpunctures = Lumbarpuncture.where("appointment_id in (?) ",a_array)
        @blooddraws = Blooddraw.where("appointment_id in (?) ",a_array)
+       @questionnaires = Questionnaire.where("appointment_id in (?) ",a_array)
      %>
 
       <tr>
@@ -80,7 +86,7 @@
     <td><%= @petscans.blank? ?  "None" :	@petscans.collect{|sp| link_to("pet scan",petscan_path(sp))}.join(", ").html_safe %></td>
     <td><%= @petscans.blank? ?  "-" :	@petscans.collect{|sp| sp.completedpetscan==1 ? "C": (sp.enteredpetscan==1 ? "+": "-")}.join(", ").html_safe %></td>
 <% if edit_count > 0 %>
-    <td><%= link_to  'add-Petscan', new_petscan_path+"/"+vgroup.id.to_s %></td>
+    <td><%= link_to  'add-Pet', new_petscan_path+"/"+vgroup.id.to_s %></td>
 <% end %>
 	<td><%= @lumbarpunctures.blank? ?  "None" :	@lumbarpunctures.collect{|sp| link_to("lp",lumbarpuncture_path(sp))}.join(", ").html_safe %></td>
 	<td><%= @lumbarpunctures.blank? ?  "-" :	@lumbarpunctures.collect{|sp| sp.completedlumbarpuncture==1 ? "C": (sp.enteredlumbarpuncture==1 ? "+": "-")}.join(", ").html_safe %></td>
@@ -96,7 +102,12 @@
 	<td><%= @neuropsyches.blank? ?  "-" :	@neuropsyches.collect{|sp| sp.completedneuropsych==1 ? "C": (sp.enteredneuropsych==1 ? "+": "-")}.join(", ").html_safe %></td>
 <% if edit_count > 0 %>
     <td><%= link_to  'add-NP', new_neuropsych_path+"/"+vgroup.id.to_s %></td>
-<% end %>    
+<% end %>   
+	<td><%= @questionnaires.blank? ?  "None" :	@questionnaires.collect{|sp| link_to("q",questionnaire_path(sp))}.join(", ").html_safe %></td>
+	<td><%= @questionnaires.blank? ?  "-" :	@questionnaires.collect{|sp| sp.completedquestionnaire==1 ? "C": (sp.enteredquestionnaire==1 ? "+": "-")}.join(", ").html_safe %></td>
+<% if edit_count > 0 %>
+    <td><%= link_to  'add-Q', new_questionnaire_path+"/"+vgroup.id.to_s %></td>
+<% end %> 
 <!--       <td><= vgroup.appointments.blank? ? "None" : vgroup.appointmets.sort_by(&:codename).collect {|sp| sp.appointment_type}.join(", ").html_safe %></td>
  
         <td><= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
