@@ -18,6 +18,7 @@ edit_count = edit_count -1
 	       @lumbarpunctures = Lumbarpuncture.where("appointment_id in (?) ",a_array)
 	       @blooddraws = Blooddraw.where("appointment_id in (?) ",a_array)
 	       @neuropsyches = Neuropsych.where("appointment_id in (?) ",a_array)
+	      @questionnaires = Questionnaire.where("appointment_id in (?) ",a_array)
 %>
 
 <p id="notice"><%= notice %></p>
@@ -126,7 +127,26 @@ edit_count = edit_count -1
 		<tr><td colspan="5"><%= @appointment.comment %>
 		</td></tr>
 	<%end %>  </table>		
-</td></tr></table>
+</td></tr>
+<tr><td colspan=4  align="left">
+	<b>Questionnaire: </b><%= @questionnaires.blank? ? "None" :""%></td><td align="right"> 
+<% if edit_count > 0 %>
+	<%= link_to  'New-NP', new_questionnaire_path+"/"+@vgroup.id.to_s %>
+<% end %></b></td></tr>
+<tr><td colspan=5  align="left"><table  width="80%">
+	<% @questionnaires.each do |q|
+	   @appointment = Appointment.find(q.appointment_id)	%>
+	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%></td>
+		<td  align="left" width="10%"><%= link_to("show",questionnaire_path(q) )%></td>
+		<td  align="left" width="10%"><%= edit_count>0 ? link_to("edit",edit_questionnaire_path(q) ) :"" %></td>
+		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+		<td><%= q.completedquestionnaire==1 ? "Completed" :(q.enteredquestionnaire==1 ? "Entered" : " ")%> </td>
+		</tr>
+		<tr><td colspan="5"><%= @appointment.comment %>
+		</td></tr>
+	<%end %>  </table>		
+</td></tr>
+</table>
 <% if edit_count > 0 %>
 	<%= link_to 'Edit', edit_vgroup_path(@vgroup) %> |
 <% end %>
