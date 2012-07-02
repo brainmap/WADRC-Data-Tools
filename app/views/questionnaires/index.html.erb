@@ -1,0 +1,26 @@
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
+<h1>Listing questionnaires</h1>
+
+<table>
+  <tr>
+    <th>Appointment</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @questionnaires.each do |questionnaire| %>
+  <tr>
+    <td><%= questionnaire.appointment_id %></td>
+    <td><%= link_to 'Show', questionnaire %></td>
+    <td><%= link_to 'Edit', edit_questionnaire_path(questionnaire) %></td>
+    <td><%= link_to 'Destroy', questionnaire, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Questionnaire', new_questionnaire_path %>
+
+<% end %>

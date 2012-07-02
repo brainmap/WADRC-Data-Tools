@@ -48,6 +48,9 @@
             <li <%= "class=current" if @current_tab == "neuropsyches" %>>
               <%= link_to "NeuroPsy", neuropsych_search_path %>
             </li>
+            <li <%= "class=current" if @current_tab == "questionnaires" %>>
+              <%= link_to "Questionnaires", questionnaire_search_path %>
+            </li>
             <li <%= "class=current" if @current_tab == "enrollments" %>>
               <%= link_to "Enroll", enrollments_path %>
             </li>

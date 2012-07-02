@@ -7,19 +7,19 @@ edit_low_scan_procedure_array =  (current_user.edit_low_scan_procedure_array).sp
 edit_count =edit_low_scan_procedure_array.length 
 edit_count = edit_count -1 
 %>
-<%   @current_tab = "neuropsyches"
+<%   @current_tab = "questionnaires"
 %>
 
 <% if edit_count > 0 %>
-<span style="float:right"><%= link_to 'Edit Neuro Psych appt', edit_neuropsych_path(@neuropsych) %> | <%= link_to 'Vgroup', Vgroup.find(@appointment.vgroup_id) %></span>
+<span style="float:right"><%= link_to 'Edit Questionnaire appt', edit_questionnaire_path(@questionnaire) %> | <%= link_to 'Vgroup', Vgroup.find(@appointment.vgroup_id) %></span>
 <% end %>
 <div id="visit_heading">
-  <%=	link_to "&larr; Older".html_safe, @older_neuropsych if @older_neuropsych %>
+  <%=	link_to "&larr; Older".html_safe, @older_questionnaire if @older_questionnaire %>
   &nbsp;
   <h1><%= @enumbers.blank? ? @vgroup.rmr : @enumbers.collect{|e| e.enumber }.join(", ") %></h1>
   <p class="date"><%= @appointment.appointment_date.to_s(:long) %></p>
   &nbsp;
-  <%=	link_to "Newer &rarr;".html_safe, @newer_neuropsych if @newer_neuropsych %>
+  <%=	link_to "Newer &rarr;".html_safe, @newer_questionnaire if @newer_questionnaire %>
   <br />
 </div>
 
@@ -38,10 +38,10 @@ edit_count = edit_count -1
 
   <div id="visit_details_note" class="sticky">
     <%= key_val_table("visit_details", {
-      :Neuropsych_completed => @neuropsych.completedneuropsych == 1 ? "Yes" : "No" ,
-      :Neuropsych_entered =>  @neuropsych.enteredneuropsych == 1 ? "Yes" : "No",
-      :Neuropsych_entered_date =>  @neuropsych.enteredneuropsychdate,
-      :Neuropsych_entered_by => @neuropsych.enteredneuropsychwho.nil? ? nil : Employee.find(@neuropsych.enteredneuropsychwho).name
+      :Questionnaire_completed => @questionnaire.completedquestionnaire == 1 ? "Yes" : "No" ,
+      :Questionnaire_entered =>  @questionnaire.enteredquestionnaire == 1 ? "Yes" : "No",
+      :Questionnaire_entered_date =>  @questionnaire.enteredquestionnairedate,
+      :Questionnaire_entered_by => @questionnaire.enteredquestionnairewho.nil? ? nil : Employee.find(@questionnaire.enteredquestionnairewho).name
     }) %>
   </div>
 
@@ -54,8 +54,7 @@ edit_count = edit_count -1
   <div id="notes" class="sticky">
 	<%=  RedCloth.new(@appointment.comment.blank? ? "No comment entered for this Neuro Psych" : @appointment.comment).to_html.html_safe 
             %><br>
-    <%=  RedCloth.new(@neuropsych.neuropsychnote.blank? ? "No notes entered for this Neuro Psych" : @neuropsych.neuropsychnote).to_html.html_safe 
-            %>
+
   </div> 
 
 

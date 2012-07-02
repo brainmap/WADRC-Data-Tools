@@ -244,6 +244,14 @@ class QuestionformsController < ApplicationController
         format.html { redirect_to( var, :notice => 'Questionform was successfully updated.' )}
         format.xml  { render :xml => @questionforms }
       end
+    elsif params["questionform_id"] == "14"   #  need the taget page plus the questionnaire object based on appointment_id -- need to know its an Appointment object
+        @questionnaire = Questionnaire.where("appointment_id in (?)",params["value_link"]["appointment_id"])
+        var = '/questionnaires/'+@questionnaire[0].id.to_s
+
+        respond_to do |format|
+          format.html { redirect_to( var, :notice => 'Questionform was successfully updated.' )}
+          format.xml  { render :xml => @questionforms }
+        end
   else
     respond_to do |format|
       format.html { redirect_to(@questionform, :notice => 'Questionform was successfully updated.') }

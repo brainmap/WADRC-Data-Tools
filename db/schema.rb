@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120515194308) do
+ActiveRecord::Schema.define(:version => 20120702140547) do
 
   create_table "analyses", :force => true do |t|
     t.string   "description"
@@ -38,13 +38,25 @@ ActiveRecord::Schema.define(:version => 20120515194308) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "temp_visit_id"
+    t.integer  "user_id"
   end
 
   create_table "blooddraws", :force => true do |t|
     t.integer  "appointment_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "completedblooddraw", :default => 0
+    t.integer  "enteredblood",       :default => 0
+    t.datetime "enteredblooddate"
+    t.integer  "enteredbloodwho"
+    t.string   "blooddrawnote"
+    t.integer  "temp_fklabhealthid"
+    t.integer  "temp_fkvisitid"
+    t.integer  "height_inches"
+    t.integer  "weight_kg"
   end
+
+  add_index "blooddraws", ["appointment_id"], :name => "ind_blooddraws_appt"
 
   create_table "employees", :force => true do |t|
     t.string   "first_name"
@@ -511,6 +523,7 @@ ActiveRecord::Schema.define(:version => 20120515194308) do
     t.datetime "updated_at"
     t.integer  "temp_fkscandataid"
     t.integer  "temp_enum"
+    t.integer  "image_dataset_id"
   end
 
   add_index "mriscantasks", ["visit_id"], :name => "ind_mriscantasks_visit"
@@ -538,6 +551,13 @@ ActiveRecord::Schema.define(:version => 20120515194308) do
     t.integer  "appointment_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "completedneuropsych",   :default => 0
+    t.integer  "enteredneuropsych",     :default => 0
+    t.datetime "enteredneuropsychdate"
+    t.integer  "enteredneuropsychwho"
+    t.string   "neuropsychnote"
+    t.integer  "temp_fkneuroid"
+    t.integer  "temp_fkvisitid"
   end
 
   add_index "neuropsyches", ["appointment_id"], :name => "ind_neuropsyches_appt"
@@ -677,6 +697,13 @@ ActiveRecord::Schema.define(:version => 20120515194308) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "entrance_page_type"
+    t.string   "target_page"
+  end
+
+  create_table "questionnaires", :force => true do |t|
+    t.integer  "appointment_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "questions", :force => true do |t|
@@ -849,6 +876,16 @@ ActiveRecord::Schema.define(:version => 20120515194308) do
     t.date    "visit_date"
   end
 
+  create_table "t_access_neuro", :id => false, :force => true do |t|
+    t.integer "pkneuroid",       :default => 0, :null => false
+    t.integer "fkvisitid"
+    t.integer "enum"
+    t.integer "appointment_id"
+    t.integer "panda_visit_id"
+    t.integer "panda_vgroup_id"
+    t.date    "visit_date"
+  end
+
   create_table "t_access_panda_match_20120227", :id => false, :force => true do |t|
     t.integer "pkProtocolid_access",                  :default => 0, :null => false
     t.string  "access_enum",                                         :null => false
@@ -983,18 +1020,51 @@ ActiveRecord::Schema.define(:version => 20120515194308) do
   end
 
   create_table "t_map_visit", :id => false, :force => true do |t|
-    t.integer  "access_protocolid",                   :default => 0, :null => false
-    t.integer  "access_id"
-    t.string   "access_enum",                                        :null => false
-    t.datetime "access_visit_date"
-    t.integer  "access_visit_id",                     :default => 0, :null => false
-    t.integer  "access_appointment_id",               :default => 0, :null => false
-    t.string   "access_rmr",                                         :null => false
+    t.integer  "pkvisitid",                                :default => 0, :null => false
+    t.integer  "fkprotocolid",                                            :null => false
+    t.datetime "visitdate"
+    t.integer  "pkappointmentid",                          :default => 0, :null => false
+    t.datetime "appointmentdate"
+    t.text     "appointmentcomment", :limit => 2147483647
+    t.integer  "researcher"
+    t.string   "rmr_access",         :limit => 50
+    t.integer  "pkmriscanid"
     t.integer  "panda_visit_id"
-    t.date     "panda_date"
-    t.string   "panda_initials",        :limit => 20
-    t.string   "panda_rmr",             :limit => 50
-    t.string   "access_initials",       :limit => 20
+    t.string   "enum_1_access",      :limit => 50
+    t.string   "enum_1_panda",       :limit => 50
+    t.string   "enum_2_panda",       :limit => 50
+    t.integer  "vgroup_id"
+    t.string   "rmr_panda",          :limit => 50
+    t.date     "visit_date_panda"
+    t.integer  "pkpetscanid"
+    t.integer  "pklumbarpunctureid"
+  end
+
+  create_table "t_match", :id => false, :force => true do |t|
+    t.integer "panda_visit_id"
+    t.integer "pkvisitid",      :default => 0, :null => false
+  end
+
+  create_table "t_mrt_predict_20120603", :id => false, :force => true do |t|
+    t.string  "enumber"
+    t.integer "visits_id",         :default => 0, :null => false
+    t.date    "visit_date"
+    t.integer "appointment_id"
+    t.integer "temp_fkmriscanid"
+    t.integer "scan_procedure_id"
+    t.integer "enrollment_id"
+    t.integer "participant_id"
+    t.integer "pkdbid"
+    t.integer "apoee1"
+    t.integer "apoee2"
+    t.string  "apoecomment"
+    t.date    "dob"
+    t.integer "gender"
+    t.integer "edtype"
+    t.integer "edyears"
+    t.string  "notefamilyhx"
+    t.integer "famhx"
+    t.integer "apoestatus"
   end
 
   create_table "t_new_participants_20120229", :id => false, :force => true do |t|
@@ -1078,6 +1148,13 @@ ActiveRecord::Schema.define(:version => 20120515194308) do
     t.integer  "vgroup_id"
     t.integer  "appointment_id"
     t.integer  "temp_fkMRIscanid"
+    t.integer  "mritech"
+    t.datetime "mristarttime"
+    t.datetime "mriendtime"
+    t.integer  "goggles"
+    t.integer  "buttonbox"
+    t.integer  "completedmrifast"
+    t.string   "archivedvd",         :limit => 50
   end
 
   add_index "visits", ["appointment_id"], :name => "ind_visits_appt"
@@ -1085,10 +1162,10 @@ ActiveRecord::Schema.define(:version => 20120515194308) do
 
   create_table "vitals", :force => true do |t|
     t.integer  "appointment_id"
-    t.integer  "bp_systol",      :default => 991
-    t.integer  "bp_diastol",     :default => 991
-    t.integer  "pulse",          :default => 991
-    t.integer  "bloodglucose",   :default => 991
+    t.integer  "bp_systol"
+    t.integer  "bp_diastol"
+    t.integer  "pulse"
+    t.integer  "bloodglucose"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

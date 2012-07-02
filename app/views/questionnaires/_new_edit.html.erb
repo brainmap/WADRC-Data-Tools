@@ -1,0 +1,56 @@
+<%
+v_yes_no_display = [["Yes","1"], ["No","0"]]
+%>
+<% javascript_tag 'defaults' %>
+<div id="new_edit_form">
+
+<!-- Directory path? -->
+<%= form_for(@questionnaire) do |f| %>
+  <%= f.error_messages %>
+  <div class="three_col_left">
+    <p>
+      <%= f.label :date %><br />
+      <%= date_select :appointment, :appointment_date, :include_blank => true, :end_year => Time.now.year + 1 %><br />
+    </p>	
+  </div>
+  <div class="three_col_mid">
+    <table>
+      <tr>
+        <td><%= f.label :Entered_by%></td>
+        <td><%= select(:questionnaire, :enteredquestionnairewho, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Scan Entered By" }) %></td>
+      </tr>
+      <tr>
+        <td><%= f.label :Questionnaire_Entered %></td>
+        <td><%= f.select :enteredquestionnaire, options_for_select(v_yes_no_display, @questionnaire.enteredquestionnaire),
+						              {:prompt => 'Select if the questionnaire has been entered'} %>
+	</td>
+      </tr>
+      <tr>
+        <td><%= f.label :Questionnaire_Completed %></td>
+        <td><%= f.select :completedquestionnaire, options_for_select(v_yes_no_display, @questionnaire.completedneuropsych),
+							              {:prompt => 'Select if the questionnaire has been entered'} %></td>
+      </tr>
+      <tr>
+        <td><%= f.label :Date_Questionnaire_Entered %>   </td>
+        <td><%= date_select :questionnaire, :enteredquestionnairedate, :include_blank => true, :end_year => Time.now.year + 1 %></td>
+      </tr>
+  
+    </table>
+  </div>
+  <div class="three_col_right">
+    <p>
+      <%= f.label :Notes %><br/>
+      <%= text_area( :appointment,:comment,:value=>@appointment.comment ) %><br />
+    </p>
+  </div>
+
+  <br style="clear:both" />
+  <% if !params[:new_appointment_vgroup_id].blank?%>
+       <%=  hidden_field_tag( 'new_appointment_vgroup_id',params[:new_appointment_vgroup_id]) %>
+  <% end %>
+
+  <%= f.submit form_action %>
+
+<% end %>
+
+</div>

@@ -90,13 +90,13 @@
 	%>
 	
 	  <%if !@question.heading_1.blank? %>
-		<B><%=  @question.heading_1 %></B> <br>
+		<B><%=  @question.heading_1.try(:html_safe) %></B> <br>
 	   <% end %>
 	  <%if !@question.phrase_a_1.blank? %>
-		<%=  @question.phrase_a_1 %>  
+		<%=  @question.phrase_a_1.try(:html_safe) %>  
 	  <% end %>	
 	  <%if !@question.phrase_b_1.blank? %>
-		<%=  @question.phrase_b_1 %>  
+		<%=  @question.phrase_b_1.try(:html_safe) %>  
 	  <% end %>
 	  <%if !@question.value_type_1.blank?   # follow order in array in question form edit
 			val_array =[]
@@ -214,13 +214,13 @@
 	  <% end %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	  <%if !@question.heading_2.blank? %>
-		<B><%=  @question.heading_2 %></B> <br>
+		<B><%=  @question.heading_2.try(:html_safe) %></B> <br>
 	   <% end %>
 	  <%if !@question.phrase_a_2.blank? %>
-		<%=  @question.phrase_a_2 %>  
+		<%=  @question.phrase_a_2.try(:html_safe) %>  
 	  <% end %>	
 	  <%if !@question.phrase_b_2.blank? %>
-		<%=  @question.phrase_b_2 %>  
+		<%=  @question.phrase_b_2.try(:html_safe) %>  
 	  <% end %>	
 		  <%if !@question.value_type_2.blank?   # follow order in array in question form edit
 			val_array =[]
@@ -335,13 +335,13 @@
 	  <% end %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	  <%if !@question.heading_3.blank? %>
-		<B><%=  @question.heading_3 %></B> <br>
+		<B><%=  @question.heading_3.try(:html_safe) %></B> <br>
 	   <% end %>
 	  <%if !@question.phrase_a_3.blank? %>
-		<%=  @question.phrase_a_3 %>  
+		<%=  @question.phrase_a_3.try(:html_safe) %>  
 	  <% end %>	
 	  <%if !@question.phrase_b_3.blank? %>
-		<%=  @question.phrase_b_3 %>  
+		<%=  @question.phrase_b_3.try(:html_safe) %>  
 	  <% end %>
 	
 		  <%if !@question.value_type_3.blank?   # follow order in array in question form edit
