@@ -192,14 +192,14 @@ class ParticipantsController < ApplicationController
    
               @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments
                 where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
-                       and participants.gender is not NULL and participants.wrapnum in (?) )", params[:participant_search][:wrapnum])
+                       and participants.wrapnum is not NULL and participants.wrapnum in (?) )", params[:participant_search][:wrapnum])
             end
             
             if !params[:participant_search][:reggieid].blank?
    
               @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments
                 where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
-                       and participants.gender is not NULL and participants.reggieid in (?) )", params[:participant_search][:reggieid])
+                       and participants.reggieid is not NULL and participants.reggieid in (?) )", params[:participant_search][:reggieid])
             end
 
          # NEED TO CHANGE TO BE FOR ANY APPOITMENT 
