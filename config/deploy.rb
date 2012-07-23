@@ -31,6 +31,7 @@ namespace :deploy do
    # run "ln -nfs #{shared_path}/db/transfer_scans_production.sqlite3 #{release_path}/db/transfer_scans_production.sqlite3"
     run "ln -nfs  #{shared_path}/config/database.yml #{release_path}/config/database.yml"
     run "ln -nfs  #{shared_path}/config/ldap.yml #{release_path}/config/ldap.yml"
+    run "ln -nfs  #{shared_path}/app/models/radiology_comment.rb #{release_path}/app/models/radiology_comment.rb"
     # run "ln -nfs #{shared_path}/system #{release_path}/public/system"
   end
 
