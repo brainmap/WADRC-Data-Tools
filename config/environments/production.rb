@@ -70,7 +70,7 @@ WADRCDataTools::Application.configure do
     :password       => email_password,
     :tls            => true
   }
-  config.action_mailer.default_url_options = {:host => 'nelson'}
+  config.action_mailer.default_url_options = {:host => 'nelson.dom.wisc.edu'}
   
   config.middleware.use ExceptionNotifier,
     :email_prefix => "[Panda Exception] ",
