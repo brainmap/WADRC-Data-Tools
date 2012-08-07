@@ -3,7 +3,7 @@ class RawDataImportsController < ApplicationController
   
   def new
     @recent_visits = Visit.where(:created_at.lt => 1.month.ago).all
-    
+    # vipr files need to be bzip2 or they don't get imported into panda
     respond_to do |format|
       format.html # new.html.erb
     end
