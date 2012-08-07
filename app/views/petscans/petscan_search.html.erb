@@ -150,7 +150,8 @@ edit_count = edit_count -1
   <tbody>
     <% @petscans.each do |petscan| %>
        <%    appointment = Appointment.find(petscan.appointment_id) 
-             vgroup = Vgroup.find(appointment.vgroup_id)
+            # there are petscan appts which could not be mapped to a vgroup
+              vgroup = Vgroup.find(appointment.vgroup_id)
         %>
       <tr>
         <td><%= link_to appointment.appointment_date.to_s(:datetime_military), petscan %></td>
