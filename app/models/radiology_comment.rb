@@ -1,5 +1,6 @@
+require "base64"
 class RadiologyComment < ActiveRecord::Base
-  
+  # THIS IS NOT BEING DEPLOYED FROM GIT HUB -- radiology site username --- linking from shared during deploy!!!!!!
   belongs_to :visit 
   
 
@@ -81,9 +82,8 @@ class RadiologyComment < ActiveRecord::Base
        return var
   end
 
-
   
-    def load_paths(v_months_back)
+  def load_paths(v_months_back)
       # pass in how far back to go, default is 3 month for visit date
       # select visit_id, rmr, scan_number from visits where visits.date > sysdate - 3 months
       # and visits.id not in (select visit_id from radiology_comments where rad_path is not null) 
@@ -91,6 +91,7 @@ class RadiologyComment < ActiveRecord::Base
       # get each new path - match on rmr and scan_number 
 
       agent = Mechanize.new
+      agent.basic_auth('datapanda@medicine.wisc.edu','(!nGulat3!31')
       # this gives back a listing page - the RMR sent shouldn't be important
       page = agent.get('https://www.radiology.wisc.edu/protected/neuroResearchScans/scanList.php?origin=searchForm&subjID=RMRaic004440')
 
@@ -142,15 +143,16 @@ class RadiologyComment < ActiveRecord::Base
 
   def load_comments(v_months_back)
        agent = Mechanize.new
+       agent.basic_auth('datapanda@medicine.wisc.edu','(!nGulat3!31')
        # Comment_html_1 only 500 long
         past_time = Time.new - (v_months_back.to_i).month
           v_past_date = past_time.strftime("%Y-%m-%d")
        @radiology_comments = RadiologyComment.where(" trim(radiology_comments.rad_path) is not null and  (radiology_comments.comment_html_1 is null
                      OR radiology_comments.comment_header_html_1 is null
-                     OR radiology_comments.visit_id in (select visits.id from visits where visits.date >  '"+v_past_date+"' )  ) " )
+                     OR radiology_comments.visit_id  in (select visits.id from visits where visits.date >  '"+v_past_date+"' )  ) " )
 #                      OR radiology_comments.comment_header_html_1 is null
 
-      @radiology_comments = RadiologyComment.where(" trim(radiology_comments.rad_path) is not null and radiology_comments.id = 1106")
+     #  @radiology_comments = RadiologyComment.where(" trim(radiology_comments.rad_path) is not null and radiology_comments.id = 1106")
        @radiology_comments.each do |r|
           # sleep for a minute or so to not seem like scripts
            sleep(97)
@@ -315,8 +317,19 @@ puts "============ visit_id ="+r.visit_id.to_s
             end
             
 
-            
-            sql = "update radiology_comments set comment_html_1 = '"+doc_sub_string[0..498]+
+            if doc_sub_string[0..498] == "<b>Radiologist Comments</b> You "
+                sql = "update radiology_comments set comment_html_1 = NULL
+              ,comment_html_2 = NULL, comment_html_3 =  NULL,
+               comment_html_4 =  NULL,  comment_html_5 =  NULL  ,
+               comment_header_html_1 = '"+doc_header_string[0..498]+
+               "',comment_header_html_2 = '"+comment_header_html_2+"', comment_header_html_3 = '"+comment_header_html_3+"',
+                comment_header_html_4 = '"+comment_header_html_4+"',  comment_header_html_5 = '"+comment_header_html_5+"'  ,
+                  comment_header_html_6 = '"+comment_header_html_6+"'  ,
+                comment_text_1=null,comment_text_2=null,comment_text_3=null,comment_text_4=null,
+                comment_text_5 =null,q1_flag= null
+                     where radiology_comments.rad_path ='"+r.rad_path+"'    "                            
+            else
+              sql = "update radiology_comments set comment_html_1 = '"+doc_sub_string[0..498]+
             "',comment_html_2 = '"+comment_html_2+"', comment_html_3 = '"+comment_html_3+"',
              comment_html_4 = '"+comment_html_4+"',  comment_html_5 = '"+comment_html_5+"'  ,
              comment_header_html_1 = '"+doc_header_string[0..498]+
@@ -326,6 +339,7 @@ puts "============ visit_id ="+r.visit_id.to_s
               comment_text_1=null,comment_text_2=null,comment_text_3=null,comment_text_4=null,
               comment_text_5 =null,q1_flag= null
                    where radiology_comments.rad_path ='"+r.rad_path+"'    "
+            end
             connection = ActiveRecord::Base.connection();
             begin            
                results = connection.execute(sql)    
