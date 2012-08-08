@@ -201,23 +201,45 @@ class Visit < ActiveRecord::Base
   
 
   def age_at_visit
-    return age_from_dicom_info[:age] unless age_from_dicom_info[:age].blank?
+    # changed 20120808 so preferentially use participant dob instead of age from dicom header
+####    return age_from_dicom_info[:age] unless age_from_dicom_info[:age].blank?
 
-    unless enrollments.blank?
-      enrollments.each do |enrollment|
-        unless enrollment.participant.blank?
-          unless enrollment.participant.dob.blank?
-            participant_dob = enrollment.participant.dob
+####    unless enrollments.blank?
+####      enrollments.each do |enrollment|
+####        unless enrollment.participant.blank?
+####          unless enrollment.participant.dob.blank?
+####            participant_dob = enrollment.participant.dob
+####          end
+####        end
+####      end
+####    end
+    
+####    dob = age_from_dicom_info[:dob] ||= participant_dob ||= nil
+
+####    unless dob.blank?
+####      date.year - dob.year - ((date.month > dob.month || (date.month == dob.month && date.day >= dob.day)) ? 0 :1 ) unless dob.nil?
+####    end
+  participant_dob = nil
+  age_at_visit = nil
+  # get participant dob 1st
+      unless enrollments.blank?
+        enrollments.each do |enrollment|
+          unless enrollment.participant.blank?
+            unless enrollment.participant.dob.blank?
+              participant_dob = enrollment.participant.dob
+            end
           end
         end
-      end
+      end   
+    # participant_dob.to_s  yyyy-mm-dd
+    appointment = Appointment.find(self.appointment_id)
+    dob = participant_dob ||= age_from_dicom_info[:dob] ||= nil
+    if dob.blank?
+      age_at_visit = age_from_dicom_info[:age] unless age_from_dicom_info[:age].blank?
+    else
+      age_at_visit = ((appointment.appointment_date - dob)/365.25).floor
     end
-    
-    dob = age_from_dicom_info[:dob] ||= participant_dob ||= nil
-
-    unless dob.blank?
-      date.year - dob.year - ((date.month > dob.month || (date.month == dob.month && date.day >= dob.day)) ? 0 :1 ) unless dob.nil?
-    end
+    return age_at_visit
   end
   
   def age_from_dicom_info
