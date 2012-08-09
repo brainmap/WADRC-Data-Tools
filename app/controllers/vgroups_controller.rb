@@ -11,12 +11,65 @@ class VgroupsController < ApplicationController
     end
   end
 
+  def change_appointment_vgroup
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    
+      # check that a valid vgroup_id
+      sql = "select count(*) cnt from vgroups where id ="+params[:target_vgroup_id] 
+puts sql
+      connection = ActiveRecord::Base.connection();
+      @results = connection.execute(sql)
+      cnt =10
+      @results.each do |r|
+        cnt=r[0]
+      end
+      if cnt.to_i > 0
+
+         # update appointments.vgroup_id to new vgroup_id
+         # delete old vgroup is last appointment???
+         sql = "update appointments set appointments.vgroup_id = "+params[:target_vgroup_id]+" where appointments.id ="+params[:move_appointemnt_id][0]
+         @results = connection.execute(sql)
+         respond_to do |format|
+            format.html { redirect_to( '/vgroups/'+params[:id], :notice => 'Appointment was moved to vgroup '+params[:target_vgroup_id]+'.' )}
+            format.xml  { render :xml => @vgroup }
+          end
+      else
+        respond_to do |format|
+           format.html { redirect_to( '/vgroups/'+params[:id], :notice => 'The vgroup_id was not valid.' )}
+           format.xml  { render :xml => @vgroup }
+         end
+      end
+  end
+
   # GET /vgroups/1
   # GET /vgroups/1.xml
   def show
     scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
-
+    if current_user.role == 'Admin_High'
+        # for changing appointment vgroup_id    
+        @appointments = Appointment.order("appointments.appointment_type ASC").where("appointments.vgroup_id in (?)", params[:id])
+        v_appointment_array = Array.new 
+        i = 0
+        @appointments.each do |appointment|
+            v_temp_array = [[appointment.appointment_type+"-"+(appointment.appointment_date).to_s, appointment.id]]
+            if i > 0 
+               @v_appointment_array.concat(v_temp_array)
+            else
+               @v_appointment_array = v_temp_array
+            end
+            i = 1
+        end 
+        
+        @possible_vgroups = Vgroup.where("vgroups.id != (?) and 
+                (vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships 
+                                        where enrollment_vgroup_memberships.enrollment_id in
+                                                  (select enrollment_id from enrollment_vgroup_memberships where vgroup_id in (?))
+              or vgroups.id in (select id from vgroups where rmr in (?))
+                              ))", params[:id],params[:id],@vgroup.rmr)
+        
+    end
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @vgroup }

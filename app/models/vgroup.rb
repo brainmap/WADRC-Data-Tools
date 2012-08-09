@@ -4,6 +4,7 @@ class Vgroup < ActiveRecord::Base
   default_scope :order => 'vgroup_date DESC' 
   paginates_per 50
   
+  attr_accessor :move_appointemnt_id, :target_vgroup_id
 #  has_and_belongs_to_many :scan_procedures
 #  has_many :enrollment_vgroup_memberships
 #  has_many :enrollments, :through => :enrollment_vgroup_memberships, :uniq => true
@@ -21,6 +22,8 @@ class Vgroup < ActiveRecord::Base
 #  has_many :enrollment_vgroup_memberships
 #  has_many :enrollments, :through => :enrollment_vgroup_memberships, :uniq => true
 has_and_belongs_to_many :scan_procedures
+  
+
   
   def participant
     @participant ||= nil

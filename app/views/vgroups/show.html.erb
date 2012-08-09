@@ -151,3 +151,37 @@ edit_count = edit_count -1
 	<%= link_to 'Edit', edit_vgroup_path(@vgroup) %> |
 <% end %>
 <%= link_to 'Back', home_path %>
+
+<% if current_user.role == 'Admin_High'%>
+<%
+#v_appointment_list = {"Exclude"=>"exclude", "Include"=>"include"}
+%>
+
+<br><br><B>Change an appointment to a different vgroup</b><br>
+
+	<% form_tag( "/vgroups/change_appointment_vgroup",:url => { :controller=>"vgroups",:action => "change_appointment_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
+<%= hidden_field_tag 'id', @vgroup.id %>
+  <div class="field">
+	
+    <%= label_tag 'Appointment_to_move' %><br />
+ <%= select( :move_appointemnt_id,'', @v_appointment_array,
+	              {:prompt => 'Select an appointment to move to another vgroup'} ,{:required => true})  %>
+  </div>
+	  <div class="field">
+	 <%= label_tag 'Target Vgroup_id' %><br />
+	    <%= number_field_tag 'target_vgroup_id', params[:id],:size =>10 %>
+	<% if !@possible_vgroups.blank? %>
+	 <br><table><tr><td colspan="2">Possible related vgroup(s) - same enumber or rmr </td></tr>
+	 
+	 <% @possible_vgroups.each do |vg|%>
+	   <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td align="right"> <%= vg.id %></td></tr>
+	  <% end%>
+	</table>
+	<% end %>
+	  </div>
+	  <div class="actions">
+	    <%= submit_tag("Change appointments vgroup") %>
+	  </div>
+	<% end %>	
+
+<% end %>
