@@ -72,9 +72,9 @@
 
       <tr>
         <td><%= link_to vgroup.vgroup_date.to_s(:datetime_military), vgroup %></td>
-        <td><%= visit.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
-        <td><%= visit.blank? ? "" :visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
-        <td><%= visit.blank? ? "" : visit.rmr %></td>
+        <td><%= vgroup.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
+        <td><%= vgroup.blank? ? "" :vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
+        <td><%= vgroup.blank? ? "" : vgroup.rmr %></td>
      <td><%= #@a.blank? ?  "None" :	@a.collect{|sp| link_to("appt",appointment_path(sp))}.join(", ").html_safe 
              # vgroup.appointments.collect { |sp| link_to("appt",appointment_path(sp)) }.join(", ").html_safe  # second way of making coolection
 	%><%= link_to 'Appts', vgroup %></td>

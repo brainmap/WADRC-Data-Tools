@@ -28,10 +28,10 @@ edit_count = edit_count -1
   <%= @vgroup.vgroup_date %>
 </td><td>
 	<b>Scan Procedure:</b><br>
-    <%= visit.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(",<br>").html_safe %> 
+    <%= @vgroup.blank? ? "None" : @vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(",<br>").html_safe %> 
 </td><td>
 	<b>Enroll Number:</b><br>
-	<%= visit.blank? ? "": visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(",<br>").html_safe %>
+	<%= @vgroup.blank? ? "": @vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(",<br>").html_safe %>
 	
 </td><td>
 	<b>RMR:</b>
@@ -152,7 +152,7 @@ edit_count = edit_count -1
 <% end %>
 <%= link_to 'Back', home_path %>
 
-<% if current_user.role == 'Admin_High'%>
+<% if current_user.role == 'Admin_High' and !@v_appointment_array.blank?%>
 <%
 #v_appointment_list = {"Exclude"=>"exclude", "Include"=>"include"}
 %>

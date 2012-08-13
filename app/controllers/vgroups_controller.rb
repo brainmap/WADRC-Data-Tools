@@ -81,6 +81,8 @@ puts sql
   def new
     @vgroup = Vgroup.new
 
+    # @vgroup.enrollments << Enrollment.new
+
     respond_to do |format|
       format.html # new.html.erb
       format.xml  { render :xml => @vgroup }
@@ -96,10 +98,30 @@ puts sql
   # POST /vgroups
   # POST /vgroups.xml
   def create
-    @vgroup = Vgroup.new(params[:vgroup])
- 
+    @vgroup = Vgroup.new(params[:vgroup]) 
     respond_to do |format|
       if @vgroup.save
+        if !(@vgroup.participant_id).blank?   # how will this interact with load visit? participant_id is probably blank until the enumber update in mri
+          sql = "select enrollments.id from enrollments where participant_id ="+@vgroup.participant_id.to_s 
+          # this is going to cause problems if there are multiple enrollments for a participant?
+
+          connection = ActiveRecord::Base.connection();        
+          participants_results = connection.execute(sql)
+          # is there a better way to get the results?
+          participants_results.each do |r|
+              sql = "select count(*) cnt from enrollment_vgroup_memberships where vgroup_id = "+@vgroup.id.to_s+" and enrollment_id="+(r[0]).to_s
+              results = connection.execute(sql)
+              cnt = 0
+              results.each do |r_cnt|
+                cnt = r_cnt[0]
+              end
+              if cnt < 1
+                sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(r[0]).to_s+")"      
+                results = connection.execute(sql)
+              end
+          end
+
+        end
         format.html { redirect_to(@vgroup, :notice => 'Vgroup was successfully created.') }
         format.xml  { render :xml => @vgroup, :status => :created, :location => @vgroup }
       else

@@ -1,3 +1,4 @@
+require "base64"
 class VisitsController <  AuthorizedController #  ApplicationController
 
     load_resource
