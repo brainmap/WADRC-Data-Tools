@@ -11,7 +11,8 @@ edit_count = edit_count -1
   <%= f.error_messages %>
   <p>
     <%= f.label :date_of_birth %><br />
-    <%= f.date_select :dob %><br />
+    <%= f.date_select :dob, :start_year => Time.now.year - 100,
+	    :end_year => Time.now.year  %><br />
   </p>
   <p>
     <%= f.label :gender %><br />
