@@ -379,6 +379,34 @@ class Visit < ActiveRecord::Base
     "%s <=> %s (%.3f)" % [rmr, mri_scan.study_rmr]
   end
   
+  def get_base_path()
+  	# look for mount to adrc image server - different on linux vs mac os , and different on mac os delending on login order
+  	# check for
+  	# Linux /home/USER/adrcdata,   /Data/vtrak1   
+  	#Mac  /Volumnes/team*  /Volumnes/team*/preprocessed   /Volumnes/team*/raw
+  	base_path =""
+  	#user = ENV['USER']
+
+  	if File.directory?("/Volumes/team")
+  		 base_path ="/Volumes/team"
+  	elsif File.directory?("/Volumes/team-1")
+  		 base_path ="/Volumes/team-1"
+  	elsif File.directory?("/Volumes/team-2")
+  		 base_path ="/Volumes/team-2"	
+  	elsif File.directory?("/Volumes/team-3")
+  		 base_path ="/Volumes/team-3"
+   	elsif File.directory?("/Volumes/team-4")
+   		 base_path ="/Volumes/team-4"
+   	elsif File.directory?("/Volumes/team-5")
+   		 base_path ="/Volumes/team-5"
+   	elsif File.directory?("/Volumes/team-6")
+   		 base_path ="/Volumes/team-6"
+  	else
+  		base_path ="/Volumes/team"	
+    end
+
+  	return base_path
+  end
   
   # Run before validations. Fixes the many-to-many association between visits
   # and enrollments from the nested_attributes enrollment_params hash passed in

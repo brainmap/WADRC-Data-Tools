@@ -30,6 +30,40 @@ class VisitsController <  AuthorizedController #  ApplicationController
       format.xml  { render :xml => @visits }
     end
 
+  def change_direcory_path
+       # normal visits way of getting sp array didn't work -- using vgroups version to get sp array
+       scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array] 
+      @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+      @v_base_path = get_base_path()
+      v_path_original = @visit.path
+      v_path_new = params[:path]
+      cnt = 0
+      if File.directory? v_path_new
+        puts "folder exisits"
+        cnt = 1
+        @visit.path = v_path_new
+        @visit.save
+    
+        if params[:change_image_dataset_path] == "1"
+           sql = "update image_datasets set path = replace(path,'"+v_path_original+"','"+v_path_new+"')
+                where path like '"+v_path_original+"%'"
+           connection = ActiveRecord::Base.connection();
+           @results = connection.execute(sql)
+         end
+          
+        end
+          if cnt > 0
+             respond_to do |format|
+                format.html { redirect_to( '/visits/'+params[:id], :notice => 'THIS IS NOT CHANGING DB YET !!! Directory path has been updated to '+params[:path]+'.' )}
+                format.xml  { render :xml => @vgroup }
+              end
+          else
+            respond_to do |format|
+               format.html { redirect_to( '/visits/'+params[:id], :notice => 'THIS IS NOT CHANGING DB YET !!! The directory path was not valid.' )}
+               format.xml  { render :xml => @vgroup }
+             end
+          end
+  end
 
   # GET /visits/:scope
   def index_by_scope
