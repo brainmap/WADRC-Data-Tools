@@ -34,7 +34,6 @@ class VisitsController <  AuthorizedController #  ApplicationController
        # normal visits way of getting sp array didn't work -- using vgroups version to get sp array
        scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array] 
       @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
-      @v_base_path = get_base_path()
       v_path_original = @visit.path
       v_path_new = params[:path]
       cnt = 0
@@ -54,12 +53,12 @@ class VisitsController <  AuthorizedController #  ApplicationController
         end
           if cnt > 0
              respond_to do |format|
-                format.html { redirect_to( '/visits/'+params[:id], :notice => 'THIS IS NOT CHANGING DB YET !!! Directory path has been updated to '+params[:path]+'.' )}
+                format.html { redirect_to( '/visits/'+params[:id], :notice => 'Directory path has been updated to '+params[:path]+'.' )}
                 format.xml  { render :xml => @vgroup }
               end
           else
             respond_to do |format|
-               format.html { redirect_to( '/visits/'+params[:id], :notice => 'THIS IS NOT CHANGING DB YET !!! The directory path was not valid.' )}
+               format.html { redirect_to( '/visits/'+params[:id], :notice => 'The directory path was not valid.' )}
                format.xml  { render :xml => @vgroup }
              end
           end
