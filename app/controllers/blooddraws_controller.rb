@@ -193,6 +193,8 @@ class BlooddrawsController < ApplicationController
         @current_tab = "blooddraws"
         @blooddraw = Blooddraw.new
         vgroup_id = params[:id]
+        @vgroup = Vgroup.find(vgroup_id)
+        @enumbers = @vgroup.enrollments
         params[:new_appointment_vgroup_id] = vgroup_id
         @appointment = Appointment.new
         @appointment.vgroup_id = vgroup_id

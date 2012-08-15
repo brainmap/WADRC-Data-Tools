@@ -166,6 +166,8 @@ class PetscansController < ApplicationController
     @current_tab = "petscans"
     @petscan = Petscan.new
     vgroup_id = params[:id]
+    @vgroup = Vgroup.find(vgroup_id)
+    @enumbers = @vgroup.enrollments
     params[:new_appointment_vgroup_id] = vgroup_id
     @appointment = Appointment.new
     @appointment.vgroup_id = vgroup_id

@@ -185,6 +185,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # GET /visits/new.xml
   def new
     vgroup_id = params[:id]
+    @vgroup = Vgroup.find(vgroup_id)
+    @enumbers = @vgroup.enrollments
     params[:new_appointment_vgroup_id] = vgroup_id
     @visit = Visit.new
     @visit.enrollments << Enrollment.new

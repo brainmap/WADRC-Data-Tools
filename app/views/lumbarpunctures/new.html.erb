@@ -9,6 +9,7 @@ edit_count = edit_count -1
 %>
 <% if edit_count > 0 %>
 <h1>New Lumbar Puncture Appt</h1>
+<h2><%= @enumbers.blank? ? @vgroup.rmr : @enumbers.collect{|e| e.enumber }.join(", ") %></h2>
 
 <%= render :partial => 'new_edit', :locals => { :form_action => 'Create Lumbar Puncture appt'} %>
 
