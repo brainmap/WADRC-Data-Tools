@@ -58,7 +58,24 @@ edit_count = edit_count -1
             %>
   </div> 
 
+<% @vital =  Vital.where("appointment_id in (?) ",@blooddraw.appointment_id).first
+ if !@vital.blank?
+	 vital = Vital.find(@vital.id) 
+	if ( ((vital.pulse.blank?? 911 :vital.pulse) < 911) or
+		      ((vital.bp_systol.blank?? 911 :vital.bp_systol) < 911 ) or 
+		        ( (vital.bp_diastol.blank?? 911 :vital.bp_diastol) < 911) or 
+		           ((vital.bloodglucose.blank?? 911 :vital.bloodglucose) < 911)  )%>
 
+<h4>Vitals:</h4>
+<div id="vital" class="sticky">
+     <%= vital.pulse==991 ?  "" :("Pulse: "+vital.pulse.to_s+"<br>").html_safe %>
+     <%= vital.bp_systol==991 ?  "" :("BP Systol: "+vital.bp_systol.to_s+"<br>").html_safe %>
+     <%= vital.bp_diastol==991 ?  "" :("PBP Diastol: "+vital.bp_diastol.to_s+"<br>").html_safe %>
+     <%= vital.bloodglucose==991 ?  "" :("Blood Glucose: "+vital.bloodglucose.to_s+"<br>").html_safe %>
+</div>
+
+<%    end 
+  end %>
 </div>
 
 
