@@ -93,6 +93,22 @@ puts sql
   def edit
     scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    
+    if current_user.role == 'Admin_High'
+        # for changing appointment vgroup_id    
+        @appointments = Appointment.order("appointments.appointment_type ASC").where("appointments.vgroup_id in (?)", params[:id])
+        v_appointment_array = Array.new 
+        i = 0
+        @appointments.each do |appointment|
+            v_temp_array = [[appointment.appointment_type+"-"+(appointment.appointment_date).to_s, appointment.id]]
+            if i > 0 
+               @v_appointment_array.concat(v_temp_array)
+            else
+               @v_appointment_array = v_temp_array
+            end
+            i = 1
+        end
+     end
   end
 
   # POST /vgroups
@@ -152,7 +168,7 @@ puts sql
     end
     
     params[:vgroup].delete('enrollments_attributes') 
-    puts "AAAAAAAA="+params[:vgroup].to_s
+   
     
     respond_to do |format|
       if @vgroup.update_attributes(params[:vgroup])
@@ -278,7 +294,7 @@ puts sql
     @vgroup.destroy
 
     respond_to do |format|
-      format.html { redirect_to(vgroups_url) }
+      format.html { redirect_to('/vgroups/home') }
       format.xml  { head :ok }
     end
   end
