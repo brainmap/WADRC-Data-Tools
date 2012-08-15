@@ -6,11 +6,11 @@ class Vgroup < ActiveRecord::Base
   
   attr_accessor :move_appointemnt_id, :target_vgroup_id
 
-#  has_many :enrollment_vgroup_memberships
-#  has_many :enrollments, :through => :enrollment_vgroup_memberships, :uniq => true
-#  accepts_nested_attributes_for :enrollments, :reject_if => :all_blank, :allow_destroy => true
+  has_many :enrollment_vgroup_memberships
+  has_many :enrollments, :through => :enrollment_vgroup_memberships, :uniq => true
+  accepts_nested_attributes_for :enrollments, :reject_if => :all_blank, :allow_destroy => true
 #  before_validation :lookup_enrollments
-# delegate :enumber, :to => :enrollment, :prefix => true
+  delegate :enumber, :to => :enrollment, :prefix => true
  
    belongs_to :user 
      belongs_to :created_by, :class_name => "User"
@@ -21,7 +21,9 @@ class Vgroup < ActiveRecord::Base
   has_many :appointments,  :class_name =>"Appointment",:dependent => :destroy
   has_and_belongs_to_many :scan_procedures
   
-
+    def lookup_enrollments
+      # get from visits
+    end
   
   def participant
     @participant ||= nil

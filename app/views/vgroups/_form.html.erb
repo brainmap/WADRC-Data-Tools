@@ -17,7 +17,7 @@
   </div>
   <div class="field">
     <%= f.label :participant_id %><br />
-<%= select(:vgroup, :participant_id, Enrollment.where(" participant_id is not null").all.sort_by(&:enumber).collect {|p| [ p.enumber, p.participant_id ] }, { :include_blank => "Select  a participant" }) %>
+<%= select(:vgroup, :participant_id, Enrollment.where(" participant_id is not null").all.sort_by(&:enumber).collect {|p| [ p.enumber, p.participant_id ] }, { :include_blank => "Select  a participant" }) %>   The participant may have mulitple enumbers --- not sure how to identify a participant. <br>Ignore the enumber associated with this participant when the enumber ( below) is not linked to this vgroup.<br><br>
 
   </div>
 
@@ -46,6 +46,18 @@
 	<% end %>
 	</ul>
 	</div>
+	
+	<%= f.fields_for :enrollments do |e| %>
+	<p>
+		<%= e.label :enumber %>
+		<%= e.check_box :_destroy unless e.object.new_record?  %>
+		<%= e.label :_destroy, "Remove?" unless e.object.new_record? %>
+		<%= e.text_field_with_auto_complete :enumber, {},
+			        { :method => :get, :url => enrollments_path(:format => :js), :param_name => 'search' } %>
+	</p>
+	<% end %>
+	 not sure how to add more enumbers
+	<br><br>
   <div class="actions">
     <%= f.submit %>
   </div>

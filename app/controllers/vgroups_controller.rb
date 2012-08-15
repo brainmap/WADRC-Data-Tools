@@ -137,31 +137,47 @@ puts sql
     scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
+    # getting undefined method `to_sym' error -- somethng is nil 
+    # just trying to delete 
+    params[:vgroup][:enrollments_attributes].each do|cnt, value|
+      #enumberpipr00042id2203_destroy1
+      enrollment_id = (value.to_s)[(value.to_s).index("id")+2,(value.to_s).index("_destroy")]
+      v_destroy = (value.to_s)[(value.to_s).index("_destroy")+8,(value.to_s).length] 
+      if v_destroy.to_s == "1"
+        enrollment_id = enrollment_id.sub("_destroy1","")
+        sql = "delete from enrollment_vgroup_memberships where enrollment_id="+enrollment_id+" and vgroup_id ="+@vgroup.id.to_s
+        connection = ActiveRecord::Base.connection();
+        results = connection.execute(sql)
+      end
+    end
+    
+    params[:vgroup].delete('enrollments_attributes') 
+    puts "AAAAAAAA="+params[:vgroup].to_s
+    
     respond_to do |format|
       if @vgroup.update_attributes(params[:vgroup])
-        connection = ActiveRecord::Base.connection(); 
-        sql = "delete from enrollment_vgroup_memberships where vgroup_id = "+@vgroup.id.to_s
-        results = connection.execute(sql)
-        if !(@vgroup.participant_id).blank?   # how will this interact with load visit? participant_id is probably blank until the enumber update in mri
-          sql = "select enrollments.id from enrollments where participant_id ="+@vgroup.participant_id.to_s 
-          # this is going to cause problems if there are multiple enrollments for a participant?
+#        connection = ActiveRecord::Base.connection(); 
+#        sql = "delete from enrollment_vgroup_memberships where vgroup_id = "+@vgroup.id.to_s
+#        results = connection.execute(sql)
+#        if !(@vgroup.participant_id).blank?   # how will this interact with load visit? participant_id is probably blank until the enumber update in mri
+#          sql = "select enrollments.id from enrollments where participant_id ="+@vgroup.participant_id.to_s 
+#          # this is going to cause problems if there are multiple enrollments for a participant?
        
-          participants_results = connection.execute(sql)
+#          participants_results = connection.execute(sql)
           # is there a better way to get the results?
-          participants_results.each do |r|
-              sql = "select count(*) cnt from enrollment_vgroup_memberships where vgroup_id = "+@vgroup.id.to_s+" and enrollment_id="+(r[0]).to_s
-              results = connection.execute(sql)
-              cnt = 0
-              results.each do |r_cnt|
-                cnt = r_cnt[0]
-              end
-              if cnt < 1
-                sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(r[0]).to_s+")"      
-                results = connection.execute(sql)
-              end
-          end
-
-        end
+#          participants_results.each do |r|
+#              sql = "select count(*) cnt from enrollment_vgroup_memberships where vgroup_id = "+@vgroup.id.to_s+" and enrollment_id="+(r[0]).to_s
+#              results = connection.execute(sql)
+#              cnt = 0
+#              results.each do |r_cnt|
+#                cnt = r_cnt[0]
+#              end
+#              if cnt < 1
+#                sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(r[0]).to_s+")"      
+#                results = connection.execute(sql)
+#              end
+#          end
+#        end
         format.html { redirect_to(@vgroup, :notice => 'Vgroup was successfully updated.') }
         format.xml  { head :ok }
       else
