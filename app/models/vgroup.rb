@@ -6,7 +6,7 @@ class Vgroup < ActiveRecord::Base
   
   attr_accessor :move_appointemnt_id, :target_vgroup_id
 
-  has_many :enrollment_vgroup_memberships
+  has_many :enrollment_vgroup_memberships,:dependent => :destroy
   has_many :enrollments, :through => :enrollment_vgroup_memberships, :uniq => true
   accepts_nested_attributes_for :enrollments, :reject_if => :all_blank, :allow_destroy => true
 #  before_validation :lookup_enrollments
