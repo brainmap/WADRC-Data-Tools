@@ -266,6 +266,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # PUT /visits/1.xml
   def update
      scan_procedure_array =current_user[:edit_low_scan_procedure_array] 
+     delete_scantask_array = []
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
              params[:date][:mristartt][0]="1899"
@@ -341,20 +342,29 @@ class VisitsController <  AuthorizedController #  ApplicationController
     						
     mriscantask_id_array = params[:mriscantask][:mriscantask_id]  
     mriscantask_id_array.each do |mri_id|
+      if !params[:mriscantask][:destroy].blank?
+       if !params[:mriscantask][:destroy][mri_id].blank?
+        if !delete_scantask_array.blank?
+          delete_scantask_array.push(mri_id)
+        else
+          delete_scantask_array=[mri_id]
+        end
+       end
+      end
       mri_id_int = mri_id.to_i
       if mri_id_int < 0 
         if !params[:mriscantask][:lookup_set_id][mri_id].blank? or 
            !params[:mriscantask][:lookup_scantask_id][mri_id].blank? or 
-              !params[:mriscantask][:preday][mri_id].blank? or 
-                 !params[:mriscantask][:task_order][mri_id].blank? or 
-                    !params[:mriscantask][:moved][mri_id].blank? or 
-                       !params[:mriscantask][:eyecontact][mri_id].blank? or 
+              #!params[:mriscantask][:preday][mri_id].blank? or 
+                 #!params[:mriscantask][:task_order][mri_id].blank? or 
+                    #!params[:mriscantask][:moved][mri_id].blank? or 
+                       #!params[:mriscantask][:eyecontact][mri_id].blank? or 
                           !params[:mriscantask][:logfilerecorded][mri_id].blank? or 
-                              !params[:mriscantask][:p_file][mri_id].blank? or 
+                              #!params[:mriscantask][:p_file][mri_id].blank? or 
                                   !params[:mriscantask][:tasknote][mri_id].blank? or 
-                                      !params[:mriscantask][:reps][mri_id].blank? or 
-                                          !params[:mriscantask][:has_concerns][mri_id].blank? or 
-                                              !params[:mriscantask][:concerns][mri_id].blank? or 
+                                      #!params[:mriscantask][:reps][mri_id].blank? or 
+                                          #!params[:mriscantask][:has_concerns][mri_id].blank? or 
+                                              #!params[:mriscantask][:concerns][mri_id].blank? or 
                                                   !params[:mriscantask][:image_dataset_id][mri_id].blank? 
             @mriscantask = Mriscantask.new
             @mriscantask.lookup_set_id = params[:mriscantask][:lookup_set_id][mri_id]
@@ -403,16 +413,16 @@ class VisitsController <  AuthorizedController #  ApplicationController
         if !params[:mriscantask][:lookup_scantask_id][mri_id].blank?
              @mriscantask.lookup_scantask_id = params[:mriscantask][:lookup_scantask_id][mri_id]
         end
-        @mriscantask.preday = params[:mriscantask][:preday][mri_id]
-        @mriscantask.task_order = params[:mriscantask][:task_order][mri_id]
-        @mriscantask.moved = params[:mriscantask][:moved][mri_id]
-        @mriscantask.eyecontact = params[:mriscantask][:eyecontact][mri_id]
+        #@mriscantask.preday = params[:mriscantask][:preday][mri_id] 
+        #@mriscantask.task_order = params[:mriscantask][:task_order][mri_id]
+        #@mriscantask.moved = params[:mriscantask][:moved][mri_id]
+        #@mriscantask.eyecontact = params[:mriscantask][:eyecontact][mri_id]
         @mriscantask.logfilerecorded = params[:mriscantask][:logfilerecorded][mri_id]
-        @mriscantask.p_file = params[:mriscantask][:p_file][mri_id]
+        #@mriscantask.p_file = params[:mriscantask][:p_file][mri_id]
         @mriscantask.tasknote = params[:mriscantask][:tasknote][mri_id]
-        @mriscantask.reps = params[:mriscantask][:reps][mri_id]
-        @mriscantask.has_concerns = params[:mriscantask][:has_concerns][mri_id]
-        @mriscantask.concerns = params[:mriscantask][:concerns][mri_id]
+        #@mriscantask.reps = params[:mriscantask][:reps][mri_id]
+        #@mriscantask.has_concerns = params[:mriscantask][:has_concerns][mri_id]
+        #@mriscantask.concerns = params[:mriscantask][:concerns][mri_id]
         @mriscantask.image_dataset_id = params[:mriscantask][:image_dataset_id][mri_id]
         @mriscantask.save
         # get the acc and hit
@@ -441,6 +451,12 @@ class VisitsController <  AuthorizedController #  ApplicationController
     end         
     respond_to do |format|
       if @visit.update_attributes(attributes)
+        if !delete_scantask_array.blank?
+          delete_scantask_array.each do |mri_id|
+             @mriscantask = Mriscantask.find(mri_id.to_i)
+             @mriscantask.destroy
+         end
+        end
         @appointment = Appointment.find(@visit.appointment_id)
         @appointment.appointment_date = @visit.date
         @appointment.save
