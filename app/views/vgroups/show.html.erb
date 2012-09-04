@@ -51,11 +51,13 @@ edit_count = edit_count -1
 <% if edit_count > 0 %>
 	<%= link_to  'New-MRI', new_visit_path+"/"+@vgroup.id.to_s %>
 <% end %></td></tr>
-	<tr><td colspan=5>	<table>
+	<tr><td colspan=5>	<table  width="90%">
 	<% @visits.each do |v| 
 		@appointment = Appointment.find(v.appointment_id) %>
-	<tr><td><%= @appointment.appointment_date%></td><td><%= link_to("show",visit_path(v) )%></td><td><%= edit_count>0 ? link_to("edit",edit_visit_path(v) ) :"" %></td>
+	<tr><td align="left" colspan=5><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",visit_path(v) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_visit_path(v) ) :"" %></td>
 		</tr>
+		<tr><td colspan="5"  align="left"><%= v.notes %><%= @appointment.comment %>
+		</td></tr>
 	<% end %> </table>
 	</td></tr>
 <tr><td colspan=4  align="left">
@@ -65,9 +67,7 @@ edit_count = edit_count -1
 <tr><td colspan=5  align="left"><table width="80%">
 	<% @petscans.each do |p|  
 		@appointment = Appointment.find(p.appointment_id) %>
-	<tr><td  align="left" width="10%"><%= @appointment.appointment_date%></td>
-		<td  align="left" width="10%"><%= link_to("show",petscan_path(p) )%></td>
-		<td  align="left" width="10%"><%= edit_count>0 ? link_to("edit",edit_petscan_path(p) ) :"" %></td>
+	<tr><td  align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",petscan_path(p) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_petscan_path(p) ) :"" %></td>
 		<td><%=p.lookup_pettracer_id.nil? ? nil : LookupPettracer.find(p.lookup_pettracer_id).name_description.html_safe %></td>
 		<td><%= p.completedpetscan==1 ? "Completed" :(p.enteredpetscan==1 ? "Entered" : " ")%> </td>
 		</tr>
@@ -131,7 +131,7 @@ edit_count = edit_count -1
 <tr><td colspan=4  align="left">
 	<b>Questionnaire: </b><%= @questionnaires.blank? ? "None" :""%></td><td align="right"> 
 <% if edit_count > 0 %>
-	<%= link_to  'New-NP', new_questionnaire_path+"/"+@vgroup.id.to_s %>
+	<%= link_to  'New-Q', new_questionnaire_path+"/"+@vgroup.id.to_s %>
 <% end %></b></td></tr>
 <tr><td colspan=5  align="left"><table  width="80%">
 	<% @questionnaires.each do |q|
