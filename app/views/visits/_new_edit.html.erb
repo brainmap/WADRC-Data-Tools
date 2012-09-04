@@ -169,7 +169,6 @@
               -->
 	
 		<table  class="tabular_no_shade" ><tr><th>Scan Series</th><th>Set</th><th>Order</th><th>LogFile Recorded</th><th colspan=4 align="left">Task Note</th> </tr>
-			<tr><th>P_file</th><th>Reps</th><th>Moved</th><th>Eye Contact</th><th>Preday</th><th colspan=3 align="left">Concerns</th</tr>
 	<%   v_mriscantask_id = 0
 	     v_mriperformance_id = 0
 	   if !@mriscantask.blank?  %>
@@ -177,7 +176,7 @@
 		<% v_header_count = 0 
 		  @mriscantask.each do |mst|
 					v_header_count = v_header_count + 1 
-			 if v_header_count > 3
+			 if v_header_count > 6
 				 v_header_count = 0 %>
 				<tr><th>Scan Series</th><th>Set</th><th>Order</th><th>LogFile Recorded</th><th>Task Note</th></tr>				
 			<% end%>
@@ -193,24 +192,31 @@
 			  </td>
 			<td><%= select("mriscantask[logfilerecorded]",mst.id,[['No',"0"],["Yes","-1"]],{ :selected =>mst.logfilerecorded.try(:to_s), :include_blank => "Log?" })  %>  </td>
 			<td colspan=4  align="left"> 
-				<%=  text_field_tag( "mriscantask[tasknote]["+mst.id.to_s+"]",mst.tasknote, :size => 60) %>  </td>
+				<%=  text_field_tag( "mriscantask[tasknote]["+mst.id.to_s+"]",mst.tasknote, :size => 60) %>&nbsp;<%= check_box_tag( "mriscantask[destroy]["+mst.id.to_s+"]")   %><%= f.label :_destroy, "Del" %>  </td>
 			</tr>
+			<% if !mst.p_file.blank? or !mst.reps.blank? or !mst.moved.blank? or !mst.eyecontact.blank? or !mst.preday.blank? or !mst.concerns.blank? or !mst.has_concerns.blank? %>
 			<tr>	
-			<td><%= mst.p_file%>  </td>     
-			<td><%= mst.reps.try(:to_s)%>  </td>
+			<td><%= if !mst.p_file.blank?
+				  "P-file: "+mst.p_file
+				   end %>  </td>     
+			<td><%= if !mst.reps.blank? 
+				    "Reps: "+mst.reps.try(:to_s)
+				   end %>  </td>
 			<td><%= if !mst.moved.blank? 
-				       mst.moved==(-1) ? "Yes" : "No" 
+				       mst.moved==(-1) ? "Moved: Yes" : "Moved: No" 
 				   end%>      </td>
 			<td><%= if !mst.eyecontact.blank?
-				      mst.eyecontact ==(-1) ? "Yes" : "No"
+				      mst.eyecontact ==(-1) ? "Eye Contact: Yes" : "Eye Contact: No"
 				    end %>     </td>
-			<td><%= mst.preday.try(:to_s)%></td>		
-			<td colspan="2" align="left">	
-			<% if !mst.concerns.blank? or mst.has_concerns==(1) %>
-			<%= mst.has_concerns==(1) ? "Has Concerns: " : ""%> <%= mst.concerns%> </td>
+			<td><%= if !mst.preday.blank?
+				      "Preday: "+mst.preday.try(:to_s)
+				 end %></td>		
+			<td colspan="2" align="left">
+			<% if !mst.concerns.blank? or mst.has_concerns==(1) %> 
+			<%= mst.has_concerns==(1) ? "Has Concerns: " : "Concerns: "%> <%= mst.concerns%>
 			<% end %>  
-				</td><td alighn="left"><%= check_box_tag( "mriscantask[destroy]["+mst.id.to_s+"]")   %><%= f.label :_destroy, "Remove?" %>
-				 </td></tr>
+				</td></tr>
+		<% end %>
 			<% mriperformance_flag=0
 			    @mriperformances = Mriperformance.where("mriscantask_id in (?)",mst.id)
 			   @mriperformances.each do |mp|
@@ -248,7 +254,7 @@
 <td><%= select("mriscantask[lookup_set_id]",v_mriscantask_id, LookupSet.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :include_blank => "Select a set" }) %> </td>
 <td><%= select( "mriscantask[task_order]",v_mriscantask_id, [['',''],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['6','6'],['7','7'],['8','8'],['9','9'],['10','10'],['-1','-1']], { :include_blank => "Select order" } ) %></td>
 					<td><%= select("mriscantask[logfilerecorded]",v_mriscantask_id,[['No',"0"],["Yes","-1"]],{  :include_blank => "Log?" })  %>  </td>
-					<td colspan=4  align="left"> <%=  text_field_tag( "mriscantask[tasknote]["+v_mriscantask_id.to_s+"]","", :size => 60) %>  </td>
+					<td colspan=4  align="left"> <%=  text_field_tag( "mriscantask[tasknote]["+v_mriscantask_id.to_s+"]","", :size => 60) %> &nbsp;<%= check_box_tag( "mriscantask[destroy]["+mst.id.to_s+"]")   %><%= f.label :_destroy, "Del" %> </td>
 				</tr>
 		<% if img_dt_set.series_description.downcase.include? "task"
 						     v_mriperformance_id = v_mriperformance_id -1 %>

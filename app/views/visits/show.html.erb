@@ -116,37 +116,47 @@ edit_count = edit_count -1
 <%= render(:partial => "lookup_radiology_button", :locals => {:rmr => @visit.rmr} ) %>
 <br>
 <div >
-	<table  class="tabular_no_shade"><tr><th>Scan Series</th><th>Set</th><th>Order</th><th>LogFile Recorded</th><th>P_file</th>
-		<th>Reps</th><th>Moved</th><th>Eye Contact</th><th>Preday</th></tr>
-		<tr><th colspan=9 align="left">Task Note</th</tr>
-		<tr><th colspan=9 align="left">Concerns</th</tr>
+	
+	<table  class="tabular_no_shade"><tr><th colsapn="4"  align="left">Scan Series</th><th align="left">Set</th><th align="left">Order</th><th align="left">LogFile Recorded</th></tr>
 	<% @mriscantask.each do |mst|%>
 	<% if !mst.image_dataset_id.blank?%>
-	<tr><td colsapn="9" align = "left"><b><%= ImageDataset.find(mst.image_dataset_id).series_description %></b></td><tr>
+	<tr><td colsapn="7" align = "left"><b><%= ImageDataset.find(mst.image_dataset_id).series_description %></b></td><tr>
 	<% end %>
-	<tr><td><%= mst.lookup_scantask_id.blank? ? "" : LookupScantask.find(mst.lookup_scantask_id).description %>      </td>
-		<td><%= mst.lookup_set_id.blank? ? "" :LookupSet.find(mst.lookup_set_id).description %>      </td>
-		<td><%= mst.task_order.try(:to_s)%>      </td>
-		<td><%= mst.logfilerecorded==(-1) ? "Yes" : "No"%>      </td>
-		<td><%= mst.p_file%>      </td>
-		<td><%= mst.reps.try(:to_s)%>      </td>
-		<td><%= mst.moved==(-1) ? "Yes" : "No"%>      </td>
-		<td><%= mst.eyecontact ==(-1) ? "Yes" : "No"%>      </td>
-		<td><%= mst.preday.try(:to_s)%>      </td>		
+	<tr><td colsapn="4" align="left"><%= mst.lookup_scantask_id.blank? ? "" : LookupScantask.find(mst.lookup_scantask_id).description %>      </td>
+		<td  align="left"><%= mst.lookup_set_id.blank? ? "" :LookupSet.find(mst.lookup_set_id).description %>      </td>
+		<td align="left"><%= mst.task_order.try(:to_s)%>      </td>
+		<td align="left"><%= mst.logfilerecorded==(-1) ? "Yes" : "No"%>      </td>
 		</tr>
-		<% if !mst.tasknote.blank? %>
-		<tr><td colspan=9  align="left"> <%= mst.tasknote%> </td></tr>
-		<% end %>
-		<% if !mst.concerns.blank? or mst.has_concerns==(1) %>
-		<tr><td><%= mst.has_concerns==(1) ? "Has Concerns" : ""%></td><td colspan=8  align="left"> <%= mst.concerns%> </td></tr>
-		<% end %>
-		<% @mriperformances = Mriperformance.where("mriscantask_id in (?)",mst.id)
-		   @mriperformances.each do |mp|
-		%>
-		<tr><td>------</td><td>Hit: <%= mp.hitpercentage.try(:to_s)%></td><td>Acc: <%= mp.accuracypercentage.try(:to_s)%><td><td colspan="7"></tr>
+			<% if !mst.tasknote.blank? %>
+			<tr><td colspan=7  align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Note: <%= mst.tasknote%> </td></tr>
+			<% end %>
+	<% @mriperformances = Mriperformance.where("mriscantask_id in (?)",mst.id)
+	    @mriperformances.each do |mp| %>
+		   <tr><td colspan="3" align="left">------Hit: <%= mp.hitpercentage.try(:to_s)%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Acc: <%= mp.accuracypercentage.try(:to_s)%><td><td colspan="4"></tr>
 		<% end%>
-		
-	
+	 <% if !mst.p_file.blank? or !mst.reps.blank? or !mst.moved.blank? or !mst.eyecontact.blank? or !mst.preday.blank? or !mst.concerns.blank? or mst.has_concerns==(1) %>
+		<tr>	
+		<td align="right"><%= if !mst.p_file.blank?
+			  "P-file: "+mst.p_file
+			   end %>  </td>     
+		<td align="right"><%= if !mst.reps.blank? 
+			    "Reps: "+mst.reps.try(:to_s)
+			   end %>  </td>
+		<td align="right"><%= if !mst.moved.blank? 
+			       mst.moved==(-1) ? "Moved: Yes" : "Moved: No" 
+			   end%>      </td>
+		<td align="right"><%= if !mst.eyecontact.blank?
+			      mst.eyecontact ==(-1) ? "Eye Contact: Yes" : "Eye Contact: No"
+			    end %>     </td>
+		<td align="right"><%= if !mst.preday.blank?
+			      "Preday: "+mst.preday.try(:to_s)
+			 end %></td>		
+		<td colspan="2" align="right">
+		<% if !mst.concerns.blank? or mst.has_concerns==(1) %> 
+		<%= mst.has_concerns==(1) ? "Has Concerns: " : "Concerns: "%> <%= mst.concerns %> 
+		<% end %>  
+		</tr>
+	 <% end %>
 	<% end %>
 	</table>
 </div>
