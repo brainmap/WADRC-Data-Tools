@@ -21,6 +21,8 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
       <%= f.label :Fast_Completed %>&nbsp;&nbsp;&nbsp;</td><td width="10">
 		<%= f.select :completedlpfast, options_for_select(v_yes_no_display, @lumbarpuncture.completedlpfast),
 							              {:prompt => 'Select if the lumbarpuncture fast was completed'} %></td></tr>
+     <tr><td><%= f.label :Fast_Total_Time %>&nbsp;&nbsp;&nbsp;</td><td width="10">
+	<%= 	text_field_tag( 'lumbarpuncture[lpfasttotaltime]',@lumbarpuncture.lpfasttotaltime, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
      <tr><td>
       LP Successful&nbsp;&nbsp;&nbsp;</td><td>
 	<%= f.select :lpsuccess, options_for_select(v_yes_no_display, @lumbarpuncture.lpsuccess),

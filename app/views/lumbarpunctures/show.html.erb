@@ -33,6 +33,7 @@ edit_count =  edit_count -1
       :Lumbarpuncture_appt_date => @appointment.appointment_date,
       :MD_for_Lumbarpuncture => @lumbarpuncture.lp_exam_md_id.nil? ? nil : Employee.find(@lumbarpuncture.lp_exam_md_id).name,
       :LP_Fast_Completed => @lumbarpuncture.completedlpfast == 1 ? "Yes" : "No",
+	  :LP_Fast_Total_Time => @lumbarpuncture.lpfasttotaltime ,
       :LP_Successful => @lumbarpuncture.lpsuccess == 1 ? "Yes" : "No",
       :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
       :RMR_Number => @vgroup.rmr,

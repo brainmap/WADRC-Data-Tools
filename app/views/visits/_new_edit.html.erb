@@ -1,3 +1,6 @@
+<%
+v_yes_no_display = [["Yes","1"], ["No","0"]]
+%>
 <% javascript_tag 'defaults' %>
 <div id="new_edit_form">
 <%= form_for(@visit) do |f| %>
@@ -95,10 +98,10 @@
         <td><%= f.label :Compile_Folder %></td>
         <td><%= select :visit, :compile_folder, ["no", "yes", "n/a"] %></td>
       </tr>
-      <tr>
+ <!--     <tr>
         <td><%= f.label :Conference %></td>
         <td><%= select :visit, :conference, ["no", "yes", "n/a"] %></td>
-      </tr>
+      </tr>  -->
 	<tr>
       <td><%= f.label(:mritech) %></td>
       <td><%= select(:visit, :mritech, Employee.all.sort_by(&:name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Select MRI Tech" }) %></td>
@@ -111,6 +114,11 @@
       <td><%= f.label(:Scan_End_Time) %></td>
       <td> <%= select_time( @visit.mriendtime,:field_name =>'mriendt][', :include_blank => true) %></td>
     </tr>
+ <tr>
+        <td><%= f.label :Fast_Completed %></td>
+        <td><%= f.select :completedmrifast, options_for_select(v_yes_no_display, @visit.completedmrifast),{:prompt => 'Select if the mri fast was completed'} %> &nbsp; <%= f.label :Total_Time %>
+               <%= 	text_field_tag( 'visit[mrifasttotaltime]',@visit.mrifasttotaltime, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td>
+      </tr>  
 
     </table>
 <%     @vitals = Vital.where("vitals.appointment_id in (?)",@visit.appointment_id)     
