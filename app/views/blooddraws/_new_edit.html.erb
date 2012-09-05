@@ -15,7 +15,7 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
   </div>
   <div class="three_col_mid">
     <table>
-      <tr>
+<!--      <tr>
         <td><%= f.label :Entered_by%></td>
         <td><%= select(:blooddraw, :enteredbloodwho, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Lab Health Entered By" }) %></td>
       </tr>
@@ -24,17 +24,20 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
         <td><%= f.select :enteredblood, options_for_select(v_yes_no_display, @blooddraw.enteredblood),
 						              {:prompt => 'Select if the blooddraw has been entered'} %>
 	</td>
-      </tr>
+      </tr> -->
       <tr>
         <td><%= f.label :Lab_Health_Completed %></td>
-        <td><%= f.select :completedblooddraw, options_for_select(v_yes_no_display, @blooddraw.completedblooddraw),
-							              {:prompt => 'Select if the blooddraw has been entered'} %></td>
-      </tr>
-      <tr>
+        <td><%= select :vgroup, :completedblooddraw, ["no", "yes", "n/a"] %>
+		</td>
+	    </tr>
+	    <tr><td colspan="2">
+		<small>Select "n/a" if the Lab Health will not be done.</small>
+		</td></tr>
+<!--      <tr>
         <td><%= f.label :Date_Lab_Health_Entered %>   </td>
         <td><%= date_select :blooddraw, :enteredblooddate, :include_blank => true, :end_year => Time.now.year + 1 %></td>
       </tr>
-  
+ -->
     </table>
 	<%     @vitals = Vital.where("vitals.appointment_id in (?)",@blooddraw.appointment_id)     
 	       @vitals.each do |v|  # could have multiples? %>

@@ -76,11 +76,7 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
       </tr>
       <tr>
         <td><%= f.label :Transfer_MRI %></td>
-        <td><%= select :visit, :transfer_mri, ["no", "yes", "n/a"] %></td>
-      </tr>
-      <tr>
-        <td><%= f.label :Transfer_PET %></td>
-        <td><%= select :visit, :transfer_pet, ["n/a", "no", "yes"] %></td>
+        <td><%= select :vgroup, :transfer_mri, ["no", "yes", "n/a"] %></td>
       </tr>
       <tr>
         <td><%= f.label :radiology_outcome %></td>
@@ -116,8 +112,10 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
     </tr>
  <tr>
         <td><%= f.label :Fast_Completed %></td>
-        <td><%= f.select :completedmrifast, options_for_select(v_yes_no_display, @visit.completedmrifast),{:prompt => 'Select if the mri fast was completed'} %> &nbsp; <%= f.label :Total_Time %>
-               <%= 	text_field_tag( 'visit[mrifasttotaltime]',@visit.mrifasttotaltime, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td>
+        <td><%= f.select :completedmrifast, options_for_select(v_yes_no_display, @visit.completedmrifast),{:prompt => 'Select if the mri fast was completed'} %>
+   </tr>
+<tr><td> <%= f.label :Total_Fast_Time %></td>
+            <td><%= 	text_field_tag( 'visit[mrifasttotaltime]',@visit.mrifasttotaltime, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td>
       </tr>  
 
     </table>
@@ -262,7 +260,7 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
 <td><%= select("mriscantask[lookup_set_id]",v_mriscantask_id, LookupSet.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :include_blank => "Select a set" }) %> </td>
 <td><%= select( "mriscantask[task_order]",v_mriscantask_id, [['',''],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['6','6'],['7','7'],['8','8'],['9','9'],['10','10'],['-1','-1']], { :include_blank => "Select order" } ) %></td>
 					<td><%= select("mriscantask[logfilerecorded]",v_mriscantask_id,[['No',"0"],["Yes","-1"]],{  :include_blank => "Log?" })  %>  </td>
-					<td colspan=4  align="left"> <%=  text_field_tag( "mriscantask[tasknote]["+v_mriscantask_id.to_s+"]","", :size => 60) %> &nbsp;<%= check_box_tag( "mriscantask[destroy]["+mst.id.to_s+"]")   %><%= f.label :_destroy, "Del" %> </td>
+					<td colspan=4  align="left"> <%=  text_field_tag( "mriscantask[tasknote]["+v_mriscantask_id.to_s+"]","", :size => 60) %>  </td>
 				</tr>
 		<% if img_dt_set.series_description.downcase.include? "task"
 						     v_mriperformance_id = v_mriperformance_id -1 %>

@@ -239,6 +239,8 @@ class PetscansController < ApplicationController
 
     respond_to do |format|
       if @petscan.save
+         @vgroup.transfer_pet = params[:vgroup][:transfer_pet]
+          @vgroup.save
         # @appointment.save
         if !params[:vital_id].blank?
           @vital = Vital.find(params[:vital_id])
@@ -321,6 +323,9 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
         @appointment.comment = params[:appointment][:comment]
         @appointment.appointment_date =appointment_date
         @appointment.save
+        @vgroup = Vgroup.find(@appointment.vgroup_id)
+        @vgroup.transfer_pet = params[:vgroup][:transfer_pet]
+        @vgroup.save
         format.html { redirect_to(@petscan, :notice => 'Petscan was successfully updated.') }
         format.xml  { head :ok }
       else

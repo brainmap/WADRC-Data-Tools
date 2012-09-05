@@ -105,7 +105,8 @@ class LumbarpuncturesController < ApplicationController
 
     respond_to do |format|
       if @lumbarpuncture.save
-        
+         @vgroup.completedlumbarpuncture = params[:vgroup][:completedlumbarpuncture]
+          @vgroup.save
         
         # @appointment.save
         if !params[:vital_id].blank?
@@ -200,6 +201,9 @@ class LumbarpuncturesController < ApplicationController
             @appointment.comment = params[:appointment][:comment]
             @appointment.appointment_date =appointment_date
             @appointment.save
+            @vgroup = Vgroup.find(@appointment.vgroup_id)
+            @vgroup.completedlumbarpuncture = params[:vgroup][:completedlumbarpuncture]
+            @vgroup.save
             
            
 

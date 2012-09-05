@@ -163,6 +163,13 @@ WADRCDataTools::Application.routes.draw do
    match '/vgroups/in_scan_procedure/:scan_procedure_id', :controller => 'vgroups', :action => 'index_by_scan_procedure', :as => :in_scan_procedure_vgroup
    match '/vgroups/vgroup_search' , :controller => 'vgroups', :action => 'vgroup_search', :as =>:vgroup_search
    match '/vgroups/change_appointment_vgroup', :controller => 'vgroups', :action => 'change_appointment_vgroup', :as =>:change_appointment_vgroup
+   match '/vgroups/change_transfer_mri_vgroup', :controller => 'vgroups', :action => 'change_transfer_mri_vgroup', :as =>:change_transfer_mri_vgroup
+   match '/vgroups/change_transfer_pet_vgroup', :controller => 'vgroups', :action => 'change_transfer_pet_vgroup', :as =>:change_transfer_pet_vgroup
+   match '/vgroups/change_completedlumbarpuncture_vgroup', :controller => 'vgroups', :action => 'change_completedlumbarpuncture_vgroup', :as =>:change_completedlumbarpuncture_vgroup
+   match '/vgroups/change_completedblooddraw_vgroup', :controller => 'vgroups', :action => 'change_completedblooddraw_vgroup', :as =>:change_completedblooddraw_vgroup
+   match '/vgroups/change_completedneuropsych_vgroup', :controller => 'vgroups', :action => 'change_completedneuropsych_vgroup', :as =>:change_completedneuropsych_vgroup
+   match '/vgroups/change_completedquestionnaire_vgroup', :controller => 'vgroups', :action => 'change_completedquestionnaire_vgroup', :as =>:change_completedquestionnaire_vgroup
+
   
    resources :vgroups
   resources :studies

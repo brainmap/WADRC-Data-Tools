@@ -16,25 +16,14 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
   <div class="three_col_mid">
     <table>
       <tr>
-        <td><%= f.label :Entered_by%></td>
-        <td><%= select(:neuropsych, :enteredneuropsychwho, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Neuro Psych Entered By" }) %></td>
-      </tr>
-      <tr>
-        <td><%= f.label :Neuropsych_Entered %></td>
-        <td><%= f.select :enteredneuropsych, options_for_select(v_yes_no_display, @neuropsych.enteredneuropsych),
-						              {:prompt => 'Select if the neuropsych has been entered'} %>
-	</td>
-      </tr>
-      <tr>
         <td><%= f.label :Neuropsych_Completed %></td>
-        <td><%= f.select :completedneuropsych, options_for_select(v_yes_no_display, @neuropsych.completedneuropsych),
-							              {:prompt => 'Select if the neuropsych has been entered'} %></td>
-      </tr>
-      <tr>
-        <td><%= f.label :Date_Neuropsych_Entered %>   </td>
-        <td><%= date_select :neuropsych, :enteredneuropsychdate, :include_blank => true, :end_year => Time.now.year + 1 %></td>
-      </tr>
-  
+        <td><%= select :vgroup, :completedneuropsych, ["no", "yes", "n/a"] %>
+		</td>
+	    </tr>
+	    <tr><td colspan="2">
+		<small>Select "n/a" if the NP will not be done.</small>
+		</td>
+	  </tr>	
     </table>
   </div>
   <div class="three_col_right">

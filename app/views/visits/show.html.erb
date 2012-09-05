@@ -26,19 +26,15 @@ edit_count = edit_count -1
     <thead>
       <tr>
         <th>Transfer MRI</th>
-        <th>Transfer PET</th>
         <th>Radiology Outcome</th>
         <th>Compile Folder</th>
-        <th>Conference</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <%= show_bool(@visit.transfer_mri) %>
-        <%= show_bool(@visit.transfer_pet) %>
+        <%= show_bool(@vgroup.transfer_mri) %>
         <%= show_rad_review(@visit.radiology_outcome) %>
         <%= show_bool(@visit.compile_folder) %>
-        <%= show_bool(@visit.conference) %>
       </tr>
     </tbody>
   </table>

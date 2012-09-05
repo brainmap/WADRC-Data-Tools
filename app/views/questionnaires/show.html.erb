@@ -29,7 +29,7 @@ edit_count = edit_count -1
   
   <div id="visit_details_note" class="sticky">
     <%= key_val_table("visit_details", {
-      :Neuropsych_appt_date => @appointment.appointment_date,
+      :Questionnaire_appt_date => @appointment.appointment_date,
       :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
       :RMR_Number => @vgroup.rmr,
      :Participant => @participant.nil? ? nil : link_to('view participant', @participant)
@@ -38,10 +38,7 @@ edit_count = edit_count -1
 
   <div id="visit_details_note" class="sticky">
     <%= key_val_table("visit_details", {
-      :Questionnaire_completed => @questionnaire.completedquestionnaire == 1 ? "Yes" : "No" ,
-      :Questionnaire_entered =>  @questionnaire.enteredquestionnaire == 1 ? "Yes" : "No",
-      :Questionnaire_entered_date =>  @questionnaire.enteredquestionnairedate,
-      :Questionnaire_entered_by => @questionnaire.enteredquestionnairewho.nil? ? nil : Employee.find(@questionnaire.enteredquestionnairewho).name
+      :Questionnaire_completed => @vgroup.completedquestionnaire ,
     }) %>
   </div>
 

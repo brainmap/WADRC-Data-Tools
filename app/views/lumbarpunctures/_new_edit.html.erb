@@ -40,6 +40,7 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
   </div>
   <div class="three_col_mid">
   <table>
+<!--	
     <tr>
       <td><%= f.label :Entered_by%></td>
       <td><%= select(:lumbarpuncture, :enteredlumbarpuncturewho, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Lumbar Puncture Entered By" }) %></td>
@@ -50,16 +51,21 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
 						              {:prompt => 'Select if the lumbarpuncture has been entered'} %>
 	</td>
     </tr>
+-->
     <tr>
       <td><%= f.label :lumbarpuncture_Completed %></td>
-      <td><%= f.select :completedlumbarpuncture, options_for_select(v_yes_no_display, @lumbarpuncture.completedlumbarpuncture),
-							              {:prompt => 'Select if the lumbarpuncture has been entered'} %></td>
+      <td><%= select :vgroup, :completedlumbarpuncture, ["no", "yes", "n/a"] %>
+	</td>
     </tr>
+    <tr><td colspan="2">
+	<small>Select "n/a" if the LP will not be done.</small>
+	</td></tr>
+<!--
     <tr>
       <td><%= f.label :Date_lumbarpuncture_Entered %>   </td>
       <td nowrap><%= date_select :lumbarpuncture, :enteredlumbarpuncturedate, :include_blank => true, :end_year => Time.now.year + 1 %></td>
     </tr>
-
+-->
   </table>
  <br><br><br><br>
   <table><tr><td>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>

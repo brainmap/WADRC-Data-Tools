@@ -274,6 +274,8 @@ class QuestionnairesController < ApplicationController
     @q_data_form.save
     respond_to do |format|
       if @questionnaire.save
+        @vgroup.completedquestionnaire = params[:vgroup][:completedquestionnaire]
+        @vgroup.save
 =begin    
         # @appointment.save
         if !params[:vital_id].blank?
@@ -343,6 +345,9 @@ class QuestionnairesController < ApplicationController
         @appointment.comment = params[:appointment][:comment]
         @appointment.appointment_date =appointment_date
         @appointment.save
+        @vgroup = Vgroup.find(@appointment.vgroup_id)
+        @vgroup.completedquestionnaire = params[:vgroup][:completedquestionnaire]
+        @vgroup.save
         format.html { redirect_to(@questionnaire, :notice => 'Questionnaire was successfully updated.') }
         format.xml  { head :ok }
       else

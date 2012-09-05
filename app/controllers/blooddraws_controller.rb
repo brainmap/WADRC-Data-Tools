@@ -275,6 +275,8 @@ class BlooddrawsController < ApplicationController
 
   respond_to do |format|
     if @blooddraw.save
+      @vgroup.completedblooddraw = params[:vgroup][:completedblooddraw]
+      @vgroup.save
       # @appointment.save
       if !params[:vital_id].blank?
         @vital = Vital.find(params[:vital_id])
@@ -342,6 +344,9 @@ class BlooddrawsController < ApplicationController
             @appointment.comment = params[:appointment][:comment]
             @appointment.appointment_date =appointment_date
             @appointment.save
+            @vgroup = Vgroup.find(@appointment.vgroup_id)
+            @vgroup.completedblooddraw = params[:vgroup][:completedblooddraw]
+            @vgroup.save
         format.html { redirect_to(@blooddraw, :notice => 'Lab Health was successfully updated.') }
         format.xml  { head :ok }
       else

@@ -43,6 +43,7 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
   </div>
   <div class="three_col_mid">
     <table>
+	<!--
       <tr>
         <td><%= f.label :Entered_by%></td>
         <td><%= select(:petscan, :enteredpetscanwho, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Scan Entered By" }) %></td>
@@ -52,17 +53,20 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
         <td><%= f.select :enteredpetscan, options_for_select(v_yes_no_display, @petscan.enteredpetscan),
 						              {:prompt => 'Select if the petscan has been entered'} %>
 	</td>
-      </tr>
+      </tr>  -->
       <tr>
         <td><%= f.label :Petscan_Completed %></td>
-        <td><%= f.select :completedpetscan, options_for_select(v_yes_no_display, @petscan.completedpetscan),
-							              {:prompt => 'Select if the petscan has been entered'} %></td>
-      </tr>
-      <tr>
+        <td><%= select :vgroup, :transfer_pet, ["no", "yes", "n/a"] %>
+		</td>
+	    </tr>
+	    <tr><td colspan="2">
+		<small>Select "n/a" if the Petscan will not be done.</small>
+		</td></tr>
+ <!--    <tr>
         <td><%= f.label :Date_Petscan_Entered %>   </td>
         <td><%= date_select :petscan, :enteredpetscandate, :include_blank => true, :end_year => Time.now.year + 1 %></td>
       </tr>
-  
+  -->
     </table>
   <% if !params[:new_appointment_vgroup_id].blank?%>
        <%=  hidden_field_tag( 'new_appointment_vgroup_id',params[:new_appointment_vgroup_id]) %>

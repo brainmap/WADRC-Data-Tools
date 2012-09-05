@@ -259,6 +259,7 @@ class NeuropsychesController < ApplicationController
 
     vgroup_id =params[:new_appointment_vgroup_id]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(vgroup_id)
+    
     @appointment = Appointment.new
     @appointment.vgroup_id = vgroup_id
     @appointment.appointment_type ='neuropsych'
@@ -273,6 +274,8 @@ class NeuropsychesController < ApplicationController
     @q_data_form.save
     respond_to do |format|
       if @neuropsych.save
+        @vgroup.completedneuropsych = params[:vgroup][:completedneuropsych]
+        @vgroup.save
 =begin    
         # @appointment.save
         if !params[:vital_id].blank?
@@ -342,6 +345,9 @@ class NeuropsychesController < ApplicationController
         @appointment.comment = params[:appointment][:comment]
         @appointment.appointment_date =appointment_date
         @appointment.save
+        @vgroup = Vgroup.find(@appointment.vgroup_id)
+        @vgroup.completedneuropsych = params[:vgroup][:completedneuropsych]
+        @vgroup.save
         format.html { redirect_to(@neuropsych, :notice => 'Neuropsych was successfully updated.') }
         format.xml  { head :ok }
       else

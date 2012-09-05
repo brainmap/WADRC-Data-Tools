@@ -17,7 +17,6 @@ class VgroupsController < ApplicationController
     
       # check that a valid vgroup_id
       sql = "select count(*) cnt from vgroups where id ="+params[:target_vgroup_id] 
-puts sql
       connection = ActiveRecord::Base.connection();
       @results = connection.execute(sql)
       cnt =10
@@ -40,6 +39,75 @@ puts sql
            format.xml  { render :xml => @vgroup }
          end
       end
+  end
+  def change_completedquestionnaire_vgroup
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    @vgroup.completedquestionnaire =params[:vgroup][:completedquestionnaire]
+    @vgroup.save
+    respond_to do |format|
+       format.html { redirect_to( '/vgroups/'+params[:id], :notice => ' ' )}
+       format.xml  { render :xml => @vgroup }
+     end  
+  end
+    
+  def change_completedneuropsych_vgroup
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    @vgroup.completedneuropsych =params[:vgroup][:completedneuropsych]
+    @vgroup.save
+    respond_to do |format|
+       format.html { redirect_to( '/vgroups/'+params[:id], :notice => ' ' )}
+       format.xml  { render :xml => @vgroup }
+     end  
+  end  
+  
+  
+  
+  def change_completedblooddraw_vgroup
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    @vgroup.completedblooddraw =params[:vgroup][:completedblooddraw]
+    @vgroup.save
+    respond_to do |format|
+       format.html { redirect_to( '/vgroups/'+params[:id], :notice => ' ' )}
+       format.xml  { render :xml => @vgroup }
+     end  
+  end  
+  
+  
+  def change_completedlumbarpuncture_vgroup
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    @vgroup.completedlumbarpuncture =params[:vgroup][:completedlumbarpuncture]
+    @vgroup.save
+    respond_to do |format|
+       format.html { redirect_to( '/vgroups/'+params[:id], :notice => ' ' )}
+       format.xml  { render :xml => @vgroup }
+     end  
+  end
+  
+  
+  def change_transfer_pet_vgroup
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    @vgroup.transfer_pet =params[:vgroup][:transfer_pet]
+    @vgroup.save
+    respond_to do |format|
+       format.html { redirect_to( '/vgroups/'+params[:id], :notice => ' ' )}
+       format.xml  { render :xml => @vgroup }
+     end  
+  end
+
+  def change_transfer_mri_vgroup
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    @vgroup.transfer_mri =params[:vgroup][:transfer_mri]
+    @vgroup.save
+    respond_to do |format|
+       format.html { redirect_to( '/vgroups/'+params[:id], :notice => ' ' )}
+       format.xml  { render :xml => @vgroup }
+     end  
   end
 
   # GET /vgroups/1
@@ -152,7 +220,13 @@ puts sql
   def update
     scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
-
+    # update attributes not doing updates
+    @vgroup.note =params[:vgroup][:note]
+    @vgroup.participant_id =params[:vgroup][:participant_id]
+    @vgroup.rmr =params[:vgroup][:rmr]
+    @vgroup.vgroup_date = params[:vgroup]["#{'vgroup_date'}(1i)"] +"-"+params[:vgroup]["#{'vgroup_date'}(2i)"].rjust(2,"0")+"-"+params[:vgroup]["#{'vgroup_date'}(3i)"].rjust(2,"0")
+    
+    
     # getting undefined method `to_sym' error -- somethng is nil 
     # just trying to delete 
     params[:vgroup][:enrollments_attributes].each do|cnt, value|
@@ -168,7 +242,6 @@ puts sql
     end
     
     params[:vgroup].delete('enrollments_attributes') 
-   
     
     respond_to do |format|
       if @vgroup.update_attributes(params[:vgroup])
@@ -194,7 +267,7 @@ puts sql
 #              end
 #          end
 #        end
-        format.html { redirect_to(@vgroup, :notice => 'Vgroup was successfully updated.') }
+        format.html { redirect_to(@vgroup) }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }

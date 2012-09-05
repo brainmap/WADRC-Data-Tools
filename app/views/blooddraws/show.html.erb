@@ -38,10 +38,7 @@ edit_count = edit_count -1
 
   <div id="visit_details_note" class="sticky">
     <%= key_val_table("visit_details", {
-      :Lab_Health_completed => @blooddraw.completedblooddraw == 1 ? "Yes" : "No" ,
-      :Lab_Health_entered =>  @blooddraw.enteredblood == 1 ? "Yes" : "No",
-      :Lab_Health_entered_date =>  @blooddraw.enteredblooddate,
-      :Lab_Health_entered_by => @blooddraw.enteredbloodwho.nil? ? nil : Employee.find(@blooddraw.enteredbloodwho).name
+      :Lab_Health_completed => @vgroup.completedblooddraw ,
     }) %>
   </div>
 

@@ -174,6 +174,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     @enumbers = @visit.enrollments
     @mriscantask = Mriscantask.where("visit_id in (?) and (lookup_set_id not in (8) or lookup_set_id is NULL)",@visit.id)
     @appointment = Appointment.find(@visit.appointment_id)
+    @vgroup = Vgroup.find(@appointment.vgroup_id)
 
     respond_to do |format|
       format.html # show.html.erb
@@ -252,6 +253,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
     
     respond_to do |format|
       if @visit.save
+         @vgroup.transfer_mri = params[:vgroup][:transfer_mri]
+          @vgroup.save
         flash[:notice] = 'MRI appt was successfully created.'
         format.html { redirect_to(@visit) }
         format.xml  { render :xml => @visit, :status => :created, :location => @visit }
@@ -371,16 +374,16 @@ class VisitsController <  AuthorizedController #  ApplicationController
             if !params[:mriscantask][:lookup_scantask_id][mri_id].blank?
               @mriscantask.lookup_scantask_id = params[:mriscantask][:lookup_scantask_id][mri_id]
             end
-            @mriscantask.preday = params[:mriscantask][:preday][mri_id]
+            #@mriscantask.preday = params[:mriscantask][:preday][mri_id]
             @mriscantask.task_order = params[:mriscantask][:task_order][mri_id]
-            @mriscantask.moved = params[:mriscantask][:moved][mri_id]
-            @mriscantask.eyecontact = params[:mriscantask][:eyecontact][mri_id]
+            #@mriscantask.moved = params[:mriscantask][:moved][mri_id]
+            #@mriscantask.eyecontact = params[:mriscantask][:eyecontact][mri_id]
             @mriscantask.logfilerecorded = params[:mriscantask][:logfilerecorded][mri_id]
-            @mriscantask.p_file = params[:mriscantask][:p_file][mri_id]
+            #@mriscantask.p_file = params[:mriscantask][:p_file][mri_id]
             @mriscantask.tasknote = params[:mriscantask][:tasknote][mri_id]
-            @mriscantask.reps = params[:mriscantask][:reps][mri_id]
-            @mriscantask.has_concerns = params[:mriscantask][:has_concerns][mri_id]
-            @mriscantask.concerns = params[:mriscantask][:concerns][mri_id]
+            #@mriscantask.reps = params[:mriscantask][:reps][mri_id]
+            #@mriscantask.has_concerns = params[:mriscantask][:has_concerns][mri_id]
+            #@mriscantask.concerns = params[:mriscantask][:concerns][mri_id]
             @mriscantask.image_dataset_id = params[:mriscantask][:image_dataset_id][mri_id]
             @mriscantask.visit_id = @visit.id
             @mriscantask.save
@@ -461,6 +464,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
         @appointment.appointment_date = @visit.date
         @appointment.save
         @vgroup = Vgroup.find(@appointment.vgroup_id)
+        @vgroup.transfer_mri = params[:vgroup][:transfer_mri]
         @vgroup.rmr = @visit.rmr
  #       @vgroup.enrollments = @visit.enrollments
         if !@visit.enrollments.blank?
