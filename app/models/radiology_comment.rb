@@ -135,6 +135,14 @@ class RadiologyComment < ActiveRecord::Base
              sql = "Insert into radiology_comments(visit_id,rmr,scan_number,rad_path,load_date)Values("+v.id.to_s+",'"+rmr+"','"+scan_number.to_s+"','"+rad_path+"','"+v_date+"')"
              connection = ActiveRecord::Base.connection();
               results = connection.execute(sql)
+            elsif (var.include? downcase(rmr) )     &&  (var.include? scan_number.to_s) # some scans have lower case rmr
+                 pars = var.split('</td>')
+                 rad_path =pars[1].to_s.gsub(downcase(rmr),"")
+                 rad_path = rad_path.gsub('" title="urgent','')
+
+                 sql = "Insert into radiology_comments(visit_id,rmr,scan_number,rad_path,load_date)Values("+v.id.to_s+",'"+rmr+"','"+scan_number.to_s+"','"+rad_path+"','"+v_date+"')"
+                 connection = ActiveRecord::Base.connection();
+                  results = connection.execute(sql)
            end  
          end   
       end
