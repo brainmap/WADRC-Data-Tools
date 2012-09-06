@@ -91,7 +91,7 @@ class RadiologyComment < ActiveRecord::Base
       # get each new path - match on rmr and scan_number 
 
       agent = Mechanize.new
-      agent.basic_auth('datapanda@medicine.wisc.edu','(!nGulat3!31')
+      agent.basic_auth('')
       # this gives back a listing page - the RMR sent shouldn't be important
       page = agent.get('https://www.radiology.wisc.edu/protected/neuroResearchScans/scanList.php?origin=searchForm&subjID=RMRaic004440')
 
