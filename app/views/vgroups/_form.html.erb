@@ -24,7 +24,11 @@
   <div class="field">
     <%= f.label :rmr %><br />
     <%= f.text_field :rmr %>
-  </div>
+  </div><br>
+<div class="field">
+  <%= f.label :Compile_Folder %><br />
+  <%= select :vgroup, :compile_folder, ["no", "yes", "n/a"] %>
+</div><br>
   <div class="field">
     <%= f.label :note %><br />
     <%= f.text_area :note %>

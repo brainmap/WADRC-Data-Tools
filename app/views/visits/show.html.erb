@@ -27,14 +27,12 @@ edit_count = edit_count -1
       <tr>
         <th>Transfer MRI</th>
         <th>Radiology Outcome</th>
-        <th>Compile Folder</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <%= show_bool(@vgroup.transfer_mri) %>
         <%= show_rad_review(@visit.radiology_outcome) %>
-        <%= show_bool(@visit.compile_folder) %>
       </tr>
     </tbody>
   </table>

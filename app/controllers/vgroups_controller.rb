@@ -221,6 +221,7 @@ class VgroupsController < ApplicationController
     scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     # update attributes not doing updates
+    @vgroup.compile_folder = params[:vgroup][:compile_folder]
     @vgroup.note =params[:vgroup][:note]
     @vgroup.participant_id =params[:vgroup][:participant_id]
     @vgroup.rmr =params[:vgroup][:rmr]

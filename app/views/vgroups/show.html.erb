@@ -36,8 +36,8 @@ edit_count = edit_count -1
 </td><td>
 	<b>RMR:</b>
   <%= visit.blank? ? (@vgroup.rmr.blank? ? "" : @vgroup.rmr   ) : visit.rmr %>
-</td><td>
-	<b>Participant Reggie_id:</b><br>
+</td><td><b>Compile Folder:</b> <%= @vgroup.compile_folder%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<b>Participant Reggie_id:</b><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<%= @vgroup.participant_id.blank? ? "" : Participant.find(@vgroup.participant_id).reggieid%>
 	
 	

@@ -359,32 +359,17 @@ class VisitsController <  AuthorizedController #  ApplicationController
       if mri_id_int < 0 
         if !params[:mriscantask][:lookup_set_id][mri_id].blank? or 
            !params[:mriscantask][:lookup_scantask_id][mri_id].blank? or 
-              #!params[:mriscantask][:preday][mri_id].blank? or 
-                 #!params[:mriscantask][:task_order][mri_id].blank? or 
-                    #!params[:mriscantask][:moved][mri_id].blank? or 
-                       #!params[:mriscantask][:eyecontact][mri_id].blank? or 
                           !params[:mriscantask][:logfilerecorded][mri_id].blank? or 
-                              #!params[:mriscantask][:p_file][mri_id].blank? or 
                                   !params[:mriscantask][:tasknote][mri_id].blank? or 
-                                      #!params[:mriscantask][:reps][mri_id].blank? or 
-                                          #!params[:mriscantask][:has_concerns][mri_id].blank? or 
-                                              #!params[:mriscantask][:concerns][mri_id].blank? or 
                                                   !params[:mriscantask][:image_dataset_id][mri_id].blank? 
             @mriscantask = Mriscantask.new
             @mriscantask.lookup_set_id = params[:mriscantask][:lookup_set_id][mri_id]
             if !params[:mriscantask][:lookup_scantask_id][mri_id].blank?
               @mriscantask.lookup_scantask_id = params[:mriscantask][:lookup_scantask_id][mri_id]
             end
-            #@mriscantask.preday = params[:mriscantask][:preday][mri_id]
             @mriscantask.task_order = params[:mriscantask][:task_order][mri_id]
-            #@mriscantask.moved = params[:mriscantask][:moved][mri_id]
-            #@mriscantask.eyecontact = params[:mriscantask][:eyecontact][mri_id]
             @mriscantask.logfilerecorded = params[:mriscantask][:logfilerecorded][mri_id]
-            #@mriscantask.p_file = params[:mriscantask][:p_file][mri_id]
             @mriscantask.tasknote = params[:mriscantask][:tasknote][mri_id]
-            #@mriscantask.reps = params[:mriscantask][:reps][mri_id]
-            #@mriscantask.has_concerns = params[:mriscantask][:has_concerns][mri_id]
-            #@mriscantask.concerns = params[:mriscantask][:concerns][mri_id]
             @mriscantask.image_dataset_id = params[:mriscantask][:image_dataset_id][mri_id]
             @mriscantask.visit_id = @visit.id
             @mriscantask.save
@@ -417,16 +402,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
         if !params[:mriscantask][:lookup_scantask_id][mri_id].blank?
              @mriscantask.lookup_scantask_id = params[:mriscantask][:lookup_scantask_id][mri_id]
         end
-        #@mriscantask.preday = params[:mriscantask][:preday][mri_id] 
-        #@mriscantask.task_order = params[:mriscantask][:task_order][mri_id]
-        #@mriscantask.moved = params[:mriscantask][:moved][mri_id]
-        #@mriscantask.eyecontact = params[:mriscantask][:eyecontact][mri_id]
         @mriscantask.logfilerecorded = params[:mriscantask][:logfilerecorded][mri_id]
-        #@mriscantask.p_file = params[:mriscantask][:p_file][mri_id]
         @mriscantask.tasknote = params[:mriscantask][:tasknote][mri_id]
-        #@mriscantask.reps = params[:mriscantask][:reps][mri_id]
-        #@mriscantask.has_concerns = params[:mriscantask][:has_concerns][mri_id]
-        #@mriscantask.concerns = params[:mriscantask][:concerns][mri_id]
         @mriscantask.image_dataset_id = params[:mriscantask][:image_dataset_id][mri_id]
         @mriscantask.save
         # get the acc and hit
@@ -468,35 +445,31 @@ class VisitsController <  AuthorizedController #  ApplicationController
         @vgroup.transfer_mri = params[:vgroup][:transfer_mri]
         @vgroup.rmr = @visit.rmr
  #       @vgroup.enrollments = @visit.enrollments
-        if !@visit.enrollments.blank?
-          sql = "Delete from enrollment_vgroup_memberships where vgroup_id ="+@vgroup.id.to_s
+        sql = "Delete from enrollment_vgroup_memberships where vgroup_id ="+@vgroup.id.to_s
+        connection = ActiveRecord::Base.connection();        
+        results_del = connection.execute(sql)
+        sql = "select distinct enrollment_id from enrollment_visit_memberships where visit_id in (select visits.id from visits, appointments where appointments.id = visits.appointment_id and appointments.vgroup_id ="+@vgroup.id.to_s+")"
+        connection = ActiveRecord::Base.connection();        
+        results = connection.execute(sql)
+        results.each do |e|
+          sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+e[0].to_s+")"
           connection = ActiveRecord::Base.connection();        
           results = connection.execute(sql)
-          @visit.enrollments.each do |e|
-            sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+e.id.to_s+")"
-            connection = ActiveRecord::Base.connection();        
-            results = connection.execute(sql)
-          end 
-          
-        else
-          sql = "Delete from enrollment_vgroup_memberships where vgroup_id ="+@vgroup.id.to_s
+        end 
+        #### REPEAT FOR SP  
+
+        sql = "Delete from scan_procedures_vgroups where vgroup_id ="+@vgroup.id.to_s
+        connection = ActiveRecord::Base.connection();        
+        results = connection.execute(sql)
+        sql = "select distinct scan_procedure_id from scan_procedures_visits where visit_id in (select visits.id from visits, appointments where appointments.id = visits.appointment_id and appointments.vgroup_id ="+@vgroup.id.to_s+")"
+        connection = ActiveRecord::Base.connection();        
+        results = connection.execute(sql)
+        results.each do |sp|           
+          sql = "Insert into scan_procedures_vgroups(vgroup_id,scan_procedure_id) values("+@vgroup.id.to_s+","+sp[0].to_s+")"
           connection = ActiveRecord::Base.connection();        
-          results = connection.execute(sql)
-        end
-         if !@visit.scan_procedures.blank?
-           sql = "Delete from scan_procedures_vgroups where vgroup_id ="+@vgroup.id.to_s
-           connection = ActiveRecord::Base.connection();        
-           results = connection.execute(sql)
-           @visit.scan_procedures.each do |sp|  
-             sql = "Insert into scan_procedures_vgroups(vgroup_id,scan_procedure_id) values("+@vgroup.id.to_s+","+sp.id.to_s+")"
-             connection = ActiveRecord::Base.connection();        
-             results = connection.execute(sql)        
-           end   
-         else
-           sql = "Delete from scan_procedures_vgroups where vgroup_id ="+@vgroup.id.to_s
-           connection = ActiveRecord::Base.connection();        
-           results = connection.execute(sql)
-         end
+          results = connection.execute(sql)        
+        end   
+
         @vgroup.save
    #     4
         flash[:notice] = 'visit was successfully updated.'
@@ -794,7 +767,7 @@ radiology_comments_options = {
 #      :image_datasets => { :only => [:series_description] }
 # }
 
-limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:dicom_dvd,:compile_folder,:id,
+limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:dicom_dvd,:id,
                   :created_at, :updated_at, :research_diagnosis, :consent_form_type, :created_by_id, :dicom_study_uid,:compiled_at]
 
 
