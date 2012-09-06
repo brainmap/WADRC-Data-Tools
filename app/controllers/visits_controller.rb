@@ -45,7 +45,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     
         # always change # if params[:change_image_dataset_path] == "1"
         sql = "update image_datasets set path = replace(path,'"+v_path_original+"','"+v_path_new+"')
-                where path like '"+v_path_original+"%'"
+                where path like '"+v_path_original+"%' and image_datasets.visit_id ="+@visits.id.to_s
         connection = ActiveRecord::Base.connection();
         puts sql
         @results = connection.execute(sql)
