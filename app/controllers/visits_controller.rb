@@ -30,7 +30,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
       format.xml  { render :xml => @visits }
     end
 
-  def change_direcory_path
+  def change_directory_path
        # normal visits way of getting sp array didn't work -- using vgroups version to get sp array
        scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array] 
       @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
@@ -43,12 +43,13 @@ class VisitsController <  AuthorizedController #  ApplicationController
         @visit.path = v_path_new
         @visit.save
     
-        if params[:change_image_dataset_path] == "1"
-           sql = "update image_datasets set path = replace(path,'"+v_path_original+"','"+v_path_new+"')
+        # always change # if params[:change_image_dataset_path] == "1"
+        sql = "update image_datasets set path = replace(path,'"+v_path_original+"','"+v_path_new+"')
                 where path like '"+v_path_original+"%'"
-           connection = ActiveRecord::Base.connection();
-           @results = connection.execute(sql)
-         end
+        connection = ActiveRecord::Base.connection();
+        puts sql
+        @results = connection.execute(sql)
+         
           
         end
           if cnt > 0

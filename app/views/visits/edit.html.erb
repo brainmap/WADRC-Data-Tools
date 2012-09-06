@@ -18,19 +18,19 @@ edit_count = edit_count -1
 
 <br><br><B>Edit the Directory Path</b> <br>
 
-	<% form_tag( "/visits/change_direcory_path",:url => { :controller=>"visits",:action => "change_direcory_path" } ,  :html => { :id => params[:id] }) do |f| %>
+	<% form_tag( "/visits/change_directory_path",:url => { :controller=>"visits",:action => "change_direcory_path" } ,  :html => { :id => params[:id] }) do |f| %>
 <%= hidden_field_tag 'id', @visit.id %>
   <div class="field">
 	
     <%= label_tag 'Directory Path' %><br />
 <%= text_field_tag 'path', @visit.path,:size =>100 %><br>
 The base path for the Data Panda server is <%=@visit.get_base_path() %>
-  </div>
+  </div> <!--
 <br><div class="field">
 	 <%= label_tag 'Also change Image Dataset Path? ' %>
 	    <%= check_box_tag 'change_image_dataset_path' %>
 
-	  </div><br>
+	  </div><br> -->
 	  <div class="actions">
 	    <%= submit_tag("Change directory path") %>
 	  </div>

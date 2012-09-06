@@ -133,7 +133,7 @@ WADRCDataTools::Application.routes.draw do
   match '/visits/in_scan_procedure/:scan_procedure_id', :controller => 'visits', :action => 'index_by_scan_procedure', :as => :in_scan_procedure
   match '/visits/visit_search' , :controller => 'visits', :action => 'visit_search', :as =>:visit_search
   match '/visit_search' , :controller => 'visits', :action => 'visit_search', :as =>:visit_search
-  match '/visits/change_direcory_path', :controller => 'visits', :action => 'change_direcory_path', :as =>:change_direcory_path
+  match '/visits/change_directory_path', :controller => 'visits', :action => 'change_directory_path', :as =>:change_directory_path
   
     match '/petscan_search' , :controller => 'petscans', :action => 'petscan_search', :as =>:petscan_search
     match '/lumbarpuncture_search' , :controller => 'lumbarpunctures', :action => 'lumbarpuncture_search', :as =>:lumbarpuncture_search
