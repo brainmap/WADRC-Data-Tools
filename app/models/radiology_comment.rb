@@ -151,7 +151,7 @@ class RadiologyComment < ActiveRecord::Base
 
   def load_comments(v_months_back)
        agent = Mechanize.new
-       agent.basic_auth('datapanda@medicine.wisc.edu','(!nGulat3!31')
+       agent.basic_auth()
        # Comment_html_1 only 500 long
         past_time = Time.new - (v_months_back.to_i).month
           v_past_date = past_time.strftime("%Y-%m-%d")
