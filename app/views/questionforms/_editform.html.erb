@@ -46,10 +46,25 @@
      value_link_array = [] %>
 <%    results.each do |vl|  
 	  value_link_array << vl.try(:to_s)
-     if vl.try(:to_s) == "participant"   %> 
+     if vl.try(:to_s) == "participant"    
+        if !params[:participant_id].blank?  %>
              <%= hidden_field_tag("value_1[-1]","") %> <%= hidden_field_tag("value_link[participant_id]",params[:participant_id]) %>
+        <% 
+        else 
+	         sql_participant = "select participant_id from enrollments where enrollments.id in ( select enrollment_id from enrollment_vgroup_memberships, appointments 
+		                          where appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id and appointments.id ="+@appointment.id.to_s+")"
+		     results_participant = connection.execute(sql_participant)
+		     v_participant_id = 0
+		     results_participant.each do |p|
+		          v_participant_id = p[0]
+		     end
+		     @participant = Participant.find(v_participant_id)
+		%>
+	        <%= hidden_field_tag("value_1[-1]","") %><%= hidden_field_tag("value_link[participant_id]",@participant.id.to_s) %>
+
+       <% end %>
    <% elsif vl.try(:to_s) == "visit"   %> <%= hidden_field_tag("value_link[visit_id]",params[:visit_id]) %>
-   <% elsif vl.try(:to_s) == "appointment"   %><%= hidden_field_tag("value_link[appointment_id]",@appointment.id.to_s) %>
+   <% elsif vl.try(:to_s) == "appointment"   %><%= hidden_field_tag("value_link[appointment_id]",@appointment.id.to_s) %> 
    <% elsif vl.try("to_s") == "enrollment"   %> <%= hidden_field_tag("value_link[enrollment_id]",params[:enrollment_id]) %>			
 	<% elsif  vl.try("to_s") == "scan_procedure"   %> <%= hidden_field_tag("value_link[scan_procedure_id]",params[:escan_procedure_id]) %>
 <%	  end %>
