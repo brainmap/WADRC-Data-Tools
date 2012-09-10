@@ -21,6 +21,7 @@ edit_count = edit_count -1
       <th>Gender</th>
       <th>WrapNum</th>
       <th>ReggieID</th>
+      <th>AdrcNum</th>
       <th>Years of Education</th>
       <th>Notes</th>
       <!-- <th>APOE status</th>
@@ -39,6 +40,7 @@ edit_count = edit_count -1
       <td><%=h @participant.gender_prompt %></td>
       <td><%=h @participant.wrapnum %></td>
       <td><%=h @participant.reggieid %></td>
+      <td><%=h @participant.adrcnum %></td>
       <td><%=h @participant.ed_years %></td>
       <td>
         <%= popup_note('peek', "<p>#{@participant.note}</p>") unless @participant.note.nil? %>

@@ -167,7 +167,7 @@ class QuestionformsController < ApplicationController
             if @question.base_table_1 == "appointments" or @question.base_table_1 == "participants" 
               sql ="update  "+@question.base_table_1+"
                     set "+@question.base_table_1+"."+@question.base_column_1+" = '"+@q_data.value_1+"'
-                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s              
+                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s                                            
             else
             sql ="update  "+@question.base_table_1+"
                   set "+@question.base_table_1+"."+@question.base_column_1+" = '"+@q_data.value_1+"'
