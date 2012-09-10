@@ -78,12 +78,12 @@
      <td><%= #@a.blank? ?  "None" :	@a.collect{|sp| link_to("appt",appointment_path(sp))}.join(", ").html_safe 
              # vgroup.appointments.collect { |sp| link_to("appt",appointment_path(sp)) }.join(", ").html_safe  # second way of making coolection
 	%><%= link_to 'Appts', vgroup %></td>
-    <td><%= @visits.blank? ?  "None" :	@visits.collect{|sp| link_to("mri scan",visit_path(sp))}.join(", ").html_safe %></td>
+    <td><%= @visits.blank? ?  "None" :	@visits.collect{|sp| link_to("mri "+sp.date.strftime('%m-%y'),visit_path(sp))}.join(", ").html_safe %></td>
     <td><!-- status --></td>
 <% if edit_count > 0 %>
     <td><%= link_to  'add-MRI', new_visit_path+"/"+vgroup.id.to_s %></td>
 <% end %>
-    <td><%= @petscans.blank? ?  "None" :	@petscans.collect{|sp| link_to("pet scan",petscan_path(sp))}.join(", ").html_safe %></td>
+    <td><%= @petscans.blank? ?  "None" :	@petscans.collect{|sp| link_to("pet",petscan_path(sp))}.join(", ").html_safe %></td>
     <td><%= @petscans.blank? ?  "-" :	@petscans.collect{|sp| sp.completedpetscan==1 ? "C": (sp.enteredpetscan==1 ? "+": "-")}.join(", ").html_safe %></td>
 <% if edit_count > 0 %>
     <td><%= link_to  'add-Pet', new_petscan_path+"/"+vgroup.id.to_s %></td>
