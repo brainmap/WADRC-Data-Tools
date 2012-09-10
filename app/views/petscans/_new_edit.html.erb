@@ -46,7 +46,9 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
 	<!--
       <tr>
         <td><%= f.label :Entered_by%></td>
-        <td><%= select(:petscan, :enteredpetscanwho, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Scan Entered By" }) %></td>
+        <td><%= @petscan.enteredpetscanwho %> <% if !@petscan.enteredpetscanwho.blank?
+	                     @employee = Employee.find(@petscan.enteredpetscanwho) %> <%= @employee.last_name %> <%= @employee.first_name %> 
+	                                        <% end %></td>
       </tr>
       <tr>
         <td><%= f.label :Petscan_Entered %></td>
@@ -64,7 +66,10 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
 		</td></tr>
  <!--    <tr>
         <td><%= f.label :Date_Petscan_Entered %>   </td>
-        <td><%= date_select :petscan, :enteredpetscandate, :include_blank => true, :end_year => Time.now.year + 1 %></td>
+        <td>
+		<% if !@petscan.enteredpetscandate.blank? %>
+	                        <%= @petscan.enteredpetscandate.to_s %>
+		                          <% end  %></td>
       </tr>
   -->
     </table>

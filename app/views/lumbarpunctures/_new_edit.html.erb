@@ -43,7 +43,9 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
 <!--	
     <tr>
       <td><%= f.label :Entered_by%></td>
-      <td><%= select(:lumbarpuncture, :enteredlumbarpuncturewho, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Lumbar Puncture Entered By" }) %></td>
+      <td><%= @lumbarpuncture.enteredlumbarpuncturewho %> <% if !@lumbarpuncture.enteredlumbarpuncturewho.blank?
+	                     @employee = Employee.find(@lumbarpuncture.enteredlumbarpuncturewho) %> <%= @employee.last_name %> <%= @employee.first_name %> 
+	                                        <% end %></td>
     </tr>
     <tr>
       <td><%= f.label :lumbarpuncture_Entered %></td>
@@ -63,7 +65,9 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
 <!--
     <tr>
       <td><%= f.label :Date_lumbarpuncture_Entered %>   </td>
-      <td nowrap><%= date_select :lumbarpuncture, :enteredlumbarpuncturedate, :include_blank => true, :end_year => Time.now.year + 1 %></td>
+      <td nowrap><% if !@lumbarpuncture.enteredlumbarpuncturedate.blank? %>
+                        <%= @lumbarpuncture.enteredlumbarpuncturedate.to_s %>
+	                          <% end  %></td>
     </tr>
 -->
   </table>

@@ -17,7 +17,10 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
     <table>
 <!--      <tr>
         <td><%= f.label :Entered_by%></td>
-        <td><%= select(:blooddraw, :enteredbloodwho, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Lab Health Entered By" }) %></td>
+        <td>
+		<%= @blooddraw.enteredbloodwho %> <% if !@blooddraw.enteredbloodwho.blank?
+	                     @employee = Employee.find(@blooddraw.enteredbloodwho) %> <%= @employee.last_name %> <%= @employee.first_name %> 
+	                                        <% end %></td>
       </tr>
       <tr>
         <td><%= f.label :Lab_Health_Entered %></td>
@@ -35,7 +38,10 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
 		</td></tr>
 <!--      <tr>
         <td><%= f.label :Date_Lab_Health_Entered %>   </td>
-        <td><%= date_select :blooddraw, :enteredblooddate, :include_blank => true, :end_year => Time.now.year + 1 %></td>
+        <td>
+		<% if !@blooddraw.enteredblooddate.blank? %>
+	                        <%= @blooddraw.enteredblooddate.to_s %>
+		                          <% end  %></td>
       </tr>
  -->
     </table>
