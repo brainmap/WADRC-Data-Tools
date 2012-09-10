@@ -183,6 +183,13 @@ class VgroupsController < ApplicationController
   # POST /vgroups.xml
   def create
     @vgroup = Vgroup.new(params[:vgroup]) 
+    # not sure why vgroup params not getting saved -- same in update  -- something with the mess of enrollments?
+    @vgroup.compile_folder = params[:vgroup][:compile_folder]
+    @vgroup.note =params[:vgroup][:note]
+    @vgroup.participant_id =params[:vgroup][:participant_id]
+    @vgroup.rmr =params[:vgroup][:rmr]
+    @vgroup.vgroup_date = params[:vgroup]["#{'vgroup_date'}(1i)"] +"-"+params[:vgroup]["#{'vgroup_date'}(2i)"].rjust(2,"0")+"-"+params[:vgroup]["#{'vgroup_date'}(3i)"].rjust(2,"0")
+    
     respond_to do |format|
       if @vgroup.save
         if !(@vgroup.participant_id).blank?   # how will this interact with load visit? participant_id is probably blank until the enumber update in mri
@@ -204,7 +211,14 @@ class VgroupsController < ApplicationController
                 results = connection.execute(sql)
               end
           end
-
+        end
+       
+        if !params[:vgroup][:scan_procedure_ids].blank?
+           connection = ActiveRecord::Base.connection();
+          params[:vgroup][:scan_procedure_ids].each do |sp|           
+            sql = "Insert into scan_procedures_vgroups(vgroup_id,scan_procedure_id) values("+@vgroup.id.to_s+","+sp+")"        
+            results = connection.execute(sql)        
+          end
         end
         format.html { redirect_to(@vgroup, :notice => 'Vgroup was successfully created.') }
         format.xml  { render :xml => @vgroup, :status => :created, :location => @vgroup }
