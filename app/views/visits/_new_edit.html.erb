@@ -1,5 +1,6 @@
 <%
 v_yes_no_display = [["Yes","1"], ["No","0"]]
+v_0_30_min_display = [["0","0"], ["30","30"]]
 %>
 <% javascript_tag 'defaults' %>
 <div id="new_edit_form">
@@ -115,7 +116,12 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
         <td><%= f.select :completedmrifast, options_for_select(v_yes_no_display, @visit.completedmrifast),{:prompt => 'Select if the mri fast was completed'} %>
    </tr>
 <tr><td> <%= f.label :Total_Fast_Time %></td>
-            <td><%= 	text_field_tag( 'visit[mrifasttotaltime]',@visit.mrifasttotaltime, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td>
+		<td nowrap> 
+      	<%= f.select :mrifasttotaltime, options_for_select(0..48, @visit.mrifasttotaltime),
+																              {:prompt => 'Select hrs'} %> <small>hrs </small>
+											<br> 
+											<%= f.select :mrifasttotaltime_min, options_for_select(v_0_30_min_display, @visit.mrifasttotaltime_min),
+																              {:prompt => 'Select mins'} %> <small> mins</small></td>
       </tr>  
 
     </table>

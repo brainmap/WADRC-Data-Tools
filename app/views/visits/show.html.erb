@@ -55,7 +55,8 @@ edit_count = edit_count -1
 	:Scan_Start_Time =>@visit.mristarttime.nil? ? nil : @visit.mristarttime.hour.to_s.rjust(2,'0')+":"+@visit.mristarttime.min.to_s.rjust(2,'0'),
 	:Scan_End_Time =>@visit.mriendtime.nil? ? nil : @visit.mriendtime.hour.to_s.rjust(2,'0')+":"+@visit.mriendtime.min.to_s.rjust(2,'0'),
 	:MRI_Fast_Completed => @visit.completedmrifast == 1 ? "Yes" : "No",
-	:MRI_Fast_Total_Time => @visit.mrifasttotaltime ,
+	:MRI_Fast_Total_Time => @visit.mrifasttotaltime.nil?  ? @visit.mrifasttotaltime_min.nil? ? nil : @visit.mrifasttotaltime.to_s+" hrs : "+@visit.mrifasttotaltime_min.to_s+" mins" :  @visit.mrifasttotaltime.to_s+" hrs : "+@visit.mrifasttotaltime_min.to_s+" mins" ,
+	
     })  #:Archive_Dvd =>@visit.archivedvd,
     %>
   </div>
