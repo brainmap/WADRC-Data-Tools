@@ -259,7 +259,16 @@ class VgroupsController < ApplicationController
     params[:vgroup].delete('enrollments_attributes') 
     
     respond_to do |format|
-      if @vgroup.update_attributes(params[:vgroup])
+      if @vgroup.save #update_attributes(params[:vgroup])
+        connection = ActiveRecord::Base.connection();
+        sql = "delete from scan_procedures_vgroups where vgroup_id ="+@vgroup.id.to_s
+        results = connection.execute(sql)
+        if !params[:vgroup][:scan_procedure_ids].blank?
+          params[:vgroup][:scan_procedure_ids].each do |sp|           
+            sql = "Insert into scan_procedures_vgroups(vgroup_id,scan_procedure_id) values("+@vgroup.id.to_s+","+sp+")"        
+            results = connection.execute(sql)        
+          end
+        end
 #        connection = ActiveRecord::Base.connection(); 
 #        sql = "delete from enrollment_vgroup_memberships where vgroup_id = "+@vgroup.id.to_s
 #        results = connection.execute(sql)
