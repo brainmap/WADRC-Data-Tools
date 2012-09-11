@@ -79,32 +79,32 @@
              # vgroup.appointments.collect { |sp| link_to("appt",appointment_path(sp)) }.join(", ").html_safe  # second way of making coolection
 	%><%= link_to 'Appts', vgroup %></td>
     <td><%= @visits.blank? ?  "None" :	@visits.collect{|sp| link_to("mri "+sp.date.strftime('%m-%y'),visit_path(sp))}.join(", ").html_safe %></td>
-    <td><!-- status --></td>
+    <td><%= vgroup.transfer_mri %></td>
 <% if edit_count > 0 %>
     <td><%= link_to  'add-MRI', new_visit_path+"/"+vgroup.id.to_s %></td>
 <% end %>
     <td><%= @petscans.blank? ?  "None" :	@petscans.collect{|sp| link_to("pet",petscan_path(sp))}.join(", ").html_safe %></td>
-    <td><%= @petscans.blank? ?  "-" :	@petscans.collect{|sp| sp.completedpetscan==1 ? "C": (sp.enteredpetscan==1 ? "+": "-")}.join(", ").html_safe %></td>
+    <td><%= vgroup.transfer_pet %></td>
 <% if edit_count > 0 %>
     <td><%= link_to  'add-Pet', new_petscan_path+"/"+vgroup.id.to_s %></td>
 <% end %>
 	<td><%= @lumbarpunctures.blank? ?  "None" :	@lumbarpunctures.collect{|sp| link_to("lp",lumbarpuncture_path(sp))}.join(", ").html_safe %></td>
-	<td><%= @lumbarpunctures.blank? ?  "-" :	@lumbarpunctures.collect{|sp| sp.completedlumbarpuncture==1 ? "C": (sp.enteredlumbarpuncture==1 ? "+": "-")}.join(", ").html_safe %></td>
+	<td><%= vgroup.completedlumbarpuncture %></td>
 <% if edit_count > 0 %>
     <td><%= link_to  'add-LP', new_lumbarpuncture_path+"/"+vgroup.id.to_s %></td>
 <% end %>
 	<td><%= @blooddraws.blank? ?  "None" :	@blooddraws.collect{|sp| link_to("lab",blooddraw_path(sp))}.join(", ").html_safe %></td>
-	<td><%= @blooddraws.blank? ?  "-" :	@blooddraws.collect{|sp| sp.completedblooddraw==1 ? "C": (sp.enteredblood==1 ? "+": "-")}.join(", ").html_safe %></td>
+	<td><%= vgroup.completedblooddraw %></td>
 <% if edit_count > 0 %>
     <td><%= link_to  'add-Lab', new_blooddraw_path+"/"+vgroup.id.to_s %></td>
 <% end %>
 	<td><%= @neuropsyches.blank? ?  "None" :	@neuropsyches.collect{|sp| link_to("np",neuropsych_path(sp))}.join(", ").html_safe %></td>
-	<td><%= @neuropsyches.blank? ?  "-" :	@neuropsyches.collect{|sp| sp.completedneuropsych==1 ? "C": (sp.enteredneuropsych==1 ? "+": "-")}.join(", ").html_safe %></td>
+	<td><%= vgroup.completedneuropsych %></td>
 <% if edit_count > 0 %>
     <td><%= link_to  'add-NP', new_neuropsych_path+"/"+vgroup.id.to_s %></td>
 <% end %>   
 	<td><%= @questionnaires.blank? ?  "None" :	@questionnaires.collect{|sp| link_to("q",questionnaire_path(sp))}.join(", ").html_safe %></td>
-	<td><%= @questionnaires.blank? ?  "-" :	@questionnaires.collect{|sp| sp.completedquestionnaire==1 ? "C": (sp.enteredquestionnaire==1 ? "+": "-")}.join(", ").html_safe %></td>
+	<td><%= vgroup.completedquestionnaire %></td>
 <% if edit_count > 0 %>
     <td><%= link_to  'add-Q', new_questionnaire_path+"/"+vgroup.id.to_s %></td>
 <% end %> 

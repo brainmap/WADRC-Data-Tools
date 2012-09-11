@@ -137,10 +137,8 @@ edit_count = edit_count -1
       <th><span><%= sort_link @search, :rmr %></span></th>
       <th><span class="vert"><%= sort_link @search, :path, "Directory Path" %></span></th>
       <th><span class="vert"><%= sort_link @search, :transfer_mri %></span></th>
-      <th><span class="vert"><%= sort_link @search, :transfer_pet %></span></th>
       <th><span class="vert"><%= sort_link @search, :radiology_outcome %></span></th>
       <th><span class="vert"><%= sort_link @search, :compile_folder %></span></th>
-      <th><span class="vert"><%= sort_link @search, :conference %></span></th>
       <th></th>
     </tr>
   </thead>
@@ -164,7 +162,6 @@ end
      <th colspan ="6" ><span>Radiology Comments</span></th>
 <% else %>
       <th><span class="vert">Transfer mri</span></th>
-      <th><span class="vert">Transfer Pet</span></th>
       <th><span class="vert">Radiology Outcome</span></th>
       <th><span class="vert">Compile Folder</span></th>
       <th><span class="vert">Conference</span></th>
@@ -181,7 +178,9 @@ end
   </td></tr></tfoot>
   
   <tbody>
-    <% @visits.each do |visit| %>
+    <% @visits.each do |visit|
+	     appointment = Appointment.find(visit.appointment_id) 
+	     vgroup = Vgroup.find(appointment.vgroup_id)%>
       <tr>
         <td><%= link_to visit.date.to_s(:datetime_military), visit %></td>
         <td><%= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
@@ -204,11 +203,9 @@ end
 	
 	
 <% else %>
-        <%= show_bool(visit.transfer_mri) %>
-        <%= show_bool(visit.transfer_pet) %>
+        <%= show_bool(vgroup.transfer_mri) %>
         <%= show_rad_review(visit.radiology_outcome) %>
-        <%= show_bool(visit.compile_folder) %>
-        <%= show_bool(visit.conference) %>
+        <%= show_bool(vgroup.compile_folder) %>
 <% end %>
         <td style="width: 6em;">
           <%= link_to 'show', visit %>
