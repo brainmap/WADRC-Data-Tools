@@ -152,3 +152,82 @@ edit_count =   edit_count -1
   </tbody>
 
 </table>
+
+
+<!--
+<% 
+=begin
+%>
+<br><br><br><br><br><br><br><br><br><br>
+<%
+@column_headers = ['Protocol','Enumber','RMR','Appt Date','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','LP status','LP Note', 'Appt Note'] # need to look up values
+# Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+@column_number =   @column_headers.size
+@fields =["CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'Yes' ELSE 'No' end ","CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'Yes' ELSE 'No' end" ,"lumbarpunctures.lpfollownote",
+  "concat(employees.first_name,' ',employees.last_name)",
+  "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'Yes' ELSE 'No' end",
+  "lumbarpunctures.lpfasttotaltime","lumbarpunctures.lpfasttotaltime_min","vgroups.completedlumbarpuncture","lumbarpunctures.lumbarpuncture_note","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
+@tables =['lumbarpunctures'] # trigger joins --- vgroups and appointments by default
+@left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
+@conditions =["scan_procedures.codename='johnson.pipr.visit1'"] # need look up for like, lt, gt, between  
+@order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
+%>
+<%= render :partial => 'data_searches/index_partial', :locals => { } %>
+
+<table class="tabular">
+  
+  <caption><%= pluralize(@results.size, 'Lumbarpuncture appt') %><%#= paginated ? pagination_info(@lumbarpunctures) : pluralize(@lumbarpunctures.length, 'Lumbarpuncture appt') %></caption>
+  <thead>
+    <tr>
+		<% @column_headers.each do |column_header|%>
+	      <th><%= column_header%></th>
+	  <% end %>
+
+      <th></th>
+<% if edit_count > 0 %>
+       <th></th>
+<% end %>
+      <th></th>
+    </tr>
+  </thead>
+
+
+  <tfoot><tr><td colspan=(column_header.size+3)>
+		 <%# NEED TO HAVE PAGINATION -- array vs hash  paginate @results %> 
+		<%# if paginated %>
+    	<%#= @lumbarpuncture_search.nil? ? will_paginate(@lumbarpunctures) : will_paginate(@lumbarpunctures, :params => { :lumbarpuncture_search => @lumbarpuncture_search }) %>
+		<%# end %>
+  </td></tr></tfoot>
+
+  <tbody>
+    <% @results.each do |result| %>
+       <%   
+             lumbarpuncture = Lumbarpuncture.find(result[@column_headers.size-1])
+             appointment = Appointment.find(lumbarpuncture.appointment_id) 
+             vgroup = Vgroup.find(appointment.vgroup_id)
+            result.delete_at(@column_headers.size-1)
+        %>
+	  <tr>
+	   <% for i in 0..@column_number-1 %>
+	    <td><%= result[i] %></td>
+	   <% end %>
+        <td style="width: 6em;" nowrap>
+          <%= link_to 'show', lumbarpuncture %>
+		  <% if edit_count > 0 %>
+		          <%= link_to 'edit', edit_lumbarpuncture_path(lumbarpuncture) %>
+		  <% end %>
+        </td>
+       <td>
+<% if edit_count > 0 %>
+	<%= link_to  'New', new_lumbarpuncture_path+"/"+vgroup.id.to_s %>
+<% end %></td>
+
+      </tr>
+    <% end %>
+  </tbody>
+
+</table>
+<%
+=end
+%>
+-->
