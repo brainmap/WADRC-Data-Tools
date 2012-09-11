@@ -3,7 +3,7 @@ class Vgroup < ActiveRecord::Base
   acts_as_reportable
   default_scope :order => 'vgroup_date DESC' 
   paginates_per 50
-  attr_accessible  :transfer_mri
+  # attr_accessible  :transfer_mri  --- if this is added, add all the fields which should be updated from vgroup edit/create form 
   attr_accessor :move_appointemnt_id, :target_vgroup_id
 
   has_many :enrollment_vgroup_memberships,:dependent => :destroy

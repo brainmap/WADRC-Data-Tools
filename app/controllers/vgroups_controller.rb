@@ -183,12 +183,12 @@ class VgroupsController < ApplicationController
   # POST /vgroups.xml
   def create
     @vgroup = Vgroup.new(params[:vgroup]) 
-    # not sure why vgroup params not getting saved -- same in update  -- something with the mess of enrollments?
-    @vgroup.compile_folder = params[:vgroup][:compile_folder]
-    @vgroup.note =params[:vgroup][:note]
-    @vgroup.participant_id =params[:vgroup][:participant_id]
-    @vgroup.rmr =params[:vgroup][:rmr]
-    @vgroup.vgroup_date = params[:vgroup]["#{'vgroup_date'}(1i)"] +"-"+params[:vgroup]["#{'vgroup_date'}(2i)"].rjust(2,"0")+"-"+params[:vgroup]["#{'vgroup_date'}(3i)"].rjust(2,"0")
+    # removed attr_accessible in model and now ok --not sure why vgroup params not getting saved -- same in update  -- something with the mess of enrollments?
+    #  @vgroup.compile_folder = params[:vgroup][:compile_folder]
+    #  @vgroup.note =params[:vgroup][:note]
+    #  @vgroup.participant_id =params[:vgroup][:participant_id]
+    #  @vgroup.rmr =params[:vgroup][:rmr]
+    #  @vgroup.vgroup_date = params[:vgroup]["#{'vgroup_date'}(1i)"] +"-"+params[:vgroup]["#{'vgroup_date'}(2i)"].rjust(2,"0")+"-"+params[:vgroup]["#{'vgroup_date'}(3i)"].rjust(2,"0")
     
     respond_to do |format|
       if @vgroup.save
@@ -212,14 +212,14 @@ class VgroupsController < ApplicationController
               end
           end
         end
-       
-        if !params[:vgroup][:scan_procedure_ids].blank?
-           connection = ActiveRecord::Base.connection();
-          params[:vgroup][:scan_procedure_ids].each do |sp|           
-            sql = "Insert into scan_procedures_vgroups(vgroup_id,scan_procedure_id) values("+@vgroup.id.to_s+","+sp+")"        
-            results = connection.execute(sql)        
-          end
-        end
+      # removed attr_accessible in model and now ok  
+      #  if !params[:vgroup][:scan_procedure_ids].blank?
+      #     connection = ActiveRecord::Base.connection();
+      #    params[:vgroup][:scan_procedure_ids].each do |sp|           
+      #      sql = "Insert into scan_procedures_vgroups(vgroup_id,scan_procedure_id) values("+@vgroup.id.to_s+","+sp+")"        
+      #      results = connection.execute(sql)        
+      #    end
+      #  end
         format.html { redirect_to(@vgroup, :notice => 'Vgroup was successfully created.') }
         format.xml  { render :xml => @vgroup, :status => :created, :location => @vgroup }
       else
@@ -234,12 +234,12 @@ class VgroupsController < ApplicationController
   def update
     scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
-    # update attributes not doing updates
-    @vgroup.compile_folder = params[:vgroup][:compile_folder]
-    @vgroup.note =params[:vgroup][:note]
-    @vgroup.participant_id =params[:vgroup][:participant_id]
-    @vgroup.rmr =params[:vgroup][:rmr]
-    @vgroup.vgroup_date = params[:vgroup]["#{'vgroup_date'}(1i)"] +"-"+params[:vgroup]["#{'vgroup_date'}(2i)"].rjust(2,"0")+"-"+params[:vgroup]["#{'vgroup_date'}(3i)"].rjust(2,"0")
+    # removed attr_accessible  in model and ok now - update attributes not doing updates
+    #   @vgroup.compile_folder = params[:vgroup][:compile_folder]
+    #   @vgroup.note =params[:vgroup][:note]
+    #   @vgroup.participant_id =params[:vgroup][:participant_id]
+    #   @vgroup.rmr =params[:vgroup][:rmr]
+    #   @vgroup.vgroup_date = params[:vgroup]["#{'vgroup_date'}(1i)"] +"-"+params[:vgroup]["#{'vgroup_date'}(2i)"].rjust(2,"0")+"-"+params[:vgroup]["#{'vgroup_date'}(3i)"].rjust(2,"0")
     
     
     # getting undefined method `to_sym' error -- somethng is nil 
@@ -259,7 +259,7 @@ class VgroupsController < ApplicationController
     params[:vgroup].delete('enrollments_attributes') 
     
     respond_to do |format|
-      if @vgroup.save #update_attributes(params[:vgroup])
+      if @vgroup.update_attributes(params[:vgroup])  #@vgroup.save #update_attributes(params[:vgroup])
         connection = ActiveRecord::Base.connection();
         sql = "delete from scan_procedures_vgroups where vgroup_id ="+@vgroup.id.to_s
         results = connection.execute(sql)
