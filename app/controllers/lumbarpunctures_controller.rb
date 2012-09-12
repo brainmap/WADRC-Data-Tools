@@ -336,6 +336,154 @@ class LumbarpuncturesController < ApplicationController
         format.xml  { render :xml => @lumbarpunctures }
       end
     end
+    
+ def lp_search
+     # make @conditions from search form input
+     @conditions = []
+     @current_tab = "lumbarpunctures"
+     params["search_criteria"] =""
+
+     if params[:lp_search].nil?
+          params[:lp_search] =Hash.new  
+     end
+
+     scan_procedure_array = []
+     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+ 
+     if !params[:lp_search][:scan_procedure_id].blank?
+        condition =" lumbarpunctures.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
+                                               appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
+                                               and scan_procedure_id in ("+params[:lp_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+        @conditions.push(condition)
+        @scan_procedures = ScanProcedure.where("id in (?)",params[:lp_search][:scan_procedure_id])
+        params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
+     end
+ 
+     if !params[:lp_search][:enumber].blank?
+        condition =" lumbarpunctures.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
+         where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
+         and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:lp_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+         @conditions.push(condition)
+         params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:lp_search][:enumber]
+     end      
+
+     if !params[:lp_search][:rmr].blank? 
+         condition =" lumbarpunctures.appointment_id in (select appointments.id from appointments,vgroups
+                   where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:lp_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
+         @conditions.push(condition)           
+         params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:lp_search][:rmr]
+     end   
+
+
+     #  build expected date format --- between, >, < 
+     v_date_latest =""
+     #want all three date parts
+
+     if !params[:lp_search]["#{'latest_timestamp'}(1i)"].blank? && !params[:lp_search]["#{'latest_timestamp'}(2i)"].blank? && !params[:lp_search]["#{'latest_timestamp'}(3i)"].blank?
+          v_date_latest = params[:lp_search]["#{'latest_timestamp'}(1i)"] +"-"+params[:lp_search]["#{'latest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:lp_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+     end
+
+     v_date_earliest =""
+     #want all three date parts
+
+     if !params[:lp_search]["#{'earliest_timestamp'}(1i)"].blank? && !params[:lp_search]["#{'earliest_timestamp'}(2i)"].blank? && !params[:lp_search]["#{'earliest_timestamp'}(3i)"].blank?
+           v_date_earliest = params[:lp_search]["#{'earliest_timestamp'}(1i)"] +"-"+params[:lp_search]["#{'earliest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:lp_search]["#{'earliest_timestamp'}(3i)"].rjust(2,"0")
+      end
+     v_date_latest = v_date_latest.gsub(/[;:'"()=<>]/, '')
+     v_date_earliest = v_date_earliest.gsub(/[;:'"()=<>]/, '')
+     if v_date_latest.length>0 && v_date_earliest.length >0
+       condition ="  lumbarpunctures.appointment_id in (select appointments.id from appointments where appointments.appointment_date between '"+v_date_earliest+"' and '"+v_date_latest+"' )"
+       @conditions.push(condition)
+       params["search_criteria"] = params["search_criteria"] +",  visit date between "+v_date_earliest+" and "+v_date_latest
+     elsif v_date_latest.length>0
+       condition ="  lumbarpunctures.appointment_id in (select appointments.id from appointments where appointments.appointment_date < '"+v_date_latest+"'  )"
+        @conditions.push(condition)
+        params["search_criteria"] = params["search_criteria"] +",  visit date before "+v_date_latest 
+     elsif  v_date_earliest.length >0
+       condition ="  lumbarpunctures.appointment_id in (select appointments.id from appointments where appointments.appointment_date > '"+v_date_earliest+"' )"
+        @conditions.push(condition)
+        params["search_criteria"] = params["search_criteria"] +",  visit date after "+v_date_earliest
+      end
+
+      if !params[:lp_search][:gender].blank?
+         condition ="  lumbarpunctures.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
+          where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+          and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                 and participants.gender is not NULL and participants.gender in ("+params[:lp_search][:gender].gsub(/[;:'"()=<>]/, '')+") )"
+          @conditions.push(condition)
+          if params[:lp_search][:gender] == 1
+             params["search_criteria"] = params["search_criteria"] +",  sex is Male"
+          elsif params[:lp_search][:gender] == 2
+             params["search_criteria"] = params["search_criteria"] +",  sex is Female"
+          end
+      end   
+
+      if !params[:lp_search][:min_age].blank? && params[:lp_search][:max_age].blank?
+          condition ="   lumbarpunctures.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
+                             where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                          and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                          and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                          and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) >= "+params[:lp_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+           @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:lp_search][:min_age]
+      elsif params[:lp_search][:min_age].blank? && !params[:lp_search][:max_age].blank?
+           condition ="   lumbarpunctures.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
+                              where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                           and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                           and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                       and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) <= "+params[:lp_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+          @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:lp_search][:max_age]
+      elsif !params[:lp_search][:min_age].blank? && !params[:lp_search][:max_age].blank?
+         condition ="    lumbarpunctures.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
+                            where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                         and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                         and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                     and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) between "+params[:lp_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:lp_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+        @conditions.push(condition)
+        params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:lp_search][:min_age]+" and "+params[:lp_search][:max_age]
+      end
+      # trim leading ","
+      params["search_criteria"] = params["search_criteria"].sub(", ","")
+      # adjust columns and fields for html vs xls
+      request_format = request.formats.to_s
+      case  request_format
+        when "application/html" then
+          @column_headers = ['Protocol','Enumber','RMR','Appt Date','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','LP status','LP Note', 'Appt Note'] # need to look up values
+          # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+          @column_number =   @column_headers.size
+          @fields =["CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'Yes' ELSE 'No' end ","CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'Yes' ELSE 'No' end" ,"lumbarpunctures.lpfollownote",
+             "concat(employees.first_name,' ',employees.last_name)",
+            "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'Yes' ELSE 'No' end",
+            "lumbarpunctures.lpfasttotaltime","lumbarpunctures.lpfasttotaltime_min","vgroups.completedlumbarpuncture","lumbarpunctures.lumbarpuncture_note","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
+        else
+              @column_headers = ['Protocol','Enumber','RMR','Appt Date','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','LP status','LP Note', 'Appt Note'] # need to look up values
+              # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+              @column_number =   @column_headers.size
+              @fields =["CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'Yes' ELSE 'No' end ","CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'Yes' ELSE 'No' end" ,"lumbarpunctures.lpfollownote",
+                 "concat(employees.first_name,' ',employees.last_name)",
+                "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'Yes' ELSE 'No' end",
+                "lumbarpunctures.lpfasttotaltime","lumbarpunctures.lpfasttotaltime_min","vgroups.completedlumbarpuncture","lumbarpunctures.lumbarpuncture_note","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
+        end
+      @tables =['lumbarpunctures'] # trigger joins --- vgroups and appointments by default
+      @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
+      #@conditions =[] # ["scan_procedures.codename='johnson.pipr.visit1'"] # need look up for like, lt, gt, between  
+      @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
+            
+     @results = self.run_search   # in the application controller
+     @results_total = @results  # pageination makes result count wrong
+    
+     ### LOOK WHERE TITLE IS SHOWING UP
+     @collection_title = 'All Lumbarpuncture appts'
+
+     #data_searches.run_search
+     respond_to do |format|
+       format.xls # index.html.erb
+       format.xml  { render :xml => @lumbarpunctures }       
+      format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(10)}
+     end
+   end
+  
   
 
   # DELETE /lumbarpunctures/1

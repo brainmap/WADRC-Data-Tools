@@ -137,6 +137,8 @@ WADRCDataTools::Application.routes.draw do
   
     match '/petscan_search' , :controller => 'petscans', :action => 'petscan_search', :as =>:petscan_search
     match '/lumbarpuncture_search' , :controller => 'lumbarpunctures', :action => 'lumbarpuncture_search', :as =>:lumbarpuncture_search
+    match '/lp_search' , :controller => 'lumbarpunctures', :action => 'lp_search', :as =>:lp_search
+    match '/lumbarpunctures/lp_search' , :controller => 'lumbarpunctures', :action => 'lp_search', :as =>:lp_search
     match '/blooddraw_search' , :controller => 'blooddraws', :action => 'blooddraw_search', :as =>:blooddraw_search
     match '/neuropsych_search' , :controller => 'neuropsyches', :action => 'neuropsych_search', :as =>:neuropsych_search
     match '/questionnaire_search' , :controller => 'questionnaires', :action => 'questionnaire_search', :as =>:questionnaire_search

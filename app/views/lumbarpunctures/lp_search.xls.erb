@@ -1,0 +1,16 @@
+<table border=1>
+	 <tr>
+		<% @column_headers.each do |column_header|%>
+	      <th><%= column_header%></th>
+	    <% end %>	
+	 </tr>
+
+	    <% @results.each do |result| %>
+	       <%     result.delete_at(@column_headers.size-1)  %>
+		  <tr>
+		   <% for i in 0..@column_number-1 %>
+		    <td><%= result[i] %></td>
+		   <% end %>
+	      </tr>
+	 <% end %>
+</table>

@@ -118,7 +118,9 @@ class DataSearchesController < ApplicationController
         end    
     end
 
-
+ #def run_search
+#   copy of def index in application_controller  -- so other controllers can get at  -- need for csv export
+# end
     
     
 end

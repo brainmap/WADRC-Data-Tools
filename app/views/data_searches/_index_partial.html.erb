@@ -13,13 +13,17 @@ if @tables.size == 1
         sql = sql +" AND "+tab+".appointment_id = appointments.id  "
       end
       sql = sql +" AND scan_procedures.id = scan_procedures_vgroups.scan_procedure_id
-      AND scan_procedures_vgroups.vgroup_id = vgroups.id
-      AND "+@conditions.join(' and ')
-      
+      AND scan_procedures_vgroups.vgroup_id = vgroups.id "
+
+      if @conditions.size > 0
+          sql = sql +" AND "+@conditions.join(' and ')
+      end
+     #conditions - feed thru ActiveRecord? stop sql injection -- replace : ; " ' ( ) = < > - others?
       if @order_by.size > 0
         sql = sql +" ORDER BY "+@order_by.join(',')
       end
 
+=begin
      # faster -- but not sure about adding enumber , and the group by , and outer join for chain of joins
       # 2095 msec vs 3193 msec
      sql_groupconcat = "      SELECT vgroups.id vgroup_id, GROUP_CONCAT(scan_procedures.codename), vgroups.rmr,appointments.appointment_date ,"+@fields.join(',') +"
@@ -32,7 +36,7 @@ if @tables.size == 1
                   AND "+@conditions.join(' and ')+"
                   group by vgroups.id,  vgroups.rmr,appointments.appointment_date ,"+@fields.join(',')+"
                   ORDER BY appointments.appointment_date"      
-  
+=end  
   end
   connection = ActiveRecord::Base.connection();
   @results2 = connection.execute(sql)

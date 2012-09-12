@@ -8,4 +8,6 @@ class Lumbarpuncture < ActiveRecord::Base
         @appointment =Appointment.find(self.appointment_id)
         return @appointment
     end
+    
+    
 end
