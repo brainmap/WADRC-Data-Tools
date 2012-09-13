@@ -136,6 +136,8 @@ WADRCDataTools::Application.routes.draw do
   match '/visits/change_directory_path', :controller => 'visits', :action => 'change_directory_path', :as =>:change_directory_path
   
     match '/petscan_search' , :controller => 'petscans', :action => 'petscan_search', :as =>:petscan_search
+    match '/pet_search' , :controller => 'petscans', :action => 'pet_search', :as =>:pet_search
+    match '/petscans/pet_search' , :controller => 'petscans', :action => 'pet_search', :as =>:pet_search
     match '/lumbarpuncture_search' , :controller => 'lumbarpunctures', :action => 'lumbarpuncture_search', :as =>:lumbarpuncture_search
     match '/lp_search' , :controller => 'lumbarpunctures', :action => 'lp_search', :as =>:lp_search
     match '/lumbarpunctures/lp_search' , :controller => 'lumbarpunctures', :action => 'lp_search', :as =>:lp_search

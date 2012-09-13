@@ -338,7 +338,7 @@ class LumbarpuncturesController < ApplicationController
     end
     
  def lp_search
-     # make @conditions from search form input
+     # make @conditions from search form input, access control in application controller run_search
      @conditions = []
      @current_tab = "lumbarpunctures"
      params["search_criteria"] =""
@@ -346,10 +346,7 @@ class LumbarpuncturesController < ApplicationController
      if params[:lp_search].nil?
           params[:lp_search] =Hash.new  
      end
-
-     scan_procedure_array = []
-     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
- 
+     
      if !params[:lp_search][:scan_procedure_id].blank?
         condition =" lumbarpunctures.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                                appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
@@ -374,18 +371,14 @@ class LumbarpuncturesController < ApplicationController
          params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:lp_search][:rmr]
      end   
 
-
      #  build expected date format --- between, >, < 
      v_date_latest =""
      #want all three date parts
-
      if !params[:lp_search]["#{'latest_timestamp'}(1i)"].blank? && !params[:lp_search]["#{'latest_timestamp'}(2i)"].blank? && !params[:lp_search]["#{'latest_timestamp'}(3i)"].blank?
           v_date_latest = params[:lp_search]["#{'latest_timestamp'}(1i)"] +"-"+params[:lp_search]["#{'latest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:lp_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
      end
-
      v_date_earliest =""
      #want all three date parts
-
      if !params[:lp_search]["#{'earliest_timestamp'}(1i)"].blank? && !params[:lp_search]["#{'earliest_timestamp'}(2i)"].blank? && !params[:lp_search]["#{'earliest_timestamp'}(3i)"].blank?
            v_date_earliest = params[:lp_search]["#{'earliest_timestamp'}(1i)"] +"-"+params[:lp_search]["#{'earliest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:lp_search]["#{'earliest_timestamp'}(3i)"].rjust(2,"0")
       end
@@ -445,6 +438,7 @@ class LumbarpuncturesController < ApplicationController
       end
       # trim leading ","
       params["search_criteria"] = params["search_criteria"].sub(", ","")
+
       # adjust columns and fields for html vs xls
       request_format = request.formats.to_s
       case  request_format
@@ -472,15 +466,16 @@ class LumbarpuncturesController < ApplicationController
             
      @results = self.run_search   # in the application controller
      @results_total = @results  # pageination makes result count wrong
+     t = Time.now 
+     @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
     
      ### LOOK WHERE TITLE IS SHOWING UP
      @collection_title = 'All Lumbarpuncture appts'
 
-     #data_searches.run_search
      respond_to do |format|
-       format.xls # index.html.erb
+       format.xls # lp_search.xls.erb
        format.xml  { render :xml => @lumbarpunctures }       
-      format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(10)}
+       format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(30)} # lp_search.html.erb
      end
    end
   

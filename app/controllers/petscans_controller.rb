@@ -32,7 +32,7 @@ class PetscansController < ApplicationController
       if !params[:petscan_search][:ecatfilename].blank?
          var = "%"+params[:petscan_search][:ecatfilename].downcase+"%"
          @search =@search.where(" petscans.ecatfilename  like ? ", var)
-          params["search_criteria"] = params["search_criteria"] +", Series description "+params[:petscan_search][:ecatfilename]
+          params["search_criteria"] = params["search_criteria"] +", Ecat file "+params[:petscan_search][:ecatfilename]
       end
       
       if !params[:petscan_search][:enumber].blank?
@@ -127,6 +127,158 @@ class PetscansController < ApplicationController
       format.xml  { render :xml => @petscans }
     end
   end
+
+  def pet_search
+      # make @conditions from search form input, access control in application controller run_search
+      @conditions = []
+      @current_tab = "petscans"
+      params["search_criteria"] =""
+
+      if params[:pet_search].nil?
+           params[:pet_search] =Hash.new  
+      end
+
+      if !params[:pet_search][:scan_procedure_id].blank?
+         condition =" petscans.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
+                                                appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
+                                                and scan_procedure_id in ("+params[:pet_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+         @conditions.push(condition)
+         @scan_procedures = ScanProcedure.where("id in (?)",params[:pet_search][:scan_procedure_id])
+         params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
+      end
+
+      if !params[:pet_search][:ecatfilename].blank?
+          var = "%"+params[:pet_search][:ecatfilename].downcase+"%"
+          condition =" petscans.ecatfilename  like '"+var.gsub(/[;:'"()=<>]/, '')+"' "
+          @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +", Ecat file "+params[:pet_search][:ecatfilename]
+      end
+      
+      if !params[:pet_search][:enumber].blank?
+          condition =" petscans.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
+          where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
+          and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:pet_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+          @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:pet_search][:enumber]
+      end      
+
+      if !params[:pet_search][:rmr].blank? 
+          condition =" petscans.appointment_id in (select appointments.id from appointments,vgroups
+                    where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:pet_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
+          @conditions.push(condition)           
+          params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:pet_search][:rmr]
+      end   
+
+      #  build expected date format --- between, >, < 
+      v_date_latest =""
+      #want all three date parts
+      if !params[:pet_search]["#{'latest_timestamp'}(1i)"].blank? && !params[:pet_search]["#{'latest_timestamp'}(2i)"].blank? && !params[:pet_search]["#{'latest_timestamp'}(3i)"].blank?
+           v_date_latest = params[:pet_search]["#{'latest_timestamp'}(1i)"] +"-"+params[:pet_search]["#{'latest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:pet_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+      end
+      v_date_earliest =""
+      #want all three date parts
+      if !params[:pet_search]["#{'earliest_timestamp'}(1i)"].blank? && !params[:pet_search]["#{'earliest_timestamp'}(2i)"].blank? && !params[:pet_search]["#{'earliest_timestamp'}(3i)"].blank?
+            v_date_earliest = params[:pet_search]["#{'earliest_timestamp'}(1i)"] +"-"+params[:pet_search]["#{'earliest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:pet_search]["#{'earliest_timestamp'}(3i)"].rjust(2,"0")
+       end
+      v_date_latest = v_date_latest.gsub(/[;:'"()=<>]/, '')
+      v_date_earliest = v_date_earliest.gsub(/[;:'"()=<>]/, '')
+      if v_date_latest.length>0 && v_date_earliest.length >0
+        condition ="  petscans.appointment_id in (select appointments.id from appointments where appointments.appointment_date between '"+v_date_earliest+"' and '"+v_date_latest+"' )"
+        @conditions.push(condition)
+        params["search_criteria"] = params["search_criteria"] +",  visit date between "+v_date_earliest+" and "+v_date_latest
+      elsif v_date_latest.length>0
+        condition ="  petscans.appointment_id in (select appointments.id from appointments where appointments.appointment_date < '"+v_date_latest+"'  )"
+         @conditions.push(condition)
+         params["search_criteria"] = params["search_criteria"] +",  visit date before "+v_date_latest 
+      elsif  v_date_earliest.length >0
+        condition ="  petscans.appointment_id in (select appointments.id from appointments where appointments.appointment_date > '"+v_date_earliest+"' )"
+         @conditions.push(condition)
+         params["search_criteria"] = params["search_criteria"] +",  visit date after "+v_date_earliest
+       end
+
+       if !params[:pet_search][:gender].blank?
+          condition ="  petscans.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
+           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+           and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                  and participants.gender is not NULL and participants.gender in ("+params[:pet_search][:gender].gsub(/[;:'"()=<>]/, '')+") )"
+           @conditions.push(condition)
+           if params[:pet_search][:gender] == 1
+              params["search_criteria"] = params["search_criteria"] +",  sex is Male"
+           elsif params[:pet_search][:gender] == 2
+              params["search_criteria"] = params["search_criteria"] +",  sex is Female"
+           end
+       end   
+
+       if !params[:pet_search][:min_age].blank? && params[:pet_search][:max_age].blank?
+           condition ="   petscans.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
+                              where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                           and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                           and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                           and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) >= "+params[:pet_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+            @conditions.push(condition)
+           params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:pet_search][:min_age]
+       elsif params[:pet_search][:min_age].blank? && !params[:pet_search][:max_age].blank?
+            condition ="   petscans.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
+                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                            and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                        and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) <= "+params[:pet_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+           @conditions.push(condition)
+           params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:pet_search][:max_age]
+       elsif !params[:pet_search][:min_age].blank? && !params[:pet_search][:max_age].blank?
+          condition ="    petscans.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
+                             where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                          and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                          and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                      and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) between "+params[:pet_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:pet_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+         @conditions.push(condition)
+         params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:pet_search][:min_age]+" and "+params[:pet_search][:max_age]
+       end
+       # trim leading ","
+       params["search_criteria"] = params["search_criteria"].sub(", ","")
+
+       # adjust columns and fields for html vs xls
+       request_format = request.formats.to_s
+       case  request_format
+         when "application/html" then
+           @column_headers = ['Protocol','Enumber','RMR','Appt Date','Tracer','Ecatfile','Dose','Injection Time','Scan Start','Note','Range','Pet status','Appt Note'] # need to look up values
+               # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+           @column_number =   @column_headers.size
+           @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename","petscans.netinjecteddose",
+                 "time_format(timediff( time(petscans.injecttiontime),subtime(utc_time(),time(localtime()))),'%H:%i')",
+                 "time_format(timediff( time(scanstarttime),subtime(utc_time(),time(localtime()))),'%H:%i')",
+                 "petscans.petscan_note","petscans.range","vgroups.transfer_pet","petscans.id"] # vgroups.id vgroup_id always first, include table name
+         else              
+            @column_headers = ['Protocol','Enumber','RMR','Appt Date','Tracer','Ecatfile','Dose','Injection Time','Scan Start','Note','Range','Pet status','Appt Note'] # need to look up values
+                  # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+            @column_number =   @column_headers.size
+            @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename","petscans.netinjecteddose",
+                    "time_format(timediff( time(petscans.injecttiontime),subtime(utc_time(),time(localtime()))),'%H:%i')",
+                    "time_format(timediff( time(scanstarttime),subtime(utc_time(),time(localtime()))),'%H:%i')",
+                    "petscans.petscan_note","petscans.range","vgroups.transfer_pet","petscans.id"] # vgroups.id vgroup_id always first, include table name                 
+                 
+         end
+       @tables =['petscans'] # trigger joins --- vgroups and appointments by default
+       @left_join = ["LEFT JOIN lookup_pettracers on petscans.lookup_pettracer_id = lookup_pettracers.id",
+                   "LEFT JOIN employees on petscans.enteredpetscanwho = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
+       @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
+
+      @results = self.run_search   # in the application controller
+      @results_total = @results  # pageination makes result count wrong
+      t = Time.now 
+      @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
+
+      ### LOOK WHERE TITLE IS SHOWING UP
+      @collection_title = 'All Petscan appts'
+
+      respond_to do |format|
+        format.xls # pet_search.xls.erb
+        format.xml  { render :xml => @petscans }       
+        format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(30)} # pet_search.html.erb
+      end
+    end
+
+
 
   # GET /petscans/1
   # GET /petscans/1.xml

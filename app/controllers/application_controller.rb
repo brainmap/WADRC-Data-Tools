@@ -30,14 +30,13 @@ class ApplicationController < ActionController::Base
   # without super getting error frm params
   # super has to be callled from in a procedure -- 
 
-# trying place where lumbarpuncture, blooddraw, visits, and other controllers can get at
-
+# place where lumbarpuncture, blooddraw, visits, and other controllers can get at
 def run_search
+  scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
   if @tables.size == 1  
-
        sql ="SELECT distinct vgroups.id vgroup_id,  vgroups.rmr,appointments.appointment_date , "+@fields.join(',')+",appointments.comment 
         FROM vgroups, appointments,scan_procedures, scan_procedures_vgroups, "+@tables.join(',')+" "+@left_join.join(' ')+"
-        WHERE vgroups.id = appointments.vgroup_id"
+        WHERE vgroups.id = appointments.vgroup_id and scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") "
         @tables.each do |tab|
           sql = sql +" AND "+tab+".appointment_id = appointments.id  "
         end
@@ -60,6 +59,7 @@ def run_search
     i =0
     @temp_results.each do |var|
       @temp = []
+      # TRY TUNING BY GETTING ALL RELEVANT sp , enum , put in hash, with vgroup_id as key
       # take each var --- get vgroup_id => find vgroup
       # get scan procedure(s) -- make string, put in @results[0]
       # vgroup.rmr --- put in @results[1]
@@ -91,5 +91,4 @@ def run_search
     end   
     return @results
  end
-
 end
