@@ -800,6 +800,176 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:di
 #    render :template => "visits/visit_search"
     
   end
+
+  def mri_search
+      # make @conditions from search form input, access control in application controller run_search
+      @conditions = []
+      @current_tab = "visit_search"
+      params["search_criteria"] =""
+
+      if params[:mri_search].nil?
+           params[:mri_search] =Hash.new  
+      end
+
+      if !params[:mri_search][:scan_procedure_id].blank?
+         condition =" visits.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
+                                                appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
+                                                and scan_procedure_id in ("+params[:mri_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+         @conditions.push(condition)
+         @scan_procedures = ScanProcedure.where("id in (?)",params[:mri_search][:scan_procedure_id])
+         params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
+      end
+      
+      if !params[:mri_search][:series_description].blank?
+         var = "%"+params[:mri_search][:series_description].downcase+"%"
+         condition ="  visits.id in (select image_datasets.visit_id from image_datasets
+          where lower(image_datasets.series_description) like '"+var.gsub(/[;:'"()=<>]/, '')+"' )"
+          @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +", Series description "+params[:visit_search][:series_description]
+      end      
+
+      if !params[:mri_search][:enumber].blank?
+         condition =" visits.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
+          where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
+          and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:mri_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+          @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:mri_search][:enumber]
+      end      
+
+      if !params[:mri_search][:rmr].blank? 
+          condition =" visits.appointment_id in (select appointments.id from appointments,vgroups
+                    where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:mri_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
+          @conditions.push(condition)           
+          params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:mri_search][:rmr]
+      end   
+
+      #  build expected date format --- between, >, < 
+      v_date_latest =""
+      #want all three date parts
+      if !params[:mri_search]["#{'latest_timestamp'}(1i)"].blank? && !params[:mri_search]["#{'latest_timestamp'}(2i)"].blank? && !params[:mri_search]["#{'latest_timestamp'}(3i)"].blank?
+           v_date_latest = params[:mri_search]["#{'latest_timestamp'}(1i)"] +"-"+params[:mri_search]["#{'latest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:mri_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+      end
+      v_date_earliest =""
+      #want all three date parts
+      if !params[:mri_search]["#{'earliest_timestamp'}(1i)"].blank? && !params[:mri_search]["#{'earliest_timestamp'}(2i)"].blank? && !params[:mri_search]["#{'earliest_timestamp'}(3i)"].blank?
+            v_date_earliest = params[:mri_search]["#{'earliest_timestamp'}(1i)"] +"-"+params[:mri_search]["#{'earliest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:mri_search]["#{'earliest_timestamp'}(3i)"].rjust(2,"0")
+       end
+      v_date_latest = v_date_latest.gsub(/[;:'"()=<>]/, '')
+      v_date_earliest = v_date_earliest.gsub(/[;:'"()=<>]/, '')
+      if v_date_latest.length>0 && v_date_earliest.length >0
+        condition ="  visits.appointment_id in (select appointments.id from appointments where appointments.appointment_date between '"+v_date_earliest+"' and '"+v_date_latest+"' )"
+        @conditions.push(condition)
+        params["search_criteria"] = params["search_criteria"] +",  visit date between "+v_date_earliest+" and "+v_date_latest
+      elsif v_date_latest.length>0
+        condition ="  visits.appointment_id in (select appointments.id from appointments where appointments.appointment_date < '"+v_date_latest+"'  )"
+         @conditions.push(condition)
+         params["search_criteria"] = params["search_criteria"] +",  visit date before "+v_date_latest 
+      elsif  v_date_earliest.length >0
+        condition ="  visits.appointment_id in (select appointments.id from appointments where appointments.appointment_date > '"+v_date_earliest+"' )"
+         @conditions.push(condition)
+         params["search_criteria"] = params["search_criteria"] +",  visit date after "+v_date_earliest
+       end
+
+       if !params[:mri_search][:gender].blank?
+          condition ="  visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
+           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+           and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                  and participants.gender is not NULL and participants.gender in ("+params[:mri_search][:gender].gsub(/[;:'"()=<>]/, '')+") )"
+           @conditions.push(condition)
+           if params[:mri_search][:gender] == 1
+              params["search_criteria"] = params["search_criteria"] +",  sex is Male"
+           elsif params[:mri_search][:gender] == 2
+              params["search_criteria"] = params["search_criteria"] +",  sex is Female"
+           end
+       end   
+
+       if !params[:mri_search][:min_age].blank? && params[:mri_search][:max_age].blank?
+           condition ="   visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
+                              where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                           and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                           and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                           and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) >= "+params[:mri_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+            @conditions.push(condition)
+           params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:mri_search][:min_age]
+       elsif params[:mri_search][:min_age].blank? && !params[:mri_search][:max_age].blank?
+            condition ="   visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
+                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                            and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                        and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) <= "+params[:mri_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+           @conditions.push(condition)
+           params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:mri_search][:max_age]
+       elsif !params[:mri_search][:min_age].blank? && !params[:mri_search][:max_age].blank?
+          condition ="    visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
+                             where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                          and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                          and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                      and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) between "+params[:mri_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:mri_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+         @conditions.push(condition)
+         params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:mri_search][:min_age]+" and "+params[:mri_search][:max_age]
+       end
+       # trim leading ","
+       params["search_criteria"] = params["search_criteria"].sub(", ","")
+       v_include_radiology_comments = "0"
+       if !params[:mri_search][:include_radiology_comment].try(:length).nil?   
+         v_include_radiology_comments = params[:mri_search][:include_radiology_comment]
+       end
+       
+       # adjust columns and fields for html vs xls, adjust for radiology comments
+      request_format = request.formats.to_s
+      if v_include_radiology_comments == "1"
+          case  request_format
+            when "text/html" then
+              @column_headers = ['Protocol','Enumber','RMR','Appt Date','Scan','Path',  'Radiology Comments','Appt Note'] # need to look up values
+              # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+              @column_number =   @column_headers.size
+              @fields =["visits.scan_number","visits.path","concat(radiology_comments.comment_html_1,radiology_comments.comment_html_2,radiology_comments.comment_html_3,radiology_comments.comment_html_4,radiology_comments.comment_html_5)","visits.id"] # vgroups.id vgroup_id always first, include table name
+            else
+              @column_headers = ['Protocol','Enumber','RMR','Appt Date','Scan','Path',  'Radiology Comments','Appt Note'] # need to look up values
+              # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+              @column_number =   @column_headers.size
+              @fields =["visits.scan_number","visits.path","concat(radiology_comments.comment_text_1,radiology_comments.comment_text_2,radiology_comments.comment_text_3,radiology_comments.comment_text_4,radiology_comments.comment_text_5)","visits.id"] # vgroups.id vgroup_id always first, include table name
+            end
+         @tables =['visits'] # trigger joins --- vgroups and appointments by default
+         @left_join = ["LEFT JOIN radiology_comments on visits.id = radiology_comments.visit_id" ] # left join needs to be in sql right after the parent table!!!!!!!
+         @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]     
+      else
+         # adjust columns and fields for html vs xls, adjust for radiology comments
+         case  request_format
+           when "text/html" then
+             @column_headers = ['Protocol','Enumber','RMR','Appt Date','Scan','Path',  'Completed Fast','Fast hrs','Fast min','Mri status','Radiology Outcome','Notes','Appt Note'] # need to look up values
+             # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+             @column_number =   @column_headers.size
+             @fields =["visits.scan_number","visits.path","CASE visits.completedmrifast WHEN 1 THEN 'Yes' ELSE 'No' end",
+               "visits.mrifasttotaltime","visits.mrifasttotaltime_min","vgroups.transfer_mri","CASE visits.radiology_outcome WHEN 1 THEN 'Yes' ELSE 'No' end","visits.notes","visits.id"] # vgroups.id vgroup_id always first, include table name
+           else
+             @column_headers = ['Protocol','Enumber','RMR','Appt Date','Scan','Path',  'Completed Fast','Fast hrs','Fast min','Mri status','Radiology Outcome','Notes','Appt Note'] # need to look up values
+             # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+             @column_number =   @column_headers.size
+             @fields =["visits.scan_number","visits.path","CASE visits.completedmrifast WHEN 1 THEN 'Yes' ELSE 'No' end",
+               "visits.mrifasttotaltime","visits.mrifasttotaltime_min","vgroups.transfer_mri","CASE visits.radiology_outcome WHEN 1 THEN 'Yes' ELSE 'No' end","visits.notes","visits.id"] # vgroups.id vgroup_id always first, include table name
+           end
+        @tables =['visits'] # trigger joins --- vgroups and appointments by default
+        @left_join = [ ] # left join needs to be in sql right after the parent table!!!!!!!  
+        @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
+      end
+
+      @results = self.run_search   # in the application controller
+      @results_total = @results  # pageination makes result count wrong
+      t = Time.now 
+      @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
+
+      ### LOOK WHERE TITLE IS SHOWING UP
+      @collection_title = 'All Mri appts'
+
+      respond_to do |format|
+        format.xls # mri_search.xls.erb
+        format.xml  { render :xml => @visits }       
+        format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(30)} # mri_search.html.erb
+      end
+    end
+
+
   
   private
   

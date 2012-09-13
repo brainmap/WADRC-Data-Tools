@@ -240,7 +240,7 @@ class PetscansController < ApplicationController
        # adjust columns and fields for html vs xls
        request_format = request.formats.to_s
        case  request_format
-         when "application/html" then
+         when "text/html" then # ? application/html
            @column_headers = ['Protocol','Enumber','RMR','Appt Date','Tracer','Ecatfile','Dose','Injection Time','Scan Start','Note','Range','Pet status','Appt Note'] # need to look up values
                # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
            @column_number =   @column_headers.size

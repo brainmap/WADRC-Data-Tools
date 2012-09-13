@@ -442,7 +442,7 @@ class LumbarpuncturesController < ApplicationController
       # adjust columns and fields for html vs xls
       request_format = request.formats.to_s
       case  request_format
-        when "application/html" then
+        when "text/html" then  # application/html ?
           @column_headers = ['Protocol','Enumber','RMR','Appt Date','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','LP status','LP Note', 'Appt Note'] # need to look up values
           # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
           @column_number =   @column_headers.size

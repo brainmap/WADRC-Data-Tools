@@ -13,7 +13,7 @@ class DataSearchesController < ApplicationController
       @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename","petscans.netinjecteddose",
         "time_format(timediff( time(petscans.injecttiontime),subtime(utc_time(),time(localtime()))),'%H:%i')",
         "time_format(timediff( time(scanstarttime),subtime(utc_time(),time(localtime()))),'%H:%i')",
-        "petscans.petscan_note","petscans.range","vgroups.transfer_pet"] # vgroups.id vgroup_id always first, include table name
+        "petscans.petscan_note","petscans.range","vgroups.transfer_pet","petscans.id"] # vgroups.id vgroup_id always first, include table name
       @tables =['petscans'] # trigger joins --- vgroups and appointments by default
       @left_join = ["LEFT JOIN lookup_pettracers on petscans.lookup_pettracer_id = lookup_pettracers.id",
                   "LEFT JOIN employees on petscans.enteredpetscanwho = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
@@ -27,7 +27,7 @@ class DataSearchesController < ApplicationController
       @fields =["CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'Yes' ELSE 'No' end ","CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'Yes' ELSE 'No' end" ,"lumbarpunctures.lpfollownote",
         "concat(employees.first_name,' ',employees.last_name)",
         "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'Yes' ELSE 'No' end",
-        "lumbarpunctures.lpfasttotaltime","lumbarpunctures.lpfasttotaltime_min","vgroups.completedlumbarpuncture","lumbarpunctures.lumbarpuncture_note"] # vgroups.id vgroup_id always first, include table name
+        "lumbarpunctures.lpfasttotaltime","lumbarpunctures.lpfasttotaltime_min","vgroups.completedlumbarpuncture","lumbarpunctures.lumbarpuncture_note","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
       @tables =['lumbarpunctures'] # trigger joins --- vgroups and appointments by default
       @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
       @conditions =["scan_procedures.codename='johnson.pipr.visit1'"] # need look up for like, lt, gt, between  
@@ -39,7 +39,7 @@ class DataSearchesController < ApplicationController
       # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
       @column_number =   @column_headers.size
       @fields =["visits.scan_number","visits.path","CASE visits.completedmrifast WHEN 1 THEN 'Yes' ELSE 'No' end",
-        "visits.mrifasttotaltime","visits.mrifasttotaltime_min","vgroups.transfer_mri","CASE visits.radiology_outcome WHEN 1 THEN 'Yes' ELSE 'No' end","visits.notes",] # vgroups.id vgroup_id always first, include table name
+        "visits.mrifasttotaltime","visits.mrifasttotaltime_min","vgroups.transfer_mri","CASE visits.radiology_outcome WHEN 1 THEN 'Yes' ELSE 'No' end","visits.notes","visits.id"] # vgroups.id vgroup_id always first, include table name
       @tables =['visits'] # trigger joins --- vgroups and appointments by default
       @left_join = [ ] # left join needs to be in sql right after the parent table!!!!!!!
       @conditions =["scan_procedures.codename='johnson.predict.visit1'"] # need look up for like, lt, gt, between  

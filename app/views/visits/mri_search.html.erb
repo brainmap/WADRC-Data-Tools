@@ -1,0 +1,164 @@
+<%
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+edit_count =current_user[:edit_low_scan_procedure_array].length
+edit_count = edit_count -1 
+@current_tab = "visits"
+%>
+
+<div id="heading_and_link">
+  <h1>MRI appts:</h1>
+<% if edit_count > 0 %> 
+ <p><%= link_to 'create new MRI appt', new_visit_path %> |
+	<%= link_to 'import MRI appt data', new_raw_data_import_path %>
+  </p>
+<% end %>
+</p>
+</div>
+
+<B>Criteria: </b><%= params["search_criteria"] %>
+
+
+<%= form_for 'mri_search' do |f| %>
+<table class="search_form">
+	<tr><td><%= f.label :scan_procedures %><br>
+	<div id="scan_procedure_list">
+	<ul>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_visits where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
+		<li>
+			<%#= f.fields_for scan_procedure do |scan_fields| %>
+				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
+				<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
+			<%# end %>
+		</li>
+		<li>
+			<%= check_box_tag "visit_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'mri_search[scan_procedure_id][]' %>
+			<%= label_tag '', scan_procedure.codename %>
+		</li>
+	<% end %>
+	</ul>
+	</div>
+
+	  </td></tr></table>
+
+<!-- visits/find.html.erb has a nice checkbox -- from some metasearch plugin?  -->
+  <table class="search_form">
+
+    <tr>
+      <th><%= f.label :enumber %></th>
+      <td><%= f.text_field :enumber %></td>
+    </tr>
+
+    <tr>
+      <th>RMR</th>
+      <td><%= f.text_field :rmr %></td>
+    </tr>
+
+    <tr>
+      <th><%= f.label :series_description %></th>
+      <td><%= f.text_field :series_description %></td>
+    </tr>
+
+    <tr>
+      <th><%= f.label :path %></th>
+      <td><%= f.text_field :path %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :scan_date_before %></th>
+      <td><%= f.date_select "latest_timestamp", :start_year => 1995, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :scan_date_after %></th>
+      <td><%= f.date_select :earliest_timestamp, :start_year => 1995, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th>check to include <br> <b><%= f.label :radiology_comments %></b></th>
+      <td><%= f.check_box :include_radiology_comment %></td>
+    </tr>
+  </table>
+
+
+  <table class="search_form">
+    <tr>
+      <th><%= f.label :gender %></th>
+      <td><%= select :mri_search, :gender, { "M" => 1, "F" => 2 }, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :minimum_age %></th>
+      <td><%= select :mri_search, :min_age, (1..110).to_a, :include_blank => true %><B> (the age at visit) </B></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_age %></th>
+      <td><%= select :mri_search, :max_age, (1..110).to_a, :include_blank => true %></td>
+    </tr>
+  </table>
+<!--
+    <tr>
+      <th><%= f.label :minimum_education_years %></th>
+      <td><%= select :image_search, :min_ed_years, (0..25).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_education_years %></th>
+      <td><%= select :image_search, :max_ed_years, (0..25).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :apoe_status %></th>
+      <td><%= select :image_search, :apoe_status, { "negative" => 0, "positive" => 1 }, :include_blank => true %></td>
+    </tr>
+  </table>
+-->
+  
+  <%= clearing_br %>
+  <%= f.submit "Search" %>
+  
+<% end %>
+
+
+<%= link_to 'download xls',{ :controller=>"visits", :action=>"mri_search", :mri_search =>  params[:mri_search] , :format => :xls} %>  </p>
+
+<table class="tabular">  
+  <caption><%= pluralize(@results_total.size, 'MRI appt') %></caption>
+  <thead>
+    <tr>
+		<% @column_headers.each do |column_header|%>
+	      <th><%= column_header%></th>
+	  <% end %>
+      <th></th>
+<% if edit_count > 0 %>
+       <th></th>
+<% end %>
+      <th></th>
+    </tr>
+  </thead>
+
+<!--   add params and order by link to col header!!!!!!!!!!!    -->
+  <tfoot><tr><td colspan=(column_header.size+3)>
+		 <%=    paginate @results %> 
+  </td></tr></tfoot>
+
+  <tbody>
+    <% @results.each do |result| %>
+       <%  visit = Visit.find(result[@column_headers.size-1])
+           appointment = Appointment.find(visit.appointment_id) 
+           vgroup = Vgroup.find(appointment.vgroup_id)
+           result.delete_at(@column_headers.size-1)
+        %>
+	  <tr>
+	   <% for i in 0..@column_number-1 %>
+	    <td><%= result[i].to_s.html_safe %></td>
+	   <% end %>
+       <td style="width: 6em;" nowrap><%= link_to 'show', visit %>
+		  <% if edit_count > 0 %>
+			<%= link_to 'edit', edit_visit_path(visit) %>
+		  <% end %>
+       </td>
+       <td>
+          <% if edit_count > 0 %>
+	         <%= link_to  'New', new_visit_path+"/"+vgroup.id.to_s %>
+          <% end %>
+       </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
