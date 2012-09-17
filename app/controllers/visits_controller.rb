@@ -921,16 +921,18 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:di
       if v_include_radiology_comments == "1"
           case  request_format
             when "text/html" then
-              @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path',  'Radiology Comments','Appt Note'] # need to look up values
+              @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path',  'Radiology Comments','Rad Site','Appt Note'] # need to look up values
               # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
               @column_number =   @column_headers.size
-              @fields =["visits.scan_number","visits.path","concat(radiology_comments.comment_html_1,radiology_comments.comment_html_2,radiology_comments.comment_html_3,radiology_comments.comment_html_4,radiology_comments.comment_html_5)","visits.id"] # vgroups.id vgroup_id always first, include table name
+              @fields =["visits.scan_number","visits.path","concat(radiology_comments.comment_html_1,radiology_comments.comment_html_2,radiology_comments.comment_html_3,radiology_comments.comment_html_4,radiology_comments.comment_html_5)",
+                                   "radiology_comments.rad_path","visits.id"] # vgroups.id vgroup_id always first, include table name
             else
               @html_request ="N"
-              @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path',  'Radiology Comments','Appt Note'] # need to look up values
+              @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path',  'Radiology Comments','Rad Site','Appt Note'] # need to look up values
               # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
               @column_number =   @column_headers.size
-              @fields =["visits.scan_number","visits.path","concat(radiology_comments.comment_text_1,radiology_comments.comment_text_2,radiology_comments.comment_text_3,radiology_comments.comment_text_4,radiology_comments.comment_text_5)","visits.id"] # vgroups.id vgroup_id always first, include table name
+              @fields =["visits.scan_number","visits.path","concat(radiology_comments.comment_text_1,radiology_comments.comment_text_2,radiology_comments.comment_text_3,radiology_comments.comment_text_4,radiology_comments.comment_text_5)",
+                       "radiology_comments.rad_path","visits.id"] # vgroups.id vgroup_id always first, include table name
             end
          @tables =['visits'] # trigger joins --- vgroups and appointments by default
          @left_join = ["LEFT JOIN radiology_comments on visits.id = radiology_comments.visit_id" ] # left join needs to be in sql right after the parent table!!!!!!!
@@ -942,14 +944,14 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:di
              @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path','Mri status','Radiology Outcome','Notes','Appt Note'] # need to look up values
              # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
              @column_number =   @column_headers.size
-             @fields =["visits.scan_number","visits.path","vgroups.transfer_mri","CASE visits.radiology_outcome WHEN 1 THEN 'yes' ELSE 'no' end","visits.notes","visits.id"] # vgroups.id vgroup_id always first, include table name
+             @fields =["visits.scan_number","visits.path","vgroups.transfer_mri","visits.radiology_outcome","visits.notes","visits.id"] # vgroups.id vgroup_id always first, include table name
            else
              @html_request ="N"
              @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path',  'Completed Fast','Fast hrs','Fast min','Mri status','Radiology Outcome','Notes','Appt Note'] # need to look up values
              # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
              @column_number =   @column_headers.size
              @fields =["visits.scan_number","visits.path","CASE visits.completedmrifast WHEN 1 THEN 'Yes' ELSE 'No' end",
-               "visits.mrifasttotaltime","visits.mrifasttotaltime_min","vgroups.transfer_mri","CASE visits.radiology_outcome WHEN 1 THEN 'Yes' ELSE 'No' end","visits.notes","visits.id"] # vgroups.id vgroup_id always first, include table name
+               "visits.mrifasttotaltime","visits.mrifasttotaltime_min","vgroups.transfer_mri","radiology_outcome","visits.notes","visits.id"] # vgroups.id vgroup_id always first, include table name
            end
         @tables =['visits'] # trigger joins --- vgroups and appointments by default
         @left_join = [ ] # left join needs to be in sql right after the parent table!!!!!!!  

@@ -37,10 +37,10 @@
               <%= link_to "Image Datasets", image_datasets_path %>
             </li>
             <li <%= "class=current" if @current_tab == "petscans" %>>
-              <%= link_to "PetScan", pet_search_path %>
+              <%= link_to "PetScan", '/pet_search' %>
             </li>
             <li <%= "class=current" if @current_tab == "lumbarpunctures" %>>
-              <%= link_to "LP", lp_search_path %>
+              <%= link_to "LP", '/lp_search' %>
             </li>
             <li <%= "class=current" if @current_tab == "blooddraws" %>>
               <%= link_to "LabHealth", blooddraw_search_path %>
