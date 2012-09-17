@@ -34,7 +34,7 @@ class ApplicationController < ActionController::Base
 def run_search
   scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
   if @tables.size == 1  
-       sql ="SELECT distinct vgroups.id vgroup_id,  vgroups.rmr,appointments.appointment_date , "+@fields.join(',')+",appointments.comment 
+       sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr , "+@fields.join(',')+",appointments.comment 
         FROM vgroups, appointments,scan_procedures, scan_procedures_vgroups, "+@tables.join(',')+" "+@left_join.join(' ')+"
         WHERE vgroups.id = appointments.vgroup_id and scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") "
         @tables.each do |tab|
@@ -51,6 +51,8 @@ def run_search
           sql = sql +" ORDER BY "+@order_by.join(',')
         end 
     end
+    
+puts sql    
     connection = ActiveRecord::Base.connection();
     @results2 = connection.execute(sql)
     @temp_results = @results2
@@ -70,21 +72,27 @@ def run_search
       #@temp[0]=vgroup.scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ")
       #@temp[1]=vgroup.enrollments.collect {|e| e.enumber }.join(", ")
       # change to scan_procedures.id and enrollments.id  or vgroup_id to make links-- maybe keep vgroup_id for display
-      sql_sp = "SELECT distinct scan_procedures.codename 
+      @temp[0] = var[1] # want appt date first
+      if @html_request =="N"
+          sql_sp = "SELECT distinct scan_procedures.codename 
                 FROM scan_procedures, scan_procedures_vgroups
                 WHERE scan_procedures.id = scan_procedures_vgroups.scan_procedure_id
                 AND scan_procedures_vgroups.vgroup_id = "+var[0].to_s
-      @results_sp = connection.execute(sql_sp)
-      @temp[0] =@results_sp.to_a.join(", ")
+          @results_sp = connection.execute(sql_sp)
+          @temp[1] =@results_sp.to_a.join(", ")
 
-      sql_enum = "SELECT distinct enrollments.enumber 
+          sql_enum = "SELECT distinct enrollments.enumber 
                 FROM enrollments, enrollment_vgroup_memberships
                 WHERE enrollments.id = enrollment_vgroup_memberships.enrollment_id
                 AND enrollment_vgroup_memberships.vgroup_id = "+var[0].to_s
-      @results_enum = connection.execute(sql_enum)
-      @temp[1] =@results_enum.to_a.join(", ")
-
+          @results_enum = connection.execute(sql_enum)
+          @temp[2] =@results_enum.to_a.join(", ")
+      else  # need to only get the sp and enums which are displayed - and need object to make link
+        @temp[1] = var[0].to_s
+        @temp[2] = var[0].to_s
+      end 
       var.delete_at(0) # get rid of vgroup_id
+      var.delete_at(0) # get rid of extra copy of appt date
       @temp_row = @temp + var
       @results[i] = @temp_row
       i = i+1

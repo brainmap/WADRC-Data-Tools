@@ -441,17 +441,18 @@ class LumbarpuncturesController < ApplicationController
 
       # adjust columns and fields for html vs xls
       request_format = request.formats.to_s
+      @html_request ="Y"
       case  request_format
         when "text/html" then  # application/html ?
-          @column_headers = ['Protocol','Enumber','RMR','Appt Date','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','LP status','LP Note', 'Appt Note'] # need to look up values
+          @column_headers = ['Date','Protocol','Enumber','RMR','LP status','LP abnormality','LP success','LP followup','Completed Fast','LP Note', 'Appt Note'] # need to look up values
           # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
           @column_number =   @column_headers.size
-          @fields =["CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'Yes' ELSE 'No' end ","CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'Yes' ELSE 'No' end" ,"lumbarpunctures.lpfollownote",
-             "concat(employees.first_name,' ',employees.last_name)",
-            "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'Yes' ELSE 'No' end",
-            "lumbarpunctures.lpfasttotaltime","lumbarpunctures.lpfasttotaltime_min","vgroups.completedlumbarpuncture","lumbarpunctures.lumbarpuncture_note","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
+          @fields =["vgroups.completedlumbarpuncture", "CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'yes' ELSE 'no' end" ,"CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'yes' ELSE 'no' end ","lumbarpunctures.lpfollownote",
+            "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'yes' ELSE 'no' end",
+            "lumbarpunctures.lumbarpuncture_note","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
         else
-              @column_headers = ['Protocol','Enumber','RMR','Appt Date','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','LP status','LP Note', 'Appt Note'] # need to look up values
+              @html_request ="N"
+              @column_headers = ['Date','Protocol','Enumber','RMR','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','LP status','LP Note', 'Appt Note'] # need to look up values
               # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
               @column_number =   @column_headers.size
               @fields =["CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'Yes' ELSE 'No' end ","CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'Yes' ELSE 'No' end" ,"lumbarpunctures.lpfollownote",

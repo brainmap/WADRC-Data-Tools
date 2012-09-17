@@ -146,7 +146,21 @@ edit_count = edit_count -1
         %>
 	  <tr>
 	   <% for i in 0..@column_number-1 %>
-	    <td><%= result[i] %></td>
+	        <% if i == 0 %>
+		     <td><%= link_to result[i].to_s(:datetime_military), petscan %></td>
+		    <% elsif i == 1 %>
+		     <td><%= vgroup.scan_procedures.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
+		    <% elsif i == 2 %>
+		     <td><%= vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
+		    <% elsif i == 6 %>
+		      <td><%= popup_note('peek', key_val_table('path_popup', { :PetNote => result[i].to_s })) unless result[i].to_s.blank? %></td>
+		    <% elsif i == 7 %>
+		    <%= show_bool(result[i].to_s ) %>
+		    <% elsif i == 8 %>
+		      <td><%= popup_note('peek', key_val_table('path_popup', { :ApptNote => result[i].to_s })) unless result[i].to_s.blank? %></td>
+		    <% else %>
+		    <td><%= result[i] %></td>
+		     <% end %>
 	   <% end %>
        <td style="width: 6em;" nowrap><%= link_to 'show', petscan %>
 		  <% if edit_count > 0 %>

@@ -915,18 +915,19 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:di
        if !params[:mri_search][:include_radiology_comment].try(:length).nil?   
          v_include_radiology_comments = params[:mri_search][:include_radiology_comment]
        end
-       
+       @html_request ="Y"
        # adjust columns and fields for html vs xls, adjust for radiology comments
       request_format = request.formats.to_s
       if v_include_radiology_comments == "1"
           case  request_format
             when "text/html" then
-              @column_headers = ['Protocol','Enumber','RMR','Appt Date','Scan','Path',  'Radiology Comments','Appt Note'] # need to look up values
+              @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path',  'Radiology Comments','Appt Note'] # need to look up values
               # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
               @column_number =   @column_headers.size
               @fields =["visits.scan_number","visits.path","concat(radiology_comments.comment_html_1,radiology_comments.comment_html_2,radiology_comments.comment_html_3,radiology_comments.comment_html_4,radiology_comments.comment_html_5)","visits.id"] # vgroups.id vgroup_id always first, include table name
             else
-              @column_headers = ['Protocol','Enumber','RMR','Appt Date','Scan','Path',  'Radiology Comments','Appt Note'] # need to look up values
+              @html_request ="N"
+              @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path',  'Radiology Comments','Appt Note'] # need to look up values
               # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
               @column_number =   @column_headers.size
               @fields =["visits.scan_number","visits.path","concat(radiology_comments.comment_text_1,radiology_comments.comment_text_2,radiology_comments.comment_text_3,radiology_comments.comment_text_4,radiology_comments.comment_text_5)","visits.id"] # vgroups.id vgroup_id always first, include table name
@@ -938,13 +939,13 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:di
          # adjust columns and fields for html vs xls, adjust for radiology comments
          case  request_format
            when "text/html" then
-             @column_headers = ['Protocol','Enumber','RMR','Appt Date','Scan','Path',  'Completed Fast','Fast hrs','Fast min','Mri status','Radiology Outcome','Notes','Appt Note'] # need to look up values
+             @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path','Mri status','Radiology Outcome','Notes','Appt Note'] # need to look up values
              # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
              @column_number =   @column_headers.size
-             @fields =["visits.scan_number","visits.path","CASE visits.completedmrifast WHEN 1 THEN 'Yes' ELSE 'No' end",
-               "visits.mrifasttotaltime","visits.mrifasttotaltime_min","vgroups.transfer_mri","CASE visits.radiology_outcome WHEN 1 THEN 'Yes' ELSE 'No' end","visits.notes","visits.id"] # vgroups.id vgroup_id always first, include table name
+             @fields =["visits.scan_number","visits.path","vgroups.transfer_mri","CASE visits.radiology_outcome WHEN 1 THEN 'yes' ELSE 'no' end","visits.notes","visits.id"] # vgroups.id vgroup_id always first, include table name
            else
-             @column_headers = ['Protocol','Enumber','RMR','Appt Date','Scan','Path',  'Completed Fast','Fast hrs','Fast min','Mri status','Radiology Outcome','Notes','Appt Note'] # need to look up values
+             @html_request ="N"
+             @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path',  'Completed Fast','Fast hrs','Fast min','Mri status','Radiology Outcome','Notes','Appt Note'] # need to look up values
              # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
              @column_number =   @column_headers.size
              @fields =["visits.scan_number","visits.path","CASE visits.completedmrifast WHEN 1 THEN 'Yes' ELSE 'No' end",

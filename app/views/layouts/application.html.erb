@@ -31,16 +31,16 @@
               <%= link_to "Visits", home_path %>
             </li>
             <li <%= "class=current" if @current_tab == "visits" %>>
-              <%= link_to "MRI", visit_search_path %>
+              <%= link_to "MRI", mri_search_path %>
             </li>
             <li <%= "class=current" if @current_tab == "image_datasets" %>>
               <%= link_to "Image Datasets", image_datasets_path %>
             </li>
             <li <%= "class=current" if @current_tab == "petscans" %>>
-              <%= link_to "PetScan", petscan_search_path %>
+              <%= link_to "PetScan", pet_search_path %>
             </li>
             <li <%= "class=current" if @current_tab == "lumbarpunctures" %>>
-              <%= link_to "LP", lumbarpuncture_search_path %>
+              <%= link_to "LP", lp_search_path %>
             </li>
             <li <%= "class=current" if @current_tab == "blooddraws" %>>
               <%= link_to "LabHealth", blooddraw_search_path %>

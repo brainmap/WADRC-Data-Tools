@@ -239,17 +239,17 @@ class PetscansController < ApplicationController
 
        # adjust columns and fields for html vs xls
        request_format = request.formats.to_s
+       @html_request ="Y"
        case  request_format
          when "text/html" then # ? application/html
-           @column_headers = ['Protocol','Enumber','RMR','Appt Date','Tracer','Ecatfile','Dose','Injection Time','Scan Start','Note','Range','Pet status','Appt Note'] # need to look up values
+           @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Note','Pet status','Appt Note'] # need to look up values
                # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
            @column_number =   @column_headers.size
-           @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename","petscans.netinjecteddose",
-                 "time_format(timediff( time(petscans.injecttiontime),subtime(utc_time(),time(localtime()))),'%H:%i')",
-                 "time_format(timediff( time(scanstarttime),subtime(utc_time(),time(localtime()))),'%H:%i')",
-                 "petscans.petscan_note","petscans.range","vgroups.transfer_pet","petscans.id"] # vgroups.id vgroup_id always first, include table name
-         else              
-            @column_headers = ['Protocol','Enumber','RMR','Appt Date','Tracer','Ecatfile','Dose','Injection Time','Scan Start','Note','Range','Pet status','Appt Note'] # need to look up values
+           @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename",
+                 "petscans.petscan_note","vgroups.transfer_pet","petscans.id"] # vgroups.id vgroup_id always first, include table name
+         else    
+           @html_request ="N"          
+            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Dose','Injection Time','Scan Start','Note','Range','Pet status','Appt Note'] # need to look up values
                   # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
             @column_number =   @column_headers.size
             @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename","petscans.netinjecteddose",

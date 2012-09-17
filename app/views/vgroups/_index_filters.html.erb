@@ -14,6 +14,9 @@
     <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
     <%= collection_select(:scan_procedure, :id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'choose scan procedure'}, {:multiple =>  false} ) %>
     <%= submit_tag("In scan procedure") %>
+<!--     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <= text_field_tag :enumber %> <= submit_tag("Enumber search") %>
+-->
   <% end %>
 <!--
   <%= form_tag '/vgroups/assigned_to_who' do %>
