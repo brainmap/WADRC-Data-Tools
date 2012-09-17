@@ -206,6 +206,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     @visit.enrollments.build # if @visit.enrollments.blank?
     @mriscantask = Mriscantask.where("visit_id in (?) and (lookup_set_id not in (8) or lookup_set_id is NULL)",@visit.id)
     @appointment = Appointment.find(@visit.appointment_id)
+    @vgroup = Vgroup.find(@appointment.vgroup_id)
   end
 
   # POST /visits
