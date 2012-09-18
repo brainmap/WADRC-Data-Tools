@@ -157,7 +157,7 @@ edit_count = edit_count -1
 	    <% elsif i == 6 # no problem in radiology %>
 	    <%= show_bool(result[i].to_s ) %>
 	    <% elsif i == 7 # no problem in radiology %>
-	      <% if params[:mri_search][:include_radiology_comment]  == 1 %>
+	      <% if params[:mri_search][:include_radiology_comment]  == "1" %>
 	       <td><% if !result[i].blank? %><a href="https://www.radiology.wisc.edu/protected/neuroResearchScans/<%=result[i]%>" target="_blank">Radiology Site</a><% end %></td>
 	      <% else %>
 	       <%= show_rad_review(result[i].to_s ) %>
@@ -184,4 +184,5 @@ edit_count = edit_count -1
     <% end %>
   </tbody>
 </table>
+
 
