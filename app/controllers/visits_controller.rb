@@ -257,6 +257,20 @@ class VisitsController <  AuthorizedController #  ApplicationController
       if @visit.save
          @vgroup.transfer_mri = params[:vgroup][:transfer_mri]
           @vgroup.save
+          # not sure if this is useful in the load script
+=begin
+          sql = "Delete from scan_procedures_vgroups where vgroup_id ="+@vgroup.id.to_s
+          connection = ActiveRecord::Base.connection();        
+          results = connection.execute(sql)
+          sql = "select distinct scan_procedure_id from scan_procedures_visits where visit_id in (select visits.id from visits, appointments where appointments.id = visits.appointment_id and appointments.vgroup_id ="+@vgroup.id.to_s+")"
+          connection = ActiveRecord::Base.connection();        
+          results = connection.execute(sql)
+          results.each do |sp|           
+            sql = "Insert into scan_procedures_vgroups(vgroup_id,scan_procedure_id) values("+@vgroup.id.to_s+","+sp[0].to_s+")"
+            connection = ActiveRecord::Base.connection();        
+            results = connection.execute(sql)        
+          end
+=end          
         flash[:notice] = 'MRI appt was successfully created.'
         format.html { redirect_to(@visit) }
         format.xml  { render :xml => @visit, :status => :created, :location => @visit }
