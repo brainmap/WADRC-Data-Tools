@@ -87,12 +87,14 @@ puts sql
                 AND enrollment_vgroup_memberships.vgroup_id = "+var[0].to_s
           @results_enum = connection.execute(sql_enum)
           @temp[2] =@results_enum.to_a.join(", ")
+          
       else  # need to only get the sp and enums which are displayed - and need object to make link
         @temp[1] = var[0].to_s
         @temp[2] = var[0].to_s
       end 
       var.delete_at(0) # get rid of vgroup_id
       var.delete_at(0) # get rid of extra copy of appt date
+      
       @temp_row = @temp + var
       @results[i] = @temp_row
       i = i+1

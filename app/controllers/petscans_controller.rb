@@ -274,7 +274,7 @@ class PetscansController < ApplicationController
       respond_to do |format|
         format.xls # pet_search.xls.erb
         format.xml  { render :xml => @petscans }       
-        format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(30)} # pet_search.html.erb
+        format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(50)} # pet_search.html.erb
       end
     end
 

@@ -476,7 +476,7 @@ class LumbarpuncturesController < ApplicationController
      respond_to do |format|
        format.xls # lp_search.xls.erb
        format.xml  { render :xml => @lumbarpunctures }       
-       format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(30)} # lp_search.html.erb
+       format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(50)} # lp_search.html.erb
      end
    end
   

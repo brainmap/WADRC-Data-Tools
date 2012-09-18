@@ -969,7 +969,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:di
       respond_to do |format|
         format.xls # mri_search.xls.erb
         format.xml  { render :xml => @visits }       
-        format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(30)} # mri_search.html.erb
+        format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(50)} # mri_search.html.erb
       end
     end
 
