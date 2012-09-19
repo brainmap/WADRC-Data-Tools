@@ -5,7 +5,8 @@
     <tr>
       <th>Code Name</th>
       <th>Description</th>
-			<th>Total</th>
+	  <th>Petscan Flag</th>
+	  <th>Total</th>
       <th></th>
     </tr>
   </thead>
@@ -17,6 +18,7 @@
     <tr>
       <td><%= link_to(scan_procedure.codename, in_scan_procedure_path(scan_procedure)) %></td>
       <td><%=h scan_procedure.description %></td>
+      <td><%=h scan_procedure.petscan_flag %></td>
 			<td><%=h scan_procedure.visits.count %></td>
       <td>
         <%= link_to '@', scan_procedure %>

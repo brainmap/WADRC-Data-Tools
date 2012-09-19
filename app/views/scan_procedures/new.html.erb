@@ -16,6 +16,10 @@
     <%= collection_select :scan_procedure, :protocol_id, Protocol.all.sort_by(&:id), :id, :name, :prompt => 'choose a protocol' %>
   </p>
   <p>
+    <%= f.label :petscan_flag %><br />
+    <%= f.select (:petscan_flag,options_for_select([['Yes','Y'],['No','N']] ),:include_blank => 'Select if petscans can be included in sp' )%>
+  </p>
+  <p>
     <%= f.submit "Create" %>
   </p>
 <% end %>
