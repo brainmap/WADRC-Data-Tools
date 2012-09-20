@@ -502,7 +502,7 @@ class LumbarpuncturesController < ApplicationController
     @lumbarpuncture.destroy
 
     respond_to do |format|
-      format.html { redirect_to(lumbarpuncture_search_path) }
+      format.html { redirect_to(lh_search_path) }
       format.xml  { head :ok }
     end
   end

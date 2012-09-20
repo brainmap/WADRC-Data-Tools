@@ -121,6 +121,164 @@ class NeuropsychesController < ApplicationController
       end
     end
 
+  
+    def np_search
+       @current_tab = "neuropsyches"
+       params["search_criteria"] =""
+
+       if params[:neuropsych_search].nil?
+            params[:neuropsych_search] =Hash.new  
+       end
+
+       scan_procedure_array = []
+       scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)   
+
+  #    @neuropsyches = Blooddraw.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
+  #                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
+  #    and scan_procedure_id in (?))", scan_procedure_array).all
+  #     sql = "select * from neuropsyches inner join  appointments on appointments.id = neuropsyches.appointment_id order by appointment_date desc"
+  #      @search = Blooddraw.find_by_sql(sql)
+  #     @search = Blooddraw.where("neuropsyches.appointment_id in (select appointments.id from appointments)").all
+        @search = Neuropsych.search(params[:search])    # parms search makes something which works with where?
+        @search =@search.where("neuropsyches.appointment_id in (select appointment_id from q_data_forms)")
+        if !params[:neuropsych_search][:scan_procedure_id].blank?
+           @search =@search.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
+                                                  appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
+                                                  and scan_procedure_id in (?))",params[:neuropsych_search][:scan_procedure_id])
+           @scan_procedures = ScanProcedure.where("id in (?)",params[:neuropsych_search][:scan_procedure_id])
+           params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
+        end
+
+        if !params[:neuropsych_search][:enumber].blank?
+           @search =@search.where(" neuropsyches.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
+            where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
+            and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower(?)))",params[:neuropsych_search][:enumber])
+            params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:neuropsych_search][:enumber]
+        end      
+
+        if !params[:neuropsych_search][:rmr].blank? 
+            @search = @search.where(" neuropsyches.appointment_id in (select appointments.id from appointments,vgroups
+                      where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower(?)   ))",params[:neuropsych_search][:rmr])
+            params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:neuropsych_search][:rmr]
+        end
+
+         #  build expected date format --- between, >, < 
+         v_date_latest =""
+         #want all three date parts
+
+         if !params[:neuropsych_search]["#{'latest_timestamp'}(1i)"].blank? && !params[:neuropsych_search]["#{'latest_timestamp'}(2i)"].blank? && !params[:neuropsych_search]["#{'latest_timestamp'}(3i)"].blank?
+              v_date_latest = params[:neuropsych_search]["#{'latest_timestamp'}(1i)"] +"-"+params[:neuropsych_search]["#{'latest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:neuropsych_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+         end
+
+         v_date_earliest =""
+         #want all three date parts
+
+         if !params[:neuropsych_search]["#{'earliest_timestamp'}(1i)"].blank? && !params[:neuropsych_search]["#{'earliest_timestamp'}(2i)"].blank? && !params[:neuropsych_search]["#{'earliest_timestamp'}(3i)"].blank?
+               v_date_earliest = params[:neuropsych_search]["#{'earliest_timestamp'}(1i)"] +"-"+params[:neuropsych_search]["#{'earliest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:neuropsych_search]["#{'earliest_timestamp'}(3i)"].rjust(2,"0")
+          end
+
+         if v_date_latest.length>0 && v_date_earliest.length >0
+           @search = @search.where(" neuropsyches.appointment_id in (select appointments.id from appointments where appointments.appointment_date between ? and ? )",v_date_earliest,v_date_latest)
+           params["search_criteria"] = params["search_criteria"] +",  visit date between "+v_date_earliest+" and "+v_date_latest
+         elsif v_date_latest.length>0
+           @search = @search.where(" neuropsyches.appointment_id in (select appointments.id from appointments where appointments.appointment_date < ?  )",v_date_latest)
+            params["search_criteria"] = params["search_criteria"] +",  visit date before "+v_date_latest 
+         elsif  v_date_earliest.length >0
+           @search = @search.where(" neuropsyches.appointment_id in (select appointments.id from appointments where appointments.appointment_date > ? )",v_date_earliest)
+            params["search_criteria"] = params["search_criteria"] +",  visit date after "+v_date_earliest
+          end
+
+          if !params[:neuropsych_search][:gender].blank?
+             @search =@search.where(" neuropsyches.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
+              where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+              and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                     and participants.gender is not NULL and participants.gender in (?) )", params[:neuropsych_search][:gender])
+              if params[:neuropsych_search][:gender] == 1
+                 params["search_criteria"] = params["search_criteria"] +",  sex is Male"
+              elsif params[:neuropsych_search][:gender] == 2
+                 params["search_criteria"] = params["search_criteria"] +",  sex is Female"
+              end
+          end   
+
+          if !params[:neuropsych_search][:min_age].blank? && params[:neuropsych_search][:max_age].blank?
+              @search = @search.where("  neuropsyches.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
+                                 where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                              and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                              and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                              and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) >= ?   )",params[:neuropsych_search][:min_age])
+              params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:neuropsych_search][:min_age]
+          elsif params[:neuropsych_search][:min_age].blank? && !params[:neuropsych_search][:max_age].blank?
+               @search = @search.where("  neuropsyches.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
+                                  where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                               and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                               and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                           and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) <= ?   )",params[:neuropsych_search][:max_age])
+              params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:neuropsych_search][:max_age]
+          elsif !params[:neuropsych_search][:min_age].blank? && !params[:neuropsych_search][:max_age].blank?
+             @search = @search.where("   neuropsyches.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
+                                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                             and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                             and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                         and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) between ? and ?   )",params[:neuropsych_search][:min_age],params[:neuropsych_search][:max_age])
+            params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:neuropsych_search][:min_age]+" and "+params[:neuropsych_search][:max_age]
+          end
+          # trim leading ","
+          params["search_criteria"] = params["search_criteria"].sub(", ","")
+          # pass to download file?
+
+      @search =  @search.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
+                                                 appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
+                                                 and scan_procedure_id in (?))", scan_procedure_array)
+
+
+      @neuropsyches =  @search.page(params[:page])
+
+    
+     # adjust columns and fields for html vs xls
+     request_format = request.formats.to_s
+     @html_request ="Y"
+     case  request_format
+       when "text/html" then  # application/html ?
+         @column_headers = ['Date','Protocol','Enumber','RMR','LP status','LP abnormality','LP success','LP followup','Completed Fast','LP Note', 'Appt Note'] # need to look up values
+         # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+         @column_number =   @column_headers.size
+         @fields =["vgroups.completedneuropsyche", "CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'yes' ELSE 'no' end" ,"CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'yes' ELSE 'no' end ","lumbarpunctures.lpfollownote",
+           "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'yes' ELSE 'no' end",
+           "lumbarpunctures.lumbarpuncture_note","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
+         @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
+       else
+             @html_request ="N"
+             @column_headers = ['Date','Protocol','Enumber','RMR','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','LP status','LP Note','BP Systol','BP Diastol','Pulse','Blood Glucose', 'Appt Note'] # need to look up values
+             # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+             @column_number =   @column_headers.size
+             @fields =["CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'Yes' ELSE 'No' end ","CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'Yes' ELSE 'No' end" ,"lumbarpunctures.lpfollownote",
+                "concat(employees.first_name,' ',employees.last_name)",
+               "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'Yes' ELSE 'No' end",
+               "lumbarpunctures.lpfasttotaltime","lumbarpunctures.lpfasttotaltime_min","vgroups.completedlumbarpuncture","lumbarpunctures.lumbarpuncture_note","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
+             @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id",
+                           "LEFT JOIN vitals on lumbarpunctures.appointment_id = vitals.appointment_id"] # left join needs to be in sql right after the parent table!!!!!!!
+       end
+     @tables =['neuropsyches'] # trigger joins --- vgroups and appointments by default
+
+     #@conditions =[] # ["scan_procedures.codename='johnson.pipr.visit1'"] # need look up for like, lt, gt, between  
+     @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
+           
+    @results = self.run_search   # in the application controller
+    @results_total = @results  # pageination makes result count wrong
+    t = Time.now 
+    @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
+   
+    ### LOOK WHERE TITLE IS SHOWING UP
+    @collection_title = 'All Neuro Psych appts'
+
+    respond_to do |format|
+      format.xls # lp_search.xls.erb
+      format.xml  { render :xml => @neuropsyches }       
+      format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(50)} # lp_search.html.erb
+    end
+
+    end
+
   # GET /neuropsyches
   # GET /neuropsyches.xml
   def index

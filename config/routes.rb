@@ -144,8 +144,11 @@ WADRCDataTools::Application.routes.draw do
     match '/lp_search' , :controller => 'lumbarpunctures', :action => 'lp_search', :as =>:lp_search
     # match '/lumbarpunctures/lp_search' , :controller => 'lumbarpunctures', :action => 'lp_search', :as =>:lp_search
     match '/blooddraw_search' , :controller => 'blooddraws', :action => 'blooddraw_search', :as =>:blooddraw_search
+    match '/lh_search' , :controller => 'blooddraws', :action => 'lh_search', :as =>:lh_search
     match '/neuropsych_search' , :controller => 'neuropsyches', :action => 'neuropsych_search', :as =>:neuropsych_search
+    match '/np_search' , :controller => 'neuropsyches', :action => 'np_search', :as =>:np_search
     match '/questionnaire_search' , :controller => 'questionnaires', :action => 'questionnaire_search', :as =>:questionnaire_search
+    match '/q_search' , :controller => 'questionnaires', :action => 'q_search', :as =>:q_search
   
     match '/participant_search' , :controller => 'participants', :action => 'participant_search', :as =>:participant_search
   

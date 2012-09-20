@@ -607,7 +607,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     @visit.destroy
 
     respond_to do |format|
-      format.html { redirect_to(visit_search_path) }
+      format.html { redirect_to(mri_search_path) }
       format.xml  { head :ok }
     end
   end
