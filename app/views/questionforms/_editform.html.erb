@@ -71,6 +71,7 @@
   <% end %>
 <%    # scan_procedure id --- access control, limit participants, visits, etc%>
 <%   # want to use value_link_array.include? make different dropdown - include visit-participant-enroll in one dropdown, and resplit to the different parts   %>
+<table width="40%"><tr><td width="100%" align="right"><%= submit_tag("Save the bottom entries") %></td></tr></table>
 <table>
     <% @questionform_questions.each do |qfq| 
 	@question = Question.find(qfq.question_id)
@@ -466,5 +467,5 @@
 	</td></tr>	
 	<% end %>
 </table>
-<%= submit_tag("Enter") %>
+<%= submit_tag("Save the entries") %>
 <% end %>

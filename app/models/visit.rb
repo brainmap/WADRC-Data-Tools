@@ -183,6 +183,7 @@ class Visit < ActiveRecord::Base
        appointment.appointment_date = visit.date
        vgroup = Vgroup.create
        vgroup.vgroup_date = visit.date
+       vgroup.rmr = visit.rmr
        vgroup.save
        appointment.vgroup_id = vgroup.id
        appointment.save
