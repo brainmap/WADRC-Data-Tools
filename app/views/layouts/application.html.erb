@@ -43,13 +43,13 @@
               <%= link_to "LP", '/lp_search' %>
             </li>
             <li <%= "class=current" if @current_tab == "blooddraws" %>>
-              <%= link_to "LabHealth", blooddraw_search_path %>
+              <%= link_to "LabHealth", lh_search_path %>
             </li>
             <li <%= "class=current" if @current_tab == "neuropsyches" %>>
-              <%= link_to "NeuroPsy", neuropsych_search_path %>
+              <%= link_to "NeuroPsy", np_search_path %>
             </li>
             <li <%= "class=current" if @current_tab == "questionnaires" %>>
-              <%= link_to "Questionnaires", questionnaire_search_path %>
+              <%= link_to "Questionnaires", q_search_path %>
             </li>
             <li <%= "class=current" if @current_tab == "enrollments" %>>
               <%= link_to "Enroll", enrollments_path %>

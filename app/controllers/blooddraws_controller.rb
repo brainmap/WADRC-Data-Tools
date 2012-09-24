@@ -123,8 +123,10 @@ class BlooddrawsController < ApplicationController
    end
 
   def lh_search
+    @conditions = []
      @current_tab = "blooddraws"
      params["search_criteria"] =""
+      q_form_id = 12   # use in data_search_q_data
 
      if params[:lh_search].nil?
           params[:lh_search] =Hash.new  
@@ -139,13 +141,14 @@ class BlooddrawsController < ApplicationController
 #     sql = "select * from blooddraws inner join  appointments on appointments.id = blooddraws.appointment_id order by appointment_date desc"
 #      @search = Blooddraw.find_by_sql(sql)
 #     @search = Blooddraw.where("blooddraws.appointment_id in (select appointments.id from appointments)").all
-      @search = Blooddraw.search(params[:search])    # parms search makes something which works with where?
+    ####  @search = Blooddraw.search(params[:search])    # parms search makes something which works with where?
 
       if !params[:lh_search][:scan_procedure_id].blank?
          condition ="   blooddraws.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                                 appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                                 and scan_procedure_id in ("+params[:lh_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
          @scan_procedures = ScanProcedure.where("id in (?)",params[:lh_search][:scan_procedure_id])
+         @conditions.push(condition)
          params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
       end
 
@@ -153,12 +156,14 @@ class BlooddrawsController < ApplicationController
          condition ="   blooddraws.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
           where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
           and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:lh_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+          @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:lh_search][:enumber]
       end      
 
       if !params[:lh_search][:rmr].blank? 
           condition ="   blooddraws.appointment_id in (select appointments.id from appointments,vgroups
                     where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:lh_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
+                    @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:lh_search][:rmr]
       end
 
@@ -179,12 +184,15 @@ class BlooddrawsController < ApplicationController
 
        if v_date_latest.length>0 && v_date_earliest.length >0
          condition ="    blooddraws.appointment_id in (select appointments.id from appointments where appointments.appointment_date between '"+v_date_earliest+"' and '"+v_date_latest+"' )"
+         @conditions.push(condition)
          params["search_criteria"] = params["search_criteria"] +",  visit date between "+v_date_earliest+" and "+v_date_latest
        elsif v_date_latest.length>0
          condition ="    blooddraws.appointment_id in (select appointments.id from appointments where appointments.appointment_date < '"+v_date_latest+"'  )"
+          @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  visit date before "+v_date_latest 
        elsif  v_date_earliest.length >0
          condition ="    blooddraws.appointment_id in (select appointments.id from appointments where appointments.appointment_date >  '"+v_date_earliest+"' )"
+          @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  visit date after "+v_date_earliest
         end
 
@@ -193,6 +201,7 @@ class BlooddrawsController < ApplicationController
             where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
                    and participants.gender is not NULL and participants.gender in ("+params[:lh_search][:gender].gsub(/[;:'"()=<>]/, '')+") )"
+            @conditions.push(condition)
             if params[:lh_search][:gender] == 1
                params["search_criteria"] = params["search_criteria"] +",  sex is Male"
             elsif params[:lh_search][:gender] == 2
@@ -206,6 +215,7 @@ class BlooddrawsController < ApplicationController
                             and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                             and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
                             and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) >= "+params[:lh_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+            @conditions.push(condition)
             params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:lh_search][:min_age]
         elsif params[:lh_search][:min_age].blank? && !params[:lh_search][:max_age].blank?
              condition ="     blooddraws.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
@@ -213,6 +223,7 @@ class BlooddrawsController < ApplicationController
                              and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                              and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
                          and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) <= "+params[:lh_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+            @conditions.push(condition)
             params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:lh_search][:max_age]
         elsif !params[:lh_search][:min_age].blank? && !params[:lh_search][:max_age].blank?
            condition ="      blooddraws.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
@@ -220,6 +231,7 @@ class BlooddrawsController < ApplicationController
                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                            and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
                        and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) between "+params[:lh_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:lh_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+          @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:lh_search][:min_age]+" and "+params[:lh_search][:max_age]
         end
         # trim leading ","
@@ -232,31 +244,31 @@ class BlooddrawsController < ApplicationController
    @html_request ="Y"
    case  request_format
      when "text/html" then  # application/html ?
-       @column_headers = ['Date','Protocol','Enumber','RMR','LP status','LP abnormality','LP success','LP followup','Completed Fast','LP Note', 'Appt Note'] # need to look up values
+       @column_headers = ['Date','Protocol','Enumber','RMR','LH status','LH Note', 'Appt Note'] # need to look up values
        # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
        @column_number =   @column_headers.size
-       @fields =["vgroups.completedblooddraw", "CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'yes' ELSE 'no' end" ,"CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'yes' ELSE 'no' end ","lumbarpunctures.lpfollownote",
-         "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'yes' ELSE 'no' end",
-         "lumbarpunctures.lumbarpuncture_note","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
-       @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
+       @fields =["vgroups.completedblooddraw","blooddraws.blooddrawnote","blooddraws.id"] # vgroups.id vgroup_id always first, include table name
+       @left_join = [""] # left join needs to be in sql right after the parent table!!!!!!!
      else
            @html_request ="N"
-           @column_headers = ['Date','Protocol','Enumber','RMR','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','LP status','LP Note','BP Systol','BP Diastol','Pulse','Blood Glucose', 'Appt Note'] # need to look up values
+           @column_headers = ['Date','Protocol','Enumber','RMR','LH status','LH Note', 'Appt Note'] # need to look up values
            # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
            @column_number =   @column_headers.size
-           @fields =["CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'Yes' ELSE 'No' end ","CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'Yes' ELSE 'No' end" ,"lumbarpunctures.lpfollownote",
-              "concat(employees.first_name,' ',employees.last_name)",
-             "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'Yes' ELSE 'No' end",
-             "lumbarpunctures.lpfasttotaltime","lumbarpunctures.lpfasttotaltime_min","vgroups.completedlumbarpuncture","lumbarpunctures.lumbarpuncture_note","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
-           @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id",
-                         "LEFT JOIN vitals on lumbarpunctures.appointment_id = vitals.appointment_id"] # left join needs to be in sql right after the parent table!!!!!!!
+           @fields =["vgroups.completedblooddraw","blooddraws.blooddrawnote","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","blooddraws.id"] # vgroups.id vgroup_id always first, include table name
+           @left_join = ["LEFT JOIN vitals on blooddraws.appointment_id = vitals.appointment_id"] # left join needs to be in sql right after the parent table!!!!!!!
      end
    @tables =['blooddraws'] # trigger joins --- vgroups and appointments by default
 
    #@conditions =[] # ["scan_procedures.codename='johnson.pipr.visit1'"] # need look up for like, lt, gt, between  
    @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
-         
-  @results = self.run_search   # in the application controller
+   
+   if @html_request == "Y"     
+       @results = self.run_search   # in the application controller
+   elsif @html_request == "N"
+        @results = self.run_search_q_data   # in the application controller
+   end
+       
+       
   @results_total = @results  # pageination makes result count wrong
   t = Time.now 
   @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
@@ -525,7 +537,7 @@ class BlooddrawsController < ApplicationController
     @blooddraw.destroy
 
     respond_to do |format|
-      format.html { redirect_to(blooddraw_search_path) }
+      format.html { redirect_to(lh_search_path) }
       format.xml  { head :ok }
     end
   end
