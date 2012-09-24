@@ -149,7 +149,7 @@ edit_count = edit_count -1
 	    <% if i == 0 %>
 	     <td><%= link_to result[i].to_s(:datetime_military), visit %></td>
 	   <% elsif i == 1 %>
-	     <td><%= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
+	     <td><%= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, '/mri_search?mri_search[scan_procedure_id][]='+sp.id.to_s)}.join(", ").html_safe %></td>
 	    <% elsif i == 2 %>
 	     <td><%= visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
 	    <% elsif i == 5 %>

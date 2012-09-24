@@ -145,7 +145,7 @@ edit_count = edit_count -1
 	    <% if i == 0 %>
 	     <td><%= link_to result[i].to_s(:datetime_military), neuropsych %></td>
 	    <% elsif i == 1 %>
-	     <td><%= vgroup.scan_procedures.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
+	     <td><%= vgroup.scan_procedures.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, '/np_search?np_search[scan_procedure_id][]='+sp.id.to_s)}.join(", ").html_safe %></td>
 	    <% elsif i == 2 %>
 	     <td><%= vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
 	    <% elsif i == 4  %>
