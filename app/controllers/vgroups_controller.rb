@@ -149,7 +149,7 @@ class VgroupsController < ApplicationController
   def new
     @vgroup = Vgroup.new
 
-    # @vgroup.enrollments << Enrollment.new
+    @vgroup.enrollments << Enrollment.new
 
     respond_to do |format|
       format.html # new.html.erb
@@ -189,9 +189,30 @@ class VgroupsController < ApplicationController
     #  @vgroup.participant_id =params[:vgroup][:participant_id]
     #  @vgroup.rmr =params[:vgroup][:rmr]
     #  @vgroup.vgroup_date = params[:vgroup]["#{'vgroup_date'}(1i)"] +"-"+params[:vgroup]["#{'vgroup_date'}(2i)"].rjust(2,"0")+"-"+params[:vgroup]["#{'vgroup_date'}(3i)"].rjust(2,"0")
+     
     
     respond_to do |format|
       if @vgroup.save
+        #problems with new enumber
+        if !params[:vgroup][:enrollments_attributes]["0"][:enumber].blank?
+          connection = ActiveRecord::Base.connection();
+          enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+          if !enrollment.blank?
+            # do nothing, will show up
+          else  # make a new enrollment with this participant-- only works for participant selected
+            if !(@vgroup.participant_id).blank?
+                sql = " insert into enrollments(enumber,participant_id)values('"+params[:vgroup][:enrollments_attributes]["0"][:enumber].gsub(/[;:'"()=<>]/, '')+"',"+@vgroup.participant_id.to_s+")"
+                results = connection.execute(sql) 
+            else
+                sql = " insert into enrollments(enumber)values('"+params[:vgroup][:enrollments_attributes]["0"][:enumber].gsub(/[;:'"()=<>]/, '')+"' )"  
+                results = connection.execute(sql)
+                # need to add
+                @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+                sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment[0].id).to_s+")"      
+                results = connection.execute(sql)
+            end                    
+           end    
+        end    
         if !(@vgroup.participant_id).blank?   # how will this interact with load visit? participant_id is probably blank until the enumber update in mri
           sql = "select enrollments.id from enrollments where participant_id ="+@vgroup.participant_id.to_s 
           # this is going to cause problems if there are multiple enrollments for a participant?
@@ -212,6 +233,7 @@ class VgroupsController < ApplicationController
               end
           end
         end
+
       # removed attr_accessible in model and now ok  
       #  if !params[:vgroup][:scan_procedure_ids].blank?
       #     connection = ActiveRecord::Base.connection();
@@ -244,17 +266,49 @@ class VgroupsController < ApplicationController
     
     # getting undefined method `to_sym' error -- somethng is nil 
     # just trying to delete 
+    v_cnt = 0
     params[:vgroup][:enrollments_attributes].each do|cnt, value|
-      #enumberpipr00042id2203_destroy1
-      enrollment_id = (value.to_s)[(value.to_s).index("id")+2,(value.to_s).index("_destroy")]
-      v_destroy = (value.to_s)[(value.to_s).index("_destroy")+8,(value.to_s).length] 
-      if v_destroy.to_s == "1"
-        enrollment_id = enrollment_id.sub("_destroy1","")
-        sql = "delete from enrollment_vgroup_memberships where enrollment_id="+enrollment_id+" and vgroup_id ="+@vgroup.id.to_s
-        connection = ActiveRecord::Base.connection();
-        results = connection.execute(sql)
-      end
+      v_cnt = v_cnt + 1
+      if !params[:vgroup][:enrollments_attributes][cnt.to_s][:id].blank?
+         #enumberpipr00042id2203_destroy1
+         enrollment_id = (value.to_s)[(value.to_s).index("id")+2,(value.to_s).index("_destroy")]
+         v_destroy = (value.to_s)[(value.to_s).index("_destroy")+8,(value.to_s).length] 
+         if v_destroy.to_s == "1"
+             enrollment_id = enrollment_id.sub("_destroy1","")
+             sql = "delete from enrollment_vgroup_memberships where enrollment_id="+enrollment_id+" and vgroup_id ="+@vgroup.id.to_s
+             connection = ActiveRecord::Base.connection();
+             results = connection.execute(sql)
+         end
+       else
+         if !params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].blank?
+           connection = ActiveRecord::Base.connection();
+           @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
+           if !@enrollment.blank?
+             @enrollment_vgroup_membership = EnrollmentVgroupMembership.where("enrollment_id in (?) and vgroup_id in (?)",@enrollment[0].id, @vgroup.id)
+              if @enrollment_vgroup_membership.blank?
+                  sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment[0].id).to_s+")"      
+                  results = connection.execute(sql)
+              end
+           else  # make a new enrollment with this participant-- only works for participant selected
+             if !(@vgroup.participant_id).blank?
+                 sql = " insert into enrollments(enumber,participant_id)values('"+params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].gsub(/[;:'"()=<>]/, '')+"',"+@vgroup.participant_id.to_s+")"
+                 results = connection.execute(sql) 
+             else
+                 sql = " insert into enrollments(enumber)values('"+params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].gsub(/[;:'"()=<>]/, '')+"' )"  
+                 results = connection.execute(sql)
+              end
+                 # need to add
+                 @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
+                 @enrollment_vgroup_membership = EnrollmentVgroupMembership.where("enrollment_id in (?)",@enrollment[0].id)
+                 if @enrollment_vgroup_membership.blank?
+                     sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment[0].id).to_s+")"      
+                     results = connection.execute(sql)
+                 end                   
+            end    
+         end
+       end
     end
+
     
     params[:vgroup].delete('enrollments_attributes') 
     

@@ -11,6 +11,8 @@ class Vgroup < ActiveRecord::Base
   accepts_nested_attributes_for :enrollments, :reject_if => :all_blank, :allow_destroy => true
 #  before_validation :lookup_enrollments
   delegate :enumber, :to => :enrollment, :prefix => true
+  
+
  
    belongs_to :user 
      belongs_to :created_by, :class_name => "User"
@@ -22,7 +24,7 @@ class Vgroup < ActiveRecord::Base
   has_and_belongs_to_many :scan_procedures
   
     def lookup_enrollments
-      # get from visits
+      # get from visits--- now get from vgroups
     end
   
   def participant

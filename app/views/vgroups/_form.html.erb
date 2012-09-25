@@ -50,7 +50,7 @@
 	<% end %>
 	</ul>
 	</div>
-	
+	<% v_cnt = 0   # not sure why empty field not showing up like in visit mri -- making a blank with the next vgroup[enrollments_attributes][0][id]%>
 	<%= f.fields_for :enrollments do |e| %>
 	<p>
 		<%= e.label :enumber %>
@@ -59,7 +59,11 @@
 		<%= e.text_field_with_auto_complete :enumber, {},
 			        { :method => :get, :url => enrollments_path(:format => :js), :param_name => 'search' } %>
 	</p>
-	<% end %>
+	<%    v_cnt = v_cnt + 1
+	   end %>
+	<%= f.label :enumber %>
+	<%= text_field_tag ("vgroup[enrollments_attributes]["+v_cnt.to_s+"][enumber]" )%><br>
+	<br>
 	 When a vgroup is created, the selected participant will add all its enumbers to the vgroup. The extras can be deleted. Not sure how to add more enumbers, or to add an enumber which does not exist. Need to fix.
 	<br><br>
   <div class="actions">

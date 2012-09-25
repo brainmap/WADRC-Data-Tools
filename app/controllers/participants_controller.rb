@@ -19,9 +19,9 @@ class ParticipantsController < ApplicationController
 #      from enrollment_visit_memberships, scan_procedures_visits
 #      where enrollment_visit_memberships.visit_id = scan_procedures_visits.visit_id and scan_procedures_visits.scan_procedure_id in (?))) ", scan_procedure_array).search(params[:search])
  
- @search = Participant.where(" participants.id in ( select participant_id from enrollments,enrollment_visit_memberships, scan_procedures_visits
-      where enrollments.id = enrollment_visit_memberships.enrollment_id
-     and  enrollment_visit_memberships.visit_id = scan_procedures_visits.visit_id and scan_procedures_visits.scan_procedure_id in (?)) ", scan_procedure_array).search(params[:search])
+ @search = Participant.where(" participants.id in ( select participant_id from enrollments,enrollment_vgroup_memberships, scan_procedures_vgroups
+      where enrollments.id = enrollment_vgroup_memberships.enrollment_id
+     and  enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.visit_id and scan_procedures_vgroups.scan_procedure_id in (?)) ", scan_procedure_array).search(params[:search])
            
     @participants = @search.relation.page(params[:page])
 
@@ -38,8 +38,8 @@ class ParticipantsController < ApplicationController
 #    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
      
-     @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships, scan_procedures_visits
-           where enrollment_visit_memberships.visit_id = scan_procedures_visits.visit_id and scan_procedures_visits.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
+     @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
+           where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
 
     respond_to do |format|
       format.html # show.html.erb
@@ -64,8 +64,8 @@ class ParticipantsController < ApplicationController
 #    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
      @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in 
-     (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships,scan_procedures_visits
-      where enrollment_visit_memberships.visit_id = scan_procedures_visits.visit_id and  scan_procedures_visits.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
+     (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships,scan_procedures_vgroups
+      where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and  scan_procedures_vgroups.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
   end
 
   # POST /participants
@@ -91,8 +91,8 @@ class ParticipantsController < ApplicationController
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
 #    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
-     @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships, scan_procedures_visits
-                 where enrollment_visit_memberships.visit_id  =  scan_procedures_visits.visit_id and  scan_procedures_visits.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
+     @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
+                 where enrollment_vgroup_memberships.vgroup_id  =  scan_procedures_vgroups.vgroup_id and  scan_procedures_vgroups.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
 
     respond_to do |format|
       if @participant.update_attributes(params[:participant])
@@ -111,12 +111,12 @@ class ParticipantsController < ApplicationController
 
         # possible params -- participants fields just get added as AND statements
         #   other table fields should be grouped into one lower level IN select 
-        # scan_procedures_visits.scan_procedures_id
-        # visits.rmr
-        # visits.path
-        # visits.date scan date before = latest_timestamp(1i)(2i)(3i)
-        # visits.date scan date after  = earliest_timestamp(1i)(2i)(3i)
-        #enrollment_visit_memberships.enrollment_id enrollments.enumber
+        # scan_procedures_vgroups.scan_procedures_id
+        # vgroups.rmr
+        # vgroups.path
+        # vgroups.date scan date before = latest_timestamp(1i)(2i)(3i)
+        # vgroups.date scan date after  = earliest_timestamp(1i)(2i)(3i)
+        #enrollment_vgroup_memberships.enrollment_id enrollments.enumber
         
         # age at ANY of the appointments
 
@@ -129,24 +129,24 @@ class ParticipantsController < ApplicationController
         # Remove default scope if sorting has been requested.
         @search = Participant.search(params[:search]) 
           if !params[:participant_search][:scan_procedure_id].blank?
-             @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments, scan_procedures_visits
-                               where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                            and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id
-                            and scan_procedures_visits.scan_procedure_id in (?))",params[:participant_search][:scan_procedure_id])
+             @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups
+                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                            and scan_procedures_vgroups.scan_procedure_id in (?))",params[:participant_search][:scan_procedure_id])
           end
 
           if !params[:participant_search][:enumber].blank?
-             @search =@search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments
-                                        where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+             @search =@search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments
+                                        where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                                           and lower(enrollments.enumber) in (lower(?)))",params[:participant_search][:enumber])
           end      
 
           if !params[:participant_search][:rmr].blank? 
-              @search = @search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments, scan_procedures_visits,visits
-                                 where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                              and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id 
-                              and visits.id = enrollment_visit_memberships.visit_id
-                              and lower(visits.rmr) in (lower(?)  ) )",params[:participant_search][:rmr])
+              @search = @search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,vgroups
+                                 where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                              and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                              and vgroups.id = enrollment_vgroup_memberships.vgroup_id
+                              and lower(vgroups.rmr) in (lower(?)  ) )",params[:participant_search][:rmr])
           end
 
            #  build expected date format --- between, >, < 
@@ -165,69 +165,69 @@ class ParticipantsController < ApplicationController
             end
 
            if v_date_latest.length>0 && v_date_earliest.length >0
-             @search = @search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments,visits
-               where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                      and visits.id = enrollment_visit_memberships.visit_id
-                      and   visits.date between ? and ? )",v_date_earliest,v_date_latest)
+             @search = @search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments,vgroups
+               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                      and vgroups.id = enrollment_vgroup_memberships.vgroup_id
+                      and   vgroups.date between ? and ? )",v_date_earliest,v_date_latest)
            elsif v_date_latest.length>0
-             @search = @search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments,visits
-                where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                       and visits.id = enrollment_visit_memberships.visit_id
-                       and visits.date < ?  )",v_date_latest)
+             @search = @search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments,vgroups
+                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                       and vgroups.id = enrollment_vgroup_memberships.vgroup_id
+                       and vgroups.date < ?  )",v_date_latest)
            elsif  v_date_earliest.length >0
-             @search = @search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments,visits
-                where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                       and visits.id = enrollment_visit_memberships.visit_id
-                       and visits.date > ? )",v_date_earliest)
+             @search = @search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments,vgroups
+                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                       and vgroups.id = enrollment_vgroup_memberships.vgroup_id
+                       and vgroups.date > ? )",v_date_earliest)
             end
 
             if !params[:participant_search][:gender].blank?
    
-              @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments
-                where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+              @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments
+                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
                        and participants.gender is not NULL and participants.gender in (?) )", params[:participant_search][:gender])
             end   
 
             if !params[:participant_search][:wrapnum].blank?
    
-              @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments
-                where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+              @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments
+                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
                        and participants.wrapnum is not NULL and participants.wrapnum in (?) )", params[:participant_search][:wrapnum])
             end
             
             if !params[:participant_search][:reggieid].blank?
    
-              @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments
-                where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+              @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments
+                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
                        and participants.reggieid is not NULL and participants.reggieid in (?) )", params[:participant_search][:reggieid])
             end
 
          # NEED TO CHANGE TO BE FOR ANY APPOITMENT 
 
          if !params[:participant_search][:min_age].blank? && params[:participant_search][:max_age].blank?
-             @search = @search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments, scan_procedures_visits,visits
-                                where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                             and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id 
-                             and visits.id = enrollment_visit_memberships.visit_id
-                             and floor(DATEDIFF(visits.date,participants.dob)/365.25) >= ?   )",params[:participant_search][:min_age])
+             @search = @search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,vgroups
+                                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                             and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                             and vgroups.id = enrollment_vgroup_memberships.vgroup_id
+                             and floor(DATEDIFF(vgroups.date,participants.dob)/365.25) >= ?   )",params[:participant_search][:min_age])
          elsif params[:participant_search][:min_age].blank? && !params[:participant_search][:max_age].blank?
-              @search = @search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments, scan_procedures_visits,visits
-                              where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                          and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id 
-                          and visits.id = enrollment_visit_memberships.visit_id
-                          and floor(DATEDIFF(visits.date,participants.dob)/365.25) <= ?   )",params[:participant_search][:max_age])
+              @search = @search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,vgroups
+                              where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                          and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                          and vgroups.id = enrollment_vgroup_memberships.vgroup_id
+                          and floor(DATEDIFF(vgroups.date,participants.dob)/365.25) <= ?   )",params[:participant_search][:max_age])
          elsif !params[:participant_search][:min_age].blank? && !params[:participant_search][:max_age].blank?
-            @search = @search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments, scan_procedures_visits,visits
-                            where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                        and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id 
-                        and visits.id = enrollment_visit_memberships.visit_id
-                        and floor(DATEDIFF(visits.date,participants.dob)/365.25) between ? and ?   )",params[:participant_search][:min_age],params[:participant_search][:max_age])
+            @search = @search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,vgroups
+                            where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                        and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                        and vgroups.id = enrollment_vgroup_memberships.vgroup_id
+                        and floor(DATEDIFF(vgroups.date,participants.dob)/365.25) between ? and ?   )",params[:participant_search][:min_age],params[:participant_search][:max_age])
          end
 
-        @search  =  @search.where(" participants.id in     (select enrollments.participant_id from participants,  enrollment_visit_memberships, enrollments, scan_procedures_visits
-                               where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                            and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id
-                            and Scan_procedures_visits.scan_procedure_id in (?))", scan_procedure_array)
+        @search  =  @search.where(" participants.id in     (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups
+                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                            and Scan_procedures_vgroups.scan_procedure_id in (?))", scan_procedure_array)
        @participants  =  @search.page(params[:page]) 
 
         ### LOOK WHERE TITLE IS SHOWING UP
@@ -267,8 +267,8 @@ class ParticipantsController < ApplicationController
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
      
      @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in 
-     (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships, scan_procedures_visits
-      where enrollment_visit_memberships.visit_id = scan_procedures_visits.visit_id and  scan_procedures_visits.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id]) 
+     (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
+      where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and  scan_procedures_vgroups.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id]) 
     @participant.destroy
 
     respond_to do |format|
