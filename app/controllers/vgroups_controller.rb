@@ -393,6 +393,10 @@ class VgroupsController < ApplicationController
   def in_scan_procedure
    redirect_to in_scan_procedure_vgroup_path( :scan_procedure_id => params[:scan_procedure][:id] )
   end
+  
+  def in_enumber
+   redirect_to in_enumber_vgroup_path( :enumber => params[:enumber] )
+  end
 
   def index_by_scan_procedure  
     scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
@@ -409,6 +413,32 @@ class VgroupsController < ApplicationController
        @vgroups = @search.relation.where(" vgroups.id in (select Vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?) and scan_procedure_id in (?))", 
                               scan_procedure_array,params[:scan_procedure_id]).page(params[:page])
        @collection_title = "All Visits enrolled in #{ScanProcedure.find_by_id(params[:scan_procedure_id]).codename}"
+    else
+      @vgroups = @search.relation.where(" vgroups.id in (select Vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
+      @collection_title = "All Visits"
+    end
+    
+    render :template => "vgroups/home"
+
+  end
+  
+  def index_by_enumber  
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    if !params[:search].blank? && !params[:search][:meta_sort].blank?
+      @search = Vgroup.unscoped.search(params[:search]) 
+    else
+      @search = Vgroup.search(params[:search]) 
+    end
+    # if !params[:enumber].blank? 
+    #   @vgroups = @search.where(" vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships,enrollments
+    #                                                      where enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower(?)))",params[:enumber])
+    #  @collection_title = "All Visits for params[:enumber]"
+    if !params[:enumber].blank? 
+       @vgroups = @search.relation.where(" vgroups.id in (select Vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?) ) and 
+                                         vgroups.id in ( select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships, enrollments 
+                                                            where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enrollments.enumber in (?)) ", 
+                              scan_procedure_array,params[:enumber]).page(params[:page])
+       @collection_title = "All Visits with enumber in "+params[:enumber]
     else
       @vgroups = @search.relation.where(" vgroups.id in (select Vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
       @collection_title = "All Visits"

@@ -170,6 +170,10 @@ WADRCDataTools::Application.routes.draw do
    match '/vgroups/recently_imported', :to => 'vgroups#index_by_scope', :scope => 'recently_imported', :as => :recently_imported_vgroups
    match '/vgroups/assigned_to/:user_login', :controller => 'vgroups', :action => 'index_by_user_id', :as => :assigned_to_vgroup
    match '/vgroups/in_scan_procedure/:scan_procedure_id', :controller => 'vgroups', :action => 'index_by_scan_procedure', :as => :in_scan_procedure_vgroup
+   match '/vgroups/in_enumber/:enumber', :controller => 'vgroups', :action => 'index_by_enumber', :as => :in_enumber_vgroup
+   #match '/vgroups/in_scan_procedure', :controller => 'vgroups', :action => 'home', :as => :home
+   #match '/vgroups/in_enumber', :controller => 'vgroups', :action => 'home', :as => :home
+      
    match '/vgroups/vgroup_search' , :controller => 'vgroups', :action => 'vgroup_search', :as =>:vgroup_search
    match '/vgroups/change_appointment_vgroup', :controller => 'vgroups', :action => 'change_appointment_vgroup', :as =>:change_appointment_vgroup
    match '/vgroups/change_transfer_mri_vgroup', :controller => 'vgroups', :action => 'change_transfer_mri_vgroup', :as =>:change_transfer_mri_vgroup
