@@ -72,17 +72,43 @@ class ParticipantsController < ApplicationController
   # POST /participants.xml
   def create
     @participant = Participant.new(params[:participant])
+    connection = ActiveRecord::Base.connection();
+    if !params[:enumber].blank?
+       @enrollment = Enrollment.where("enumber = ?",params[:enumber] )
+       if !@enrollment.blank?
+         flash[:notice] = 'There is a participant with enumber '+params[:enumber]               
+       end         
+     end
+     if !params[:participant][:wrapnum].blank?
+        @participant2 = Participant.where("wrapnum in (?)",params[:participant][:wrapnum] )
+        if !@participant2.blank?
+          flash[:notice] = 'There is a participant with wrapnumber '+params[:participant][:wrapnum]               
+        end         
+      end
+      if !params[:participant][:reggieid].blank?
+         @participant3 = Participant.where("reggieid = ?",params[:participant][:reggieid] )
+         if !@participant3.blank?
+           flash[:notice] = 'There is a participant with reggieid '+params[:participant][:reggieid]               
+         end         
+       end
 
     respond_to do |format|
-      if @participant.save
+      if !@enrollment.blank? or !@participant2.blank? or !@participant3.blank?
+        format.html { render :action => "new" }
+        format.xml  { render :xml => @participant.errors, :status => :unprocessable_entity }
+      elsif @participant.save 
+        if !params[:enumber].blank?
+          sql = " insert into enrollments(enumber,participant_id)values('"+params[:enumber].gsub(/[;:'"()=<>]/, '')+"',"+@participant.id.to_s+")"
+          results = connection.execute(sql)
+        end
         flash[:notice] = 'Participant was successfully created.'
-        format.html { redirect_to(@participant) }
+        format.html { redirect_to(participant_search_path) }
         format.xml  { render :xml => @participant, :status => :created, :location => @participant }
       else
         format.html { render :action => "new" }
         format.xml  { render :xml => @participant.errors, :status => :unprocessable_entity }
       end
-    end
+     end
   end
 
   # PUT /participants/1
@@ -120,7 +146,7 @@ class ParticipantsController < ApplicationController
         
         # age at ANY of the appointments
 
-
+      params[:search] =Hash.new
        if params[:participant_search].nil?
             params[:participant_search] =Hash.new  
        end
@@ -129,15 +155,16 @@ class ParticipantsController < ApplicationController
         # Remove default scope if sorting has been requested.
         @search = Participant.search(params[:search]) 
           if !params[:participant_search][:scan_procedure_id].blank?
-             @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups
-                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                            and scan_procedures_vgroups.scan_procedure_id in (?))",params[:participant_search][:scan_procedure_id])
+            @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups
+                              where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                           and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                           and scan_procedures_vgroups.scan_procedure_id in (?))",params[:participant_search][:scan_procedure_id])
+            
           end
 
           if !params[:participant_search][:enumber].blank?
-             @search =@search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments
-                                        where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+             @search =@search.where("  participants.id in (select enrollments.participant_id from participants,   enrollments
+                                        where enrollments.participant_id = participants.id
                                           and lower(enrollments.enumber) in (lower(?)))",params[:participant_search][:enumber])
           end      
 
@@ -183,22 +210,22 @@ class ParticipantsController < ApplicationController
 
             if !params[:participant_search][:gender].blank?
    
-              @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments
-                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+              @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollments
+                where  enrollments.participant_id = participants.id 
                        and participants.gender is not NULL and participants.gender in (?) )", params[:participant_search][:gender])
             end   
 
             if !params[:participant_search][:wrapnum].blank?
    
-              @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments
-                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+              @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollments
+                where enrollments.participant_id = participants.id 
                        and participants.wrapnum is not NULL and participants.wrapnum in (?) )", params[:participant_search][:wrapnum])
             end
             
             if !params[:participant_search][:reggieid].blank?
    
-              @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments
-                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+              @search =@search.where(" participants.id in (select enrollments.participant_id from participants,   enrollments
+                where  enrollments.participant_id = participants.id 
                        and participants.reggieid is not NULL and participants.reggieid in (?) )", params[:participant_search][:reggieid])
             end
 
@@ -223,18 +250,18 @@ class ParticipantsController < ApplicationController
                         and vgroups.id = enrollment_vgroup_memberships.vgroup_id
                         and floor(DATEDIFF(vgroups.date,participants.dob)/365.25) between ? and ?   )",params[:participant_search][:min_age],params[:participant_search][:max_age])
          end
-
-        @search  =  @search.where(" participants.id in     (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups
-                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                            and Scan_procedures_vgroups.scan_procedure_id in (?))", scan_procedure_array)
+# show all the particpants in index page
+#        @search  =  @search.where(" participants.id in     (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups
+#                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+#                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+#                            and Scan_procedures_vgroups.scan_procedure_id in (?))", scan_procedure_array)
        @participants  =  @search.page(params[:page]) 
 
         ### LOOK WHERE TITLE IS SHOWING UP
         @collection_title = 'All participants'
 
-
-    limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:dicom_dvd,:compile_folder,:id,
+#:initials,
+    limit_visits =  [:user_id ,:transfer_mri,:transfer_pet,:conference,:dicom_dvd,:compile_folder,:id,
                       :created_at, :updated_at, :research_diagnosis, :consent_form_type, :created_by_id, :dicom_study_uid,:compiled_at]
 
 
