@@ -260,7 +260,7 @@ class NeuropsychesController < ApplicationController
              @html_request ="N"
              @column_headers = ['Date','Protocol','Enumber','RMR','NP status','NP Note', 'Appt Note'] # need to look up values
              # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
-             @column_number =   @column_headers.size
+             #@column_number =   @column_headers.size
              @fields =["vgroups.completedneuropsych", "neuropsyches.neuropsychnote","neuropsyches.id"] # vgroups.id vgroup_id always first, include table name
              @left_join = [] # left join needs to be in sql right after the parent table!!!!!!!
        end
@@ -274,6 +274,7 @@ class NeuropsychesController < ApplicationController
        @results = self.run_search   # in the application controller
    elsif @html_request == "N"
         @results = self.run_search_q_data   # in the application controller
+        @column_number =   @column_headers.size
    end
     @results_total = @results  # pageination makes result count wrong
     t = Time.now 

@@ -126,7 +126,7 @@ class BlooddrawsController < ApplicationController
     @conditions = []
      @current_tab = "blooddraws"
      params["search_criteria"] =""
-      q_form_id = 12   # use in data_search_q_data
+      @q_form_id = 12   # use in data_search_q_data
 
      if params[:lh_search].nil?
           params[:lh_search] =Hash.new  
@@ -253,7 +253,7 @@ class BlooddrawsController < ApplicationController
            @html_request ="N"
            @column_headers = ['Date','Protocol','Enumber','RMR','LH status','LH Note','BP Systol','BP Diastol','Pulse','Blood Glucose','Height(inches)','Weight(kg)', 'Appt Note'] # need to look up values
            # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
-           @column_number =   @column_headers.size
+           #@column_number =   @column_headers.size
            @fields =["vgroups.completedblooddraw","blooddraws.blooddrawnote","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","blooddraws.height_inches","blooddraws.weight_kg","blooddraws.id"] # vgroups.id vgroup_id always first, include table name
            @left_join = ["LEFT JOIN vitals on blooddraws.appointment_id = vitals.appointment_id"] # left join needs to be in sql right after the parent table!!!!!!!
      end
@@ -266,6 +266,7 @@ class BlooddrawsController < ApplicationController
        @results = self.run_search   # in the application controller
    elsif @html_request == "N"
         @results = self.run_search_q_data   # in the application controller
+        @column_number =   @column_headers.size
    end
        
        

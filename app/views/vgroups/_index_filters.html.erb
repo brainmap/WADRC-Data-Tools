@@ -18,17 +18,12 @@
    <% end %>
 </td><td nowrap align="right" valign="center">
      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<%= form_tag '/vgroups/in_enumber' do %>
+	 <%= text_field_tag :enumber  %> <%= submit_tag("Enumber search") %>
+	  <% end %>
 
-<%= form_tag '/vgroups/in_enumber' do %>
- <%= text_field_tag :enumber  %> <%= submit_tag("Enumber search") %>
-  <% end %>
 </td></tr></table>
-<!--
-  <%= form_tag '/vgroups/assigned_to_who' do %>
-    <%= collection_select :user, :username, User.all.sort_by(&:username_name), :id, :username_name, :prompt => 'choose user' %>
-    <%= submit_tag("Assigned to") %>
-  <% end %>
---> 
+
 </div>
 
 <br style="clear:both" />
