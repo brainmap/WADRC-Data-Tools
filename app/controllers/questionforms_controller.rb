@@ -188,8 +188,8 @@ class QuestionformsController < ApplicationController
           if !@question.base_table_2.blank? and !@question.base_column_2.blank?
             if @question.base_table_2 == "appointments" or @question.base_table_2 == "participants" 
               sql ="update  "+@question.base_table_2+"
-                    set "+@question.base_table_2+"s."+@question.base_column_2+" = '"+@q_data.value_2+"'
-                    where "+@question.value_link+".id = "+@q_data.value_link.to_s              
+                    set "+@question.base_table_2+"."+@question.base_column_2+" = '"+@q_data.value_2+"'
+                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s              
             else
             sql ="update  "+@question.base_table_2+"
                   set "+@question.base_table_2+"."+@question.base_column_2+" = '"+@q_data.value_2+"'

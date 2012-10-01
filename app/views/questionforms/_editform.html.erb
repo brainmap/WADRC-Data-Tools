@@ -93,6 +93,58 @@
 		   @q_data.value_1 = @question.default_val_1
 		   @q_data.value_2 = @question.default_val_2
 		   @q_data.value_3 = @question.default_val_3
+		   # get value from global --
+		   if @question.global_update_1 == "Y"			
+			  if @question.base_table_1 == "appointments" 
+			      sql ="select "+@question.base_table_1+"."+@question.base_column_1+" from  "+@question.base_table_1+"
+	                    where "+@question.base_table_1+".id = "+@appointment.id.to_s
+			  elsif @question.base_table_1 == "participants" 
+                  sql ="select "+@question.base_table_1+"."+@question.base_column_1+" from  "+@question.base_table_1+"
+                    where "+@question.base_table_1+".id = "+@participant.id.to_s              
+              else   # not sure what this will do-- assumming appointment_id
+                  sql ="select "+@question.base_table_1+"."+@question.base_column_1+" from  "+@question.base_table_1+"
+                  where "+@question.value_link+"_id = "+@appointment.id.to_s
+              end
+              connection = ActiveRecord::Base.connection();      
+              results = connection.execute(sql)
+              results.each do |id|
+	              @q_data.value_1 = id[0].to_s
+	          end
+		    end
+			if @question.global_update_2 == "Y"			
+				  if @question.base_table_2 == "appointments" 
+				      sql ="select "+@question.base_table_2+"."+@question.base_column_2+" from  "+@question.base_table_2+"
+		                    where "+@question.base_table_2+".id = "+@appointment.id.to_s
+				  elsif @question.base_table_2 == "participants" 
+	                  sql ="select "+@question.base_table_2+"."+@question.base_column_2+" from  "+@question.base_table_2+"
+	                    where "+@question.base_table_2+".id = "+@participant.id.to_s              
+	              else   # not sure what this will do-- assumming appointment_id
+	                  sql ="select "+@question.base_table_2+"."+@question.base_column_2+" from  "+@question.base_table_2+"
+	                  where "+@question.value_link+"_id = "+@appointment.id.to_s
+	              end
+	              connection = ActiveRecord::Base.connection();      
+	              results = connection.execute(sql)
+	              results.each do |id|
+		              @q_data.value_2 = id[0].to_s
+		          end
+			 end
+			if @question.global_update_3 == "Y"			
+				  if @question.base_table_3 == "appointments" 
+				      sql ="select "+@question.base_table_3+"."+@question.base_column_3+" from  "+@question.base_table_3+"
+		                    where "+@question.base_table_3+".id = "+@appointment.id.to_s
+				  elsif @question.base_table_3 == "participants" 
+	                  sql ="select "+@question.base_table_3+"."+@question.base_column_3+" from  "+@question.base_table_3+"
+	                    where "+@question.base_table_3+".id = "+@participant.id.to_s              
+	              else   # not sure what this will do-- assumming appointment_id
+	                  sql ="select "+@question.base_table_3+"."+@question.base_column_3+" from  "+@question.base_table_3+"
+	                  where "+@question.value_link+"_id = "+@appointment.id.to_s
+	              end
+	              connection = ActiveRecord::Base.connection();      
+	              results = connection.execute(sql)
+	              results.each do |id|
+		              @q_data.value_3 = id[0].to_s
+		          end
+			    end
 		  end
 	     %>
 	<tr><td>

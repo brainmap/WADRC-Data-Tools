@@ -108,6 +108,8 @@ def run_search_q_data
   connection = ActiveRecord::Base.connection();
   @left_join_vgroup =[]
   if @tables.size == 1  
+     v_table_base_appt = @tables[0]
+     #puts "AAAAAAAAAA"+v_table_base_appt
       # get distinct sp
 
       sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr , "+@fields.join(',')+",appointments.comment 
@@ -160,7 +162,7 @@ def run_search_q_data
                  col_3 = "a_alias_"+@question.id.to_s+".c_"+@question.id.to_s
                  @fields.push(col_3)
                  left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+", q_data.value_3 c_"+@question.id.to_s+" 
-                 from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on blooddraws.appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+                 from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                  @left_join.push(left_join)
                elsif @question.value_link == "participant" and @question.ref_table_a_1 == "" and @question.ref_table_a_2 = "" and @question.ref_table_a_3 = ""
                  col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
@@ -182,18 +184,18 @@ def run_search_q_data
                  if @question.value_link == "appointment"
                    if @question.ref_table_a_1 == "LOOKUP_REFS"
                        left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description a_"+@question.id.to_s+
-                       " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on blooddraws.appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                       " from q_data,LOOKUP_REFS where q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                    elsif @question.ref_table_a_1 != ""
                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
-                          " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on blooddraws.appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
+                          " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
                    else
-                      left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on blooddraws.appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+                      left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                    end
                    @left_join.push(left_join) 
                  elsif      @question.value_link == "participant"
                         if @question.ref_table_a_1 == "LOOKUP_REFS"
                             left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description a_"+@question.id.to_s+
-                            " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                            " from q_data, LOOKUP_REFS where q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                         elsif @question.ref_table_a_1 != ""
                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
                                " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -206,21 +208,21 @@ def run_search_q_data
                 # outer join to table.appointment_id  vs vgroups.participant_id
                  if @question.value_link == "appointment"
                     if @question.ref_table_a_2 == "LOOKUP_REFS"
-                        left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description a_"+@question.id.to_s+
-                        " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on blooddraws.appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                        left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description b_"+@question.id.to_s+
+                        " from q_data , LOOKUP_REFS where q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                     elsif @question.ref_table_a_2 != ""
-                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description a_"+@question.id.to_s+
-                           " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on blooddraws.appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
+                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
+                           " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
                     else
-                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on blooddraws.appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                     end
                     @left_join.push(left_join) 
                   elsif      @question.value_link == "participant"
                          if @question.ref_table_a_2 == "LOOKUP_REFS"
-                             left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description a_"+@question.id.to_s+
-                             " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                             left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description b_"+@question.id.to_s+
+                             " from q_data, LOOKUP_REFS where q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                          elsif @question.ref_table_a_2 != ""
-                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description a_"+@question.id.to_s+
+                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
                                 " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
                          else
                             left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
@@ -232,18 +234,18 @@ def run_search_q_data
                     if @question.value_link == "appointment"
                       if @question.ref_table_a_3 == "LOOKUP_REFS"
                           left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description c_"+@question.id.to_s+
-                          " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on blooddraws.appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                          " from q_data, LOOKUP_REFS where q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                       elsif @question.ref_table_a_3 != ""
                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
-                             " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on blooddraws.appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
+                             " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
                       else
-                         left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_3 c_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on blooddraws.appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+                         left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_3 c_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                       end
                       @left_join.push(left_join) 
                     elsif      @question.value_link == "participant"
                            if @question.ref_table_a_3 == "LOOKUP_REFS"
                                left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description c_"+@question.id.to_s+
-                               " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                               " from q_data, LOOKUP_REFS where q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                            elsif @question.ref_table_a_3 != ""
                               left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
                                   " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -254,27 +256,45 @@ def run_search_q_data
                      end
                   end
               
-          elsif @question.value_type_1 != '' and @question.value_type_1 != 'text' and  @question.value_type_2 != '' and @question.value_type_2 != 'text'
+          elsif @question.value_type_1 != '' and @question.value_type_1 != 'text' and  @question.value_type_2 != ''  and @question.value_type_2 != 'text'
             @column_headers.push(@question.export_column_header_1)
             @column_headers.push(@question.export_column_header_2)
+            # outer join to table.appointment_id  vs vgroups.participant_id
+            if @question.value_link == "appointment" and @question.ref_table_a_1 == "" and @question.ref_table_a_2 = "" 
+              col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
+              @fields.push(col_1)
+              col_2 = "a_alias_"+@question.id.to_s+".b_"+@question.id.to_s
+              @fields.push(col_2)
+              left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+" 
+              from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+              @left_join.push(left_join)
+            elsif @question.value_link == "participant" and @question.ref_table_a_1 == "" and @question.ref_table_a_2 = "" 
+              col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
+               @fields.push(col_1)
+               col_2 = "a_alias_"+@question.id.to_s+".b_"+@question.id.to_s
+               @fields.push(col_2)
+               left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+" 
+               from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+               @left_join_vgroup.push(left_join)
+            else
              col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
              @fields.push(col_1)
              # outer join to table.appointment_id  vs vgroups.participant_id
              if @question.value_link == "appointment"
                  if @question.ref_table_a_1 == "LOOKUP_REFS"
                      left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description a_"+@question.id.to_s+
-                     " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on blooddraws.appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                     " from q_data, LOOKUP_REFS where q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                  elsif @question.ref_table_a_1 != ""
                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
-                        " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on blooddraws.appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
+                        " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
                  else
-                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on blooddraws.appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                  end
                  @left_join.push(left_join) 
              elsif      @question.value_link == "participant"
                       if @question.ref_table_a_1 == "LOOKUP_REFS"
                           left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description a_"+@question.id.to_s+
-                          " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                          " from q_data, LOOKUP_REFS where q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                       elsif @question.ref_table_a_1 != ""
                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
                              " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -290,18 +310,18 @@ def run_search_q_data
               if @question.value_link == "appointment"
                   if @question.ref_table_a_2 == "LOOKUP_REFS"
                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description b_"+@question.id.to_s+
-                      " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on blooddraws.appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                      " from q_data, LOOKUP_REFS where q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                   elsif @question.ref_table_a_2 != ""
                      left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
-                         " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on blooddraws.appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
+                         " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
                   else
-                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on blooddraws.appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                   end
                   @left_join.push(left_join) 
               elsif      @question.value_link == "participant"
                        if @question.ref_table_a_2 == "LOOKUP_REFS"
                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description b_"+@question.id.to_s+
-                           " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                           " from q_data, LOOKUP_REFS where q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                        elsif @question.ref_table_a_2 != ""
                           left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
                               " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -310,28 +330,46 @@ def run_search_q_data
                        end
                        @left_join_vgroup.push(left_join)
                end
-                   
+              end     
           elsif @question.value_type_2 != '' and @question.value_type_2 != 'text' and  @question.value_type_3 != '' and @question.value_type_3 != 'text'
             @column_headers.push(@question.export_column_header_2)
             @column_headers.push(@question.export_column_header_3)
+            # outer join to table.appointment_id  vs vgroups.participant_id
+            if @question.value_link == "appointment" and  @question.ref_table_a_2 = "" and @question.ref_table_a_3 = ""
+              col_2 = "a_alias_"+@question.id.to_s+".b_"+@question.id.to_s
+              @fields.push(col_2)
+              col_3 = "a_alias_"+@question.id.to_s+".c_"+@question.id.to_s
+              @fields.push(col_3)
+              left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+",  q_data.value_2 b_"+@question.id.to_s+", q_data.value_3 c_"+@question.id.to_s+" 
+              from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+              @left_join.push(left_join)
+            elsif @question.value_link == "participant" and  @question.ref_table_a_2 = "" and @question.ref_table_a_3 = ""
+               col_2 = "a_alias_"+@question.id.to_s+".b_"+@question.id.to_s
+               @fields.push(col_2)
+               col_3 = "a_alias_"+@question.id.to_s+".c_"+@question.id.to_s
+               @fields.push(col_3)
+               left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+", q_data.value_3 c_"+@question.id.to_s+" 
+               from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+               @left_join_vgroup.push(left_join)
+            else
             col_2 = "b_alias_"+@question.id.to_s+".b_"+@question.id.to_s
             @fields.push(col_2)
             # outer join to table.appointment_id  vs vgroups.participant_id
             if @question.value_link == "appointment"
                 if @question.ref_table_a_2 == "LOOKUP_REFS"
                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description b_"+@question.id.to_s+
-                    " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on blooddraws.appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                    " from q_data, LOOKUP_REFS where q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                 elsif @question.ref_table_a_2 != ""
                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
-                       " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on blooddraws.appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
+                       " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
                 else
-                   left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on blooddraws.appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+                   left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                 end
                 @left_join.push(left_join) 
             elsif      @question.value_link == "participant"
                      if @question.ref_table_a_2 == "LOOKUP_REFS"
                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description b_"+@question.id.to_s+
-                         " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                         " from q_data, LOOKUP_REFS where q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                      elsif @question.ref_table_a_2 != ""
                         left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
                             " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -348,18 +386,18 @@ def run_search_q_data
                if @question.value_link == "appointment"
                    if @question.ref_table_a_3 == "LOOKUP_REFS"
                        left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description c_"+@question.id.to_s+
-                       " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on blooddraws.appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                       " from q_data, LOOKUP_REFS where q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                    elsif @question.ref_table_a_3 != ""
                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
-                          " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on blooddraws.appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
+                          " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
                    else
-                      left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_3 c_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on blooddraws.appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+                      left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_3 c_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                    end
                    @left_join.push(left_join) 
                elsif      @question.value_link == "participant"
                         if @question.ref_table_a_3 == "LOOKUP_REFS"
                             left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description c_"+@question.id.to_s+
-                            " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                            " from q_data, LOOKUP_REFS where q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                         elsif @question.ref_table_a_3 != ""
                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
                                " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -368,28 +406,46 @@ def run_search_q_data
                         end
                         @left_join_vgroup.push(left_join)
                 end   
-                    
+              end      
           elsif @question.value_type_1 != '' and @question.value_type_1 != 'text' and  @question.value_type_3 != '' and @question.value_type_3 != 'text'
             @column_headers.push(@question.export_column_header_1)
             @column_headers.push(@question.export_column_header_3)
+            # outer join to table.appointment_id  vs vgroups.participant_id
+            if @question.value_link == "appointment" and @question.ref_table_a_1 == ""  and @question.ref_table_a_3 = ""
+              col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
+              @fields.push(col_1)
+              col_3 = "a_alias_"+@question.id.to_s+".c_"+@question.id.to_s
+              @fields.push(col_3)
+              left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+",  q_data.value_3 c_"+@question.id.to_s+" 
+              from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+              @left_join.push(left_join)
+            elsif @question.value_link == "participant" and @question.ref_table_a_1 == "" and @question.ref_table_a_3 = ""
+              col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
+               @fields.push(col_1)
+               col_3 = "a_alias_"+@question.id.to_s+".c_"+@question.id.to_s
+               @fields.push(col_3)
+               left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+",  q_data.value_3 c_"+@question.id.to_s+" 
+               from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+               @left_join_vgroup.push(left_join)
+            else
              col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
              @fields.push(col_1)
              # outer join to table.appointment_id  vs vgroups.participant_id
              if @question.value_link == "appointment"
                  if @question.ref_table_a_1 == "LOOKUP_REFS"
                      left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description a_"+@question.id.to_s+
-                     " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on blooddraws.appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                     " from q_data, LOOKUP_REFS where q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                  elsif @question.ref_table_a_1 != ""
                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
-                        " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on blooddraws.appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
+                        " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
                  else
-                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on blooddraws.appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                  end
                  @left_join.push(left_join) 
              elsif      @question.value_link == "participant"
                       if @question.ref_table_a_1 == "LOOKUP_REFS"
                           left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description a_"+@question.id.to_s+
-                          " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                          " from q_data, LOOKUP_REFS where q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                       elsif @question.ref_table_a_1 != ""
                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
                              " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -405,18 +461,18 @@ def run_search_q_data
                if @question.value_link == "appointment"
                    if @question.ref_table_a_3 == "LOOKUP_REFS"
                        left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description c_"+@question.id.to_s+
-                       " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on blooddraws.appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                       " from q_data, LOOKUP_REFS where q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                    elsif @question.ref_table_a_3 != ""
                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
-                          " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on blooddraws.appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
+                          " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
                    else
-                      left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_3 c_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on blooddraws.appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+                      left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_3 c_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                    end
                    @left_join.push(left_join) 
                elsif      @question.value_link == "participant"
                         if @question.ref_table_a_3 == "LOOKUP_REFS"
                             left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description c_"+@question.id.to_s+
-                            " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                            " from q_data, LOOKUP_REFS where q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                         elsif @question.ref_table_a_3 != ""
                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
                                " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -425,7 +481,7 @@ def run_search_q_data
                         end
                         @left_join_vgroup.push(left_join)
                 end
-                      
+              end        
           elsif @question.value_type_1 != '' and @question.value_type_1 != 'text' 
              @column_headers.push(@question.export_column_header_1)
              col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
@@ -434,18 +490,18 @@ def run_search_q_data
              if @question.value_link == "appointment"
                  if @question.ref_table_a_1 == "LOOKUP_REFS"
                      left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description a_"+@question.id.to_s+
-                     " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on blooddraws.appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                     " from q_data, LOOKUP_REFS where q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                  elsif @question.ref_table_a_1 != ""
                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
-                        " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on blooddraws.appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
+                        " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
                  else
-                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on blooddraws.appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                  end
                  @left_join.push(left_join) 
              elsif      @question.value_link == "participant"
                       if @question.ref_table_a_1 == "LOOKUP_REFS"
                           left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description a_"+@question.id.to_s+
-                          " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                          " from q_data, LOOKUP_REFS where q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                       elsif @question.ref_table_a_1 != ""
                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
                              " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -462,18 +518,18 @@ def run_search_q_data
             if @question.value_link == "appointment"
                 if @question.ref_table_a_2 == "LOOKUP_REFS"
                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description b_"+@question.id.to_s+
-                    " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on blooddraws.appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                    " from q_data, LOOKUP_REFS where q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                 elsif @question.ref_table_a_2 != ""
                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
-                       " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on blooddraws.appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
+                       " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
                 else
-                   left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on blooddraws.appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+                   left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                 end
                 @left_join.push(left_join) 
             elsif      @question.value_link == "participant"
                      if @question.ref_table_a_2 == "LOOKUP_REFS"
                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description b_"+@question.id.to_s+
-                         " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                         " from q_data, LOOKUP_REFS where q_data.value_2 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                      elsif @question.ref_table_a_2 != ""
                         left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
                             " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -490,18 +546,18 @@ def run_search_q_data
              if @question.value_link == "appointment"
                  if @question.ref_table_a_3 == "LOOKUP_REFS"
                      left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description c_"+@question.id.to_s+
-                     " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on blooddraws.appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                     " from q_data, LOOKUP_REFS where q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                  elsif @question.ref_table_a_3 != ""
                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
-                        " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on blooddraws.appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
+                        " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
                  else
-                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_3 c_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on blooddraws.appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
+                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_3 c_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                  end
                  @left_join.push(left_join) 
              elsif      @question.value_link == "participant"
                       if @question.ref_table_a_3 == "LOOKUP_REFS"
                           left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description c_"+@question.id.to_s+
-                          " from q_data LEFT JOIN LOOKUP_REFS on q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' where q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                          " from q_data, LOOKUP_REFS where q_data.value_3 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                       elsif @question.ref_table_a_3 != ""
                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
                              " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
