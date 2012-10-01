@@ -126,7 +126,7 @@ class NeuropsychesController < ApplicationController
       @conditions = []
        @current_tab = "neuropsyches"
        params["search_criteria"] =""
-        q_form_id = 13   # use in data_search_q_data
+        @q_form_id = 13   # use in data_search_q_data
 
        if params[:np_search].nil?
             params[:np_search] =Hash.new  

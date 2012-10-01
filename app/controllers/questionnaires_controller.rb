@@ -127,7 +127,7 @@ class QuestionnairesController < ApplicationController
       @conditions = []
        @current_tab = "questionnaires"
        params["search_criteria"] =""
-       q_form_id = 14   # use in data_search_q_data
+       @q_form_id = 14   # use in data_search_q_data
 
        if params[:q_search].nil?
             params[:q_search] =Hash.new  
