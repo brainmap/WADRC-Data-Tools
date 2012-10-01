@@ -165,10 +165,16 @@ class QuestionformsController < ApplicationController
                    
           if !@question.base_table_1.blank? and !@question.base_column_1.blank?
             if @question.base_table_1 == "appointments" or @question.base_table_1 == "participants" 
-              sql ="update  "+@question.base_table_1+"
+              if @q_data.value_1 == ""    # problem on unique index on wrapnum and reggieid
+                sql ="update  "+@question.base_table_1+"
+                    set "+@question.base_table_1+"."+@question.base_column_1+" = NULL 
+                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s        
+               else
+                sql ="update  "+@question.base_table_1+"
                     set "+@question.base_table_1+"."+@question.base_column_1+" = '"+@q_data.value_1+"'
-                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s                                            
-            else
+                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s   
+              end                                         
+            else                        
             sql ="update  "+@question.base_table_1+"
                   set "+@question.base_table_1+"."+@question.base_column_1+" = '"+@q_data.value_1+"'
                   where "+@question.value_link+"_id = "+@q_data.value_link.to_s
@@ -187,9 +193,15 @@ class QuestionformsController < ApplicationController
                    
           if !@question.base_table_2.blank? and !@question.base_column_2.blank?
             if @question.base_table_2 == "appointments" or @question.base_table_2 == "participants" 
-              sql ="update  "+@question.base_table_2+"
+              if @q_data.value_2 == ""   # problem on unique index on wrapnum and reggieid
+                sql ="update  "+@question.base_table_2+"
+                      set "+@question.base_table_2+"."+@question.base_column_2+" = NULL
+                      where "+@question.value_link+"s.id = "+@q_data.value_link.to_s
+              else              
+                sql ="update  "+@question.base_table_2+"
                     set "+@question.base_table_2+"."+@question.base_column_2+" = '"+@q_data.value_2+"'
-                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s              
+                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s 
+              end             
             else
             sql ="update  "+@question.base_table_2+"
                   set "+@question.base_table_2+"."+@question.base_column_2+" = '"+@q_data.value_2+"'
@@ -209,9 +221,16 @@ class QuestionformsController < ApplicationController
                    
           if !@question.base_table_3.blank? and !@question.base_column_3.blank?
             if @question.base_table_3 == "appointments" or @question.base_table_3 == "participants" 
-              sql ="update  "+@question.base_table_3+"
-                    set "+@question.base_table_3+"."+@question.base_column_3+" = '"+@q_data.value_3+"'
+              if @q_data.value_3 == ""  # problem on unique index on wrapnum and reggieid
+                sql ="update  "+@question.base_table_3+"
+                    set "+@question.base_table_3+"."+@question.base_column_3+" = NULL
                     where "+@question.value_link+"s.id = "+@q_data.value_link.to_s              
+                
+              else              
+                sql ="update  "+@question.base_table_3+"
+                    set "+@question.base_table_3+"."+@question.base_column_3+" = '"+@q_data.value_3+"'
+                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s 
+              end             
             else
             sql ="update  "+@question.base_table_3+"
                   set "+@question.base_table_3+"."+@question.base_column_3+" = '"+@q_data.value_3+"'

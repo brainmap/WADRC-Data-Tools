@@ -125,12 +125,19 @@ def run_search_q_data
            sql = sql +" AND "+@conditions.join(' and ')
        end
 
-       sql = "select distinct scan_procedure_id from scan_procedures_vgroups where scan_procedures_vgroups.vgroup_id in 
+       sql_sp = "select distinct scan_procedure_id from scan_procedures_vgroups where scan_procedures_vgroups.vgroup_id in 
            ( select t1.vgroup_id from ("+sql+") t1 )"
 
        # get distinct question_id  -- q_form_id
-       @results = connection.execute(sql)
-
+       @results = connection.execute(sql_sp)
+       if @results.size == 0
+          @results = ['-1']
+       end
+       #POSSIBLE TUNING!!!!!!!!!!!!
+       # could get appointment list, simplify the left join sql by getting rid of all tables/joins which don't have fields
+       # remove left_join and conditions
+       sql_apptid = "select distinct appointments.id from appointments where appointments.vgroup_id in 
+           ( select t1.vgroup_id from ("+sql+") t1 )"       
        
        @questionform_questions = QuestionformQuestion.where("question_id in  (select questions.id from questions where 
                                        ((value_type_1 != 'text' and value_type_1 != '') or (value_type_2 != 'text' and value_type_2 != '') or (value_type_3 != 'text' and value_type_3 != '')) )
