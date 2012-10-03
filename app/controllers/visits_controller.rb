@@ -374,6 +374,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
       if mri_id_int < 0 
         if !params[:mriscantask][:lookup_set_id][mri_id].blank? or 
            !params[:mriscantask][:lookup_scantask_id][mri_id].blank? or 
+                    !params[:mriscantask][:task_order][mri_id].blank? or
                           !params[:mriscantask][:logfilerecorded][mri_id].blank? or 
                                   !params[:mriscantask][:tasknote][mri_id].blank? or 
                                                   !params[:mriscantask][:image_dataset_id][mri_id].blank? 
@@ -414,10 +415,11 @@ class VisitsController <  AuthorizedController #  ApplicationController
 
         @mriscantask = Mriscantask.find(mri_id_int)
         @mriscantask.lookup_set_id = params[:mriscantask][:lookup_set_id][mri_id]
-        if !params[:mriscantask][:lookup_scantask_id][mri_id].blank?
+        if !params[:mriscantask][:lookup_scantask_id][mri_id].nil?
              @mriscantask.lookup_scantask_id = params[:mriscantask][:lookup_scantask_id][mri_id]
         end
         @mriscantask.logfilerecorded = params[:mriscantask][:logfilerecorded][mri_id]
+        @mriscantask.task_order = params[:mriscantask][:task_order][mri_id]
         @mriscantask.tasknote = params[:mriscantask][:tasknote][mri_id]
         @mriscantask.image_dataset_id = params[:mriscantask][:image_dataset_id][mri_id]
         @mriscantask.save

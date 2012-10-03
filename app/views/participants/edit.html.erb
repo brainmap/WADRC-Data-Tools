@@ -16,7 +16,7 @@ edit_count = edit_count -1
   </p>
   <p>
     <%= f.label :gender %><br />
-    <%= f.select(:gender, [['Male',1],['Female',2]]) %>
+    <%= f.select(:gender, [['Male',1],['Female',2]],:prompt =>'Select gender', :include_blank => true) %>
   </p>
   <p>
     <%= f.label :wrap_number %><br />
@@ -32,7 +32,7 @@ edit_count = edit_count -1
   </p>
   <p>
     <%= f.label :years_of_education %><br />
-    <%= f.select(:ed_years, (1..20).to_a) %>
+    <%= f.select(:ed_years, (1..20).to_a, :prompt =>'Select years of education', :include_blank => true) %>
   </p>
   <!-- <p>
     <%#= f.label :apoe_allele_1 %><br />

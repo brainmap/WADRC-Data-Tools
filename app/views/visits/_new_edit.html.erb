@@ -195,12 +195,12 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 		<% if !mst.image_dataset_id.blank?%>
 		<tr><td colsapn="8" align = "left"><b><%= ImageDataset.find(mst.image_dataset_id).series_description %></b></td><tr>
 		<% end %>
-		<tr><td><%= select("mriscantask[lookup_scantask_id]",mst.id, LookupScantask.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :selected =>mst.lookup_scantask_id.try(:to_s),:include_blank => "Select a scan task" } )%>   
+		<tr><td><%= select("mriscantask[lookup_scantask_id]",mst.id, LookupScantask.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :selected =>mst.lookup_scantask_id.try(:to_s),:prompt => "Select a scan task", :include_blank => true } )%>   
 			<%=  hidden_field_tag( "mriscantask[mriscantask_id][]",mst.id.to_s) %>
 			<%=  hidden_field_tag( "mriscantask[image_dataset_id]["+mst.id.to_s+"]",mst.image_dataset_id.to_s) %>
 			</td>
-			<td><%= select("mriscantask[lookup_set_id]",mst.id, LookupSet.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, {:selected =>mst.lookup_set_id.try(:to_s), :include_blank => "Select a set" }) %> </td>
-	<td><%= select( "mriscantask[task_order]",mst.id, [['',''],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['6','6'],['7','7'],['8','8'],['9','9'],['10','10'],['-1','-1']], { :selected =>mst.task_order.try(:to_s), :include_blank => "Select order" } ) %>
+			<td><%= select("mriscantask[lookup_set_id]",mst.id, LookupSet.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, {:selected =>mst.lookup_set_id.try(:to_s), :prompt => "Select a set", :include_blank => true }) %> </td>
+	<td><%= select( "mriscantask[task_order]",mst.id, [['',''],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['6','6'],['7','7'],['8','8'],['9','9'],['10','10'],['-1','-1']], { :selected =>mst.task_order.try(:to_s), :include_blank => "Select order"} ) %>
 			  </td>
 			<td><%= select("mriscantask[logfilerecorded]",mst.id,[['No',"0"],["Yes","-1"]],{ :selected =>mst.logfilerecorded.try(:to_s), :include_blank => "Log?" })  %>  </td>
 			<td colspan=4  align="left"> 
