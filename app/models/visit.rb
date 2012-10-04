@@ -27,17 +27,19 @@ class Visit < ActiveRecord::Base
   belongs_to :created_by, :class_name => "User"
   
   validates_inclusion_of :radiology_outcome, :in => RADIOLOGY_OUTCOMES
-  validates_inclusion_of :transfer_mri, :transfer_pet, :conference, :compile_folder, :in => PROGRESS_CHOICES
+  # moved to vgroups
+  # validates_inclusion_of :transfer_mri, :transfer_pet, :conference, :compile_folder, :in => PROGRESS_CHOICES
+   validates_inclusion_of :conference, :in => PROGRESS_CHOICES
   
   has_many :enrollment_visit_memberships
   has_many :enrollments, :through => :enrollment_visit_memberships, :uniq => true
   accepts_nested_attributes_for :enrollments, :reject_if => :all_blank, :allow_destroy => true
   before_validation :lookup_enrollments
-  before_validation :update_compiled_at_date, :if => Proc.new {|v| v.compile_folder_changed? }
-    
-    
-  scope :complete, where(:compile_folder => "yes")
-  scope :incomplete, where(:compile_folder => "no")
+  
+  # moved to vgroups
+  # before_validation :update_compiled_at_date, :if => Proc.new {|v| v.compile_folder_changed? }
+  #scope :complete, where(:compile_folder => "yes")
+  #scope :incomplete, where(:compile_folder => "no")
   scope :recently_imported, where(:created_at.gt => 1.week.ago)
   scope :assigned_to, lambda { |user_id|
     { :conditions => { :user_id => user_id } }
