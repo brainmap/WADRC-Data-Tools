@@ -364,7 +364,7 @@ class BlooddrawsController < ApplicationController
         @appointment.appointment_date = (Vgroup.find(vgroup_id)).vgroup_date
         @appointment.appointment_type ='blood_draw'
     #    @appointment.save  --- save in create step
-
+puts "AAAAAAAAAAAA"
         @blooddraw.appointment_id = @appointment.id
     respond_to do |format|
       format.html # new.html.erb
@@ -413,7 +413,7 @@ class BlooddrawsController < ApplicationController
    scan_procedure_array = []
    scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
   @blooddraw = Blooddraw.new(params[:blooddraw])
-  
+  puts "BBBBBBBB"
   
   appointment_date = nil
   if !params[:appointment]["#{'appointment_date'}(1i)"].blank? && !params[:appointment]["#{'appointment_date'}(2i)"].blank? && !params[:appointment]["#{'appointment_date'}(3i)"].blank?
@@ -430,34 +430,41 @@ class BlooddrawsController < ApplicationController
   @appointment.user = current_user
   @appointment.save
   @blooddraw.appointment_id = @appointment.id
-
+puts "CCCCCCCCC"
+puts  @blooddraw.appointment_id.to_s
   @q_data_form = QDataForm.new
   @q_data_form.appointment_id = @appointment.id
   @q_data_form.questionform_id = q_form_id
   @q_data_form.save
-
+puts "DDDDDDDDDDDDD"
   respond_to do |format|
     if @blooddraw.save
+      puts "EEEEEEEEEEEE"
+      puts params[:vgroup][:completedblooddraw]
       @vgroup.completedblooddraw = params[:vgroup][:completedblooddraw]
       @vgroup.save
       # @appointment.save
       if !params[:vital_id].blank?
+        puts "FFFFFFFFFF"
         @vital = Vital.find(params[:vital_id])
         @vital.pulse = params[:pulse]
         @vital.bp_systol = params[:bp_systol]
         @vital.bp_diastol = params[:bp_diastol]
         @vital.bloodglucose = params[:bloodglucose]
         @vital.save
+        puts "GGGGGGGGGGGGG"
       else
+        puts "HHHHHHHHH"
         @vital = Vital.new
         @vital.appointment_id = @blooddraw.appointment_id
         @vital.pulse = params[:pulse]
         @vital.bp_systol = params[:bp_systol]
         @vital.bp_diastol = params[:bp_diastol]
         @vital.bloodglucose = params[:bloodglucose]
-        @vital.save      
+        @vital.save  
+        puts "IIIIIIII"    
       end        
-  
+  puts "JJJJJJJJJJJ"
         format.html { redirect_to(@blooddraw, :notice => 'Lab Health was successfully created.') }
         format.xml  { render :xml => @blooddraw, :status => :created, :location => @blooddraw }
       else
