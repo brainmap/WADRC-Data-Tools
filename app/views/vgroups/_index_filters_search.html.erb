@@ -1,0 +1,30 @@
+<div>
+<!--   <p>
+    Filters:
+    <%= link_to "All", home_path %>,
+    <%= link_to "Incomplete", incomplete_vgroups_path %>,
+    <%= link_to "Complete", complete_vgroups_path %>,
+    <%= link_to "Recent imports", recently_imported_vgroups_path %>,
+		<%= link_to "Search for Visits", vgroup_search_path %>
+		   <% #find_visits_path 
+		    %>
+  </p>
+ -->
+<table width="60%"><tr ><td nowrap align="left"  valign="center">
+<%= form_for 'vgroups_search' do |f| %>
+
+<% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
+
+<%= collection_select(:scan_procedure, :id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'choose scan procedure'}, {:multiple =>  false} ) %>
+</td><td nowrap align="right" valign="center">
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<%= f.label :enumber %></th>
+  <td><%= f.text_field :enumber %>
+	<%= f.submit "Search" %>
+
+	<% end %>	
+</td></tr></table>
+</div>
+
+<br style="clear:both" />

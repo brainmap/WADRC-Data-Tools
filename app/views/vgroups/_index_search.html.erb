@@ -1,0 +1,137 @@
+<%# paginated = true unless paginated == false %>
+
+<table class="tabular">
+  
+  <caption><%= pluralize(@vgroups.total_count, 'Visits') %><%#= paginated ? pagination_info(vgroups) : pluralize(vgroups.length, 'Visits') %></caption>
+  
+  <thead>
+    <tr>
+      <th><span>Date<!--_ = sort_link @search, :vgroup_date % ---></span></th>
+      <th><span>Scan Procedure<!--- = sort_link @search, :scan_procedures_codename, "Scan Procedure" % ---></span></th>
+      <th><span>Enroll Number<!----= sort_link @search, :enrollments_enumber, "Enroll Number" %---></span></th>
+      <th><span>RMR<!--- = sort_link @search, :rmr %---></span></th>
+      <th><span class="vert">Appointments</span></th>
+      <th><span class="vert">MRI Scan</span></th>
+       <th><span class="vert">status</span></th>
+<% if edit_count > 0 %>
+      <th><span class="vert">new</span></th>
+<% end %>
+      <th><span class="vert">Pet Scan</span></th>
+      <th><span class="vert">status</span></th>
+<% if edit_count > 0 %>
+      <th><span class="vert">new</span></th>
+<% end %>
+      <th><span class="vert">Lumbar Puncture</span></th>
+      <th><span class="vert">status</span></th>
+<% if edit_count > 0 %>
+      <th><span class="vert">new</span></th>
+<% end %>
+      <th><span class="vert">Lab Health</span></th>
+      <th><span class="vert">status</span></th>
+<% if edit_count > 0 %>
+      <th><span class="vert">new</span></th>
+<% end %>
+      <th><span class="vert">NeuroP</span></th>
+      <th><span class="vert">status</span></th>
+<% if edit_count > 0 %>
+      <th><span class="vert">new</span></th>
+<% end %>
+      <th><span class="vert">Questionnaire</span></th>
+      <th><span class="vert">status</span></th>
+<% if edit_count > 0 %>
+      <th><span class="vert">new</span></th>
+	  <th><span class="vert">Vgroup edit</span></th>
+<% end %>
+      <th></th>
+    </tr>
+  </thead>
+  
+  <tfoot><tr><td colspan=21>
+		 <%= paginate @vgroups %> 
+		<%# if paginated %>
+    	<%#= @vgroup_search.nil? ? will_paginate(vgroups) : will_paginate(vgroups, :params => { :vgroup_search => @vgroup_search }) %>
+		<%# end %>
+  </td></tr></tfoot>
+  
+  <tbody>
+    <% @vgroups.each do |vgroup| %>
+
+   <%  @a =  Appointment.where("vgroup_id in (?)",vgroup.id)
+        a_array =@a.to_a
+       @visits = Visit.where("appointment_id in (?) ",a_array)
+         visit = nil
+         @visits.each do |v| 
+	       visit = v
+	     end
+   # CHANGE TO GET rmr,enroll,scan_protocol from vgroup
+       @petscans = Petscan.where("appointment_id in (?) ",a_array)
+       @lumbarpunctures = Lumbarpuncture.where("appointment_id in (?) ",a_array)
+       @blooddraws = Blooddraw.where("appointment_id in (?) ",a_array)
+       @questionnaires = Questionnaire.where("appointment_id in (?) ",a_array)
+     %>
+
+      <tr>
+        <td><%= link_to vgroup.vgroup_date.to_s(:datetime_military), vgroup %></td>
+        <td><%= vgroup.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, "/vgroups/in_scan_procedure/"+sp.id.to_s)}.join(", ").html_safe %></td>
+        <td><%= vgroup.blank? ? "" :vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
+        <td><%= vgroup.blank? ? "" : vgroup.rmr %></td>
+     <td><%= #@a.blank? ?  "None" :	@a.collect{|sp| link_to("appt",appointment_path(sp))}.join(", ").html_safe 
+             # vgroup.appointments.collect { |sp| link_to("appt",appointment_path(sp)) }.join(", ").html_safe  # second way of making coolection
+	%><%= link_to 'Appts', vgroup %></td>
+    <td><%= @visits.blank? ?  "None" :	@visits.collect{|sp| link_to("mri "+sp.date.strftime('%m-%y'),visit_path(sp))}.join(", ").html_safe %></td>
+    <%= show_bool(vgroup.transfer_mri) %>
+<% if edit_count > 0 %>
+    <td><%= link_to  'add-MRI', new_visit_path+"/"+vgroup.id.to_s %></td>
+<% end %>
+    <td><%= @petscans.blank? ?  "None" :	@petscans.collect{|sp| link_to("pet",petscan_path(sp))}.join(", ").html_safe %></td>
+    <%= show_bool(vgroup.transfer_pet )%>
+<% if edit_count > 0 %>
+    <td><%= link_to  'add-Pet', new_petscan_path+"/"+vgroup.id.to_s %></td>
+<% end %>
+	<td><%= @lumbarpunctures.blank? ?  "None" :	@lumbarpunctures.collect{|sp| link_to("lp",lumbarpuncture_path(sp))}.join(", ").html_safe %></td>
+	<%= show_bool(vgroup.completedlumbarpuncture) %>
+<% if edit_count > 0 %>
+    <td><%= link_to  'add-LP', new_lumbarpuncture_path+"/"+vgroup.id.to_s %></td>
+<% end %>
+	<td><%= @blooddraws.blank? ?  "None" :	@blooddraws.collect{|sp| link_to("lab",blooddraw_path(sp))}.join(", ").html_safe %></td>
+	<%= show_bool(vgroup.completedblooddraw) %>
+<% if edit_count > 0 %>
+    <td><%= link_to  'add-Lab', new_blooddraw_path+"/"+vgroup.id.to_s %></td>
+<% end %>
+	<td><%= @neuropsyches.blank? ?  "None" :	@neuropsyches.collect{|sp| link_to("np",neuropsych_path(sp))}.join(", ").html_safe %></td>
+	<%= show_bool(vgroup.completedneuropsych) %>
+<% if edit_count > 0 %>
+    <td><%= link_to  'add-NP', new_neuropsych_path+"/"+vgroup.id.to_s %></td>
+<% end %>   
+	<td><%= @questionnaires.blank? ?  "None" :	@questionnaires.collect{|sp| link_to("q",questionnaire_path(sp))}.join(", ").html_safe %></td>
+	<%= show_bool(vgroup.completedquestionnaire) %>
+<% if edit_count > 0 %>
+    <td><%= link_to  'add-Q', new_questionnaire_path+"/"+vgroup.id.to_s %></td>
+<% end %> 
+<!--       <td><= vgroup.appointments.blank? ? "None" : vgroup.appointmets.sort_by(&:codename).collect {|sp| sp.appointment_type}.join(", ").html_safe %></td>
+ 
+        <td><= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
+        <td><= visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
+        <td><= visit.rmr %></td>
+
+-->
+<!--        <td><= popup_note('peek', key_val_table('path_popup', { :Path => visit.path })) unless visit.path.blank? %></td>
+        <= show_bool(visit.transfer_mri) %>
+        <= show_bool(visit.transfer_pet) %>
+        <= show_rad_review(visit.radiology_outcome) %>
+        <= show_bool(visit.compile_folder) %>
+        <= show_bool(visit.conference) %>
+-->
+        <td style="width: 6em;">
+<% if edit_count > 0 %>
+          <%= link_to 'edit', edit_vgroup_path(vgroup) %>
+<% end %>
+          <%#= link_to 'X', vgroup, :confirm => "Are you sure you want to delete this Visits?", :method => :delete %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+  
+</table>
+
+
