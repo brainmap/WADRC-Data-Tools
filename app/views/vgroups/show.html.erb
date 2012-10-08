@@ -19,46 +19,72 @@ edit_count = edit_count -1
 	       @blooddraws = Blooddraw.where("appointment_id in (?) ",a_array)
 	       @neuropsyches = Neuropsych.where("appointment_id in (?) ",a_array)
 	      @questionnaires = Questionnaire.where("appointment_id in (?) ",a_array)
+	      if !@vgroup.participant_id.blank?
+		     @participant = Participant.find(@vgroup.participant_id)
+		  end
 %>
 
 <p id="notice"><%= notice %></p>
 <h3>Vgroup:</h3>
-<table width="100%"  class="tabular"><tr><td>
+<table width="100%"  class="tabular"><tr><td colspan="5" align="left">
 <b>Vgroup date:</b>
+<% if edit_count > 0 %>
+	<%= link_to @vgroup.vgroup_date, edit_vgroup_path(@vgroup) %>
+<% else %>
   <%= @vgroup.vgroup_date %>
-</td><td>
-	<b>Scan Procedure:</b><br>
-    <%= @vgroup.blank? ? "None" : @vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(",<br>").html_safe %> 
-</td><td>
-	<b>Enroll Number:</b><br>
-	<%= @vgroup.blank? ? "": @vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(",<br>").html_safe %>
-	
-</td><td>
+<% end %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<b>Scan Procedure:</b>
+    <%= @vgroup.blank? ? "None" : @vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %> 
+<br>
+	<br><b>Enroll Number:</b>
+	<%= @vgroup.blank? ? "": @vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<b>RMR:</b>
   <%= visit.blank? ? (@vgroup.rmr.blank? ? "" : @vgroup.rmr   ) : visit.rmr %>
-</td><td><b>Compile Folder:</b> <%= @vgroup.compile_folder%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	<b>Participant Reggie_id:</b><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	<%= @vgroup.participant_id.blank? ? "" : Participant.find(@vgroup.participant_id).reggieid%>
-	
-	
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<b>Compile Folder:</b> <%= @vgroup.compile_folder%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </td></tr>
-<!--
-<tr>
-  <td><= f.label :Transfer_MRI %></td>
-  <td><= select :visit, :transfer_mri, ["no", "yes", "n/a"] %></td>
-</tr>
-<tr>
-  <td><= f.label :Transfer_PET %></td>
-  <td><= select :visit, :transfer_pet, ["n/a", "no", "yes"] %></td>
-</tr>
--->
+<tr><td colspan="3" align="left"><%= link_to('Participant', @participant)%>:<br><B>Reggieid:</B>&nbsp;<%= @vgroup.participant_id.blank? ? "" :  @participant.reggieid%>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>Wrap#:</B>&nbsp;<%= @vgroup.participant_id.blank? ? "" :  @participant.wrapnum%>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>Adrc#:</B>&nbsp;<%= @vgroup.participant_id.blank? ? "" :  @participant.adrcnum%>
+	</td>
+	<td colsan="2" nowrap>
+		<%= form_tag("/vgroups/change_qc_vgroup",:url=>{controller=>"vgroups", :action=>"change_qc_vgroup"} ,  :html => { :id => params[:id] }) do |f| %>
+		  <% if @vgroup.errors.any? %>
+		    <div id="error_explanation">
+		      <h2><%= pluralize(@vgroup.errors.count, "error") %> prohibited this vgroup from being saved:</h2>
+
+		      <ul>
+		      <% @vgroup.errors.full_messages.each do |msg| %>
+		        <li><%= msg %></li>
+		      <% end %>
+		      </ul>
+		    </div>
+		  <% end %>
+		<B>Entered by:</B>
+		<%= select(:vgroup, :entered_by, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select who entered data" }) %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<B>QC'd by:</B>
+		<%= select(:vgroup, :qc_by, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select who QC'ed data" }) %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<B>QC completed:</B>
+		<%= select :vgroup, :qc_completed, ["no", "yes", "n/a"] %>	
+		<% if edit_count > 0 %>	
+		<%= hidden_field_tag 'id', @vgroup.id %>
+			<%= submit_tag("Update") %>
+		<% end %>
+	<% end %>
+	</td></tr>
 
 <tr><td colspan=5 align="left">
   <b>Note:</b><br>
   <%= @vgroup.note %>
 </td></tr>
-<tr><td colspan=3  align="left">
-	<b>MRI:</b>    <%= visit.blank? ? "None" :""%></td><td colspan="2" align="right" nowrap> 
+<tr><td colspan="5" vheight="4"><hr></td></tr>
+</table><br><br>
+<table width="100%"   class="tabular">
+
+<tr><td colspan=5  align="left">
+	<b>MRI:</b>    <%= visit.blank? ? "None" :""%></td><td >&nbsp;</td><td colspan="1" width="30%" align="right" nowrap <%= show_bool_cell_color(@vgroup.transfer_mri) %> > 
 <% if edit_count > 0 %>
      <% form_tag( "/vgroups/change_transfer_mri_vgroup",:url => { :controller=>"vgroups",:action => "change_transfer_mri_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
            <%= hidden_field_tag 'id', @vgroup.id %>
@@ -70,17 +96,17 @@ edit_count = edit_count -1
 <%= label_tag :Transfer_MRI %> <%= select :vgroup, :transfer_mri, ["no", "yes", "n/a"] %>
  <!-- just display mri_transfer -->
 <% end %></td></tr>
-	<tr><td colspan=5>	<table  width="90%">
+	<tr><td colspan=7>	<table  width="90%">
 	<% @visits.each do |v| 
 		@appointment = Appointment.find(v.appointment_id) %>
 	<tr><td align="left" colspan=5><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",visit_path(v) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_visit_path(v) ) :"" %></td>
 		</tr>
-		<tr><td colspan="5"  align="left"><%= v.notes %><%= @appointment.comment %>
+		<tr><td colspan="7"  align="left"><%= v.notes %><%= @appointment.comment %>
 		</td></tr>
 	<% end %> </table>
 	</td></tr>
-<tr><td colspan=3  align="left">
-	<b>Petscan: </b><%= @petscans.blank? ? "None" :""%></td><td colspan="2" align="right">
+<tr><td colspan=5  align="left">
+	<b>Petscan: </b><%= @petscans.blank? ? "None" :""%></td><td  >&nbsp;</td><td colspan="1" align="right" nowrap <%= show_bool_cell_color(@vgroup.transfer_pet) %> >
 <% if edit_count > 0 %>
  <% form_tag( "/vgroups/change_transfer_pet_vgroup",:url => { :controller=>"vgroups",:action => "change_transfer_pet_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
        <%= hidden_field_tag 'id', @vgroup.id %>
@@ -91,7 +117,7 @@ edit_count = edit_count -1
 	<% else %>
 	<%= label_tag :Transfer_PET %> <%= select :vgroup, :transfer_pet, ["no", "yes", "n/a"] %>&nbsp;
 	<% end %></td></tr>
-<tr><td colspan=5  align="left"><table width="80%">
+<tr><td colspan=7  align="left"><table width="80%">
 	<% @petscans.each do |p|  
 		@appointment = Appointment.find(p.appointment_id) %>
 	<tr><td  align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",petscan_path(p) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_petscan_path(p) ) :"" %></td>
@@ -102,8 +128,8 @@ edit_count = edit_count -1
 		</td></tr>
 	<%end %> </table>	
 </td></tr>
-<tr><td colspan=4  align="left">
-	<b>Lumbar Puncture: </b><%= @lumbarpunctures.blank? ? "None" :""%></td><td align="right">
+<tr><td colspan=5  align="left">
+	<b>Lumbar Puncture: </b><%= @lumbarpunctures.blank? ? "None" :""%></td><td  >&nbsp;</td><td colspan="1" align="right" nowrap <%= show_bool_cell_color(@vgroup.completedlumbarpuncture) %> >
 <% if edit_count > 0 %>
       <% form_tag( "/vgroups/change_completedlumbarpuncture_vgroup",:url => { :controller=>"vgroups",:action => "change_completedlumbarpuncture_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
       <%= hidden_field_tag 'id', @vgroup.id %>
@@ -114,7 +140,7 @@ edit_count = edit_count -1
 <% else %>
 	<%= label_tag :Completed_LP %> <%= select :vgroup, :completedlumbarpuncture, ["no", "yes", "n/a"] %>&nbsp;
 <% end %></b></td></tr>
-<tr><td colspan=5  align="left"><table  width="80%">
+<tr><td colspan=7  align="left"><table  width="80%">
 	<% @lumbarpunctures.each do |lp|
 	   @appointment = Appointment.find(lp.appointment_id)	%>
 	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",lumbarpuncture_path(lp) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_lumbarpuncture_path(lp) ) :"" %></td>
@@ -125,8 +151,8 @@ edit_count = edit_count -1
 		</td></tr>
 	<%end %>  </table>	
 		
-<tr><td colspan=4  align="left">
-	<b>Lab Health: </b><%= @blooddraws.blank? ? "None" :""%></td><td align="right">
+<tr><td colspan=5  align="left">
+	<b>Lab Health: </b><%= @blooddraws.blank? ? "None" :""%></td><td  >&nbsp;</td><td colspan="1" align="right" nowrap <%= show_bool_cell_color(@vgroup.completedblooddraw) %> >
 <% if edit_count > 0 %>
       <% form_tag( "/vgroups/change_completedblooddraw_vgroup",:url => { :controller=>"vgroups",:action => "change_completedblooddraw_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
       <%= hidden_field_tag 'id', @vgroup.id %>
@@ -137,7 +163,7 @@ edit_count = edit_count -1
 <% else %>
 	<%= label_tag :Completed_Lab %> <%= select :vgroup, :completedblooddraw, ["no", "yes", "n/a"] %>&nbsp;
 <% end %></b></td></tr>
-<tr><td colspan=5  align="left"><table  width="80%">
+<tr><td colspan=7  align="left"><table  width="80%">
 	<% @blooddraws.each do |bd|
 	   @appointment = Appointment.find(bd.appointment_id)	%>
 	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",blooddraw_path(bd) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_blooddraw_path(bd) ) :"" %></td>
@@ -148,8 +174,8 @@ edit_count = edit_count -1
 		</td></tr>
 	<%end %>  </table>		
 </td></tr>
-<tr><td colspan=4  align="left">
-	<b>Neuro Psych: </b><%= @neuropsyches.blank? ? "None" :""%></td><td align="right"> 
+<tr><td colspan=5  align="left">
+	<b>Neuro Psych: </b><%= @neuropsyches.blank? ? "None" :""%></td><td  >&nbsp;</td><td colspan="1" align="right" nowrap <%= show_bool_cell_color(@vgroup.completedneuropsych) %> >
 <% if edit_count > 0 %>
 	<% form_tag( "/vgroups/change_completedneuropsych_vgroup",:url => { :controller=>"vgroups",:action => "change_completedneuropsych_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
 		<%= hidden_field_tag 'id', @vgroup.id %>
@@ -160,7 +186,7 @@ edit_count = edit_count -1
 	<% else %>
 		<%= label_tag :Completed_NP %> <%= select :vgroup, :completedneuropsych, ["no", "yes", "n/a"] %>&nbsp;
 <% end %></b></td></tr>
-<tr><td colspan=5  align="left"><table  width="80%">
+<tr><td colspan=7  align="left"><table  width="80%">
 	<% @neuropsyches.each do |np|
 	   @appointment = Appointment.find(np.appointment_id)	%>
 	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",neuropsych_path(np) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_neuropsych_path(np) ) :"" %></td>
@@ -171,8 +197,8 @@ edit_count = edit_count -1
 		</td></tr>
 	<%end %>  </table>		
 </td></tr>
-<tr><td colspan=4  align="left">
-	<b>Questionnaire: </b><%= @questionnaires.blank? ? "None" :""%></td><td align="right"> 
+<tr><td colspan=5  align="left">
+	<b>Questionnaire: </b><%= @questionnaires.blank? ? "None" :""%></td><td  >&nbsp;</td><td colspan="1" align="right" nowrap <%= show_bool_cell_color(@vgroup.completedquestionnaire) %> > 
 <% if edit_count > 0 %>
 	<% form_tag( "/vgroups/change_completedquestionnaire_vgroup",:url => { :controller=>"vgroups",:action => "change_completedquestionnaire_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
 		<%= hidden_field_tag 'id', @vgroup.id %>
@@ -183,7 +209,7 @@ edit_count = edit_count -1
 <% else %>
 			<%= label_tag :Completed_Q %> <%= select :vgroup, :completedquestionnaire, ["no", "yes", "n/a"] %>&nbsp;
 <% end %></b></td></tr>
-<tr><td colspan=5  align="left"><table  width="80%">
+<tr><td colspan=7  align="left"><table  width="80%">
 	<% @questionnaires.each do |q|
 	   @appointment = Appointment.find(q.appointment_id)	%>
 	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",questionnaire_path(q) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_questionnaire_path(q) ) :"" %></td>

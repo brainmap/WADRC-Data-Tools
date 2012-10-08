@@ -40,6 +40,19 @@ class VgroupsController < ApplicationController
          end
       end
   end
+  def change_qc_vgroup
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    @vgroup.entered_by =params[:vgroup][:entered_by]
+    @vgroup.qc_by =params[:vgroup][:qc_by]
+    @vgroup.qc_completed =params[:vgroup][:qc_completed]
+    @vgroup.save
+    respond_to do |format|
+       format.html { redirect_to( '/vgroups/'+params[:id], :notice => ' ' )}
+       format.xml  { render :xml => @vgroup }
+     end  
+  end
+  
   def change_completedquestionnaire_vgroup
     scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
@@ -453,6 +466,71 @@ class VgroupsController < ApplicationController
      render :template => "vgroups/home"
   end
   
+  def vgroups_search
+      # slightly different -- no joins in appointment, so can't use common search
+      scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+      # make @conditions from search form input, access control in application controller run_search
+      @conditions = []
+      @current_tab = "vgroups"
+      params["search_criteria"] =""
+      @vgroups = Vgroup.where(" vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
+      if params[:vgroups_search].nil?
+           params[:vgroups_search] =Hash.new  
+      end
+
+      if !params[:scan_procedure][:id].blank?
+      #   condition =" vgroups.id in (select vgroups_id from scan_procedures_vgroups where 
+      #                                           scan_procedure_id in ("+params[:vgroups_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+        @vgroups = @vgroups.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where 
+                                                                                          scan_procedure_id in(?))",params[:scan_procedure][:id])
+        # @conditions.push(condition)
+         @scan_procedures = ScanProcedure.where("id in (?)",params[:scan_procedure][:id])
+         params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
+      end
+      if !params[:vgroups_search][:enumber].blank?
+          condition =" vgroups.id in (select vgroup_id from enrollment_vgroup_memberships,enrollments
+          where enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:vgroups_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+          #@conditions.push(condition)
+          @vgroups = @vgroups.where(" vgroups.id in (select vgroup_id from enrollment_vgroup_memberships,enrollments
+          where enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower(?)))",params[:vgroups_search][:enumber])
+          
+          params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:vgroups_search][:enumber]
+      end      
+       # trim leading ","
+       params["search_criteria"] = params["search_criteria"].sub(", ","")
+
+
+         
+       # adjust columns and fields for html vs xls
+       request_format = request.formats.to_s
+       @html_request ="Y"
+       case  request_format
+         when "text/html" then # ? application/html
+           @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Note','Pet status','Appt Note'] # need to look up values
+               # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+           @column_number =   @column_headers.size
+    
+         else    
+           @html_request ="N"          
+            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Dose','Injection Time','Scan Start','Note','Range','Pet status','BP Systol','BP Diastol','Pulse','Blood Glucose','Appt Note'] # need to look up values
+                  # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended           
+                 
+         end
+ 
+
+      t = Time.now 
+      @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@vgroups.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
+      
+      ### LOOK WHERE TITLE IS SHOWING UP
+      @collection_title = 'All Vgroups'
+
+      respond_to do |format|
+        format.xls # vgroups_search.xls.erb
+        format.xml  { render :xml => @vgroups }       
+        format.html # {@vgroups = Kaminari.paginate(@vgroups).page(params[:page]).per(50)} # vgroups_search.html.erb
+      end
+    end
+
   
   def home
     scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]

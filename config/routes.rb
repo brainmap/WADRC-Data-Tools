@@ -176,6 +176,7 @@ WADRCDataTools::Application.routes.draw do
    #match '/vgroups/in_enumber', :controller => 'vgroups', :action => 'home', :as => :home
       
    match '/vgroups/vgroup_search' , :controller => 'vgroups', :action => 'vgroup_search', :as =>:vgroup_search
+    match '/vgroups/change_qc_vgroup', :controller => 'vgroups', :action => 'change_qc_vgroup', :as =>:change_qc_vgroup
    match '/vgroups/change_appointment_vgroup', :controller => 'vgroups', :action => 'change_appointment_vgroup', :as =>:change_appointment_vgroup
    match '/vgroups/change_transfer_mri_vgroup', :controller => 'vgroups', :action => 'change_transfer_mri_vgroup', :as =>:change_transfer_mri_vgroup
    match '/vgroups/change_transfer_pet_vgroup', :controller => 'vgroups', :action => 'change_transfer_pet_vgroup', :as =>:change_transfer_pet_vgroup

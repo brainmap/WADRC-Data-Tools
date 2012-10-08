@@ -12,6 +12,20 @@ module VisitsHelper
     end
     return html.html_safe
   end
+  
+  def show_bool_cell_color(field)
+    html = case field
+    when "yes"
+      " style='background-color: #bbffbb; min-width: 1.5em; max-width: 3em;' "
+    when "no"
+      " style='background-color: #ffbbbb; min-width: 1.5em; max-width: 3em;' "
+    when "n/a"
+      "  style='background-color: #cccccc; min-width: 1.5em; max-width: 3em;' "
+    else 
+      " "
+    end
+    return html.html_safe
+  end
 
 end
 
