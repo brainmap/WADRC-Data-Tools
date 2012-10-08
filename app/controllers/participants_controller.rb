@@ -97,6 +97,10 @@ class ParticipantsController < ApplicationController
         format.html { render :action => "new" }
         format.xml  { render :xml => @participant.errors, :status => :unprocessable_entity }
       elsif @participant.save 
+        sql = "update participants set wrapnum = NULL where trim(wrapnum) = '' "
+        results = connection.execute(sql)
+        sql = "update participants set reggieid = NULL where trim(reggieid) = '' "
+        results = connection.execute(sql)
         if !params[:enumber].blank?
           sql = " insert into enrollments(enumber,participant_id)values('"+params[:enumber].gsub(/[;:'"()=<>]/, '')+"',"+@participant.id.to_s+")"
           results = connection.execute(sql)
@@ -122,6 +126,12 @@ class ParticipantsController < ApplicationController
 
     respond_to do |format|
       if @participant.update_attributes(params[:participant])
+        sql = "update participants set wrapnum = NULL where trim(wrapnum) = '' "
+        connection = ActiveRecord::Base.connection();
+        results = connection.execute(sql)
+        sql = "update participants set reggieid = NULL where trim(reggieid) = '' "
+        results = connection.execute(sql)
+        
         flash[:notice] = 'Participant was successfully updated.'
         format.html { redirect_to(@participant) }
         format.xml  { head :ok }
