@@ -11,7 +11,7 @@ edit_count = edit_count -1
   <h1><%= @collection_title or "Visits" %>:</h1>
 <% if edit_count > 0 %> 
  <p>
-		<%= link_to 'create new Visit', new_vgroup_path %> |
+		<%= link_to 'create new Visit', new_vgroup_path , :confirm => "Are you sure there is not an exisiting Vgroup with the same date, scan procedure and enumber?"%> |
 		<%= link_to 'import MRI appt data', new_raw_data_import_path %>
 	</p>
 <% end %>

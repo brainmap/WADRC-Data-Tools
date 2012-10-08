@@ -26,7 +26,7 @@ edit_count = edit_count -1
 
 <p id="notice"><%= notice %></p>
 <h3>Vgroup:</h3>
-<table width="100%"  class="tabular"><tr><td colspan="5" align="left">
+<table width="100%"  class="tabular"><tr><td colspan="6" align="left">
 <b>Vgroup date:</b>
 <% if edit_count > 0 %>
 	<%= link_to @vgroup.vgroup_date, edit_vgroup_path(@vgroup) %>
@@ -45,11 +45,11 @@ edit_count = edit_count -1
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <b>Compile Folder:</b> <%= @vgroup.compile_folder%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </td></tr>
-<tr><td colspan="3" align="left"><%= link_to('Participant', @participant)%>:<br><B>Reggieid:</B>&nbsp;<%= @vgroup.participant_id.blank? ? "" :  @participant.reggieid%>
+<tr><td colspan="3" align="left" ><%= link_to('Participant', @participant)%>:<br><B>Reggieid:</B>&nbsp;<%= @vgroup.participant_id.blank? ? "" :  @participant.reggieid%>
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>Wrap#:</B>&nbsp;<%= @vgroup.participant_id.blank? ? "" :  @participant.wrapnum%>
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<B>Adrc#:</B>&nbsp;<%= @vgroup.participant_id.blank? ? "" :  @participant.adrcnum%>
 	</td>
-	<td colsan="2" nowrap>
+	<td colsan="3" nowrap    >
 		<%= form_tag("/vgroups/change_qc_vgroup",:url=>{controller=>"vgroups", :action=>"change_qc_vgroup"} ,  :html => { :id => params[:id] }) do |f| %>
 		  <% if @vgroup.errors.any? %>
 		    <div id="error_explanation">
@@ -62,20 +62,23 @@ edit_count = edit_count -1
 		      </ul>
 		    </div>
 		  <% end %>
+		<table><tr><td colspan="4">
 		<B>Entered by:</B>
 		<%= select(:vgroup, :entered_by, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select who entered data" }) %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		<B>QC'd by:</B>
 		<%= select(:vgroup, :qc_by, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select who QC'ed data" }) %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		</td><td  align="left" nowrap <%= show_bool_cell_color(@vgroup.qc_completed) %>>
 		<B>QC completed:</B>
 		<%= select :vgroup, :qc_completed, ["no", "yes", "n/a"] %>	
 		<% if edit_count > 0 %>	
 		<%= hidden_field_tag 'id', @vgroup.id %>
 			<%= submit_tag("Update") %>
 		<% end %>
+		</td></tr></table>
 	<% end %>
 	</td></tr>
 
-<tr><td colspan=5 align="left">
+<tr><td colspan=6 align="left">
   <b>Note:</b><br>
   <%= @vgroup.note %>
 </td></tr>
@@ -90,7 +93,7 @@ edit_count = edit_count -1
            <%= hidden_field_tag 'id', @vgroup.id %>
       <%= label_tag :Transfer_MRI %> <%= select :vgroup, :transfer_mri, ["no", "yes", "n/a"] %>
      <%= submit_tag("Update") %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	<%= link_to  'New-MRI', new_visit_path+"/"+@vgroup.id.to_s %>
+	<%= link_to  'New-MRI', new_visit_path+"/"+@vgroup.id.to_s , :confirm => "Are you sure there is not an existing MRI appointment for the same date, scan procedure and enumber? MRI appointments are usually created when the scans are imported."%>
 	<% end %>
 <% else %>
 <%= label_tag :Transfer_MRI %> <%= select :vgroup, :transfer_mri, ["no", "yes", "n/a"] %>
