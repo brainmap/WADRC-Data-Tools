@@ -416,6 +416,7 @@ class PetscansController < ApplicationController
         format.html { redirect_to(@petscan, :notice => 'Petscan was successfully created.') }
         format.xml  { render :xml => @petscan, :status => :created, :location => @petscan }
       else
+        @appointment.delete
         format.html { render :action => "new" }
         format.xml  { render :xml => @petscan.errors, :status => :unprocessable_entity }
       end

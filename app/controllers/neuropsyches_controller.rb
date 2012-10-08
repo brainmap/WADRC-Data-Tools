@@ -469,6 +469,8 @@ class NeuropsychesController < ApplicationController
         format.html { redirect_to(@neuropsych, :notice => 'Neuropsych was successfully created.') }
         format.xml  { render :xml => @neuropsych, :status => :created, :location => @neuropsych }
       else
+        @q_data_form.delete
+        @appointment.delete
         format.html { render :action => "new" }
         format.xml  { render :xml => @neuropsych.errors, :status => :unprocessable_entity }
       end

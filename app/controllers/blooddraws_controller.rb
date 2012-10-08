@@ -413,7 +413,6 @@ class BlooddrawsController < ApplicationController
    scan_procedure_array = []
    scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
   @blooddraw = Blooddraw.new(params[:blooddraw])
-
   
   appointment_date = nil
   if !params[:appointment]["#{'appointment_date'}(1i)"].blank? && !params[:appointment]["#{'appointment_date'}(2i)"].blank? && !params[:appointment]["#{'appointment_date'}(3i)"].blank?
@@ -439,8 +438,7 @@ puts  @blooddraw.appointment_id.to_s
 
   respond_to do |format|
     if @blooddraw.save
-    
-      puts params[:vgroup][:completedblooddraw]
+     # puts params[:vgroup][:completedblooddraw]
       @vgroup.completedblooddraw = params[:vgroup][:completedblooddraw]
       @vgroup.save
       # @appointment.save
@@ -462,12 +460,13 @@ puts  @blooddraw.appointment_id.to_s
         @vital.bp_diastol = params[:bp_diastol]
         @vital.bloodglucose = params[:bloodglucose]
         @vital.save  
-           
       end        
  
         format.html { redirect_to(@blooddraw, :notice => 'Lab Health was successfully created.') }
         format.xml  { render :xml => @blooddraw, :status => :created, :location => @blooddraw }
       else
+        @q_data_form.delete
+        @appointment.delete
         format.html { render :action => "new" }
         format.xml  { render :xml => @blooddraw.errors, :status => :unprocessable_entity }
       end

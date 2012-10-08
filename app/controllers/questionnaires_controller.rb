@@ -469,6 +469,8 @@ class QuestionnairesController < ApplicationController
         format.html { redirect_to(@questionnaire, :notice => 'Questionnaire was successfully created.') }
         format.xml  { render :xml => @questionnaire, :status => :created, :location => @questionnaire }
       else
+        @q_data_form.delete
+        @appointment.delete
         format.html { render :action => "new" }
         format.xml  { render :xml => @questionnaire.errors, :status => :unprocessable_entity }
       end

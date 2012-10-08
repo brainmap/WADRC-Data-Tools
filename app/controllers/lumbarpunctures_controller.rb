@@ -142,6 +142,7 @@ class LumbarpuncturesController < ApplicationController
         format.html { redirect_to(@lumbarpuncture, :notice => 'Lumbarpuncture was successfully created.') }
         format.xml  { render :xml => @lumbarpuncture, :status => :created, :location => @lumbarpuncture }
       else
+        @appointment.delete
         format.html { render :action => "new" }
         format.xml  { render :xml => @lumbarpuncture.errors, :status => :unprocessable_entity }
       end
