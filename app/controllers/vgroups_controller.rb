@@ -469,33 +469,35 @@ class VgroupsController < ApplicationController
   def vgroups_search
       # slightly different -- no joins in appointment, so can't use common search
       scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+      scan_procedure_list = scan_procedure_array.map(&:to_i).join(',')
       # make @conditions from search form input, access control in application controller run_search
       @conditions = []
       @current_tab = "vgroups"
       params["search_criteria"] =""
-      @vgroups = Vgroup.where(" vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
       if params[:vgroups_search].nil?
            params[:vgroups_search] =Hash.new  
       end
 
-      if !params[:scan_procedure][:id].blank?
-      #   condition =" vgroups.id in (select vgroups_id from scan_procedures_vgroups where 
-      #                                           scan_procedure_id in ("+params[:vgroups_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
-        @vgroups = @vgroups.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where 
-                                                                                          scan_procedure_id in(?))",params[:scan_procedure][:id])
-        # @conditions.push(condition)
-         @scan_procedures = ScanProcedure.where("id in (?)",params[:scan_procedure][:id])
+      if !params[:vgroups_search][:scan_procedure_id].blank? and !params[:vgroups_search][:scan_procedure_id][:id].blank?
+         condition =" vgroups.id in (select vgroup_id from scan_procedures_vgroups where 
+                                                 scan_procedure_id in ("+params[:vgroups_search][:scan_procedure_id][:id].to_a.join(", ").gsub(/[;:'"()=<>]/, '')+"))"
+         @conditions.push(condition)
+         @scan_procedures = ScanProcedure.where("id in (?)",params[:vgroups_search][:scan_procedure_id][:id])
          params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
       end
+
       if !params[:vgroups_search][:enumber].blank?
           condition =" vgroups.id in (select vgroup_id from enrollment_vgroup_memberships,enrollments
           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:vgroups_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
-          #@conditions.push(condition)
-          @vgroups = @vgroups.where(" vgroups.id in (select vgroup_id from enrollment_vgroup_memberships,enrollments
-          where enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower(?)))",params[:vgroups_search][:enumber])
-          
+          @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:vgroups_search][:enumber]
-      end      
+      end 
+      
+      if !params[:vgroups_search][:qc_completed].blank?
+          condition =" vgroups.qc_completed in ('"+params[:vgroups_search][:qc_completed].gsub(/[;:'"()=<>]/, '')+"')"
+          @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +",  QC completed "+params[:vgroups_search][:qc_completed]
+      end          
        # trim leading ","
        params["search_criteria"] = params["search_criteria"].sub(", ","")
 
@@ -506,28 +508,105 @@ class VgroupsController < ApplicationController
        @html_request ="Y"
        case  request_format
          when "text/html" then # ? application/html
-           @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Note','Pet status','Appt Note'] # need to look up values
+           @column_headers = ['Date','Protocol','Enumber','RMR','MRI status','PET status','LP status','LH status','NP status','Questionnaire status'] # need to look up values
                # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+           @fields =["vgroups.transfer_mri", "vgroups.transfer_pet", "vgroups.completedlumbarpuncture", "vgroups.completedblooddraw", "vgroups.completedneuropsych", "vgroups.completedquestionnaire"]      
+           @left_join = []
+               
            @column_number =   @column_headers.size
     
          else    
            @html_request ="N"          
-            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Dose','Injection Time','Scan Start','Note','Range','Pet status','BP Systol','BP Diastol','Pulse','Blood Glucose','Appt Note'] # need to look up values
-                  # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended           
-                 
+            @column_headers = ['Date','Protocol','Enumber','RMR','MRI status','PET status','LP status','LH status','NP status','Questionnaire status','Entered by','QCed by','QC completed','Compile folder','Vgroup Note'] # need to look up values
+            @fields =["vgroups.transfer_mri", "vgroups.transfer_pet", "vgroups.completedlumbarpuncture", "vgroups.completedblooddraw", "vgroups.completedneuropsych", "vgroups.completedquestionnaire", "concat(u1.first_name,' ',u1.last_name)", "concat(u2.first_name,' ',u2.last_name)", "vgroups.qc_completed", "vgroups.compile_folder", "vgroups.note"]
+            @left_join = ["LEFT JOIN users u1 on vgroups.entered_by = u1.id",
+                              "LEFT JOIN users u2 on vgroups.qc_by = u2.id  "]
+                  # Protocol,Enumber,RMR,vgroup_Date get prepended to the fields   
+           @column_number =   @column_headers.size         
          end
- 
+          
+          @tables =['vgroups'] # trigger joins --- vgroups and appointments by default
+          @order_by =["vgroups.vgroup_date DESC", "vgroups.rmr"]
+          
+          # do what self.run_search is doing
 
+          sql ="SELECT distinct vgroups.id vgroup_id,vgroups.vgroup_date,  vgroups.rmr , "+@fields.join(',')+" 
+           FROM  scan_procedures_vgroups, "+@tables.join(',')+" "+@left_join.join(' ')+"
+           WHERE  scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") "
+
+           sql = sql +" AND scan_procedures_vgroups.vgroup_id = vgroups.id "
+
+           if @conditions.size > 0
+               sql = sql +" AND "+@conditions.join(' and ')
+           end
+          #conditions - feed thru ActiveRecord? stop sql injection -- replace : ; " ' ( ) = < > - others?
+           if @order_by.size > 0
+             sql = sql +" ORDER BY "+@order_by.join(',')
+           end          
+
+           connection = ActiveRecord::Base.connection();
+           @results2 = connection.execute(sql)
+           @temp_results = @results2
+
+           @results = []   
+           i =0
+           @temp_results.each do |var|
+             @temp = []
+             @temp_vgroup_id =[]
+             # TRY TUNING BY GETTING ALL RELEVANT sp , enum , put in hash, with vgroup_id as key
+             # take each var --- get vgroup_id => find vgroup
+             # get scan procedure(s) -- make string, put in @results[0]
+             # vgroup.rmr --- put in @results[1]
+             # get enumber(s) -- make string, put in @results[2]
+             # put the rest of var - minus vgroup_id, into @results
+             # SLOWER THAN sql  -- 9915 msec vs 3193 msec
+             #vgroup = Vgroup.find(var[0])
+             #@temp[0]=vgroup.scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ")
+             #@temp[1]=vgroup.enrollments.collect {|e| e.enumber }.join(", ")
+             # change to scan_procedures.id and enrollments.id  or vgroup_id to make links-- maybe keep vgroup_id for display
+             @temp[0] = var[1] # want appt date first
+             if @html_request =="N"
+                 sql_sp = "SELECT distinct scan_procedures.codename 
+                       FROM scan_procedures, scan_procedures_vgroups
+                       WHERE scan_procedures.id = scan_procedures_vgroups.scan_procedure_id
+                       AND scan_procedures_vgroups.vgroup_id = "+var[0].to_s
+                 @results_sp = connection.execute(sql_sp)
+                 @temp[1] =@results_sp.to_a.join(", ")
+
+                 sql_enum = "SELECT distinct enrollments.enumber 
+                       FROM enrollments, enrollment_vgroup_memberships
+                       WHERE enrollments.id = enrollment_vgroup_memberships.enrollment_id
+                       AND enrollment_vgroup_memberships.vgroup_id = "+var[0].to_s
+                 @results_enum = connection.execute(sql_enum)
+                 @temp[2] =@results_enum.to_a.join(", ")
+                 var.delete_at(0) # get rid of vgroup_id- only in xls -- using vgroup_id to get vgroup --- so not chnage the index page code
+                 var.delete_at(0) # get rid of vgroup_id- only in xls -- using vgroup_id to get vgroup --- so not chnage the index page code
+             else  # need to only get the sp and enums which are displayed - and need object to make link
+               @temp[1] = var[0].to_s
+               @temp[2] = var[0].to_s
+               var.delete_at(0) # get rid of vgroup_id- only in xls -- using vgroup_id to get vgroup --- so not chnage the index page code
+             end 
+
+             #
+
+             @temp_row = @temp + var
+             @results[i] = @temp_row
+             i = i+1
+           end   
+
+         
+         @results_total = @results  # pageination makes result count wrong
+        # return @vgroups instead? for html -- xls -- go to results -- no pageation
       t = Time.now 
-      @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@vgroups.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
+      @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.count.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
       
       ### LOOK WHERE TITLE IS SHOWING UP
       @collection_title = 'All Vgroups'
 
       respond_to do |format|
         format.xls # vgroups_search.xls.erb
-        format.xml  { render :xml => @vgroups }       
-        format.html # {@vgroups = Kaminari.paginate(@vgroups).page(params[:page]).per(50)} # vgroups_search.html.erb
+        format.xml  { render :xml => @results }       
+        format.html   {@results = Kaminari.paginate_array(@results).page(params[:page]).per(50)}# vgroups_search.html.erb
       end
     end
 

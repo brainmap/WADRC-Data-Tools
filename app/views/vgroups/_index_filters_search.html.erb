@@ -10,20 +10,26 @@
 		    %>
   </p>
  -->
-<table width="60%"><tr ><td nowrap align="left"  valign="center">
+<table width="60%"  border=1><tr ><td nowrap align="left"  valign="center">
 <%= form_for 'vgroups_search' do |f| %>
+<B>Search by: </B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
 
-<%= collection_select(:scan_procedure, :id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'choose scan procedure'}, {:multiple =>  false} ) %>
-</td><td nowrap align="right" valign="center">
+<%= collection_select('vgroups_search[scan_procedure_id]', :id,ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'choose scan procedure'}, {:multiple =>  false} ) %>
+
      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-<%= f.label :enumber %></th>
-  <td><%= f.text_field :enumber %>
+<%= f.label :enumber %>
+ <%= f.text_field :enumber %>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<%= f.label :QC_ed %>
+
+<%= select :vgroups_search, :qc_completed, ["", "no", "yes", "n/a"] %>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<%= f.submit "Search" %>
 
-	<% end %>	
+	<% end %> 	
 </td></tr></table>
 </div>
 

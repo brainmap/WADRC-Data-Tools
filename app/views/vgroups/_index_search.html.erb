@@ -1,9 +1,11 @@
+<%= link_to 'download xls', { :controller=>"vgroups", :action=>"vgroups_search", :vgroups_search =>  params[:vgroups_search] , :format => :xls} %>  </p>
+
 <%# paginated = true unless paginated == false %>
 
 <table class="tabular">
   
-  <caption><%= pluralize(@vgroups.total_count, 'Visits') %><%#= paginated ? pagination_info(vgroups) : pluralize(vgroups.length, 'Visits') %></caption>
-  
+
+  <caption><%= pluralize(@results_total.size, 'Visit') %></caption>
   <thead>
     <tr>
       <th><span>Date<!--_ = sort_link @search, :vgroup_date % ---></span></th>
@@ -47,16 +49,16 @@
   </thead>
   
   <tfoot><tr><td colspan=21>
-		 <%= paginate @vgroups %> 
+		 <%= paginate @results %> 
 		<%# if paginated %>
     	<%#= @vgroup_search.nil? ? will_paginate(vgroups) : will_paginate(vgroups, :params => { :vgroup_search => @vgroup_search }) %>
 		<%# end %>
   </td></tr></tfoot>
   
   <tbody>
-    <% @vgroups.each do |vgroup| %>
-
-   <%  @a =  Appointment.where("vgroup_id in (?)",vgroup.id)
+    <% @results.each do |vg| %>
+   <%   vgroup = Vgroup.find(vg[1])
+        @a =  Appointment.where("vgroup_id in (?)",vgroup.id)
         a_array =@a.to_a
        @visits = Visit.where("appointment_id in (?) ",a_array)
          visit = nil
@@ -81,7 +83,7 @@
     <td><%= @visits.blank? ?  "None" :	@visits.collect{|sp| link_to("mri "+sp.date.strftime('%m-%y'),visit_path(sp))}.join(", ").html_safe %></td>
     <%= show_bool(vgroup.transfer_mri) %>
 <% if edit_count > 0 %>
-    <td><%= link_to  'add-MRI', new_visit_path+"/"+vgroup.id.to_s %></td>
+    <td><%= link_to  'add-MRI', new_visit_path+"/"+vgroup.id.to_s, :confirm => "Are you sure there is not an existing MRI appointment for the same date, scan procedure and enumber? MRI appointments are usually created when the scans are imported." %></td>
 <% end %>
     <td><%= @petscans.blank? ?  "None" :	@petscans.collect{|sp| link_to("pet",petscan_path(sp))}.join(", ").html_safe %></td>
     <%= show_bool(vgroup.transfer_pet )%>
