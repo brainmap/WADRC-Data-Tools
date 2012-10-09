@@ -72,10 +72,6 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
   <div class="three_col_mid">
     <table>
       <tr>
-        <td><%= f.label(:Entered_by) %></td>
-        <td><%= select(:vgroup, :entered_by, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select who entered data" }) %></td>
-      </tr>
-      <tr>
         <td><%= f.label :Transfer_MRI %></td>
         <td><%= select :vgroup, :transfer_mri, ["no", "yes", "n/a"] %></td>
       </tr>

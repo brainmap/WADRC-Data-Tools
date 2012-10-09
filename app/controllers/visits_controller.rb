@@ -243,7 +243,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
        end
         @vgroup.rmr = @visit.rmr
         @vgroup.transfer_mri = params[:vgroup][:transfer_mri]
-        @vgroup.entered_by = params[:vgroup][:entered_by]
+        #@vgroup.entered_by = params[:vgroup][:entered_by]
        @vgroup.save
        @appointment.vgroup_id = @vgroup.id
        @appointment.user = current_user
@@ -258,7 +258,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     respond_to do |format|
       if @visit.save
          @vgroup.transfer_mri = params[:vgroup][:transfer_mri]
-         @vgroup.entered_by = params[:vgroup][:entered_by]
+         # @vgroup.entered_by = params[:vgroup][:entered_by]
           @vgroup.save
           # not sure if this is useful in the load script
 =begin
@@ -465,7 +465,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
         @appointment.save
         @vgroup = Vgroup.find(@appointment.vgroup_id)
         @vgroup.transfer_mri = params[:vgroup][:transfer_mri]
-        @vgroup.entered_by = params[:vgroup][:entered_by]
+        #@vgroup.entered_by = params[:vgroup][:entered_by]
         @vgroup.rmr = @visit.rmr
  #       @vgroup.enrollments = @visit.enrollments
         sql = "Delete from enrollment_vgroup_memberships where vgroup_id ="+@vgroup.id.to_s
