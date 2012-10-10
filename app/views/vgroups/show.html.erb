@@ -1,3 +1,26 @@
+<!--- hiding all on load -->
+<script  type="text/javascript">
+ $(window).bind("load", function() {
+   toggle2_closed('mri1','myHeader2');
+   toggle2_closed('mri2','myHeader2');
+   toggle2_closed('mri3','myHeader2');
+   toggle2_closed('pet1','myHeader2');
+   toggle2_closed('pet2','myHeader2');
+   toggle2_closed('pet3','myHeader2');
+   toggle2_closed('lp1','myHeader2');
+   toggle2_closed('lp2','myHeader2');
+   toggle2_closed('lp3','myHeader2');
+   toggle2_closed('lh1','myHeader2');
+   toggle2_closed('lh2','myHeader2');
+   toggle2_closed('lh3','myHeader2');
+   toggle2_closed('np1','myHeader2');
+   toggle2_closed('np2','myHeader2');
+   toggle2_closed('np3','myHeader2');
+   toggle2_closed('questionnaire1','myHeader2');
+   toggle2_closed('questionnaire2','myHeader2');
+   toggle2_closed('questionnaire3','myHeader2');
+  });
+</script>
 <%
 @var = current_user
 # assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
@@ -99,14 +122,20 @@ edit_count = edit_count -1
 <%= label_tag :Transfer_MRI %> <%= select :vgroup, :transfer_mri, ["no", "yes", "n/a"] %>
  <!-- just display mri_transfer -->
 <% end %></td></tr>
-	<tr><td colspan=7>	<table  width="90%">
-	<% @visits.each do |v| 
+	<tr><td colspan=7 align="left">	<table  width="90%">
+	<%  v_cnt = 0
+	   @visits.each do |v| 
+		v_cnt = v_cnt + 1
 		@appointment = Appointment.find(v.appointment_id) %>
 	<tr><td align="left" colspan=5><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",visit_path(v) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_visit_path(v) ) :"" %></td>
 		</tr>
 		<tr><td colspan="7"  align="left"><%= v.notes %><%= @appointment.comment %>
 		</td></tr>
 	<% end %> </table>
+	<a id="myHeader1" href="javascript:toggle2_closed('mri<%= v_cnt.to_s%>','myHeader2');" ><small><small>show/hide</small></small></a><br>
+	   <div id="mri<%= v_cnt.to_s%>" style="display: ">
+		MRI
+	   </div>
 	</td></tr>
 <tr><td colspan=5  align="left">
 	<b>Petscan: </b><%= @petscans.blank? ? "None" :""%></td><td  >&nbsp;</td><td colspan="1" align="right" nowrap <%= show_bool_cell_color(@vgroup.transfer_pet) %> >
@@ -120,8 +149,11 @@ edit_count = edit_count -1
 	<% else %>
 	<%= label_tag :Transfer_PET %> <%= select :vgroup, :transfer_pet, ["no", "yes", "n/a"] %>&nbsp;
 	<% end %></td></tr>
-<tr><td colspan=7  align="left"><table width="80%">
-	<% @petscans.each do |p|  
+<tr><td colspan=7  align="left"><table width="90%">
+	<%  v_cnt = 0
+	   @petscans.each do |p| 
+		v_cnt = v_cnt + 1 
+		@petscan = p
 		@appointment = Appointment.find(p.appointment_id) %>
 	<tr><td  align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",petscan_path(p) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_petscan_path(p) ) :"" %></td>
 		<td><%=p.lookup_pettracer_id.nil? ? nil : LookupPettracer.find(p.lookup_pettracer_id).name_description.html_safe %></td>
@@ -129,6 +161,12 @@ edit_count = edit_count -1
 		</tr>
 		<tr><td colspan="5"><%= @appointment.comment %>
 		</td></tr>
+		<tr><td colspan="7"><a id="myHeader1" href="javascript:toggle2_closed('pet<%= v_cnt.to_s%>','myHeader2');" ><small><small>show/hide</small></small></a><br>
+		   <div id="pet<%= v_cnt.to_s%>" style="display: ">
+			<%= 
+			render :partial => 'petscans/show' , :locals => { :petscan => p} %>
+		   </div>
+		</td><tr>
 	<%end %> </table>	
 </td></tr>
 <tr><td colspan=5  align="left">
@@ -143,8 +181,11 @@ edit_count = edit_count -1
 <% else %>
 	<%= label_tag :Completed_LP %> <%= select :vgroup, :completedlumbarpuncture, ["no", "yes", "n/a"] %>&nbsp;
 <% end %></b></td></tr>
-<tr><td colspan=7  align="left"><table  width="80%">
-	<% @lumbarpunctures.each do |lp|
+<tr><td colspan=7  align="left"><table  width="90%">
+	<%  v_cnt = 0
+	   @lumbarpunctures.each do |lp|
+		v_cnt = v_cnt + 1
+		@lumbarpuncture = lp
 	   @appointment = Appointment.find(lp.appointment_id)	%>
 	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",lumbarpuncture_path(lp) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_lumbarpuncture_path(lp) ) :"" %></td>
 		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
@@ -152,8 +193,13 @@ edit_count = edit_count -1
 		</tr>
 		<tr><td colspan="5"><%= @appointment.comment %>
 		</td></tr>
-	<%end %>  </table>	
-		
+			<tr><td colspan="7"><a id="myHeader1" href="javascript:toggle2_closed('lp<%= v_cnt.to_s%>','myHeader2');" ><small><small>show/hide</small></small></a><br>
+			   <div id="lp<%= v_cnt.to_s%>" style="display: ">
+				<%= 
+				render :partial => 'lumbarpunctures/show' , :locals => { :lumbarpuncture => lp} %>
+			   </div>
+			</td><tr>
+	<%end %>  </table>
 <tr><td colspan=5  align="left">
 	<b>Lab Health: </b><%= @blooddraws.blank? ? "None" :""%></td><td  >&nbsp;</td><td colspan="1" align="right" nowrap <%= show_bool_cell_color(@vgroup.completedblooddraw) %> >
 <% if edit_count > 0 %>
@@ -166,8 +212,11 @@ edit_count = edit_count -1
 <% else %>
 	<%= label_tag :Completed_Lab %> <%= select :vgroup, :completedblooddraw, ["no", "yes", "n/a"] %>&nbsp;
 <% end %></b></td></tr>
-<tr><td colspan=7  align="left"><table  width="80%">
-	<% @blooddraws.each do |bd|
+<tr><td colspan=7  align="left"><table  width="90%">
+	<% v_cnt =0
+	   @blooddraws.each do |bd|
+		@blooddraw = bd
+		v_cnt = v_cnt + 1
 	   @appointment = Appointment.find(bd.appointment_id)	%>
 	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",blooddraw_path(bd) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_blooddraw_path(bd) ) :"" %></td>
 		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
@@ -175,7 +224,19 @@ edit_count = edit_count -1
 		</tr>
 		<tr><td colspan="5"><%= @appointment.comment %>
 		</td></tr>
-	<%end %>  </table>		
+		 <tr><td align="left" colspan=7>
+			<a id="myHeader1" href="javascript:toggle2_closed('lh<%= v_cnt.to_s%>','myHeader2');" ><small><small>show/hide</small></small></a><br>
+			   <div id="lh<%= v_cnt.to_s%>" style="none: ">
+				<%= q_form_id=12  
+				@questionform = Questionform.find(q_form_id)
+				@q_data_form = QDataForm.where("questionform_id="+ q_form_id.to_s+" and appointment_id in (?)",@appointment.id) 
+		     @q_data_form = @q_data_form[0]
+				render :partial => 'blooddraws/show' , :locals => { :blooddraw => bd } %>
+			
+			   </div>
+		 </td></tr>
+	<%end %>  </table>
+				
 </td></tr>
 <tr><td colspan=5  align="left">
 	<b>Neuro Psych: </b><%= @neuropsyches.blank? ? "None" :""%></td><td  >&nbsp;</td><td colspan="1" align="right" nowrap <%= show_bool_cell_color(@vgroup.completedneuropsych) %> >
@@ -189,15 +250,28 @@ edit_count = edit_count -1
 	<% else %>
 		<%= label_tag :Completed_NP %> <%= select :vgroup, :completedneuropsych, ["no", "yes", "n/a"] %>&nbsp;
 <% end %></b></td></tr>
-<tr><td colspan=7  align="left"><table  width="80%">
-	<% @neuropsyches.each do |np|
+<tr><td colspan=7  align="left"><table  width="90%">
+	<% v_cnt = 0
+	   @neuropsyches.each do |np|
+		@neuropsych = np
+		v_cnt = v_cnt + 1
 	   @appointment = Appointment.find(np.appointment_id)	%>
 	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",neuropsych_path(np) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_neuropsych_path(np) ) :"" %></td>
 		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 		<td> </td>
 		</tr>
 		<tr><td colspan="5"><%= @appointment.comment %>
-		</td></tr>
+		</td></tr>	 <tr><td align="left" colspan=7> 
+				<a id="myHeader1" href="javascript:toggle2_closed('np<%= v_cnt.to_s%>','myHeader2');" ><small><small>show/hide</small></small></a><br>
+				   <div id="np<%= v_cnt.to_s%>" style="none: ">
+					<%= q_form_id=13  
+					@questionform = Questionform.find(q_form_id)
+					@q_data_form = QDataForm.where("questionform_id="+ q_form_id.to_s+" and appointment_id in (?)",@appointment.id) 
+			     @q_data_form = @q_data_form[0]
+					render :partial => 'neuropsyches/show' , :locals => { :neuropsych => np } %>
+
+				   </div>
+			 </td></tr>
 	<%end %>  </table>		
 </td></tr>
 <tr><td colspan=5  align="left">
@@ -212,15 +286,27 @@ edit_count = edit_count -1
 <% else %>
 			<%= label_tag :Completed_Q %> <%= select :vgroup, :completedquestionnaire, ["no", "yes", "n/a"] %>&nbsp;
 <% end %></b></td></tr>
-<tr><td colspan=7  align="left"><table  width="80%">
-	<% @questionnaires.each do |q|
+<tr><td colspan=7  align="left"><table  width="90%">
+	<% v_cnt = 0
+	   @questionnaires.each do |q|
+		@questionnaire = q
+		v_cnt = v_cnt + 1
 	   @appointment = Appointment.find(q.appointment_id)	%>
 	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",questionnaire_path(q) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_questionnaire_path(q) ) :"" %></td>
 		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 		<td></td>
 		</tr>
 		<tr><td colspan="5"><%= @appointment.comment %>
-		</td></tr>
+		</td></tr>	<tr><td align="left" colspan=7>
+					<a id="myHeader1" href="javascript:toggle2_closed('questionnaire<%= v_cnt.to_s%>','myHeader2');" ><small><small>show/hide</small></small></a><br>
+					   <div id="questionnaire<%= v_cnt.to_s%>" style="none: ">
+						<%= q_form_id = 	14  
+						@questionform = Questionform.find(q_form_id)
+						@q_data_form = QDataForm.where("questionform_id="+q_form_id.to_s+" and appointment_id in (?)",@appointment.id)   # THIS IS FAILING
+				     @q_data_form = @q_data_form[0] 
+		render :partial => 'questionnaires/show' , :locals => { :questionnaire => q } %>
+					   </div>
+				 </td></tr>
 	<%end %>  </table>		
 </td></tr>
 </table>
@@ -261,4 +347,13 @@ edit_count = edit_count -1
 	  </div>
 	<% end %>	
 
-<% end %>
+<% end %>	
+
+
+
+
+
+
+
+
+

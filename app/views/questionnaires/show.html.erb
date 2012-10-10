@@ -23,40 +23,4 @@ edit_count = edit_count -1
   <br />
 </div>
 
-
-<div id="leftcol" class="two_col_left">
-  <h3>Summary:</h3>
-  
-  <div id="visit_details_note" class="sticky">
-    <%= key_val_table("visit_details", {
-      :Questionnaire_appt_date => @appointment.appointment_date,
-      :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
-      :RMR_Number => @vgroup.rmr,
-     :Participant => @participant.nil? ? nil : link_to('view participant', @participant)
-    }) %>
-  </div>
-
-  <div id="visit_details_note" class="sticky">
-    <%= key_val_table("visit_details", {
-      :Questionnaire_completed => @vgroup.completedquestionnaire ,
-    }) %>
-  </div>
-
-</div>
-
-
-<div id="visit_status_report" class="two_col_right">
-
-  <h3>Notes:</h3>
-  <div id="notes" class="sticky">
-	<%=  RedCloth.new(@appointment.comment.blank? ? "No comment entered for this Questiuonnaire" : @appointment.comment).to_html.html_safe 
-            %><br>
-
-  </div> 
-
-
-</div>
-
-
-<br style="clear: both" /><br />
-<%= render :partial => 'questionforms/displayform', :locals => { } %>
+<%= 	render :partial => 'questionnaires/show'  %>
