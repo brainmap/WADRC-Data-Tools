@@ -240,7 +240,7 @@ WADRCDataTools::Application.routes.draw do
 ####  match '/login', :controller => 'sessions', :action => 'new', :as => :username
 ####  match '/logout', :controller => 'sessions', :action => 'destroy', :as => :logout
 
-  root :to => "vgroups#home" #"visits#index"
+  root :to => "vgroups#vgroups_search" #"vgroups#home" #"visits#index"
 
   match ':controller(/:action(/:id(.:format)))'
 
