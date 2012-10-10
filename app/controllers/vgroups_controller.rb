@@ -497,6 +497,12 @@ class VgroupsController < ApplicationController
           condition =" vgroups.qc_completed in ('"+params[:vgroups_search][:qc_completed].gsub(/[;:'"()=<>]/, '')+"')"
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  QC completed "+params[:vgroups_search][:qc_completed]
+      end 
+      
+      if !params[:vgroups_search][:entered_by].blank?
+          condition =" vgroups.entered_by in ('"+params[:vgroups_search][:entered_by].gsub(/[;:'"()=<>]/, '')+"')"
+          @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +",  Entered by "+User.find(params[:vgroups_search][:entered_by]).username_name
       end          
        # trim leading ","
        params["search_criteria"] = params["search_criteria"].sub(", ","")

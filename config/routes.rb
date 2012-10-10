@@ -164,7 +164,8 @@ WADRCDataTools::Application.routes.draw do
   
    match '/question/clone/:id', :controller=>'questions',:action=>'clone', :as => :clone
    
-   match '/vgroups/home', :controller => 'vgroups', :action => 'home', :as => :home
+   #match '/vgroups/home', :controller => 'vgroups', :action => 'home', :as => :home
+    match '/vgroups/home', :controller => 'vgroups', :action => 'vgroups_search', :as => :home
    match '/vgroups/vgroups_search', :controller => 'vgroups', :action => 'vgroups_search', :as => :vgroups_search
    match '/vgroups/complete', :to => 'vgroups#index_by_scope', :scope => 'complete', :as => :complete_vgroups
    match '/vgroups/incomplete', :to => 'vgroups#index_by_scope', :scope => 'incomplete', :as => :incomplete_vgroups
