@@ -1,26 +1,4 @@
-<!--- hiding all on load -->
-<script  type="text/javascript">
- $(window).bind("load", function() {
-   toggle2_closed('mri1','myHeader2');
-   toggle2_closed('mri2','myHeader2');
-   toggle2_closed('mri3','myHeader2');
-   toggle2_closed('pet1','myHeader2');
-   toggle2_closed('pet2','myHeader2');
-   toggle2_closed('pet3','myHeader2');
-   toggle2_closed('lp1','myHeader2');
-   toggle2_closed('lp2','myHeader2');
-   toggle2_closed('lp3','myHeader2');
-   toggle2_closed('lh1','myHeader2');
-   toggle2_closed('lh2','myHeader2');
-   toggle2_closed('lh3','myHeader2');
-   toggle2_closed('np1','myHeader2');
-   toggle2_closed('np2','myHeader2');
-   toggle2_closed('np3','myHeader2');
-   toggle2_closed('questionnaire1','myHeader2');
-   toggle2_closed('questionnaire2','myHeader2');
-   toggle2_closed('questionnaire3','myHeader2');
-  });
-</script>
+
 <%
 @var = current_user
 # assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
@@ -45,6 +23,10 @@ edit_count = edit_count -1
 	      if !@vgroup.participant_id.blank?
 		     @participant = Participant.find(@vgroup.participant_id)
 		  end
+		  sp_list = @vgroup.scan_procedures.collect {|sp| sp.id}.join(",")
+	 	  sp_array =[]
+	 	  sp_array = sp_list.split(',').map(&:to_i)
+	 	  @scanprocedures = ScanProcedure.where("id in (?)",sp_array)
 %>
 
 <p id="notice"><%= notice %></p>
@@ -125,17 +107,22 @@ edit_count = edit_count -1
 	<tr><td colspan=7 align="left">	<table  width="90%">
 	<%  v_cnt = 0
 	   @visits.each do |v| 
+		@visit = v
 		v_cnt = v_cnt + 1
 		@appointment = Appointment.find(v.appointment_id) %>
 	<tr><td align="left" colspan=5><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",visit_path(v) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_visit_path(v) ) :"" %></td>
 		</tr>
 		<tr><td colspan="7"  align="left"><%= v.notes %><%= @appointment.comment %>
-		</td></tr>
+		</td></tr>	<tr><td align="left" colspan=7> 
+					<a id="myHeader1" href="javascript:toggle2_closed('mri<%= v_cnt.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a><br>
+					   <div id="mri<%= v_cnt.to_s%>"  style="display:none">
+						<p><%= @visit.path %></p>
+						<%= 
+						render :partial => 'visits/show' , :locals => { :visit => v } %>
+
+					   </div>
+				 </td></tr>
 	<% end %> </table>
-	<a id="myHeader1" href="javascript:toggle2_closed('mri<%= v_cnt.to_s%>','myHeader2');" ><small><small>show/hide</small></small></a><br>
-	   <div id="mri<%= v_cnt.to_s%>" style="display: ">
-		MRI
-	   </div>
 	</td></tr>
 <tr><td colspan=5  align="left">
 	<b>Petscan: </b><%= @petscans.blank? ? "None" :""%></td><td  >&nbsp;</td><td colspan="1" align="right" nowrap <%= show_bool_cell_color(@vgroup.transfer_pet) %> >
@@ -161,8 +148,8 @@ edit_count = edit_count -1
 		</tr>
 		<tr><td colspan="5"><%= @appointment.comment %>
 		</td></tr>
-		<tr><td colspan="7"><a id="myHeader1" href="javascript:toggle2_closed('pet<%= v_cnt.to_s%>','myHeader2');" ><small><small>show/hide</small></small></a><br>
-		   <div id="pet<%= v_cnt.to_s%>" style="display: ">
+		<tr><td colspan="7"><a id="myHeader1" href="javascript:toggle2_closed('pet<%= v_cnt.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a><br>
+		   <div id="pet<%= v_cnt.to_s%>"   style="display:none">
 			<%= 
 			render :partial => 'petscans/show' , :locals => { :petscan => p} %>
 		   </div>
@@ -193,8 +180,8 @@ edit_count = edit_count -1
 		</tr>
 		<tr><td colspan="5"><%= @appointment.comment %>
 		</td></tr>
-			<tr><td colspan="7"><a id="myHeader1" href="javascript:toggle2_closed('lp<%= v_cnt.to_s%>','myHeader2');" ><small><small>show/hide</small></small></a><br>
-			   <div id="lp<%= v_cnt.to_s%>" style="display: ">
+			<tr><td colspan="7"><a id="myHeader1" href="javascript:toggle2_closed('lp<%= v_cnt.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a><br>
+			   <div id="lp<%= v_cnt.to_s%>"   style="display:none">
 				<%= 
 				render :partial => 'lumbarpunctures/show' , :locals => { :lumbarpuncture => lp} %>
 			   </div>
@@ -225,8 +212,8 @@ edit_count = edit_count -1
 		<tr><td colspan="5"><%= @appointment.comment %>
 		</td></tr>
 		 <tr><td align="left" colspan=7>
-			<a id="myHeader1" href="javascript:toggle2_closed('lh<%= v_cnt.to_s%>','myHeader2');" ><small><small>show/hide</small></small></a><br>
-			   <div id="lh<%= v_cnt.to_s%>" style="none: ">
+			<a id="myHeader1" href="javascript:toggle2_closed('lh<%= v_cnt.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a><br>
+			   <div id="lh<%= v_cnt.to_s%>"  style="display:none">
 				<%= q_form_id=12  
 				@questionform = Questionform.find(q_form_id)
 				@q_data_form = QDataForm.where("questionform_id="+ q_form_id.to_s+" and appointment_id in (?)",@appointment.id) 
@@ -262,8 +249,8 @@ edit_count = edit_count -1
 		</tr>
 		<tr><td colspan="5"><%= @appointment.comment %>
 		</td></tr>	 <tr><td align="left" colspan=7> 
-				<a id="myHeader1" href="javascript:toggle2_closed('np<%= v_cnt.to_s%>','myHeader2');" ><small><small>show/hide</small></small></a><br>
-				   <div id="np<%= v_cnt.to_s%>" style="none: ">
+				<a id="myHeader1" href="javascript:toggle2_closed('np<%= v_cnt.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a><br>
+				   <div id="np<%= v_cnt.to_s%>"  style="display:none">
 					<%= q_form_id=13  
 					@questionform = Questionform.find(q_form_id)
 					@q_data_form = QDataForm.where("questionform_id="+ q_form_id.to_s+" and appointment_id in (?)",@appointment.id) 
@@ -298,13 +285,14 @@ edit_count = edit_count -1
 		</tr>
 		<tr><td colspan="5"><%= @appointment.comment %>
 		</td></tr>	<tr><td align="left" colspan=7>
-					<a id="myHeader1" href="javascript:toggle2_closed('questionnaire<%= v_cnt.to_s%>','myHeader2');" ><small><small>show/hide</small></small></a><br>
-					   <div id="questionnaire<%= v_cnt.to_s%>" style="none: ">
-						<%= q_form_id = 	14  
+			<a id="myHeader1" href="javascript:toggle2_closed('questionnaire<%= v_cnt.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a><br>
+		<div id="questionnaire<%= v_cnt.to_s%>" style="display:none">
+						<% q_form_id = 	14  
 						@questionform = Questionform.find(q_form_id)
-						@q_data_form = QDataForm.where("questionform_id="+q_form_id.to_s+" and appointment_id in (?)",@appointment.id)   # THIS IS FAILING
-				     @q_data_form = @q_data_form[0] 
-		render :partial => 'questionnaires/show' , :locals => { :questionnaire => q } %>
+						@q_data_form = QDataForm.where("questionform_id="+ q_form_id.to_s+" and appointment_id in (?)",@appointment.id)   # THIS IS FAILING when extra space before last "+" [+ q_form_id.to_s +]	
+				      @q_data_form = @q_data_form[0] 
+				%>
+	<%=	render :partial => 'questionnaires/show' , :locals => { :questionnaire => q } %>
 					   </div>
 				 </td></tr>
 	<%end %>  </table>		

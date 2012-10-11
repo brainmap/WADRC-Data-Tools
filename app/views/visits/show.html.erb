@@ -20,82 +20,8 @@ edit_count = edit_count -1
 </div>
 
 
-<div id="leftcol" class="two_col_left">
-  <h3>Summary:</h3>
-  <table id="visit_status_table">
-    <thead>
-      <tr>
-        <th>Transfer MRI</th>
-        <th>Radiology Outcome</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <%= show_bool(@vgroup.transfer_mri) %>
-        <%= show_rad_review(@visit.radiology_outcome) %>
-      </tr>
-    </tbody>
-  </table>
-  
-  <div id="visit_details_note" class="sticky">
-    <%= key_val_table("visit_details", {
-      :MRI_appt_date => @visit.date,
-      :scan_procedure => @visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe,
-      :Scan_number => @visit.scan_number,
-      :enumber => @enumber.nil? ? nil : link_to(@visit.enrollment.enumber, @visit.enrollment),
-      :Initials => @visit.initials_from_dicom_or_model,
-      :RMR_Number => @visit.rmr,
-      :Dicom_DVD => @visit.dicom_dvd == 'no' ? nil : @visit.dicom_dvd,
-      :Entered_by => @vgroup.entered_by.nil? ? nil : User.find(@vgroup.entered_by).username,
-      :Scanner_source => @visit.scanner_source,
-      :Created_by => @visit.created_by ? @visit.created_by.login : '',
-      :Participant => @participant.nil? ? nil : link_to('view participant', @participant),
-	  :Age_at_Visit => @visit.age_at_visit,
-	 :MRI_Tech =>@visit.mritech.blank? ? "" : Employee.find(@visit.mritech).name,
-	:Scan_Start_Time =>@visit.mristarttime.nil? ? nil : @visit.mristarttime.hour.to_s.rjust(2,'0')+":"+@visit.mristarttime.min.to_s.rjust(2,'0'),
-	:Scan_End_Time =>@visit.mriendtime.nil? ? nil : @visit.mriendtime.hour.to_s.rjust(2,'0')+":"+@visit.mriendtime.min.to_s.rjust(2,'0'),
-	:MRI_Fast_Completed => @visit.completedmrifast == 1 ? "Yes" : "No",
-	:MRI_Fast_Total_Time => @visit.mrifasttotaltime.nil?  ? @visit.mrifasttotaltime_min.nil? ? nil : @visit.mrifasttotaltime.to_s+" hrs : "+@visit.mrifasttotaltime_min.to_s+" mins" :  @visit.mrifasttotaltime.to_s+" hrs : "+@visit.mrifasttotaltime_min.to_s+" mins" ,
-	
-    })  #:Archive_Dvd =>@visit.archivedvd,
-    %>
-  </div>
 
-
-
-</div>
-
-
-
-<div id="visit_status_report" class="two_col_right">
-
-  <h3>Notes:</h3>
-  <div id="notes" class="sticky">
-    <%= RedCloth.new(@visit.notes.blank? ? "No notes entered for this visit" : @visit.notes).to_html.html_safe %>
-  </div>
-  <div id="notes" class="sticky">
-    <%= RedCloth.new(@appointment.comment.blank? ? "" : @appointment.comment).to_html.html_safe %>
-  </div>
-<% @vital =  Vital.where("appointment_id in (?) ",@visit.appointment_id).first
- if !@vital.blank?
-	 vital = Vital.find(@vital.id) 
-	if ( ((vital.pulse.blank?? 911 :vital.pulse) < 911) or
-		      ((vital.bp_systol.blank?? 911 :vital.bp_systol) < 911 ) or 
-		        ( (vital.bp_diastol.blank?? 911 :vital.bp_diastol) < 911) or 
-		           ((vital.bloodglucose.blank?? 911 :vital.bloodglucose) < 911)  )%>
-	
-<h4>Vitals:</h4>
-<div id="vital" class="sticky">
-     <%= vital.pulse==991 ?  "" :("Pulse: "+vital.pulse.to_s+"<br>").html_safe %>
-     <%= vital.bp_systol==991 ?  "" :("BP Systol: "+vital.bp_systol.to_s+"<br>").html_safe %>
-     <%= vital.bp_diastol==991 ?  "" :("BP Diastol: "+vital.bp_diastol.to_s+"<br>").html_safe %>
-     <%= vital.bloodglucose==991 ?  "" :("Blood Glucose: "+vital.bloodglucose.to_s+"<br>").html_safe %>
-</div>
-
-<%    end 
-  end %>
-</div>
-
+<%= render :partial => 'visits/show' %>
 
 <br style="clear: both" /><br />
 
