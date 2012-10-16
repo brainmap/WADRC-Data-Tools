@@ -7,6 +7,7 @@
     <th>Entrance Page Type</th>
     <th>Target Page</th>
     <th>Long description</th>
+    <th>Tab Type</th>
     <th>Display order</th>
     <th>Parent questionform</th>
     <th></th>
@@ -21,6 +22,7 @@
     <td><%= questionform.entrance_page_type %></td>
     <td><%= questionform.target_page %></td>
     <td><%= questionform.long_description %></td>
+    <td><%= questionform.tab_type %></td>
     <td><%= questionform.display_order %></td>
     <td><%= if !questionform.parent_questionform_id.blank?
 	Questionform.find(questionform.parent_questionform_id).description

@@ -35,6 +35,10 @@ v_entrance_page_type =[["scan_procedure","scan_procedure"],["scan_procedure, vis
     <%= f.text_area :long_description %>
   </div>
   <div class="field">
+    <%= f.label :tab_type %><br />
+    <%= select :questionform, :tab_type, ["","questionnaire", "np", "lh"] %>
+  </div>
+  <div class="field">
     <%= f.label :display_order %><br />
     <%= f.text_field :display_order %>
   </div>

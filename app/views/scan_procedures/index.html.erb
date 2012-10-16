@@ -16,7 +16,7 @@
   <tbody>
     <% @scan_procedures.each do |scan_procedure| %>
     <tr>
-      <td><%= link_to(scan_procedure.codename, in_scan_procedure_path(scan_procedure)) %></td>
+      <td><%= link_to(scan_procedure.codename, '/mri_search?mri_search[scan_procedure_id][]='+scan_procedure.id.to_s) %></td>
       <td><%=h scan_procedure.description %></td>
       <td><%=h scan_procedure.petscan_flag %></td>
 			<td><%=h scan_procedure.visits.count %></td>

@@ -61,8 +61,8 @@ class EnrollmentsController < ApplicationController
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
 #    @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
-     @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships, scan_procedures_visits
-           where enrollment_visit_memberships.visit_id = scan_procedures_visits.visit_id and scan_procedures_visits.scan_procedure_id in (?)) ", scan_procedure_array).find(params[:id])
+     @enrollment = Enrollment.where(" enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
+           where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?)) ", scan_procedure_array).find(params[:id])
      
   end
 
@@ -89,8 +89,8 @@ class EnrollmentsController < ApplicationController
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
 #    @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
-     @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships, scan_procedures_visits
-           where enrollment_visit_memberships.visit_id = scan_procedures_visits.visit_id and  scan_procedures_visits.scan_procedure_id in (?)) ", scan_procedure_array).find(params[:id])
+     @enrollment = Enrollment.where(" enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
+           where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and  scan_procedures_vgroups.scan_procedure_id in (?)) ", scan_procedure_array).find(params[:id])
 
     respond_to do |format|
       if @enrollment.update_attributes(params[:enrollment])
@@ -110,8 +110,8 @@ class EnrollmentsController < ApplicationController
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
 #    @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
-     @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships, scan_procedures_visits
-       where enrollment_visit_memberships.visit_id = scan_procedures_visits.visit_id and scan_procedures_visits.scan_procedure_id in (?)) ", scan_procedure_array).find(params[:id])
+     @enrollment = Enrollment.where(" enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
+       where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?)) ", scan_procedure_array).find(params[:id])
     @enrollment.destroy
 
     respond_to do |format|

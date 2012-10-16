@@ -404,7 +404,9 @@ class VgroupsController < ApplicationController
   end
   
   def in_scan_procedure
-   redirect_to in_scan_procedure_vgroup_path( :scan_procedure_id => params[:scan_procedure][:id] )
+   # redirect_to in_scan_procedure_vgroup_path( :scan_procedure_id => params[:scan_procedure][:id] )
+   redirect_to '/vgroups_search?vgroups_search[scan_procedure_id][]='+ params[:scan_procedure][:id]
+   
   end
   
   def in_enumber

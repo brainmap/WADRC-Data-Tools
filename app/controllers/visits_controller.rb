@@ -94,7 +94,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
   end
   
   def in_scan_procedure
-    redirect_to in_scan_procedure_path( :scan_procedure_id => params[:scan_procedure][:id] )
+    #redirect_to in_scan_procedure_path( :scan_procedure_id => params[:scan_procedure][:id] )
+    redirect_to mri_search_path( :scan_procedure_id => params[:scan_procedure][:id] )
   end
 
   def index_by_scan_procedure  
@@ -451,7 +452,10 @@ class VisitsController <  AuthorizedController #  ApplicationController
           end
          end
       end
-    end         
+    end 
+    
+    # getting error when trying to add enumber ??? try changing thye enum format chars[xxxx(x)]digits[xxxx]
+            
     respond_to do |format|
       if @visit.update_attributes(attributes)
         if !delete_scantask_array.blank?
