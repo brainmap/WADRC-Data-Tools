@@ -40,7 +40,7 @@ edit_count = edit_count -1
 <% end %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<b>Scan Procedure:</b>
-    <%= @vgroup.blank? ? "None" : @vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, '/vgroups/vgroups_search?vgroups_search[scan_procedure_id]='+ sp.id.to_s)}.join(", ").html_safe %> 
+    <%= @vgroup.blank? ? "None" : @vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, '/vgroups/vgroups_search?vgroups_search[scan_procedure_id][id]='+ sp.id.to_s)}.join(", ").html_safe %> 
 <br>
 	<br><b>Enroll Number:</b>
 	<%= @vgroup.blank? ? "": @vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %>
