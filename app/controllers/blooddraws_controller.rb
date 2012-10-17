@@ -332,13 +332,17 @@ class BlooddrawsController < ApplicationController
      # NEED SCAN PROC ARRAY FOR VGROUP  --- change to vgroup!!
 
       @a =  Appointment.where("vgroup_id in (?)",@appointment.vgroup_id)
-         a_array =@a.to_a
-        @visits = Visit.where("appointment_id in (?) ",a_array)
-          visit = nil
-          @visits.each do |v| 
- 	       visit = v
- 	     end  
- 	  sp_list = visit.scan_procedures.collect {|sp| sp.id}.join(",")
+# switching to vgroup sp
+#         a_array =@a.to_a
+#        @visits = Visit.where("appointment_id in (?) ",a_array)
+#          visit = nil
+#          @visits.each do |v| 
+# 	       visit = v
+# 	     end  
+# 	  sp_list = visit.scan_procedures.collect {|sp| sp.id}.join(",")
+ 	  
+ 	  vgroup = Vgroup.find(@appointment.vgroup_id)
+ 	  sp_list = vgroup.scan_procedures.collect {|sp| sp.id}.join(",")
 
  	  sp_array =[]
  	  sp_array = sp_list.split(',').map(&:to_i)
@@ -392,13 +396,16 @@ class BlooddrawsController < ApplicationController
     # NEED SCAN PROC ARRAY FOR VGROUP  --- change to vgroup!!
   
      @a =  Appointment.where("vgroup_id in (?)",@appointment.vgroup_id)
-        a_array =@a.to_a
-       @visits = Visit.where("appointment_id in (?) ",a_array)
-         visit = nil
-         @visits.each do |v| 
-	       visit = v
-	     end  
-	  sp_list = visit.scan_procedures.collect {|sp| sp.id}.join(",")
+    # switching to vgroup sp
+    #    a_array =@a.to_a
+    #   @visits = Visit.where("appointment_id in (?) ",a_array)
+    #     visit = nil
+    #     @visits.each do |v| 
+	  #     visit = v
+	   #  end  
+	  #sp_list = visit.scan_procedures.collect {|sp| sp.id}.join(",")
+	  vgroup = Vgroup.find(@appointment.vgroup_id)
+ 	  sp_list = vgroup.scan_procedures.collect {|sp| sp.id}.join(",")
 	  sp_array =[]
 	  sp_array = sp_list.split(',').map(&:to_i)
 	  @scanprocedures = ScanProcedure.where("id in (?)",sp_array)
