@@ -280,6 +280,7 @@ class VgroupsController < ApplicationController
     # getting undefined method `to_sym' error -- somethng is nil 
     # just trying to delete 
     v_cnt = 0
+    enumber_array = []
     params[:vgroup][:enrollments_attributes].each do|cnt, value|
       v_cnt = v_cnt + 1
       if !params[:vgroup][:enrollments_attributes][cnt.to_s][:id].blank?
@@ -291,11 +292,14 @@ class VgroupsController < ApplicationController
              sql = "delete from enrollment_vgroup_memberships where enrollment_id="+enrollment_id+" and vgroup_id ="+@vgroup.id.to_s
              connection = ActiveRecord::Base.connection();
              results = connection.execute(sql)
+         else
+           enumber_array << params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber]
          end
        else
          if !params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].blank?
            connection = ActiveRecord::Base.connection();
            @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
+           enumber_array << params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] 
            if !@enrollment.blank?
              @enrollment_vgroup_membership = EnrollmentVgroupMembership.where("enrollment_id in (?) and vgroup_id in (?)",@enrollment[0].id, @vgroup.id)
               if @enrollment_vgroup_membership.blank?
@@ -321,7 +325,10 @@ class VgroupsController < ApplicationController
          end
        end
     end
-
+    if v_cnt > 0
+       # also want to set participant in vgroup
+       set_participant_in_enrollment(@vgroup.rmr, enumber_array)
+    end
     
     params[:vgroup].delete('enrollments_attributes') 
     
@@ -366,6 +373,91 @@ class VgroupsController < ApplicationController
       end
     end
   end
+
+# similar to function in visits controller
+def set_participant_in_enrollment( rmr, enumber_array)
+  # loop thru each enrollment, check for participant_id
+  # if not populated, look for other participant_id based on
+  # last 6 digits of rmr = RMRaic
+  # other participant_id for the enumber
+  participant_id =""
+  # make hash of enums
+   blank_participant_id ="N"
+  enumber_array.each do |enum|
+    @e = Enrollment.where("enumber ='"+enum+"'")
+     if !@e[0].participant_id.blank?
+         participant_id = @e[0].participant_id
+     else
+         blank_participant_id ="Y"
+     end
+  end
+  # what if there are two participant_id's -- multiple enrollments
+  if participant_id.blank?
+    # if rmr starts with RMRaic and last 6 chars are digits
+    # look for a participant with this reggieID
+    if rmr[0..5] == "RMRaic" && is_a_number?(rmr[6..11]) && rmr.length == 12
+         reggieid = rmr[6..11]
+         @participant = Participant.where(" reggieid in (?)",reggieid)
+         participant_id = @participant[0].try(:id).to_s
+    end
+    if participant_id.blank?
+          # look for participant_id associated with enumber
+          @participant = Participant.where(" participants.id in (select enrollments.participant_id  from  enrollments where enumber  in (?))",enumber_array)
+          participant_id = @participant[0].try(:id).to_s           
+    end
+    # if still blank, and good rmr format, insert new partipant
+    if participant_id.blank? && rmr[0..5] == "RMRaic" && is_a_number?(rmr[6..11]) && rmr.length == 12
+        # do insert , get participant_id
+         
+         @participant = Participant.new
+         @participant.reggieid = rmr[6..11]
+         @participant.save
+        participant_id = @participant.id
+    end
+  end
+        # participant_id was blank, now, if not blank, update enrollments where participant_id is null
+    if !participant_id.blank? 
+       sql = "UPDATE enrollments set enrollments.participant_id = "+participant_id.to_s+" WHERE enrollments.participant_id is NULL AND
+                        enrollments.id 
+                          IN (select  enrollment_vgroup_memberships.enrollment_id  FROM enrollment_vgroup_memberships
+                              WHERE enrollment_vgroup_memberships.vgroup_id = "+params[:id]+ " )"
+
+                         
+        connection = ActiveRecord::Base.connection();
+        results = connection.execute(sql) 
+        if blank_participant_id == "Y"
+          enumber_array.each do |enum|
+              @e = Enrollment.where("enumber ='"+enum+"'")
+             if !@e[0].participant_id.blank?
+                 var = var # not do anything
+             else
+                    sql = "UPDATE enrollments set enrollments.participant_id = "+participant_id.to_s+" WHERE enrollments.participant_id is NULL AND
+                                     enrollments.id = "+@e[0].id.to_s
+                     connection = ActiveRecord::Base.connection();
+                     results = connection.execute(sql)
+             end
+          end
+        end         
+         
+  end 
+  
+  # check if vgroup.participant_id is blank 
+  if !participant_id.blank?
+    # HOW TO DO THE CHAINED FIND?
+     #@vgroup = Vgroup.find(Appointment.find(Visit.find(params[:id]).appointment_id).vgroup_id)
+     if @vgroup.participant_id.blank?
+       @vgroup.participant_id = participant_id
+       @vgroup.save
+     end
+     
+  end
+  
+end
+    def is_a_number?(s)
+
+      s.to_s.match(/\A[+-]?\d+?(\.\d+)?\Z/) == nil ? false : true
+  1
+    end
   
   # GET /vgroups/:scope
   def index_by_scope

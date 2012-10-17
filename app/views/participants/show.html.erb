@@ -65,6 +65,7 @@ edit_count = edit_count -1
 
 <h3>Visits</h3>
 <%= content_tag(:p, "No visits associated with this participant") if @participant.visits.blank? %>
+<% # this can return the same visit multiple times if there are multiple enrollments %>
 <% @participant.visits.each do |v| %>
 	<p>
 		<%= link_to v.date.to_s(:long), v %> 

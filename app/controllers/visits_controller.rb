@@ -508,7 +508,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
       end
     end
   end
-  
+  #similar to function in vgroups controller
   def set_participant_in_enrollment( rmr, enroll)
     # loop thru each enrollment, check for participant_id
     # if not populated, look for other participant_id based on
@@ -528,7 +528,6 @@ class VisitsController <  AuthorizedController #  ApplicationController
        end
     end
     # what if there are two participant_id's -- multiple enrollments
-
     if participant_id.blank?
       # if rmr starts with RMRaic and last 6 chars are digits
       # look for a participant with this reggieID
@@ -551,8 +550,9 @@ class VisitsController <  AuthorizedController #  ApplicationController
            @participant.save
           participant_id = @participant.id
       end
+    end
           # participant_id was blank, now, if not blank, update enrollments where participant_id is null
-      if !participant_id.blank?
+      if !participant_id.blank? 
          sql = "UPDATE enrollments set enrollments.participant_id = "+participant_id.to_s+" WHERE enrollments.participant_id is NULL AND
                           enrollments.id 
                             IN (select  enrollment_visit_memberships.enrollment_id  FROM enrollment_visit_memberships
@@ -560,8 +560,20 @@ class VisitsController <  AuthorizedController #  ApplicationController
 
                            
           connection = ActiveRecord::Base.connection();
-          results = connection.execute(sql)          
-      end      
+          results = connection.execute(sql) 
+          if blank_participant_id == "Y"
+            enroll.each do |e|
+               if !e.participant_id.blank?
+                   var = var # not do anything
+               else
+                      sql = "UPDATE enrollments set enrollments.participant_id = "+participant_id.to_s+" WHERE enrollments.participant_id is NULL AND
+                                       enrollments.id = "+e.id.to_s
+                       connection = ActiveRecord::Base.connection();
+                       results = connection.execute(sql)
+               end
+            end
+          end         
+            
     end
     if  blank_participant_id == "Y"
       if !participant_id.blank?
@@ -592,7 +604,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
   def is_a_number?(s)
 
     s.to_s.match(/\A[+-]?\d+?(\.\d+)?\Z/) == nil ? false : true
-1
+#1
   end  
   
 
