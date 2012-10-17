@@ -244,6 +244,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
        end
         @vgroup.rmr = @visit.rmr
         @vgroup.transfer_mri = params[:vgroup][:transfer_mri]
+       # @vgroup.dicom_dvd = params[:vgroup][:dicom_dvd]
         #@vgroup.entered_by = params[:vgroup][:entered_by]
        @vgroup.save
        @appointment.vgroup_id = @vgroup.id
@@ -259,6 +260,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     respond_to do |format|
       if @visit.save
          @vgroup.transfer_mri = params[:vgroup][:transfer_mri]
+         # @vgroup.dicom_dvd = params[:vgroup][:dicom_dvd]
          # @vgroup.entered_by = params[:vgroup][:entered_by]
           @vgroup.save
           # not sure if this is useful in the load script
@@ -469,6 +471,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
         @appointment.save
         @vgroup = Vgroup.find(@appointment.vgroup_id)
         @vgroup.transfer_mri = params[:vgroup][:transfer_mri]
+       # @vgroup.dicom_dvd = params[:vgroup][:dicom_dvd]
         #@vgroup.entered_by = params[:vgroup][:entered_by]
         @vgroup.rmr = @visit.rmr
  #       @vgroup.enrollments = @visit.enrollments
@@ -806,7 +809,7 @@ radiology_comments_options = {
 #      :image_datasets => { :only => [:series_description] }
 # }
 
-limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:dicom_dvd,:id,
+limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id,
                   :created_at, :updated_at, :research_diagnosis, :consent_form_type, :created_by_id, :dicom_study_uid,:compiled_at]
 
 

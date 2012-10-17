@@ -79,13 +79,14 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
         <td><%= f.label :radiology_outcome %></td>
         <td><%= select :visit, :radiology_outcome, ["no", "Nm", "A-NF", "A-F", "n/a"] %></td>
       </tr>
-      <tr>
-        <td><%= f.label :Which_DICOM_DVD %></td>
-        <td><%= f.text_field :dicom_dvd, :size => 6 %></td>
       </tr>
- <!--    <tr>
-        <td><%= f.label :Archive_DVD %></td>
-        <td><%= f.text_field :archivedvd, :size => 6 %></td>
+ <!--      <tr>
+        <td><= f.label :Which_DICOM_DVD %></td>
+        <td><= text_field :vgroup,:dicom_dvd, :size => 14 %></td>
+      </tr>
+    <tr>
+        <td><= f.label :Archive_DVD %></td>
+        <td><= f.text_field :archivedvd, :size => 6 %></td>
       </tr> 
       <tr>
         <td><%= f.label :Compile_Folder %></td>

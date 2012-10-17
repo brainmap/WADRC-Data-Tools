@@ -46,6 +46,8 @@ class VgroupsController < ApplicationController
     @vgroup.entered_by =params[:vgroup][:entered_by]
     @vgroup.qc_by =params[:vgroup][:qc_by]
     @vgroup.qc_completed =params[:vgroup][:qc_completed]
+    @vgroup.dicom_dvd =params[:vgroup][:dicom_dvd]
+    @vgroup.compile_folder = params[:vgroup][:compile_folder]
     @vgroup.save
     respond_to do |format|
        format.html { redirect_to( '/vgroups/'+params[:id], :notice => ' ' )}

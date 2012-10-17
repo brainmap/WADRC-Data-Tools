@@ -23,7 +23,6 @@
       :enumber => @enumber.nil? ? nil : link_to(@visit.enrollment.enumber, @visit.enrollment),
       :Initials => @visit.initials_from_dicom_or_model,
       :RMR_Number => @visit.rmr,
-      :Dicom_DVD => @visit.dicom_dvd == 'no' ? nil : @visit.dicom_dvd,
       :Entered_by => @vgroup.entered_by.nil? ? nil : User.find(@vgroup.entered_by).username,
       :Scanner_source => @visit.scanner_source,
       :Created_by => @visit.created_by ? @visit.created_by.login : '',
@@ -35,7 +34,7 @@
 	:MRI_Fast_Completed => @visit.completedmrifast.nil? ? "_": @visit.completedmrifast == 1 ? "Yes" : "No",
 	:MRI_Fast_Total_Time => @visit.mrifasttotaltime.nil?  ? @visit.mrifasttotaltime_min.nil? ? nil : @visit.mrifasttotaltime.to_s+" hrs : "+@visit.mrifasttotaltime_min.to_s+" mins" :  @visit.mrifasttotaltime.to_s+" hrs : "+@visit.mrifasttotaltime_min.to_s+" mins" ,
 	
-    })  #:Archive_Dvd =>@visit.archivedvd,
+    })  #:Archive_Dvd =>@visit.archivedvd,:Dicom_DVD => @vgroup.dicom_dvd == 'no' ? nil : @vgroup.dicom_dvd,
     %>
   </div>
 

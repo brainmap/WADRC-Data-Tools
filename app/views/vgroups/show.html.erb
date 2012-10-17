@@ -75,11 +75,20 @@ edit_count = edit_count -1
 		</td><td  align="left" nowrap <%= show_bool_cell_color(@vgroup.qc_completed) %>>
 		<B>QC completed:</B>
 		<%= select :vgroup, :qc_completed, ["no", "yes", "n/a"] %>	
+		
 		<% if edit_count > 0 %>	
 		<%= hidden_field_tag 'id', @vgroup.id %>
 			<%= submit_tag("Update") %>
-		<% end %>
+		</td></tr>
+		<tr><td colspan="5" align="left">
+			<b>Which DVD:  </b><%= text_field :vgroup,:dicom_dvd, :size => 20 %>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<b>Compile Folder:</b>				  <%= select :vgroup, :compile_folder, ["no", "yes", "n/a"] %>
+			
+			<% end %>
 		</td></tr></table>
+		
+		
 	<% end %>
 	</td></tr>
 
