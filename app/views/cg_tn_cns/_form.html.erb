@@ -1,0 +1,66 @@
+<%  v_y_n = {"Y"=>"Y","N"=>"N"}
+    v_data_type = {"integer"=>"integer","string"=>"string","date"=>"date","float"=>"float"}
+
+%>
+
+<%= form_for(@cg_tn_cn) do |f| %>
+  <% if @cg_tn_cn.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@cg_tn_cn.errors.count, "error") %> prohibited this cg_tn_cn from being saved:</h2>
+
+      <ul>
+      <% @cg_tn_cn.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :cg_tn_id %>: <%= collection_select :cg_tn_cn, :cg_tn_id, CgTn.all.sort_by(&:display_order), :id, :tn,{:prompt => 'Select a Table'},{:required => true}  %>
+
+  </div><br>
+  <div class="field">
+    <%= f.label :column_name %>: <%= f.text_field :cn %>
+	
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <%= f.label :common_name %>:     <%= f.text_field :common_name %>
+	
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <%= f.label :export_name %>:     <%= f.text_field :export_name %>
+  </div><br>
+  <div class="field">
+    <%= f.label :key_column_flag %>:  <%= f.select :key_column_flag, options_for_select(v_y_n, @cg_tn_cn.key_column_flag),
+		              {:prompt => 'Select y/n column is part of key/id'}  %>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<%= f.label :searchable_flag %>: <%= f.select :searchable_flag, options_for_select(v_y_n, @cg_tn_cn.searchable_flag),
+					              {:prompt => 'Select y/n searchable'}  %>		
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		    <%= f.label :data_type %>:
+		     <%= f.select :data_type, options_for_select(v_data_type, @cg_tn_cn.data_type),
+				              {:prompt => 'Select column data type'}  %>	
+			
+  </div><br>
+
+ <div class="field">
+    <%= f.label :display_order %>:
+    <%= f.number_field :display_order ,:size=>15 ,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}"%>	
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <%= f.label :value_limits %>: 
+    <%= f.text_field :value_limits %>
+  </div>
+<br>
+  <div class="field">
+    <%= f.label :ref_table_a %>: 
+    <%= f.text_field :ref_table_a %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <small> e.g. LOOKUP_REFS ( plus a ref_table_b value), or camel case model nameLookupGender</small>
+  </div>
+  <div class="field">
+    <%= f.label :ref_table_b %>: 
+    <%= f.text_field :ref_table_b %>
+  </div>
+<br>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div><br>
+<% end %>

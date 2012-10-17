@@ -1,5 +1,9 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :cg_tn_cns
+
+  resources :cg_tns
+
   resources :questionnaires
 
   resources :blooddraws
@@ -155,6 +159,7 @@ WADRCDataTools::Application.routes.draw do
   match '/users/update_role', :controller => 'users', :action => 'update_role', :as => :update_role
   match '/users/control', :controller => 'users', :action => 'control', :as => :control
   match '/users/questionformbase', :controller => 'users', :action => 'questionformbase', :as => :questionformbase
+  match '/users/cgbase', :controller => 'users', :action => 'cgbase', :as => :cgbase
   match '/users/add_user', :controller => 'users', :action => 'add_user', :as => :add_user
   match '/users/edit_user', :controller => 'users', :action => 'edit_user', :as => :edit_user
   match '/questionform/displayform/:id', :controller=>'questionforms',:action=>'displayform', :as => :displayform

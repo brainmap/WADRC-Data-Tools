@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Tn:</b> <%= @cg_tn.tn %>   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <b>Common name:</b> <%= @cg_tn.common_name %>
+</p>
+
+<p>
+  <b>Join left:</b><br>
+  <%= @cg_tn.join_left %>
+</p>
+
+<p>
+  <b>Join right:</b><br>
+  <%= @cg_tn.join_right %>
+</p>
+
+<p>
+  <b>Display order:</b>
+  <%= @cg_tn.display_order %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <b>Table type:</b>
+  <%= @cg_tn.table_type %>
+</p>
+
+
+<%= link_to 'Edit', edit_cg_tn_path(@cg_tn) %> |
+<%= link_to 'Back', cg_tns_path %> |
+<%= link_to('Column Group search/load', '/users/cgbase') %>

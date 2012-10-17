@@ -1,0 +1,54 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Table Name:</b>
+  <%= CgTn.find(@cg_tn_cn.cg_tn_id).common_name%>
+</p>
+
+<p>
+  <b>Column Name:</b>
+  <%= @cg_tn_cn.cn %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <b>Common name:</b>
+  <%= @cg_tn_cn.common_name %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <b>Export name:</b>
+  <%= @cg_tn_cn.export_name %>
+</p>
+
+<p>
+  <b>Key column flag:</b>
+  <%= @cg_tn_cn.key_column_flag %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <b>Searchable flag:</b>
+  <%= @cg_tn_cn.searchable_flag %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<b>Data type:</b>
+<%= @cg_tn_cn.data_type %>
+</p>
+<p>
+  <b>Display order:</b>
+  <%= @cg_tn_cn.display_order %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <b>Value limits:</b>
+  <%= @cg_tn_cn.value_limits %>
+</p>
+
+
+<p>
+  <b>Ref table a:</b>
+  <%= @cg_tn_cn.ref_table_a %>
+</p>
+
+<p>
+  <b>Ref table b:</b>
+  <%= @cg_tn_cn.ref_table_b %>
+</p>
+
+
+
+
+
+<%= link_to 'Edit', edit_cg_tn_cn_path(@cg_tn_cn) %> |
+<%= link_to 'Back', cg_tn_cns_path %> |
+<%= link_to('Column Group search/load', '/users/cgbase') %>

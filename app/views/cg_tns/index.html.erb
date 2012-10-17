@@ -1,0 +1,34 @@
+<h1>Listing cg_tns</h1>
+
+<table>
+  <tr>
+    <th>Tn</th>
+    <th>Common name</th>
+    <th>Join left</th>
+    <th>Join right</th>
+    <th>Display order</th>
+    <th>Table type</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @cg_tns.each do |cg_tn| %>
+  <tr>
+    <td><%= cg_tn.tn %></td>
+    <td><%= cg_tn.common_name %></td>
+    <td><%= cg_tn.join_left %></td>
+    <td><%= cg_tn.join_right %></td>
+    <td><%= cg_tn.display_order %></td>
+    <td><%= cg_tn.table_type %></td>
+    <td><%= link_to 'Show', cg_tn %></td>
+    <td><%= link_to 'Edit', edit_cg_tn_path(cg_tn) %></td>
+    <td><%= link_to 'Destroy', cg_tn, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Cg tn', new_cg_tn_path %> |
+<%= link_to('Column Group search/load', '/users/cgbase') %>

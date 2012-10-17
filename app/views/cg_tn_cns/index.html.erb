@@ -1,0 +1,44 @@
+<h1>Listing cg_tn_cns</h1>
+
+<table>
+  <tr>
+    <th>Table Name</th>
+    <th>Column Name</th>
+    <th>Common name</th>
+    <th>Export name</th>
+    <th>Key column flag</th>
+    <th>Searchable flag</th>
+    <th>Data type</th>
+    <th>Display order</th>
+    <th>Value limits</th>
+    <th>Ref table a</th>
+    <th>Ref table b</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @cg_tn_cns.each do |cg_tn_cn| %>
+  <tr>
+    <td><%= CgTn.find(cg_tn_cn.cg_tn_id).common_name%></td>
+    <td><%= cg_tn_cn.cn %></td>
+    <td><%= cg_tn_cn.common_name %></td>
+    <td><%= cg_tn_cn.export_name %></td>
+    <td><%= cg_tn_cn.key_column_flag %></td>
+    <td><%= cg_tn_cn.searchable_flag %></td>
+    <td><%= cg_tn_cn.data_type %></td>
+    <td><%= cg_tn_cn.display_order %></td>
+    <td><%= cg_tn_cn.value_limits %></td>
+    <td><%= cg_tn_cn.ref_table_a %></td>
+    <td><%= cg_tn_cn.ref_table_b %></td>
+    <td><%= link_to 'Show', cg_tn_cn %></td>
+    <td><%= link_to 'Edit', edit_cg_tn_cn_path(cg_tn_cn) %></td>
+    <td><%= link_to 'Destroy', cg_tn_cn, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Cg tn cn', new_cg_tn_cn_path %> |
+<%= link_to('Column Group search/load', '/users/cgbase') %>

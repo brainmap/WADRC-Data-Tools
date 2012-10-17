@@ -1,0 +1,2 @@
+module CgTnCnsHelper
+end

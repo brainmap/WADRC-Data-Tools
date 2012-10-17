@@ -1,0 +1,18 @@
+<h1>Listing results</h1>
+<%= @column_number %>
+<table>
+  <tr>
+	<% @column_headers.each do |column_header|%>
+        <th><%= column_header%></th>
+    <% end %>
+  </tr>
+
+<% @results.each do |result| %>
+  <tr>
+   <% for i in 0..@column_number %>
+    <td><%= result[i] %></td>
+   <% end %>
+
+  </tr>
+<% end %>
+</table>

@@ -1,0 +1,12 @@
+<% if current_user.role == 'Admin_High'  or current_user.role == 'Admin_Low'%>
+
+<%= link_to('Column Group - Tables', '/cg_tns') %> <br>
+<%= link_to('Column Group - Columns', '/cg_tn_cns') %> <br>
+
+<br>
+
+
+<%else %>	
+	
+	
+<% end %>

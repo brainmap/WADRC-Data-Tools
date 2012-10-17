@@ -1,0 +1,2 @@
+module CgTnsHelper
+end

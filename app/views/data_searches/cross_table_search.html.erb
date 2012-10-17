@@ -1,0 +1,82 @@
+<% @current_tab = "searches" 
+# order list of default open tables
+# columns , if search able column, what is the search able field - text field first -- dropdowns
+# dropdown of =, >,<, !=, between
+# other search fields like current search - sp, rmr, enum
+
+#    join element
+# will store in table, first use array and hash
+# include all columns option at table  +/-
+# for export
+# apply access control
+
+# inner or outer join
+
+# output to one file --- ? multiple rows
+# output to worksheets option -- sheet for each table -- always with vg_tables
+
+
+# ordered list of expand/collapse table -- will the form elements still be there when collapsed?
+# query db to get list of column_group table  - vg_"some_name"_vg_run_id
+# or query vg_run table --- active status
+
+# save query - base_flag ==> unchangeable
+# track last time run
+# save query - editable by creator, 
+# others can use, save as own 
+# base at top of drop down query list
+# then current query
+# then old, unrun query
+
+# pass in string of enum to search 
+# need to save, recover search  -- set default in drop down if no saved search values
+
+v_join_type =[['Inner','0'],['Outer','1']]
+v_conditions = [['=','0'],['>=','1'],['<=','2'],['!=','3'],['between','4']]
+
+@cg_tn = CgTn.where("table_type='base'").order(:id)
+# how to order
+v_tn_cn_hash =[]
+v_tn_cn_searchable_hash = []
+
+%>
+<table><tr><th width="50"><small><small>Include</small></small></th><th  nowrap>Table/Column Name</th><th width="50"><small><small>Join Type</small></small></th>
+	<th width="100"><small><small>Search By</small></small></th><th width="50"><small><small></small></small></th><th width="50"><small><small>Condition</small></small></th>
+
+<%= form_for 'cg_search' do |f|
+         @cg_tn.each do |tn| %>
+             <tr><td><%= check_box("cg_search", "include_tn]["+tn.id.to_s)%></td><td><br><%=  (tn.common_name+"  - <small>("+ tn.tn+")</small>:" ).html_safe %></td>
+	                      <td><%= f.select :value_type_1, options_for_select(v_join_type, "0"),
+							              {:prompt => 'Select join type'}  %></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+              <% @cg_tn_cn = CgTnCn.where("cg_tn_id ="+tn.id.to_s)
+                 @cg_tn_cn.each do |cn|  %> 
+	                  <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box("cg_search", "include_cn]["+cn.id.to_s)%></td><td nowrap> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%=   (cn.common_name+" - <small>("+ cn.cn+")</small>:").html_safe %></td>
+		<% if cn.searchable_flag == "Y"  
+			   if !cn.ref_table_b.blank?%>
+				<td><%= collection_select "value_1",cn.id.to_s, LookupRef.where("label = ?",cn.ref_table_b).sort_by(&:display_order),
+			    	:ref_value, :description, {:include_blank => "Select a value"}%> <!-- #,:selected => (@q_data.value_1 or @question.default_val_1)} --></td>
+						<td><%= collection_select "value_2",cn.id.to_s, LookupRef.where("label = ?",cn.ref_table_b).sort_by(&:display_order),
+					    	:ref_value, :description, {:include_blank => "Select a value"}%> <!-- #,:selected => (@q_data.value_2 or @question.default_val_2)} --></td>
+			   <% elsif !cn.ref_table_a.blank?%>
+				<td><%= collection_select "value_1",cn.id.to_s, ((cn.ref_table_a).constantize).all.sort_by(&:description),:id, :description , {:include_blank => "Select a value"}  %>
+				<!--,:selected => (@q_data.value_1 or @question.default_val_1)} --></td>
+						<td> <%= collection_select "value_2",cn.id.to_s, ((cn.ref_table_a).constantize).all.sort_by(&:description),
+					    	:id, :description, {:include_blank => "Select a value"} %> 
+					<!--,:selected => (@q_data.value_2 or @question.default_val_1)} -->
+					
+					</td>
+			   <% else%>  
+		
+		<td><%= text_field :cg_search,"value_1]["+cn.id.to_s, :size => 20 %></td><td><%= text_field :cg_search,"value_2]["+cn.id.to_s, :size => 20 %></td>
+		       <% end %>
+		<td>	<%= f.select :value_type_1, options_for_select(v_conditions, "0"),
+							              {:prompt => 'Select conditions'}  %></td></tr>
+<%       else %>
+          <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+
+<%       end
+	              end
+          end
+     end
+%>
+</table>

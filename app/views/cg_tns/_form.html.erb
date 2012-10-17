@@ -1,0 +1,44 @@
+<%  v_table_type = {"base"=>"base","column_group"=>"column_group"}%>
+
+<%= form_for(@cg_tn) do |f| %>
+  <% if @cg_tn.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@cg_tn.errors.count, "error") %> prohibited this cg_tn from being saved:</h2>
+
+      <ul>
+      <% @cg_tn.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :tn %>:     <%= f.text_field :tn %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+   <%= f.label :common_name %>:     <%= f.text_field :common_name %>
+  </div><BR>
+  <div class="field">
+    <%= f.label :join_left %><br />
+    <%= f.text_field :join_left ,:size=>100 %>
+  </div><BR>
+  <div class="field">
+    <%= f.label :join_right %><br />
+    <%= f.text_field :join_right ,:size=>100 %>
+  </div><BR>
+  <div class="field">
+	<table><tr><td>
+    <%= f.label :display_order %>:    <%= f.number_field :display_order ,:SIZE=> 15,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}"%>
+ </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    <%= f.label :table_type %>: 
+	<%= f.select :table_type, options_for_select(v_table_type, @cg_tn.table_type),
+		              {:prompt => 'Select table type'}  %>
+ </td></tr></table>
+</div>
+<br>
+  <div class="actions">
+    <%= f.submit %>
+  </div><br>
+<% end %>
+
+

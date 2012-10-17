@@ -1,0 +1,14 @@
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
+<h1>Editing cg_tn</h1>
+
+<%= render 'form' %>
+
+<%= link_to 'Show', @cg_tn %> |
+<%= link_to 'Back', cg_tns_path %> |
+<%= link_to('Column Group search/load', '/users/cgbase') %>
+
+
+<%else %>	
+	
+	
+<% end %>
