@@ -30,15 +30,21 @@
     <%= f.label :export_name %>:     <%= f.text_field :export_name %>
   </div><br>
   <div class="field">
-    <%= f.label :key_column_flag %>:  <%= f.select :key_column_flag, options_for_select(v_y_n, @cg_tn_cn.key_column_flag),
+    <%= f.label :key_column %>:  <%= f.select :key_column_flag, options_for_select(v_y_n, @cg_tn_cn.key_column_flag),
 		              {:prompt => 'Select y/n column is part of key/id'}  %>
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	<%= f.label :searchable_flag %>: <%= f.select :searchable_flag, options_for_select(v_y_n, @cg_tn_cn.searchable_flag),
-					              {:prompt => 'Select y/n searchable'}  %>		
-			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		    <%= f.label :data_type %>:
-		     <%= f.select :data_type, options_for_select(v_data_type, @cg_tn_cn.data_type),
-				              {:prompt => 'Select column data type'}  %>	
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<%= f.label :searchable %>: <%= f.select :searchable_flag, options_for_select(v_y_n, @cg_tn_cn.searchable_flag),
+					              {:prompt => 'Select y/n searchable'}  %>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<%= f.label :search_between %>: <%= f.select :condition_between_flag, options_for_select(v_y_n, @cg_tn_cn.condition_between_flag),
+					{:prompt => 'Select y/n between searchable'}  %>		
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<%= f.label :data_type %>:
+	<%= f.select :data_type, options_for_select(v_data_type, @cg_tn_cn.data_type),
+	              {:prompt => 'Select column data type'}  %>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	 <%= f.label :status_active %>: <%= f.select :status_flag, options_for_select(v_y_n, @cg_tn_cn.status_flag),
+										              {:prompt => 'Select table status'}  %>	
 			
   </div><br>
 
@@ -48,6 +54,9 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <%= f.label :value_limits %>: 
     <%= f.text_field :value_limits %>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	    <%= f.label :value_list %>: 
+	    <%= f.text_field :value_list %> <small>(e.g. yes|no|n/a   "|", pipe as divider)</small>
   </div>
 <br>
   <div class="field">

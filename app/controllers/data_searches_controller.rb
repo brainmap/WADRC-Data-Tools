@@ -118,6 +118,16 @@ class DataSearchesController < ApplicationController
         end    
     end
 
+    def cg_search
+      
+      puts "AAAAAAAAAAAAA IN cg_search !!!!!!!!"
+      respond_to do |format|
+        format.html # index.html.erb
+        format.xml  { render :xml => @lumbarpunctures }
+      end
+     
+    end
+
  #def run_search
 #   copy of def index in application_controller  -- so other controllers can get at  -- need for csv export
 # end
