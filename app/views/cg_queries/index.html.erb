@@ -1,0 +1,43 @@
+<h1>Listing cg_queries</h1>
+
+<table>
+  <tr>
+    <th>User</th>
+    <th>Create date</th>
+    <th>Save flag</th>
+    <th>Encumber</th>
+    <th>Save flag</th>
+    <th>Rmr</th>
+    <th>Scan procedure id list</th>
+    <th>Cg name</th>
+    <th>Gender</th>
+    <th>Min age</th>
+    <th>Max age</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @cg_queries.each do |cg_query| %>
+  <tr>
+    <td><%= cg_query.user_id %></td>
+    <td><%= cg_query.create_date %></td>
+    <td><%= cg_query.save_flag %></td>
+    <td><%= cg_query.encumber %></td>
+    <td><%= cg_query.save_flag %></td>
+    <td><%= cg_query.rmr %></td>
+    <td><%= cg_query.scan_procedure_id_list %></td>
+    <td><%= cg_query.cg_name %></td>
+    <td><%= cg_query.gender %></td>
+    <td><%= cg_query.min_age %></td>
+    <td><%= cg_query.max_age %></td>
+    <td><%= link_to 'Show', cg_query %></td>
+    <td><%= link_to 'Edit', edit_cg_query_path(cg_query) %></td>
+    <td><%= link_to 'Destroy', cg_query, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Cg query', new_cg_query_path %>

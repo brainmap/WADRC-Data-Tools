@@ -1,0 +1,37 @@
+<%= form_for(@cg_query_tn_cn) do |f| %>
+  <% if @cg_query_tn_cn.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@cg_query_tn_cn.errors.count, "error") %> prohibited this cg_query_tn_cn from being saved:</h2>
+
+      <ul>
+      <% @cg_query_tn_cn.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :cg_query_tn_id %><br />
+    <%= f.text_field :cg_query_tn_id %>
+  </div>
+  <div class="field">
+    <%= f.label :cg_tn_cn_id %><br />
+    <%= f.text_field :cg_tn_cn_id %>
+  </div>
+  <div class="field">
+    <%= f.label :value_1 %><br />
+    <%= f.text_field :value_1 %>
+  </div>
+  <div class="field">
+    <%= f.label :value_2 %><br />
+    <%= f.text_field :value_2 %>
+  </div>
+  <div class="field">
+    <%= f.label :condition %><br />
+    <%= f.text_field :condition %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,61 @@
+<%= form_for(@cg_query) do |f| %>
+  <% if @cg_query.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@cg_query.errors.count, "error") %> prohibited this cg_query from being saved:</h2>
+
+      <ul>
+      <% @cg_query.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :user_id %><br />
+    <%= f.text_field :user_id %>
+  </div>
+  <div class="field">
+    <%= f.label :create_date %><br />
+    <%= f.date_select :create_date %>
+  </div>
+  <div class="field">
+    <%= f.label :save_flag %><br />
+    <%= f.text_field :save_flag %>
+  </div>
+  <div class="field">
+    <%= f.label :encumber %><br />
+    <%= f.text_field :encumber %>
+  </div>
+  <div class="field">
+    <%= f.label :save_flag %><br />
+    <%= f.text_field :save_flag %>
+  </div>
+  <div class="field">
+    <%= f.label :rmr %><br />
+    <%= f.text_field :rmr %>
+  </div>
+  <div class="field">
+    <%= f.label :scan_procedure_id_list %><br />
+    <%= f.text_field :scan_procedure_id_list %>
+  </div>
+  <div class="field">
+    <%= f.label :cg_name %><br />
+    <%= f.text_field :cg_name %>
+  </div>
+  <div class="field">
+    <%= f.label :gender %><br />
+    <%= f.text_field :gender %>
+  </div>
+  <div class="field">
+    <%= f.label :min_age %><br />
+    <%= f.text_field :min_age %>
+  </div>
+  <div class="field">
+    <%= f.label :max_age %><br />
+    <%= f.text_field :max_age %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

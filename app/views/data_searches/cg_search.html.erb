@@ -1,0 +1,233 @@
+<% @current_tab = "searches" 
+# order list of default open tables
+# columns , if search able column, what is the search able field - text field first -- dropdowns
+# dropdown of =, >,<, !=, between
+# other search fields like current search - sp, rmr, enum
+
+#    join element
+# will store in table, first use array and hash
+# include all columns option at table  +/-
+# for export
+# apply access control
+
+# inner or outer join
+
+# output to one file --- ? multiple rows
+# output to worksheets option -- sheet for each table -- always with vg_tables
+
+
+# ordered list of expand/collapse table -- will the form elements still be there when collapsed?
+# query db to get list of column_group table  - vg_"some_name"_vg_run_id
+# or query vg_run table --- active status
+
+# save query - base_flag ==> unchangeable
+# track last time run
+# save query - editable by creator, 
+# others can use, save as own 
+# base at top of drop down query list
+# then current query
+# then old, unrun query
+
+# pass in string of enum to search 
+# need to save, recover search  -- set default in drop down if no saved search values
+
+v_join_type_hash =[['Inner','0'],['Outer','1']]
+v_conditions_hash = [['=','0'],['>=','1'],['<=','2'],['!=','3'],['between','4']]
+
+@cg_tn = CgTn.where("table_type='base' and status_flag='Y'").order(:id)
+# how to order
+v_tn_cn_hash =[]
+v_tn_cn_searchable_hash = []
+
+%>
+
+<%= form_for  'cg_search' do |f| %>
+
+<table class="search_form">
+	<tr><td><%= f.label :scan_procedures %><br>
+	<div id="scan_procedure_list">
+	<ul>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
+		<li>
+			<%#= f.fields_for scan_procedure do |scan_fields| %>
+				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
+				<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
+			<%# end %>
+		</li>
+		<li>
+			<% if @sp_array.include?(scan_procedure.id.to_s)%>
+			   <%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,TRUE , :name => 'cg_search[scan_procedure_id][]' %>
+			<% else %>
+			   <%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'cg_search[scan_procedure_id][]' %>
+			<% end %>
+			<%= label_tag '', scan_procedure.codename %>
+		</li>
+	<% end %>
+	</ul>
+	</div>
+
+	  </td></tr></table>
+
+<!-- visits/find.html.erb has a nice checkbox -- from some metasearch plugin?  -->
+  <table class="search_form">
+
+    <tr>
+      <th><%= f.label :enumber %></th>
+      <td><%= text_field  :cg_search,:enumber, :value => @cg_query.enumber %></td>
+    </tr>
+
+    <tr>
+      <th>RMR</th>
+      <td><%= text_field  :cg_search, :rmr ,:value => @cg_query.rmr %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :gender %></th>
+      <td><%= select :cg_search, :gender, { "M" => 1, "F" => 2 }, :selected =>@cg_query.gender.to_i , :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :minimum_age %></th>
+      <td><%= select :cg_search, :min_age, (1..110).to_a, :selected =>@cg_query.min_age.to_i ,:include_blank => true %><small> (the age at visit) </small></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_age %></th>
+      <td><%= select :cg_search, :max_age, (1..110).to_a, :selected =>@cg_query.max_age.to_i , :include_blank => true %></td>
+    </tr>
+  </table>
+
+
+  <table class="search_form">
+    <tr>
+      <th><%= f.label :Stored_Search %></th>
+      <td><%= select :cg_search, :save_flag, { "Y" => "Y", "N" => "N" },:selected =>@cg_query.save_flag, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :Save_search_as %></th>
+      <td><%= text_field :cg_search, :cg_name, :value => @cg_query.cg_name, :size => 20 %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :save_search %></th>
+      <td><%= check_box( :cg_search, "save_search")%></td>
+    </tr>
+    <tr>
+      <th></th>
+      <td><%= f.submit("search")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <small><%= link_to "Clear Search", '/cg_search?clear_all=Y'%></small></td>
+    </tr>
+  </table>
+
+  <%= clearing_br %>
+
+<br>
+<table><tr><th width="50"><small><small>Include</small></small></th><th  nowrap>Table/Column Name</th><th width="50"><small><small>Join Type</small></small></th>
+	<th width="100"><small><small>Search By</small></small></th><th width="50"><small><small></small></small></th><th width="50"><small><small>Condition</small></small></th>
+	
+
+     <%    @cg_tn.each do |tn| %>
+             <% @cg_query_tn = @cg_query_tn_hash[tn.id.to_s]
+              v_join_type = "0"
+              v_include_tn = "FALSE"
+              if !@cg_query_tn.blank?   
+                v_join_type =@cg_query_tn.join_type	   
+                v_include_tn = "TRUE"          
+	          end
+                %>
+             <tr><td><%= check_box_tag "include_tns", "1", v_include_tn == "FALSE" ? FALSE : TRUE , :name => "cg_search[include_tn]["+tn.id.to_s+"]" %></td>
+	     <td><br><%=  (tn.common_name+"  - <small>("+ tn.tn+")</small>:" ).html_safe %></td>
+	                      <td><%= select  :cg_search,"join_type]["+tn.id.to_s, options_for_select(v_join_type_hash, v_join_type  ),
+							              {:prompt => 'Select join type'}  %></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+              <% @cg_tn_cn = CgTnCn.where("cg_tn_id ="+tn.id.to_s+" and status_flag= 'Y'")
+                 @cg_query_cn_hash = @cg_query_tn_cn_hash[tn.id.to_s] 
+                 @cg_tn_cn.each do |cn|  
+	                v_include_cn = "FALSE" 
+	                v_value_1 =""
+	                v_value_2 =""
+	                v_condition = ""
+	                @cg_query_tn_cn = nil
+	                if !@cg_query_cn_hash.blank?
+	                    @cg_query_tn_cn = @cg_query_cn_hash[cn.id.to_s]
+	                    if !@cg_query_tn_cn.blank?
+		                   v_include_cn = "TRUE"
+		                   v_value_1 = @cg_query_tn_cn.value_1       # NEEDD ALL THE REST OF THE FORMATS OTHER THAN TEXT
+		                                                             # NEED VALUES IN SEARCH WHEN CN not checked?
+		                   v_value_2 = @cg_query_tn_cn.value_2
+		                   v_condition = @cg_query_tn_cn.condition
+		                end 
+	                end
+	                %> 
+	                  <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<%= check_box_tag "include_cns"+cn.id.to_s, "1", v_include_cn == "FALSE" ? FALSE : TRUE , :name => "cg_search[include_cn]["+tn.id.to_s+"]["+cn.id.to_s+"]" %></td>
+		<td nowrap> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%=   (cn.common_name+" - <small>("+ cn.cn+")</small>:").html_safe %></td>
+		<% if cn.searchable_flag == "Y"  
+			   if !cn.ref_table_b.blank?%>
+				<td><%= collection_select "cg_search[value_1]",cn.id.to_s, LookupRef.where("label = ?",cn.ref_table_b).sort_by(&:display_order),
+			    	:ref_value, :description, {:include_blank => "Select a value",:selected => v_value_1}%> <!-- #,:selected => (@q_data.value_1 or @question.default_val_1)} --></td>
+			      <% if cn.condition_between_flag == "Y" %>
+						<td><%= collection_select "cg_search[value_2]",cn.id.to_s, LookupRef.where("label = ?",cn.ref_table_b).sort_by(&:display_order),
+					    	:ref_value, :description, {:include_blank => "Select a value",:selected =>v_value_2}%> <!-- #,:selected => (@q_data.value_2 or @question.default_val_2)} --></td>
+			      <% else %>
+			            <td>&nbsp;</td>
+			      <% end %>
+			   <% elsif !cn.ref_table_a.blank?%>
+				<td><%= collection_select "cg_search", "value_1]["+cn.id.to_s, ((cn.ref_table_a).constantize).all.sort_by(&:description),:id, :description , {:include_blank => "Select a value",:selected =>v_value_1}  %>
+				<!--,:selected => (@q_data.value_1 or @question.default_val_1)} --></td>
+				   <% if cn.condition_between_flag == "Y" %>
+						<td> <%= collection_select "cg_search", "value_2]["+cn.id.to_s, ((cn.ref_table_a).constantize).all.sort_by(&:description),
+					    	:id, :description, {:include_blank => "Select a value", :selected =>v_value_2} %> 
+					<!--,:selected => (@q_data.value_2 or @question.default_val_1)} --></td>		
+			      <% else %>
+			            <td>&nbsp;</td>
+			      <% end %>
+			    <% elsif !cn.value_list.blank?
+					      v_value_list_array =  cn.value_list.split("|")
+					      v_value_list = {}
+					      v_value_list_array.each do |v|
+						     v_value_list[v]=v
+						  end
+					%>
+					<td><%= select  :cg_search, "value_1]["+cn.id.to_s, options_for_select(v_value_list,v_value_1),
+										{:prompt => 'Select a value'}  %>
+						<!--,:selected => (@q_data.value_1 or @question.default_val_1)} --></td>
+					  <% if cn.condition_between_flag == "Y" %>
+							<td> <%= select  :cg_search, "value_2]["+cn.id.to_s, options_for_select(v_value_list,v_value_2),
+												{:prompt => 'Select a value'}  %>
+							<!--,:selected => (@q_data.value_2 or @question.default_val_1)} --></td>		
+					  <% else %>
+					            <td>&nbsp;</td>
+					   <% end %>
+            
+			   <% elsif !cn.data_type.blank? and cn.data_type == "date"%>
+				  <td nowrap><%= date_select  :cg_search,"value_1]["+cn.id.to_s, :start_year => 1995, :include_blank => true %></td>
+				   <% if cn.condition_between_flag == "Y" %>
+						<td nowrap> &nbsp;&nbsp;&nbsp;<%= date_select  :cg_search,"value_2]["+cn.id.to_s,  :start_year => 1995, :include_blank => true %>&nbsp;&nbsp;&nbsp;
+					<!--,:selected => (@q_data.value_2 or @question.default_val_1)} --></td>		
+			      <% else %>
+			            <td>&nbsp;</td>
+			      <% end %>
+			   <% else%>  
+			       <% if !cn.data_type.blank? and (cn.data_type == "integer" or cn.data_type == "float")%>
+		             <td nowrap><%= text_field :cg_search,"value_1]["+cn.id.to_s, :value=>v_value_1,:size => 20,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}" %></td>
+		             <% if cn.condition_between_flag == "Y" %>
+		                   <td ><%= text_field :cg_search,"value_2]["+cn.id.to_s,:value=>v_value_2, :size => 20,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}" %></td>		
+                    <% else %>
+                         <td>&nbsp;</td>
+                     <% end %>			
+			       <% else %>
+		             <td nowrap><%= text_field :cg_search,"value_1]["+cn.id.to_s,:value=>v_value_1, :size => 20 %></td>
+		             <% if cn.condition_between_flag == "Y" %>
+		                   <td ><%= text_field :cg_search,"value_2]["+cn.id.to_s, :value=>v_value_2, :size => 20 %></td>		
+                      <% else %>
+                           <td>&nbsp;</td>
+                       <% end %>
+                   <% end %>
+		       <% end %>
+		<td>	<%= select  :cg_search, "condition]["+cn.id.to_s, options_for_select(v_conditions_hash, v_condition),
+							              {:prompt => 'Select conditions'}  %></td></tr>
+<%       else %>
+          <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+
+<%       end
+	              end %>
+	<tr><td colspan="7"><hr></td></tr>
+<%          end
+     end
+%>
+</table>

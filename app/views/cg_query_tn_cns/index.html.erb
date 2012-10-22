@@ -1,0 +1,31 @@
+<h1>Listing cg_query_tn_cns</h1>
+
+<table>
+  <tr>
+    <th>Cg query tn</th>
+    <th>Cg tn cn</th>
+    <th>Value 1</th>
+    <th>Value 2</th>
+    <th>Condition</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @cg_query_tn_cns.each do |cg_query_tn_cn| %>
+  <tr>
+    <td><%= cg_query_tn_cn.cg_query_tn_id %></td>
+    <td><%= cg_query_tn_cn.cg_tn_cn_id %></td>
+    <td><%= cg_query_tn_cn.value_1 %></td>
+    <td><%= cg_query_tn_cn.value_2 %></td>
+    <td><%= cg_query_tn_cn.condition %></td>
+    <td><%= link_to 'Show', cg_query_tn_cn %></td>
+    <td><%= link_to 'Edit', edit_cg_query_tn_cn_path(cg_query_tn_cn) %></td>
+    <td><%= link_to 'Destroy', cg_query_tn_cn, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Cg query tn cn', new_cg_query_tn_cn_path %>

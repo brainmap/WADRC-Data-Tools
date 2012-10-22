@@ -1,0 +1,20 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Cg query:</b>
+  <%= @cg_query_tn.cg_query_id %>
+</p>
+
+<p>
+  <b>Cg tn:</b>
+  <%= @cg_query_tn.cg_tn_id %>
+</p>
+
+<p>
+  <b>Join type:</b>
+  <%= @cg_query_tn.join_type %>
+</p>
+
+
+<%= link_to 'Edit', edit_cg_query_tn_path(@cg_query_tn) %> |
+<%= link_to 'Back', cg_query_tns_path %>

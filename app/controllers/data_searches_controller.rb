@@ -117,10 +117,58 @@ class DataSearchesController < ApplicationController
           i = i+1
         end    
     end
-
+   # can not do a self join-- unless two copies of table - unique tn_id, tn_cn_id
     def cg_search
-      
-      puts "AAAAAAAAAAAAA IN cg_search !!!!!!!!"
+       @cg_query = CgQuery.new
+       @cg_query_tn_hash = Hash.new
+       @cg_query_tn_cn_hash = Hash.new
+       @cg_query_cn_hash = Hash.new
+       @sp_array =[]
+       if !params[:cg_search].blank?
+         @cg_query.cg_name = params[:cg_search][:cg_name]
+         @cg_query.rmr = params[:cg_search][:rmr]
+         @cg_query.enumber = params[:cg_search][:enumber]
+         @cg_query.gender = params[:cg_search][:gender]
+         @cg_query.min_age = params[:cg_search][:min_age]
+         @cg_query.max_age = params[:cg_search][:max_age]
+         @cg_query.save_flag = params[:cg_search][:save_flag]
+####NEED!!!!         @cg_query.user_id 
+         if !params[:cg_search][:scan_procedure_id].blank?
+           @cg_query.scan_procedure_id_list = params[:cg_search][:scan_procedure_id].join(',')
+           @sp_array = @cg_query.scan_procedure_id_list.split(",")
+         end      
+         if !params[:cg_search][:include_tn].blank? 
+           params[:cg_search][:include_tn].each do |tn_id|
+             if tn_id[1] == "1" # only getting checked - value is always= 1
+               @cg_query_tn = CgQueryTn.new
+               @cg_query_tn.cg_tn_id =tn_id[0]
+               @cg_query_tn.cg_query_id = @cg_query.id
+               @cg_query_tn.join_type = params[:cg_search][:join_type][tn_id[0]]
+               # need hash with cg_tn_id as key
+               @cg_query_tn_hash[tn_id[0]] = @cg_query_tn
+               if !params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][tn_id[0]].blank?
+                 params[:cg_search][:include_cn][tn_id[0]].each do |tn_cn_id|
+                   @cg_query_tn_cn = CgQueryTnCn.new 
+                   @cg_query_tn_cn.cg_tn_cn_id =tn_cn_id[0]
+                   @cg_query_tn_cn.cg_query_tn_id =@cg_query_tn.id
+                   @cg_query_tn_cn.value_1 = params[:cg_search][:value_1][tn_cn_id[0]]
+                   @cg_query_tn_cn.value_2 = params[:cg_search][:value_2][tn_cn_id[0]]
+                   @cg_query_tn_cn.condition = params[:cg_search][:condition][tn_cn_id[0]]
+                   @cg_query_cn_hash[tn_cn_id[0]] = @cg_query_tn_cn                   
+                 end
+               end
+               @cg_query_tn_cn_hash[tn_id[0]] = @cg_query_cn_hash 
+             end
+           end
+         end
+         
+         
+       end
+       @sp_array.push("-1") # need something in the array
+# ADD SAVE IF SAVE_FLAG/ new vs create/save
+# NEED ACCESS CONTROL
+# MAKE THE SQL
+#MAKE THE EXPORT      
       respond_to do |format|
         format.html # index.html.erb
         format.xml  { render :xml => @lumbarpunctures }

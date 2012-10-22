@@ -93,7 +93,11 @@ edit_count = edit_count -1
 	</td></tr>
 
 <tr><td colspan=6 align="left">
-  <b>Note:</b><br>
+	<% if edit_count > 0 %>
+		<b><%= link_to 'Note', edit_vgroup_path(@vgroup) %>:</b><br>
+	<% else %>
+	<b>Note:</b><br>
+	<% end %>
   <%= @vgroup.note %>
 </td></tr>
 <tr><td colspan="5" vheight="4"><hr></td></tr>

@@ -1,0 +1,27 @@
+<h1>Listing cg_query_tns</h1>
+
+<table>
+  <tr>
+    <th>Cg query</th>
+    <th>Cg tn</th>
+    <th>Join type</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @cg_query_tns.each do |cg_query_tn| %>
+  <tr>
+    <td><%= cg_query_tn.cg_query_id %></td>
+    <td><%= cg_query_tn.cg_tn_id %></td>
+    <td><%= cg_query_tn.join_type %></td>
+    <td><%= link_to 'Show', cg_query_tn %></td>
+    <td><%= link_to 'Edit', edit_cg_query_tn_path(cg_query_tn) %></td>
+    <td><%= link_to 'Destroy', cg_query_tn, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Cg query tn', new_cg_query_tn_path %>
