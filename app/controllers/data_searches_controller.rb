@@ -119,11 +119,32 @@ class DataSearchesController < ApplicationController
     end
    # can not do a self join-- unless two copies of table - unique tn_id, tn_cn_id
     def cg_search
+      
+      @sp_array =[]
+      @cg_query_tn_hash = Hash.new
+      @cg_query_tn_cn_hash = Hash.new
+      @cg_query_cn_hash = Hash.new
+      if !params[:cg_search].blank? and !params[:cg_search][:cg_query_id].blank?
+         @cg_query = CgQuery.find(params[:cg_search][:cg_query_id])
+        if !@cg_query.scan_procedure_id_list.blank?
+           @sp_array = @cg_query.scan_procedure_id_list.split(",")
+         end
+
+         @cg_query_tns =  CgQueryTn.where("cg_query_id = "+@cg_query.id.to_s)
+         @cg_query_tns.each do |cg_query_tn|
+           v_tn_id = cg_query_tn.cg_tn_id 
+           @cg_query_tn_hash[v_tn_id.to_s] = cg_query_tn  
+           @cg_query_tn_cns = CgQueryTnCn.where("cg_query_tn_id = "+cg_query_tn.id.to_s) 
+           @cg_query_tn_cns.each do |cg_query_tn_cn|
+             v_tn_cn_id = cg_query_tn_cn.cg_tn_cn_id.to_s
+             @cg_query_cn_hash[v_tn_cn_id] = cg_query_tn_cn
+           end 
+           @cg_query_tn_cn_hash[v_tn_id.to_s] = @cg_query_cn_hash         
+         end           
+      else
        @cg_query = CgQuery.new
-       @cg_query_tn_hash = Hash.new
-       @cg_query_tn_cn_hash = Hash.new
-       @cg_query_cn_hash = Hash.new
-       @sp_array =[]
+       @user = current_user
+
        if !params[:cg_search].blank?
          @cg_query.cg_name = params[:cg_search][:cg_name]
          @cg_query.rmr = params[:cg_search][:rmr]
@@ -132,40 +153,82 @@ class DataSearchesController < ApplicationController
          @cg_query.min_age = params[:cg_search][:min_age]
          @cg_query.max_age = params[:cg_search][:max_age]
          @cg_query.save_flag = params[:cg_search][:save_flag]
-####NEED!!!!         @cg_query.user_id 
+         @cg_query.user_id  = @user.id
          if !params[:cg_search][:scan_procedure_id].blank?
            @cg_query.scan_procedure_id_list = params[:cg_search][:scan_procedure_id].join(',')
            @sp_array = @cg_query.scan_procedure_id_list.split(",")
-         end      
-         if !params[:cg_search][:include_tn].blank? 
-           params[:cg_search][:include_tn].each do |tn_id|
-             if tn_id[1] == "1" # only getting checked - value is always= 1
+         end 
+         if params[:cg_search][:save_search] == "1"    
+            @cg_query.save
+         end 
+         if !params[:cg_search][:tn_id].blank? 
+           params[:cg_search][:tn_id].each do |tn_id|
+               v_tn_id = tn_id.to_a.to_s
+             if (!params[:cg_search][:include_tn].blank? and !params[:cg_search][:include_tn][v_tn_id ].blank?) or !params[:cg_search][:join_type][v_tn_id].blank? or (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id].blank?) or !params[:cg_search][:value_1][v_tn_id].blank? or !params[:cg_search][:value_2][v_tn_id].blank? or !params[:cg_search][:condition][v_tn_id].blank?   
                @cg_query_tn = CgQueryTn.new
-               @cg_query_tn.cg_tn_id =tn_id[0]
+               @cg_query_tn.cg_tn_id =v_tn_id
                @cg_query_tn.cg_query_id = @cg_query.id
-               @cg_query_tn.join_type = params[:cg_search][:join_type][tn_id[0]]
+               if !params[:cg_search][:include_tn].blank? and !params[:cg_search][:include_tn][v_tn_id ].blank?
+                 @cg_query_tn.include_tn = 1
+               end
+               @cg_query_tn.join_type = params[:cg_search][:join_type][v_tn_id]
                # need hash with cg_tn_id as key
-               @cg_query_tn_hash[tn_id[0]] = @cg_query_tn
-               if !params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][tn_id[0]].blank?
-                 params[:cg_search][:include_cn][tn_id[0]].each do |tn_cn_id|
-                   @cg_query_tn_cn = CgQueryTnCn.new 
-                   @cg_query_tn_cn.cg_tn_cn_id =tn_cn_id[0]
-                   @cg_query_tn_cn.cg_query_tn_id =@cg_query_tn.id
-                   @cg_query_tn_cn.value_1 = params[:cg_search][:value_1][tn_cn_id[0]]
-                   @cg_query_tn_cn.value_2 = params[:cg_search][:value_2][tn_cn_id[0]]
-                   @cg_query_tn_cn.condition = params[:cg_search][:condition][tn_cn_id[0]]
-                   @cg_query_cn_hash[tn_cn_id[0]] = @cg_query_tn_cn                   
+               if params[:cg_search][:save_search] == "1"    
+                  @cg_query_tn.save
+               end
+               @cg_query_tn_hash[v_tn_id] = @cg_query_tn
+               if !params[:cg_search][:cn_id].blank? and !params[:cg_search][:cn_id][v_tn_id].blank?
+                 params[:cg_search][:cn_id][v_tn_id].each do |tn_cn_id|
+                   v_tn_cn_id = tn_cn_id.to_a.to_s
+                   if (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?) or (!params[:cg_search][:value_1][v_tn_id].blank? and !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id].blank?)  or (!params[:cg_search][:value_2][v_tn_id].blank? and !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id].blank?) or (!params[:cg_search][:condition][v_tn_id].blank? and !params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank?)
+                     @cg_query_tn_cn = CgQueryTnCn.new 
+                     @cg_query_tn_cn.cg_tn_cn_id =v_tn_cn_id
+                     if !params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?
+                       @cg_query_tn_cn.include_cn = 1
+                     end
+                     @cg_query_tn_cn.cg_query_tn_id =@cg_query_tn.id
+                     if !params[:cg_search][:value_1][v_tn_id].blank?
+                       @cg_query_tn_cn.value_1 = params[:cg_search][:value_1][v_tn_id][v_tn_cn_id]
+                     end
+                     if !@cg_query_tn_cn.value_2 = params[:cg_search][:value_2][v_tn_id].blank?
+                       @cg_query_tn_cn.value_2 = params[:cg_search][:value_2][v_tn_id][v_tn_cn_id]
+                     end
+                     if !params[:cg_search][:condition][v_tn_id].blank?
+                       @cg_query_tn_cn.condition = params[:cg_search][:condition][v_tn_id][v_tn_cn_id]
+                     end
+                     # dates                
+                     if !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(1i)"].blank? && !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(2i)"].blank? && !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(3i)"].blank?
+                         v_value_1 = params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(1i)"] +"-"+params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(2i)"].rjust(2,"0")+"-"+params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(3i)"].rjust(2,"0")
+                         @cg_query_tn_cn.value_1 = v_value_1
+                         v_value_1 =""
+                      end
+                      if !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(1i)"].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(2i)"].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(3i)"].blank?
+                           v_value_2 = params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(1i)"] +"-"+params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(2i)"].rjust(2,"0")+"-"+params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(3i)"].rjust(2,"0")
+                           @cg_query_tn_cn.value_2 = v_value_2
+                           v_value_2 =""
+                      end                     
+                     
+                     if params[:cg_search][:save_search] == "1"    
+                        @cg_query_tn_cn.save
+                     end
+                     @cg_query_cn_hash[v_tn_cn_id] = @cg_query_tn_cn  
+                  end                 
                  end
                end
-               @cg_query_tn_cn_hash[tn_id[0]] = @cg_query_cn_hash 
+               @cg_query_tn_cn_hash[v_tn_id] = @cg_query_cn_hash 
              end
            end
          end
          
          
        end
-       @sp_array.push("-1") # need something in the array
-# ADD SAVE IF SAVE_FLAG/ new vs create/save
+      end 
+      @sp_array.push("-1") # need something in the array
+       # for stored query drop down
+      sql = "select  concat(cg_name,' - ',users.username,' - ', date_format(cg_queries.created_at,'%Y %m %d')),cg_queries.id  from cg_queries, users where status_flag = 'Y' and cg_queries.user_id = users.id
+         order by save_flag desc, users.username, date_format(cg_queries.created_at,'%Y %m %d') desc"
+      connection = ActiveRecord::Base.connection();
+      @results = connection.execute(sql)
 # NEED ACCESS CONTROL
 # MAKE THE SQL
 #MAKE THE EXPORT      

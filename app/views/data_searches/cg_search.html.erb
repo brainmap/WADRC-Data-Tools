@@ -40,6 +40,13 @@ v_tn_cn_hash =[]
 v_tn_cn_searchable_hash = []
 
 %>
+<table width="100%"><tr ><td align="right">
+	<%= form_for 'cg_search' do |f| %>
+	 <small><%= f.label :select_saved_search%>:</small> 
+	<%= f.select :cg_query_id, @results,:include_blank => 'Select a stored search'%>
+	<%= f.submit("submit")%>
+	<% end %>
+</td></tr><table>	
 
 <%= form_for  'cg_search' do |f| %>
 
@@ -113,24 +120,23 @@ v_tn_cn_searchable_hash = []
       <td><%= f.submit("search")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <small><%= link_to "Clear Search", '/cg_search?clear_all=Y'%></small></td>
     </tr>
   </table>
-
   <%= clearing_br %>
-
 <br>
 <table><tr><th width="50"><small><small>Include</small></small></th><th  nowrap>Table/Column Name</th><th width="50"><small><small>Join Type</small></small></th>
 	<th width="100"><small><small>Search By</small></small></th><th width="50"><small><small></small></small></th><th width="50"><small><small>Condition</small></small></th>
 	
-
      <%    @cg_tn.each do |tn| %>
              <% @cg_query_tn = @cg_query_tn_hash[tn.id.to_s]
-              v_join_type = "0"
-              v_include_tn = "FALSE"
-              if !@cg_query_tn.blank?   
-                v_join_type =@cg_query_tn.join_type	   
+             if !@cg_query_tn.blank? 
+                 v_join_type =@cg_query_tn.join_type	
+             end
+              v_include_tn = "FALSE"   
+             if !@cg_query_tn.blank?  and  @cg_query_tn.include_tn == 1   
                 v_include_tn = "TRUE"          
 	          end
                 %>
-             <tr><td><%= check_box_tag "include_tns", "1", v_include_tn == "FALSE" ? FALSE : TRUE , :name => "cg_search[include_tn]["+tn.id.to_s+"]" %></td>
+             <tr><td><%= hidden_field(:cg_search, "tn_id][", :value=>tn.id.to_s) %>
+       <%= check_box_tag "include_tns", "1", v_include_tn == "FALSE" ? FALSE : TRUE , :name => "cg_search[include_tn]["+tn.id.to_s+"]" %></td>
 	     <td><br><%=  (tn.common_name+"  - <small>("+ tn.tn+")</small>:" ).html_safe %></td>
 	                      <td><%= select  :cg_search,"join_type]["+tn.id.to_s, options_for_select(v_join_type_hash, v_join_type  ),
 							              {:prompt => 'Select join type'}  %></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
@@ -145,7 +151,9 @@ v_tn_cn_searchable_hash = []
 	                if !@cg_query_cn_hash.blank?
 	                    @cg_query_tn_cn = @cg_query_cn_hash[cn.id.to_s]
 	                    if !@cg_query_tn_cn.blank?
-		                   v_include_cn = "TRUE"
+		                   if @cg_query_tn_cn.include_cn == 1
+ 		                       v_include_cn = "TRUE"
+                           end
 		                   v_value_1 = @cg_query_tn_cn.value_1       # NEEDD ALL THE REST OF THE FORMATS OTHER THAN TEXT
 		                                                             # NEED VALUES IN SEARCH WHEN CN not checked?
 		                   v_value_2 = @cg_query_tn_cn.value_2
@@ -154,23 +162,24 @@ v_tn_cn_searchable_hash = []
 	                end
 	                %> 
 	                  <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<%= hidden_field(:cg_search, "cn_id]["+tn.id.to_s+"][", :value=>cn.id.to_s) %>
 		<%= check_box_tag "include_cns"+cn.id.to_s, "1", v_include_cn == "FALSE" ? FALSE : TRUE , :name => "cg_search[include_cn]["+tn.id.to_s+"]["+cn.id.to_s+"]" %></td>
 		<td nowrap> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%=   (cn.common_name+" - <small>("+ cn.cn+")</small>:").html_safe %></td>
 		<% if cn.searchable_flag == "Y"  
 			   if !cn.ref_table_b.blank?%>
-				<td><%= collection_select "cg_search[value_1]",cn.id.to_s, LookupRef.where("label = ?",cn.ref_table_b).sort_by(&:display_order),
+				<td><%= collection_select "cg_search[value_1]["+tn.id.to_s+"]",cn.id.to_s, LookupRef.where("label = ?",cn.ref_table_b).sort_by(&:display_order),
 			    	:ref_value, :description, {:include_blank => "Select a value",:selected => v_value_1}%> <!-- #,:selected => (@q_data.value_1 or @question.default_val_1)} --></td>
 			      <% if cn.condition_between_flag == "Y" %>
-						<td><%= collection_select "cg_search[value_2]",cn.id.to_s, LookupRef.where("label = ?",cn.ref_table_b).sort_by(&:display_order),
+						<td><%= collection_select "cg_search[value_2]["+tn.id.to_s+"]",cn.id.to_s, LookupRef.where("label = ?",cn.ref_table_b).sort_by(&:display_order),
 					    	:ref_value, :description, {:include_blank => "Select a value",:selected =>v_value_2}%> <!-- #,:selected => (@q_data.value_2 or @question.default_val_2)} --></td>
 			      <% else %>
 			            <td>&nbsp;</td>
 			      <% end %>
 			   <% elsif !cn.ref_table_a.blank?%>
-				<td><%= collection_select "cg_search", "value_1]["+cn.id.to_s, ((cn.ref_table_a).constantize).all.sort_by(&:description),:id, :description , {:include_blank => "Select a value",:selected =>v_value_1}  %>
+				<td><%= collection_select "cg_search", "value_1]["+tn.id.to_s+"]["+cn.id.to_s, ((cn.ref_table_a).constantize).all.sort_by(&:description),:id, :description , {:include_blank => "Select a value",:selected =>v_value_1}  %>
 				<!--,:selected => (@q_data.value_1 or @question.default_val_1)} --></td>
 				   <% if cn.condition_between_flag == "Y" %>
-						<td> <%= collection_select "cg_search", "value_2]["+cn.id.to_s, ((cn.ref_table_a).constantize).all.sort_by(&:description),
+						<td> <%= collection_select "cg_search", "value_2]["+tn.id.to_s+"]["+cn.id.to_s, ((cn.ref_table_a).constantize).all.sort_by(&:description),
 					    	:id, :description, {:include_blank => "Select a value", :selected =>v_value_2} %> 
 					<!--,:selected => (@q_data.value_2 or @question.default_val_1)} --></td>		
 			      <% else %>
@@ -183,11 +192,11 @@ v_tn_cn_searchable_hash = []
 						     v_value_list[v]=v
 						  end
 					%>
-					<td><%= select  :cg_search, "value_1]["+cn.id.to_s, options_for_select(v_value_list,v_value_1),
+					<td><%= select  :cg_search, "value_1]["+tn.id.to_s+"]["+cn.id.to_s, options_for_select(v_value_list,v_value_1),
 										{:prompt => 'Select a value'}  %>
 						<!--,:selected => (@q_data.value_1 or @question.default_val_1)} --></td>
 					  <% if cn.condition_between_flag == "Y" %>
-							<td> <%= select  :cg_search, "value_2]["+cn.id.to_s, options_for_select(v_value_list,v_value_2),
+							<td> <%= select  :cg_search, "value_2]["+tn.id.to_s+"]["+cn.id.to_s, options_for_select(v_value_list,v_value_2),
 												{:prompt => 'Select a value'}  %>
 							<!--,:selected => (@q_data.value_2 or @question.default_val_1)} --></td>		
 					  <% else %>
@@ -195,31 +204,45 @@ v_tn_cn_searchable_hash = []
 					   <% end %>
             
 			   <% elsif !cn.data_type.blank? and cn.data_type == "date"%>
-				  <td nowrap><%= date_select  :cg_search,"value_1]["+cn.id.to_s, :start_year => 1995, :include_blank => true %></td>
+			       <%   if !v_value_1.blank?   # NEEDD THE v_value_1_2 to populate the date_select-- problem with not being a model date object
+			          v_date_1_array = v_value_1.split('-') 
+			          v_date_1 = Date.new(v_date_1_array[0].to_i,v_date_1_array[1].to_i,v_date_1_array[2].to_i)
+			         %>
+				  <td nowrap><%= date_select  :cg_search,"value_1]["+tn.id.to_s+"]["+cn.id.to_s, :start_year => 1995,  :class => 'date-field',:default=>v_date_1_array, :include_blank => true  %><%= v_date_1.to_s%></td>
+				    <% else %>
+				  <td nowrap><%= date_select  :cg_search,"value_1]["+tn.id.to_s+"]["+cn.id.to_s, :start_year => 1995, :include_blank => true %></td>
+				    <% end %>
 				   <% if cn.condition_between_flag == "Y" %>
-						<td nowrap> &nbsp;&nbsp;&nbsp;<%= date_select  :cg_search,"value_2]["+cn.id.to_s,  :start_year => 1995, :include_blank => true %>&nbsp;&nbsp;&nbsp;
-					<!--,:selected => (@q_data.value_2 or @question.default_val_1)} --></td>		
+				  <%   if !v_value_2.blank?
+			            v_date_2_array = v_value_2.split('-') 
+			            v_date_2 = Date.new(v_date_2_array[0].to_i,v_date_2_array[1].to_i,v_date_2_array[2].to_i)
+			            %>
+					    <td nowrap> &nbsp;&nbsp;&nbsp;<%= date_select  :cg_search,"value_2]["+tn.id.to_s+"]["+cn.id.to_s,:start_year => 1995, :include_blank => true %> &nbsp;&nbsp;&nbsp;
+					  <%else%>
+					    <td nowrap> &nbsp;&nbsp;&nbsp;<%= date_select  :cg_search,"value_2]["+tn.id.to_s+"]["+cn.id.to_s,:start_year => 1995, :include_blank => true %> &nbsp;&nbsp;&nbsp;
+					  <%end%>
+				   </td>		
 			      <% else %>
 			            <td>&nbsp;</td>
 			      <% end %>
 			   <% else%>  
 			       <% if !cn.data_type.blank? and (cn.data_type == "integer" or cn.data_type == "float")%>
-		             <td nowrap><%= text_field :cg_search,"value_1]["+cn.id.to_s, :value=>v_value_1,:size => 20,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}" %></td>
+		             <td nowrap><%= text_field :cg_search,"value_1]["+tn.id.to_s+"]["+cn.id.to_s, :value=>v_value_1,:size => 20,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}" %></td>
 		             <% if cn.condition_between_flag == "Y" %>
-		                   <td ><%= text_field :cg_search,"value_2]["+cn.id.to_s,:value=>v_value_2, :size => 20,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}" %></td>		
+		                   <td ><%= text_field :cg_search,"value_2]["+tn.id.to_s+"]["+cn.id.to_s,:value=>v_value_2, :size => 20,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}" %></td>		
                     <% else %>
                          <td>&nbsp;</td>
                      <% end %>			
 			       <% else %>
-		             <td nowrap><%= text_field :cg_search,"value_1]["+cn.id.to_s,:value=>v_value_1, :size => 20 %></td>
+		             <td nowrap><%= text_field :cg_search,"value_1]["+tn.id.to_s+"]["+cn.id.to_s,:value=>v_value_1, :size => 20 %></td>
 		             <% if cn.condition_between_flag == "Y" %>
-		                   <td ><%= text_field :cg_search,"value_2]["+cn.id.to_s, :value=>v_value_2, :size => 20 %></td>		
+		                   <td ><%= text_field :cg_search,"value_2]["+tn.id.to_s+"]["+cn.id.to_s, :value=>v_value_2, :size => 20 %></td>		
                       <% else %>
                            <td>&nbsp;</td>
                        <% end %>
                    <% end %>
 		       <% end %>
-		<td>	<%= select  :cg_search, "condition]["+cn.id.to_s, options_for_select(v_conditions_hash, v_condition),
+		<td>	<%= select  :cg_search, "condition]["+tn.id.to_s+"]["+cn.id.to_s, options_for_select(v_conditions_hash, v_condition),
 							              {:prompt => 'Select conditions'}  %></td></tr>
 <%       else %>
           <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>

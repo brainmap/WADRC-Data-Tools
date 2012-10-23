@@ -1,5 +1,11 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :cg_query_tn_cns
+
+  resources :cg_query_tns
+
+  resources :cg_queries
+
   resources :cg_tn_cns
 
   resources :cg_tns
