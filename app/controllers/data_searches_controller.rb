@@ -164,7 +164,7 @@ class DataSearchesController < ApplicationController
          if !params[:cg_search][:tn_id].blank? 
            params[:cg_search][:tn_id].each do |tn_id|
                v_tn_id = tn_id.to_a.to_s
-             if (!params[:cg_search][:include_tn].blank? and !params[:cg_search][:include_tn][v_tn_id ].blank?) or !params[:cg_search][:join_type][v_tn_id].blank? or (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id].blank?) or !params[:cg_search][:value_1][v_tn_id].blank? or !params[:cg_search][:value_2][v_tn_id].blank? or !params[:cg_search][:condition][v_tn_id].blank?   
+             if (!params[:cg_search][:include_tn].blank? and !params[:cg_search][:include_tn][v_tn_id ].blank?) or !params[:cg_search][:join_type][v_tn_id].blank? or (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id].blank?) or  !params[:cg_search][:condition][v_tn_id].blank?   
                @cg_query_tn = CgQueryTn.new
                @cg_query_tn.cg_tn_id =v_tn_id
                @cg_query_tn.cg_query_id = @cg_query.id
@@ -180,7 +180,7 @@ class DataSearchesController < ApplicationController
                if !params[:cg_search][:cn_id].blank? and !params[:cg_search][:cn_id][v_tn_id].blank?
                  params[:cg_search][:cn_id][v_tn_id].each do |tn_cn_id|
                    v_tn_cn_id = tn_cn_id.to_a.to_s
-                   if (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?) or (!params[:cg_search][:value_1][v_tn_id].blank? and !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id].blank?)  or (!params[:cg_search][:value_2][v_tn_id].blank? and !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id].blank?) or (!params[:cg_search][:condition][v_tn_id].blank? and !params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank?)
+                   if (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?) or (!params[:cg_search][:condition][v_tn_id].blank? and !params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank?)
                      @cg_query_tn_cn = CgQueryTnCn.new 
                      @cg_query_tn_cn.cg_tn_cn_id =v_tn_cn_id
                      if !params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?

@@ -37,7 +37,7 @@ If the enumber is not already associated with a participant, add the enumber bel
   <%= text_field :vgroup,:dicom_dvd, :size => 20 %>
 </div><br>
 <div class="field">
-  <%= f.label :Entwered_by %><br />
+  <%= f.label :Entered_by %><br />
   <%= select(:vgroup, :entered_by, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select who entered data" }) %>
 </div><br>
 <div class="field">

@@ -607,7 +607,6 @@ def run_search_q_data
     end   
     
     # removed scan_procedures,  ---- AND scan_procedures.id = scan_procedures_vgroups.scan_procedure_id
-puts "AAAAAAAAAAAA"+sql
     @results2 = connection.execute(sql)
     @temp_results = @results2
 
@@ -655,5 +654,7 @@ puts "AAAAAAAAAAAA"+sql
     end   
     return @results
  end
+ 
+
  
 end

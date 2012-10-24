@@ -206,18 +206,30 @@ v_tn_cn_searchable_hash = []
 			   <% elsif !cn.data_type.blank? and cn.data_type == "date"%>
 			       <%   if !v_value_1.blank?   # NEEDD THE v_value_1_2 to populate the date_select-- problem with not being a model date object
 			          v_date_1_array = v_value_1.split('-') 
-			          v_date_1 = Date.new(v_date_1_array[0].to_i,v_date_1_array[1].to_i,v_date_1_array[2].to_i)
+			          @start_year = 1995
+					   @base_name ="value_1]["+tn.id.to_s+"]["+cn.id.to_s
+					   @form_name ="cg_search"
+					   @default_value =""
+					   @select_value = v_date_1_array
 			         %>
-				  <td nowrap><%= date_select  :cg_search,"value_1]["+tn.id.to_s+"]["+cn.id.to_s, :start_year => 1995,  :class => 'date-field',:default=>v_date_1_array, :include_blank => true  %><%= v_date_1.to_s%></td>
+				  <td nowrap>
+				<%= 	render :partial => 'date_select_no_linked_model' ,:locals => {} %>
+				<!-- = date_select  :cg_search,"value_1]["+tn.id.to_s+"]["+cn.id.to_s, :start_year => 1995,  :class => 'date-field',:default=>v_date_1_array, :include_blank => true  --></td>
 				    <% else %>
-				  <td nowrap><%= date_select  :cg_search,"value_1]["+tn.id.to_s+"]["+cn.id.to_s, :start_year => 1995, :include_blank => true %></td>
+				  <td nowrap>	 
+				<%= date_select  :cg_search,"value_1]["+tn.id.to_s+"]["+cn.id.to_s, :start_year => 1995, :include_blank => true %></td>
 				    <% end %>
 				   <% if cn.condition_between_flag == "Y" %>
 				  <%   if !v_value_2.blank?
 			            v_date_2_array = v_value_2.split('-') 
-			            v_date_2 = Date.new(v_date_2_array[0].to_i,v_date_2_array[1].to_i,v_date_2_array[2].to_i)
+			            @start_year = 1995
+						@base_name ="value_2]["+tn.id.to_s+"]["+cn.id.to_s
+						@form_name ="cg_search"
+						@default_value =""
+						@select_value = v_date_2_array
 			            %>
-					    <td nowrap> &nbsp;&nbsp;&nbsp;<%= date_select  :cg_search,"value_2]["+tn.id.to_s+"]["+cn.id.to_s,:start_year => 1995, :include_blank => true %> &nbsp;&nbsp;&nbsp;
+					    <td nowrap> &nbsp;&nbsp;&nbsp;<%= 	render :partial => 'date_select_no_linked_model' ,:locals => {} %>
+					<!-- >= date_select  :cg_search,"value_2]["+tn.id.to_s+"]["+cn.id.to_s,:start_year => 1995, :include_blank => true --> &nbsp;&nbsp;&nbsp;
 					  <%else%>
 					    <td nowrap> &nbsp;&nbsp;&nbsp;<%= date_select  :cg_search,"value_2]["+tn.id.to_s+"]["+cn.id.to_s,:start_year => 1995, :include_blank => true %> &nbsp;&nbsp;&nbsp;
 					  <%end%>

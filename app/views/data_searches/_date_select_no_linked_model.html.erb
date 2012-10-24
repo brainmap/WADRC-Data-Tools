@@ -1,0 +1,15 @@
+<% # this is a replacement for date_select when the form is not tied to a model date field %>
+<% v_months=[["January","01"],["February","02"],["March","03"],["April","04"],["May","05"],["June","06"],["July","07"],
+             ["August","08"],["September","09"],["October","10"],["November","11"],["December","12"]] 
+ if @select_value.blank? and !@default_value.blank?
+	   @select_value = @default_value
+	elsif @select_value.blank?
+	   @select_value=["","",""]
+	end 
+	%>
+<%=	select  @form_name, @base_name+"(1i)", options_for_select(@start_year..(Time.now.year+5),@select_value[0]),
+					:include_blank => true  %>	
+<%=	select  @form_name, @base_name+"(2i)", options_for_select(v_months,@select_value[1]),
+				:include_blank => true  %>
+<%=	select  @form_name, @base_name+"(3i)", options_for_select(1..31,@select_value[2].gsub(/^0/,'').to_i),
+								:include_blank => true  %>
