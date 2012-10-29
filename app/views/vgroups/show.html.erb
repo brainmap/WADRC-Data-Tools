@@ -31,7 +31,7 @@ edit_count = edit_count -1
 
 <p id="notice"><%= notice %></p>
 <h3>Vgroup:</h3>
-<table width="100%"  class="tabular"><tr><td colspan="6" align="left">
+<table width="100%"  class="tabular_lighter_highlight"><tr><td colspan="6" align="left">
 <b>Vgroup date:</b>
 <% if edit_count > 0 %>
 	<%= link_to @vgroup.vgroup_date, edit_vgroup_path(@vgroup) %>
@@ -102,7 +102,7 @@ edit_count = edit_count -1
 </td></tr>
 <tr><td colspan="5" vheight="4"><hr></td></tr>
 </table><br><br>
-<table width="100%"   class="tabular">
+<table width="100%"   class="tabular_lighter_highlight">
 
 <tr><td colspan=5  align="left">
 	<b>MRI:</b>    <%= visit.blank? ? "None" :""%></td><td >&nbsp;</td><td colspan="1" width="30%" align="right" nowrap <%= show_bool_cell_color(@vgroup.transfer_mri) %> > 

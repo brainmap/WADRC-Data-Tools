@@ -119,11 +119,18 @@ class DataSearchesController < ApplicationController
     end
    # can not do a self join-- unless two copies of table - unique tn_id, tn_cn_id
     def cg_search
-      
+      # make the sql -- start with base 
+      @column_headers =[]
+      @fields = []
+      @conditions =[]
+      @tables =[] # need to add outer join to table, --  
+      @tables_left_join_hash = Hash.new
+      @joins = [] # just inner joins
       @sp_array =[]
       @cg_query_tn_hash = Hash.new
       @cg_query_tn_cn_hash = Hash.new
       @cg_query_cn_hash = Hash.new
+      # get stored cg_search
       if !params[:cg_search].blank? and !params[:cg_search][:cg_query_id].blank?
          @cg_query = CgQuery.find(params[:cg_search][:cg_query_id])
         if !@cg_query.scan_procedure_id_list.blank?
@@ -140,12 +147,22 @@ class DataSearchesController < ApplicationController
              @cg_query_cn_hash[v_tn_cn_id] = cg_query_tn_cn
            end 
            @cg_query_tn_cn_hash[v_tn_id.to_s] = @cg_query_cn_hash         
-         end           
-      else
+         end   
+      else # make new cg_search      
+        if !params[:cg_search].blank? and !params[:cg_search][:stored_cg_query_id].blank? and    params[:cg_search][:save_search] == "1"   # update an exisiting CgQuery
+          @cg_query = CgQuery.find(params[:cg_search][:stored_cg_query_id])
+          @user = current_user
+          if @user.id  == @cg_query.user_id and @cg_query.cg_name == params[:cg_search][:cg_name]
+            @cg_query.destroy   # cg query tns and cg_query_tn_cns also destroyed
+          end
+
+        end
+        
        @cg_query = CgQuery.new
        @user = current_user
 
        if !params[:cg_search].blank?
+          # NEED TO BUILD  v_condition = -- LOOK AT OTHER SEARCHES
          @cg_query.cg_name = params[:cg_search][:cg_name]
          @cg_query.rmr = params[:cg_search][:rmr]
          @cg_query.enumber = params[:cg_search][:enumber]
@@ -153,6 +170,7 @@ class DataSearchesController < ApplicationController
          @cg_query.min_age = params[:cg_search][:min_age]
          @cg_query.max_age = params[:cg_search][:max_age]
          @cg_query.save_flag = params[:cg_search][:save_flag]
+          @cg_query.status_flag = params[:cg_search][:save_flag] # NOT SURE HOW SAVE_FLAG vs STATUS_FLAG will work
          @cg_query.user_id  = @user.id
          if !params[:cg_search][:scan_procedure_id].blank?
            @cg_query.scan_procedure_id_list = params[:cg_search][:scan_procedure_id].join(',')
@@ -160,7 +178,9 @@ class DataSearchesController < ApplicationController
          end 
          if params[:cg_search][:save_search] == "1"    
             @cg_query.save
+            params[:cg_search][:cg_query_id] = @cg_query.id.to_s
          end 
+         # loop thru each table
          if !params[:cg_search][:tn_id].blank? 
            params[:cg_search][:tn_id].each do |tn_id|
                v_tn_id = tn_id.to_a.to_s
@@ -172,6 +192,44 @@ class DataSearchesController < ApplicationController
                  @cg_query_tn.include_tn = 1
                end
                @cg_query_tn.join_type = params[:cg_search][:join_type][v_tn_id]
+               @cg_tns = CgTn.find(v_tn_id)
+                if @cg_query_tn.join_type == 1  # outer join joins  # NEED PARENT TABLE join_left_parent_tn
+                            # need to add outer as part of table length !!!!! THIS HAS TO BE FIXED
+                    if @tables.index(@cg_tns.join_left_parent_tn).blank?   # WHAT ABOUT ALIAS                        
+                                  @tables.push(@cg_tns.join_left_parent_tn)
+                    end
+                    if ! @tables_left_join_hash[@cg_tns.join_left_parent_tn ].blank?
+                        @tables_left_join_hash[@cg_tns.join_left_parent_tn ] = @cg_tns.join_left+"  "+ @tables_left_join_hash[@cg_tns.join_left_parent_tn ]
+                    else
+                        @tables_left_join_hash[@cg_tns.join_left_parent_tn ] = @cg_tns.join_left
+                    end
+                else # doing inner join by default  #### 
+                  if  !params[:cg_search][:join_type][v_tn_id].blank? or 
+                    (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank?) or
+                      !params[:cg_search][:condition][v_tn_id].blank? # NEED TO ADD LIMIT BY CN
+                      v_include_tn = "N"
+                      if !params[:cg_search][:cn_id].blank? and !params[:cg_search][:cn_id][v_tn_id].blank?
+                        params[:cg_search][:cn_id][v_tn_id].each do |tn_cn_id|
+                           v_tn_cn_id = tn_cn_id.to_a.to_s
+                           if (!params[:cg_search][:condition][v_tn_id].blank? and !params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank?) or
+                                 (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank? )
+                             v_include_tn ="Y"
+                           end  
+                        end
+                      end
+                    if v_include_tn == "Y"
+                      if @tables.index(@cg_tns.tn).blank?   # WHAT ABOUT ALIAS                        
+                        @tables.push(@cg_tns.tn)
+                      end
+                      if @conditions.index(@cg_tns.join_right).blank?   # NEED TO ADJUST FOR OUTER JOIN
+                        @conditions.push(@cg_tns.join_right)
+                      end
+                    end
+                  end
+                 end
+               
+               
+               
                # need hash with cg_tn_id as key
                if params[:cg_search][:save_search] == "1"    
                   @cg_query_tn.save
@@ -181,10 +239,21 @@ class DataSearchesController < ApplicationController
                  params[:cg_search][:cn_id][v_tn_id].each do |tn_cn_id|
                    v_tn_cn_id = tn_cn_id.to_a.to_s
                    if (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?) or (!params[:cg_search][:condition][v_tn_id].blank? and !params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank?)
+                     @cg_tn_cns = CgTnCn.find(v_tn_cn_id)
                      @cg_query_tn_cn = CgQueryTnCn.new 
                      @cg_query_tn_cn.cg_tn_cn_id =v_tn_cn_id
                      if !params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?
                        @cg_query_tn_cn.include_cn = 1
+                       if @cg_tn_cns.common_name != "question fields"
+                           @column_headers.push(@cg_tn_cns.export_name)
+                           if !@cg_tn_cns.ref_table_b.blank?  # LOOKUP_REFS and label= ---- what about outer joins? ref_value and description
+                               @fields.push(@cg_tns.tn+"."+@cg_tn_cns.cn) # NEED lookup#.description  -- lookup_refs add to tablles l#, label="" to conditions
+                           elsif !@cg_tn_cns.ref_table_a.blank? # camel case LookupPettracer to lookup_pettracers  - description
+                               @fields.push(@cg_tns.tn+"."+@cg_tn_cns.cn)  #NEED camelcase pluraize.description 
+                           else
+                               @fields.push(@cg_tns.tn+"."+@cg_tn_cns.cn)
+                           end
+                       end
                      end
                      @cg_query_tn_cn.cg_query_tn_id =@cg_query_tn.id
                      if !params[:cg_search][:value_1][v_tn_id].blank?
@@ -193,20 +262,54 @@ class DataSearchesController < ApplicationController
                      if !@cg_query_tn_cn.value_2 = params[:cg_search][:value_2][v_tn_id].blank?
                        @cg_query_tn_cn.value_2 = params[:cg_search][:value_2][v_tn_id][v_tn_cn_id]
                      end
-                     if !params[:cg_search][:condition][v_tn_id].blank?
-                       @cg_query_tn_cn.condition = params[:cg_search][:condition][v_tn_id][v_tn_cn_id]
-                     end
+
                      # dates                
-                     if !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(1i)"].blank? && !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(2i)"].blank? && !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(3i)"].blank?
+                     if !params[:cg_search][:value_1].blank? && !params[:cg_search][:value_1][v_tn_id].blank? && !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(1i)"].blank? && !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(2i)"].blank? && !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(3i)"].blank?
                          v_value_1 = params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(1i)"] +"-"+params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(2i)"].rjust(2,"0")+"-"+params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(3i)"].rjust(2,"0")
                          @cg_query_tn_cn.value_1 = v_value_1
                          v_value_1 =""
                       end
-                      if !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(1i)"].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(2i)"].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(3i)"].blank?
+                      if !params[:cg_search][:value_2].blank? && !params[:cg_search][:value_2][v_tn_id].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(1i)"].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(2i)"].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(3i)"].blank?
                            v_value_2 = params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(1i)"] +"-"+params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(2i)"].rjust(2,"0")+"-"+params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(3i)"].rjust(2,"0")
                            @cg_query_tn_cn.value_2 = v_value_2
                            v_value_2 =""
-                      end                     
+                      end     
+                      if !params[:cg_search][:condition][v_tn_id].blank?
+                        @cg_query_tn_cn.condition = params[:cg_search][:condition][v_tn_id][v_tn_cn_id]
+                       # [['=','0'],['>=','1'],['<=','2'],['!=','3'],['between','4'],['is blank','5']]
+                        if @cg_query_tn_cn.condition == 0 
+                          v_condition =  " "+@cg_tns.tn+"."+@cg_tn_cns.cn+" = '"+@cg_query_tn_cn.value_1+"'"
+                          if !v_condition.blank?
+                              @conditions.push(v_condition)
+                          end
+                        elsif @cg_query_tn_cn.condition ==  1
+                          v_condition =  " "+@cg_tns.tn+"."+@cg_tn_cns.cn+" >= '"+@cg_query_tn_cn.value_1+"' "
+                          if !v_condition.blank?
+                              @conditions.push(v_condition)
+                          end
+                        elsif @cg_query_tn_cn.condition == 2
+                          v_condition =  " "+@cg_tns.tn+"."+@cg_tn_cns.cn+" <= '"+@cg_query_tn_cn.value_1+"' "
+                          if !v_condition.blank?
+                             @conditions.push(v_condition)
+                          end
+                        elsif @cg_query_tn_cn.condition == 3
+                          v_condition =  " "+@cg_tns.tn+"."+@cg_tn_cns.cn+" != '"+@cg_query_tn_cn.value_1+"' "
+                          if !v_condition.blank?
+                              @conditions.push(v_condition)                           
+                          end
+                        elsif @cg_query_tn_cn.condition == 4
+                          v_condition =  " "+@cg_tns.tn+"."+@cg_tn_cns.cn+" between '"+@cg_query_tn_cn.value_1+"' and '"+ @cg_query_tn_cn.value_2+"' "
+                          if !v_condition.blank?
+                              @conditions.push(v_condition)
+                          end
+                        elsif @cg_query_tn_cn.condition == 5
+                          v_condition = " trim( "+@cg_tns.tn+"."+@cg_tn_cns.cn+") is NULL "
+                          if !v_condition.blank?
+                              @conditions.push(v_condition)
+                          end  
+                        end
+
+                      end                
                      
                      if params[:cg_search][:save_search] == "1"    
                         @cg_query_tn_cn.save
@@ -225,10 +328,32 @@ class DataSearchesController < ApplicationController
       end 
       @sp_array.push("-1") # need something in the array
        # for stored query drop down
-      sql = "select  concat(cg_name,' - ',users.username,' - ', date_format(cg_queries.created_at,'%Y %m %d')),cg_queries.id  from cg_queries, users where status_flag = 'Y' and cg_queries.user_id = users.id
+      sql = "select  concat(cg_name,' - ',users.username,' - ', date_format(cg_queries.created_at,'%Y %m %d')),cg_queries.id  
+      from cg_queries, users where status_flag != 'N' and cg_queries.user_id = users.id  
          order by save_flag desc, users.username, date_format(cg_queries.created_at,'%Y %m %d') desc"
       connection = ActiveRecord::Base.connection();
-      @results = connection.execute(sql)
+      @results_stored_search = connection.execute(sql)
+      
+#puts "AAAAAAA"
+#puts @fields   
+#puts @column_headers  
+#puts @tables
+#puts  @tables_left_join_hash.to_a
+#puts @conditions
+sql = " select "+@fields.join(',')+" from "
+@all_tables = []
+@tables.each do |tn|
+  v_tn = tn
+  if !@tables_left_join_hash[tn].blank?
+    v_tn = v_tn +" "+ @tables_left_join_hash[tn] 
+  end
+  @all_tables.push(v_tn)
+end
+sql = sql + @all_tables.join(", ")
+sql = sql + " where "+ @conditions.join(" and ")
+puts sql
+
+      
 # NEED ACCESS CONTROL
 # MAKE THE SQL
 #MAKE THE EXPORT      
