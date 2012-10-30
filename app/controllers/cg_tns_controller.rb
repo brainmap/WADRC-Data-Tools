@@ -40,6 +40,8 @@ class CgTnsController < ApplicationController
   # POST /cg_tns
   # POST /cg_tns.xml
   def create
+    params[:cg_tn][:tn] =  params[:cg_tn][:tn].downcase 
+    params[:cg_tn][:join_left_parent_tn] =  params[:cg_tn][:join_left_parent_tn].downcase
     @cg_tn = CgTn.new(params[:cg_tn])
 
     respond_to do |format|
@@ -57,7 +59,8 @@ class CgTnsController < ApplicationController
   # PUT /cg_tns/1.xml
   def update
     @cg_tn = CgTn.find(params[:id])
-
+     params[:cg_tn][:tn] =  params[:cg_tn][:tn].downcase 
+     params[:cg_tn][:join_left_parent_tn] =  params[:cg_tn][:join_left_parent_tn].downcase
     respond_to do |format|
       if @cg_tn.update_attributes(params[:cg_tn])
         format.html { redirect_to(@cg_tn, :notice => 'Cg tn was successfully updated.') }
