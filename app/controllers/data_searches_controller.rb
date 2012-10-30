@@ -119,12 +119,14 @@ class DataSearchesController < ApplicationController
     end
    # can not do a self join-- unless two copies of table - unique tn_id, tn_cn_id
     def cg_search
+       
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       # make the sql -- start with base 
-      @column_headers =[]
-      @fields = []
-      @conditions =[]
-      @tables =[] # need to add outer join to table, -- 
+      @local_column_headers =[]
+      @local_fields = []
+      @local_conditions =[]
+      @conditions = [] # for the q_data_search
+      @local_tables =[] # need to add outer join to table, -- 
       @table_types =[] 
       @tables_left_join_hash = Hash.new
       @joins = [] # just inner joins
@@ -184,7 +186,7 @@ class DataSearchesController < ApplicationController
                                                    a2.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                                    and scan_procedure_id in ("+params[:cg_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
             @scan_procedures = ScanProcedure.where("id in (?)",params[:cg_search][:scan_procedure_id])
-            @conditions.push(v_condition)
+            @local_conditions.push(v_condition)
             params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
             
             @cg_query.scan_procedure_id_list = params[:cg_search][:scan_procedure_id].join(',')
@@ -196,7 +198,7 @@ class DataSearchesController < ApplicationController
             v_condition ="   appointments.id in (select a2.id from enrollment_vgroup_memberships,enrollments, appointments a2
              where enrollment_vgroup_memberships.vgroup_id= a2.vgroup_id 
              and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:cg_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
-             @conditions.push(v_condition)
+             @local_conditions.push(v_condition)
              params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:cg_search][:enumber]
          end      
 
@@ -204,7 +206,7 @@ class DataSearchesController < ApplicationController
             @table_types.push('base')
              v_condition ="   appointments.id in (select a2.id from appointments a2,vgroups
                        where a2.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:cg_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
-                       @conditions.push(v_condition)
+                       @local_conditions.push(v_condition)
              params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:cg_search][:rmr]
          end
          
@@ -214,7 +216,7 @@ class DataSearchesController < ApplicationController
              where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
              and enrollment_vgroup_memberships.vgroup_id = a2.vgroup_id
                     and participants.gender is not NULL and participants.gender in ("+params[:cg_search][:gender].gsub(/[;:'"()=<>]/, '')+") )"
-             @conditions.push(v_condition)
+             @local_conditions.push(v_condition)
              if params[:cg_search][:gender] == 1
                 params["search_criteria"] = params["search_criteria"] +",  sex is Male"
              elsif params[:cg_search][:gender] == 2
@@ -229,7 +231,7 @@ class DataSearchesController < ApplicationController
                              and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                              and a2.vgroup_id = enrollment_vgroup_memberships.vgroup_id
                              and floor(DATEDIFF(a2.appointment_date,participants.dob)/365.25) >= "+params[:cg_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
-             @conditions.push(v_condition)
+             @local_conditions.push(v_condition)
              params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:cg_search][:min_age]
          elsif params[:cg_search][:min_age].blank? && !params[:cg_search][:max_age].blank?
              @table_types.push('base')
@@ -238,7 +240,7 @@ class DataSearchesController < ApplicationController
                               and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                               and a2.vgroup_id = enrollment_vgroup_memberships.vgroup_id
                           and floor(DATEDIFF(a2.appointment_date,participants.dob)/365.25) <= "+params[:cg_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
-             @conditions.push(v_condition)
+             @local_conditions.push(v_condition)
              params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:cg_search][:max_age]
          elsif !params[:cg_search][:min_age].blank? && !params[:cg_search][:max_age].blank?
             @table_types.push('base')
@@ -247,10 +249,12 @@ class DataSearchesController < ApplicationController
                             and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                             and a2.vgroup_id = enrollment_vgroup_memberships.vgroup_id
                         and floor(DATEDIFF(a2.appointment_date,participants.dob)/365.25) between "+params[:cg_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:cg_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
-           @conditions.push(v_condition)
+           @local_conditions.push(v_condition)
            params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:cg_search][:min_age]+" and "+params[:cg_search][:max_age]
          end         
-         
+         @local_conditions.each do |a|  # really want to unlink the arrays
+           @conditions.push(a)
+        end
          if params[:cg_search][:save_search] == "1"    
             @cg_query.save
             params[:cg_search][:cg_query_id] = @cg_query.id.to_s
@@ -271,8 +275,8 @@ class DataSearchesController < ApplicationController
                 if @cg_query_tn.join_type == 1  # outer join joins  # NEED PARENT TABLE join_left_parent_tn
                     @table_types.push(@cg_tn.table_type)
                             # need to add outer as part of table length !!!!! THIS HAS TO BE FIXED
-                    if @tables.index(@cg_tn.join_left_parent_tn).blank?   # WHAT ABOUT ALIAS                        
-                                  @tables.push(@cg_tn.join_left_parent_tn)
+                    if @local_tables.index(@cg_tn.join_left_parent_tn).blank?   # WHAT ABOUT ALIAS                        
+                                  @local_tables.push(@cg_tn.join_left_parent_tn)
                                 
                     end
                     if ! @tables_left_join_hash[@cg_tn.join_left_parent_tn ].blank?
@@ -295,10 +299,10 @@ class DataSearchesController < ApplicationController
                         end
                       end
                     if v_include_tn == "Y"                       
-                        @tables.push(@cg_tn.tn) # use uniq later
+                        @local_tables.push(@cg_tn.tn) # use uniq later
                         @table_types.push(@cg_tn.table_type) # use uniq later  use mix of table_type to define core join
                                # base, cg_enumber, cg_enumber_sp, cg_rmr, cg_rmr_sp, cg_sp, cg_wrapnum, cg_adrcnum, cg_reggieid
-                        @conditions.push(@cg_tn.join_right) # use uniq later
+                        @local_conditions.push(@cg_tn.join_right) # use uniq later
                     end
                   end
                  end
@@ -318,16 +322,13 @@ class DataSearchesController < ApplicationController
                      @cg_query_tn_cn.cg_tn_cn_id =v_tn_cn_id
                      if !params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?
                        @cg_query_tn_cn.include_cn = 1
-                       if @cg_tn_cn.common_name != "question fields"
-                           @column_headers.push(@cg_tn_cn.export_name)
+                       if @cg_tn_cn.q_data_form_id.blank? # q_data
+                           @local_column_headers.push(@cg_tn_cn.export_name)
                            v_join_left_tn = @cg_tn.tn 
-                           if @tables.index(@cg_tn.tn).blank?   # left join of left join?
+                           if @local_tables.index(@cg_tn.tn).blank?   # left join of left join?
                              v_join_left_tn = @cg_tn.join_left_parent_tn
                            end
-                           if !@cg_tn_cn.ref_table_b.blank?  # LOOKUP_REFS and label= ---- what about outer joins? ref_value and description
-                             #left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description a_"+@question.id.to_s+
-                             # " from q_data, LOOKUP_REFS where q_data.value_1 = LOOKUP_REFS.ref_value and LOOKUP_REFS.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
-                           
+                           if !@cg_tn_cn.ref_table_b.blank?  # LOOKUP_REFS and label= 
                               join_left = "LEFT JOIN (select LOOKUP_REFS.ref_value id_"+v_tn_cn_id.to_s+", LOOKUP_REFS.description a_"+v_tn_cn_id.to_s+"  
                                 from  LOOKUP_REFS where   LOOKUP_REFS.label ='"+@cg_tn_cn.ref_table_b+"'  
                                 ) a_alias_"+v_tn_cn_id.to_s+" on "+@cg_tn.tn+"."+@cg_tn_cn.cn+" = a_alias_"+v_tn_cn_id.to_s+".id_"+v_tn_cn_id.to_s 
@@ -337,7 +338,7 @@ class DataSearchesController < ApplicationController
                               else
                                   @tables_left_join_hash[v_join_left_tn ] = join_left
                               end
-                               @fields.push("a_alias_"+v_tn_cn_id.to_s+".a_"+v_tn_cn_id.to_s) # NEED lookup#.description  -- lookup_refs add to tablles l#, label="" to conditions
+                               @local_fields.push("a_alias_"+v_tn_cn_id.to_s+".a_"+v_tn_cn_id.to_s)
                            elsif !@cg_tn_cn.ref_table_a.blank? # camel case LookupPettracer to lookup_pettracers  - description
                               join_left = "LEFT JOIN (select "+@cg_tn_cn.ref_table_a.pluralize.underscore+".id id_"+v_tn_cn_id.to_s+", "+@cg_tn_cn.ref_table_a.pluralize.underscore+".description a_"+v_tn_cn_id.to_s+
                                       " from "+@cg_tn_cn.ref_table_a.pluralize.underscore+" ) a_alias_"+v_tn_cn_id.to_s+" on  "+@cg_tn.tn+"."+@cg_tn_cn.cn+" = a_alias_"+v_tn_cn_id.to_s+".id_"+v_tn_cn_id.to_s
@@ -346,11 +347,36 @@ class DataSearchesController < ApplicationController
                               else
                                     @tables_left_join_hash[v_join_left_tn ] = join_left
                               end
-                               @fields.push("a_alias_"+v_tn_cn_id.to_s+".a_"+v_tn_cn_id.to_s)
+                               @local_fields.push("a_alias_"+v_tn_cn_id.to_s+".a_"+v_tn_cn_id.to_s)
                            else
-                               @fields.push(@cg_tn.tn+"."+@cg_tn_cn.cn)
+                               @local_fields.push(@cg_tn.tn+"."+@cg_tn_cn.cn)
                            end
-                        else # need q_data
+                        elsif !@cg_tn_cn.q_data_form_id.blank? # need q_data
+                          v_join_left_tn = @cg_tn.tn 
+                          if @local_tables.index(@cg_tn.tn).blank?   # left join of left join?
+                             v_join_left_tn = @cg_tn.join_left_parent_tn
+                           end
+                           @cg_search_q_data  ="Y"
+                           # variables for run_search_q_data
+                           @fields =[]
+                           @tables =[]
+                           @left_join =[]
+                           @column_headers =[]
+                           # @conditions  captured above, after first set of form elements - mainly want sp limit
+                           # define q_data form_id  
+                           # pass to run_search_q_data and get back fields, columns_headers, conditions, etc.
+                           @tables =[@cg_tn.tn]
+                           @q_form_id = @cg_tn_cn.q_data_form_id
+                            (@fields,@tables, @left_join) = run_search_q_data
+                            @local_fields.concat(@fields)
+                            @left_join.each do |lj|
+                              if !@tables_left_join_hash[v_join_left_tn ].blank?               
+                                    @tables_left_join_hash[v_join_left_tn] = @tables_left_join_hash[v_join_left_tn ]+"  "+lj
+                              else
+                                    @tables_left_join_hash[v_join_left_tn ] = lj
+                              end
+                            end 
+                            @cg_search_q_data = nil                          
                        end
                      end
                      @cg_query_tn_cn.cg_query_tn_id =@cg_query_tn.id
@@ -378,49 +404,49 @@ class DataSearchesController < ApplicationController
                         if @cg_query_tn_cn.condition == 0 
                           v_condition =  " "+@cg_tn.tn+"."+@cg_tn_cn.cn+" = '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"'"
                           if !v_condition.blank?
-                              @conditions.push(v_condition)
+                              @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" = "+@cg_query_tn_cn.value_1
                           end
                         elsif @cg_query_tn_cn.condition ==  1
                           v_condition =  " "+@cg_tn.tn+"."+@cg_tn_cn.cn+" >= '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                           if !v_condition.blank?
-                              @conditions.push(v_condition)
+                              @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" >= "+@cg_query_tn_cn.value_1
                           end
                         elsif @cg_query_tn_cn.condition == 2
                           v_condition =  " "+@cg_tn.tn+"."+@cg_tn_cn.cn+" <= '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                           if !v_condition.blank?
-                             @conditions.push(v_condition)
+                             @local_conditions.push(v_condition)
                              params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" <= "+@cg_query_tn_cn.value_1
                           end
                         elsif @cg_query_tn_cn.condition == 3
                           v_condition =  " "+@cg_tn.tn+"."+@cg_tn_cn.cn+" != '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                           if !v_condition.blank?
-                              @conditions.push(v_condition)
+                              @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" != "+@cg_query_tn_cn.value_1                           
                           end
                         elsif @cg_query_tn_cn.condition == 4
                           v_condition =  " "+@cg_tn.tn+"."+@cg_tn_cn.cn+" between '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' and '"+ @cg_query_tn_cn.value_2.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                           if !v_condition.blank?
-                              @conditions.push(v_condition)
+                              @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" between "+@cg_query_tn_cn.value_1+" and "+ @cg_query_tn_cn.value_2
                           end
                         elsif @cg_query_tn_cn.condition == 5
                           v_condition = " trim( "+@cg_tn.tn+"."+@cg_tn_cn.cn+") is NULL "
                           if !v_condition.blank?
-                              @conditions.push(v_condition)
+                              @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" is blank"
                           end
                         elsif @cg_query_tn_cn.condition == 6
                           v_condition = " trim( "+@cg_tn.tn+"."+@cg_tn_cn.cn+") is NOT NULL "
                           if !v_condition.blank?
-                              @conditions.push(v_condition)
+                              @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" is not blank "
                           end  
                         elsif @cg_query_tn_cn.condition == 7
                           v_condition = "  "+@cg_tn.tn+"."+@cg_tn_cn.cn+" like '%"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"%' "
                           if !v_condition.blank?
-                              @conditions.push(v_condition)
+                              @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" contains "+@cg_query_tn_cn.value_1
                           end
                         end
@@ -455,47 +481,47 @@ class DataSearchesController < ApplicationController
       params["search_criteria"] = params["search_criteria"].sub(", ","")
       
       if !@table_types.blank? and !@table_types.index('base').blank?  # extend to cg_enumber, cg_enumber_sp, cg_rmr, cg_rmr_sp, cg_sp, cg_wrapnum, cg_adrcnum, cg_reggieid
-        @tables.push("vgroups")
-        @tables.push("appointments")
-        @tables.push("scan_procedures")
-        @tables.push("scan_procedures_vgroups")
+        @local_tables.push("vgroups")
+        @local_tables.push("appointments")
+        @local_tables.push("scan_procedures")
+        @local_tables.push("scan_procedures_vgroups")
         @fields_front =[]
         @fields_front.push("vgroups.id vgroup_id")
         @fields_front.push("vgroups.vgroup_date")
         @fields_front.push("vgroups.rmr")
-        @fields = @fields_front.concat(@fields)
-        @conditions.push("vgroups.id = appointments.vgroup_id")
-        @conditions.push("scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") ")
-        @conditions.push("scan_procedures.id = scan_procedures_vgroups.scan_procedure_id")
-        @conditions.push("scan_procedures_vgroups.vgroup_id = vgroups.id")
+        @local_fields = @fields_front.concat(@local_fields)
+        @local_conditions.push("vgroups.id = appointments.vgroup_id")
+        @local_conditions.push("scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") ")
+        @local_conditions.push("scan_procedures.id = scan_procedures_vgroups.scan_procedure_id")
+        @local_conditions.push("scan_procedures_vgroups.vgroup_id = vgroups.id")
                                             # everything always joined
         @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
         
         #run_search_q_data tn_cn_id/tn_id in (686/676,687/677,688/688) common_name = "question fields" vs run_search if 
       end     
-      @column_number =   @column_headers.size
+      @column_number =   @local_column_headers.size
            
+  if !params[:cg_search].blank?
+    @local_conditions.delete_if {|x| x == "" }   # a blank getting inserted 
+    sql = " select "+@local_fields.join(',')+" from "
+    @all_tables = []
+    @local_tables.uniq.each do |tn|   # need left join right after parent tn
+       v_tn = tn
+       if !@tables_left_join_hash[tn].blank?
+          v_tn = v_tn +" "+ @tables_left_join_hash[tn] 
+       end
+       @all_tables.push(v_tn)
+    end
+    sql = sql + @all_tables.join(", ")
+    sql = sql + " where "+ @local_conditions.uniq.join(" and ")
+    sql = sql+" order by "+@order_by.join(",")
+    puts sql
 
-  @conditions.delete_if {|x| x == "" }   # a blank getting inserted 
-  sql = " select "+@fields.join(',')+" from "
-  @all_tables = []
-  @tables.uniq.each do |tn|   # need left join right after parent tn
-     v_tn = tn
-     if !@tables_left_join_hash[tn].blank?
-        v_tn = v_tn +" "+ @tables_left_join_hash[tn] 
-     end
-     @all_tables.push(v_tn)
-  end
-  sql = sql + @all_tables.join(", ")
-  sql = sql + " where "+ @conditions.uniq.join(" and ")
-  sql = sql+" order by "+@order_by.join(",")
-  puts sql
-
-  # run the sql ==>@results
-  @results_total = @results_stored_search # JUST TEMP TO KEEP IT WORKING  @results  # pageination makes result count wrong
-  t = Time.now 
-  @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
-    
+    # run the sql ==>@results
+    @results_total = @results_stored_search # JUST TEMP TO KEEP IT WORKING  @results  # pageination makes result count wrong
+    t = Time.now 
+    @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
+  end   
       respond_to do |format|
         format.html # index.html.erb
         format.xml  { render :xml => @lumbarpunctures }

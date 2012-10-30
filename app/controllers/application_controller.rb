@@ -111,9 +111,12 @@ def run_search_q_data
      v_table_base_appt = @tables[0]
      #puts "AAAAAAAAAA"+v_table_base_appt
       # get distinct sp
-
-      sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr , "+@fields.join(',')+",appointments.comment 
-       FROM vgroups, appointments,scan_procedures, scan_procedures_vgroups, "+@tables.join(',')+" "+@left_join.join(' ')+"
+      if !@fields.blank?
+        sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr , "+@fields.join(',')+",appointments.comment "
+      else  # calll from cg_search doesn't have fields
+          sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr ,appointments.comment "
+      end
+       sql =sql+" FROM vgroups, appointments,scan_procedures, scan_procedures_vgroups, "+@tables.join(',')+" "+@left_join.join(' ')+"
        WHERE vgroups.id = appointments.vgroup_id and scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") "
        @tables.each do |tab|
          sql = sql +" AND "+tab+".appointment_id = appointments.id  "
@@ -151,8 +154,12 @@ def run_search_q_data
 
         # have questionform_questions.question_id and questionform_questions.display_order
         # get the *.id off last field, add back,, same with last header = appt note
-        v_last_field =@fields.pop
-        v_last_header = @column_headers.pop
+        if !@fields.blank? # cg_search blank fields and column header
+          v_last_field =@fields.pop
+        end
+        if !@column_headers.blank?
+          v_last_header = @column_headers.pop
+        end 
         @questionform_questions.each do |q|
           @question = Question.find(q.question_id)
           if @question.value_type_1 != '' and @question.value_type_1 != 'text' and  @question.value_type_2 != '' and @question.value_type_2 != 'text' and  @question.value_type_3 != '' and @question.value_type_3 != 'text'
@@ -586,6 +593,9 @@ def run_search_q_data
           # make different sql for when value_type_1, value_type_2, value_type_3 are = text or ''
           
         end
+        if !@cg_search_q_data.blank?
+          return @fields,@tables, @left_join
+        end 
         @fields.push(v_last_field)
         @column_headers.push(v_last_header)
 
