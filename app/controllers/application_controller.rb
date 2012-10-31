@@ -594,7 +594,7 @@ def run_search_q_data
           
         end
         if !@cg_search_q_data.blank?
-          return @fields,@tables, @left_join
+          return @fields,@tables, @left_join,@left_join_vgroup
         end 
         @fields.push(v_last_field)
         @column_headers.push(v_last_header)
@@ -615,7 +615,7 @@ def run_search_q_data
           sql = sql +" ORDER BY "+@order_by.join(',')
         end 
     end   
-    
+    #puts sql 
     # removed scan_procedures,  ---- AND scan_procedures.id = scan_procedures_vgroups.scan_procedure_id
     @results2 = connection.execute(sql)
     @temp_results = @results2
