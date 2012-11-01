@@ -101,7 +101,7 @@ v_tn_cn_searchable_hash = []
     </tr>
     <tr>
 	   <td colspan="2">
-		<%= link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls} %>  </p>
+		<%= link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post} %>  </p>
 		</td>
 	</tr>
   </table>
@@ -276,6 +276,7 @@ v_tn_cn_searchable_hash = []
 %>
 </table>
 <br><br>
+<% if !params[:cg_search].blank? %>
 <table border=1>
 	  <tr><td align="left" colspan=<%= @local_column_headers.size %>>
 		 <%= @export_file_title %>
@@ -295,3 +296,4 @@ v_tn_cn_searchable_hash = []
 	    </tr>
 	 <% end %>
 </table>
+<% end %>

@@ -571,11 +571,12 @@ class DataSearchesController < ApplicationController
       i = i+1
     end
     
-    @results_total = @results_stored_search # JUST TEMP TO KEEP IT WORKING  @results  # pageination makes result count wrong
+    @results_total = @results # pageination makes result count wrong
     t = Time.now 
     @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
   end   
       respond_to do |format|
+        format.xls # cg_search.xls.erb
         format.html # index.html.erb
         format.xml  { render :xml => @lumbarpunctures }
       end
