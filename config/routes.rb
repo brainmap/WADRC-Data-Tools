@@ -161,7 +161,7 @@ WADRCDataTools::Application.routes.draw do
     match '/q_search' , :controller => 'questionnaires', :action => 'q_search', :as =>:q_search
   
     match '/participant_search' , :controller => 'participants', :action => 'participant_search', :as =>:participant_search
-  match '/cg_search' , :controller => 'data_searches', :action => 'cg_search', :as =>:cd_search
+  match '/cg_search' , :controller => 'data_searches', :action => 'cg_search', :as =>:cg_search
 
   
   match '/users/update_role', :controller => 'users', :action => 'update_role', :as => :update_role
