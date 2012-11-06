@@ -32,7 +32,8 @@
 # need to save, recover search  -- set default in drop down if no saved search values
 
 v_join_type_hash =[['Inner','0'],['Outer','1']]
-v_conditions_hash = [['=','0'],['>=','1'],['<=','2'],['!=','3'],['between','4'],['is blank','5'],['is not blank','6'],['contains','7']]
+v_conditions_hash = [['=','0'],['>=','1'],['<=','2'],['!=','3'],['is blank','5'],['is not blank','6'],['contains','7']]
+v_conditions_between_hash = [['=','0'],['>=','1'],['<=','2'],['!=','3'],['between','4'],['is blank','5'],['is not blank','6'],['contains','7']]
 
 @cg_tn = CgTn.where("table_type='base' and status_flag='Y'").order(:id)
 # how to order
@@ -40,13 +41,35 @@ v_tn_cn_hash =[]
 v_tn_cn_searchable_hash = []
 
 %>
+
 <table width="100%"><tr ><td align="right">
 	<%= form_for 'cg_search' do |f| %>
 	 <small><%= f.label :select_saved_search%>:</small> 
 	<%= f.select :cg_query_id, @results_stored_search,:include_blank => 'Select a stored search'%>
 	<%= f.submit("submit")%>
 	<% end %>
-</td></tr><table>	
+</td></tr>
+<% if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?%>
+<tr><td align="center">
+	<%= form_tag '/cg_search.xls' do%>
+	    <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
+	    <%  v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
+	        v_link_to_elements = v_link_to_elements.gsub(/&amp;method=post">download xls<\/a>/,'')
+	        v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'') 
+	        v_link_to_elements = v_link_to_elements.gsub(/^&amp;/,'')   
+	        v_link_array =[]
+	        v_link_array = v_link_to_elements.split("\&amp\;") 
+	        v_link_array.each do |v| 
+	            v_name = ""
+	            v_val =""
+		        (v_name,v_val) = v.split('=')%>	
+	            <%= hidden_field_tag v_name, v_val %>	
+	       <% end %>
+	      <%= submit_tag 'export'%>
+	<% end %>
+	</td></tr>
+	<% end %>
+<table>	
 
 <%= form_for  'cg_search' do |f| %>
 
@@ -99,11 +122,8 @@ v_tn_cn_searchable_hash = []
       <th><%= f.label :maximum_age %></th>
       <td><%= select :cg_search, :max_age, (1..110).to_a, :selected =>@cg_query.max_age.to_i , :include_blank => true %></td>
     </tr>
-    <tr>
-	   <td colspan="2">
-		<%= link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post} %>  </p>
-		</td>
-	</tr>
+		<% # limit on url length? take link, parse to form hidden elementas link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}  %> 
+
   </table>
 
 
@@ -145,7 +165,7 @@ v_tn_cn_searchable_hash = []
 	          end
                 %>
              <tr><td><%= hidden_field(:cg_search, "tn_id][", :value=>tn.id.to_s) %>
-  <%= check_box_tag "include_tns", "1", v_include_tn == "FALSE" ? FALSE : TRUE , :name => "cg_search[include_tn]["+tn.id.to_s+"]" %></td>
+  <%= check_box_tag "include_tns", "1", v_include_tn == "FALSE" ? FALSE : TRUE , :name => "cg_search[include_tn]["+tn.id.to_s+"]", :onclick =>"checkbox_cascade(this,'"+tn.id.to_s+"')"%></td>
 	     <td><br><%=  (tn.common_name+"  - <small>("+ tn.tn+")</small>:" ).html_safe %></td>
 	                      <td><%= select  :cg_search,"join_type]["+tn.id.to_s, options_for_select(v_join_type_hash, v_join_type  ),
 							              {:prompt => 'Select join type'}  %></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
@@ -263,8 +283,14 @@ v_tn_cn_searchable_hash = []
                        <% end %>
                    <% end %>
 		       <% end %>
-		<td>	<%= select  :cg_search, "condition]["+tn.id.to_s+"]["+cn.id.to_s, options_for_select(v_conditions_hash, v_condition),
-							              {:prompt => 'Select conditions'}  %></td></tr>
+		<td><% if cn.condition_between_flag == "Y" %>	
+		       <%= select  :cg_search, "condition]["+tn.id.to_s+"]["+cn.id.to_s, options_for_select(v_conditions_between_hash, v_condition),
+							              {:prompt => 'Select conditions'}  %>
+			<% else %>
+			    <%= select  :cg_search, "condition]["+tn.id.to_s+"]["+cn.id.to_s, options_for_select(v_conditions_hash, v_condition),
+															              {:prompt => 'Select conditions'}  %>	
+			 <% end %>			
+							</td></tr>
 <%       else %>
           <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
 
@@ -275,8 +301,27 @@ v_tn_cn_searchable_hash = []
      end
 %>
 </table>
+<% if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?%>
+<%= form_tag '/cg_search.xls' do%>
+    <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
+    <%  v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
+        v_link_to_elements = v_link_to_elements.gsub(/&amp;method=post">download xls<\/a>/,'')
+        v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'') 
+        v_link_to_elements = v_link_to_elements.gsub(/^&amp;/,'')   
+        v_link_array =[]
+        v_link_array = v_link_to_elements.split("\&amp\;") 
+        v_link_array.each do |v| 
+            v_name = ""
+            v_val =""
+	        (v_name,v_val) = v.split('=')%>	
+            <%= hidden_field_tag v_name, v_val %>	
+       <% end %>
+      <%= submit_tag 'export'%>
+<% end %>
+
+
 <br><br>
-<% if !params[:cg_search].blank? %>
+
 <table class="tabular">
   <caption><%= pluralize(@results_total.size, 'Result') %></caption>
   <thead>

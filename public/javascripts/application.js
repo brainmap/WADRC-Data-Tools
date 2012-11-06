@@ -42,3 +42,19 @@ function togglecomment(showHideDiv, switchTextDiv,first_text,second_text) {
 		text.innerHTML = second_text;
 	}
 }
+// checks all the children checkboxes
+function checkbox_cascade(f, parent_id){
+	var v_name = 'cg_search[include_cn]['+parent_id+']'
+	var ele = document.getElement
+	// document.forms[0].v_name.checked=true; 
+	var inputs = document.getElementsByTagName("input"); //or document.forms[0].elements;   
+	for (var i = 0; i < inputs.length; i++) {  
+	  if (inputs[i].type == "checkbox") { 
+		var i_name =inputs[i].name
+		if(inputs[i].name.indexOf(v_name) !=-1)
+		  {
+		   inputs[i].checked=true	
+		  }
+	   }  
+	 }  	
+}
