@@ -168,6 +168,13 @@ class PetscansController < ApplicationController
           @conditions.push(condition)           
           params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:pet_search][:rmr]
       end   
+      
+      if !params[:pet_search][:pet_status].blank? 
+          condition =" petscans.appointment_id in (select appointments.id from appointments,vgroups
+                              where appointments.vgroup_id = vgroups.id and  lower(vgroups.transfer_pet) in (lower('"+params[:pet_search][:pet_status].gsub(/[;:'"()=<>]/, '')+"')   ))"
+          @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +",  Pet status "+params[:pet_search][:pet_status]
+      end
 
       #  build expected date format --- between, >, < 
       v_date_latest =""

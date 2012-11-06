@@ -885,6 +885,12 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
           params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:mri_search][:rmr]
       end   
 
+      if !params[:mri_search][:mri_status].blank? 
+          condition =" visits.appointment_id in (select appointments.id from appointments,vgroups
+                              where appointments.vgroup_id = vgroups.id and  lower(vgroups.transfer_mri) in (lower('"+params[:mri_search][:mri_status].gsub(/[;:'"()=<>]/, '')+"')   ))"
+          @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +",  Mri status "+params[:mri_search][:mri_status]
+      end
       #  build expected date format --- between, >, < 
       v_date_latest =""
       #want all three date parts

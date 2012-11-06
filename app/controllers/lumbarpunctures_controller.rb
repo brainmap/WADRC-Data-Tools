@@ -370,7 +370,14 @@ class LumbarpuncturesController < ApplicationController
                    where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:lp_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
          @conditions.push(condition)           
          params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:lp_search][:rmr]
-     end   
+     end  
+     
+      if !params[:lp_search][:lp_status].blank? 
+          condition =" lumbarpunctures.appointment_id in (select appointments.id from appointments,vgroups
+                              where appointments.vgroup_id = vgroups.id and  lower(vgroups.completedlumbarpuncture) in (lower('"+params[:lp_search][:lp_status].gsub(/[;:'"()=<>]/, '')+"')   ))"
+          @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +",  LP status "+params[:lp_search][:lp_status]
+      end 
 
      #  build expected date format --- between, >, < 
      v_date_latest =""

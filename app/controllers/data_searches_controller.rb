@@ -314,7 +314,7 @@ class DataSearchesController < ApplicationController
                if !params[:cg_search][:cn_id].blank? and !params[:cg_search][:cn_id][v_tn_id].blank?
                  params[:cg_search][:cn_id][v_tn_id].each do |tn_cn_id|
                    v_tn_cn_id = tn_cn_id.to_a.to_s
-                   if (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?) or (!params[:cg_search][:condition][v_tn_id].blank? and !params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank?)
+                   if (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and  !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?) or (!params[:cg_search][:condition].blank? and !params[:cg_search][:condition][v_tn_id].blank? and !params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank?)
                      @cg_tn_cn = CgTnCn.find(v_tn_cn_id)
                      @cg_query_tn_cn = CgQueryTnCn.new 
                      @cg_query_tn_cn.cg_tn_cn_id =v_tn_cn_id
@@ -578,7 +578,7 @@ class DataSearchesController < ApplicationController
                         end
  
                   end  
-                  if params[:cg_search][:include_tn][v_tn_id].blank?
+                  if !params[:cg_search].blank? and !params[:cg_search][:include_tn].blank? and params[:cg_search][:include_tn][v_tn_id].blank?
                      params[:cg_search][:include_tn].delete(v_tn_id)   
                   end               
                  end
@@ -586,16 +586,16 @@ class DataSearchesController < ApplicationController
                @cg_query_tn_cn_hash[v_tn_id] = @cg_query_cn_hash
                # trying to delete more params to shorten url -- might be able to shorten url  some more -- more deletes, shorter var name
              else  # try deleting empty params
-                if params[:cg_search][:join_type][v_tn_id].blank?
+                if !params[:cg_search].blank? and  !params[:cg_search][:join_type].blank? and params[:cg_search][:join_type][v_tn_id].blank?
                      params[:cg_search][:join_type].delete(v_tn_id)
                 end
-                if params[:cg_search][:include_tn][v_tn_id].blank?
+                if !params[:cg_search].blank? and  !params[:cg_search][:include_tn].blank? and  params[:cg_search][:include_tn][v_tn_id].blank?
                    params[:cg_search][:include_tn].delete(v_tn_id)   
                 end
-                if !params[:cg_search][:cn_id][v_tn_id].blank?
+                if !params[:cg_search].blank? and !params[:cg_search][:cn_id].blank? and  !params[:cg_search][:cn_id][v_tn_id].blank?
                    params[:cg_search][:cn_id][v_tn_id].each do |tn_cn_id|
                      v_tn_cn_id = tn_cn_id.to_a.to_s
-                     if !params[:cg_search][:include_cn][v_tn_id].blank? 
+                     if !params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? 
                        if params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?
                            params[:cg_search][:include_cn][v_tn_id].delete(v_tn_cn_id)
                        end
@@ -685,7 +685,7 @@ class DataSearchesController < ApplicationController
       end     
       @column_number =   @local_column_headers.size
            
-  if !params[:cg_search].blank?
+  if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?
     @local_conditions.delete_if {|x| x == "" }   # a blank getting inserted 
     sql = " select distinct "+@local_fields.join(',')+" from "
     @all_tables = []
@@ -752,7 +752,7 @@ class DataSearchesController < ApplicationController
   end   
       respond_to do |format|
         format.xls # cg_search.xls.erb
-        if !params[:cg_search].blank?
+        if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?
           format.html  {@results = Kaminari.paginate_array(@results).page(params[:page]).per(100)}  
         else
           format.html 
