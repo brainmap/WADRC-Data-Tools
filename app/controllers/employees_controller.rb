@@ -41,7 +41,7 @@ class EmployeesController < ApplicationController
   # POST /employees.xml
   def create
     @employee = Employee.new(params[:employee])
-
+    @employee.description = @employee.last_name+", "+@employee.first_name+" "+@employee.mi
     respond_to do |format|
       if @employee.save
         format.html { redirect_to(@employee, :notice => 'Employee was successfully created.') }
@@ -60,6 +60,8 @@ class EmployeesController < ApplicationController
 
     respond_to do |format|
       if @employee.update_attributes(params[:employee])
+        @employee.description = @employee.last_name+", "+@employee.first_name+" "+@employee.mi
+        @employee.save
         format.html { redirect_to(@employee, :notice => 'Employee was successfully updated.') }
         format.xml  { head :ok }
       else

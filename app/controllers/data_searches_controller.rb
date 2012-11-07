@@ -142,7 +142,7 @@ class DataSearchesController < ApplicationController
            @sp_array = @cg_query.scan_procedure_id_list.split(",")
          end
 
-         @cg_query_tns =  CgQueryTn.where("cg_query_id = "+@cg_query.id.to_s)
+         @cg_query_tns =  CgQueryTn.where("cg_query_id = "+@cg_query.id.to_s).order("display_order")
          @cg_query_tns.each do |cg_query_tn|
            v_tn_id = cg_query_tn.cg_tn_id 
            @cg_query_tn_hash[v_tn_id.to_s] = cg_query_tn  
@@ -349,9 +349,9 @@ class DataSearchesController < ApplicationController
                            else
                                @local_fields.push(@cg_tn.tn+"."+@cg_tn_cn.cn)
                            end
-                        elsif !@cg_tn_cn.q_data_form_id.blank? # need q_data
-                          v_join_left_tn = @cg_tn.tn 
-                          if @local_tables.index(@cg_tn.tn).blank?   # left join of left join?
+                         elsif !@cg_tn_cn.q_data_form_id.blank? # need q_data
+                           v_join_left_tn = @cg_tn.tn 
+                           if @local_tables.index(@cg_tn.tn).blank?   # left join of left join?
                              v_join_left_tn = @cg_tn.join_left_parent_tn
                            end
                            @cg_search_q_data  ="Y"
@@ -368,25 +368,25 @@ class DataSearchesController < ApplicationController
                            # pass to run_search_q_data and get back fields, columns_headers, conditions, etc.
                            @tables =[@cg_tn.tn]
                            @q_form_id = @cg_tn_cn.q_data_form_id
-                            (@fields,@tables, @left_join,@left_join_vgroup) = run_search_q_data
+                           (@fields,@tables, @left_join,@left_join_vgroup) = run_search_q_data
            
-                            @left_join_vgroup.each do |vg|
+                           @left_join_vgroup.each do |vg|
                                 if !@tables_left_join_hash["vgroups" ].blank?               
                                       @tables_left_join_hash["vgroups"] = @tables_left_join_hash[v_join_left_tn ]+"  "+vg
                                 else
                                       @tables_left_join_hash["vgroups" ] = vg
                                 end  
-                            end   
+                           end   
                             
-                            @local_fields.concat(@fields)
-                            @left_join.each do |lj|
+                           @local_fields.concat(@fields)
+                           @left_join.each do |lj|
                               if !@tables_left_join_hash[v_join_left_tn ].blank?               
                                     @tables_left_join_hash[v_join_left_tn] = @tables_left_join_hash[v_join_left_tn ]+"  "+lj
                               else
                                     @tables_left_join_hash[v_join_left_tn ] = lj
                               end
-                            end 
-                            @cg_search_q_data = nil                          
+                           end 
+                           @cg_search_q_data = nil                          
                        end
                      end
                      @cg_query_tn_cn.cg_query_tn_id =@cg_query_tn.id
@@ -402,13 +402,13 @@ class DataSearchesController < ApplicationController
                          v_value_1 = params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(1i)"] +"-"+params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(2i)"].rjust(2,"0")+"-"+params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(3i)"].rjust(2,"0")
                          @cg_query_tn_cn.value_1 = v_value_1
                          v_value_1 =""
-                      end
-                      if !params[:cg_search][:value_2].blank? && !params[:cg_search][:value_2][v_tn_id].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(1i)"].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(2i)"].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(3i)"].blank?
+                     end
+                     if !params[:cg_search][:value_2].blank? && !params[:cg_search][:value_2][v_tn_id].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(1i)"].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(2i)"].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(3i)"].blank?
                            v_value_2 = params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(1i)"] +"-"+params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(2i)"].rjust(2,"0")+"-"+params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(3i)"].rjust(2,"0")
                            @cg_query_tn_cn.value_2 = v_value_2
                            v_value_2 =""
-                      end     
-                      if !params[:cg_search][:condition][v_tn_id].blank?
+                     end     
+                     if !params[:cg_search][:condition][v_tn_id].blank?
                         @cg_query_tn_cn.condition = params[:cg_search][:condition][v_tn_id][v_tn_cn_id]
                        # [['=','0'],['>=','1'],['<=','2'],['!=','3'],['between','4'],['is blank','5']]
                         if @cg_query_tn_cn.condition == 0 
@@ -466,6 +466,9 @@ class DataSearchesController < ApplicationController
                         @cg_query_tn_cn.save
                      end
                      @cg_query_cn_hash[v_tn_cn_id] = @cg_query_tn_cn  
+                     if ( params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank? or params[:cg_search][:condition][v_tn_id][v_tn_cn_id] == "") and (!params[:cg_search][:include_cn][v_tn_id].blank? and (params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank? or params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id] == "" ))
+                         params[:cg_search][:cn_id][v_tn_id].delete(v_tn_cn_id)
+                     end
                      if !params[:cg_search][:include_cn][v_tn_id].blank? 
                        if params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?
                            params[:cg_search][:include_cn][v_tn_id].delete(v_tn_cn_id)
@@ -485,7 +488,6 @@ class DataSearchesController < ApplicationController
                      if !params[:cg_search][:value_1].blank? and !params[:cg_search][:value_1][v_tn_id].blank? 
                        if params[:cg_search][:value_1][v_tn_id][v_tn_cn_id].blank?
                            params[:cg_search][:value_1][v_tn_id].delete(v_tn_cn_id)
-                           puts v_tn_cn_id.to_s
                         elsif params[:cg_search][:value_1][v_tn_id][v_tn_cn_id] == ""
                                 params[:cg_search][:value_1][v_tn_id].delete(v_tn_cn_id)
                        end
@@ -527,13 +529,14 @@ class DataSearchesController < ApplicationController
                            elsif params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(3i)"] == ""
                              params[:cg_search][:value_2][v_tn_id].delete(v_tn_cn_id+"(3i)")                           
                            end                        
-                       end 
+                       end
+                       
                     else # another set of deletes
                        # :conditions seems to be needed
+                       
                       if !params[:cg_search][:value_1].blank? and !params[:cg_search][:value_1][v_tn_id].blank? 
                         if params[:cg_search][:value_1][v_tn_id][v_tn_cn_id].blank?
                             params[:cg_search][:value_1][v_tn_id].delete(v_tn_cn_id)
-                            puts v_tn_cn_id.to_s
                          elsif params[:cg_search][:value_1][v_tn_id][v_tn_cn_id] == ""
                                  params[:cg_search][:value_1][v_tn_id].delete(v_tn_cn_id)
                         end
@@ -586,43 +589,42 @@ class DataSearchesController < ApplicationController
                @cg_query_tn_cn_hash[v_tn_id] = @cg_query_cn_hash
                # trying to delete more params to shorten url -- might be able to shorten url  some more -- more deletes, shorter var name
              else  # try deleting empty params
+               if !params[:cg_search][:cn_id][v_tn_id].blank?
+                 params[:cg_search][:cn_id][v_tn_id].each do |tn_cn_id|
+                    v_tn_cn_id = tn_cn_id.to_a.to_s
+                    if !params[:cg_search][:condition].blank? and !params[:cg_search][:condition][v_tn_id].blank? and !params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank?
+                      if (( params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank? or params[:cg_search][:condition][v_tn_id][v_tn_cn_id] == "") and params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank? )
+                       params[:cg_search][:cn_id][v_tn_id].delete(v_tn_cn_id.to_s)
+                       params[:cg_search][:cn_id][v_tn_id].delete(v_tn_cn_id)
+                       params[:cg_search][:condition][v_tn_id].delete(v_tn_cn_id.to_s)
+                       params[:cg_search][:condition][v_tn_id].delete(v_tn_cn_id)
+                       if !params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? 
+                          if params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?
+                              params[:cg_search][:include_cn][v_tn_id].delete(v_tn_cn_id)
+                          end
+                         end
+                        if !params[:cg_search][:value_1].blank? and !params[:cg_search][:value_1][v_tn_id].blank? 
+                          if params[:cg_search][:value_1][v_tn_id][v_tn_cn_id].blank?
+                              params[:cg_search][:value_1][v_tn_id].delete(v_tn_cn_id)
+                          elsif params[:cg_search][:value_1][v_tn_id][v_tn_cn_id] == ""
+                              params[:cg_search][:value_1][v_tn_id].delete(v_tn_cn_id)
+                          end
+                         end
+                         if !params[:cg_search][:value_2].blank? and !params[:cg_search][:value_2][v_tn_id].blank? 
+                           if params[:cg_search][:value_2][v_tn_id][v_tn_cn_id].blank?
+                               params[:cg_search][:value_2][v_tn_id].delete(v_tn_cn_id)
+                           elsif params[:cg_search][:value_2][v_tn_id][v_tn_cn_id] == ""
+                             params[:cg_search][:value_2][v_tn_id].delete(v_tn_cn_id)
+                           end
+                          end
+                      end 
+                    end
+                  end
+                end
+               
                 if !params[:cg_search].blank? and  !params[:cg_search][:join_type].blank? and params[:cg_search][:join_type][v_tn_id].blank?
                      params[:cg_search][:join_type].delete(v_tn_id)
-                end
-                if !params[:cg_search].blank? and  !params[:cg_search][:include_tn].blank? and  params[:cg_search][:include_tn][v_tn_id].blank?
-                   params[:cg_search][:include_tn].delete(v_tn_id)   
-                end
-                if !params[:cg_search].blank? and !params[:cg_search][:cn_id].blank? and  !params[:cg_search][:cn_id][v_tn_id].blank?
-                   params[:cg_search][:cn_id][v_tn_id].each do |tn_cn_id|
-                     v_tn_cn_id = tn_cn_id.to_a.to_s
-                     if !params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? 
-                       if params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?
-                           params[:cg_search][:include_cn][v_tn_id].delete(v_tn_cn_id)
-                       end
-                      end
-                     if !params[:cg_search][:condition].blank? and !params[:cg_search][:condition][v_tn_id].blank?
-                         if params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank?
-                            params[:cg_search][:condition][v_tn_id].delete(v_tn_cn_id)
-                         elsif params[:cg_search][:condition][v_tn_id][v_tn_cn_id] == ""
-                                params[:cg_search][:condition][v_tn_id].delete(v_tn_cn_id)
-                         end
-                      end
-                     if !params[:cg_search][:value_1].blank? and !params[:cg_search][:value_1][v_tn_id].blank? 
-                       if params[:cg_search][:value_1][v_tn_id][v_tn_cn_id].blank?
-                           params[:cg_search][:value_1][v_tn_id].delete(v_tn_cn_id)
-                       elsif params[:cg_search][:value_1][v_tn_id][v_tn_cn_id] == ""
-                           params[:cg_search][:value_1][v_tn_id].delete(v_tn_cn_id)
-                       end
-                      end
-                      if !params[:cg_search][:value_2].blank? and !params[:cg_search][:value_2][v_tn_id].blank? 
-                        if params[:cg_search][:value_2][v_tn_id][v_tn_cn_id].blank?
-                            params[:cg_search][:value_2][v_tn_id].delete(v_tn_cn_id)
-                        elsif params[:cg_search][:value_2][v_tn_id][v_tn_cn_id] == ""
-                          params[:cg_search][:value_2][v_tn_id].delete(v_tn_cn_id)
-                        end
-                       end
-                   end
-                end
+                end                     
              end
              # trying to reduce number of params if blank -- afraid url will get to long in pageation and download
              if params[:cg_search][:rmr].blank?
@@ -644,12 +646,19 @@ class DataSearchesController < ApplicationController
              if params[:cg_search][:max_age].blank?
                   params[:cg_search].delete('max_age')
              end
+             if !params[:cg_search][:include_tn].blank?
+               params[:cg_search][:include_tn].delete(v_tn_id) 
+               params[:cg_search][:include_tn].delete(v_tn_id.to_s)
+             end
            end
          end
          
          
        end
       end 
+      if !params[:cg_search].blank? and !params[:cg_search][:include_tn].blank?
+        params[:cg_search].delete('include_tn') 
+      end
       
       
       @sp_array.push("-1") # need something in the array

@@ -56,6 +56,10 @@ edit_count =   edit_count -1
       <th><%= f.label :maximum_age %></th>
       <td><%= select :lp_search, :max_age, (1..110).to_a, :include_blank => true %></td>
     </tr>
+    <tr>
+      <th><%= f.label :lp_status %></th>
+      <td><%= select :lp_search, :lp_status, { "yes" => "yes", "no" => "no", "n/a" => "n/a" }, :selected =>"yes",:include_blank => true %></td>
+    </tr>
   </table>
   <%= clearing_br %>
   <%= f.submit "Search" %>

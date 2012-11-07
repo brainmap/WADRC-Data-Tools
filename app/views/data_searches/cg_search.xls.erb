@@ -1,0 +1,19 @@
+<table border=1>
+	  <tr><td align="left" colspan=<%= @local_column_headers.size %>>
+		 <%= @export_file_title %>
+		</td>
+      </tr>		
+	 <tr>
+		<% @local_column_headers.each do |column_header|%>
+	      <th><%= column_header%></th>
+	    <% end %>	
+	 </tr>
+	 <% @results.each do |result| %>
+	    <%      result.delete_at(@local_column_headers.size-1) # *.id used to get the * object, not want to display %>
+		<tr>
+		   <% for i in 0..@column_number-1  # results is an array of arrays%>
+		      <td><%= result[i] %></td>
+		   <% end %>
+	    </tr>
+	 <% end %>
+</table>
