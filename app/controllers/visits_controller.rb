@@ -850,7 +850,8 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
       params["search_criteria"] =""
 
       if params[:mri_search].nil?
-           params[:mri_search] =Hash.new  
+           params[:mri_search] =Hash.new
+           params[:mri_search][:mri_status] = "yes"  
       end
 
       if !params[:mri_search][:scan_procedure_id].blank?

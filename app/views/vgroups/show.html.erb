@@ -109,12 +109,12 @@ edit_count = edit_count -1
 <% if edit_count > 0 %>
      <% form_tag( "/vgroups/change_transfer_mri_vgroup",:url => { :controller=>"vgroups",:action => "change_transfer_mri_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
            <%= hidden_field_tag 'id', @vgroup.id %>
-      <%= label_tag :Transfer_MRI %> <%= select :vgroup, :transfer_mri, ["no", "yes", "n/a"] %>
+      <%= label_tag :Completed_MRI %> <%= select :vgroup, :transfer_mri, ["no", "yes", "n/a"] %>
      <%= submit_tag("Update") %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<%= link_to  'New-MRI', new_visit_path+"/"+@vgroup.id.to_s , :confirm => "Are you sure there is not an existing MRI appointment for the same date, scan procedure and enumber? MRI appointments are usually created when the scans are imported."%>
 	<% end %>
 <% else %>
-<%= label_tag :Transfer_MRI %> <%= select :vgroup, :transfer_mri, ["no", "yes", "n/a"] %>
+<%= label_tag :Completed_MRI %> <%= select :vgroup, :transfer_mri, ["no", "yes", "n/a"] %>
  <!-- just display mri_transfer -->
 <% end %></td></tr>
 	<tr><td colspan=7 align="left">	<table  width="90%">
@@ -142,12 +142,12 @@ edit_count = edit_count -1
 <% if edit_count > 0 %>
  <% form_tag( "/vgroups/change_transfer_pet_vgroup",:url => { :controller=>"vgroups",:action => "change_transfer_pet_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
        <%= hidden_field_tag 'id', @vgroup.id %>
-  <%= label_tag :Transfer_PET %> <%= select :vgroup, :transfer_pet, ["no", "yes", "n/a"] %>&nbsp;
+  <%= label_tag :Completed_PET %> <%= select :vgroup, :transfer_pet, ["no", "yes", "n/a"] %>&nbsp;
  <%= submit_tag("Update") %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<%= link_to  'New-Petscan', new_petscan_path+"/"+@vgroup.id.to_s %>
 	<% end %>
 	<% else %>
-	<%= label_tag :Transfer_PET %> <%= select :vgroup, :transfer_pet, ["no", "yes", "n/a"] %>&nbsp;
+	<%= label_tag :Completed_PET %> <%= select :vgroup, :transfer_pet, ["no", "yes", "n/a"] %>&nbsp;
 	<% end %></td></tr>
 <tr><td colspan=7  align="left"><table width="90%">
 	<%  v_cnt = 0

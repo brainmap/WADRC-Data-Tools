@@ -371,7 +371,7 @@ class DataSearchesController < ApplicationController
                            (@fields,@tables, @left_join,@left_join_vgroup) = run_search_q_data
            
                            @left_join_vgroup.each do |vg|
-                                if !@tables_left_join_hash["vgroups" ].blank?               
+                                if !@tables_left_join_hash["vgroups" ].blank?  and !@tables_left_join_hash[v_join_left_tn ].blank?             
                                       @tables_left_join_hash["vgroups"] = @tables_left_join_hash[v_join_left_tn ]+"  "+vg
                                 else
                                       @tables_left_join_hash["vgroups" ] = vg
@@ -466,10 +466,10 @@ class DataSearchesController < ApplicationController
                         @cg_query_tn_cn.save
                      end
                      @cg_query_cn_hash[v_tn_cn_id] = @cg_query_tn_cn  
-                     if ( params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank? or params[:cg_search][:condition][v_tn_id][v_tn_cn_id] == "") and (!params[:cg_search][:include_cn][v_tn_id].blank? and (params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank? or params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id] == "" ))
+                     if !params[:cg_search][:condition].blank? and !params[:cg_search][:condition][v_tn_id].blank? and ( params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank? or params[:cg_search][:condition][v_tn_id][v_tn_cn_id] == "") and (!params[:cg_search][:include_cn][v_tn_id].blank? and (params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank? or params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id] == "" ))
                          params[:cg_search][:cn_id][v_tn_id].delete(v_tn_cn_id)
                      end
-                     if !params[:cg_search][:include_cn][v_tn_id].blank? 
+                     if !params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? 
                        if params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?
                            params[:cg_search][:include_cn][v_tn_id].delete(v_tn_cn_id)
                        end

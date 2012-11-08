@@ -42,15 +42,15 @@ v_tn_cn_searchable_hash = []
 
 %>
 
-<table width="100%"><tr ><td align="right">
+<table  width="100%"><tr ><td>&nbsp;</td><td width="20%" nowrap align="right" bgcolor="CFCFCF">
 	<%= form_for 'cg_search' do |f| %>
 	 <small><%= f.label :select_saved_search%>:</small> 
 	<%= f.select :cg_query_id, @results_stored_search,:include_blank => 'Select a stored search'%>
-	<%= f.submit("submit")%>
+	<%= f.submit("Retrieve stored query")%>
 	<% end %>
 </td></tr>
 <% if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?%>
-<tr><td align="center">
+<tr><td align="center" colspan=2>
 	<%= form_tag '/cg_search.xls' do%>
 	    <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
 	    <%  v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
@@ -65,7 +65,7 @@ v_tn_cn_searchable_hash = []
 		        (v_name,v_val) = v.split('=')%>	
 	            <%= hidden_field_tag v_name, v_val %>	
 	       <% end %>
-	      <%= submit_tag 'export'%>
+	      <%= submit_tag 'export file'%>
 	<% end %>
 	</td></tr>
 	<% end %>
@@ -142,7 +142,7 @@ v_tn_cn_searchable_hash = []
     </tr>
     <tr>
       <th></th>
-      <td><%= f.submit("search")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <small><%= link_to "Clear Search", '/cg_search?clear_all=Y'%></small></td>
+      <td><%= f.submit("run search")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <small><%= link_to "Clear Search", '/cg_search?clear_all=Y'%></small></td>
     </tr>
   </table>
   <%= clearing_br %>
@@ -297,8 +297,9 @@ v_tn_cn_searchable_hash = []
 <%       end
 	              end %>
 	<tr><td colspan="7"><hr></td></tr>
-<%          end
-     end
+<%          end %>
+	<tr><td colspan="2" align="left" ><%= f.submit("run search")%></td><td colspan="5">&nbsp;</td></tr>
+<%     end
 %>
 </table>
 <% if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?%>
@@ -316,7 +317,7 @@ v_tn_cn_searchable_hash = []
 	        (v_name,v_val) = v.split('=')%>	
             <%= hidden_field_tag v_name, v_val %>	
        <% end %>
-      <%= submit_tag 'export'%>
+      <%= submit_tag 'export file'%>
 <% end %>
 
 

@@ -346,6 +346,7 @@ class LumbarpuncturesController < ApplicationController
 
      if params[:lp_search].nil?
           params[:lp_search] =Hash.new  
+          params[:lp_search][:lp_status] = "yes"
      end
      
      if !params[:lp_search][:scan_procedure_id].blank?

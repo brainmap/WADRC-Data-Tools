@@ -136,6 +136,7 @@ class PetscansController < ApplicationController
 
       if params[:pet_search].nil?
            params[:pet_search] =Hash.new  
+           params[:pet_search][:pet_status] = "yes"
       end
 
       if !params[:pet_search][:scan_procedure_id].blank?
