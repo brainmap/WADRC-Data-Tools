@@ -142,7 +142,7 @@ class DataSearchesController < ApplicationController
            @sp_array = @cg_query.scan_procedure_id_list.split(",")
          end
 
-         @cg_query_tns =  CgQueryTn.where("cg_query_id = "+@cg_query.id.to_s).order("display_order")
+         @cg_query_tns =  CgQueryTn.where("cg_query_id = "+@cg_query.id.to_s)
          @cg_query_tns.each do |cg_query_tn|
            v_tn_id = cg_query_tn.cg_tn_id 
            @cg_query_tn_hash[v_tn_id.to_s] = cg_query_tn  
