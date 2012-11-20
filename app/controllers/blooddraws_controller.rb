@@ -256,6 +256,10 @@ class BlooddrawsController < ApplicationController
            #@column_number =   @column_headers.size
            @fields =["vgroups.completedblooddraw","blooddraws.blooddrawnote","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","blooddraws.height_inches","blooddraws.weight_kg","blooddraws.id"] # vgroups.id vgroup_id always first, include table name
            @left_join = ["LEFT JOIN vitals on blooddraws.appointment_id = vitals.appointment_id"] # left join needs to be in sql right after the parent table!!!!!!!
+           # need to split off q_data into sql with less than 61 tables 
+           @column_headers_q_data =[]
+           @fields_q_data = []
+           @left_join_q_data = []
      end
    @tables =['blooddraws'] # trigger joins --- vgroups and appointments by default
 
