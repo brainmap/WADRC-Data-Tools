@@ -263,6 +263,9 @@ class NeuropsychesController < ApplicationController
              #@column_number =   @column_headers.size
              @fields =["vgroups.completedneuropsych", "neuropsyches.neuropsychnote","neuropsyches.id"] # vgroups.id vgroup_id always first, include table name
              @left_join = [] # left join needs to be in sql right after the parent table!!!!!!!
+             @column_headers_q_data =[]
+             @fields_q_data = []
+             @left_join_q_data = []
        end
      @tables =['neuropsyches'] # trigger joins --- vgroups and appointments by default
 
