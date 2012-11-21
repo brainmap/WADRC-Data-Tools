@@ -30,6 +30,27 @@ function toggle2_closed(showHideDiv, switchTextDiv) {
 	}
 }
 
+function toggle2_closed_all( switchTextDiv) {
+// get all div elements which start with 
+// pet, mri, lp, lh, np, questionnaire
+var inputs = document.getElementsByTagName("div");
+for (var x=0;x<=inputs.length;x++){
+  myname = inputs[x].id // getAttribute("id");
+  ele = inputs[x]
+  if(myname.indexOf("mri")==0 || myname.indexOf("pet")==0 || myname.indexOf("lp")==0 || myname.indexOf("lh")==0 || myname.indexOf("np")==0 || myname.indexOf("questionnaire")==0){
+    if(ele.style.display == "none") {
+    		ele.style.display = "block";
+		//text.innerHTML = "restore" ;
+  	}
+	else {
+		ele.style.display = "none";
+		//text.innerHTML = "collapse";
+	}
+   }
+  }
+
+}
+
 function togglecomment(showHideDiv, switchTextDiv,first_text,second_text) {
 	var ele = document.getElementById(showHideDiv);
 	var text = document.getElementById(switchTextDiv);
