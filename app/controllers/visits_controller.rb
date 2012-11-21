@@ -485,6 +485,11 @@ class VisitsController <  AuthorizedController #  ApplicationController
           sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+e[0].to_s+")"
           connection = ActiveRecord::Base.connection();        
           results = connection.execute(sql)
+          # trying to get link to participant to show up in one update of enumber
+          if !@vgroup.participant_id.blank?
+            sql = "update enrollments set participant_id = "+@vgroup.participant_id.to_s+" where participant_id is null and enrollments.id ="+e[0].to_s
+            results = connection.execute(sql)                    
+          end
         end 
         #### REPEAT FOR SP  
 

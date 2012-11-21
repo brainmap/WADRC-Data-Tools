@@ -307,6 +307,10 @@ class VgroupsController < ApplicationController
               if @enrollment_vgroup_membership.blank?
                   sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment[0].id).to_s+")"      
                   results = connection.execute(sql)
+                  if !(@vgroup.participant_id).blank? # tryiong to get link to participant for enumber
+                    sql = "update enrollments set participant_id = "+@vgroup.participant_id.to_s+" where participant_id is null and enrollments.id ="+@enrollment[0].id.to_s+" "
+                    results = connection.execute(sql)
+                  end
               end
            else  # make a new enrollment with this participant-- only works for participant selected
              if !(@vgroup.participant_id).blank?
