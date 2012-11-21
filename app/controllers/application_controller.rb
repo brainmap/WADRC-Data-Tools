@@ -555,6 +555,7 @@ def run_search_q_data
                 end
               end        
           elsif @question.value_type_1 != '' and @question.value_type_1 != 'text' 
+
              @column_headers_q_data.push(@question.export_column_header_1)
              col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
              @fields_q_data.push(col_1)
@@ -718,7 +719,7 @@ def run_search_q_data
         end
         # NEED TO RETURN q_data columns
         if !@cg_search_q_data.blank?
-          return @fields,@tables, @left_join,@left_join_vgroup_q_data
+          return @fields,@tables, @left_join,@left_join_vgroup_q_data,@fields_q_data, @left_join_q_data
         end 
         @fields.push(v_last_field)
         @column_headers.push(v_last_header)

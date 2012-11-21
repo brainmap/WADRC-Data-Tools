@@ -357,19 +357,28 @@ class DataSearchesController < ApplicationController
                            @cg_search_q_data  ="Y"
                            # variables for run_search_q_data
                            @fields =[]
+                           @fields_q_data =[]
                            @tables =[]
                            @left_join =[]
+                           @left_join_q_data =[]
                            @column_headers =[]
                            @conditions = []
                            @left_join_vgroup = []
+                           @column_headers_q_data =[]
+        
                            @conditions.concat(@conditions_bak)
                            # @conditions  captured above, after first set of form elements - mainly want sp limit
                            # define q_data form_id  
                            # pass to run_search_q_data and get back fields, columns_headers, conditions, etc.
                            @tables =[@cg_tn.tn]
                            @q_form_id = @cg_tn_cn.q_data_form_id
-                           (@fields,@tables, @left_join,@left_join_vgroup) = run_search_q_data
+                           (@fields,@tables, @left_join,@left_join_vgroup,@fields_q_data, @left_join_q_data) = run_search_q_data
+                           # could there be multiple q_data forms???????
+                           #NEED TO SPLIT OFF q_data sql , need to keep number tables in sql < 61 ( left joins up to 2 tables per leftjoin)
+                           # get all results, index by link_id/link type in array, add fields, reuslts to end of query -- what if 2 form_id's-- keep adding in
+                           # if > 25 , keep getting results and adding to array with same key
            
+                           # ??? PROBLEM WITH participant?
                            @left_join_vgroup.each do |vg|
                                 if !@tables_left_join_hash["vgroups" ].blank?  and !@tables_left_join_hash[v_join_left_tn ].blank?             
                                       @tables_left_join_hash["vgroups"] = @tables_left_join_hash[v_join_left_tn ]+"  "+vg
@@ -377,6 +386,7 @@ class DataSearchesController < ApplicationController
                                       @tables_left_join_hash["vgroups" ] = vg
                                 end  
                            end   
+                           
                             
                            @local_fields.concat(@fields)
                            @left_join.each do |lj|
