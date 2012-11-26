@@ -121,6 +121,11 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
     @image_dataset.user = current_user
     respond_to do |format|
       if @image_dataset.save
+        # problem with some SCREENSAVE sereies description, null rep_time causing error
+        if @image_dataset.series_description == 'SCREENSAVE' and @image_dataset.rep_time.blank?
+          @image_dataset.rep_time = 0
+          @image_dataset.save
+        end
         flash[:notice] = 'ImageDataset was successfully created.'
         format.html { redirect_to(@image_dataset) }
         format.xml  { render :xml => @image_dataset, :status => :created, :location => @image_dataset }
