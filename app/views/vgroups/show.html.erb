@@ -135,6 +135,18 @@ edit_count = edit_count -1
 						<%= 
 						render :partial => 'visits/show' , :locals => { :visit => v } %>
 
+<b>Tasks:</b>
+<%   @mriscantask = Mriscantask.where("visit_id in (?) and (lookup_set_id not in (8) or lookup_set_id is NULL)",@visit.id) 
+     @mriscantask.each do |mst|
+	   if !mst.lookup_scantask_id.blank? %>
+        <br><%= LookupScantask.find(mst.lookup_scantask_id).description %>		
+<%        @mriperformances = Mriperformance.where("mriscantask_id in (?)",mst.id)
+          @mriperformances.each do |mp|  %>
+	------Hit: <%= mp.hitpercentage.try(:to_s)%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Acc: <%= mp.accuracypercentage.try(:to_s)%>
+<%          end
+	   end
+	end
+   %>
 					   </div>
 				 </td></tr>
 	<% end %> </table>

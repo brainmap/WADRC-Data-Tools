@@ -205,10 +205,10 @@ v_tn_cn_searchable_hash = []
 			            <td>&nbsp;</td>
 			      <% end %>
 			   <% elsif !cn.ref_table_a.blank?%>
-				<td><%= collection_select "cg_search", "value_1]["+tn.id.to_s+"]["+cn.id.to_s, ((cn.ref_table_a).constantize).all.sort_by(&:description),:id, :description , {:include_blank => "Select a value",:selected =>v_value_1}  %>
+				<td><%= collection_select "cg_search", "value_1]["+tn.id.to_s+"]["+cn.id.to_s, ((cn.ref_table_a).constantize).where("trim(description) != ''").sort_by(&:description),:id, :description , {:include_blank => "Select a value",:selected =>v_value_1}  %>
 				<!--,:selected => (@q_data.value_1 or @question.default_val_1)} --></td>
 				   <% if cn.condition_between_flag == "Y" %>
-						<td> <%= collection_select "cg_search", "value_2]["+tn.id.to_s+"]["+cn.id.to_s, ((cn.ref_table_a).constantize).all.sort_by(&:description),
+						<td> <%= collection_select "cg_search", "value_2]["+tn.id.to_s+"]["+cn.id.to_s, ((cn.ref_table_a).constantize).where("trim(description) != ''").sort_by(&:description),
 					    	:id, :description, {:include_blank => "Select a value", :selected =>v_value_2} %> 
 					<!--,:selected => (@q_data.value_2 or @question.default_val_1)} --></td>		
 			      <% else %>
@@ -294,8 +294,8 @@ v_tn_cn_searchable_hash = []
 <%       else %>
           <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
 
-<%       end
-	              end %>
+<%       end 
+ 	              end %>
 	<tr><td colspan="7"><hr></td></tr>
 <%          end %>
 	<tr><td colspan="2" align="left" ><%= f.submit("run search")%></td><td colspan="5">&nbsp;</td></tr>
