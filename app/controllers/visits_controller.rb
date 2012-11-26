@@ -249,6 +249,12 @@ class VisitsController <  AuthorizedController #  ApplicationController
        @vgroup.save
        @appointment.vgroup_id = @vgroup.id
        @appointment.user = current_user
+       if !@vgroup.participant_id.blank?
+         @participant = Participant.find(@vgroup.participant_id)
+         if !@participant.dob.blank?
+            @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+         end
+       end
        @appointment.save
        @vital = Vital.new
        @vital.appointment_id = @appointment.id
@@ -467,9 +473,16 @@ class VisitsController <  AuthorizedController #  ApplicationController
          end
         end
         @appointment = Appointment.find(@visit.appointment_id)
-        @appointment.appointment_date = @visit.date
-        @appointment.save
         @vgroup = Vgroup.find(@appointment.vgroup_id)
+        @appointment.appointment_date = @visit.date
+        if !@vgroup.participant_id.blank?
+          @participant = Participant.find(@vgroup.participant_id)
+          if !@participant.dob.blank?
+             @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+          end
+        end
+        @appointment.save
+
         @vgroup.transfer_mri = params[:vgroup][:transfer_mri]
        # @vgroup.dicom_dvd = params[:vgroup][:dicom_dvd]
         #@vgroup.entered_by = params[:vgroup][:entered_by]

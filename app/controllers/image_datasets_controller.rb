@@ -125,6 +125,10 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
         if @image_dataset.series_description == 'SCREENSAVE' and @image_dataset.rep_time.blank?
           @image_dataset.rep_time = 0
           @image_dataset.save
+          # if save not work
+          #sql = "UPDATE image_datasets set rep_time=0 where rep_time is NULL and id="+@image_dataset.id.to_s
+          #connection = ActiveRecord::Base.connection();
+          #results = connection.execute(sql)
         end
         flash[:notice] = 'ImageDataset was successfully created.'
         format.html { redirect_to(@image_dataset) }

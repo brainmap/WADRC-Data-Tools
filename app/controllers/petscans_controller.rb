@@ -397,6 +397,12 @@ class PetscansController < ApplicationController
     @appointment.appointment_date =appointment_date
     @appointment.comment = params[:appointment][:comment]
     @appointment.user = current_user
+    if !@vgroup.participant_id.blank?
+      @participant = Participant.find(@vgroup.participant_id)
+      if !@participant.dob.blank?
+         @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+      end
+    end
     @appointment.save
     @petscan.appointment_id = @appointment.id
 
@@ -484,10 +490,16 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
     respond_to do |format|
       if @petscan.update_attributes(params[:petscan])
         @appointment = Appointment.find(@petscan.appointment_id)
+        @vgroup = Vgroup.find(@appointment.vgroup_id)
         @appointment.comment = params[:appointment][:comment]
         @appointment.appointment_date =appointment_date
+        if !@vgroup.participant_id.blank?
+          @participant = Participant.find(@vgroup.participant_id)
+          if !@participant.dob.blank?
+             @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+          end
+        end
         @appointment.save
-        @vgroup = Vgroup.find(@appointment.vgroup_id)
         @vgroup.transfer_pet = params[:vgroup][:transfer_pet]
         @vgroup.save
         format.html { redirect_to(@petscan, :notice => 'Petscan was successfully updated.') }

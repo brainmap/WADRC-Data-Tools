@@ -446,6 +446,12 @@ class NeuropsychesController < ApplicationController
     @appointment.appointment_date =appointment_date
     @appointment.comment = params[:appointment][:comment]
     @appointment.user = current_user
+    if !@vgroup.participant_id.blank?
+      @participant = Participant.find(@vgroup.participant_id)
+      if !@participant.dob.blank?
+         @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+      end
+    end
     @appointment.save
     @neuropsych.appointment_id = @appointment.id
     @q_data_form = QDataForm.new
@@ -524,10 +530,16 @@ class NeuropsychesController < ApplicationController
     respond_to do |format|
       if @neuropsych.update_attributes(params[:neuropsych])
         @appointment = Appointment.find(@neuropsych.appointment_id)
+        @vgroup = Vgroup.find(@appointment.vgroup_id)
         @appointment.comment = params[:appointment][:comment]
         @appointment.appointment_date =appointment_date
+        if !@vgroup.participant_id.blank?
+          @participant = Participant.find(@vgroup.participant_id)
+          if !@participant.dob.blank?
+             @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+          end
+        end
         @appointment.save
-        @vgroup = Vgroup.find(@appointment.vgroup_id)
         @vgroup.completedneuropsych = params[:vgroup][:completedneuropsych]
         @vgroup.save
         format.html { redirect_to(@neuropsych, :notice => 'Neuropsych was successfully updated.') }

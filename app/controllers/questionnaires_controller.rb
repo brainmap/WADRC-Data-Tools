@@ -446,6 +446,12 @@ class QuestionnairesController < ApplicationController
     @appointment.appointment_date =appointment_date
     @appointment.comment = params[:appointment][:comment]
     @appointment.user = current_user
+    if !@vgroup.participant_id.blank?
+      @participant = Participant.find(@vgroup.participant_id)
+      if !@participant.dob.blank?
+         @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+      end
+    end
     @appointment.save
     @questionnaire.appointment_id = @appointment.id
     @q_data_form = QDataForm.new
@@ -524,10 +530,16 @@ class QuestionnairesController < ApplicationController
     respond_to do |format|
       if @questionnaire.update_attributes(params[:questionnaire])
         @appointment = Appointment.find(@questionnaire.appointment_id)
+        @vgroup = Vgroup.find(@appointment.vgroup_id)
         @appointment.comment = params[:appointment][:comment]
         @appointment.appointment_date =appointment_date
+        if !@vgroup.participant_id.blank?
+          @participant = Participant.find(@vgroup.participant_id)
+          if !@participant.dob.blank?
+             @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+          end
+        end
         @appointment.save
-        @vgroup = Vgroup.find(@appointment.vgroup_id)
         @vgroup.completedquestionnaire = params[:vgroup][:completedquestionnaire]
         @vgroup.save
         format.html { redirect_to(@questionnaire, :notice => 'Questionnaire was successfully updated.') }

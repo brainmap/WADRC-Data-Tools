@@ -438,6 +438,12 @@ class BlooddrawsController < ApplicationController
   @appointment.appointment_date =appointment_date
   @appointment.comment = params[:appointment][:comment]
   @appointment.user = current_user
+  if !@vgroup.participant_id.blank?
+    @participant = Participant.find(@vgroup.participant_id)
+    if !@participant.dob.blank?
+       @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+    end
+  end
   @appointment.save
   @blooddraw.appointment_id = @appointment.id
 
@@ -521,10 +527,16 @@ puts  @blooddraw.appointment_id.to_s
         respond_to do |format|
           if @blooddraw.update_attributes(params[:blooddraw])
             @appointment = Appointment.find(@blooddraw.appointment_id)
+            @vgroup = Vgroup.find(@appointment.vgroup_id)
             @appointment.comment = params[:appointment][:comment]
             @appointment.appointment_date =appointment_date
+            if !@vgroup.participant_id.blank?
+              @participant = Participant.find(@vgroup.participant_id)
+              if !@participant.dob.blank?
+                 @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+              end
+            end
             @appointment.save
-            @vgroup = Vgroup.find(@appointment.vgroup_id)
             @vgroup.completedblooddraw = params[:vgroup][:completedblooddraw]
             @vgroup.save
         format.html { redirect_to(@blooddraw, :notice => 'Lab Health was successfully updated.') }
