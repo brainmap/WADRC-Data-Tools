@@ -73,7 +73,7 @@ v_tn_cn_searchable_hash = []
 	<% end %>
 <table>	
 
-<%= form_for  'cg_search#view_results' do |f| %>
+<%= form_for  'cg_search' do |f| %>
 
 <table class="search_form">
 	<tr><td><%= f.label :scan_procedures %><br>
@@ -153,8 +153,10 @@ v_tn_cn_searchable_hash = []
   </table>
   <%= clearing_br %>
 <br>
-<table><tr><th width="50"><small><small>Include</small></small></th><th  nowrap>Table/Column Name</th><th width="50"><small><small>Join Type</small></small></th>
-	<th width="100"><small><small>Search By</small></small></th><th width="50"><small><small></small></small></th><th width="50"><small><small>Condition</small></small></th>
+<table  width="90%"><tr><th width="50"><small><small>Include</small></small></th><th  nowrap>Table/Column Name 
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<small><small>Search By</small></small>&nbsp;<small><small>/</small></small>&nbsp;<small><small>Condition</small></small></th><th width="50"><small><small>Join Type</small></small></th>
+	<th width="100">&nbsp;</th><th width="50"><small><small></small></small></th><th width="50">&nbsp;</th>
 	<% v_cg_query_id = ""
 	    if !params[:cg_search].blank? and !params[:cg_search][:cg_query_id].blank? 
 		   v_cg_query_id =params[:cg_search][:cg_query_id]
@@ -172,9 +174,16 @@ v_tn_cn_searchable_hash = []
                 %>
              <tr><td><%= hidden_field(:cg_search, "tn_id][", :value=>tn.id.to_s) %>
   <%= check_box_tag "include_tns", "1", v_include_tn == "FALSE" ? FALSE : TRUE , :name => "cg_search[include_tn]["+tn.id.to_s+"]", :onclick =>"checkbox_cascade(this,'"+tn.id.to_s+"')"%></td>
-	     <td><br><%=  (tn.common_name+"  - <small>("+ tn.tn+")</small>:" ).html_safe %></td>
-	                      <td><%= select  :cg_search,"join_type]["+tn.id.to_s, options_for_select(v_join_type_hash, v_join_type  ),
-							              {:prompt => 'Select join type'}  %></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+	     <td><%=  (tn.common_name+"  - <small>("+ tn.tn+")</small>:" ).html_safe %></td>
+	                      <td> <%= select  :cg_search,"join_type]["+tn.id.to_s, options_for_select(v_join_type_hash, v_join_type  ),
+							              {:prompt => 'Select join type'}  %></td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;
+								
+											<a id="myHeader1" href="javascript:toggle2_closed('tn_<%=tn.id.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a>
+											   </td></tr>
+<tr><td colspan="7">
+	<div id="tn_<%=tn.id.to_s %>"  >
+		<table>
+			
               <% @cg_tn_cn = CgTnCn.where("cg_tn_id ="+tn.id.to_s+" and status_flag= 'Y'").order("display_order")
                  @cg_query_cn_hash = @cg_query_tn_cn_hash[tn.id.to_s] 
                  @cg_tn_cn.each do |cn|  
@@ -302,6 +311,10 @@ v_tn_cn_searchable_hash = []
 
 <%       end 
  	              end %>
+</table>
+</div>
+</td></tr>   
+
 	<tr><td colspan="7"><hr></td></tr>
 <%          end %>
 	<tr><td colspan="2" align="left" ><%= f.submit("run search")%></td><td colspan="5">&nbsp;</td></tr>
