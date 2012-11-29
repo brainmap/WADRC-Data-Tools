@@ -721,7 +721,7 @@ class DataSearchesController < ApplicationController
     sql = sql + " where "+ @local_conditions.uniq.join(" and ")
     sql = sql+" order by "+@order_by.join(",")
     puts sql
-
+    @sql = sql
     # run the sql ==>@results, after some substitutions
     @results2 = connection.execute(sql)
     @temp_results = @results2
