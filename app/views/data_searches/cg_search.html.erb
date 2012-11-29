@@ -315,9 +315,9 @@ v_tn_cn_searchable_hash = []
 </div>
 </td></tr>   
 
-	<tr><td colspan="7"><hr></td></tr>
+	<tr><td colspan="7" align="right"><hr></td></tr>
 <%          end %>
-	<tr><td colspan="2" align="left" ><%= f.submit("run search")%></td><td colspan="5">&nbsp;</td></tr>
+	<tr><td colspan="2" align="left" ><%= f.submit("run search")%></td><td colspan="4" align="right">&nbsp;</td><td width=2><smal><small><%= popup_note('.', @sql ) unless @sql.to_s.blank? %></small></small></td></tr>
 <%     end
 %>
 </table>
@@ -376,3 +376,4 @@ v_tn_cn_searchable_hash = []
 
 
 <% end %>
+
