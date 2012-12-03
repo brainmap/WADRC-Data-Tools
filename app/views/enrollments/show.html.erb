@@ -28,7 +28,15 @@ edit_count = edit_count -1
 <% end %>
 
 <h3>Visits</h3>
-<%= content_tag(:p, "No visits for this enrollment") if @enrollment.visits.blank? %>
+<%= content_tag(:p, "No visits for this enrollment") if @enrollment.vgroups.blank? %>
+<ul>
+  <% @enrollment.vgroups.each do |vgroup| %>
+    <li><%= link_to vgroup.vgroup_date, vgroup %> in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
+  <% end %>
+</ul>
+
+<h3>Mri appointments</h3>
+<%= content_tag(:p, "No mri appointments for this enrollment") if @enrollment.visits.blank? %>
 <ul>
   <% @enrollment.visits.each do |visit| %>
     <li><%= link_to visit.date, visit %> in <%= visit.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
