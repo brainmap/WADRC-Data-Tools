@@ -34,17 +34,35 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
         #   @total_count = @image_datasets.count
         #   @page_title = "All Image Datasets for Visit #{@visit.rmr}"
         # else
-        if !params[:search].blank? && !params[:search][:meta_sort].blank? ## want to limit  last 2 months when nothing searched for
-          @page_title = "All Image Datasets "
-   @search = ImageDataset.where("image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).search(params[:search])
-      elsif !params[:search].blank?
-         @page_title = "All Image Datasets "
-   @search = ImageDataset.where("image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).search(params[:search])          
-       else
-          @page_title = "All Image Datasets - last 2 months"
-   @search = ImageDataset.where("image_datasets.visit_id in (select visits.id from visits where visits.date > DATE_SUB(NOW(), INTERVAL 2 MONTH) )
+        if !params[:visit].blank? and !params[:visit][:scan_procedure_id].blank?
+          # params[:lh_search][:scan_procedure_id].join(',')
+                if !params[:search].blank? && !params[:search][:meta_sort].blank? ## want to limit  last 2 months when nothing searched for
+                  @page_title = "All Image Datasets "
+           @search = ImageDataset.where("image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))
+                                               and image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array,params[:visit][:scan_procedure_id]).search(params[:search])
+                elsif !params[:search].blank?
+                  @page_title = "All Image Datasets "
+           @search = ImageDataset.where("image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))
+                                               and image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array,params[:visit][:scan_procedure_id]).search(params[:search])          
+                else
+                 @page_title = "All Image Datasets "
+          @search = ImageDataset.where("image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))
+                                       and image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array,params[:visit][:scan_procedure_id]).search(params[:search])
+                 end        
+        else
+        
+          if !params[:search].blank? && !params[:search][:meta_sort].blank? ## want to limit  last 2 months when nothing searched for
+            @page_title = "All Image Datasets "
+     @search = ImageDataset.where("image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).search(params[:search])
+          elsif !params[:search].blank?
+            @page_title = "All Image Datasets "
+     @search = ImageDataset.where("image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).search(params[:search])          
+          else
+           @page_title = "All Image Datasets - last 2 months"
+    @search = ImageDataset.where("image_datasets.visit_id in (select visits.id from visits where visits.date > DATE_SUB(NOW(), INTERVAL 2 MONTH) )
                                  and image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).search(params[:search])
-         end 
+           end 
+         end   
         #  @search = ImageDataset.search(params[:search])
 
           # Set pagination and reporting options depending on the requested format
