@@ -168,9 +168,9 @@
 			end %>
 		 	<%= hidden_field_tag("value_link["+@question.id.to_s+"][]",@q_data.value_link) %>
 	     <% if @question.value_type_1 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
-	         <%= draw_text_area(@question.id,"1","60x7", @question.default_val_1,@q_data.value_1) %>
+	         <%= draw_text_area(@question.id,"1","60x7", @question.default_val_1,@q_data.value_1,@question.required_y_n_1) %>
 	      <% elsif @question.value_type_1 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
-	         <%= draw_text_area(@question.id,"1","60x7", @question.default_val_1,@q_data.value_1) %>
+	         <%= draw_text_area(@question.id,"1","60x7", @question.default_val_1,@q_data.value_1,@question.required_y_n_1) %>
 		<% elsif @question.value_type_1 == "dropdown"
 		    if @question.ref_table_a_1 == "LOOKUP_REFS"  ## use ref_table_b_1 %>
 				<%= collection_select "value_1",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_1).sort_by(&:display_order),
@@ -181,22 +181,22 @@
 		     <%   end   %>
 		<% elsif @question.value_type_1 == "text_5"  %>
 			<% #question_id, value_number,size %>
-			<%= draw_text_field(@question.id,"1",5, @question.default_val_1,@q_data.value_1,@question.js_1) %>
+			<%= draw_text_field(@question.id,"1",5, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>
 		<% elsif @question.value_type_1 == "text_10"  %>
 		<% #question_id, value_number,size %>
-		   <%= draw_text_field(@question.id,"1",10, @question.default_val_1,@q_data.value_1,@question.js_1) %>	
+		   <%= draw_text_field(@question.id,"1",10, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>	
 		<% elsif @question.value_type_1 == "text_20"  %>
-		   <%= draw_text_field(@question.id,"1",20, @question.default_val_1,@q_data.value_1,@question.js_1) %>	
+		   <%= draw_text_field(@question.id,"1",20, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>	
 		<% elsif @question.value_type_1 == "text_30"  %>
-		   <%= draw_text_field(@question.id,"1",30, @question.default_val_1,@q_data.value_1,@question.js_1) %>	
+		   <%= draw_text_field(@question.id,"1",30, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>	
 		<% elsif @question.value_type_1 == "text_50"  %>
-		   <%= draw_text_field(@question.id,"1",50, @question.default_val_1,@q_data.value_1,@question.js_1) %>
+		   <%= draw_text_field(@question.id,"1",50, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>
 		<% elsif @question.value_type_1 == "text_70"  %>
-		   <%= draw_text_field(@question.id,"1",70, @question.default_val_1,@q_data.value_1,@question.js_1) %>	
+		   <%= draw_text_field(@question.id,"1",70, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>	
 		<% elsif @question.value_type_1 == "text_90"  %>
-		   <%= draw_text_field(@question.id,"1",90, @question.default_val_1,@q_data.value_1,@question.js_1) %>
+		   <%= draw_text_field(@question.id,"1",90, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>
 		<% elsif @question.value_type_1 == "date"  %>
-		   <%= draw_text_field(@question.id,"1",10, @question.default_val_1,@q_data.value_1,@question.js_1) %>								
+		   <%= draw_text_field(@question.id,"1",10, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>								
 		<% elsif @question.value_type_1 == "checkbox_1_col"  %>
 		   <% if @question.ref_table_a_1 == "LOOKUP_REFS" 
 			     sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_1+"' order by display_order"
@@ -290,9 +290,9 @@
 				val_array = @q_data.value_2.split(',')
 			end
 		     if @question.value_type_2 == "textarea"   # walk thru each value_type --- get each disoplay value  %>			
-	         <%= draw_text_area(@question.id,"2","60x7", @question.default_val_2,@q_data.value_2) %>
+	         <%= draw_text_area(@question.id,"2","60x7", @question.default_val_2,@q_data.value_2,@question.required_y_n_2) %>
 	        <% elsif @question.value_type_2 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
-	         <%= draw_text_area(@question.id,"2","60x7", @question.default_val_2,@q_data.value_2) %>
+	         <%= draw_text_area(@question.id,"2","60x7", @question.default_val_2,@q_data.value_2,@question.required_y_n_2) %>
 			<% elsif @question.value_type_2 == "dropdown"
 			    if @question.ref_table_a_2 == "LOOKUP_REFS"  ## use ref_table_b_2 %>
 					<%= collection_select "value_2",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_2).sort_by(&:display_order),
@@ -303,21 +303,21 @@
 			     <%   end   %>
 			<% elsif @question.value_type_2 == "text_5"  %>
 						<% #question_id, value_number,size %>
-				<%= draw_text_field(@question.id,"2",5, @question.default_val_2,@q_data.value_2,@question.js_2) %>
+				<%= draw_text_field(@question.id,"2",5, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>
 			<% elsif @question.value_type_2 == "text_10"  %>
-			  <%= draw_text_field(@question.id,"2",10, @question.default_val_2,@q_data.value_2,@question.js_2) %>	
+			  <%= draw_text_field(@question.id,"2",10, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>	
 			<% elsif @question.value_type_2 == "text_20"  %>
-			  <%= draw_text_field(@question.id,"2",20, @question.default_val_2,@q_data.value_2,@question.js_2) %>	
+			  <%= draw_text_field(@question.id,"2",20, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>	
 			<% elsif @question.value_type_2 == "text_30"  %>
-			   <%= draw_text_field(@question.id,"2",30, @question.default_val_2,@q_data.value_2,@question.js_2) %>
+			   <%= draw_text_field(@question.id,"2",30, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>
 			<% elsif @question.value_type_2 == "text_50"  %>
-			   <%= draw_text_field(@question.id,"2",50, @question.default_val_2,@q_data.value_2,@question.js_2) %>
+			   <%= draw_text_field(@question.id,"2",50, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>
 			<% elsif @question.value_type_2 == "text_70"  %>
-			   <%= draw_text_field(@question.id,"2",70, @question.default_val_2,@q_data.value_2,@question.js_2) %>	
+			   <%= draw_text_field(@question.id,"2",70, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>	
 			<% elsif @question.value_type_2 == "text_90"  %>
-			   <%= draw_text_field(@question.id,"2",90, @question.default_val_2,@q_data.value_2,@question.js_2) %>
+			   <%= draw_text_field(@question.id,"2",90, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>
 			<% elsif @question.value_type_2 == "date"  %>
-			   <%= draw_text_field(@question.id,"2",10, @question.default_val_2,@q_data.value_2,@question.js_2) %>
+			   <%= draw_text_field(@question.id,"2",10, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>
 			<% elsif @question.value_type_2 == "checkbox_1_col"  %>
 		   		<% if @question.ref_table_a_2 == "LOOKUP_REFS" 
 			     	sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_2+"' order by display_order"
@@ -412,9 +412,9 @@
 				val_array = @q_data.value_3.split(',')
 			end
 		      if @question.value_type_3 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
-	           <%= draw_text_area(@question.id,"3","60x7", @question.default_val_3,@q_data.value_3) %>
+	           <%= draw_text_area(@question.id,"3","60x7", @question.default_val_3,@q_data.value_3,@question.required_y_n_3) %>
 	        <% elsif @question.value_type_3 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
-	         <%= draw_text_area(@question.id,"3","60x7", @question.default_val_3,@q_data.value_3) %>
+	         <%= draw_text_area(@question.id,"3","60x7", @question.default_val_3,@q_data.value_3,@question.required_y_n_3) %>
 			<% elsif @question.value_type_3 == "dropdown"
 			    if @question.ref_table_a_3 == "LOOKUP_REFS"  ## use ref_table_b_3 %>
 					<%= collection_select "value_3",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_3).sort_by(&:display_order),
@@ -424,21 +424,21 @@
 				    	:id, :description, {:include_blank => @question.prompt_3,:selected => (@q_data.value_3 or @question.default_val_3)} %>
 			     <%   end   %>
 			<% elsif @question.value_type_3 == "text_5"  %>
-					 <%= draw_text_field(@question.id,"3",5, @question.default_val_3,@q_data.value_3,@question.js_3) %>
+					 <%= draw_text_field(@question.id,"3",5, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>
 			<% elsif @question.value_type_3 == "text_10"  %>
-				   <%= draw_text_field(@question.id,"3",10, @question.default_val_3,@q_data.value_3,@question.js_3) %>	
+				   <%= draw_text_field(@question.id,"3",10, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>	
 			<% elsif @question.value_type_3 == "text_20"  %>
-					<%= draw_text_field(@question.id,"3",20, @question.default_val_3,@q_data.value_3,@question.js_3) %>	
+					<%= draw_text_field(@question.id,"3",20, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>	
 			<% elsif @question.value_type_3 == "text_30"  %>
-					<%= draw_text_field(@question.id,"3",30, @question.default_val_3,@q_data.value_3,@question.js_3) %>	
+					<%= draw_text_field(@question.id,"3",30, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>	
 			<% elsif @question.value_type_3 == "text_50"  %>
-					<%= draw_text_field(@question.id,"3",50, @question.default_val_3,@q_data.value_3,@question.js_3) %>
+					<%= draw_text_field(@question.id,"3",50, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>
 			<% elsif @question.value_type_3 == "text_70"  %>
-					<%= draw_text_field(@question.id,"3",70, @question.default_val_3,@q_data.value_3,@question.js_3) %>	
+					<%= draw_text_field(@question.id,"3",70, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>	
 			<% elsif @question.value_type_3 == "text_90"  %>
-					<%= draw_text_field(@question.id,"3",90, @question.default_val_3,@q_data.value_3,@question.js_3) %>
+					<%= draw_text_field(@question.id,"3",90, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>
 			<% elsif @question.value_type_3 == "date"  %>
-					<%= draw_text_field(@question.id,"3",10, @question.default_val_3,@q_data.value_3,@question.js_3) %>
+					<%= draw_text_field(@question.id,"3",10, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>
 			<% elsif @question.value_type_3 == "checkbox_1_col"  %>
 		    	<% if @question.ref_table_a_3 == "LOOKUP_REFS" 
 			     	sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_3+"' order by display_order"
