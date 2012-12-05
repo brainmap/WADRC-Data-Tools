@@ -49,8 +49,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
           @search = ImageDataset.where("image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))
                                        and image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array,params[:visit][:scan_procedure_id]).search(params[:search])
                  end        
-        else
-        
+        else      
           if !params[:search].blank? && !params[:search][:meta_sort].blank? ## want to limit  last 2 months when nothing searched for
             @page_title = "All Image Datasets "
      @search = ImageDataset.where("image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).search(params[:search])

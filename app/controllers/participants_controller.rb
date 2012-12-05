@@ -131,6 +131,13 @@ class ParticipantsController < ApplicationController
         results = connection.execute(sql)
         sql = "update participants set reggieid = NULL where trim(reggieid) = '' "
         results = connection.execute(sql)
+        if !@participant.dob.blank?
+           @appointments = Appointment.where("appointments.vgroup_id in (select vgroups.id from vgroups where participant_id is not null and participant_id in (?))", params[:id])
+           @appointments.each do |appt|
+              appt.age_at_appointment = ((appt.appointment_date - @participant.dob)/365.25).floor
+              appt.save
+           end
+        end
         
         flash[:notice] = 'Participant was successfully updated.'
         format.html { redirect_to(@participant) }
