@@ -5,6 +5,7 @@
 	<th></th>
     <th>Description</th>
     <th>Entrance Page Type</th>
+    <th>View Name</th>
     <th>Target Page</th>
     <th>Long description</th>
     <th>Tab Type</th>
@@ -20,6 +21,7 @@
 	<td><%= link_to 'Display Form/Questions', '/questionforms/displayform/'+questionform.id.to_s %> </td>
     <td><%= questionform.description %></td>
     <td><%= questionform.entrance_page_type %></td>
+    <td><%= questionform.view_name %>
     <td><%= questionform.target_page %></td>
     <td><%= questionform.long_description %></td>
     <td><%= questionform.tab_type %></td>

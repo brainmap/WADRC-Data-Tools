@@ -135,6 +135,24 @@ class DataSearchesController < ApplicationController
       @cg_query_tn_cn_hash = Hash.new
       @cg_query_cn_hash = Hash.new
       params["search_criteria"] =""
+      @headers_q_data = []
+      @q_data_form_array = []
+      @q_data_fields_hash = Hash.new
+      @q_data_left_join_hash = Hash.new
+      @q_data_left_join_vgroup_hash = Hash.new
+      @q_data_left_column_hash = Hash.new
+      @q_data_tables_hash = Hash.new
+      @fields_hash = Hash.new
+      
+      request_format = request.formats.to_s
+      @html_request ="Y"
+      case  request_format
+        when "text/html" then  # application/html ?
+            @html_request ="Y" 
+        else
+            @html_request ="N"
+         end
+      
       # get stored cg_search
       if !params[:cg_search].blank? and !params[:cg_search][:cg_query_id].blank?
          @cg_query = CgQuery.find(params[:cg_search][:cg_query_id])
@@ -350,6 +368,13 @@ class DataSearchesController < ApplicationController
                                @local_fields.push(@cg_tn.tn+"."+@cg_tn_cn.cn)
                            end
                          elsif !@cg_tn_cn.q_data_form_id.blank? # need q_data
+                           if @html_request =="N"
+                             var = 1
+                               @local_fields.push(@cg_tn.tn+"."+@cg_tn_cn.cn)
+                               @local_column_headers.push("q_data_form_"+@cg_tn_cn.q_data_form_id.to_s)
+                               # WHAT ABOUT THE view into tables_local, join and left_join
+                           end
+                           # push col_header with form_id, push appt id linked to this form_id
                            v_join_left_tn = @cg_tn.tn 
                            if @local_tables.index(@cg_tn.tn).blank?   # left join of left join?
                              v_join_left_tn = @cg_tn.join_left_parent_tn
@@ -372,11 +397,25 @@ class DataSearchesController < ApplicationController
                            # pass to run_search_q_data and get back fields, columns_headers, conditions, etc.
                            @tables =[@cg_tn.tn]
                            @q_form_id = @cg_tn_cn.q_data_form_id
-                           (@fields,@tables, @left_join,@left_join_vgroup,@fields_q_data, @left_join_q_data) = run_search_q_data
+   
+                           @q_data_form_array.unshift(@q_form_id)
+                           (@fields,@tables, @left_join,@left_join_vgroup,@fields_q_data, @left_join_q_data,@headers_q_data) = run_search_q_data
+
+                           # put @q_form_id.to_s in array --- use as key
+                           # make array of array for @left_join_vgroup,@fields_q_data, @left_join_q_data                      
+                           @q_data_fields_hash[@q_form_id] = @fields_q_data
+                           @q_data_left_join_hash[@q_form_id] = @left_join_q_data
+                           @q_data_left_join_vgroup_hash[@q_form_id] = @left_join_vgroup
+                           @q_data_left_column_hash[@q_form_id] = @headers_q_data
+                           @q_data_tables_hash[@q_form_id] = @tables
+                           @fields_hash[@q_form_id] = @fields
+
+    
                            # could there be multiple q_data forms???????
                            #NEED TO SPLIT OFF q_data sql , need to keep number tables in sql < 61 ( left joins up to 2 tables per leftjoin)
                            # get all results, index by link_id/link type in array, add fields, reuslts to end of query -- what if 2 form_id's-- keep adding in
                            # if > 25 , keep getting results and adding to array with same key
+                    # get form_id named arrays - column names, results , leave question_field column as marker
            
                            # ??? PROBLEM WITH participant?
                            @left_join_vgroup.each do |vg|
@@ -386,9 +425,7 @@ class DataSearchesController < ApplicationController
                                       @tables_left_join_hash["vgroups" ] = vg
                                 end  
                            end   
-                           
-                            
-                           @local_fields.concat(@fields)
+                           #### don't think this is needed@local_fields.concat(@fields)
                            @left_join.each do |lj|
                               if !@tables_left_join_hash[v_join_left_tn ].blank?               
                                     @tables_left_join_hash[v_join_left_tn] = @tables_left_join_hash[v_join_left_tn ]+"  "+lj
@@ -701,7 +738,7 @@ class DataSearchesController < ApplicationController
         @local_conditions.push("appointments.vgroup_id = vgroups.id")
                                             # everything always joined
         @order_by =["vgroups.vgroup_date DESC", "vgroups.rmr"]
-        
+     
         #run_search_q_data tn_cn_id/tn_id in (686/676,687/677,688/688) common_name = "question fields" vs run_search if 
       end     
       @column_number =   @local_column_headers.size
@@ -720,21 +757,11 @@ class DataSearchesController < ApplicationController
     sql = sql + @all_tables.join(", ")
     sql = sql + " where "+ @local_conditions.uniq.join(" and ")
     sql = sql+" order by "+@order_by.join(",")
-    puts sql
     @sql = sql
     # run the sql ==>@results, after some substitutions
     @results2 = connection.execute(sql)
     @temp_results = @results2
-    request_format = request.formats.to_s
-    @html_request ="Y"
-    case  request_format
-      when "text/html" then  # application/html ?
-          @html_request ="Y" 
-          puts " html_request= Y"
-      else
-          @html_request ="N"
-          puts "html_request = N"
-       end
+
     @results = []   
     i =0
     @temp_results.each do |var|
@@ -765,6 +792,98 @@ class DataSearchesController < ApplicationController
       @temp_row = @temp + var
       @results[i] = @temp_row
       i = i+1
+
+    end
+    if @html_request =="N"  and !@q_data_form_array.blank?
+      @results_q_data =[]
+      @q_data_form_array.each do |id| 
+          # use @q_data_fields_hash[id], @q_data_fields_left_join_hash[id], @q_data_fields_left_join_vgroup_hash[id]
+          # plus sql to get results for each id
+          # insert results based on location of q_data_+id.to_s column name   --- need to check that in column name list
+          @local_column_headers = @local_column_headers+@q_data_left_column_hash[id]
+          @column_number =   @local_column_headers.size
+          @questionform = Questionform.find(id)
+           
+           # same approach as in applications controller         
+           v_limit = 15  # like the chunk approach issue with multiple appts in a vgroup and multiple enrollments
+           @q_data_fields_hash[id].each_slice(v_limit) do |fields_local|
+             @results_q_data_temp = []
+             # get all the aliases, find in @left_join_q_data and @left_join_vgroup_q_data
+             @left_join_q_data_local = []
+             @left_join_vgroup_q_data_local = []
+             alias_local =[]
+             fields_local.each do |v|
+               (a,b) = v.split('.')
+               if !alias_local.include?(a)
+                  alias_local.push(a)
+                  @q_data_left_join_hash[id].each do |d|
+                    if d.include?(a)
+                      @left_join_q_data_local.push(d)
+                    end
+                  end
+
+                  @q_data_left_join_vgroup_hash[id].each do |d|
+                    if d.include?(a)
+                     @left_join_vgroup_q_data_local.push(d)
+                   end
+                  end
+               end
+             end
+             
+              sql ="SELECT distinct appointments.id appointment_id, "+fields_local.join(',')+"
+               FROM vgroups "+@left_join_vgroup_q_data_local.join(' ')+", appointments ,  scan_procedures_vgroups, "+@q_data_tables_hash[id].join(',')+" "+@left_join_q_data_local.join(' ')+"
+               WHERE vgroups.id = appointments.vgroup_id  and scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") "
+               @q_data_tables_hash[id].each do |tab|
+                 sql = sql +" AND "+tab+".appointment_id = appointments.id  "
+               end
+               sql = sql +" AND scan_procedures_vgroups.vgroup_id = vgroups.id "
+
+               if @conditions.size > 0
+                   sql = sql +" AND "+@conditions.join(' and ')
+               end
+               
+               # puts sql
+
+               @results_q_data_temp = connection.execute(sql)
+               # @results_q_data
+               # getting duplicate appts??-- multiple enrollments
+               last_appointment =-1
+               @results_q_data_temp.each do |var|
+                 appointment_id = var[0]
+                                 
+                 var.delete_at(0) # get rid of appointment_id
+                 if last_appointment != appointment_id
+                     last_appointment = appointment_id
+                    if !@results_q_data[appointment_id].blank?
+                        @results_q_data[appointment_id].concat(var)
+                    else
+                        @results_q_data[appointment_id] = var
+                    end
+                 end
+               end            
+           end
+           # need appointment_id in @results for this form_id
+           # get index in header array of q_data_form_+id
+           v_index =@local_column_headers.index("q_data_form_"+id.to_s)
+           @local_column_headers.delete_at(v_index)
+           @column_number =   @local_column_headers.size
+           @temp = []
+           i =0
+           @results.each do |result|
+             if !result[v_index].blank? and !@results_q_data[result[v_index]].blank?
+                 result = result.concat(@results_q_data[result[v_index]])
+             else
+                 v_array_cell_cnt =@q_data_left_column_hash[id].size
+                 v_empty_array = Array.new(v_array_cell_cnt)
+                 result = result+v_empty_array
+             end
+             result.delete_at(v_index)
+             @results[i] = result
+
+             i = i + 1
+           end
+           
+     end
     end
     
     @results_total = @results # pageination makes result count wrong

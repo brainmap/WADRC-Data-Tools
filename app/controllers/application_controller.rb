@@ -113,9 +113,9 @@ def run_search_q_data
      #puts "AAAAAAAAAA"+v_table_base_appt
       # get distinct sp
       if !@fields.blank?
-        sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr , "+@fields.join(',')+",appointments.comment "
+        sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr , "+@fields.join(',')  +" ,appointments.comment "
       else  # calll from cg_search doesn't have fields
-          sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr ,appointments.comment "
+          sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr  ,appointments.comment "
       end
        sql =sql+" FROM vgroups, appointments,scan_procedures, scan_procedures_vgroups, "+@tables.join(',')+" "+@left_join.join(' ')+"
        WHERE vgroups.id = appointments.vgroup_id and scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") "
@@ -665,7 +665,7 @@ def run_search_q_data
                    @left_join_vgroup.push(*@left_join_vgroup_q_data)
         else # get data in v_limit sized chunks
           @fields_q_data.each_slice(v_limit) do |fields_local|
-            @results_q_data_temp 
+            @results_q_data_temp = []
             # get all the aliases, find in @left_join_q_data and @left_join_vgroup_q_data
             @left_join_q_data_local = []
             @left_join_vgroup_q_data_local = []
@@ -719,7 +719,7 @@ def run_search_q_data
         end
         # NEED TO RETURN q_data columns
         if !@cg_search_q_data.blank?
-          return @fields,@tables, @left_join,@left_join_vgroup_q_data,@fields_q_data, @left_join_q_data
+          return @fields,@tables, @left_join,@left_join_vgroup_q_data,@fields_q_data, @left_join_q_data,@column_headers_q_data
         end 
         @fields.push(v_last_field)
         @column_headers.push(v_last_header)
