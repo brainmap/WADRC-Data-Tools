@@ -1,5 +1,5 @@
 class DataSearchesController < ApplicationController
-
+   # this isn't used - was a test bed for making sql
   def index
       # get the tables to join
       # columns and values to add to where

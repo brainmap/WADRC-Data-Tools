@@ -180,12 +180,7 @@ def run_search_q_data
                  left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+", q_data.value_3 c_"+@question.id.to_s+" 
                  from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                  @left_join_q_data.push(left_join)
-                 
-                 
-                 
-                 
-                                 
-                 
+
                elsif @question.value_link == "participant" and @question.ref_table_a_1 == "" and @question.ref_table_a_2 = "" and @question.ref_table_a_3 = ""
                  col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
                   @fields_q_data.push(col_1)
@@ -196,12 +191,6 @@ def run_search_q_data
                   left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+", q_data.value_3 c_"+@question.id.to_s+" 
                   from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                   @left_join_vgroup_q_data.push(left_join)
-                  
-                  
-                  
-                  
-                  
-                  
                   
                else
                  col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
@@ -221,9 +210,7 @@ def run_search_q_data
                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                    end
                    @left_join_q_data.push(left_join)
-                   
-                   
-                    
+
                  elsif      @question.value_link == "participant"
                         if @question.ref_table_a_1 == "LOOKUP_REFS"
                             left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description a_"+@question.id.to_s+
@@ -234,10 +221,7 @@ def run_search_q_data
                         else
                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                         end
-                        @left_join_vgroup_q_data.push(left_join)
-                        
-                        
-                        
+                        @left_join_vgroup_q_data.push(left_join)   
                   end
           
                 # outer join to table.appointment_id  vs vgroups.participant_id
@@ -252,8 +236,7 @@ def run_search_q_data
                        left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                     end
                     @left_join_q_data.push(left_join)
-                    
-                     
+
                   elsif      @question.value_link == "participant"
                          if @question.ref_table_a_2 == "LOOKUP_REFS"
                              left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", LOOKUP_REFS.description b_"+@question.id.to_s+
@@ -264,9 +247,7 @@ def run_search_q_data
                          else
                             left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                          end
-                         @left_join_vgroup_q_data.push(left_join)
-                         
-                         
+                         @left_join_vgroup_q_data.push(left_join) 
                    end
                   
                   # outer join to table.appointment_id  vs vgroups.participant_id
@@ -310,8 +291,6 @@ def run_search_q_data
               from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
               @left_join_q_data.push(left_join)
               
-              
-              
             elsif @question.value_link == "participant" and @question.ref_table_a_1 == "" and @question.ref_table_a_2 = "" 
               col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
                @fields_q_data.push(col_1)
@@ -320,8 +299,6 @@ def run_search_q_data
                left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+" 
                from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                @left_join_vgroup_q_data.push(left_join)
-               
-               
                
             else
              col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
@@ -349,8 +326,7 @@ def run_search_q_data
                       else
                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                       end
-                      @left_join_vgroup_q_data.push(left_join)
-                      
+                      @left_join_vgroup_q_data.push(left_join)    
               end
          
               col_2 = "b_alias_"+@question.id.to_s+".b_"+@question.id.to_s
@@ -395,8 +371,6 @@ def run_search_q_data
               from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
               @left_join_q_data.push(left_join)
               
-              
-              
             elsif @question.value_link == "participant" and  @question.ref_table_a_2 = "" and @question.ref_table_a_3 = ""
                col_2 = "a_alias_"+@question.id.to_s+".b_"+@question.id.to_s
                @fields_q_data.push(col_2)
@@ -405,8 +379,6 @@ def run_search_q_data
                left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_2 b_"+@question.id.to_s+", q_data.value_3 c_"+@question.id.to_s+" 
                from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                @left_join_vgroup_q_data.push(left_join)
-               
-               
                
             else
             col_2 = "b_alias_"+@question.id.to_s+".b_"+@question.id.to_s
@@ -438,7 +410,6 @@ def run_search_q_data
                      
              end       
                
-              
                col_3 = "c_alias_"+@question.id.to_s+".c_"+@question.id.to_s
                @fields_q_data.push(col_3)
                # outer join to table.appointment_id  vs vgroups.participant_id
@@ -480,9 +451,7 @@ def run_search_q_data
               left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+",  q_data.value_3 c_"+@question.id.to_s+" 
               from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
               @left_join_q_data.push(left_join)
-              
-              
-              
+
             elsif @question.value_link == "participant" and @question.ref_table_a_1 == "" and @question.ref_table_a_3 = ""
               col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
                @fields_q_data.push(col_1)
@@ -491,9 +460,7 @@ def run_search_q_data
                left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+",  q_data.value_3 c_"+@question.id.to_s+" 
                from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                @left_join_vgroup_q_data.push(left_join)
-               
-               
-               
+                
             else
              col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
              @fields_q_data.push(col_1)
@@ -520,9 +487,7 @@ def run_search_q_data
                       else
                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", q_data.value_1 a_"+@question.id.to_s+" from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                       end
-                      @left_join_vgroup_q_data.push(left_join)
-                      
-                      
+                      @left_join_vgroup_q_data.push(left_join)  
               end
               
                col_3 = "c_alias_"+@question.id.to_s+".c_"+@question.id.to_s
@@ -659,6 +624,7 @@ def run_search_q_data
         @results_q_data =[]
         v_limit = 15  # like the chunk approach issue with multiple appts in a vgroup and multiple enrollments
         @column_headers.push(*@column_headers_q_data)
+
         if @fields_q_data.size < v_limit # should be less than 61 table limit
                    @fields.push(*@fields_q_data)
                    @left_join.push(*@left_join_q_data)
@@ -717,10 +683,11 @@ def run_search_q_data
               end            
           end                    
         end
-        # NEED TO RETURN q_data columns
+        # NEED TO RETURN q_data columns-- to cg_search -- rest of processing is used by simple search q_data export 
         if !@cg_search_q_data.blank?
           return @fields,@tables, @left_join,@left_join_vgroup_q_data,@fields_q_data, @left_join_q_data,@column_headers_q_data
         end 
+
         @fields.push(v_last_field)
         @column_headers.push(v_last_header)
 
