@@ -1,0 +1,17 @@
+
+<%= form_for 'series_desc_cnt' do |f|%>
+<table><tr><td>image_dataset ids between  
+<%= f.text_field 'start_id',:value=>@v_start_id %>	and <%= f.text_field 'end_id',:value=>@v_end_id %>
+	</td></tr>
+<tr><td>
+ <%= f.submit %>
+	</td></tr></table>
+
+<% end %>
+<!--
+ if !@image_datasets.blank?
+	@image_datasets.each do |ids|%>
+	 ids.series_description %>=  ids.dcm_file_count%><br>
+	 
+ end end%>	
+-->

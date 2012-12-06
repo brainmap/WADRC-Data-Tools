@@ -146,6 +146,7 @@ WADRCDataTools::Application.routes.draw do
   match '/mri_search' , :controller => 'visits', :action => 'mri_search', :as =>:mri_search
   match '/visits/mri_search' , :controller => 'visits', :action => 'mri_search', :as =>:mri_search
   match '/visits/change_directory_path', :controller => 'visits', :action => 'change_directory_path', :as =>:change_directory_path
+  match '/visits/series_desc_cnt', :controller => 'visits', :action => 'series_desc_cnt', :as =>:series_desc_cnt
   
     match '/petscan_search' , :controller => 'petscans', :action => 'petscan_search', :as =>:petscan_search
     match '/pet_search' , :controller => 'petscans', :action => 'pet_search', :as =>:pet_search

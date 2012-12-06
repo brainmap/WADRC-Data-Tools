@@ -200,6 +200,28 @@ class VisitsController <  AuthorizedController #  ApplicationController
     end
   end
 
+def series_desc_cnt
+  @v_start_id=""
+  @v_end_id = "" 
+  if !params[:series_desc_cnt].blank? and !params[:series_desc_cnt][:start_id].blank? and  !params[:series_desc_cnt][:end_id].blank?
+       @v_start_id = params[:series_desc_cnt][:start_id]
+       @v_end_id = params[:series_desc_cnt][:end_id]
+       @image_datasets = ImageDataset.where( " id between "+params[:series_desc_cnt][:start_id]+" and "+params[:series_desc_cnt][:end_id] ).where(" dcm_file_count is null ").where(" glob is not null")
+       @image_datasets.each do |ids|
+       v_path = (ids.path).gsub('team','team*')
+       if !ids.glob.blank?
+         v_glob = (ids.glob).gsub('*.dcm','*.dcm*')
+         v_count = `cd #{v_path};ls -1 #{v_glob}| wc -l`.to_i   # 
+         ids.dcm_file_count = v_count
+         ids.save      
+       end
+     end
+   end
+  respond_to do |format|
+    format.html # new.html.erb
+  end
+end
+
   # GET /visits/1/edit
   def edit
     scan_procedure_array =current_user[:edit_low_scan_procedure_array ]   
