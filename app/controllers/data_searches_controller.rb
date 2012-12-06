@@ -367,7 +367,7 @@ class DataSearchesController < ApplicationController
                            else
                                @local_fields.push(@cg_tn.tn+"."+@cg_tn_cn.cn)
                            end
-                         elsif !@cg_tn_cn.q_data_form_id.blank? # need q_data
+                         elsif !@cg_tn_cn.q_data_form_id.blank? and @html_request =="N"  # need q_data
                            if @html_request =="N"
                              var = 1
                                @local_fields.push(@cg_tn.tn+"."+@cg_tn_cn.cn)
@@ -399,7 +399,9 @@ class DataSearchesController < ApplicationController
                            @q_form_id = @cg_tn_cn.q_data_form_id
    
                            @q_data_form_array.unshift(@q_form_id)
+                           puts "DDDDDDDDDDDD before run_search_q_data"
                            (@fields,@tables, @left_join,@left_join_vgroup,@fields_q_data, @left_join_q_data,@headers_q_data) = run_search_q_data
+                          
 
                            # put @q_form_id.to_s in array --- use as key
                            # make array of array for @left_join_vgroup,@fields_q_data, @left_join_q_data                      
@@ -759,6 +761,9 @@ class DataSearchesController < ApplicationController
     sql = sql+" order by "+@order_by.join(",")
     @sql = sql
     # run the sql ==>@results, after some substitutions
+puts "AAAAAAAAAAAAAA"
+puts sql
+puts "BBBBBBBBBB"
     @results2 = connection.execute(sql)
     @temp_results = @results2
 

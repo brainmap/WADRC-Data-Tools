@@ -259,13 +259,13 @@ class PetscansController < ApplicationController
                     "LEFT JOIN employees on petscans.enteredpetscanwho = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
          else    
            @html_request ="N"          
-            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Dose','Injection Time','Scan Start','Note','Range','Pet status','BP Systol','BP Diastol','Pulse','Blood Glucose','Appt Note'] # need to look up values
+            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Dose','Injection Time','Scan Start','Note','Range','Pet status','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt','Appt Note'] # need to look up values
                   # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
             @column_number =   @column_headers.size
             @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename","petscans.netinjecteddose",
                     "time_format(timediff( time(petscans.injecttiontime),subtime(utc_time(),time(localtime()))),'%H:%i')",
                     "time_format(timediff( time(scanstarttime),subtime(utc_time(),time(localtime()))),'%H:%i')",
-                    "petscans.petscan_note","petscans.range","vgroups.transfer_pet","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","petscans.id"] # vgroups.id vgroup_id always first, include table name 
+                    "petscans.petscan_note","petscans.range","vgroups.transfer_pet","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","petscans.id"] # vgroups.id vgroup_id always first, include table name 
             @left_join = ["LEFT JOIN lookup_pettracers on petscans.lookup_pettracer_id = lookup_pettracers.id",
                         "LEFT JOIN vitals on petscans.appointment_id = vitals.appointment_id  "] # left join needs to be in sql right after the parent table!!!!!!!   
                         # "LEFT JOIN employees on petscans.enteredpetscanwho = employees.id",             

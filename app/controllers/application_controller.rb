@@ -104,6 +104,8 @@ puts sql
  
 # for q_data forms -- only run in export?
 def run_search_q_data
+
+puts "CCCCCCCCCCCCCCi  run_search_q_data"
   scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
   connection = ActiveRecord::Base.connection();
   @left_join_vgroup_q_data =[]  # used when participant is data_link

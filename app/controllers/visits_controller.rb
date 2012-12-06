@@ -1014,11 +1014,11 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
              @left_join = [ ] # left join needs to be in sql right after the parent table!!!!!!!
            else
              @html_request ="N"
-             @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path',  'Completed Fast','Fast hrs','Fast min','Mri status','Radiology Outcome','Notes','BP Systol','BP Diastol','Pulse','Blood Glucose','Appt Note'] # need to look up values
+             @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path',  'Completed Fast','Fast hrs','Fast min','Mri status','Radiology Outcome','Notes','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt','Appt Note'] # need to look up values
              # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
              @column_number =   @column_headers.size
              @fields =["visits.scan_number","visits.path","CASE visits.completedmrifast WHEN 1 THEN 'Yes' ELSE 'No' end",
-               "visits.mrifasttotaltime","visits.mrifasttotaltime_min","vgroups.transfer_mri","radiology_outcome","visits.notes","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","visits.id"] # vgroups.id vgroup_id always first, include table name
+               "visits.mrifasttotaltime","visits.mrifasttotaltime_min","vgroups.transfer_mri","radiology_outcome","visits.notes","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","visits.id"] # vgroups.id vgroup_id always first, include table name
              @left_join = ["LEFT JOIN vitals on visits.appointment_id = vitals.appointment_id" ] # left join needs to be in sql right after the parent table!!!!!!!
            end
         @tables =['visits'] # trigger joins --- vgroups and appointments by default  

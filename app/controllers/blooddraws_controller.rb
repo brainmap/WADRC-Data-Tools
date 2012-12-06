@@ -251,10 +251,10 @@ class BlooddrawsController < ApplicationController
        @left_join = [""] # left join needs to be in sql right after the parent table!!!!!!!
      else
            @html_request ="N"
-           @column_headers = ['Date','Protocol','Enumber','RMR','LH status','LH Note','BP Systol','BP Diastol','Pulse','Blood Glucose','Height(inches)','Weight(kg)', 'Appt Note'] # need to look up values
+           @column_headers = ['Date','Protocol','Enumber','RMR','LH status','LH Note','BP Systol','BP Diastol','Pulse','Blood Glucose','Height(inches)','Weight(kg)','Age at Appt', 'Appt Note'] # need to look up values
            # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
            #@column_number =   @column_headers.size
-           @fields =["vgroups.completedblooddraw","blooddraws.blooddrawnote","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","blooddraws.height_inches","blooddraws.weight_kg","blooddraws.id"] # vgroups.id vgroup_id always first, include table name
+           @fields =["vgroups.completedblooddraw","blooddraws.blooddrawnote","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","blooddraws.height_inches","blooddraws.weight_kg","appointments.age_at_appointment","blooddraws.id"] # vgroups.id vgroup_id always first, include table name
            @left_join = ["LEFT JOIN vitals on blooddraws.appointment_id = vitals.appointment_id"] # left join needs to be in sql right after the parent table!!!!!!!
            # need to split off q_data into sql with less than 61 tables 
            @column_headers_q_data =[]

@@ -258,10 +258,10 @@ class NeuropsychesController < ApplicationController
          @left_join = [""] # left join needs to be in sql right after the parent table!!!!!!!
        else
              @html_request ="N"
-             @column_headers = ['Date','Protocol','Enumber','RMR','NP status','NP Note', 'Appt Note'] # need to look up values
+             @column_headers = ['Date','Protocol','Enumber','RMR','NP status','NP Note', 'Age at Appt','Appt Note'] # need to look up values
              # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
              #@column_number =   @column_headers.size
-             @fields =["vgroups.completedneuropsych", "neuropsyches.neuropsychnote","neuropsyches.id"] # vgroups.id vgroup_id always first, include table name
+             @fields =["vgroups.completedneuropsych", "neuropsyches.neuropsychnote","appointments.age_at_appointment","neuropsyches.id"] # vgroups.id vgroup_id always first, include table name
              @left_join = [] # left join needs to be in sql right after the parent table!!!!!!!
              @column_headers_q_data =[]
              @fields_q_data = []
