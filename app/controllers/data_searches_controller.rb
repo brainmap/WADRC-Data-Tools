@@ -140,7 +140,7 @@ class DataSearchesController < ApplicationController
       @q_data_fields_hash = Hash.new
       @q_data_left_join_hash = Hash.new
       @q_data_left_join_vgroup_hash = Hash.new
-      @q_data_left_column_hash = Hash.new
+      @q_data_headers_hash = Hash.new
       @q_data_tables_hash = Hash.new
       @fields_hash = Hash.new
       
@@ -367,9 +367,8 @@ class DataSearchesController < ApplicationController
                            else
                                @local_fields.push(@cg_tn.tn+"."+@cg_tn_cn.cn)
                            end
-                         elsif !@cg_tn_cn.q_data_form_id.blank? and @html_request =="N"  # need q_data
+                         elsif !@cg_tn_cn.q_data_form_id.blank? and  @html_request =="N"  # need q_data
                            if @html_request =="N"
-                             var = 1
                                @local_fields.push(@cg_tn.tn+"."+@cg_tn_cn.cn)
                                @local_column_headers.push("q_data_form_"+@cg_tn_cn.q_data_form_id.to_s)
                                # WHAT ABOUT THE view into tables_local, join and left_join
@@ -408,7 +407,7 @@ class DataSearchesController < ApplicationController
                            @q_data_fields_hash[@q_form_id] = @fields_q_data
                            @q_data_left_join_hash[@q_form_id] = @left_join_q_data
                            @q_data_left_join_vgroup_hash[@q_form_id] = @left_join_vgroup
-                           @q_data_left_column_hash[@q_form_id] = @headers_q_data
+                           @q_data_headers_hash[@q_form_id] = @headers_q_data
                            @q_data_tables_hash[@q_form_id] = @tables
                            @fields_hash[@q_form_id] = @fields
 
@@ -805,12 +804,16 @@ puts "BBBBBBBBBB"
           # use @q_data_fields_hash[id], @q_data_fields_left_join_hash[id], @q_data_fields_left_join_vgroup_hash[id]
           # plus sql to get results for each id
           # insert results based on location of q_data_+id.to_s column name   --- need to check that in column name list
-          @local_column_headers = @local_column_headers+@q_data_left_column_hash[id]
+          if !@q_data_headers_hash[id].blank?            
+               @local_column_headers = @local_column_headers+@q_data_headers_hash[id]
+           else
+             puts " hhhhhhhhhhh    blank @q_data_headers_hash[id]"
+           end
           @column_number =   @local_column_headers.size
           @questionform = Questionform.find(id)
            
            # same approach as in applications controller         
-           v_limit = 15  # like the chunk approach issue with multiple appts in a vgroup and multiple enrollments
+           v_limit = 10  # like the chunk approach issue with multiple appts in a vgroup and multiple enrollments
            @q_data_fields_hash[id].each_slice(v_limit) do |fields_local|
              @results_q_data_temp = []
              # get all the aliases, find in @left_join_q_data and @left_join_vgroup_q_data
@@ -878,7 +881,7 @@ puts "BBBBBBBBBB"
              if !result[v_index].blank? and !@results_q_data[result[v_index]].blank?
                  result = result.concat(@results_q_data[result[v_index]])
              else
-                 v_array_cell_cnt =@q_data_left_column_hash[id].size
+                 v_array_cell_cnt =@q_data_headers_hash[id].size
                  v_empty_array = Array.new(v_array_cell_cnt)
                  result = result+v_empty_array
              end

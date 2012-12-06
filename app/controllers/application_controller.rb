@@ -105,7 +105,7 @@ puts sql
 # for q_data forms -- only run in export?
 def run_search_q_data
 
-puts "CCCCCCCCCCCCCCi  run_search_q_data"
+puts "CCCCCCCCCCCCCC  run_search_q_data"
   scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
   connection = ActiveRecord::Base.connection();
   @left_join_vgroup_q_data =[]  # used when participant is data_link
@@ -624,7 +624,7 @@ puts "CCCCCCCCCCCCCCi  run_search_q_data"
           
         end
         @results_q_data =[]
-        v_limit = 15  # like the chunk approach issue with multiple appts in a vgroup and multiple enrollments
+        v_limit = 10  # like the chunk approach issue with multiple appts in a vgroup and multiple enrollments
         @column_headers.push(*@column_headers_q_data)
 
         if @fields_q_data.size < v_limit # should be less than 61 table limit
