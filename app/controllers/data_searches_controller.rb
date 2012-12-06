@@ -118,7 +118,9 @@ class DataSearchesController < ApplicationController
         end    
     end
    # can not do a self join-- unless two copies of table - unique tn_id, tn_cn_id
-    def cg_search       
+    def cg_search   
+puts "AAAAAAAAAAAAAAAA in cg_search"   
+logger.debug "BBBBBBBBB in cg_search" 
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       # make the sql -- start with base 
       @local_column_headers =["Date","Protocol","Enumber","RMR"]
@@ -151,7 +153,7 @@ class DataSearchesController < ApplicationController
             @html_request ="Y" 
         else
             @html_request ="N"
-         end
+        end
       
       # get stored cg_search
       if !params[:cg_search].blank? and !params[:cg_search][:cg_query_id].blank?
@@ -398,7 +400,7 @@ class DataSearchesController < ApplicationController
                            @q_form_id = @cg_tn_cn.q_data_form_id
    
                            @q_data_form_array.unshift(@q_form_id)
-                           puts "DDDDDDDDDDDD before run_search_q_data"
+                           
                            (@fields,@tables, @left_join,@left_join_vgroup,@fields_q_data, @left_join_q_data,@headers_q_data) = run_search_q_data
                           
 
@@ -760,9 +762,9 @@ class DataSearchesController < ApplicationController
     sql = sql+" order by "+@order_by.join(",")
     @sql = sql
     # run the sql ==>@results, after some substitutions
-puts "AAAAAAAAAAAAAA"
-puts sql
-puts "BBBBBBBBBB"
+
+#puts sql
+
     @results2 = connection.execute(sql)
     @temp_results = @results2
 
@@ -804,11 +806,9 @@ puts "BBBBBBBBBB"
           # use @q_data_fields_hash[id], @q_data_fields_left_join_hash[id], @q_data_fields_left_join_vgroup_hash[id]
           # plus sql to get results for each id
           # insert results based on location of q_data_+id.to_s column name   --- need to check that in column name list
-          if !@q_data_headers_hash[id].blank?            
-               @local_column_headers = @local_column_headers+@q_data_headers_hash[id]
-           else
-             puts " hhhhhhhhhhh    blank @q_data_headers_hash[id]"
-           end
+                      
+          @local_column_headers = @local_column_headers+@q_data_headers_hash[id]
+
           @column_number =   @local_column_headers.size
           @questionform = Questionform.find(id)
            
@@ -898,6 +898,7 @@ puts "BBBBBBBBBB"
     t = Time.now 
     @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
   end   
+  
       respond_to do |format|
         format.xls # cg_search.xls.erb
         if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?
