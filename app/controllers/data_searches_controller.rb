@@ -119,8 +119,7 @@ class DataSearchesController < ApplicationController
     end
    # can not do a self join-- unless two copies of table - unique tn_id, tn_cn_id
     def cg_search   
-puts "AAAAAAAAAAAAAAAA in cg_search"   
-logger.debug "BBBBBBBBB in cg_search" 
+
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       # make the sql -- start with base 
       @local_column_headers =["Date","Protocol","Enumber","RMR"]
@@ -152,6 +151,9 @@ logger.debug "BBBBBBBBB in cg_search"
         when "text/html" then  # application/html ?
             @html_request ="Y" 
         else
+            @html_request ="N"
+        end
+        if !params[:xls_request].blank? # not sure request.formats.to_s is working in production
             @html_request ="N"
         end
       

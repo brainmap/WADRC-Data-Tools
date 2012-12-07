@@ -336,6 +336,7 @@ v_tn_cn_searchable_hash = []
 	        (v_name,v_val) = v.split('=')%>	
             <%= hidden_field_tag v_name, v_val %>	
        <% end %>
+       <%= hidden_field_tag 'xls_request','Y'%>
       <%= submit_tag 'export file'%>
 <% end %>
 
