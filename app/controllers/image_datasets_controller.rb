@@ -22,6 +22,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
   # GET /image_datasets.xml
   def index
     scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+    @sp_array = []
     if params[:visit_id]
       @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:visit_id])
       @search = @visit.image_datasets.search(params[:search])
@@ -35,11 +36,13 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
         #   @page_title = "All Image Datasets for Visit #{@visit.rmr}"
         # else
         if !params[:visit].blank? and !params[:visit][:scan_procedure_id].blank?
+          scan_procedure_id_list = params[:visit][:scan_procedure_id].join(',')
+          @sp_array =   scan_procedure_id_list.split(",")
           # params[:lh_search][:scan_procedure_id].join(',')
                 if !params[:search].blank? && !params[:search][:meta_sort].blank? ## want to limit  last 2 months when nothing searched for
                   @page_title = "All Image Datasets "
            @search = ImageDataset.where("image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))
-                                               and image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array,params[:visit][:scan_procedure_id]).search(params[:search])
+                                     and image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array,params[:visit][:scan_procedure_id]).search(params[:search])
                 elsif !params[:search].blank?
                   @page_title = "All Image Datasets "
            @search = ImageDataset.where("image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))
@@ -67,8 +70,9 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
           # Set pagination and reporting options depending on the requested format
           # (ie Don't paginate datasets on CSV download.)
           if params[:format]
+            
             @image_datasets = @search.relation
-
+      
             # Eventually, we'll be able to set exactly what we want included in the 
             # report from the web interface. For now, we'll do it programatically 
             # here in the controller.
