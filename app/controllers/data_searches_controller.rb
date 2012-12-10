@@ -119,7 +119,7 @@ class DataSearchesController < ApplicationController
     end
    # can not do a self join-- unless two copies of table - unique tn_id, tn_cn_id
     def cg_search   
-
+     puts " AAAAAA in cg_search"
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       # make the sql -- start with base 
       @local_column_headers =["Date","Protocol","Enumber","RMR"]
@@ -153,9 +153,11 @@ class DataSearchesController < ApplicationController
         else
             @html_request ="N"
         end
-        if !params[:xls_request].blank? # not sure request.formats.to_s is working in production
+  puts "BBBB html_request = "+@html_request
+      if !params[:xls_request].blank? # not sure request.formats.to_s is working in production
             @html_request ="N"
-        end
+      end
+   puts "CCCC html_request = "+@html_request
       
       # get stored cg_search
       if !params[:cg_search].blank? and !params[:cg_search][:cg_query_id].blank?
