@@ -687,7 +687,7 @@ puts "CCCCCCCCCCCCCC  run_search_q_data"
         end
         # NEED TO RETURN q_data columns-- to cg_search -- rest of processing is used by simple search q_data export 
 puts "uuuuuuuu before return"
-puts " !@cg_search_q_data.blank? = "+@cg_search_q_data
+
         if !@cg_search_q_data.blank?
 puts "ttttttttttt   in !@cg_search_q_data.blank?"
           return @fields,@tables, @left_join,@left_join_vgroup_q_data,@fields_q_data, @left_join_q_data,@column_headers_q_data
