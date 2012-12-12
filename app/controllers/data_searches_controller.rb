@@ -396,7 +396,7 @@ class DataSearchesController < ApplicationController
                            @left_join_vgroup = []
                            @column_headers_q_data =[]
                            @headers_q_data =[]
-        
+
                            @conditions.concat(@conditions_bak)
                            # @conditions  captured above, after first set of form elements - mainly want sp limit
                            # define q_data form_id  
@@ -406,7 +406,7 @@ class DataSearchesController < ApplicationController
    
                            @q_data_form_array.unshift(@q_form_id)
 puts "iiiii   before run_search_q_data"                           
-                           (@fields,@tables, @left_join,@left_join_vgroup,@fields_q_data, @left_join_q_data,@headers_q_data) = run_search_q_data
+                           (@fields,@tables, @left_join,@left_join_vgroup,@fields_q_data, @left_join_q_data,@headers_q_data) = run_search_q_data(@tables,@fields ,@left_join,@left_join_vgroup)
 puts "jjjjjjjj after run_search_q_data"                          
 
                            # put @q_form_id.to_s in array --- use as key

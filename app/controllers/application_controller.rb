@@ -103,25 +103,31 @@ puts sql
  end
  
 # for q_data forms -- only run in export?
-def run_search_q_data
+def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup)
 
 puts "CCCCCCCCCCCCCC  run_search_q_data"
   scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
   connection = ActiveRecord::Base.connection();
   @left_join_vgroup_q_data =[]  # used when participant is data_link
-  @left_join_vgroup = []
-  if @tables.size == 1  
-     v_table_base_appt = @tables[0]
-     #puts "AAAAAAAAAA"+v_table_base_appt
+  left_join_vgroup = []
+  @column_headers_q_data = []
+  @fields_q_data = []
+  @left_join_q_data = []
+  @column_headers_q_data = []
+puts "gggggg left_join="+p_left_join.to_s
+  
+  if tables.size == 1  
+     v_table_base_appt = tables[0]
+     puts "AAAAAAAAAA"+v_table_base_appt
       # get distinct sp
-      if !@fields.blank?
-        sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr , "+@fields.join(',')  +" ,appointments.comment "
+      if !fields.blank?
+        sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr , "+fields.join(',')  +" ,appointments.comment "
       else  # calll from cg_search doesn't have fields
           sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr  ,appointments.comment "
       end
-       sql =sql+" FROM vgroups, appointments,scan_procedures, scan_procedures_vgroups, "+@tables.join(',')+" "+@left_join.join(' ')+"
+       sql =sql+" FROM vgroups, appointments,scan_procedures, scan_procedures_vgroups, "+tables.join(',')+" "+p_left_join.join(' ')+"
        WHERE vgroups.id = appointments.vgroup_id and scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") "
-       @tables.each do |tab|
+       tables.each do |tab|
          sql = sql +" AND "+tab+".appointment_id = appointments.id  "
        end
        sql = sql +" AND scan_procedures.id = scan_procedures_vgroups.scan_procedure_id
@@ -157,8 +163,8 @@ puts "CCCCCCCCCCCCCC  run_search_q_data"
 
         # have questionform_questions.question_id and questionform_questions.display_order
         # get the *.id off last field, add back,, same with last header = appt note
-        if !@fields.blank? # cg_search blank fields and column header
-          v_last_field =@fields.pop
+        if !fields.blank? # cg_search blank fields and column header
+          v_last_field =fields.pop
         end
         if !@column_headers.blank?
           v_last_header = @column_headers.pop
@@ -628,9 +634,9 @@ puts "CCCCCCCCCCCCCC  run_search_q_data"
         @column_headers.push(*@column_headers_q_data)
 
         if @fields_q_data.size < v_limit # should be less than 61 table limit
-                   @fields.push(*@fields_q_data)
-                   @left_join.push(*@left_join_q_data)
-                   @left_join_vgroup.push(*@left_join_vgroup_q_data)
+                   fields.push(*@fields_q_data)
+                   p_left_join.push(*@left_join_q_data)
+                   left_join_vgroup.push(*@left_join_vgroup_q_data)
         else # get data in v_limit sized chunks
           @fields_q_data.each_slice(v_limit) do |fields_local|
             @results_q_data_temp = []
@@ -656,9 +662,9 @@ puts "CCCCCCCCCCCCCC  run_search_q_data"
               end
             end
              sql ="SELECT distinct appointments.id appointment_id, "+fields_local.join(',')+"
-              FROM vgroups "+@left_join_vgroup_q_data_local.join(' ')+", appointments, scan_procedures_vgroups, "+@tables.join(',')+" "+@left_join_q_data_local.join(' ')+"
+              FROM vgroups "+@left_join_vgroup_q_data_local.join(' ')+", appointments, scan_procedures_vgroups, "+tables.join(',')+" "+@left_join_q_data_local.join(' ')+"
               WHERE vgroups.id = appointments.vgroup_id and scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") "
-              @tables.each do |tab|
+              tables.each do |tab|
                 sql = sql +" AND "+tab+".appointment_id = appointments.id  "
               end
               sql = sql +" AND scan_procedures_vgroups.vgroup_id = vgroups.id "
@@ -686,20 +692,23 @@ puts "CCCCCCCCCCCCCC  run_search_q_data"
           end                    
         end
         # NEED TO RETURN q_data columns-- to cg_search -- rest of processing is used by simple search q_data export 
-puts "uuuuuuuu before return"
+puts "uuuuuuuuuuuuu before return"
 
         if !@cg_search_q_data.blank?
 puts "ttttttttttt   in !@cg_search_q_data.blank?"
-          return @fields,@tables, @left_join,@left_join_vgroup_q_data,@fields_q_data, @left_join_q_data,@column_headers_q_data
+          return fields,tables, p_left_join,@left_join_vgroup_q_data,@fields_q_data, @left_join_q_data,@column_headers_q_data
         end 
 puts "sssssss after should have returned"
-        @fields.push(v_last_field)
+        fields.push(v_last_field)
         @column_headers.push(v_last_header)
+puts "hhhhhhhh left_join="+p_left_join.to_s
 
-       sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date, appointments.id, vgroups.rmr , "+@fields.join(',')+",appointments.comment 
-        FROM vgroups "+@left_join_vgroup.join(' ')+", appointments, scan_procedures_vgroups, "+@tables.join(',')+" "+@left_join.join(' ')+"
+       sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date, appointments.id, vgroups.rmr , "+fields.join(',')+",appointments.comment 
+        FROM vgroups "+left_join_vgroup.to_a.join(' ')+", appointments, 
+         scan_procedures_vgroups, "+tables.join(',')+
+         " "+p_left_join.to_a.join(' ')+"
         WHERE vgroups.id = appointments.vgroup_id and scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") "
-        @tables.each do |tab|
+        tables.each do |tab|
           sql = sql +" AND "+tab+".appointment_id = appointments.id  "
         end
         sql = sql +" AND scan_procedures_vgroups.vgroup_id = vgroups.id "
@@ -766,7 +775,7 @@ puts "sssssss after should have returned"
       @results[i] = @temp_row
       i = i+1
     end   
-    return @results
+    return @results   #,tables,fields, left_join
  end
  
 

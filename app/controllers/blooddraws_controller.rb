@@ -242,6 +242,7 @@ class BlooddrawsController < ApplicationController
    # adjust columns and fields for html vs xls
    request_format = request.formats.to_s
    @html_request ="Y"
+
    case  request_format
      when "text/html" then  # application/html ?
        @column_headers = ['Date','Protocol','Enumber','RMR','LH status','LH Note', 'Appt Note'] # need to look up values
@@ -269,7 +270,9 @@ class BlooddrawsController < ApplicationController
    if @html_request == "Y"     
        @results = self.run_search   # in the application controller
    elsif @html_request == "N"
-        @results = self.run_search_q_data   # in the application controller
+        @left_join_vgroup = []
+puts "ffffffff @left_join="+@left_join.to_s
+        @results = self.run_search_q_data (@tables,@fields ,@left_join,@left_join_vgroup)  # in the application controller
         @column_number =   @column_headers.size
    end
        
