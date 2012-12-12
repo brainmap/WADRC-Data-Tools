@@ -76,14 +76,15 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
             # Eventually, we'll be able to set exactly what we want included in the 
             # report from the web interface. For now, we'll do it programatically 
             # here in the controller.
-            light_include_options = :image_dataset_quality_checks
+            light_include_options = {:image_dataset_quality_checks, :image_comments   }
             heavy_include_options = {
               :image_dataset_quality_checks => {:except => [:id]},
+              :image_comments => {:except => [:id]},
               :visit => {:methods => :age_at_visit, :only => [:scanner_source, :date], :include => {
                 :enrollments => {:only => [:enumber], :include => { 
                   :participant => { :methods => :genetic_status, :only => [:gender, :wrapnum, :ed_years] }
-                }}
-              }}
+                }  }
+              }} 
             }
           else
             @image_datasets = @search.relation.page(params[:page])

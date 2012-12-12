@@ -404,9 +404,9 @@ class DataSearchesController < ApplicationController
                            @q_form_id = @cg_tn_cn.q_data_form_id
    
                            @q_data_form_array.unshift(@q_form_id)
-                           
+puts "iiiii   before run_search_q_data"                           
                            (@fields,@tables, @left_join,@left_join_vgroup,@fields_q_data, @left_join_q_data,@headers_q_data) = run_search_q_data
-                          
+puts "jjjjjjjj after run_search_q_data"                          
 
                            # put @q_form_id.to_s in array --- use as key
                            # make array of array for @left_join_vgroup,@fields_q_data, @left_join_q_data                      
@@ -416,6 +416,12 @@ class DataSearchesController < ApplicationController
                            @q_data_headers_hash[@q_form_id] = @headers_q_data
                            @q_data_tables_hash[@q_form_id] = @tables
                            @fields_hash[@q_form_id] = @fields
+if !@q_data_headers_hash.blank?
+  puts "hhhhhhhhhh form_id and q_data_headers_hash="+@q_form_id.to_s+"   not blank hash"
+else
+  puts "hhhhhhhhhh form_id and q_data_headers_hash="+@q_form_id.to_s+"    blank hash"
+end
+  
 
     
                            # could there be multiple q_data forms???????
@@ -807,6 +813,7 @@ class DataSearchesController < ApplicationController
     if @html_request =="N"  and !@q_data_form_array.blank?
       @results_q_data =[]
       @q_data_form_array.each do |id| 
+puts "  gggggggggg q_data_form_array.id ="+id.to_s
           # use @q_data_fields_hash[id], @q_data_fields_left_join_hash[id], @q_data_fields_left_join_vgroup_hash[id]
           # plus sql to get results for each id
           # insert results based on location of q_data_+id.to_s column name   --- need to check that in column name list
