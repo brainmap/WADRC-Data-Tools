@@ -136,7 +136,7 @@ class DataSearchesController < ApplicationController
       @cg_query_tn_cn_hash = Hash.new
       @cg_query_cn_hash = Hash.new
       params["search_criteria"] =""
-      @headers_q_data = []
+      ####@headers_q_data = []
       @q_data_form_array = []
       @q_data_fields_hash = Hash.new
       @q_data_left_join_hash = Hash.new
@@ -395,6 +395,7 @@ class DataSearchesController < ApplicationController
                            @conditions = []
                            @left_join_vgroup = []
                            @column_headers_q_data =[]
+                           @headers_q_data =[]
         
                            @conditions.concat(@conditions_bak)
                            # @conditions  captured above, after first set of form elements - mainly want sp limit
@@ -419,30 +420,38 @@ puts "jjjjjjjj after run_search_q_data"
 
 
 
+puts "jjjjjjjj after run_search_q_data"                          
+puts "jjjjjjaaa  @fields="+@fields.size.to_s
+puts "jjjjjjbbb  @tables="+@tables.size.to_s
+puts "jjjjjjccc  @left_join="+@left_join.size.to_s
+puts "jjjjjjddd  @left_join_vgroup="+@left_join_vgroup.size.to_s
+puts "jjjjjjeee  @fields_q_data="+@fields_q_data.size.to_s
+puts "jjjjjjfff  @left_join_q_data="+@left_join_q_data.size.to_s
+puts "jjjjjjggg  @headers_q_data="+@headers_q_data.size.to_s
 if !@q_data_fields_hash.blank?
   puts "hhhhhhhhhhaaaa form_id and q_data_fields_hash="+@q_form_id.to_s+"   not blank hash"
-  puts " @q_data_fields_hash[@q_form_id] ="+@q_data_fields_hash[@q_form_id].to_s
+  puts " @q_data_fields_hash[@q_form_id] ="+@q_data_fields_hash[@q_form_id].size.to_s
 else
   puts "hhhhhhhhhhaaaaa form_id and q_data_fields_hash="+@q_form_id.to_s+"    blank hash"
 end
 
 if !@q_data_left_join_hash.blank?
   puts "hhhhhhhhhhbbb form_id and q_data_left_join_hash="+@q_form_id.to_s+"   not blank hash"
-  puts " @q_data_left_join_hash[@q_form_id] ="+@q_data_left_join_hash[@q_form_id].to_s
+  puts " @q_data_left_join_hash[@q_form_id] ="+@q_data_left_join_hash[@q_form_id].size.to_s
 else
   puts "hhhhhhhhhhbbbb form_id and q_data_left_join_hash="+@q_form_id.to_s+"    blank hash"
 end
 
 if !@q_data_left_join_vgroup_hash.blank?
   puts "hhhhhhhhhhccc form_id and q_data_left_join_vgroup_hash="+@q_form_id.to_s+"   not blank hash"
-  puts " @q_data_left_join_vgroup_hash[@q_form_id] ="+@q_data_left_join_vgroup_hash[@q_form_id].to_s
+  puts " @q_data_left_join_vgroup_hash[@q_form_id] ="+@q_data_left_join_vgroup_hash[@q_form_id].size.to_s
 else
   puts "hhhhhhhhhhcccc form_id and q_data_left_join_vgroup_hash="+@q_form_id.to_s+"    blank hash"
 end                           
                            
 if !@q_data_headers_hash.blank?
   puts "hhhhhhhhhhdddd form_id and q_data_headers_hash="+@q_form_id.to_s+"   not blank hash"
-  puts " @q_data_headers_hash[@q_form_id] ="+@q_data_headers_hash[@q_form_id].to_s
+  puts " @q_data_headers_hash[@q_form_id] ="+@q_data_headers_hash[@q_form_id].size.to_s
 else
   puts "hhhhhhhhhhdddd form_id and q_data_headers_hash="+@q_form_id.to_s+"    blank hash"
 end
@@ -450,14 +459,14 @@ end
 
 if !@q_data_tables_hash.blank?
   puts "hhhhhhhhheeee form_id and q_data_tables_hash="+@q_form_id.to_s+"   not blank hash"
-  puts " @q_data_tables_hash[@q_form_id] ="+@q_data_tables_hash[@q_form_id].to_s
+  puts " @q_data_tables_hash[@q_form_id] ="+@q_data_tables_hash[@q_form_id].size.to_s
 else
   puts "hhhhhhhhhheeeee form_id and q_data_tables_hash="+@q_form_id.to_s+"    blank hash"
 end
 
 if !@fields_hash.blank?
   puts "hhhhhhhhhhffff form_id and fields_hash="+@q_form_id.to_s+"   not blank hash"
-  puts " @fields_hash[@q_form_id] ="+@fields_hash[@q_form_id].to_s
+  puts " @fields_hash[@q_form_id] ="+@fields_hash[@q_form_id].size.to_s
 else
   puts "hhhhhhhhhhffff form_id and fields_hash="+@q_form_id.to_s+"    blank hash"
 end
