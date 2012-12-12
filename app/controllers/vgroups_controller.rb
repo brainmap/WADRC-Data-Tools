@@ -225,6 +225,12 @@ class VgroupsController < ApplicationController
                 @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
                 sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment[0].id).to_s+")"      
                 results = connection.execute(sql)
+                enumber_array = []
+                enumber_array << params[:vgroup][:enrollments_attributes]["0"][:enumber]
+                   # also want to set participant in vgroup
+                params[:id] = @vgroup.id.to_s
+                set_participant_in_enrollment(@vgroup.rmr, enumber_array)
+
             end                    
            end    
         end    
@@ -386,6 +392,7 @@ def set_participant_in_enrollment( rmr, enumber_array)
   # if not populated, look for other participant_id based on
   # last 6 digits of rmr = RMRaic
   # other participant_id for the enumber
+  @vgroup = Vgroup.find(params[:id])
   participant_id =""
   # make hash of enums
    blank_participant_id ="N"
@@ -431,6 +438,9 @@ def set_participant_in_enrollment( rmr, enumber_array)
                          
         connection = ActiveRecord::Base.connection();
         results = connection.execute(sql) 
+        sql = "UPDATE vgroups set vgroups.participant_id = "+participant_id.to_s+" WHERE vgroups.id = "+params[:id]
+         connection = ActiveRecord::Base.connection();
+         results = connection.execute(sql)
         if blank_participant_id == "Y"
           enumber_array.each do |enum|
               @e = Enrollment.where("enumber ='"+enum+"'")
