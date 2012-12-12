@@ -416,10 +416,50 @@ puts "jjjjjjjj after run_search_q_data"
                            @q_data_headers_hash[@q_form_id] = @headers_q_data
                            @q_data_tables_hash[@q_form_id] = @tables
                            @fields_hash[@q_form_id] = @fields
-if !@q_data_headers_hash.blank?
-  puts "hhhhhhhhhh form_id and q_data_headers_hash="+@q_form_id.to_s+"   not blank hash"
+
+
+
+if !@q_data_fields_hash.blank?
+  puts "hhhhhhhhhhaaaa form_id and q_data_fields_hash="+@q_form_id.to_s+"   not blank hash"
+  puts " @q_data_fields_hash[@q_form_id] ="+@q_data_fields_hash[@q_form_id].to_s
 else
-  puts "hhhhhhhhhh form_id and q_data_headers_hash="+@q_form_id.to_s+"    blank hash"
+  puts "hhhhhhhhhhaaaaa form_id and q_data_fields_hash="+@q_form_id.to_s+"    blank hash"
+end
+
+if !@q_data_left_join_hash.blank?
+  puts "hhhhhhhhhhbbb form_id and q_data_left_join_hash="+@q_form_id.to_s+"   not blank hash"
+  puts " @q_data_left_join_hash[@q_form_id] ="+@q_data_left_join_hash[@q_form_id].to_s
+else
+  puts "hhhhhhhhhhbbbb form_id and q_data_left_join_hash="+@q_form_id.to_s+"    blank hash"
+end
+
+if !@q_data_left_join_vgroup_hash.blank?
+  puts "hhhhhhhhhhccc form_id and q_data_left_join_vgroup_hash="+@q_form_id.to_s+"   not blank hash"
+  puts " @q_data_left_join_vgroup_hash[@q_form_id] ="+@q_data_left_join_vgroup_hash[@q_form_id].to_s
+else
+  puts "hhhhhhhhhhcccc form_id and q_data_left_join_vgroup_hash="+@q_form_id.to_s+"    blank hash"
+end                           
+                           
+if !@q_data_headers_hash.blank?
+  puts "hhhhhhhhhhdddd form_id and q_data_headers_hash="+@q_form_id.to_s+"   not blank hash"
+  puts " @q_data_headers_hash[@q_form_id] ="+@q_data_headers_hash[@q_form_id].to_s
+else
+  puts "hhhhhhhhhhdddd form_id and q_data_headers_hash="+@q_form_id.to_s+"    blank hash"
+end
+
+
+if !@q_data_tables_hash.blank?
+  puts "hhhhhhhhheeee form_id and q_data_tables_hash="+@q_form_id.to_s+"   not blank hash"
+  puts " @q_data_tables_hash[@q_form_id] ="+@q_data_tables_hash[@q_form_id].to_s
+else
+  puts "hhhhhhhhhheeeee form_id and q_data_tables_hash="+@q_form_id.to_s+"    blank hash"
+end
+
+if !@fields_hash.blank?
+  puts "hhhhhhhhhhffff form_id and fields_hash="+@q_form_id.to_s+"   not blank hash"
+  puts " @fields_hash[@q_form_id] ="+@fields_hash[@q_form_id].to_s
+else
+  puts "hhhhhhhhhhffff form_id and fields_hash="+@q_form_id.to_s+"    blank hash"
 end
   
 
@@ -826,6 +866,7 @@ puts "  gggggggggg q_data_form_array.id ="+id.to_s
            # same approach as in applications controller         
            v_limit = 10  # like the chunk approach issue with multiple appts in a vgroup and multiple enrollments
            @q_data_fields_hash[id].each_slice(v_limit) do |fields_local|
+      puts "ggggggfffff   loop with v_limit ="+v_limit.to_s
              @results_q_data_temp = []
              # get all the aliases, find in @left_join_q_data and @left_join_vgroup_q_data
              @left_join_q_data_local = []
@@ -861,7 +902,7 @@ puts "  gggggggggg q_data_form_array.id ="+id.to_s
                    sql = sql +" AND "+@conditions.join(' and ')
                end
                
-               # puts sql
+   puts "ffffffff "+sql
 
                @results_q_data_temp = connection.execute(sql)
                # @results_q_data
