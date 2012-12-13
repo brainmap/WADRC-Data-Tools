@@ -203,6 +203,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
 def series_desc_cnt
   @v_start_id=""
   @v_end_id = "" 
+
   if !params[:series_desc_cnt].blank? and !params[:series_desc_cnt][:start_id].blank? and  !params[:series_desc_cnt][:end_id].blank?
        @v_start_id = params[:series_desc_cnt][:start_id]
        @v_end_id = params[:series_desc_cnt][:end_id]
@@ -217,6 +218,7 @@ def series_desc_cnt
        end
      end
    end
+
   respond_to do |format|
     format.html # new.html.erb
   end

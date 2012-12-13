@@ -268,6 +268,27 @@ class Visit < ActiveRecord::Base
     return @age_info
   end
   
+  
+  def series_desc_cnt(p_start_id, p_end_id)
+    @v_start_id=""
+    @v_end_id = "" 
+    if !p_start_id.blank? and !p_end_id.blank?
+         @v_start_id = p_start_id
+         @v_end_id = p_end_id
+         @image_datasets = ImageDataset.where( " id between "+p_start_id+" and "+p_end_id ).where(" dcm_file_count is null ").where(" glob is not null")
+         @image_datasets.each do |ids|
+         v_path = (ids.path).gsub('team','team*')
+         if !ids.glob.blank?
+           v_glob = (ids.glob).gsub('*.dcm','*.dcm*')
+           v_count = `cd #{v_path};ls -1 #{v_glob}| wc -l`.to_i   # 
+           ids.dcm_file_count = v_count
+           ids.save      
+         end
+       end
+     end
+      return "ok"
+  end
+  
   def find_first_dicom_study_uid
     uid = ''
     image_datasets.each do |dataset|
