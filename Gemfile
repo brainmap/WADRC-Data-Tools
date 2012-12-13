@@ -73,4 +73,5 @@ group :development, :test do
   gem 'timecop'
   gem 'sqlite3-ruby', :require => 'sqlite3'
   gem 'hirb', '~>0.4.5'
+  gem 'rack-mini-profiler'
 end
