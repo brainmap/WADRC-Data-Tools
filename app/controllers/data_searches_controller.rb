@@ -119,7 +119,7 @@ class DataSearchesController < ApplicationController
     end
    # can not do a self join-- unless two copies of table - unique tn_id, tn_cn_id
     def cg_search   
-     puts " AAAAAA in cg_search"
+
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       # make the sql -- start with base 
       @local_column_headers =["Date","Protocol","Enumber","RMR"]
@@ -153,11 +153,6 @@ class DataSearchesController < ApplicationController
         else
             @html_request ="N"
         end
-  puts "BBBB html_request = "+@html_request
-      if !params[:xls_request].blank? # not sure request.formats.to_s is working in production
-            @html_request ="N"
-      end
-   puts "CCCC html_request = "+@html_request
       
       # get stored cg_search
       if !params[:cg_search].blank? and !params[:cg_search][:cg_query_id].blank?
@@ -293,20 +288,20 @@ class DataSearchesController < ApplicationController
                  @cg_query_tn.include_tn = 1
                end
                @cg_query_tn.join_type = params[:cg_search][:join_type][v_tn_id]
+
                @cg_tn = CgTn.find(v_tn_id)
                 if @cg_query_tn.join_type == 1  # outer join joins  # NEED PARENT TABLE join_left_parent_tn
                     @table_types.push(@cg_tn.table_type)
                             # need to add outer as part of table length !!!!! THIS HAS TO BE FIXED
                     if @local_tables.index(@cg_tn.join_left_parent_tn).blank?   # WHAT ABOUT ALIAS                        
-                                  @local_tables.push(@cg_tn.join_left_parent_tn)
-                                
+                                  @local_tables.push(@cg_tn.join_left_parent_tn)                                
                     end
                     if ! @tables_left_join_hash[@cg_tn.join_left_parent_tn ].blank?
                         @tables_left_join_hash[@cg_tn.join_left_parent_tn ] = @cg_tn.join_left+"  "+ @tables_left_join_hash[@cg_tn.join_left_parent_tn ]
                     else
                         @tables_left_join_hash[@cg_tn.join_left_parent_tn ] = @cg_tn.join_left
                     end
-                else # doing inner join by default  #### 
+                else # was doing inner join by default , change to outer #### 
                   if  !params[:cg_search][:join_type][v_tn_id].blank? or 
                     (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank?) or
                       !params[:cg_search][:condition][v_tn_id].blank? # NEED TO ADD LIMIT BY CN
@@ -321,10 +316,23 @@ class DataSearchesController < ApplicationController
                         end
                       end
                     if v_include_tn == "Y"                       
-                        @local_tables.push(@cg_tn.tn) # use uniq later
-                        @table_types.push(@cg_tn.table_type) # use uniq later  use mix of table_type to define core join
-                               # base, cg_enumber, cg_enumber_sp, cg_rmr, cg_rmr_sp, cg_sp, cg_wrapnum, cg_adrcnum, cg_reggieid
-                        @local_conditions.push(@cg_tn.join_right) # use uniq later
+                        if params[:cg_search][:join_type][v_tn_id].blank? and !@cg_tn.join_left.blank?  # setting default to outer join
+                           @table_types.push(@cg_tn.table_type)
+                                    # need to add outer as part of table length !!!!! THIS HAS TO BE FIXED
+                            if @local_tables.index(@cg_tn.join_left_parent_tn).blank?   # WHAT ABOUT ALIAS                        
+                                          @local_tables.push(@cg_tn.join_left_parent_tn)                                
+                            end
+                            if ! @tables_left_join_hash[@cg_tn.join_left_parent_tn ].blank?
+                                @tables_left_join_hash[@cg_tn.join_left_parent_tn ] = @cg_tn.join_left+"  "+ @tables_left_join_hash[@cg_tn.join_left_parent_tn ]
+                            else
+                                @tables_left_join_hash[@cg_tn.join_left_parent_tn ] = @cg_tn.join_left
+                            end
+                        else
+                          @local_tables.push(@cg_tn.tn) # use uniq later
+                          @table_types.push(@cg_tn.table_type) # use uniq later  use mix of table_type to define core join
+                                 # base, cg_enumber, cg_enumber_sp, cg_rmr, cg_rmr_sp, cg_sp, cg_wrapnum, cg_adrcnum, cg_reggieid
+                           @local_conditions.push(@cg_tn.join_right) # use uniq later
+                        end
                     end
                   end
                  end
@@ -405,9 +413,8 @@ class DataSearchesController < ApplicationController
                            @q_form_id = @cg_tn_cn.q_data_form_id
    
                            @q_data_form_array.unshift(@q_form_id)
-puts "iiiii   before run_search_q_data"                           
-                           (@fields,@tables, @left_join,@left_join_vgroup,@fields_q_data, @left_join_q_data,@headers_q_data) = run_search_q_data(@tables,@fields ,@left_join,@left_join_vgroup)
-puts "jjjjjjjj after run_search_q_data"                          
+                          
+                           (@fields,@tables, @left_join,@left_join_vgroup,@fields_q_data, @left_join_q_data,@headers_q_data) = run_search_q_data(@tables,@fields ,@left_join,@left_join_vgroup)                       
 
                            # put @q_form_id.to_s in array --- use as key
                            # make array of array for @left_join_vgroup,@fields_q_data, @left_join_q_data                      
@@ -417,60 +424,6 @@ puts "jjjjjjjj after run_search_q_data"
                            @q_data_headers_hash[@q_form_id] = @headers_q_data
                            @q_data_tables_hash[@q_form_id] = @tables
                            @fields_hash[@q_form_id] = @fields
-
-
-
-puts "jjjjjjjj after run_search_q_data"                          
-puts "jjjjjjaaa  @fields="+@fields.size.to_s
-puts "jjjjjjbbb  @tables="+@tables.size.to_s
-puts "jjjjjjccc  @left_join="+@left_join.size.to_s
-puts "jjjjjjddd  @left_join_vgroup="+@left_join_vgroup.size.to_s
-puts "jjjjjjeee  @fields_q_data="+@fields_q_data.size.to_s
-puts "jjjjjjfff  @left_join_q_data="+@left_join_q_data.size.to_s
-puts "jjjjjjggg  @headers_q_data="+@headers_q_data.size.to_s
-if !@q_data_fields_hash.blank?
-  puts "hhhhhhhhhhaaaa form_id and q_data_fields_hash="+@q_form_id.to_s+"   not blank hash"
-  puts " @q_data_fields_hash[@q_form_id] ="+@q_data_fields_hash[@q_form_id].size.to_s
-else
-  puts "hhhhhhhhhhaaaaa form_id and q_data_fields_hash="+@q_form_id.to_s+"    blank hash"
-end
-
-if !@q_data_left_join_hash.blank?
-  puts "hhhhhhhhhhbbb form_id and q_data_left_join_hash="+@q_form_id.to_s+"   not blank hash"
-  puts " @q_data_left_join_hash[@q_form_id] ="+@q_data_left_join_hash[@q_form_id].size.to_s
-else
-  puts "hhhhhhhhhhbbbb form_id and q_data_left_join_hash="+@q_form_id.to_s+"    blank hash"
-end
-
-if !@q_data_left_join_vgroup_hash.blank?
-  puts "hhhhhhhhhhccc form_id and q_data_left_join_vgroup_hash="+@q_form_id.to_s+"   not blank hash"
-  puts " @q_data_left_join_vgroup_hash[@q_form_id] ="+@q_data_left_join_vgroup_hash[@q_form_id].size.to_s
-else
-  puts "hhhhhhhhhhcccc form_id and q_data_left_join_vgroup_hash="+@q_form_id.to_s+"    blank hash"
-end                           
-                           
-if !@q_data_headers_hash.blank?
-  puts "hhhhhhhhhhdddd form_id and q_data_headers_hash="+@q_form_id.to_s+"   not blank hash"
-  puts " @q_data_headers_hash[@q_form_id] ="+@q_data_headers_hash[@q_form_id].size.to_s
-else
-  puts "hhhhhhhhhhdddd form_id and q_data_headers_hash="+@q_form_id.to_s+"    blank hash"
-end
-
-
-if !@q_data_tables_hash.blank?
-  puts "hhhhhhhhheeee form_id and q_data_tables_hash="+@q_form_id.to_s+"   not blank hash"
-  puts " @q_data_tables_hash[@q_form_id] ="+@q_data_tables_hash[@q_form_id].size.to_s
-else
-  puts "hhhhhhhhhheeeee form_id and q_data_tables_hash="+@q_form_id.to_s+"    blank hash"
-end
-
-if !@fields_hash.blank?
-  puts "hhhhhhhhhhffff form_id and fields_hash="+@q_form_id.to_s+"   not blank hash"
-  puts " @fields_hash[@q_form_id] ="+@fields_hash[@q_form_id].size.to_s
-else
-  puts "hhhhhhhhhhffff form_id and fields_hash="+@q_form_id.to_s+"    blank hash"
-end
-  
 
     
                            # could there be multiple q_data forms???????
@@ -862,7 +815,7 @@ end
     if @html_request =="N"  and !@q_data_form_array.blank?
       @results_q_data =[]
       @q_data_form_array.each do |id| 
-puts "  gggggggggg q_data_form_array.id ="+id.to_s
+
           # use @q_data_fields_hash[id], @q_data_fields_left_join_hash[id], @q_data_fields_left_join_vgroup_hash[id]
           # plus sql to get results for each id
           # insert results based on location of q_data_+id.to_s column name   --- need to check that in column name list
@@ -875,7 +828,7 @@ puts "  gggggggggg q_data_form_array.id ="+id.to_s
            # same approach as in applications controller         
            v_limit = 10  # like the chunk approach issue with multiple appts in a vgroup and multiple enrollments
            @q_data_fields_hash[id].each_slice(v_limit) do |fields_local|
-      puts "ggggggfffff   loop with v_limit ="+v_limit.to_s
+
              @results_q_data_temp = []
              # get all the aliases, find in @left_join_q_data and @left_join_vgroup_q_data
              @left_join_q_data_local = []
@@ -911,7 +864,6 @@ puts "  gggggggggg q_data_form_array.id ="+id.to_s
                    sql = sql +" AND "+@conditions.join(' and ')
                end
                
-   puts "ffffffff "+sql
 
                @results_q_data_temp = connection.execute(sql)
                # @results_q_data

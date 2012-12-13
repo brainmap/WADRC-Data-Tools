@@ -105,7 +105,7 @@ puts sql
 # for q_data forms -- only run in export?
 def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup)
 
-puts "CCCCCCCCCCCCCC  run_search_q_data"
+
   scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
   connection = ActiveRecord::Base.connection();
   @left_join_vgroup_q_data =[]  # used when participant is data_link
@@ -114,11 +114,9 @@ puts "CCCCCCCCCCCCCC  run_search_q_data"
   @fields_q_data = []
   @left_join_q_data = []
   @column_headers_q_data = []
-puts "gggggg left_join="+p_left_join.to_s
   
   if tables.size == 1  
      v_table_base_appt = tables[0]
-     puts "AAAAAAAAAA"+v_table_base_appt
       # get distinct sp
       if !fields.blank?
         sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr , "+fields.join(',')  +" ,appointments.comment "
@@ -672,7 +670,7 @@ puts "gggggg left_join="+p_left_join.to_s
               if @conditions.size > 0
                   sql = sql +" AND "+@conditions.join(' and ')
               end
-              puts sql
+              # puts sql
               @results_q_data_temp = connection.execute(sql)
               # @results_q_data
               # getting duplicate appts??-- multiple enrollments
@@ -692,16 +690,14 @@ puts "gggggg left_join="+p_left_join.to_s
           end                    
         end
         # NEED TO RETURN q_data columns-- to cg_search -- rest of processing is used by simple search q_data export 
-puts "uuuuuuuuuuuuu before return"
 
         if !@cg_search_q_data.blank?
-puts "ttttttttttt   in !@cg_search_q_data.blank?"
           return fields,tables, p_left_join,@left_join_vgroup_q_data,@fields_q_data, @left_join_q_data,@column_headers_q_data
         end 
-puts "sssssss after should have returned"
+
         fields.push(v_last_field)
         @column_headers.push(v_last_header)
-puts "hhhhhhhh left_join="+p_left_join.to_s
+
 
        sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date, appointments.id, vgroups.rmr , "+fields.join(',')+",appointments.comment 
         FROM vgroups "+left_join_vgroup.to_a.join(' ')+", appointments, 
