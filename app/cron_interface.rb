@@ -5,8 +5,11 @@ class CronInterface < ActiveRecord::Base
   puts "AAAAAAAAAAA in CronInterface"+v_value_1.to_s
   
 
+  # dev 
   #/usr/local/bin/rails  runner /Users/caillingworth/code/WADRC-Data-Tools/app/cron_interface.rb sp_series_desc_count
   if v_value_1 == "sp_series_desc_count"
+    v_base_path = ""
+
     # move to function?
     # run visit series_desc_cnt for last month -- 
       sql = "select min(image_datasets.id) min_id, max(image_datasets.id) max_id from image_datasets where dcm_file_count is null
@@ -19,8 +22,10 @@ class CronInterface < ActiveRecord::Base
         image_dataset = ImageDataset.find(v_end_id)
         visit = Visit.find(image_dataset.visit_id)
         visit.series_desc_cnt(v_start_id, v_end_id)
+        v_base_path = visit.get_base_path() # happens to be in the visits model
        end 
-       
+
+      v_dir_path = v_base_path+"/analyses/panda/sp_series_desc_cnt/summary/"
       # truncate and populate table
       sql = "truncate table t_sp_series_desc_cout_freq"
       connection = ActiveRecord::Base.connection();        
@@ -64,16 +69,21 @@ class CronInterface < ActiveRecord::Base
       
       # get sp from last month -- codename
       sql = "select distinct scan_procedures.codename from scan_procedures, scan_procedures_vgroups spg2, vgroups vg
-                                        where scan_procedures.id = spg2.scan_procedure_id and vg.id=spg2.vgroup_id and vg.vgroup_date >  adddate(curdate(),'-31')"                            
+                                        where scan_procedures.id = spg2.scan_procedure_id and vg.id=spg2.vgroup_id" # want to write them all first .... and vg.vgroup_date >  adddate(curdate(),'-31')"                            
       results = connection.execute(sql)
+
       results.each do |r|
            puts "codename="+r[0]
            sql_internal = "select codename,series_description,dcm_file_count,frequency_count, fraction_of_total from t_sp_series_desc_cout_freq 
                          where t_sp_series_desc_cout_freq.codename='"+r[0]+"' order by series_description, fraction_of_total desc "
            results_internal = connection.execute(sql_internal)
            # open file for codename
-           results_internal.each do |rc|
-             # write a tab separated row
+           v_file = v_dir_path+r[0]+"_series_desc_cnt.txt"
+           File.open(v_file, "w+") do |f|
+             results_internal.each do |rc|
+               f.write(rc[0]+"\t"+rc[1]+"\t"+rc[2].to_s+"\t"+rc[3].to_s+"\t"+rc[4].to_s+"\n")
+               # write a tab separated row
+             end
            end
            # close file for codeman
       end
