@@ -86,15 +86,32 @@ class CronInterface < ActiveRecord::Base
                # write a tab separated row
              end
            end
-           # close file for codeman
       end
-      
-      
-      
-      # write files v_base_path/analyses/panda/sp_series_desc_cnt/summary/
-      # ----- [codename]_series_desc_cnt.txt
-      # order by sereis_desc, fraction_of_total so first row of new series desc is the highest count 
-      
+   elsif v_value_1 == "fs_Y_N"  #   rails runner app/cron_interface.rb fs_Y_N
+       visit = Visit.find(3)  #  need to get base path without visit
+       v_base_path = visit.get_base_path()
+       v_fs_path = v_base_path+"/preprocessed/modalities/freesurfer/orig_recon/"
+      # ls the dirs
+      v_dir_skip =  ['QA', 'fsaverage', 'fsaverage_bkup20121114', '.', '..', 'lh.EC_average','rh.EC_average','qdec']
+      # 'tmp*'  --- just keep dir cleaner
+      # ??? 'pdt00020.long.pdt00020_base',      'pdt00020_base',       'pdt00020_v2.long.pdt00020_base', plq20018.R, plq20024.R
+      # _v2, _v3, _v4 --> visit2,3,4
+      # check for enumber in enrollment, link to enrollment_vgroup_memberships, appointments, visits
+      # limit by _v2, _v3, _v4 in sp via scan_procedures_vgroups , scan_procedures like 'visit2, visit3, visit4
+      dir_list = Dir.entries(v_fs_path).select { |file| File.directory? File.join(v_fs_path, file)}
+      dir_list.each do |dirname|
+        if !v_dir_skip.include?(dirname) and !dirname.start_with?('tmp')
+          if dirname.count('_v2')  > 1
+            dirname = dirname.gsub(/_v2/,'')
+          elsif dirname.count('_v3')  > 1
+            dirname = dirname.gsub(/_v3/,'')
+          elsif dirname.count('_v4')  > 1
+            dirname = dirname.gsub(/_v4/,'')
+          else
+            puts dirname
+          end
+        end
+      end
       
     
   end
