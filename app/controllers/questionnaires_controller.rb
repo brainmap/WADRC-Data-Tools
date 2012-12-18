@@ -276,7 +276,7 @@ class QuestionnairesController < ApplicationController
    if @html_request == "Y"     
        @results = self.run_search   # in the application controller
    elsif @html_request == "N"
-        @results = self.run_search_q_data (@tables,@fields ,@left_join,@left_join_vgroup)   # in the application controller
+        @results = self.run_search_q_data(@tables,@fields ,@left_join,@left_join_vgroup)   # in the application controller
         @column_number =   @column_headers.size
    end
      @results_total = @results  # pageination makes result count wrong

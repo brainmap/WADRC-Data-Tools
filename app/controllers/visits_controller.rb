@@ -200,13 +200,18 @@ class VisitsController <  AuthorizedController #  ApplicationController
     end
   end
 
-def series_desc_cnt
+def series_desc_cnt(p_start_id="",p_end_id="")
   @v_start_id=""
   @v_end_id = "" 
 
-  if !params[:series_desc_cnt].blank? and !params[:series_desc_cnt][:start_id].blank? and  !params[:series_desc_cnt][:end_id].blank?
-       @v_start_id = params[:series_desc_cnt][:start_id]
-       @v_end_id = params[:series_desc_cnt][:end_id]
+  if (!params[:series_desc_cnt].blank? and !params[:series_desc_cnt][:start_id].blank? and  !params[:series_desc_cnt][:end_id].blank?) or (!p_start_id.blank? and !p_end_id.blank?)
+       if !p_start_id.blank? and !p_end_id.blank?
+          @v_start_id  = p_start_id
+          @v_end_id = p_end_id
+       else
+         @v_start_id = params[:series_desc_cnt][:start_id]
+         @v_end_id = params[:series_desc_cnt][:end_id]
+       end
        @image_datasets = ImageDataset.where( " id between "+params[:series_desc_cnt][:start_id]+" and "+params[:series_desc_cnt][:end_id] ).where(" dcm_file_count is null ").where(" glob is not null")
        @image_datasets.each do |ids|
        v_path = (ids.path).gsub('team','team*')

@@ -272,7 +272,7 @@ class BlooddrawsController < ApplicationController
    elsif @html_request == "N"
         @left_join_vgroup = []
 puts "ffffffff @left_join="+@left_join.to_s
-        @results = self.run_search_q_data (@tables,@fields ,@left_join,@left_join_vgroup)  # in the application controller
+        @results = self.run_search_q_data(@tables,@fields ,@left_join,@left_join_vgroup)  # in the application controller
         @column_number =   @column_headers.size
    end
        

@@ -21,6 +21,7 @@ class CronInterface < ActiveRecord::Base
         v_end_id   = r[1].to_s
         image_dataset = ImageDataset.find(v_end_id)
         visit = Visit.find(image_dataset.visit_id)
+        puts "start id = "+v_start_id+"   end id="+v_end_id
         visit.series_desc_cnt(v_start_id, v_end_id)
         v_base_path = visit.get_base_path() # happens to be in the visits model
        end 
@@ -69,7 +70,7 @@ class CronInterface < ActiveRecord::Base
       
       # get sp from last month -- codename
       sql = "select distinct scan_procedures.codename from scan_procedures, scan_procedures_vgroups spg2, vgroups vg
-                                        where scan_procedures.id = spg2.scan_procedure_id and vg.id=spg2.vgroup_id" # want to write them all first .... and vg.vgroup_date >  adddate(curdate(),'-31')"                            
+                                        where scan_procedures.id = spg2.scan_procedure_id and vg.id=spg2.vgroup_id  and vg.vgroup_date >  adddate(curdate(),'-31')"                            
       results = connection.execute(sql)
 
       results.each do |r|
