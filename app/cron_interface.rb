@@ -91,24 +91,100 @@ class CronInterface < ActiveRecord::Base
        visit = Visit.find(3)  #  need to get base path without visit
        v_base_path = visit.get_base_path()
        v_fs_path = v_base_path+"/preprocessed/modalities/freesurfer/orig_recon/"
-      # ls the dirs
-      v_dir_skip =  ['QA', 'fsaverage', 'fsaverage_bkup20121114', '.', '..', 'lh.EC_average','rh.EC_average','qdec']
+      # ls the dirs and links
+      v_dir_skip =  ['QA', 'fsaverage', 'fsaverage_bkup20121114', '.', '..', 'lh.EC_average','rh.EC_average','qdec','surfer.log']
       # 'tmp*'  --- just keep dir cleaner
       # ??? 'pdt00020.long.pdt00020_base',      'pdt00020_base',       'pdt00020_v2.long.pdt00020_base', plq20018.R, plq20024.R
       # _v2, _v3, _v4 --> visit2,3,4
+      connection = ActiveRecord::Base.connection();
+      v_sp_visit1_array = []
+      v_sp_visit2_array = []
+      v_sp_visit3_array = []
+      v_sp_visit4_array = []
+      sql = "select id from scan_procedures where codename like '%visit2'"        
+      results = connection.execute(sql)
+      results.each do |r|
+        v_sp_visit2_array.push(r[0])
+      end      
+      
+      sql = "select id from scan_procedures where codename like '%visit3'"        
+      results = connection.execute(sql)
+      results.each do |r|
+        v_sp_visit3_array.push(r[0])
+      end
+      
+      sql = "select id from scan_procedures where codename like '%visit4'"        
+      results = connection.execute(sql)
+      results.each do |r|
+        v_sp_visit4_array.push(r[0])
+      end
+      
+      sql = "select id from scan_procedures where codename not like '%visit2' and  codename  not like '%visit3' and  codename  not like '%visit4'"        
+      results = connection.execute(sql)
+      results.each do |r|
+        v_sp_visit1_array.push(r[0])
+      end      
+      
+      
+      
       # check for enumber in enrollment, link to enrollment_vgroup_memberships, appointments, visits
       # limit by _v2, _v3, _v4 in sp via scan_procedures_vgroups , scan_procedures like 'visit2, visit3, visit4
       dir_list = Dir.entries(v_fs_path).select { |file| File.directory? File.join(v_fs_path, file)}
+      link_list = Dir.entries(v_fs_path).select { |file| File.symlink? File.join(v_fs_path, file)}
+      dir_list.concat(link_list)
       dir_list.each do |dirname|
         if !v_dir_skip.include?(dirname) and !dirname.start_with?('tmp')
-          if dirname.count('_v2')  > 1
+          if dirname.include?('_v2')
             dirname = dirname.gsub(/_v2/,'')
-          elsif dirname.count('_v3')  > 1
+            visits = Visit.where("visits.appointment_id in ( select appointments.id from appointments where appointments.vgroup_id in
+                                                                (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
+                                                                     where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
+                                                            and appointments.vgroup_id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+                                                                                             where scan_procedure_id in (?)))", dirname,v_sp_visit2_array)
+            visits.each do |v|
+              if v.fs_flag != "Y"
+                 v.fs_flag ="Y"
+                 v.save
+              end
+            end
+          elsif dirname.include?('_v3')
             dirname = dirname.gsub(/_v3/,'')
-          elsif dirname.count('_v4')  > 1
+            visits = Visit.where("visits.appointment_id in ( select appointments.id from appointments where appointments.vgroup_id in
+                                                                (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
+                                                                     where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
+                                                            and appointments.vgroup_id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+                                                                                             where scan_procedure_id in (?)))", dirname,v_sp_visit3_array)
+            visits.each do |v|
+              if v.fs_flag != "Y"
+                 v.fs_flag ="Y"
+                 v.save
+              end
+            end
+          elsif dirname.include?('_v4')
             dirname = dirname.gsub(/_v4/,'')
+            visits = Visit.where("visits.appointment_id in ( select appointments.id from appointments where appointments.vgroup_id in
+                                                                (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
+                                                                     where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
+                                                            and appointments.vgroup_id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+                                                                                             where scan_procedure_id in (?)))", dirname,v_sp_visit4_array)
+            visits.each do |v|
+              if v.fs_flag != "Y"
+                 v.fs_flag ="Y"
+                 v.save
+              end
+            end
           else
-            puts dirname
+            visits = Visit.where("visits.appointment_id in ( select appointments.id from appointments where appointments.vgroup_id in
+                                                                (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
+                                                                     where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
+                                                            and appointments.vgroup_id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+                                                                                             where scan_procedure_id in (?)))", dirname,v_sp_visit1_array)
+            visits.each do |v|
+              if v.fs_flag != "Y"
+                 v.fs_flag ="Y"
+                 v.save
+              end
+            end
           end
         end
       end
