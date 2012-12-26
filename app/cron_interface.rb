@@ -68,7 +68,7 @@ class CronInterface < ActiveRecord::Base
         v_end_id   = r[1].to_s
         vgroup = Vgroup.find(v_end_id)
         puts "VGROUP start id = "+v_start_id+"   end id="+v_end_id
-        vgroup.nii_file_cnt(v_start_id, v_end_id)
+        vgroup.nii_file_cnt(v_start_id, v_end_id)  
         # alread got from visits v_base_path = vgroup.get_base_path() # happens to be in the visits model
        end
       

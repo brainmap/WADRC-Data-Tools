@@ -269,7 +269,7 @@ class Visit < ActiveRecord::Base
   end
   
   
-  def series_desc_cnt(p_start_id, p_end_id)
+  def series_desc_cnt(p_start_id, p_end_id)  ## duplicate of visit_controller function 
     @v_start_id=""
     @v_end_id = "" 
     if !p_start_id.blank? and !p_end_id.blank?

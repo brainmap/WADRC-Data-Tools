@@ -726,7 +726,7 @@ end
       end
     end
 
-    def nii_file_cnt(p_start_id="",p_end_id="")
+    def nii_file_cnt(p_start_id="",p_end_id="") # duplicated somewhat in vgroup model
       @v_start_id=""
       @v_end_id = "" 
 
@@ -757,7 +757,7 @@ end
                  end
                end
              end      
-         end
+           end
        end
 
       respond_to do |format|

@@ -200,7 +200,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     end
   end
 
-def series_desc_cnt(p_start_id="",p_end_id="")
+def series_desc_cnt(p_start_id="",p_end_id="")  ### ??? duplicate in visit model????
   @v_start_id=""
   @v_end_id = "" 
 
