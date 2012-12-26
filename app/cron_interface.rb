@@ -132,63 +132,64 @@ class CronInterface < ActiveRecord::Base
       dir_list = Dir.entries(v_fs_path).select { |file| File.directory? File.join(v_fs_path, file)}
       link_list = Dir.entries(v_fs_path).select { |file| File.symlink? File.join(v_fs_path, file)}
       dir_list.concat(link_list)
+      v_cnt = 0
       dir_list.each do |dirname|
         if !v_dir_skip.include?(dirname) and !dirname.start_with?('tmp')
           if dirname.include?('_v2')
             dirname = dirname.gsub(/_v2/,'')
-            visits = Visit.where("visits.appointment_id in ( select appointments.id from appointments where appointments.vgroup_id in
-                                                                (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
+            vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
                                                                      where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
-                                                            and appointments.vgroup_id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
-                                                                                             where scan_procedure_id in (?)))", dirname,v_sp_visit2_array)
-            visits.each do |v|
+                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+                                                                                             where scan_procedure_id in (?))", dirname,v_sp_visit2_array)                                                                               
+            vgroups.each do |v|
               if v.fs_flag != "Y"
                  v.fs_flag ="Y"
                  v.save
+                 v_cnt = v_cnt + 1
               end
             end
           elsif dirname.include?('_v3')
             dirname = dirname.gsub(/_v3/,'')
-            visits = Visit.where("visits.appointment_id in ( select appointments.id from appointments where appointments.vgroup_id in
-                                                                (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
+            vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
                                                                      where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
-                                                            and appointments.vgroup_id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
-                                                                                             where scan_procedure_id in (?)))", dirname,v_sp_visit3_array)
-            visits.each do |v|
+                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+                                                                                             where scan_procedure_id in (?))", dirname,v_sp_visit3_array)
+            vgroups.each do |v|
               if v.fs_flag != "Y"
                  v.fs_flag ="Y"
                  v.save
+                  v_cnt = v_cnt + 1
               end
             end
           elsif dirname.include?('_v4')
             dirname = dirname.gsub(/_v4/,'')
-            visits = Visit.where("visits.appointment_id in ( select appointments.id from appointments where appointments.vgroup_id in
-                                                                (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
+            vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
                                                                      where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
-                                                            and appointments.vgroup_id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
-                                                                                             where scan_procedure_id in (?)))", dirname,v_sp_visit4_array)
-            visits.each do |v|
+                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+                                                                                             where scan_procedure_id in (?))", dirname,v_sp_visit4_array)
+            vgroups.each do |v|
               if v.fs_flag != "Y"
                  v.fs_flag ="Y"
                  v.save
+                  v_cnt = v_cnt + 1
               end
             end
           else
-            visits = Visit.where("visits.appointment_id in ( select appointments.id from appointments where appointments.vgroup_id in
-                                                                (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
+            vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
                                                                      where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
-                                                            and appointments.vgroup_id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
-                                                                                             where scan_procedure_id in (?)))", dirname,v_sp_visit1_array)
-            visits.each do |v|
+                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+                                                                                             where scan_procedure_id in (?))", dirname,v_sp_visit1_array)
+            vgroups.each do |v|
               if v.fs_flag != "Y"
                  v.fs_flag ="Y"
                  v.save
+                  v_cnt = v_cnt + 1
               end
             end
           end
         end
       end
-      
+      puts " fs_flag set = Y "+v_cnt.to_s
     
   end
   

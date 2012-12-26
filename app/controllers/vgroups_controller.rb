@@ -633,8 +633,8 @@ end
     
          else    
            @html_request ="N"          
-            @column_headers = ['Date','Protocol','Enumber','RMR','MRI status','PET status','LP status','LH status','NP status','Questionnaire status','Entered by','QCed by','QC completed','Compile folder','Vgroup Note'] # need to look up values
-            @fields =["vgroups.transfer_mri", "vgroups.transfer_pet", "vgroups.completedlumbarpuncture", "vgroups.completedblooddraw", "vgroups.completedneuropsych", "vgroups.completedquestionnaire", "concat(u1.first_name,' ',u1.last_name)", "concat(u2.first_name,' ',u2.last_name)", "vgroups.qc_completed", "vgroups.compile_folder", "vgroups.note"]
+            @column_headers = ['Date','Protocol','Enumber','RMR','MRI status','PET status','LP status','LH status','NP status','Questionnaire status','Entered by','QCed by','QC completed','Compile folder','FS Y/N','Vgroup Note'] # need to look up values
+            @fields =["vgroups.transfer_mri", "vgroups.transfer_pet", "vgroups.completedlumbarpuncture", "vgroups.completedblooddraw", "vgroups.completedneuropsych", "vgroups.completedquestionnaire", "concat(u1.first_name,' ',u1.last_name)", "concat(u2.first_name,' ',u2.last_name)", "vgroups.qc_completed", "vgroups.compile_folder","vgroups.fs_flag", "vgroups.note"]
             @left_join = ["LEFT JOIN users u1 on vgroups.entered_by = u1.id",
                               "LEFT JOIN users u2 on vgroups.qc_by = u2.id  "]
                   # Protocol,Enumber,RMR,vgroup_Date get prepended to the fields   
@@ -725,6 +725,49 @@ end
         format.html   {@results = Kaminari.paginate_array(@results).page(params[:page]).per(50)}# vgroups_search.html.erb
       end
     end
+
+    def nii_file_cnt(p_start_id="",p_end_id="")
+      @v_start_id=""
+      @v_end_id = "" 
+
+      if (!params[:nii_file_cnt].blank? and !params[:nii_file_cnt][:start_id].blank? and  !params[:nii_file_cnt][:end_id].blank?) or (!p_start_id.blank? and !p_end_id.blank?)
+           if !p_start_id.blank? and !p_end_id.blank?
+              @v_start_id  = p_start_id
+              @v_end_id = p_end_id
+           else
+             @v_start_id = params[:nii_file_cnt][:start_id]
+             @v_end_id = params[:nii_file_cnt][:end_id]
+           end
+           @vgroups = Vgroup.where( " id between "+@v_start_id+" and "+@v_end_id ).where("( nii_file_count is null or nii_file_count = 0 )")
+           v_base_path = @vgroups[0].get_base_path
+           v_glob = '*.nii'
+           @vgroups.each do |vg|
+             # could be multiple sp
+             vg.scan_procedures.each do |sp| 
+               v_sp = sp.codename
+               # could be multiple subject_id
+               vg.enrollments.each do |s|
+                 v_subject_id = s.enumber
+                 v_path = v_base_path+"/preprocessed/visits/"+v_sp+"/"+v_subject_id+"/unknown/"
+  puts "AAAAAA="+v_path
+                 v_count = `cd #{v_path};ls -1 #{v_glob}| wc -l`.to_i   #
+  puts "BBBBBBB="+v_count.to_s
+                 if v_count > 0 
+  puts "CCCCCCCC count> 0 "
+                   @vgroup = Vgroup.find(vg.id)
+                   @vgroup.nii_file_count = v_count
+                   @vgroup.save
+                 end
+               end
+             end      
+         end
+       end
+
+      respond_to do |format|
+        format.html # new.html.erb
+      end
+    end
+
 
   
   def home

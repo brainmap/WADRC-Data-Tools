@@ -413,7 +413,7 @@ class Visit < ActiveRecord::Base
     "%s <=> %s (%.3f)" % [rmr, mri_scan.study_rmr]
   end
   
-  def get_base_path()
+  def get_base_path()  # this is a duplicate of vgroup model function --- need a common location
   	# look for mount to adrc image server - different on linux vs mac os , and different on mac os delending on login order
   	# check for
   	# Linux /home/USER/adrcdata,   /Data/vtrak1   

@@ -189,6 +189,7 @@ WADRCDataTools::Application.routes.draw do
    match '/vgroups/in_enumber/:enumber', :controller => 'vgroups', :action => 'index_by_enumber', :as => :in_enumber_vgroup
    #match '/vgroups/in_scan_procedure', :controller => 'vgroups', :action => 'home', :as => :home
    #match '/vgroups/in_enumber', :controller => 'vgroups', :action => 'home', :as => :home
+   match '/vgroups/nii_file_cnt', :controller => 'vgroups', :action => 'nii_file_cnt', :as =>:nii_file_cnt
       
    match '/vgroups/vgroup_search' , :controller => 'vgroups', :action => 'vgroup_search', :as =>:vgroup_search
     match '/vgroups/change_qc_vgroup', :controller => 'vgroups', :action => 'change_qc_vgroup', :as =>:change_qc_vgroup
