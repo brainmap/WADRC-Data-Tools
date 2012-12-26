@@ -749,11 +749,8 @@ end
                vg.enrollments.each do |s|
                  v_subject_id = s.enumber
                  v_path = v_base_path+"/preprocessed/visits/"+v_sp+"/"+v_subject_id+"/unknown/"
-  puts "AAAAAA="+v_path
                  v_count = `cd #{v_path};ls -1 #{v_glob}| wc -l`.to_i   #
-  puts "BBBBBBB="+v_count.to_s
                  if v_count > 0 
-  puts "CCCCCCCC count> 0 "
                    @vgroup = Vgroup.find(vg.id)
                    @vgroup.nii_file_count = v_count
                    @vgroup.save

@@ -58,6 +58,34 @@ class CronInterface < ActiveRecord::Base
       group by sp.codename, ids.series_description, ids.dcm_file_count"        
       results = connection.execute(sql)
       
+      
+      # get the nii file_count from vgroups
+      sql = "select min(vgroups.id) min_id, max(vgroups.id) max_id from image_datasets where ( nii_file_count is null or nii_file_count = 0)
+         and  vgroups.vgroup_date > adddate(curdate(),'-31'))"
+      connection = ActiveRecord::Base.connection();        
+      results = connection.execute(sql)
+      results.each do |r|
+        v_start_id =r[0].to_s
+        v_end_id   = r[1].to_s
+        vgroup = Vgroup.find(v_end_id)
+        puts "start id = "+v_start_id+"   end id="+v_end_id
+        vgroup.nii_desc_cnt(v_start_id, v_end_id)
+        # alread got from visits v_base_path = vgroup.get_base_path() # happens to be in the visits model
+       end
+      
+       sql = "insert into t_sp_series_desc_cout_freq (codename,series_description, dcm_file_count, frequency_count)
+       select sp.codename, 'nii_files', vg2.nii_file_count, count(*) frequency_count
+       from scan_procedures sp, scan_procedures_vgroups spg,  vgroups vg2
+       where sp.id = spg.scan_procedure_id
+       and  vg2.id = spg.vgroup_id
+       and ( vg2.nii_file_count is not null and vg2.nii_file_count > 0)
+       and spg.scan_procedure_id in (select spg2.scan_procedure_id from scan_procedures_vgroups spg2, vgroups vg
+                                         where vg.id=spg2.vgroup_id and vg.vgroup_date >  adddate(curdate(),'-400') )
+       group by sp.codename, vg2.nii_file_count"        
+       results = connection.execute(sql)      
+      
+      
+      
       # update fraction_of_total
       sql ="update t_sp_series_desc_cout_freq 
       set fraction_of_total =
