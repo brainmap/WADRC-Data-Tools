@@ -60,8 +60,8 @@ class CronInterface < ActiveRecord::Base
       
       
       # get the nii file_count from vgroups
-      sql = "select min(vgroups.id) min_id, max(vgroups.id) max_id from vgroups where ( nii_file_count is null or nii_file_count = 0)
-         and  vgroups.vgroup_date > adddate(curdate(),'-31'))"      
+      sql = "select min(vgroups.id) min_id, max(vgroups.id) max_id from vgroups where ( nii_file_count is not null or nii_file_count > 0)
+         and  vgroups.vgroup_date > adddate(curdate(),'-31')"      
       results = connection.execute(sql)
       results.each do |r|
         v_start_id =r[0].to_s
