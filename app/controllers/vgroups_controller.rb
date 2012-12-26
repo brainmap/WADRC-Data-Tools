@@ -738,26 +738,29 @@ end
              @v_start_id = params[:nii_file_cnt][:start_id]
              @v_end_id = params[:nii_file_cnt][:end_id]
            end
-           @vgroups = Vgroup.where( " id between "+@v_start_id+" and "+@v_end_id ).where("( nii_file_count is null or nii_file_count = 0 )")
-           v_base_path = @vgroups[0].get_base_path
-           v_glob = '*.nii'
-           @vgroups.each do |vg|
-             # could be multiple sp
-             vg.scan_procedures.each do |sp| 
-               v_sp = sp.codename
-               # could be multiple subject_id
-               vg.enrollments.each do |s|
-                 v_subject_id = s.enumber
-                 v_path = v_base_path+"/preprocessed/visits/"+v_sp+"/"+v_subject_id+"/unknown/"
-                 v_count = `cd #{v_path};ls -1 #{v_glob}| wc -l`.to_i   #
-                 if v_count > 0 
-                   @vgroup = Vgroup.find(vg.id)
-                   @vgroup.nii_file_count = v_count
-                   @vgroup.save
-                 end
-               end
-             end      
-           end
+           vg = Vgroup.find( @v_start_id)
+           vg.nii_file_cnt( @v_start_id, @v_end_id) # use version in model - same as used by cron_interface
+           
+#           @vgroups = Vgroup.where( " id between "+@v_start_id+" and "+@v_end_id ).where("( nii_file_count is null or nii_file_count = 0 )")
+#           v_base_path = @vgroups[0].get_base_path
+#           v_glob = '*.nii'
+#           @vgroups.each do |vg|
+#             # could be multiple sp
+#             vg.scan_procedures.each do |sp| 
+#               v_sp = sp.codename
+#               # could be multiple subject_id
+#               vg.enrollments.each do |s|
+#                 v_subject_id = s.enumber
+#                 v_path = v_base_path+"/preprocessed/visits/"+v_sp+"/"+v_subject_id+"/unknown/"
+#                 v_count = `cd #{v_path};ls -1 #{v_glob}| wc -l`.to_i   #
+#                 if v_count > 0 
+#                   @vgroup = Vgroup.find(vg.id)
+#                   @vgroup.nii_file_count = v_count
+#                   @vgroup.save
+#                 end
+#               end
+#             end      
+#           end
        end
 
       respond_to do |format|
