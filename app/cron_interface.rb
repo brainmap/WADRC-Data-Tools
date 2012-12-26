@@ -61,14 +61,13 @@ class CronInterface < ActiveRecord::Base
       
       # get the nii file_count from vgroups
       sql = "select min(vgroups.id) min_id, max(vgroups.id) max_id from image_datasets where ( nii_file_count is null or nii_file_count = 0)
-         and  vgroups.vgroup_date > adddate(curdate(),'-31'))"
-      connection = ActiveRecord::Base.connection();        
+         and  vgroups.vgroup_date > adddate(curdate(),'-31'))"      
       results = connection.execute(sql)
       results.each do |r|
         v_start_id =r[0].to_s
         v_end_id   = r[1].to_s
         vgroup = Vgroup.find(v_end_id)
-        puts "start id = "+v_start_id+"   end id="+v_end_id
+        puts "VGROUP start id = "+v_start_id+"   end id="+v_end_id
         vgroup.nii_desc_cnt(v_start_id, v_end_id)
         # alread got from visits v_base_path = vgroup.get_base_path() # happens to be in the visits model
        end
