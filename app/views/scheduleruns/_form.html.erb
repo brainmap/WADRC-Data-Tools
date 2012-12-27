@@ -1,0 +1,37 @@
+<%= form_for(@schedulerun) do |f| %>
+  <% if @schedulerun.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@schedulerun.errors.count, "error") %> prohibited this schedulerun from being saved:</h2>
+
+      <ul>
+      <% @schedulerun.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :schedule_id %><br />
+    <%= f.text_field :schedule_id %>
+  </div>
+  <div class="field">
+    <%= f.label :start_time %><br />
+    <%= f.date_select :start_time %>
+  </div>
+  <div class="field">
+    <%= f.label :end_time %><br />
+    <%= f.date_select :end_time %>
+  </div>
+  <div class="field">
+    <%= f.label :status_flag %><br />
+    <%= f.text_field :status_flag %>
+  </div>
+  <div class="field">
+    <%= f.label :log_file %><br />
+    <%= f.text_field :log_file %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

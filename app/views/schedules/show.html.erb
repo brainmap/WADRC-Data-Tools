@@ -1,0 +1,40 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Run command:</b>
+  <%= @schedule.run_command %>
+</p>
+
+<p>
+  <b>Parameters:</b>
+  <%= @schedule.parameters %>
+</p>
+
+<p>
+  <b>Description:</b>
+  <%= @schedule.description %>
+</p>
+
+<p>
+  <b>Run time length min:</b>
+  <%= @schedule.run_time_length_min %>
+</p>
+
+<p>
+  <b>Status flag:</b>
+  <%= @schedule.status_flag %>
+</p>
+
+<p>
+  <b>Target table:</b>
+  <%= @schedule.target_table %>
+</p>
+
+<p>
+  <b>Target column:</b>
+  <%= @schedule.target_column %>
+</p>
+
+
+<%= link_to 'Edit', edit_schedule_path(@schedule) %> |
+<%= link_to 'Back', schedules_path %>

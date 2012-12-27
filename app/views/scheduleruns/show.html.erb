@@ -1,0 +1,30 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Schedule:</b>
+  <%= @schedulerun.schedule_id %>
+</p>
+
+<p>
+  <b>Start time:</b>
+  <%= @schedulerun.start_time %>
+</p>
+
+<p>
+  <b>End time:</b>
+  <%= @schedulerun.end_time %>
+</p>
+
+<p>
+  <b>Status flag:</b>
+  <%= @schedulerun.status_flag %>
+</p>
+
+<p>
+  <b>Log file:</b>
+  <%= @schedulerun.log_file %>
+</p>
+
+
+<%= link_to 'Edit', edit_schedulerun_path(@schedulerun) %> |
+<%= link_to 'Back', scheduleruns_path %>
