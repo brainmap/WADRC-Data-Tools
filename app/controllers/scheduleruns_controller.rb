@@ -2,10 +2,10 @@ class SchedulerunsController < ApplicationController
   # GET /scheduleruns
   # GET /scheduleruns.xml
   def index
-    @scheduleruns = Schedulerun.all
+    @scheduleruns = Schedulerun.order("id DESC")
 
     respond_to do |format|
-      format.html # index.html.erb
+      format.html {@scheduleruns = Kaminari.paginate_array(@scheduleruns).page(params[:page]).per(50)}# index.html.erb
       format.xml  { render :xml => @scheduleruns }
     end
   end

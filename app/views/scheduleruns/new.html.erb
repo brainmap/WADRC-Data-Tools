@@ -1,5 +1,14 @@
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
 <h1>New schedulerun</h1>
 
 <%= render 'form' %>
 
-<%= link_to 'Back', scheduleruns_path %>
+<%= link_to 'Back', scheduleruns_path %> |
+<%= link_to('Column Group search/load', '/users/cgbase') %>
+
+
+<%else %>	
+	
+	
+<% end %>
+

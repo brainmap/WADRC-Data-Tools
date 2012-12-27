@@ -9,7 +9,15 @@ class CronInterface < ActiveRecord::Base
   #/usr/local/bin/rails  runner /Users/caillingworth/code/WADRC-Data-Tools/app/cron_interface.rb sp_series_desc_count
   if v_value_1 == "sp_series_desc_count"
     v_base_path = ""
-
+     @schedule = Schedule.where("name in ('sp_series_desc_count')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting sp_series_desc_count"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+    begin   # catch all exception and put error in comment
     # move to function?
     # run visit series_desc_cnt for last month -- 
       sql = "select min(image_datasets.id) min_id, max(image_datasets.id) max_id from image_datasets where dcm_file_count is null
@@ -57,7 +65,7 @@ class CronInterface < ActiveRecord::Base
       and ids.series_description not in ("+v_excluded_series_desc+")
       group by sp.codename, ids.series_description, ids.dcm_file_count"        
       results = connection.execute(sql)
-      
+      v_comment = v_comment+"\n finish series desc cnt"
       
       # get the nii file_count from vgroups
       sql = "select min(vgroups.id) min_id, max(vgroups.id) max_id from vgroups where ( nii_file_count is not null or nii_file_count > 0)
@@ -82,7 +90,7 @@ class CronInterface < ActiveRecord::Base
                                          where vg.id=spg2.vgroup_id and vg.vgroup_date >  adddate(curdate(),'-400') )
        group by sp.codename, vg2.nii_file_count"        
        results = connection.execute(sql)      
-      
+       v_comment = v_comment+"\n finish nii cnt"
       
       
       # update fraction_of_total
@@ -102,6 +110,7 @@ class CronInterface < ActiveRecord::Base
 
       results.each do |r|
            puts "codename="+r[0]
+           v_comment = v_comment+"\n codename="+r[0]
            sql_internal = "select codename,series_description,dcm_file_count,frequency_count, fraction_of_total from t_sp_series_desc_cout_freq 
                          where t_sp_series_desc_cout_freq.codename='"+r[0]+"' order by series_description, fraction_of_total desc "
            results_internal = connection.execute(sql_internal)
@@ -114,7 +123,25 @@ class CronInterface < ActiveRecord::Base
              end
            end
       end
+       @schedulerun.comment =("successful finish sp_series_desc_count "+v_comment)[0..499]
+        @schedulerun.save
+        @schedulerun.end_time = @schedulerun.updated_at      
+        @schedulerun.save
+      rescue Exception => msg
+         v_error = msg.to_s
+          @schedulerun.comment =v_error[0..499]
+          @schedulerun.status_flag="E"
+          @schedulerun.save
+      end
    elsif v_value_1 == "fs_Y_N"  #   rails runner app/cron_interface.rb fs_Y_N
+     @schedule = Schedule.where("name in ('fs_Y_N')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting fs_Y_N"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+    begin   # catch all exception and put error in comment
        visit = Visit.find(3)  #  need to get base path without visit
        v_base_path = visit.get_base_path()
        v_fs_path = v_base_path+"/preprocessed/modalities/freesurfer/orig_recon/"
@@ -216,7 +243,19 @@ class CronInterface < ActiveRecord::Base
           end
         end
       end
+ 
+       @schedulerun.comment ="successful finish fs_Y_N ===set = Y "+v_cnt.to_s
+        @schedulerun.save
+        @schedulerun.end_time = @schedulerun.updated_at      
+        @schedulerun.save
       puts " fs_flag set = Y "+v_cnt.to_s
+      rescue Exception => msg
+         v_error = msg.to_s
+          @schedulerun.comment =v_error[0..499]
+          @schedulerun.status_flag="E"
+          @schedulerun.save
+      end
+      
     
   end
   

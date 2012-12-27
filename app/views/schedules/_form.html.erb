@@ -1,3 +1,5 @@
+<%  v_y_n = {"Y"=>"Y","N"=>"N","E"=>"E"}
+%>
 <%= form_for(@schedule) do |f| %>
   <% if @schedule.errors.any? %>
     <div id="error_explanation">
@@ -10,35 +12,28 @@
       </ul>
     </div>
   <% end %>
+<table width="80%">
+	<tr><td align="left"><b>Name:</b> <%= f.text_field :name, :required =>TRUE %> </td><td align="left"><b>Run Length <small>(min.)</small>:</b> <%= f.text_field :run_time_length_min ,:size=>10, :onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}"%>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<b>Status:</b> <%= f.select :status_flag, v_y_n,
+											              {:prompt => 'Status?'}  %> 
+		 </tr>
+<tr><td align="left" colspan="2">	<b>Run Command:</b><br>
+	<%= f.text_area :run_command,:size => "140x6" %>
+  </td></tr>
+<tr><td align="left" colspan="2">	<b>Parameters:</b><br>
+	<%= f.text_area :parameters,:size => "100x6" %>
+  <br><br><br></td></tr>
+<tr><td align="left" colspan="2">	<b>Description:</b><br>
+	<%= f.text_area :description,:size => "100x6" %>
+  <br><br></td></tr>
+<tr><td align="left"><b>Target Table:</b> <%= f.text_field :target_table %> </td><td align="left"><b>Target Column(s):</b> <%= f.text_field :target_column %> </td></tr>
+</table>
+<br><br>
 
-  <div class="field">
-    <%= f.label :run_command %><br />
-    <%= f.text_field :run_command %>
-  </div>
-  <div class="field">
-    <%= f.label :parameters %><br />
-    <%= f.text_field :parameters %>
-  </div>
-  <div class="field">
-    <%= f.label :description %><br />
-    <%= f.text_field :description %>
-  </div>
-  <div class="field">
-    <%= f.label :run_time_length_min %><br />
-    <%= f.text_field :run_time_length_min %>
-  </div>
-  <div class="field">
-    <%= f.label :status_flag %><br />
-    <%= f.text_field :status_flag %>
-  </div>
-  <div class="field">
-    <%= f.label :target_table %><br />
-    <%= f.text_field :target_table %>
-  </div>
-  <div class="field">
-    <%= f.label :target_column %><br />
-    <%= f.text_field :target_column %>
-  </div>
+
+
+
   <div class="actions">
     <%= f.submit %>
   </div>

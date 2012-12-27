@@ -1,5 +1,9 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :scheduleruns
+
+  resources :schedules
+
   resources :cg_query_tn_cns
 
   resources :cg_query_tns

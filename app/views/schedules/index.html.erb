@@ -2,6 +2,7 @@
 
 <table>
   <tr>
+	<th>Name</th>
     <th>Run command</th>
     <th>Parameters</th>
     <th>Description</th>
@@ -16,6 +17,7 @@
 
 <% @schedules.each do |schedule| %>
   <tr>
+  <td valign="top"><%= schedule.name %></td>
     <td><%= schedule.run_command %></td>
     <td><%= schedule.parameters %></td>
     <td><%= schedule.description %></td>
@@ -32,4 +34,5 @@
 
 <br />
 
-<%= link_to 'New Schedule', new_schedule_path %>
+<%= link_to 'New Schedule', new_schedule_path %>|
+<%= link_to('Column Group search/load', '/users/cgbase') %>
