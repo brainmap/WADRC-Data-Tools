@@ -35,13 +35,23 @@ v_join_type_hash =[['Inner','0'],['Outer','1']]
 v_conditions_hash = [['=','0'],['>=','1'],['<=','2'],['!=','3'],['is blank','5'],['is not blank','6'],['contains','7']]
 v_conditions_between_hash = [['=','0'],['>=','1'],['<=','2'],['!=','3'],['between','4'],['is blank','5'],['is not blank','6'],['contains','7']]
 
-@cg_tn = CgTn.where("table_type='base' and status_flag='Y'").order(:id)
+# make array of tn_id from cg add table
+@add_cg_tn_id = []
+if !params[:cg_search].blank? and !params[:cg_search][:add_cg_tn_id].blank? 
+  params[:cg_search][:add_cg_tn_id].each do |add_cg_tn_id|
+    v_add_cg_tn_id = add_cg_tn_id.to_a.to_s
+    if (!params[:cg_search][:include_add_cg_tn].blank? and !params[:cg_search][:include_add_cg_tn][v_add_cg_tn_id].blank?)
+	   @add_cg_tn_id.push(v_add_cg_tn_id)
+	end
+  end	
+end
+@add_cg_tns = CgTn.where("table_type='column_group' and status_flag='Y'")
+@cg_tn = CgTn.where("(table_type='base' and status_flag='Y') or id in (?)",@add_cg_tn_id).order(:id)
 # how to order
 v_tn_cn_hash =[]
 v_tn_cn_searchable_hash = []
 
 %>
-
 
 <table  width="100%" ><tr ><td>&nbsp;</td><td width="20%" nowrap align="right" bgcolor="CFCFCF"><table border="1"><tr><td  >
 	<%= form_for 'cg_search' do |f| %>
@@ -145,14 +155,25 @@ v_tn_cn_searchable_hash = []
     <tr>
       <th></th>
       <td><%= f.submit("run search")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <small><%= link_to "Clear Search", '/cg_search?clear_all=Y'%></small>
+	<% if @add_cg_tns.size > 0 %>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <small><%= link_to "Add tables", '/cg_tables'%></small>
+	<% end %>
 	   <% if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?%><br>
 	<a href="#view_results">View Results</a>
        <% end %>
+      
 	 </td>
     </tr>
   </table>
   <%= clearing_br %>
 <br>
+<% # make hidden fields to propagate the added cg tables
+@add_cg_tn_id.each do |add_cg| %>
+<%= hidden_field :cg_search, :add_cg_tn_id, :value=>add_cg  %>
+<%= hidden_field :cg_search, 'include_add_cg_tn]['+add_cg  , :value=>"1"%>
+
+<% end
+%>
 <table  width="90%"><tr><th width="50"><small><small>Include</small></small></th><th  nowrap>Table/Column Name 
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<small><small>Search By</small></small>&nbsp;<small><small>/</small></small>&nbsp;<small><small>Condition</small></small></th><th width="50"><small><small>Join Type</small></small></th>

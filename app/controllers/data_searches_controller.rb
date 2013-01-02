@@ -117,6 +117,13 @@ class DataSearchesController < ApplicationController
           i = i+1
         end    
     end
+    
+    def cg_tables
+      respond_to do |format|
+          format.html
+      end
+      
+    end
    # can not do a self join-- unless two copies of table - unique tn_id, tn_cn_id
     def cg_search   
 
