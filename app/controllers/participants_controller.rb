@@ -21,7 +21,7 @@ class ParticipantsController < ApplicationController
  
  @search = Participant.where(" participants.id in ( select participant_id from enrollments,enrollment_vgroup_memberships, scan_procedures_vgroups
       where enrollments.id = enrollment_vgroup_memberships.enrollment_id
-     and  enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.visit_id and scan_procedures_vgroups.scan_procedure_id in (?)) ", scan_procedure_array).search(params[:search])
+     and  enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?)) ", scan_procedure_array).search(params[:search])
            
     @participants = @search.relation.page(params[:page])
 
