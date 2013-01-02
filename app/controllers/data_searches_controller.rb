@@ -124,6 +124,41 @@ class DataSearchesController < ApplicationController
       end
       
     end
+    def cg_edit_table
+      @cg_tn = CgTn.find(params[:id])
+      v_key_columns =""
+      if @cg_tn.table_type == 'column_group' # want to limit to cg tables
+        @cns = []
+        @key_cns = []
+        @cns_type_dict ={}
+        @cns_common_name_dict = {}
+        @cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",@cg_tn.id)
+        @cg_tn_cns.each do |cg_tn_cn|
+            @cns.push(cg_tn_cn.cn)
+            @cns_common_name_dict[cg_tn_cn.cn] = cg_tn_cn.common_name
+            if cg_tn_cn.key_column_flag == "Y"
+              @key_cns.push(cg_tn_cn.cn)
+            end 
+            if !cg_tn_cn.data_type.blank?
+              @cns_type_dict[cg_tn_cn.cn] = cg_tn_cn.data_type
+            end
+        end  
+        @v_key_columns = @key_cns.join(',') 
+          
+        if   @key_cns.size == 0
+          # NEED TO ADD FLASH
+        end
+        sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn 
+        connection = ActiveRecord::Base.connection();
+        @results = connection.execute(sql)
+   
+      
+      end
+      respond_to do |format|
+          format.html
+      end
+      
+    end
    # can not do a self join-- unless two copies of table - unique tn_id, tn_cn_id
     def cg_search   
 
