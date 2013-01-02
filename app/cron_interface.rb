@@ -123,12 +123,16 @@ class CronInterface < ActiveRecord::Base
              end
            end
       end
-       @schedulerun.comment =("successful finish sp_series_desc_count "+v_comment)[0..499]
+      puts "successful finish sp_series_desc_count "+v_comment)[0..459]
+       @schedulerun.comment =("successful finish sp_series_desc_count "+v_comment)[0..459]
         @schedulerun.save
         @schedulerun.end_time = @schedulerun.updated_at      
         @schedulerun.save
+        
       rescue Exception => msg
          v_error = msg.to_s
+         puts "ERROR !!!!!!!"
+         puts v_error
           @schedulerun.comment =v_error[0..499]
           @schedulerun.status_flag="E"
           @schedulerun.save
@@ -251,6 +255,8 @@ class CronInterface < ActiveRecord::Base
       puts " fs_flag set = Y "+v_cnt.to_s
       rescue Exception => msg
          v_error = msg.to_s
+         puts "ERROR !!!!!!!"
+         puts v_error
           @schedulerun.comment =v_error[0..499]
           @schedulerun.status_flag="E"
           @schedulerun.save

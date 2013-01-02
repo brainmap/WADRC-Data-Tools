@@ -40,6 +40,8 @@ class LoadComments < ActiveRecord::Base
      @schedulerun.save
    rescue Exception => msg
       v_error = msg.to_s
+      puts "ERROR !!!!!!!"
+      puts v_error
        @schedulerun.comment =v_error[0..499]
        @schedulerun.status_flag="E"
        @schedulerun.save
