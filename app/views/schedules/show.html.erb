@@ -34,8 +34,17 @@
   <b>Target column:</b>
   <%= @schedule.target_column %>
 </p>
-
-
-<%= link_to 'Edit', edit_schedule_path(@schedule) %> |
+<p>
+	<b>Owners:</b>
+	<%= @schedule.users.sort_by(&:username_name).collect {|u|  u.username_name}.join(", ").html_safe %>
+</p>
+<% if @schedule.users.include?( current_user)%>
+<p>
+	<b>Execute:</b>
+</p>		
+<% end %>
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
+    <%= link_to 'Edit', edit_schedule_path(@schedule) %> |
+<% end %>
 <%= link_to 'Back', schedules_path %> |
 <%= link_to('Column Group search/load', '/users/cgbase') %>

@@ -28,7 +28,28 @@
 	<%= f.text_area :description,:size => "100x6" %>
   <br><br></td></tr>
 <tr><td align="left"><b>Target Table:</b> <%= f.text_field :target_table %> </td><td align="left"><b>Target Column(s):</b> <%= f.text_field :target_column %> </td></tr>
-</table>
+<tr><td align="left" colspan=2>
+<br>
+<B>Owner:</b></td></tr>
+	</table>
+<div id="scan_procedure_list">
+<ul>
+<% User.where(" users.username not like '%left%' ").all.sort_by(&:username_name).each do |user| %>
+	<li>
+		<%#= f.fields_for scan_procedure do |scan_fields| %>
+			<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
+			<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
+		<%# end %>
+	</li>
+	<li>
+		<%= check_box_tag "schedule_user_ids", user.id, @schedule.users.include?(user), :name => 'schedule[user_ids][]' %>
+		<%= label_tag '', user.username_name %>
+	</li>
+<% end %>
+</ul>
+</div>
+
+
 <br><br>
 
 
