@@ -1,0 +1,22 @@
+ <%= @export_file_title %>
+<table>
+	<tr>
+	<th>Status flag</th>
+    <th>Schedule</th>
+    <th>Start time</th>
+    <th>End time</th>  
+    <th>Comment</th>
+    <th>Log file</th>
+</tr>
+<% @results.each do |r|
+	 schedulerun = Schedulerun.find(r[0]) %>
+<tr>
+<td><%= schedulerun.status_flag %></td>
+<td><%= Schedule.find(schedulerun.schedule_id).name %></td>
+<td><%= schedulerun.start_time %></td>
+<td><%= schedulerun.end_time %></td>
+<td><%= schedulerun.comment %></td>
+<td><%= schedulerun.log_file %></td>
+</tr>
+<% end %>
+</table>

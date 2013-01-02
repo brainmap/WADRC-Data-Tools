@@ -137,7 +137,7 @@ class CronInterface < ActiveRecord::Base
           @schedulerun.status_flag="E"
           @schedulerun.save
       end
-   elsif v_value_1 == "fs_Y_N"  #   rails runner app/cron_interface.rb fs_Y_N
+   elsif v_value_1 == "fs_Y_N"  #   rails runner app/cron_interface.rb fs_Y_N 
      @schedule = Schedule.where("name in ('fs_Y_N')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
@@ -197,6 +197,7 @@ class CronInterface < ActiveRecord::Base
             dirname = dirname.gsub(/_v2/,'')
             vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
                                                                      where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
+                                                            and vgroups.id in (select appointments,vgroup_id from appointments where appointment_type = 'mri' )
                                                             and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
                                                                                              where scan_procedure_id in (?))", dirname,v_sp_visit2_array)                                                                               
             vgroups.each do |v|
@@ -210,6 +211,7 @@ class CronInterface < ActiveRecord::Base
             dirname = dirname.gsub(/_v3/,'')
             vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
                                                                      where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
+                                                             and vgroups.id in (select appointments,vgroup_id from appointments where appointment_type = 'mri' )
                                                             and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
                                                                                              where scan_procedure_id in (?))", dirname,v_sp_visit3_array)
             vgroups.each do |v|
@@ -223,6 +225,7 @@ class CronInterface < ActiveRecord::Base
             dirname = dirname.gsub(/_v4/,'')
             vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
                                                                      where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
+                                                             and vgroups.id in (select appointments,vgroup_id from appointments where appointment_type = 'mri' )
                                                             and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
                                                                                              where scan_procedure_id in (?))", dirname,v_sp_visit4_array)
             vgroups.each do |v|
@@ -235,6 +238,7 @@ class CronInterface < ActiveRecord::Base
           else
             vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
                                                                      where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
+                                                             and vgroups.id in (select appointments,vgroup_id from appointments where appointment_type = 'mri' )
                                                             and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
                                                                                              where scan_procedure_id in (?))", dirname,v_sp_visit1_array)
             vgroups.each do |v|

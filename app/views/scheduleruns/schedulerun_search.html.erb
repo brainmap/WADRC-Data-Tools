@@ -1,0 +1,78 @@
+<%
+# NEED TO LIMIT RUNS BY OWNER AND ADMIN !!!!!!!!!!!!
+@var = current_user
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+edit_count =@var.edit_low_scan_procedure_array.split(' ').length 
+edit_count = edit_count -1 
+%>
+<% @v_status_reverse_dict = {'yes' =>'Y','no'=>'N','error(no)'=>'E'} 
+ @v_status_dict = {'Y' =>'yes','N'=>'no','E'=>'no'}  # need for boolean td cvell color
+%>
+<h1>Listing scheduleruns</h1>
+
+<B>Criteria: </b><%= params["search_criteria"] %>
+
+
+<%= form_for 'schedulerun_search' do |f| %>
+<table class="search_form">
+
+  <tr>
+    <th><%= f.label :status_flag %></th>
+    <td><%= f.select :status_flag, @v_status_reverse_dict, {:prompt => 'Status?'} %></td>
+<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<th><%= f.label :start_time_before %></th>
+<td><%= f.date_select "latest_timestamp", :start_year => 2012, :include_blank => true %></td>
+  </tr>
+  <tr>
+    <th><%= f.label :schedule %></th>
+    <td>	<%= collection_select :schedulerun_search, :schedule_id, @schedules, :id, :name, :prompt => 'choose a schedule' %></td>
+<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+    <th><%= f.label :start_time_after %></th>
+    <td><%= f.date_select :earliest_timestamp, :start_year => 2012, :include_blank => true %></td>
+  </tr>
+</table>
+<%= clearing_br %>
+<%= f.submit "Search" %>
+<% end %>
+<%= link_to 'download xls', { :controller=>"scheduleruns", :action=>"schedulerun_search", :schedulerun_search =>  params[:schedulerun_search] , :format => :xls} %>  </p>
+<table class="tabular">
+	<caption><%= pluralize(@results_total.size, 'schedulerun') %></caption>
+  <thead>
+  <tr>
+	<th>Status flag</th>
+    <th>Schedule</th>
+    <th>Start time</th>
+    <th>End time</th>  
+    <th>Comment</th>
+    <th>Log file</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+</thead>
+ <tfoot><td colspan=4><%= paginate @results %></td></tfoot>
+ <tbody>
+<% @results.each do |r|
+	 schedulerun = Schedulerun.find(r[0]) %>
+  <tr>
+	<%= show_bool( @v_status_dict[schedulerun.status_flag] ) %>
+    <td><%= link_to( (Schedule.find(schedulerun.schedule_id)).name, edit_schedule_path(Schedule.find(schedulerun.schedule_id)) ) %></td>
+    <td><%= schedulerun.start_time %></td>
+    <td><%= schedulerun.end_time %></td>
+    <td><%= schedulerun.comment %></td>
+    <td><%= schedulerun.log_file %></td>
+    <td><%= link_to 'Show', schedulerun %></td>
+<% if edit_count >30 %>
+    <td><%= link_to 'Edit', edit_schedulerun_path(schedulerun) %></td>
+    <td><%= link_to 'Destroy', schedulerun, :confirm => 'Are you sure?', :method => :delete %></td>
+<% end %>
+  </tr>
+<% end %>
+ </tbody>
+</table>
+
+<br />
+
+
+<%= link_to('Column Group search/load', '/users/cgbase') %>

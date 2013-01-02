@@ -80,4 +80,79 @@ class SchedulerunsController < ApplicationController
       format.xml  { head :ok }
     end
   end
+  
+  def schedulerun_search
+    @schedules = Schedule.order("name")
+    @conditions = []
+    @current_tab = "vgroups"
+    params["search_criteria"] =""
+
+    if params[:schedulerun_search].nil?
+         params[:schedulerun_search] =Hash.new  
+    end
+    
+    if !params[:schedulerun_search][:status_flag].blank?
+        var = params[:schedulerun_search][:status_flag]
+        condition =" scheduleruns.status_flag  = '"+var.gsub(/[;:'"()=<>]/, '')+"' "
+        @conditions.push(condition)
+        params["search_criteria"] = params["search_criteria"] +", Status flag= "+params[:schedulerun_search][:status_flag]
+    end
+    
+    if !params[:schedulerun_search][:schedule_id].blank?
+        var = params[:schedulerun_search][:schedule_id]
+        condition =" scheduleruns.schedule_id  = '"+var.gsub(/[;:'"()=<>]/, '')+"' "
+        @conditions.push(condition)
+        params["search_criteria"] = params["search_criteria"] +", Schedule= "+Schedule.find(params[:schedulerun_search][:schedule_id]).name
+    end
+    
+    #  build expected date format --- between, >, < 
+    v_date_latest =""
+    #want all three date parts
+    if !params[:schedulerun_search]["#{'latest_timestamp'}(1i)"].blank? && !params[:schedulerun_search]["#{'latest_timestamp'}(2i)"].blank? && !params[:schedulerun_search]["#{'latest_timestamp'}(3i)"].blank?
+         v_date_latest = params[:schedulerun_search]["#{'latest_timestamp'}(1i)"] +"-"+params[:schedulerun_search]["#{'latest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:schedulerun_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+    end
+    v_date_earliest =""
+    #want all three date parts
+    if !params[:schedulerun_search]["#{'earliest_timestamp'}(1i)"].blank? && !params[:schedulerun_search]["#{'earliest_timestamp'}(2i)"].blank? && !params[:schedulerun_search]["#{'earliest_timestamp'}(3i)"].blank?
+          v_date_earliest = params[:schedulerun_search]["#{'earliest_timestamp'}(1i)"] +"-"+params[:schedulerun_search]["#{'earliest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:schedulerun_search]["#{'earliest_timestamp'}(3i)"].rjust(2,"0")
+     end
+    v_date_latest = v_date_latest.gsub(/[;:'"()=<>]/, '')
+    v_date_earliest = v_date_earliest.gsub(/[;:'"()=<>]/, '')
+    if v_date_latest.length>0 && v_date_earliest.length >0
+      condition ="   scheduleruns.start_time between '"+v_date_earliest+"' and '"+v_date_latest+"' "
+      @conditions.push(condition)
+      params["search_criteria"] = params["search_criteria"] +",  run date between "+v_date_earliest+" and "+v_date_latest
+    elsif v_date_latest.length>0
+      condition ="  scheduleruns.start_time < '"+v_date_latest+"'  "
+       @conditions.push(condition)
+       params["search_criteria"] = params["search_criteria"] +",  run time before "+v_date_latest 
+    elsif  v_date_earliest.length >0
+      condition ="  scheduleruns.start_time > '"+v_date_earliest+"' "
+       @conditions.push(condition)
+       params["search_criteria"] = params["search_criteria"] +",  run time after "+v_date_earliest
+     end   
+      @tables =['scheduleruns'] # trigger joins --- vgroups and appointments by default
+      @order_by =["scheduleruns.id DESC"]
+       sql = "select scheduleruns.id from "+@tables.join(",")
+       if @conditions.size > 0
+             sql = sql +" WHERE  "+@conditions.join(' and ')
+       end
+      #conditions - feed thru ActiveRecord? stop sql injection -- replace : ; " ' ( ) = < > - others?
+       if @order_by.size > 0
+         sql = sql +" ORDER BY "+@order_by.join(',')
+       end
+       connection = ActiveRecord::Base.connection();
+       @results = connection.execute(sql)
+     @results_total = @results  # pageination makes result count wrong
+     t = Time.now 
+     @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
+    @scheduleruns = Schedulerun.order("id DESC")
+    
+    respond_to do |format|
+      format.xls # pet_search.xls.erb
+      format.html {@results = Kaminari.paginate_array(@results.to_a).page(params[:page]).per(50)}# index.html.erb
+      format.xml  { render :xml => @scheduleruns }
+    end
+    
+  end
 end

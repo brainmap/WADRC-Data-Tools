@@ -16,7 +16,8 @@ edit_count = edit_count -1
 	</p>
 <% end %>
 <% if current_user.role == 'Admin_High'%>
- | <%= link_to('Protocol Access and Users', control_path) %>
+ | <%= link_to('Administration', control_path) %>
+ | <%= link_to('Scheduled Runs', '/schedulerun_search') %>
 <% end %>
 </div>
 <%= render :partial => 'index_filters_search', :locals => { :edit_count => edit_count} %>
