@@ -143,7 +143,10 @@ class SchedulerunsController < ApplicationController
        end
        connection = ActiveRecord::Base.connection();
        @results = connection.execute(sql)
-     @results_total = @results  # pageination makes result count wrong
+
+     @results_total = @results # pageination makes result count wrong
+      @results_total_size = @results.size
+
      t = Time.now 
      @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
     @scheduleruns = Schedulerun.order("id DESC")

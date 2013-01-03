@@ -37,7 +37,7 @@ edit_count = edit_count -1
 <% end %>
 <%= link_to 'download xls', { :controller=>"scheduleruns", :action=>"schedulerun_search", :schedulerun_search =>  params[:schedulerun_search] , :format => :xls} %>  </p>
 <table class="tabular">
-	<caption><%= pluralize(@results_total.size, 'schedulerun') %></caption>
+	<caption><%= pluralize(@results_total.to_a.size, 'schedulerun') %></caption>
   <thead>
   <tr>
 	<th>Status flag</th>
