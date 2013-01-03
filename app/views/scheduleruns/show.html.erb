@@ -24,7 +24,10 @@
   <b>Log file:</b>
   <%= @schedulerun.log_file %>
 </p>
-
+<p>
+  <b>Comment:</b>
+  <%= @schedulerun.comment %>
+</p>
 
 <%= link_to 'Edit', edit_schedulerun_path(@schedulerun) %> |
 <%= link_to 'Back', schedulerun_search_path %> |
