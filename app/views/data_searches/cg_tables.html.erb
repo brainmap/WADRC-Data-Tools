@@ -1,0 +1,22 @@
+<% @current_tab = "searches" 
+@cg_tns = CgTn.where("table_type='column_group' and status_flag='Y'").order(:id)
+%>
+<%= form_tag  '/cg_search'  do %>
+<table  width="90%"><tr><th width="50"><small><small>Add to Search</small></small></th><th  nowrap align="left">Table Name</th>
+    <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low' %><th align="left">Edit Table Values</th><% end %>
+ </tr>
+	<%    @cg_tns.each do |tn| %>
+	 <tr><td><%= hidden_field(:cg_search, "add_cg_tn_id][", :value=>tn.id.to_s) %>
+		<%= check_box_tag "include_add_cg_tns", "1",  FALSE , :name => "cg_search[include_add_cg_tn]["+tn.id.to_s+"]", :onclick =>"checkbox_cascade(this,'"+tn.id.to_s+"')"%></td>
+		     <td><%=  (tn.common_name+"  - <small>("+ tn.tn+")</small>:" ).html_safe %></td>
+		
+		<% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low') and tn.editable_flag == "Y"  # NEED TO ADD IN OWNER????%>
+		<td> <%= link_to  'Edit values', '/cg_edit_table/'+tn.id.to_s %></td>
+		<%end%>
+
+	<% end %>
+	<tr><td align="left" colspan="2"><%= submit_tag("add tables to search")%> </td></tr>
+</table>
+
+
+<% end %>

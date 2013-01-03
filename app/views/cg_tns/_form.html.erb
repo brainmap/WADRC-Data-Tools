@@ -43,9 +43,32 @@
 					    <%= f.label :status_active %>: 
 						<%= f.select :status_flag, options_for_select(v_y_n, @cg_tn.status_flag),
 							              {:prompt => 'Select table status'}  %>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+						    <%= f.label :table_editable %>: 
+							<%= f.select :editable_flag, options_for_select(v_y_n, @cg_tn.editable_flag),
+								              {:prompt => 'Select editable'}  %>							
  </td></tr></table>
 </div>
 <br>
+<br>
+<B>Owner:</b></td></tr>
+	</table>
+<div id="scan_procedure_list">
+<ul>
+<% User.where(" users.username not like '%left%' ").all.sort_by(&:username_name).each do |user| %>
+	<li>
+		<%#= f.fields_for scan_procedure do |scan_fields| %>
+			<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
+			<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
+		<%# end %>
+	</li>
+	<li>
+		<%= check_box_tag "cg_tn_user_ids", user.id, @cg_tn.users.include?(user), :name => 'cg_tn[user_ids][]' %>
+		<%= label_tag '', user.username_name %>
+	</li>
+<% end %>
+</ul>
+</div>
   <div class="actions">
     <%= f.submit %>
   </div><br>

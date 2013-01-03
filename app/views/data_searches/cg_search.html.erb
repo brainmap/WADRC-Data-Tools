@@ -169,7 +169,8 @@ v_tn_cn_searchable_hash = []
 <br>
 <% # make hidden fields to propagate the added cg tables
 @add_cg_tn_id.each do |add_cg| %>
-<%= hidden_field :cg_search, :add_cg_tn_id, :value=>add_cg  %>
+
+<%= hidden_field :cg_search, 'add_cg_tn_id][', :value=>add_cg  %>
 <%= hidden_field :cg_search, 'include_add_cg_tn]['+add_cg  , :value=>"1"%>
 
 <% end

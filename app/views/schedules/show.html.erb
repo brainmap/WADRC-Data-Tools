@@ -38,7 +38,7 @@
 	<b>Owners:</b>
 	<%= @schedule.users.sort_by(&:username_name).collect {|u|  u.username_name}.join(", ").html_safe %>
 </p>
-<% if @schedule.users.include?( current_user)%>
+<% if @schedule.users.include?( current_user) or (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low')%>
 <p>
 	<b>Execute:</b>
 </p>		

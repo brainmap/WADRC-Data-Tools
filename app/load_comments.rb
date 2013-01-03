@@ -18,7 +18,7 @@ class LoadComments < ActiveRecord::Base
    # radiology_comments[0].  seems to only get the first visit????
     # going off of visit, ok if only called once   
     radiology_comments[0].load_paths(1)
-    v_comment = v_comment+"\n finish load_paths "
+    v_comment = "\n finish load_paths "+v_comment
 #   radiology_comments = RadiologyComment.where(" trim(radiology_comments.rad_path) is not null and  (radiology_comments.comment_html_1 is null
 #                  OR radiology_comments.comment_header_html_1 is null
 #                  OR radiology_comments.visit_id in (select visits.id from visits where visits.date >  '"+v_past_date+"' )  ) " )
@@ -32,9 +32,9 @@ class LoadComments < ActiveRecord::Base
             radiology_comments[0].load_text
 #        rc.load_text
 #    end
-  v_comment = v_comment+"\n finish load text "
+  v_comment = "\n finish load text "+v_comment
    puts "======= finished path and comments load ====="
-    @schedulerun.comment =("successful finish load_radiology_comment "+v_comment)[0..499]
+    @schedulerun.comment =("successful finish load_radiology_comment "+v_comment[0..450])
      @schedulerun.save
      @schedulerun.end_time = @schedulerun.updated_at      
      @schedulerun.save

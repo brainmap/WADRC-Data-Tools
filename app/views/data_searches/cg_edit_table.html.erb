@@ -1,0 +1,67 @@
+<%
+# check if tn_id had key columns defined
+# check for cg_table ( edit) -- varchar version
+# make if not there
+# display all sved edits
+# grey out key columns
+# list key columns
+# check if key columns are unique
+# add delete row checkbox
+@cg_tn = CgTn.find(params[:id])
+if @cg_tn.table_type == 'column_group'
+%>
+
+cg_edit_table = <%= params[:id]%>
+
+
+<% if !@v_key_columns.blank?%>
+
+
+<% else %>
+ <B>There is no key column</B> -- make whole thing non-editable
+<% end %>
+
+<br>
+loop thru columns, loop thru values<br>
+merge with existing edits in text fields 
+<br>
+<br>
+<b><%= @cg_tn.common_name %> - <%= @cg_tn.tn %>
+	<table>
+		
+		<tr>
+		<%	@cns.each do |cn|  %>
+		<th><%= @cns_common_name_dict[cn]%></th>
+		<% end %>
+		</tr>
+		
+	<% @results.each do |r|
+		v_cnt = 0 %>
+    <tr>
+	 <%  v_key_array = []
+	    r.each do |v| # get the key values for this row | 
+	    if @key_cns.include(@cns[v_cnt])?
+		  v_key.push(r)
+		end
+	    v_cnt = v_cnt + 1
+	 end %>
+	 <%  v_cnt = 0 
+	     v_key = v_key_array.join('|')
+	   r.each do |v| 
+		%>
+     <td><%= v %>  Need textfield with [<%= v_key %>][<%= @cns[v_cnt]%>] </td>	
+	     <%  v_cnt = v_cnt + 1
+	      end %>
+	  </tr>
+  <%     end%>
+
+
+
+
+
+
+
+
+
+
+<% end %>

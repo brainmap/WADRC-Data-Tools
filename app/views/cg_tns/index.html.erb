@@ -10,6 +10,8 @@
     <th>Display order</th>
     <th>Table type</th>
     <th>Table active status</th>
+    <th>Table editable</th>
+    <th>Owners</th>
     <th></th>
     <th></th>
     <th></th>
@@ -25,9 +27,13 @@
     <td><%= cg_tn.display_order %></td>
     <td><%= cg_tn.table_type %></td>
     <td><%= cg_tn.status_flag %></td>
+    <td><%= cg_tn.editable_flag %></td>
+    <td><%= cg_tn.users.sort_by(&:username_name).collect {|u|  u.username_name}.join(", ").html_safe %></td>
     <td><%= link_to 'Show', cg_tn %></td>
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
     <td><%= link_to 'Edit', edit_cg_tn_path(cg_tn) %></td>
     <td><%= link_to 'Destroy', cg_tn, :confirm => 'Are you sure?', :method => :delete %></td>
+<% end %>
   </tr>
 <% end %>
 </table>
