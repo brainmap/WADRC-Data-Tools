@@ -12,7 +12,7 @@ if @cg_tn.table_type == 'column_group' and @cg_tn.editable_flag == "Y"
 %>
 
 cg_edit_table = <%= @cg_tn.common_name%>
-
+<% # check if key is unique !!!!!!!!!!!%>
 
 <% if !@key_cns.blank?%>
   <%= form_for 'cg_edit_table' do |f| %>
@@ -24,7 +24,9 @@ cg_edit_table = <%= @cg_tn.common_name%>
     <% end %>
    </tr>
    <% @v_key.each do |k| %>
-     <tr><td><%= check_box_tag "delete_data", "1", @cg_edit_data_dict[k+"delete_key_flag"] == "Y" ? TRUE : FALSE , :name => "cg_edit_table[delete_data]["+k+"]"   %></td>
+     <tr><td>
+<%= hidden_field 'cg_edit_table','key][' ,  :value=>k %>
+<%= check_box_tag "delete_data", "1", @cg_edit_data_dict[k+"delete_key_flag"] == "Y" ? TRUE : FALSE , :name => "cg_edit_table[delete_data]["+k+"]"   %></td>
      <td><%= f.check_box 'delete_edit]['+k %></td>
      <% @cns.each do |cn|%>
         <td  <% if  !@cg_edit_data_dict[k+cn].blank? and @cg_edit_data_dict[k+cn] != "|" %>

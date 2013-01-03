@@ -174,6 +174,21 @@ class DataSearchesController < ApplicationController
              v_cnt = v_cnt + 1
           end         
         end
+        
+        
+        if !params[:cg_edit_table].blank? and !params[:cg_edit_table][:key].blank?
+          # remove all params[:cg_edit_table][:key] rows from @cg_tn.tn+"_edit" if delete_edit
+          # make sql -- split params[:cg_edit_table][:key] by "|", then split by "="
+          #      put ' ' around [1] value
+          # loop thru keys
+            # insert _edit row  
+            #   if delete_data
+            #       make delete statement for cg_data_table
+            #   if not delete_edit
+            #   if any in row - cg_edit_table[edit_col][key+cn].value !=  @cg_data_dict[key+cn]
+            #      make one edit_table insert statement  @col_list.push, @value_list.push
+            #      make update statement form data_table  @col_value_list.push
+        end
    
         sql = "SELECT "+@cns.join(',') +",delete_key_flag FROM "+@cg_tn.tn+"_edit" 
         @edit_results = connection.execute(sql)  
