@@ -127,11 +127,15 @@ class DataSearchesController < ApplicationController
     def cg_edit_table
       @cg_tn = CgTn.find(params[:id])
       v_key_columns =""
-      if @cg_tn.table_type == 'column_group' # want to limit to cg tables
+      if @cg_tn.table_type == 'column_group' and @cg_tn.editable_flag == "Y"# want to limit to cg tables
         @cns = []
         @key_cns = []
+        @v_key = []
         @cns_type_dict ={}
         @cns_common_name_dict = {}
+        @cg_data_dict = {}
+        @cg_edit_data_dict = {}
+        
         @cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",@cg_tn.id)
         @cg_tn_cns.each do |cg_tn_cn|
             @cns.push(cg_tn_cn.cn)
@@ -144,14 +148,59 @@ class DataSearchesController < ApplicationController
             end
         end  
         @v_key_columns = @key_cns.join(',') 
-          
         if   @key_cns.size == 0
           # NEED TO ADD FLASH
         end
         sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn 
         connection = ActiveRecord::Base.connection();
         @results = connection.execute(sql)
+        @results.each do |r|
+          v_cnt  = 0
+          v_key =""
+          r.each do |rc| # make and save cn-value| key
+            if @key_cns.include?(@cns[v_cnt]) # key column
+              v_key = v_key+@cns[v_cnt] +"="+rc.to_s+"|"
+            end
+            v_cnt = v_cnt + 1
+          end
+          if !v_key.blank? and !@v_key.include?(v_key) 
+              @v_key.push(v_key)
+          end          
+          # load data dict
+          v_cnt = 0
+          r.each do |rc|
+             v_temp = v_key+@cns[v_cnt]
+             @cg_data_dict[v_temp] = rc.to_s
+             v_cnt = v_cnt + 1
+          end         
+        end
    
+        sql = "SELECT "+@cns.join(',') +",delete_key_flag FROM "+@cg_tn.tn+"_edit" 
+        @edit_results = connection.execute(sql)  
+        @edit_results.each do |r|
+          v_cnt  = 0
+          v_key =""
+          r.each do |rc| # make and save cn-value| key
+            if @key_cns.include?(@cns[v_cnt]) # key column
+              v_key = v_key+@cns[v_cnt] +"="+rc.to_s+"|"
+            end
+            v_cnt = v_cnt + 1
+          end
+          if !v_key.blank? and !@v_key.include?(v_key) 
+              @v_key.push(v_key)
+          end          
+          # load data dict
+          v_cnt = 0
+          r.each do |rc| 
+            v_col = @cns[v_cnt]
+            if @cns[v_cnt].blank?
+              v_col = "delete_key_flag"
+            end
+             v_temp = v_key+v_col
+             @cg_edit_data_dict[v_temp] = rc.to_s
+             v_cnt = v_cnt + 1
+          end         
+        end
       
       end
       respond_to do |format|
