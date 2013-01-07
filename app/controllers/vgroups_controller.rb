@@ -377,6 +377,24 @@ class VgroupsController < ApplicationController
 #              end
 #          end
 #        end
+        if @vgroup.participant_id.blank? and !params[:make_participant_flag].blank? and params[:make_participant_flag] == "Y"
+          # make new participant-- no data
+          @participant = Participant.new
+          @participant.save
+          @vgroup.participant_id = @participant.id
+          @vgroup.save
+          @enrollments = Enrollment.where("enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships 
+                                                  where vgroup_id in ("+@vgroup.id.to_s+" ))")
+           @enrollments.each do |e|
+              if e.participant_id.blank?       
+                 e.participant_id = @participant.id
+                 e.save
+              end             
+            end
+          
+          # link participant_id to enrollments
+          # link participant_id to vgroup
+        end
         format.html { redirect_to(@vgroup) }
         format.xml  { head :ok }
       else

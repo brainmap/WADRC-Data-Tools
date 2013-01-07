@@ -25,8 +25,23 @@ If the enumber is not already associated with a participant, add the enumber bel
   </div>
 
   <div class="field">
+	<table><tr><td>
     <%= f.label :rmr %><br />
     <%= f.text_field :rmr %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   </td><td>
+	<% if current_user.role == 'Admin_High'%>
+      <%  if (@vgroup.rmr[0..5] == "RMRaic" && is_a_number?(@vgroup.rmr[6..11]) && @vgroup.rmr.length == 12) or !@vgroup.participant_id.blank? 
+	      # don't do anything
+	     else  %>
+	    <%= f.label :Make_a_participant %>  <%= select_tag 'make_participant_flag', options_for_select([ "N","Y"],"N") %><br>
+	    Only make a participant if there is no other scans for this participant <br> where an "expected" rmr exists with RMRaic and 6 digits. 
+	
+        <% end
+	          %>
+	
+	<% end %>
+	</td></tr></table>
   </div><br>
 <div class="field">
   <%= f.label :Compile_Folder %><br />
