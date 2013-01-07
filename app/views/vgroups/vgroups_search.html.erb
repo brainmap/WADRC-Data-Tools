@@ -17,6 +17,8 @@ edit_count = edit_count -1
 <% end %>
 <% if current_user.role == 'Admin_High'%>
  | <%= link_to('Administration', control_path) %>
+<% end %>
+<% if @schedules_users.include?( current_user.id) or current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
  | <%= link_to('Scheduled Runs', '/schedulerun_search') %>
 <% end %>
 </div>

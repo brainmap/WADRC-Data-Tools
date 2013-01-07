@@ -90,6 +90,12 @@ class SchedulerunsController < ApplicationController
     if params[:schedulerun_search].nil?
          params[:schedulerun_search] =Hash.new  
     end
+    if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low' 
+      # no limit
+    else
+      condition =" scheduleruns.schedule_id in ( select schedules_users.schedule_id from schedules_users where user_id in ("+current_user.id.to_s+")) "
+      @conditions.push(condition)
+    end
     
     if !params[:schedulerun_search][:status_flag].blank?
         var = params[:schedulerun_search][:status_flag]

@@ -57,13 +57,17 @@ edit_count = edit_count -1
 	 schedulerun = Schedulerun.find(r[0]) %>
   <tr>
 	<%= show_bool( @v_status_dict[schedulerun.status_flag] ) %>
-    <td><%= link_to( (Schedule.find(schedulerun.schedule_id)).name, edit_schedule_path(Schedule.find(schedulerun.schedule_id)) ) %></td>
+	<% if  current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'  %>
+        <td><%= link_to( (Schedule.find(schedulerun.schedule_id)).name, edit_schedule_path(Schedule.find(schedulerun.schedule_id)) ) %></td>
+    <% else %>
+        <td><%= link_to( (Schedule.find(schedulerun.schedule_id)).name, schedule_path(Schedule.find(schedulerun.schedule_id)) ) %></td>
+    <% end %>
     <td><%= schedulerun.start_time %></td>
     <td><%= schedulerun.end_time %></td>
     <td><%= schedulerun.comment %></td>
     <td><%= schedulerun.log_file %></td>
     <td><%= link_to 'Show', schedulerun %></td>
-<% if edit_count >30 %>
+<% if  current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'  %>
     <td><%= link_to 'Edit', edit_schedulerun_path(schedulerun) %></td>
     <td><%= link_to 'Destroy', schedulerun, :confirm => 'Are you sure?', :method => :delete %></td>
 <% end %>

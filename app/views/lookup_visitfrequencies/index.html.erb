@@ -24,6 +24,18 @@
 
 <%= link_to 'New Lookup visitfrequency', new_lookup_visitfrequency_path %>
 
+<br>
+<% if Rails.env == "development" %>
+this is development
+<%= link_to('Visit Frequency', lookup_visitfrequencies_path) %> <br>
+<%= link_to 'https Visit Frequency',   lookup_visitfrequencies_url(:protocol => "https") %>
+<% elsif Rails.env == "production"%>
+this is production<br>
+<%= link_to('Visit Frequency', lookup_visitfrequencies_path) %> <br>
+<%= link_to 'https Visit Frequency',   lookup_visitfrequencies_url(:protocol => "https") %>
+<% end %>
+
 <% else %>
   Your <%= current_user.role %> role does not allow access. 
 <% end %>
+

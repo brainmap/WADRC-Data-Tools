@@ -28,7 +28,8 @@
   <b>Comment:</b>
   <%= @schedulerun.comment %>
 </p>
-
-<%= link_to 'Edit', edit_schedulerun_path(@schedulerun) %> |
+<% if  current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'  %>
+   <%= link_to 'Edit', edit_schedulerun_path(@schedulerun) %> |
+<% end %>
 <%= link_to 'Back', schedulerun_search_path %> |
 <%= link_to('Column Group search/load', '/users/cgbase') %>

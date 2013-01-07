@@ -93,9 +93,15 @@ to the radiology_comments index url<br>
 <%= link_to('Visit Frequency', '/lookup_visitfrequencies') %> <br>
 
 
- 
-
-
+ <br>
+Try to test https link in production <br>
+<% if Rails.env == "development" %>
+this is development
+<%= link_to('Visit Frequency', lookup_visitfrequencies_path) %> <br>
+<% elsif Rails.env == "production"%>
+this is production<br>
+<%= link_to('Visit Frequency', lookup_visitfrequencies_path) %> <br>
+<% end %>
 
 	
 	

@@ -583,6 +583,14 @@ end
       # make @conditions from search form input, access control in application controller run_search
       @conditions = []
       @current_tab = "vgroups"
+      @schedules = Schedule.all
+      @schedules_users = []
+      @schedules_users.push(-1)
+      @schedules.each do |s|
+        s.users.each do |u|
+          @schedules_users.push(u.id)
+        end 
+      end
       params["search_criteria"] =""
       if params[:vgroups_search].nil?
            params[:vgroups_search] =Hash.new  
