@@ -238,6 +238,7 @@ class DataSearchesController < ApplicationController
       @tables_left_join_hash = Hash.new
       @joins = [] # just inner joins
       @sp_array =[]
+      @cg_query_tn_id_array = []
       @cg_query_tn_hash = Hash.new
       @cg_query_tn_cn_hash = Hash.new
       @cg_query_cn_hash = Hash.new
@@ -270,6 +271,7 @@ class DataSearchesController < ApplicationController
          @cg_query_tns =  CgQueryTn.where("cg_query_id = "+@cg_query.id.to_s)
          @cg_query_tns.each do |cg_query_tn|
            v_tn_id = cg_query_tn.cg_tn_id 
+            @cg_query_tn_id_array.push(v_tn_id) # need to retrieve for display on the page
            @cg_query_tn_hash[v_tn_id.to_s] = cg_query_tn  
            @cg_query_tn_cns = CgQueryTnCn.where("cg_query_tn_id = "+cg_query_tn.id.to_s) 
            @cg_query_tn_cns.each do |cg_query_tn_cn|

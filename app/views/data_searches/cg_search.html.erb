@@ -46,7 +46,7 @@ if !params[:cg_search].blank? and !params[:cg_search][:add_cg_tn_id].blank?
   end	
 end
 @add_cg_tns = CgTn.where("table_type='column_group' and status_flag='Y'")
-@cg_tn = CgTn.where("(table_type='base' and status_flag='Y') or id in (?)",@add_cg_tn_id).order(:id)
+@cg_tn = CgTn.where("(table_type='base' and status_flag='Y') or id in (?) or id in (?)",@add_cg_tn_id, @cg_query_tn_id_array).order(:id)
 # how to order
 v_tn_cn_hash =[]
 v_tn_cn_searchable_hash = []
@@ -142,7 +142,7 @@ v_tn_cn_searchable_hash = []
   <table class="search_form">
     <tr>
       <th><%= f.label :Stored_Search %></th>
-      <td><%= select :cg_search, :save_flag, { "Y" => "Y", "Inactivate" => "N" },:selected =>@cg_query.save_flag, :include_blank => true %></td>
+      <td><%= select :cg_search, :save_flag, { "Y" => "Y", "Inactivate" => "N" },:selected =>@cg_query.save_flag %></td>
     </tr>
     <tr>
       <th><%= f.label :Save_search_as %></th>
