@@ -76,7 +76,7 @@ class SchedulerunsController < ApplicationController
     @schedulerun.destroy
 
     respond_to do |format|
-      format.html { redirect_to(scheduleruns_url) }
+      format.html { redirect_to(schedulerun_search_url) }
       format.xml  { head :ok }
     end
   end
