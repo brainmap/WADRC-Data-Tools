@@ -77,25 +77,28 @@ class CgTnCnsController < ApplicationController
               v_get_next_column = "Y"
             end
           end
-          
-          @cg_tn_cn = CgTnCn.new
-          @cg_tn_cn.cn = v_next_column
-          @cg_tn_cn.common_name = v_next_column
-          @cg_tn_cn.export_name = v_next_column
-          if v_next_column_datatype == "date"
-            @cg_tn_cn.data_type ="date"
-          elsif v_next_column_datatype.include?('int')
-            @cg_tn_cn.data_type ="integer"
-          elsif v_next_column_datatype == "float"
-             @cg_tn_cn.data_type ="float"
-          elsif v_next_column_datatype.include?('varchar')
-             @cg_tn_cn.data_type ="string"
-          elsif v_next_column_datatype.include?('char')
-             @cg_tn_cn.data_type ="string"
+          if v_next_column == ""
+            format.html { redirect_to(@cg_tn_cn, :notice => 'Cg tn cn was successfully created.') }
+          else
+            @cg_tn_cn = CgTnCn.new
+            @cg_tn_cn.cn = v_next_column
+            @cg_tn_cn.common_name = v_next_column
+            @cg_tn_cn.export_name = v_next_column
+            if v_next_column_datatype == "date"
+              @cg_tn_cn.data_type ="date"
+            elsif v_next_column_datatype.include?('int')
+              @cg_tn_cn.data_type ="integer"
+            elsif v_next_column_datatype == "float"
+               @cg_tn_cn.data_type ="float"
+            elsif v_next_column_datatype.include?('varchar')
+               @cg_tn_cn.data_type ="string"
+            elsif v_next_column_datatype.include?('char')
+               @cg_tn_cn.data_type ="string"
+            end
+            @cg_tn_cn.cg_tn_id = params[:cg_tn_cn][:cg_tn_id]
+            @cg_tn_cn.display_order = (params[:cg_tn_cn][:display_order]).to_i + 1
+            format.html { render :action => "new" }
           end
-          @cg_tn_cn.cg_tn_id = params[:cg_tn_cn][:cg_tn_id]
-          @cg_tn_cn.display_order = (params[:cg_tn_cn][:display_order]).to_i + 1
-          format.html { render :action => "new" }
         else
           format.html { redirect_to(@cg_tn_cn, :notice => 'Cg tn cn was successfully created.') }
         end
