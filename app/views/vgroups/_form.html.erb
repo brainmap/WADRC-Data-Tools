@@ -19,8 +19,8 @@
     <%= f.label :participant_id %><br />
 <%= select(:vgroup, :participant_id, Enrollment.where(" participant_id is not null").all.sort_by(&:enumber).collect {|p| [ p.enumber, p.participant_id ] }, { :include_blank => "Select  a participant" }) %>   
 <br>Pick any enumber associated with a participant. After the vgroup is created, delete the extra enumbers.<br>
-If the enumber is not already associated with a participant, add the enumber below, after selecting another enumber associated with the participant. 
-<br>Only add a new participant and the associated enumber <%= link_to '(create new participant)',new_participant_path %> if the participant does not exist.<br><br> 
+If the enumber is not already associated with a participant, add the enumber below at the bottom of the form, after selecting another enumber associated with the participant. 
+<br><br> 
 
   </div>
 
@@ -35,7 +35,9 @@ If the enumber is not already associated with a participant, add the enumber bel
 	      # don't do anything
 	     else  %>
 	    <%= f.label :Make_a_participant %>  <%= select_tag 'make_participant_flag', options_for_select([ "N","Y"],"N") %><br>
-	    Only make a participant if there is no other scans for this participant <br> where an "expected" rmr exists with RMRaic and 6 digits. 
+	    Only make a participant if there is no other scans for this participant <br> where an "expected" rmr exists with RMRaic and 6 digits. <br>
+	     This will make a participant, link to this vgroup and link the participant to the enrollments. <br>
+	    <small><%= link_to '(create new participant)',new_participant_path %> will also let you make a participant but it will need to be re-linked to this vgroup. 
 	
         <% end
 	          %>
