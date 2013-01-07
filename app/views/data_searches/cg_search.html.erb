@@ -159,7 +159,7 @@ v_tn_cn_searchable_hash = []
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <small><%= link_to "Add tables", '/cg_tables'%></small>
 	<% end %>
 	   <% if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?%><br>
-	<a href="#view_results">View Results</a>
+	<a href="#view_results">View Results</a> (<%= pluralize(@results_total.size, 'Result') %>)
        <% end %>
       
 	 </td>
