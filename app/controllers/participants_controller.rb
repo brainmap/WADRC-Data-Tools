@@ -72,6 +72,9 @@ class ParticipantsController < ApplicationController
   # POST /participants.xml
   def create
     @participant = Participant.new(params[:participant])
+    if @participant.dob > 365.days.ago.to_date # form is setting a default date of today sometimes
+       @participant.dob = nil
+    end
     connection = ActiveRecord::Base.connection();
     if !params[:enumber].blank?
        @enrollment = Enrollment.where("enumber = ?",params[:enumber] )
@@ -131,6 +134,10 @@ class ParticipantsController < ApplicationController
         results = connection.execute(sql)
         sql = "update participants set reggieid = NULL where trim(reggieid) = '' "
         results = connection.execute(sql)
+        if @participant.dob > 365.days.ago.to_date # form is setting a default date of today sometimes
+           @participant.dob = nil
+           @participant.save
+        end
         if !@participant.dob.blank?
            @appointments = Appointment.where("appointments.vgroup_id in (select vgroups.id from vgroups where participant_id is not null and participant_id in (?))", params[:id])
            @appointments.each do |appt|

@@ -125,6 +125,7 @@ class CronInterface < ActiveRecord::Base
       end
       puts "successful finish sp_series_desc_count "+v_comment[0..459]
        @schedulerun.comment =("successful finish sp_series_desc_count "+v_comment[0..459])
+       @schedulerun.status_flag ="Y"
         @schedulerun.save
         @schedulerun.end_time = @schedulerun.updated_at      
         @schedulerun.save
@@ -252,7 +253,8 @@ class CronInterface < ActiveRecord::Base
         end
       end
  
-       @schedulerun.comment ="successful finish fs_Y_N ===set = Y "+v_cnt.to_s
+        @schedulerun.comment ="successful finish fs_Y_N ===set = Y "+v_cnt.to_s
+        @schedulerun.status_flag ="Y"
         @schedulerun.save
         @schedulerun.end_time = @schedulerun.updated_at      
         @schedulerun.save

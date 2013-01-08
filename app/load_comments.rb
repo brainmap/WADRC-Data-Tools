@@ -35,6 +35,7 @@ class LoadComments < ActiveRecord::Base
   v_comment = "\n finish load text "+v_comment
    puts "======= finished path and comments load ====="
     @schedulerun.comment =("successful finish load_radiology_comment "+v_comment[0..450])
+    @schedulerun.status_flag ="Y"
      @schedulerun.save
      @schedulerun.end_time = @schedulerun.updated_at      
      @schedulerun.save
