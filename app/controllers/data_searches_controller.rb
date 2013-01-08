@@ -119,6 +119,16 @@ class DataSearchesController < ApplicationController
     end
     
     def cg_tables
+      @cg_tn_key_y = []
+      @cg_tns = CgTn.where("table_type='column_group' and status_flag='Y'").order(:id)
+      @cg_tns.each do |cg_tn|
+          cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",cg_tn.id)
+          cg_tn_cns.each do |cg_tn_cn|
+               if cg_tn_cn.key_column_flag == "Y"
+                   @cg_tn_key_y[cg_tn.id] = "Y"
+               end
+          end
+      end
       respond_to do |format|
           format.html
       end
@@ -128,6 +138,8 @@ class DataSearchesController < ApplicationController
       @cg_tn = CgTn.find(params[:id])
       v_key_columns =""
       if @cg_tn.table_type == 'column_group' and @cg_tn.editable_flag == "Y"# want to limit to cg tables
+        
+        
         @cns = []
         @key_cns = []
         @v_key = []
@@ -159,7 +171,7 @@ class DataSearchesController < ApplicationController
           v_key =""
           r.each do |rc| # make and save cn-value| key
             if @key_cns.include?(@cns[v_cnt]) # key column
-              v_key = v_key+@cns[v_cnt] +"="+rc.to_s+"|"
+              v_key = v_key+@cns[v_cnt] +"^"+rc.to_s+"|"   # params seem to not like "=" in a key
             end
             v_cnt = v_cnt + 1
           end
@@ -176,20 +188,7 @@ class DataSearchesController < ApplicationController
         end
         
         
-        if !params[:cg_edit_table].blank? and !params[:cg_edit_table][:key].blank?
-          # remove all params[:cg_edit_table][:key] rows from @cg_tn.tn+"_edit" if delete_edit
-          # make sql -- split params[:cg_edit_table][:key] by "|", then split by "="
-          #      put ' ' around [1] value
-          # loop thru keys
-            # insert _edit row  
-            #   if delete_data
-            #       make delete statement for cg_data_table
-            #   if not delete_edit
-            #   if any in row - cg_edit_table[edit_col][key+cn].value !=  @cg_data_dict[key+cn]
-            #      make one edit_table insert statement  @col_list.push, @value_list.push
-            #      make update statement form data_table  @col_value_list.push
-        end
-   
+        # get current state of cg_edit
         sql = "SELECT "+@cns.join(',') +",delete_key_flag FROM "+@cg_tn.tn+"_edit" 
         @edit_results = connection.execute(sql)  
         @edit_results.each do |r|
@@ -197,7 +196,7 @@ class DataSearchesController < ApplicationController
           v_key =""
           r.each do |rc| # make and save cn-value| key
             if @key_cns.include?(@cns[v_cnt]) # key column
-              v_key = v_key+@cns[v_cnt] +"="+rc.to_s+"|"
+              v_key = v_key+@cns[v_cnt] +"^"+rc.to_s+"|"
             end
             v_cnt = v_cnt + 1
           end
@@ -216,7 +215,211 @@ class DataSearchesController < ApplicationController
              v_cnt = v_cnt + 1
           end         
         end
-      
+        
+        if !params[:cg_edit_table].blank? and !params[:cg_edit_table][:key].blank?
+          # remove all params[:cg_edit_table][:key] rows from @cg_tn.tn+"_edit" if delete_edit
+          # make sql -- split params[:cg_edit_table][:key] by "|", then split by "="
+          #      put ' ' around [1] value
+          # loop thru keys
+            # insert _edit row  
+            #   if delete_data
+            #       make delete statement for cg_data_table
+            #   if not delete_edit
+            #   if any in row - cg_edit_table[edit_col][key+cn].value !=  @cg_data_dict[key+cn]
+            #      make one edit_table insert statement  @col_list.push, @value_list.push
+            #      make update statement form data_table  @col_value_list.push
+            v_cnt = 0
+
+            v_key_pipe_array = []
+            params[:cg_edit_table][:key].each do |k|
+              #puts "AAAAAA start of key="+k +" v_cnt = "+v_cnt.to_s
+              # make v_key -- split k on | , wrap value in ''
+              v_key = ""
+              v_tmp = ""
+              v_key_array = []
+              v_key_pipe_array = k.split("|")
+              v_key_cn_array = []
+              v_key_value_array = []
+              v_key_pipe_array.each do |cn_v|
+                v_tmp = cn_v.split("^")
+                v_key_array.push(v_tmp[0]+"='"+v_tmp[1]+"'")
+                v_key_cn_array.push(v_tmp[0])
+                v_key_value_array.push("'"+v_tmp[1]+"'")
+              end
+              v_edit_in_row_flag ="N"
+              @cns.each do |cn|
+            	    if  !@cg_edit_data_dict[k+cn].blank? and @cg_edit_data_dict[k+cn] != "|" 
+            		      v_edit_in_row_flag ="Y"
+            		   end
+            	end
+              if !params[:cg_edit_table][:delete_data].blank? and !params[:cg_edit_table][:delete_data][v_cnt.to_s].blank?
+                puts "    in delete data v_cnt="+v_cnt.to_s
+                # check if key in edit_table
+                if v_edit_in_row_flag =="Y"
+                   sql ="update "+@cg_tn.tn+"_edit set delete_key_flag ='Y' where "+v_key_array.join(" and ")
+                    @results = connection.execute(sql)
+                else
+                   sql = "insert into "+@cg_tn.tn+"_edit("+v_key_cn_array.join(",")+",delete_key_flag) values("+v_key_value_array.join(",")+",'Y' )"
+                    @results = connection.execute(sql)
+                end
+              elsif !params[:cg_edit_table][:delete_edit][v_cnt.to_s].blank? and params[:cg_edit_table][:delete_edit][v_cnt.to_s] == "1"
+                  sql = " delete from "+@cg_tn.tn+"_edit  where "+v_key_array.join(" and ")
+                   @results = connection.execute(sql)
+              else
+                if v_edit_in_row_flag =="Y" 
+                  # make delete and insert - evaluate vs incoming values vs exisiting edits - loop thru cns, make keys
+                  sql = " delete from "+@cg_tn.tn+"_edit  where "+v_key_array.join(" and ")
+                   @results = connection.execute(sql)
+                  v_cnt_cn = 0
+                  v_tmp_value_array = []
+                  v_tmp_cn_array = []
+                  @cns.each do |cn|
+                    if !params[:cg_edit_table][:edit_col].blank? and  !params[:cg_edit_table][:edit_col][k].blank? and !v_key_cn_array.include?(cn)
+                           #puts "aaaaaa !params[:cg_edit_table][:edit_col][v_cnt.to_s].blank?"
+                           if !params[:cg_edit_table][:edit_col][k][cn].blank?
+                              # value in cell
+                              if @cg_data_dict[k+cn] != params[:cg_edit_table][:edit_col][k][cn] or @cg_edit_data_dict[k+cn] == params[:cg_edit_table][:edit_col][k][cn] 
+                                v_tmp_value_array.push("'"+params[:cg_edit_table][:edit_col][k][cn]+"'")
+                                v_tmp_cn_array.push(cn)
+                              end
+                           else
+                              # blank cell == |
+                              if @cg_data_dict[k+cn] != params[:cg_edit_table][:edit_col][k][cn] or @cg_edit_data_dict[k+cn] == params[:cg_edit_table][:edit_col][k][cn] 
+                                v_tmp_value_array.push("")
+                                v_tmp_cn_array.push(cn)
+                              end
+                            end
+                    end
+                    v_cnt_cn = v_cnt_cn + 1
+                  end
+                  if v_key_value_array.size > 0
+                      v_tmp_cn_array.concat(v_key_cn_array)
+                      v_tmp_value_array.concat(v_key_value_array)
+                      sql = "insert into "+@cg_tn.tn+"_edit("+v_tmp_cn_array.join(',')+") values("+v_tmp_value_array.join(",")+")"
+                       @results = connection.execute(sql)
+                  end                  
+                  
+                else
+                  # make insert  loop thru cns, make keys
+                  v_cnt_cn = 0
+                  v_tmp_value_array = []
+                  v_tmp_cn_array = []
+                  @cns.each do |cn|
+                    if !params[:cg_edit_table][:edit_col].blank? and  !params[:cg_edit_table][:edit_col][k].blank? and !v_key_cn_array.include?(cn)
+                           #puts "aaaaaa !params[:cg_edit_table][:edit_col][v_cnt.to_s].blank?"
+                           if !params[:cg_edit_table][:edit_col][k][cn].blank?
+                              # value in cell
+                              if @cg_data_dict[k+cn] != params[:cg_edit_table][:edit_col][k][cn]
+                                v_tmp_value_array.push("'"+params[:cg_edit_table][:edit_col][k][cn]+"'")
+                                v_tmp_cn_array.push(cn)
+                              end
+                           else
+                              # blank cell == |
+                              if @cg_data_dict[k+cn] != params[:cg_edit_table][:edit_col][k][cn]
+                                v_tmp_value_array.push("")
+                                v_tmp_cn_array.push(cn)
+                              end
+                            end
+                    end
+                    v_cnt_cn = v_cnt_cn + 1
+                  end
+                  if v_key_value_array.size > 0
+                      v_tmp_cn_array.concat(v_key_cn_array)
+                      v_tmp_value_array.concat(v_key_value_array)
+                      sql = "insert into "+@cg_tn.tn+"_edit("+v_tmp_cn_array.join(',')+") values("+v_tmp_value_array.join(",")+")"
+                       @results = connection.execute(sql)
+                  end
+                end
+              end
+              puts " v_cnt ="+v_cnt.to_s+" end  key="+k
+              v_cnt = v_cnt +1
+            end
+        end
+        
+        # apply cg_edit to cg_data and refresh cg_edit , same as above, but no key array
+        sql = "SELECT "+@cns.join(',') +",delete_key_flag FROM "+@cg_tn.tn+"_edit" 
+        @edit_results = connection.execute(sql)         
+        @edit_results.each do |r|
+            v_key_array = []
+            v_cnt  = 0
+            v_key =""
+            v_delete_data_row="N"
+            r.each do |rc| # make and save cn-value| key
+              if @key_cns.include?(@cns[v_cnt]) # key column
+                v_key = v_key+@cns[v_cnt] +"^"+rc.to_s+"|"
+                v_key_array.push( @cns[v_cnt] +"='"+rc.to_s+"'")
+              end
+              v_cnt = v_cnt + 1
+            end  
+            if !v_key.blank? and !@v_key.include?(v_key) 
+                @v_key.push(v_key)
+            end
+            # update cg_data
+            v_cnt = 0
+            v_col_value_array = []
+            r.each do |rc|
+              if !@key_cns.include?(@cns[v_cnt])
+                # might need to int, to date, etc from datatype
+                if @cns[v_cnt].blank?
+                  v_col_value_array.push(" delete_key_flag ='"+rc.to_s+"' ")
+                  if rc.to_s == "Y"
+                    v_delete_data_row="Y"
+                  end
+                else
+                    v_col_value_array.push(@cns[v_cnt]+"='"+rc.to_s+"' ")
+                end
+              end               
+              v_cnt = v_cnt + 1
+            end
+            if v_delete_data_row=="N"
+                sql = "update "+@cg_tn.tn+" set "+v_col_value_array.join(',')+" where "+v_key_array.join(" and ")
+                 @results = connection.execute(sql)
+            else
+                sql = "delete from "+@cg_tn.tn+" where "+v_key_array.join(" and ")
+                 @results = connection.execute(sql)
+            end
+                              
+            # load editdata dict
+            @cg_edit_data_dict = {}
+            v_cnt = 0
+            r.each do |rc| 
+              v_col = @cns[v_cnt]
+              if @cns[v_cnt].blank?
+                v_col = "delete_key_flag"
+              end
+               v_temp = v_key+v_col
+               @cg_edit_data_dict[v_temp] = rc.to_s
+               v_cnt = v_cnt + 1
+            end         
+          end
+          
+        
+        # refresh cg_data
+        @cg_data_dict = {}
+        sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn 
+        @results = connection.execute(sql)
+        @results.each do |r|
+          v_cnt  = 0
+          v_key =""
+          r.each do |rc| # make and save cn-value| key
+            if @key_cns.include?(@cns[v_cnt]) # key column
+              v_key = v_key+@cns[v_cnt] +"^"+rc.to_s+"|"   # params seem to not like "=" in a key
+            end
+            v_cnt = v_cnt + 1
+          end
+          if !v_key.blank? and !@v_key.include?(v_key) 
+              @v_key.push(v_key)
+          end          
+          # load data dict
+          v_cnt = 0
+          r.each do |rc|
+             v_temp = v_key+@cns[v_cnt]
+             @cg_data_dict[v_temp] = rc.to_s
+             v_cnt = v_cnt + 1
+          end         
+        end
+        
+        
       end
       respond_to do |format|
           format.html

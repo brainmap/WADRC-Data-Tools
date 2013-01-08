@@ -24,8 +24,10 @@ cg_edit_table = <%= @cg_tn.common_name%>
 	   <th><%= @cns_common_name_dict[cn]%> <br><small>-<%=cn%></small></th>
     <% end %>
    </tr>
-   <% @v_key.each do |k| %>
-    <% v_edit_in_row_flag ="N"
+   <% v_cnt = 0
+      @v_key.each do |k| %>
+    <% 
+    v_edit_in_row_flag ="N"
          @cns.each do |cn|
 	       if  !@cg_edit_data_dict[k+cn].blank? and @cg_edit_data_dict[k+cn] != "|" 
 		      v_edit_in_row_flag ="Y"
@@ -34,23 +36,28 @@ cg_edit_table = <%= @cg_tn.common_name%>
       %>
      <tr><td>
 <%= hidden_field 'cg_edit_table','key][' ,  :value=>k %>
-<%= check_box_tag "delete_data", "1", @cg_edit_data_dict[k+"delete_key_flag"] == "Y" ? TRUE : FALSE , :name => "cg_edit_table[delete_data]["+k+"]"   %></td>
-     <td> <% if v_edit_in_row_flag =="Y"%> <%= f.check_box 'delete_edit]['+k %> <% end %></td>
-     <% @cns.each do |cn|%>
+<%= check_box_tag "delete_data", "1", @cg_edit_data_dict[k+"delete_key_flag"] == "Y" ? TRUE : FALSE , :name => "cg_edit_table[delete_data]["+v_cnt.to_s+"]"   %></td>
+     <td> <% if v_edit_in_row_flag =="Y"%> <%= f.check_box 'delete_edit]['+v_cnt.to_s %> <% end %></td>
+     <% v_cnt_cn = 0
+      @cns.each do |cn|%>
         <td  <% if  !@cg_edit_data_dict[k+cn].blank? and @cg_edit_data_dict[k+cn] != "|" %>
 	          bgcolor="silver"
 	         <%end%> >
 	<small>(<%= @cg_data_dict[k+cn] %>)</small>
 	    <% if !@key_cns.include?(cn) %>
-	    <%= f.text_field 'edit_col]['+k+cn ,:size=>10 ,
+	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,
         :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>
        <% end %>
 
     </td>
-     <% end %>
+     <%   v_cnt_cn = v_cnt_cn + 1
+      end %>
      </tr>
-   <% end%>
+   <% v_cnt = v_cnt +1 
+    end%>
+<% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low' or @cg_tn.users.include?( current_user) ) and @cg_tn.editable_flag == "Y" %>
 	<tr><td align="left" colspan="<%= @cns.size+2 %>"><%= submit_tag("save edits")%> </td></tr>
+<% end %>
 </table>
   <% end %>
 <% else %>
