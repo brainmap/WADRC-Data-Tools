@@ -366,7 +366,9 @@ class DataSearchesController < ApplicationController
                     v_delete_data_row="Y"
                   end
                 else
-                    v_col_value_array.push(@cns[v_cnt]+"='"+rc.to_s+"' ")
+                    if rc.to_s != "|"
+                        v_col_value_array.push(@cns[v_cnt]+"='"+rc.to_s+"' ")
+                    end
                 end
               end               
               v_cnt = v_cnt + 1
