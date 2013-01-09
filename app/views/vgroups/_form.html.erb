@@ -30,8 +30,9 @@ If the enumber is not already associated with a participant, add the enumber bel
     <%= f.text_field :rmr %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
    </td><td>
-	<% if current_user.role == 'Admin_High'%>
-      <%  if (@vgroup.rmr[0..5] == "RMRaic" && is_a_number?(@vgroup.rmr[6..11]) && @vgroup.rmr.length == 12) or !@vgroup.participant_id.blank? 
+	<% if current_user.role == 'Admin_High'   #is_a_number?(@vgroup.rmr[6..11]) %>
+
+      <%  if (@vgroup.rmr[0..5] == "RMRaic" && @vgroup.rmr[6..11].to_i.to_s == @vgroup.rmr[6..11] && @vgroup.rmr.length == 12) or !@vgroup.participant_id.blank? 
 	      # don't do anything
 	     else  %>
 	    <%= f.label :Make_a_participant %>  <%= select_tag 'make_participant_flag', options_for_select([ "N","Y"],"N") %><br>

@@ -1,6 +1,32 @@
 // Place your application-specific JavaScript functions and classes here
 // This file is automatically included by javascript_include_tag :defaults
 
+
+ 
+	
+
+
+
+function isValidDate_yyyy_mm_dd(date){
+        var valid = true;
+
+        date = date.replace('/-/g', '');
+
+        var year  = parseInt(date.substring(0, 4),10);
+        var month = parseInt(date.substring(4, 6),10);
+        var day   = parseInt(date.substring(6, 8),10);
+
+
+        if((month < 1) || (month > 12)) valid = false;
+        else if((day < 1) || (day > 31)) valid = false;
+        else if(((month == 4) || (month == 6) || (month == 9) || (month == 11)) && (day > 30)) valid = false;
+        else if((month == 2) && (((year % 400) == 0) || ((year % 4) == 0)) && ((year % 100) != 0) && (day > 29)) valid = false;
+        else if((month == 2) && ((year % 100) == 0) && (day > 29)) valid = false;
+
+    return valid;
+}
+
+
 // not using the inner html text -- using an image
 // so can ignore the link div id
 function toggle2(showHideDiv, switchTextDiv) {
