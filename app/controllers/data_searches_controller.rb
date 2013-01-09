@@ -120,14 +120,31 @@ class DataSearchesController < ApplicationController
     
     def cg_tables
       @cg_tn_key_y = []
+      @cg_tn_key_unique_y = []
       @cg_tns = CgTn.where("table_type='column_group' and status_flag='Y'").order(:id)
       @cg_tns.each do |cg_tn|
+          cg_tn_key_array = []
           cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",cg_tn.id)
           cg_tn_cns.each do |cg_tn_cn|
                if cg_tn_cn.key_column_flag == "Y"
                    @cg_tn_key_y[cg_tn.id] = "Y"
+                   cg_tn_key_array.push(cg_tn_cn.cn)
                end
           end
+          @cg_tn_key_unique_y[cg_tn.id] = "Y"
+          if @cg_tn_key_y[cg_tn.id] == "Y"
+              sql = "select "+cg_tn_key_array.join(',')+" from "+cg_tn.tn+" group by "+cg_tn_key_array.join(',')+" having count(*) > 1"
+              connection = ActiveRecord::Base.connection();
+              @results = connection.execute(sql)
+              @cg_tn_key_unique_y[cg_tn.id] = "Y"
+              @results.each do |r|
+                if @cg_tn_key_unique_y[cg_tn.id] == "Y"
+                  @cg_tn_key_unique_y[cg_tn.id] = r[0].to_s
+                else
+                  @cg_tn_key_unique_y[cg_tn.id] = @cg_tn_key_unique_y[cg_tn.id]+", "+r[0].to_s
+                end
+              end
+         end
       end
       respond_to do |format|
           format.html
@@ -135,9 +152,16 @@ class DataSearchesController < ApplicationController
       
     end
     def cg_edit_table
+      # really want to stop edit_table from being used on core tables
+      v_exclude_tables_array =['appointments','blooddraws','cg_queries','cg_query_tn_cns','cg_query_tns','cg_tn_cns','cg_tns',
+        'cg_tns_users','employees','enrollment_vgroup_memberships','enrollment_visit_memberships','enrollments',
+        'image_comments','image_dataset_quality_checks','image_datasets','lumbarpuncture_results','lumbarpunctures','mriperformances','mriscantasks',
+        'neuropsyches','participants','petscans','q_data','q_data_forms','question_scan_procedures','questionform_questions','questionform_scan_procedures',
+        'questionforms','questionnaires','questions','radiology_comments','roles','scan_procedures','scan_procedures_vgroups','scan_procedures_visits',
+        'scheduleruns','schedules','schedules_users','series_descriptions','users','vgroups','visits','vitals'] 
       @cg_tn = CgTn.find(params[:id])
       v_key_columns =""
-      if @cg_tn.table_type == 'column_group' and @cg_tn.editable_flag == "Y"# want to limit to cg tables
+      if @cg_tn.table_type == 'column_group' and @cg_tn.editable_flag == "Y"  and !v_exclude_tables_array.include?(@cg_tn.tn.downcase) # want to limit to cg tables
         
         
         @cns = []
@@ -242,9 +266,9 @@ class DataSearchesController < ApplicationController
               v_key_value_array = []
               v_key_pipe_array.each do |cn_v|
                 v_tmp = cn_v.split("^")
-                v_key_array.push(v_tmp[0]+"='"+v_tmp[1]+"'")
+                v_key_array.push(v_tmp[0]+"='"+v_tmp[1].gsub(/'/, "''")+"'")
                 v_key_cn_array.push(v_tmp[0])
-                v_key_value_array.push("'"+v_tmp[1]+"'")
+                v_key_value_array.push("'"+v_tmp[1].gsub(/'/, "''")+"'")
               end
               v_edit_in_row_flag ="N"
               @cns.each do |cn|
@@ -253,7 +277,7 @@ class DataSearchesController < ApplicationController
             		   end
             	end
               if !params[:cg_edit_table][:delete_data].blank? and !params[:cg_edit_table][:delete_data][v_cnt.to_s].blank?
-                puts "    in delete data v_cnt="+v_cnt.to_s
+                
                 # check if key in edit_table
                 if v_edit_in_row_flag =="Y"
                    sql ="update "+@cg_tn.tn+"_edit set delete_key_flag ='Y' where "+v_key_array.join(" and ")
@@ -279,7 +303,7 @@ class DataSearchesController < ApplicationController
                            if !params[:cg_edit_table][:edit_col][k][cn].blank?
                               # value in cell
                               if @cg_data_dict[k+cn] != params[:cg_edit_table][:edit_col][k][cn] or @cg_edit_data_dict[k+cn] == params[:cg_edit_table][:edit_col][k][cn] 
-                                v_tmp_value_array.push("'"+params[:cg_edit_table][:edit_col][k][cn]+"'")
+                                v_tmp_value_array.push("'"+params[:cg_edit_table][:edit_col][k][cn].gsub(/'/, "''")+"'")
                                 v_tmp_cn_array.push(cn)
                               end
                            else
@@ -292,7 +316,7 @@ class DataSearchesController < ApplicationController
                     end
                     v_cnt_cn = v_cnt_cn + 1
                   end
-                  if v_key_value_array.size > 0
+                  if v_key_value_array.size > 0 and v_tmp_value_array.size > 0 and @cg_edit_data_dict[k+"delete_key_flag"] != "Y"
                       v_tmp_cn_array.concat(v_key_cn_array)
                       v_tmp_value_array.concat(v_key_value_array)
                       sql = "insert into "+@cg_tn.tn+"_edit("+v_tmp_cn_array.join(',')+") values("+v_tmp_value_array.join(",")+")"
@@ -310,7 +334,7 @@ class DataSearchesController < ApplicationController
                            if !params[:cg_edit_table][:edit_col][k][cn].blank?
                               # value in cell
                               if @cg_data_dict[k+cn] != params[:cg_edit_table][:edit_col][k][cn]
-                                v_tmp_value_array.push("'"+params[:cg_edit_table][:edit_col][k][cn]+"'")
+                                v_tmp_value_array.push("'"+params[:cg_edit_table][:edit_col][k][cn].gsub(/'/, "''")+"'")
                                 v_tmp_cn_array.push(cn)
                               end
                            else
@@ -336,6 +360,7 @@ class DataSearchesController < ApplicationController
             end
         end
         
+      if !params[:cg_edit_table].blank? and !params[:cg_edit_table][:key].blank?  
         # apply cg_edit to cg_data and refresh cg_edit , same as above, but no key array
         sql = "SELECT "+@cns.join(',') +",delete_key_flag FROM "+@cg_tn.tn+"_edit" 
         @edit_results = connection.execute(sql)         
@@ -361,65 +386,107 @@ class DataSearchesController < ApplicationController
               if !@key_cns.include?(@cns[v_cnt])
                 # might need to int, to date, etc from datatype
                 if @cns[v_cnt].blank?
-                  v_col_value_array.push(" delete_key_flag ='"+rc.to_s+"' ")
-                  if rc.to_s == "Y"
+                 # v_col_value_array.push(" delete_key_flag ='"+rc.to_s+"' ")
+                   if rc.to_s == "Y"
                     v_delete_data_row="Y"
                   end
                 else
                     if rc.to_s != "|"
-                        v_col_value_array.push(@cns[v_cnt]+"='"+rc.to_s+"' ")
+                        v_col_value_array.push(@cns[v_cnt]+"='"+rc.to_s.gsub(/'/, "''")+"' ")
                     end
                 end
               end               
               v_cnt = v_cnt + 1
             end
             if v_delete_data_row=="N"
-                sql = "update "+@cg_tn.tn+" set "+v_col_value_array.join(',')+" where "+v_key_array.join(" and ")
-                 @results = connection.execute(sql)
+                if v_col_value_array.size > 0
+                  sql = "update "+@cg_tn.tn+" set "+v_col_value_array.join(',')+" where "+v_key_array.join(" and ")
+                   @results = connection.execute(sql)
+                 end
             else
                 sql = "delete from "+@cg_tn.tn+" where "+v_key_array.join(" and ")
                  @results = connection.execute(sql)
-            end
-                              
-            # load editdata dict
-            @cg_edit_data_dict = {}
-            v_cnt = 0
-            r.each do |rc| 
-              v_col = @cns[v_cnt]
-              if @cns[v_cnt].blank?
-                v_col = "delete_key_flag"
-              end
-               v_temp = v_key+v_col
-               @cg_edit_data_dict[v_temp] = rc.to_s
-               v_cnt = v_cnt + 1
-            end         
+            end        
           end
-          
+    end        
         
-        # refresh cg_data
-        @cg_data_dict = {}
-        sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn 
-        @results = connection.execute(sql)
-        @results.each do |r|
-          v_cnt  = 0
-          v_key =""
-          r.each do |rc| # make and save cn-value| key
-            if @key_cns.include?(@cns[v_cnt]) # key column
-              v_key = v_key+@cns[v_cnt] +"^"+rc.to_s+"|"   # params seem to not like "=" in a key
-            end
-            v_cnt = v_cnt + 1
+      ## problems with getting clean, new copy- think its the keys
+      # refresh cg_data and cg_edit
+      @cns = []
+      @key_cns = []
+      @v_key = []
+      @cns_type_dict ={}
+      @cns_common_name_dict = {}
+      @cg_data_dict = {}
+      @cg_edit_data_dict = {}
+      
+      @cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",@cg_tn.id)
+      @cg_tn_cns.each do |cg_tn_cn|
+          @cns.push(cg_tn_cn.cn)
+          @cns_common_name_dict[cg_tn_cn.cn] = cg_tn_cn.common_name
+          if cg_tn_cn.key_column_flag == "Y"
+            @key_cns.push(cg_tn_cn.cn)
+          end 
+          if !cg_tn_cn.data_type.blank?
+            @cns_type_dict[cg_tn_cn.cn] = cg_tn_cn.data_type
           end
-          if !v_key.blank? and !@v_key.include?(v_key) 
-              @v_key.push(v_key)
-          end          
-          # load data dict
-          v_cnt = 0
-          r.each do |rc|
-             v_temp = v_key+@cns[v_cnt]
-             @cg_data_dict[v_temp] = rc.to_s
-             v_cnt = v_cnt + 1
-          end         
+      end  
+      @v_key_columns = @key_cns.join(',') 
+      if   @key_cns.size == 0
+        # NEED TO ADD FLASH
+      end
+      sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn 
+      connection = ActiveRecord::Base.connection();
+      @results = connection.execute(sql)
+      @results.each do |r|
+        v_cnt  = 0
+        v_key =""
+        r.each do |rc| # make and save cn-value| key
+          if @key_cns.include?(@cns[v_cnt]) # key column
+            v_key = v_key+@cns[v_cnt] +"^"+rc.to_s+"|"   # params seem to not like "=" in a key
+          end
+          v_cnt = v_cnt + 1
         end
+        if !v_key.blank? and !@v_key.include?(v_key) 
+            @v_key.push(v_key)
+        end          
+        # load data dict
+        v_cnt = 0
+        r.each do |rc|
+           v_temp = v_key+@cns[v_cnt]
+           @cg_data_dict[v_temp] = rc.to_s
+           v_cnt = v_cnt + 1
+        end         
+      end
+      
+      
+      # get current state of cg_edit
+      sql = "SELECT "+@cns.join(',') +",delete_key_flag FROM "+@cg_tn.tn+"_edit" 
+      @edit_results = connection.execute(sql)  
+      @edit_results.each do |r|
+        v_cnt  = 0
+        v_key =""
+        r.each do |rc| # make and save cn-value| key
+          if @key_cns.include?(@cns[v_cnt]) # key column
+            v_key = v_key+@cns[v_cnt] +"^"+rc.to_s+"|"
+          end
+          v_cnt = v_cnt + 1
+        end
+        if !v_key.blank? and !@v_key.include?(v_key) 
+            @v_key.push(v_key)
+        end          
+        # load data dict
+        v_cnt = 0
+        r.each do |rc| 
+          v_col = @cns[v_cnt]
+          if @cns[v_cnt].blank?
+            v_col = "delete_key_flag"
+          end
+           v_temp = v_key+v_col
+           @cg_edit_data_dict[v_temp] = rc.to_s
+           v_cnt = v_cnt + 1
+        end         
+      end
         
         
       end

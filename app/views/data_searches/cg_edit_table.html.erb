@@ -37,7 +37,7 @@ cg_edit_table = <%= @cg_tn.common_name%>
      <tr><td>
 <%= hidden_field 'cg_edit_table','key][' ,  :value=>k %>
 <%= check_box_tag "delete_data", "1", @cg_edit_data_dict[k+"delete_key_flag"] == "Y" ? TRUE : FALSE , :name => "cg_edit_table[delete_data]["+v_cnt.to_s+"]"   %></td>
-     <td> <% if v_edit_in_row_flag =="Y"%> <%= f.check_box 'delete_edit]['+v_cnt.to_s %> <% end %></td>
+     <td> <% if v_edit_in_row_flag =="Y" or @cg_edit_data_dict[k+"delete_key_flag"] == "Y"  %> <%= f.check_box 'delete_edit]['+v_cnt.to_s %> <% end %></td>
      <% v_cnt_cn = 0
       @cns.each do |cn|%>
         <td  <% if  !@cg_edit_data_dict[k+cn].blank? and @cg_edit_data_dict[k+cn] != "|" %>
@@ -45,9 +45,23 @@ cg_edit_table = <%= @cg_tn.common_name%>
 	         <%end%> >
 	<small>(<%= @cg_data_dict[k+cn] %>)</small>
 	    <% if !@key_cns.include?(cn) %>
+	       <% if @cns_type_dict[cn] == "date"   # format YYYY-MM-DD %>
+	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if ( isValidDate_yyyy_mm_dd(this.value) ){alert('The field needs to be a date - YYYY-MM-DD.');this.value =''}",
+        :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>	
+	       <% elsif @cns_type_dict[cn] == "integer"%>
+	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}",
+        :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>
+	       <% elsif @cns_type_dict[cn] == "float"%>
+	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}",
+        :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>
+	       <% else %>
 	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,
         :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>
+           <% end %>
+       <% else %>
+          <%=  @cg_edit_data_dict[k+cn]%>
        <% end %>
+
 
     </td>
      <%   v_cnt_cn = v_cnt_cn + 1
@@ -56,7 +70,7 @@ cg_edit_table = <%= @cg_tn.common_name%>
    <% v_cnt = v_cnt +1 
     end%>
 <% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low' or @cg_tn.users.include?( current_user) ) and @cg_tn.editable_flag == "Y" %>
-	<tr><td align="left" colspan="<%= @cns.size+2 %>"><%= submit_tag("save edits")%> </td></tr>
+	<tr><td align="left" colspan="<%= @cns.size+2 %>"><%= submit_tag("save edits")%> | <%= link_to "Back", '/cg_tables'%></td></tr>
 <% end %>
 </table>
   <% end %>
