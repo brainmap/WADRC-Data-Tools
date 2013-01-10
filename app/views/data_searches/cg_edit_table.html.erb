@@ -46,13 +46,13 @@ cg_edit_table = <%= @cg_tn.common_name%>
 	<small>(<%= @cg_data_dict[k+cn] %>)</small>
 	    <% if !@key_cns.include?(cn) %>
 	       <% if @cns_type_dict[cn] == "date"   # format YYYY-MM-DD %>
-	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if ( isValidDate_yyyy_mm_dd(this.value) ){alert('The field needs to be a date - YYYY-MM-DD.');this.value =''}",
+	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if (this.value != '|' && isValidDate_yyyy_mm_dd(this.value) ){alert('The field needs to be a date - YYYY-MM-DD.');this.value =''}",
         :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>	
 	       <% elsif @cns_type_dict[cn] == "integer"%>
-	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}",
+	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if ( this.value != '|' &&  isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}",
         :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>
 	       <% elsif @cns_type_dict[cn] == "float"%>
-	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}",
+	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if ( this.value != '|' && isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}",
         :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>
 	       <% else %>
 	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,

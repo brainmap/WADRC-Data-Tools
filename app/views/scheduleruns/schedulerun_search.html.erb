@@ -78,5 +78,6 @@ edit_count = edit_count -1
 
 <br />
 
-
+	<% if  current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'  %>
 <%= link_to('Column Group search/load', '/users/cgbase') %>
+   <% end %>
