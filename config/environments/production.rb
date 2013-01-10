@@ -72,7 +72,7 @@ WADRCDataTools::Application.configure do
   }
   config.action_mailer.default_url_options = {:host => 'nelson.dom.wisc.edu'}
   
-  config.middleware.use Rack::SslEnforcer, :only_hosts => '144.92.151.228'
+ # seems to make everyone go to https:// -- but not in ror--  config.middleware.use Rack::SslEnforcer, :only_hosts => '144.92.151.228'
   
   config.middleware.use ExceptionNotifier,
     :email_prefix => "[Panda Exception] ",
