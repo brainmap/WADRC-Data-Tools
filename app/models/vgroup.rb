@@ -66,9 +66,10 @@ class Vgroup < ActiveRecord::Base
            end
          end
          if v_vgroup.blank?
-           puts "v_vgroup is blank"
+           puts "v_vgroup is blank, no vgroups in time span without nii counted"
+         else
+            v_base_path = v_vgroup.get_base_path
          end
-         v_base_path = v_vgroup.get_base_path
          v_glob = '*.nii'
          @vgroups.each do |vg|
             # could be multiple sp
