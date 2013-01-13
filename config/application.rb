@@ -3,7 +3,10 @@ require File.expand_path('../boot', __FILE__)
 require 'rails/all'
 
 require 'iconv'
-require 'rack/ssl-enforcer'
+##### require 'rack/ssl-enforcer'
+
+
+
 
 
 # If you have a Gemfile, require the gems listed there, including any gems
@@ -42,5 +45,8 @@ module WADRCDataTools
 
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password, :password_confirmation]
+    
+
+
   end
 end
