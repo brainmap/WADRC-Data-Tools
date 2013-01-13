@@ -3,8 +3,8 @@ require File.expand_path('../boot', __FILE__)
 require 'rails/all'
 
 require 'iconv'
-##### require 'rack/ssl-enforcer'
-require 'rack/ssl'
+require 'rack/ssl-enforcer'
+####require 'rack/ssl'
 
 
 
