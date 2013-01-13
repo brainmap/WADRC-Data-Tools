@@ -4,7 +4,7 @@ require 'rails/all'
 
 require 'iconv'
 ####require 'rack/ssl-enforcer'
-require 'rack/ssl'
+### require 'rack/ssl'
 
 
 

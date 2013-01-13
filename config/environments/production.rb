@@ -76,7 +76,7 @@ WADRCDataTools::Application.configure do
  ### config.middleware.use Rack::SslEnforcer
  #  or ?
 # ? causing error ?  config.middleware.insert_before ActionDispatch::Static, "Rack::SSL"
- config.force_ssl = true
+ #### config.force_ssl = true
   
   config.middleware.use ExceptionNotifier,
     :email_prefix => "[Panda Exception] ",
