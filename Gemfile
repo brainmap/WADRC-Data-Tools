@@ -38,7 +38,8 @@ gem "cancan"
 gem "mechanize"
 gem "hpricot"
 
-gem 'rack-ssl-enforcer'
+#gem 'rack-ssl-enforcer'
+gem 'rack-ssl', :require => 'rack/ssl'
 
 # Deploy with Capistrano
 gem 'capistrano', '~>2.5.19'
