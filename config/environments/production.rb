@@ -74,7 +74,7 @@ WADRCDataTools::Application.configure do
   
  ##### seems to make everyone go to https:// -- but not in ror--  config.middleware.use Rack::SslEnforcer, :only_hosts => '144.92.151.228'
  #  or ?
- config.middleware.insert_before ActionDispatch::Static, "Rack::SSL"
+# ? causing error ?  config.middleware.insert_before ActionDispatch::Static, "Rack::SSL"
  config.force_ssl = true
   
   config.middleware.use ExceptionNotifier,
