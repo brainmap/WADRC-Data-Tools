@@ -73,7 +73,7 @@ WADRCDataTools::Application.configure do
   config.action_mailer.default_url_options = {:host => 'nelson.dom.wisc.edu'}
   
  ##### seems to make everyone go to https:// -- but not in ror-- 
-  config.middleware.use Rack::SslEnforcer
+ ### config.middleware.use Rack::SslEnforcer
  #  or ?
 # ? causing error ?  config.middleware.insert_before ActionDispatch::Static, "Rack::SSL"
  config.force_ssl = true
