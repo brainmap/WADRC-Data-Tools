@@ -61,9 +61,12 @@ class Vgroup < ActiveRecord::Base
          @vgroups = Vgroup.where( " id between "+@v_start_id+" and "+@v_end_id ).where("( nii_file_count is null or nii_file_count = 0 )")
          v_vgroup = nil
          @vgroups.each do |vg|
-           if !vg.blank?
+           if !vg.blank? and v_vgroup.blank?
              v_vgroup = vg
            end
+         end
+         if v_vgroup.blank?
+           puts "v_vgroup is blank"
          end
          v_base_path = v_vgroup.get_base_path
          v_glob = '*.nii'
