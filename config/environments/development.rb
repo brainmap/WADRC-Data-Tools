@@ -6,6 +6,8 @@ WADRCDataTools::Application.configure do
   # since you don't have to restart the webserver when you make code changes.
   config.cache_classes = false
 
+  #config.force_ssl = true
+
   # Log error messages when you accidentally call methods on nil.
   config.whiny_nils = true
 
@@ -38,6 +40,9 @@ WADRCDataTools::Application.configure do
   export DATAPANDA_EMAIL_LOGIN='noreply_johnson_lab@medicine.wisc.edu'; export DATAPANDA_EMAIL_PASSWORD='goodpassword')
   ----"""
   end
+
+#### config.middleware.use Rack::SslEnforcer, :only_hosts => '144.92.151.228'
+#### config.force_ssl = true
 
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
