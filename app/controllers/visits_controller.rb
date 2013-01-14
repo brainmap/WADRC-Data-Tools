@@ -921,9 +921,17 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
       end      
 
       if !params[:mri_search][:enumber].blank?
+        if params[:mri_search][:enumber].include?(',') # string of enumbers
+         v_enumber =  params[:mri_search][:enumber].gsub(/ /,'').downcase
+         v_enumber = v_enumber.gsub(/,/,"','")
+          condition =" visits.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
+             where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
+             and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"         
+        else
          condition =" visits.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
           where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
           and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:mri_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+        end
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:mri_search][:enumber]
       end      

@@ -156,11 +156,20 @@ class PetscansController < ApplicationController
       end
       
       if !params[:pet_search][:enumber].blank?
+        if params[:pet_search][:enumber].include?(',') # string of enumbers
+         v_enumber =  params[:pet_search][:enumber].gsub(/ /,'').downcase
+         v_enumber = v_enumber.gsub(/,/,"','")
+           condition =" petscans.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
+           where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
+           and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"
+          
+        else
           condition =" petscans.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
           where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
           and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:pet_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
-          @conditions.push(condition)
-          params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:pet_search][:enumber]
+        end
+        @conditions.push(condition)
+        params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:pet_search][:enumber]
       end      
 
       if !params[:pet_search][:rmr].blank? 

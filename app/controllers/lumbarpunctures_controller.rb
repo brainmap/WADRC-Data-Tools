@@ -371,11 +371,19 @@ class LumbarpuncturesController < ApplicationController
      end
  
      if !params[:lp_search][:enumber].blank?
+       if params[:lp_search][:enumber].include?(',') # string of enumbers
+        v_enumber =  params[:lp_search][:enumber].gsub(/ /,'').downcase
+        v_enumber = v_enumber.gsub(/,/,"','")
+          condition =" lumbarpunctures.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
+             where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
+             and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"         
+       else
         condition =" lumbarpunctures.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
          where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
          and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:lp_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
-         @conditions.push(condition)
-         params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:lp_search][:enumber]
+       end
+       @conditions.push(condition)
+       params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:lp_search][:enumber]
      end      
 
      if !params[:lp_search][:rmr].blank? 

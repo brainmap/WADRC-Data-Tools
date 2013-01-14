@@ -623,10 +623,17 @@ end
       end
 
       if !params[:vgroups_search][:enumber].blank?
+        if params[:vgroups_search][:enumber].include?(',') # string of enumbers
+         v_enumber =  params[:vgroups_search][:enumber].gsub(/ /,'').downcase
+         v_enumber = v_enumber.gsub(/,/,"','")
+           condition =" vgroups.id in (select vgroup_id from enrollment_vgroup_memberships,enrollments
+           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"         
+        else
           condition =" vgroups.id in (select vgroup_id from enrollment_vgroup_memberships,enrollments
           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:vgroups_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
-          @conditions.push(condition)
-          params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:vgroups_search][:enumber]
+        end
+        @conditions.push(condition)
+        params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:vgroups_search][:enumber]
       end 
       
       if !params[:vgroups_search][:qc_completed].blank?

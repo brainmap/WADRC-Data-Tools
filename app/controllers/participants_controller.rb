@@ -187,9 +187,21 @@ class ParticipantsController < ApplicationController
           end
 
           if !params[:participant_search][:enumber].blank?
+            
+            if params[:participant_search][:enumber].include?(',') # string of enumbers
+             v_enumber =  params[:participant_search][:enumber].gsub(/ /,'').downcase
+             v_enumber_array = []
+             v_enumber_array = v_enumber.split(",")
+             
+
+             @search =@search.where("  participants.id in (select enrollments.participant_id from participants,   enrollments
+                                        where enrollments.participant_id = participants.id
+                                          and lower(enrollments.enumber) in (?))",v_enumber_array)
+            else
              @search =@search.where("  participants.id in (select enrollments.participant_id from participants,   enrollments
                                         where enrollments.participant_id = participants.id
                                           and lower(enrollments.enumber) in (lower(?)))",params[:participant_search][:enumber])
+             end
           end      
 
           if !params[:participant_search][:rmr].blank? 

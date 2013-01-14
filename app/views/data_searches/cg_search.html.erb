@@ -74,8 +74,12 @@ v_tn_cn_searchable_hash = []
 	        v_link_array.each do |v| 
 	            v_name = ""
 	            v_val =""
-		        (v_name,v_val) = v.split('=')%>	
-	            <%= hidden_field_tag v_name, v_val %>	
+		        (v_name,v_val) = v.split('=')%>
+				<%   if v_name == "cg_search[enumber]"   %>
+			      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",") %>
+			    <% else %>	
+	              <%= hidden_field_tag v_name, v_val %>	
+	            <% end %>
 	       <% end %>
 	      <%= submit_tag 'export file'%>
 	<% end %>
@@ -361,8 +365,12 @@ v_tn_cn_searchable_hash = []
         v_link_array.each do |v| 
             v_name = ""
             v_val =""
-	        (v_name,v_val) = v.split('=')%>	
+	        (v_name,v_val) = v.split('=') %>
+	     <%   if v_name == "cg_search[enumber]"   %>
+	      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",") %>
+	       <% else %>	
             <%= hidden_field_tag v_name, v_val %>	
+           <% end %>
        <% end %>
       <%= submit_tag 'export file'%>
 <% end %>
