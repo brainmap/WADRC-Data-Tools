@@ -157,7 +157,7 @@ class PetscansController < ApplicationController
       
       if !params[:pet_search][:enumber].blank?
         if params[:pet_search][:enumber].include?(',') # string of enumbers
-         v_enumber =  params[:pet_search][:enumber].gsub(/ /,'').downcase
+         v_enumber =  params[:pet_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
          v_enumber = v_enumber.gsub(/,/,"','")
            condition =" petscans.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
            where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 

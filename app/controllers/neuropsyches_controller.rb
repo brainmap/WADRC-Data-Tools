@@ -154,7 +154,7 @@ class NeuropsychesController < ApplicationController
 
         if !params[:np_search][:enumber].blank?
           if params[:np_search][:enumber].include?(',') # string of enumbers
-           v_enumber =  params[:np_search][:enumber].gsub(/ /,'').downcase
+           v_enumber =  params[:np_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
            v_enumber = v_enumber.gsub(/,/,"','")
             condition ="    neuropsyches.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
                where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 

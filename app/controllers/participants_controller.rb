@@ -189,7 +189,7 @@ class ParticipantsController < ApplicationController
           if !params[:participant_search][:enumber].blank?
             
             if params[:participant_search][:enumber].include?(',') # string of enumbers
-             v_enumber =  params[:participant_search][:enumber].gsub(/ /,'').downcase
+             v_enumber =  params[:participant_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
              v_enumber_array = []
              v_enumber_array = v_enumber.split(",")
              

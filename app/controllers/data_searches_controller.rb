@@ -596,7 +596,7 @@ class DataSearchesController < ApplicationController
             @table_types.push('base')
           
             if params[:cg_search][:enumber].include?(',') # string of enumbers
-             v_enumber =  params[:cg_search][:enumber].gsub(/ /,'').downcase
+             v_enumber =  params[:cg_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
              v_enumber = v_enumber.gsub(/,/,"','")
              v_condition ="   appointments.id in (select a2.id from enrollment_vgroup_memberships,enrollments, appointments a2
                   where enrollment_vgroup_memberships.vgroup_id= a2.vgroup_id 
