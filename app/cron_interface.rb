@@ -2,9 +2,16 @@ require 'visit'
 require 'image_dataset'
 class CronInterface < ActiveRecord::Base
   v_value_1 = ARGV[0]
-  puts "AAAAAAAAAAA in CronInterface"+v_value_1.to_s
-  
+  puts "AAAAAAAAAAA in CronInterface"+v_value_1.to_s+"="
+# calls from cron
+#   sp_series_desc_count
+#   fs_Y_N
+#   fs_aseg_aparc
 
+  visit = Visit.find(3)  #  need to get base path without visit
+  v_base_path = visit.get_base_path()
+  
+  
   # dev 
   #/usr/local/bin/rails  runner /Users/caillingworth/code/WADRC-Data-Tools/app/cron_interface.rb sp_series_desc_count
   if v_value_1 == "sp_series_desc_count"
@@ -147,8 +154,6 @@ class CronInterface < ActiveRecord::Base
       @schedulerun.start_time = @schedulerun.created_at
       @schedulerun.save
     begin   # catch all exception and put error in comment
-       visit = Visit.find(3)  #  need to get base path without visit
-       v_base_path = visit.get_base_path()
        v_fs_path = v_base_path+"/preprocessed/modalities/freesurfer/orig_recon/"
       # ls the dirs and links
       v_dir_skip =  ['QA', 'fsaverage', 'fsaverage_bkup20121114', '.', '..', 'lh.EC_average','rh.EC_average','qdec','surfer.log']
@@ -267,7 +272,70 @@ class CronInterface < ActiveRecord::Base
           @schedulerun.status_flag="E"
           @schedulerun.save
       end
-      
+    elsif v_value_1 == "fs_aseg_aparc"  #   rails runner app/cron_interface.rb fs_aseg_aparc
+      @schedule = Schedule.where("name in ('fs_aseg_aparc')").first
+       @schedulerun = Schedulerun.new
+       @schedulerun.schedule_id = @schedule.id
+       @schedulerun.comment ="starting fs_aseg_aparc"
+       @schedulerun.save
+       @schedulerun.start_time = @schedulerun.created_at
+       @schedulerun.save
+     begin  
+        # to do 
+          # define tables, table_edit, add to cg tables/search 
+         # call fs_file.py
+         # only in prod --- lots of path issues
+          v_call = v_base_path+"/data1/lab_scripts/python_dev/fs_file.py N"
+          v_call = v_base_path+"/data1/lab_scripts/python_dev/transfer_process.py -test_call"
+          #v_return = system("export PYTHONPATH=/usr/local/bin/python/ && python "+v_call)  # return value not working
+          #  its working but must be better way -- getting all the print output from the python script, 
+          # exit in python script after "print" return value, loop thru to get the last line
+          v_return =  `python #{v_call}`
+          v_last_return_value = ""
+          v_comment = ""
+          v_return.each do |line|
+            v_comment = line + v_comment
+            v_last_return_value = line
+          end
+          # evaluate return values v_return(ERROR or SUCCESS)+"|"+yyyymmdd+"|"+(/tmp/)log_file
+          v_result_array = v_last_return_value.split("|")
+          if v_result_array[0] == "SUCCESS"
+            v_file_array = ["aseg","lh.aparc.area","rh.aparc.area"]
+            # v_table_array =["cg_aseg","cg_lh_aparc_area", "cg_rh_aparc_area"]
+            #v_result_array[1]+".aseg.all.txt",  v_result_array[1]+".lh.aparc.area.all.txt",   v_result_array[1]+".rh.aparc.area.all.txt"
+            v_file_dir = v_base_path+"/preprocessed/modalities/freesurfer/orig_recon/"
+            # loop thru file array
+            # get files
+            # move cg_[file_replace"."] table to cg_[file_replace"."]_old
+            # trunacte and load cg_table
+            #File.open("testfile.txt",'r') do |fileb|
+            #  while line = fileb.gets
+                 # map the subjectid_v# to enrollment, vgroup
+                 #make insert sql
+             # end
+             # apply edits
+            
+          
+         # load aseg, lh aparc, rh aparc files    
+       
+         @schedulerun.comment =("successful finish fs_aseg_aparc  values="+v_last_return_value+"\n"+v_comment)[0..499]
+         @schedulerun.status_flag ="Y"
+         
+         else
+           @schedulerun.comment =("error in fs_file.py fs_aseg_aparc  "+v_last_return_value+"\n"+v_comment)[0..499]
+         end
+         @schedulerun.save
+         @schedulerun.end_time = @schedulerun.updated_at      
+         @schedulerun.save
+       puts " Successful fs_aseg_aparc !!"
+       rescue Exception => msg
+          v_error = msg.to_s
+          puts "ERROR !!!!!!!"
+          puts v_error
+           @schedulerun.comment =(v_error[0..499]+v_comment)[0..499]
+           @schedulerun.status_flag="E"
+           @schedulerun.save
+       end   
     
   end
   
