@@ -286,7 +286,7 @@ class CronInterface < ActiveRecord::Base
          # call fs_file.py
          # only in prod --- lots of path issues
           v_call = v_base_path+"/data1/lab_scripts/python_dev/fs_file.py N"
-          v_call = v_base_path+"/data1/lab_scripts/python_dev/transfer_process.py -test_call"
+          # v_call = v_base_path+"/data1/lab_scripts/python_dev/transfer_process.py -test_call"
           #v_return = system("export PYTHONPATH=/usr/local/bin/python/ && python "+v_call)  # return value not working
           #  its working but must be better way -- getting all the print output from the python script, 
           # exit in python script after "print" return value, loop thru to get the last line
