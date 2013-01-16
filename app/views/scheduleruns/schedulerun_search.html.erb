@@ -33,8 +33,19 @@ edit_count = edit_count -1
   </tr>
 </table>
 <%= clearing_br %>
+<table width="80%"><tr><td align="left">
 <%= f.submit "Search" %>
-<% end %>
+<% end %></td><td align="right">
+	<%= form_for :schedule ,:url=>'/schedules/' do |f2| %>
+	<%= f2.label 'View Schedule'%><br>
+	<select onChange="if(this.selectedIndex!=0) self.location=this.options[this.selectedIndex].value">
+		<option value="">view a schedule</option>
+		<% @schedules.each do |s| %>
+	<option value=/schedules/<%=s.id %>><%= s.name %></option>
+	   <% end %>
+	</select>
+	<% end %>
+	</td></tr></table>
 <%= link_to 'download xls', { :controller=>"scheduleruns", :action=>"schedulerun_search", :schedulerun_search =>  params[:schedulerun_search] , :format => :xls} %>  </p>
 <table class="tabular">
 	<caption><%= pluralize(@results_total.to_a.size, 'schedulerun') %></caption>
