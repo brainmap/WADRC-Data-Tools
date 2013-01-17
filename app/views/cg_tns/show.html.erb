@@ -35,6 +35,7 @@
 	<b>Owners:</b>
 	<%= @cg_tn.users.sort_by(&:username_name).collect {|u|  u.username_name}.join(", ").html_safe %>
 </p>
+<b>Data Dictionary:</b><% if !@cg_tn.datadictionary_file_name.blank? %><small><small><%= link_to 'Download DataDictionary', @cg_tn.datadictionary.url %> <%= @cg_tn.datadictionary_file_name%></small></small><%end%><br>
 <% if @cg_tn.users.include?( current_user) or (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low')%>
    <%= link_to 'Edit', edit_cg_tn_path(@cg_tn) %> |
 <% end %>

@@ -2,7 +2,7 @@
  v_y_n = {"Y"=>"Y","N"=>"N"}%>
 
 
-<%= form_for(@cg_tn) do |f| %>
+<%= form_for(@cg_tn, :html => {:multipart => true}) do |f| %>
   <% if @cg_tn.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(@cg_tn.errors.count, "error") %> prohibited this cg_tn from being saved:</h2>
@@ -53,6 +53,8 @@
 <br>
 <B>Owner:</b></td></tr>
 	</table>
+	<table width="60%">
+		<tr><td>
 <div id="scan_procedure_list">
 <ul>
 <% User.where(" users.username not like '%left%' ").all.sort_by(&:username_name).each do |user| %>
@@ -69,6 +71,9 @@
 <% end %>
 </ul>
 </div>
+</td><td valign="top"><%= f.label :datadictionary, 'Upload data dictionary'%>: <%= f.file_field :datadictionary %> 
+	<br> <% if !@cg_tn.datadictionary_file_name.blank?%><small><small><%= link_to 'Download DataDictionary', @cg_tn.datadictionary.url %> <%= @cg_tn.datadictionary_file_name%></small></small><%end%>
+	</td></tr></table>
   <div class="actions">
     <%= f.submit %>
   </div><br>
