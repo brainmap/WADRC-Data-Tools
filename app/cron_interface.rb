@@ -296,8 +296,8 @@ class CronInterface < ActiveRecord::Base
 # problem running in dev -- need to be admin-- make file, then test rest
           v_return =  `python #{v_call}`
           v_last_return_value = ""
-          v_comment = ""
-          v_return.each do |line|
+
+         v_return.each do |line|
             v_comment = line + v_comment
             v_last_return_value = line
           end
@@ -407,6 +407,7 @@ class CronInterface < ActiveRecord::Base
                 # need to apply in insert to cg_ tables --- multple rows --- just getting min(vgroup_id) to track unmapped rows
                 # update vgroup  -- make into a function
                 sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.vgroup_id = ( select min( evm.vgroup_id) from enrollment_vgroup_memberships evm where evm.enrollment_id = t.enrollment_id
+                                                                                  and evm.vgroup_id in (select appointments.vgroup_id from appointments where appointment_type='mri')
                                                                                   and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
                                                                                          where sp.id = spv.scan_procedure_id
                                                                                          and ( sp.codename like '%visit1' or sp.codename not like '%visit%')))
@@ -414,6 +415,7 @@ class CronInterface < ActiveRecord::Base
                 results = connection.execute(sql)
                 v_visit_array.each do |v_num|
                    sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.vgroup_id = ( select  min( evm.vgroup_id) from enrollment_vgroup_memberships evm where evm.enrollment_id = t.enrollment_id
+                                                                                  and evm.vgroup_id in (select appointments.vgroup_id from appointments where appointment_type='mri')
                                                                                   and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
                                                                                          where sp.id = spv.scan_procedure_id
                                                                                          and sp.codename like '%visit"+v_num+"'))
@@ -454,9 +456,10 @@ class CronInterface < ActiveRecord::Base
                 results = connection.execute(sql)
                 
                 sql = "insert into cg_"+f.gsub(/\./,'_')+"("+v_sql_base_dict[f]+",enrollment_id,vgroup_id) 
-                select "+v_sql_base_dict[f]+",t.enrollment_id, evm.vgroup_id from cg_"+f.gsub(/\./,'_')+"_new t,enrollment_vgroup_memberships evm
+                select distinct "+v_sql_base_dict[f]+",t.enrollment_id, evm.vgroup_id from cg_"+f.gsub(/\./,'_')+"_new t,enrollment_vgroup_memberships evm
                                                where t.vgroup_id is not null and t.subjectid not like '%_v%'
                                               and  evm.enrollment_id = t.enrollment_id
+                                              and evm.vgroup_id in (select appointments.vgroup_id from appointments where appointment_type='mri')
                                               and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
                                                                      where sp.id = spv.scan_procedure_id
                                                                    and ( sp.codename like '%visit1' or sp.codename not like '%visit%'))"
@@ -464,9 +467,10 @@ class CronInterface < ActiveRecord::Base
                 
                 v_visit_array.each do |v_num|
                    sql = "insert into cg_"+f.gsub(/\./,'_')+"("+v_sql_base_dict[f]+",enrollment_id,vgroup_id) 
-                   select "+v_sql_base_dict[f]+",t.enrollment_id, evm.vgroup_id from cg_"+f.gsub(/\./,'_')+"_new t,enrollment_vgroup_memberships evm
+                   select distinct "+v_sql_base_dict[f]+",t.enrollment_id, evm.vgroup_id from cg_"+f.gsub(/\./,'_')+"_new t,enrollment_vgroup_memberships evm
                                                where t.vgroup_id is not null and t.subjectid  like '%_v"+v_num+"%'
                                               and  evm.enrollment_id = t.enrollment_id
+                                               and evm.vgroup_id in (select appointments.vgroup_id from appointments where appointment_type='mri')
                                               and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
                                                                      where sp.id = spv.scan_procedure_id
                                                                    and ( sp.codename like '%visit"+v_num+"'))"
