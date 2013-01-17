@@ -286,7 +286,7 @@ class DataSearchesController < ApplicationController
                    sql = "insert into "+@cg_tn.tn+"_edit("+v_key_cn_array.join(",")+",delete_key_flag) values("+v_key_value_array.join(",")+",'Y' )"
                     @results = connection.execute(sql)
                 end
-              elsif !params[:cg_edit_table][:delete_edit][v_cnt.to_s].blank? and params[:cg_edit_table][:delete_edit][v_cnt.to_s] == "1"
+              elsif !params[:cg_edit_table][:delete_edit].blank? and !params[:cg_edit_table][:delete_edit][v_cnt.to_s].blank? and params[:cg_edit_table][:delete_edit][v_cnt.to_s] == "1"
                   sql = " delete from "+@cg_tn.tn+"_edit  where "+v_key_array.join(" and ")
                    @results = connection.execute(sql)
               else
