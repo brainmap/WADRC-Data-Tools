@@ -37,9 +37,9 @@ edit_count = edit_count -1
 <%= f.submit "Search" %>
 <% end %></td><td align="right">
 	<%= form_for :schedule ,:url=>'/schedules/' do |f2| %>
-	<%= f2.label 'View Schedule'%><br>
+	<%= f2.label 'Run Schedule'%><br>
 	<select onChange="if(this.selectedIndex!=0) self.location=this.options[this.selectedIndex].value">
-		<option value="">view a schedule</option>
+		<option value="">run a schedule</option>
 		<% @schedules.each do |s| %>
 	<option value=/schedules/<%=s.id %>><%= s.name %></option>
 	   <% end %>

@@ -21,7 +21,7 @@
   <td valign="top"><%= schedule.name %></td>
     <td><%= schedule.run_command %></td>
     <td><%= schedule.parameters %></td>
-    <td><%= schedule.description %></td>
+    <td><%= schedule.description.html_safe %></td>
     <td><%= schedule.run_time_length_min %></td>
     <td><%= schedule.status_flag %></td>
     <td><%= schedule.target_table %></td>

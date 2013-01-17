@@ -407,8 +407,8 @@ class DataSearchesController < ApplicationController
                 sql = "delete from "+@cg_tn.tn+" where "+v_key_array.join(" and ")
                  @results = connection.execute(sql)
             end        
-          end
-    end        
+        end
+      end        
         
       ## problems with getting clean, new copy- think its the keys
       # refresh cg_data and cg_edit

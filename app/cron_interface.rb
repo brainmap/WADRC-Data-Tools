@@ -285,11 +285,15 @@ class CronInterface < ActiveRecord::Base
           # define tables, table_edit, add to cg tables/search 
          # call fs_file.py
          # only in prod --- lots of path issues
-          v_call = v_base_path+"/data1/lab_scripts/python_dev/fs_file.py N"
+         time = Time.now
+         v_date_stamp = time.strftime("%Y%m%d")
+          v_call = v_base_path+"/data1/lab_scripts/python_dev/fs_file.py Y"
+          v_comment = "start "+v_call
           # v_call = v_base_path+"/data1/lab_scripts/python_dev/transfer_process.py -test_call"
           #v_return = system("export PYTHONPATH=/usr/local/bin/python/ && python "+v_call)  # return value not working
           #  its working but must be better way -- getting all the print output from the python script, 
           # exit in python script after "print" return value, loop thru to get the last line
+# problem running in dev -- need to be admin-- make file, then test rest
           v_return =  `python #{v_call}`
           v_last_return_value = ""
           v_comment = ""
@@ -298,27 +302,262 @@ class CronInterface < ActiveRecord::Base
             v_last_return_value = line
           end
           # evaluate return values v_return(ERROR or SUCCESS)+"|"+yyyymmdd+"|"+(/tmp/)log_file
+          v_last_return_value = "SUCCESS|"+v_date_stamp+"|tmp.YYYYMMDD.txt"
           v_result_array = v_last_return_value.split("|")
           if v_result_array[0] == "SUCCESS"
+            connection = ActiveRecord::Base.connection();        
+  
+            v_visit_array = ['2','3','4','5']
             v_file_array = ["aseg","lh.aparc.area","rh.aparc.area"]
+            v_file_header_dict = {}
+            v_file_header_dict['aseg'] = "Measure:volume	Left-Lateral-Ventricle	Left-Inf-Lat-Vent	Left-Cerebellum-White-Matter	Left-Cerebellum-Cortex	Left-Thalamus-Proper	Left-Caudate	Left-Putamen	Left-Pallidum	3rd-Ventricle	4th-Ventricle	Brain-Stem	Left-Hippocampus	Left-Amygdala	CSF	Left-Accumbens-area	Left-VentralDC	Left-vessel	Left-choroid-plexus	Right-Lateral-Ventricle	Right-Inf-Lat-Vent	Right-Cerebellum-White-Matter	Right-Cerebellum-Cortex	Right-Thalamus-Proper	Right-Caudate	Right-Putamen	Right-Pallidum	Right-HippocampusRight-Amygdala	Right-Accumbens-area	Right-VentralDC	Right-vessel	Right-choroid-plexus	5th-Ventricle	WM-hypointensities	Left-WM-hypointensities	Right-WM-hypointensities	non-WM-hypointensities	Left-non-WM-hypointensities	Right-non-WM-hypointensities	Optic-Chiasm	CC_Posterior	CC_Mid_Posterior	CC_Central	CC_Mid_Anterior	CC_Anterior	lhCortexVol	rhCortexVol	CortexVol	lhCorticalWhiteMatterVol	rhCorticalWhiteMatterVol	CorticalWhiteMatterVol	SubCortGrayVol	TotalGrayVol	SupraTentorialVol	IntraCranialVol"
+            v_file_header_dict['lh.aparc.area'] = "lh.aparc.area	lh_bankssts_area	lh_caudalanteriorcingulate_area	lh_caudalmiddlefrontal_area	lh_cuneus_area	lh_entorhinal_area	lh_fusiform_area	lh_inferiorparietal_area	lh_inferiortemporal_area	lh_isthmuscingulate_area	lh_lateraloccipital_area	lh_lateralorbitofrontal_area	lh_lingual_area	lh_medialorbitofrontal_area	lh_middletemporal_area	lh_parahippocampal_area	lh_paracentral_area	lh_parsopercularis_area	lh_parsorbitalis_area	lh_parstriangularis_area	lh_pericalcarine_area	lh_postcentral_area	lh_posteriorcingulate_area	lh_precentral_area	lh_precuneus_area	lh_rostralanteriorcingulate_area	lh_rostralmiddlefrontal_area	lh_superiorfrontal_area	lh_superiorparietal_area	lh_superiortemporal_area	lh_supramarginal_area	lh_frontalpole_area	lh_temporalpole_area	lh_transversetemporal_area	lh_insula_area	lh_WhiteSurfArea_area"
+            v_file_header_dict['rh.aparc.area'] = "rh.aparc.area	rh_bankssts_area	rh_caudalanteriorcingulate_area	rh_caudalmiddlefrontal_area	rh_cuneus_area	rh_entorhinal_area	rh_fusiform_area	rh_inferiorparietal_area	rh_inferiortemporal_area	rh_isthmuscingulate_area	rh_lateraloccipital_area	rh_lateralorbitofrontal_area	rh_lingual_area	rh_medialorbitofrontal_area	rh_middletemporal_area	rh_parahippocampal_area	rh_paracentral_area	rh_parsopercularis_area	rh_parsorbitalis_area	rh_parstriangularis_area	rh_pericalcarine_area	rh_postcentral_area	rh_posteriorcingulate_area	rh_precentral_area	rh_precuneus_area	rh_rostralanteriorcingulate_area	rh_rostralmiddlefrontal_area	rh_superiorfrontal_area	rh_superiorparietal_area	rh_superiortemporal_area	rh_supramarginal_area	rh_frontalpole_area	rh_temporalpole_area	rh_transversetemporal_area	rh_insula_area	rh_WhiteSurfArea_area"
+            v_old_truncate_dict = {}
+            v_old_truncate_dict['aseg'] = "truncate table cg_aseg_old"
+            v_old_truncate_dict['lh.aparc.area'] = "truncate table cg_lh_aparc_area_old"
+            v_old_truncate_dict['rh.aparc.area'] = "truncate table cg_rh_aparc_area_old" 
+            v_truncate_dict = {}
+            v_truncate_dict['aseg'] = "truncate table cg_aseg"
+            v_truncate_dict['lh.aparc.area'] = "truncate table cg_lh_aparc_area"
+            v_truncate_dict['rh.aparc.area'] = "truncate table cg_rh_aparc_area"
+            v_new_truncate_dict = {}
+            v_new_truncate_dict['aseg'] = "truncate table cg_aseg_new"
+            v_new_truncate_dict['lh.aparc.area'] = "truncate table cg_lh_aparc_area_new"
+            v_new_truncate_dict['rh.aparc.area'] = "truncate table cg_rh_aparc_area_new"
+            v_sql_base_dict = {}
+            v_sql_base_dict['aseg'] ="subjectid,left_lateral_ventricle,left_inf_lat_vent,left_cerebellum_white_matter,left_cerebellum_cortex,
+            left_thalamus_proper,left_caudate,left_putamen,left_pallidum,third_ventricle,fourth_ventricle,
+            brain_stem,left_hippocampus,left_amygdala,csf,left_accumbens_area,left_ventraldc,left_vessel,
+            left_choroid_plexus,right_lateral_ventricle,right_inf_lat_vent,right_cerebellum_white_matter,
+            right_cerebellum_cortex,right_thalamus_proper,right_caudate,right_putamen,
+            right_pallidum,right_hippocampus,right_amygdala,right_accumbens_area,right_ventraldc,right_vessel,
+            right_choroid_plexus,fifth_ventricle,wm_hypointensities,left_wm_hypointensities,
+            right_wm_hypointensities,non_wm_hypointensities,left_non_wm_hypointensities,right_non_wm_hypointensities,
+            optic_chiasm,cc_posterior,cc_mid_posterior,cc_central,cc_mid_anterior,cc_anterior,lhcortexvol,
+            rhcortexvol,cortexvol,lhcorticalwhitemattervol,rhcorticalwhitemattervol,corticalwhitemattervol,
+            subcortgrayvol,totalgrayvol,supratentorialvol,intracranialvol "                       
+            v_sql_base_dict['lh.aparc.area'] ="subjectid,lh_bankssts_area,lh_caudalanteriorcingulate_area,lh_caudalmiddlefrontal_area,lh_cuneus_area,
+            lh_entorhinal_area,lh_fusiform_area,lh_inferiorparietal_area,lh_inferiortemporal_area,lh_isthmuscingulate_area,
+            lh_lateraloccipital_area,lh_lateralorbitofrontal_area,lh_lingual_area,lh_medialorbitofrontal_area,
+            lh_middletemporal_area,lh_parahippocampal_area,lh_paracentral_area,lh_parsopercularis_area,lh_parsorbitalis_area,
+            lh_parstriangularis_area,lh_pericalcarine_area,lh_postcentral_area,lh_posteriorcingulate_area,
+            lh_precentral_area,lh_precuneus_area,lh_rostralanteriorcingulate_area,lh_rostralmiddlefrontal_area,
+            lh_superiorfrontal_area,lh_superiorparietal_area,lh_superiortemporal_area,lh_supramarginal_area,
+            lh_frontalpole_area,lh_temporalpole_area,lh_transversetemporal_area,
+            lh_insula_area,lh_whitesurfarea_area "
+            v_sql_base_dict['rh.aparc.area'] ="subjectid,rh_bankssts_area,rh_caudalanteriorcingulate_area,rh_caudalmiddlefrontal_area,rh_cuneus_area,
+            rh_entorhinal_area,rh_fusiform_area,rh_inferiorparietal_area,rh_inferiortemporal_area,rh_isthmuscingulate_area,
+            rh_lateraloccipital_area,rh_lateralorbitofrontal_area,rh_lingual_area,rh_medialorbitofrontal_area,
+            rh_middletemporal_area,rh_parahippocampal_area,rh_paracentral_area,rh_parsopercularis_area,
+            rh_parsorbitalis_area,rh_parstriangularis_area,rh_pericalcarine_area,rh_postcentral_area,
+            rh_posteriorcingulate_area,rh_precentral_area,rh_precuneus_area,rh_rostralanteriorcingulate_area,
+            rh_rostralmiddlefrontal_area,rh_superiorfrontal_area,rh_superiorparietal_area,rh_superiortemporal_area,
+            rh_supramarginal_area,rh_frontalpole_area,rh_temporalpole_area,rh_transversetemporal_area,
+            rh_insula_area,rh_whitesurfarea_area "
+            
+            
             # v_table_array =["cg_aseg","cg_lh_aparc_area", "cg_rh_aparc_area"]
             #v_result_array[1]+".aseg.all.txt",  v_result_array[1]+".lh.aparc.area.all.txt",   v_result_array[1]+".rh.aparc.area.all.txt"
             v_file_dir = v_base_path+"/preprocessed/modalities/freesurfer/orig_recon/"
             # loop thru file array
-            # get files
-            # move cg_[file_replace"."] table to cg_[file_replace"."]_old
-            # trunacte and load cg_table
-            #File.open("testfile.txt",'r') do |fileb|
-            #  while line = fileb.gets
-                 # map the subjectid_v# to enrollment, vgroup
-                 #make insert sql
-             # end
-             # apply edits
+            v_file_array.each do |f|
+              v_file_name = v_date_stamp+"."+f+".all.txt"
+              puts "file name = "+v_file_name
+              v_file_path = v_file_dir+v_file_name
+              v_cnt = 0
+              v_header = ""
+              File.open(v_file_path,'r') do |file_a|
+                while line = file_a.gets and v_cnt < 1
+                   if v_cnt < 1
+                    v_header = line
+                   end
+                   v_cnt = v_cnt +1
+                end
+              end
+              if v_header.gsub(/	/,"").gsub(/\n/,"") !=  v_file_header_dict[f].gsub(/	/,"").gsub(/\n/,"")
+                v_comment = "ERROR!!! file header "+f+" not match expected header \n" +v_comment
+                puts "ERROR!!! file header "+f+" not match expected header"                
+              else
+                puts " header matches expected."
+                v_comment = " header matches expected."+v_comment
+                v_comment = v_comment[0..499]
+                sql = v_new_truncate_dict[f]
+                results = connection.execute(sql)
+                v_cnt = 0
+                v_line_array = []
+                File.open(v_file_path,'r') do |file_a|
+                  while line = file_a.gets
+                    if v_cnt > 0
+                      sql = "insert into cg_"+f.gsub(/\./,'_')+"_new ( "+v_sql_base_dict[f]+" ) values("
+                      v_line_array = []
+                      line.gsub(/\n/,"").split("\t").each do |v|
+                        v_line_array.push("'"+v+"'")
+                      end 
+                      sql = sql+v_line_array.join(",")
+                      sql = sql+")"
+                      results = connection.execute(sql)                    
+                    end
+                    v_cnt = v_cnt + 1
+                  end
+                end
+                # update enrollment -- make into a function?
+                sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.enrollment_id = ( select e.id from enrollments e where e.enumber = replace(replace(replace(replace(t.subjectid,'_v2',''),'_v3',''),'_v4',''),'_v5',''))"
+                results = connection.execute(sql)
+                # need to apply in insert to cg_ tables --- multple rows --- just getting min(vgroup_id) to track unmapped rows
+                # update vgroup  -- make into a function
+                sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.vgroup_id = ( select min( evm.vgroup_id) from enrollment_vgroup_memberships evm where evm.enrollment_id = t.enrollment_id
+                                                                                  and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
+                                                                                         where sp.id = spv.scan_procedure_id
+                                                                                         and ( sp.codename like '%visit1' or sp.codename not like '%visit%')))
+                      where t.subjectid not like '%_v2' and  t.subjectid not like '%_v3' and  t.subjectid not like '%_v4' and  t.subjectid not like '%_v5' " 
+                results = connection.execute(sql)
+                v_visit_array.each do |v_num|
+                   sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.vgroup_id = ( select  min( evm.vgroup_id) from enrollment_vgroup_memberships evm where evm.enrollment_id = t.enrollment_id
+                                                                                  and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
+                                                                                         where sp.id = spv.scan_procedure_id
+                                                                                         and sp.codename like '%visit"+v_num+"'))
+                      where t.subjectid like '%_v"+v_num+"'"
+                   results = connection.execute(sql)
+                 end
+              
+                # report on unmapped rows, not insert unmapped rows 
+                sql = "select subjectid, enrollment_id from cg_"+f.gsub(/\./,'_')+"_new where vgroup_id is null order by subjectid"
+                results = connection.execute(sql)
+                results.each do |re|
+                  v_comment = re.join(' | ')+" ,"+v_comment
+                end
+                if !results.blank?
+                   v_comment = "cg_"+f.gsub(/\./,'_')+"_new unmapped subjectid,enrollment_id ="+v_comment
+                end
+                
+                # check move cg_ to cg_old
+                sql = "select count(*) from cg_"+f.gsub(/\./,'_')+"_old"
+                results_old = connection.execute(sql)
+                
+                sql = "select count(*) from cg_"+f.gsub(/\./,'_')
+                results = connection.execute(sql)
+                v_old_cnt = results_old.first.to_s.to_i
+                v_present_cnt = results.first.to_s.to_i
+                v_old_minus_present =v_old_cnt-v_present_cnt
+                v_present_minus_old = v_present_cnt-v_old_cnt
+                if ( v_old_minus_present <= 0 or ( v_old_cnt > 0 and  (v_present_minus_old/v_old_cnt)>0.7     ) )
+                  sql =  v_old_truncate_dict[f]
+                  results = connection.execute(sql)
+                  sql = "insert into cg_"+f.gsub(/\./,'_')+"_old select * from cg_"+f.gsub(/\./,'_')
+                  results = connection.execute(sql)
+                else
+                  v_comment = " The cg_"+f.gsub(/\./,'_')+"_old table has 30% more rows than the present cg_"+f.gsub(/\./,'_')+"\n Not truncating cg_"+f.gsub(/\./,'_')+"_old "+v_comment 
+                end
+                #  truncate cg_ and insert cg_new
+                sql =  v_truncate_dict[f]
+                results = connection.execute(sql)
+                
+                sql = "insert into cg_"+f.gsub(/\./,'_')+"("+v_sql_base_dict[f]+",enrollment_id,vgroup_id) 
+                select "+v_sql_base_dict[f]+",t.enrollment_id, evm.vgroup_id from cg_"+f.gsub(/\./,'_')+"_new t,enrollment_vgroup_memberships evm
+                                               where t.vgroup_id is not null and t.subjectid not like '%_v%'
+                                              and  evm.enrollment_id = t.enrollment_id
+                                              and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
+                                                                     where sp.id = spv.scan_procedure_id
+                                                                   and ( sp.codename like '%visit1' or sp.codename not like '%visit%'))"
+                results = connection.execute(sql)
+                
+                v_visit_array.each do |v_num|
+                   sql = "insert into cg_"+f.gsub(/\./,'_')+"("+v_sql_base_dict[f]+",enrollment_id,vgroup_id) 
+                   select "+v_sql_base_dict[f]+",t.enrollment_id, evm.vgroup_id from cg_"+f.gsub(/\./,'_')+"_new t,enrollment_vgroup_memberships evm
+                                               where t.vgroup_id is not null and t.subjectid  like '%_v"+v_num+"%'
+                                              and  evm.enrollment_id = t.enrollment_id
+                                              and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
+                                                                     where sp.id = spv.scan_procedure_id
+                                                                   and ( sp.codename like '%visit"+v_num+"'))"
+                   results = connection.execute(sql)
+                end
+                # apply edits  -- make into a function --- same as in data_searches controller
+                v_tn = "cg_"+f.gsub(/\./,'_')
+                @cg_tns = CgTn.where(" tn = '"+v_tn+"'")
+                @cg_tn = nil
+                @cg_tns.each do |tns|
+                  if !tns.id.blank?
+                     @cg_tn = CgTn.find(tns.id)
+                  end
+                end
+
+                @cns = []
+                @key_cns = []
+                @v_key = []
+                @cns_type_dict ={}
+                @cns_common_name_dict = {}
+                @cg_data_dict = {}
+                @cg_edit_data_dict = {}
+
+                @cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",@cg_tn.id)
+                @cg_tn_cns.each do |cg_tn_cn|
+                    @cns.push(cg_tn_cn.cn)
+                    @cns_common_name_dict[cg_tn_cn.cn] = cg_tn_cn.common_name
+                    if cg_tn_cn.key_column_flag == "Y"
+                      @key_cns.push(cg_tn_cn.cn)
+                    end 
+                    if !cg_tn_cn.data_type.blank?
+                      @cns_type_dict[cg_tn_cn.cn] = cg_tn_cn.data_type
+                    end
+                end
+                # apply cg_edit to cg_data and refresh cg_edit , same as above, but no key array
+                sql = "SELECT "+@cns.join(',') +",delete_key_flag FROM "+@cg_tn.tn+"_edit" 
+                @edit_results = connection.execute(sql)         
+                @edit_results.each do |r|
+                    v_key_array = []
+                    v_cnt  = 0
+                    v_key =""
+                    v_delete_data_row="N"
+                    r.each do |rc| # make and save cn-value| key
+                      if @key_cns.include?(@cns[v_cnt]) # key column
+                        v_key = v_key+@cns[v_cnt] +"^"+rc.to_s+"|"
+                        v_key_array.push( @cns[v_cnt] +"='"+rc.to_s+"'")
+                      end
+                      v_cnt = v_cnt + 1
+                    end  
+                    if !v_key.blank? and !@v_key.include?(v_key) 
+                        @v_key.push(v_key)
+                    end
+                    # update cg_data
+                    v_cnt = 0
+                    v_col_value_array = []
+                    r.each do |rc|
+                      if !@key_cns.include?(@cns[v_cnt])
+                        # might need to int, to date, etc from datatype
+                        if @cns[v_cnt].blank?
+                         # v_col_value_array.push(" delete_key_flag ='"+rc.to_s+"' ")
+                           if rc.to_s == "Y"
+                            v_delete_data_row="Y"
+                          end
+                        else
+                            if rc.to_s != "|"
+                                v_col_value_array.push(@cns[v_cnt]+"='"+rc.to_s.gsub(/'/, "''")+"' ")
+                            end
+                        end
+                      end               
+                      v_cnt = v_cnt + 1
+                    end
+                    if v_delete_data_row=="N"
+                        if v_col_value_array.size > 0
+                          sql = "update "+@cg_tn.tn+" set "+v_col_value_array.join(',')+" where "+v_key_array.join(" and ")
+                           @results = connection.execute(sql)
+                         end
+                    else
+                        sql = "delete from "+@cg_tn.tn+" where "+v_key_array.join(" and ")
+                         @results = connection.execute(sql)
+                    end        
+                end
+                
+                 
+                 v_comment = "finish loading cg_"+f.gsub(/\./,'_')+"   \n"               
+              end
+           end
             
           
          # load aseg, lh aparc, rh aparc files    
        
-         @schedulerun.comment =("successful finish fs_aseg_aparc  values="+v_last_return_value+"\n"+v_comment)[0..499]
+         @schedulerun.comment =("successful finish fs_aseg_aparc  values=") # +v_last_return_value+"\n"+v_comment)[0..499]
          @schedulerun.status_flag ="Y"
          
          else
