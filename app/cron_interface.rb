@@ -31,6 +31,11 @@ class CronInterface < ActiveRecord::Base
          and image_datasets.visit_id in (select visits.id from visits where visits.date > adddate(curdate(),'-31'))"
       connection = ActiveRecord::Base.connection();        
       results = connection.execute(sql)
+      v_end_id  = ""
+      results.each do |r|
+        v_end_id   = r[1].to_s
+       end
+     if !v_end_id.blank?
       results.each do |r|
         v_start_id =r[0].to_s
         v_end_id   = r[1].to_s
@@ -38,9 +43,10 @@ class CronInterface < ActiveRecord::Base
         visit = Visit.find(image_dataset.visit_id)
         puts "start id = "+v_start_id+"   end id="+v_end_id
         visit.series_desc_cnt(v_start_id, v_end_id)
-        v_base_path = visit.get_base_path() # happens to be in the visits model
-       end 
-
+       end
+      end 
+      visit = Visit.find(3)
+      v_base_path = visit.get_base_path() # happens to be in the visits model
       v_dir_path = v_base_path+"/analyses/panda/sp_series_desc_cnt/summary/"
       # truncate and populate table
       sql = "truncate table t_sp_series_desc_cout_freq"
@@ -73,20 +79,31 @@ class CronInterface < ActiveRecord::Base
       group by sp.codename, ids.series_description, ids.dcm_file_count"        
       results = connection.execute(sql)
       v_comment = "\n finish series desc cnt "+v_comment
+      @schedulerun.comment =v_comment
+      @schedulerun.save
       
       # get the nii file_count from vgroups
       sql = "select min(vgroups.id) min_id, max(vgroups.id) max_id from vgroups where ( nii_file_count is not null or nii_file_count > 0)
          and  vgroups.vgroup_date > adddate(curdate(),'-31')"      
       results = connection.execute(sql)
+       v_end_id  = ""
       results.each do |r|
-        v_start_id =r[0].to_s
-        v_end_id   = r[1].to_s
-        vgroup = Vgroup.find(v_end_id)
-        puts "VGROUP start id = "+v_start_id+"   end id="+v_end_id
-        vgroup.nii_file_cnt(v_start_id, v_end_id)  
-        # alread got from visits v_base_path = vgroup.get_base_path() # happens to be in the visits model
+         v_end_id   = r[1].to_s
+      end
+      if !v_end_id.blank?
+       results.each do |r|
+          v_start_id =r[0].to_s
+          v_end_id   = r[1].to_s
+          puts "VGROUP start id = "+v_start_id+"   end id="+v_end_id
+          vgroup = Vgroup.find(v_end_id)
+          puts "VGROUP start id = "+v_start_id+"   end id="+v_end_id
+          v_comment = "start nii_file_cnt "+v_comment
+          @schedulerun.comment =v_comment
+          @schedulerun.save
+          vgroup.nii_file_cnt(v_start_id, v_end_id)  
+          # alread got from visits v_base_path = vgroup.get_base_path() # happens to be in the visits model
        end
-      
+      end
        sql = "insert into t_sp_series_desc_cout_freq (codename,series_description, dcm_file_count, frequency_count)
        select sp.codename, 'nii_files', vg2.nii_file_count, count(*) frequency_count
        from scan_procedures sp, scan_procedures_vgroups spg,  vgroups vg2
@@ -97,7 +114,10 @@ class CronInterface < ActiveRecord::Base
                                          where vg.id=spg2.vgroup_id and vg.vgroup_date >  adddate(curdate(),'-400') )
        group by sp.codename, vg2.nii_file_count"        
        results = connection.execute(sql)      
+      
        v_comment = "\n finish nii cnt "+v_comment
+       @schedulerun.comment =v_comment
+       @schedulerun.save
       
       
       # update fraction_of_total
@@ -141,6 +161,7 @@ class CronInterface < ActiveRecord::Base
          v_error = msg.to_s
          puts "ERROR !!!!!!!"
          puts v_error
+         v_error = v_error+"\n"+v_comment
           @schedulerun.comment =v_error[0..499]
           @schedulerun.status_flag="E"
           @schedulerun.save
