@@ -1,16 +1,34 @@
 require 'visit'
 require 'image_dataset'
+require 'shared' # this contains functions --- not sure where else to make functions accessible to this class
 class CronInterface < ActiveRecord::Base
   v_value_1 = ARGV[0]
   puts "AAAAAAAAAAA in CronInterface"+v_value_1.to_s+"="
+  v_shared = Shared.new
 # calls from cron
 #   sp_series_desc_count
 #   fs_Y_N
 #   fs_aseg_aparc
 
+
+
   visit = Visit.find(3)  #  need to get base path without visit
   v_base_path = visit.get_base_path()
-  
+  if v_value_1 == "test"
+    v_shared = Shared.new
+    v_flag =""
+    v_comment =""
+    sql = "select subjectid from cg_aseg"
+    connection = ActiveRecord::Base.connection();        
+    results = connection.execute(sql)
+    results.each do |r|
+        v_comment =v_shared.get_sp_id_from_subjectid_v(r[0])
+       if v_comment.blank?
+         puts r[0]
+       end
+    end
+  end
+
   
   # dev 
   #/usr/local/bin/rails  runner /Users/caillingworth/code/WADRC-Data-Tools/app/cron_interface.rb sp_series_desc_count
@@ -301,6 +319,8 @@ class CronInterface < ActiveRecord::Base
        @schedulerun.save
        @schedulerun.start_time = @schedulerun.created_at
        @schedulerun.save
+       v_return_flag =""
+       v_return_comment =""
      begin  
         # to do 
           # define tables, table_edit, add to cg tables/search 
@@ -308,6 +328,7 @@ class CronInterface < ActiveRecord::Base
          # only in prod --- lots of path issues
          time = Time.now
          v_date_stamp = time.strftime("%Y%m%d")
+#### v_date_stamp ="20130117"
           v_call = v_base_path+"/data1/lab_scripts/python_dev/fs_file.py Y"
           v_comment = "start "+v_call
           # v_call = v_base_path+"/data1/lab_scripts/python_dev/transfer_process.py -test_call"
@@ -323,7 +344,8 @@ class CronInterface < ActiveRecord::Base
             v_last_return_value = line
           end
           # evaluate return values v_return(ERROR or SUCCESS)+"|"+yyyymmdd+"|"+(/tmp/)log_file
-          v_last_return_value = "SUCCESS|"+v_date_stamp+"|tmp.YYYYMMDD.txt"
+####  added temp row
+####          v_last_return_value = "SUCCESS|"+v_date_stamp+"|tmp.YYYYMMDD.txt"
           v_result_array = v_last_return_value.split("|")
           if v_result_array[0] == "SUCCESS"
             connection = ActiveRecord::Base.connection();        
@@ -396,12 +418,13 @@ class CronInterface < ActiveRecord::Base
                    v_cnt = v_cnt +1
                 end
               end
-              if v_header.gsub(/	/,"").gsub(/\n/,"") !=  v_file_header_dict[f].gsub(/	/,"").gsub(/\n/,"")
-                v_comment = "ERROR!!! file header "+f+" not match expected header \n" +v_comment
-                puts "ERROR!!! file header "+f+" not match expected header"                
+              v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_file_header_dict[f])
+              if v_return_flag == "N" 
+                v_comment = v_return_comment+" \n"+v_comment
+                puts v_return_comment               
               else
-                puts " header matches expected."
-                v_comment = " header matches expected."+v_comment
+                puts v_return_comment
+                v_comment = v_return_comment+v_comment
                 v_comment = v_comment[0..499]
                 sql = v_new_truncate_dict[f]
                 results = connection.execute(sql)
@@ -425,27 +448,37 @@ class CronInterface < ActiveRecord::Base
                 # update enrollment -- make into a function?
                 sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.enrollment_id = ( select e.id from enrollments e where e.enumber = replace(replace(replace(replace(t.subjectid,'_v2',''),'_v3',''),'_v4',''),'_v5',''))"
                 results = connection.execute(sql)
+                sql = "select subjectid from cg_"+f.gsub(/\./,'_')+"_new"
+                results = connection.execute(sql)
+                results.each do |r|
+                  v_sp_id = v_shared.get_sp_id_from_subjectid_v(r[0])
+                  if !v_sp_id.blank?
+                    sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.scan_procedure_id = "+v_sp_id.to_s+" where subjectid ='"+r[0]+"'"
+                    results = connection.execute(sql)
+                  end
+                end
+
                 # need to apply in insert to cg_ tables --- multple rows --- just getting min(vgroup_id) to track unmapped rows
                 # update vgroup  -- make into a function
-                sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.vgroup_id = ( select min( evm.vgroup_id) from enrollment_vgroup_memberships evm where evm.enrollment_id = t.enrollment_id
-                                                                                  and evm.vgroup_id in (select appointments.vgroup_id from appointments where appointment_type='mri')
-                                                                                  and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
-                                                                                         where sp.id = spv.scan_procedure_id
-                                                                                         and ( sp.codename like '%visit1' or sp.codename not like '%visit%')))
-                      where t.subjectid not like '%_v2' and  t.subjectid not like '%_v3' and  t.subjectid not like '%_v4' and  t.subjectid not like '%_v5' " 
-                results = connection.execute(sql)
-                v_visit_array.each do |v_num|
-                   sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.vgroup_id = ( select  min( evm.vgroup_id) from enrollment_vgroup_memberships evm where evm.enrollment_id = t.enrollment_id
-                                                                                  and evm.vgroup_id in (select appointments.vgroup_id from appointments where appointment_type='mri')
-                                                                                  and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
-                                                                                         where sp.id = spv.scan_procedure_id
-                                                                                         and sp.codename like '%visit"+v_num+"'))
-                      where t.subjectid like '%_v"+v_num+"'"
-                   results = connection.execute(sql)
-                 end
+ #               sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.vgroup_id = ( select min( evm.vgroup_id) from enrollment_vgroup_memberships evm where evm.enrollment_id = t.enrollment_id
+ #                                                                                  and evm.vgroup_id in (select appointments.vgroup_id from appointments where appointment_type='mri')
+#                                                                                  and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
+#                                                                                         where sp.id = spv.scan_procedure_id
+#                                                                                         and ( sp.codename like '%visit1' or sp.codename not like '%visit%')))
+#                      where t.subjectid not like '%_v2' and  t.subjectid not like '%_v3' and  t.subjectid not like '%_v4' and  t.subjectid not like '%_v5' " 
+#                results = connection.execute(sql)
+#                v_visit_array.each do |v_num|
+#                   sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.vgroup_id = ( select  min( evm.vgroup_id) from enrollment_vgroup_memberships evm where evm.enrollment_id = t.enrollment_id
+#                                                                                  and evm.vgroup_id in (select appointments.vgroup_id from appointments where appointment_type='mri')
+#                                                                                  and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
+#                                                                                         where sp.id = spv.scan_procedure_id
+#                                                                                         and sp.codename like '%visit"+v_num+"'))
+#                      where t.subjectid like '%_v"+v_num+"'"
+#                   results = connection.execute(sql)
+#                 end
               
                 # report on unmapped rows, not insert unmapped rows 
-                sql = "select subjectid, enrollment_id from cg_"+f.gsub(/\./,'_')+"_new where vgroup_id is null order by subjectid"
+                sql = "select subjectid, enrollment_id from cg_"+f.gsub(/\./,'_')+"_new where scan_procedure_id is null order by subjectid"
                 results = connection.execute(sql)
                 results.each do |re|
                   v_comment = re.join(' | ')+" ,"+v_comment
@@ -476,104 +509,13 @@ class CronInterface < ActiveRecord::Base
                 sql =  v_truncate_dict[f]
                 results = connection.execute(sql)
                 
-                sql = "insert into cg_"+f.gsub(/\./,'_')+"("+v_sql_base_dict[f]+",enrollment_id,vgroup_id) 
-                select distinct "+v_sql_base_dict[f]+",t.enrollment_id, evm.vgroup_id from cg_"+f.gsub(/\./,'_')+"_new t,enrollment_vgroup_memberships evm
-                                               where t.vgroup_id is not null and t.subjectid not like '%_v%'
-                                              and  evm.enrollment_id = t.enrollment_id
-                                              and evm.vgroup_id in (select appointments.vgroup_id from appointments where appointment_type='mri')
-                                              and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
-                                                                     where sp.id = spv.scan_procedure_id
-                                                                   and ( sp.codename like '%visit1' or sp.codename not like '%visit%'))"
+                sql = "insert into cg_"+f.gsub(/\./,'_')+"("+v_sql_base_dict[f]+",enrollment_id,scan_procedure_id) 
+                select distinct "+v_sql_base_dict[f]+",t.enrollment_id, scan_procedure_id from cg_"+f.gsub(/\./,'_')+"_new t
+                                               where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
-                
-                v_visit_array.each do |v_num|
-                   sql = "insert into cg_"+f.gsub(/\./,'_')+"("+v_sql_base_dict[f]+",enrollment_id,vgroup_id) 
-                   select distinct "+v_sql_base_dict[f]+",t.enrollment_id, evm.vgroup_id from cg_"+f.gsub(/\./,'_')+"_new t,enrollment_vgroup_memberships evm
-                                               where t.vgroup_id is not null and t.subjectid  like '%_v"+v_num+"%'
-                                              and  evm.enrollment_id = t.enrollment_id
-                                               and evm.vgroup_id in (select appointments.vgroup_id from appointments where appointment_type='mri')
-                                              and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
-                                                                     where sp.id = spv.scan_procedure_id
-                                                                   and ( sp.codename like '%visit"+v_num+"'))"
-                   results = connection.execute(sql)
-                end
-                # apply edits  -- make into a function --- same as in data_searches controller
-                v_tn = "cg_"+f.gsub(/\./,'_')
-                @cg_tns = CgTn.where(" tn = '"+v_tn+"'")
-                @cg_tn = nil
-                @cg_tns.each do |tns|
-                  if !tns.id.blank?
-                     @cg_tn = CgTn.find(tns.id)
-                  end
-                end
 
-                @cns = []
-                @key_cns = []
-                @v_key = []
-                @cns_type_dict ={}
-                @cns_common_name_dict = {}
-                @cg_data_dict = {}
-                @cg_edit_data_dict = {}
-
-                @cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",@cg_tn.id)
-                @cg_tn_cns.each do |cg_tn_cn|
-                    @cns.push(cg_tn_cn.cn)
-                    @cns_common_name_dict[cg_tn_cn.cn] = cg_tn_cn.common_name
-                    if cg_tn_cn.key_column_flag == "Y"
-                      @key_cns.push(cg_tn_cn.cn)
-                    end 
-                    if !cg_tn_cn.data_type.blank?
-                      @cns_type_dict[cg_tn_cn.cn] = cg_tn_cn.data_type
-                    end
-                end
-                # apply cg_edit to cg_data and refresh cg_edit , same as above, but no key array
-                sql = "SELECT "+@cns.join(',') +",delete_key_flag FROM "+@cg_tn.tn+"_edit" 
-                @edit_results = connection.execute(sql)         
-                @edit_results.each do |r|
-                    v_key_array = []
-                    v_cnt  = 0
-                    v_key =""
-                    v_delete_data_row="N"
-                    r.each do |rc| # make and save cn-value| key
-                      if @key_cns.include?(@cns[v_cnt]) # key column
-                        v_key = v_key+@cns[v_cnt] +"^"+rc.to_s+"|"
-                        v_key_array.push( @cns[v_cnt] +"='"+rc.to_s+"'")
-                      end
-                      v_cnt = v_cnt + 1
-                    end  
-                    if !v_key.blank? and !@v_key.include?(v_key) 
-                        @v_key.push(v_key)
-                    end
-                    # update cg_data
-                    v_cnt = 0
-                    v_col_value_array = []
-                    r.each do |rc|
-                      if !@key_cns.include?(@cns[v_cnt])
-                        # might need to int, to date, etc from datatype
-                        if @cns[v_cnt].blank?
-                         # v_col_value_array.push(" delete_key_flag ='"+rc.to_s+"' ")
-                           if rc.to_s == "Y"
-                            v_delete_data_row="Y"
-                          end
-                        else
-                            if rc.to_s != "|"
-                                v_col_value_array.push(@cns[v_cnt]+"='"+rc.to_s.gsub(/'/, "''")+"' ")
-                            end
-                        end
-                      end               
-                      v_cnt = v_cnt + 1
-                    end
-                    if v_delete_data_row=="N"
-                        if v_col_value_array.size > 0
-                          sql = "update "+@cg_tn.tn+" set "+v_col_value_array.join(',')+" where "+v_key_array.join(" and ")
-                           @results = connection.execute(sql)
-                         end
-                    else
-                        sql = "delete from "+@cg_tn.tn+" where "+v_key_array.join(" and ")
-                         @results = connection.execute(sql)
-                    end        
-                end
-                
+                # apply edits  -- made into a function  in shared model
+                v_shared.apply_cg_edits(f)
                  
                  v_comment = "finish loading cg_"+f.gsub(/\./,'_')+"   \n"               
               end

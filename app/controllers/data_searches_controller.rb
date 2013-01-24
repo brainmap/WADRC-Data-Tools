@@ -361,7 +361,7 @@ class DataSearchesController < ApplicationController
         end
         
       if !params[:cg_edit_table].blank? and !params[:cg_edit_table][:key].blank?  
-        # apply cg_edit to cg_data and refresh cg_edit , same as above, but no key array
+        # apply cg_edit to cg_data and refresh cg_edit , same as above, but no key array ---  made into a function  in shared model - needswitch to that function
         sql = "SELECT "+@cns.join(',') +",delete_key_flag FROM "+@cg_tn.tn+"_edit" 
         @edit_results = connection.execute(sql)         
         @edit_results.each do |r|
