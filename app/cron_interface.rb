@@ -312,9 +312,15 @@ class CronInterface < ActiveRecord::Base
           @schedulerun.save
       end
     elsif v_value_1 == "fs_aseg_aparc"  #   rails runner app/cron_interface.rb fs_aseg_aparc
+      
       @schedule = Schedule.where("name in ('fs_aseg_aparc')").first
+      puts "schedule id = "+@schedule.id.to_s
        @schedulerun = Schedulerun.new
-       @schedulerun.schedule_id = @schedule.id
+       if !@schedule.id.blank?
+          @schedulerun.schedule_id = @schedule.id
+       else
+         @schedulerun.schedule_id = 4
+      end
        @schedulerun.comment ="starting fs_aseg_aparc"
        @schedulerun.save
        @schedulerun.start_time = @schedulerun.created_at
@@ -331,6 +337,8 @@ class CronInterface < ActiveRecord::Base
 #### v_date_stamp ="20130117"
           v_call = v_base_path+"/data1/lab_scripts/python_dev/fs_file.py Y"
           v_comment = "start "+v_call
+          @schedulerun.comment = v_comment
+          @schedulerun.save
           # v_call = v_base_path+"/data1/lab_scripts/python_dev/transfer_process.py -test_call"
           #v_return = system("export PYTHONPATH=/usr/local/bin/python/ && python "+v_call)  # return value not working
           #  its working but must be better way -- getting all the print output from the python script, 
@@ -346,6 +354,9 @@ class CronInterface < ActiveRecord::Base
           # evaluate return values v_return(ERROR or SUCCESS)+"|"+yyyymmdd+"|"+(/tmp/)log_file
 ####  added temp row
 ####          v_last_return_value = "SUCCESS|"+v_date_stamp+"|tmp.YYYYMMDD.txt"
+          v_comment = "after python call "+v_last_return_value + " \n "+v_comment
+          @schedulerun.comment = v_comment
+          @schedulerun.save
           v_result_array = v_last_return_value.split("|")
           if v_result_array[0] == "SUCCESS"
             connection = ActiveRecord::Base.connection();        
@@ -517,7 +528,7 @@ class CronInterface < ActiveRecord::Base
                 # apply edits  -- made into a function  in shared model
                 v_shared.apply_cg_edits(f)
                  
-                 v_comment = "finish loading cg_"+f.gsub(/\./,'_')+"   \n"               
+                 v_comment = "finish loading cg_"+f.gsub(/\./,'_')+"   \n"+ v_comment               
               end
            end
             
