@@ -334,7 +334,7 @@ class CronInterface < ActiveRecord::Base
          # only in prod --- lots of path issues
          time = Time.now
          v_date_stamp = time.strftime("%Y%m%d")
-#### v_date_stamp ="20130117"
+ v_date_stamp ="20130117"
           v_call = v_base_path+"/data1/lab_scripts/python_dev/fs_file.py Y"
           v_comment = "start "+v_call
           @schedulerun.comment = v_comment
@@ -344,16 +344,16 @@ class CronInterface < ActiveRecord::Base
           #  its working but must be better way -- getting all the print output from the python script, 
           # exit in python script after "print" return value, loop thru to get the last line
 # problem running in dev -- need to be admin-- make file, then test rest
-          v_return =  `python #{v_call}`
-          v_last_return_value = ""
+####          v_return =  `python #{v_call}`
+####          v_last_return_value = ""
 
-         v_return.each do |line|
-            v_comment = line + v_comment
-            v_last_return_value = line
-          end
+####         v_return.each do |line|
+####            v_comment = line + v_comment
+####            v_last_return_value = line
+####          end
           # evaluate return values v_return(ERROR or SUCCESS)+"|"+yyyymmdd+"|"+(/tmp/)log_file
 ####  added temp row
-####          v_last_return_value = "SUCCESS|"+v_date_stamp+"|tmp.YYYYMMDD.txt"
+          v_last_return_value = "SUCCESS|"+v_date_stamp+"|tmp.YYYYMMDD.txt"
           v_comment = "after python call "+v_last_return_value + " \n "+v_comment
           @schedulerun.comment = v_comment
           @schedulerun.save
