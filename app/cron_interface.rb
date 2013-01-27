@@ -353,7 +353,7 @@ class CronInterface < ActiveRecord::Base
           end
           # evaluate return values v_return(ERROR or SUCCESS)+"|"+yyyymmdd+"|"+(/tmp/)log_file
 ####  added temp row
-####          v_last_return_value = "SUCCESS|"+v_date_stamp+"|tmp.YYYYMMDD.txt"
+        #### v_last_return_value = "SUCCESS|"+v_date_stamp+"|tmp.YYYYMMDD.txt"
           v_comment = "after python call "+v_last_return_value + " \n "+v_comment
           @schedulerun.comment = v_comment
           @schedulerun.save
