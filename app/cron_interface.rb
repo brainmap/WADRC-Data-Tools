@@ -240,11 +240,14 @@ class CronInterface < ActiveRecord::Base
         if !v_dir_skip.include?(dirname) and !dirname.start_with?('tmp')
           if dirname.include?('_v2')
             dirname = dirname.gsub(/_v2/,'')
+            v_dirname_chop = dirname.gsub(/[0123456789]/,'')
             vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
                                                                      where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
                                                             and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
                                                             and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
-                                                                                             where scan_procedure_id in (?))", dirname,v_sp_visit2_array)                                                                               
+                                                                                             where scan_procedures_vgroups.scan_procedure_id in (?)
+                                                                                              and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
+                                                                                              and scan_procedures.subjectid_base in (?))", dirname,v_sp_visit2_array,v_dirname_chop)                                                                               
             vgroups.each do |v|
               if v.fs_flag != "Y"
                  v.fs_flag ="Y"
@@ -254,11 +257,14 @@ class CronInterface < ActiveRecord::Base
             end
           elsif dirname.include?('_v3')
             dirname = dirname.gsub(/_v3/,'')
+            v_dirname_chop = dirname.gsub(/[0123456789]/,'')
             vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
                                                                      where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
                                                              and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
                                                             and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
-                                                                                             where scan_procedure_id in (?))", dirname,v_sp_visit3_array)
+                                                                                             where scan_procedures_vgroups.scan_procedure_id in (?)
+                                                                                              and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
+                                                                                              and scan_procedures.subjectid_base in (?))", dirname,v_sp_visit3_array,v_dirname_chop)
             vgroups.each do |v|
               if v.fs_flag != "Y"
                  v.fs_flag ="Y"
@@ -268,11 +274,14 @@ class CronInterface < ActiveRecord::Base
             end
           elsif dirname.include?('_v4')
             dirname = dirname.gsub(/_v4/,'')
+            v_dirname_chop = dirname.gsub(/[0123456789]/,'')
             vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
                                                                      where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
                                                              and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
                                                             and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
-                                                                                             where scan_procedure_id in (?))", dirname,v_sp_visit4_array)
+                                                                                             where scan_procedures_vgroups.scan_procedure_id in (?)
+                                                                                              and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
+                                                                                              and scan_procedures.subjectid_base in (?))", dirname,v_sp_visit4_array,v_dirname_chop)
             vgroups.each do |v|
               if v.fs_flag != "Y"
                  v.fs_flag ="Y"
@@ -281,11 +290,14 @@ class CronInterface < ActiveRecord::Base
               end
             end
           else
+            v_dirname_chop = dirname.gsub(/[0123456789]/,'')
             vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
                                                                      where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
                                                              and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
-                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
-                                                                                             where scan_procedure_id in (?))", dirname,v_sp_visit1_array)
+                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups,scan_procedures
+                                                                                             where scan_procedures_vgroups.scan_procedure_id in (?)
+                                                                                             and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
+                                                                                             and scan_procedures.subjectid_base in (?))", dirname,v_sp_visit1_array,v_dirname_chop)
             vgroups.each do |v|
               if v.fs_flag != "Y"
                  v.fs_flag ="Y"
