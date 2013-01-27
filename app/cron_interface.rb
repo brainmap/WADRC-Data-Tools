@@ -244,7 +244,7 @@ class CronInterface < ActiveRecord::Base
             vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
                                                                      where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
                                                             and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
-                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups,scan_procedures
                                                                                              where scan_procedures_vgroups.scan_procedure_id in (?)
                                                                                               and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
                                                                                               and scan_procedures.subjectid_base in (?))", dirname,v_sp_visit2_array,v_dirname_chop)                                                                               
@@ -261,7 +261,7 @@ class CronInterface < ActiveRecord::Base
             vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
                                                                      where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
                                                              and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
-                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups,scan_procedures
                                                                                              where scan_procedures_vgroups.scan_procedure_id in (?)
                                                                                               and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
                                                                                               and scan_procedures.subjectid_base in (?))", dirname,v_sp_visit3_array,v_dirname_chop)
@@ -278,7 +278,7 @@ class CronInterface < ActiveRecord::Base
             vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
                                                                      where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
                                                              and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
-                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups,scan_procedures
                                                                                              where scan_procedures_vgroups.scan_procedure_id in (?)
                                                                                               and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
                                                                                               and scan_procedures.subjectid_base in (?))", dirname,v_sp_visit4_array,v_dirname_chop)
