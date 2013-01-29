@@ -801,7 +801,7 @@ class DataSearchesController < ApplicationController
                            @tables =[@cg_tn.tn]
                            @q_form_id = @cg_tn_cn.q_data_form_id
    
-                           @q_data_form_array.unshift(@q_form_id)
+                           @q_data_form_array.unshift(@q_form_id)                       
                           
                            (@fields,@tables, @left_join,@left_join_vgroup,@fields_q_data, @left_join_q_data,@headers_q_data) = run_search_q_data(@tables,@fields ,@left_join,@left_join_vgroup)                       
 
@@ -1124,8 +1124,11 @@ class DataSearchesController < ApplicationController
       
       # trim leading ","
       params["search_criteria"] = params["search_criteria"].sub(", ","")
-      
-      if !@table_types.blank? and !@table_types.index('base').blank?  # extend to cg_enumber, cg_enumber_sp, cg_rmr, cg_rmr_sp, cg_sp, cg_wrapnum, cg_adrcnum, cg_reggieid
+
+
+     # not sure how to use this with base vs column_group or other -- if no table_type, sql is not run below
+      if !@table_types.blank? # and !@table_types.index('base').blank?  # extend to cg_enumber, cg_enumber_sp, cg_rmr, cg_rmr_sp, cg_sp, cg_wrapnum, cg_adrcnum, cg_reggieid  
+        @table_types.push('base')    
         @local_tables.push("vgroups")
         @local_tables.push("appointments") # --- include in mri, pet, lp, lh, q views -- need for other limits -- ? switch to vgroup?
         @local_tables.push("scan_procedures")
@@ -1146,6 +1149,7 @@ class DataSearchesController < ApplicationController
         #run_search_q_data tn_cn_id/tn_id in (686/676,687/677,688/688) common_name = "question fields" vs run_search if 
       end     
       @column_number =   @local_column_headers.size
+
            
   if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?
     @local_conditions.delete_if {|x| x == "" }   # a blank getting inserted 
@@ -1164,7 +1168,7 @@ class DataSearchesController < ApplicationController
     @sql = sql
     # run the sql ==>@results, after some substitutions
 
-#puts sql
+puts sql
 
     @results2 = connection.execute(sql)
     @temp_results = @results2
