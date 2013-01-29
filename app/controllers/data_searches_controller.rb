@@ -309,7 +309,7 @@ class DataSearchesController < ApplicationController
                            else
                               # blank cell == |
                               if @cg_data_dict[k+cn] != params[:cg_edit_table][:edit_col][k][cn] or @cg_edit_data_dict[k+cn] == params[:cg_edit_table][:edit_col][k][cn] 
-                                v_tmp_value_array.push("")
+                                v_tmp_value_array.push("''")
                                 v_tmp_cn_array.push(cn)
                               end
                             end
@@ -328,6 +328,7 @@ class DataSearchesController < ApplicationController
                   v_cnt_cn = 0
                   v_tmp_value_array = []
                   v_tmp_cn_array = []
+                  
                   @cns.each do |cn|
                     if !params[:cg_edit_table][:edit_col].blank? and  !params[:cg_edit_table][:edit_col][k].blank? and !v_key_cn_array.include?(cn)
                            #puts "aaaaaa !params[:cg_edit_table][:edit_col][v_cnt.to_s].blank?"
@@ -340,22 +341,30 @@ class DataSearchesController < ApplicationController
                            else
                               # blank cell == |
                               if @cg_data_dict[k+cn] != params[:cg_edit_table][:edit_col][k][cn]
-                                v_tmp_value_array.push("")
+                                v_tmp_value_array.push("''")
                                 v_tmp_cn_array.push(cn)
                               end
                             end
                     end
                     v_cnt_cn = v_cnt_cn + 1
                   end
-                  if v_key_value_array.size > 0
-                      v_tmp_cn_array.concat(v_key_cn_array)
-                      v_tmp_value_array.concat(v_key_value_array)
-                      sql = "insert into "+@cg_tn.tn+"_edit("+v_tmp_cn_array.join(',')+") values("+v_tmp_value_array.join(",")+")"
-                       @results = connection.execute(sql)
+                  if v_key_value_array.size > 0 
+                      v_insert_edit_flag ='N'
+                      @cns.each do |cn|
+                        if   !params[:cg_edit_table][:edit_col][k][cn].nil? and params[:cg_edit_table][:edit_col][k][cn] != @cg_data_dict[k+cn]
+                          v_insert_edit_flag ='Y'
+                        end
+                      end
+                      if v_insert_edit_flag == 'Y'
+                          v_tmp_cn_array.concat(v_key_cn_array)
+                          v_tmp_value_array.concat(v_key_value_array)
+                          sql = "insert into "+@cg_tn.tn+"_edit("+v_tmp_cn_array.join(',')+") values("+v_tmp_value_array.join(",")+")"
+                          @results = connection.execute(sql)
+                      end
                   end
                 end
               end
-              puts " v_cnt ="+v_cnt.to_s+" end  key="+k
+              # puts " v_cnt ="+v_cnt.to_s+" end  key="+k
               v_cnt = v_cnt +1
             end
         end
@@ -1168,7 +1177,7 @@ class DataSearchesController < ApplicationController
     @sql = sql
     # run the sql ==>@results, after some substitutions
 
-puts sql
+#puts sql
 
     @results2 = connection.execute(sql)
     @temp_results = @results2
