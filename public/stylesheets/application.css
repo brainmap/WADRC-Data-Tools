@@ -53,9 +53,11 @@ table { word-wrap:break-word; }
 	-webkit-border-radius:10px;
 	-moz-border-radius:10px;
 }
+
 .tabular > thead > tr > th { background:#006644; color:white; font-weight:normal; padding: 1em; }
 .tabular > thead a { color: white; font-weight: normal; border-bottom: none;}
 .tabular > thead a:hover { background: inherit; text-decoration: underline;}
+
 .tabular > tbody > tr { border-bottom: solid thin; }
 .tabular > tbody > tr:nth-child(even) { background-color: #eee; }
 .tabular > tbody > tr:nth-child(odd) { background-color: #ddd; }
