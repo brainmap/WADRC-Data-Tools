@@ -4,6 +4,7 @@
   <thead>
     <tr>
       <th>Code Name</th>
+	      <th>Subjectid Base<br> <small><small>- this is a duplication<br> of the protocol.abbr</small></small></th>
       <th>Description</th>
 	  <th>Petscan Flag</th>
 	  <th>Total</th>
@@ -17,6 +18,7 @@
     <% @scan_procedures.each do |scan_procedure| %>
     <tr>
       <td><%= link_to(scan_procedure.codename, '/mri_search?mri_search[scan_procedure_id][]='+scan_procedure.id.to_s) %></td>
+      <td><%=h scan_procedure.subjectid_base %></td>
       <td><%=h scan_procedure.description %></td>
       <td><%=h scan_procedure.petscan_flag %></td>
 			<td><%=h scan_procedure.visits.count %></td>

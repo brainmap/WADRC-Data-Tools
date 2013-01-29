@@ -9,11 +9,12 @@
 <div class="sticky">
   <%= key_val_table('scan_procedure_details', {
     :code_name => @scan_procedure.codename,
+    :subjectid_base => @scan_procedure.subjectid_base,
     :description => @scan_procedure.description,
     :petscan_flag => @scan_procedure.petscan_flag
   })%>
 </div>
-
+subjectid_base   is a duplication of the protocol.abbr
 <p>
 <%= link_to 'Edit this scan procedure', edit_scan_procedure_path(@scan_procedure) %>
 </p>
