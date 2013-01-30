@@ -2,12 +2,16 @@ class Shared  < ActionController::Base
   
   
   def test_return( p_var)
-    return "AAAAAAAAAAAAA"
+    return "AAAAAAAAAAAAA"+p_var
   end
   
   def apply_cg_edits(p_tn)
     connection = ActiveRecord::Base.connection();
-    v_tn = "cg_"+p_tn.gsub(/\./,'_')
+    if !p_tn.include?('cg_')  
+        v_tn = "cg_"+p_tn.gsub(/\./,'_')  # made for the fs aseg, lh.aparc.arae, rh.aprac.area
+     else
+       v_tn = p_tn
+    end
     @cg_tns = CgTn.where(" tn = '"+v_tn+"'")
     @cg_tn = nil
     @cg_tns.each do |tns|
