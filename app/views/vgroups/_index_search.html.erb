@@ -70,6 +70,7 @@
        @lumbarpunctures = Lumbarpuncture.where("appointment_id in (?) ",a_array)
        @blooddraws = Blooddraw.where("appointment_id in (?) ",a_array)
        @questionnaires = Questionnaire.where("appointment_id in (?) ",a_array)
+       @neuropsyches = Neuropsych.where("appointment_id in (?) ",a_array)
      %>
 
       <tr>
