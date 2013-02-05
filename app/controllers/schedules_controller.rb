@@ -1,3 +1,4 @@
+
 class SchedulesController < ApplicationController
   # GET /schedules
   # GET /schedules.xml
@@ -19,6 +20,27 @@ class SchedulesController < ApplicationController
       format.html # show.html.erb
       format.xml  { render :xml => @schedule }
     end
+  end
+  
+  def run_schedule
+    # check permissions
+    
+    @schedule = Schedule.find(params[:id])
+    if @schedule.users.include?( current_user) or (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low')
+      # find location of first cd, trim to before that -- the cronjob times
+    #   v_run_command = @schedule.run_command[@schedule.run_command.index('cd')..@schedule.run_command.length]
+      # need to spawn child process
+     #  exec v_run_command  -- moved from cron interface to shared function
+      if !@schedule.shared_function_name.blank?
+         v_shared = Shared.new
+         v_shared.send(@schedule.shared_function_name)
+      end
+      respond_to do |format|
+        format.html { redirect_to(schedulerun_search_url) }
+        format.xml  { head :ok }
+      end
+     end
+  
   end
 
   # GET /schedules/new

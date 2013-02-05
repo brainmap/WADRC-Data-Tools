@@ -75,7 +75,7 @@ edit_count = edit_count -1
     <% end %>
     <td><%= schedulerun.start_time %></td>
     <td><%= schedulerun.end_time %></td>
-    <td><%= schedulerun.comment %></td>
+    <td width="40%"><%= schedulerun.comment %></td>
     <td><%= schedulerun.log_file %></td>
     <td><%= link_to 'Show', schedulerun %></td>
 <% if  current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'  %>

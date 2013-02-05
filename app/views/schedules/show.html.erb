@@ -40,7 +40,7 @@
 </p>
 <% if @schedule.users.include?( current_user) or (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low')%>
 <p>
-	<b>Execute:</b>
+	<b>Execute:</b> <%= link_to 'run_schedule', run_schedule_path %>
 </p>		
 <% end %>
 <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
