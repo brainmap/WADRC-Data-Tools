@@ -187,146 +187,11 @@ class CronInterface < ActiveRecord::Base
           @schedulerun.status_flag="E"
           @schedulerun.save
       end
-   elsif v_value_1 == "fs_Y_N"  #   rails runner app/cron_interface.rb fs_Y_N 
-     @schedule = Schedule.where("name in ('fs_Y_N')").first
-      @schedulerun = Schedulerun.new
-      @schedulerun.schedule_id = @schedule.id
-      @schedulerun.comment ="starting fs_Y_N"
-      @schedulerun.save
-      @schedulerun.start_time = @schedulerun.created_at
-      @schedulerun.save
-    begin   # catch all exception and put error in comment
-       v_fs_path = v_base_path+"/preprocessed/modalities/freesurfer/orig_recon/"
-      # ls the dirs and links
-      v_dir_skip =  ['QA', 'fsaverage', 'fsaverage_bkup20121114', '.', '..', 'lh.EC_average','rh.EC_average','qdec','surfer.log']
-      # 'tmp*'  --- just keep dir cleaner
-      # ??? 'pdt00020.long.pdt00020_base',      'pdt00020_base',       'pdt00020_v2.long.pdt00020_base', plq20018.R, plq20024.R
-      # _v2, _v3, _v4 --> visit2,3,4
-      connection = ActiveRecord::Base.connection();
-      v_sp_visit1_array = []
-      v_sp_visit2_array = []
-      v_sp_visit3_array = []
-      v_sp_visit4_array = []
-      sql = "select id from scan_procedures where codename like '%visit2'"        
-      results = connection.execute(sql)
-      results.each do |r|
-        v_sp_visit2_array.push(r[0])
-      end      
-      
-      sql = "select id from scan_procedures where codename like '%visit3'"        
-      results = connection.execute(sql)
-      results.each do |r|
-        v_sp_visit3_array.push(r[0])
-      end
-      
-      sql = "select id from scan_procedures where codename like '%visit4'"        
-      results = connection.execute(sql)
-      results.each do |r|
-        v_sp_visit4_array.push(r[0])
-      end
-      
-      sql = "select id from scan_procedures where codename not like '%visit2' and  codename  not like '%visit3' and  codename  not like '%visit4'"        
-      results = connection.execute(sql)
-      results.each do |r|
-        v_sp_visit1_array.push(r[0])
-      end      
-      
-      
-      
-      # check for enumber in enrollment, link to enrollment_vgroup_memberships, appointments, visits
-      # limit by _v2, _v3, _v4 in sp via scan_procedures_vgroups , scan_procedures like 'visit2, visit3, visit4
-      dir_list = Dir.entries(v_fs_path).select { |file| File.directory? File.join(v_fs_path, file)}
-      link_list = Dir.entries(v_fs_path).select { |file| File.symlink? File.join(v_fs_path, file)}
-      dir_list.concat(link_list)
-      v_cnt = 0
-      dir_list.each do |dirname|
-        if !v_dir_skip.include?(dirname) and !dirname.start_with?('tmp')
-          if dirname.include?('_v2')
-            dirname = dirname.gsub(/_v2/,'')
-            v_dirname_chop = dirname.gsub(/[0123456789]/,'')
-            vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
-                                                                     where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
-                                                            and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
-                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups,scan_procedures
-                                                                                             where scan_procedures_vgroups.scan_procedure_id in (?)
-                                                                                              and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
-                                                                                              and scan_procedures.subjectid_base in (?))", dirname,v_sp_visit2_array,v_dirname_chop)                                                                               
-            vgroups.each do |v|
-              if v.fs_flag != "Y"
-                 v.fs_flag ="Y"
-                 v.save
-                 v_cnt = v_cnt + 1
-              end
-            end
-          elsif dirname.include?('_v3')
-            dirname = dirname.gsub(/_v3/,'')
-            v_dirname_chop = dirname.gsub(/[0123456789]/,'')
-            vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
-                                                                     where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
-                                                             and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
-                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups,scan_procedures
-                                                                                             where scan_procedures_vgroups.scan_procedure_id in (?)
-                                                                                              and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
-                                                                                              and scan_procedures.subjectid_base in (?))", dirname,v_sp_visit3_array,v_dirname_chop)
-            vgroups.each do |v|
-              if v.fs_flag != "Y"
-                 v.fs_flag ="Y"
-                 v.save
-                  v_cnt = v_cnt + 1
-              end
-            end
-          elsif dirname.include?('_v4')
-            dirname = dirname.gsub(/_v4/,'')
-            v_dirname_chop = dirname.gsub(/[0123456789]/,'')
-            vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
-                                                                     where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
-                                                             and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
-                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups,scan_procedures
-                                                                                             where scan_procedures_vgroups.scan_procedure_id in (?)
-                                                                                              and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
-                                                                                              and scan_procedures.subjectid_base in (?))", dirname,v_sp_visit4_array,v_dirname_chop)
-            vgroups.each do |v|
-              if v.fs_flag != "Y"
-                 v.fs_flag ="Y"
-                 v.save
-                  v_cnt = v_cnt + 1
-              end
-            end
-          else
-            v_dirname_chop = dirname.gsub(/[0123456789]/,'')
-            vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
-                                                                     where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
-                                                             and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
-                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups,scan_procedures
-                                                                                             where scan_procedures_vgroups.scan_procedure_id in (?)
-                                                                                             and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
-                                                                                             and scan_procedures.subjectid_base in (?))", dirname,v_sp_visit1_array,v_dirname_chop)
-            vgroups.each do |v|
-              if v.fs_flag != "Y"
-                 v.fs_flag ="Y"
-                 v.save
-                  v_cnt = v_cnt + 1
-              end
-            end
-          end
-        end
-      end
- 
-        @schedulerun.comment ="successful finish fs_Y_N ===set = Y "+v_cnt.to_s
-        @schedulerun.status_flag ="Y"
-        @schedulerun.save
-        @schedulerun.end_time = @schedulerun.updated_at      
-        @schedulerun.save
-      puts " fs_flag set = Y "+v_cnt.to_s
-      rescue Exception => msg
-         v_error = msg.to_s
-         puts "ERROR !!!!!!!"
-         puts v_error
-          @schedulerun.comment =v_error[0..499]
-          @schedulerun.status_flag="E"
-          @schedulerun.save
-      end
-    elsif v_value_1 == "fs_aseg_aparc"  #   rails runner app/cron_interface.rb fs_aseg_aparc
+   elsif v_value_1 == "fs_Y_N"  
+     v_shared = Shared.new
+     v_shared.run_fs_Y_N()
+
+   elsif v_value_1 == "fs_aseg_aparc"  #   rails runner app/cron_interface.rb fs_aseg_aparc
       
       @schedule = Schedule.where("name in ('fs_aseg_aparc')").first
       puts "schedule id = "+@schedule.id.to_s
@@ -484,24 +349,6 @@ class CronInterface < ActiveRecord::Base
                   end
                 end
 
-                # need to apply in insert to cg_ tables --- multple rows --- just getting min(vgroup_id) to track unmapped rows
-                # update vgroup  -- make into a function
- #               sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.vgroup_id = ( select min( evm.vgroup_id) from enrollment_vgroup_memberships evm where evm.enrollment_id = t.enrollment_id
- #                                                                                  and evm.vgroup_id in (select appointments.vgroup_id from appointments where appointment_type='mri')
-#                                                                                  and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
-#                                                                                         where sp.id = spv.scan_procedure_id
-#                                                                                         and ( sp.codename like '%visit1' or sp.codename not like '%visit%')))
-#                      where t.subjectid not like '%_v2' and  t.subjectid not like '%_v3' and  t.subjectid not like '%_v4' and  t.subjectid not like '%_v5' " 
-#                results = connection.execute(sql)
-#                v_visit_array.each do |v_num|
-#                   sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.vgroup_id = ( select  min( evm.vgroup_id) from enrollment_vgroup_memberships evm where evm.enrollment_id = t.enrollment_id
-#                                                                                  and evm.vgroup_id in (select appointments.vgroup_id from appointments where appointment_type='mri')
-#                                                                                  and evm.vgroup_id in ( select spv.vgroup_id from scan_procedures_vgroups spv, scan_procedures sp
-#                                                                                         where sp.id = spv.scan_procedure_id
-#                                                                                         and sp.codename like '%visit"+v_num+"'))
-#                      where t.subjectid like '%_v"+v_num+"'"
-#                   results = connection.execute(sql)
-#                 end
               
                 # report on unmapped rows, not insert unmapped rows 
                 sql = "select subjectid, enrollment_id from cg_"+f.gsub(/\./,'_')+"_new where scan_procedure_id is null order by subjectid"

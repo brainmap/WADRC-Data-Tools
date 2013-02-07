@@ -187,7 +187,7 @@ class DataSearchesController < ApplicationController
         if   @key_cns.size == 0
           # NEED TO ADD FLASH
         end
-        sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn 
+        sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn  # NEED TO ADD ACL
         connection = ActiveRecord::Base.connection();
         @results = connection.execute(sql)
         @results.each do |r|
@@ -444,7 +444,7 @@ class DataSearchesController < ApplicationController
       if   @key_cns.size == 0
         # NEED TO ADD FLASH
       end
-      sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn 
+      sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn # NEED ACL   WHERE keys in ( select keys where vgroup_id in ( normal acl ))
       connection = ActiveRecord::Base.connection();
       @results = connection.execute(sql)
       @results.each do |r|

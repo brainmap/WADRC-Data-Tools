@@ -18,9 +18,9 @@ module VisitsHelper
     when "yes"
       " style='background-color: #bbffbb; ' "
     when "no"
-      " style='background-color: #ffbbbb;' "
+      " style='background-color: #cccccc;' "
     when "n/a"
-      "  style='background-color: #cccccc;' "
+      "  style='background-color: #ffbbbb;' "
     else 
       " "
     end

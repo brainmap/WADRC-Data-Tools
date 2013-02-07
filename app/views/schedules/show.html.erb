@@ -38,11 +38,13 @@
 	<b>Owners:</b>
 	<%= @schedule.users.sort_by(&:username_name).collect {|u|  u.username_name}.join(", ").html_safe %>
 </p>
-<% if @schedule.users.include?( current_user) or (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low')%>
+<% if @schedule.users.include?( current_user) or (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low')
+	  if !@schedule.shared_function_name.blank? %>
 <p>
 	<b>Execute:</b> <%= link_to 'run_schedule', run_schedule_path %>
 </p>		
-<% end %>
+<%    end
+   end %>
 <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
     <%= link_to 'Edit', edit_schedule_path(@schedule) %> |
 <% end %>
