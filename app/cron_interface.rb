@@ -19,15 +19,23 @@ class CronInterface < ActiveRecord::Base
     v_shared = Shared.new
     v_flag =""
     v_comment =""
-    sql = "select subjectid from cg_aseg"
-    connection = ActiveRecord::Base.connection();        
-    results = connection.execute(sql)
-    results.each do |r|
-        v_comment =v_shared.get_sp_id_from_subjectid_v(r[0])
-       if v_comment.blank?
-         puts r[0]
-       end
+#    sql = "select subjectid from cg_aseg"
+#    connection = ActiveRecord::Base.connection();        
+#    results = connection.execute(sql)
+#    results.each do |r|
+#        v_comment =v_shared.get_sp_id_from_subjectid_v(r[0])
+#       if v_comment.blank?
+#         puts r[0]
+#       end
+#    end
+    v_path = v_base_path+"/preprocessed/visits/johnson.merit220.visit2/mrt00064/asl"
+    v_dir_array = Dir.entries(v_path)
+    v_dir_array.each do |f|
+      puts "aaaaa"+f
     end
+    
+
+
   end
 
   

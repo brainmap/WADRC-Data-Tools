@@ -214,7 +214,7 @@ v_tn_cn_searchable_hash = []
 								
 											<a id="myHeader1" href="javascript:toggle2_closed('tn_<%=tn.id.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a>
 											   </td></tr>
-<tr><td colspan="7">
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td colspan="6">
 	<div id="tn_<%=tn.id.to_s %>"  >
 		<table>
 			
@@ -239,10 +239,10 @@ v_tn_cn_searchable_hash = []
 		                end 
 	                end
 	                %> 
-	                  <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	                  <tr><td>
 		<%= hidden_field(:cg_search, "cn_id]["+tn.id.to_s+"][", :value=>cn.id.to_s) %>
 		<%= check_box_tag "include_cns"+cn.id.to_s, "1", v_include_cn == "FALSE" ? FALSE : TRUE , :name => "cg_search[include_cn]["+tn.id.to_s+"]["+cn.id.to_s+"]" %></td>
-		<td nowrap> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%=   (cn.common_name+" - <small>("+ cn.cn+")</small>:").html_safe %></td>
+		<td nowrap>&nbsp;&nbsp;&nbsp;<%=   (cn.common_name+" - <small>("+ cn.cn+")</small>:").html_safe %></td>
 		<% if cn.searchable_flag == "Y"  
 			   if !cn.ref_table_b.blank?%>
 				<td><%= collection_select "cg_search[value_1]["+tn.id.to_s+"]",cn.id.to_s, LookupRef.where("label = ?",cn.ref_table_b).sort_by(&:display_order),

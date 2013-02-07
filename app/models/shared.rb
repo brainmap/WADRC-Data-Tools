@@ -238,8 +238,8 @@ class Shared  < ActionController::Base
                          if !enrollment.blank?
                              v_subjectid_asl = v_preprocessed_full_path+"/"+dir_name_array[0]+"/asl"
                              if File.directory?(v_subjectid_asl)
-                                # get filename/date from dir
-                                # evalute for asl_registered_to_fs_flag = rFS_ASL_[subjectid]_fmap.nii ,
+                                  v_dir_array = Dir.entries(v_subjectid_asl)   # need to get date for specific files
+                                  # evalute for asl_registered_to_fs_flag = rFS_ASL_[subjectid]_fmap.nii ,
                                   # asl_smoothed_and_warped_flag = swrFS_ASL_[subjectid]_fmap.nii,
                                   # asl_fmap_flag = [ASL_[subjectid]_[sdir]_fmap.nii or ASL_[subjectid]_fmap.nii],
                                   # asl_fmap_single = ASL_[subjectid]_fmap.nii
@@ -247,18 +247,25 @@ class Shared  < ActionController::Base
                                 v_asl_smoothed_and_warped_flag = "N"
                                 v_asl_fmap_flag = "N"
                                 v_asl_fmap_single ="N"
-                                if File.exist?(v_subjectid_asl+"/swrFS_ASL_"+dir_name_array[0]+"_fmap.nii") 
-                                  sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','Y','completed swrFS_ASL_"+dir_name_array[0]+"_fmap.nii',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
-                                  results = connection.execute(sql)                              
-                                else
-                                  sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','N','no swrFS_ASL_"+dir_name_array[0]+"_fmap.nii',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
-                                  results = connection.execute(sql)                              
-                                end # check for the asl file 
+                                v_dir_array.each do |f|
+                                  if f == "swrFS_ASL_"+dir_name_array[0]+"_fmap.nii"
+                                    v_asl_smoothed_and_warped_flag = "Y"
+                                  elsif  f == "rFS_ASL_"+dir_name_array[0]+"_fmap.nii"
+                                    v_asl_registered_to_fs_flag ="Y"
+                                  elsif  f == "ASL_"+dir_name_array[0]+"_fmap.nii"
+                                    v_asl_fmap_flag = "Y"
+                                    v_asl_fmap_single ="Y"
+                                  elsif  f.start_with?("ASL_"+dir_name_array[0]) and f.end_with?("_fmap.nii")
+                                    v_asl_fmap_flag = "Y"
+                                  end
+                                end
+                                sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','','"+v_asl_registered_to_fs_flag+"','"+v_asl_smoothed_and_warped_flag+"','"+v_asl_fmap_flag+"',
+                                                           '"+v_asl_fmap_single+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                 results = connection.execute(sql)
                              else
                                  sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no ASL dir','N','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              end # check for subjectid asl dir
-
                          else
                            #puts "no enrollment "+dir_name_array[0]
                          end # check for enrollment
@@ -268,11 +275,11 @@ class Shared  < ActionController::Base
                         #puts "               # NOT exists "+v_raw_full_path
                  end # check if raw dir exisits
             end            
-
             # check move cg_ to cg_old
             # v_shared = Shared.new 
              # move from new to present table -- made into a function  in shared model
-             v_comment = self.move_present_to_old_new_to_present("cg_asl_status","asl_subjectid, asl_status_flag,asl_status, enrollment_id, scan_procedure_id",
+             v_comment = self.move_present_to_old_new_to_present("cg_asl_status",
+             "asl_subjectid, asl_general_comment,asl_registered_to_fs_flag, asl_registered_to_fs_comment, asl_registered_to_fs_global_quality, asl_smoothed_and_warped_flag, asl_smoothed_and_warped_comment, asl_smoothed_and_warped_global_quality, asl_fmap_flag, asl_fmap_single, asl_fmap_comment, asl_fmap_global_quality, enrollment_id,scan_procedure_id",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
 
