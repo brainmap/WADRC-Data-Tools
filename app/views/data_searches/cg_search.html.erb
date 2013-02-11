@@ -119,7 +119,11 @@ v_tn_cn_searchable_hash = []
 
     <tr>
       <th><%= f.label :enumber %></th>
-      <td><%= text_field  :cg_search,:enumber, :value => @cg_query.enumber %></td>
+      <td><% if !params[:cg_search].blank? and !params[:cg_search][:enumber].blank? and params[:cg_search][:enumber].size > 20  %>
+	             <%= text_area  :cg_search, :enumber, :value => @cg_query.enumber, :cols => 30, :rows => 4 %>
+	       <% else %>
+               <%= text_field  :cg_search,:enumber, :value => @cg_query.enumber %>
+           <% end %></td>
     </tr>
 
     <tr>

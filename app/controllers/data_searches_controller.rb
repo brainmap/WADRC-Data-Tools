@@ -171,9 +171,21 @@ class DataSearchesController < ApplicationController
         @cns_common_name_dict = {}
         @cg_data_dict = {}
         @cg_edit_data_dict = {}
+        @ref_table_a_dict ={}
+        @ref_table_b_dict ={}
+        @value_list_dict ={}
         
         @cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",@cg_tn.id)
         @cg_tn_cns.each do |cg_tn_cn|
+            if !cg_tn_cn.ref_table_a.blank?
+              @ref_table_a_dict[cg_tn_cn.cn] = cg_tn_cn.ref_table_a
+            end
+            if !cg_tn_cn.ref_table_b.blank?
+              @ref_table_b_dict[cg_tn_cn.cn] = cg_tn_cn.ref_table_b
+            end
+            if !cg_tn_cn.value_list.blank?
+               @value_list_dict[cg_tn_cn.cn] = cg_tn_cn.value_list
+            end             
             @cns.push(cg_tn_cn.cn)
             @cns_common_name_dict[cg_tn_cn.cn] = cg_tn_cn.common_name
             if cg_tn_cn.key_column_flag == "Y"
@@ -444,7 +456,7 @@ class DataSearchesController < ApplicationController
       if   @key_cns.size == 0
         # NEED TO ADD FLASH
       end
-      sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn # NEED ACL   WHERE keys in ( select keys where vgroup_id in ( normal acl ))
+      sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn  # NEED ACL   WHERE keys in ( select keys where vgroup_id in ( normal acl ))
       connection = ActiveRecord::Base.connection();
       @results = connection.execute(sql)
       @results.each do |r|
