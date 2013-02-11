@@ -306,6 +306,142 @@ class Shared  < ActionController::Base
     
   end
   
+  def run_t1seg_status
+        visit = Visit.find(3)  #  need to get base path without visit
+        v_base_path = visit.get_base_path()
+         @schedule = Schedule.where("name in ('t1seg_status')").first
+          @schedulerun = Schedulerun.new
+          @schedulerun.schedule_id = @schedule.id
+          @schedulerun.comment ="starting t1seg_status"
+          @schedulerun.save
+          @schedulerun.start_time = @schedulerun.created_at
+          @schedulerun.save
+          v_comment = ""
+    ####    begin   # catch all exception and put error in comment    
+            sql = "truncate table cg_t1seg_status_new"
+            connection = ActiveRecord::Base.connection();        
+            results = connection.execute(sql)
+
+            sql_base = "insert into cg_t1seg_status_new(t1seg_subjectid, t1seg_general_comment,t1seg_ac_pc_flag,t1seg_smoothed_and_warped_flag,enrollment_id, scan_procedure_id)values("  
+            v_raw_path = v_base_path+"/raw"
+            v_mri = "/mri"
+            no_mri_path_sp_list =['asthana.adrc-clinical-core.visit1',
+            'bendlin.mets.visit1','bendlin.tami.visit1','bendlin.wmad.visit1','carlson.sharp.visit1','carlson.sharp.visit2',
+            'carlson.sharp.visit3','carlson.sharp.visit4','dempsey.plaque.visit1','dempsey.plaque.visit2','gleason.falls.visit1',
+            'johnson.merit220.visit1','johnson.merit220.visit2','johnson.tbi.aware.visit3','johnson.tbi-va.visit1','ries.aware.visit1','wrap140']
+
+            v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+            # get list of scan_procedure codename -- exclude 4, 10, 15, 19, 32, 
+                # ??? johnson.pc vs johnsonpc4000.visit1 vs pc_4000
+                # ??? johnson.tbi10000 vs johnson.tbiaware vs tbi_1000
+                # ??? johnson.wrap140.visit1 vs wrap140.visit1 vs wrap140
+                # NOT exists /Volumes/team-1/raw/carlson.esprit/mri
+                # NOT exists /Volumes/team-1/raw/johnson.wrap140.visit1/mri
+                # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit1/mri
+                # NOT exists /Volumes/team-1/raw/johnson.tbiaware.visit3/mri
+                # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
+                # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
+                # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
+            v_exclude_sp =[4,10,15,19,32]
+            @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
+            @scan_procedures. each do |sp|
+              v_visit_number =""
+              if sp.codename.include?("visit2")
+                v_visit_number ="_v2"
+              elsif sp.codename.include?("visit3")
+                v_visit_number ="_v3"
+              elsif sp.codename.include?("visit4")
+                v_visit_number ="_v4"
+              elsif sp.codename.include?("visit5")
+                v_visit_number ="_v5"
+              end
+               if no_mri_path_sp_list.include?(sp.codename)
+                 v_mri = ""
+                else
+                  v_mri = "/mri"
+                end
+                v_raw_full_path = v_raw_path+"/"+sp.codename+v_mri
+                v_preprocessed_full_path = v_preprocessed_path+sp.codename
+                if File.directory?(v_raw_full_path)
+                    if !File.directory?(v_preprocessed_full_path)
+                        puts "preprocessed path NOT exists "+v_preprocessed_full_path
+                     end
+                    Dir.entries(v_raw_full_path).select { |file| File.directory? File.join(v_raw_full_path, file)}.each do |dir|
+                      dir_name_array = dir.split('_')
+                      if dir_name_array.size == 3
+                         enrollment = Enrollment.where("enumber in (?)",dir_name_array[0])
+                         if !enrollment.blank?
+                             v_subjectid_t1seg = v_preprocessed_full_path+"/"+dir_name_array[0]+"/t1_aligned_newseg"
+                             v_subjectid_unknown = v_preprocessed_full_path+"/"+dir_name_array[0]+"/unknown"
+                             if File.directory?(v_subjectid_t1seg)
+                                  v_dir_array = Dir.entries(v_subjectid_t1seg)   # need to get date for specific files
+                                  # evalute for t1seg_ac_pc_flag = rFS_t1seg_[subjectid]_fmap.nii ,
+                                  # t1seg_smoothed_and_warped_flag = swrFS_t1seg_[subjectid]_fmap.nii,
+                                  # t1seg_fmap_flag = [t1seg_[subjectid]_[sdir]_fmap.nii or t1seg_[subjectid]_fmap.nii],
+                                  # t1seg_fmap_single = t1seg_[subjectid]_fmap.nii
+                                v_t1seg_ac_pc_flag ="N"
+                                v_t1seg_smoothed_and_warped_flag = "N"
+                                v_dir_array.each do |f|
+                                  if f.start_with?("smwc1o"+dir_name_array[0]+"_Ax-FSPGR-BRAVO_") and f.end_with?(".nii")
+                                    v_t1seg_smoothed_and_warped_flag = "Y"
+                                  end
+                                end
+                                if File.directory?(v_subjectid_unknown)
+                                  v_dir_array = Dir.entries(v_subjectid_unknown)
+                                  v_dir_array.each do |f|
+                                     if f.start_with?("o"+dir_name_array[0]+"_Ax-FSPGR-BRAVO_") and f.end_with?(".nii")
+                                        v_t1seg_ac_pc_flag ="Y"
+                                      end
+                                  end
+                                end
+                                
+                                sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','','"+v_t1seg_ac_pc_flag+"','"+v_t1seg_smoothed_and_warped_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                 results = connection.execute(sql)
+                             else
+                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                 results = connection.execute(sql)
+                             end # check for subjectid asl dir
+                         else
+                           #puts "no enrollment "+dir_name_array[0]
+                         end # check for enrollment
+                      end # check that dir name is in expected format [subjectid]_exam#_MMDDYY - just test size of array
+                    end # loop thru the subjectids
+                 else
+                        #puts "               # NOT exists "+v_raw_full_path
+                 end # check if raw dir exisits
+            end            
+            # check move cg_ to cg_old
+            # v_shared = Shared.new 
+             # move from new to present table -- made into a function  in shared model
+             v_comment = self.move_present_to_old_new_to_present("cg_t1seg_status",
+             "t1seg_subjectid, t1seg_general_comment,t1seg_ac_pc_flag, t1seg_ac_pc_comment, t1seg_ac_pc_global_quality, t1seg_smoothed_and_warped_flag, t1seg_smoothed_and_warped_comment, t1seg_smoothed_and_warped_global_quality, enrollment_id,scan_procedure_id",
+                            "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
+
+
+             # apply edits  -- made into a function  in shared model
+             self.apply_cg_edits('cg_t1seg_status')
+
+             puts "successful finish t1seg_status "+v_comment[0..459]
+              @schedulerun.comment =("successful finish t1seg_status "+v_comment[0..459])
+              if !v_comment.include?("ERROR")
+                 @schedulerun.status_flag ="Y"
+               end
+               @schedulerun.save
+               @schedulerun.end_time = @schedulerun.updated_at      
+               @schedulerun.save
+    ####    rescue Exception => msg
+    ####         v_error = msg.to_s
+    ####         puts "ERROR !!!!!!!"
+    ####         puts v_error
+    ####         v_error = v_error+"\n"+v_comment
+    ####          @schedulerun.comment =v_error[0..499]
+    ####          @schedulerun.status_flag="E"
+    ####    end
+    
+    
+  end
+  
+  
   def run_fs_Y_N
     visit = Visit.find(3)  #  need to get base path without visit
     v_base_path = visit.get_base_path()

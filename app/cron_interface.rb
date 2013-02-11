@@ -42,6 +42,18 @@ class CronInterface < ActiveRecord::Base
   if v_value_1 == "asl_status"
     v_shared = Shared.new
     v_shared.run_asl_status()
+  
+  elsif v_value_1 == "fdg_status"
+      v_shared = Shared.new
+      v_shared.run_fdg_status()
+  
+  elsif v_value_1 == "pib_status"
+      v_shared = Shared.new
+      v_shared.run_pib_status()
+  
+  elsif v_value_1 == "t1seg_status"
+      v_shared = Shared.new
+      v_shared.run_t1seg_status()
       
   # dev 
   #/usr/local/bin/rails  runner /Users/caillingworth/code/WADRC-Data-Tools/app/cron_interface.rb sp_series_desc_count
