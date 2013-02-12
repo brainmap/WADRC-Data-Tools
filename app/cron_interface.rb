@@ -42,10 +42,18 @@ class CronInterface < ActiveRecord::Base
   if v_value_1 == "asl_status"
     v_shared = Shared.new
     v_shared.run_asl_status()
+    
+  elsif v_value_1 == "epi_rest_status"
+      v_shared = Shared.new
+      v_shared.run_epi_rest_status()  
   
   elsif v_value_1 == "fdg_status"
       v_shared = Shared.new
       v_shared.run_fdg_status()
+      
+  elsif v_value_1 == "lst_116_status"
+        v_shared = Shared.new
+        v_shared.run_lst_116_status()    
   
   elsif v_value_1 == "pib_status"
       v_shared = Shared.new
