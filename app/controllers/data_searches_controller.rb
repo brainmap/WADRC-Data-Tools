@@ -252,8 +252,10 @@ class DataSearchesController < ApplicationController
           end         
         end
         
-        if !params[:cg_edit_table].blank? and !params[:cg_edit_table][:key].blank?
-          # remove all params[:cg_edit_table][:key] rows from @cg_tn.tn+"_edit" if delete_edit
+        if !params[:cg_edit_table].blank? and !params[:cg_edit_table][:key_data].blank?   
+  # using key_data instead of key because of problem of edit rows showing when no row displayed
+  # this will become a problem with pageation or acl where a data row may not be displayed
+          # remove all params[:cg_edit_table][:key_data] rows from @cg_tn.tn+"_edit" if delete_edit
           # make sql -- split params[:cg_edit_table][:key] by "|", then split by "="
           #      put ' ' around [1] value
           # loop thru keys
@@ -267,7 +269,7 @@ class DataSearchesController < ApplicationController
             v_cnt = 0
 
             v_key_pipe_array = []
-            params[:cg_edit_table][:key].each do |k|
+            params[:cg_edit_table][:key_data].each do |k|
               #puts "AAAAAA start of key="+k +" v_cnt = "+v_cnt.to_s
               # make v_key -- split k on | , wrap value in ''
               v_key = ""
@@ -456,7 +458,7 @@ class DataSearchesController < ApplicationController
       if   @key_cns.size == 0
         # NEED TO ADD FLASH
       end
-      sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn  # NEED ACL   WHERE keys in ( select keys where vgroup_id in ( normal acl ))
+      sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn   # NEED ACL   WHERE keys in ( select keys where vgroup_id in ( normal acl ))
       connection = ActiveRecord::Base.connection();
       @results = connection.execute(sql)
       @results.each do |r|

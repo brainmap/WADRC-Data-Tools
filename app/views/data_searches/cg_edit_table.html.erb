@@ -42,28 +42,18 @@ cg_edit_table = <%= @cg_tn.common_name%>
 <%= check_box_tag "delete_data", "1", @cg_edit_data_dict[k+"delete_key_flag"] == "Y" ? TRUE : FALSE , :name => "cg_edit_table[delete_data]["+v_cnt.to_s+"]"   %></td>
      <td> <% if v_edit_in_row_flag =="Y" or @cg_edit_data_dict[k+"delete_key_flag"] == "Y"  %> <%= f.check_box 'delete_edit]['+v_cnt.to_s %> <% end %></td>
      <% v_cnt_cn = 0
-      @cns.each do |cn|%>
+        v_cg_data_row = "N"
+      @cns.each do |cn|
+	       if !@cg_data_dict[k+cn].blank?
+		        v_cg_data_row = "Y"
+		    end
+	       %>
         <td  <% if  !@cg_edit_data_dict[k+cn].blank? and @cg_edit_data_dict[k+cn] != "|" %>
 	          bgcolor="silver"
 	         <%end%> >
 	<small>(<%= @cg_data_dict[k+cn] %>)</small>
 	    <% if !@key_cns.include?(cn) %>
-	<!--
-	<% ####   NEED TO HAVE DEFAULT VALUES/NO SELECT  === |   NEED TO BREAK INTO SMALLER PAGES ___ WITHOUT WIPING OUT THE NON_DISPLAYED  === CHECK form element name 
-	 #### if !@ref_table_b_dict[cn].blank?
-	 #### collection_select  "cg_edit", 'edit_col]['+k+']['+cn, LookupRef.where("label = ?",cn.ref_table_b).sort_by(&:display_order),
-	####				    	:ref_value, :description, {:include_blank => "Select a value",:selected => @cg_edit_data_dict[k+cn] }
-	#### 	elsif !@ref_table_b_dict[cn].blank?%>
-	     #### collection_select "cg_edit", 'edit_col]['+k+']['+cn, ((cn.ref_table_a).constantize).where("trim(description) != ''").sort_by(&:description),:id, :description , {:include_blank => "Select a value",:selected =>@cg_edit_data_dict[k+cn]}
-	      ####						elsif !@value_list_dict[cn].blank?
-		####												      v_value_list_array =  @value_list_dict[cn].split("|")
-		####												      v_value_list = {}
-		####												      v_value_list_array.each do |v|
-		####													     v_value_list[v]=v
-		####													  end
-		#### select  :cg_edit, 'edit_col]['+k+']['+cn, options_for_select(v_value_list,@cg_edit_data_dict[k+cn]),	{:prompt => 'Select a value'} 
-		%>
-	-->
+
 
 	       <% if @cns_type_dict[cn] == "date"   # format YYYY-MM-DD %>
 	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if (this.value != '|' && isValidDate_yyyy_mm_dd(this.value) ){alert('The field needs to be a date - YYYY-MM-DD.');this.value =''}",
@@ -86,7 +76,10 @@ cg_edit_table = <%= @cg_tn.common_name%>
 
 
     </td>
-     <%   v_cnt_cn = v_cnt_cn + 1
+     <%  if v_cg_data_row == "Y" %>
+	     <%= hidden_field 'cg_edit_table','key_data][' ,  :value=>k %>         
+       <%    end
+         v_cnt_cn = v_cnt_cn + 1
       end %>
      </tr>
    <% v_cnt = v_cnt +1 
