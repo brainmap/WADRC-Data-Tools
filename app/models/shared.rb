@@ -429,6 +429,124 @@ class Shared  < ActionController::Base
     
     
   end
+
+  def run_fdg_status
+        visit = Visit.find(3)  #  need to get base path without visit
+        v_base_path = visit.get_base_path()
+         @schedule = Schedule.where("name in ('fdg_status')").first
+          @schedulerun = Schedulerun.new
+          @schedulerun.schedule_id = @schedule.id
+          @schedulerun.comment ="starting fdg_status"
+          @schedulerun.save
+          @schedulerun.start_time = @schedulerun.created_at
+          @schedulerun.save
+          v_comment = ""
+    ####    begin   # catch all exception and put error in comment    
+            sql = "truncate table cg_fdg_status_new"
+            connection = ActiveRecord::Base.connection();        
+            results = connection.execute(sql)
+
+            sql_base = "insert into cg_fdg_status_new(fdg_subjectid, fdg_general_comment,fdg_registered_to_fs_flag,fdg_scaled_registered_to_fs_flag,fdg_smoothed_and_warped_flag,fdg_scaled_smoothed_and_warped_flag,enrollment_id, scan_procedure_id)values("  
+
+
+            v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+            # get list of scan_procedure codename -- exclude 4, 10, 15, 19, 32, 
+                # ??? johnson.pc vs johnsonpc4000.visit1 vs pc_4000
+                # ??? johnson.tbi10000 vs johnson.tbiaware vs tbi_1000
+                # ??? johnson.wrap140.visit1 vs wrap140.visit1 vs wrap140
+                # NOT exists /Volumes/team-1/raw/carlson.esprit/mri
+                # NOT exists /Volumes/team-1/raw/johnson.wrap140.visit1/mri
+                # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit1/mri
+                # NOT exists /Volumes/team-1/raw/johnson.tbiaware.visit3/mri
+                # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
+                # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
+                # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
+            v_exclude_sp =[4,10,15,19,32]
+            @scan_procedures = ScanProcedure.where("petscan_flag='Y' and id not in (?)",v_exclude_sp)  # NEED ONLY sp with fdg, but filter later
+            @scan_procedures. each do |sp|
+               v_visit_number =""
+               if sp.codename.include?("visit2")
+                  v_visit_number ="_v2"
+               elsif sp.codename.include?("visit3")
+                  v_visit_number ="_v3"
+               elsif sp.codename.include?("visit4")
+                  v_visit_number ="_v4"
+               elsif sp.codename.include?("visit5")
+                  v_visit_number ="_v5"
+               end
+
+                v_preprocessed_full_path = v_preprocessed_path+sp.codename
+                sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups, vgroups, appointments, petscans, enrollment_vgroup_memberships
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" and  vgroups.transfer_pet = 'yes'  
+                                    and appointments.vgroup_id = vgroups.id and appointments.appointment_type = 'pet_scan'
+                                    and appointments.id = petscans.appointment_id and petscans.lookup_pettracer_id = 2
+                                    and enrollment_vgroup_memberships.vgroup_id = vgroups.id and enrollment_vgroup_memberships.enrollment_id = enrollments.id
+                                    and enrollments.enumber like '"+sp.subjectid_base+"%' "
+                 @results = connection.execute(sql_enum)
+                                    
+                 @results.each do |r|
+                     enrollment = Enrollment.where("enumber='"+r[0]+"'")
+                     if !enrollment.blank?
+                        v_subjectid_fdg = v_preprocessed_full_path+"/"+enrollment[0].enumber+"/pet/fdg"
+                        if File.directory?(v_subjectid_fdg)
+                            v_dir_array = Dir.entries(v_subjectid_fdg)   # need to get date for specific files
+                            v_fdg_registered_to_fs_flag ="N"
+                            v_fdg_scaled_registered_to_fs_flag ="N"
+                            v_fdg_smoothed_and_warped_flag = "N"
+                            v_fdg_scaled_smoothed_and_warped_flag = "N"
+                            v_dir_array.each do |f|
+                               if f.start_with?("swr"+enrollment[0].enumber) and f.end_with?("_realignfdg_DVR_HYPR.nii")
+                                  v_fdg_smoothed_and_warped_flag = "Y"
+                               elsif f.start_with?("swr"+enrollment[0].enumber) and f.end_with?("_realignfdg_DVR_HYPR.nii")
+                                  v_fdg_scaled_smoothed_and_warped_flag = "Y"
+                               elsif f.start_with?("rFS_r"+enrollment[0].enumber) and f.end_with?("_realignfdg_DVR_HYPR.nii")
+                                  v_fdg_registered_to_fs_flag ="Y"
+                               elsif f.start_with?("rFS_r"+enrollment[0].enumber) and f.end_with?("_realignfdg_DVR_HYPR.nii")
+                                  v_fdg_scaled_registered_to_fs_flag ="Y"
+                                end
+                              end
+                                
+                             sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','','"+v_fdg_registered_to_fs_flag+"','"+v_fdg_scaled_registered_to_fs_flag+"','"+v_fdg_smoothed_and_warped_flag+"','"+v_fdg_scaled_smoothed_and_warped_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                 results = connection.execute(sql)
+                             else
+                                 sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','no fdg dir','N','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                 results = connection.execute(sql)
+                             end # check for subjectid asl dir
+                      else
+                           #puts "no enrollment "+dir_name_array[0]
+                      end # check for enrollment
+                 end # loop thru the subjectids
+            end            
+            # check move cg_ to cg_old
+            # v_shared = Shared.new 
+             # move from new to present table -- made into a function  in shared model
+             v_comment = self.move_present_to_old_new_to_present("cg_fdg_status",
+             "fdg_subjectid, fdg_general_comment,fdg_registered_to_fs_flag, fdg_registered_to_fs_comment, fdg_registered_to_fs_global_quality,fdg_scaled_registered_to_fs_flag, fdg_scaled_registered_to_fs_comment, fdg_scaled_registered_to_fs_global_quality,fdg_smoothed_and_warped_flag, fdg_smoothed_and_warped_comment, fdg_smoothed_and_warped_global_quality,fdg_scaled_smoothed_and_warped_flag, fdg_scaled_smoothed_and_warped_comment, fdg_scaled_smoothed_and_warped_global_quality,enrollment_id,scan_procedure_id",
+                            "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
+
+
+             # apply edits  -- made into a function  in shared model
+             self.apply_cg_edits('cg_fdg_status')
+
+             puts "successful finish fdg_status "+v_comment[0..459]
+              @schedulerun.comment =("successful finish fdg_status "+v_comment[0..459])
+              if !v_comment.include?("ERROR")
+                 @schedulerun.status_flag ="Y"
+               end
+               @schedulerun.save
+               @schedulerun.end_time = @schedulerun.updated_at      
+               @schedulerun.save
+    ####    rescue Exception => msg
+    ####         v_error = msg.to_s
+    ####         puts "ERROR !!!!!!!"
+    ####         puts v_error
+    ####         v_error = v_error+"\n"+v_comment
+    ####          @schedulerun.comment =v_error[0..499]
+    ####          @schedulerun.status_flag="E"
+    ####    end
+    
+    
+  end
   
   
   def run_lst_116_status
@@ -551,7 +669,118 @@ class Shared  < ActionController::Base
     
   end
   
-  
+  def run_pib_status
+        visit = Visit.find(3)  #  need to get base path without visit
+        v_base_path = visit.get_base_path()
+         @schedule = Schedule.where("name in ('pib_status')").first
+          @schedulerun = Schedulerun.new
+          @schedulerun.schedule_id = @schedule.id
+          @schedulerun.comment ="starting pib_status"
+          @schedulerun.save
+          @schedulerun.start_time = @schedulerun.created_at
+          @schedulerun.save
+          v_comment = ""
+    ####    begin   # catch all exception and put error in comment    
+            sql = "truncate table cg_pib_status_new"
+            connection = ActiveRecord::Base.connection();        
+            results = connection.execute(sql)
+
+            sql_base = "insert into cg_pib_status_new(pib_subjectid, pib_general_comment,pib_registered_to_fs_flag,pib_smoothed_and_warped_flag,enrollment_id, scan_procedure_id)values("  
+
+
+            v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+            # get list of scan_procedure codename -- exclude 4, 10, 15, 19, 32, 
+                # ??? johnson.pc vs johnsonpc4000.visit1 vs pc_4000
+                # ??? johnson.tbi10000 vs johnson.tbiaware vs tbi_1000
+                # ??? johnson.wrap140.visit1 vs wrap140.visit1 vs wrap140
+                # NOT exists /Volumes/team-1/raw/carlson.esprit/mri
+                # NOT exists /Volumes/team-1/raw/johnson.wrap140.visit1/mri
+                # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit1/mri
+                # NOT exists /Volumes/team-1/raw/johnson.tbiaware.visit3/mri
+                # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
+                # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
+                # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
+            v_exclude_sp =[4,10,15,19,32]
+            @scan_procedures = ScanProcedure.where("petscan_flag='Y' and id not in (?)",v_exclude_sp)  # NEED ONLY sp with pib, but filter later
+            @scan_procedures. each do |sp|
+               v_visit_number =""
+               if sp.codename.include?("visit2")
+                  v_visit_number ="_v2"
+               elsif sp.codename.include?("visit3")
+                  v_visit_number ="_v3"
+               elsif sp.codename.include?("visit4")
+                  v_visit_number ="_v4"
+               elsif sp.codename.include?("visit5")
+                  v_visit_number ="_v5"
+               end
+
+                v_preprocessed_full_path = v_preprocessed_path+sp.codename
+                sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups, vgroups, appointments, petscans, enrollment_vgroup_memberships
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" and  vgroups.transfer_pet = 'yes'  
+                                    and appointments.vgroup_id = vgroups.id and appointments.appointment_type = 'pet_scan'
+                                    and appointments.id = petscans.appointment_id and petscans.lookup_pettracer_id = 1
+                                    and enrollment_vgroup_memberships.vgroup_id = vgroups.id and enrollment_vgroup_memberships.enrollment_id = enrollments.id
+                                    and enrollments.enumber like '"+sp.subjectid_base+"%' "
+                 @results = connection.execute(sql_enum)
+                                    
+                 @results.each do |r|
+                     enrollment = Enrollment.where("enumber='"+r[0]+"'")
+                     if !enrollment.blank?
+                        v_subjectid_pib = v_preprocessed_full_path+"/"+enrollment[0].enumber+"/pet/pib"
+                        if File.directory?(v_subjectid_pib)
+                            v_dir_array = Dir.entries(v_subjectid_pib)   # need to get date for specific files
+                            v_pib_registered_to_fs_flag ="N"
+                            v_pib_smoothed_and_warped_flag = "N"
+                            v_dir_array.each do |f|
+                               if f.start_with?("swr"+enrollment[0].enumber) and f.end_with?("_realignPIB_DVR_HYPR.nii")
+                                  v_pib_smoothed_and_warped_flag = "Y"
+                               elsif f.start_with?("rFS_r"+enrollment[0].enumber) and f.end_with?("_realignPIB_DVR_HYPR.nii")
+                                  v_pib_registered_to_fs_flag ="Y"
+                                end
+                              end
+                                
+                             sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','','"+v_pib_registered_to_fs_flag+"','"+v_pib_smoothed_and_warped_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                 results = connection.execute(sql)
+                             else
+                                 sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','no pib dir','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                 results = connection.execute(sql)
+                             end # check for subjectid asl dir
+                      else
+                           #puts "no enrollment "+dir_name_array[0]
+                      end # check for enrollment
+                 end # loop thru the subjectids
+            end            
+            # check move cg_ to cg_old
+            # v_shared = Shared.new 
+             # move from new to present table -- made into a function  in shared model
+             v_comment = self.move_present_to_old_new_to_present("cg_pib_status",
+             "pib_subjectid, pib_general_comment,pib_registered_to_fs_flag, pib_registered_to_fs_comment, pib_registered_to_fs_global_quality, pib_smoothed_and_warped_flag, pib_smoothed_and_warped_comment, pib_smoothed_and_warped_global_quality, enrollment_id,scan_procedure_id",
+                            "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
+
+
+             # apply edits  -- made into a function  in shared model
+             self.apply_cg_edits('cg_pib_status')
+
+             puts "successful finish pib_status "+v_comment[0..459]
+              @schedulerun.comment =("successful finish pib_status "+v_comment[0..459])
+              if !v_comment.include?("ERROR")
+                 @schedulerun.status_flag ="Y"
+               end
+               @schedulerun.save
+               @schedulerun.end_time = @schedulerun.updated_at      
+               @schedulerun.save
+    ####    rescue Exception => msg
+    ####         v_error = msg.to_s
+    ####         puts "ERROR !!!!!!!"
+    ####         puts v_error
+    ####         v_error = v_error+"\n"+v_comment
+    ####          @schedulerun.comment =v_error[0..499]
+    ####          @schedulerun.status_flag="E"
+    ####    end
+    
+    
+  end
+    
   def run_t1seg_status
         visit = Visit.find(3)  #  need to get base path without visit
         v_base_path = visit.get_base_path()
