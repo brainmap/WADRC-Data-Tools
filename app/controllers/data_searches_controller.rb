@@ -297,6 +297,7 @@ class DataSearchesController < ApplicationController
                    sql ="update "+@cg_tn.tn+"_edit set delete_key_flag ='Y' where "+v_key_array.join(" and ")
                     @results = connection.execute(sql)
                 else
+  puts "AAAAAAA insert"                
                    sql = "insert into "+@cg_tn.tn+"_edit("+v_key_cn_array.join(",")+",delete_key_flag) values("+v_key_value_array.join(",")+",'Y' )"
                     @results = connection.execute(sql)
                 end
