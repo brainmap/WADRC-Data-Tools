@@ -296,8 +296,7 @@ class DataSearchesController < ApplicationController
                 if v_edit_in_row_flag =="Y"
                    sql ="update "+@cg_tn.tn+"_edit set delete_key_flag ='Y' where "+v_key_array.join(" and ")
                     @results = connection.execute(sql)
-                else
-  puts "AAAAAAA insert"                
+                else                
                    sql = "insert into "+@cg_tn.tn+"_edit("+v_key_cn_array.join(",")+",delete_key_flag) values("+v_key_value_array.join(",")+",'Y' )"
                     @results = connection.execute(sql)
                 end
@@ -328,7 +327,8 @@ class DataSearchesController < ApplicationController
                                 v_tmp_cn_array.push(cn)
                               end
                             end
-                    end
+                    end                   
+                    
                     v_cnt_cn = v_cnt_cn + 1
                   end
                   if v_key_value_array.size > 0 and v_tmp_value_array.size > 0 and @cg_edit_data_dict[k+"delete_key_flag"] != "Y"
@@ -515,7 +515,7 @@ class DataSearchesController < ApplicationController
         
       end
       respond_to do |format|
-          format.html
+          format.html {@v_key = Kaminari.paginate_array(@v_key).page(params[:page]).per(50)}
       end
       
     end

@@ -481,7 +481,7 @@ class Shared  < ActionController::Base
                                     and appointments.vgroup_id = vgroups.id and appointments.appointment_type = 'pet_scan'
                                     and appointments.id = petscans.appointment_id and petscans.lookup_pettracer_id = 2
                                     and enrollment_vgroup_memberships.vgroup_id = vgroups.id and enrollment_vgroup_memberships.enrollment_id = enrollments.id
-                                    and enrollments.enumber like '"+sp.subjectid_base+"%' "
+                                    and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
                  @results = connection.execute(sql_enum)
                                     
                  @results.each do |r|
@@ -720,7 +720,7 @@ class Shared  < ActionController::Base
                                     and appointments.vgroup_id = vgroups.id and appointments.appointment_type = 'pet_scan'
                                     and appointments.id = petscans.appointment_id and petscans.lookup_pettracer_id = 1
                                     and enrollment_vgroup_memberships.vgroup_id = vgroups.id and enrollment_vgroup_memberships.enrollment_id = enrollments.id
-                                    and enrollments.enumber like '"+sp.subjectid_base+"%' "
+                                    and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
                  @results = connection.execute(sql_enum)
                                     
                  @results.each do |r|
