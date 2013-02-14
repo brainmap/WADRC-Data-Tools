@@ -14,10 +14,39 @@ if @cg_tn.table_type == 'column_group' and @cg_tn.editable_flag == "Y"
 
 cg_edit_table = <%= @cg_tn.common_name%>
 <% # check if key is unique !!!!!!!!!!!%>
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>enter "  <b>|</b> " to remove an individual cell's edit</small><br>
+<%= form_for '/cg_edit_table'+params[:id] do |f| %>
+<table class="search_form">
+	<tr><td><%= f.label :scan_procedures %><br>
+	<div id="scan_procedure_list">
+	<ul>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
+		<li>
+			<%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'cg_edit_table[scan_procedure_id][]' %>
+			<%= label_tag '', scan_procedure.codename %>
+		</li>
+	<% end %>
+	</ul>
+	</div>
+
+	  </td></tr></table>
+	<br><br><br><br><br><br>
+
+  <table class="search_form">
+    <tr>
+      <th valign="top"><%= f.label :enumber %></th>
+      <td><%= text_field :cg_edit_table, :enumber %> <br><br>
+	<%= f.submit "Search" %></td>
+    </tr>
+  </table><%= hidden_field(:cg_edit_table, :id, :value=>params[:id])%>
+<% end %>
 
 <% if !@key_cns.blank?%>
-  <%= form_for 'cg_edit_table' do |f| %>
+  <%= form_for 'cg_edit_table' do |f| %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>enter "  <b>|</b> " to remove an individual cell's edit</small><br>
+       <% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low' or @cg_tn.users.include?( current_user) ) and @cg_tn.editable_flag == "Y" %>
+<br><%= submit_tag("save edits")%> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <%= link_to "Back", '/cg_tables'%>
+            <% end %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br><br>
+
+
 <%= hidden_field 'cg_edit_table','id' ,  :value=>params[:id]%>
 <table class="tabular">
    <tr><th><small>Remove<br>data row</small></th>	<th><small>Remove<br>edit row</small></th>
@@ -27,6 +56,9 @@ cg_edit_table = <%= @cg_tn.common_name%>
 		<% if @key_cns.include?(cn)  %><br> key column <% end %></th>
     <% end %>
    </tr>
+	<tfoot><tr><td colspan=<%= @cns.size+2 %> align="left">
+		 <%= paginate @v_key %>
+	</td></tr></tfoot>
    <% v_cnt = 0
       @v_key.each do |k| %>
     <% 
@@ -48,14 +80,28 @@ cg_edit_table = <%= @cg_tn.common_name%>
 		        v_cg_data_row = "Y"
 		    end
 	       %>
-        <td  <% if  !@cg_edit_data_dict[k+cn].blank? and @cg_edit_data_dict[k+cn] != "|" %>
+        <td  wrap <% if  !@cg_edit_data_dict[k+cn].blank? and @cg_edit_data_dict[k+cn] != "|" %>
 	          bgcolor="silver"
 	         <%end%> >
 	<small>(<%= @cg_data_dict[k+cn] %>)</small>
 	    <% if !@key_cns.include?(cn) %>
+			       <% 	if !@value_list_dict[cn].blank?
+						v_value_list_array =  @value_list_dict[cn].split("|")
+						v_value_list = {}
 
-
-	       <% if @cns_type_dict[cn] == "date"   # format YYYY-MM-DD %>
+						v_value_list_array.each do |v|
+							v_value_list[v]=v
+						end 
+						v_value_list['Select a value'] = '|'
+						v_val ="|"
+						if @cg_data_dict[k+cn].blank?
+		                      v_val ="|"
+		                 else
+		                       v_val = @cg_data_dict[k+cn]
+		                  end
+				%>
+		<%=  select  :cg_edit_table, 'edit_col]['+k+']['+cn, options_for_select(v_value_list, v_val)	 %><%= v_val%>				 
+	     <%    elsif @cns_type_dict[cn] == "date"   # format YYYY-MM-DD %>
 	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if (this.value != '|' && isValidDate_yyyy_mm_dd(this.value) ){alert('The field needs to be a date - YYYY-MM-DD.');this.value =''}",
         :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>	
 	       <% elsif @cns_type_dict[cn] == "integer"%>
@@ -64,9 +110,15 @@ cg_edit_table = <%= @cg_tn.common_name%>
 	       <% elsif @cns_type_dict[cn] == "float"%>
 	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if ( this.value != '|' && isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}",
         :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>
-	       <% else %>
+	       <% else 
+	            v_val = !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]
+	            if v_val.size > 20
+	%>    
+	                  <%= text_area  :cg_edit_table, '[edit_col]['+k+']['+cn+']', :value => v_val, :cols => 10, :rows => 4 %>
+	            <% else %>
 	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,
         :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>
+                 <% end %>
            <% end %>
 
 

@@ -160,8 +160,26 @@ class DataSearchesController < ApplicationController
         'questionforms','questionnaires','questions','radiology_comments','roles','scan_procedures','scan_procedures_vgroups','scan_procedures_visits',
         'scheduleruns','schedules','schedules_users','series_descriptions','users','vgroups','visits','vitals'] 
       @cg_tn = CgTn.find(params[:id])
+      v_enumber =""
+      v_sp =""
+      # build up condition and join from @cg_tn
+      if !params[:cg_edit_table].blank? and  !params[:cg_edit_table][:enumber].blank?
+          if params[:cg_edit_table][:enumber].include?(',') # string of enumbers
+            v_enumber =  params[:cg_edit_table][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
+            v_enumber = v_enumber.gsub(/[;:"()=<>]/, '')     #  put in single quote? gsub(/,/,"','")
+          else
+             v_enumber = params[:cg_edit_table][:enumber].gsub(/[;:'"()=<>]/, '')
+          end
+      end
+
+      if !params[:cg_edit_table].blank? and !params[:cg_edit_table][:scan_procedure_id].blank?
+           v_sp = params[:cg_edit_table][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')
+      end
+
       v_key_columns =""
       if @cg_tn.table_type == 'column_group' and @cg_tn.editable_flag == "Y"  and !v_exclude_tables_array.include?(@cg_tn.tn.downcase) # want to limit to cg tables
+        
+
         
         
         @cns = []
@@ -199,7 +217,7 @@ class DataSearchesController < ApplicationController
         if   @key_cns.size == 0
           # NEED TO ADD FLASH
         end
-        sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn  # NEED TO ADD ACL
+        sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn # add in conditions # NEED TO ADD ACL
         connection = ActiveRecord::Base.connection();
         @results = connection.execute(sql)
         @results.each do |r|
