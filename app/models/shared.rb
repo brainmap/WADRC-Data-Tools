@@ -495,13 +495,13 @@ class Shared  < ActionController::Base
                             v_fdg_smoothed_and_warped_flag = "N"
                             v_fdg_scaled_smoothed_and_warped_flag = "N"
                             v_dir_array.each do |f|
-                               if f.start_with?("swr"+enrollment[0].enumber) and f.end_with?("_realignfdg_DVR_HYPR.nii")
+                               if f.start_with?("swr") and f.end_with?("summed.nii")
                                   v_fdg_smoothed_and_warped_flag = "Y"
-                               elsif f.start_with?("swr"+enrollment[0].enumber) and f.end_with?("_realignfdg_DVR_HYPR.nii")
+                               elsif f.start_with?("swr") and f.end_with?("scaled.nii")
                                   v_fdg_scaled_smoothed_and_warped_flag = "Y"
-                               elsif f.start_with?("rFS_r"+enrollment[0].enumber) and f.end_with?("_realignfdg_DVR_HYPR.nii")
+                               elsif f.start_with?("rFS") and f.end_with?("summed.nii")
                                   v_fdg_registered_to_fs_flag ="Y"
-                               elsif f.start_with?("rFS_r"+enrollment[0].enumber) and f.end_with?("_realignfdg_DVR_HYPR.nii")
+                               elsif f.start_with?("rFS") and f.end_with?("scaled.nii")
                                   v_fdg_scaled_registered_to_fs_flag ="Y"
                                 end
                               end
@@ -732,9 +732,9 @@ class Shared  < ActionController::Base
                             v_pib_registered_to_fs_flag ="N"
                             v_pib_smoothed_and_warped_flag = "N"
                             v_dir_array.each do |f|
-                               if f.start_with?("swr"+enrollment[0].enumber) and f.end_with?("_realignPIB_DVR_HYPR.nii")
+                               if f.start_with?("swr") and f.end_with?(".nii")
                                   v_pib_smoothed_and_warped_flag = "Y"
-                               elsif f.start_with?("rFS_r"+enrollment[0].enumber) and f.end_with?("_realignPIB_DVR_HYPR.nii")
+                               elsif f.start_with?("rFS") and f.end_with?(".nii")
                                   v_pib_registered_to_fs_flag ="Y"
                                 end
                               end

@@ -100,7 +100,7 @@ cg_edit_table = <%= @cg_tn.common_name%>
 		                       v_val = @cg_data_dict[k+cn]
 		                  end
 				%>
-		<%=  select  :cg_edit_table, 'edit_col]['+k+']['+cn, options_for_select(v_value_list, v_val)	 %><%= v_val%>				 
+		<%=  select  :cg_edit_table, 'edit_col]['+k+']['+cn, options_for_select(v_value_list, v_val)	 %>				 
 	     <%    elsif @cns_type_dict[cn] == "date"   # format YYYY-MM-DD %>
 	     <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if (this.value != '|' && isValidDate_yyyy_mm_dd(this.value) ){alert('The field needs to be a date - YYYY-MM-DD.');this.value =''}",
         :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>	
