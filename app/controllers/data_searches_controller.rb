@@ -240,8 +240,8 @@ class DataSearchesController < ApplicationController
         if   @key_cns.size == 0
           # NEED TO ADD FLASH
         end
-        sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn # add in conditions from search # NEED TO ADD ACL
-        if @cg_tn.join_left_parent_tn == "vgroups"
+        #sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn # add in conditions from search # NEED TO ADD ACL
+        if @cg_tn.join_left_parent_tn == "vgroupsNOT NEED HERE ONLY BEFORE DISPLAY"
             @conditions.push(" scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") " )
              @conditions.push(" scan_procedures.id = scan_procedures_vgroups.scan_procedure_id " )
              @conditions.push(" scan_procedures_vgroups.vgroup_id = vgroups.id ")
@@ -293,7 +293,7 @@ class DataSearchesController < ApplicationController
           end
           # pushing in edit rows if not in data
           if !v_key.blank? and !@v_key.include?(v_key) 
-            if current_user.role == 'Admin_High'
+            if current_user.role == 'Admin_High1111'
                 @v_key.push(v_key)
             end
           end          
@@ -600,7 +600,7 @@ class DataSearchesController < ApplicationController
           v_cnt = v_cnt + 1
         end
         if !v_key.blank? and !@v_key.include?(v_key)  # pushing in edit key rows not in data
-            if current_user.role == 'Admin_High'
+            if current_user.role == 'Admin_High1111'
                 @v_key.push(v_key)
             end
         end          
