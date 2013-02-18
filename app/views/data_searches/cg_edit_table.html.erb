@@ -21,7 +21,11 @@ cg_edit_table = <%= @cg_tn.common_name%>
 	<ul>
 	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
 		<li>
-			<%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'cg_edit_table[scan_procedure_id][]' %>
+		<% if @sp_array.include?(scan_procedure.id.to_s)%>
+		   <%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,TRUE , :name => 'cg_edit_table[scan_procedure_id][]' %>
+		<% else %>
+		   <%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'cg_edit_table[scan_procedure_id][]' %>
+		<% end %>
 			<%= label_tag '', scan_procedure.codename %>
 		</li>
 	<% end %>
@@ -34,7 +38,7 @@ cg_edit_table = <%= @cg_tn.common_name%>
   <table class="search_form">
     <tr>
       <th valign="top"><%= f.label :enumber %></th>
-      <td><%= text_field :cg_edit_table, :enumber %> <br><br>
+      <td><%= text_field :cg_edit_table, :enumber , :value =>@enumber_search%> <br><br>
 	<%= f.submit "Search" %></td>
     </tr>
   </table><%= hidden_field(:cg_edit_table, :id, :value=>params[:id])%>
@@ -45,7 +49,12 @@ cg_edit_table = <%= @cg_tn.common_name%>
        <% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low' or @cg_tn.users.include?( current_user) ) and @cg_tn.editable_flag == "Y" %>
 <br><%= submit_tag("save edits")%> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <%= link_to "Back", '/cg_tables'%>
             <% end %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br><br>
-
+<% @sp_array.each do |sp| %>
+   <%= hidden_field 'cg_edit_table','scan_procedure_id][' ,  :value=>sp%>
+<%end %>
+<% if !@enumber_search.blank? %>
+ <%= hidden_field 'cg_edit_table','enumber' ,  :value=>@enumber_search%>
+<% end %>
 
 <%= hidden_field 'cg_edit_table','id' ,  :value=>params[:id]%>
 <table class="tabular">
@@ -112,7 +121,7 @@ cg_edit_table = <%= @cg_tn.common_name%>
         :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>
 	       <% else 
 	            v_val = !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]
-	            if v_val.size > 20
+	            if !v_val.blank? and v_val.size > 20
 	%>    
 	                  <%= text_area  :cg_edit_table, '[edit_col]['+k+']['+cn+']', :value => v_val, :cols => 10, :rows => 4 %>
 	            <% else %>

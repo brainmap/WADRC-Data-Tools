@@ -152,6 +152,7 @@ class DataSearchesController < ApplicationController
       
     end
     def cg_edit_table
+      scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       # really want to stop edit_table from being used on core tables
       v_exclude_tables_array =['appointments','blooddraws','cg_queries','cg_query_tn_cns','cg_query_tns','cg_tn_cns','cg_tns',
         'cg_tns_users','employees','enrollment_vgroup_memberships','enrollment_visit_memberships','enrollments',
@@ -161,19 +162,41 @@ class DataSearchesController < ApplicationController
         'scheduleruns','schedules','schedules_users','series_descriptions','users','vgroups','visits','vitals'] 
       @cg_tn = CgTn.find(params[:id])
       v_enumber =""
+      @enumber_search =""
       v_sp =""
+      @sp_array =[]
+      v_condition =""
+      @conditions = []
+      params["search_criteria"] =""
       # build up condition and join from @cg_tn
       if !params[:cg_edit_table].blank? and  !params[:cg_edit_table][:enumber].blank?
           if params[:cg_edit_table][:enumber].include?(',') # string of enumbers
             v_enumber =  params[:cg_edit_table][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
-            v_enumber = v_enumber.gsub(/[;:"()=<>]/, '')     #  put in single quote? gsub(/,/,"','")
+             @enumber_search = v_enumber
+             v_enumber = v_enumber.gsub(/,/,"','")
+            v_condition ="   appointments.id in (select a2.id from enrollment_vgroup_memberships,enrollments, appointments a2
+                              where enrollment_vgroup_memberships.vgroup_id= a2.vgroup_id 
+                               and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"')) "
           else
              v_enumber = params[:cg_edit_table][:enumber].gsub(/[;:'"()=<>]/, '')
+             v_condition ="   appointments.id in (select a2.id from enrollment_vgroup_memberships,enrollments, appointments a2
+                            where enrollment_vgroup_memberships.vgroup_id= a2.vgroup_id 
+                             and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:cg_edit_table][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
           end
+          @conditions.push(v_condition)
+          params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:cg_edit_table][:enumber]
       end
 
       if !params[:cg_edit_table].blank? and !params[:cg_edit_table][:scan_procedure_id].blank?
+           @sp_array = params[:cg_edit_table][:scan_procedure_id]
            v_sp = params[:cg_edit_table][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')
+
+           v_condition ="   appointments.id in (select a2.id from appointments a2,scan_procedures_vgroups where 
+                                                              a2.vgroup_id = scan_procedures_vgroups.vgroup_id 
+                                                              and scan_procedure_id in ("+params[:cg_edit_table][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+           @conditions.push(v_condition)
+           @scan_procedures = ScanProcedure.where("id in (?)",params[:cg_edit_table][:scan_procedure_id])
+           params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
       end
 
       v_key_columns =""
@@ -217,10 +240,24 @@ class DataSearchesController < ApplicationController
         if   @key_cns.size == 0
           # NEED TO ADD FLASH
         end
-        sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn # add in conditions # NEED TO ADD ACL
+        sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn # add in conditions from search # NEED TO ADD ACL
+        if @cg_tn.join_left_parent_tn == "vgroups"
+            @conditions.push(" scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") " )
+             @conditions.push(" scan_procedures.id = scan_procedures_vgroups.scan_procedure_id " )
+             @conditions.push(" scan_procedures_vgroups.vgroup_id = vgroups.id ")
+             @conditions.push(" appointments.vgroup_id = vgroups.id ")
+             @cns_plus_tn = []
+             @cns.each do |cn|
+               @cns_plus_tn.push(@cg_tn.tn+"."+cn)
+             end
+            sql = "SELECT distinct "+@cns_plus_tn.join(',')+" FROM appointments,scan_procedures,scan_procedures_vgroups,vgroups "+ @cg_tn.join_left+" where "+@conditions.uniq.join(' and ') # add in conditions from search # NEED TO ADD ACL   WHERE keys in ( select keys where vgroup_id in ( normal acl ))
+
+        else   # slip loose from acl
+             sql = "SELECT "+@cns.join(',')+" FROM "+@cg_tn.tn        
+        end
         connection = ActiveRecord::Base.connection();
         @results = connection.execute(sql)
-        @results.each do |r|
+        @results.each do |r|   # populate keys and data
           v_cnt  = 0
           v_key =""
           r.each do |rc| # make and save cn-value| key
@@ -254,9 +291,13 @@ class DataSearchesController < ApplicationController
             end
             v_cnt = v_cnt + 1
           end
+          # pushing in edit rows if not in data
           if !v_key.blank? and !@v_key.include?(v_key) 
-              @v_key.push(v_key)
+            if current_user.role == 'Admin_High'
+                @v_key.push(v_key)
+            end
           end          
+    
           # load data dict
           v_cnt = 0
           r.each do |rc| 
@@ -304,17 +345,28 @@ class DataSearchesController < ApplicationController
               end
               v_edit_in_row_flag ="N"
               @cns.each do |cn|
-            	    if  !@cg_edit_data_dict[k+cn].blank? and @cg_edit_data_dict[k+cn] != "|" 
+            	    if  !@cg_edit_data_dict[k+cn].blank? and @cg_edit_data_dict[k+cn] != "|" and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)
             		      v_edit_in_row_flag ="Y"
+            		      
             		   end
             	end
-              if !params[:cg_edit_table][:delete_data].blank? and !params[:cg_edit_table][:delete_data][v_cnt.to_s].blank?
-                
+            	v_delete_edit_row ="Y"
+            	@cns.each do |cn|  # deleting all | only row
+            	    if @cg_edit_data_dict[k+cn] != "|" and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)
+            	      v_delete_edit_row ="N"
+            	    end
+            	end
+            	if v_delete_edit_row == "Y"
+            	  sql = " delete from "+@cg_tn.tn+"_edit  where "+v_key_array.join(" and ")
+                 @results = connection.execute(sql)
+            	end
+            	
+              if !params[:cg_edit_table][:delete_data].blank? and !params[:cg_edit_table][:delete_data][v_cnt.to_s].blank?              
                 # check if key in edit_table
                 if v_edit_in_row_flag =="Y"
                    sql ="update "+@cg_tn.tn+"_edit set delete_key_flag ='Y' where "+v_key_array.join(" and ")
                     @results = connection.execute(sql)
-                else                
+                else            
                    sql = "insert into "+@cg_tn.tn+"_edit("+v_key_cn_array.join(",")+",delete_key_flag) values("+v_key_value_array.join(",")+",'Y' )"
                     @results = connection.execute(sql)
                 end
@@ -350,6 +402,7 @@ class DataSearchesController < ApplicationController
                     v_cnt_cn = v_cnt_cn + 1
                   end
                   if v_key_value_array.size > 0 and v_tmp_value_array.size > 0 and @cg_edit_data_dict[k+"delete_key_flag"] != "Y"
+                      # existing edit
                       v_tmp_cn_array.concat(v_key_cn_array)
                       v_tmp_value_array.concat(v_key_value_array)
                       sql = "insert into "+@cg_tn.tn+"_edit("+v_tmp_cn_array.join(',')+") values("+v_tmp_value_array.join(",")+")"
@@ -384,11 +437,13 @@ class DataSearchesController < ApplicationController
                   if v_key_value_array.size > 0 
                       v_insert_edit_flag ='N'
                       @cns.each do |cn|
-                        if   !params[:cg_edit_table][:edit_col][k][cn].nil? and params[:cg_edit_table][:edit_col][k][cn] != @cg_data_dict[k+cn]
+                       # if   !params[:cg_edit_table][:edit_col][k][cn].blank? and params[:cg_edit_table][:edit_col][k][cn] != @cg_data_dict[k+cn] and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)
+                      if   !params[:cg_edit_table][:edit_col][k][cn].blank? and params[:cg_edit_table][:edit_col][k][cn] != "|" and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)  and params[:cg_edit_table][:edit_col][k][cn] != @cg_data_dict[k+cn]
                           v_insert_edit_flag ='Y'
                         end
                       end
                       if v_insert_edit_flag == 'Y'
+                         # new edit
                           v_tmp_cn_array.concat(v_key_cn_array)
                           v_tmp_value_array.concat(v_key_value_array)
                           sql = "insert into "+@cg_tn.tn+"_edit("+v_tmp_cn_array.join(',')+") values("+v_tmp_value_array.join(",")+")"
@@ -397,6 +452,17 @@ class DataSearchesController < ApplicationController
                   end
                 end
               end
+              
+              v_delete_edit_row ="Y"
+            	@cns.each do |cn|  # deleting all | only row
+            	    if @cg_edit_data_dict[k+cn] != "|" and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)
+            	      v_delete_edit_row ="N"
+            	    end
+            	end
+            	if v_delete_edit_row == "Y"
+            	  sql = " delete from "+@cg_tn.tn+"_edit  where "+v_key_array.join(" and ")
+                 @results = connection.execute(sql)
+            	end
               # puts " v_cnt ="+v_cnt.to_s+" end  key="+k
               v_cnt = v_cnt +1
             end
@@ -477,7 +543,26 @@ class DataSearchesController < ApplicationController
       if   @key_cns.size == 0
         # NEED TO ADD FLASH
       end
-      sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn   # NEED ACL   WHERE keys in ( select keys where vgroup_id in ( normal acl ))
+      if @cg_tn.join_left_parent_tn == "vgroups"
+          @conditions.push(" scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") " )
+           @conditions.push(" scan_procedures.id = scan_procedures_vgroups.scan_procedure_id " )
+           @conditions.push(" scan_procedures_vgroups.vgroup_id = vgroups.id ")
+           @conditions.push(" appointments.vgroup_id = vgroups.id ")
+           @key_cns.each do |k|
+               @conditions.push(@cg_tn.tn+"."+k+" is not null ")
+           end  
+           @cns_plus_tn = []
+           @cns.each do |cn|
+             @cns_plus_tn.push(@cg_tn.tn+"."+cn)
+           end
+          sql = "SELECT distinct "+@cns_plus_tn.join(',')+" FROM appointments,scan_procedures,scan_procedures_vgroups,vgroups "+ @cg_tn.join_left+" where "+@conditions.uniq.join(' and ') # add in conditions from search # NEED TO ADD ACL   WHERE keys in ( select keys where vgroup_id in ( normal acl ))
+          
+      else   # slip loose from acl
+           sql = "SELECT "+@cns.join(',')+" FROM "+@cg_tn.tn        
+      end
+
+ 
+    
       connection = ActiveRecord::Base.connection();
       @results = connection.execute(sql)
       @results.each do |r|
@@ -514,8 +599,10 @@ class DataSearchesController < ApplicationController
           end
           v_cnt = v_cnt + 1
         end
-        if !v_key.blank? and !@v_key.include?(v_key) 
-            @v_key.push(v_key)
+        if !v_key.blank? and !@v_key.include?(v_key)  # pushing in edit key rows not in data
+            if current_user.role == 'Admin_High'
+                @v_key.push(v_key)
+            end
         end          
         # load data dict
         v_cnt = 0
