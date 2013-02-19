@@ -1,6 +1,8 @@
 require 'visit'
 require 'image_dataset'
 require 'shared' # this contains functions --- not sure where else to make functions accessible to this class
+# require 'popen4'
+
 class CronInterface < ActiveRecord::Base
   v_value_1 = ARGV[0]
   puts "AAAAAAAAAAA in CronInterface"+v_value_1.to_s+"="
@@ -58,6 +60,32 @@ class CronInterface < ActiveRecord::Base
   elsif v_value_1 == "pib_status"
       v_shared = Shared.new
       v_shared.run_pib_status()
+      
+  elsif v_value_1 == "test_shell"
+    v_base_path = visit.get_base_path()
+    v_base_path = visit.get_base_path()
+     @schedule = Schedule.where("name in ('test_shell')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting test_shell"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_command = v_base_path+"/data1/lab_scripts/python_dev/select_file_from_dir.sh "+v_base_path+"/preprocessed/visits/johnson.predict.visit1/pdt00126/LST_116 "+v_base_path+"/preprocessed/visits/johnson.predict.visit1/pdt00126/LST_116/watlas_wm.nii"
+       status = POpen4::popen4(v_command) do |stdout, stderr |
+
+           puts "stdout     : #{ stdout.read.strip }"
+           puts "stderr     : #{ stderr.read.strip }"
+         end
+
+           puts "status     : #{ status.inspect }"
+           puts "exitstatus : #{ status.exitstatus }"
+        @schedulerun.comment = v_comment[0..459]
+        @schedulerun.status_flag = 'E'
+        @schedulerun.save
+        # puts "EXIT STATUS:"+status.exitstatus.to_s
+
   
   elsif v_value_1 == "t1seg_status"
       v_shared = Shared.new
