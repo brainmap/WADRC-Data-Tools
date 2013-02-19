@@ -204,7 +204,7 @@ v_tn_cn_searchable_hash = []
                 %>
              <tr><td><%= hidden_field(:cg_search, "tn_id][", :value=>tn.id.to_s) %>
   <%= check_box_tag "include_tns", "1", v_include_tn == "FALSE" ? FALSE : TRUE , :name => "cg_search[include_tn]["+tn.id.to_s+"]", :onclick =>"checkbox_cascade(this,'"+tn.id.to_s+"')"%></td>
-	     <td><%=  (tn.common_name+"  - <small>("+ tn.tn+")</small>:" ).html_safe %></td>
+	     <td><%= (tn.common_name).html_safe %> <!-- <%= "("+tn.tn+")" %> --> </td>
 	                      <td> 
 	                    <% if !tn.join_left.blank?%>
 	                       <%= select  :cg_search,"join_type]["+tn.id.to_s, options_for_select(v_join_type_hash, v_join_type  ),
@@ -246,7 +246,7 @@ v_tn_cn_searchable_hash = []
 	                  <tr><td>
 		<%= hidden_field(:cg_search, "cn_id]["+tn.id.to_s+"][", :value=>cn.id.to_s) %>
 		<%= check_box_tag "include_cns"+cn.id.to_s, "1", v_include_cn == "FALSE" ? FALSE : TRUE , :name => "cg_search[include_cn]["+tn.id.to_s+"]["+cn.id.to_s+"]" %></td>
-		<td nowrap>&nbsp;&nbsp;&nbsp;<%=   (cn.common_name+" - <small>("+ cn.cn+")</small>:").html_safe %></td>
+		<td nowrap>&nbsp;&nbsp;&nbsp;<%= (cn.common_name).html_safe %><!-- <%=  "("+cn.cn+")"  %> --></td>
 		<% if cn.searchable_flag == "Y"  
 			   if !cn.ref_table_b.blank?%>
 				<td><%= collection_select "cg_search[value_1]["+tn.id.to_s+"]",cn.id.to_s, LookupRef.where("label = ?",cn.ref_table_b).sort_by(&:display_order),

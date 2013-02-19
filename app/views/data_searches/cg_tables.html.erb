@@ -8,7 +8,7 @@
 	<%    @cg_tns.each do |tn| %>
 	 <tr><td><%= hidden_field(:cg_search, "add_cg_tn_id][", :value=>tn.id.to_s) %>
 		<%= check_box_tag "include_add_cg_tns", "1",  FALSE , :name => "cg_search[include_add_cg_tn]["+tn.id.to_s+"]", :onclick =>"checkbox_cascade(this,'"+tn.id.to_s+"')"%></td>
-		     <td><%=  (tn.common_name+"  - <small>("+ tn.tn+")</small>:" ).html_safe %></td><td>
+		     <td><%= popup_note((tn.common_name).html_safe, ("("+ tn.tn+")") ) unless ("("+ tn.tn+")").blank? %> </td><td>
 		<% if !tn.datadictionary_file_name.blank?%>
 		<small><small><%= link_to 'Download', tn.datadictionary.url %> <%= tn.datadictionary_file_name%></small></small>
 		<% end %></td>

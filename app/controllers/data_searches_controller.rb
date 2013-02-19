@@ -293,7 +293,7 @@ class DataSearchesController < ApplicationController
           end
           # pushing in edit rows if not in data
           if !v_key.blank? and !@v_key.include?(v_key) 
-            if current_user.role == 'Admin_High1111'
+            if current_user.role == 'Admin_High'
                 @v_key.push(v_key)
             end
           end          
@@ -344,8 +344,9 @@ class DataSearchesController < ApplicationController
                 v_key_value_array.push("'"+v_tmp[1].gsub(/'/, "''")+"'")
               end
               v_edit_in_row_flag ="N"
+  #puts "CCCCCCC blank to nil"
               @cns.each do |cn|
-            	    if  !@cg_edit_data_dict[k+cn].blank? and @cg_edit_data_dict[k+cn] != "|" and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)
+            	    if  !@cg_edit_data_dict[k+cn].nil? and @cg_edit_data_dict[k+cn] != "|" and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)
             		      v_edit_in_row_flag ="Y"
             		      
             		   end
@@ -414,9 +415,9 @@ class DataSearchesController < ApplicationController
                   v_cnt_cn = 0
                   v_tmp_value_array = []
                   v_tmp_cn_array = []
-                  
+   #puts "BBBBBBBB blank to nil"               
                   @cns.each do |cn|
-                    if !params[:cg_edit_table][:edit_col].blank? and  !params[:cg_edit_table][:edit_col][k].blank? and !v_key_cn_array.include?(cn)
+                    if !params[:cg_edit_table][:edit_col].nil? and  !params[:cg_edit_table][:edit_col][k].blank? and !v_key_cn_array.include?(cn)
                            #puts "aaaaaa !params[:cg_edit_table][:edit_col][v_cnt.to_s].blank?"
                            if !params[:cg_edit_table][:edit_col][k][cn].blank?
                               # value in cell
@@ -436,9 +437,10 @@ class DataSearchesController < ApplicationController
                   end
                   if v_key_value_array.size > 0 
                       v_insert_edit_flag ='N'
+      #puts "DDDDDD blank to nil"
                       @cns.each do |cn|
                        # if   !params[:cg_edit_table][:edit_col][k][cn].blank? and params[:cg_edit_table][:edit_col][k][cn] != @cg_data_dict[k+cn] and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)
-                      if   !params[:cg_edit_table][:edit_col][k][cn].blank? and params[:cg_edit_table][:edit_col][k][cn] != "|" and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)  and params[:cg_edit_table][:edit_col][k][cn] != @cg_data_dict[k+cn]
+                      if   !params[:cg_edit_table][:edit_col][k][cn].nil? and params[:cg_edit_table][:edit_col][k][cn] != "|" and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)  and params[:cg_edit_table][:edit_col][k][cn] != @cg_data_dict[k+cn]
                           v_insert_edit_flag ='Y'
                         end
                       end
@@ -600,7 +602,7 @@ class DataSearchesController < ApplicationController
           v_cnt = v_cnt + 1
         end
         if !v_key.blank? and !@v_key.include?(v_key)  # pushing in edit key rows not in data
-            if current_user.role == 'Admin_High1111'
+            if current_user.role == 'Admin_High'
                 @v_key.push(v_key)
             end
         end          
