@@ -240,21 +240,9 @@ class DataSearchesController < ApplicationController
         if   @key_cns.size == 0
           # NEED TO ADD FLASH
         end
-        #sql = "SELECT "+@cns.join(',') +" FROM "+@cg_tn.tn # add in conditions from search # NEED TO ADD ACL
-        if @cg_tn.join_left_parent_tn == "vgroupsNOT NEED HERE ONLY BEFORE DISPLAY"
-            @conditions.push(" scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") " )
-             @conditions.push(" scan_procedures.id = scan_procedures_vgroups.scan_procedure_id " )
-             @conditions.push(" scan_procedures_vgroups.vgroup_id = vgroups.id ")
-             @conditions.push(" appointments.vgroup_id = vgroups.id ")
-             @cns_plus_tn = []
-             @cns.each do |cn|
-               @cns_plus_tn.push(@cg_tn.tn+"."+cn)
-             end
-            sql = "SELECT distinct "+@cns_plus_tn.join(',')+" FROM appointments,scan_procedures,scan_procedures_vgroups,vgroups "+ @cg_tn.join_left+" where "+@conditions.uniq.join(' and ') # add in conditions from search # NEED TO ADD ACL   WHERE keys in ( select keys where vgroup_id in ( normal acl ))
-
-        else   # slip loose from acl
-             sql = "SELECT "+@cns.join(',')+" FROM "+@cg_tn.tn        
-        end
+        #NOT NEED ACL here - only getting cg_edit to compare with returned form values
+        sql = "SELECT "+@cns.join(',')+" FROM "+@cg_tn.tn        
+        
         connection = ActiveRecord::Base.connection();
         @results = connection.execute(sql)
         @results.each do |r|   # populate keys and data
@@ -545,23 +533,22 @@ class DataSearchesController < ApplicationController
       if   @key_cns.size == 0
         # NEED TO ADD FLASH
       end
-      if @cg_tn.join_left_parent_tn == "vgroups"
-          @conditions.push(" scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") " )
-           @conditions.push(" scan_procedures.id = scan_procedures_vgroups.scan_procedure_id " )
-           @conditions.push(" scan_procedures_vgroups.vgroup_id = vgroups.id ")
-           @conditions.push(" appointments.vgroup_id = vgroups.id ")
-           @key_cns.each do |k|
-               @conditions.push(@cg_tn.tn+"."+k+" is not null ")
-           end  
-           @cns_plus_tn = []
-           @cns.each do |cn|
-             @cns_plus_tn.push(@cg_tn.tn+"."+cn)
-           end
-          sql = "SELECT distinct "+@cns_plus_tn.join(',')+" FROM appointments,scan_procedures,scan_procedures_vgroups,vgroups "+ @cg_tn.join_left+" where "+@conditions.uniq.join(' and ') # add in conditions from search # NEED TO ADD ACL   WHERE keys in ( select keys where vgroup_id in ( normal acl ))
-          
-      else   # slip loose from acl
-           sql = "SELECT "+@cns.join(',')+" FROM "+@cg_tn.tn        
+      #apply acl limits
+      @conditions.push(" scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") " )
+      @conditions.push(" scan_procedures.id = scan_procedures_vgroups.scan_procedure_id " )
+      @conditions.push(" scan_procedures_vgroups.vgroup_id = vgroups.id ")
+      @conditions.push(" appointments.vgroup_id = vgroups.id ")
+      @conditions.push(@cg_tn.join_right)
+      @key_cns.each do |k|
+          @conditions.push(@cg_tn.tn+"."+k+" is not null ")
+      end  
+      @cns_plus_tn = []
+      @cns.each do |cn|
+          @cns_plus_tn.push(@cg_tn.tn+"."+cn)
       end
+      sql = "SELECT distinct "+@cns_plus_tn.join(',')+" FROM appointments,scan_procedures,scan_procedures_vgroups,vgroups, "+ @cg_tn.tn+" where "+@conditions.uniq.join(' and ') # add in conditions from search # NEED TO ADD ACL   WHERE keys in ( select keys where vgroup_id in ( normal acl ))    
+      # sql = "SELECT "+@cns.join(',')+" FROM "+@cg_tn.tn        
+
 
  
     
