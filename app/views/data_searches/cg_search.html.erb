@@ -149,17 +149,20 @@ v_tn_cn_searchable_hash = []
 
   <table class="search_form">
     <tr>
-      <th><%= f.label :Stored_Search %></th>
-      <td><%= select :cg_search, :save_flag, { "Y" => "Y", "Inactivate" => "N" },:selected =>@cg_query.save_flag %></td>
+      <th colspan="2" align="right"><%= f.label :Stored_Search %>&nbsp;&nbsp;&nbsp;
+      <%= select :cg_search, :save_flag, { "Y" => "Y", "Inactivate" => "N" },:selected =>@cg_query.save_flag %></th>
     </tr>
     <tr>
-      <th><%= f.label :Save_search_as %></th>
-      <td><%= text_field :cg_search, :cg_name, :value => @cg_query.cg_name, :size => 20 %></td>
+      <th colspan="2" align="right"><%= f.label :Save_search_as %>&nbsp;&nbsp;&nbsp;
+      <%= text_field :cg_search, :cg_name, :value => @cg_query.cg_name, :size => 20 %></th>
     </tr>
     <tr>
-      <th><%= f.label :save_search %></th>
-      <td><%= check_box( :cg_search, "save_search")%></td>
+      <th colspan="2" align="right"><%= f.label :save_search %>&nbsp;&nbsp;&nbsp;
+      <%= check_box( :cg_search, "save_search")%></th>
     </tr>
+    <tr>
+      <th colspan="2" align="right">&nbsp;&nbsp;&nbsp;</th>
+	</tr>
     <tr>
       <th></th>
       <td><%= f.submit("run search")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <small><%= link_to "Clear Search", '/cg_search?clear_all=Y'%></small>

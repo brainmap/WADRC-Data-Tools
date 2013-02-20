@@ -797,7 +797,12 @@ class DataSearchesController < ApplicationController
                @cg_query_tn.join_type = params[:cg_search][:join_type][v_tn_id]
 
                @cg_tn = CgTn.find(v_tn_id)
-                if @cg_query_tn.join_type == 1  # outer join joins  # NEED PARENT TABLE join_left_parent_tn
+                if @cg_query_tn.join_type == 0  # inner join joins  
+                    @table_types.push(@cg_tn.table_type)                     
+                    @local_tables.push(@cg_tn.tn)                                
+                     @local_conditions.push(@cg_tn.join_right)
+                    
+                elsif @cg_query_tn.join_type == 1  # outer join joins  # NEED PARENT TABLE join_left_parent_tn
                     @table_types.push(@cg_tn.table_type)
                             # need to add outer as part of table length !!!!! THIS HAS TO BE FIXED
                     if @local_tables.index(@cg_tn.join_left_parent_tn).blank?   # WHAT ABOUT ALIAS                        

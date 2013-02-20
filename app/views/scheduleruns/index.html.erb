@@ -8,7 +8,7 @@ edit_count =@var.edit_low_scan_procedure_array.split(' ').length
 edit_count = edit_count -1 
 %>
 <% @v_status_dict = {'Y' =>'yes','N'=>'no','E'=>'no'} %>
-<h1>Listing scheduleruns</h1>
+<h1>Scheduled Runs Log</h1>
 
 <table class="tabular">
 	<caption><%= pluralize(@scheduleruns.size, 'schedulerun') %></caption>
