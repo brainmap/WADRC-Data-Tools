@@ -46,7 +46,7 @@ edit_count = edit_count -1
 	<%= @vgroup.blank? ? "": @vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<b>RMR:</b>
-  <%= visit.blank? ? (@vgroup.rmr.blank? ? "" : @vgroup.rmr   ) : visit.rmr %>
+	<%= !@vgroup.blank? ? @vgroup.rmr : (!visit.rmr.blank? ? visit.rmr : "") %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <b>Compile Folder:</b> <%= @vgroup.compile_folder%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </td></tr>

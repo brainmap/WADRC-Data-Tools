@@ -45,7 +45,11 @@ class ImageDataset < ActiveRecord::Base
   # validates :path, :filesytem_format => true
 
   def rep_time_hundredths
+    # if !rep_time.blank?  # put default 0 in the db instead
     (100 * rep_time).round / 100.0
+    # else
+    #  return 0
+    # end
   end
   
   def excluded_by_any_analyses?
