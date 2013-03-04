@@ -32,7 +32,13 @@ If the enumber is not already associated with a participant, add the enumber bel
    </td><td>
 	<% if current_user.role == 'Admin_High'   #is_a_number?(@vgroup.rmr[6..11]) %>
 
-      <%  if (@vgroup.rmr[0..5] == "RMRaic" && @vgroup.rmr[6..11].to_i.to_s == @vgroup.rmr[6..11] && @vgroup.rmr.length == 12) or !@vgroup.participant_id.blank? 
+      <%  if !@vgroup.blank?	 %>
+	    <%= f.label :Make_a_participant %>  <%= select_tag 'make_participant_flag', options_for_select([ "N","Y"],"N") %><br>
+	    Only make a participant if there is no other scans for this participant <br> where an "expected" rmr exists with RMRaic and 6 digits. <br>
+	     This will make a participant, link to this vgroup and link the participant to the enrollments. <br>
+	    <small><%= link_to '(create new participant)',new_participant_path %> will also let you make a participant but it will need to be re-linked to this vgroup.
+	
+	   <% elsif (@vgroup.rmr[0..5] == "RMRaic" && @vgroup.rmr[6..11].to_i.to_s == @vgroup.rmr[6..11] && @vgroup.rmr.length == 12) or !@vgroup.participant_id.blank? 
 	      # don't do anything
 	     else  %>
 	    <%= f.label :Make_a_participant %>  <%= select_tag 'make_participant_flag', options_for_select([ "N","Y"],"N") %><br>
