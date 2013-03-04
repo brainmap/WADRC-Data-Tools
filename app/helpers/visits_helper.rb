@@ -4,9 +4,9 @@ module VisitsHelper
     when "yes"
       "<td style='background-color: #bbffbb; min-width: 1.5em; max-width: 3em;'>yes</td>"
     when "no"
-      "<td style='background-color: #ffbbbb; min-width: 1.5em; max-width: 3em;'>no</td>"
+      "<td style='background-color: #cccccc; min-width: 1.5em; max-width: 3em;'>no</td>"
     when "n/a"
-      "<td style='background-color: #cccccc; min-width: 1.5em; max-width: 3em;'>n/a</td>"
+      "<td style='background-color: #ffbbbb; min-width: 1.5em; max-width: 3em;'>n/a</td>"
     else 
       "<td>#{field}</td>"
     end
@@ -32,9 +32,9 @@ end
 def show_rad_review(field)
   html = case field
   when "n/a"
-    "<td style='background-color: #cccccc; min-width: 1.5em; max-width: 3em;'>n/a</td>"
+    "<td style='background-color: #ffbbbb; min-width: 1.5em; max-width: 3em;'>n/a</td>"
   when "no"
-    "<td style='background-color: #ffbbbb; min-width: 1.5em; max-width: 3em;'>no</td>"
+    "<td style='background-color: #cccccc; min-width: 1.5em; max-width: 3em;'>no</td>"
   when "yes"
     "<td style='background-color: #bbffbb; min-width: 1.5em; max-width: 3em;'>yes</td>"
   else
