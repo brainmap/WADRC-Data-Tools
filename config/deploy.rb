@@ -4,13 +4,13 @@ require 'bundler/capistrano'
 #ssh_options[:paranoid] = false
 
 set :application, "WADRC-Data-Tools"
-set :host_server, "nelson.medicine.wisc.edu"
+set :host_server, "nelson.medicine.wisc.edu" #adrcdev.....
 role :app, host_server
 role :web, host_server
 role :db,  host_server, :primary => true
 
-set :user, "admin"
-set :group, "staff"
+set :user, "admin"   # panda_admin
+set :group, "staff"  # admin
 set :deploy_to, "/Library/WebServer/WADRC-Data-Tools"
 
 set :scm, "git"
@@ -23,7 +23,7 @@ set :branch, "master"
 default_environment['PATH'] = "/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin"
 
 # Bundler depends on this to use the gem version of metamri
-default_environment['RAILS_ENV'] = "production"
+default_environment['RAILS_ENV'] = "production" # development
 
 namespace :deploy do
   desc "Symlink shared configs and folders on each release."
@@ -31,6 +31,7 @@ namespace :deploy do
    # run "ln -nfs #{shared_path}/db/transfer_scans_production.sqlite3 #{release_path}/db/transfer_scans_production.sqlite3"
     run "ln -nfs  #{shared_path}/config/database.yml #{release_path}/config/database.yml"
     run "ln -nfs  #{shared_path}/config/ldap.yml #{release_path}/config/ldap.yml"
+    run "ln -nfs  #{shared_path}/config/deploy.rb #{release_path}/config/deploy.rb"
     run "ln -nfs  #{shared_path}/app/models/radiology_comment.rb #{release_path}/app/models/radiology_comment.rb"
     # run "ln -nfs #{shared_path}/system #{release_path}/public/system"
   end
