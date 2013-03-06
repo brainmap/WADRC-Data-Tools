@@ -62,7 +62,7 @@ group :development, :test do
   gem 'rspec-rails', '~>2.4.0'
   # gem 'gherkin', '~>2.1.5'
   # gem 'cucumber', '~>0.7.3'
-  gem 'cucumber-rails', '~>0.4.1'
+  # gem 'cucumber-rails', '~>0.4.1'
   # gem 'capybara'
   gem 'webrat'
   gem 'database_cleaner'
