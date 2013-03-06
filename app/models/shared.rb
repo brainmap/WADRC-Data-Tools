@@ -549,7 +549,7 @@ class Shared  < ActionController::Base
   end
   
   
-  def run_lst_116_status
+  def run_lst_116_status   # also lst_122 in same column
         visit = Visit.find(3)  #  need to get base path without visit
         v_base_path = visit.get_base_path()
          @schedule = Schedule.where("name in ('lst_116_status')").first
@@ -615,6 +615,7 @@ class Shared  < ActionController::Base
                          enrollment = Enrollment.where("enumber in (?)",dir_name_array[0])
                          if !enrollment.blank?
                              v_subjectid_lst_116 = v_preprocessed_full_path+"/"+dir_name_array[0]+"/LST_116"
+                             v_subjectid_lst_122 = v_preprocessed_full_path+"/"+dir_name_array[0]+"/LST_122"
                              if File.directory?(v_subjectid_lst_116)
                                   v_dir_array = Dir.entries(v_subjectid_lst_116)   # need to get date for specific files
                                 v_wlesion_030_flag ="N"
@@ -623,11 +624,24 @@ class Shared  < ActionController::Base
                                     v_wlesion_030_flag = "Y"
                                    end
                                 end
-                                sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','','"+v_wlesion_030_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','LST 116 dir','"+v_wlesion_030_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              else
-                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no LST_116 dir','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
-                                 results = connection.execute(sql)
+                                 if File.directory?(v_subjectid_lst_122)
+                                       v_dir_array = Dir.entries(v_subjectid_lst_122)   # need to get date for specific files
+                                     v_wlesion_030_flag ="N"
+                                     v_dir_array.each do |f|
+                                       if f.start_with?("wlesion_lbm0_030_rm"+dir_name_array[0]+"_Sag-CUBE-FLAIR_") and f.end_with?("_cubet2flair.nii")
+                                         v_wlesion_030_flag = "Y"
+                                        end
+                                     end
+                                     sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','LST 122 dir','"+v_wlesion_030_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                      results = connection.execute(sql)
+                               
+                                 else
+                                   sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no LST_116 dir or LST_122 dir','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                   results = connection.execute(sql)
+                                 end
                              end # check for subjectid asl dir
                          else
                            #puts "no enrollment "+dir_name_array[0]

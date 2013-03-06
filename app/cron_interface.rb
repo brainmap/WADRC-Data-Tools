@@ -1,7 +1,7 @@
 require 'visit'
 require 'image_dataset'
 require 'shared' # this contains functions --- not sure where else to make functions accessible to this class
-# require 'popen4'
+# require 'open4'
 
 class CronInterface < ActiveRecord::Base
   v_value_1 = ARGV[0]
@@ -53,7 +53,7 @@ class CronInterface < ActiveRecord::Base
       v_shared = Shared.new
       v_shared.run_fdg_status()
       
-  elsif v_value_1 == "lst_116_status"
+  elsif v_value_1 == "lst_116_status"  # also getting lst_122 in same column
         v_shared = Shared.new
         v_shared.run_lst_116_status()    
   
@@ -72,15 +72,31 @@ class CronInterface < ActiveRecord::Base
       @schedulerun.start_time = @schedulerun.created_at
       @schedulerun.save
       v_comment = ""
-      v_command = v_base_path+"/data1/lab_scripts/python_dev/select_file_from_dir.sh "+v_base_path+"/preprocessed/visits/johnson.predict.visit1/pdt00126/LST_116 "+v_base_path+"/preprocessed/visits/johnson.predict.visit1/pdt00126/LST_116/watlas_wm.nii"
-       status = POpen4::popen4(v_command) do |stdout, stderr |
+      v_command = v_base_path+"/data1/lab_scripts/python_dev/test_shell.sh "+v_base_path+"/preprocessed/visits/johnson.predict.visit1/pdt00126/LST_116 "+v_base_path+"/preprocessed/visits/johnson.predict.visit1/pdt00126/LST_116/watlas_wm.nii "
 
-           puts "stdout     : #{ stdout.read.strip }"
-           puts "stderr     : #{ stderr.read.strip }"
-         end
+# --- calls one gets exit status   -- test_shell calls internal function 
+#       status = POpen4::popen4(v_command) do |stdout, stderr |
+#           puts "stdout     : #{ stdout.read.strip }"
+#           puts "stderr     : #{ stderr.read.strip }"
+#         end
+#           puts "status     : #{ status.inspect }"
+#           puts "exitstatus : #{ status.exitstatus }"
+           
+# spawn   ## spawn error if return value != 0?   --- runs them one after another
+      v_array=[0,1,2,3]
+      # ??? open4(producer) do |pid, i, o, e|
+      #producer = 'ruby -e" STDOUT.sync = true; loop{sleep(rand+rand) and puts 42} "'
+#      v_array.each do |v|
+#        puts 'start '+v.to_s
+#       open4.spawn v_command,  :stdout=>STDOUT      #, :stdin_timeout => 1.4
+#        puts 'end '+v.to_s       
+#      end
 
-           puts "status     : #{ status.inspect }"
-           puts "exitstatus : #{ status.exitstatus }"
+# fork    undefined method `pfork4'
+# bg    
+
+
+           
         @schedulerun.comment = v_comment[0..459]
         @schedulerun.status_flag = 'E'
         @schedulerun.save
