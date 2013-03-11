@@ -1,6 +1,5 @@
 <%= link_to 'download xls', { :controller=>"vgroups", :action=>"vgroups_search", :vgroups_search =>  params[:vgroups_search] , :format => :xls} %>  </p>
 
-<%# paginated = true unless paginated == false %>
 
 <table class="tabular">
   
@@ -8,10 +7,10 @@
   <caption><%= pluralize(@results_total.size, 'Visit') %></caption>
   <thead>
     <tr>
-      <th><span>Date<!--_ = sort_link @search, :vgroup_date % ---></span></th>
-      <th><span>Scan Procedure<!--- = sort_link @search, :scan_procedures_codename, "Scan Procedure" % ---></span></th>
-      <th><span>Enroll Number<!----= sort_link @search, :enrollments_enumber, "Enroll Number" %---></span></th>
-      <th><span>RMR<!--- = sort_link @search, :rmr %---></span></th>
+      <th><span>Date</span></th>
+      <th><span>Scan Procedure</span></th>
+      <th><span>Enroll Number</span></th>
+      <th><span>RMR</span></th>
       <th><span class="vert">Appointments</span></th>
       <th><span class="vert">MRI Scan</span></th>
        <th><span class="vert">status</span></th>
@@ -50,9 +49,6 @@
   
   <tfoot><tr><td colspan=21>
 		 <%= paginate @results %> 
-		<%# if paginated %>
-    	<%#= @vgroup_search.nil? ? will_paginate(vgroups) : will_paginate(vgroups, :params => { :vgroup_search => @vgroup_search }) %>
-		<%# end %>
   </td></tr></tfoot>
   
   <tbody>
