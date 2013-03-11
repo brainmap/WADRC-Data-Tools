@@ -1,10 +1,6 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    POpen4 (0.1.4)
-      Platform (>= 0.4.0)
-      open4
-    Platform (0.4.0)
     RedCloth (4.2.8)
     ZenTest (4.6.2)
     abstract (1.0.0)
@@ -220,7 +216,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  POpen4 (~> 0.1.4)
   RedCloth (~> 4.2.7)
   acts_as_reportable
   autotest-rails

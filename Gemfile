@@ -39,7 +39,7 @@ gem "mechanize"
 gem "hpricot"
 
 gem 'open4'
-gem 'POpen4', '~>0.1.4'
+# gem 'POpen4', '~>0.1.4'
 
 # Deploy with Capistrano
 gem 'capistrano', '~>2.5.19'
