@@ -185,6 +185,8 @@ GEM
     ruport (1.6.3)
       fastercsv
       pdf-writer (= 1.1.8)
+    rvm-capistrano (1.2.7)
+      capistrano (>= 2.0.0)
     simple_form (1.4.2)
       actionpack (~> 3.0)
       activemodel (~> 3.0)
@@ -247,6 +249,7 @@ DEPENDENCIES
   rspec (~> 2.4.0)
   rspec-rails (~> 2.4.0)
   ruport (~> 1.6.3)
+  rvm-capistrano
   simple_form
   sqlite3-ruby
   timecop

@@ -38,6 +38,8 @@ gem "cancan"
 gem "mechanize"
 gem "hpricot"
 
+gem 'rvm-capistrano'
+
 gem 'open4'
 # gem 'POpen4', '~>0.1.4'
 
