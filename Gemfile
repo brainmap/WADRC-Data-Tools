@@ -24,7 +24,7 @@ gem 'acts_as_reportable'
 gem 'kaminari'
 gem 'meta_where'
 gem 'meta_search'
-gem 'rmagick', :require => 'RMagick'  # metamri had s.add_runtime_dependency('rmagick', "~> 2.13.1")
+gem 'rmagick', :path => "/Users/panda_admin/.rvm/gems/ruby-1.8.7-p371/gems/rmagick-2.13.1"  # metamri had s.add_runtime_dependency('rmagick', "~> 2.13.1")
 gem 'simple_form'
 gem 'exception_notification', "~> 2.4.1", :require => 'exception_notifier'
 
