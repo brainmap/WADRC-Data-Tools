@@ -24,7 +24,11 @@ gem 'acts_as_reportable'
 gem 'kaminari'
 gem 'meta_where'
 gem 'meta_search'
+ if ENV['RAILS_ENV'] == "production"
 gem 'rmagick', :path => "/Users/panda_admin/.rvm/gems/ruby-1.8.7-p371/gems/rmagick-2.13.1"  # metamri had s.add_runtime_dependency('rmagick', "~> 2.13.1")
+ else
+   gem 'rmagick'
+  end
 gem 'simple_form'
 gem 'exception_notification', "~> 2.4.1", :require => 'exception_notifier'
 
@@ -39,7 +43,7 @@ gem "mechanize"
 gem "hpricot"
 
 gem 'rvm-capistrano'
-
+gem 'mini_magick'
 gem 'open4'
 # gem 'POpen4', '~>0.1.4'
 
