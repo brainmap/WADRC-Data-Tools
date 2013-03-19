@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 gem 'rails', '~>3.0.4'
 
 # gem 'sqlite3', '~>1.3.3'
-gem 'mysql2', '~>0.2.0'
+gem 'mysql2'  # not limiting version 20130314, '~>0.2.0'
 gem 'yaml_db'
 
 # Bundle edge Rails instead:
