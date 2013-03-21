@@ -251,6 +251,7 @@ DEPENDENCIES
   ruport (~> 1.6.3)
   rvm-capistrano
   simple_form
+  sqlite3 (~> 1.3.3)
   sqlite3-ruby
   timecop
   webrat
