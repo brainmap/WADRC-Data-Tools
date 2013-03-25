@@ -1,5 +1,4 @@
 source 'http://rubygems.org'
-gem 'nokogiri','~>1.5.0' # suggested to put at top of Gemfile
 gem 'rails', '~>3.0.4'
 
 
@@ -37,11 +36,11 @@ gem 'jquery-rails'
 gem "devise", ">= 1.4.9"
 gem "devise_ldap_authenticatable"
 gem "cancan"
-gem "mechanize"
+# gem "mechanize" # used in radiology model for scaping  # trying to remove nokogiri because of problems with xml lib versions on adrcdev/rvm
 gem "hpricot"
 
 gem 'rvm-capistrano'
-gem 'mini_magick'
+# gem 'mini_magick' # needs newer ruby 1.9.2 to work with ruby dicom
 gem 'open4'
 # gem 'POpen4', '~>0.1.4'
 
@@ -64,13 +63,13 @@ gem 'capistrano', '~>2.5.19'
 group :development, :test do
   gem 'rspec', '~>2.4.0'
   gem 'rspec-rails', '~>2.4.0'
-  # gem 'gherkin', '~>2.1.5'
-  # gem 'cucumber', '~>0.7.3'
+  # gem 'gherkin', '~>2.1.5' # trying to remove nokogiri because of problems with xml lib versions on adrcdev/rvm
+  # gem 'cucumber', '~>0.7.3' # trying to remove nokogiri because of problems with xml lib versions on adrcdev/rvm
   # gem 'cucumber-rails', '~>0.4.1'
   # gem 'capybara'
-  gem 'webrat'
+  # gem 'webrat'  # trying to remove nokogiri because of problems with xml lib versions on adrcdev/rvm
   gem 'database_cleaner'
-  gem 'pickle'
+  # gem 'pickle'  # trying to remove nokogiri because of problems with xml lib versions on adrcdev/rvm
   gem 'autotest-rails'
   gem 'factory_girl_rails', '~>1.0.1'
   gem 'chronic'
@@ -78,5 +77,5 @@ group :development, :test do
   gem 'timecop'
   gem 'sqlite3-ruby', :require => 'sqlite3'
   gem 'hirb', '~>0.4.5'
-  gem 'rack-mini-profiler'
+  # gem 'rack-mini-profiler' # getting error on adrcdev
 end
