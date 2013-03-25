@@ -41,7 +41,7 @@ gem "mechanize"
 gem "hpricot"
 
 gem 'rvm-capistrano'
-#gem 'mini_magick'
+gem 'mini_magick'
 gem 'open4'
 # gem 'POpen4', '~>0.1.4'
 
