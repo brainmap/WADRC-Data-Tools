@@ -1,7 +1,9 @@
 source 'http://rubygems.org'
+gem 'nokogiri','~>1.5.0' # suggested to put at top of Gemfile
 gem 'rails', '~>3.0.4'
 
-# gem 'sqlite3', '~>1.3.3'
+
+gem 'sqlite3', '~>1.3.3'  # need in metamri
 gem 'mysql2','~>0.2.0'  # not limiting version 20130314, '~>0.2.0'---# went back to limit ACtiveRecord adapter and rails 3.1
 gem 'yaml_db'
 
@@ -9,11 +11,11 @@ gem 'yaml_db'
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
 # in production
-#### if ENV['RAILS_ENV'] == "production"
-  gem 'metamri','~>0.2.11'  ####:path => '~>0.2.11'
-####else
-####  gem 'metamri', :path => '~/code/metamri'
-#### end
+# if ENV['RAILS_ENV'] == "production"
+  gem 'metamri'  ,'~>0.2.15'  ####:path => '~>0.2.11'
+ #else
+ # gem 'metamri', :path => '~/code/metamri'
+ #end
 
 gem 'builder', '~>2.1.2'
 gem 'RedCloth', '~>4.2.7'
@@ -24,7 +26,7 @@ gem 'acts_as_reportable'
 gem 'kaminari'
 gem 'meta_where'
 gem 'meta_search'
-gem 'rmagick'
+##### gem 'rmagick'
 gem 'simple_form'
 gem 'exception_notification', "~> 2.4.1", :require => 'exception_notifier'
 
