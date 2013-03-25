@@ -11,11 +11,11 @@ gem 'yaml_db'
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
 # in production
- if ENV['RAILS_ENV'] == "production"
+# if ENV['RAILS_ENV'] == "production"
   gem 'metamri'  ,'~>0.2.16'  ####:path => '~>0.2.11'
- else
-  gem 'metamri', :path => '~/code/metamri'
- end
+# else
+#  gem 'metamri', :path => '~/code/metamri'
+# end
 
 gem 'builder', '~>2.1.2'
 gem 'RedCloth', '~>4.2.7'
