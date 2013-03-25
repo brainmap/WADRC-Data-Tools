@@ -105,7 +105,7 @@ class Visit < ActiveRecord::Base
   # 
   def self.create_or_update_from_metamri(v, created_by = nil)
     created_by ||= User.first
-    
+puts "WWWWWWWWWWWW in create_or_update_from_metamri"    
     sp = ScanProcedure.find_or_create_by_codename(v.scan_procedure_name)
     
     # Build an ActiveRecord Visit object using available attributes from metamri.
@@ -131,8 +131,11 @@ class Visit < ActiveRecord::Base
         # Note: Using Metamri#RawImageDatasetThumbnail Directly
         metamri_attr_options = {}
         begin
+  puts "XXXXXXXX before RawImageDatasetThumbnail.new(dataset).thumbnail"
           metamri_attr_options[:thumb] = File.open(RawImageDatasetThumbnail.new(dataset).thumbnail)
+  puts "ZZZZZZZZZZ after RawImageDatasetThumbnail.new(dataset).thumbnail"
         rescue StandardError, ScriptError => e
+          puts "WWWWWWWWW in rescue RawImageDatasetThumbnail.new(dataset).thumbnail"
           logger.debug e
         end
 
