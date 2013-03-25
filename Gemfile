@@ -12,7 +12,7 @@ gem 'yaml_db'
 
 # in production
 # if ENV['RAILS_ENV'] == "production"
-  gem 'metamri'  ,'~>0.2.15'  ####:path => '~>0.2.11'
+  gem 'metamri'  ,'~>0.2.16'  ####:path => '~>0.2.11'
  #else
  # gem 'metamri', :path => '~/code/metamri'
  #end
