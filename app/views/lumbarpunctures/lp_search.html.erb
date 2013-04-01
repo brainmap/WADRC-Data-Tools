@@ -41,6 +41,14 @@ edit_count =   edit_count -1
       <th>RMR</th>
       <td><%= f.text_field :rmr %></td>
     </tr>
+    <tr>
+      <th><%= f.label :scan_date_before %></th>
+      <td><%= f.date_select "latest_timestamp", :start_year => 1995, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :scan_date_after %></th>
+      <td><%= f.date_select :earliest_timestamp, :start_year => 1995, :include_blank => true %></td>
+    </tr>
   </table>
 
   <table class="search_form">
