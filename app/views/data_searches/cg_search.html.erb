@@ -78,7 +78,7 @@ v_tn_cn_searchable_hash = []
 				<%   if v_name == "cg_search[enumber]"   %>
 			      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
 			    <% else %>	
-	              <%= hidden_field_tag v_name, v_val %>	
+	              <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
 	            <% end %>
 	       <% end %>
 	      <%= submit_tag 'export file'%>
@@ -381,7 +381,7 @@ v_tn_cn_searchable_hash = []
 	     <%   if v_name == "cg_search[enumber]"   %>
 	      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
 	       <% else %>	
-            <%= hidden_field_tag v_name, v_val %>	
+            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
            <% end %>
        <% end %>
       <%= submit_tag 'export file'%>
