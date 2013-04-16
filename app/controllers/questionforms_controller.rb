@@ -142,13 +142,13 @@ class QuestionformsController < ApplicationController
         @q_data.question_id = q_id
                  
         if !params["value_1"][q_id].blank? 
-          @q_data.value_1 = params["value_1"][q_id].to_a.join(',')
+          @q_data.value_1 = params["value_1"][q_id].to_a.join(',').gsub("'","''")
         end
         if !params["value_2"][q_id].blank? 
-          @q_data.value_2 = params["value_2"][q_id].to_a.join(',')
+          @q_data.value_2 = params["value_2"][q_id].to_a.join(',').gsub("'","''")
         end
         if !params["value_3"][q_id].blank? 
-          @q_data.value_3 = params["value_3"][q_id].to_a.join(',')
+          @q_data.value_3 = params["value_3"][q_id].to_a.join(',').gsub("'","''")
         end
     if v_value_link != "-1"
         if params["q_data_id"][q_id].length  > 0
