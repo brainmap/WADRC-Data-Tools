@@ -167,7 +167,7 @@ v_tn_cn_searchable_hash = []
       <th></th>
       <td><%= f.submit("run search")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <small><%= link_to "Clear Search", '/cg_search?clear_all=Y'%></small>
 	<% if @add_cg_tns.size > 0 %>
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <small><%= link_to "Add tables", '/cg_tables'%></small>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <BIG><B><%= link_to "Add tables", '/cg_tables'%></B></BIG>
 	<% end %>
 	   <% if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?%><br>
 	<a href="#view_results">View Results</a> (<%= pluralize(@results_total.size, 'Result') %>)

@@ -171,6 +171,79 @@ class Shared  < ActionController::Base
    return v_comment
   end 
   
+  
+  def run_adrc_upload   
+    visit = Visit.find(3)  #  need to get base path without visit
+    v_base_path = visit.get_base_path()
+     @schedule = Schedule.where("name in ('adrc_upload')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting adrc_upload"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+    connection = ActiveRecord::Base.connection();
+    # recruit new adrc scans --- 
+    sql = "select distinct enrollments.enumber from enrollments,enrollment_vgroup_memberships, vgroups  where enrollments.enumber like 'adrc%' 
+              and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
+              and enrollment_vgroup_memberships.enrollment_id = enrollments.id
+              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL 2 WEEK)              
+              and vgroups.vgroup_date > DATE_SUB(curdate(), INTERVAL 20 WEEK)
+              and enrollments.enumber NOT IN ( select subjectid from cg_adrc_upload)"
+    results = connection.execute(sql)
+    results.each do |r|
+          sql2 = "insert into cg_adrc_upload (subjectid,sent_flag,status_flag) values('"+r[0]+"','N','Y')"
+          results2 = connection.execute(sql2)
+    end
+    
+    # get adrc subjectid to upload
+    sql = "select distinct subjectid from cg_adrc_upload where sent_flag ='N' and status_flag ='Y'"
+    results = connection.execute(sql)
+    # change series_description_map table
+    v_folder_list = Array.new
+    results.each do |r|
+      # update schedulerun comment - prepend 
+      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')"
+      results_vgroup = connection.execute(sql_vgroup)
+      # mkdir /tmp/adrc_upload/[subjectid]_YYYYMMDD_wisc
+      sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_map.series_description_type 
+                  from vgroups , appointments, visits, image_datasets, series_description_map 
+                  where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
+                  and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
+                  and image_datasets.series_description =   series_description_map.series_description
+                  and series_description_map.series_description_type in ('T1','T2','T2 Flair') 
+                  and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')"
+      results_dataset = connection.execute(sql_dataset)
+      v_folder_list = [] # how to empty
+      results_dataset.each do |r_dataset|
+             # temp - replace /Volumes/team/ and /Data/vtrak1/ with /Volumes/team-1 in dev
+            # split on / --- get the last dir
+            # make new dir name dir_series_description_type 
+            # check if in v_folder_list , if in v_folder_list , dir_series_description_type => dir_series_description_type_2
+            # add  dir, dir_series_description_type to v_folder_list
+            # cp path ==> /tmp/adrc_upload/[subjectid]_yyymmdd_wisc/dir_series_description_type(_2)
+      end
+      # update cg_adrc_upload with dir list 
+      # bunzip /tmp/adrc_upload/[subjectid]_yyymmdd_wisc/
+      # dicom clean up /tmp/adrc_upload/[subjectid]_yyymmdd_wisc/
+      # scp to scooby
+      # sftp 
+      # update cg_adrc_upload 
+      #
+    end
+              
+    @schedulerun.comment =("successful finish adrc_upload "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+       @schedulerun.status_flag ="Y"
+     end
+     @schedulerun.save
+     @schedulerun.end_time = @schedulerun.updated_at      
+     @schedulerun.save          
+      
+    
+  end
+  
   def run_asl_status
         visit = Visit.find(3)  #  need to get base path without visit
         v_base_path = visit.get_base_path()
@@ -305,6 +378,95 @@ class Shared  < ActionController::Base
     
     
   end
+  
+
+  def run_dti_status
+        visit = Visit.find(3)  #  need to get base path without visit
+        v_base_path = visit.get_base_path()
+         @schedule = Schedule.where("name in ('dti_status')").first
+          @schedulerun = Schedulerun.new
+          @schedulerun.schedule_id = @schedule.id
+          @schedulerun.comment ="starting dti_status"
+          @schedulerun.save
+          @schedulerun.start_time = @schedulerun.created_at
+          @schedulerun.save
+          v_comment = ""
+    ####    begin   # catch all exception and put error in comment    
+            sql = "truncate table cg_dti_status_new"
+            connection = ActiveRecord::Base.connection();        
+            results = connection.execute(sql)
+
+            sql_base = "insert into cg_dti_status_new(dti_subjectid,dti_fa_file_name, dti_general_comment,dti_fa_flag,enrollment_id, scan_procedure_id)values("  
+# just looking in preprocessed for list - but could add the listing from raw later to drive processing 
+
+            v_preprocessed_path = v_base_path+"/preprocessed/modalities/dti/adluru_pipeline/"
+            v_preprocessed_full_path = v_preprocessed_path   #+sp.codename
+            if File.directory?( v_preprocessed_full_path) # v_raw_full_path)
+              if !File.directory?(v_preprocessed_full_path)
+                  puts "preprocessed path NOT exists "+v_preprocessed_full_path
+              end
+              # FA
+              # ls *_combined_fa.nii*
+              # split off subjected - assume all visit1
+              v_cnt = 0
+puts "AAAAAAAA before  dir glob"
+              Dir.glob(v_preprocessed_path+"/FA/*_combined_fa.nii*").each do |f|
+                  v_file_name = f.gsub(v_preprocessed_path+"/FA/","")
+                  file_name_array = v_file_name.split('_')
+puts "BBBBB file_name="+v_file_name
+puts "CCCCCC subjectid="+file_name_array[0]
+puts "dddd size ="+file_name_array.size.to_s
+                  if file_name_array.size == 3
+                      enrollment = Enrollment.where("enumber in (?)",file_name_array[0])
+                      if !enrollment.blank?
+                        v_dti_fa_flag = "Y"
+                        # get v_sp based on subjectid - replace all numbers? look up in scan_procedure -- visit1 
+                        v_subjectid_trim = file_name_array[0].gsub(/[0-9]/,"")
+puts "DDDDDD subjectid base ="+v_subjectid_trim
+                        sql = "select id from scan_procedures where subjectid_base ='"+v_subjectid_trim+"' and codename like '%visit1'"
+                        results = connection.execute(sql)
+                        v_sp = 0;
+                        results.each do |r|
+                              v_sp = r[0]
+                        end
+                        sql = sql_base+"'"+file_name_array[0]+"','"+v_file_name+"','','"+v_dti_fa_flag+"',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
+puts "EEEEEEE sql="+sql
+                        results = connection.execute(sql)
+                        v_cnt = v_cnt + 1
+                      end
+                  else
+                        #puts "               # NOT exists "+v_raw_full_path
+                  end # check if raw dir exisits
+              end
+           end           
+           # check move cg_ to cg_old
+           # v_shared = Shared.new 
+           # move from new to present table -- made into a function  in shared model
+           v_comment = self.move_present_to_old_new_to_present("cg_dti_status",
+             "dti_subjectid,dti_fa_file_name, dti_general_comment,dti_fa_flag, dti_fa_comment, dti_fa_global_quality, enrollment_id,scan_procedure_id",
+                            "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
+
+
+           # apply edits  -- made into a function  in shared model
+           self.apply_cg_edits('cg_dti_status')
+
+           puts "successful finish dti_status "+v_comment[0..459]
+           @schedulerun.comment =("successful finish dti_status "+v_cnt.to_s+" records loaded "+v_comment[0..459])
+           if !v_comment.include?("ERROR")
+              @schedulerun.status_flag ="Y"
+           end
+           @schedulerun.save
+           @schedulerun.end_time = @schedulerun.updated_at      
+           @schedulerun.save
+    ####    rescue Exception => msg
+    ####         v_error = msg.to_s
+    ####         puts "ERROR !!!!!!!"
+    ####         puts v_error
+    ####         v_error = v_error+"\n"+v_comment
+    ####          @schedulerun.comment =v_error[0..499]
+    ####          @schedulerun.status_flag="E"
+    ####    end
+  end  
   
   def run_epi_rest_status
         visit = Visit.find(3)  #  need to get base path without visit
