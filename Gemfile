@@ -43,7 +43,8 @@ gem 'rvm-capistrano'
 # gem 'mini_magick' # needs newer ruby 1.9.2 to work with ruby dicom
 gem 'open4'
 # gem 'POpen4', '~>0.1.4'
-
+# gem 'bzip2-ruby' 
+gem 'escoffier'
 # Deploy with Capistrano
 gem 'capistrano', '~>2.5.19'
 

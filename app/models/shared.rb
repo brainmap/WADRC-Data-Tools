@@ -172,7 +172,8 @@ class Shared  < ActionController::Base
   end 
   
   
-  def run_adrc_upload   
+  def run_adrc_upload  
+     
     visit = Visit.find(3)  #  need to get base path without visit
     v_base_path = visit.get_base_path()
      @schedule = Schedule.where("name in ('adrc_upload')").first
@@ -183,57 +184,168 @@ class Shared  < ActionController::Base
       @schedulerun.start_time = @schedulerun.created_at
       @schedulerun.save
       v_comment = ""
+      v_comment_warning =""
     connection = ActiveRecord::Base.connection();
+    sql = "truncate table cg_adrc_upload_new"       
+    results = connection.execute(sql)
     # recruit new adrc scans --- 
     sql = "select distinct enrollments.enumber from enrollments,enrollment_vgroup_memberships, vgroups  where enrollments.enumber like 'adrc%' 
               and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
               and enrollment_vgroup_memberships.enrollment_id = enrollments.id
               and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL 2 WEEK)              
               and vgroups.vgroup_date > DATE_SUB(curdate(), INTERVAL 20 WEEK)
-              and enrollments.enumber NOT IN ( select subjectid from cg_adrc_upload)"
+              and enrollments.enumber NOT IN ( select subjectid from cg_adrc_upload_new)
+              and vgroups.transfer_mri ='yes'"
     results = connection.execute(sql)
     results.each do |r|
-          sql2 = "insert into cg_adrc_upload (subjectid,sent_flag,status_flag) values('"+r[0]+"','N','Y')"
+          enrollment = Enrollment.where("enumber in (?)",r[0])
+          sql2 = "insert into cg_adrc_upload_new (subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id) values('"+r[0]+"','N','Y', "+enrollment[0].id.to_s+",22)"
           results2 = connection.execute(sql2)
     end
+    v_comment = self.move_present_to_old_new_to_present("cg_adrc_upload",
+    "subjectid, sent_flag,status_flag, enrollment_id, scan_procedure_id",
+                   "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
+
+
+    # apply edits  -- made into a function  in shared model
+    self.apply_cg_edits('cg_adrc_upload')
+    
     
     # get adrc subjectid to upload
-    sql = "select distinct subjectid from cg_adrc_upload where sent_flag ='N' and status_flag ='Y'"
+    sql = "select distinct subjectid from cg_adrc_upload where sent_flag ='N' and status_flag in ('Y','R')"
     results = connection.execute(sql)
     # change series_description_map table
-    v_folder_list = Array.new
+    v_folder_array = Array.new
+    v_scan_desc_type_array = Array.new
+    # check for dir in /tmp
+    v_target_dir ="/tmp/adrc_upload"
+    if !File.directory?(v_target_dir)
+      v_call = "mkdir "+v_target_dir
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      stdin.close
+      stdout.close
+      stderr.close
+    end
     results.each do |r|
+
       # update schedulerun comment - prepend 
       sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')"
       results_vgroup = connection.execute(sql_vgroup)
       # mkdir /tmp/adrc_upload/[subjectid]_YYYYMMDD_wisc
+      v_subject_dir = r[0]+"_"+(results_vgroup.first)[0].to_s+"_wisc"
+      v_parent_dir_target =v_target_dir+"/"+v_subject_dir
+      v_call = "mkdir "+v_parent_dir_target
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      stdin.close
+      stdout.close
+      stderr.close
       sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_map.series_description_type 
                   from vgroups , appointments, visits, image_datasets, series_description_map 
                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
                   and image_datasets.series_description =   series_description_map.series_description
                   and series_description_map.series_description_type in ('T1','T2','T2 Flair') 
-                  and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')"
+                  and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
+                   order by appointments.appointment_date "
       results_dataset = connection.execute(sql_dataset)
-      v_folder_list = [] # how to empty
+      v_folder_array = [] # how to empty
+      v_scan_desc_type_array = []
+      v_cnt = 1
       results_dataset.each do |r_dataset|
+            v_series_description_type = r_dataset[5].gsub(" ","_")
+            if !v_scan_desc_type_array.include?(v_series_description_type)
+                 v_scan_desc_type_array.push(v_series_description_type)
+            end
+            v_path = r_dataset[4]
+            v_dir_array = v_path.split("/")
+            v_dir = v_dir_array[(v_dir_array.size - 1)]
+            v_dir_target = v_dir+"_"+v_series_description_type
+            v_path = v_base_path+"/"+v_path.gsub("/Volumes/team/","").gsub("/Volumes/team-1/","").gsub("/Data/vtrak1/","")
+            if v_folder_array.include?(v_dir_target)
+              v_dir_target = v_dir_target+"_"+v_cnt.to_s
+              v_cnt = v_cnt +1
+              # might get weird if multiple types have dups - only expect T1/Bravo
+            end
+            v_folder_array.push(v_dir_target)
+
+             # v_call = "/usr/bin/bunzip2 "+v_parent_dir_target+"/"+v_dir_target+"/*.bz2"
+              v_call = "mise "+v_path+" "+v_parent_dir_target+"/"+v_dir_target   # works where bunzip2 cmd after rsync not work
+puts "AAAAAA "+v_call
+             stdin, stdout, stderr = Open3.popen3(v_call)
+              stderr.each {|line|
+                  puts line
+                }
+             stdin.close
+             stdout.close
+             stderr.close
              # temp - replace /Volumes/team/ and /Data/vtrak1/ with /Volumes/team-1 in dev
             # split on / --- get the last dir
             # make new dir name dir_series_description_type 
-            # check if in v_folder_list , if in v_folder_list , dir_series_description_type => dir_series_description_type_2
-            # add  dir, dir_series_description_type to v_folder_list
+            # check if in v_folder_array , if in v_folder_array , dir_series_description_type => dir_series_description_type_2
+            # add  dir, dir_series_description_type to v_folder_array
             # cp path ==> /tmp/adrc_upload/[subjectid]_yyymmdd_wisc/dir_series_description_type(_2)
       end
-      # update cg_adrc_upload with dir list 
-      # bunzip /tmp/adrc_upload/[subjectid]_yyymmdd_wisc/
-      # dicom clean up /tmp/adrc_upload/[subjectid]_yyymmdd_wisc/
-      # scp to scooby
-      # sftp 
-      # update cg_adrc_upload 
-      #
+
+      sql_status = "select status_flag from cg_adrc_upload where subjectid ='"+r[0]+"'"
+      results_status = connection.execute(sql_status)
+
+      if v_scan_desc_type_array.size < 3   and (results_status.first)[0] != "R"
+         v_comment_warning = v_comment_warning+"  "+v_scan_desc_type_array.size.to_s+" scan type "+r[0]
+      v_call = "rm -rf "+v_parent_dir_target
+puts "BBBBBBBB "+v_call
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      stdin.close
+      stdout.close
+      stderr.close
+      else
+      
+        sql_dirlist = "update cg_adrc_upload set dir_list ='"+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
+        results_dirlist = connection.execute(sql_dirlist)
+
+puts "bbbbb dicom clean "+v_parent_dir_target+"/*/"
+      # dicom clean up /tmp/adrc_upload/[subjectid]_yyymmdd_wisc
+      # Load an anonymization instance:
+  #    a = DICOM::Anonymizer.new
+     #   a.add_folder(v_parent_dir_target+"/*/")
+    #    a.remove_tag("0010,0030") # => "DOB"
+      #  a.remove_tag("0010,0010") #  => "Name")
+      #  a.remove_tag("0008,0050") #  => "Accession Number")
+      #  a.remove_tag("0008,1030") #  => "Study Description")
+      #  a.remove_tag("0010,0020") #  => "Patient ID")
+      #  a.remove_tag("0040,0254") #  => "Performed Proc Step Desc")
+      #  a.remove_tag("0008,0080") #  => "Institution Name")
+      #  a.remove_tag("0008,1010") #  => "Station Name")
+      #  a.remove_tag("0009,1002") #  => "Private")
+      #  a.remove_tag("0009,1030") #  => "Private")
+      #  a.remove_tag("0018,1000") #  => "Device Serial Number")
+      #  a.remove_tag("0025,101A") #  => "Private")
+      #  a.remove_tag("0040,0242") #  => "Performed Station Name")
+      #  a.remove_tag("0040,0243") #  => "Performed Location")
+    #  puts(a.print)
+    #    a.execute
+      #       
+        v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
+puts "CCCCCC "+v_call
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        stdin.close
+        stdout.close
+        stderr.close
+    
+        # scp to scooby
+        # sftp 
+        sql_sent = "update cg_adrc_upload set sent_flag ='Y' where subjectid ='"+r[0]+"' "
+        #### results_sent = connection.execute(sql_sent)
+      end
+      v_call = "rm -rf "+v_parent_dir_target
+puts "FFFFFFF "+v_call
+      # stdin, stdout, stderr = Open3.popen3(v_call)
+      #       stdin.close
+      #       stdout.close
+      #       stderr.close  
+      #       #
     end
               
-    @schedulerun.comment =("successful finish adrc_upload "+v_comment[0..1990])
+    @schedulerun.comment =("successful finish adrc_upload "+v_comment_warning+" "+v_comment[0..1990])
     if !v_comment.include?("ERROR")
        @schedulerun.status_flag ="Y"
      end
@@ -409,20 +521,15 @@ class Shared  < ActionController::Base
               # ls *_combined_fa.nii*
               # split off subjected - assume all visit1
               v_cnt = 0
-puts "AAAAAAAA before  dir glob"
               Dir.glob(v_preprocessed_path+"/FA/*_combined_fa.nii*").each do |f|
                   v_file_name = f.gsub(v_preprocessed_path+"/FA/","")
                   file_name_array = v_file_name.split('_')
-puts "BBBBB file_name="+v_file_name
-puts "CCCCCC subjectid="+file_name_array[0]
-puts "dddd size ="+file_name_array.size.to_s
                   if file_name_array.size == 3
                       enrollment = Enrollment.where("enumber in (?)",file_name_array[0])
                       if !enrollment.blank?
                         v_dti_fa_flag = "Y"
                         # get v_sp based on subjectid - replace all numbers? look up in scan_procedure -- visit1 
                         v_subjectid_trim = file_name_array[0].gsub(/[0-9]/,"")
-puts "DDDDDD subjectid base ="+v_subjectid_trim
                         sql = "select id from scan_procedures where subjectid_base ='"+v_subjectid_trim+"' and codename like '%visit1'"
                         results = connection.execute(sql)
                         v_sp = 0;
@@ -430,7 +537,6 @@ puts "DDDDDD subjectid base ="+v_subjectid_trim
                               v_sp = r[0]
                         end
                         sql = sql_base+"'"+file_name_array[0]+"','"+v_file_name+"','','"+v_dti_fa_flag+"',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
-puts "EEEEEEE sql="+sql
                         results = connection.execute(sql)
                         v_cnt = v_cnt + 1
                       end
