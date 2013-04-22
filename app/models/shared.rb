@@ -293,6 +293,10 @@ puts "AAAAAA "+v_call
       v_call = "rm -rf "+v_parent_dir_target
 #puts "BBBBBBBB "+v_call
       stdin, stdout, stderr = Open3.popen3(v_call)
+      stdin, stdout, stderr = Open3.popen3(v_call)
+       stderr.each {|line|
+           puts line
+         }
       stdin.close
       stdout.close
       stderr.close
