@@ -291,7 +291,7 @@ puts "AAAAAA "+v_call
       if v_scan_desc_type_array.size < 3   and (results_status.first)[0] != "R"
          v_comment_warning = v_comment_warning+"  "+v_scan_desc_type_array.size.to_s+" scan type "+r[0]
       v_call = "rm -rf "+v_parent_dir_target
-puts "BBBBBBBB "+v_call
+#puts "BBBBBBBB "+v_call
       stdin, stdout, stderr = Open3.popen3(v_call)
       stdin.close
       stdout.close
@@ -301,7 +301,7 @@ puts "BBBBBBBB "+v_call
         sql_dirlist = "update cg_adrc_upload set dir_list ='"+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
         results_dirlist = connection.execute(sql_dirlist)
 
-puts "bbbbb dicom clean "+v_parent_dir_target+"/*/"
+#puts "bbbbb dicom clean "+v_parent_dir_target+"/*/"
 Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0030"].nil? 
                                                                                           d["0010,0030"].value = "DOB"; d.write(dcm) 
                                                                                               end }
@@ -343,8 +343,7 @@ Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.n
                                                                                             end }
 Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0040,0243"].nil? 
                                                                                             d["0040,0243"].value = "Performed Location"; d.write(dcm) 
-                                                                                            end }
-
+                                                                                             end }
       # dicom clean up /tmp/adrc_upload/[subjectid]_yyymmdd_wisc
       # Load an anonymization instance:
   #    a = DICOM::Anonymizer.new
@@ -368,6 +367,7 @@ Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.n
     #    a.execute
       #       
         v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
+        v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+".zip  "+v_subject_dir
 puts "CCCCCC "+v_call
         stdin, stdout, stderr = Open3.popen3(v_call)
         stdin.close
@@ -380,7 +380,7 @@ puts "CCCCCC "+v_call
         results_sent = connection.execute(sql_sent)
       end
       v_call = "rm -rf "+v_parent_dir_target
-puts "FFFFFFF "+v_call
+#puts "FFFFFFF "+v_call
        stdin, stdout, stderr = Open3.popen3(v_call)
              stdin.close
              stdout.close
