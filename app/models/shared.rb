@@ -341,7 +341,7 @@ Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.n
 Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0040,0242"].nil? 
                                                                                             d["0040,0242"].value = "Performed Station Name"; d.write(dcm) 
                                                                                             end }
-Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0030"].nil? 
+Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0040,0243"].nil? 
                                                                                             d["0040,0243"].value = "Performed Location"; d.write(dcm) 
                                                                                             end }
 
