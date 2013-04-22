@@ -188,6 +188,8 @@ class Shared  < ActionController::Base
     connection = ActiveRecord::Base.connection();
     sql = "truncate table cg_adrc_upload_new"       
     results = connection.execute(sql)
+    sql = "insert into cg_adrc_upload_new(subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id) select subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id from cg_adrc_upload "
+    results = connection.execute(sql)
     # recruit new adrc scans --- 
     sql = "select distinct enrollments.enumber from enrollments,enrollment_vgroup_memberships, vgroups  where enrollments.enumber like 'adrc%' 
               and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
