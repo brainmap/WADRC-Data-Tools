@@ -192,8 +192,7 @@ class Shared  < ActionController::Base
     sql = "select distinct enrollments.enumber from enrollments,enrollment_vgroup_memberships, vgroups  where enrollments.enumber like 'adrc%' 
               and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
               and enrollment_vgroup_memberships.enrollment_id = enrollments.id
-              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL 2 WEEK)              
-              and vgroups.vgroup_date > DATE_SUB(curdate(), INTERVAL 20 WEEK)
+              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL 2 WEEK)             
               and enrollments.enumber NOT IN ( select subjectid from cg_adrc_upload_new)
               and vgroups.transfer_mri ='yes'"
     results = connection.execute(sql)
@@ -303,6 +302,21 @@ puts "BBBBBBBB "+v_call
         results_dirlist = connection.execute(sql_dirlist)
 
 puts "bbbbb dicom clean "+v_parent_dir_target+"/*/"
+Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); d["0010,0030"].value = "DOB"; d.write(dcm)}
+Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); d["0010,0010"].value = "Name"; d.write(dcm)}
+Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); d["0008,0050"].value = "Accession Number"; d.write(dcm)}
+Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); d["0008,1030"].value = "Study Description"; d.write(dcm)}
+Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); d["0010,0020"].value = "Patient ID"; d.write(dcm)}
+Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); d["0040,0254"].value = "Performed Proc Step Desc"; d.write(dcm)}
+Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); d["0008,0080"].value = "Institution Name"; d.write(dcm)}
+Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); d["0008,1010"].value = "Station Name"; d.write(dcm)}
+Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); d["0009,1002"].value = "Private"; d.write(dcm)}
+Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); d["0009,1030"].value = "Private"; d.write(dcm)}
+Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); d["0018,1000"].value = "Device Serial Number"; d.write(dcm)}
+Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); d["0025,101A"].value = "Private"; d.write(dcm)}
+Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); d["0040,0242"].value = "Performed Station Name"; d.write(dcm)}
+Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); d["0040,0243"].value = "Performed Location"; d.write(dcm)}
+
       # dicom clean up /tmp/adrc_upload/[subjectid]_yyymmdd_wisc
       # Load an anonymization instance:
   #    a = DICOM::Anonymizer.new
@@ -313,6 +327,7 @@ puts "bbbbb dicom clean "+v_parent_dir_target+"/*/"
       #  a.remove_tag("0008,1030") #  => "Study Description")
       #  a.remove_tag("0010,0020") #  => "Patient ID")
       #  a.remove_tag("0040,0254") #  => "Performed Proc Step Desc")
+      
       #  a.remove_tag("0008,0080") #  => "Institution Name")
       #  a.remove_tag("0008,1010") #  => "Station Name")
       #  a.remove_tag("0009,1002") #  => "Private")
@@ -334,15 +349,14 @@ puts "CCCCCC "+v_call
         # scp to scooby
         # sftp 
         sql_sent = "update cg_adrc_upload set sent_flag ='Y' where subjectid ='"+r[0]+"' "
-        #### results_sent = connection.execute(sql_sent)
+        results_sent = connection.execute(sql_sent)
       end
       v_call = "rm -rf "+v_parent_dir_target
 puts "FFFFFFF "+v_call
-      # stdin, stdout, stderr = Open3.popen3(v_call)
-      #       stdin.close
-      #       stdout.close
-      #       stderr.close  
-      #       #
+       stdin, stdout, stderr = Open3.popen3(v_call)
+             stdin.close
+             stdout.close
+             stderr.close  
     end
               
     @schedulerun.comment =("successful finish adrc_upload "+v_comment_warning+" "+v_comment[0..1990])
