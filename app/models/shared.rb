@@ -213,13 +213,14 @@ class Shared  < ActionController::Base
     
     
     # get adrc subjectid to upload
-    sql = "select distinct subjectid from cg_adrc_upload where sent_flag ='N' and status_flag in ('Y','R')"
+    sql = "select distinct subjectid from cg_adrc_upload where sent_flag ='N' and status_flag in ('R')" #('Y','R')
     results = connection.execute(sql)
     # change series_description_map table
     v_folder_array = Array.new
     v_scan_desc_type_array = Array.new
     # check for dir in /tmp
     v_target_dir ="/tmp/adrc_upload"
+    v_target_dir ="/Volumes/Macintosh_HD2/adrc_upload"
     if !File.directory?(v_target_dir)
       v_call = "mkdir "+v_target_dir
       stdin, stdout, stderr = Open3.popen3(v_call)
@@ -372,8 +373,9 @@ Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.n
     #  puts(a.print)
     #    a.execute
       #       
-        v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
-        v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+".zip  "+v_subject_dir
+        #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
+        #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
+        v_call = "cd "+v_target_dir+";  tar -zcvf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
 puts "CCCCCC "+v_call
         stdin, stdout, stderr = Open3.popen3(v_call)
         stdin.close
@@ -386,11 +388,11 @@ puts "CCCCCC "+v_call
         results_sent = connection.execute(sql_sent)
       end
       v_call = "rm -rf "+v_parent_dir_target
-#puts "FFFFFFF "+v_call
-       stdin, stdout, stderr = Open3.popen3(v_call)
-             stdin.close
-             stdout.close
-             stderr.close  
+#puts "FFFFFFF "+v_call            REACTIVATE!!!!!!!!!!!!!!!!
+       # stdin, stdout, stderr = Open3.popen3(v_call)
+       #       stdin.close
+       #       stdout.close
+       #       stderr.close  
     end
               
     @schedulerun.comment =("successful finish adrc_upload "+v_comment_warning+" "+v_comment[0..1990])
