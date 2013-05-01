@@ -611,7 +611,12 @@ puts "CCCCCC "+v_call
             # v_shared = Shared.new 
              # move from new to present table -- made into a function  in shared model
              v_comment = self.move_present_to_old_new_to_present("cg_asl_status",
-             "asl_subjectid, asl_general_comment,asl_registered_to_fs_flag, asl_registered_to_fs_comment, asl_registered_to_fs_global_quality, asl_smoothed_and_warped_flag, asl_smoothed_and_warped_comment, asl_smoothed_and_warped_global_quality, asl_fmap_flag, asl_fmap_single, asl_fmap_comment, asl_fmap_global_quality, enrollment_id,scan_procedure_id",
+             "asl_subjectid, asl_general_comment,asl_registered_to_fs_flag, asl_registered_to_fs_comment, asl_registered_to_fs_global_quality, asl_smoothed_and_warped_flag, asl_smoothed_and_warped_comment, asl_smoothed_and_warped_global_quality, asl_fmap_flag, asl_fmap_single, asl_fmap_comment, asl_fmap_global_quality,
+             asl_bkup_registered_to_fs_flag, asl_bkup_registered_to_fs_comment, asl_bkup_registered_to_fs_global_quality, asl_bkup_smoothed_and_warped_flag, asl_bkup_smoothed_and_warped_comment, asl_bkup_smoothed_and_warped_global_quality, asl_bkup_fmap_flag, asl_bkup_fmap_single, asl_bkup_fmap_comment, asl_bkup_fmap_global_quality, 
+             asl_2013_0_fmap_flag, asl_2013_0_fmap_single, asl_2013_0_fmap_comment, asl_2013_0_fmap_global_quality,
+             asl_2013_1525_fmap_flag, asl_2013_1525_fmap_single, asl_2013_1525_fmap_comment, asl_2013_1525_fmap_global_quality,
+            asl_2013_2025_fmap_flag, asl_2013_2025_fmap_single, asl_2013_2025_fmap_comment, asl_2013_2025_fmap_global_quality,
+              enrollment_id,scan_procedure_id",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
 
