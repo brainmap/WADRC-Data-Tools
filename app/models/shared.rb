@@ -188,7 +188,7 @@ class Shared  < ActionController::Base
     connection = ActiveRecord::Base.connection();
     sql = "truncate table cg_adrc_upload_new"       
     results = connection.execute(sql)
-    sql = "insert into cg_adrc_upload_new(subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id) select subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id from cg_adrc_upload "
+    sql = "insert into cg_adrc_upload_new(subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,status_comment,dir_list) select subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,status_comment,dir_list from cg_adrc_upload "
     results = connection.execute(sql)
     # recruit new adrc scans --- 
     sql = "select distinct enrollments.enumber from enrollments,enrollment_vgroup_memberships, vgroups  where enrollments.enumber like 'adrc%' 
@@ -290,11 +290,10 @@ puts "AAAAAA "+v_call
 
       sql_status = "select status_flag from cg_adrc_upload where subjectid ='"+r[0]+"'"
       results_status = connection.execute(sql_status)
-
       if v_scan_desc_type_array.size < 3   and (results_status.first)[0] != "R"
          v_comment_warning = v_comment_warning+"  "+v_scan_desc_type_array.size.to_s+" scan type "+r[0]
       v_call = "rm -rf "+v_parent_dir_target
-#puts "BBBBBBBB "+v_call
+# puts "BBBBBBBB "+v_call
       stdin, stdout, stderr = Open3.popen3(v_call)
        stderr.each {|line|
            puts line
@@ -306,8 +305,8 @@ puts "AAAAAA "+v_call
       
         sql_dirlist = "update cg_adrc_upload set dir_list ='"+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
         results_dirlist = connection.execute(sql_dirlist)
-
-#puts "bbbbb dicom clean "+v_parent_dir_target+"/*/"
+# TURN INTO A LOOP
+# #puts "bbbbb dicom clean "+v_parent_dir_target+"/*/"
 Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0030"].nil? 
                                                                                           d["0010,0030"].value = "DOB"; d.write(dcm) 
                                                                                               end }
@@ -391,8 +390,8 @@ Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.ne
                                                                                             d["0040,0242"].value = "Performed Station Name"; d.write(dcm) 
                                                                                             end }
 Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0040,0243"].nil? 
-                                                                                            d["0040,0243"].value = "Performed Location"; d.write(dcm) 
-                                                                                             end }
+                                                                                           d["0040,0243"].value = "Performed Location"; d.write(dcm) 
+                                                                                            end }
                                                                                              
       # dicom clean up /tmp/adrc_upload/[subjectid]_yyymmdd_wisc
       # Load an anonymization instance:
@@ -419,11 +418,14 @@ Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.ne
         #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
         #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
         v_call = "cd "+v_target_dir+";  tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
+        v_call = "  tar  -C "+v_target_dir+"/  -zcf "+v_target_dir+"/"+v_subject_dir+".tar.gz "+v_subject_dir+"/"
 puts "CCCCCC "+v_call
-        stdin, stdout, stderr = Open3.popen3(v_call)
-        stdin.close
-        stdout.close
-        stderr.close
+        sql_dirlist = "update cg_adrc_upload set status_comment ='"+v_call+"' where subjectid ='"+r[0]+"' "
+        results_dirlist = connection.execute(sql_dirlist)
+        # stdin, stdout, stderr = Open3.popen3(v_call)
+        #   stdin.close
+        #   stdout.close
+        #   stderr.close
     
         # scp to scooby
         # sftp 
@@ -432,10 +434,10 @@ puts "CCCCCC "+v_call
       end
       v_call = "rm -rf "+v_parent_dir_target
 #puts "FFFFFFF "+v_call            REACTIVATE!!!!!!!!!!!!!!!!
-        stdin, stdout, stderr = Open3.popen3(v_call)
-              stdin.close
-              stdout.close
-              stderr.close  
+        # stdin, stdout, stderr = Open3.popen3(v_call)
+        #        stdin.close
+        #        stdout.close
+        #        stderr.close  
     end
               
     @schedulerun.comment =("successful finish adrc_upload "+v_comment_warning+" "+v_comment[0..1990])
@@ -465,7 +467,9 @@ puts "CCCCCC "+v_call
             connection = ActiveRecord::Base.connection();        
             results = connection.execute(sql)
 
-            sql_base = "insert into cg_asl_status_new(asl_subjectid, asl_general_comment,asl_registered_to_fs_flag,asl_smoothed_and_warped_flag,asl_fmap_flag,asl_fmap_single,enrollment_id, scan_procedure_id)values("  
+            sql_base = "insert into cg_asl_status_new(asl_subjectid, asl_general_comment,asl_registered_to_fs_flag,asl_smoothed_and_warped_flag,asl_fmap_flag,asl_fmap_single,
+            asl_bkup_registered_to_fs_flag,asl_bkup_smoothed_and_warped_flag,asl_bkup_fmap_flag,asl_bkup_fmap_single,asl_2013_0_fmap_flag,asl_2013_0_fmap_single,
+            asl_2013_1525_fmap_flag,asl_2013_1525_fmap_single,asl_2013_2025_fmap_flag,asl_2013_2025_fmap_single,enrollment_id, scan_procedure_id)values("  
             v_raw_path = v_base_path+"/raw"
             v_mri = "/mri"
             no_mri_path_sp_list =['asthana.adrc-clinical-core.visit1',
@@ -514,6 +518,43 @@ puts "CCCCCC "+v_call
                       if dir_name_array.size == 3
                          enrollment = Enrollment.where("enumber in (?)",dir_name_array[0])
                          if !enrollment.blank?
+                             v_asl_registered_to_fs_flag ="N"
+                             v_asl_smoothed_and_warped_flag = "N"
+                             v_asl_fmap_flag = "N"
+                             v_asl_fmap_single ="N"                                
+                             v_asl_bkup_registered_to_fs_flag ="N"
+                             v_asl_bkup_smoothed_and_warped_flag = "N"
+                             v_asl_bkup_fmap_flag = "N"
+                             v_asl_bkup_fmap_single ="N"
+                             v_asl_2013_0_fmap_flag = "N"
+                             v_asl_2013_0_fmap_single ="N"                             
+                             v_asl_2013_1525_fmap_flag = "N"
+                             v_asl_2013_1525_fmap_single ="N"                             
+                             v_asl_2013_2025_fmap_flag = "N"
+                             v_asl_2013_2025_fmap_single ="N"
+                             
+                             v_subjectid_asl_bkup = v_preprocessed_full_path+"/"+dir_name_array[0]+"/asl_bkup"
+                             if File.directory?(v_subjectid_asl_bkup)
+                                  v_dir_array = Dir.entries(v_subjectid_asl_bkup)   # need to get date for specific files
+                                  # evalute for asl_registered_to_fs_flag = rFS_ASL_[subjectid]_fmap.nii ,
+                                  # asl_smoothed_and_warped_flag = swrFS_ASL_[subjectid]_fmap.nii,
+                                  # asl_fmap_flag = [ASL_[subjectid]_[sdir]_fmap.nii or ASL_[subjectid]_fmap.nii],
+                                  # asl_fmap_single = ASL_[subjectid]_fmap.nii
+                             
+                                v_dir_array.each do |f|
+                                  if f == "swrFS_ASL_"+dir_name_array[0]+"_fmap.nii"
+                                    v_asl_bkup_smoothed_and_warped_flag = "Y"
+                                  elsif  f == "rFS_ASL_"+dir_name_array[0]+"_fmap.nii"
+                                    v_asl_bkup_registered_to_fs_flag ="Y"
+                                  elsif  f == "ASL_"+dir_name_array[0]+"_fmap.nii"
+                                    v_asl_bkup_fmap_flag = "Y"
+                                    v_asl_bkup_fmap_single ="Y"
+                                  elsif  f.start_with?("ASL_"+dir_name_array[0]) and f.end_with?("_fmap.nii")
+                                    v_asl_bkup_fmap_flag = "Y"
+                                  end
+                                end
+                             end
+                             
                              v_subjectid_asl = v_preprocessed_full_path+"/"+dir_name_array[0]+"/asl"
                              if File.directory?(v_subjectid_asl)
                                   v_dir_array = Dir.entries(v_subjectid_asl)   # need to get date for specific files
@@ -521,15 +562,24 @@ puts "CCCCCC "+v_call
                                   # asl_smoothed_and_warped_flag = swrFS_ASL_[subjectid]_fmap.nii,
                                   # asl_fmap_flag = [ASL_[subjectid]_[sdir]_fmap.nii or ASL_[subjectid]_fmap.nii],
                                   # asl_fmap_single = ASL_[subjectid]_fmap.nii
-                                v_asl_registered_to_fs_flag ="N"
-                                v_asl_smoothed_and_warped_flag = "N"
-                                v_asl_fmap_flag = "N"
-                                v_asl_fmap_single ="N"
+                                  # dir_name_array[0] is just subjectid
+                             
                                 v_dir_array.each do |f|
                                   if f == "swrFS_ASL_"+dir_name_array[0]+"_fmap.nii"
                                     v_asl_smoothed_and_warped_flag = "Y"
                                   elsif  f == "rFS_ASL_"+dir_name_array[0]+"_fmap.nii"
                                     v_asl_registered_to_fs_flag ="Y"
+                                  elsif  f.start_with?("ASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
+                                    v_asl_2013_0_fmap_flag = "Y"
+                                    v_asl_2013_0_fmap_single ="Y"
+                                    v_asl_2013_1525_fmap_flag = "Y"
+                                    v_asl_2013_1525_fmap_single ="Y"  
+                                  elsif   f.start_with?("ASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii")
+                                      v_asl_2013_1525_fmap_flag = "Y"
+                                      v_asl_2013_1525_fmap_single ="Y"
+                                  elsif   f.start_with?("ASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii")
+                                      v_asl_2013_2025_fmap_flag = "Y"
+                                      v_asl_2013_2025_fmap_single ="Y"                                      
                                   elsif  f == "ASL_"+dir_name_array[0]+"_fmap.nii"
                                     v_asl_fmap_flag = "Y"
                                     v_asl_fmap_single ="Y"
@@ -537,11 +587,15 @@ puts "CCCCCC "+v_call
                                     v_asl_fmap_flag = "Y"
                                   end
                                 end
+                             end
+                             if File.directory?(v_subjectid_asl) or  File.directory?(v_subjectid_asl_bkup)
                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','','"+v_asl_registered_to_fs_flag+"','"+v_asl_smoothed_and_warped_flag+"','"+v_asl_fmap_flag+"',
-                                                           '"+v_asl_fmap_single+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                                           '"+v_asl_fmap_single+"','"+v_asl_bkup_registered_to_fs_flag+"','"+v_asl_bkup_smoothed_and_warped_flag+"','"+v_asl_bkup_fmap_flag+"',
+                                                           '"+v_asl_bkup_fmap_single+"','"+v_asl_2013_0_fmap_flag+"', '"+v_asl_2013_0_fmap_single+"','"+v_asl_2013_1525_fmap_flag+"', '"+v_asl_2013_1525_fmap_single+"',
+                                                          '"+v_asl_2013_2025_fmap_flag+"', '"+v_asl_2013_2025_fmap_single+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              else
-                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no ASL dir','N','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no ASL or ASL_bkup dir','N','N','N','N','N','N','N','N','N','N','N','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              end # check for subjectid asl dir
                          else
