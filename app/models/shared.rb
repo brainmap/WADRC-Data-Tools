@@ -469,7 +469,10 @@ puts "CCCCCC "+v_call
 
             sql_base = "insert into cg_asl_status_new(asl_subjectid, asl_general_comment,asl_registered_to_fs_flag,asl_smoothed_and_warped_flag,asl_fmap_flag,asl_fmap_single,
             asl_bkup_registered_to_fs_flag,asl_bkup_smoothed_and_warped_flag,asl_bkup_fmap_flag,asl_bkup_fmap_single,asl_2013_0_fmap_flag,asl_2013_0_fmap_single,
-            asl_2013_1525_fmap_flag,asl_2013_1525_fmap_single,asl_2013_2025_fmap_flag,asl_2013_2025_fmap_single,enrollment_id, scan_procedure_id)values("  
+            asl_2013_1525_fmap_flag,asl_2013_1525_fmap_single,asl_2013_2025_fmap_flag,asl_2013_2025_fmap_single,
+            asl_2013_0_registered_to_fs_flag,asl_2013_0_smoothed_and_warped_flag,asl_2013_1525_registered_to_fs_flag,asl_2013_1525_smoothed_and_warped_flag,
+            asl_2013_2025_registered_to_fs_flag,asl_2013_2025_smoothed_and_warped_flag,
+            enrollment_id, scan_procedure_id)values("  
             v_raw_path = v_base_path+"/raw"
             v_mri = "/mri"
             no_mri_path_sp_list =['asthana.adrc-clinical-core.visit1',
@@ -527,11 +530,17 @@ puts "CCCCCC "+v_call
                              v_asl_bkup_fmap_flag = "N"
                              v_asl_bkup_fmap_single ="N"
                              v_asl_2013_0_fmap_flag = "N"
-                             v_asl_2013_0_fmap_single ="N"                             
+                             v_asl_2013_0_fmap_single ="N"   
+                             v_asl_2013_0_registered_to_fs_flag ="N"
+                             v_asl_2013_0_smoothed_and_warped_flag = "N"                          
                              v_asl_2013_1525_fmap_flag = "N"
-                             v_asl_2013_1525_fmap_single ="N"                             
+                             v_asl_2013_1525_fmap_single ="N"  
+                             v_asl_2013_1525_registered_to_fs_flag ="N"
+                             v_asl_2013_1525_smoothed_and_warped_flag = "N"                           
                              v_asl_2013_2025_fmap_flag = "N"
                              v_asl_2013_2025_fmap_single ="N"
+                             v_asl_2013_2025_registered_to_fs_flag ="N"
+                             v_asl_2013_2025_smoothed_and_warped_flag = "N"
                              
                              v_subjectid_asl_bkup = v_preprocessed_full_path+"/"+dir_name_array[0]+"/asl_bkup"
                              if File.directory?(v_subjectid_asl_bkup)
@@ -572,14 +581,26 @@ puts "CCCCCC "+v_call
                                   elsif  f.start_with?("ASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
                                     v_asl_2013_0_fmap_flag = "Y"
                                     v_asl_2013_0_fmap_single ="Y"
-                                    v_asl_2013_1525_fmap_flag = "Y"
-                                    v_asl_2013_1525_fmap_single ="Y"  
+                                   # v_asl_2013_1525_fmap_flag = "Y"
+                                    # v_asl_2013_1525_fmap_single ="Y" 
+                                  elsif f.start_with?("swrFS_ASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii") 
+                                      v_asl_2013_0_smoothed_and_warped_flag = "Y"
+                                  elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
+                                      v_asl_2013_0_registered_to_fs_flag ="Y"                                                                         
                                   elsif   f.start_with?("ASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii")
                                       v_asl_2013_1525_fmap_flag = "Y"
                                       v_asl_2013_1525_fmap_single ="Y"
+                                  elsif f.start_with?("swrFS_ASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii") 
+                                      v_asl_2013_1525_smoothed_and_warped_flag = "Y"
+                                  elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii")
+                                      v_asl_2013_1525_registered_to_fs_flag ="Y"                                                                       
                                   elsif   f.start_with?("ASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii")
                                       v_asl_2013_2025_fmap_flag = "Y"
-                                      v_asl_2013_2025_fmap_single ="Y"                                      
+                                      v_asl_2013_2025_fmap_single ="Y"  
+                                  elsif f.start_with?("swrFS_ASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii") 
+                                      v_asl_2013_2025_smoothed_and_warped_flag = "Y"
+                                  elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
+                                      v_asl_2013_2025_registered_to_fs_flag ="Y"                                    
                                   elsif  f == "ASL_"+dir_name_array[0]+"_fmap.nii"
                                     v_asl_fmap_flag = "Y"
                                     v_asl_fmap_single ="Y"
@@ -592,10 +613,12 @@ puts "CCCCCC "+v_call
                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','','"+v_asl_registered_to_fs_flag+"','"+v_asl_smoothed_and_warped_flag+"','"+v_asl_fmap_flag+"',
                                                            '"+v_asl_fmap_single+"','"+v_asl_bkup_registered_to_fs_flag+"','"+v_asl_bkup_smoothed_and_warped_flag+"','"+v_asl_bkup_fmap_flag+"',
                                                            '"+v_asl_bkup_fmap_single+"','"+v_asl_2013_0_fmap_flag+"', '"+v_asl_2013_0_fmap_single+"','"+v_asl_2013_1525_fmap_flag+"', '"+v_asl_2013_1525_fmap_single+"',
-                                                          '"+v_asl_2013_2025_fmap_flag+"', '"+v_asl_2013_2025_fmap_single+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                                          '"+v_asl_2013_2025_fmap_flag+"', '"+v_asl_2013_2025_fmap_single+"','"+v_asl_2013_0_registered_to_fs_flag+"','"+v_asl_2013_0_smoothed_and_warped_flag+"'
+                                                          ,'"+v_asl_2013_1525_registered_to_fs_flag+"','"+v_asl_2013_1525_smoothed_and_warped_flag+"','"+v_asl_2013_2025_registered_to_fs_flag+"',
+                                                          '"+v_asl_2013_2025_smoothed_and_warped_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              else
-                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no ASL or ASL_bkup dir','N','N','N','N','N','N','N','N','N','N','N','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no ASL or ASL_bkup dir','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              end # check for subjectid asl dir
                          else
@@ -616,6 +639,8 @@ puts "CCCCCC "+v_call
              asl_2013_0_fmap_flag, asl_2013_0_fmap_single, asl_2013_0_fmap_comment, asl_2013_0_fmap_global_quality,
              asl_2013_1525_fmap_flag, asl_2013_1525_fmap_single, asl_2013_1525_fmap_comment, asl_2013_1525_fmap_global_quality,
             asl_2013_2025_fmap_flag, asl_2013_2025_fmap_single, asl_2013_2025_fmap_comment, asl_2013_2025_fmap_global_quality,
+            asl_2013_0_registered_to_fs_flag,asl_2013_0_smoothed_and_warped_flag,asl_2013_1525_registered_to_fs_flag,asl_2013_1525_smoothed_and_warped_flag,
+            asl_2013_2025_registered_to_fs_flag,asl_2013_2025_smoothed_and_warped_flag,
               enrollment_id,scan_procedure_id",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 

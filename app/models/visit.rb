@@ -133,12 +133,11 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
         begin
   puts "XXXXXXXX before RawImageDatasetThumbnail.new(dataset).thumbnail"
           metamri_attr_options[:thumb] = File.open(RawImageDatasetThumbnail.new(dataset).thumbnail)
-  puts "ZZZZZZZZZZ after RawImageDatasetThumbnail.new(dataset).thumbnail"
+  puts "ZZZZZZZZZZ after RawImageDatasetThumbnail.new(dataset).thumbnail"   # not sure where it fails after this
         rescue StandardError, ScriptError => e
           puts "WWWWWWWWW in rescue RawImageDatasetThumbnail.new(dataset).thumbnail"
           logger.debug e
         end
-
         # Test to see if this dataset already exists and grab it if so,
         # otherwise build it fresh. This fails if the image dataset exists but
         # is not associated with the visit, since it's essentially scoping
@@ -154,11 +153,12 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
           data = ImageDataset.where(:path.matches => dataset.directory, :scanned_file.matches => dataset.scanned_file).first
         else raise StandardError, "Could not identify type of dataset #{File.join(dataset.directory, datset.scanned_file)}"
         end
-          
+      
         meta_attrs = dataset.attributes_for_active_record(metamri_attr_options)
-        
+
         # If the ActiveRecord Visit (visit) has a dataset that already matches the metamri dataset (dataset) on dicom_series_uid, then use it and update its params.  Otherwise, build a new one.
         unless data.blank? # AKA data.kind_of? ImageDataset
+
           logger.debug "updating dataset #{data.id} with new metamri attributes"
           data.attributes.merge!(meta_attrs)
           if data.valid?
@@ -179,7 +179,7 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
         metamri_attr_options[:thumb].close if metamri_attr_options[:thumb].kind_of? File
       end
     end
-    
+ 
     visit.created_by = created_by
     # added 20120502 to make mri appointment and the vgroup
     if visit.appointment_id.blank?
