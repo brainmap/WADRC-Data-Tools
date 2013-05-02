@@ -246,7 +246,7 @@ class Shared  < ActionController::Base
                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
                   and image_datasets.series_description =   series_description_map.series_description
-                  and series_description_map.series_description_type in ('T1','T2','T2 Flair') 
+                  and series_description_map.series_description_type in ('T1','T2','T2 Flair','DTI') 
                   and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
                    order by appointments.appointment_date "
       results_dataset = connection.execute(sql_dataset)
@@ -290,7 +290,7 @@ puts "AAAAAA "+v_call
 
       sql_status = "select status_flag from cg_adrc_upload where subjectid ='"+r[0]+"'"
       results_status = connection.execute(sql_status)
-      if v_scan_desc_type_array.size < 3   and (results_status.first)[0] != "R"
+      if v_scan_desc_type_array.size < 4   and (results_status.first)[0] != "R"
          v_comment_warning = v_comment_warning+"  "+v_scan_desc_type_array.size.to_s+" scan type "+r[0]
       v_call = "rm -rf "+v_parent_dir_target
 # puts "BBBBBBBB "+v_call
@@ -313,47 +313,65 @@ puts "AAAAAA "+v_call
                             '0008,0080'=>'Institution Name','0008,1010'=>'Station Name','0009,1002'=>'Private',
                             '0009,1030'=>'Private','0018,1000'=>'Device Serial Number','0025,101A'=>'Private',
                             '0040,0242'=>'Performed Station Name','0040,0243'=>'Performed Location'}
-        # v_dicom_field_array.each do |dicom_key|
-        #        Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d[dicom_key].nil? 
-        #                                                                                          d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
-        #                                                                                     end }
-        #       Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d[dicom_key].nil? 
-        #                                                                                       d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
-        #                                                                                    end }
-        #                                                                                         
-        #  end                            
-                            
+        v_dicom_field_array.each do |dicom_key|
+               Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d[dicom_key].nil? 
+                                                                                                 d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end }
+                                                                                                
+         end                            
+                                    
 #                             
 # # #puts "bbbbb dicom clean "+v_parent_dir_target+"/*/"
 # Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0030"].nil? 
 #                                                                                           d["0010,0030"].value = "DOB"; d.write(dcm) 
 #                                                                                               end } 
-        v_call = "rsync -av "+v_parent_dir_target+"/ panda_admin@scooby.dom.wisc.edu:/home/panda_admin/upload_adrc"
-  puts "AAAAAA "+v_call
+        v_call = "rsync -av "+v_parent_dir_target+" panda_admin@scooby.dom.wisc.edu:/home/panda_admin/upload_adrc/"
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
                                                                            
         #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
         #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
-        v_call = "cd "+v_target_dir+";  tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
-        v_call = "  tar  -C "+v_target_dir+"/  -zcf "+v_target_dir+"/"+v_subject_dir+".tar.gz "+v_subject_dir+"/"
-puts "CCCCCC "+v_call
-        sql_dirlist = "update cg_adrc_upload set status_comment ='"+v_call+"' where subjectid ='"+r[0]+"' "
-        results_dirlist = connection.execute(sql_dirlist)
-        # stdin, stdout, stderr = Open3.popen3(v_call)
-        #   stdin.close
-        #   stdout.close
-        #   stderr.close
-    
-        # scp to scooby
-        # sftp 
+        v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
+        v_call =  'ssh panda_admin@scooby.dom.wisc.edu "  tar  -C /home/panda_admin/upload_adrc  -zcf /home/panda_admin/upload_adrc/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+        puts "bbbbbbb "+v_call
+
+        v_call = ' rm -rf '+v_target_dir+'/'+v_subject_dir
+           stdin, stdout, stderr = Open3.popen3(v_call)
+           while !stdout.eof?
+             puts stdout.read 1024    
+            end
+           stdin.close
+           stdout.close
+           stderr.close
+        # 
+        v_call = 'ssh panda_admin@scooby.dom.wisc.edu " rm -rf /home/panda_admin/upload_adrc/'+v_subject_dir+' "'
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+       
+        # sftp -- how to get the username /password and address
         sql_sent = "update cg_adrc_upload set sent_flag ='Y' where subjectid ='"+r[0]+"' "
         results_sent = connection.execute(sql_sent)
-      end
-      v_call = "rm -rf "+v_parent_dir_target
-#puts "FFFFFFF "+v_call            REACTIVATE!!!!!!!!!!!!!!!!
-        # stdin, stdout, stderr = Open3.popen3(v_call)
-        #        stdin.close
-        #        stdout.close
-        #        stderr.close  
+      end 
     end
               
     @schedulerun.comment =("successful finish adrc_upload "+v_comment_warning+" "+v_comment[0..1990])
