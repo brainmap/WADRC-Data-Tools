@@ -313,15 +313,21 @@ puts "AAAAAA "+v_call
                             '0008,0080'=>'Institution Name','0008,1010'=>'Station Name','0009,1002'=>'Private',
                             '0009,1030'=>'Private','0018,1000'=>'Device Serial Number','0025,101A'=>'Private',
                             '0040,0242'=>'Performed Station Name','0040,0243'=>'Performed Location'}
-        v_dicom_field_array.each do |dicom_key|
-               Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d[dicom_key].nil? 
+     ####  v_dicom_field_array.each do |dicom_key|
+               Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                     v_dicom_field_array.each do |dicom_key|
+                                                                                           if !d[dicom_key].nil? 
                                                                                                  d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
-                                                                                            end }
-              Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d[dicom_key].nil? 
+                                                                                            end 
+                                                                                      end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
-                                                                                           end }
+                                                                                           end 
+                                                                                        end }
                                                                                                 
-         end                            
+       ####  end                            
                                     
 #                             
 # # #puts "bbbbb dicom clean "+v_parent_dir_target+"/*/"
