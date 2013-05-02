@@ -306,115 +306,31 @@ puts "AAAAAA "+v_call
         sql_dirlist = "update cg_adrc_upload set dir_list ='"+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
         results_dirlist = connection.execute(sql_dirlist)
 # TURN INTO A LOOP
-# #puts "bbbbb dicom clean "+v_parent_dir_target+"/*/"
-Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0030"].nil? 
-                                                                                          d["0010,0030"].value = "DOB"; d.write(dcm) 
-                                                                                              end }
-Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0010"].nil?
-                                                                                           d["0010,0010"].value = "Name"; d.write(dcm)
-                                                                                               end }
-Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0008,0050"].nil?
-                                                                                           d["0008,0050"].value = "Accession Number"; d.write(dcm) 
-                                                                                           end }
-Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0008,1030"].nil?
-                                                                                           d["0008,1030"].value = "Study Description"; d.write(dcm) 
-                                                                                           end }
-Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0020"].nil?
-                                                                                d["0010,0020"].value = "Patient ID"; d.write(dcm) 
-                                                                                end }
-Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0040,0254"].nil? 
-                                                                                            d["0040,0254"].value = "Performed Proc Step Desc"; d.write(dcm) 
-                                                                                            end }
-Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0008,0080"].nil? 
-                                                                                            d["0008,0080"].value = "Institution Name"; d.write(dcm) 
-                                                                                            end }
-Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0008,1010"].nil? 
-                                                                                            d["0008,1010"].value = "Station Name"; d.write(dcm) 
-                                                                                            end }
-Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0009,1002"].nil?
-                                                                                             d["0009,1002"].value = "Private"; d.write(dcm) 
-                                                                                             end }
-Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0009,1030"].nil? 
-                                                                                            d["0009,1030"].value = "Private"; d.write(dcm) 
-                                                                                            end }
-Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0018,1000"].nil?
-                                                                                             d["0018,1000"].value = "Device Serial Number"; d.write(dcm) 
-                                                                                             end }
-Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0025,101A"].nil? 
-                                                                                            d["0025,101A"].value = "Private"; d.write(dcm) 
-                                                                                            end }
-Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0040,0242"].nil? 
-                                                                                            d["0040,0242"].value = "Performed Station Name"; d.write(dcm) 
-                                                                                            end }
-Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0040,0243"].nil? 
-                                                                                            d["0040,0243"].value = "Performed Location"; d.write(dcm) 
-                                                                                             end }
-# there are some headers with waisman like non-dcm file name
-Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0030"].nil? 
-                                                                                          d["0010,0030"].value = "DOB"; d.write(dcm) 
-                                                                                              end }
-Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0010"].nil?
-                                                                                           d["0010,0010"].value = "Name"; d.write(dcm)
-                                                                                               end }
-Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0008,0050"].nil?
-                                                                                           d["0008,0050"].value = "Accession Number"; d.write(dcm) 
-                                                                                           end }
-Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0008,1030"].nil?
-                                                                                           d["0008,1030"].value = "Study Description"; d.write(dcm) 
-                                                                                           end }
-Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0020"].nil?
-                                                                                d["0010,0020"].value = "Patient ID"; d.write(dcm) 
-                                                                                end }
-Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0040,0254"].nil? 
-                                                                                            d["0040,0254"].value = "Performed Proc Step Desc"; d.write(dcm) 
-                                                                                            end }
-Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0008,0080"].nil? 
-                                                                                            d["0008,0080"].value = "Institution Name"; d.write(dcm) 
-                                                                                            end }
-Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0008,1010"].nil? 
-                                                                                            d["0008,1010"].value = "Station Name"; d.write(dcm) 
-                                                                                            end }
-Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0009,1002"].nil?
-                                                                                             d["0009,1002"].value = "Private"; d.write(dcm) 
-                                                                                             end }
-Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0009,1030"].nil? 
-                                                                                            d["0009,1030"].value = "Private"; d.write(dcm) 
-                                                                                            end }
-Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0018,1000"].nil?
-                                                                                             d["0018,1000"].value = "Device Serial Number"; d.write(dcm) 
-                                                                                             end }
-Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0025,101A"].nil? 
-                                                                                            d["0025,101A"].value = "Private"; d.write(dcm) 
-                                                                                            end }
-Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0040,0242"].nil? 
-                                                                                            d["0040,0242"].value = "Performed Station Name"; d.write(dcm) 
-                                                                                            end }
-Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0040,0243"].nil? 
-                                                                                           d["0040,0243"].value = "Performed Location"; d.write(dcm) 
-                                                                                            end }
-                                                                                             
-      # dicom clean up /tmp/adrc_upload/[subjectid]_yyymmdd_wisc
-      # Load an anonymization instance:
-  #    a = DICOM::Anonymizer.new
-     #   a.add_folder(v_parent_dir_target+"/*/")
-    #    a.remove_tag("0010,0030") # => "DOB"
-      #  a.remove_tag("0010,0010") #  => "Name")
-      #  a.remove_tag("0008,0050") #  => "Accession Number")
-      #  a.remove_tag("0008,1030") #  => "Study Description")
-      #  a.remove_tag("0010,0020") #  => "Patient ID")
-      #  a.remove_tag("0040,0254") #  => "Performed Proc Step Desc")
-      
-      #  a.remove_tag("0008,0080") #  => "Institution Name")
-      #  a.remove_tag("0008,1010") #  => "Station Name")
-      #  a.remove_tag("0009,1002") #  => "Private")
-      #  a.remove_tag("0009,1030") #  => "Private")
-      #  a.remove_tag("0018,1000") #  => "Device Serial Number")
-      #  a.remove_tag("0025,101A") #  => "Private")
-      #  a.remove_tag("0040,0242") #  => "Performed Station Name")
-      #  a.remove_tag("0040,0243") #  => "Performed Location")
-    #  puts(a.print)
-    #    a.execute
-      #       
+        v_dicom_field_array =['0010,0030','0010,0010','0008,0050','0008,1030','0010,0020','0040,0254','0008,0080','0008,1010','0009,1002','0009,1030','0018,1000',
+                        '0025,101A','0040,0242','0040,0243']
+        v_dicom_field_value_hash ={'0010,0030'=>'DOB','0010,0010'=>'Name','0008,0050'=>'Accession Number',
+                           '0008,1030'=>'Study Description', '0010,0020'=>'Patient ID','0040,0254'=>'Performed Proc Step Desc',
+                            '0008,0080'=>'Institution Name','0008,1010'=>'Station Name','0009,1002'=>'Private',
+                            '0009,1030'=>'Private','0018,1000'=>'Device Serial Number','0025,101A'=>'Private',
+                            '0040,0242'=>'Performed Station Name','0040,0243'=>'Performed Location'}
+        # v_dicom_field_array.each do |dicom_key|
+        #        Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d[dicom_key].nil? 
+        #                                                                                          d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+        #                                                                                     end }
+        #       Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d[dicom_key].nil? 
+        #                                                                                       d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+        #                                                                                    end }
+        #                                                                                         
+        #  end                            
+                            
+#                             
+# # #puts "bbbbb dicom clean "+v_parent_dir_target+"/*/"
+# Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0030"].nil? 
+#                                                                                           d["0010,0030"].value = "DOB"; d.write(dcm) 
+#                                                                                               end } 
+        v_call = "rsync -av "+v_parent_dir_target+"/ panda_admin@scooby.dom.wisc.edu:/home/panda_admin/upload_adrc"
+  puts "AAAAAA "+v_call
+                                                                           
         #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
         #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
         v_call = "cd "+v_target_dir+";  tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
@@ -599,7 +515,7 @@ puts "CCCCCC "+v_call
                                       v_asl_2013_2025_fmap_single ="Y"  
                                   elsif f.start_with?("swrFS_ASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii") 
                                       v_asl_2013_2025_smoothed_and_warped_flag = "Y"
-                                  elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
+                                  elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii")
                                       v_asl_2013_2025_registered_to_fs_flag ="Y"                                    
                                   elsif  f == "ASL_"+dir_name_array[0]+"_fmap.nii"
                                     v_asl_fmap_flag = "Y"
