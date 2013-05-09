@@ -204,7 +204,7 @@ class Shared  < ActionController::Base
           results2 = connection.execute(sql2)
     end
     v_comment = self.move_present_to_old_new_to_present("cg_adrc_upload",
-    "subjectid, sent_flag,status_flag, enrollment_id, scan_procedure_id",
+    "subjectid, general_comment, sent_flag, sent_comment, status_flag, status_comment, dir_list,enrollment_id, scan_procedure_id",
                    "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
 
@@ -224,12 +224,23 @@ class Shared  < ActionController::Base
     if !File.directory?(v_target_dir)
       v_call = "mkdir "+v_target_dir
       stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
       stdin.close
       stdout.close
       stderr.close
     end
+    v_comment = " :list of subjectid "+v_comment
     results.each do |r|
-
+      v_comment = r[0]+","+v_comment
+    end
+    @schedulerun.comment =v_comment[0..1990]
+    @schedulerun.save
+    results.each do |r|
+      v_comment = "strt "+r[0]+","+v_comment
+      @schedulerun.comment =v_comment[0..1990]
+      @schedulerun.save
       # update schedulerun comment - prepend 
       sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')"
       results_vgroup = connection.execute(sql_vgroup)
@@ -238,6 +249,9 @@ class Shared  < ActionController::Base
       v_parent_dir_target =v_target_dir+"/"+v_subject_dir
       v_call = "mkdir "+v_parent_dir_target
       stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
       stdin.close
       stdout.close
       stderr.close
@@ -277,6 +291,9 @@ puts "AAAAAA "+v_call
               stderr.each {|line|
                   puts line
                 }
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                 end
              stdin.close
              stdout.close
              stderr.close
@@ -295,9 +312,12 @@ puts "AAAAAA "+v_call
       v_call = "rm -rf "+v_parent_dir_target
 # puts "BBBBBBBB "+v_call
       stdin, stdout, stderr = Open3.popen3(v_call)
-       stderr.each {|line|
+      stderr.each {|line|
            puts line
-         }
+      }
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end   
       stdin.close
       stdout.close
       stderr.close
@@ -377,7 +397,10 @@ puts "AAAAAA "+v_call
         # sftp -- how to get the username /password and address
         sql_sent = "update cg_adrc_upload set sent_flag ='Y' where subjectid ='"+r[0]+"' "
         results_sent = connection.execute(sql_sent)
-      end 
+      end
+      v_comment = "end "+r[0]+","+v_comment
+      @schedulerun.comment =v_comment[0..1990]
+      @schedulerun.save 
     end
               
     @schedulerun.comment =("successful finish adrc_upload "+v_comment_warning+" "+v_comment[0..1990])
