@@ -61,7 +61,7 @@
               <%= link_to "ScanProc", scan_procedures_path %>
             </li>
             <li <%= "class=current" if @current_tab == "searches" %>>
-              <%= link_to "Search", '/cg_search' %>
+              <%= link_to "Search", '/cg_search' %> <small><small><%= link_to " -cg's", '/cg_tables'%></small></small>
             </li>
             <!-- <li <%= "class=current" if @current_tab == "log_files" %>>
               <%= link_to("Log files", log_files_path) %>

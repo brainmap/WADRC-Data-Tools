@@ -77,9 +77,11 @@ class ParticipantsController < ApplicationController
     end
     connection = ActiveRecord::Base.connection();
     if !params[:enumber].blank?
-       @enrollment = Enrollment.where("enumber = ?",params[:enumber] )
-       if !@enrollment.blank?
-         flash[:notice] = 'There is a participant with enumber '+params[:enumber]               
+       @enrollment = Enrollment.where("participant_id is not NULL and enumber = ?",params[:enumber] )
+       if !@enrollment.blank? 
+         flash[:notice] = 'There is a participant with enumber '+params[:enumber]
+       else
+         @enrollment = Enrollment.where(" enumber = ?",params[:enumber] )               
        end         
      end
      if !params[:participant][:wrapnum].blank?
@@ -96,7 +98,7 @@ class ParticipantsController < ApplicationController
        end
 
     respond_to do |format|
-      if !@enrollment.blank? or !@participant2.blank? or !@participant3.blank?
+      if (!@enrollment.blank? and !(@enrollment[0].participant_id).blank? ) or !@participant2.blank? or !@participant3.blank?
         format.html { render :action => "new" }
         format.xml  { render :xml => @participant.errors, :status => :unprocessable_entity }
       elsif @participant.save 
@@ -104,8 +106,11 @@ class ParticipantsController < ApplicationController
         results = connection.execute(sql)
         sql = "update participants set reggieid = NULL where trim(reggieid) = '' "
         results = connection.execute(sql)
-        if !params[:enumber].blank?
+        if !params[:enumber].blank? and @enrollment.blank?
           sql = " insert into enrollments(enumber,participant_id)values('"+params[:enumber].gsub(/[;:'"()=<>]/, '')+"',"+@participant.id.to_s+")"
+          results = connection.execute(sql)
+        elsif !params[:enumber].blank? and !@enrollment.blank?
+          sql = " update enrollments set participant_id = "+@participant.id.to_s+" where enumber ='"+params[:enumber].gsub(/[;:'"()=<>]/, '')+"' "
           results = connection.execute(sql)
         end
         flash[:notice] = 'Participant was successfully created.'
