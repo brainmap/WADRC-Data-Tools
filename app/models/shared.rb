@@ -1,5 +1,7 @@
 require 'visit'
 require 'image_dataset'
+require 'net/sftp'
+
 class Shared  < ActionController::Base
   
 
@@ -170,6 +172,24 @@ class Shared  < ActionController::Base
    
    return v_comment
   end 
+  
+  def run_sftp
+      v_file_name ="test_upload.txt"
+      v_username ="" # get from config
+      v_passwrd =""  # get from config file which is not on github
+      v_ip = "" # get from config 
+      v_source ="/Users/panda_admin/upload_adrc/test_upload.txt"
+      v_target ="/coho2/home/wisconsin/test_upload.txt"
+ 
+Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
+  puts "BBBBBBBBBB"
+sftp.upload!(v_source, "test_upload.txt")
+end
+
+      
+      # need to run from scooby as panda_admin-- adrc expects the ip address
+    
+  end
   
   
   def run_adrc_upload  
@@ -395,6 +415,34 @@ puts "AAAAAA "+v_call
         stderr.close
        
         # sftp -- how to get the username /password and address
+         # did the tar.gz on scooby to avoid mac acl PaxHeader extra directories
+         v_call = "rsync -av pand_admin@scooby.dom.wisc.edu:/home/panda_admin/upload_adrc/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
+         stdin, stdout, stderr = Open3.popen3(v_call)
+         while !stdout.eof?
+           puts stdout.read 1024    
+          end
+         stdin.close
+         stdout.close
+         stderr.close
+              v_file_name ="test_upload.txt" 
+              v_username =  ""  # get from config file which is not on github
+              v_passwrd =""  # get from config file which is not on github
+              v_ip = "128.208.132.61"  # get from config file which is not on github
+              v_source = v_target_dir+'/'+v_subject_dir+".tar.gz"
+              v_target = v_subject_dir+".tar.gz"
+        Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
+        sftp.upload!(v_source, v_target)
+        end
+
+        v_call = " rm -rf "+v_target_dir+'/'+v_subject_dir+".tar.gz"
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close        
+        
         sql_sent = "update cg_adrc_upload set sent_flag ='Y' where subjectid ='"+r[0]+"' "
         results_sent = connection.execute(sql_sent)
       end

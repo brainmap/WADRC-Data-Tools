@@ -49,6 +49,10 @@ class CronInterface < ActiveRecord::Base
       v_shared = Shared.new
       v_shared.run_adrc_upload()
       
+ elsif v_value_1 == "test_sftp"
+         v_shared = Shared.new
+         v_shared.run_sftp()
+      
  elsif v_value_1 == "dti_status"
       v_shared = Shared.new
       v_shared.run_dti_status()
