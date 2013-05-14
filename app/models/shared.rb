@@ -173,11 +173,12 @@ class Shared  < ActionController::Base
    return v_comment
   end 
   
+
   def run_sftp
-      v_file_name ="test_upload.txt"
-      v_username ="" # get from config
-      v_passwrd =""  # get from config file which is not on github
-      v_ip = "" # get from config 
+     # HOW TO CALL shared conroller function from model ??? 
+      v_username = self.adrc_sftp_user # get from config
+      v_passwrd = self.adrc_sftp_pwd   # get from config file which is not on github
+      v_ip = self.adrc_sftp_host # get from config 
       v_source ="/Users/panda_admin/upload_adrc/test_upload.txt"
       v_target ="/coho2/home/wisconsin/test_upload.txt"
  
@@ -427,7 +428,7 @@ puts "AAAAAA "+v_call
               v_file_name ="test_upload.txt" 
               v_username =  ""  # get from config file which is not on github
               v_passwrd =""  # get from config file which is not on github
-              v_ip = "128.208.132.61"  # get from config file which is not on github
+              v_ip = ""  # get from config file which is not on github
               v_source = v_target_dir+'/'+v_subject_dir+".tar.gz"
               v_target = v_subject_dir+".tar.gz"
         Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
