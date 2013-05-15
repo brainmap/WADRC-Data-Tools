@@ -3,8 +3,10 @@ require 'image_dataset'
 require 'net/sftp'
 
 class Shared  < ActionController::Base
-  
-
+  extend SharedHelper
+  def self.adrc_sftp_username; adrc_sftp_user end
+  def self.adrc_sftp_host_address; adrc_sftp_host end
+  def self.adrc_sftp_password; adrc_sftp_pwd end
   
   def test_return( p_var)
     return "AAAAAAAAAAAAA"+p_var
@@ -175,17 +177,14 @@ class Shared  < ActionController::Base
   
 
   def run_sftp
-     # HOW TO CALL shared conroller function from model ??? 
-      v_username = self.adrc_sftp_user # get from config
-      v_passwrd = self.adrc_sftp_pwd   # get from config file which is not on github
-      v_ip = self.adrc_sftp_host # get from config 
+      v_username = Shared.adrc_sftp_username # get from shared helper
+      v_passwrd = Shared.adrc_sftp_password   # get from shared helperwhich is not on github
+      v_ip = Shared.adrc_sftp_host_address # get from shared helper
       v_source ="/Users/panda_admin/upload_adrc/test_upload.txt"
       v_target ="/coho2/home/wisconsin/test_upload.txt"
- 
-Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
-  puts "BBBBBBBBBB"
-sftp.upload!(v_source, "test_upload.txt")
-end
+      Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
+           sftp.upload!(v_source, "test_upload.txt")
+      end
 
       
       # need to run from scooby as panda_admin-- adrc expects the ip address
@@ -211,11 +210,12 @@ end
     results = connection.execute(sql)
     sql = "insert into cg_adrc_upload_new(subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,status_comment,dir_list) select subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,status_comment,dir_list from cg_adrc_upload "
     results = connection.execute(sql)
-    # recruit new adrc scans --- 
+    # recruit new adrc scans ---   change 
+    v_weeks_back = "7"
     sql = "select distinct enrollments.enumber from enrollments,enrollment_vgroup_memberships, vgroups  where enrollments.enumber like 'adrc%' 
               and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
               and enrollment_vgroup_memberships.enrollment_id = enrollments.id
-              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL 2 WEEK)             
+              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL "+v_weeks_back+" WEEK)             
               and enrollments.enumber NOT IN ( select subjectid from cg_adrc_upload_new)
               and vgroups.transfer_mri ='yes'"
     results = connection.execute(sql)
@@ -415,7 +415,7 @@ puts "AAAAAA "+v_call
         stdout.close
         stderr.close
        
-        # sftp -- how to get the username /password and address
+        
          # did the tar.gz on scooby to avoid mac acl PaxHeader extra directories
          v_call = "rsync -av pand_admin@scooby.dom.wisc.edu:/home/panda_admin/upload_adrc/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
          stdin, stdout, stderr = Open3.popen3(v_call)
@@ -425,14 +425,15 @@ puts "AAAAAA "+v_call
          stdin.close
          stdout.close
          stderr.close
-              v_file_name ="test_upload.txt" 
-              v_username =  ""  # get from config file which is not on github
-              v_passwrd =""  # get from config file which is not on github
-              v_ip = ""  # get from config file which is not on github
-              v_source = v_target_dir+'/'+v_subject_dir+".tar.gz"
-              v_target = v_subject_dir+".tar.gz"
+
+        # sftp -- shared helper hasthe username /password and address
+        v_username = Shared.adrc_sftp_username # get from shared helper
+        v_passwrd = Shared.adrc_sftp_password   # get from shared helperwhich is not on github
+        v_ip = Shared.adrc_sftp_host_address # get from shared helper
+        v_source = v_target_dir+'/'+v_subject_dir+".tar.gz"
+        v_target = v_subject_dir+".tar.gz"
         Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
-        sftp.upload!(v_source, v_target)
+            sftp.upload!(v_source, v_target)
         end
 
         v_call = " rm -rf "+v_target_dir+'/'+v_subject_dir+".tar.gz"
