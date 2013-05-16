@@ -211,7 +211,7 @@ class Shared  < ActionController::Base
     sql = "insert into cg_adrc_upload_new(subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,status_comment,dir_list) select subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,status_comment,dir_list from cg_adrc_upload "
     results = connection.execute(sql)
     # recruit new adrc scans ---   change 
-    v_weeks_back = "7"
+    v_weeks_back = "2"
     sql = "select distinct enrollments.enumber from enrollments,enrollment_vgroup_memberships, vgroups  where enrollments.enumber like 'adrc%' 
               and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
               and enrollment_vgroup_memberships.enrollment_id = enrollments.id
@@ -417,7 +417,7 @@ puts "AAAAAA "+v_call
        
         
          # did the tar.gz on scooby to avoid mac acl PaxHeader extra directories
-         v_call = "rsync -av pand_admin@scooby.dom.wisc.edu:/home/panda_admin/upload_adrc/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
+         v_call = "rsync -av panda_admin@scooby.dom.wisc.edu:/home/panda_admin/upload_adrc/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
          stdin, stdout, stderr = Open3.popen3(v_call)
          while !stdout.eof?
            puts stdout.read 1024    
