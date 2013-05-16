@@ -329,6 +329,8 @@ puts "AAAAAA "+v_call
       sql_status = "select status_flag from cg_adrc_upload where subjectid ='"+r[0]+"'"
       results_status = connection.execute(sql_status)
       if v_scan_desc_type_array.size < 4   and (results_status.first)[0] != "R"
+        sql_dirlist = "update cg_adrc_upload set general_comment =' NOT ALL SCAN TYPES!!!! "+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
+        results_dirlist = connection.execute(sql_dirlist)
          v_comment_warning = v_comment_warning+"  "+v_scan_desc_type_array.size.to_s+" scan type "+r[0]
       v_call = "rm -rf "+v_parent_dir_target
 # puts "BBBBBBBB "+v_call
@@ -680,6 +682,94 @@ puts "AAAAAA "+v_call
     
     
   end
+  
+
+  def run_dir_size
+        visit = Visit.find(3)  #  need to get base path without visit
+        v_base_path = visit.get_base_path()
+        connection = ActiveRecord::Base.connection(); 
+         @schedule = Schedule.where("name in ('dir_size')").first
+          @schedulerun = Schedulerun.new
+          @schedulerun.schedule_id = @schedule.id
+          @schedulerun.comment ="starting dir_size"
+          @schedulerun.save
+          @schedulerun.start_time = @schedulerun.created_at
+          @schedulerun.save
+          v_comment = ""
+          v_date = Date.today.strftime("%Y-%m-%d")
+          v_dir_array =['SysAdmin','data1','data3','data5','data7','raw','analyses','data2','data4','data6','preprocessed','soar_data']     
+          # linux likes "du -ch --max-depth=2 ."
+          # mac like "du -ch -d 2 ."
+          v_cnt = 1
+          v_dir_array.each do |dir|  
+            v_dir_base =   v_base_path+"/"+dir      
+            v_sql = "delete from dir_size where run_date ='"+v_date+"' and dir_base ='"+v_dir_base+"' "
+              results = connection.execute(v_sql)                      
+            v_call = "cd "+v_dir_base+"; du -ch -d 2 ."
+            stdin, stdout, stderr = Open3.popen3(v_call)
+            while !stdout.eof?
+              v_lines = stdout.read 1024
+              puts v_lines
+            end
+            
+            v_lines.each do |v_line|    
+              # convert eveything to G
+              v_cols = v_line.split()
+              # gsub and to_float, divide
+              v_dir_size = v_cols[0]
+              v_dir_size_float =0
+              if v_dir_size.include?"G"
+                 v_dir_size.gsub("G","")
+                 v_dir_size_float = v_dir_size.to_f
+              elsif v_dir_size.include?"T"
+                v_dir_size.gsub("T","")
+                v_dir_size_float =  (v_dir_size.to_f)*1024
+              elsif v_dir_size.include?"M"
+                v_dir_size.gsub("M","")
+                v_dir_size_float =  (v_dir_size.to_f)/(1024)
+              elsif v_dir_size.include?"K"
+                v_dir_size.gsub("K","")
+                v_dir_size_float =  (v_dir_size.to_f)/(1024*1024)
+              end
+              
+              # split, replace leading ./ with v_dir_base
+              if v_cols[1][0..0] == "."
+                 v_dir_path = v_dir_base+ (v_cols[1])[1..-1]  # need to trim leading "."
+              else
+                if v_cols[1] == "total"
+                  v_dir_path = v_dir_base+"/="+ (v_cols[1])
+                else
+                    v_dir_path = v_dir_base+"/"+ (v_cols[1])
+                 end
+              end
+               v_sql = "insert into dir_size(dir_base,dir_path, run_date,dir_size)Values('"+v_dir_base+"','"+v_dir_path+"','"+v_date+"','"+v_dir_size_float.to_s+"')"
+               results = connection.execute(v_sql)
+               v_cnt = v_cnt + 1
+             end
+             # how to try/catch errors
+             
+            stdin.close
+            stdout.close
+            stderr.close
+          end
+
+           puts "successful finish dir_size "+v_comment[0..459]
+           @schedulerun.comment =("successful finish dir_size "+v_cnt.to_s+" rows inserted "+ v_comment[0..459])
+           if !v_comment.include?("ERROR")
+              @schedulerun.status_flag ="Y"
+           end
+           @schedulerun.save
+           @schedulerun.end_time = @schedulerun.updated_at      
+           @schedulerun.save
+    ####    rescue Exception => msg
+    ####         v_error = msg.to_s
+    ####         puts "ERROR !!!!!!!"
+    ####         puts v_error
+    ####         v_error = v_error+"\n"+v_comment
+    ####          @schedulerun.comment =v_error[0..499]
+    ####          @schedulerun.status_flag="E"
+    ####    end
+  end  
   
 
   def run_dti_status
