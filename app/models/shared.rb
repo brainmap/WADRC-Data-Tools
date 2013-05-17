@@ -697,22 +697,28 @@ puts "AAAAAA "+v_call
           @schedulerun.save
           v_comment = ""
           v_date = Date.today.strftime("%Y-%m-%d")
-          v_dir_array =['SysAdmin','data1','data3','data5','data7','raw','analyses','data2','data4','data6','preprocessed','soar_data']     
+          v_dir_array =['data2','data4','data6','SysAdmin','data1','data3','data5','data7','analyses','preprocessed','soar_data','raw'] 
+          # v_dir_array =['data3']    
           # linux likes "du -ch --max-depth=2 ."
           # mac like "du -ch -d 2 ."
           v_cnt = 1
           v_dir_array.each do |dir|  
+            v_depth = "1"
+            if dir == "preprocessed"
+               v_depth = "2"
+            end
             v_dir_base =   v_base_path+"/"+dir      
             v_sql = "delete from dir_size where run_date ='"+v_date+"' and dir_base ='"+v_dir_base+"' "
               results = connection.execute(v_sql)                      
-            v_call = "cd "+v_dir_base+"; du -ch -d 2 ."
+            v_call = "cd "+v_dir_base+"; du -ch -d "+v_depth+" ."
+            puts v_call
             stdin, stdout, stderr = Open3.popen3(v_call)
             while !stdout.eof?
-              v_lines = stdout.read 1024
-              puts v_lines
+              v_val = 1
+              # just waiting
             end
-            
-            v_lines.each do |v_line|    
+            while v_line = stdout.gets 
+           # (stdout.read).each do |v_line|    
               # convert eveything to G
               v_cols = v_line.split()
               # gsub and to_float, divide
