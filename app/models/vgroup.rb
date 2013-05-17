@@ -46,7 +46,7 @@ class Vgroup < ActiveRecord::Base
    	elsif File.directory?("/Volumes/team-6")
    		 base_path ="/Volumes/team-6"
   	else
-  		base_path ="/Volumes/team"	
+  		base_path ="/mounts/data"	
     end
 
   	return base_path
