@@ -31,23 +31,23 @@ class Vgroup < ActiveRecord::Base
   	base_path =""
   	#user = ENV['USER']
 
-  	if File.directory?("/Volumes/team")
-  		 base_path ="/Volumes/team"
-  	elsif File.directory?("/Volumes/team-1")
-  		 base_path ="/Volumes/team-1"
-  	elsif File.directory?("/Volumes/team-2")
-  		 base_path ="/Volumes/team-2"	
-  	elsif File.directory?("/Volumes/team-3")
-  		 base_path ="/Volumes/team-3"
-   	elsif File.directory?("/Volumes/team-4")
-   		 base_path ="/Volumes/team-4"
-   	elsif File.directory?("/Volumes/team-5")
-   		 base_path ="/Volumes/team-5"
-   	elsif File.directory?("/Volumes/team-6")
-   		 base_path ="/Volumes/team-6"
-  	else
+    # if File.directory?("/Volumes/team")
+    #    base_path ="/Volumes/team"
+    # elsif File.directory?("/Volumes/team-1")
+    #    base_path ="/Volumes/team-1"
+    # elsif File.directory?("/Volumes/team-2")
+    #    base_path ="/Volumes/team-2" 
+    # elsif File.directory?("/Volumes/team-3")
+    #    base_path ="/Volumes/team-3"
+    #     elsif File.directory?("/Volumes/team-4")
+    #        base_path ="/Volumes/team-4"
+    #     elsif File.directory?("/Volumes/team-5")
+    #        base_path ="/Volumes/team-5"
+    #     elsif File.directory?("/Volumes/team-6")
+    #        base_path ="/Volumes/team-6"
+    # else
   		base_path ="/mounts/data"	
-    end
+    # end
 
   	return base_path
   end
