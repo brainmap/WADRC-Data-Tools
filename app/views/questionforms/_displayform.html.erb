@@ -107,7 +107,7 @@ puts "q_data_form_id="+params[:q_data_form_id]
 	      <% elsif @question.value_type_1 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
 	        <%= RedCloth.new(@q_data.value_1.blank? ? "" : @q_data.value_1).to_html.html_safe %>
 		<% elsif @question.value_type_1 == "dropdown"
-		    if @question.ref_table_a_1 == "LOOKUP_REFS"  ## use ref_table_b_1 %>
+		    if @question.ref_table_a_1 == "lookup_refs"  ## use ref_table_b_1 %>
 				<%= collection_select "value_1",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_1).sort_by(&:display_order),
 			    	:ref_value, :description, {:include_blank => @question.prompt_1,:selected => (@q_data.value_1 or @question.default_val_1)} %>
 			<%	else   %>
@@ -133,8 +133,8 @@ puts "q_data_form_id="+params[:q_data_form_id]
 		<% elsif @question.value_type_1 == "date"  %>
 		   <%= @q_data.value_1 %>								
 		<% elsif @question.value_type_1 == "checkbox_1_col"  %>
-		   <% if @question.ref_table_a_1 == "LOOKUP_REFS" 
-			     sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_1+"' order by display_order"
+		   <% if @question.ref_table_a_1 == "lookup_refs" 
+			     sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_1+"' order by display_order"
 			     connection = ActiveRecord::Base.connection();
               results = connection.execute(sql)
 			    %>
@@ -151,8 +151,8 @@ puts "q_data_form_id="+params[:q_data_form_id]
 	          <% end %>
 	        <% end %>	
 		<% elsif @question.value_type_1 == "checkbox_in_line"  %>
-		   <% if @question.ref_table_a_1 == "LOOKUP_REFS" 
-			     sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_1+"' order by display_order"
+		   <% if @question.ref_table_a_1 == "lookup_refs" 
+			     sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_1+"' order by display_order"
 			     connection = ActiveRecord::Base.connection();
              results = connection.execute(sql)
 			    %>
@@ -169,8 +169,8 @@ puts "q_data_form_id="+params[:q_data_form_id]
 	          <% end %>
 	        <% end %>
 		<% elsif @question.value_type_1 == "radio_1_col"  %>
-		   <% if @question.ref_table_a_1 == "LOOKUP_REFS" 
-			     sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_1+"' order by display_order"
+		   <% if @question.ref_table_a_1 == "lookup_refs" 
+			     sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_1+"' order by display_order"
 			     connection = ActiveRecord::Base.connection();
                  results = connection.execute(sql)
 			    %>
@@ -187,8 +187,8 @@ puts "q_data_form_id="+params[:q_data_form_id]
 	          <% end %>
 	        <% end %>		
 		<% elsif @question.value_type_1 == "radio_in_line"  %>
-		   <% if @question.ref_table_a_1 == "LOOKUP_REFS" 
-			     sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_1+"' order by display_order"
+		   <% if @question.ref_table_a_1 == "lookup_refs" 
+			     sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_1+"' order by display_order"
 			     connection = ActiveRecord::Base.connection();
                  results = connection.execute(sql)
 			    %>
@@ -229,7 +229,7 @@ puts "q_data_form_id="+params[:q_data_form_id]
 	        <% elsif @question.value_type_2 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
 	         <%= RedCloth.new(@q_data.value_2.blank? ? "" : @q_data.value_2).to_html.html_safe %>
 			<% elsif @question.value_type_2 == "dropdown"
-			    if @question.ref_table_a_2 == "LOOKUP_REFS"  ## use ref_table_b_2 %>
+			    if @question.ref_table_a_2 == "lookup_refs"  ## use ref_table_b_2 %>
 					<%= collection_select "value_2",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_2).sort_by(&:display_order),
 				    	:ref_value, :description, {:include_blank => @question.prompt_2,:selected => (@q_data.value_2 or @question.default_val_2)} %>
 				<%	else   %>
@@ -254,8 +254,8 @@ puts "q_data_form_id="+params[:q_data_form_id]
 			<% elsif @question.value_type_2 == "date"  %>
 			   <%= @q_data.value_2 %>
 			<% elsif @question.value_type_2 == "checkbox_1_col"  %>
-		   		<% if @question.ref_table_a_2 == "LOOKUP_REFS" 
-			     	sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_2+"' order by display_order"
+		   		<% if @question.ref_table_a_2 == "lookup_refs" 
+			     	sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_2+"' order by display_order"
 			     	connection = ActiveRecord::Base.connection();
               		results = connection.execute(sql)
 			    	%>
@@ -272,8 +272,8 @@ puts "q_data_form_id="+params[:q_data_form_id]
 	          		<% end %>
 	        	<% end %>
 			<% elsif @question.value_type_2 == "checkbox_in_line"  %>
-		   		<% if @question.ref_table_a_2 == "LOOKUP_REFS" 
-			     	sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_2+"' order by display_order"
+		   		<% if @question.ref_table_a_2 == "lookup_refs" 
+			     	sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_2+"' order by display_order"
 			     	connection = ActiveRecord::Base.connection();
            		results = connection.execute(sql)
 			    	%>
@@ -290,8 +290,8 @@ puts "q_data_form_id="+params[:q_data_form_id]
 	          		<% end %>
 	        	<% end %>
 			<% elsif @question.value_type_2 == "radio_1_col"  %>
-			   <% if @question.ref_table_a_2 == "LOOKUP_REFS" 
-				     sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_2+"' order by display_order"
+			   <% if @question.ref_table_a_2 == "lookup_refs" 
+				     sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_2+"' order by display_order"
 				     connection = ActiveRecord::Base.connection();
 	                 results = connection.execute(sql)
 				    %>
@@ -308,8 +308,8 @@ puts "q_data_form_id="+params[:q_data_form_id]
 		          <% end %>
 		        <% end %>						
 			<% elsif @question.value_type_2 == "radio_in_line"  %>
-			   <% if @question.ref_table_a_2 == "LOOKUP_REFS" 
-				     sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_2+"' order by display_order"
+			   <% if @question.ref_table_a_2 == "lookup_refs" 
+				     sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_2+"' order by display_order"
 				     connection = ActiveRecord::Base.connection();
 	                 results = connection.execute(sql)
 				    %>
@@ -351,7 +351,7 @@ puts "q_data_form_id="+params[:q_data_form_id]
 	        <% elsif @question.value_type_3 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
 	         <%= RedCloth.new(@q_data.value_3.blank? ? "" : @q_data.value_3).to_html.html_safe %>
 			<% elsif @question.value_type_3 == "dropdown"
-			    if @question.ref_table_a_3 == "LOOKUP_REFS"  ## use ref_table_b_3 %>
+			    if @question.ref_table_a_3 == "lookup_refs"  ## use ref_table_b_3 %>
 					<%= collection_select "value_3",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_3).sort_by(&:display_order),
 				    	:ref_value, :description, {:include_blank => @question.prompt_3,:selected => (@q_data.value_3 or @question.default_val_3)} %>
 				<%	else   %>
@@ -375,8 +375,8 @@ puts "q_data_form_id="+params[:q_data_form_id]
 			<% elsif @question.value_type_3 == "date"  %>
 					<%= @q_data.value_3 %>
 			<% elsif @question.value_type_3 == "checkbox_1_col"  %>
-		    	<% if @question.ref_table_a_3 == "LOOKUP_REFS" 
-			     	sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_3+"' order by display_order"
+		    	<% if @question.ref_table_a_3 == "lookup_refs" 
+			     	sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_3+"' order by display_order"
 			     	connection = ActiveRecord::Base.connection();
               		results = connection.execute(sql)
 			    	%>
@@ -393,8 +393,8 @@ puts "q_data_form_id="+params[:q_data_form_id]
 	          		<% end %>
 	        	<% end %>
          	<% elsif @question.value_type_3 == "checkbox_in_line"  %>
-		    	<% if @question.ref_table_a_3 == "LOOKUP_REFS" 
-			     	sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_3+"' order by display_order"
+		    	<% if @question.ref_table_a_3 == "lookup_refs" 
+			     	sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_3+"' order by display_order"
 			     	connection = ActiveRecord::Base.connection();
            		results = connection.execute(sql)
 			    	%>
@@ -411,8 +411,8 @@ puts "q_data_form_id="+params[:q_data_form_id]
 	          		<% end %>
 	        	<% end %>          
 			<% elsif @question.value_type_3 == "radio_1_col"  %>
-			   <% if @question.ref_table_a_3 == "LOOKUP_REFS" 
-				     sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_3+"' order by display_order"
+			   <% if @question.ref_table_a_3 == "lookup_refs" 
+				     sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_3+"' order by display_order"
 				     connection = ActiveRecord::Base.connection();
 	                 results = connection.execute(sql)
 				    %>
@@ -429,8 +429,8 @@ puts "q_data_form_id="+params[:q_data_form_id]
 		          <% end %>
 		        <% end %>
          	<% elsif @question.value_type_3 == "radio_in_line"  %>
-			   <% if @question.ref_table_a_3 == "LOOKUP_REFS" 
-				     sql = "select ref_value, description from LOOKUP_REFS where label ='"+@question.ref_table_b_3+"' order by display_order"
+			   <% if @question.ref_table_a_3 == "lookup_refs" 
+				     sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_3+"' order by display_order"
 				     connection = ActiveRecord::Base.connection();
 	                 results = connection.execute(sql)
 				    %>
