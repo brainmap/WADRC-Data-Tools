@@ -36,9 +36,7 @@ class CronInterface < ActiveRecord::Base
       puts "aaaaa"+f
     end
     
-
-
-  end
+  end  # end test
 
   
   if v_value_1 == "asl_status"
