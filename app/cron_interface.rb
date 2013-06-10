@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'visit'
 require 'image_dataset'
 require 'shared' # this contains functions --- not sure where else to make functions accessible to this class

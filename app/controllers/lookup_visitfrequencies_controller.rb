@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupVisitfrequenciesController < ApplicationController
   # GET /lookup_visitfrequencies
   # GET /lookup_visitfrequencies.xml

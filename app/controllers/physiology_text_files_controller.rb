@@ -1,3 +1,4 @@
+# encoding: utf-8
 class PhysiologyTextFilesController < ApplicationController
   # GET /physiology_text_files
   # GET /physiology_text_files.xml

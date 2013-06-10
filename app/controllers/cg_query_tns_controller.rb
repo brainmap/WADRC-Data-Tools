@@ -1,3 +1,4 @@
+# encoding: utf-8
 class CgQueryTnsController < ApplicationController
   # GET /cg_query_tns
   # GET /cg_query_tns.xml

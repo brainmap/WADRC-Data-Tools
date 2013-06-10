@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupDrugunitsController < ApplicationController
   # GET /lookup_drugunits
   # GET /lookup_drugunits.xml

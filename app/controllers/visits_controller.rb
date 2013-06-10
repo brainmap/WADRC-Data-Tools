@@ -1,3 +1,4 @@
+# encoding: utf-8
 require "base64"
 class VisitsController <  AuthorizedController #  ApplicationController
 

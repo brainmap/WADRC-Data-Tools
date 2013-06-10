@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupRadsController < ApplicationController
   # GET /lookup_rads
   # GET /lookup_rads.xml

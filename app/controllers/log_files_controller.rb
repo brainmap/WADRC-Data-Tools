@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LogFilesController < ApplicationController
   before_filter :set_current_tab
   

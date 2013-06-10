@@ -1,3 +1,4 @@
+# encoding: utf-8
 class RecruitmentGroupsController < ApplicationController
   # GET /recruitment_groups
   # GET /recruitment_groups.xml

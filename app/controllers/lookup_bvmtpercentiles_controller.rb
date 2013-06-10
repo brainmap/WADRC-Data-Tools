@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupBvmtpercentilesController < ApplicationController
   # GET /lookup_bvmtpercentiles
   # GET /lookup_bvmtpercentiles.xml

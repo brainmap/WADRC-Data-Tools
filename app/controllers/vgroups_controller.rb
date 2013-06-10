@@ -1,3 +1,4 @@
+# encoding: utf-8
 class VgroupsController < ApplicationController
   # GET /vgroups
   # GET /vgroups.xml

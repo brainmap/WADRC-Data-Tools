@@ -1,3 +1,4 @@
+# encoding: utf-8
 class QDataFormsController < ApplicationController
   # GET /q_data_forms
   # GET /q_data_forms.xml

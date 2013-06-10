@@ -1,3 +1,4 @@
+# encoding: utf-8
 class BlooddrawsController < ApplicationController
   # GET /blooddraws
   # GET /blooddraws.xml

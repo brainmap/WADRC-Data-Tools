@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupHardwaresController < ApplicationController
   # GET /lookup_hardwares
   # GET /lookup_hardwares.xml

@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupEligibilityIneligibilitiesController < ApplicationController
   # GET /lookup_eligibility_ineligibilities
   # GET /lookup_eligibility_ineligibilities.xml

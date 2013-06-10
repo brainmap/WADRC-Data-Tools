@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupConsentformsController < ApplicationController
   # GET /lookup_consentforms
   # GET /lookup_consentforms.xml

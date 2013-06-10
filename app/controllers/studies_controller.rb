@@ -1,3 +1,4 @@
+# encoding: utf-8
 class StudiesController < ApplicationController
   # GET /studies
   # GET /studies.xml

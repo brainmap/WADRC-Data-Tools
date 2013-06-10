@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupLetterlabelsController < ApplicationController
   # GET /lookup_letterlabels
   # GET /lookup_letterlabels.xml

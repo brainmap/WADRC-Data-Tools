@@ -1,3 +1,4 @@
+# encoding: utf-8
 class DataSearchesController < ApplicationController
    # this isn't used - was a test bed for making sql
   def index

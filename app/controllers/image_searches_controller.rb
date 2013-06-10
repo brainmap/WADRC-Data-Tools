@@ -1,3 +1,4 @@
+# encoding: utf-8
 class ImageSearchesController < ApplicationController
   
   PER_PAGE = 50

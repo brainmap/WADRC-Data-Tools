@@ -1,3 +1,4 @@
+# encoding: utf-8
 class SeriesDescriptionsController < ApplicationController
   # GET /series_descriptions
   # GET /series_descriptions.xml

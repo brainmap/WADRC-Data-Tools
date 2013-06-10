@@ -1,3 +1,4 @@
+# encoding: utf-8
 class QuestionformsController < ApplicationController
   # GET /questionforms
   # GET /questionforms.xml

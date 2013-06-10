@@ -1,3 +1,4 @@
+# encoding: utf-8
 class AnalysesController < ApplicationController
   
   PER_PAGE = 50

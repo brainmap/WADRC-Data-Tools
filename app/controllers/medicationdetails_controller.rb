@@ -1,3 +1,4 @@
+# encoding: utf-8
 class MedicationdetailsController < ApplicationController
   # GET /medicationdetails
   # GET /medicationdetails.xml

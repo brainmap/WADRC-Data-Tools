@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupRelationshipsController < ApplicationController
   # GET /lookup_relationships
   # GET /lookup_relationships.xml

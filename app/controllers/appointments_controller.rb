@@ -1,3 +1,4 @@
+# encoding: utf-8
 class AppointmentsController < ApplicationController
   # GET /appointments
   # GET /appointments.xml

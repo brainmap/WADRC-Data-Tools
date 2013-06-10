@@ -1,3 +1,4 @@
+# encoding: utf-8
 class CgTnCnsController < ApplicationController
   # GET /cg_tn_cns
   # GET /cg_tn_cns.xml

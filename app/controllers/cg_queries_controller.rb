@@ -1,3 +1,4 @@
+# encoding: utf-8
 class CgQueriesController < ApplicationController
   # GET /cg_queries
   # GET /cg_queries.xml

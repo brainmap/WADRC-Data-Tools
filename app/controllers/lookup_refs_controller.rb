@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupRefsController < ApplicationController
   # GET /lookup_refs
   # GET /lookup_refs.xml

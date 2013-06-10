@@ -1,3 +1,4 @@
+# encoding: utf-8
 class MriperformancesController < ApplicationController
   # GET /mriperformances
   # GET /mriperformances.xml

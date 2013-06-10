@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupStatusesController < ApplicationController
   # GET /lookup_statuses
   # GET /lookup_statuses.xml

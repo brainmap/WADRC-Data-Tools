@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupTruthtablesController < ApplicationController
   # GET /lookup_truthtables
   # GET /lookup_truthtables.xml

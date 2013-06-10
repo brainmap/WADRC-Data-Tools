@@ -1,3 +1,4 @@
+# encoding: utf-8
 class ImageDatasetsController < ApplicationController # AuthorizedController #  ApplicationController
 #   load_and_authorize_resource
   before_filter :set_current_tab

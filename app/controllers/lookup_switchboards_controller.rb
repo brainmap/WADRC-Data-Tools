@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupSwitchboardsController < ApplicationController
   # GET /lookup_switchboards
   # GET /lookup_switchboards.xml

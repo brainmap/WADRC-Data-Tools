@@ -1,3 +1,4 @@
+# encoding: utf-8
 class RadiologyCommentsController < ApplicationController
   # GET /radiology_comments
   # GET /radiology_comments.xml

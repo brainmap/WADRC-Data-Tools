@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupScantasksController < ApplicationController
   # GET /lookup_scantasks
   # GET /lookup_scantasks.xml

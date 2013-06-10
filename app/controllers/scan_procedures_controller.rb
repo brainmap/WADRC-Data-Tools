@@ -1,3 +1,4 @@
+# encoding: utf-8
 class ScanProceduresController <  AuthorizedController #  ApplicationController
 load_and_authorize_resource
   

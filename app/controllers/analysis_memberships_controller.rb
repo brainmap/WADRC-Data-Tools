@@ -1,3 +1,4 @@
+# encoding: utf-8
 class AnalysisMembershipsController < ApplicationController
   # GET /analysis_memberships
   # GET /analysis_memberships.xml

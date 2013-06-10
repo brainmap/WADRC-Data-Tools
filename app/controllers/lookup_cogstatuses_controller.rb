@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupCogstatusesController < ApplicationController
   # GET /lookup_cogstatuses
   # GET /lookup_cogstatuses.xml

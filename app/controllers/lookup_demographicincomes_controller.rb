@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupDemographicincomesController < ApplicationController
   # GET /lookup_demographicincomes
   # GET /lookup_demographicincomes.xml

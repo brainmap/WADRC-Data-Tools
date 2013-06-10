@@ -1,3 +1,4 @@
+# encoding: utf-8
 class QuestionformScanProceduresController < ApplicationController
   # GET /questionform_scan_procedures
   # GET /questionform_scan_procedures.xml

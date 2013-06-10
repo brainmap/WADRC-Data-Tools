@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupLumbarpuncturesController < ApplicationController
   # GET /lookup_lumbarpunctures
   # GET /lookup_lumbarpunctures.xml

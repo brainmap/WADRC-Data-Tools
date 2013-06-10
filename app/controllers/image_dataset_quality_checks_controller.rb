@@ -1,3 +1,4 @@
+# encoding: utf-8
 class ImageDatasetQualityChecksController < ApplicationController # AuthorizedController #  ApplicationController
  #  load_and_authorize_resource
   # GET /image_dataset_quality_checks

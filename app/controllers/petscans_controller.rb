@@ -1,3 +1,4 @@
+# encoding: utf-8
 class PetscansController < ApplicationController
   # GET /petscans
   # GET /petscans.xml

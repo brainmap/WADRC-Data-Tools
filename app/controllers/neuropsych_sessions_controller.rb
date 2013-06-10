@@ -1,3 +1,4 @@
+# encoding: utf-8
 class NeuropsychSessionsController < ApplicationController
   # GET /neuropsych_sessions
   # GET /neuropsych_sessions.xml

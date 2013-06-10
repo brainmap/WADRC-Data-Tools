@@ -187,7 +187,7 @@ class Shared  < ActionController::Base
       end
 
       
-      # need to run from scooby as panda_admin-- adrc expects the ip address
+      # need to run from merida as panda_admin-- adrc expects the ip address
     
   end
   
@@ -297,7 +297,7 @@ class Shared  < ActionController::Base
             v_dir_array = v_path.split("/")
             v_dir = v_dir_array[(v_dir_array.size - 1)]
             v_dir_target = v_dir+"_"+v_series_description_type
-            v_path = v_base_path+"/"+v_path.gsub("/Volumes/team/","").gsub("/Volumes/team-1/","").gsub("/Data/vtrak1/","")
+            v_path = v_path.gsub("/Volumes/team/","").gsub("/Volumes/team-1/","").gsub("/Data/vtrak1/","")  #v_base_path+"/"+
             if v_folder_array.include?(v_dir_target)
               v_dir_target = v_dir_target+"_"+v_cnt.to_s
               v_cnt = v_cnt +1
@@ -377,7 +377,7 @@ puts "AAAAAA "+v_call
 # Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0030"].nil? 
 #                                                                                           d["0010,0030"].value = "DOB"; d.write(dcm) 
 #                                                                                               end } 
-        v_call = "rsync -av "+v_parent_dir_target+" panda_admin@scooby.dom.wisc.edu:/home/panda_admin/upload_adrc/"
+        v_call = "rsync -av "+v_parent_dir_target+" panda_admin@merida.dom.wisc.edu:/home/panda_admin/upload_adrc/"
         stdin, stdout, stderr = Open3.popen3(v_call)
         while !stdout.eof?
           puts stdout.read 1024    
@@ -389,7 +389,7 @@ puts "AAAAAA "+v_call
         #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
         #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
         v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
-        v_call =  'ssh panda_admin@scooby.dom.wisc.edu "  tar  -C /home/panda_admin/upload_adrc  -zcf /home/panda_admin/upload_adrc/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
+        v_call =  'ssh panda_admin@merida.dom.wisc.edu "  tar  -C /home/panda_admin/upload_adrc  -zcf /home/panda_admin/upload_adrc/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
         stdin, stdout, stderr = Open3.popen3(v_call)
         while !stdout.eof?
           puts stdout.read 1024    
@@ -408,7 +408,7 @@ puts "AAAAAA "+v_call
            stdout.close
            stderr.close
         # 
-        v_call = 'ssh panda_admin@scooby.dom.wisc.edu " rm -rf /home/panda_admin/upload_adrc/'+v_subject_dir+' "'
+        v_call = 'ssh panda_admin@merida.dom.wisc.edu " rm -rf /home/panda_admin/upload_adrc/'+v_subject_dir+' "'
         stdin, stdout, stderr = Open3.popen3(v_call)
         while !stdout.eof?
           puts stdout.read 1024    
@@ -418,8 +418,8 @@ puts "AAAAAA "+v_call
         stderr.close
        
         
-         # did the tar.gz on scooby to avoid mac acl PaxHeader extra directories
-         v_call = "rsync -av panda_admin@scooby.dom.wisc.edu:/home/panda_admin/upload_adrc/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
+         # did the tar.gz on merida to avoid mac acl PaxHeader extra directories
+         v_call = "rsync -av panda_admin@merida.dom.wisc.edu:/home/panda_admin/upload_adrc/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
          stdin, stdout, stderr = Open3.popen3(v_call)
          while !stdout.eof?
            puts stdout.read 1024    

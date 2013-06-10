@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupPettracersController < ApplicationController
   # GET /lookup_pettracers
   # GET /lookup_pettracers.xml

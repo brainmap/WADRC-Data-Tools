@@ -1,3 +1,4 @@
+# encoding: utf-8
 class VitalsController < ApplicationController
   # GET /vitals
   # GET /vitals.xml

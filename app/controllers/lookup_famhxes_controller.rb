@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupFamhxesController < ApplicationController
   # GET /lookup_famhxes
   # GET /lookup_famhxes.xml

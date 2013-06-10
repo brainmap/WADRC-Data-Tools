@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'radiology_comment'
 class LoadComments < ActiveRecord::Base
   # This script will load the radiology_comments rad_path, the comment html, the comment_text, and set the q1_flag

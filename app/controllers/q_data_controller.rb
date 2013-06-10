@@ -1,3 +1,4 @@
+# encoding: utf-8
 class QDataController < ApplicationController
   # GET /q_data
   # GET /q_data.xml

@@ -1,3 +1,4 @@
+# encoding: utf-8
 class SchedulerunsController < ApplicationController
   # GET /scheduleruns
   # GET /scheduleruns.xml

@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LookupImagingplanesController < ApplicationController
   # GET /lookup_imagingplanes
   # GET /lookup_imagingplanes.xml

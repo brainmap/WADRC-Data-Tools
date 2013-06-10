@@ -1,3 +1,4 @@
+# encoding: utf-8
 class NeuropsychAssessmentsController < ApplicationController
   # GET /neuropsych_assessments
   # GET /neuropsych_assessments.xml
