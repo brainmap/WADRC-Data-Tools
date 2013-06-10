@@ -127,7 +127,7 @@ class ImageDataset < ActiveRecord::Base
     png_path = RawImageDatasetThumbnail.new(ds).create_thumbnail
     tf = File.open(png_path)
     self.thumbnail = tf
-    raise StandardError, "Could not create thumbnail for #{File.join(path, scanned_file)}" unless File.exists?(png_path)
+    raise (StandardError, "Could not create thumbnail for #{File.join(path, scanned_file)}") unless File.exists?(png_path)
     return png_path
   end
   
