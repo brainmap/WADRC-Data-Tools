@@ -359,9 +359,9 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
     return false unless rmr_digits.length > 4
     begin
       date = case rmr_digits
-      when /^(\d{1,2})(\d{1,2})(\d{2})$/
+      when /^(\d{1,2})(\d{1,2})(\d{2})$/  then
         Date.civil($3.to_i + 2000, $1.to_i, $2.to_i)
-      when /^(\d{1,2})(\d{1,2})(\d{4})$/
+      when /^(\d{1,2})(\d{1,2})(\d{4})$/  then
         Date.civil($3.to_i, $1.to_i, $2.to_i)
       else
         Date.parse(rmr_digits)
@@ -384,11 +384,11 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
   
   def rmr_number_enum
     case rmr_digits.first.to_i
-    when 1
+    when 1 then
       return 'tbi'
-    when 2
+    when 2   then
       return 'alz'
-    when 4
+    when 4   then
       return 'pc'
     else
       return nil
