@@ -1,11 +1,11 @@
 module VisitsHelper
   def show_bool(field)
     html = case field
-    when "yes"
+    when "yes" then
       "<td style='background-color: #bbffbb; min-width: 1.5em; max-width: 3em;'>yes</td>"
-    when "no"
+    when "no" then 
       "<td style='background-color: #cccccc; min-width: 1.5em; max-width: 3em;'>no</td>"
-    when "n/a"
+    when "n/a" then
       "<td style='background-color: #ffbbbb; min-width: 1.5em; max-width: 3em;'>n/a</td>"
     else 
       "<td>#{field}</td>"
@@ -15,11 +15,11 @@ module VisitsHelper
   
   def show_bool_cell_color(field)
     html = case field
-    when "yes"
+    when "yes" then
       " style='background-color: #bbffbb; ' "
-    when "no"
+    when "no"  then
       " style='background-color: #cccccc;' "
-    when "n/a"
+    when "n/a" then 
       "  style='background-color: #ffbbbb;' "
     else 
       " "
@@ -31,11 +31,11 @@ end
 
 def show_rad_review(field)
   html = case field
-  when "n/a"
+  when "n/a" then
     "<td style='background-color: #ffbbbb; min-width: 1.5em; max-width: 3em;'>n/a</td>"
-  when "no"
+  when "no" then
     "<td style='background-color: #cccccc; min-width: 1.5em; max-width: 3em;'>no</td>"
-  when "yes"
+  when "yes" then
     "<td style='background-color: #bbffbb; min-width: 1.5em; max-width: 3em;'>yes</td>"
   else
     "<td style='background-color: #eee; min-width: 1.5em; max-width: 3em;'>#{field}</td>"
@@ -45,7 +45,7 @@ end
 
 def show_which_dicom(field)
   html = case field
-  when :blank?
+  when :blank? then
     "<td style='background-color: #eee; min-width: 1.5em; max-width: 1.5em;'>n/a</td>"
   else
     "<td style='background-color: #eee; min-width: 1.5em; max-width: 1.5em;'>#{field}</td>"
