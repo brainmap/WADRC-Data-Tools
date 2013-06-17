@@ -169,6 +169,7 @@ WADRCDataTools::Application.routes.draw do
   match '/cg_search' , :controller => 'data_searches', :action => 'cg_search', :as =>:cg_search
   match '/cg_tables' , :controller => 'data_searches', :action => 'cg_tables', :as =>:cg_tables
   match '/cg_edit_table/:id' , :controller => 'data_searches', :action => 'cg_edit_table', :as =>:cg_edit_table
+    match '/cg_table_create_db' , :controller => 'data_searches', :action => 'cg_create_table_db', :as =>:cg_create_table_db
   match '/schedulerun_search' , :controller => 'scheduleruns', :action => 'schedulerun_search', :as =>:schedulerun_search
   
   match '/run_schedule/:id' ,:controller =>'schedules', :action => 'run_schedule', :as => :run_schedule

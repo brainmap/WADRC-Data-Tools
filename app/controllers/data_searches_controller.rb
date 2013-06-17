@@ -1444,6 +1444,13 @@ class DataSearchesController < ApplicationController
  #def run_search
 #   copy of def index in application_controller  -- so other controllers can get at  -- need for csv export
 # end
-    
+
+ def cg_create_table_db
+     render :template => "data_searches/cg_table_create_db"
+ end  
+ 
+ def cg_edit_table_db
+     render :template => "data_searches/cg_table_edit_db"
+ end 
     
 end
