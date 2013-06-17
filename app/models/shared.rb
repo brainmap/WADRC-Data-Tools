@@ -307,6 +307,9 @@ class Shared  < ActionController::Base
 
              # v_call = "/usr/bin/bunzip2 "+v_parent_dir_target+"/"+v_dir_target+"/*.bz2"
               v_call = "mise "+v_path+" "+v_parent_dir_target+"/"+v_dir_target   # works where bunzip2 cmd after rsync not work
+#puts "v_path = "+v_path
+#puts "v_parent_dir_target = "+ v_parent_dir_target
+#puts "v_dir_target="+v_dir_target
 puts "AAAAAA "+v_call
              stdin, stdout, stderr = Open3.popen3(v_call)
               stderr.each {|line|
