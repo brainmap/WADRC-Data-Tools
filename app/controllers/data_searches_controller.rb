@@ -1446,7 +1446,46 @@ class DataSearchesController < ApplicationController
 # end
 
  def cg_create_table_db
-     render :template => "data_searches/cg_table_create_db"
+     if !params[:key_type].blank? and !params[:table_name_base].blank?
+       v_table_name = "cg_"+params[:table_name_base].downcase
+       v_table_name = v_table_name.gsub(' ','_').gsub('"','_').gsub("'","_").gsub("/","_").gsub(".","_").gsub("\\","_")
+       # check for cg_ tn in database
+       v_schema ='panda_production'
+       if RAILS_ENV=="development" 
+         v_schema ='panda_development'
+       end
+       sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '"+v_schema+"' AND table_name = '"+v_table_name+"'"
+       connection = ActiveRecord::Base.connection();        
+       results = connection.execute(sql)
+       v_cnt = results.first
+       if v_cnt[0] > 0
+         flash[:notice] = 'Error: Table '+v_table_name+' already exists in the database.'
+         render :template => "data_searches/cg_table_create_db"
+       else
+         v_key_col_sql = "enrollment_id integer, scan_procedure_id integer"
+         v_key_col_edit_sql = "enrollment_id varchar(50) DEFAULT '|', scan_procedure_id varchar(50) DEFAULT '|'"
+         if params[:key_type] == "participant_id"
+             v_key_col_sql = "participant_id integer"
+             v_key_col_edit_sql = "participant_id varchar(50) DEFAULT '|'"
+         elsif  params[:key_type] == "enrollment/sp"
+              v_key_col_sql = "enrollment_id integer, scan_procedure_id integer"
+              v_key_col_edit_sql = "enrollment_id varchar(50) DEFAULT '|', scan_procedure_id varchar(50) DEFAULT '|'"
+         end
+         sql ="create table "+v_table_name+" (subjectid varchar(50), general_comment varchar(2000),done_flag varchar(1),status_flag varchar(1),status_comment varchar(500),"+v_key_col_sql+")"
+         results = connection.execute(sql)
+         sql ="create table "+v_table_name+"_old (subjectid varchar(50), general_comment varchar(2000),done_flag varchar(1),status_flag varchar(1),status_comment varchar(500),"+v_key_col_sql+")"
+         results = connection.execute(sql)
+         sql ="create table "+v_table_name+"_new (subjectid varchar(50), general_comment varchar(2000),done_flag varchar(1),status_flag varchar(1),status_comment varchar(500),"+v_key_col_sql+")"
+         results = connection.execute(sql)
+         sql ="create table "+v_table_name+"_edit (subjectid varchar(50), general_comment varchar(2000) DEFAULT '|',done_flag varchar(1) DEFAULT '|',status_flag varchar(1) DEFAULT '|',status_comment varchar(500) DEFAULT '|',"+v_key_col_edit_sql+",delete_key_flag varchar(1) DEFAULT 'N')"
+         results = connection.execute(sql)
+         flash[:notice] = 'Table '+v_table_name+' was successfully created in the database.'
+         render :template => "data_searches/cg_table_edit_db"
+      
+       end
+     else 
+      render :template => "data_searches/cg_table_create_db"
+     end
  end  
  
  def cg_edit_table_db

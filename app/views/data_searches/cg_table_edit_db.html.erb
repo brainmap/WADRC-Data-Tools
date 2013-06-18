@@ -1,6 +1,7 @@
 <% @current_tab = "searches" 
 
 %>
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
 add columns to existing cg_table
 
 drop down pick table
@@ -37,4 +38,6 @@ edit_table ---- >
       tn     [add col]
         cn-> link 
         cn --> link
+
+<%end%>
       

@@ -2,19 +2,15 @@
 
 v_key_type = [["enumber and visit# mapped to enrollment/scan_procedure","enrollment/sp"],["participant_id","participant_id"]]
 %>
-
-Create a cg_table
-<br>
-table_name  -- check if tn exisits -- js?<br>
-cg_[  NAME ]<br> 
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
                        
 <br>
 <%= form_tag  '/cg_table_create_db'  do %>
-    <b>Make a cg_table in the database</b><br>
+    <H2>Make a cg_table in the database</H2><br>
 	 <table width="100%"><tr><td align="left">
 		<div class="field">
 	    <B>Table Name:</B> a short table name is best &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		    <%= text_field_tag "table_name" %>
+		    <%= text_field_tag "table_name_base" %>
 	  </div>
 		</td></tr>
         <tr><td  align="left">
@@ -30,12 +26,17 @@ cg_[  NAME ]<br>
 		<br>
 This will make a cg_[ NAME ] table, with associated cg_[ NAME ]_new, cg_[ NAME ]_old and cg_[ NAME ]_edit	<br>
 with the following columns- <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- [ NAME]_general_comment <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- general_comment <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- done_flag <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- status_flag <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- status_comment <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if key type is enrollment/scan procedure ( most common )-<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ NAME ]_subjectid - the enumber for visit1 is just the enumber, for other visit#'s enumber_v# <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enrollment_id -- mapped programmatically from [ NAME ]_subjectid <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scan_procedure_id -- mapped programmatically from [ NAME ]_subjectid <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;subjectid - the enumber for visit1 is just the enumber, for other visit#'s enumber_v# <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enrollment_id -- mapped programmatically from subjectid <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scan_procedure_id -- mapped programmatically from subjectid <br>
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if key type is participant - <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;participant_id --- mapped programmatically from a second field such as reggieid
 <% end %>
+
+<%end%>
