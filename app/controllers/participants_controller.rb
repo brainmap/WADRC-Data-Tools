@@ -41,6 +41,8 @@ class ParticipantsController < ApplicationController
      @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
            where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
 
+     @vgroups = Vgroup.where("participant_id in ( select participant_id from enrollments where participant_id = ? and enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
+                  where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?))) ", params[:id],scan_procedure_array)
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @participant }
