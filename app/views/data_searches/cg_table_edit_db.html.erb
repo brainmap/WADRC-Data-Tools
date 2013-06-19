@@ -1,43 +1,78 @@
 <% @current_tab = "searches" 
 
 %>
-<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
-add columns to existing cg_table
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'
 
-drop down pick table
-pre-pick table if cycling 
+	%>
 
+<table width="80%"  ><tr><td align="right">
+	<%= form_for :cg_table_name ,:url=>'/cg_table_edit_db' do |f2| %>
+	<%= f2.label 'Pick CG_Table'%><br>
+	<select onChange="if(this.selectedIndex!=0) self.location=this.options[this.selectedIndex].value">
+		<option value="">select cg table to add columns or edit columns</option>
+		<% @results_cg_tn.each do |s| %>
+	<option value="/cg_table_edit_db?cg_table_name=<%=s[0] %>" <% if s[0] == @v_cg_table_name %> selected<%end%>><%= s[0] %></option>
+	   <% end %>
+	</select>
+	<% end %>
+	</td></tr></table>
+<% if @v_cg_table_name > "" %>
+<table width="70%" class="tabular" >
+	<tr><td align="left" colspan=6><B>Table Name: <%=@v_cg_table_name%></B><td><tr>
+		<tr><td align="left" colspan=2><small><b>Existing columns</b></small></td>
+			        <td align="left" ><small><b>Datatype</b></small></td>
+			        <td align="left" ><small><b>Size</b></small></td><td align="left" colspan=2 >&nbsp;<td><tr>
+	<% @results_cg_tn_cn.each do |cn| %>
+	    <tr><td>&nbsp;</td><td align="left" ><%= cn[0]%></td><td align="left" ><%= cn[1]%></td><td align="left" ><%= cn[2]%></td>
+		<td><small><%= link_to 'edit', '/cg_table_edit_db?cg_action=edit&cg_table_name='+@v_cg_table_name+'&cg_tn_column_name='+cn[0] %></small></td>
+		<td><small><%= link_to 'delete', '/cg_table_edit_db?cg_action=delete&cg_table_name='+@v_cg_table_name+'&cg_tn_column_name='+cn[0] %></small></td></tr>
+    <% end%>
+	
+</table>
 
-add columns 
-group of 10 rows
-   checkbox first cell --- check on_change 
-   -- check if cn exists
+<%end%>
+<br><br>
 
-
-edit columns 
-  change size
-  change datatype -- test
-  delete columns  -- warning about populated rows in table
-
-
-columns name
-datatypes
-editab;e
-_flag
-
-
-display exisisting columns above
-
-
-
-
-
-
-add-table
-edit_table ---- > 
-      tn     [add col]
-        cn-> link 
-        cn --> link
+<% if @v_cg_action == "edit"
+	 v_datasize = @v_cg_tn_column_datasize # problem using @v_cg_tn_column_datasize in select, no problem with datatype?
+	 if v_datasize <"1" 
+		v_datasize= "10"
+	  end%>
+     <%= form_for 'cg_table_edit_db' do |f| %> 
+        <%= hidden_field_tag 'cg_table_name',  @v_cg_table_name%>
+        <%= hidden_field_tag 'cg_tn_column_name',  @v_cg_tn_column_name%>
+        <%= hidden_field_tag 'cg_action',  'alter'%>
+        <table><tr><th>&nbsp;</th><th align="left"> Column Name</th><th>Datatype</th><th>Size</th><th></tr>
+			 <tr><td><%= submit_tag("alter column")%></td>
+	              <td> <%=  @v_cg_tn_column_name %></td>
+	              <td><%=  select  :cg_table_edit, 'datatype][0', options_for_select(@v_data_types,@v_cg_tn_column_datatype)	 %></td>
+	                 <td><%=  select  :cg_table_edit, 'datasize][0', options_for_select(@v_data_sizes,v_datasize)	 %></td><td></tr>
+	
+	    </table>
+   <%end%>
+<% else %>
+    <%= form_for 'cg_table_edit' do |f| %> 
+            <%= hidden_field_tag 'cg_table_name',  @v_cg_table_name%>
+            <%= hidden_field_tag 'cg_action',  'add'%>
+        <table><tr><th>add?</th><th align="left"><%= submit_tag("save columns")%> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Column Name</th><th>Datatype</th><th>Size</th><th></tr>
+        <%v_row_cnt = 10
+          v_cnt = 0
+          while v_cnt < v_row_cnt   %>
+               <%= hidden_field 'cg_table_edit','key][' ,  :value=>v_cnt %>
+              <tr><td><%= f.check_box 'add_column]['+v_cnt.to_s %></td>
+	              <td> <%= f.text_field 'add_column_name]['+v_cnt.to_s ,:size=>50 %></td>
+	              <td><%=  select  :cg_table_edit, 'datatype]['+v_cnt.to_s, options_for_select(@v_data_types,'varchar')	 %></td>
+	                 <td><%=  select  :cg_table_edit, 'datasize]['+v_cnt.to_s, options_for_select(@v_data_sizes,'50')	 %></td><td></tr>
+ 
+             <% v_cnt = v_cnt + 1
+           end %>
+        </table>
+      <%end%>    
+ <%end %>	
+	
+	
+<br><br>
+	
 
 <%end%>
       

@@ -1448,7 +1448,7 @@ class DataSearchesController < ApplicationController
  def cg_create_table_db
      if !params[:key_type].blank? and !params[:table_name_base].blank?
        v_table_name = "cg_"+params[:table_name_base].downcase
-       v_table_name = v_table_name.gsub(' ','_').gsub('"','_').gsub("'","_").gsub("/","_").gsub(".","_").gsub("\\","_")
+       v_table_name = v_table_name.gsub(' ','_').gsub('"','_').gsub("'","_").gsub("/","_").gsub(".","_").gsub("\\","_").gsub(";","").gsub(":","")
        # check for cg_ tn in database
        v_schema ='panda_production'
        if RAILS_ENV=="development" 
@@ -1458,7 +1458,7 @@ class DataSearchesController < ApplicationController
        connection = ActiveRecord::Base.connection();        
        results = connection.execute(sql)
        v_cnt = results.first
-       if v_cnt[0] > 0
+       if v_cnt[0].to_i > 0
          flash[:notice] = 'Error: Table '+v_table_name+' already exists in the database.'
          render :template => "data_searches/cg_table_create_db"
        else
@@ -1480,7 +1480,10 @@ class DataSearchesController < ApplicationController
          sql ="create table "+v_table_name+"_edit (subjectid varchar(50), general_comment varchar(2000) DEFAULT '|',done_flag varchar(1) DEFAULT '|',status_flag varchar(1) DEFAULT '|',status_comment varchar(500) DEFAULT '|',"+v_key_col_edit_sql+",delete_key_flag varchar(1) DEFAULT 'N')"
          results = connection.execute(sql)
          flash[:notice] = 'Table '+v_table_name+' was successfully created in the database.'
-         render :template => "data_searches/cg_table_edit_db"
+         respond_to do |format|
+            format.html { redirect_to( '/cg_table_edit_db?cg_table_name='+v_table_name, :notice => 'Table '+v_table_name+' was successfully created in the database.' )}
+  
+          end
       
        end
      else 
@@ -1489,6 +1492,121 @@ class DataSearchesController < ApplicationController
  end  
  
  def cg_edit_table_db
+     v_schema ='panda_production'
+     if RAILS_ENV=="development" 
+       v_schema ='panda_development'
+     end
+     sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = '"+v_schema+"' 
+     AND table_name LIKE 'cg_%' and table_name NOT LIKE '%_new'  and table_name NOT LIKE '%_old'  and table_name NOT LIKE '%_edit' 
+     order by table_name"
+     connection = ActiveRecord::Base.connection();        
+     @results_cg_tn = connection.execute(sql)
+     @v_cg_table_name = ""
+     @results_cg_tn_cn = []
+    if !params[:cg_action].blank?
+      v_tn = params[:cg_table_name]
+      
+      if params[:cg_action] == "alter"
+          # ??? ALTER TABLE <tablename> CHANGE COLUMN <colname> <colname> VARCHAR(65536);
+          # keep _edit varchar(50) DEFAULT '|'" 
+          v_cn = params[:cg_tn_column_name]
+          if params[:cg_table_edit][:datatype]["0"] == "varchar"
+              sql = "alter table "+v_tn+" modify "+v_cn+" VARCHAR("+params[:cg_table_edit][:datasize]["0"]+") "
+              results = connection.execute(sql)
+              sql = "alter table "+v_tn+"_old modify "+v_cn+" VARCHAR("+params[:cg_table_edit][:datasize]["0"]+") "
+              results = connection.execute(sql)
+              sql = "alter table "+v_tn+"_new modify "+v_cn+" VARCHAR("+params[:cg_table_edit][:datasize]["0"]+") "
+              results = connection.execute(sql)
+          elsif params[:cg_table_edit][:datatype]["0"] == "int"
+              sql = "alter table "+v_tn+" modify "+v_cn+" int "
+              results = connection.execute(sql)
+              sql = "alter table "+v_tn+"_old modify "+v_cn+" int "
+              results = connection.execute(sql)
+              sql = "alter table "+v_tn+"_new modify "+v_cn+" int "
+              results = connection.execute(sql)
+          elsif params[:cg_table_edit][:datatype]["0"] == "float"
+            sql = "alter table "+v_tn+" modify "+v_cn+" float "
+            results = connection.execute(sql)
+            sql = "alter table "+v_tn+"_old modify "+v_cn+" float "
+            results = connection.execute(sql)
+            sql = "alter table "+v_tn+"_new modify "+v_cn+" float "
+            results = connection.execute(sql)
+          end
+      elsif params[:cg_action] == "delete"
+         v_cn = params[:cg_tn_column_name]
+         sql = "alter table "+v_tn+" drop column "+v_cn
+         results = connection.execute(sql) 
+         sql = "alter table "+v_tn+"_old drop column "+v_cn
+         results = connection.execute(sql)
+         sql = "alter table "+v_tn+"_new drop column "+v_cn
+         results = connection.execute(sql)
+         sql = "alter table "+v_tn+"_edit drop column "+v_cn
+         results = connection.execute(sql)        
+      elsif params[:cg_action] == "add"
+          # loop thru key, check for check box  
+          params[:cg_table_edit][:key].each do |v|
+            if !params[:cg_table_edit][:add_column_name].blank? and !params[:cg_table_edit][:add_column_name][v].blank? and params[:cg_table_edit][:add_column][v] == "1"
+              v_add_column_name = params[:cg_table_edit][:add_column_name][v]
+              v_add_column_name = v_add_column_name.gsub(' ','_').gsub('"','_').gsub("'","_").gsub("/","_").gsub(".","_").gsub("\\","_").gsub(";","").gsub(":","")
+              if params[:cg_table_edit][:datatype][v] == "varchar"
+                  sql = "alter table "+v_tn+" add "+v_add_column_name+" VARCHAR("+params[:cg_table_edit][:datasize][v]+") "
+                  results = connection.execute(sql)
+                  sql = "alter table "+v_tn+"_old add "+v_add_column_name+" VARCHAR("+params[:cg_table_edit][:datasize][v]+") "
+                  results = connection.execute(sql)
+                  sql = "alter table "+v_tn+"_new add "+v_add_column_name+" VARCHAR("+params[:cg_table_edit][:datasize][v]+") "
+                  results = connection.execute(sql)
+                  sql = "alter table "+v_tn+"_edit add "+v_add_column_name+" VARCHAR("+params[:cg_table_edit][:datasize][v]+")  DEFAULT '|' "
+                  results = connection.execute(sql)
+              elsif params[:cg_table_edit][:datatype][v] == "int"
+                  sql = "alter table "+v_tn+" add "+v_add_column_name+" int "
+                  results = connection.execute(sql)
+                  sql = "alter table "+v_tn+"_old add "+v_add_column_name+" int "
+                  results = connection.execute(sql)
+                  sql = "alter table "+v_tn+"_new add "+v_add_column_name+" int "
+                  results = connection.execute(sql)
+                  sql = "alter table "+v_tn+"_edit add "+v_add_column_name+"  varchar(50) DEFAULT '|' "
+                  results = connection.execute(sql)
+              elsif params[:cg_table_edit][:datatype][v] == "float"
+                sql = "alter table "+v_tn+" add "+v_add_column_name+" float "
+                results = connection.execute(sql)
+                sql = "alter table "+v_tn+"_old add "+v_add_column_name+" float "
+                results = connection.execute(sql)
+                sql = "alter table "+v_tn+"_new add "+v_add_column_name+" float "
+                results = connection.execute(sql)
+                sql = "alter table "+v_tn+"_edit add "+v_add_column_name+"  varchar(50) DEFAULT '|'"
+                results = connection.execute(sql)
+              end
+            end 
+          end        
+      end
+      
+    end
+     
+   	if !params[:cg_table_name].blank?
+   		@v_cg_table_name = params[:cg_table_name]
+   		sql = "SELECT `COLUMN_NAME`,`DATA_TYPE`, `CHARACTER_MAXIMUM_LENGTH` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA`='"+v_schema+"' AND `TABLE_NAME`='"+@v_cg_table_name +"'"
+   		@results_cg_tn_cn = connection.execute(sql)
+   	end
+   	@v_cg_tn_column_name =""
+   	@v_cg_tn_column_datatype=""
+   	@v_cg_tn_column_datasize=""
+   	if !params[:cg_tn_column_name].blank?
+   	  @v_cg_tn_column_name  = params[:cg_tn_column_name]
+   	  @results_cg_tn_cn.each do |c|
+   	    if c[0] == @v_cg_tn_column_name
+   	      @v_cg_tn_column_datatype=c[1]
+         	@v_cg_tn_column_datasize=c[2].to_s
+   	    end
+   	  end
+   	end
+   	@v_cg_action =""
+   	if !params[:cg_action].blank?
+   	  @v_cg_action  = params[:cg_action]
+   	end
+    @v_data_types=[["varchar","varchar"],["int","int"],["float","float"]]
+    @v_data_sizes=[["1","1"],["10","10"],["50","50"],["100","100"],["500","500"],["2000","2000"]] 	
+
+     
      render :template => "data_searches/cg_table_edit_db"
  end 
     
