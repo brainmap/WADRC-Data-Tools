@@ -131,6 +131,7 @@ class BlooddrawsController < ApplicationController
 
      if params[:lh_search].nil?
           params[:lh_search] =Hash.new  
+          # params[:lh_search][:lh_status] = "yes"
      end
 
      scan_procedure_array = []
@@ -175,6 +176,13 @@ class BlooddrawsController < ApplicationController
                     where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:lh_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
                     @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:lh_search][:rmr]
+      end
+      
+      if !params[:lh_search][:lh_status].blank? 
+          condition =" blooddraws.appointment_id in (select appointments.id from appointments,vgroups
+                              where appointments.vgroup_id = vgroups.id and  lower(vgroups.completedblooddraw) in (lower('"+params[:lh_search][:lh_status].gsub(/[;:'"()=<>]/, '')+"')   ))"
+          @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +",  LH status "+params[:lh_search][:lh_status]
       end
 
        #  build expected date format --- between, >, < 

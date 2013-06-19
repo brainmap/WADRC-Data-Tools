@@ -130,7 +130,8 @@ class NeuropsychesController < ApplicationController
         @q_form_id = 13   # use in data_search_q_data
 
        if params[:np_search].nil?
-            params[:np_search] =Hash.new  
+            params[:np_search] =Hash.new 
+            # params[:np_search][:np_status] = "yes" 
        end
 
        scan_procedure_array = []
@@ -174,6 +175,13 @@ class NeuropsychesController < ApplicationController
                       where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:np_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
                       @conditions.push(condition)
             params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:np_search][:rmr]
+        end
+
+        if !params[:np_search][:np_status].blank? 
+            condition =" neuropsyches.appointment_id in (select appointments.id from appointments,vgroups
+                                where appointments.vgroup_id = vgroups.id and  lower(vgroups.completedneuropsych) in (lower('"+params[:np_search][:np_status].gsub(/[;:'"()=<>]/, '')+"')   ))"
+            @conditions.push(condition)
+            params["search_criteria"] = params["search_criteria"] +",  NP status "+params[:np_search][:np_status]
         end
 
          #  build expected date format --- between, >, < 

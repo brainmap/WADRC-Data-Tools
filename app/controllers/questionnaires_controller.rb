@@ -131,7 +131,8 @@ class QuestionnairesController < ApplicationController
        @q_form_id = 14   # use in data_search_q_data
 
        if params[:q_search].nil?
-            params[:q_search] =Hash.new  
+            params[:q_search] =Hash.new 
+           #  params[:q_search][:q_status] = "yes" 
        end
 
        scan_procedure_array = []
@@ -175,6 +176,13 @@ class QuestionnairesController < ApplicationController
                       where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:q_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
                       @conditions.push(condition)
             params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:q_search][:rmr]
+        end
+        
+        if !params[:q_search][:q_status].blank? 
+            condition =" questionnaires.appointment_id in (select appointments.id from appointments,vgroups
+                                where appointments.vgroup_id = vgroups.id and  lower(vgroups.completedquestionnaire) in (lower('"+params[:q_search][:q_status].gsub(/[;:'"()=<>]/, '')+"')   ))"
+            @conditions.push(condition)
+            params["search_criteria"] = params["search_criteria"] +",  Q status "+params[:q_search][:q_status]
         end
 
          #  build expected date format --- between, >, < 
