@@ -64,7 +64,15 @@ edit_count = edit_count -1
 </p>
 
 <h3>Visits</h3>
-<%= content_tag(:p, "No visits associated with this participant") if @participant.visits.blank? %>
+<%= content_tag(:p, "No visits for this particpant") if @vgroups.blank? %>
+<ul>
+  <% @vgroups.each do |vgroup| %>
+    <li><%= link_to vgroup.vgroup_date, vgroup %> in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
+  <% end %>
+</ul>
+
+<h3>MRI appointments</h3>
+<%= content_tag(:p, "No MRI appointments associated with this participant") if @participant.visits.blank? %>
 <% # this can return the same visit multiple times if there are multiple enrollments %>
 <% @participant.visits.each do |v| %>
 	<p>

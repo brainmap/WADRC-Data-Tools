@@ -1546,8 +1546,15 @@ class DataSearchesController < ApplicationController
           # loop thru key, check for check box  
           params[:cg_table_edit][:key].each do |v|
             if !params[:cg_table_edit][:add_column_name].blank? and !params[:cg_table_edit][:add_column_name][v].blank? and params[:cg_table_edit][:add_column][v] == "1"
-              v_add_column_name = params[:cg_table_edit][:add_column_name][v]
-              v_add_column_name = v_add_column_name.gsub(' ','_').gsub('"','_').gsub("'","_").gsub("/","_").gsub(".","_").gsub("\\","_").gsub(";","").gsub(":","")
+             v_add_column_name = params[:cg_table_edit][:add_column_name][v].downcase
+             v_add_column_name = v_add_column_name.gsub(' ','_').gsub('"','_').gsub("'","_").gsub("/","_").gsub(".","_").gsub("\\","_").gsub(";","").gsub(":","")
+             sql = "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = '"+v_schema+"' AND table_name = '"+v_tn+"' and column_name='"+v_add_column_name+"'"
+             connection = ActiveRecord::Base.connection();        
+             results = connection.execute(sql)
+             v_cnt = results.first
+             if v_cnt[0].to_i > 0
+                 flash[:notice] = 'Error: Column '+v_add_column_name+' in Table '+v_tn+' already exists in the database.'              
+             else
               if params[:cg_table_edit][:datatype][v] == "varchar"
                   sql = "alter table "+v_tn+" add "+v_add_column_name+" VARCHAR("+params[:cg_table_edit][:datasize][v]+") "
                   results = connection.execute(sql)
@@ -1576,6 +1583,7 @@ class DataSearchesController < ApplicationController
                 sql = "alter table "+v_tn+"_edit add "+v_add_column_name+"  varchar(50) DEFAULT '|'"
                 results = connection.execute(sql)
               end
+             end
             end 
           end        
       end
