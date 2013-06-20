@@ -39,16 +39,42 @@
   <b>Target column:</b>
   <%= @schedule.target_column %>
 </p>
+<p><b>File Upload Fields</b><br>
+  <b>File Upload Flag:</b><%= @schedule.file_upload_flag %><br>
+  <b>File Header:</b><%= @schedule.file_header %><br>
+  <b>File Columns Included:</b><%= @schedule.file_columns_included%><br>
+  <b>File Key Source Columns:</b><%= @schedule.file_key_source_column %><br>
+  <b>File Path:</b><%= @schedule.file_path %><br>
+  <b>Key Type:</b><%= @schedule.key_type %><br>
+  <b>Target_Table_columns/order:</b><%= @schedule.target_table_columns %><br>
+
+</p>
+
+
 <p>
 	<b>Owners:</b>
 	<%= @schedule.users.sort_by(&:username_name).collect {|u|  u.username_name}.join(", ").html_safe %>
 </p>
 <% if @schedule.users.include?( current_user) or (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low')
-	  if !@schedule.shared_function_name.blank? %>
+	  if (!@schedule.shared_function_name.blank? and ( @schedule.file_upload_flag.blank?  or @schedule.file_upload_flag !='Y'   )) or
+		  (!@schedule.shared_function_name.blank? and @schedule.file_upload_flag =='Y' and !@schedule.file_path.blank?)   %>
 <p>
 	<b>Execute:</b> <%= link_to 'run_schedule', run_schedule_path %>
-</p>		
+</p>	
+	
 <%    end
+      if  @schedule.file_upload_flag == 'Y' %>
+<% form_tag('/shared_file_upload', :method=>'post', :multipart => true) do %>
+       <table>
+	</td><td valign="top"><b>Browse for file to upload:</b> <%= file_field_tag "file_name" , :accept => 'text/csv' %> 
+		</td></tr></table>
+		<%= hidden_field_tag 'schedule_id',  @schedule.id.to_s%>
+	  <div class="actions">
+	    <%= submit_tag('upload file') %>
+	  </div><br>
+
+        <%end%>	
+ <%	  end
    end %>
 <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
     <%= link_to 'Edit', edit_schedule_path(@schedule) %> |
