@@ -1,36 +1,61 @@
 <% if current_user.role == 'Admin_High'%>
+<table><tr><td colspan=3>
+<%= link_to('Add user', '/users/add_user') %>  <br>
+Enter the new users ldap login, Fisrt Name, Last Name, and Email. <br>
+Add protocol roles - default is "edit lower level fields" for all protocols which are needed.	<br><br>
 	
+</td></tr>	
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td colspan=2>
+	<%= link_to('Update user PROTOCOL specific role', protocol_roles_path) %><br>
+	Search by the user or protocol. <br>
+	This role is applied only to individual protocol.<br>
+	A user can have multiple roles for a specific protocol. These roles are applied 
+	in a cumulative manner. The edit role also allows viewing.
+</td></tr>
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td colspan=2>
+	<%= link_to('Edit and delete user', '/users/edit_user') %>  <br>
+	It is better to remove all the protocol roles from a user instead of deleting the user,<br>
+	so objects created by the user are identifiable. If a user leave UW Health, they will not be able to login<br>
+	since they will not be in the DOM Ldap server.<br><br>
+</td></tr>
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>	
+
 <%= link_to('Update user GLOBAL role', update_role_path) %><br>
-The users are ordered by "PRESENT ROLE"- Name . <br>
-This role is applied to all protocols, and allows access to all protocols<br>
 Most users have a blank/null global role.<br>
-The question forms need Admin High or Admin Low global role.<br>	
-Still need to add edit form for users other fields.<br><br>
-
-<%= link_to('Update user PROTOCOL specific role', protocol_roles_path) %><br>
-Search by the user or protocol. <br>
-This role is applied only to individual protocol.<br>
-A user can have multiple roles for a specific protocol. These roles are applied 
-in a cumulative manner. The edit role also allows viewing.<br><br>
-
-
+This role is applied to all protocols, and allows access to all protocols<br>
+The question forms need Admin High or Admin Low global role.<br>
+The users are ordered by "PRESENT ROLE"- Name . <br>	
+<small>Still need to add edit form for users other fields.</small><br><br>
 
 <%= link_to('Add roles', '/roles') %> <br><br>
 
-
 <%= link_to('Add protocol', '/protocols') %>  <br><br>
 
-<%= link_to('Add user', '/users/add_user') %>  <br>
-Enter the new users ldap login, Fisrt Name, Last Name, and Email. <br>
-Add protocol roles - default is "edit lower level fields" for all protocols which are needed.<br><br>
+</td></tr>
 
-<%= link_to('Edit and delete user', '/users/edit_user') %>  <br>
-It is better to remove all the protocol roles from a user instead of deleting the user,<br>
-so objects created by the user are identifiable. If a user leave UW Health, they will not be able to login<br>
-since they will not be in the DOM Ldap server.
+<tr><td colspan=3>
+<%= link_to('Question Forms', '/users/questionformbase') %>   --- presently used by Lab Health, NeuroPsyche, and Questionaires<br>
+includes links to making questions, linking a question to a form and setting the display order, limiting a question to a scan procedure, and limiting a question form to a scan procedure.
+<br>
+<%= link_to('Combined Reference Table', '/lookup_refs') %> --- add reference lookups used by questions.
 <br><br>
+</td></tr>
+
+<tr><td colspan=3>
+<%= link_to('Column Group search/load - Scheduled jobs', '/users/cgbase') %> --- make a cg_table available in the Search tab, define cg_table_columns (join to vgroup,  column display order, show/hide column in search/export, whether the column is searchable). A cg_table needs to have first been created in the database (below).<br>
+-- Define scheduled jobs, which may populate a cg_table. The actually scheduling of a job is defined in the crontab, but the job outcome is logged in scheduleruns.
+<br><br>
+</td></tr>
+
+<tr><td colspan=3>
+	<%= link_to('Create Column Group table in database', '/data_searches/cg_create_table_db') %>  -- just make the cg_table in the database. Needed before can add a cg_table to a process or the search.
+	<br>
+	<%= link_to('Add columns to Column Group table in database', '/data_searches/cg_edit_table_db') %> -- added or changing columns of a cg_table in the database.
+	<br><br>
+</td></tr>
 
 
+<tr><td colspan=3>
  <%= link_to('Edit Radiology Comment links', '/radiology_comments?radiology_comment=""') %>  <br>
 The rad_path retrieves the radiology comments linked to a visit. Harvesting of the rad_path
 from the Radiology website is dependent on a RMR and scan_number. If the RMR or scan_number
@@ -46,21 +71,22 @@ To reload comments from visits in the last 1 month add<br>
 to the radiology_comments index url<br>
 <%= link_to("Add new Radiology Comment",'/radiology_comments/new')%>   -- if the RMR or scan number are different between the Panda and the Radiology site.
 <br><br>
-<%= link_to('Vgroup NII file counts', '/vgroups/nii_file_cnt') %> 
-<br>
-<%= link_to('Image Dataset file counts', '/visits/series_desc_cnt') %> 
-<br>
-<%= link_to('Question Forms', '/users/questionformbase') %> 
-<br>
-<%= link_to('Column Group search/load - Scheduled jobs', '/users/cgbase') %> 
-<br>
-<%= link_to('Create Column Group table in database', '/data_searches/cg_create_table_db') %> 
-<br>
-<%= link_to('Add columns to Column Group table in database', '/data_searches/cg_edit_table_db') %> 
+</td></tr>
+
+<tr><td ><%= link_to('Vgroup NII file counts', '/vgroups/nii_file_cnt') %>
+</td><td colspan=2> Process for counting the # of nii files for each vgroup/mri. Used to write file of nii count/scan procedure for validation of scan import process. This happens automatically as a scan is loaded, and generally never needs to be run anymore.	
+</td></tr>
+<tr><td ><%= link_to('Image Dataset file counts', '/visits/series_desc_cnt') %>
+</td><td colspan=2> Process for counting the # of *.dcm files for each vgroup/mri/image_dataset series descriptiom. Used to write file of *.dcm count/scan procedure for validation of scan import process. This happens automatically as a scan is loaded, and generally never needs to be run anymore.
+	<br><br>	
+</td></tr>
+</table>
+
 <br><br>
-<b>Look up tables:</b><br>
-<%= link_to('Employees', '/employees') %> <br><br>
-<%= link_to('Combined Reference Table', '/lookup_refs') %> <br>
+<%= link_to('Combined Reference Table', '/lookup_refs') %> - lookup_refs 
+<br><br>
+<b>Look up tables:</b> these are normal ruby on rails forms for added values to reference tables. Instead of adding a new lookup table for each new set of references, use the Combined Reference table, lookup_refs <br>
+<%= link_to('Employees', '/employees') %> <br>
 <%= link_to('BVMT percentiles', '/lookup_bvmtpercentiles') %> <br>
 <%= link_to('Cog statuses', '/lookup_cogstatuses') %> <br>
 <%= link_to('Cohorts', '/lookup_cohorts') %> <br>

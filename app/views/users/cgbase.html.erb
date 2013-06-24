@@ -1,13 +1,16 @@
 <% if current_user.role == 'Admin_High'  or current_user.role == 'Admin_Low'%>
+<table class="tabular">
+<tr><td align="left"><%= link_to('Column Group - Tables', '/cg_tns') %> </td><td align="left">--- define parent join table, left and right joins, common name, active status, if table is editable via cg_edit, upload of data dictionary, and owner of table for editing. A cg_table will be available in the Search tab. Before any of this, the cg_table needs to have been made in the database. New Cg tn link is at bottom of page. <br></td></tr>
+<tr><td nowrap align="left"><%= link_to('Column Group - Columns', '/cg_tn_cns') %></td><td align="left"> New Cg tn cn link at bottom of page.<br> After selecting cg table name, enter the first column name, set "load next column?"== Y to autopopulate the column name, display order and datatype.<br> To skip a column set the status active=N. <br>The display order can be decimal. Large text fields are generally not searchable.<br>
+	Value List ("val1|val2|val3|etc.) will define a dropdown select in the cg_edit form. The values are separated by "|" - pipe.<br>
+	Ref table a expects a camel case model name, e.g. LookupGender ( like in the questions forms), <br>
+	or Ref table a expects LOOKUP_REFS and Ref table b containing the "label"/key column - e.g. rate, frequency_times, etc..<br><br></td></tr>
 
-<%= link_to('Column Group - Tables', '/cg_tns') %> <br>
-<%= link_to('Column Group - Columns', '/cg_tn_cns') %> <br>
 
-<br>
-<%= link_to('Scheduled Jobs', '/schedules') %> <br>
+<tr><td nowrap align="left"><%= link_to('Scheduled Jobs', '/schedules') %></td><td align="left">--- New Schedule link at bottom of page. Define name of scheduled job, name of shared function, run command ( used in crontab, copy/paste into terminal as panda_admin, or via run button) , owner who can run job, whether job is active (still need to stop in crontab), optional parameters and description, cg_table and columns if involved, if a file upload populates the cg_table. <br></td></tr>
 
-<%= link_to('Runs -Scheduled Jobs', '/schedulerun_search') %> <br>
-
+<tr><td nowrap align="left"><%= link_to('Runs -Scheduled Jobs', '/schedulerun_search') %></td><td align="left"> logging of recent scheduled jobs runs.<br></td></tr>
+</table>
 
 <%else %>	
 	

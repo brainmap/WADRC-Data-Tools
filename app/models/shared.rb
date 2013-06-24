@@ -109,6 +109,7 @@ class Shared  < ActionController::Base
     return v_flag, v_comment
   end
   
+  
   def get_sp_id_from_subjectid_v(p_subjectid_v)
     v_subjectid_chop = p_subjectid_v.gsub(/_v/,"").delete("0-9")
     v_visit_number = 1
