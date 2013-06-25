@@ -39,6 +39,7 @@ class SharedController < ActionController::Base
           @schedulerun.save
           csv = CSV.parse(uploaded_io.read, :headers => true)
           v_file_columns_included_arr = @schedule.file_columns_included.split(',')
+          v_expected_cell_cnt = v_file_columns_included_arr.size
           connection = ActiveRecord::Base.connection();
           v_sql_base_insert = "insert into "+@schedule.target_table+"_new("+@schedule.target_table_columns+" )values("
           v_sql = "truncate table "+@schedule.target_table+"_new"
@@ -58,10 +59,10 @@ class SharedController < ActionController::Base
           v_cnt = 0
           v_content_array.each do |r|
             v_sql_insert = v_sql_base_insert
+            v_internal_cnt = 0
             if v_cnt > 0
              # WHAT ABOUT CSV WITH LAST BATCH OF CELLS BLANK
               csv = CSV.parse(v_content_array[v_cnt])
-              v_internal_cnt = 0
               csv.each do  |c_row|
                  v_internal_cnt = 0
                  c_row.each do |c|
@@ -71,11 +72,19 @@ class SharedController < ActionController::Base
                       else
                          v_sql_insert = v_sql_insert+"'"+c.to_s+"'"
                       end
-                   end
-                   v_internal_cnt = v_internal_cnt + 1
-                end
+                  end
+                  v_internal_cnt = v_internal_cnt + 1
+                 end
               end
               #puts "aaaaa v_cnt = "+v_cnt.to_s
+               if v_expected_cell_cnt > v_internal_cnt # trailing blank cells in the file, need to add some ,NULL
+                  v_missing_cells = v_expected_cell_cnt - v_internal_cnt
+                  for i in 1..v_missing_cells
+                    v_sql_insert = v_sql_insert+", NULL "
+                  end
+                  
+                  
+               end
                v_sql_insert =  v_sql_insert+")"
                results = connection.execute(v_sql_insert)
             end
