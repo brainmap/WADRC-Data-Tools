@@ -4,6 +4,7 @@ class CgTnCnsController < ApplicationController
   # GET /cg_tn_cns.xml
   def index
     @cg_tn_cns = CgTnCn.find(:all, :order =>"cg_tn_id,display_order")
+    @cg_tns = CgTn.order("common_name")
 
     respond_to do |format|
       format.html # index.html.erb
@@ -43,7 +44,26 @@ class CgTnCnsController < ApplicationController
     end
   end
   
-
+  # batch update column orde rand other properties
+  def tn_cols
+    puts "AAAAAAA id="+params[:id]
+    @cg_tn = CgTn.find(params[:id])
+    
+    if !params[:tn_cn_id].blank?
+      params[:tn_cn_id].each do |cn|
+         puts "aaaaaa cn id="+cn
+         @cg_tn_cn = CgTnCn.find(cn)
+         @cg_tn_cn.display_order = params[:display_order][cn]
+         @cg_tn_cn.status_flag = params[:status_flag][cn] 
+         @cg_tn_cn.save
+      end
+    end
+        @cg_tn_cns = CgTnCn.where("cg_tn_id = "+params[:id]).find(:all,:order=>"display_order")
+    respond_to do |format|
+      format.html 
+      format.xml  { head :ok }
+    end
+  end
 
   # POST /cg_tn_cns
   # POST /cg_tn_cns.xml

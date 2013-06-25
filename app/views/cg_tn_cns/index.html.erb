@@ -1,4 +1,16 @@
-<h1>Listing cg_tn_cns</h1>
+<table><tr><td><h1>Listing cg_tn_cns</h1></td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+	
+																			<%= form_for :cg_tn_cn ,:url=>'/cg_tn_cns/tn_cols' do |f2| %>
+																			<%= f2.label 'Edit table column order'%><br>
+																			<select onChange="if(this.selectedIndex!=0) self.location=this.options[this.selectedIndex].value">
+																				<option value="">Select a Table</option>
+																				<% @cg_tns.each do |s| %>
+																			<option value=/cg_tn_cns/tn_cols/<%=s.id %>><%= s.common_name %></option>
+																			   <% end %>
+																			</select>
+																			<% end %>
+	</td></tr></table>
+
 
 <table  class="tabular">
   <tr>

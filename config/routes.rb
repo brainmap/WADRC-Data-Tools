@@ -174,6 +174,8 @@ WADRCDataTools::Application.routes.draw do
   match '/schedulerun_search' , :controller => 'scheduleruns', :action => 'schedulerun_search', :as =>:schedulerun_search
   match '/shared_file_upload' , :controller => 'shared', :action => 'file_upload', :as =>:file_upload
   
+    match '/cg_tn_cns/tn_cols/:id' , :controller => 'cg_tn_cns', :action => 'tn_cols', :as =>:tn_cols
+  
   match '/run_schedule/:id' ,:controller =>'schedules', :action => 'run_schedule', :as => :run_schedule
   
   match '/users/update_role', :controller => 'users', :action => 'update_role', :as => :update_role
