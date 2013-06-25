@@ -156,7 +156,8 @@ class Shared  < ActionController::Base
     v_present_cnt = results.first.to_s.to_i
     v_old_minus_present =v_old_cnt-v_present_cnt
     v_present_minus_old = v_present_cnt-v_old_cnt
-    if ( v_old_minus_present <= 0 or ( v_old_cnt > 0 and  (v_present_minus_old/v_old_cnt)>0.7     ) )
+    v_comment = "  v_present_cnt="+v_present_cnt.to_s+"   v_old_cnt="+v_old_cnt.to_s+"   "+v_comment
+    if ( (v_old_minus_present <= 0   ) or ( v_old_cnt > 0 and  ( (v_present_cnt.to_f/v_old_cnt.to_f)>0.7  )   ) )
       sql =  "truncate table "+p_tn+"_old"
       results = connection.execute(sql)
       sql = "insert into "+p_tn+"_old select * from "+p_tn
