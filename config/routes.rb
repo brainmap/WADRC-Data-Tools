@@ -175,6 +175,7 @@ WADRCDataTools::Application.routes.draw do
   match '/shared_file_upload' , :controller => 'shared', :action => 'file_upload', :as =>:file_upload
   
     match '/cg_tn_cns/tn_cols/:id' , :controller => 'cg_tn_cns', :action => 'tn_cols', :as =>:tn_cols
+    match '/cg_tns/create_from_cg_tn_db' , :controller => 'cg_tns', :action => 'create_from_cg_tn_db', :as =>:create_from_cg_tn_db
   
   match '/run_schedule/:id' ,:controller =>'schedules', :action => 'run_schedule', :as => :run_schedule
   

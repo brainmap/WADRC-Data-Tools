@@ -37,6 +37,43 @@ class CgTnsController < ApplicationController
   def edit
     @cg_tn = CgTn.find(params[:id])
   end
+  
+ 
+  
+  def create_from_cg_tn_db
+    
+    params[:cg_tn][:tn] =  params[:cg_table_name].downcase
+    v_tn = params[:cg_table_name].downcase 
+    params[:cg_tn][:common_name] = params[:cg_table_name]
+    params[:cg_tn][:editable_flag] ="Y"
+    params[:cg_tn][:status_flag] ="Y"
+    params[:cg_tn][:table_type] ="column_group"
+    sql = "select max(display_order) from cg_tns where table_type ='column_group'"
+    connection = ActiveRecord::Base.connection();
+    @results = connection.execute(sql)
+    v_display_order = (@results.first.to_s.to_i)+1
+    params[:cg_tn][:display_order] = v_display_order.to_s
+    if params[:key_type] == 'enrollment/sp'
+      params[:cg_tn][:join_left_parent_tn] ="vgroups"
+      params[:cg_tn][:join_left] ="LEFT JOIN "+v_tn+" on vgroups.id in ( select spv2.vgroup_id from scan_procedures_vgroups spv2 where spv2.scan_procedure_id = "+v_tn+".scan_procedure_id and spv2.vgroup_id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships where enrollment_vgroup_memberships.enrollment_id = "+v_tn+".enrollment_id))"
+      params[:cg_tn][:join_right] ="appointments.appointment_type ='mri' and scan_procedures_vgroups.scan_procedure_id = "+v_tn+".scan_procedure_id and vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships where enrollment_vgroup_memberships.enrollment_id = "+v_tn+".enrollment_id)"
+    elsif params[:key_type] == 'participant_id'
+      params[:cg_tn][:join_left_parent_tn] ="vgroups"
+      params[:cg_tn][:join_left]="LEFT JOIN "+v_tn+" on vgroups.participant_id = "+v_tn+".participant_id"
+      params[:cg_tn][:join_right]="vgroups.participant_id = "+v_tn+".participant_id"
+    end
+    params[:cg_tn][:join_left_parent_tn] =  params[:cg_tn][:join_left_parent_tn].downcase
+    @cg_tn = CgTn.new(params[:cg_tn])
+    respond_to do |format|
+      if @cg_tn.save
+        format.html { redirect_to(@cg_tn, :notice => 'Cg tn was successfully created.') }
+        format.xml  { render :xml => @cg_tn, :status => :created, :location => @cg_tn }
+      else
+        format.html { render :action => "new" }
+        format.xml  { render :xml => @cg_tn.errors, :status => :unprocessable_entity }
+      end
+    end
+  end
 
   # POST /cg_tns
   # POST /cg_tns.xml

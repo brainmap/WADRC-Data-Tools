@@ -1672,7 +1672,7 @@ class DataSearchesController < ApplicationController
       end
       
     end
-     
+
    	if !params[:cg_table_name].blank?
    		@v_cg_table_name = params[:cg_table_name]
    		sql = "SELECT `COLUMN_NAME`,`DATA_TYPE`, `CHARACTER_MAXIMUM_LENGTH` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA`='"+v_schema+"' AND `TABLE_NAME`='"+@v_cg_table_name +"'"
@@ -1695,9 +1695,30 @@ class DataSearchesController < ApplicationController
    	  @v_cg_action  = params[:cg_action]
    	end
     @v_data_types=[["varchar","varchar"],["int","int"],["float","float"]]
-    @v_data_sizes=[["1","1"],["10","10"],["50","50"],["100","100"],["500","500"],["2000","2000"]] 	
-
-     
+    @v_data_sizes=[["1","1"],["10","10"],["50","50"],["100","100"],["500","500"],["2000","2000"]] 
+    
+    # determine key_type from columns  
+    # enrollment/sp =>subjectid,enrollment_id,scan_procedure_id
+    # participant_id => participant_id
+    v_cols = []	
+    @results_cg_tn_cn.each do |c|
+ 	    v_cols.push(c[0])
+ 	  end
+    @v_key_type = ""
+    if v_cols.include?('subjectid') and v_cols.include?('enrollment_id') and v_cols.include?('scan_procedure_id') 
+        @v_key_type = "enrollment/sp"
+    elsif v_cols.include?('participant_id') and !v_cols.include?('subjectid') and !v_cols.include?('enrollment_id') and !v_cols.include?('scan_procedure_id') 
+      @v_key_type = "participant_id"
+    end
+    @v_link_cg_table_setup = "N"
+    if @v_key_type > ""
+       sql = "select count(*) from cg_tns where tn ='"+@v_cg_table_name+"'"
+       @results_check_cg = connection.execute(sql)
+       if @results_check_cg.first.to_s.to_i < 1
+         @v_link_cg_table_setup = "Y"
+      end 
+    end
+    
      render :template => "data_searches/cg_table_edit_db"
  end 
     

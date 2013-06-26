@@ -80,3 +80,20 @@ load next column? : <%= select_tag 'load_next_column', options_for_select(v_y_n,
     <%= f.submit %>
   </div><br>
 <% end %>
+Enter the name of the first column (e.g. subjectid), set "load next column? "== Y, enter rest of fields.<br>
+Subjectid-v# column maps to enrollment and scan_procedure, and is the key column=Y,<br>
+or reggieid column maps to participant and is the key_column=Y.<br>
+After the first column, many of the fields will auto-populate.<br>
+Display order will auto-increment.<br>
+Common value lists include <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ Y|N ]  = yes, no   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ Y|N|R ] = yes, no, run   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ Pass|Fail|Partial ] for quality columns <br>
+Large text fields are generally not searchable.<br>
+Most fields have "Search Between" = N. <br>
+Ref Table a will be the model name in camel case for a reference table, <br>
+or == LOOKUP_REFS plus the identifying "label" for the set of reference rows.<br>
+
+
+
+

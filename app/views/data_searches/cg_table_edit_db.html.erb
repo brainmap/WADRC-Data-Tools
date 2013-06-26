@@ -1,9 +1,15 @@
-<% @current_tab = "searches" 
+<% @current_tab = "searches" %>
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
 
-%>
-<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'
 
-	%>
+<% if @v_link_cg_table_setup == "Y" and @v_key_type > "" %>
+  <%= form_for :cg_tns ,:url=>'/cg_tns/create_from_cg_tn_db' do |f2| %>
+   <%= submit_tag("Setup "+@v_cg_table_name +" table in Search and Edit") %>
+        <%= hidden_field_tag 'cg_tn[tn]',  @v_cg_table_name%>
+       <%= hidden_field_tag 'cg_table_name',  @v_cg_table_name%>
+       <%= hidden_field_tag 'key_type',  @v_key_type%>
+   <%end%>
+<%end%>
 
 <table width="80%"  ><tr><td align="right">
 	<%= form_for :cg_table_name ,:url=>'/cg_table_edit_db' do |f2| %>
@@ -32,8 +38,8 @@
 
 <%end%>
 <br><br>
-
-<% if @v_cg_action == "edit"
+<% if !@v_cg_table_name.blank? %>
+ <% if @v_cg_action == "edit"
 	 v_datasize = @v_cg_tn_column_datasize # problem using @v_cg_tn_column_datasize in select, no problem with datatype?
 	 if v_datasize <"1" 
 		v_datasize= "10"
@@ -50,10 +56,11 @@
 	
 	    </table>
    <%end%>
-<% else %>
+ <% else %>
     <%= form_for 'cg_table_edit' do |f| %> 
             <%= hidden_field_tag 'cg_table_name',  @v_cg_table_name%>
             <%= hidden_field_tag 'cg_action',  'add'%>
+      Check add checkbox to include new column<br>
         <table><tr><th>add?</th><th align="left"><%= submit_tag("save columns")%> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Column Name</th><th>Datatype</th><th>Size</th><th></tr>
         <%v_row_cnt = 10
           v_cnt = 0
@@ -68,7 +75,8 @@
            end %>
         </table>
       <%end%>    
- <%end %>	
+  <%end %>	
+<%end%>
 	
 	
 <br><br>

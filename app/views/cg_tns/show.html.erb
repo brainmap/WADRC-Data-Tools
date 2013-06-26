@@ -1,5 +1,5 @@
 <p id="notice"><%= notice %></p>
-
+<%= link_to 'Add columns for this table', new_cg_tn_cn_path %>
 <p>
   <b>Tn:</b> <%= @cg_tn.tn %>   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <b>Common name:</b> <%= @cg_tn.common_name %>
@@ -40,4 +40,4 @@
    <%= link_to 'Edit', edit_cg_tn_path(@cg_tn) %> |
 <% end %>
 <%= link_to 'Back', cg_tns_path %> |
-<%= link_to('Column Group search/load', '/users/cgbase') %>
+<%= link_to('Column Group search/load', '/users/cgbase') %> | <%= link_to 'Add columns for this table', new_cg_tn_cn_path %>
