@@ -1063,7 +1063,14 @@ class DataSearchesController < ApplicationController
                         @cg_query_tn_cn.condition = params[:cg_search][:condition][v_tn_id][v_tn_cn_id]
                        # [['=','0'],['>=','1'],['<=','2'],['!=','3'],['between','4'],['is blank','5']]
                         if @cg_query_tn_cn.condition == 0 
-                          v_condition =  " "+@cg_tn.tn+"."+@cg_tn_cn.cn+" = '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"'"
+                          # letting wrapno, reggieid, adrcnum be IN () condition
+                          if @cg_query_tn_cn.value_1.include?(',') and ((@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.wrapnum" or (@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.adrcnum" or (@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.reggieid" )
+                              @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/ /,'').gsub(/'/,'')
+                              @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/,/,"','")
+                              v_condition =  " "+@cg_tn.tn+"."+@cg_tn_cn.cn+" in ( '"+@cg_query_tn_cn.value_1.gsub(/[;:"()=<>]/, '')+"')"
+                          else
+                              v_condition =  " "+@cg_tn.tn+"."+@cg_tn_cn.cn+" = '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"'"
+                          end
                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" = "+@cg_query_tn_cn.value_1
