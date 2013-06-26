@@ -66,11 +66,12 @@ class SharedController < ActionController::Base
               csv.each do  |c_row|
                  v_internal_cnt = 0
                  c_row.each do |c|
+                   v_cell = (c.to_s).gsub("'","''")
                    if v_include.include?(v_internal_cnt)
                       if v_sql_insert > v_sql_base_insert
-                         v_sql_insert = v_sql_insert+",'"+c.to_s+"'"
+                         v_sql_insert = v_sql_insert+",'"+v_cell+"'"
                       else
-                         v_sql_insert = v_sql_insert+"'"+c.to_s+"'"
+                         v_sql_insert = v_sql_insert+"'"+v_cell+"'"
                       end
                   end
                   v_internal_cnt = v_internal_cnt + 1
