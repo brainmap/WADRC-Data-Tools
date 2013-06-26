@@ -30,7 +30,7 @@ class SharedController < ActionController::Base
        v_content_array = v_file_content.split("\n")
        v_file_header = v_content_array[0]
        if v_file_header != @schedule.file_header
-         v_comment = "ERROR -file header differs from expected header  actual"+v_file_header+" != expected="+@schedule.file_header+" |"+v_comment
+         v_comment = "ERROR -file header differs from expected header  actual= "+v_file_header+" != expected= "+@schedule.file_header+" |"+v_comment
          @schedulerun.comment =v_comment[0..1990]
           @schedulerun.save
        else 
@@ -82,9 +82,7 @@ class SharedController < ActionController::Base
                   v_missing_cells = v_expected_cell_cnt - v_internal_cnt
                   for i in 1..v_missing_cells
                     v_sql_insert = v_sql_insert+", NULL "
-                  end
-                  
-                  
+                  end                 
                end
                v_sql_insert =  v_sql_insert+")"
                results = connection.execute(v_sql_insert)
@@ -97,7 +95,7 @@ class SharedController < ActionController::Base
     # --- how to also call from a command line?  --- controller--- if big problem duplicate in model or put most of stuff in 
 
          # update key columns
-         if @schedule.key_type == 'enrollment/sp'
+         if @schedule.key_type == 'enrollment/sp'    # similar to data_searches_controller add-a-row
             # expect enum_v# == @schedule.file_key_source_column
             # update enrollment -- make into a function?
             v_file_col_array = (@schedule.file_columns_included).split(',')

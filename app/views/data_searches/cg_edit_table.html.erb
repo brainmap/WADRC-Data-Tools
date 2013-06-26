@@ -13,6 +13,13 @@ if @cg_tn.table_type == 'column_group' and @cg_tn.editable_flag == "Y"
 %>
 
 cg_edit_table = <%= @cg_tn.common_name%>
+<% @cg_tn_cn = CgTnCn.where("key_column_flag ='Y' and cg_tn_id in (?)",@cg_tn.id) 
+if @cg_tn_cn.size == 1 # only want to show if key is one column %>
+   <%= form_for '/cg_edit_table'+params[:id] do |f| %>
+     <table width="90%"><tr><td width="80%">&nbsp;&nbsp;&nbsp;&nbsp;</td><td> <b>Add a row - enter key value:</b><br><%= text_field :cg_edit_table, :add_a_row_key_value %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= f.submit "Add Row" %></td></tr>
+	 </table>
+   <%end%>
+<% end %>
 <% # check if key is unique !!!!!!!!!!!%>
 <%= form_for '/cg_edit_table'+params[:id] do |f| %>
 <table class="search_form">
