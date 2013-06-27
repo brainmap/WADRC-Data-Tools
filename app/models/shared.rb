@@ -1275,6 +1275,144 @@ puts "AAAAAA "+v_call
     
   end
   
+  
+  def run_pib_cereb_tac
+        visit = Visit.find(3)  #  need to get base path without visit
+        v_base_path = visit.get_base_path()
+         @schedule = Schedule.where("name in ('pib_cereb_tac')").first
+          @schedulerun = Schedulerun.new
+          @schedulerun.schedule_id = @schedule.id
+          @schedulerun.comment ="starting pib_status"
+          @schedulerun.save
+          @schedulerun.start_time = @schedulerun.created_at
+          @schedulerun.save
+          v_comment = ""
+    ####    begin   # catch all exception and put error in comment    
+            sql = "truncate table cg_pib_cereb_tac_new"
+            connection = ActiveRecord::Base.connection();        
+            results = connection.execute(sql)
+
+            sql_base = "insert into cg_pib_cereb_tac_new(subjectid, general_comment,done_flag,status_flag,enrollment_id, scan_procedure_id, val_1,val_2,val_3,val_4,val_5,val_6,val_7,val_8,val_9,val_10,val_11,val_12,val_13,val_14,val_15,val_16,val_17)values("  
+
+
+            v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+            # get list of scan_procedure codename -- exclude 4, 10, 15, 19, 32, 
+                # ??? johnson.pc vs johnsonpc4000.visit1 vs pc_4000
+                # ??? johnson.tbi10000 vs johnson.tbiaware vs tbi_1000
+                # ??? johnson.wrap140.visit1 vs wrap140.visit1 vs wrap140
+                # NOT exists /Volumes/team-1/raw/carlson.esprit/mri
+                # NOT exists /Volumes/team-1/raw/johnson.wrap140.visit1/mri
+                # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit1/mri
+                # NOT exists /Volumes/team-1/raw/johnson.tbiaware.visit3/mri
+                # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
+                # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
+                # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
+            v_exclude_sp =[4,10,15,19,32]
+            @scan_procedures = ScanProcedure.where("petscan_flag='Y' and id not in (?)",v_exclude_sp)  # NEED ONLY sp with pib, but filter later
+            @scan_procedures. each do |sp|
+               v_visit_number =""
+               if sp.codename.include?("visit2")
+                  v_visit_number ="_v2"
+               elsif sp.codename.include?("visit3")
+                  v_visit_number ="_v3"
+               elsif sp.codename.include?("visit4")
+                  v_visit_number ="_v4"
+               elsif sp.codename.include?("visit5")
+                  v_visit_number ="_v5"
+               end
+
+                v_preprocessed_full_path = v_preprocessed_path+sp.codename
+                sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups, vgroups, appointments, petscans, enrollment_vgroup_memberships
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" and  vgroups.transfer_pet = 'yes'  
+                                    and appointments.vgroup_id = vgroups.id and appointments.appointment_type = 'pet_scan'
+                                    and appointments.id = petscans.appointment_id and petscans.lookup_pettracer_id = 1
+                                    and enrollment_vgroup_memberships.vgroup_id = vgroups.id and enrollment_vgroup_memberships.enrollment_id = enrollments.id
+                                    and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
+                 @results = connection.execute(sql_enum)
+                                    
+                 @results.each do |r|
+                     enrollment = Enrollment.where("enumber='"+r[0]+"'")
+                     if !enrollment.blank?
+                        v_subjectid_pib = v_preprocessed_full_path+"/"+enrollment[0].enumber+"/pet/pib"
+                        if File.directory?(v_subjectid_pib)
+                            v_dir_array = Dir.entries(v_subjectid_pib)   # need to get date for specific files
+                            v_done_flag ="N"
+                            v_status_flag = "N"
+                            v_comment =""
+                            v_val_arr =["","","","","","","","","","","","","","","","",""] 
+                            v_dir_array.each do |f|
+                               if f.start_with?(enrollment[0].enumber+v_visit_number) and f.end_with?("_cereb_TAC_HYPR.txt")
+                                  v_status_flag = "Y"
+                                  v_file_path = v_subjectid_pib+"/"+enrollment[0].enumber+v_visit_number+"_cereb_TAC_HYPR.txt"
+                                  # get file and harvest values
+                                  v_cnt = 0
+                                  if File.size(v_file_path) > 0
+                                      File.open(v_file_path, "r").each_line do |line|
+                                        v_val_arr[v_cnt] = line.gsub("\n","").gsub("\r","")
+                                        v_cnt = v_cnt + 1
+                                      end
+                                   else
+                                     v_comment ="empty "+enrollment[0].enumber+v_visit_number+"_cereb_TAC_HYPR.txt file"
+                                   end
+                                elsif f.start_with?(enrollment[0].enumber) and f.end_with?("_cereb_TAC_HYPR.txt")
+                                    v_status_flag = "Y"
+                                    v_file_path = v_subjectid_pib+"/"+enrollment[0].enumber+"_cereb_TAC_HYPR.txt"
+                                    # get file and harvest values
+                                    v_cnt = 0
+                                    if File.size(v_file_path) > 0
+                                      File.open(v_file_path, "r").each_line do |line|
+                                        v_val_arr[v_cnt] = line.gsub("\n","").gsub("\r","")
+                                        v_cnt = v_cnt + 1
+                                      end
+                                    else
+                                      v_comment ="empty "+enrollment[0].enumber+"_cereb_TAC_HYPR.txt file"
+                                    end
+                                end
+                              end
+                                
+                             sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_comment+"','"+v_done_flag+"','"+v_status_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_val_arr[0]+"','"+v_val_arr[1]+"','"+v_val_arr[2]+"','"+v_val_arr[3]+"','"+v_val_arr[4]+"','"+v_val_arr[5]+"','"+v_val_arr[6]+"','"+v_val_arr[7]+"','"+v_val_arr[8]+"','"+v_val_arr[9]+"','"+v_val_arr[10]+"','"+v_val_arr[11]+"','"+v_val_arr[12]+"','"+v_val_arr[13]+"','"+v_val_arr[14]+"','"+v_val_arr[15]+"','"+v_val_arr[16]+"')"
+                                 results = connection.execute(sql)
+                             else
+                                 sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','no pib dir','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)"
+                                 results = connection.execute(sql)
+                             end # check for subjectid asl dir
+                      else
+                           #puts "no enrollment "+dir_name_array[0]
+                      end # check for enrollment
+                 end # loop thru the subjectids
+            end            
+            # check move cg_ to cg_old
+            # v_shared = Shared.new 
+             # move from new to present table -- made into a function  in shared model
+             v_comment = self.move_present_to_old_new_to_present("cg_pib_cereb_tac",
+             "subjectid, general_comment,done_flag,status_flag, status_comment, val_1,val_2,val_3,val_4,val_5,val_6,val_7,val_8,val_9,val_10,val_11,val_12,val_13,val_14,val_15,val_16,val_17, enrollment_id,scan_procedure_id",
+                            "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
+
+
+             # apply edits  -- made into a function  in shared model
+             self.apply_cg_edits('cg_pib_cereb_tac')
+
+             puts "successful finish cg_pib_cereb_tac "+v_comment[0..459]
+              @schedulerun.comment =("successful finish cg_pib_cereb_tac "+v_comment[0..459])
+              if !v_comment.include?("ERROR")
+                 @schedulerun.status_flag ="Y"
+               end
+               @schedulerun.save
+               @schedulerun.end_time = @schedulerun.updated_at      
+               @schedulerun.save
+    ####    rescue Exception => msg
+    ####         v_error = msg.to_s
+    ####         puts "ERROR !!!!!!!"
+    ####         puts v_error
+    ####         v_error = v_error+"\n"+v_comment
+    ####          @schedulerun.comment =v_error[0..499]
+    ####          @schedulerun.status_flag="E"
+    ####    end
+    
+    
+  end
+  
+  
   def run_pib_status
         visit = Visit.find(3)  #  need to get base path without visit
         v_base_path = visit.get_base_path()

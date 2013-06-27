@@ -75,6 +75,10 @@ class CronInterface < ActiveRecord::Base
   elsif v_value_1 == "pib_status"
       v_shared = Shared.new
       v_shared.run_pib_status()
+    
+  elsif v_value_1 == "pib_cereb_tac"
+      v_shared = Shared.new
+      v_shared.run_pib_cereb_tac()
       
   elsif v_value_1 == "test_shell"
     v_base_path = visit.get_base_path()
