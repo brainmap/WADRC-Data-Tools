@@ -137,9 +137,90 @@ class SharedController < ActionController::Base
                            "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
             # apply edits  -- made into a function  in shared model
             v_shared.apply_cg_edits(@schedule.target_table)
-         elsif  @schedule.key_type == 'participant_id'
-             # could be wrapno, reggieid, adrcnum ish
-             v_comment = "PARTICIPANT_ID IS NOT IMPLEMENTED YET!!!!!! "+v_comment
+         elsif  @schedule.key_type == "reggieid-kc-participant_id"
+           v_file_col_array = (@schedule.file_columns_included).split(',')
+           v_table_col_array = (@schedule.target_table_columns).split(',')
+           v_table_key_source = v_table_col_array[v_file_col_array.index(@schedule.file_key_source_column)]
+           sql = "update "+@schedule.target_table+"_new  t set t.participant_id = ( select p.id from participants p where p.reggieid = t."+v_table_key_source +")"
+           results = connection.execute(sql)
+           # report on unmapped rows, not insert unmapped rows 
+           sql = "select "+v_table_key_source+", participant_id from "+@schedule.target_table+"_new where participant_id is null order by "+v_table_key_source
+           results = connection.execute(sql)
+           results.each do |re|
+             v_comment = re.join(' | ')+" ,"+v_comment
+           end
+           if !results.blank?
+              v_comment =  @schedule.target_table+"_new unmapped "+v_table_key_source+",participant_id ="+v_comment
+              @schedulerun.comment =v_comment[0..1990]
+              @schedulerun.save
+           end
+           # populate non-present rows from present if partial load
+           if params[:full_partial] == "partial"
+             v_sql = "insert into "+@schedule.target_table+"_new("+@schedule.target_table_columns+",participant_id)  select "+@schedule.target_table_columns+",participant_id from "+@schedule.target_table+" where "+@schedule.target_table+"."+v_table_key_source+" not in (select "+v_table_key_source+" from "+@schedule.target_table+"_new)"
+             results = connection.execute(v_sql)
+           end
+           # -- do the new-old-present-edit pivot
+           v_comment = v_shared.move_present_to_old_new_to_present(@schedule.target_table,
+           @schedule.target_table_columns+",participant_id",
+                          "participant_id is not null ",v_comment)
+           # apply edits  -- made into a function  in shared model
+           v_shared.apply_cg_edits(@schedule.target_table)
+         elsif  @schedule.key_type == "wrapnum-kc-participant_id"
+           v_file_col_array = (@schedule.file_columns_included).split(',')
+           v_table_col_array = (@schedule.target_table_columns).split(',')
+           v_table_key_source = v_table_col_array[v_file_col_array.index(@schedule.file_key_source_column)]
+           sql = "update "+@schedule.target_table+"_new  t set t.participant_id = ( select p.id from participants p where p.wrapnum = t."+v_table_key_source +")"
+           results = connection.execute(sql)
+           # report on unmapped rows, not insert unmapped rows 
+           sql = "select "+v_table_key_source+", participant_id from "+@schedule.target_table+"_new where participant_id is null order by "+v_table_key_source
+           results = connection.execute(sql)
+           results.each do |re|
+             v_comment = re.join(' | ')+" ,"+v_comment
+           end
+           if !results.blank?
+              v_comment =  @schedule.target_table+"_new unmapped "+v_table_key_source+",participant_id ="+v_comment
+              @schedulerun.comment =v_comment[0..1990]
+              @schedulerun.save
+           end
+           # populate non-present rows from present if partial load
+           if params[:full_partial] == "partial"
+             v_sql = "insert into "+@schedule.target_table+"_new("+@schedule.target_table_columns+",participant_id)  select "+@schedule.target_table_columns+",participant_id from "+@schedule.target_table+" where "+@schedule.target_table+"."+v_table_key_source+" not in (select "+v_table_key_source+" from "+@schedule.target_table+"_new)"
+             results = connection.execute(v_sql)
+           end
+           # -- do the new-old-present-edit pivot
+           v_comment = v_shared.move_present_to_old_new_to_present(@schedule.target_table,
+           @schedule.target_table_columns+",participant_id",
+                          "participant_id is not null ",v_comment)
+           # apply edits  -- made into a function  in shared model
+           v_shared.apply_cg_edits(@schedule.target_table)
+         elsif  @schedule.key_type == "adrcnum-kc-participant_id"
+           v_file_col_array = (@schedule.file_columns_included).split(',')
+           v_table_col_array = (@schedule.target_table_columns).split(',')
+           v_table_key_source = v_table_col_array[v_file_col_array.index(@schedule.file_key_source_column)]
+           sql = "update "+@schedule.target_table+"_new  t set t.participant_id = ( select p.id from participants p where p.adrcnum = t."+v_table_key_source +")"
+           results = connection.execute(sql)
+           # report on unmapped rows, not insert unmapped rows 
+           sql = "select "+v_table_key_source+", participant_id from "+@schedule.target_table+"_new where participant_id is null order by "+v_table_key_source
+           results = connection.execute(sql)
+           results.each do |re|
+             v_comment = re.join(' | ')+" ,"+v_comment
+           end
+           if !results.blank?
+              v_comment =  @schedule.target_table+"_new unmapped "+v_table_key_source+",participant_id ="+v_comment
+              @schedulerun.comment =v_comment[0..1990]
+              @schedulerun.save
+           end
+           # populate non-present rows from present if partial load
+           if params[:full_partial] == "partial"
+             v_sql = "insert into "+@schedule.target_table+"_new("+@schedule.target_table_columns+",participant_id)  select "+@schedule.target_table_columns+",participant_id from "+@schedule.target_table+" where "+@schedule.target_table+"."+v_table_key_source+" not in (select "+v_table_key_source+" from "+@schedule.target_table+"_new)"
+             results = connection.execute(v_sql)
+           end
+           # -- do the new-old-present-edit pivot
+           v_comment = v_shared.move_present_to_old_new_to_present(@schedule.target_table,
+           @schedule.target_table_columns+",participant_id",
+                          "participant_id is not null ",v_comment)
+           # apply edits  -- made into a function  in shared model
+           v_shared.apply_cg_edits(@schedule.target_table)
          end
 
     # -- render to schedule runs index

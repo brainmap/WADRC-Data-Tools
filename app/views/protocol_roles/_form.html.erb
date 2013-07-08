@@ -21,11 +21,12 @@
   <div class="field">
     <%= f.label :protocol_id %><br />
     <!-- f.text_field :protocol_id -->
-<%= collection_select :protocol_role, :protocol_id, Protocol.all.sort_by(&:id), :id, :name, :prompt => 'choose a protocol' %>
+<%= collection_select :protocol_role, :protocol_id, Protocol.all.sort_by(&:name), :id, :name, :prompt => 'choose a protocol' %>
   </div>
   <div class="field">
     <%= f.label :role %><br />
-    <!--  f.text_field :role --><%= collection_select :protocol_role, :role, Role.all.sort_by(&:role), :role, :description, :prompt => 'choose a role' %>
+    <!--  f.text_field :role --><%= collection_select :protocol_role, :role, Role.all.sort_by(&:role), :role, :description, :prompt => 'choose a role' %> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>"edit lower level fields" is the common setting</small> 
   </div>
   <div class="actions">
     <%= f.submit %>

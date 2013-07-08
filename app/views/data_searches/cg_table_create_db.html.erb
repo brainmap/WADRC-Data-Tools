@@ -1,6 +1,6 @@
 <% @current_tab = "searches" 
 
-v_key_type = [["enumber and visit# mapped to enrollment/scan_procedure","enrollment/sp"],["participant_id","participant_id"]]
+v_key_type = [["enumber and visit# mapped to enrollment/scan_procedure","enrollment/sp"],["reggieid-participant_id","reggieid-kc-participant_id"],["wrapnum-participant_id","wrapnum-kc-participant_id"],["adrcnum-participant_id","adrcnum-kc-participant_id"]]
 %>
 <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
                        
@@ -15,7 +15,8 @@ v_key_type = [["enumber and visit# mapped to enrollment/scan_procedure","enrollm
 		</td></tr>
         <tr><td  align="left">
 	    <B>Key Type</B>: provides linkage to vgroup &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				<%= select_tag "key_type", options_for_select([["enumber and visit# mapped to enrollment/scan_procedure","enrollment/sp"],["participant_id","participant_id"]], "enrollment/sp")%>
+<%= select_tag "key_type", options_for_select([["enumber and visit# mapped to enrollment/scan_procedure","enrollment/sp"],
+["reggieid-participant_id","reggieid-kc-participant_id"],["wrapnum-participant_id","wrapnum-kc-participant_id"],["adrcnum-participant_id","adrcnum-kc-participant_id"]], "enrollment/sp")%>
 		</td></tr>
 	   <tr><td  align="left">
 						  <div class="actions">

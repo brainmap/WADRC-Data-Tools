@@ -61,6 +61,18 @@ class CgTnsController < ApplicationController
       params[:cg_tn][:join_left_parent_tn] ="vgroups"
       params[:cg_tn][:join_left]="LEFT JOIN "+v_tn+" on vgroups.participant_id = "+v_tn+".participant_id"
       params[:cg_tn][:join_right]="vgroups.participant_id = "+v_tn+".participant_id"
+    elsif params[:key_type] == 'reggieid-kc-participant_id'
+      params[:cg_tn][:join_left_parent_tn] ="vgroups"
+      params[:cg_tn][:join_left]="LEFT JOIN "+v_tn+" on vgroups.participant_id = "+v_tn+".participant_id"
+      params[:cg_tn][:join_right]="vgroups.participant_id = "+v_tn+".participant_id"      
+    elsif params[:key_type] == 'wrapnum-kc-participant_id'
+      params[:cg_tn][:join_left_parent_tn] ="vgroups"
+      params[:cg_tn][:join_left]="LEFT JOIN "+v_tn+" on vgroups.participant_id = "+v_tn+".participant_id"
+      params[:cg_tn][:join_right]="vgroups.participant_id = "+v_tn+".participant_id"      
+    elsif params[:key_type] == 'adrcnum-kc-participant_id'
+      params[:cg_tn][:join_left_parent_tn] ="vgroups"
+      params[:cg_tn][:join_left]="LEFT JOIN "+v_tn+" on vgroups.participant_id = "+v_tn+".participant_id"
+      params[:cg_tn][:join_right]="vgroups.participant_id = "+v_tn+".participant_id"      
     end
     params[:cg_tn][:join_left_parent_tn] =  params[:cg_tn][:join_left_parent_tn].downcase
     @cg_tn = CgTn.new(params[:cg_tn])

@@ -153,6 +153,10 @@ class DataSearchesController < ApplicationController
       
     end
     def cg_edit_table
+      v_schema ='panda_production'
+      if RAILS_ENV=="development" 
+        v_schema ='panda_development'
+      end
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       # really want to stop edit_table from being used on core tables
       v_exclude_tables_array =['appointments','blooddraws','cg_queries','cg_query_tn_cns','cg_query_tns','cg_tn_cns','cg_tns',
@@ -162,7 +166,7 @@ class DataSearchesController < ApplicationController
         'questionforms','questionnaires','questions','radiology_comments','roles','scan_procedures','scan_procedures_vgroups','scan_procedures_visits',
         'scheduleruns','schedules','schedules_users','series_descriptions','users','vgroups','visits','vitals'] 
       @cg_tn = CgTn.find(params[:id])
-      v_enumber =""
+      v_new_key_value =""
       @enumber_search =""
       v_sp =""
       @sp_array =[]
@@ -171,79 +175,195 @@ class DataSearchesController < ApplicationController
       params["search_criteria"] =""
       # add a row
       if !params[:cg_edit_table].blank? and !params[:cg_edit_table][:add_a_row_key_value].blank?
-        params[:cg_edit_table][:enumber] = params[:cg_edit_table][:add_a_row_key_value]
-        # check if already in table
-        v_cg_tn_cn = CgTnCn.where("key_column_flag ='Y' and cg_tn_id in (?)",@cg_tn.id)
-        # expect only one key column --- want an error if 
-        v_enumber =  params[:cg_edit_table][:add_a_row_key_value].gsub(/ /,'').gsub(/'/,'').downcase
-        if v_cg_tn_cn.size == 1
-           sql = "select count(*) from "+@cg_tn.tn+" where "+v_cg_tn_cn[0].cn+"= '"+v_enumber+"'"
-           connection = ActiveRecord::Base.connection();
-           @results = connection.execute(sql)
-           if @results.first.to_s.to_i > 0
-               flash[:notice] = v_enumber+" is already in  "+@cg_tn.common_name+"."
-           else # new key
-              # get link type from join table and joins --- only good for subject_v# => enrollment_id and scan_procedure_id 
-              v_key_type =""   # should this be moved from schedule to cg_tns?
-              if @cg_tn.join_left_parent_tn == "vgroups" and @cg_tn.join_right.include?("scan_procedures_vgroups.scan_procedure_id") and @cg_tn.join_right.include?("enrollment_vgroup_memberships.enrollment_id")
-                v_key_type = "enrollment/sp"
-              elsif @cg_tn.join_left_parent_tn == "vgroups" and @cg_tn.join_right.include?("vgroups.participant_id") 
-                 v_key_type = "participant_id"
-                 flash[:notice] = " The participant linkage has not been implemented yet is add-a-row."
-              else
-                flash[:notice] = " The  linkage to vgroup is unclear -- the add-a-row will not function."
+              params[:cg_edit_table][:enumber] = params[:cg_edit_table][:add_a_row_key_value]
+              # check if already in table
+              v_cg_tn_cn = CgTnCn.where("key_column_flag ='Y' and cg_tn_id in (?)",@cg_tn.id)
+              # expect only one key column --- want an error if 
+              v_new_key_value =  params[:cg_edit_table][:add_a_row_key_value].gsub(/ /,'').gsub(/'/,'').downcase
+              if v_cg_tn_cn.size == 1
+                 sql = "select count(*) from "+@cg_tn.tn+" where "+v_cg_tn_cn[0].cn+"= '"+v_new_key_value+"'"
+                 connection = ActiveRecord::Base.connection();
+                 @results = connection.execute(sql)
+                 if @results.first.to_s.to_i > 0
+                     flash[:notice] = v_new_key_value+" is already in  "+@cg_tn.common_name+"."
+                 else # new key
+                    # get link type from join table and joins --- only good for subject_v# => enrollment_id and scan_procedure_id 
+                    v_key_type =""   # should this be moved from schedule to cg_tns?
+                    if @cg_tn.join_left_parent_tn == "vgroups" and @cg_tn.join_right.include?("scan_procedures_vgroups.scan_procedure_id") and @cg_tn.join_right.include?("enrollment_vgroup_memberships.enrollment_id")
+                      v_key_type = "enrollment/sp"
+                    elsif @cg_tn.join_left_parent_tn == "vgroups" and @cg_tn.join_right.include?("vgroups.participant_id") 
+                      connection = ActiveRecord::Base.connection();
+                      sql = "SELECT `COLUMN_NAME`,`DATA_TYPE`, `CHARACTER_MAXIMUM_LENGTH` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA`='"+v_schema+"' AND `TABLE_NAME`='"+@cg_tn.tn+"'"
+                      @results_cg_tn_cn = connection.execute(sql)
+                      v_cols = [] 
+                      @results_cg_tn_cn.each do |c|
+                            v_cols.push(c[0])
+                      end
+                       v_key_type = "participant_id"
+                       if v_cols.include?('participant_id') and v_cols.include?('reggieid_kc') 
+                         v_key_type = "reggieid-kc-participant_id"
+                       elsif v_cols.include?('participant_id') and v_cols.include?('wrapnum_kc') 
+                         v_key_type = "wrapnum-kc-participant_id"
+                       elsif v_cols.include?('participant_id') and v_cols.include?('adrcnum_kc') 
+                         v_key_type = "adrcnum-kc-participant_id"
+                        end
+                    else
+                      flash[:notice] = " The  linkage to vgroup is unclear -- the add-a-row will not function."
+                    end
+                    if v_key_type == "enrollment/sp"
+                       # insert into _new 
+                       sql = "truncate table "+@cg_tn.tn+"_new"
+                       @results = connection.execute(sql)
+                       sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ")values('"+v_new_key_value+"')"
+                       @results = connection.execute(sql)
+                      # map key to link column 
+                      v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload
+                      sql = "update "+@cg_tn.tn+"_new  t set t.enrollment_id = ( select e.id from enrollments e where e.enumber = replace(replace(replace(replace(t."+v_cg_tn_cn[0].cn+",'_v2',''),'_v3',''),'_v4',''),'_v5',''))"
+                      results = connection.execute(sql)
+                      sql = "select distinct "+v_cg_tn_cn[0].cn+" from "+@cg_tn.tn+"_new"
+                      results = connection.execute(sql)
+                      results.each do |r|
+                        v_sp_id = v_shared.get_sp_id_from_subjectid_v(r[0])
+                        if !v_sp_id.blank?
+                          sql = "update "+@cg_tn.tn+"_new  t set t.scan_procedure_id = "+v_sp_id.to_s+" where "+v_cg_tn_cn[0].cn+" ='"+r[0]+"'"
+                          results = connection.execute(sql)
+                        end
+                      end
+                      # check if expected columns mapped?
+                      sql = "select "+v_cg_tn_cn[0].cn+", enrollment_id from "+@cg_tn.tn+"_new where "+v_cg_tn_cn[0].cn+" = '"+v_new_key_value+"' and scan_procedure_id is null order by "+v_cg_tn_cn[0].cn
+                      results = connection.execute(sql)
+                      v_msg =""
+                      results.each do |re|
+                        v_msg = re.join(' | ')+" ,"+v_msg
+                        flash[:notice] = v_new_key_value+" could not be mapped to an enrollment and scan procedure."
+                      end
+                                     
+                      # insert present into new, apply edit -- like the partial file reload
+                      # get all the columns from @cg_tn.tn+"_new
+                      sql = "SHOW COLUMNS FROM "+@cg_tn.tn+"_new"
+                      connection = ActiveRecord::Base.connection();
+                      v_cols =[]
+                      @results = connection.execute(sql)
+                      @results.each do |c|
+                         v_cols.push(c[0])
+                      end
+                      # this will get all the _edit into _new , but _edit is still ok
+                      v_sql = "insert into "+@cg_tn.tn+"_new("+v_cols.join(',')+")  select "+v_cols.join(',')+" from "+@cg_tn.tn+" where "+@cg_tn.tn+"."+v_cg_tn_cn[0].cn+" not in (select "+v_cg_tn_cn[0].cn+" from "+@cg_tn.tn+"_new)"
+                      results = connection.execute(v_sql)
+                      
+                      v_msg = v_shared.move_present_to_old_new_to_present(@cg_tn.tn,
+                      v_cols.join(','), "scan_procedure_id is not null  and enrollment_id is not null ",v_msg)
+                      v_shared.apply_cg_edits(@cg_tn.tn)
+                    elsif v_key_type == "reggieid-kc-participant_id"   
+                      # insert into _new 
+                      sql = "truncate table "+@cg_tn.tn+"_new"
+                      @results = connection.execute(sql)
+                      sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ")values('"+v_new_key_value+"')"
+                      @results = connection.execute(sql)   
+                      # map key to link column 
+                      v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload
+                      sql = "update "+@cg_tn.tn+"_new  t set t.participant_id = ( select distinct p.id from participants p where p.reggieid = t."+v_cg_tn_cn[0].cn+")"
+                      results = connection.execute(sql) 
+                      # check if expected columns mapped?
+                      sql = "select "+v_cg_tn_cn[0].cn+", participant_id from "+@cg_tn.tn+"_new where "+v_cg_tn_cn[0].cn+" = '"+v_new_key_value+"' and participant_id is null order by "+v_cg_tn_cn[0].cn
+                      results = connection.execute(sql)
+                      v_msg =""
+                      results.each do |re|
+                        v_msg = re.join(' | ')+" ,"+v_msg
+                        flash[:notice] = v_new_key_value+" could not be mapped to a participant."
+                      end  
+                      # insert present into new, apply edit -- like the partial file reload
+                      # get all the columns from @cg_tn.tn+"_new
+                      sql = "SHOW COLUMNS FROM "+@cg_tn.tn+"_new"
+                      connection = ActiveRecord::Base.connection();
+                      v_cols =[]
+                      @results = connection.execute(sql)
+                      @results.each do |c|
+                         v_cols.push(c[0])
+                      end
+                      # this will get all the _edit into _new , but _edit is still ok
+                      v_sql = "insert into "+@cg_tn.tn+"_new("+v_cols.join(',')+")  select "+v_cols.join(',')+" from "+@cg_tn.tn+" where "+@cg_tn.tn+"."+v_cg_tn_cn[0].cn+" not in (select "+v_cg_tn_cn[0].cn+" from "+@cg_tn.tn+"_new)"
+                      results = connection.execute(v_sql)
+                      
+                      v_msg = v_shared.move_present_to_old_new_to_present(@cg_tn.tn,
+                      v_cols.join(','), "participant_id is not null  ",v_msg)
+                      v_shared.apply_cg_edits(@cg_tn.tn)       
+                      
+                    elsif v_key_type == "wrapnum-kc-participant_id"
+                      # insert into _new 
+                      sql = "truncate table "+@cg_tn.tn+"_new"
+                      @results = connection.execute(sql)
+                      sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ")values('"+v_new_key_value+"')"
+                      @results = connection.execute(sql)
+                      # map key to link column 
+                      v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload
+                      sql = "update "+@cg_tn.tn+"_new  t set t.participant_id = ( select distinct p.id from participants p where p.wrapnum = t."+v_cg_tn_cn[0].cn+")"
+                      results = connection.execute(sql)
+                      # check if expected columns mapped?
+                      sql = "select "+v_cg_tn_cn[0].cn+", participant_id from "+@cg_tn.tn+"_new where "+v_cg_tn_cn[0].cn+" = '"+v_new_key_value+"' and participant_id is null order by "+v_cg_tn_cn[0].cn
+                      results = connection.execute(sql)
+                      v_msg =""
+                      results.each do |re|
+                        v_msg = re.join(' | ')+" ,"+v_msg
+                        flash[:notice] = v_new_key_value+" could not be mapped to a participant."
+                      end
+                      # insert present into new, apply edit -- like the partial file reload
+                      # get all the columns from @cg_tn.tn+"_new
+                      sql = "SHOW COLUMNS FROM "+@cg_tn.tn+"_new"
+                      connection = ActiveRecord::Base.connection();
+                      v_cols =[]
+                      @results = connection.execute(sql)
+                      @results.each do |c|
+                         v_cols.push(c[0])
+                      end
+                      # this will get all the _edit into _new , but _edit is still ok
+                      v_sql = "insert into "+@cg_tn.tn+"_new("+v_cols.join(',')+")  select "+v_cols.join(',')+" from "+@cg_tn.tn+" where "+@cg_tn.tn+"."+v_cg_tn_cn[0].cn+" not in (select "+v_cg_tn_cn[0].cn+" from "+@cg_tn.tn+"_new)"
+                      results = connection.execute(v_sql)
+                      
+                      v_msg = v_shared.move_present_to_old_new_to_present(@cg_tn.tn,
+                      v_cols.join(','), "participant_id is not null  ",v_msg)
+                      v_shared.apply_cg_edits(@cg_tn.tn)
+                      
+                    elsif v_key_type == "adrcnum-kc-participant_id"
+                      # insert into _new 
+                      sql = "truncate table "+@cg_tn.tn+"_new"
+                      @results = connection.execute(sql)
+                      sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ")values('"+v_new_key_value+"')"
+                      @results = connection.execute(sql)
+                      # map key to link column 
+                      v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload
+                      sql = "update "+@cg_tn.tn+"_new  t set t.participant_id = ( select distinct p.id from participants p where p.adrcnum = t."+v_cg_tn_cn[0].cn+")"
+                      results = connection.execute(sql)
+                      # check if expected columns mapped?
+                      sql = "select "+v_cg_tn_cn[0].cn+", participant_id from "+@cg_tn.tn+"_new where "+v_cg_tn_cn[0].cn+" = '"+v_new_key_value+"' and participant_id is null order by "+v_cg_tn_cn[0].cn
+                      results = connection.execute(sql)
+                      v_msg =""
+                      results.each do |re|
+                        v_msg = re.join(' | ')+" ,"+v_msg
+                        flash[:notice] = v_new_key_value+" could not be mapped to a participant."
+                      end
+                      # insert present into new, apply edit -- like the partial file reload
+                      # get all the columns from @cg_tn.tn+"_new
+                      sql = "SHOW COLUMNS FROM "+@cg_tn.tn+"_new"
+                      connection = ActiveRecord::Base.connection();
+                      v_cols =[]
+                      @results = connection.execute(sql)
+                      @results.each do |c|
+                         v_cols.push(c[0])
+                      end
+                      # this will get all the _edit into _new , but _edit is still ok
+                      v_sql = "insert into "+@cg_tn.tn+"_new("+v_cols.join(',')+")  select "+v_cols.join(',')+" from "+@cg_tn.tn+" where "+@cg_tn.tn+"."+v_cg_tn_cn[0].cn+" not in (select "+v_cg_tn_cn[0].cn+" from "+@cg_tn.tn+"_new)"
+                      results = connection.execute(v_sql)
+                      
+                      v_msg = v_shared.move_present_to_old_new_to_present(@cg_tn.tn,
+                      v_cols.join(','), "participant_id is not null  ",v_msg)
+                      v_shared.apply_cg_edits(@cg_tn.tn)                     
+                    end# ok key link
+                 end
               end
-              if v_key_type == "enrollment/sp"
-                 # insert into _new 
-                 sql = "truncate table "+@cg_tn.tn+"_new"
-                 @results = connection.execute(sql)
-                 sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ")values('"+v_enumber+"')"
-                 @results = connection.execute(sql)
-                # map key to link column 
-                v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload
-                sql = "update "+@cg_tn.tn+"_new  t set t.enrollment_id = ( select e.id from enrollments e where e.enumber = replace(replace(replace(replace(t."+v_cg_tn_cn[0].cn+",'_v2',''),'_v3',''),'_v4',''),'_v5',''))"
-                results = connection.execute(sql)
-                sql = "select distinct "+v_cg_tn_cn[0].cn+" from "+@cg_tn.tn+"_new"
-                results = connection.execute(sql)
-                results.each do |r|
-                  v_sp_id = v_shared.get_sp_id_from_subjectid_v(r[0])
-                  if !v_sp_id.blank?
-                    sql = "update "+@cg_tn.tn+"_new  t set t.scan_procedure_id = "+v_sp_id.to_s+" where "+v_cg_tn_cn[0].cn+" ='"+r[0]+"'"
-                    results = connection.execute(sql)
-                  end
-                end
-                # check if expected columns mapped?
-                sql = "select "+v_cg_tn_cn[0].cn+", enrollment_id from "+@cg_tn.tn+"_new where "+v_cg_tn_cn[0].cn+" = '"+v_enumber+"' and scan_procedure_id is null order by "+v_cg_tn_cn[0].cn
-                results = connection.execute(sql)
-                v_msg =""
-                results.each do |re|
-                  v_msg = re.join(' | ')+" ,"+v_msg
-                  flash[:notice] = v_enumber+" could not be mapped to an enrollment and scan procedure."
-                end
-               
-                # insert present into new, apply edit -- like the partial file reload
-                # get all the columns from @cg_tn.tn+"_new
-                sql = "SHOW COLUMNS FROM "+@cg_tn.tn+"_new"
-                connection = ActiveRecord::Base.connection();
-                v_cols =[]
-                @results = connection.execute(sql)
-                @results.each do |c|
-                   v_cols.push(c[0])
-                end
-                # this will get all the _edit into _new , but _edit is still ok
-                v_sql = "insert into "+@cg_tn.tn+"_new("+v_cols.join(',')+")  select "+v_cols.join(',')+" from "+@cg_tn.tn+" where "+@cg_tn.tn+"."+v_cg_tn_cn[0].cn+" not in (select "+v_cg_tn_cn[0].cn+" from "+@cg_tn.tn+"_new)"
-                results = connection.execute(v_sql)
-                
-                v_msg = v_shared.move_present_to_old_new_to_present(@cg_tn.tn,
-                v_cols.join(','), "scan_procedure_id is not null  and enrollment_id is not null ",v_msg)
-                v_shared.apply_cg_edits(@cg_tn.tn)
-                
-              end# ok key link
+              
             end
-        end
-        
-      end
-      
+            
       
       # build up condition and join from @cg_tn
       if !params[:cg_edit_table].blank? and  !params[:cg_edit_table][:enumber].blank?
@@ -1547,22 +1667,33 @@ class DataSearchesController < ApplicationController
        else
          v_key_col_sql = "enrollment_id integer, scan_procedure_id integer"
          v_key_col_edit_sql = "enrollment_id varchar(50) DEFAULT '|', scan_procedure_id varchar(50) DEFAULT '|'"
-         if params[:key_type] == "participant_id"
-             v_key_col_sql = "participant_id integer"
-             v_key_col_edit_sql = "participant_id varchar(50) DEFAULT '|'"
+         if params[:key_type] == "reggieid-kc-participant_id"
+             v_key_col_sql ="reggieid_kc varchar(50) "
+             v_key_col_join_sql = "participant_id integer"
+             v_key_col_edit_join_sql = "participant_id varchar(50) DEFAULT '|'"
+          elsif params[:key_type] == "wrapnum-kc-participant_id"
+            v_key_col_sql ="wrapnum_kc varchar(50) "
+             v_key_col_join_sql = "participant_id integer"             
+             v_key_col_edit_join_sql = "participant_id varchar(50) DEFAULT '|'"
+          elsif params[:key_type] == "adrcnum-kc-participant_id"
+             v_key_col_sql ="adrcnum_kc varchar(50) "
+              v_key_col_join_sql = "participant_id integer"             
+              v_key_col_edit_join_sql = "participant_id varchar(50) DEFAULT '|'"
          elsif  params[:key_type] == "enrollment/sp"
-              v_key_col_sql = "enrollment_id integer, scan_procedure_id integer"
-              v_key_col_edit_sql = "enrollment_id varchar(50) DEFAULT '|', scan_procedure_id varchar(50) DEFAULT '|'"
+              v_key_col_sql ="subjectid varchar(50) "
+              v_key_col_join_sql = "enrollment_id integer, scan_procedure_id integer"
+              v_key_col_edit_join_sql = "enrollment_id varchar(50) DEFAULT '|', scan_procedure_id varchar(50) DEFAULT '|'"
          end
-         sql ="create table "+v_table_name+" (subjectid varchar(50), general_comment varchar(2000),done_flag varchar(1),status_flag varchar(1),status_comment varchar(500),"+v_key_col_sql+")"
+         sql ="create table "+v_table_name+" ("+v_key_col_sql+", general_comment varchar(2000),done_flag varchar(1),status_flag varchar(1),status_comment varchar(500),"+v_key_col_join_sql+")"
          results = connection.execute(sql)
-         sql ="create table "+v_table_name+"_old (subjectid varchar(50), general_comment varchar(2000),done_flag varchar(1),status_flag varchar(1),status_comment varchar(500),"+v_key_col_sql+")"
+         sql ="create table "+v_table_name+"_old ("+v_key_col_sql+", general_comment varchar(2000),done_flag varchar(1),status_flag varchar(1),status_comment varchar(500),"+v_key_col_join_sql+")"
          results = connection.execute(sql)
-         sql ="create table "+v_table_name+"_new (subjectid varchar(50), general_comment varchar(2000),done_flag varchar(1),status_flag varchar(1),status_comment varchar(500),"+v_key_col_sql+")"
+         sql ="create table "+v_table_name+"_new ("+v_key_col_sql+", general_comment varchar(2000),done_flag varchar(1),status_flag varchar(1),status_comment varchar(500),"+v_key_col_join_sql+")"
          results = connection.execute(sql)
-         sql ="create table "+v_table_name+"_edit (subjectid varchar(50), general_comment varchar(2000) DEFAULT '|',done_flag varchar(1) DEFAULT '|',status_flag varchar(1) DEFAULT '|',status_comment varchar(500) DEFAULT '|',"+v_key_col_edit_sql+",delete_key_flag varchar(1) DEFAULT 'N')"
+         sql ="create table "+v_table_name+"_edit ("+v_key_col_sql+", general_comment varchar(2000) DEFAULT '|',done_flag varchar(1) DEFAULT '|',status_flag varchar(1) DEFAULT '|',status_comment varchar(500) DEFAULT '|',"+v_key_col_edit_join_sql+",delete_key_flag varchar(1) DEFAULT 'N')"
          results = connection.execute(sql)
          flash[:notice] = 'Table '+v_table_name+' was successfully created in the database.'
+          
          respond_to do |format|
             format.html { redirect_to( '/cg_table_edit_db?cg_table_name='+v_table_name, :notice => 'Table '+v_table_name+' was successfully created in the database.' )}
   
@@ -1707,8 +1838,12 @@ class DataSearchesController < ApplicationController
     @v_key_type = ""
     if v_cols.include?('subjectid') and v_cols.include?('enrollment_id') and v_cols.include?('scan_procedure_id') 
         @v_key_type = "enrollment/sp"
-    elsif v_cols.include?('participant_id') and !v_cols.include?('subjectid') and !v_cols.include?('enrollment_id') and !v_cols.include?('scan_procedure_id') 
-      @v_key_type = "participant_id"
+    elsif v_cols.include?('participant_id') and v_cols.include?('reggieid_kc') 
+      @v_key_type = "reggieid-kc-participant_id"
+    elsif v_cols.include?('participant_id') and v_cols.include?('wrapnum_kc') 
+      @v_key_type = "wrapnum-kc-participant_id"
+    elsif v_cols.include?('participant_id') and v_cols.include?('adrcnum_kc') 
+      @v_key_type = "adrcnum-kc-participant_id"
     end
     @v_link_cg_table_setup = "N"
     if @v_key_type > ""

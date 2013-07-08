@@ -336,6 +336,12 @@ puts "AAAAAA "+v_call
       if v_scan_desc_type_array.size < 4   and (results_status.first)[0] != "R"
         sql_dirlist = "update cg_adrc_upload set general_comment =' NOT ALL SCAN TYPES!!!! "+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
         results_dirlist = connection.execute(sql_dirlist)
+        # send email 
+        v_subject = "adrc_upload "+r[0]+" is missing some scan types --- set status_flag ='R' to send  : scans ="+v_folder_array.join(", ") 
+        mail(
+          :to => "noreply_johnson_lab@medicine.wisc.edu", 
+          :subject => v_subject
+        )
          v_comment_warning = v_comment_warning+"  "+v_scan_desc_type_array.size.to_s+" scan type "+r[0]
       v_call = "rm -rf "+v_parent_dir_target
 # puts "BBBBBBBB "+v_call
