@@ -30,6 +30,10 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
       <%= f.text_field :range,:size => 6 %>
     </p>
     <p>
+      <%= f.label :Path %><br />
+      <%= f.text_field :path , :size=> 80 %>
+    </p>
+    <p>
       <%= f.label :Injection_time %><br />
       <%= select_time  (@petscan.injecttiontime ,:field_name =>'injectiont][', :include_blank => true )%><br />
     </p>

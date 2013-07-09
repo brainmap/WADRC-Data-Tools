@@ -157,10 +157,12 @@ edit_count = edit_count -1
 		    <% elsif i == 2 %>
 		     <td><%= vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
 		    <% elsif i == 6 %>
-		      <td><%= popup_note('peek', key_val_table('path_popup', { :PetNote => result[i].to_s })) unless result[i].to_s.blank? %></td>
+		      <td><%= popup_note('peek', key_val_table('path_popup', { :Path => result[i].to_s })) unless result[i].to_s.blank? %></td>
 		    <% elsif i == 7 %>
-		    <%= show_bool(result[i].to_s ) %>
+		      <td><%= popup_note('peek', key_val_table('path_popup', { :PetNote => result[i].to_s })) unless result[i].to_s.blank? %></td>
 		    <% elsif i == 8 %>
+		    <%= show_bool(result[i].to_s ) %>
+		    <% elsif i == 9 %>
 		      <td><%= popup_note('peek', key_val_table('path_popup', { :ApptNote => result[i].to_s })) unless result[i].to_s.blank? %></td>
 		    <% else %>
 		    <td><%= result[i] %></td>

@@ -1418,6 +1418,79 @@ puts "AAAAAA "+v_call
     
   end
   
+  def run_pet_path
+    visit = Visit.find(3)  #  need to get base path without visit
+    v_base_path = visit.get_base_path()
+     @schedule = Schedule.where("name in ('pet_path')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting pet_path"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      
+      sql = "select distinct  petscans.id, petscans.appointment_id, petscans.ecatfilename, appointments.vgroup_id , petscans.lookup_pettracer_id
+        from petscans, appointments where petscans.path is null and petscans.ecatfilename is not null and petscans.lookup_pettracer_id is not null
+        and appointments.id = petscans.appointment_id"
+      connection = ActiveRecord::Base.connection();        
+      results = connection.execute(sql)
+      v_cnt = 0
+      results.each do |r|
+        # get sp 
+        sql_sp = "select distinct scan_procedure_id from scan_procedures_vgroups where scan_procedures_vgroups.vgroup_id ="+r[3].to_s 
+        # could limit by scan_procedures.petscan_flag, but don't trust its being populated
+        results_sp = connection.execute(sql_sp)   
+        results_sp.each do |r_sp|
+            # pass to function so can use in petscan edit
+            v_return_path = ""     
+            v_return_path = get_pet_path(r_sp[0], r[2], r[4])  # pass in sp, file name, tracerid
+            if v_return_path > ""
+              v_petscan = Petscan.find(r[0])
+              v_petscan.path = v_return_path
+              v_petscan.save
+              v_cnt = v_cnt + 1
+            end
+        end
+        
+      end
+      v_comment = " petscan paths update ="+v_cnt.to_s+"  "+v_comment
+      @schedulerun.comment =("successful finish pet_path "+v_comment[0..459])
+      if !v_comment.include?("ERROR")
+         @schedulerun.status_flag ="Y"
+       end
+       @schedulerun.save
+       @schedulerun.end_time = @schedulerun.updated_at      
+       @schedulerun.save
+    
+  end
+  
+  def get_pet_path(v_sp_id, v_file_name, v_tracer_id)
+    visit = Visit.find(3)  #  need to get base path without visit
+    # ???? '1_asthana.adrc-clinical-core.visit1'=>'', '2_bendlin.tami.visit1'=>'', '1_bendlin.wmad.visit1'=>'','1_bendlin.mets.visit1'=> '',    '2_bendlin.mets.visit1'=> ''
+    # 2_ries.mosaic.visit1    3_ries.mosaic.visit1
+    # tracer 1=pib, 2=fdg, 3=way, 4=015
+    v_base_path = visit.get_base_path()
+    v_pet_target_hash ={'1_johnson.pipr.visit1'=>'johnson.pipr.visit1/pet','2_johnson.predict.visit1'=>'johnson.predict.visit1/pet/FDG-visit1',
+         '1_johnson.predict.visit1'=>'johnson.predict.visit1/pet/PIB-visit1','2_johnson.predict.visit2'=>'johnson.predict.visit2/pet/FDG',
+         '1_johnson.predict.visit2'=>'johnson.predict.visit2/pet/PIB','2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
+         '2_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/FDG',    '3_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/WAY' }
+    v_sp = ScanProcedure.find(v_sp_id)
+    v_key = v_tracer_id.to_s+"_"+v_sp.codename
+    v_path = ""
+    if !v_pet_target_hash[v_key].blank?
+        v_path = v_base_path+"/raw/"+v_pet_target_hash[v_key]+"/"+v_file_name
+    else
+        puts "AAAAAAAAA "+v_key+"   "+v_file_name
+    end
+    if File.exists?(v_path)
+      return v_path
+    else
+      return ""
+    end
+    
+    
+  end
   
   def run_pib_status
         visit = Visit.find(3)  #  need to get base path without visit

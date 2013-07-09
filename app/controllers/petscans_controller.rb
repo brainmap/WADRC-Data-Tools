@@ -260,19 +260,19 @@ class PetscansController < ApplicationController
        @html_request ="Y"
        case  request_format
          when "text/html" then # ? application/html
-           @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Note','Pet status','Appt Note'] # need to look up values
+           @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Path','Note','Pet status','Appt Note'] # need to look up values
                # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
            @column_number =   @column_headers.size
-           @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename",
+           @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename","petscans.path",
                  "petscans.petscan_note","vgroups.transfer_pet","petscans.id"] # vgroups.id vgroup_id always first, include table name
             @left_join = ["LEFT JOIN lookup_pettracers on petscans.lookup_pettracer_id = lookup_pettracers.id",
                     "LEFT JOIN employees on petscans.enteredpetscanwho = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
          else    
            @html_request ="N"          
-            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Dose','Injection Time','Scan Start','Note','Range','Pet status','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt','Appt Note'] # need to look up values
+            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Path','Dose','Injection Time','Scan Start','Note','Range','Pet status','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt','Appt Note'] # need to look up values
                   # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
             @column_number =   @column_headers.size
-            @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename","petscans.netinjecteddose",
+            @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename","petscans.path","petscans.netinjecteddose",
                     "time_format(timediff( time(petscans.injecttiontime),subtime(utc_time(),time(localtime()))),'%H:%i')",
                     "time_format(timediff( time(scanstarttime),subtime(utc_time(),time(localtime()))),'%H:%i')",
                     "petscans.petscan_note","petscans.range","vgroups.transfer_pet","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","petscans.id"] # vgroups.id vgroup_id always first, include table name 
@@ -496,11 +496,25 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
       @vital.bloodglucose = params[:bloodglucose]
       @vital.save      
     end
+    
 
     respond_to do |format|
       if @petscan.update_attributes(params[:petscan])
         @appointment = Appointment.find(@petscan.appointment_id)
         @vgroup = Vgroup.find(@appointment.vgroup_id)
+        # get sp_id's
+        connection = ActiveRecord::Base.connection();
+        sql_sp = "select distinct scan_procedure_id from scan_procedures_vgroups where scan_procedures_vgroups.vgroup_id ="+@appointment.vgroup_id.to_s
+        results_sp = connection.execute(sql_sp) 
+        v_shared = Shared.new  
+        results_sp.each do |r_sp|
+            v_path = ""
+            v_path = v_shared.get_pet_path(r_sp[0], @petscan.ecatfilename, @petscan.lookup_pettracer_id)
+            if v_path > ""
+              @petscan.path = v_path
+              @petscan.save 
+            end
+        end
         @appointment.comment = params[:appointment][:comment]
         @appointment.appointment_date =appointment_date
         if !@vgroup.participant_id.blank?
