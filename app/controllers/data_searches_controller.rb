@@ -1068,8 +1068,8 @@ class DataSearchesController < ApplicationController
                              v_join_left_tn = @cg_tn.join_left_parent_tn
                            end
                            if !@cg_tn_cn.ref_table_b.blank?  # LOOKUP_REFS and label= 
-                              join_left = "LEFT JOIN (select LOOKUP_REFS.ref_value id_"+v_tn_cn_id.to_s+", LOOKUP_REFS.description a_"+v_tn_cn_id.to_s+"  
-                                from  LOOKUP_REFS where   LOOKUP_REFS.label ='"+@cg_tn_cn.ref_table_b+"'  
+                              join_left = "LEFT JOIN (select lookup_refs.ref_value id_"+v_tn_cn_id.to_s+", lookup_refs.description a_"+v_tn_cn_id.to_s+"  
+                                from  lookup_refs where   lookup_refs.label ='"+@cg_tn_cn.ref_table_b+"'  
                                 ) cg_alias_"+v_tn_cn_id.to_s+" on "+@cg_tn.tn+"."+@cg_tn_cn.cn+" = cg_alias_"+v_tn_cn_id.to_s+".id_"+v_tn_cn_id.to_s 
                               
                               if !@tables_left_join_hash[v_join_left_tn ].blank?               
