@@ -31,13 +31,13 @@
 <tr><td align="left"><b>Target Table:</b> <%= f.text_field :target_table %> </td><td align="left"><b>Target Column(s):</b> <%= f.text_field :target_column %> </td></tr>
 
 <tr><td align="left" ><br><b>File Upload Fields:</b>  </td><td align="left">&nbsp; </td></tr>
-<tr><td align="left" colspan=2><b>File_Upload_Flag:</b><%= f.select :file_upload_flag, v_y_n, :selected => 'N'  %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<tr><td align="left" colspan=2><b>File_Upload_Flag:</b><%= f.select :file_upload_flag, v_y_n, :selected => @schedule.file_upload_flag.blank? ? 'N' :  @schedule.file_upload_flag   %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<b>File Header:</b> <%= f.text_field :file_header, :size=>90 %> </td></tr>
 
 <tr><td align="left" colspan=2><b>File_Columns_Included:</b> <%= f.text_field :file_columns_included, :size=>60 %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<b>File Key Source Column:</b> <%= f.text_field :file_key_source_column %> </td></tr>
 <tr><td align="left" colspan=2><b>File Path:</b> <%= f.text_field :file_path, :size => 60 %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	<b>Key Type:</b> <%= f.select :key_type, v_key, :selected => 'enrollment/sp'  %></td></tr>
+	<b>Key Type:</b> <%= f.select :key_type, v_key, :selected => @schedule.key_type ? 'enrollment/sp': @schedule.key_type %></td></tr>
 <tr><td align="left" colspan=2><b>Target_Table_columns/order:</b> <%= f.text_field :target_table_columns, :size=>90 %>	</td></tr>
 <tr><td align="left" colspan=2>
 <br>
