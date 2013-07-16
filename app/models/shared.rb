@@ -978,7 +978,8 @@ puts "AAAAAA "+v_call
            # v_shared = Shared.new 
            # move from new to present table -- made into a function  in shared model
            v_comment = self.move_present_to_old_new_to_present("cg_dti_status",
-             "dti_subjectid,dti_fa_file_name, dti_general_comment,dti_fa_flag, dti_fa_comment, dti_fa_global_quality,dti_md_file_name,dti_md_flag, dti_md_comment, dti_md_global_quality, enrollment_id,scan_procedure_id",
+             "dti_subjectid,dti_fa_file_name, dti_general_comment,dti_fa_flag, dti_fa_comment, dti_fa_global_quality,dti_md_file_name,dti_md_flag, dti_md_comment, dti_md_global_quality, dti_l1_file_name,dti_l1_flag, dti_l1_comment, dti_l1_global_quality,dti_l2_file_name,dti_l2_flag, dti_l2_comment, dti_l2_global_quality, dti_l3_file_name,dti_l3_flag, dti_l3_comment, dti_l3_global_quality,
+              enrollment_id,scan_procedure_id",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
 
