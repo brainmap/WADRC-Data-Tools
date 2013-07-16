@@ -413,8 +413,9 @@ class DataSearchesController < ApplicationController
         @ref_table_b_dict ={}
         @value_list_dict ={}
         
-        @cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",@cg_tn.id)
+        @cg_tn_cns =CgTnCn.where("cg_tn_id in (?) and status_flag='Y'",@cg_tn.id)
         @cg_tn_cns.each do |cg_tn_cn|
+  puts "AAAAAAA cg_tn_cn.cn="+cg_tn_cn.cn
             if !cg_tn_cn.ref_table_a.blank?
               @ref_table_a_dict[cg_tn_cn.cn] = cg_tn_cn.ref_table_a
             end
@@ -715,7 +716,7 @@ class DataSearchesController < ApplicationController
       @cg_data_dict = {}
       @cg_edit_data_dict = {}
       
-      @cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",@cg_tn.id)
+      @cg_tn_cns =CgTnCn.where("cg_tn_id in (?) and status_flag = 'Y' ",@cg_tn.id).order("display_order")
       @cg_tn_cns.each do |cg_tn_cn|
           @cns.push(cg_tn_cn.cn)
           @cns_common_name_dict[cg_tn_cn.cn] = cg_tn_cn.common_name

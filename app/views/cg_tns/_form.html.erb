@@ -72,8 +72,9 @@
 </ul>
 </div>
 </td><td valign="top"><%= f.label :datadictionary, 'Upload data dictionary'%>: <%= f.file_field :datadictionary %> 
-	<br> <% if !@cg_tn.datadictionary_file_name.blank?%><small><small><%= link_to 'Download DataDictionary', @cg_tn.datadictionary.url %> <%= @cg_tn.datadictionary_file_name%></small></small><%end%>
-	</td></tr></table>
+	<br> <% if !@cg_tn.datadictionary_file_name.blank?%><small><small><%= link_to 'Download DataDictionary', @cg_tn.datadictionary.url %> <%= @cg_tn.datadictionary_file_name%></small> -Careful not to update cg_tns and lose the data dictionary.</small><%end%>
+	</td></tr>
+	<tr><td>The data dictionary can ONLY be a *.pdf or a *.xls file. </td></tr></table>
   <div class="actions">
     <%= f.submit %>
   </div><br>
