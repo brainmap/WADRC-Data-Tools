@@ -415,7 +415,7 @@ class DataSearchesController < ApplicationController
         
         @cg_tn_cns =CgTnCn.where("cg_tn_id in (?) and status_flag='Y'",@cg_tn.id)
         @cg_tn_cns.each do |cg_tn_cn|
-  puts "AAAAAAA cg_tn_cn.cn="+cg_tn_cn.cn
+  # puts "AAAAAAA cg_tn_cn.cn="+cg_tn_cn.cn
             if !cg_tn_cn.ref_table_a.blank?
               @ref_table_a_dict[cg_tn_cn.cn] = cg_tn_cn.ref_table_a
             end
