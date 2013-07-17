@@ -205,6 +205,21 @@ v_tn_cn_searchable_hash = []
                 v_include_tn = "TRUE"          
 	          end
                 %>
+<% if tn.common_name == "Pet Appointments"%>
+<tr><td colspan="5">Pick tracer(s):
+	
+<%	LookupPettracer.all.sort_by(&:name).each do |tr| %>
+		
+			<% if @pet_tracer_array.include?(tr.id.to_s)%>
+			   <%= check_box_tag "pet_tracer_ids", tr.id,TRUE , :name => 'cg_search[pet_tracer_id][]' %>
+			<% else %>
+			   <%= check_box_tag "pet_tracer_ids", tr.id,FALSE , :name => 'cg_search[pet_tracer_id][]' %>
+			<% end %>
+			<%= label_tag '', tr.name %>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<% end %>
+	</td></tr>
+<% end %>
              <tr><td><%= hidden_field(:cg_search, "tn_id][", :value=>tn.id.to_s) %>
   <%= check_box_tag "include_tns", "1", v_include_tn == "FALSE" ? FALSE : TRUE , :name => "cg_search[include_tn]["+tn.id.to_s+"]", :onclick =>"checkbox_cascade(this,'"+tn.id.to_s+"')"%></td>
 	     <td><%= (tn.common_name).html_safe %> <!-- <%= "("+tn.tn+")" %> --> </td>

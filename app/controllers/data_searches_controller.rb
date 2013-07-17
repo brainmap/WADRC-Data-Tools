@@ -822,10 +822,12 @@ class DataSearchesController < ApplicationController
       @conditions = [] # for the q_data_search
       @conditions_bak = []
       @local_tables =[] # need to add outer join to table, -- 
+      @local_tables_alias_hash =Hash.new # need to make pet tracer select 
       @table_types =[] 
       @tables_left_join_hash = Hash.new
       @joins = [] # just inner joins
       @sp_array =[]
+      @pet_tracer_array = []
       @cg_query_tn_id_array = []
       @cg_query_tn_hash = Hash.new
       @cg_query_tn_cn_hash = Hash.new
@@ -854,6 +856,10 @@ class DataSearchesController < ApplicationController
          @cg_query = CgQuery.find(params[:cg_search][:cg_query_id])
         if !@cg_query.scan_procedure_id_list.blank?
            @sp_array = @cg_query.scan_procedure_id_list.split(",")
+        end
+      
+         if !@cg_query.pet_tracer_id_list.blank?
+            @pet_tracer_array = @cg_query.pet_tracer_id_list.split(",")
          end
 
          @cg_query_tns =  CgQueryTn.where("cg_query_id = "+@cg_query.id.to_s)
@@ -906,6 +912,11 @@ class DataSearchesController < ApplicationController
             
             @cg_query.scan_procedure_id_list = params[:cg_search][:scan_procedure_id].join(',')
             @sp_array = @cg_query.scan_procedure_id_list.split(",")
+         end
+         
+         if !params[:cg_search][:pet_tracer_id].blank?
+            @cg_query.pet_tracer_id_list = params[:cg_search][:pet_tracer_id].join(',')
+            @pet_tracer_array = @cg_query.pet_tracer_id_list.split(",")
          end
 
          if !params[:cg_search][:enumber].blank?
@@ -984,27 +995,50 @@ class DataSearchesController < ApplicationController
          # loop thru each table
          if !params[:cg_search][:tn_id].blank? 
            params[:cg_search][:tn_id].each do |tn_id|
-               v_tn_id = tn_id.to_a.to_s
+            v_tn_id = tn_id.to_a.to_s
+            v_cg_tn_array = []  
+            # pet with a tracer picked - could be many tracers - artifically make more "tables"
+            @cg_tn = CgTn.find(v_tn_id)
+            if @cg_tn.tn == "view_petscan_appts" and !params[:cg_search][:pet_tracer_id].blank?
+                # need to loop thru each pet tracer picked
+                params[:cg_search][:pet_tracer_id].each do |tr|
+                     @cg_tn = CgTn.find(v_tn_id)
+                     # remake the @cg_tn with pet_tracer_id
+                     @cg_tn.alias = @cg_tn.tn+"_"+tr
+                     @cg_tn.tn = "(select * from view_petscan_appts where view_petscan_appts.lookup_pettracer_id = '"+tr+"')  "+@cg_tn.alias
+                     @cg_tn.join_right = "view_petscan_appts_"+tr+".petscan_vgroup_id = vgroups.id"
+                     @cg_tn.join_left ="LEFT JOIN (select * from view_petscan_appts where view_petscan_appts.lookup_pettracer_id = '"+tr+"')  "+@cg_tn.alias+" on  vgroups.id = view_petscan_appts_"+tr+".petscan_vgroup_id"
+                     @local_tables_alias_hash[@cg_tn.tn] = @cg_tn.alias
+                     v_cg_tn_array.push(@cg_tn)
+                end
+            else
+                @cg_tn = CgTn.find(v_tn_id)  
+                @cg_tn.alias = @cg_tn.tn
+                v_cg_tn_array.push(@cg_tn)
+            end
+            v_cg_tn_array.each do |tn_object| 
+             @cg_tn = tn_object             
              if (!params[:cg_search][:include_tn].blank? and !params[:cg_search][:include_tn][v_tn_id ].blank?) or !params[:cg_search][:join_type][v_tn_id].blank? or (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id].blank?) or  !params[:cg_search][:condition][v_tn_id].blank?   
-               @cg_query_tn = CgQueryTn.new
-               @cg_query_tn.cg_tn_id =v_tn_id
-               @cg_query_tn.cg_query_id = @cg_query.id
-               if !params[:cg_search][:include_tn].blank? and !params[:cg_search][:include_tn][v_tn_id ].blank?
-                 @cg_query_tn.include_tn = 1
-               end
-               @cg_query_tn.join_type = params[:cg_search][:join_type][v_tn_id]
+                @cg_query_tn = CgQueryTn.new
+                @cg_query_tn.cg_tn_id =v_tn_id
+                @cg_query_tn.cg_query_id = @cg_query.id
+                if !params[:cg_search][:include_tn].blank? and !params[:cg_search][:include_tn][v_tn_id ].blank?
+                  @cg_query_tn.include_tn = 1
+                end
+                @cg_query_tn.join_type = params[:cg_search][:join_type][v_tn_id]
 
-               @cg_tn = CgTn.find(v_tn_id)
                 if @cg_query_tn.join_type == 0  # inner join joins  
                     @table_types.push(@cg_tn.table_type)                     
-                    @local_tables.push(@cg_tn.tn)                                
-                     @local_conditions.push(@cg_tn.join_right)
+                    @local_tables.push(@cg_tn.tn)  
+                    @local_tables_alias_hash[@cg_tn.tn] =  @cg_tn.alias                         
+                    @local_conditions.push(@cg_tn.join_right)
                     
                 elsif @cg_query_tn.join_type == 1  # outer join joins  # NEED PARENT TABLE join_left_parent_tn
                     @table_types.push(@cg_tn.table_type)
                             # need to add outer as part of table length !!!!! THIS HAS TO BE FIXED
                     if @local_tables.index(@cg_tn.join_left_parent_tn).blank?   # WHAT ABOUT ALIAS                        
-                                  @local_tables.push(@cg_tn.join_left_parent_tn)                                
+                                  @local_tables.push(@cg_tn.join_left_parent_tn)  
+                                  @local_tables_alias_hash[@cg_tn.join_left_parent_tn] =   @cg_tn.join_left_parent_tn                             
                     end
                     if ! @tables_left_join_hash[@cg_tn.join_left_parent_tn ].blank?
                         @tables_left_join_hash[@cg_tn.join_left_parent_tn ] = @cg_tn.join_left+"  "+ @tables_left_join_hash[@cg_tn.join_left_parent_tn ]
@@ -1030,7 +1064,8 @@ class DataSearchesController < ApplicationController
                            @table_types.push(@cg_tn.table_type)
                                     # need to add outer as part of table length !!!!! THIS HAS TO BE FIXED
                             if @local_tables.index(@cg_tn.join_left_parent_tn).blank?   # WHAT ABOUT ALIAS                        
-                                          @local_tables.push(@cg_tn.join_left_parent_tn)                                
+                                          @local_tables.push(@cg_tn.join_left_parent_tn) 
+                                          @local_tables_alias_hash[@cg_tn.join_left_parent_tn] =   @cg_tn.join_left_parent_tn                                 
                             end
                             if ! @tables_left_join_hash[@cg_tn.join_left_parent_tn ].blank?
                                 @tables_left_join_hash[@cg_tn.join_left_parent_tn ] = @cg_tn.join_left+"  "+ @tables_left_join_hash[@cg_tn.join_left_parent_tn ]
@@ -1039,6 +1074,7 @@ class DataSearchesController < ApplicationController
                             end
                         else
                           @local_tables.push(@cg_tn.tn) # use uniq later
+                          @local_tables_alias_hash[@cg_tn.tn] =   @cg_tn.alias   
                           @table_types.push(@cg_tn.table_type) # use uniq later  use mix of table_type to define core join
                                  # base, cg_enumber, cg_enumber_sp, cg_rmr, cg_rmr_sp, cg_sp, cg_wrapnum, cg_adrcnum, cg_reggieid
                            @local_conditions.push(@cg_tn.join_right) # use uniq later
@@ -1069,36 +1105,40 @@ class DataSearchesController < ApplicationController
                              v_join_left_tn = @cg_tn.join_left_parent_tn
                            end
                            if !@cg_tn_cn.ref_table_b.blank?  # LOOKUP_REFS and label= 
+                             # problem with petscan/tracers and  alias -- picking up last 3 chars from @local_tables_alias_hash[@cg_tn.tn] and adding to lookup alias
+                              v_unique = @local_tables_alias_hash[@cg_tn.tn].reverse[0...3].reverse
                               join_left = "LEFT JOIN (select lookup_refs.ref_value id_"+v_tn_cn_id.to_s+", lookup_refs.description a_"+v_tn_cn_id.to_s+"  
                                 from  lookup_refs where   lookup_refs.label ='"+@cg_tn_cn.ref_table_b+"'  
-                                ) cg_alias_"+v_tn_cn_id.to_s+" on "+@cg_tn.tn+"."+@cg_tn_cn.cn+" = cg_alias_"+v_tn_cn_id.to_s+".id_"+v_tn_cn_id.to_s 
+                                ) cg_alias_"+v_tn_cn_id.to_s+v_unique+" on "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" = cg_alias_"+v_tn_cn_id.to_s+v_unique+".id_"+v_tn_cn_id.to_s 
                               
                               if !@tables_left_join_hash[v_join_left_tn ].blank?               
                                    @tables_left_join_hash[v_join_left_tn ] =  @tables_left_join_hash[v_join_left_tn ]+"  "+join_left
                               else
                                   @tables_left_join_hash[v_join_left_tn ] = join_left
                               end
-                               @local_fields.push("cg_alias_"+v_tn_cn_id.to_s+".a_"+v_tn_cn_id.to_s)
+                               @local_fields.push("cg_alias_"+v_tn_cn_id.to_s+v_unique+".a_"+v_tn_cn_id.to_s)
                            elsif !@cg_tn_cn.ref_table_a.blank? # camel case LookupPettracer to lookup_pettracers  - description
+                              # problem with petscan/tracers and  alias -- picking up last 3 chars from @local_tables_alias_hash[@cg_tn.tn] and adding to lookup alias
+                              v_unique = @local_tables_alias_hash[@cg_tn.tn].reverse[0...3].reverse
                               join_left = "LEFT JOIN (select "+@cg_tn_cn.ref_table_a.pluralize.underscore+".id id_"+v_tn_cn_id.to_s+", "+@cg_tn_cn.ref_table_a.pluralize.underscore+".description a_"+v_tn_cn_id.to_s+
-                                      " from "+@cg_tn_cn.ref_table_a.pluralize.underscore+" ) cg_alias_"+v_tn_cn_id.to_s+" on  "+@cg_tn.tn+"."+@cg_tn_cn.cn+" = cg_alias_"+v_tn_cn_id.to_s+".id_"+v_tn_cn_id.to_s
+                                      " from "+@cg_tn_cn.ref_table_a.pluralize.underscore+" ) cg_alias_"+v_tn_cn_id.to_s+v_unique+" on  "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" = cg_alias_"+v_tn_cn_id.to_s+v_unique+".id_"+v_tn_cn_id.to_s
                               if !@tables_left_join_hash[v_join_left_tn ].blank?               
                                     @tables_left_join_hash[v_join_left_tn] = @tables_left_join_hash[v_join_left_tn ]+"  "+join_left
                               else
                                     @tables_left_join_hash[v_join_left_tn ] = join_left
                               end
-                               @local_fields.push("cg_alias_"+v_tn_cn_id.to_s+".a_"+v_tn_cn_id.to_s)
+                               @local_fields.push("cg_alias_"+v_tn_cn_id.to_s+v_unique+".a_"+v_tn_cn_id.to_s)
                            else
-                               @local_fields.push(@cg_tn.tn+"."+@cg_tn_cn.cn)
+                               @local_fields.push(@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn)
                            end
-                         elsif !@cg_tn_cn.q_data_form_id.blank? and  @html_request =="N"  # need q_data
+                       elsif !@cg_tn_cn.q_data_form_id.blank? and  @html_request =="N"  # need q_data
                            if @html_request =="N"
-                               @local_fields.push(@cg_tn.tn+"."+@cg_tn_cn.cn)
+                               @local_fields.push(@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn)
                                @local_column_headers.push("q_data_form_"+@cg_tn_cn.q_data_form_id.to_s)
                                # WHAT ABOUT THE view into tables_local, join and left_join
                            end
                            # push col_header with form_id, push appt id linked to this form_id
-                           v_join_left_tn = @cg_tn.tn 
+                           v_join_left_tn = @cg_tn.tn
                            if @local_tables.index(@cg_tn.tn).blank?   # left join of left join?
                              v_join_left_tn = @cg_tn.join_left_parent_tn
                            end
@@ -1119,7 +1159,7 @@ class DataSearchesController < ApplicationController
                            # @conditions  captured above, after first set of form elements - mainly want sp limit
                            # define q_data form_id  
                            # pass to run_search_q_data and get back fields, columns_headers, conditions, etc.
-                           @tables =[@cg_tn.tn]
+                           @tables =[@cg_tn.tn]  # leaving alone @local_tables_alias_hash[ no q_data in pet
                            @q_form_id = @cg_tn_cn.q_data_form_id
    
                            @q_data_form_array.unshift(@q_form_id)                       
@@ -1188,55 +1228,55 @@ class DataSearchesController < ApplicationController
                           if @cg_query_tn_cn.value_1.include?(',') and ((@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.wrapnum" or (@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.adrcnum" or (@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.reggieid" )
                               @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/ /,'').gsub(/'/,'')
                               @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/,/,"','")
-                              v_condition =  " "+@cg_tn.tn+"."+@cg_tn_cn.cn+" in ( '"+@cg_query_tn_cn.value_1.gsub(/[;:"()=<>]/, '')+"')"
+                              v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" in ( '"+@cg_query_tn_cn.value_1.gsub(/[;:"()=<>]/, '')+"')"
                           else
-                              v_condition =  " "+@cg_tn.tn+"."+@cg_tn_cn.cn+" = '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"'"
+                              v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" = '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"'"
                           end
                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
-                              params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" = "+@cg_query_tn_cn.value_1
+                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" = "+@cg_query_tn_cn.value_1
                           end
                         elsif @cg_query_tn_cn.condition ==  1
-                          v_condition =  " "+@cg_tn.tn+"."+@cg_tn_cn.cn+" >= '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
+                          v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" >= '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
-                              params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" >= "+@cg_query_tn_cn.value_1
+                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" >= "+@cg_query_tn_cn.value_1
                           end
                         elsif @cg_query_tn_cn.condition == 2
-                          v_condition =  " "+@cg_tn.tn+"."+@cg_tn_cn.cn+" <= '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
+                          v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" <= '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                           if !v_condition.blank?
                              @local_conditions.push(v_condition)
-                             params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" <= "+@cg_query_tn_cn.value_1
+                             params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" <= "+@cg_query_tn_cn.value_1
                           end
                         elsif @cg_query_tn_cn.condition == 3
-                          v_condition =  " "+@cg_tn.tn+"."+@cg_tn_cn.cn+" != '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
+                          v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" != '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
-                              params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" != "+@cg_query_tn_cn.value_1                           
+                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" != "+@cg_query_tn_cn.value_1                           
                           end
                         elsif @cg_query_tn_cn.condition == 4
-                          v_condition =  " "+@cg_tn.tn+"."+@cg_tn_cn.cn+" between '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' and '"+ @cg_query_tn_cn.value_2.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
+                          v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" between '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' and '"+ @cg_query_tn_cn.value_2.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
-                              params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" between "+@cg_query_tn_cn.value_1+" and "+ @cg_query_tn_cn.value_2
+                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" between "+@cg_query_tn_cn.value_1+" and "+ @cg_query_tn_cn.value_2
                           end
                         elsif @cg_query_tn_cn.condition == 5
-                          v_condition = " trim( "+@cg_tn.tn+"."+@cg_tn_cn.cn+") is NULL "
+                          v_condition = " trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") is NULL "
                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
-                              params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" is blank"
+                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" is blank"
                           end
                         elsif @cg_query_tn_cn.condition == 6
-                          v_condition = " trim( "+@cg_tn.tn+"."+@cg_tn_cn.cn+") is NOT NULL "
+                          v_condition = " trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") is NOT NULL "
                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
-                              params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" is not blank "
+                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" is not blank "
                           end  
                         elsif @cg_query_tn_cn.condition == 7
-                          v_condition = "  "+@cg_tn.tn+"."+@cg_tn_cn.cn+" like '%"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"%' "
+                          v_condition = "  "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" like '%"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"%' "
                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
-                              params["search_criteria"] = params["search_criteria"] +", "+@cg_tn.tn+"."+@cg_tn_cn.cn+" contains "+@cg_query_tn_cn.value_1
+                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" contains "+@cg_query_tn_cn.value_1
                           end
                         end
                       end                
@@ -1432,6 +1472,7 @@ class DataSearchesController < ApplicationController
                params[:cg_search][:include_tn].delete(v_tn_id.to_s)
              end
            end
+          end 
          end
          
          
@@ -1458,9 +1499,13 @@ class DataSearchesController < ApplicationController
       if !@table_types.blank? # and !@table_types.index('base').blank?  # extend to cg_enumber, cg_enumber_sp, cg_rmr, cg_rmr_sp, cg_sp, cg_wrapnum, cg_adrcnum, cg_reggieid  
         @table_types.push('base')    
         @local_tables.push("vgroups")
+        @local_tables_alias_hash["vgroups"] =   "vgroups" 
         @local_tables.push("appointments") # --- include in mri, pet, lp, lh, q views -- need for other limits -- ? switch to vgroup?
+        @local_tables_alias_hash["appointments"]
         @local_tables.push("scan_procedures")
+        @local_tables_alias_hash["scan_procedures"]
         @local_tables.push("scan_procedures_vgroups")
+        @local_tables_alias_hash["scan_procedures_vgroups"]
         @fields_front =[]
         @fields_front.push("vgroups.id vgroup_id")
         @fields_front.push("vgroups.vgroup_date")
