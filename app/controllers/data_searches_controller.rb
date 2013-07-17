@@ -1015,6 +1015,7 @@ class DataSearchesController < ApplicationController
                 @cg_tn = CgTn.find(v_tn_id)  
                 @cg_tn.alias = @cg_tn.tn
                 v_cg_tn_array.push(@cg_tn)
+                @local_tables_alias_hash[@cg_tn.tn] =  @cg_tn.alias
             end
             v_cg_tn_array.each do |tn_object| 
              @cg_tn = tn_object             
