@@ -627,12 +627,18 @@ puts "AAAAAA "+v_call
                                       v_asl_2013_2025_smoothed_and_warped_flag = "Y"
                                   elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii")
                                       v_asl_2013_2025_registered_to_fs_flag ="Y"                                    
-                                  elsif  f == "ASL_"+dir_name_array[0]+"_fmap.nii"
+                                  end
+                                  
+                                  if v_asl_2013_0_fmap_flag == "Y" or v_asl_2013_1525_fmap_flag == "Y" or v_asl_2013_2025_fmap_flag == "Y"
                                     v_asl_fmap_flag = "Y"
                                     v_asl_fmap_single ="Y"
-                                  elsif  f.start_with?("ASL_"+dir_name_array[0]) and f.end_with?("_fmap.nii")
-                                    v_asl_fmap_flag = "Y"
                                   end
+                                  
+                                  if (v_asl_2013_0_fmap_flag == "Y" and v_asl_2013_1525_fmap_flag == "Y")  or (v_asl_2013_0_fmap_flag == "Y" and v_asl_2013_2025_fmap_flag == "Y") or (v_asl_2013_1525_fmap_flag == "Y" and v_asl_2013_2025_fmap_flag == "Y")
+                                    v_asl_fmap_single ="N"
+                                  end                                  
+
+                                  
                                 end
                              end
                              if File.directory?(v_subjectid_asl) or  File.directory?(v_subjectid_asl_bkup)

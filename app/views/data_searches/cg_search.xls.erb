@@ -1,5 +1,7 @@
 <table border=1>
-	  <tr><td align="left" colspan=<%= @local_column_headers.size %>>
+	  <tr><td align="left" colspan=1 > 
+	<%= #@local_column_headers.size  multiple cols cause problem with sort, but one column causes line wrap and a wide column
+	 %>   
 		 <%= @export_file_title %>
 		</td>
       </tr>		
