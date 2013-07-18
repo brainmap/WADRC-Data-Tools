@@ -1,7 +1,7 @@
 <div id="heading_and_link">
   <h1><%= @scan_procedure.codename %></h1>
   <p>
-    <%= link_to(pluralize(@scan_procedure.visits.size,'visit'), '/mri_search?mri_search[scan_procedure_id][]='+@scan_procedure.id.to_s) %> 
+    <%= link_to(pluralize(@scan_procedure.vgroups.size,'visit'), '/vgroups/home?vgroups_search[scan_procedure_id][id]='+@scan_procedure.id.to_s) %> 
     underwent this scan procedure
   </p>
 </div>
