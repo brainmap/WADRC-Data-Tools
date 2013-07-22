@@ -13,6 +13,15 @@ class PandaMailer < ActionMailer::Base
     )
   end
   
+  def schedule_notice(p_to, p_from, p_subject)
+    
+      mail(
+        :to => p_to,
+        :from => p_from, 
+        :subject => p_subject
+      )
+    end
+  
   def self.smtp_credentialed?
     !ActionMailer::Base.smtp_settings[:user_name].blank? && !ActionMailer::Base.smtp_settings[:password].blank?
   end

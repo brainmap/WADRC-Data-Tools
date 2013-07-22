@@ -338,10 +338,12 @@ puts "AAAAAA "+v_call
         results_dirlist = connection.execute(sql_dirlist)
         # send email 
         v_subject = "adrc_upload "+r[0]+" is missing some scan types --- set status_flag ='R' to send  : scans ="+v_folder_array.join(", ") 
-        mail(
-          :to => "noreply_johnson_lab@medicine.wisc.edu", 
-          :subject => v_subject
-        )
+        # mail(
+        #   :from => "noreply_johnson_lab@medicine.wisc.edu"
+        #   :to => "noreply_johnson_lab@medicine.wisc.edu", 
+        #   :subject => v_subject
+        # )
+        PandaMailer.schedule_notice("noreply_johnson_lab@medicine.wisc.edu","noreply_johnson_lab@medicine.wisc.edu",v_subject)
          v_comment_warning = v_comment_warning+"  "+v_scan_desc_type_array.size.to_s+" scan type "+r[0]
       v_call = "rm -rf "+v_parent_dir_target
 # puts "BBBBBBBB "+v_call
@@ -1341,9 +1343,7 @@ puts "AAAAAA "+v_call
                              if File.directory?(v_subjectid_lst_122)
                                   v_dir_array = Dir.entries(v_subjectid_lst_122)   # need to get date for specific files
                                   v_wlesion_030_flag ="N"
-                                  puts "aaaaaaa ="+v_subjectid_lst_122
                                   v_dir_array.each do |f|
-                                    puts "bbbbb ="+f
                                     if f.start_with?("wlesion_lbm0_030_rm"+dir_name_array[0]+"_Sag-CUBE-FLAIR_") and f.end_with?("_cubet2flair.nii")
                                       v_wlesion_030_flag = "Y"
                                     end
@@ -1375,7 +1375,7 @@ puts "AAAAAA "+v_call
                                  
                                  
                              if v_wlesion_030_flag == "N" and v_wlesion_030_flag_lst_116 == "N"
-                                   v_comment ="no LST_116 dir or LST_122 dir ;" +v_comment                               
+                                   v_comment ="no LST_116 or LST_122 product ;" +v_comment                               
                              end # check for subjectid asl dir
                              sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','"+v_comment+"','"+v_wlesion_030_flag+"','"+v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"','"+v_sag_cube_flair_flag+"','"+v_wlesion_030_flag_lst_116+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                results = connection.execute(sql)
@@ -1418,6 +1418,55 @@ puts "AAAAAA "+v_call
     ####    end
     
     
+  end
+  
+  def run_lst_122_process
+    visit = Visit.find(3)  #  need to get base path without visit
+    v_base_path = visit.get_base_path()
+     @schedule = Schedule.where("name in ('lst_122_process')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="lst_122_process"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+    
+      v_script = v_base_path+"/data1/lab_scripts/LST/LST.sh"
+      connection = ActiveRecord::Base.connection();  
+      
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid from cg_lst_116_status where wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and multiple_o_star_nii_flag = 'N' and lst_subjectid in ('lead00007','lead00004','lead00003')"      
+      results = connection.execute(sql)
+      results.each do |r|
+          puts "aaaaa "+r[0].to_s+"   "+r[1].to_s+"   "+r[2]
+          v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
+          # get location
+          sql_loc = "select distinct v.path from visits v where v.appointment_id in (select a.id from appointments a, enrollment_vgroup_memberships evg where a.vgroup_id = evg.vgroup_id  and evg.enrollment_id = "+r[0].to_s+")"
+          results_loc = connection.execute(sql_loc)
+          v_o_star_nii_sp_loc = ""
+          results_loc.each do |loc|
+            # could have 2 locations dual enrollment with 2 appointments - look for where o*.nii loc
+            v_loc_path = loc[0]
+            v_loc_path = v_loc_path.gsub(v_base_path+"/raw/","")
+            puts "ddddd="+loc[0]+"   "+v_loc_path.gsub(v_base_path,"")
+            v_loc_parts_array = v_loc_path.split("/")
+            # check in v_base_path+"/preprocessed/visits/"+v_loc_parts_array[0]+"/"+v_subjectid+"/unknown"
+            puts "cccc ="+v_loc_parts_array[0]
+            
+          end
+          # call processing script
+          
+          # sql = "update cg_lst_116_status set wlesion_030_flag = 'Y' where lst_subjectid = '"+r[2]+"'"
+      end       
+    
+    puts "successful finish lst_122_process "+v_comment[0..459]
+     @schedulerun.comment =("successful finish lst_122_process "+v_comment[0..459])
+     if !v_comment.include?("ERROR")
+        @schedulerun.status_flag ="Y"
+      end
+      @schedulerun.save
+      @schedulerun.end_time = @schedulerun.updated_at      
+      @schedulerun.save
   end
   
   
