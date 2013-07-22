@@ -1253,7 +1253,7 @@ puts "AAAAAA "+v_call
   end
   
   
-  def run_lst_116_status   # also lst_122 in same column
+  def run_lst_116_status   # actually the new  lst_122 in column, and lst_116 in separate column
         visit = Visit.find(3)  #  need to get base path without visit
         v_base_path = visit.get_base_path()
          @schedule = Schedule.where("name in ('lst_116_status')").first
@@ -1269,7 +1269,7 @@ puts "AAAAAA "+v_call
             connection = ActiveRecord::Base.connection();        
             results = connection.execute(sql)
 
-            sql_base = "insert into cg_lst_116_status_new(lst_116_subjectid, lst_116_general_comment,wlesion_030_flag,enrollment_id, scan_procedure_id)values("  
+            sql_base = "insert into cg_lst_116_status_new(lst_subjectid, lst_general_comment,wlesion_030_flag,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,wlesion_030_flag_lst_116,enrollment_id, scan_procedure_id)values("  
             v_raw_path = v_base_path+"/raw"
             v_mri = "/mri"
             no_mri_path_sp_list =['asthana.adrc-clinical-core.visit1',
@@ -1318,35 +1318,68 @@ puts "AAAAAA "+v_call
                       if dir_name_array.size == 3
                          enrollment = Enrollment.where("enumber in (?)",dir_name_array[0])
                          if !enrollment.blank?
-                             v_subjectid_lst_116 = v_preprocessed_full_path+"/"+dir_name_array[0]+"/LST_116"
-                             v_subjectid_lst_122 = v_preprocessed_full_path+"/"+dir_name_array[0]+"/LST_122"
+                             v_comment =""
+                             v_wlesion_030_flag ="N"
+                             v_wlesion_030_flag_lst_116 ="N"
+                             v_o_star_nii_flag ="N"
+                             v_multiple_o_star_nii_flag ="N"
+                             v_sag_cube_flair_flag ="N"
+                             v_subjectid_unknown = v_preprocessed_full_path+"/"+dir_name_array[0]+"/unknown"
+                             v_subjectid_lst_116 = v_preprocessed_full_path+"/"+dir_name_array[0]+"/LST/LST_116"
+                             v_subjectid_lst_122 = v_preprocessed_full_path+"/"+dir_name_array[0]+"/LST/LST_122"
                              if File.directory?(v_subjectid_lst_116)
                                   v_dir_array = Dir.entries(v_subjectid_lst_116)   # need to get date for specific files
-                                v_wlesion_030_flag ="N"
+                                v_wlesion_030_flag_lst_116 ="N"
                                 v_dir_array.each do |f|
                                   if f.start_with?("wlesion_030_m"+dir_name_array[0]+"_Sag-CUBE-FLAIR_") and f.end_with?("_cubet2flair.nii")
-                                    v_wlesion_030_flag = "Y"
+                                    v_wlesion_030_flag_lst_116 = "Y"
                                    end
                                 end
-                                sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','LST 116 dir','"+v_wlesion_030_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
-                                 results = connection.execute(sql)
-                             else
-                                 if File.directory?(v_subjectid_lst_122)
-                                       v_dir_array = Dir.entries(v_subjectid_lst_122)   # need to get date for specific files
-                                     v_wlesion_030_flag ="N"
-                                     v_dir_array.each do |f|
-                                       if f.start_with?("wlesion_lbm0_030_rm"+dir_name_array[0]+"_Sag-CUBE-FLAIR_") and f.end_with?("_cubet2flair.nii")
-                                         v_wlesion_030_flag = "Y"
-                                        end
-                                     end
-                                     sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','LST 122 dir','"+v_wlesion_030_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
-                                      results = connection.execute(sql)
-                               
-                                 else
-                                   sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no LST_116 dir or LST_122 dir','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
-                                   results = connection.execute(sql)
-                                 end
+                                v_comment = 'LST 116 dir ;'+v_comment
+                             end 
+                             
+                             if File.directory?(v_subjectid_lst_122)
+                                  v_dir_array = Dir.entries(v_subjectid_lst_122)   # need to get date for specific files
+                                  v_wlesion_030_flag ="N"
+                                  puts "aaaaaaa ="+v_subjectid_lst_122
+                                  v_dir_array.each do |f|
+                                    puts "bbbbb ="+f
+                                    if f.start_with?("wlesion_lbm0_030_rm"+dir_name_array[0]+"_Sag-CUBE-FLAIR_") and f.end_with?("_cubet2flair.nii")
+                                      v_wlesion_030_flag = "Y"
+                                    end
+                                  end
+                                  v_comment = 'LST 122 dir ;'+v_comment
+                             end
+                             
+                             if File.directory?(v_subjectid_unknown)
+                                  v_dir_array = Dir.entries(v_subjectid_unknown)   # need to get date for specific files
+                                  v_o_star_nii_flag ="N"
+                                  v_multiple_o_star_nii_flag ="N"
+                                  v_sag_cube_flair_flag ="N"
+                                  v_dir_array.each do |f|
+                                    if (f.include? "Sag-CUBE-FLAIR" or f.include? "Sag-CUBE-flair" ) and f.end_with?(".nii")
+                                      v_sag_cube_flair_flag = "Y"
+                                    end
+                                  end
+                                  v_o_star_cnt = 0
+                                  v_dir_array.each do |f|
+                                    if f.start_with?("o") and f.end_with?(".nii")
+                                      v_o_star_nii_flag = "Y"
+                                      v_o_star_cnt = v_o_star_cnt+ 1
+                                      if v_o_star_cnt > 1
+                                        v_multiple_o_star_nii_flag ="Y"
+                                      end
+                                    end
+                                  end
+                             end
+                                 
+                                 
+                             if v_wlesion_030_flag == "N" and v_wlesion_030_flag_lst_116 == "N"
+                                   v_comment ="no LST_116 dir or LST_122 dir ;" +v_comment                               
                              end # check for subjectid asl dir
+                             sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','"+v_comment+"','"+v_wlesion_030_flag+"','"+v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"','"+v_sag_cube_flair_flag+"','"+v_wlesion_030_flag_lst_116+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                               results = connection.execute(sql)
+                             
                          else
                            #puts "no enrollment "+dir_name_array[0]
                          end # check for enrollment
@@ -1360,7 +1393,7 @@ puts "AAAAAA "+v_call
             # v_shared = Shared.new 
              # move from new to present table -- made into a function  in shared model
              v_comment = self.move_present_to_old_new_to_present("cg_lst_116_status",
-             "lst_116_subjectid, lst_116_general_comment,wlesion_030_flag, wlesion_030_comment, wlesion_030_global_quality, enrollment_id,scan_procedure_id",
+             "lst_subjectid, lst_general_comment,wlesion_030_flag, wlesion_030_comment, wlesion_030_global_quality,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,wlesion_030_flag_lst_116, wlesion_030_comment_lst_116, wlesion_030_global_quality_lst_116, enrollment_id,scan_procedure_id",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
 
