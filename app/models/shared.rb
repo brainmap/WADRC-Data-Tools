@@ -344,8 +344,7 @@ puts "AAAAAA "+v_call
         #   :to => "noreply_johnson_lab@medicine.wisc.edu", 
         #   :subject => v_subject
         # )
-        # NOT WORKING!!!!!!
-        PandaMailer.schedule_notice("noreply_johnson_lab@medicine.wisc.edu","noreply_johnson_lab@medicine.wisc.edu",v_subject)
+        PandaMailer.schedule_notice(v_subject,{:send_to => "noreply_johnson_lab@medicine.wisc.edu"}).deliver
          v_comment_warning = v_comment_warning+"  "+v_scan_desc_type_array.size.to_s+" scan type "+r[0]
       v_call = "rm -rf "+v_parent_dir_target
 # puts "BBBBBBBB "+v_call
@@ -1443,7 +1442,7 @@ puts "AAAAAA "+v_call
           puts "aaaaa "+r[0].to_s+"   "+r[1].to_s+"   "+r[2]
           v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
           # get location
-          sql_loc = "select distinct v.path from visits v where v.appointment_id in (select a.id from appointments a, enrollment_vgroup_memberships evg where a.vgroup_id = evg.vgroup_id  and evg.enrollment_id = "+r[0].to_s+")"
+          sql_loc = "select distinct v.path from visits v where v.appointment_id in (select a.id from appointments a, enrollment_vgroup_memberships evg, scan_procedures_vgroups spv where a.vgroup_id = evg.vgroup_id  and evg.enrollment_id = "+r[0].to_s+"  and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id = "+r[1].to_s+")"
           results_loc = connection.execute(sql_loc)
           v_o_star_nii_sp_loc = ""
           results_loc.each do |loc|
@@ -1452,13 +1451,31 @@ puts "AAAAAA "+v_call
             v_loc_path = v_loc_path.gsub(v_base_path+"/raw/","")
             puts "ddddd="+loc[0]+"   "+v_loc_path.gsub(v_base_path,"")
             v_loc_parts_array = v_loc_path.split("/")
-            # check in v_base_path+"/preprocessed/visits/"+v_loc_parts_array[0]+"/"+v_subjectid+"/unknown"
-            puts "cccc ="+v_loc_parts_array[0]
-            
+            v_subjectid_unknown =v_base_path+"/preprocessed/visits/"+v_loc_parts_array[0]+"/"+v_subjectid+"/unknown"
+            if File.directory?(v_subjectid_unknown)
+                  v_dir_array = Dir.entries(v_subjectid_unknown)
+                  v_dir_array.each do |f|
+                    if f.start_with?("o") and f.end_with?(".nii")
+                        v_o_star_nii_sp_loc = v_loc_parts_array[0]
+                    end
+                  end 
+            end
           end
-          # call processing script
-          
-          # sql = "update cg_lst_116_status set wlesion_030_flag = 'Y' where lst_subjectid = '"+r[2]+"'"
+          if v_o_star_nii_sp_loc > ""
+              # call processing script- need to have LST toolbox on gru, merida or edna
+              # v_call =  v_script+" -p "+v_o_star_nii_sp_loc+"  -b "+v_subjectid
+
+              v_call =  'ssh panda_admin@merida.dom.wisc.edu "'  +v_script+' -p '+v_o_star_nii_sp_loc+'  -b '+v_subjectid+' "  ' 
+               puts "rrrrrrr "+v_call
+              # stdin, stdout, stderr = Open3.popen3(v_call)
+              # while !stdout.eof?
+              #   puts stdout.read 1024    
+              #  end
+              # stdin.close
+              # stdout.close
+              # stderr.close
+              # sql = "update cg_lst_116_status set wlesion_030_flag = 'Y' where lst_subjectid = '"+r[2]+"'"
+           end
       end       
     
     puts "successful finish lst_122_process "+v_comment[0..459]

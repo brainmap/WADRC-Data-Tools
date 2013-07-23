@@ -68,9 +68,13 @@ class CronInterface < ActiveRecord::Base
       v_shared = Shared.new
       v_shared.run_fdg_status()
       
-  elsif v_value_1 == "lst_116_status"  # also getting lst_122 in same column
+  elsif v_value_1 == "lst_116_status"  # getting lst_122 and lst_116 
         v_shared = Shared.new
         v_shared.run_lst_116_status()    
+  
+  elsif v_value_1 == "lst_122_process" 
+        v_shared = Shared.new
+        v_shared.run_lst_122_process()
         
   elsif v_value_1 == "pet_path"  
         v_shared = Shared.new

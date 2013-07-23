@@ -13,11 +13,10 @@ class PandaMailer < ActionMailer::Base
     )
   end
   
-  def schedule_notice(p_to, p_from, p_subject)
-    
+  def schedule_notice( p_subject,email_params)
+    email_params.to_options! 
       mail(
-        :to => p_to,
-        :from => p_from, 
+        :to => email_params[:send_to],
         :subject => p_subject
       )
     end
