@@ -1345,7 +1345,7 @@ puts "AAAAAA "+v_call
                                   v_dir_array = Dir.entries(v_subjectid_lst_122)   # need to get date for specific files
                                   v_wlesion_030_flag ="N"
                                   v_dir_array.each do |f|
-                                    if f.start_with?("wlesion_lbm0_030_rm"+dir_name_array[0]+"_Sag-CUBE-FLAIR_") and f.end_with?("_cubet2flair.nii")
+                                    if f.start_with?("wlesion_lbm3_030_rm"+dir_name_array[0]+"_Sag-CUBE-FLAIR_") and f.end_with?("_cubet2flair.nii")
                                       v_wlesion_030_flag = "Y"
                                     end
                                   end
