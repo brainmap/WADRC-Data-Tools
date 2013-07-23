@@ -283,7 +283,8 @@ class Shared  < ActionController::Base
                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
                   and image_datasets.series_description =   series_description_map.series_description
-                  and series_description_map.series_description_type in ('T1 Volumetic','T2','T2 Flair','DTI') 
+                  and series_description_map.series_description_type in ('T1 Volumetic','T1 Volumetric','T1','T2','T2 Flair','DTI') 
+                  and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
                   and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
                    order by appointments.appointment_date "
       results_dataset = connection.execute(sql_dataset)
@@ -343,6 +344,7 @@ puts "AAAAAA "+v_call
         #   :to => "noreply_johnson_lab@medicine.wisc.edu", 
         #   :subject => v_subject
         # )
+        # NOT WORKING!!!!!!
         PandaMailer.schedule_notice("noreply_johnson_lab@medicine.wisc.edu","noreply_johnson_lab@medicine.wisc.edu",v_subject)
          v_comment_warning = v_comment_warning+"  "+v_scan_desc_type_array.size.to_s+" scan type "+r[0]
       v_call = "rm -rf "+v_parent_dir_target
