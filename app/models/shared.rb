@@ -1436,10 +1436,9 @@ puts "AAAAAA "+v_call
       v_script = v_base_path+"/data1/lab_scripts/LST/LST.sh"
       connection = ActiveRecord::Base.connection();  
       
-      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid from cg_lst_116_status where wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and multiple_o_star_nii_flag = 'N' and lst_subjectid in ('lead00007','lead00004','lead00003')"      
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid from cg_lst_116_status where wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and multiple_o_star_nii_flag = 'N'" 
       results = connection.execute(sql)
       results.each do |r|
-          puts "aaaaa "+r[0].to_s+"   "+r[1].to_s+"   "+r[2]
           v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
           # get location
           sql_loc = "select distinct v.path from visits v where v.appointment_id in (select a.id from appointments a, enrollment_vgroup_memberships evg, scan_procedures_vgroups spv where a.vgroup_id = evg.vgroup_id  and evg.enrollment_id = "+r[0].to_s+"  and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id = "+r[1].to_s+")"
@@ -1449,7 +1448,6 @@ puts "AAAAAA "+v_call
             # could have 2 locations dual enrollment with 2 appointments - look for where o*.nii loc
             v_loc_path = loc[0]
             v_loc_path = v_loc_path.gsub(v_base_path+"/raw/","")
-            puts "ddddd="+loc[0]+"   "+v_loc_path.gsub(v_base_path,"")
             v_loc_parts_array = v_loc_path.split("/")
             v_subjectid_unknown =v_base_path+"/preprocessed/visits/"+v_loc_parts_array[0]+"/"+v_subjectid+"/unknown"
             if File.directory?(v_subjectid_unknown)
@@ -1466,20 +1464,30 @@ puts "AAAAAA "+v_call
               # v_call =  v_script+" -p "+v_o_star_nii_sp_loc+"  -b "+v_subjectid
 
               v_call =  'ssh panda_admin@merida.dom.wisc.edu "'  +v_script+' -p '+v_o_star_nii_sp_loc+'  -b '+v_subjectid+' "  ' 
-               puts "rrrrrrr "+v_call
-              # stdin, stdout, stderr = Open3.popen3(v_call)
-              # while !stdout.eof?
-              #   puts stdout.read 1024    
-              #  end
-              # stdin.close
-              # stdout.close
-              # stderr.close
-              # sql = "update cg_lst_116_status set wlesion_030_flag = 'Y' where lst_subjectid = '"+r[2]+"'"
+              puts "rrrrrrr "+v_call
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+               end
+               if stderr.read == 'nil'
+                 sql_update = "update cg_lst_116_status set wlesion_030_flag = 'Y' where lst_subjectid = '"+r[2]+"'"
+                 results_update = connection.execute(sql_update)
+                 v_comment = " ok=>"+r[2]+ "; " +v_comment
+              else
+                while !stderr.eof?
+                  v_err = stderr.read 1024
+                  v_comment = v_err +" =>"+r[2]+ " ; " +v_comment  
+                 end 
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+
            end
       end       
     
     puts "successful finish lst_122_process "+v_comment[0..459]
-     @schedulerun.comment =("successful finish lst_122_process "+v_comment[0..459])
+     @schedulerun.comment =("successful finish lst_122_process "+v_comment[0..1959])
      if !v_comment.include?("ERROR")
         @schedulerun.status_flag ="Y"
       end
