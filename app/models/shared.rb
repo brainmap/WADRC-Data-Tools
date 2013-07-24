@@ -1436,7 +1436,7 @@ puts "AAAAAA "+v_call
       v_script = v_base_path+"/data1/lab_scripts/LST/LST.sh"
       connection = ActiveRecord::Base.connection();  
       
-      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid from cg_lst_116_status where wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and multiple_o_star_nii_flag = 'N'" 
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid from cg_lst_116_status where wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and multiple_o_star_nii_flag = 'N' and sag_cube_flair_flag = 'Y' and lst_subjectid like 'lead%'" 
       results = connection.execute(sql)
       results.each do |r|
           v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
@@ -1469,16 +1469,24 @@ puts "AAAAAA "+v_call
               while !stdout.eof?
                 puts stdout.read 1024    
                end
-               if stderr.read == 'nil'
+               v_err =""
+               while !stderr.eof?
+                  v_err = stderr.read 1024
+                end
+               puts "err="+v_err
+               if v_err == "nil" or v_err == ""
                  sql_update = "update cg_lst_116_status set wlesion_030_flag = 'Y' where lst_subjectid = '"+r[2]+"'"
                  results_update = connection.execute(sql_update)
                  v_comment = " ok=>"+r[2]+ "; " +v_comment
               else
+                puts " in err"
                 while !stderr.eof?
                   v_err = stderr.read 1024
                   v_comment = v_err +" =>"+r[2]+ " ; " +v_comment  
                  end 
               end
+              @schedulerun.comment =v_comment
+              @schedulerun.save
               stdin.close
               stdout.close
               stderr.close
