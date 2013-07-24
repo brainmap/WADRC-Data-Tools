@@ -1462,7 +1462,7 @@ puts "AAAAAA "+v_call
           if v_o_star_nii_sp_loc > ""
               # call processing script- need to have LST toolbox on gru, merida or edna
               # v_call =  v_script+" -p "+v_o_star_nii_sp_loc+"  -b "+v_subjectid
-              @schedulerun.comment ="str "+r[2]+"; " v_comment
+              @schedulerun.comment ="str "+r[2]+"; "+v_comment
               @schedulerun.save
               v_call =  'ssh panda_admin@merida.dom.wisc.edu "'  +v_script+' -p '+v_o_star_nii_sp_loc+'  -b '+v_subjectid+' "  ' 
               puts "rrrrrrr "+v_call
