@@ -1272,7 +1272,7 @@ puts "AAAAAA "+v_call
             connection = ActiveRecord::Base.connection();        
             results = connection.execute(sql)
 
-            sql_base = "insert into cg_lst_116_status_new(lst_subjectid, lst_general_comment,wlesion_030_flag,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,wlesion_030_flag_lst_116,enrollment_id, scan_procedure_id)values("  
+            sql_base = "insert into cg_lst_116_status_new(lst_subjectid, lst_general_comment,wlesion_030_flag,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,multiple_sag_cube_flair_flag,wlesion_030_flag_lst_116,enrollment_id, scan_procedure_id)values("  
             v_raw_path = v_base_path+"/raw"
             v_mri = "/mri"
             no_mri_path_sp_list =['asthana.adrc-clinical-core.visit1',
@@ -1327,6 +1327,7 @@ puts "AAAAAA "+v_call
                              v_o_star_nii_flag ="N"
                              v_multiple_o_star_nii_flag ="N"
                              v_sag_cube_flair_flag ="N"
+                             v_multiple_sag_cube_flair_flag ="N"
                              v_subjectid_unknown = v_preprocessed_full_path+"/"+dir_name_array[0]+"/unknown"
                              v_subjectid_lst_116 = v_preprocessed_full_path+"/"+dir_name_array[0]+"/LST/LST_116"
                              v_subjectid_lst_122 = v_preprocessed_full_path+"/"+dir_name_array[0]+"/LST/LST_122"
@@ -1345,7 +1346,7 @@ puts "AAAAAA "+v_call
                                   v_dir_array = Dir.entries(v_subjectid_lst_122)   # need to get date for specific files
                                   v_wlesion_030_flag ="N"
                                   v_dir_array.each do |f|
-                                    if f.start_with?("wlesion_lbm3_030_rm"+dir_name_array[0]+"_Sag-CUBE-FLAIR_") and f.end_with?("_cubet2flair.nii")
+                                    if ( f.start_with?("wlesion_lbm3_030_rm"+dir_name_array[0]+"_Sag-CUBE-FLAIR_") or f.start_with?("wlesion_lbm3_030_rm"+dir_name_array[0]+"_Sag-CUBE-flair_") ) and f.end_with?(".nii")
                                       v_wlesion_030_flag = "Y"
                                     end
                                   end
@@ -1357,9 +1358,14 @@ puts "AAAAAA "+v_call
                                   v_o_star_nii_flag ="N"
                                   v_multiple_o_star_nii_flag ="N"
                                   v_sag_cube_flair_flag ="N"
+                                  v_sag_cube_flair_cnt = 0
                                   v_dir_array.each do |f|
                                     if (f.include? "Sag-CUBE-FLAIR" or f.include? "Sag-CUBE-flair" ) and f.end_with?(".nii")
                                       v_sag_cube_flair_flag = "Y"
+                                      v_sag_cube_flair_cnt = v_sag_cube_flair_cnt + 1
+                                      if v_sag_cube_flair_cnt > 1
+                                        v_multiple_sag_cube_flair_flag ="Y"
+                                      end
                                     end
                                   end
                                   v_o_star_cnt = 0
@@ -1378,7 +1384,7 @@ puts "AAAAAA "+v_call
                              if v_wlesion_030_flag == "N" and v_wlesion_030_flag_lst_116 == "N"
                                    v_comment ="no LST_116 or LST_122 product ;" +v_comment                               
                              end # check for subjectid asl dir
-                             sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','"+v_comment+"','"+v_wlesion_030_flag+"','"+v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"','"+v_sag_cube_flair_flag+"','"+v_wlesion_030_flag_lst_116+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                             sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','"+v_comment+"','"+v_wlesion_030_flag+"','"+v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"','"+v_sag_cube_flair_flag+"','"+v_multiple_sag_cube_flair_flag+"','"+v_wlesion_030_flag_lst_116+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                results = connection.execute(sql)
                              
                          else
@@ -1394,7 +1400,7 @@ puts "AAAAAA "+v_call
             # v_shared = Shared.new 
              # move from new to present table -- made into a function  in shared model
              v_comment = self.move_present_to_old_new_to_present("cg_lst_116_status",
-             "lst_subjectid, lst_general_comment,wlesion_030_flag, wlesion_030_comment, wlesion_030_global_quality,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,wlesion_030_flag_lst_116, wlesion_030_comment_lst_116, wlesion_030_global_quality_lst_116, enrollment_id,scan_procedure_id",
+             "lst_subjectid, lst_general_comment,wlesion_030_flag, wlesion_030_comment, wlesion_030_global_quality,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,multiple_sag_cube_flair_flag,wlesion_030_flag_lst_116, wlesion_030_comment_lst_116, wlesion_030_global_quality_lst_116, enrollment_id,scan_procedure_id",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
 
@@ -1432,11 +1438,11 @@ puts "AAAAAA "+v_call
       @schedulerun.start_time = @schedulerun.created_at
       @schedulerun.save
       v_comment = ""
-    
+      v_error_comment = ""
       v_script = v_base_path+"/data1/lab_scripts/LST/LST.sh"
       connection = ActiveRecord::Base.connection();  
       
-      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid from cg_lst_116_status where wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and multiple_o_star_nii_flag = 'N' and sag_cube_flair_flag = 'Y' and lst_subjectid like 'lead%'" 
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid from cg_lst_116_status where wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and multiple_o_star_nii_flag = 'N' and sag_cube_flair_flag = 'Y'and multiple_sag_cube_flair_flag ='N'   and (  lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'fal%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #  problems 'shp%' 'pipr%' '
       results = connection.execute(sql)
       results.each do |r|
           v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
@@ -1462,31 +1468,37 @@ puts "AAAAAA "+v_call
           if v_o_star_nii_sp_loc > ""
               # call processing script- need to have LST toolbox on gru, merida or edna
               # v_call =  v_script+" -p "+v_o_star_nii_sp_loc+"  -b "+v_subjectid
-              @schedulerun.comment ="str "+r[2]+"; "+v_comment
+              @schedulerun.comment ="str "+r[2]+"; "+v_comment[0..1990]
               @schedulerun.save
               v_call =  'ssh panda_admin@merida.dom.wisc.edu "'  +v_script+' -p '+v_o_star_nii_sp_loc+'  -b '+v_subjectid+' "  ' 
               puts "rrrrrrr "+v_call
               stdin, stdout, stderr = Open3.popen3(v_call)
+              v_success ="N"
               while !stdout.eof?
-                puts stdout.read 1024    
+                v_output = stdout.read 1024  
+                if v_output.include? "Done    'PVE label estimation and lesion segmentation'"
+                  v_success ="Y"
+                end
+                puts v_output  
                end
                v_err =""
                while !stderr.eof?
                   v_err = stderr.read 1024
                 end
                puts "err="+v_err
-               if v_err == "nil" or v_err == ""
+               if v_success =="Y"
                  sql_update = "update cg_lst_116_status set wlesion_030_flag = 'Y' where lst_subjectid = '"+r[2]+"'"
-                 results_update = connection.execute(sql_update)
-                 v_comment = " ok=>"+r[2]+ "; " +v_comment
+                 # results_update = connection.execute(sql_update)   # rerun wlesion... file detect
+                 v_comment = " finished=>"+r[2]+ "; " +v_comment
               else
                 puts " in err"
                 while !stderr.eof?
                   v_err = stderr.read 1024
                   v_comment = v_err +" =>"+r[2]+ " ; " +v_comment  
                  end 
+                 v_error_comment = "error in "+r[2]+" ;"+v_error_comment
               end
-              @schedulerun.comment =v_comment
+              @schedulerun.comment =v_comment[0..1990]
               @schedulerun.save
               stdin.close
               stdout.close
@@ -1494,7 +1506,7 @@ puts "AAAAAA "+v_call
 
            end
       end       
-    
+    v_comment = v_error_comment+v_comment
     puts "successful finish lst_122_process "+v_comment[0..459]
      @schedulerun.comment =("successful finish lst_122_process "+v_comment[0..1959])
      if !v_comment.include?("ERROR")

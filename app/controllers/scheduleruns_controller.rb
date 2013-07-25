@@ -83,7 +83,7 @@ class SchedulerunsController < ApplicationController
   end
   
   def schedulerun_search
-    @schedules = Schedule.order("name")
+    @schedules = Schedule.where("status_flag not in (?)","N").order("name")
     @conditions = []
     @current_tab = "vgroups"
     params["search_criteria"] =""
