@@ -1427,10 +1427,39 @@ puts "AAAAAA "+v_call
     
   end
   
+  def process_logs_delete_old( p_process_name, p_log_base)
+    v_sec_day = 86400
+    t = Time.now
+    v_days_back_array = [100,130,160]
+    v_days_back_array.each do |v_back|
+      tback = t - (v_sec_day * v_back)
+      v_log_path = p_log_base+p_process_name+"_"+tback.strftime("%Y%m")
+      if File.file?(v_log_path)
+         File.delete(v_log_path)
+      end
+    end
+  end
+  
+  def process_log_append(p_log_path, p_value)
+    v_value = p_value.gsub("^H"," ")
+    if File.file?(p_log_path)
+      f = File.open(p_log_path, 'a') 
+      f.write(v_value) 
+      f.close
+    else
+      f = File.open(p_log_path, 'w')
+      f.write(v_value)
+      f.close
+    end
+  end
+    
   def run_lst_122_process
-    visit = Visit.find(3)  #  need to get base path without visit
-    v_base_path = visit.get_base_path()
-     @schedule = Schedule.where("name in ('lst_122_process')").first
+      v_process_name = "lst_122"
+      v_log_base ="/mounts/data/preprocessed/logs/"
+      process_logs_delete_old( v_process_name, v_log_base)            
+      visit = Visit.find(3)  #  need to get base path without visit
+      v_base_path = visit.get_base_path()
+      @schedule = Schedule.where("name in ('lst_122_process')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
       @schedulerun.comment ="lst_122_process"
@@ -1439,12 +1468,24 @@ puts "AAAAAA "+v_call
       @schedulerun.save
       v_comment = ""
       v_error_comment = ""
-      v_script = v_base_path+"/data1/lab_scripts/LST/LST.sh"
-      connection = ActiveRecord::Base.connection();  
+      t = Time.now
+      v_date_YM = t.strftime("%Y%m") # just making monthly logs, prepend
+      v_log_name =v_process_name+"_"+v_date_YM
+      v_log_path =v_log_base+v_log_name    
       
-      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid from cg_lst_116_status where wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and multiple_o_star_nii_flag = 'N' and sag_cube_flair_flag = 'Y'and multiple_sag_cube_flair_flag ='N'   and (  lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'fal%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #  problems 'shp%' 'pipr%' '
+      
+        
+      v_script = v_base_path+"/data1/lab_scripts/LST/LST.sh"
+      
+      connection = ActiveRecord::Base.connection();  
+      # do_not_run_process_wlesion_030 == Y means do not run
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid from cg_lst_116_status where if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and multiple_o_star_nii_flag = 'N' and sag_cube_flair_flag = 'Y'and multiple_sag_cube_flair_flag ='N'   and (  lst_subjectid like 'mrt%' or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
       results = connection.execute(sql)
       results.each do |r|
+          v_log = ""
+          t_now = Time.now
+          v_log = v_log + "starting "+r[2]+"   "+ t_now.strftime("%Y%m%d:%H:%M")+"\n"
+          v_subjectid_v_num = r[2]
           v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
           # get location
           sql_loc = "select distinct v.path from visits v where v.appointment_id in (select a.id from appointments a, enrollment_vgroup_memberships evg, scan_procedures_vgroups spv where a.vgroup_id = evg.vgroup_id  and evg.enrollment_id = "+r[0].to_s+"  and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id = "+r[1].to_s+")"
@@ -1461,10 +1502,12 @@ puts "AAAAAA "+v_call
                   v_dir_array.each do |f|
                     if f.start_with?("o") and f.end_with?(".nii")
                         v_o_star_nii_sp_loc = v_loc_parts_array[0]
+                        v_log = v_log + "acpc file found \n"
                     end
                   end 
             end
           end
+          
           if v_o_star_nii_sp_loc > ""
               # call processing script- need to have LST toolbox on gru, merida or edna
               # v_call =  v_script+" -p "+v_o_star_nii_sp_loc+"  -b "+v_subjectid
@@ -1472,39 +1515,49 @@ puts "AAAAAA "+v_call
               @schedulerun.save
               v_call =  'ssh panda_admin@merida.dom.wisc.edu "'  +v_script+' -p '+v_o_star_nii_sp_loc+'  -b '+v_subjectid+' "  ' 
               puts "rrrrrrr "+v_call
+              v_log = v_log + v_call+"\n"
               stdin, stdout, stderr = Open3.popen3(v_call)
               v_success ="N"
               while !stdout.eof?
-                v_output = stdout.read 1024  
+                v_output = stdout.read 1024 
+                v_log = v_log + v_output  
                 if v_output.include? "Done    'PVE label estimation and lesion segmentation'"
                   v_success ="Y"
+                  v_log = v_log + "SUCCESS !!!!!!!!! \n"
                 end
                 puts v_output  
                end
                v_err =""
+               v_log = v_log +"IN ERROR \n"
                while !stderr.eof?
                   v_err = stderr.read 1024
+                  v_log = v_log +v_err
                 end
                puts "err="+v_err
                if v_success =="Y"
                  sql_update = "update cg_lst_116_status set wlesion_030_flag = 'Y' where lst_subjectid = '"+r[2]+"'"
                  # results_update = connection.execute(sql_update)   # rerun wlesion... file detect
                  v_comment = " finished=>"+r[2]+ "; " +v_comment
-              else
+               else
                 puts " in err"
+                v_log = v_log +"IN ERROR \n" 
                 while !stderr.eof?
                   v_err = stderr.read 1024
+                  v_log = v_log +v_err
                   v_comment = v_err +" =>"+r[2]+ " ; " +v_comment  
                  end 
                  v_error_comment = "error in "+r[2]+" ;"+v_error_comment
-              end
+               end
               @schedulerun.comment =v_comment[0..1990]
               @schedulerun.save
               stdin.close
               stdout.close
               stderr.close
+           else
+             v_log = v_log + "no acpc \n"
 
            end
+           process_log_append(v_log_path, v_log)
       end       
     v_comment = v_error_comment+v_comment
     puts "successful finish lst_122_process "+v_comment[0..459]
