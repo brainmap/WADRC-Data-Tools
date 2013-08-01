@@ -1,4 +1,5 @@
-<%  v_y_n = {"Y"=>"Y","N"=>"N","E"=>"E"}
+<%  v_y_n = {"Y"=>"Y","N"=>"N"}
+    v_y_n_e = {"Y"=>"Y","N"=>"N","E"=>"E"}  # is E used anywhere ?
     v_key = {"enumber and visit# mapped to enrollment/scan_procedure"=>"enrollment/sp","reggieid-kc-participant_id"=>"reggieid-kc-participant_id","wrapnum-kc-participant_id"=>"wrapnum-kc-participant_id","adrcnum-kc-participant_id"=>"adrcnum-kc-participant_id"}
 %>
 <%= form_for(@schedule) do |f| %>
@@ -16,7 +17,7 @@
 <table width="80%">
 	<tr><td align="left"><b>Name:</b> <%= f.text_field :name, :required =>TRUE %> </td><td align="left"><b>Run Length <small>(min.)</small>:</b> <%= f.text_field :run_time_length_min ,:size=>10, :onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}"%>
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		<b>Status:</b> <%= f.select :status_flag, v_y_n, {:prompt => 'Status?'}  %> </td>
+		<b>Status:</b> <%= f.select :status_flag, v_y_n_e, {:prompt => 'Status?'}  %> </td>
 		 </tr>
 		<tr><td align="left" colspan="2"> <b>shared_function_name:</b> <%= f.text_field :shared_function_name %>
 <tr><td align="left" colspan="2">	<b>Run Command:</b><br>
@@ -39,6 +40,7 @@
 <tr><td align="left" colspan=2><b>File Path:</b> <%= f.text_field :file_path, :size => 60 %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<b>Key Type:</b> <%= f.select :key_type, v_key, :selected => @schedule.key_type ? 'enrollment/sp': @schedule.key_type %></td></tr>
 <tr><td align="left" colspan=2><b>Target_Table_columns/order:</b> <%= f.text_field :target_table_columns, :size=>90 %>	</td></tr>
+<tr><td align="left" colspan=2><b>Process Stop File option:</b> <%= f.select :process_stop_file_flag, v_y_n, :selected => @schedule.process_stop_file_flag.blank? ? 'N' :  @schedule.process_stop_file_flag   %> 	</td></tr>
 <tr><td align="left" colspan=2>
 <br>
 <B>Owner:</b></td></tr>

@@ -1436,6 +1436,18 @@ puts "AAAAAA "+v_call
     return v_email_array    
   end
   
+  def make_schedule_process_stop_file(p_file_path)
+    v_value = "stopping process"
+    if File.file?(p_file_path)
+         # not do anything?
+    else
+      f = File.open(p_file_path, 'w')
+      f.write(v_value)
+      f.close
+    end
+  end
+  
+  
   def process_logs_delete_old( p_process_name, p_log_base)
     v_sec_day = 86400
     t = Time.now

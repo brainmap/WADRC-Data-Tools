@@ -42,6 +42,30 @@ class SchedulesController < ApplicationController
      end
   
   end
+  
+  
+  def stop_schedule
+    # check permissions
+    visit = Visit.find(3)  #  need to get base path without visit
+    v_base_path = visit.get_base_path()
+    @schedule = Schedule.find(params[:id])
+    v_file_path = v_base_path+"/preprocessed/logs/"+@schedule.name+"_stop"
+    if @schedule.users.include?( current_user) or (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low')
+      # find location of first cd, trim to before that -- the cronjob times
+    #   v_run_command = @schedule.run_command[@schedule.run_command.index('cd')..@schedule.run_command.length]
+      # need to spawn child process
+     #  exec v_run_command  -- moved from cron interface to shared function
+      if !@schedule.name.blank?
+         v_shared = Shared.new
+         v_shared.make_schedule_process_stop_file(v_file_path)
+      end
+      respond_to do |format|
+        format.html { redirect_to(schedulerun_search_url) }
+        format.xml  { head :ok }
+      end
+     end
+  
+  end
 
   # GET /schedules/new
   # GET /schedules/new.xml

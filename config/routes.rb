@@ -178,6 +178,7 @@ WADRCDataTools::Application.routes.draw do
     match '/cg_tns/create_from_cg_tn_db' , :controller => 'cg_tns', :action => 'create_from_cg_tn_db', :as =>:create_from_cg_tn_db
   
   match '/run_schedule/:id' ,:controller =>'schedules', :action => 'run_schedule', :as => :run_schedule
+  match '/stop_schedule/:id' ,:controller =>'schedules', :action => 'stop_schedule', :as => :stop_schedule
   
   match '/users/update_role', :controller => 'users', :action => 'update_role', :as => :update_role
   match '/users/control', :controller => 'users', :action => 'control', :as => :control
