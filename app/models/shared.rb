@@ -1427,6 +1427,15 @@ puts "AAAAAA "+v_call
     
   end
   
+  def get_schedule_owner_email(p_schedule_id)
+    v_email_array = ['noreply_johnson_lab@medicine.wisc.edu']
+    @schedule = Schedule.find(p_schedule_id)
+    (@schedule.users).each do |u|
+      v_email_array.push(u.email)
+    end
+    return v_email_array    
+  end
+  
   def process_logs_delete_old( p_process_name, p_log_base)
     v_sec_day = 86400
     t = Time.now
@@ -1454,12 +1463,13 @@ puts "AAAAAA "+v_call
   end
     
   def run_lst_122_process
-      v_process_name = "lst_122"
+      v_process_name = "lst_122_process"
       v_log_base ="/mounts/data/preprocessed/logs/"
       process_logs_delete_old( v_process_name, v_log_base)            
       visit = Visit.find(3)  #  need to get base path without visit
       v_base_path = visit.get_base_path()
       @schedule = Schedule.where("name in ('lst_122_process')").first
+      v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
       @schedulerun.comment ="lst_122_process"
@@ -1471,7 +1481,10 @@ puts "AAAAAA "+v_call
       t = Time.now
       v_date_YM = t.strftime("%Y%m") # just making monthly logs, prepend
       v_log_name =v_process_name+"_"+v_date_YM
-      v_log_path =v_log_base+v_log_name    
+      v_log_path =v_log_base+v_log_name 
+      v_stop_file_name = v_process_name+"_stop"
+      v_stop_file_path = v_log_base+v_stop_file_name  # use to stop the results loop  
+      v_subjectid_v_num = ""  
       
       
         
@@ -1479,10 +1492,19 @@ puts "AAAAAA "+v_call
       
       connection = ActiveRecord::Base.connection();  
       # do_not_run_process_wlesion_030 == Y means do not run
-      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid from cg_lst_116_status where if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and multiple_o_star_nii_flag = 'N' and sag_cube_flair_flag = 'Y'and multiple_sag_cube_flair_flag ='N'   and (  lst_subjectid like 'mrt%' or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) ) and (  lst_subjectid like 'mrt%' or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
       results = connection.execute(sql)
       results.each do |r|
-          v_log = ""
+          v_break = 0  # need a kill swith
+           v_log = ""
+          if File.file?(v_stop_file_path)
+            File.delete(v_stop_file_path)
+            v_break = 1
+            v_log = v_log + " STOPPING the results loop"
+            v_comment = " STOPPING the results loop  "+v_comment
+          end
+          break if v_break > 0
+            
           t_now = Time.now
           v_log = v_log + "starting "+r[2]+"   "+ t_now.strftime("%Y%m%d:%H:%M")+"\n"
           v_subjectid_v_num = r[2]
@@ -1513,6 +1535,11 @@ puts "AAAAAA "+v_call
               # v_call =  v_script+" -p "+v_o_star_nii_sp_loc+"  -b "+v_subjectid
               @schedulerun.comment ="str "+r[2]+"; "+v_comment[0..1990]
               @schedulerun.save
+              v_multiple_o_star_nii_flag = r[3]
+              v_o_star_nii_file_to_use = r[4]
+              v_multiple_sag_cube_flair_flag = r[5]
+              v_sag_cube_flair_to_use = r[6]
+              # need to change script to accept v_o_star_nii_file_to_use and v_sag_cube_flair_to_use
               v_call =  'ssh panda_admin@merida.dom.wisc.edu "'  +v_script+' -p '+v_o_star_nii_sp_loc+'  -b '+v_subjectid+' "  ' 
               puts "rrrrrrr "+v_call
               v_log = v_log + v_call+"\n"
@@ -1547,6 +1574,11 @@ puts "AAAAAA "+v_call
                   v_comment = v_err +" =>"+r[2]+ " ; " +v_comment  
                  end 
                  v_error_comment = "error in "+r[2]+" ;"+v_error_comment
+                 # send email to owner
+                 v_schedule_owner_email_array.each do |e|
+                   v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see "+v_log_path
+                   PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
+                 end
                end
               @schedulerun.comment =v_comment[0..1990]
               @schedulerun.save
