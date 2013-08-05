@@ -384,7 +384,10 @@ puts "AAAAAA "+v_call
         sql_dirlist = "update cg_adrc_upload set general_comment =' NOT ALL SCAN TYPES!!!! "+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
         results_dirlist = connection.execute(sql_dirlist)
         # send email 
-        v_subject = "adrc_upload "+r[0]+" is missing some scan types --- set status_flag ='R' to send  : scans ="+v_folder_array.join(", ") 
+        v_subject = "adrc_upload "+r[0]+" is missing some scan types --- set status_flag ='R' to send  : scans ="+v_folder_array.join(", ")
+        v_email = "noreply_johnson_lab@medicine.wisc.edu"
+        PandaMailer.schedule_notice(v_subject,{:send_to => v_email}).deliver
+
         # mail(
         #   :from => "noreply_johnson_lab@medicine.wisc.edu"
         #   :to => "noreply_johnson_lab@medicine.wisc.edu", 
