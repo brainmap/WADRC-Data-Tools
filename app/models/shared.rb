@@ -110,6 +110,15 @@ class Shared  < ActionController::Base
   end
   
   
+  def get_schedule_owner_email(p_schedule_id)
+    v_email_array = ['noreply_johnson_lab@medicine.wisc.edu']
+    @schedule = Schedule.find(p_schedule_id)
+    (@schedule.users).each do |u|
+      v_email_array.push(u.email)
+    end
+    return v_email_array    
+  end  
+  
   def get_sp_id_from_subjectid_v(p_subjectid_v)
     v_subjectid_chop = p_subjectid_v.gsub(/_v/,"").delete("0-9")
     v_visit_number = 1
@@ -142,6 +151,17 @@ class Shared  < ActionController::Base
     
     return nil
   end
+  
+  def make_schedule_process_stop_file(p_file_path)
+    v_value = "stopping process"
+    if File.file?(p_file_path)
+         # not do anything?
+    else
+      f = File.open(p_file_path, 'w')
+      f.write(v_value)
+      f.close
+    end
+  end  
   
  def move_present_to_old_new_to_present(p_tn, p_colum_list,p_conditions,p_comment)
    v_comment = p_comment
@@ -177,6 +197,32 @@ class Shared  < ActionController::Base
    return v_comment
   end 
   
+  
+  def process_logs_delete_old( p_process_name, p_log_base)
+    v_sec_day = 86400
+    t = Time.now
+    v_days_back_array = [100,130,160]
+    v_days_back_array.each do |v_back|
+      tback = t - (v_sec_day * v_back)
+      v_log_path = p_log_base+p_process_name+"_"+tback.strftime("%Y%m")
+      if File.file?(v_log_path)
+         File.delete(v_log_path)
+      end
+    end
+  end
+  
+  def process_log_append(p_log_path, p_value)
+    v_value = p_value.gsub("^H"," ")
+    if File.file?(p_log_path)
+      f = File.open(p_log_path, 'a') 
+      f.write(v_value) 
+      f.close
+    else
+      f = File.open(p_log_path, 'w')
+      f.write(v_value)
+      f.close
+    end
+  end  
 
   def run_sftp
       v_username = Shared.adrc_sftp_username # get from shared helper
@@ -479,7 +525,10 @@ puts "AAAAAA "+v_call
       
     
   end
-  
+  # to add columns --
+  # change sql_base insert statement
+  # change  sql = sql_base+  insert statement with values
+  # change  self.move_present_to_old_new_to_present
   def run_asl_status
         visit = Visit.find(3)  #  need to get base path without visit
         v_base_path = visit.get_base_path()
@@ -797,7 +846,10 @@ puts "AAAAAA "+v_call
     ####    end
   end  
   
-
+  # to add columns --
+  # change sql_base insert statement
+  # change  sql = sql_base+  insert statement with values
+  # change  self.move_present_to_old_new_to_present
   def run_dti_status
         visit = Visit.find(3)  #  need to get base path without visit
         v_base_path = visit.get_base_path()
@@ -1013,6 +1065,10 @@ puts "AAAAAA "+v_call
     ####    end
   end  
   
+  # to add columns --
+  # change sql_base insert statement
+  # change  sql = sql_base+  insert statement with values
+  # change  self.move_present_to_old_new_to_present
   def run_epi_rest_status
         visit = Visit.find(3)  #  need to get base path without visit
         v_base_path = visit.get_base_path()
@@ -1137,6 +1193,10 @@ puts "AAAAAA "+v_call
     
   end
 
+  # to add columns --
+  # change sql_base insert statement
+  # change  sql = sql_base+  insert statement with values
+  # change  self.move_present_to_old_new_to_present
   def run_fdg_status
         visit = Visit.find(3)  #  need to get base path without visit
         v_base_path = visit.get_base_path()
@@ -1255,7 +1315,10 @@ puts "AAAAAA "+v_call
     
   end
   
-  
+  # to add columns --
+  # change sql_base insert statement
+  # change  sql = sql_base+  insert statement with values
+  # change  self.move_present_to_old_new_to_present
   def run_lst_116_status   # actually the new  lst_122 in column, and lst_116 in separate column
         visit = Visit.find(3)  #  need to get base path without visit
         v_base_path = visit.get_base_path()
@@ -1427,52 +1490,6 @@ puts "AAAAAA "+v_call
     
   end
   
-  def get_schedule_owner_email(p_schedule_id)
-    v_email_array = ['noreply_johnson_lab@medicine.wisc.edu']
-    @schedule = Schedule.find(p_schedule_id)
-    (@schedule.users).each do |u|
-      v_email_array.push(u.email)
-    end
-    return v_email_array    
-  end
-  
-  def make_schedule_process_stop_file(p_file_path)
-    v_value = "stopping process"
-    if File.file?(p_file_path)
-         # not do anything?
-    else
-      f = File.open(p_file_path, 'w')
-      f.write(v_value)
-      f.close
-    end
-  end
-  
-  
-  def process_logs_delete_old( p_process_name, p_log_base)
-    v_sec_day = 86400
-    t = Time.now
-    v_days_back_array = [100,130,160]
-    v_days_back_array.each do |v_back|
-      tback = t - (v_sec_day * v_back)
-      v_log_path = p_log_base+p_process_name+"_"+tback.strftime("%Y%m")
-      if File.file?(v_log_path)
-         File.delete(v_log_path)
-      end
-    end
-  end
-  
-  def process_log_append(p_log_path, p_value)
-    v_value = p_value.gsub("^H"," ")
-    if File.file?(p_log_path)
-      f = File.open(p_log_path, 'a') 
-      f.write(v_value) 
-      f.close
-    else
-      f = File.open(p_log_path, 'w')
-      f.write(v_value)
-      f.close
-    end
-  end
     
   def run_lst_122_process
       v_process_name = "lst_122_process"
@@ -1504,7 +1521,7 @@ puts "AAAAAA "+v_call
       
       connection = ActiveRecord::Base.connection();  
       # do_not_run_process_wlesion_030 == Y means do not run
-      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) ) and (  lst_subjectid like 'mrt%' or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) ) and (  lst_subjectid not like 'shp%') #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
       results = connection.execute(sql)
       results.each do |r|
           v_break = 0  # need a kill swith
@@ -1560,7 +1577,7 @@ puts "AAAAAA "+v_call
               while !stdout.eof?
                 v_output = stdout.read 1024 
                 v_log = v_log + v_output  
-                if v_output.include? "Done    'PVE label estimation and lesion segmentation'"
+                if (v_log.tr("\n","")).include? "Done    'PVE label estimation and lesion segmentation'"  # line wrapping? Done ==> Do\nne
                   v_success ="Y"
                   v_log = v_log + "SUCCESS !!!!!!!!! \n"
                 end
@@ -1614,7 +1631,10 @@ puts "AAAAAA "+v_call
       @schedulerun.save
   end
   
-  
+  # to add columns --
+  # change sql_base insert statement
+  # change  sql = sql_base+  insert statement with values
+  # change  self.move_present_to_old_new_to_present
   def run_pib_cereb_tac
         visit = Visit.find(3)  #  need to get base path without visit
         v_base_path = visit.get_base_path()
@@ -1821,10 +1841,12 @@ puts "AAAAAA "+v_call
     else
       return ""
     end
-    
-    
   end
   
+  # to add columns --
+  # change sql_base insert statement
+  # change  sql = sql_base+  insert statement with values
+  # change  self.move_present_to_old_new_to_present
   def run_pib_status
         visit = Visit.find(3)  #  need to get base path without visit
         v_base_path = visit.get_base_path()
@@ -1932,11 +1954,14 @@ puts "AAAAAA "+v_call
     ####         v_error = v_error+"\n"+v_comment
     ####          @schedulerun.comment =v_error[0..499]
     ####          @schedulerun.status_flag="E"
-    ####    end
-    
-    
+    ####    end  
   end
     
+    
+  # to add columns --
+  # change sql_base insert statement
+  # change  sql = sql_base+  insert statement with values
+  # change  self.move_present_to_old_new_to_present  
   def run_t1seg_status
         visit = Visit.find(3)  #  need to get base path without visit
         v_base_path = visit.get_base_path()
