@@ -105,7 +105,12 @@ class SchedulesController < ApplicationController
     @schedule = Schedule.find(params[:id])
 
     respond_to do |format|
+      
       if @schedule.update_attributes(params[:schedule])
+        if params[:schedule][:user_ids].blank?
+           params[:schedule][:user_ids]=""
+           @schedule.update_attributes(params[:schedule])
+        end
         format.html { redirect_to(@schedule, :notice => 'Schedule was successfully updated.') }
         format.xml  { head :ok }
       else
