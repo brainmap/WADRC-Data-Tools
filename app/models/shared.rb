@@ -1575,7 +1575,11 @@ puts "AAAAAA "+v_call
               v_call =  'ssh panda_admin@merida.dom.wisc.edu "'  +v_script+' -p '+v_o_star_nii_sp_loc+'  -b '+v_subjectid+' "  ' 
               puts "rrrrrrr "+v_call
               v_log = v_log + v_call+"\n"
-              stdin, stdout, stderr = Open3.popen3(v_call)
+              begin
+                 stdin, stdout, stderr = Open3.popen3(v_call)
+               rescue => msg  
+                  v_log = v_log + msg+"\n"  
+               end
               v_success ="N"
               while !stdout.eof?
                 v_output = stdout.read 1024 
