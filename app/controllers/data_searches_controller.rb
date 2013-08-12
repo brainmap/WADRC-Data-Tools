@@ -790,7 +790,8 @@ class DataSearchesController < ApplicationController
             if current_user.role == 'Admin_High'
                 @v_key.push(v_key)
             end
-        end          
+        end    
+        @v_key = @v_key.sort      
         # load data dict
         v_cnt = 0
         r.each do |rc| 
