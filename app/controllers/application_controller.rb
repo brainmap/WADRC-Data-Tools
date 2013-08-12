@@ -34,12 +34,16 @@ class ApplicationController < ActionController::Base
 # place where lumbarpuncture, blooddraw, visits, and other controllers can get at
 def run_search
   scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
-  if @tables.size == 1  
+  if @tables.size == 1  or @tables.include?("image_datasets")
        sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr , "+@fields.join(',')+",appointments.comment 
         FROM vgroups, appointments,scan_procedures, scan_procedures_vgroups, "+@tables.join(',')+" "+@left_join.join(' ')+"
         WHERE vgroups.id = appointments.vgroup_id and scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") "
         @tables.each do |tab|
-          sql = sql +" AND "+tab+".appointment_id = appointments.id  "
+          if tab == "image_datasets"
+            sql = sql +" AND "+tab+".visit_id = visits.id  "
+          else
+            sql = sql +" AND "+tab+".appointment_id = appointments.id  "
+          end
         end
         sql = sql +" AND scan_procedures.id = scan_procedures_vgroups.scan_procedure_id
         AND scan_procedures_vgroups.vgroup_id = vgroups.id "
@@ -51,7 +55,7 @@ def run_search
         if @order_by.size > 0
           sql = sql +" ORDER BY "+@order_by.join(',')
         end 
-    end
+   end
 
 puts sql    
     connection = ActiveRecord::Base.connection();

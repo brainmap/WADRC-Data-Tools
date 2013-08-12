@@ -164,6 +164,7 @@ WADRCDataTools::Application.routes.draw do
     match '/np_search' , :controller => 'neuropsyches', :action => 'np_search', :as =>:np_search
     match '/questionnaire_search' , :controller => 'questionnaires', :action => 'questionnaire_search', :as =>:questionnaire_search
     match '/q_search' , :controller => 'questionnaires', :action => 'q_search', :as =>:q_search
+    match '/ids_search' , :controller => 'image_datasets', :action => 'ids_search', :as =>:ids_search
   
     match '/participant_search' , :controller => 'participants', :action => 'participant_search', :as =>:participant_search
   match '/cg_search' , :controller => 'data_searches', :action => 'cg_search', :as =>:cg_search

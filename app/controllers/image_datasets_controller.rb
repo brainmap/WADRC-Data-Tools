@@ -102,6 +102,207 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
           format.csv  { render :csv => ImageDataset.csv_download(@image_datasets, heavy_include_options) }
         end
       end
+      
+      
+
+      def ids_search
+          # make @conditions from search form input, access control in application controller run_search
+          @conditions = []
+          @current_tab = "image_datasets"
+          @series_desc_categories = {"ASL" => "ASL", 
+        	"DSC Perfusion" => "DSC Perfusion", 
+        	"DTI" => "DTI", 
+        	"Fieldmap" => "Fieldmap", 
+        	"fMRI Task" => "fMRI Task", 
+        	"HYDI" => "HYDI", 
+        	"mcDESPOT" => "mcDESPOT", 
+        	"MRA" => "MRA", 
+        	"MT" => "MT", 
+        	"Other" => "Other", 
+        	"PCVIPR" => "PCVIPR", 
+        	"PD/T2" => "PD/T2", 
+        	"resting fMRI" => "resting fMRI", 
+        	"SWI" => "SWI", 
+        	"T1 Volumetric" => "T1 Volumetric", 
+        	"T2" => "T2", 
+        	"T2 Flair" => "T2 Flair", 
+        	"T2*" => "T2*"}
+          params["search_criteria"] =""
+
+          if params[:ids_search].nil?
+               params[:ids_search] =Hash.new  
+               condition ="  visits.appointment_id in (select appointments.id from appointments where appointments.appointment_date > DATE_SUB(NOW(), INTERVAL 2 MONTH)  )"
+                @conditions.push(condition)
+                params["search_criteria"] = params["search_criteria"] +",  visit date after "+(2.months.ago).strftime("%m/%d/%Y")
+          end
+
+          if !params[:ids_search][:scan_procedure_id].blank?
+             condition =" visits.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
+                                                    appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
+                                                    and scan_procedure_id in ("+params[:ids_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+             @conditions.push(condition)
+             @scan_procedures = ScanProcedure.where("id in (?)",params[:ids_search][:scan_procedure_id])
+             params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
+          end
+
+          if !params[:ids_search][:path].blank?
+              var = "%"+params[:ids_search][:path].downcase+"%"
+              condition =" image_datasets.path  like '"+var.gsub(/[;:'"()=<>]/, '')+"' "
+              @conditions.push(condition)
+              params["search_criteria"] = params["search_criteria"] +", Path contains "+params[:ids_search][:path]
+          end
+  
+          if !params[:ids_search][:series_description].blank?
+              var = "%"+params[:ids_search][:series_description].downcase+"%"
+              condition =" image_datasets.series_description  like '"+var.gsub(/[;:'"()=<>]/, '')+"' "
+              @conditions.push(condition)
+              params["search_criteria"] = params["search_criteria"] +", Series desc contains "+params[:ids_search][:series_description]
+          end
+          
+          if !params[:ids_search][:series_category].blank?
+              var = params[:ids_search][:series_category]
+              condition =" image_datasets.series_description  in ( select series_description from series_description_map where series_description_type = '"+var.gsub(/[;:'"()=<>]/, '')+"'  )"
+              @conditions.push(condition)
+              params["search_criteria"] = params["search_criteria"] +", Series category is "+params[:ids_search][:series_category]
+          end
+          
+
+          if !params[:ids_search][:enumber].blank?
+            if params[:ids_search][:enumber].include?(',') # string of enumbers
+             v_enumber =  params[:ids_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
+             v_enumber = v_enumber.gsub(/,/,"','")
+               condition =" visits.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
+               where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
+               and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"
+
+            else
+              condition =" visits.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
+              where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
+              and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:ids_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+            end
+            @conditions.push(condition)
+            params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:ids_search][:enumber]
+          end      
+
+          if !params[:ids_search][:rmr].blank? 
+              condition =" visits.appointment_id in (select appointments.id from appointments,vgroups
+                        where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:ids_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
+              @conditions.push(condition)           
+              params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:ids_search][:rmr]
+          end   
+
+          #  build expected date format --- between, >, < 
+          v_date_latest =""
+          #want all three date parts
+          if !params[:ids_search]["#{'latest_timestamp'}(1i)"].blank? && !params[:ids_search]["#{'latest_timestamp'}(2i)"].blank? && !params[:ids_search]["#{'latest_timestamp'}(3i)"].blank?
+               v_date_latest = params[:ids_search]["#{'latest_timestamp'}(1i)"] +"-"+params[:ids_search]["#{'latest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:ids_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+          end
+          v_date_earliest =""
+          #want all three date parts
+          if !params[:ids_search]["#{'earliest_timestamp'}(1i)"].blank? && !params[:ids_search]["#{'earliest_timestamp'}(2i)"].blank? && !params[:ids_search]["#{'earliest_timestamp'}(3i)"].blank?
+                v_date_earliest = params[:ids_search]["#{'earliest_timestamp'}(1i)"] +"-"+params[:ids_search]["#{'earliest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:ids_search]["#{'earliest_timestamp'}(3i)"].rjust(2,"0")
+           end
+          v_date_latest = v_date_latest.gsub(/[;:'"()=<>]/, '')
+          v_date_earliest = v_date_earliest.gsub(/[;:'"()=<>]/, '')
+          if v_date_latest.length>0 && v_date_earliest.length >0
+            condition ="  visits.appointment_id in (select appointments.id from appointments where appointments.appointment_date between '"+v_date_earliest+"' and '"+v_date_latest+"' )"
+            @conditions.push(condition)
+            params["search_criteria"] = params["search_criteria"] +",  visit date between "+v_date_earliest+" and "+v_date_latest
+          elsif v_date_latest.length>0
+            condition ="  visits.appointment_id in (select appointments.id from appointments where appointments.appointment_date < '"+v_date_latest+"'  )"
+             @conditions.push(condition)
+             params["search_criteria"] = params["search_criteria"] +",  visit date before "+v_date_latest 
+          elsif  v_date_earliest.length >0
+            condition ="  visits.appointment_id in (select appointments.id from appointments where appointments.appointment_date > '"+v_date_earliest+"' )"
+             @conditions.push(condition)
+             params["search_criteria"] = params["search_criteria"] +",  visit date after "+v_date_earliest
+           end
+
+           if !params[:ids_search][:gender].blank?
+              condition ="  visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
+               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+               and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                      and participants.gender is not NULL and participants.gender in ("+params[:ids_search][:gender].gsub(/[;:'"()=<>]/, '')+") )"
+               @conditions.push(condition)
+               if params[:ids_search][:gender] == 1
+                  params["search_criteria"] = params["search_criteria"] +",  sex is Male"
+               elsif params[:ids_search][:gender] == 2
+                  params["search_criteria"] = params["search_criteria"] +",  sex is Female"
+               end
+           end   
+
+           if !params[:ids_search][:min_age].blank? && params[:ids_search][:max_age].blank?
+               condition ="   visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
+                                  where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                               and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                               and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                               and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) >= "+params[:ids_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                @conditions.push(condition)
+               params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:ids_search][:min_age]
+           elsif params[:ids_search][:min_age].blank? && !params[:ids_search][:max_age].blank?
+                condition ="   visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
+                                   where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                                and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                                and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                            and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) <= "+params[:ids_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+               @conditions.push(condition)
+               params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:ids_search][:max_age]
+           elsif !params[:ids_search][:min_age].blank? && !params[:ids_search][:max_age].blank?
+              condition ="    visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
+                                 where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
+                              and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
+                              and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                          and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) between "+params[:ids_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:ids_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+             @conditions.push(condition)
+             params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:ids_search][:min_age]+" and "+params[:ids_search][:max_age]
+           end
+           # trim leading ","
+           params["search_criteria"] = params["search_criteria"].sub(", ","")
+
+           # adjust columns and fields for html vs xls
+           request_format = request.formats.to_s
+           @html_request ="Y"
+           case  request_format
+             when "text/html" then # ? application/html
+               @column_headers = ['Date','Protocol','Enumber','RMR','Directory', 'Series Description','Imaging Details','Quality Check', 'Analysis Exclusions',' ' ] # need to look up values
+                   # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+               @column_number =   @column_headers.size
+               @fields =["SUBSTRING_INDEX(image_datasets.path,'/',-1)","series_description","'peek'","'Quality check'","'Analysis exclusion'","image_datasets.id"] # vgroups.id vgroup_id always first, include table name
+# need to substitue peek- details, quality check, eclusion --- need links
+                @left_join = [ ] # left join needs to be in sql right after the parent table!!!!!!!
+             else    
+               @html_request ="N"          
+                @column_headers = ['Date','Protocol','Enumber','RMR','series_description','dicom_series_uid','dcm_file_count','timestamp','scanned_file','image_uid','id','rep_time','glob','path','bold_reps','slices_per_volume','visit.age_at_visit','visit.scanner_source','image_dataset_quality_checks.motion_warning','image_dataset_quality_checks.incomplete_series','image_dataset_quality_checks.omnibus_f_comment','image_dataset_quality_checks.fov_cutoff','image_dataset_quality_checks.banding_comment','image_dataset_quality_checks.spm_mask','image_dataset_quality_checks.garbled_series_comment','image_dataset_quality_checks.motion_warning_comment','image_dataset_quality_checks.user_id','image_dataset_quality_checks.banding','image_dataset_quality_checks.field_inhomogeneity','image_dataset_quality_checks.nos_concerns_comment','image_dataset_quality_checks.garbled_series','image_dataset_quality_checks.created_at','image_dataset_quality_checks.incomplete_series_comment','image_dataset_quality_checks.omnibus_f','image_dataset_quality_checks.other_issues','image_dataset_quality_checks.fov_cutoff_comment','image_dataset_quality_checks.nos_concerns','image_dataset_quality_checks.registration_risk','image_dataset_quality_checks.ghosting_wrapping','image_dataset_quality_checks.field_inhomogeneity_comment','image_dataset_quality_checks.updated_at','image_dataset_quality_checks.registration_risk_comment','image_dataset_quality_checks.ghosting_wrapping_comment','image_dataset_quality_checks.image_dataset_id','image_dataset_quality_checks.spm_mask_comment','image_comments.comment','image_comments.updated_at','image_comments.created_at','image_comments.user_id','image_comments.image_dataset_id','Appt Note'] # need to look up values
+                      # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+                @column_number =   @column_headers.size
+                @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename","petscans.path","petscans.netinjecteddose",
+                        "time_format(timediff( time(petscans.injecttiontime),subtime(utc_time(),time(localtime()))),'%H:%i')",
+                        "time_format(timediff( time(scanstarttime),subtime(utc_time(),time(localtime()))),'%H:%i')",
+                        "petscans.petscan_note","petscans.range","vgroups.transfer_pet","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","petscans.id"] # vgroups.id vgroup_id always first, include table name 
+                @left_join = ["LEFT JOIN lookup_pettracers on petscans.lookup_pettracer_id = lookup_pettracers.id",
+                            "LEFT JOIN vitals on petscans.appointment_id = vitals.appointment_id  "] # left join needs to be in sql right after the parent table!!!!!!!   
+                            # "LEFT JOIN employees on petscans.enteredpetscanwho = employees.id",             
+
+             end
+           @tables =['visits','image_datasets'] # trigger joins --- vgroups and appointments by default
+           @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
+         @results = self.run_search   # in the application controller
+            #### JUST TESTING!!!!!
+          @results_total = @results  # pageination makes result count wrong
+          t = Time.now 
+          @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
+
+          ### LOOK WHERE TITLE IS SHOWING UP
+          @collection_title = 'Image Datasets'
+
+          respond_to do |format|
+            format.xls # ids_search.xls.erb
+            format.xml  { render :xml => @results_total }       
+            format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(50)} # ids_search.html.erb
+          end
+        end
+      
+      
   # GET /image_datasets/1
   # GET /image_datasets/1.xml
   def show

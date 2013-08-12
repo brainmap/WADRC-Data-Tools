@@ -11,7 +11,6 @@
 
 if @cg_tn.table_type == 'column_group' and @cg_tn.editable_flag == "Y"
 %>
-
 cg_edit_table = <%= @cg_tn.common_name%>
 <% @cg_tn_cn = CgTnCn.where("key_column_flag ='Y' and cg_tn_id in (?)",@cg_tn.id) 
 if @cg_tn_cn.size == 1 # only want to show if key is one column %>

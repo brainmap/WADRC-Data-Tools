@@ -1,0 +1,171 @@
+<%   @current_tab = "image_datasets"
+%>
+
+<%
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+ edit_low_scan_procedure_array = []
+edit_low_scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+edit_count =edit_low_scan_procedure_array.length 
+edit_count = edit_count -1
+
+%>
+
+<div id="heading_and_link">
+  <h1>Image Datasets:</h1>
+<% if edit_count > 0 %> 
+<% end %>
+</p>
+</div>
+
+<B>Criteria: </b><%= params["search_criteria"] %>
+
+
+<%= form_for 'ids_search' do |f| %>
+<!--
+  <table class="search_form">
+	
+    <th><%= f.label :scan_procedures %></th>
+    <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
+    <td><%= collection_select(:ids_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename, {}, {:multiple =>  true}) %></td>
+  </table>
+-->
+<table class="search_form">
+	<tr><td><%= f.label :scan_procedures %><br>
+	<div id="scan_procedure_list">
+	<ul>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
+		<li>
+			<%#= f.fields_for scan_procedure do |scan_fields| %>
+				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
+				<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
+			<%# end %>
+		</li>
+		<li>
+			<%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'ids_search[scan_procedure_id][]' %>
+			<%= label_tag '', scan_procedure.codename %>
+		</li>
+	<% end %>
+	</ul>
+	</div>
+
+	  </td></tr></table>
+
+<!-- visits/find.html.erb has a nice checkbox -- from some metasearch plugin?  -->
+  <table class="search_form">
+
+    <tr>
+      <th><%= f.label :enumber %></th>
+      <td><%= f.text_field :enumber %></td>
+    </tr>
+
+    <tr>
+      <th>RMR</th>
+      <td><%= f.text_field :rmr %></td>
+    </tr>
+
+    <tr>
+      <th><%= f.label :Path_contains %></th>
+      <td><%= f.text_field :path %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :Series_category %></th>
+      <td><%= select :ids_search, :series_category, @series_desc_categories.sort_by{ |a,b| a[0]}, :prompt =>"Select a category", :include_blank => true  %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :Series_desc_contains %></th>
+      <td><%= f.text_field :series_description %></td>
+    </tr>
+  </table>
+
+
+  <table class="search_form">
+    <tr>
+      <th><%= f.label :gender %></th>
+      <td><%= select :ids_search, :gender, { "M" => 1, "F" => 2 }, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :minimum_age %></th>
+      <td><%= select :ids_search, :min_age, (1..110).to_a, :include_blank => true %><B> (the age at visit) </B></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_age %></th>
+      <td><%= select :ids_search, :max_age, (1..110).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :scan_date_before %></th>
+      <td><%= f.date_select "latest_timestamp", :start_year => 1995, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :scan_date_after %></th>
+      <td><%= f.date_select :earliest_timestamp, :start_year => 1995, :include_blank => true %></td>
+    </tr>
+  </table>
+
+  
+  <%= clearing_br %>
+  <%= f.submit "Search" %>
+  
+<% end %>
+
+
+<%= link_to 'download xls', { :controller=>"image_datasets", :action=>"ids_search", :ids_search =>  params[:ids_search] , :format => :xls} %>  </p>
+
+<table class="tabular">  
+  <caption><%= pluralize(@results_total.size, 'Image datasets') %></caption>
+  <thead>
+    <tr>
+		<% @column_headers.each do |column_header|%>
+	      <th><%= column_header%></th>
+	  <% end %>
+      <th></th>
+<% if edit_count > 0 %>
+       <th></th>
+<% end %>
+      <th></th>
+    </tr>
+  </thead>
+
+<!--   add params and order by link to col header!!!!!!!!!!!    -->
+  <tfoot><tr><td colspan=(column_header.size+2)>
+		 <%=    paginate @results %> 
+  </td></tr></tfoot>
+
+  <tbody>
+    <% @results.each do |result| %>
+       <%  image_dataset = ImageDataset.find(result[@column_headers.size-1])
+           visit = Visit.find(image_dataset.visit_id)
+           appointment = Appointment.find(visit.appointment_id) 
+           vgroup = Vgroup.find(appointment.vgroup_id)
+           result.delete_at(@column_headers.size-1)
+        %>
+	  <tr>
+	   <% for i in 0..@column_number-1 %>
+	        <% if i == 0 %>
+		     <td><%= link_to result[i].to_s(:datetime_military), visit %></td>
+		    <% elsif i == 1 %>
+		     <td><%= vgroup.scan_procedures.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, '/ids_search?ids_search[scan_procedure_id][]='+sp.id.to_s)}.join(", ").html_safe %></td>
+		    <% elsif i == 2 %>
+		     <td><%= vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
+		    <% elsif i == 5 %>
+		      <td><%= ic = Iconv.new('UTF-8//IGNORE', 'UTF-8'); link_to ic.iconv(image_dataset.series_description), image_dataset %></td>
+		
+		    <% elsif i == 6 %>
+		      <td><%= popup_note("peek", key_val_table("image_details", image_dataset.details_hash))%></td>
+		    <% elsif i == 7 %>
+		      <td><%= qc_popup_or_link_to_new(image_dataset) %></td>
+		    <% elsif i == 8 %>
+		    <td><%=h image_dataset.excluded_by_any_analyses? ? image_dataset.analysis_memberships.out.size.to_s : "None" %></td>
+		    <!-- <% elsif i == 9 %>
+		      <td><%= popup_note('peek', key_val_table('path_popup', { :ApptNote => result[i].to_s })) unless result[i].to_s.blank? %></td> -->
+		    <% else %>
+		    <td><%= result[i] %></td>
+		     <% end %>
+	   <% end %>
+       <td style="width: 6em;" nowrap><%= link_to 'show visit', visit %> | <%= link_to 'show series',image_dataset %> 
+       </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
