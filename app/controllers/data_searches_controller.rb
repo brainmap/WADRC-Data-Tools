@@ -927,9 +927,11 @@ class DataSearchesController < ApplicationController
             v_ids_tn_id = @image_datasets_tn[0].id
             if params[:cg_search][:join_type][v_ids_tn_id.to_s] == "0" # inner affects full query- outer doesn't affect full query
              v_condition = " vgroups.id in ( select a3.vgroup_id from appointments a3,visits v3, image_datasets ids3 where a3.id = v3.appointment_id 
+                                                         and a3.appointment_type = 'mri'
                                                          and v3.id = ids3.visit_id and ids3.series_description in (select series_description from series_description_map 
                                                           where series_description_type = '"+params[:cg_search][:series_category]+"' ) ) "
              @local_conditions.push(v_condition)
+              params["search_criteria"] = params["search_criteria"] +" series description "+params[:cg_search][:series_category]+", "
             end
          end
          
