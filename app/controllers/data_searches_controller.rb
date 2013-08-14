@@ -843,6 +843,27 @@ class DataSearchesController < ApplicationController
       @q_data_tables_hash = Hash.new
       @fields_hash = Hash.new
       
+      @image_datasets_tn =  CgTn.where("tn = 'image_datasets' ")
+      # ALSO IN IDS_SEARCH !!!!!!  need to update if added new categories
+      @series_desc_categories = {"ASL" => "ASL", 
+    	"DSC Perfusion" => "DSC Perfusion", 
+    	"DTI" => "DTI", 
+    	"Fieldmap" => "Fieldmap", 
+    	"fMRI Task" => "fMRI Task", 
+    	"HYDI" => "HYDI", 
+    	"mcDESPOT" => "mcDESPOT", 
+    	"MRA" => "MRA", 
+    	"MT" => "MT", 
+    	"Other" => "Other", 
+    	"PCVIPR" => "PCVIPR", 
+    	"PD/T2" => "PD/T2", 
+    	"resting fMRI" => "resting fMRI", 
+    	"SWI" => "SWI", 
+    	"T1 Volumetric" => "T1 Volumetric", 
+    	"T2" => "T2", 
+    	"T2 Flair" => "T2 Flair", 
+    	"T2*" => "T2*"}
+      
       request_format = request.formats.to_s
       @html_request ="Y"
       case  request_format
@@ -889,7 +910,7 @@ class DataSearchesController < ApplicationController
        @user = current_user
 
        if !params[:cg_search].blank?
-          # NEED TO BUILD  v_condition = -- LOOK AT OTHER SEARCHES
+          # NEED TO BUILD  v_condition = -- LOOK AT OTHER SEARCHES    --- not saving the image_dataset conditions
          @cg_query.cg_name = params[:cg_search][:cg_name]
          @cg_query.rmr = params[:cg_search][:rmr]
          @cg_query.enumber = params[:cg_search][:enumber]
@@ -902,6 +923,16 @@ class DataSearchesController < ApplicationController
 
          # would like to switch to vgroups.id limit, by run_search_q_data gets conditions, and might expect appointments.id limits
          # build conditions from sp, enumber, rmr, gender, min_age, max_age -- @table_types.push('base')
+         if !params[:cg_search][:series_category].blank? # image_dataset
+            v_ids_tn_id = @image_datasets_tn[0].id
+            if params[:cg_search][:join_type][v_ids_tn_id.to_s] == "0" # inner affects full query- outer doesn't affect full query
+             v_condition = " vgroups.id in ( select a3.vgroup_id from appointments a3,visits v3, image_datasets ids3 where a3.id = v3.appointment_id 
+                                                         and v3.id = ids3.visit_id and ids3.series_description in (select series_description from series_description_map 
+                                                          where series_description_type = '"+params[:cg_search][:series_category]+"' ) ) "
+             @local_conditions.push(v_condition)
+            end
+         end
+         
          if !params[:cg_search][:scan_procedure_id].blank?
             @table_types.push('base')
             v_condition ="   appointments.id in (select a2.id from appointments a2,scan_procedures_vgroups where 
@@ -1263,13 +1294,13 @@ class DataSearchesController < ApplicationController
                               params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" between "+@cg_query_tn_cn.value_1+" and "+ @cg_query_tn_cn.value_2
                           end
                         elsif @cg_query_tn_cn.condition == 5
-                          v_condition = " trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") is NULL "
+                          v_condition = " ( trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") is NULL or trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") = '' ) "
                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" is blank"
                           end
                         elsif @cg_query_tn_cn.condition == 6
-                          v_condition = " trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") is NOT NULL "
+                          v_condition = " trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") is NOT NULL and  trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+")  != '' "
                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" is not blank "
@@ -1537,18 +1568,58 @@ class DataSearchesController < ApplicationController
        end
        @all_tables.push(v_tn)
     end
-    sql = sql + @all_tables.join(", ")
+    sql = sql + @all_tables.uniq.join(", ")
     sql = sql + " where "+ @local_conditions.uniq.join(" and ")
     sql = sql+" order by "+@order_by.join(",")
     @sql = sql
     # run the sql ==>@results, after some substitutions
+    
+    if !params[:cg_search].blank? and !params[:cg_search][:series_category].blank? and !params[:cg_search][:image_dataset_file].blank?
+      # image_datasets
+      # get list of columns from ids_search
+      @column_headers_ids = ['Date','Protocol','Enumber','RMR','series_description','dicom_series_uid','dcm_file_count','timestamp','scanned_file','image_uid','id','rep_time','glob','path','bold_reps','slices_per_volume','visit.age_at_visit','visit.scanner_source','image_dataset_quality_checks.motion_warning','image_dataset_quality_checks.incomplete_series','image_dataset_quality_checks.omnibus_f_comment','image_dataset_quality_checks.fov_cutoff','image_dataset_quality_checks.banding_comment','image_dataset_quality_checks.spm_mask','image_dataset_quality_checks.garbled_series_comment','image_dataset_quality_checks.motion_warning_comment','image_dataset_quality_checks.user_id','image_dataset_quality_checks.banding','image_dataset_quality_checks.field_inhomogeneity','image_dataset_quality_checks.nos_concerns_comment','image_dataset_quality_checks.garbled_series','image_dataset_quality_checks.created_at','image_dataset_quality_checks.incomplete_series_comment','image_dataset_quality_checks.omnibus_f','image_dataset_quality_checks.other_issues','image_dataset_quality_checks.fov_cutoff_comment','image_dataset_quality_checks.nos_concerns','image_dataset_quality_checks.registration_risk','image_dataset_quality_checks.ghosting_wrapping','image_dataset_quality_checks.field_inhomogeneity_comment','image_dataset_quality_checks.updated_at','image_dataset_quality_checks.registration_risk_comment','image_dataset_quality_checks.ghosting_wrapping_comment','image_dataset_quality_checks.image_dataset_id','image_dataset_quality_checks.spm_mask_comment','image_comments.comment','image_comments.updated_at','image_comments.created_at','image_comments.user_id','image_comments.image_dataset_id','Appt Note'] # need to look up values
+          # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+      @column_number_ids =   @column_headers_ids.size
+      # try left joins on quality check tables, user name
+      # weird utc transformations -- utc in db but timestamps from files seem different
+      @fields_ids =["vgroups.id","vgroups.vgroup_date","vgroups.rmr","image_datasets.series_description","image_datasets.dicom_series_uid","image_datasets.dcm_file_count","concat(date_format(image_datasets.timestamp,'%m/%d/%Y'),time_format(timediff( time(image_datasets.timestamp),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_datasets.scanned_file","image_datasets.image_uid","image_datasets.id","image_datasets.rep_time","image_datasets.glob","image_datasets.path","image_datasets.bold_reps","image_datasets.slices_per_volume","appointments.age_at_appointment","visits.scanner_source","image_dataset_quality_checks.motion_warning","image_dataset_quality_checks.incomplete_series","image_dataset_quality_checks.omnibus_f_comment","image_dataset_quality_checks.fov_cutoff","image_dataset_quality_checks.banding_comment","image_dataset_quality_checks.spm_mask","image_dataset_quality_checks.garbled_series_comment","image_dataset_quality_checks.motion_warning_comment","image_dataset_quality_checks.user_id","image_dataset_quality_checks.banding","image_dataset_quality_checks.field_inhomogeneity","image_dataset_quality_checks.nos_concerns_comment","image_dataset_quality_checks.garbled_series","concat(date_format(image_dataset_quality_checks.created_at,'%m/%d/%Y'),time_format(timediff( time(image_dataset_quality_checks.created_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_dataset_quality_checks.incomplete_series_comment","image_dataset_quality_checks.omnibus_f","image_dataset_quality_checks.other_issues","image_dataset_quality_checks.fov_cutoff_comment","image_dataset_quality_checks.nos_concerns","image_dataset_quality_checks.registration_risk","image_dataset_quality_checks.ghosting_wrapping","image_dataset_quality_checks.field_inhomogeneity_comment","concat(date_format(image_dataset_quality_checks.updated_at,'%m/%d/%Y'),time_format(timediff( time(image_dataset_quality_checks.updated_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_dataset_quality_checks.registration_risk_comment","image_dataset_quality_checks.ghosting_wrapping_comment","image_dataset_quality_checks.image_dataset_id","image_dataset_quality_checks.spm_mask_comment","image_comments.comment","concat(date_format(image_comments.updated_at,'%m/%d/%Y'),time_format(timediff( time(image_comments.updated_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(date_format(image_comments.created_at,'%m/%d/%Y'),time_format(timediff( time(image_comments.created_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(users.last_name,', ',users.first_name)","image_comments.image_dataset_id"]
+      
+      @local_conditions_ids =["visits.appointment_id = appointments.id", "visits.id = image_datasets.visit_id","image_datasets.series_description in (select series_description from series_description_map where series_description_type = '"+params[:cg_search][:series_category]+"')"]
+      @left_join_ids_hash = {
+                "image_datasets" => "LEFT JOIN image_dataset_quality_checks on image_datasets.id = image_dataset_quality_checks.image_dataset_id 
+                                     LEFT JOIN image_comments  on image_datasets.id = image_comments.image_dataset_id
+                                     LEFT JOIN users on image_comments.user_id = users.id" }
+      @tables_ids =['visits','image_datasets'] # trigger joins --- vgroups and appointments by default
+      @order_by_ids =["appointments.appointment_date DESC", "vgroups.rmr"]
+      @tables_ids.concat(@local_tables)
+      @local_conditions_ids.concat(@local_conditions)
+      @left_join_ids_hash.merge(@tables_left_join_hash)
+      # make sql based on parts
+      sql_ids = " select distinct "+@fields_ids.join(',')+" from "
+      @all_tables_ids = []
+      @tables_ids.uniq.each do |tn|   # need left join right after parent tn
+         v_tn = tn
+         if !@left_join_ids_hash[tn].blank?
+            v_tn = v_tn +" "+ @left_join_ids_hash[tn] 
+         end
+         @all_tables_ids.push(v_tn)
+      end
+      sql_ids = sql_ids + @all_tables_ids.uniq.join(", ")
+      sql_ids = sql_ids + " where "+ @local_conditions_ids.uniq.join(" and ")
+      sql_ids = sql_ids+" order by "+@order_by_ids.join(",")
+      puts sql_ids
+      sql = sql_ids
+       @column_headers_ids = ['Date','Protocol','Enumber','RMR','series_description','dicom_series_uid','dcm_file_count','timestamp','scanned_file','image_uid','id','rep_time','glob','path','bold_reps','slices_per_volume','visit.age_at_visit','visit.scanner_source','image_dataset_quality_checks.motion_warning','image_dataset_quality_checks.incomplete_series','image_dataset_quality_checks.omnibus_f_comment','image_dataset_quality_checks.fov_cutoff','image_dataset_quality_checks.banding_comment','image_dataset_quality_checks.spm_mask','image_dataset_quality_checks.garbled_series_comment','image_dataset_quality_checks.motion_warning_comment','image_dataset_quality_checks.user_id','image_dataset_quality_checks.banding','image_dataset_quality_checks.field_inhomogeneity','image_dataset_quality_checks.nos_concerns_comment','image_dataset_quality_checks.garbled_series','image_dataset_quality_checks.created_at','image_dataset_quality_checks.incomplete_series_comment','image_dataset_quality_checks.omnibus_f','image_dataset_quality_checks.other_issues','image_dataset_quality_checks.fov_cutoff_comment','image_dataset_quality_checks.nos_concerns','image_dataset_quality_checks.registration_risk','image_dataset_quality_checks.ghosting_wrapping','image_dataset_quality_checks.field_inhomogeneity_comment','image_dataset_quality_checks.updated_at','image_dataset_quality_checks.registration_risk_comment','image_dataset_quality_checks.ghosting_wrapping_comment','image_dataset_quality_checks.image_dataset_id','image_dataset_quality_checks.spm_mask_comment','image_comments.comment','image_comments.updated_at','image_comments.created_at','image_comments.user_id','image_comments.image_dataset_id','Appt Note'] # need to look up values
+       @local_column_headers = @column_headers_ids   
+    end
+    # more image_dataset column things below
 
 #puts sql
 
     @results2 = connection.execute(sql)
     @temp_results = @results2
 
-    @results = []   
+    @results = []     
     i =0
     @temp_results.each do |var|
       @temp = []
@@ -1578,9 +1649,12 @@ class DataSearchesController < ApplicationController
       @temp_row = @temp + var
       @results[i] = @temp_row
       i = i+1
-
+      
     end
-    if @html_request =="N"  and !@q_data_form_array.blank?
+    if @html_request =="N" and !params[:cg_search].blank? and !params[:cg_search][:series_category].blank? and !params[:cg_search][:image_dataset_file].blank?
+       @column_number =   @local_column_headers.size
+      
+    elsif @html_request =="N"  and !@q_data_form_array.blank?
       @results_q_data =[]
       @q_data_form_array.each do |id| 
 

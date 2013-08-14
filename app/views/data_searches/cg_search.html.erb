@@ -369,7 +369,31 @@ v_tn_cn_searchable_hash = []
  	              end %>
 </table>
 </div>
-</td></tr>   
+</td></tr>  
+
+<% if tn.common_name == "Mri Appointments"    
+	v_category = ""
+	if !params[:cg_search].blank? and !params[:cg_search][:series_category].blank?
+	   v_category = params[:cg_search][:series_category]
+	end
+	v_join_type_ids = ""
+	if !params[:cg_search].blank? and !params[:cg_search][:join_type].blank?  and !params[:cg_search][:join_type][@image_datasets_tn[0].id.to_s].blank?
+	   v_join_type_ids = params[:cg_search][:join_type][@image_datasets_tn[0].id.to_s]
+	end
+	          %> 
+    <tr><td colspan="2" align="left">
+    	<br>
+     Select a Series Description Category:&nbsp;&nbsp;
+<%= select  :cg_search, "series_category", options_for_select(@series_desc_categories.sort_by{ |a,b| a[0]}, v_category),
+											              {:prompt => 'Select a category'}  %><br>
+
+    <small> The image dataset fields will only show up in the <b>[ export file -image dataset ]. </b> </small>
+    <br><br>
+     </td><td colspan="5" align="left">	<%= select  :cg_search,"join_type]["+@image_datasets_tn[0].id.to_s, options_for_select(v_join_type_hash, v_join_type_ids  ),
+			              {:prompt => 'Select join type'}  %>
+    </td></tr>
+
+<% end %>
 
 	<tr><td colspan="7" align="right"><hr></td></tr>
 <%          end %>
@@ -399,9 +423,33 @@ v_tn_cn_searchable_hash = []
             <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
            <% end %>
        <% end %>
-      <%= submit_tag 'export file'%>
-<% end %>
+      <%= submit_tag 'export file'%> 
 
+<% end %>
+<% if !params[:cg_search].blank? and !params[:cg_search][:series_category].blank? %>
+ <%= form_tag '/cg_search.xls' do%>
+    <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
+    <%  v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
+        v_link_to_elements = v_link_to_elements.gsub(/&amp;method=post">download xls<\/a>/,'')
+        v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'') 
+        v_link_to_elements = v_link_to_elements.gsub(/^&amp;/,'')   
+        v_link_array =[]
+        v_link_array = v_link_to_elements.split("\&amp\;") 
+        v_link_array.each do |v| 
+            v_name = ""
+            v_val =""
+	        (v_name,v_val) = v.split('=') %>
+	     <%   if v_name == "cg_search[enumber]"   %>
+	      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
+	       <% else %>	
+            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
+           <% end %>
+       <% end %>
+      <%= hidden_field_tag  "cg_search[image_dataset_file]" , "image_dataset_file" %>
+      <%= submit_tag 'image dataset export file'%>
+
+ <% end %>
+<% end %>
 
 <br><br>
 <span id="view_results">&nbsp;</span>

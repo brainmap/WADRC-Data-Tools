@@ -109,6 +109,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
           # make @conditions from search form input, access control in application controller run_search
           @conditions = []
           @current_tab = "image_datasets"
+          # ALSO IN CG_SEARCH !!!!!!  need to update if added new categories
           @series_desc_categories = {"ASL" => "ASL", 
         	"DSC Perfusion" => "DSC Perfusion", 
         	"DTI" => "DTI", 
@@ -281,7 +282,8 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
                 @left_join = ["LEFT JOIN image_dataset_quality_checks on image_datasets.id = image_dataset_quality_checks.image_dataset_id",
                             "LEFT JOIN image_comments on image_datasets.id = image_comments.image_dataset_id",
                             "LEFT JOIN users on image_comments.user_id = users.id"] # left join needs to be in sql right after the parent table!!!!!!!   
-                            # "LEFT JOIN employees on petscans.enteredpetscanwho = employees.id",             
+                            # "LEFT JOIN employees on petscans.enteredpetscanwho = employees.id", 
+              # SHOULD  this be in the image_comments left joins???? LEFT JOIN users on image_comments.user_id = users.id             
 
              end
            @tables =['visits','image_datasets'] # trigger joins --- vgroups and appointments by default
