@@ -1118,7 +1118,23 @@ class DataSearchesController < ApplicationController
                   end
                  end
                
-                         
+               # trying to delete empty condition and join_type params to shorten the url in pagenation /Kaminari 
+               # include_cn, value_# and others empty params being deleted below
+               # could shorten names
+               if params[:cg_search][:join_type][v_tn_id].blank?
+                 params[:cg_search][:join_type].delete(v_tn_id)                 
+               end
+               if params[:cg_search][:condition][v_tn_id].blank?
+                  #params[:cg_search][:condition].delete(v_tn_id)
+                  # puts "aaaaaaaaaa"
+               else
+                   params[:cg_search][:condition][v_tn_id].each do |temp_tn_cn_id|
+                     v_temp_tn_cn_id = temp_tn_cn_id.to_a.to_s
+                     if params[:cg_search][:condition][v_tn_id][v_temp_tn_cn_id].blank?
+                       params[:cg_search][:condition][v_tn_id].delete(v_temp_tn_cn_id)
+                     end
+                   end
+               end         
                # need hash with cg_tn_id as key
                if params[:cg_search][:save_search] == "1"    
                   @cg_query_tn.save
@@ -1126,7 +1142,7 @@ class DataSearchesController < ApplicationController
                @cg_query_tn_hash[v_tn_id] = @cg_query_tn
                if !params[:cg_search][:cn_id].blank? and !params[:cg_search][:cn_id][v_tn_id].blank?
                  params[:cg_search][:cn_id][v_tn_id].each do |tn_cn_id|
-                   v_tn_cn_id = tn_cn_id.to_a.to_s
+                   v_tn_cn_id = tn_cn_id.to_a.to_s                  
                    if (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and  !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?) or (!params[:cg_search][:condition].blank? and !params[:cg_search][:condition][v_tn_id].blank? and !params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank?)
                      @cg_tn_cn = CgTnCn.find(v_tn_cn_id)
                      @cg_query_tn_cn = CgQueryTnCn.new 
@@ -1333,6 +1349,7 @@ class DataSearchesController < ApplicationController
                          end
                       end
                      if !params[:cg_search][:condition].blank? and !params[:cg_search][:condition][v_tn_id].blank?
+                         puts "params[:cg_search][:condition][v_tn_id][v_tn_cn_id] ="+params[:cg_search][:condition][v_tn_id][v_tn_cn_id]
                          if params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank?
                             params[:cg_search][:condition][v_tn_id].delete(v_tn_cn_id)
                          elsif params[:cg_search][:condition][v_tn_id][v_tn_cn_id] == ""
@@ -1760,6 +1777,9 @@ class DataSearchesController < ApplicationController
       respond_to do |format|
         format.xls # cg_search.xls.erb
         if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?
+          # need to change from get to post or delete lots of empty conditions 
+          # cg_search[condition][][]=""
+          # paginate @users, :method => :post
           format.html  {@results = Kaminari.paginate_array(@results).page(params[:page]).per(100)}  
         else
           format.html 
