@@ -648,7 +648,11 @@ puts "AAAAAA "+v_call
                              v_fs_home_path = v_base_path+"/preprocessed/modalities/freesurfer/"
                              sql_fs = "select fs_home_to_use from cg_asl_status where enrollment_id = "+ enrollment[0].id.to_s+" and scan_procedure_id ="+sp.id.to_s
                              results_fs = connection.execute(sql_fs)
-                             if !(results_fs.first)[0].blank?
+                             if results_fs.first.blank? # new will always just be non-edited - blank/default
+                               sql_fs = "select fs_home_to_use from cg_asl_status_new where enrollment_id = "+ enrollment[0].id.to_s+" and scan_procedure_id ="+sp.id.to_s
+                             end
+                             results_fs = connection.execute(sql_fs)
+                             if !results_fs.blank? and !results_fs.first.blank? and !(results_fs.first)[0].blank?
                                  v_fs_home = (results_fs.first)[0]  
                              end
                              v_subject_fs_path = v_fs_home_path+v_fs_home+"/"+dir_name_array[0]+"/mri"
@@ -812,6 +816,158 @@ puts "AAAAAA "+v_call
     
   end
   
+
+    def run_asl_sw_fs_process
+        v_process_name = "asl_sw_fs_process"
+        v_log_base ="/mounts/data/preprocessed/logs/"
+        process_logs_delete_old( v_process_name, v_log_base)            
+        visit = Visit.find(3)  #  need to get base path without visit
+        v_base_path = visit.get_base_path()
+        @schedule = Schedule.where("name in ('asl_sw_fs_process')").first
+        v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+        @schedulerun = Schedulerun.new
+        @schedulerun.schedule_id = @schedule.id
+        @schedulerun.comment ="asl_sw_fs_process"
+        @schedulerun.save
+        @schedulerun.start_time = @schedulerun.created_at
+        @schedulerun.save
+        v_comment = ""
+        v_error_comment = ""
+        t = Time.now
+        v_date_YM = t.strftime("%Y%m") # just making monthly logs, prepend
+        v_log_name =v_process_name+"_"+v_date_YM
+        v_log_path =v_log_base+v_log_name 
+        v_stop_file_name = v_process_name+"_stop"
+        v_stop_file_path = v_log_base+v_stop_file_name  # use to stop the results loop  
+        v_subjectid_v_num = ""              
+        v_script = v_base_path+"/data1/lab_scripts/AslProc/v3/aslproc.sh"
+
+        connection = ActiveRecord::Base.connection();  
+       # NEED GLOBAL - non-inversion specific 
+        # do_not_run_process_asl_smoothed_and_warped == Y means do not run, == R means run -- requiring active input as well as matching conditions
+        # do_not_run_process_asl_registered_to_fs == Y means do not run   == R means run -- requiring active input as well as matching conditions
+
+        # ??? t1_fs_file_to_use,  t1_fs_single 
+        # asl_smoothed_and_warped_flag , asl_registered_to_fs_flag --- not care, because may re-run or run for ask multiple ?
+
+        # if these is only one ask fmap -- should use?????
+        sql = "select distinct enrollment_id, scan_procedure_id, asl_subjectid,asl_fmap_single,asl_fmap_file_to_use,t1_fs_single,t1_fs_file_to_use,fs_home_to_use from cg_asl_status where  t1_fs_flag = 'Y' and asl_fmap_flag = 'Y' and ( asl_fmap_single = 'Y' or (asl_fmap_single ='N' and asl_fmap_file_to_use  is NOT NULL) ) and pdmap_flag  = 'Y' and t1_fs_flag = 'Y' and  ( do_not_run_process_asl_registered_to_fs = 'R' or do_not_run_process_asl_smoothed_and_warped = 'R') "
+        results = connection.execute(sql)
+        results.each do |r|
+            v_break = 0  # need a kill swith
+             v_log = ""
+            if File.file?(v_stop_file_path)
+              File.delete(v_stop_file_path)
+              v_break = 1
+              v_log = v_log + " STOPPING the results loop"
+              v_comment = " STOPPING the results loop  "+v_comment
+            end
+            break if v_break > 0
+
+            t_now = Time.now
+            v_log = v_log + "starting "+r[2]+"   "+ t_now.strftime("%Y%m%d:%H:%M")+"\n"
+            v_subjectid_v_num = r[2]
+            v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
+            # fs subjects dir
+            v_fs_subjects_dir = v_base_path+"/preprocessed/modalities/freesurfer/orig_recon"
+            if !r[7].blank? 
+                v_fs_subjects_dir = v_base_path+"/preprocessed/modalities/freesurfer/"+r[7]
+            end
+
+            # get location
+            sql_loc = "select distinct v.path from visits v where v.appointment_id in (select a.id from appointments a, enrollment_vgroup_memberships evg, scan_procedures_vgroups spv where a.vgroup_id = evg.vgroup_id  and evg.enrollment_id = "+r[0].to_s+"  and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id = "+r[1].to_s+")"
+            results_loc = connection.execute(sql_loc)
+            v_sp_loc = ""
+            results_loc.each do |loc|
+              # could have 2 locations dual enrollment with 2 appointments - look for where o*.nii loc
+              v_loc_path = loc[0]
+              v_loc_path = v_loc_path.gsub(v_base_path+"/raw/","")
+              v_loc_parts_array = v_loc_path.split("/")
+              v_subjectid_asl =v_base_path+"/preprocessed/visits/"+v_loc_parts_array[0]+"/"+v_subjectid+"/asl"
+              if File.directory?(v_subjectid_asl)
+                    v_dir_array = Dir.entries(v_subjectid_asl)
+                    v_dir_array.each do |f|
+                      if f.start_with?("ASL_fmap") and f.end_with?(r[4]+".nii")   # ?? use asl_fmap_file_to_use = r[4], split off first part of dir name
+                          v_sp_loc = v_loc_parts_array[0]
+                          v_log = v_log + "ASL fmap file found "+ v_sp_loc+"\n"
+                      end
+                    end 
+              end
+            end
+
+            if !v_sp_loc.blank? 
+                # call processing script- ARE THERE ANY THING WHICH IS REQUIRED ON merida, edna, gru
+                v_coreg_t1 = v_fs_subjects_dir+"/"+v_subjectid_v_num+"/mri/T1_FS.nii"
+                v_call =  'ssh panda_admin@merida.dom.wisc.edu "'+v_script+' -p '+v_sp_loc+'  -b '+v_subjectid+' -s  '+r[4] +' -c '+v_coreg_t1+' -fsdir '+v_fs_subjects_dir +' " ' 
+                @schedulerun.comment ="str "+r[2]+"; "+v_comment[0..1990]
+                @schedulerun.save
+
+                puts "rrrrrrr "+v_call
+                v_log = v_log + v_call+"\n"
+                # begin
+                #                    stdin, stdout, stderr = Open3.popen3(v_call)
+                #                  rescue => msg  
+                #                     v_log = v_log + msg+"\n"  
+                #                  end
+                #                 v_success ="N"
+                #                 while !stdout.eof?
+                #                   v_output = stdout.read 1024 
+                #                   v_log = v_log + v_output  
+                #                   if (v_log.tr("\n","")).include? "Done    'PVE label estimation and lesion segmentation'"  # line wrapping? Done ==> Do\nne
+                #                     v_success ="Y"
+                #                     v_log = v_log + "SUCCESS !!!!!!!!! \n"
+                #                     # NEED TO  set do not run flag from R ( sw or fs  ) to N 
+                #                   end
+                #                   puts v_output  
+                #                  end
+                #                  v_err =""
+                #                  v_log = v_log +"IN ERROR \n"
+                #                  while !stderr.eof?
+                #                     v_err = stderr.read 1024
+                #                     v_log = v_log +v_err
+                #                   end
+                #                  puts "err="+v_err
+                #                  if v_success =="Y"
+                #                    # rerun ask status.. file detect
+                #                    v_comment = " finished=>"+r[2]+ "; " +v_comment
+                #                  else
+                #                   puts " in err"
+                #                   v_log = v_log +"IN ERROR \n" 
+                #                   while !stderr.eof?
+                #                     v_err = stderr.read 1024
+                #                     v_log = v_log +v_err
+                #                     v_comment = v_err +" =>"+r[2]+ " ; " +v_comment  
+                #                    end 
+                #                    v_error_comment = "error in "+r[2]+" ;"+v_error_comment
+                #                    # send email to owner
+                #                    v_schedule_owner_email_array.each do |e|
+                #                      v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see "+v_log_path
+                #                      PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
+                #                    end
+                #                  end
+                # @schedulerun.comment =v_comment[0..1990]
+                # @schedulerun.save
+                # stdin.close
+                # stdout.close
+                # stderr.close
+             else
+               v_log = v_log + "no  \n"
+
+             end
+             process_log_append(v_log_path, v_log)
+        end       
+      v_comment = v_error_comment+v_comment
+      puts "successful finish asl_sw_fs_process "+v_comment[0..459]
+       @schedulerun.comment =("successful finish asl_sw_fs_process "+v_comment[0..1959])
+       if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+        end
+        @schedulerun.save
+        @schedulerun.end_time = @schedulerun.updated_at      
+        @schedulerun.save
+    end
+
+
 
   def run_dir_size
         visit = Visit.find(3)  #  need to get base path without visit
@@ -1573,10 +1729,7 @@ puts "AAAAAA "+v_call
       v_log_path =v_log_base+v_log_name 
       v_stop_file_name = v_process_name+"_stop"
       v_stop_file_path = v_log_base+v_stop_file_name  # use to stop the results loop  
-      v_subjectid_v_num = ""  
-      
-      
-        
+      v_subjectid_v_num = ""              
       v_script = v_base_path+"/data1/lab_scripts/LST/LST.sh"
       
       connection = ActiveRecord::Base.connection();  

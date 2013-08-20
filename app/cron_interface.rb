@@ -43,6 +43,10 @@ class CronInterface < ActiveRecord::Base
   if v_value_1 == "asl_status"
     v_shared = Shared.new
     v_shared.run_asl_status()
+  
+ elsif v_value_1 == "asl_sw_fs_process"
+       v_shared = Shared.new
+       v_shared.run_asl_sw_fs_process()
     
  elsif v_value_1 == "adrc_upload"
       v_shared = Shared.new
