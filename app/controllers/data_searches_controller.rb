@@ -1053,7 +1053,7 @@ class DataSearchesController < ApplicationController
             end
             v_cg_tn_array.each do |tn_object| 
              @cg_tn = tn_object             
-             if (!params[:cg_search][:include_tn].blank? and !params[:cg_search][:include_tn][v_tn_id ].blank?) or !params[:cg_search][:join_type][v_tn_id].blank? or (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id].blank?) or  !params[:cg_search][:condition][v_tn_id].blank?   
+             if (!params[:cg_search][:include_tn].blank? and !params[:cg_search][:include_tn][v_tn_id ].blank?) or !params[:cg_search][:join_type][v_tn_id].blank? or (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id].blank?) or  ( !params[:cg_search][:condition].blank? and !params[:cg_search][:condition][v_tn_id].blank? )  
                 @cg_query_tn = CgQueryTn.new
                 @cg_query_tn.cg_tn_id =v_tn_id
                 @cg_query_tn.cg_query_id = @cg_query.id
@@ -1124,16 +1124,18 @@ class DataSearchesController < ApplicationController
                if params[:cg_search][:join_type][v_tn_id].blank?
                  params[:cg_search][:join_type].delete(v_tn_id)                 
                end
-               if params[:cg_search][:condition][v_tn_id].blank?
+               if !params[:cg_search][:condition].blank?
+                 if params[:cg_search][:condition][v_tn_id].blank?
                   #params[:cg_search][:condition].delete(v_tn_id)
                   # puts "aaaaaaaaaa"
-               else
-                   params[:cg_search][:condition][v_tn_id].each do |temp_tn_cn_id|
-                     v_temp_tn_cn_id = temp_tn_cn_id.to_a.to_s
-                     if params[:cg_search][:condition][v_tn_id][v_temp_tn_cn_id].blank?
-                       params[:cg_search][:condition][v_tn_id].delete(v_temp_tn_cn_id)
+                 else
+                     params[:cg_search][:condition][v_tn_id].each do |temp_tn_cn_id|
+                       v_temp_tn_cn_id = temp_tn_cn_id.to_a.to_s
+                       if params[:cg_search][:condition][v_tn_id][v_temp_tn_cn_id].blank?
+                         params[:cg_search][:condition][v_tn_id].delete(v_temp_tn_cn_id)
+                       end
                      end
-                   end
+                 end
                end         
                # need hash with cg_tn_id as key
                if params[:cg_search][:save_search] == "1"    
