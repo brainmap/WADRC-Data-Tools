@@ -864,6 +864,11 @@ puts "AAAAAA "+v_call
             end
             break if v_break > 0
 
+            sql_update = "update cg_asl_status set do_not_run_process_asl_smoothed_and_warped = 'N' where do_not_run_process_asl_smoothed_and_warped = 'R' and asl_subjectid = '"+r[2]+"'"
+            results_update = connection.execute(sql_update)   # stop from re-running
+            sql_update = "update cg_asl_status set do_not_run_process_asl_registered_to_fs = 'N' where do_not_run_process_asl_registered_to_fs = 'R' and asl_subjectid = '"+r[2]+"'"
+            results_update = connection.execute(sql_update)   # stop from re-running
+            
             t_now = Time.now
             v_log = v_log + "starting "+r[2]+"   "+ t_now.strftime("%Y%m%d:%H:%M")+"\n"
             v_subjectid_v_num = r[2]
@@ -2044,7 +2049,8 @@ puts "AAAAAA "+v_call
     v_pet_target_hash ={'1_johnson.pipr.visit1'=>'johnson.pipr.visit1/pet','2_johnson.predict.visit1'=>'johnson.predict.visit1/pet/FDG-visit1',
          '1_johnson.predict.visit1'=>'johnson.predict.visit1/pet/PIB-visit1','2_johnson.predict.visit2'=>'johnson.predict.visit2/pet/FDG',
          '1_johnson.predict.visit2'=>'johnson.predict.visit2/pet/PIB','2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
-         '2_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/FDG',    '3_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/WAY' }
+         '2_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/FDG',    '3_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/WAY',
+         '2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG' }
     v_sp = ScanProcedure.find(v_sp_id)
     v_key = v_tracer_id.to_s+"_"+v_sp.codename
     v_path = ""
