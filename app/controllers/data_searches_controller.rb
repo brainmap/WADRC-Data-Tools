@@ -1083,12 +1083,12 @@ class DataSearchesController < ApplicationController
                 else # was doing inner join by default , change to outer #### 
                   if  !params[:cg_search][:join_type][v_tn_id].blank? or 
                     (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank?) or
-                      !params[:cg_search][:condition][v_tn_id].blank? # NEED TO ADD LIMIT BY CN
+                      (!params[:cg_search][:condition].blank? and !params[:cg_search][:condition][v_tn_id].blank?) # NEED TO ADD LIMIT BY CN
                       v_include_tn = "N"
                       if !params[:cg_search][:cn_id].blank? and !params[:cg_search][:cn_id][v_tn_id].blank?
                         params[:cg_search][:cn_id][v_tn_id].each do |tn_cn_id|
                            v_tn_cn_id = tn_cn_id.to_a.to_s
-                           if (!params[:cg_search][:condition][v_tn_id].blank? and !params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank?) or
+                           if (!params[:cg_search][:condition].blank? and !params[:cg_search][:condition][v_tn_id].blank? and !params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank?) or
                                  (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank? )
                              v_include_tn ="Y"
                            end  
