@@ -1146,12 +1146,12 @@ class DataSearchesController < ApplicationController
                  params[:cg_search][:cn_id][v_tn_id].each do |tn_cn_id|
                    v_tn_cn_id = tn_cn_id.to_a.to_s                  
                    if (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and  !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?) or (!params[:cg_search][:condition].blank? and !params[:cg_search][:condition][v_tn_id].blank? and !params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank?)
-                     @cg_tn_cn = CgTnCn.find(v_tn_cn_id)
-                     @cg_query_tn_cn = CgQueryTnCn.new 
-                     @cg_query_tn_cn.cg_tn_cn_id =v_tn_cn_id
-                     if !params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?
-                       @cg_query_tn_cn.include_cn = 1
-                       if @cg_tn_cn.q_data_form_id.blank? # q_data
+                       @cg_tn_cn = CgTnCn.find(v_tn_cn_id)
+                       @cg_query_tn_cn = CgQueryTnCn.new 
+                       @cg_query_tn_cn.cg_tn_cn_id =v_tn_cn_id
+                       if !params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?
+                         @cg_query_tn_cn.include_cn = 1
+                         if @cg_tn_cn.q_data_form_id.blank? # q_data
                            @local_column_headers.push(@cg_tn_cn.export_name)
                            v_join_left_tn = @cg_tn.tn 
                            if @local_tables.index(@cg_tn.tn).blank?   # left join of left join?
@@ -1184,7 +1184,7 @@ class DataSearchesController < ApplicationController
                            else
                                @local_fields.push(@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn)
                            end
-                       elsif !@cg_tn_cn.q_data_form_id.blank? and  @html_request =="N"  # need q_data
+                         elsif !@cg_tn_cn.q_data_form_id.blank? and  @html_request =="N"  # need q_data
                            if @html_request =="N"
                                @local_fields.push(@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn)
                                @local_column_headers.push("q_data_form_"+@cg_tn_cn.q_data_form_id.to_s)
@@ -1252,87 +1252,87 @@ class DataSearchesController < ApplicationController
                               end
                            end 
                            @cg_search_q_data = nil                          
+                         end
                        end
-                     end
-                     @cg_query_tn_cn.cg_query_tn_id =@cg_query_tn.id
-                     if !params[:cg_search][:value_1].blank? and !params[:cg_search][:value_1][v_tn_id].blank?
-                       @cg_query_tn_cn.value_1 = params[:cg_search][:value_1][v_tn_id][v_tn_cn_id]
-                     end
-                     if !params[:cg_search][:value_2].blank? and !params[:cg_search][:value_2][v_tn_id].blank?
-                       @cg_query_tn_cn.value_2 = params[:cg_search][:value_2][v_tn_id][v_tn_cn_id]
-                     end
+                       @cg_query_tn_cn.cg_query_tn_id =@cg_query_tn.id
+                       if !params[:cg_search][:value_1].blank? and !params[:cg_search][:value_1][v_tn_id].blank?
+                         @cg_query_tn_cn.value_1 = params[:cg_search][:value_1][v_tn_id][v_tn_cn_id]
+                       end
+                       if !params[:cg_search][:value_2].blank? and !params[:cg_search][:value_2][v_tn_id].blank?
+                         @cg_query_tn_cn.value_2 = params[:cg_search][:value_2][v_tn_id][v_tn_cn_id]
+                       end
 
-                     # dates                
-                     if !params[:cg_search][:value_1].blank? && !params[:cg_search][:value_1][v_tn_id].blank? && !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(1i)"].blank? && !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(2i)"].blank? && !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(3i)"].blank?
+                       # dates                
+                       if !params[:cg_search][:value_1].blank? && !params[:cg_search][:value_1][v_tn_id].blank? && !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(1i)"].blank? && !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(2i)"].blank? && !params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(3i)"].blank?
                          v_value_1 = params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(1i)"] +"-"+params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(2i)"].rjust(2,"0")+"-"+params[:cg_search][:value_1][v_tn_id][v_tn_cn_id+"(3i)"].rjust(2,"0")
                          @cg_query_tn_cn.value_1 = v_value_1
                          v_value_1 =""
-                     end
-                     if !params[:cg_search][:value_2].blank? && !params[:cg_search][:value_2][v_tn_id].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(1i)"].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(2i)"].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(3i)"].blank?
+                       end
+                       if !params[:cg_search][:value_2].blank? && !params[:cg_search][:value_2][v_tn_id].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(1i)"].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(2i)"].blank? && !params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(3i)"].blank?
                            v_value_2 = params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(1i)"] +"-"+params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(2i)"].rjust(2,"0")+"-"+params[:cg_search][:value_2][v_tn_id][v_tn_cn_id+"(3i)"].rjust(2,"0")
                            @cg_query_tn_cn.value_2 = v_value_2
                            v_value_2 =""
-                     end     
-                     if !params[:cg_search][:condition][v_tn_id].blank?
-                        @cg_query_tn_cn.condition = params[:cg_search][:condition][v_tn_id][v_tn_cn_id]
-                       # [['=','0'],['>=','1'],['<=','2'],['!=','3'],['between','4'],['is blank','5']]
-                        if @cg_query_tn_cn.condition == 0 
-                          # letting wrapno, reggieid, adrcnum be IN () condition
-                          if @cg_query_tn_cn.value_1.include?(',') and ((@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.wrapnum" or (@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.adrcnum" or (@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.reggieid" )
+                       end     
+                       if !params[:cg_search][:condition].blank? and  !params[:cg_search][:condition][v_tn_id].blank?
+                         @cg_query_tn_cn.condition = params[:cg_search][:condition][v_tn_id][v_tn_cn_id]
+                         # [['=','0'],['>=','1'],['<=','2'],['!=','3'],['between','4'],['is blank','5']]
+                         if @cg_query_tn_cn.condition == 0 
+                           # letting wrapno, reggieid, adrcnum be IN () condition
+                           if @cg_query_tn_cn.value_1.include?(',') and ((@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.wrapnum" or (@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.adrcnum" or (@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.reggieid" )
                               @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/ /,'').gsub(/'/,'')
                               @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/,/,"','")
                               v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" in ( '"+@cg_query_tn_cn.value_1.gsub(/[;:"()=<>]/, '')+"')"
-                          else
+                           else
                               v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" = '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"'"
-                          end
-                          if !v_condition.blank?
+                           end
+                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" = "+@cg_query_tn_cn.value_1
-                          end
-                        elsif @cg_query_tn_cn.condition ==  1
-                          v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" >= '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
-                          if !v_condition.blank?
+                           end
+                         elsif @cg_query_tn_cn.condition ==  1
+                           v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" >= '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
+                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" >= "+@cg_query_tn_cn.value_1
-                          end
-                        elsif @cg_query_tn_cn.condition == 2
-                          v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" <= '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
-                          if !v_condition.blank?
+                           end
+                         elsif @cg_query_tn_cn.condition == 2
+                           v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" <= '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
+                           if !v_condition.blank?
                              @local_conditions.push(v_condition)
                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" <= "+@cg_query_tn_cn.value_1
-                          end
-                        elsif @cg_query_tn_cn.condition == 3
-                          v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" != '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
-                          if !v_condition.blank?
+                           end
+                         elsif @cg_query_tn_cn.condition == 3
+                           v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" != '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
+                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" != "+@cg_query_tn_cn.value_1                           
-                          end
-                        elsif @cg_query_tn_cn.condition == 4
-                          v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" between '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' and '"+ @cg_query_tn_cn.value_2.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
-                          if !v_condition.blank?
+                           end
+                         elsif @cg_query_tn_cn.condition == 4
+                           v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" between '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' and '"+ @cg_query_tn_cn.value_2.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
+                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" between "+@cg_query_tn_cn.value_1+" and "+ @cg_query_tn_cn.value_2
-                          end
-                        elsif @cg_query_tn_cn.condition == 5
-                          v_condition = " ( trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") is NULL or trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") = '' ) "
-                          if !v_condition.blank?
+                           end
+                         elsif @cg_query_tn_cn.condition == 5
+                           v_condition = " ( trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") is NULL or trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") = '' ) "
+                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" is blank"
-                          end
-                        elsif @cg_query_tn_cn.condition == 6
-                          v_condition = " trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") is NOT NULL and  trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+")  != '' "
-                          if !v_condition.blank?
+                           end
+                         elsif @cg_query_tn_cn.condition == 6
+                           v_condition = " trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") is NOT NULL and  trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+")  != '' "
+                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" is not blank "
-                          end  
-                        elsif @cg_query_tn_cn.condition == 7
-                          v_condition = "  "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" like '%"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"%' "
-                          if !v_condition.blank?
+                           end  
+                         elsif @cg_query_tn_cn.condition == 7
+                           v_condition = "  "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" like '%"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"%' "
+                           if !v_condition.blank?
                               @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" contains "+@cg_query_tn_cn.value_1
-                          end
-                        end
-                      end                
+                           end
+                         end
+                       end                
                      
                        if params[:cg_search][:save_search] == "1"    
                           @cg_query_tn_cn.save
@@ -1531,6 +1531,7 @@ class DataSearchesController < ApplicationController
          
        end
       end 
+
       if !params[:cg_search].blank? and !params[:cg_search][:include_tn].blank?
         params[:cg_search].delete('include_tn') 
       end
