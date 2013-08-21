@@ -1358,7 +1358,9 @@ class DataSearchesController < ApplicationController
                                 params[:cg_search][:condition][v_tn_id].delete(v_tn_cn_id)
                          end
                        else
-                         params[:cg_search][:condition].delete(v_tn_id)
+                         if !params[:cg_search][:condition].blank? and params[:cg_search][:condition][v_tn_id].blank?
+                             params[:cg_search][:condition].delete(v_tn_id)
+                         end
                        end
                        if !params[:cg_search][:value_1].blank? and !params[:cg_search][:value_1][v_tn_id].blank? 
                          if params[:cg_search][:value_1][v_tn_id][v_tn_cn_id].blank?
