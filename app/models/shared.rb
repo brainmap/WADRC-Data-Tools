@@ -987,67 +987,74 @@ puts "AAAAAA "+v_call
           @schedulerun.save
           v_comment = ""
           v_date = Date.today.strftime("%Y-%m-%d")
-          v_dir_array =['data2','data4','data6','SysAdmin','data1','data3','data5','data7','analyses','preprocessed','soar_data','raw'] 
-          # v_dir_array =['data3']    
-          # linux likes "du -ch --max-depth=2 ."
-          # mac like "du -ch -d 2 ."
-          v_cnt = 1
-          v_dir_array.each do |dir|  
-            v_depth = "1"
-            if dir == "preprocessed"
-               v_depth = "2"
-            end
-            v_dir_base =   v_base_path+"/"+dir      
-            v_sql = "delete from dir_size where run_date ='"+v_date+"' and dir_base ='"+v_dir_base+"' "
-              results = connection.execute(v_sql)                      
-            v_call = "cd "+v_dir_base+"; du -ch -d "+v_depth+" ."
-            puts v_call
-            stdin, stdout, stderr = Open3.popen3(v_call)
-            while !stdout.eof?
-              v_val = 1
-              # just waiting
-            end
-            while v_line = stdout.gets 
-           # (stdout.read).each do |v_line|    
-              # convert eveything to G
-              v_cols = v_line.split()
-              # gsub and to_float, divide
-              v_dir_size = v_cols[0]
-              v_dir_size_float =0
-              if v_dir_size.include?"G"
-                 v_dir_size.gsub("G","")
-                 v_dir_size_float = v_dir_size.to_f
-              elsif v_dir_size.include?"T"
-                v_dir_size.gsub("T","")
-                v_dir_size_float =  (v_dir_size.to_f)*1024
-              elsif v_dir_size.include?"M"
-                v_dir_size.gsub("M","")
-                v_dir_size_float =  (v_dir_size.to_f)/(1024)
-              elsif v_dir_size.include?"K"
-                v_dir_size.gsub("K","")
-                v_dir_size_float =  (v_dir_size.to_f)/(1024*1024)
-              end
-              
-              # split, replace leading ./ with v_dir_base
-              if v_cols[1][0..0] == "."
-                 v_dir_path = v_dir_base+ (v_cols[1])[1..-1]  # need to trim leading "."
-              else
-                if v_cols[1] == "total"
-                  v_dir_path = v_dir_base+"/="+ (v_cols[1])
-                else
-                    v_dir_path = v_dir_base+"/"+ (v_cols[1])
-                 end
-              end
-               v_sql = "insert into dir_size(dir_base,dir_path, run_date,dir_size)Values('"+v_dir_base+"','"+v_dir_path+"','"+v_date+"','"+v_dir_size_float.to_s+"')"
-               results = connection.execute(v_sql)
-               v_cnt = v_cnt + 1
-             end
-             # how to try/catch errors
-             
-            stdin.close
-            stdout.close
-            stderr.close
-          end
+          #desc "take a meausrement of every directory in the system"
+          v_cnt = 0
+      		Directory.where("status_flag ='Y'").each do |directory|   # all. where("status_flag ='Y'")
+      			size = (`du -s -k #{directory.path}`).split.first
+      			directory.measurements.create :size => size
+      			v_cnt = v_cnt + 1
+      		end
+          # v_dir_array =['data2','data4','data6','SysAdmin','data1','data3','data5','data7','analyses','preprocessed','soar_data','raw'] 
+          # # v_dir_array =['data3']    
+          # # linux likes "du -ch --max-depth=2 ."
+          # # mac like "du -ch -d 2 ."
+          # v_cnt = 1
+          # v_dir_array.each do |dir|  
+          #   v_depth = "1"
+          #   if dir == "preprocessed"
+          #      v_depth = "2"
+          #   end
+          #   v_dir_base =   v_base_path+"/"+dir      
+          #   v_sql = "delete from dir_size where run_date ='"+v_date+"' and dir_base ='"+v_dir_base+"' "
+          #     results = connection.execute(v_sql)                      
+          #   v_call = "cd "+v_dir_base+"; du -ch -d "+v_depth+" ."
+          #   puts v_call
+          #   stdin, stdout, stderr = Open3.popen3(v_call)
+          #   while !stdout.eof?
+          #     v_val = 1
+          #     # just waiting
+          #   end
+          #   while v_line = stdout.gets 
+          #  # (stdout.read).each do |v_line|    
+          #     # convert eveything to G
+          #     v_cols = v_line.split()
+          #     # gsub and to_float, divide
+          #     v_dir_size = v_cols[0]
+          #     v_dir_size_float =0
+          #     if v_dir_size.include?"G"
+          #        v_dir_size.gsub("G","")
+          #        v_dir_size_float = v_dir_size.to_f
+          #     elsif v_dir_size.include?"T"
+          #       v_dir_size.gsub("T","")
+          #       v_dir_size_float =  (v_dir_size.to_f)*1024
+          #     elsif v_dir_size.include?"M"
+          #       v_dir_size.gsub("M","")
+          #       v_dir_size_float =  (v_dir_size.to_f)/(1024)
+          #     elsif v_dir_size.include?"K"
+          #       v_dir_size.gsub("K","")
+          #       v_dir_size_float =  (v_dir_size.to_f)/(1024*1024)
+          #     end
+          #     
+          #     # split, replace leading ./ with v_dir_base
+          #     if v_cols[1][0..0] == "."
+          #        v_dir_path = v_dir_base+ (v_cols[1])[1..-1]  # need to trim leading "."
+          #     else
+          #       if v_cols[1] == "total"
+          #         v_dir_path = v_dir_base+"/="+ (v_cols[1])
+          #       else
+          #           v_dir_path = v_dir_base+"/"+ (v_cols[1])
+          #        end
+          #     end
+          #      v_sql = "insert into dir_size(dir_base,dir_path, run_date,dir_size)Values('"+v_dir_base+"','"+v_dir_path+"','"+v_date+"','"+v_dir_size_float.to_s+"')"
+          #      results = connection.execute(v_sql)
+          #      v_cnt = v_cnt + 1
+          #    end
+          #    # how to try/catch errors
+          #    
+          #   stdin.close
+          #   stdout.close
+          #   stderr.close
+          # end
 
            puts "successful finish dir_size "+v_comment[0..459]
            @schedulerun.comment =("successful finish dir_size "+v_cnt.to_s+" rows inserted "+ v_comment[0..459])

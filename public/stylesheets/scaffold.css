@@ -1,5 +1,6 @@
 body { background-color: #fff; color: #333; }
 
+
 body, p, ol, ul, td {
   font-family: verdana, arial, helvetica, sans-serif;
   font-size:   13px;
@@ -53,4 +54,48 @@ div.field, div.actions {
 #error_explanation ul li {
   font-size: 12px;
   list-style: square;
+}
+
+/* added styles */
+
+#centered-page { width:1000px; margin:0 auto; }
+h1, h2, h3 { font-weight:normal; }
+
+ul.graph-list { list-style:none; padding:0; margin:0; }
+ul.graph-list li { display:inline-block; width:330px; }
+
+.small-graph { padding:10px 0; }
+.small-graph p { margin:0; }
+.small-graph p span.label { text-transform:uppercase; font-size:18pt; }
+.small-graph p span.actions { font-size:8pt; text-transform:none; }
+.small-graph p.stats { color:#663; }
+.small-graph a.title { color:#330; text-decoration:none; text-transform:uppercase; font-size:18pt; }
+.small-graph a.title:hover { color:#360; }
+
+.large-graph { padding:10px 0; }
+.large-graph p span.label { text-transform:uppercase; font-size:24pt; }
+.large-graph p span.actions { font-size:8pt; }
+.large-graph p.subtitle span.dirpath { color:#330; font-size:18pt; }
+.directory-status h2 { font-weight:normal; font-size:24pt; }
+
+ul.navtabs { margin:0; padding:0; display:inline; }
+ul.navtabs li { display:inline-block; margin:0; padding:0.5em; }
+ul.navtabs li a { text-decoration:none; }
+li.active { background-color:#fff; -webkit-border-radius: 5px; }
+li.active a { color:white; }
+
+.masthead { width:100%; height:48pt; overflow:hidden; position:relative; margin:0; padding:0; }
+.masthead > * { margin:0; padding:0; position:absolute; }
+.masthead .bottom { bottom:8pt; }
+.masthead .top { top:8pt; }
+.masthead .left { left:0; }
+.masthead .right { right:0; }
+
+.bottom-border { border-bottom:solid thin #996; margin-bottom:8pt; }
+.top-border { border-top:solid thin #996; }
+
+li .handle {
+  font-size: 12px;
+  cursor: move;
+  color: #360;
 }

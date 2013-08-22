@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 29
+/svn/!svn/ver/102/trunk/flotr
+END
+license.txt
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/4/trunk/flotr/license.txt
+END
+.project
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svn/!svn/ver/4/trunk/flotr/.project
+END
+CHANGELOG
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/33/trunk/flotr/CHANGELOG
+END
+readme.txt
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/!svn/ver/37/trunk/flotr/readme.txt
+END
+build.xml
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/!svn/ver/83/trunk/flotr/build.xml
+END

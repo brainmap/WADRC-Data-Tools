@@ -138,6 +138,12 @@ WADRCDataTools::Application.routes.draw do
   resources :neuropsych_assessments
   resources :neuropsych_sessions
   
+  resources :directories do
+  	collection do
+  		post :sort
+  	end
+	end
+  
   match '/visits/found(.:format)', :to => 'visits#found', :as => :found_visits
   match '/visits/find', :to => 'visits#find', :as => :find_visits
   match '/visits/complete', :to => 'visits#index_by_scope', :scope => 'complete', :as => :complete_visits

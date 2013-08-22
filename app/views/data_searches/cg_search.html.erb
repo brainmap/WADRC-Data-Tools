@@ -464,6 +464,7 @@ v_tn_cn_searchable_hash = []
 	 </tr>
 	<tfoot><tr><td colspan=<%= @local_column_headers.size %>>
 		 <%= paginate @results %>
+		
 	</td></tr></tfoot>
 		 <% @results.each do |result| %>
 		    <%  vgroup = Vgroup.find(result[1])

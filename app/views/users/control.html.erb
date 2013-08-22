@@ -73,6 +73,9 @@ to the radiology_comments index url<br>
 <br><br>
 </td></tr>
 
+<tr><td><%= link_to('Space usage', '/directories') %></td><td colspan=2>Displays size and change in size of directories - populated by scheduled job "dir_size"
+	</td></tr>
+
 <tr><td ><%= link_to('Vgroup NII file counts', '/vgroups/nii_file_cnt') %>
 </td><td colspan=2> Process for counting the # of nii files for each vgroup/mri. Used to write file of nii count/scan procedure for validation of scan import process. This happens automatically as a scan is loaded, and generally never needs to be run anymore.	
 </td></tr>

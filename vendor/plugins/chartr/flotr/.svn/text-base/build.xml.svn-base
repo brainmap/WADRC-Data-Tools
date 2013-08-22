@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Flotr" default="build.release">
+
+	<property name="framework" value="prototype"/>
+	<property name="version" value="0.2.0-test"/>
+	<property name="date" value="Jan 12, 2009"/>
+	<property name="example_dir" value="examples/${framework}"/>
+	<property name="release_dir" value="release"/>
+	<property name="flotr_dir" value="flotr/${framework}"/>
+	<property name="build_dir" value="${release_dir}/${framework}/flotr-${version}"/>
+	<property name="jar_dir" location="${basedir}/yuicompressor-2.3.5/build" />
+	<property name="header" value="Flotr ${version} Copyright (c) 2009 Bas Wenneker, &lt;http://solutoire.com&gt;, MIT License." />
+	<property name="replace_dir" value="../../flotr/${framework}/"/>
+	<property name="online_dir" value="${release_dir}/${framework}/online-${version}"/>
+	
+	<property 	name="firefox_exe"
+				value="C:\Program Files\Mozilla Firefox\firefox.exe"
+				description="Location of firefox.exe, used for testing"/>
+	
+	<property 	name="ie7_exe"
+				value="C:\Program Files\Internet Explorer\iexplore.exe"
+				description="Location of iexplore.exe, used for testing"/>
+				
+	<property 	name="opera_exe"
+				value="C:\Program Files\Opera\opera.exe"
+				description="Location of opera.exe, used for testing"/>
+				
+	<property 	name="safari_exe"
+				value="C:\Program Files\Safari\Safari.exe"
+				description="Location of Safari.exe, used for testing"/>
+	
+	<property	name="prototype_testsuite"
+				value="http://127.0.0.1/Flotr/tests/testRunner.html?testpage=127.0.0.1/Flotr/tests/prototype/prototypeTestSuite.html&amp;autorun=true"
+				description="URL of the prototype test suite"/>
+	
+	<target name="build.clean" description="Deletes release and online directories.">
+		<delete dir="${build_dir}"/>
+		<delete dir="${online_dir}"/>		
+	</target>
+		
+	<target name="build.preprocess" depends="build.clean" description="Places all files in the right directories. Also adds version numbering to files and folders.">		
+		<mkdir dir="${build_dir}"/>
+		<copy todir="${build_dir}/examples">
+			<fileset dir="${example_dir}"/>
+		</copy>
+		<copy todir="${build_dir}/flotr">
+			<fileset dir="${flotr_dir}"/>
+		</copy>
+		<copy todir="${build_dir}">
+			<fileset dir="${basedir}" includes="license.txt, readme.txt"/>
+		</copy>	
+		<copy file="${build_dir}/flotr/flotr.js" tofile="${build_dir}/flotr/flotr-tmp.js"/>
+		<concat destfile="${build_dir}/flotr/flotr.debug-${version}.js">
+			<header filtering="no" trimleading="yes">//${header}
+			</header>
+			<fileset file="${build_dir}/flotr/flotr.js"/>
+   		</concat>
+		<replace dir="${build_dir}" token="%version%" value="${version}">
+			<include name="*.*"/>
+			<include name="flotr/*.*"/>
+		</replace>
+		<replace dir="${build_dir}" token="%date%" value="${date}">
+			<include name="*.*"/>
+		</replace>
+		<replace dir="${build_dir}/examples" token="${replace_dir}" value="../flotr/">
+			<include name="*.html"/>
+		</replace>
+		<replace dir="${build_dir}/examples" token="../flotr/flotr.js" value="../flotr/flotr-${version}.js">
+			<include name="*.html"/>
+		</replace>
+	</target>
+	
+	<target name="build.compress" depends="build.preprocess" description="Minifies the js to test the minified version of Flotr.">
+		<apply executable="java" parallel="false">
+	        <fileset file="${build_dir}/flotr/flotr.js"/>
+	        <arg line="-jar"/>
+	        <arg path="${jar_dir}/yuicompressor-2.3.5.jar"/>
+	        <srcfile/>
+	        <arg line="-o"/>
+	        <mapper type="glob" from="*.js" to="${build_dir}/flotr/*-min.js"/>
+	        <targetfile/>
+	    </apply>
+	</target>
+	
+	<target name="build.release" depends="build.compress" description="Builds a release folder, this includes a zip package of the folder.">
+		<echo>
+			IMPORTANT: REMOVE THE PRIVATES, CHECK BUILD NUMBER			
+		</echo>	
+		<concat destfile="${build_dir}/flotr/flotr-${version}.js">
+			<header filtering="no" trimleading="yes">//${header}
+			</header>
+			<fileset file="${build_dir}/flotr/flotr-min.js"/>
+   		</concat>
+		<delete>
+			<fileset dir="${build_dir}/flotr/" includes="flotr.js, *-min.js, *-tmp.js"/>
+		</delete>
+		<zip destfile="${build_dir}/${framework}.flotr-${version}.zip" comment="${header}">
+			<zipfileset dir="${build_dir}" prefix="flotr-${version}"/>
+		</zip>
+	</target>
+	
+	<target name="build.online" depends="build.compress" description="Builds special version for online usage. This target includes Adsense ads in the examples.">
+		<echo>
+			IMPORTANT: REMOVE THE PRIVATES, CHECK BUILD NUMBER			
+		</echo>
+		<copy todir="${online_dir}/examples">
+			<fileset dir="${build_dir}/examples"/>
+		</copy>
+		<copy todir="${online_dir}/flotr">
+			<fileset dir="${build_dir}/flotr"/>
+		</copy>
+		<concat destfile="${online_dir}/flotr/flotr-${version}.js">
+			<header filtering="no" trimleading="yes">//${header}
+			</header>
+			<fileset file="${online_dir}/flotr/flotr-min.js"/>
+   		</concat>
+		<delete>
+			<fileset dir="${online_dir}/flotr/" includes="flotr.js, *-min.js, *-tmp.js"/>
+		</delete>
+		<replace dir="${online_dir}/examples" token="&lt;!-- ad --&gt;">
+			<include name="*.html"/>
+			<replacevalue>&lt;div class=&quot;ad&quot;&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;&lt;!--
+google_ad_client = &quot;pub-5018807259634553&quot;;
+/* 728x90, created 2/27/08, flotr example pages */
+google_ad_slot = &quot;1173802751&quot;;
+google_ad_width = 728;
+google_ad_height = 90;
+//--&gt;
+&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot;
+src=&quot;http://pagead2.googlesyndication.com/pagead/show_ads.js&quot;&gt;
+&lt;/script&gt;
+&lt;/div&gt;</replacevalue>
+		</replace>
+		
+		<replace dir="${online_dir}/examples" token="&lt;!-- analytics --&gt;">
+			<include name="*.html"/>
+			<replacevalue>&lt;script src=&quot;http://www.google-analytics.com/urchin.js&quot; type=&quot;text/javascript&quot;&gt;
+    &lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
+    _uacct = &quot;UA-658367-1&quot;;
+    urchinTracker();
+    &lt;/script&gt;</replacevalue>
+		</replace>
+	</target>
+	
+	<target name="test.prototype" 
+		description="Opens multiple browsers and starts unit testing.">
+			
+		<exec executable="${safari_exe}" spawn="true">		
+			<arg value="-url"/>
+			<arg value="${prototype_testsuite}"/>
+  		</exec>
+		<exec executable="${firefox_exe}" spawn="true">
+			<arg value="-new-tab"/>
+    		<arg value="${prototype_testsuite}" />
+  		</exec>
+  		<exec executable="${ie7_exe}" spawn="true">
+    		<arg value="${prototype_testsuite}" />
+  		</exec>
+		<exec executable="${opera_exe}" spawn="true">
+			<arg value="${prototype_testsuite}"/>
+  		</exec>		
+	</target>	
+</project>

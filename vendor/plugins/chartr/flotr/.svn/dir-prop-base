@@ -1,0 +1,12 @@
+K 10
+svn:ignore
+V 72
+release
+yuicompressor-2.3.5
+build.xml
+TODO.txt
+test
+tests
+jsunit
+
+END
