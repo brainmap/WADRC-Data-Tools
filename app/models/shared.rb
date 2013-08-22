@@ -659,6 +659,7 @@ puts "AAAAAA "+v_call
                              if File.directory?(v_subject_fs_path)
                                   v_dir_array = Dir.entries(v_subject_fs_path)
                                   v_dir_array.each do |f|
+                                    f = f.gsub('\n','')
                                     if f == "T1.mgz"
                                       v_t1_fs_flag = "Y"
                                       # v_t1_single ????
@@ -677,6 +678,7 @@ puts "AAAAAA "+v_call
                                   # asl_fmap_single = ASL_[subjectid]_fmap.nii
                              
                                 v_dir_array.each do |f|
+                                  f = f.gsub('\n','')
                                   if f == "swrFS_ASL_"+dir_name_array[0]+"_fmap.nii"
                                     v_asl_bkup_smoothed_and_warped_flag = "Y"
                                   elsif  f == "rFS_ASL_"+dir_name_array[0]+"_fmap.nii"
@@ -700,6 +702,7 @@ puts "AAAAAA "+v_call
                                   # dir_name_array[0] is just subjectid
                                 v_asl_fmap_single =""
                                 v_dir_array.each do |f|
+                                  f = f.gsub('\n','')
                                   if f == "swrFS_ASL_"+dir_name_array[0]+"_fmap.nii"
                                     v_asl_smoothed_and_warped_flag = "Y"
                                   elsif  f == "rFS_ASL_"+dir_name_array[0]+"_fmap.nii"
@@ -892,6 +895,7 @@ puts "AAAAAA "+v_call
               if File.directory?(v_subjectid_asl)
                     v_dir_array = Dir.entries(v_subjectid_asl)
                     v_dir_array.each do |f|
+                      f = f.gsub('\n','')
                       if f.start_with?("ASL_fmap") and f.end_with?(r[4]+".nii")   # ?? use asl_fmap_file_to_use = r[4], split off first part of dir name
                           v_sp_loc = v_loc_parts_array[0]
                           v_log = v_log + "ASL fmap file found "+ v_sp_loc+"\n"
@@ -1313,7 +1317,7 @@ puts "AAAAAA "+v_call
             connection = ActiveRecord::Base.connection();        
             results = connection.execute(sql)
 
-            sql_base = "insert into cg_epi_rest_status_new(epi_rest_subjectid, epi_rest_general_comment,w_filter_errts_norm_ra_flag,filter_errts_norm_ra_flag,enrollment_id, scan_procedure_id)values("  
+            sql_base = "insert into cg_epi_rest_status_new(epi_rest_subjectid, epi_rest_general_comment,w_filter_errts_norm_ra_flag,filter_errts_norm_ra_flag,t1_fs_flag,t1_single,enrollment_id, scan_procedure_id)values("  
             v_raw_path = v_base_path+"/raw"
             v_mri = "/mri"
             no_mri_path_sp_list =['asthana.adrc-clinical-core.visit1',
@@ -1362,12 +1366,41 @@ puts "AAAAAA "+v_call
                       if dir_name_array.size == 3
                          enrollment = Enrollment.where("enumber in (?)",dir_name_array[0])
                          if !enrollment.blank?
+                             v_t1_fs_flag = "N"
+                             v_t1_single = ""
+                             # need FS path - use fs_home_to_use if not null
+                             # have enrollemnt_id and sp.id
+                             v_fs_home = "orig_recon"
+                             v_fs_home_path = v_base_path+"/preprocessed/modalities/freesurfer/"
+                             sql_fs = "select fs_home_to_use from cg_epi_rest_status where enrollment_id = "+ enrollment[0].id.to_s+" and scan_procedure_id ="+sp.id.to_s
+                             results_fs = connection.execute(sql_fs)
+                             if results_fs.first.blank? # new will always just be non-edited - blank/default
+                               sql_fs = "select fs_home_to_use from cg_epi_rest_status_new where enrollment_id = "+ enrollment[0].id.to_s+" and scan_procedure_id ="+sp.id.to_s
+                             end
+                             results_fs = connection.execute(sql_fs)
+                             if !results_fs.blank? and !results_fs.first.blank? and !(results_fs.first)[0].blank?
+                                 v_fs_home = (results_fs.first)[0]  
+                             end
+                             v_subject_fs_path = v_fs_home_path+v_fs_home+"/"+dir_name_array[0]+"/mri"
+                             if File.directory?(v_subject_fs_path)
+                                  v_dir_array = Dir.entries(v_subject_fs_path)
+                                  v_dir_array.each do |f|
+                                    f = f.gsub('\n','')
+                                    if f == "T1.mgz"
+                                      v_t1_fs_flag = "Y"
+                                      # v_t1_single ????
+                                     end
+                                  end
+                                  
+                              end
+                             
                              v_subjectid_epi_rest = v_preprocessed_full_path+"/"+dir_name_array[0]+"/epi_rest/proc"
                              if File.directory?(v_subjectid_epi_rest)
                                   v_dir_array = Dir.entries(v_subjectid_epi_rest)   # need to get date for specific files
                                 v_w_filter_errts_norm_ra_flag ="N"
                                 v_filter_errts_norm_ra_flag = "N"
                                 v_dir_array.each do |f|
+                                  f = f.gsub('\n','')
                                   if f.start_with?("filter_errts_norm_ra"+dir_name_array[0]) and f.end_with?(".nii")
                                     v_filter_errts_norm_ra_flag = "Y"
                                   elsif f.start_with?("w_filter_errts_norm_ra"+dir_name_array[0]) and f.end_with?(".nii")
@@ -1375,10 +1408,10 @@ puts "AAAAAA "+v_call
                                   end
                                 end
                                 
-                                sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','','"+v_w_filter_errts_norm_ra_flag+"','"+v_filter_errts_norm_ra_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','','"+v_w_filter_errts_norm_ra_flag+"','"+v_filter_errts_norm_ra_flag+"','"+v_t1_fs_flag+"','"+v_t1_single +"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              else
-                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no epi_rest dir','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no epi_rest dir','N','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              end # check for subjectid asl dir
                          else
@@ -1394,7 +1427,7 @@ puts "AAAAAA "+v_call
             # v_shared = Shared.new 
              # move from new to present table -- made into a function  in shared model
              v_comment = self.move_present_to_old_new_to_present("cg_epi_rest_status",
-             "epi_rest_subjectid, epi_rest_general_comment,w_filter_errts_norm_ra_flag, w_filter_errts_norm_ra_comment, w_filter_errts_norm_ra_global_quality, filter_errts_norm_ra_flag, filter_errts_norm_ra_comment, filter_errts_norm_ra_global_quality, enrollment_id,scan_procedure_id",
+             "epi_rest_subjectid, epi_rest_general_comment,w_filter_errts_norm_ra_flag, w_filter_errts_norm_ra_comment, w_filter_errts_norm_ra_global_quality, filter_errts_norm_ra_flag, filter_errts_norm_ra_comment, filter_errts_norm_ra_global_quality,t1_fs_flag,t1_single,enrollment_id,scan_procedure_id",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
 
@@ -1490,6 +1523,7 @@ puts "AAAAAA "+v_call
                             v_fdg_smoothed_and_warped_flag = "N"
                             v_fdg_scaled_smoothed_and_warped_flag = "N"
                             v_dir_array.each do |f|
+                              f = f.gsub('\n','')
                                if f.start_with?("swr") and f.end_with?("summed.nii")
                                   v_fdg_smoothed_and_warped_flag = "Y"
                                elsif f.start_with?("swr") and f.end_with?("scaled.nii")
@@ -1626,6 +1660,7 @@ puts "AAAAAA "+v_call
                                   v_dir_array = Dir.entries(v_subjectid_lst_116)   # need to get date for specific files
                                 v_wlesion_030_flag_lst_116 ="N"
                                 v_dir_array.each do |f|
+                                  f = f.gsub('\n','')
                                   if f.start_with?("wlesion_030_m"+dir_name_array[0]+"_Sag-CUBE-FLAIR_") and f.end_with?("_cubet2flair.nii")
                                     v_wlesion_030_flag_lst_116 = "Y"
                                    end
@@ -1637,6 +1672,7 @@ puts "AAAAAA "+v_call
                                   v_dir_array = Dir.entries(v_subjectid_lst_122)   # need to get date for specific files
                                   v_wlesion_030_flag ="N"
                                   v_dir_array.each do |f|
+                                    f = f.gsub('\n','')
                                     if ( f.start_with?("wlesion_lbm3_030_rm"+dir_name_array[0]+"_Sag-CUBE-FLAIR_") or f.start_with?("wlesion_lbm3_030_rm"+dir_name_array[0]+"_Sag-CUBE-flair_") ) and f.end_with?(".nii")
                                       v_wlesion_030_flag = "Y"
                                     end
@@ -1651,6 +1687,7 @@ puts "AAAAAA "+v_call
                                   v_sag_cube_flair_flag ="N"
                                   v_sag_cube_flair_cnt = 0
                                   v_dir_array.each do |f|
+                                    f = f.gsub('\n','')
                                     if (f.include? "Sag-CUBE-FLAIR" or f.include? "Sag-CUBE-flair" ) and f.end_with?(".nii")
                                       v_sag_cube_flair_flag = "Y"
                                       v_sag_cube_flair_cnt = v_sag_cube_flair_cnt + 1
@@ -1661,6 +1698,7 @@ puts "AAAAAA "+v_call
                                   end
                                   v_o_star_cnt = 0
                                   v_dir_array.each do |f|
+                                    f = f.gsub('\n','')
                                     if f.start_with?("o") and f.end_with?(".nii")
                                       v_o_star_nii_flag = "Y"
                                       v_o_star_cnt = v_o_star_cnt+ 1
@@ -1776,6 +1814,7 @@ puts "AAAAAA "+v_call
             if File.directory?(v_subjectid_unknown)
                   v_dir_array = Dir.entries(v_subjectid_unknown)
                   v_dir_array.each do |f|
+                    f = f.gsub('\n','')
                     if f.start_with?("o") and f.end_with?(".nii")
                         v_o_star_nii_sp_loc = v_loc_parts_array[0]
                         v_log = v_log + "acpc file found \n"
@@ -1929,6 +1968,7 @@ puts "AAAAAA "+v_call
                             v_comment =""
                             v_val_arr =["","","","","","","","","","","","","","","","",""] 
                             v_dir_array.each do |f|
+                              f = f.gsub('\n','')
                                if f.start_with?(enrollment[0].enumber+v_visit_number) and f.end_with?("_cereb_TAC_HYPR.txt")
                                   v_status_flag = "Y"
                                   v_file_path = v_subjectid_pib+"/"+enrollment[0].enumber+v_visit_number+"_cereb_TAC_HYPR.txt"
@@ -2140,6 +2180,7 @@ puts "AAAAAA "+v_call
                             v_pib_registered_to_fs_flag ="N"
                             v_pib_smoothed_and_warped_flag = "N"
                             v_dir_array.each do |f|
+                              f = f.gsub('\n','')
                                if f.start_with?("swr") and f.end_with?(".nii")
                                   v_pib_smoothed_and_warped_flag = "Y"
                                elsif f.start_with?("rFS") and f.end_with?(".nii")
@@ -2268,13 +2309,17 @@ puts "AAAAAA "+v_call
                                 v_t1seg_ac_pc_flag ="N"
                                 v_t1seg_smoothed_and_warped_flag = "N"
                                 v_dir_array.each do |f|
-                                  if f.start_with?("smwc1o"+dir_name_array[0]+"_Ax-FSPGR-BRAVO_") and f.end_with?(".nii")
+                                  f = f.gsub('\n','')
+                                  puts "aaaaa dir_name_array[0]= "+dir_name_array[0]+ " f= "+f
+                                  if f.start_with?("smwc1o"+dir_name_array[0]+"_Ax-FSPGR-BRAVO_")  and f.end_with?(".nii")
+                                    puts "BBBBBBB MATCH v_t1seg_smoothed_and_warped_flag"
                                     v_t1seg_smoothed_and_warped_flag = "Y"
                                   end
                                 end
                                 if File.directory?(v_subjectid_unknown)
                                   v_dir_array = Dir.entries(v_subjectid_unknown)
                                   v_dir_array.each do |f|
+                                    f = f.gsub('\n','')
                                      if f.start_with?("o"+dir_name_array[0]+"_Ax-FSPGR-BRAVO_") and f.end_with?(".nii")
                                         v_t1seg_ac_pc_flag ="Y"
                                       end
