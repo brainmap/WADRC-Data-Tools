@@ -1,0 +1,10 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Editing directory</h1>
+
+<%= render 'form' %>
+
+	<p class="top right">
+<%= link_to 'show', directory_path(@directory) %> |
+<%= link_to 'directories', directories_path %>
+    </p>
+<% end %>

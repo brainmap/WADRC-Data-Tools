@@ -1,0 +1,20 @@
+<%  v_y_n = {"Y"=>"Y","N"=>"N"} %>
+<% form_for(@directory) do |f| %>
+  <%= f.error_messages %>
+
+  <div class="field">
+    <%= f.label :path %><br />
+    <%= f.text_field :path %>
+  </div>
+  <div class="field">
+    <%= f.label :label %><br />
+    <%= f.text_field :label %>
+  </div>
+  <div class="field">
+    <%= f.label :status %><br />
+    <%= f.select :status_flag, v_y_n, :selected =>   @directory.status_flag   %> 
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

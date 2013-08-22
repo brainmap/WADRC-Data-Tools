@@ -1,0 +1,49 @@
+<div class="large-graph">
+	
+	<p class="title">
+		<span class="label"><%= @directory.label %></span>
+	</p>
+	
+	<p class="subtitle">
+		<span class="dirpath"><%= @directory.path %></span>
+	</p>
+
+	<!-- <div id="linechart" style="width:100%;height:300px"></div>
+	<%= javascript_tag @directory.chart(:within => 1.year).output('linechart') %> -->
+	
+	<%= content_tag :div, nil, :id => "linechart", :style => "width:100%; height:300px" %>
+	<%= javascript_tag @directory.chart(:within => @days.days, :num_x_axis_labels => 15).output('linechart') %>[chart -flotr not working]
+	
+</div>
+
+<div class="directory-status">
+	
+	<h2>
+		<% unless @directory.measurements.empty? %>
+			<%= "%0.2f" % @directory.measurements.last.gb_size %> GB&nbsp;
+			<%= "%+0.1f" % @directory.change_since(1.week.ago) %>% <small>in last week</small>
+		<% end %>
+	</h2>
+	
+</div>
+
+<br />
+
+<div class="masthead top-border">
+	<ul class="navtabs top left">
+		<%= tab_to_dir @directory, 1,    '1 day'    %>
+		<%= tab_to_dir @directory, 7,    '1 week'   %>
+		<%= tab_to_dir @directory, 14,   '2 weeks'  %>
+		<%= tab_to_dir @directory, 31,   '1 month'  %>
+		<%= tab_to_dir @directory, 182,  '6 months' %>
+		<%= tab_to_dir @directory, 365,  '1 year'   %>
+	</ul>
+	<p class="top right">
+	<% if current_user.role == 'Admin_High'%>
+	
+		<%= link_to 'edit', edit_directory_path(@directory) %> | 
+		<%= link_to 'remove', @directory, :confirm => 'Are you sure?', :method => :delete %> |
+	<% end %>
+	<%= link_to 'directories', directories_path %>
+	</p>
+</div>

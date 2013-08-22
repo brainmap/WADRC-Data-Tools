@@ -1,0 +1,44 @@
+<ul id="directories" class="graph-list">
+	<% @directories.each_with_index do |d,i| %>
+	
+		<%= content_tag_for :li, d do %>
+			<div class="small-graph">
+				
+				<p>
+					<span class="handle" style="font-size:18pt; color:#630;">✙ </span>
+					<%= link_to d.label, d, :class => 'title' %>
+				</p>
+				
+				<p class="stats">
+					<% unless d.measurements.empty? %>
+						<%= d.measurements.last.size_string %>
+						<%= "%+0.1f" % d.change_since(@days.days.ago, :report_in => :megabytes) %> MB
+						<%= "%+0.1f" % d.change_since(@days.days.ago) %>%
+						in last <%= pluralize @days, 'day' %>
+					<% end %>
+				</p>
+				
+				<% div_id = "linechart_#{i}" %>
+				<%= content_tag :div, nil, :id => div_id, :style => "width:310px; height:150px" %>
+				<%= javascript_tag d.chart(:within => @days.days, :num_x_axis_labels => 7).output(div_id) %><br> [chart -flotr not working]
+				
+			</div>
+		<% end %>
+		
+	<% end %>
+</ul>
+<%= sortable_element("directories", :url => sort_directories_path, :handle => "handle", :constraint => false, :overlap => :horizontal) %>
+
+<br />
+
+<div class="masthead top-border">
+	<ul class="navtabs top left">
+		<%= tab_to 1,    '1 day'    %>
+		<%= tab_to 7,    '1 week'   %>
+		<%= tab_to 14,   '2 weeks'  %>
+		<%= tab_to 31,   '1 month'  %>
+		<%= tab_to 182,  '6 months' %>
+		<%= tab_to 365,  '1 year'   %>
+	</ul>
+	<p class="top right"><%= link_to 'New directory', new_directory_path %></p>
+</div>
