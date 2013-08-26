@@ -326,7 +326,7 @@ class Shared  < ActionController::Base
                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
                   and image_datasets.series_description =   series_description_map.series_description
-                  and series_description_map.series_description_type in ('T1 Volumetic','T1 Volumetric','T1','T2','T2 Flair','DTI') 
+                  and series_description_map.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','T2','T2 Flair','T2_Flair','T2+Flair','DTI') 
                   and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
                   and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
                    order by appointments.appointment_date "
