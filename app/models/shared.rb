@@ -109,7 +109,6 @@ class Shared  < ActionController::Base
     return v_flag, v_comment
   end
   
-  
   def get_schedule_owner_email(p_schedule_id)
     v_email_array = ['noreply_johnson_lab@medicine.wisc.edu']
     @schedule = Schedule.find(p_schedule_id)
@@ -241,9 +240,7 @@ class Shared  < ActionController::Base
   
   
   def run_adrc_upload  
-     
-    visit = Visit.find(3)  #  need to get base path without visit
-    v_base_path = visit.get_base_path()
+    v_base_path = Shared.get_base_path()
      @schedule = Schedule.where("name in ('adrc_upload')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
@@ -533,8 +530,7 @@ puts "AAAAAA "+v_call
   # change  sql = sql_base+  insert statement with values
   # change  self.move_present_to_old_new_to_present
   def run_asl_status
-        visit = Visit.find(3)  #  need to get base path without visit
-        v_base_path = visit.get_base_path()
+        v_base_path = Shared.get_base_path()
          @schedule = Schedule.where("name in ('asl_status')").first
           @schedulerun = Schedulerun.new
           @schedulerun.schedule_id = @schedule.id
@@ -824,8 +820,7 @@ puts "AAAAAA "+v_call
         v_process_name = "asl_sw_fs_process"
         v_log_base ="/mounts/data/preprocessed/logs/"
         process_logs_delete_old( v_process_name, v_log_base)            
-        visit = Visit.find(3)  #  need to get base path without visit
-        v_base_path = visit.get_base_path()
+        v_base_path = Shared.get_base_path()
         @schedule = Schedule.where("name in ('asl_sw_fs_process')").first
         v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
         @schedulerun = Schedulerun.new
@@ -979,8 +974,7 @@ puts "AAAAAA "+v_call
 
 
   def run_dir_size
-        visit = Visit.find(3)  #  need to get base path without visit
-        v_base_path = visit.get_base_path()
+        v_base_path = Shared.get_base_path()
         connection = ActiveRecord::Base.connection(); 
          @schedule = Schedule.where("name in ('dir_size')").first
           @schedulerun = Schedulerun.new
@@ -1083,8 +1077,7 @@ puts "AAAAAA "+v_call
   # change  sql = sql_base+  insert statement with values
   # change  self.move_present_to_old_new_to_present
   def run_dti_status
-        visit = Visit.find(3)  #  need to get base path without visit
-        v_base_path = visit.get_base_path()
+        v_base_path = Shared.get_base_path()
          @schedule = Schedule.where("name in ('dti_status')").first
           @schedulerun = Schedulerun.new
           @schedulerun.schedule_id = @schedule.id
@@ -1302,8 +1295,7 @@ puts "AAAAAA "+v_call
   # change  sql = sql_base+  insert statement with values
   # change  self.move_present_to_old_new_to_present
   def run_epi_rest_status
-        visit = Visit.find(3)  #  need to get base path without visit
-        v_base_path = visit.get_base_path()
+        v_base_path = Shared.get_base_path()
          @schedule = Schedule.where("name in ('epi_rest_status')").first
           @schedulerun = Schedulerun.new
           @schedulerun.schedule_id = @schedule.id
@@ -1459,8 +1451,7 @@ puts "AAAAAA "+v_call
   # change  sql = sql_base+  insert statement with values
   # change  self.move_present_to_old_new_to_present
   def run_fdg_status
-        visit = Visit.find(3)  #  need to get base path without visit
-        v_base_path = visit.get_base_path()
+        v_base_path = Shared.get_base_path()
          @schedule = Schedule.where("name in ('fdg_status')").first
           @schedulerun = Schedulerun.new
           @schedulerun.schedule_id = @schedule.id
@@ -1582,8 +1573,7 @@ puts "AAAAAA "+v_call
   # change  sql = sql_base+  insert statement with values
   # change  self.move_present_to_old_new_to_present
   def run_lst_116_status   # actually the new  lst_122 in column, and lst_116 in separate column
-        visit = Visit.find(3)  #  need to get base path without visit
-        v_base_path = visit.get_base_path()
+        v_base_path = Shared.get_base_path()
          @schedule = Schedule.where("name in ('lst_116_status')").first
           @schedulerun = Schedulerun.new
           @schedulerun.schedule_id = @schedule.id
@@ -1761,8 +1751,7 @@ puts "AAAAAA "+v_call
       v_process_name = "lst_122_process"
       v_log_base ="/mounts/data/preprocessed/logs/"
       process_logs_delete_old( v_process_name, v_log_base)            
-      visit = Visit.find(3)  #  need to get base path without visit
-      v_base_path = visit.get_base_path()
+      v_base_path = Shared.get_base_path()
       @schedule = Schedule.where("name in ('lst_122_process')").first
       v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
       @schedulerun = Schedulerun.new
@@ -1904,8 +1893,7 @@ puts "AAAAAA "+v_call
   # change  sql = sql_base+  insert statement with values
   # change  self.move_present_to_old_new_to_present
   def run_pib_cereb_tac
-        visit = Visit.find(3)  #  need to get base path without visit
-        v_base_path = visit.get_base_path()
+        v_base_path = Shared.get_base_path()
          @schedule = Schedule.where("name in ('pib_cereb_tac')").first
           @schedulerun = Schedulerun.new
           @schedulerun.schedule_id = @schedule.id
@@ -2041,8 +2029,7 @@ puts "AAAAAA "+v_call
   end
   
   def run_pet_path
-    visit = Visit.find(3)  #  need to get base path without visit
-    v_base_path = visit.get_base_path()
+    v_base_path = Shared.get_base_path()
      @schedule = Schedule.where("name in ('pet_path')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
@@ -2088,11 +2075,10 @@ puts "AAAAAA "+v_call
   end
   
   def get_pet_path(v_sp_id, v_file_name, v_tracer_id)
-    visit = Visit.find(3)  #  need to get base path without visit
     # ???? '1_asthana.adrc-clinical-core.visit1'=>'', '2_bendlin.tami.visit1'=>'', '1_bendlin.wmad.visit1'=>'','1_bendlin.mets.visit1'=> '',    '2_bendlin.mets.visit1'=> ''
     # 2_ries.mosaic.visit1    3_ries.mosaic.visit1
     # tracer 1=pib, 2=fdg, 3=way, 4=015
-    v_base_path = visit.get_base_path()
+    v_base_path = Shared.get_base_path()
     v_pet_target_hash ={'1_johnson.pipr.visit1'=>'johnson.pipr.visit1/pet','2_johnson.predict.visit1'=>'johnson.predict.visit1/pet/FDG-visit1',
          '1_johnson.predict.visit1'=>'johnson.predict.visit1/pet/PIB-visit1','2_johnson.predict.visit2'=>'johnson.predict.visit2/pet/FDG',
          '1_johnson.predict.visit2'=>'johnson.predict.visit2/pet/PIB','2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
@@ -2118,8 +2104,7 @@ puts "AAAAAA "+v_call
   # change  sql = sql_base+  insert statement with values
   # change  self.move_present_to_old_new_to_present
   def run_pib_status
-        visit = Visit.find(3)  #  need to get base path without visit
-        v_base_path = visit.get_base_path()
+        v_base_path = Shared.get_base_path()
          @schedule = Schedule.where("name in ('pib_status')").first
           @schedulerun = Schedulerun.new
           @schedulerun.schedule_id = @schedule.id
@@ -2234,8 +2219,7 @@ puts "AAAAAA "+v_call
   # change  sql = sql_base+  insert statement with values
   # change  self.move_present_to_old_new_to_present  
   def run_t1seg_status
-        visit = Visit.find(3)  #  need to get base path without visit
-        v_base_path = visit.get_base_path()
+        v_base_path = Shared.get_base_path()
          @schedule = Schedule.where("name in ('t1seg_status')").first
           @schedulerun = Schedulerun.new
           @schedulerun.schedule_id = @schedule.id
@@ -2381,8 +2365,7 @@ puts "AAAAAA "+v_call
   
   
   def run_fs_Y_N
-    visit = Visit.find(3)  #  need to get base path without visit
-    v_base_path = visit.get_base_path()
+    v_base_path = Shared.get_base_path()
      @schedule = Schedule.where("name in ('fs_Y_N')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
