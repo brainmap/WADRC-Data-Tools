@@ -56,6 +56,18 @@
 	
 	    </table>
    <%end%>
+     <%= form_for 'cg_table_edit_db' do |f| %> 
+        <%= hidden_field_tag 'cg_table_name',  @v_cg_table_name%>
+        <%= hidden_field_tag 'cg_tn_column_name',  @v_cg_tn_column_name%>
+        <%= hidden_field_tag 'cg_action',  'change'%><br>
+        <table>
+			 <tr><td><%= submit_tag("rename column")%></td>
+	              <td> <b>New Column Name:</b> <%= f.text_field 'cg_tn_column_name_new' ,:size=>50 %>  &nbsp;&nbsp;&nbsp;&nbsp;<b>existing column name:</b> <%=  @v_cg_tn_column_name %></td>
+	              <td><%= hidden_field_tag  'cg_table_edit[datatype][0]', @v_cg_tn_column_datatype	 %></td>
+	                 <td><%=  hidden_field_tag  'cg_table_edit[datasize][0]', v_datasize	 %></td><td></tr>
+	
+	    </table>
+   <%end%>
  <% else %>
     <%= form_for 'cg_table_edit' do |f| %> 
             <%= hidden_field_tag 'cg_table_name',  @v_cg_table_name%>

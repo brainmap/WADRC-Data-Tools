@@ -1895,6 +1895,37 @@ class DataSearchesController < ApplicationController
             sql = "alter table "+v_tn+"_new modify "+v_cn+" float "
             results = connection.execute(sql)
           end
+      elsif params[:cg_action] == "change"
+        v_cn = params[:cg_tn_column_name]
+        v_cn_new = params[:cg_table_edit_db][:cg_tn_column_name_new]
+        if params[:cg_table_edit][:datatype]["0"] == "varchar"
+           sql = "alter table "+v_tn+" change "+v_cn+ " "+v_cn_new + " VARCHAR("+params[:cg_table_edit][:datasize]["0"]+") "
+           results = connection.execute(sql)
+           sql = "alter table "+v_tn+"_old change "+v_cn+" "+v_cn_new +" VARCHAR("+params[:cg_table_edit][:datasize]["0"]+") "
+           results = connection.execute(sql)
+           sql = "alter table "+v_tn+"_new change "+v_cn+" "+v_cn_new +" VARCHAR("+params[:cg_table_edit][:datasize]["0"]+") "
+           results = connection.execute(sql)
+            sql = "alter table "+v_tn+"_edit change "+v_cn+" "+v_cn_new +" VARCHAR("+params[:cg_table_edit][:datasize]["0"]+") "
+            results = connection.execute(sql)
+         elsif params[:cg_table_edit][:datatype]["0"] == "int"
+            sql = "alter table "+v_tn+" change "+v_cn+" "+v_cn_new +" INT "
+            results = connection.execute(sql)
+            sql = "alter table "+v_tn+"_old change "+v_cn+" "+v_cn_new +" INT "
+            results = connection.execute(sql)
+            sql = "alter table "+v_tn+"_new change "+v_cn+" "+v_cn_new +" INT "
+            results = connection.execute(sql)
+            sql = "alter table "+v_tn+"_edit change "+v_cn+" "+v_cn_new +" VARCHAR(50) "
+            results = connection.execute(sql)
+          elsif params[:cg_table_edit][:datatype]["0"] == "float"
+             sql = "alter table "+v_tn+" change "+v_cn+" "+v_cn_new +" FLOAT "
+             results = connection.execute(sql)
+             sql = "alter table "+v_tn+"_old change "+v_cn+" "+v_cn_new +" FLOAT "
+             results = connection.execute(sql)
+             sql = "alter table "+v_tn+"_new change "+v_cn+" "+v_cn_new +" FLOAT "
+             results = connection.execute(sql)
+             sql = "alter table "+v_tn+"_edit change "+v_cn+" "+v_cn_new +" VARCHAR(50) "
+             results = connection.execute(sql)
+          end
       elsif params[:cg_action] == "delete"
          v_cn = params[:cg_tn_column_name]
          sql = "alter table "+v_tn+" drop column "+v_cn
