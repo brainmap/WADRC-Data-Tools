@@ -1,3 +1,11 @@
+<%= stylesheet_link_tag 'scaffold' %>
+<%= javascript_include_tag "prototype.js" %>
+<%= javascript_include_tag "effects.js" %>
+<%= javascript_include_tag "dragdrop.js" %>
+<%= javascript_include_tag "controls.js" %>
+<%= javascript_include_tag "rails.js" %>
+<%= raw chartr_includes %>
+
 <a href="http://braindata.dom.wisc.edu/mrtg/" target="top">top level directories -Image Server space usage</a><br><br>
 <ul id="directories" class="graph-list">
 	<% @directories.each_with_index do |d,i| %>
@@ -43,3 +51,13 @@
 	</ul>
 	<p class="top right"><%= link_to 'New directory', new_directory_path %></p>
 </div>
+<br><br>
+test
+				<div id="linechart_300" style="width:310px; height:150px"></div>
+				<script type="text/javascript">
+//<![CDATA[
+Flotr.draw($('linechart_300'), [[]], {"lines":{"show":true},"xaxis":{"ticks":[[1377541964,"08/26"],[1377159336,"08/22"],[1376776708,"08/17"],[1376394080,"08/13"],[1376011452,"08/08"],[1375628824,"08/04"],[1375246196,"07/30"]],"max":1377541964,"min":1375246196},"points":{"radius":2,"fillColor":"#fff","fill":true,"show":true},"grid":{"color":"#330","tickColor":"#360"}});
+//]]>
+</script><br> [chart -flotr not working]
+				
+			</div>
