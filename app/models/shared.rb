@@ -545,10 +545,10 @@ puts "AAAAAA "+v_call
             results = connection.execute(sql)
 
             sql_base = "insert into cg_asl_status_new(asl_subjectid, asl_general_comment,asl_registered_to_fs_flag,asl_smoothed_and_warped_flag,asl_fmap_flag,asl_fmap_single,
-            asl_bkup_registered_to_fs_flag,asl_bkup_smoothed_and_warped_flag,asl_bkup_fmap_flag,asl_bkup_fmap_single,asl_2013_0_fmap_flag,asl_2013_0_fmap_single,
-            asl_2013_1525_fmap_flag,asl_2013_1525_fmap_single,asl_2013_2025_fmap_flag,asl_2013_2025_fmap_single,
-            asl_2013_0_registered_to_fs_flag,asl_2013_0_smoothed_and_warped_flag,asl_2013_1525_registered_to_fs_flag,asl_2013_1525_smoothed_and_warped_flag,
-            asl_2013_2025_registered_to_fs_flag,asl_2013_2025_smoothed_and_warped_flag,pdmap_flag,pdmap_0_flag,pdmap_1525_flag,pdmap_2025_flag,t1_fs_flag,asl_directory_list,
+            asl_bkup_registered_to_fs_flag,asl_bkup_smoothed_and_warped_flag,asl_bkup_fmap_flag,asl_bkup_fmap_single,asl_0_fmap_flag,asl_0_fmap_single,
+            asl_1525_fmap_flag,asl_1525_fmap_single,asl_2025_fmap_flag,asl_2025_fmap_single,
+            asl_0_registered_to_fs_flag,asl_0_smoothed_and_warped_flag,asl_1525_registered_to_fs_flag,asl_1525_smoothed_and_warped_flag,
+            asl_2025_registered_to_fs_flag,asl_2025_smoothed_and_warped_flag,pdmap_flag,pdmap_0_flag,pdmap_1525_flag,pdmap_2025_flag,t1_fs_flag,asl_directory_list,
             enrollment_id, scan_procedure_id)values("  
             v_raw_path = v_base_path+"/raw"
             v_mri = "/mri"
@@ -606,18 +606,18 @@ puts "AAAAAA "+v_call
                              v_asl_bkup_smoothed_and_warped_flag = "N"
                              v_asl_bkup_fmap_flag = "N"
                              v_asl_bkup_fmap_single ="N"
-                             v_asl_2013_0_fmap_flag = "N"
-                             v_asl_2013_0_fmap_single ="N"   
-                             v_asl_2013_0_registered_to_fs_flag ="N"
-                             v_asl_2013_0_smoothed_and_warped_flag = "N"                          
-                             v_asl_2013_1525_fmap_flag = "N"
-                             v_asl_2013_1525_fmap_single ="N"  
-                             v_asl_2013_1525_registered_to_fs_flag ="N"
-                             v_asl_2013_1525_smoothed_and_warped_flag = "N"                           
-                             v_asl_2013_2025_fmap_flag = "N"
-                             v_asl_2013_2025_fmap_single ="N"
-                             v_asl_2013_2025_registered_to_fs_flag ="N"
-                             v_asl_2013_2025_smoothed_and_warped_flag = "N"
+                             v_asl_0_fmap_flag = "N"
+                             v_asl_0_fmap_single ="N"   
+                             v_asl_0_registered_to_fs_flag ="N"
+                             v_asl_0_smoothed_and_warped_flag = "N"                          
+                             v_asl_1525_fmap_flag = "N"
+                             v_asl_1525_fmap_single ="N"  
+                             v_asl_1525_registered_to_fs_flag ="N"
+                             v_asl_1525_smoothed_and_warped_flag = "N"                           
+                             v_asl_2025_fmap_flag = "N"
+                             v_asl_2025_fmap_single ="N"
+                             v_asl_2025_registered_to_fs_flag ="N"
+                             v_asl_2025_smoothed_and_warped_flag = "N"
                              v_pdmap_flag = "N"
                              v_pdmap_0_flag = "N"
                              v_pdmap_1525_flag = "N"
@@ -704,41 +704,41 @@ puts "AAAAAA "+v_call
                                   elsif  f == "rFS_ASL_"+dir_name_array[0]+"_fmap.nii"
                                     v_asl_registered_to_fs_flag ="Y"
                                   elsif  f.start_with?("ASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
-                                    v_asl_2013_0_fmap_flag = "Y"
-                                    v_asl_2013_0_fmap_single ="Y"
+                                    v_asl_0_fmap_flag = "Y"
+                                    v_asl_0_fmap_single ="Y"
                                     if v_asl_fmap_single == ""
                                        v_asl_fmap_single ="Y"
                                      elsif v_asl_fmap_single == "Y"
                                       v_asl_fmap_single = "N"
                                      end
                                   elsif f.start_with?("swrFS_ASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii") 
-                                      v_asl_2013_0_smoothed_and_warped_flag = "Y"
+                                      v_asl_0_smoothed_and_warped_flag = "Y"
                                   elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
-                                      v_asl_2013_0_registered_to_fs_flag ="Y"                                                                         
+                                      v_asl_0_registered_to_fs_flag ="Y"                                                                         
                                   elsif   f.start_with?("ASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii")
-                                      v_asl_2013_1525_fmap_flag = "Y"
-                                      v_asl_2013_1525_fmap_single ="Y"
+                                      v_asl_1525_fmap_flag = "Y"
+                                      v_asl_1525_fmap_single ="Y"
                                       if v_asl_fmap_single == ""
                                          v_asl_fmap_single ="Y"
                                        elsif v_asl_fmap_single == "Y"
                                         v_asl_fmap_single = "N"
                                        end
                                   elsif f.start_with?("swrFS_ASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii") 
-                                      v_asl_2013_1525_smoothed_and_warped_flag = "Y"
+                                      v_asl_1525_smoothed_and_warped_flag = "Y"
                                   elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii")
-                                      v_asl_2013_1525_registered_to_fs_flag ="Y"                                                                       
+                                      v_asl_1525_registered_to_fs_flag ="Y"                                                                       
                                   elsif   f.start_with?("ASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii")
-                                      v_asl_2013_2025_fmap_flag = "Y"
-                                      v_asl_2013_2025_fmap_single ="Y" 
+                                      v_asl_2025_fmap_flag = "Y"
+                                      v_asl_2025_fmap_single ="Y" 
                                       if v_asl_fmap_single == ""
                                          v_asl_fmap_single ="Y"
                                        elsif v_asl_fmap_single == "Y"
                                         v_asl_fmap_single = "N"
                                        end 
                                   elsif f.start_with?("swrFS_ASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii") 
-                                      v_asl_2013_2025_smoothed_and_warped_flag = "Y"
+                                      v_asl_2025_smoothed_and_warped_flag = "Y"
                                   elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii")
-                                      v_asl_2013_2025_registered_to_fs_flag ="Y" 
+                                      v_asl_2025_registered_to_fs_flag ="Y" 
                                   elsif   f.start_with?("PDmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
                                       v_pdmap_0_flag = "Y" 
                                   elsif   f.start_with?("PDmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii")
@@ -747,7 +747,7 @@ puts "AAAAAA "+v_call
                                       v_pdmap_2025_flag = "Y"                                                
                                   end
                                   
-                                  if v_asl_2013_0_fmap_flag == "Y" or v_asl_2013_1525_fmap_flag == "Y" or v_asl_2013_2025_fmap_flag == "Y"
+                                  if v_asl_0_fmap_flag == "Y" or v_asl_1525_fmap_flag == "Y" or v_asl_2025_fmap_flag == "Y"
                                     v_asl_fmap_flag = "Y"
                                   end 
                                   
@@ -759,10 +759,10 @@ puts "AAAAAA "+v_call
                              if File.directory?(v_subjectid_asl) or  File.directory?(v_subjectid_asl_bkup)
                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','','"+v_asl_registered_to_fs_flag+"','"+v_asl_smoothed_and_warped_flag+"','"+v_asl_fmap_flag+"',
                                                            '"+v_asl_fmap_single+"','"+v_asl_bkup_registered_to_fs_flag+"','"+v_asl_bkup_smoothed_and_warped_flag+"','"+v_asl_bkup_fmap_flag+"',
-                                                           '"+v_asl_bkup_fmap_single+"','"+v_asl_2013_0_fmap_flag+"', '"+v_asl_2013_0_fmap_single+"','"+v_asl_2013_1525_fmap_flag+"', '"+v_asl_2013_1525_fmap_single+"',
-                                                          '"+v_asl_2013_2025_fmap_flag+"', '"+v_asl_2013_2025_fmap_single+"','"+v_asl_2013_0_registered_to_fs_flag+"','"+v_asl_2013_0_smoothed_and_warped_flag+"'
-                                                          ,'"+v_asl_2013_1525_registered_to_fs_flag+"','"+v_asl_2013_1525_smoothed_and_warped_flag+"','"+v_asl_2013_2025_registered_to_fs_flag+"',
-                                                          '"+v_asl_2013_2025_smoothed_and_warped_flag+"','"+v_pdmap_flag+"','"+v_pdmap_0_flag+"','"+v_pdmap_1525_flag+"','"+v_pdmap_2025_flag+"','"+v_t1_fs_flag+"','"+v_asl_directory_list+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                                           '"+v_asl_bkup_fmap_single+"','"+v_asl_0_fmap_flag+"', '"+v_asl_0_fmap_single+"','"+v_asl_1525_fmap_flag+"', '"+v_asl_1525_fmap_single+"',
+                                                          '"+v_asl_2025_fmap_flag+"', '"+v_asl_2025_fmap_single+"','"+v_asl_0_registered_to_fs_flag+"','"+v_asl_0_smoothed_and_warped_flag+"'
+                                                          ,'"+v_asl_1525_registered_to_fs_flag+"','"+v_asl_1525_smoothed_and_warped_flag+"','"+v_asl_2025_registered_to_fs_flag+"',
+                                                          '"+v_asl_2025_smoothed_and_warped_flag+"','"+v_pdmap_flag+"','"+v_pdmap_0_flag+"','"+v_pdmap_1525_flag+"','"+v_pdmap_2025_flag+"','"+v_t1_fs_flag+"','"+v_asl_directory_list+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql) 
                              else
                                  sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no ASL or ASL_bkup dir','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
@@ -781,13 +781,13 @@ puts "AAAAAA "+v_call
             # v_shared = Shared.new 
              # move from new to present table -- made into a function  in shared model
              v_comment = self.move_present_to_old_new_to_present("cg_asl_status",
-             "asl_subjectid, asl_general_comment,asl_registered_to_fs_flag, asl_registered_to_fs_comment, asl_registered_to_fs_global_quality, asl_smoothed_and_warped_flag, asl_smoothed_and_warped_comment, asl_smoothed_and_warped_global_quality, asl_fmap_flag, asl_fmap_single, asl_fmap_comment, asl_fmap_global_quality,
-             asl_bkup_registered_to_fs_flag, asl_bkup_registered_to_fs_comment, asl_bkup_registered_to_fs_global_quality, asl_bkup_smoothed_and_warped_flag, asl_bkup_smoothed_and_warped_comment, asl_bkup_smoothed_and_warped_global_quality, asl_bkup_fmap_flag, asl_bkup_fmap_single, asl_bkup_fmap_comment, asl_bkup_fmap_global_quality, 
-             asl_2013_0_fmap_flag, asl_2013_0_fmap_single, asl_2013_0_fmap_comment, asl_2013_0_fmap_global_quality,
-             asl_2013_1525_fmap_flag, asl_2013_1525_fmap_single, asl_2013_1525_fmap_comment, asl_2013_1525_fmap_global_quality,
-            asl_2013_2025_fmap_flag, asl_2013_2025_fmap_single, asl_2013_2025_fmap_comment, asl_2013_2025_fmap_global_quality,
-            asl_2013_0_registered_to_fs_flag,asl_2013_0_smoothed_and_warped_flag,asl_2013_1525_registered_to_fs_flag,asl_2013_1525_smoothed_and_warped_flag,
-            asl_2013_2025_registered_to_fs_flag,asl_2013_2025_smoothed_and_warped_flag,pdmap_flag,pdmap_0_flag,pdmap_1525_flag,pdmap_2025_flag,t1_fs_flag,asl_directory_list,
+             "asl_subjectid, asl_general_comment,asl_registered_to_fs_flag, asl_smoothed_and_warped_flag, asl_fmap_flag, asl_fmap_single, 
+             asl_bkup_registered_to_fs_flag, asl_bkup_smoothed_and_warped_flag, asl_bkup_fmap_flag, asl_bkup_fmap_single, 
+             asl_0_fmap_flag, asl_0_fmap_single, 
+             asl_1525_fmap_flag, asl_1525_fmap_single, 
+            asl_2025_fmap_flag, asl_2025_fmap_single,
+            asl_0_registered_to_fs_flag,asl_0_smoothed_and_warped_flag,asl_1525_registered_to_fs_flag,asl_1525_smoothed_and_warped_flag,
+            asl_2025_registered_to_fs_flag,asl_2025_smoothed_and_warped_flag,pdmap_flag,pdmap_0_flag,pdmap_1525_flag,pdmap_2025_flag,t1_fs_flag,asl_directory_list,
               enrollment_id,scan_procedure_id",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
@@ -1769,11 +1769,17 @@ puts "AAAAAA "+v_call
       v_stop_file_name = v_process_name+"_stop"
       v_stop_file_path = v_log_base+v_stop_file_name  # use to stop the results loop  
       v_subjectid_v_num = ""              
+      v_script_dev = v_base_path+"/data1/lab_scripts/LST/LST.sh"
       v_script = v_base_path+"/data1/lab_scripts/LST/LST.sh"
+      v_cmd = "diff "+v_script+" "+v_script_dev
+      v_user = `echo $USER`
+      puts "aaaaaa = v_user= "+v_user
+      #@user = current_user
+      #puts "AAAAAAA user email="+@user.email
       
       connection = ActiveRecord::Base.connection();  
       # do_not_run_process_wlesion_030 == Y means do not run
-      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) ) and (  lst_subjectid not like 'shp%') #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where do_not_run_process_wlesion_030='Q' and if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) ) and (  lst_subjectid not like 'shp%') #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
       results = connection.execute(sql)
       results.each do |r|
           v_break = 0  # need a kill swith

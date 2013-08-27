@@ -8,15 +8,7 @@ class CronInterface < ActiveRecord::Base
   v_value_1 = ARGV[0]
   puts "AAAAAAAAAAA in CronInterface"+v_value_1.to_s+"="
   v_shared = Shared.new
-# calls from cron
-# asl_status
-#   sp_series_desc_count
-#   fs_Y_N
-#   fs_aseg_aparc
-
-
-  visit = Visit.find(3)  #  need to get base path without visit
-  v_base_path = visit.get_base_path()
+  v_base_path = Shared.get_base_path()
 
   if v_value_1 == "test"
     v_shared = Shared.new
@@ -39,7 +31,24 @@ class CronInterface < ActiveRecord::Base
     
   end  # end test
 
-  
+
+v_username_list = ['admin','panda_admin']  
+sql = "select users.username from users where role in ('Admin_High','Admin_Low')"
+results = connection.execute(sql)
+results.each do |r|
+      v_username_list.push(r[0])
+end
+v_user = `echo $USER`
+v_user = v_user.gsub("\n","")
+ @schedule = Schedule.where("name='"+v_value_1+"'")
+ sql = "select users.username from users, schedules_users where users.id =  schedules_users.user_id and schedules_users.schedule_id="+@schedule[0].id.to_s
+ connection = ActiveRecord::Base.connection();        
+ results = connection.execute(sql)
+ results.each do |r|
+       v_username_list.push(r[0])
+ end
+
+ if !v_username_list.index(v_user).blank?  # limit cron execution to panda, admins and owners
   if v_value_1 == "asl_status"
     v_shared = Shared.new
     v_shared.run_asl_status()
@@ -518,7 +527,7 @@ class CronInterface < ActiveRecord::Base
            @schedulerun.status_flag="E"
            @schedulerun.save
        end   
-    
+    end
   end
   
 end
