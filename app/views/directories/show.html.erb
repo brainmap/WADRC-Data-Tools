@@ -19,7 +19,7 @@
 	<%= javascript_tag @directory.chart(:within => 1.year).output('linechart') %> -->
 	
 	<%= content_tag :div, nil, :id => "linechart", :style => "width:100%; height:300px" %>
-	<%= javascript_tag @directory.chart(:within => @days.days, :num_x_axis_labels => 15).output('linechart') %>[chart -flotr not working]
+	<%= javascript_tag @directory.chart(:within => @days.days, :num_x_axis_labels => 15).output('linechart') %>
 	
 </div>
 

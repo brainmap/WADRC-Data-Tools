@@ -2,7 +2,8 @@ class DirectoriesController < ApplicationController
 	# GET /directories
 	# GET /directories.xml
 	def index
-		@directories = Directory.order("position ASC")
+		@directories = Directory.where("status_flag='Y'").order("position,path")
+		@directories_status_n = Directory.where("status_flag='N'").order("position ASC, path ASC")
 		@days = params[:days].blank? ? 31 : params[:days].to_i
 		respond_to do |format|
 			format.html # index.html.erb
@@ -25,8 +26,11 @@ class DirectoriesController < ApplicationController
 	# GET /directories/new.xml
 	def new
 		@directory = Directory.new
-		visit = Visit.find(3)  #  need to get base path without visit
-    v_base_path = visit.get_base_path()
+    v_base_path = Shared.get_base_path()
+    sql = "select max(position)+1 from directories"
+    connection = ActiveRecord::Base.connection();
+    @results = connection.execute(sql)
+    @directory.position = @results.first[0]
     @directory.path = v_base_path+"/[ enter dir ]"
 		respond_to do |format|
 			format.html # new.html.erb
@@ -74,7 +78,8 @@ class DirectoriesController < ApplicationController
 	# DELETE /directories/1.xml
 	def destroy
 		@directory = Directory.find(params[:id])
-		@directory.destroy
+		@directory.status_flag = 'N'
+		@directory.save
 
 		respond_to do |format|
 			format.html { redirect_to(directories_url) }

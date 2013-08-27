@@ -183,7 +183,7 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 	   if !@mriscantask.blank?  %>
 
 		<% v_header_count = 0 
-		  @mriscantask.each do |mst|
+		  @mriscantask.each do |mst|   # if there is an error here, look at the subjectid format [chars][nums]  not [chars][nums][chars]
 					v_header_count = v_header_count + 1 
 			 if v_header_count > 6
 				 v_header_count = 0 %>

@@ -29,7 +29,7 @@
 				
 				<% div_id = "linechart_#{i}" %>
 				<%= content_tag :div, nil, :id => div_id, :style => "width:310px; height:150px" %>
-				<%= javascript_tag d.chart(:within => @days.days, :num_x_axis_labels => 7).output(div_id) %><br> [chart -flotr not working]
+				<%= javascript_tag d.chart(:within => @days.days, :num_x_axis_labels => 7).output(div_id) %><br> 
 				
 			</div>
 		<% end %>
@@ -50,4 +50,22 @@
 		<%= tab_to 365,  '1 year'   %>
 	</ul>
 	<p class="top right"><%= link_to 'New directory', new_directory_path %></p>
+</div>
+<br><br>
+
+<a id="myHeader1" href="javascript:toggle2_closed('status_n','myHeader2');" ><small><small>expand/collapse de-activated directories</small></small></a><br>
+<div id="status_n"  style="display:none" >
+    <ul id="directories_status_n" class="graph-list"  >
+	   <% @directories_status_n.each_with_index do |d,i| %>
+		<%= content_tag_for :li, d do %>
+			<div class="navtabs top left">
+				
+				<p>
+					<span style="font-size:10pt; color:#630;">✙ </span>
+					<%= link_to d.label, d, :class => 'title' %>
+				</p>
+			</div>
+		<% end %>
+	   <%end%>
+    </ul>	
 </div>

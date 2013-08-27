@@ -11,9 +11,17 @@
     <%= f.text_field :label %>
   </div>
   <div class="field">
+    <%= f.label :display_order %><br />
+    <%= f.text_field :position %>
+  </div>
+  <div class="field">
     <%= f.label :status %><br />
     <%= f.select :status_flag, v_y_n, :selected =>   @directory.status_flag   %> 
   </div>
+  <div class="field">
+    <%= f.label :check_secondary_directories %><br />
+    <%= f.select :drill_down_flag, v_y_n, :selected =>   @directory.drill_down_flag   %> 
+  </div><br>
   <div class="actions">
     <%= f.submit %>
   </div>
