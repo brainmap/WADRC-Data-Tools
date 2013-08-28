@@ -108,6 +108,8 @@ class CgTnsController < ApplicationController
   # PUT /cg_tns/1
   # PUT /cg_tns/1.xml
   def update
+    
+    # puts "aaaaaaa datadictionary = "+params[:cg_tn][:datadictionary].content_type
     @cg_tn = CgTn.find(params[:id])
      params[:cg_tn][:tn] =  params[:cg_tn][:tn].downcase 
      params[:cg_tn][:join_left_parent_tn] =  params[:cg_tn][:join_left_parent_tn].downcase
