@@ -1855,24 +1855,25 @@ class DataSearchesController < ApplicationController
  end  
  
  def cg_edit_table_db
-     v_schema ='panda_production'
-     if RAILS_ENV=="development" 
+    v_schema ='panda_production'
+    if RAILS_ENV=="development" 
        v_schema ='panda_development'
-     end
-     sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = '"+v_schema+"' 
-     AND table_name LIKE 'cg_%' and table_name NOT LIKE '%_new'  and table_name NOT LIKE '%_old'  and table_name NOT LIKE '%_edit' 
-     order by table_name"
-     connection = ActiveRecord::Base.connection();        
-     @results_cg_tn = connection.execute(sql)
-     @v_cg_table_name = ""
-     @results_cg_tn_cn = []
+    end
+    sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = '"+v_schema+"' 
+    AND table_name LIKE 'cg_%' and table_name NOT LIKE '%_new'  and table_name NOT LIKE '%_old'  and table_name NOT LIKE '%_edit' 
+    order by table_name"
+    connection = ActiveRecord::Base.connection();        
+    @results_cg_tn = connection.execute(sql)
+    @v_cg_table_name = ""
+    @results_cg_tn_cn = []
+
     if !params[:cg_action].blank?
       v_tn = params[:cg_table_name]
       
       if params[:cg_action] == "alter"
           # ??? ALTER TABLE <tablename> CHANGE COLUMN <colname> <colname> VARCHAR(65536);
           # keep _edit varchar(50) DEFAULT '|'" 
-          v_cn = params[:cg_tn_column_name]
+          v_cn = params[:cg_tn_column_name].gsub(" ","_").gsub(".","_").gsub("-","_").gsub(",","_").gsub(";","_").gsub("'","_").gsub("/","_").gsub("(","_").gsub(")","_").gsub('"','_').downcase
           if params[:cg_table_edit][:datatype]["0"] == "varchar"
               sql = "alter table "+v_tn+" modify "+v_cn+" VARCHAR("+params[:cg_table_edit][:datasize]["0"]+") "
               results = connection.execute(sql)
@@ -1896,8 +1897,8 @@ class DataSearchesController < ApplicationController
             results = connection.execute(sql)
           end
       elsif params[:cg_action] == "change"
-        v_cn = params[:cg_tn_column_name]
-        v_cn_new = params[:cg_table_edit_db][:cg_tn_column_name_new]
+        v_cn = params[:cg_tn_column_name].gsub(" ","_").gsub(".","_").gsub("-","_").gsub(",","_").gsub(";","_").gsub("'","_").gsub("/","_").gsub("(","_").gsub(")","_").gsub('"','_').downcase
+        v_cn_new = params[:cg_table_edit_db][:cg_tn_column_name_new].gsub(" ","_").gsub(".","_").gsub("-","_").gsub(",","_").gsub(";","_").gsub("'","_").gsub("/","_").gsub("(","_").gsub(")","_").gsub('"','_').downcase
         if params[:cg_table_edit][:datatype]["0"] == "varchar"
            sql = "alter table "+v_tn+" change "+v_cn+ " "+v_cn_new + " VARCHAR("+params[:cg_table_edit][:datasize]["0"]+") "
            results = connection.execute(sql)
@@ -1941,7 +1942,7 @@ class DataSearchesController < ApplicationController
           params[:cg_table_edit][:key].each do |v|
             if !params[:cg_table_edit][:add_column_name].blank? and !params[:cg_table_edit][:add_column_name][v].blank? and params[:cg_table_edit][:add_column][v] == "1"
              v_add_column_name = params[:cg_table_edit][:add_column_name][v].downcase
-             v_add_column_name = v_add_column_name.gsub(' ','_').gsub('"','_').gsub("'","_").gsub("/","_").gsub(".","_").gsub("\\","_").gsub(";","").gsub(":","")
+             v_add_column_name = v_add_column_name.gsub(' ','_').gsub('"','_').gsub("'","_").gsub("/","_").gsub(".","_").gsub("\\","_").gsub(";","").gsub(":","").gsub("-","_").gsub("/","_").gsub("(","_").gsub(")","_")
              sql = "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = '"+v_schema+"' AND table_name = '"+v_tn+"' and column_name='"+v_add_column_name+"'"
              connection = ActiveRecord::Base.connection();        
              results = connection.execute(sql)

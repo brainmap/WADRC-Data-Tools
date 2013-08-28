@@ -5,7 +5,7 @@ load_and_authorize_resource
   before_filter :set_current_tab
   
   def set_current_tab
-    @current_tab = "Scan Procedures"
+    @current_tab = "enroll_parti_sp"
   end
   
   # GET /scan_procedures

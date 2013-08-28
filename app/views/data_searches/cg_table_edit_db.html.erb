@@ -72,7 +72,8 @@
     <%= form_for 'cg_table_edit' do |f| %> 
             <%= hidden_field_tag 'cg_table_name',  @v_cg_table_name%>
             <%= hidden_field_tag 'cg_action',  'add'%>
-      Check add checkbox to include new column<br>
+      Check <b>[ add checkbox ]</b> to include new column.<br>
+      Keep all column name lower case, with no spaces or [ "' ; . , etc. ] characters.<br> 
         <table><tr><th>add?</th><th align="left"><%= submit_tag("save columns")%> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Column Name</th><th>Datatype</th><th>Size</th><th></tr>
         <%v_row_cnt = 10
           v_cnt = 0

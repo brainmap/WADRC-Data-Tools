@@ -5,7 +5,7 @@ class ParticipantsController < ApplicationController
   before_filter :set_current_tab
   
   def set_current_tab
-    @current_tab = "participants"
+    @current_tab = "enroll_parti_sp"
   end
   
   # GET /participants

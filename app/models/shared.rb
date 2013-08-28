@@ -151,6 +151,19 @@ class Shared  < ActionController::Base
     return nil
   end
   
+  def get_user_email
+    v_user = `echo $USER`
+    v_user = v_user.gsub("\n","")
+    v_email = nil
+    if v_user == 'admin' or v_user == 'panda_admin' 
+       v_email = nil
+     else       
+       v_users = User.where("username='"+v_user+"'")
+       v_email = v_users[0].email
+      end
+    return v_email
+   end
+  
   def make_schedule_process_stop_file(p_file_path)
     v_value = "stopping process"
     if File.file?(p_file_path)
@@ -822,7 +835,13 @@ puts "AAAAAA "+v_call
         process_logs_delete_old( v_process_name, v_log_base)            
         v_base_path = Shared.get_base_path()
         @schedule = Schedule.where("name in ('asl_sw_fs_process')").first
-        v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+        v_runner_email = self.get_user_email()  #  want to send errors to the user running the process
+        v_schedule_owner_email_array = []
+        if !v_runner_email.blank?
+          v_schedule_owner_email_array.push(v_runner_email)
+        else
+          v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+        end
         @schedulerun = Schedulerun.new
         @schedulerun.schedule_id = @schedule.id
         @schedulerun.comment ="asl_sw_fs_process"
@@ -1753,7 +1772,14 @@ puts "AAAAAA "+v_call
       process_logs_delete_old( v_process_name, v_log_base)            
       v_base_path = Shared.get_base_path()
       @schedule = Schedule.where("name in ('lst_122_process')").first
-      v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+      v_runner_email = self.get_user_email()  #  want to send errors to the user running the process
+      v_schedule_owner_email_array = []
+      if !v_runner_email.blank?
+        v_schedule_owner_email_array.push(v_runner_email)
+      else
+        v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+      end
+      
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
       @schedulerun.comment ="lst_122_process"
@@ -1772,10 +1798,8 @@ puts "AAAAAA "+v_call
       v_script_dev = v_base_path+"/data1/lab_scripts/LST/LST.sh"
       v_script = v_base_path+"/data1/lab_scripts/LST/LST.sh"
       v_cmd = "diff "+v_script+" "+v_script_dev
-      v_user = `echo $USER`
-      puts "aaaaaa = v_user= "+v_user
-      #@user = current_user
-      #puts "AAAAAAA user email="+@user.email
+      
+      
       
       connection = ActiveRecord::Base.connection();  
       # do_not_run_process_wlesion_030 == Y means do not run

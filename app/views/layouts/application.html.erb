@@ -51,15 +51,14 @@
             <li <%= "class=current" if @current_tab == "questionnaires" %>>
               <%= link_to "Questionnaires", q_search_path %>
             </li>
-            <li <%= "class=current" if @current_tab == "enrollments" %>>
-              <%= link_to "Enroll", enrollments_path %>
+            <li <%= "class=current" if @current_tab == "enroll_parti_sp" %>>
+            <small><small>  <%= link_to "Enroll", enrollments_path %> | <%= link_to("Particip", participant_search_path) %> <br> <%= link_to "ScanProc", scan_procedures_path %></small></small>
             </li>
-            <li <%= "class=current" if @current_tab == "participants" %>>
-              <%= link_to("Particip", participant_search_path) %>
+            <% if current_user.role == 'Admin_High'%>
+            <li <%= "class=current" if @current_tab == "admin" %>>
+              <%= link_to('Admin', control_path) %> <small><small><%= link_to("-sh's'", "/schedulerun_search") %></small></small>
             </li>
-            <li <%= "class=current" if @current_tab == "scan_procedures" %>>
-              <%= link_to "ScanProc", scan_procedures_path %>
-            </li>
+            <%end%>
             <li <%= "class=current" if @current_tab == "searches" %>>
               <%= link_to "Search", '/cg_search' %> <small><small><%= link_to " -cg's", '/cg_tables'%></small></small>
             </li>

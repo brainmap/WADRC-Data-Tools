@@ -17,8 +17,31 @@ class SharedController < ActionController::Base
      v_shared = Shared.new
      
      # NEED FULL LOAD - PARTIAL LOAD OPTION --- CHECK FOR KEY
+    # check that database table exisits
+    sql = " select table_name from information_schema.tables  where table_name='"+@schedule.target_table+"' and table_schema='database_name' "
+     v_schema ='panda_production'
+     if RAILS_ENV=="development" 
+       v_schema ='panda_development'
+     end
+     v_error_flag = "N"
+     sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '"+v_schema+"' AND table_name = '"+@schedule.target_table+"'"
+     connection = ActiveRecord::Base.connection();        
+     results = connection.execute(sql)
+     v_cnt = results.first
+     if v_cnt[0] < 1
+       v_comment_warning = "The table "+@schedule.target_table+" needs to be created in the database. \n "+v_comment_warning 
+       v_error_flag = "Y"
+     end
+    # check that cg_table exists
+    sql = "select COUNT(*) from cg_tns where tn = '"+@schedule.target_table+"'"
+    results = connection.execute(sql)
+    v_cnt = results.first
+    if v_cnt[0] < 1
+      v_comment_warning = "The table "+@schedule.target_table+" needs to be added as a search / cg_ table. \n "+v_comment_warning 
+      v_error_flag = "Y"
+    end
 
-    if !params[:file_name].blank?
+    if !params[:file_name].blank? and v_error_flag == "N"
        uploaded_io = params[:file_name]
        v_file_name = uploaded_io.original_filename
        v_comment = "file name= "+v_file_name+" |"+v_comment
