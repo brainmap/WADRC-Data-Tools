@@ -54,7 +54,7 @@
             <li <%= "class=current" if @current_tab == "enroll_parti_sp" %>>
             <small><small>  <%= link_to "Enroll", enrollments_path %> | <%= link_to("Particip", participant_search_path) %> <br> <%= link_to "ScanProc", scan_procedures_path %></small></small>
             </li>
-            <% if current_user.role == 'Admin_High'%>
+            <% if !current_user.blank? and current_user.role == 'Admin_High'%>
             <li <%= "class=current" if @current_tab == "admin" %>>
               <%= link_to('Admin', control_path) %> <small><small><%= link_to("-sh's'", "/schedulerun_search") %></small></small>
             </li>
