@@ -799,6 +799,10 @@ puts "AAAAAA "+v_call
                                                           ,'"+v_asl_1525_registered_to_fs_flag+"','"+v_asl_1525_smoothed_and_warped_flag+"','"+v_asl_2025_registered_to_fs_flag+"',
                                                           '"+v_asl_2025_smoothed_and_warped_flag+"','"+v_pdmap_flag+"','"+v_pdmap_0_flag+"','"+v_pdmap_1525_flag+"','"+v_pdmap_2025_flag+"','"+v_t1_fs_flag+"','"+v_asl_directory_list+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql) 
+                                 if v_asl_fmap_single == "Y"
+                                      sql = "update cg_asl_status_new set asl_fmap_file_to_use ='"+v_asl_directory_list+"' where asl_fmap_single ='Y' and enrollment_id ="+enrollment[0].id.to_s+" and scan_procedure_id="+sp.id.to_s
+                                      results = connection.execute(sql)
+                                  end
                              else
                                  sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no ASL or ASL_bkup dir','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
@@ -822,7 +826,7 @@ puts "AAAAAA "+v_call
              asl_1525_fmap_flag, asl_1525_fmap_single, 
             asl_2025_fmap_flag, asl_2025_fmap_single,
             asl_0_registered_to_fs_flag,asl_0_smoothed_and_warped_flag,asl_1525_registered_to_fs_flag,asl_1525_smoothed_and_warped_flag,
-            asl_2025_registered_to_fs_flag,asl_2025_smoothed_and_warped_flag,pdmap_flag,pdmap_0_flag,pdmap_1525_flag,pdmap_2025_flag,t1_fs_flag,asl_directory_list,
+            asl_2025_registered_to_fs_flag,asl_2025_smoothed_and_warped_flag,pdmap_flag,pdmap_0_flag,pdmap_1525_flag,pdmap_2025_flag,t1_fs_flag,asl_directory_list,asl_fmap_file_to_use,
               enrollment_id,scan_procedure_id",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
@@ -890,7 +894,7 @@ puts "AAAAAA "+v_call
         # asl_smoothed_and_warped_flag , asl_registered_to_fs_flag --- not care, because may re-run or run for ask multiple ?
 
         # if these is only one ask fmap -- should use?????
-        sql = "select distinct enrollment_id, scan_procedure_id, asl_subjectid,asl_fmap_single,asl_fmap_file_to_use,t1_fs_single,t1_fs_file_to_use,fs_home_to_use from cg_asl_status where  t1_fs_flag = 'Y' and asl_fmap_flag = 'Y' and ( asl_fmap_single = 'Y' or (asl_fmap_single ='N' and asl_fmap_file_to_use  is NOT NULL) ) and pdmap_flag  = 'Y' and t1_fs_flag = 'Y' and  ( do_not_run_process_asl_registered_to_fs = 'R' or do_not_run_process_asl_smoothed_and_warped = 'R') "
+        sql = "select distinct enrollment_id, scan_procedure_id, asl_subjectid,asl_fmap_single,asl_fmap_file_to_use,fs_home_to_use from cg_asl_status where  t1_fs_flag = 'Y' and asl_fmap_flag = 'Y' and ( asl_fmap_single = 'Y' or (asl_fmap_single ='N' and asl_fmap_file_to_use  is NOT NULL) ) and pdmap_flag  = 'Y' and t1_fs_flag = 'Y' and  ( do_not_run_process_asl_registered_to_fs = 'R' or do_not_run_process_asl_smoothed_and_warped = 'R') "
         results = connection.execute(sql)
         results.each do |r|
             v_break = 0  # need a kill swith
@@ -906,6 +910,11 @@ puts "AAAAAA "+v_call
             sql_update = "update cg_asl_status set do_not_run_process_asl_smoothed_and_warped = 'N' where do_not_run_process_asl_smoothed_and_warped = 'R' and asl_subjectid = '"+r[2]+"'"
             results_update = connection.execute(sql_update)   # stop from re-running
             sql_update = "update cg_asl_status set do_not_run_process_asl_registered_to_fs = 'N' where do_not_run_process_asl_registered_to_fs = 'R' and asl_subjectid = '"+r[2]+"'"
+            results_update = connection.execute(sql_update)   # stop from re-running
+            
+            sql_update = "update cg_asl_status_edit set do_not_run_process_asl_smoothed_and_warped = 'N' where do_not_run_process_asl_smoothed_and_warped = 'R' and asl_subjectid = '"+r[2]+"'"
+            results_update = connection.execute(sql_update)   # stop from re-running
+            sql_update = "update cg_asl_status_edit set do_not_run_process_asl_registered_to_fs = 'N' where do_not_run_process_asl_registered_to_fs = 'R' and asl_subjectid = '"+r[2]+"'"
             results_update = connection.execute(sql_update)   # stop from re-running
             
             t_now = Time.now
@@ -931,10 +940,13 @@ puts "AAAAAA "+v_call
               if File.directory?(v_subjectid_asl)
                     v_dir_array = Dir.entries(v_subjectid_asl)
                     v_dir_array.each do |f|
-                      
-                      if f.start_with?("ASL_fmap") and f.end_with?(r[4]+".nii")   # ?? use asl_fmap_file_to_use = r[4], split off first part of dir name
-                          v_sp_loc = v_loc_parts_array[0]
-                          v_log = v_log + "ASL fmap file found "+ v_sp_loc+"\n"
+                      v_asl_dir_array = (r[4].gsub(" ","")).split(",")
+                      v_asl_dir_array.each do |d|
+                          v_dir_name_array = d.split("_") # sometimes just want first part of dir name
+                          if f.start_with?("ASL_fmap") and f.end_with?(v_dir_name_array[0]+".nii")   # ?? use asl_fmap_file_to_use = r[4], split off first part of dir name
+                              v_sp_loc = v_loc_parts_array[0]
+                              v_log = v_log + "ASL fmap file found "+d+" "+ v_sp_loc+"\n"
+                          end
                       end
                     end 
               end
@@ -943,12 +955,16 @@ puts "AAAAAA "+v_call
             if !v_sp_loc.blank? 
                 # call processing script- ARE THERE ANY THING WHICH IS REQUIRED ON merida, edna, gru
                 v_coreg_t1 = v_fs_subjects_dir+"/"+v_subjectid_v_num+"/mri/T1_FS.nii"
-                v_call =  'ssh panda_admin@merida.dom.wisc.edu "'+v_script+' -p '+v_sp_loc+'  -b '+v_subjectid+' -s  '+r[4] +' -c '+v_coreg_t1+' -fsdir '+v_fs_subjects_dir +' " ' 
-                @schedulerun.comment ="str "+r[2]+"; "+v_comment[0..1990]
-                @schedulerun.save
-
-                puts "rrrrrrr "+v_call
-                v_log = v_log + v_call+"\n"
+                v_asl_dir_array = (r[4].gsub(" ","")).split(",")
+                #asl_fmap_file_to_use split into an array --- define loc --- move the loc from above
+                v_asl_dir_array.each do |d|    
+                    v_dir_name_array = d.split("_") # sometimes just want first part of dir name
+                    v_call =  'ssh panda_admin@merida.dom.wisc.edu "'+v_script+' -p '+v_sp_loc+'  -b '+v_subjectid+' -s  '+v_dir_name_array[0] +' -c '+v_coreg_t1+' -fsdir '+v_fs_subjects_dir +' " ' 
+                    @schedulerun.comment ="str "+r[2]+"/"+d+"; "+v_comment[0..1990]
+                    @schedulerun.save
+                    puts "rrrrrrr "+v_call
+                    v_log = v_log + v_call+"\n"
+                end
                 # begin
                 #                    stdin, stdout, stderr = Open3.popen3(v_call)
                 #                  rescue => msg  
