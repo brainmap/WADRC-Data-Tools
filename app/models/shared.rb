@@ -109,6 +109,28 @@ class Shared  < ActionController::Base
     return v_flag, v_comment
   end
   
+  def get_file_diff(p_script,p_script_dev,p_error_comment,p_comment)
+      v_error_comment = p_error_comment
+      v_comment = ""
+      v_call = "diff "+p_script+" "+p_script_dev
+      # check for differences between dev and production
+      begin
+         stdin, stdout, stderr = Open3.popen3(v_call)
+       rescue => msg  
+          v_error_comment = v_error_comment + msg+"\n"  
+       end
+       v_diff = "N"
+       while !stdout.eof?
+         v_diff = "Y"
+         v_output = stdout.read 1024 
+          v_comment = v_output + p_comment
+       end
+       if v_diff == "Y" 
+               v_error_comment = v_error_comment + " There are differences between "+p_script+" and dev- "+p_script_dev
+       end
+       return v_error_comment,v_comment
+  end
+  
   def get_schedule_owner_email(p_schedule_id)
     v_email_array = ['noreply_johnson_lab@medicine.wisc.edu']
     @schedule = Schedule.find(p_schedule_id)
@@ -1797,25 +1819,11 @@ puts "AAAAAA "+v_call
       v_subjectid_v_num = ""              
       v_script_dev = v_base_path+"/data1/lab_scripts/LST/LST.sh"
       v_script = v_base_path+"/SysAdmin/production/LST/LST.sh"
-      v_call = "diff "+v_script+" "+v_script_dev
-      # check for differences between dev and production
-      begin
-         stdin, stdout, stderr = Open3.popen3(v_call)
-       rescue => msg  
-          v_error_comment = v_error_comment + msg+"\n"  
-       end
-       v_diff = "N"
-       while !stdout.eof?
-         v_diff = "Y"
-         v_output = stdout.read 1024 
-          v_comment = v_output + v_comment
-       end
-       if v_diff == "Y" 
-               v_error_comment = v_error_comment + " There are differences between "+v_script+" and dev- "+v_script_dev
-       end
+      (v_error_comment,v_comment) =get_file_diff(v_script,v_script_dev,v_error_comment,v_comment)
+
       connection = ActiveRecord::Base.connection();  
       # do_not_run_process_wlesion_030 == Y means do not run
-      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where enrollment_id = 1 and if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) ) and (  lst_subjectid not like 'shp%') #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) ) and (  lst_subjectid not like 'shp%') #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
       results = connection.execute(sql)
       results.each do |r|
           v_break = 0  # need a kill swith
