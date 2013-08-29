@@ -111,10 +111,10 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
           @current_tab = "image_datasets"
           # ALSO IN CG_SEARCH !!!!!!  need to update if added new categories
           @series_desc_categories = {"ASL" => "ASL", 
-        	"DSC Perfusion" => "DSC Perfusion", 
+        	"DSC_Perfusion" => "DSC_Perfusion", 
         	"DTI" => "DTI", 
         	"Fieldmap" => "Fieldmap", 
-        	"fMRI Task" => "fMRI Task", 
+        	"fMRI_Task" => "fMRI_Task", 
         	"HYDI" => "HYDI", 
         	"mcDESPOT" => "mcDESPOT", 
         	"MRA" => "MRA", 
@@ -122,11 +122,11 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
         	"Other" => "Other", 
         	"PCVIPR" => "PCVIPR", 
         	"PD/T2" => "PD/T2", 
-        	"resting fMRI" => "resting fMRI", 
+        	"resting_fMRI" => "resting_fMRI", 
         	"SWI" => "SWI", 
-        	"T1 Volumetric" => "T1 Volumetric", 
+        	"T1_Volumetric" => "T1_Volumetric", 
         	"T2" => "T2", 
-        	"T2 Flair" => "T2 Flair", 
+        	"T2_Flair" => "T2_Flair", 
         	"T2*" => "T2*"}
           params["search_criteria"] =""
 
