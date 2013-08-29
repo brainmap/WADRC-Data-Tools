@@ -799,7 +799,7 @@ puts "AAAAAA "+v_call
                                                           ,'"+v_asl_1525_registered_to_fs_flag+"','"+v_asl_1525_smoothed_and_warped_flag+"','"+v_asl_2025_registered_to_fs_flag+"',
                                                           '"+v_asl_2025_smoothed_and_warped_flag+"','"+v_pdmap_flag+"','"+v_pdmap_0_flag+"','"+v_pdmap_1525_flag+"','"+v_pdmap_2025_flag+"','"+v_t1_fs_flag+"','"+v_asl_directory_list+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql) 
-                                 if v_asl_fmap_single == "Y"
+                                 if v_asl_fmap_single == "Y" and v_asl_directory_list.split(",").size == 1
                                       sql = "update cg_asl_status_new set asl_fmap_file_to_use ='"+v_asl_directory_list+"' where asl_fmap_single ='Y' and enrollment_id ="+enrollment[0].id.to_s+" and scan_procedure_id="+sp.id.to_s
                                       results = connection.execute(sql)
                                   end
