@@ -25,8 +25,13 @@
 
 <% @cg_tn_cns.each do |cg_tn_cn| %>
 <%= hidden_field_tag 'tn_cn_id[]',  cg_tn_cn.id.to_s%>
+  
   <tr>
+	<% if cg_tn_cn.status_flag == "Y"%>
     <td><%= cg_tn_cn.cn %>   <% if cg_tn_cn.cn != cg_tn_cn.common_name %><br><%= cg_tn_cn.common_name %><%end%><% if cg_tn_cn.common_name != cg_tn_cn.export_name %><br><%= cg_tn_cn.export_name %><%end%></td>
+    <%else%>
+     <td bgcolor="#A8A8A8"><%= cg_tn_cn.cn %></td>
+    <%end%>
     <td><%= select_tag 'status_flag['+cg_tn_cn.id.to_s+']', options_for_select(v_y_n, cg_tn_cn.status_flag)  %></td>
     <td><%= number_field_tag 'display_order['+cg_tn_cn.id.to_s+']' ,cg_tn_cn.display_order,:size=>15 ,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}"%></td>
     <td><%= cg_tn_cn.key_column_flag %></td>
