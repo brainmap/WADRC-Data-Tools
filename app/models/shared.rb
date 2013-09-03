@@ -1522,7 +1522,7 @@ puts "AAAAAA "+v_call
             connection = ActiveRecord::Base.connection();        
             results = connection.execute(sql)
 
-            sql_base = "insert into cg_fdg_status_new(fdg_subjectid, fdg_general_comment,fdg_registered_to_fs_flag,fdg_scaled_registered_to_fs_flag,fdg_smoothed_and_warped_flag,fdg_scaled_smoothed_and_warped_flag,enrollment_id, scan_procedure_id)values("  
+            sql_base = "insert into cg_fdg_status_new(fdg_subjectid, fdg_general_comment,fdg_registered_to_fs_flag,fdg_scaled_registered_to_fs_flag,fdg_smoothed_and_warped_flag,fdg_scaled_smoothed_and_warped_flag,fdg_summed_flag,enrollment_id, scan_procedure_id)values("  
 
 
             v_preprocessed_path = v_base_path+"/preprocessed/visits/"
@@ -1570,6 +1570,7 @@ puts "AAAAAA "+v_call
                             v_fdg_scaled_registered_to_fs_flag ="N"
                             v_fdg_smoothed_and_warped_flag = "N"
                             v_fdg_scaled_smoothed_and_warped_flag = "N"
+                            v_fdg_summed_flag = "N"
                             v_dir_array.each do |f|
                               
                                if f.start_with?("swr") and f.end_with?("summed.nii")
@@ -1579,14 +1580,16 @@ puts "AAAAAA "+v_call
                                elsif f.start_with?("rFS") and f.end_with?("summed.nii")
                                   v_fdg_registered_to_fs_flag ="Y"
                                elsif f.start_with?("rFS") and f.end_with?("scaled.nii")
-                                  v_fdg_scaled_registered_to_fs_flag ="Y"
+                                  v_fdg_scaled_registered_to_fs_flag ="Y"                                  
+                               elsif f.start_with?(enrollment[0].enumber) and f.end_with?("fdg_summed.nii")
+                                  v_fdg_summed_flag ="Y"
                                 end
                               end
                                 
-                             sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','','"+v_fdg_registered_to_fs_flag+"','"+v_fdg_scaled_registered_to_fs_flag+"','"+v_fdg_smoothed_and_warped_flag+"','"+v_fdg_scaled_smoothed_and_warped_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                             sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','','"+v_fdg_registered_to_fs_flag+"','"+v_fdg_scaled_registered_to_fs_flag+"','"+v_fdg_smoothed_and_warped_flag+"','"+v_fdg_scaled_smoothed_and_warped_flag+"','"+v_fdg_summed_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              else
-                                 sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','no fdg dir','N','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                 sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','no fdg dir','N','N','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              end # check for subjectid asl dir
                       else
@@ -1598,7 +1601,7 @@ puts "AAAAAA "+v_call
             # v_shared = Shared.new 
              # move from new to present table -- made into a function  in shared model
              v_comment = self.move_present_to_old_new_to_present("cg_fdg_status",
-             "fdg_subjectid, fdg_general_comment,fdg_registered_to_fs_flag, fdg_registered_to_fs_comment, fdg_registered_to_fs_global_quality,fdg_scaled_registered_to_fs_flag, fdg_scaled_registered_to_fs_comment, fdg_scaled_registered_to_fs_global_quality,fdg_smoothed_and_warped_flag, fdg_smoothed_and_warped_comment, fdg_smoothed_and_warped_global_quality,fdg_scaled_smoothed_and_warped_flag, fdg_scaled_smoothed_and_warped_comment, fdg_scaled_smoothed_and_warped_global_quality,enrollment_id,scan_procedure_id",
+             "fdg_subjectid, fdg_general_comment,fdg_registered_to_fs_flag, fdg_registered_to_fs_comment, fdg_registered_to_fs_global_quality,fdg_scaled_registered_to_fs_flag, fdg_scaled_registered_to_fs_comment, fdg_scaled_registered_to_fs_global_quality,fdg_smoothed_and_warped_flag, fdg_smoothed_and_warped_comment, fdg_smoothed_and_warped_global_quality,fdg_scaled_smoothed_and_warped_flag, fdg_scaled_smoothed_and_warped_comment, fdg_scaled_smoothed_and_warped_global_quality,fdg_summed_flag,enrollment_id,scan_procedure_id",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
 
@@ -2184,7 +2187,7 @@ puts "AAAAAA "+v_call
             connection = ActiveRecord::Base.connection();        
             results = connection.execute(sql)
 
-            sql_base = "insert into cg_pib_status_new(pib_subjectid, pib_general_comment,pib_registered_to_fs_flag,pib_smoothed_and_warped_flag,enrollment_id, scan_procedure_id)values("  
+            sql_base = "insert into cg_pib_status_new(pib_subjectid, pib_general_comment,pib_registered_to_fs_flag,pib_smoothed_and_warped_flag,pib_dvr_hypr_flag,enrollment_id, scan_procedure_id)values("  
 
 
             v_preprocessed_path = v_base_path+"/preprocessed/visits/"
@@ -2230,19 +2233,22 @@ puts "AAAAAA "+v_call
                             v_dir_array = Dir.entries(v_subjectid_pib)   # need to get date for specific files
                             v_pib_registered_to_fs_flag ="N"
                             v_pib_smoothed_and_warped_flag = "N"
+                            v_pib_dvr_hypr_flag = "N"
                             v_dir_array.each do |f|
                               
                                if f.start_with?("swr") and f.end_with?(".nii")
                                   v_pib_smoothed_and_warped_flag = "Y"
                                elsif f.start_with?("rFS") and f.end_with?(".nii")
                                   v_pib_registered_to_fs_flag ="Y"
+                                elsif f.start_with?("r"+enrollment[0].enumber+v_visit_number) and f.end_with?("realignPIB_DVR_HYPR.nii")
+                                   v_pib_dvr_hypr_flag ="Y"
                                 end
                               end
                                 
-                             sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','','"+v_pib_registered_to_fs_flag+"','"+v_pib_smoothed_and_warped_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                             sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','','"+v_pib_registered_to_fs_flag+"','"+v_pib_smoothed_and_warped_flag+"','"+v_pib_dvr_hypr_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              else
-                                 sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','no pib dir','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                 sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','no pib dir','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              end # check for subjectid asl dir
                       else
@@ -2254,7 +2260,7 @@ puts "AAAAAA "+v_call
             # v_shared = Shared.new 
              # move from new to present table -- made into a function  in shared model
              v_comment = self.move_present_to_old_new_to_present("cg_pib_status",
-             "pib_subjectid, pib_general_comment,pib_registered_to_fs_flag, pib_registered_to_fs_comment, pib_registered_to_fs_global_quality, pib_smoothed_and_warped_flag, pib_smoothed_and_warped_comment, pib_smoothed_and_warped_global_quality, enrollment_id,scan_procedure_id",
+             "pib_subjectid, pib_general_comment,pib_registered_to_fs_flag, pib_registered_to_fs_comment, pib_registered_to_fs_global_quality, pib_smoothed_and_warped_flag, pib_smoothed_and_warped_comment, pib_smoothed_and_warped_global_quality,pib_dvr_hypr_flag, enrollment_id,scan_procedure_id",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
 
