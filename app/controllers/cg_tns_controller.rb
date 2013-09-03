@@ -56,7 +56,7 @@ class CgTnsController < ApplicationController
     if params[:key_type] == 'enrollment/sp'
       params[:cg_tn][:join_left_parent_tn] ="vgroups"
       params[:cg_tn][:join_left] ="LEFT JOIN "+v_tn+" on vgroups.id in ( select spv2.vgroup_id from scan_procedures_vgroups spv2 where spv2.scan_procedure_id = "+v_tn+".scan_procedure_id and spv2.vgroup_id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships where enrollment_vgroup_memberships.enrollment_id = "+v_tn+".enrollment_id))"
-      params[:cg_tn][:join_right] ="appointments.appointment_type ='mri' and scan_procedures_vgroups.scan_procedure_id = "+v_tn+".scan_procedure_id and vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships where enrollment_vgroup_memberships.enrollment_id = "+v_tn+".enrollment_id)"
+      params[:cg_tn][:join_right] ="appointments.appointment_type is not NULL and scan_procedures_vgroups.scan_procedure_id = "+v_tn+".scan_procedure_id and vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships where enrollment_vgroup_memberships.enrollment_id = "+v_tn+".enrollment_id)"
     elsif params[:key_type] == 'participant_id'
       params[:cg_tn][:join_left_parent_tn] ="vgroups"
       params[:cg_tn][:join_left]="LEFT JOIN "+v_tn+" on vgroups.participant_id = "+v_tn+".participant_id"
