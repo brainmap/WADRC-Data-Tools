@@ -2121,10 +2121,10 @@ puts "AAAAAA "+v_call
         results_sp = connection.execute(sql_sp)   
         results_sp.each do |r_sp|
             # pass to function so can use in petscan edit
+            v_petscan = Petscan.find(r[0])
             v_return_path = ""     
-            v_return_path = get_pet_path(r_sp[0], r[2], r[4])  # pass in sp, file name, tracerid
+            v_return_path = v_petscan.get_pet_path(r_sp[0], r[2], r[4])  # pass in sp, file name, tracerid
             if v_return_path > ""
-              v_petscan = Petscan.find(r[0])
               v_petscan.path = v_return_path
               v_petscan.save
               v_cnt = v_cnt + 1
@@ -2141,31 +2141,6 @@ puts "AAAAAA "+v_call
        @schedulerun.end_time = @schedulerun.updated_at      
        @schedulerun.save
     
-  end
-  
-  def get_pet_path(v_sp_id, v_file_name, v_tracer_id)
-    # ???? '1_asthana.adrc-clinical-core.visit1'=>'', '2_bendlin.tami.visit1'=>'', '1_bendlin.wmad.visit1'=>'','1_bendlin.mets.visit1'=> '',    '2_bendlin.mets.visit1'=> ''
-    # 2_ries.mosaic.visit1    3_ries.mosaic.visit1
-    # tracer 1=pib, 2=fdg, 3=way, 4=015
-    v_base_path = Shared.get_base_path()
-    v_pet_target_hash ={'1_johnson.pipr.visit1'=>'johnson.pipr.visit1/pet','2_johnson.predict.visit1'=>'johnson.predict.visit1/pet/FDG-visit1',
-         '1_johnson.predict.visit1'=>'johnson.predict.visit1/pet/PIB-visit1','2_johnson.predict.visit2'=>'johnson.predict.visit2/pet/FDG',
-         '1_johnson.predict.visit2'=>'johnson.predict.visit2/pet/PIB','2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
-         '2_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/FDG',    '3_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/WAY',
-         '2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG' }
-    v_sp = ScanProcedure.find(v_sp_id)
-    v_key = v_tracer_id.to_s+"_"+v_sp.codename
-    v_path = ""
-    if !v_pet_target_hash[v_key].blank?
-        v_path = v_base_path+"/raw/"+v_pet_target_hash[v_key]+"/"+v_file_name
-    else
-        puts "AAAAAAAAA "+v_key+"   "+v_file_name
-    end
-    if File.exists?(v_path)
-      return v_path
-    else
-      return ""
-    end
   end
   
   # to add columns --

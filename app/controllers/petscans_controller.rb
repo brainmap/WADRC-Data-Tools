@@ -415,7 +415,21 @@ class PetscansController < ApplicationController
     end
     @appointment.save
     @petscan.appointment_id = @appointment.id
-
+    # get sp_id's
+    connection = ActiveRecord::Base.connection();
+    sql_sp = "select distinct scan_procedure_id from scan_procedures_vgroups where scan_procedures_vgroups.vgroup_id ="+@appointment.vgroup_id.to_s
+    results_sp = connection.execute(sql_sp)  
+    results_sp.each do |r_sp|
+      if (@petscan.ecatfilename).blank?
+         @petscan.ecatfilename = @petscan.get_pet_file(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
+      end
+      if (@petscan.path).blank? and !(@petscan.ecatfilename).blank?
+        v_path = @petscan.get_pet_path(r_sp[0], @petscan.ecatfilename, @petscan.lookup_pettracer_id)
+        if v_path > ""
+              @petscan.path = v_path
+        end
+      end
+    end
     respond_to do |format|
       if @petscan.save
          @vgroup.transfer_pet = params[:vgroup][:transfer_pet]
@@ -505,14 +519,19 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
         # get sp_id's
         connection = ActiveRecord::Base.connection();
         sql_sp = "select distinct scan_procedure_id from scan_procedures_vgroups where scan_procedures_vgroups.vgroup_id ="+@appointment.vgroup_id.to_s
-        results_sp = connection.execute(sql_sp) 
-        v_shared = Shared.new  
+        results_sp = connection.execute(sql_sp)  
         results_sp.each do |r_sp|
+            if @petscan.ecatfilename.blank?
+              puts "aaaaa blank ecatfilename"
+              @petscan.ecatfilename = @petscan.get_pet_file(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
+            end
             v_path = ""
-            v_path = v_shared.get_pet_path(r_sp[0], @petscan.ecatfilename, @petscan.lookup_pettracer_id)
-            if v_path > ""
-              @petscan.path = v_path
-              @petscan.save 
+            if !@petscan.ecatfilename.blank?
+               v_path = @petscan.get_pet_path(r_sp[0], @petscan.ecatfilename, @petscan.lookup_pettracer_id)
+               if v_path > ""
+                 @petscan.path = v_path
+                 @petscan.save 
+               end
             end
         end
         @appointment.comment = params[:appointment][:comment]
