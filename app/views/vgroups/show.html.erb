@@ -182,7 +182,7 @@ edit_count = edit_count -1
 		</tr>
 		<tr><td colspan="5"><%= @appointment.comment %>
 		</td></tr>
-		<tr><td colspan="7"><a id="myHeader1" href="javascript:toggle2_closed('pet<%= v_cnt.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a><br>
+		<tr><td colspan="7"><a id="myHeader1" href="javascript:toggle2_closed('pet<%= v_cnt.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a><br><br>
 		   <div id="pet<%= v_cnt.to_s%>"   style="display:none">
 			<%= 
 			render :partial => 'petscans/show' , :locals => { :petscan => p} %>
