@@ -93,9 +93,21 @@ class CgTnsController < ApplicationController
     params[:cg_tn][:tn] =  params[:cg_tn][:tn].downcase 
     params[:cg_tn][:join_left_parent_tn] =  params[:cg_tn][:join_left_parent_tn].downcase
     @cg_tn = CgTn.new(params[:cg_tn])
-
+    v_schema ='panda_production'
+    if RAILS_ENV=="development" 
+      v_schema ='panda_development'
+    end
     respond_to do |format|
       if @cg_tn.save
+        sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '"+v_schema+"'  AND table_name = '"+@cg_tn.tn+"'"
+        connection = ActiveRecord::Base.connection();
+        @results = connection.execute(sql)
+        if @results.first[0] > 0 
+          format.html { redirect_to(@cg_tn, :notice => 'Cg tn was successfully created.') }
+        else
+          format.html { redirect_to(@cg_tn, :notice => 'WARNING: THE TABLE NEEDS TO CREATED IN THE DATABASE!!!! Cg tn was successfully created in search table.') }
+        end
+        
         format.html { redirect_to(@cg_tn, :notice => 'Cg tn was successfully created.') }
         format.xml  { render :xml => @cg_tn, :status => :created, :location => @cg_tn }
       else
