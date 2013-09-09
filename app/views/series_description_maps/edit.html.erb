@@ -1,0 +1,11 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Editing series_description_map</h1>
+
+<%= render 'form' %>
+
+<%= link_to 'Show', @series_description_map %> |
+<%= link_to 'Back', series_description_maps_path %>
+
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

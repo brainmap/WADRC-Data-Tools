@@ -1,0 +1,29 @@
+<%= form_for(@series_description_map) do |f| %>
+  <% if @series_description_map.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@series_description_map.errors.count, "error") %> prohibited this series_description_map from being saved:</h2>
+
+      <ul>
+      <% @series_description_map.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :id %><br />
+    <%= f.text_field :id %>
+  </div>
+  <div class="field">
+    <%= f.label :series_description_type_id %><br />
+ <%= select(:series_description_map, :series_description_type_id, SeriesDescriptionType.all.sort_by(&:series_description_type).collect {|p| [ p.series_description_type, p.id ] }, { :include_blank => "Select a series desc Category" }) %>
+  </div>
+  <div class="field">
+    <%= f.label :series_description %><br />
+    <%= f.text_field :series_description %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

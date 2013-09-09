@@ -1,0 +1,26 @@
+<% if current_user.role == 'Admin_High'%>
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Id:</b>
+  <%= @series_description_map.id %>
+</p>
+
+<p>
+  <b>Series description type:</b>
+  <%= 	if !@series_description_map.series_description_type_id.blank? 
+	        SeriesDescriptionType.find(@series_description_map.series_description_type_id).series_description_type 
+	   end%>
+</p>
+
+<p>
+  <b>Series description:</b>
+  <%= @series_description_map.series_description %>
+</p>
+
+
+<%= link_to 'Edit', edit_series_description_map_path(@series_description_map) %> |
+<%= link_to 'Back', series_description_maps_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

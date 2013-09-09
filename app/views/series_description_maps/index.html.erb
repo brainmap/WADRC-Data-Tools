@@ -1,0 +1,33 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Listing series_description_maps</h1>
+
+<table class="tabular">
+  <tr>
+    <th>Id</th>
+    <th>Series description type</th>
+    <th>Series description</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @series_description_maps.each do |series_description_map| %>
+  <tr>
+    <td><%= series_description_map.id %></td>
+    <td><%= if !series_description_map.series_description_type_id.blank? 
+	        SeriesDescriptionType.find(series_description_map.series_description_type_id).series_description_type 
+	   end%></td>
+    <td><%= series_description_map.series_description %></td>
+    <td><%= link_to 'Show', series_description_map %></td>
+    <td><%= link_to 'Edit', edit_series_description_map_path(series_description_map) %></td>
+    <td><%= link_to 'Destroy', series_description_map, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Series description map', new_series_description_map_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

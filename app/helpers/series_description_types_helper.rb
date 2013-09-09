@@ -1,0 +1,2 @@
+module SeriesDescriptionTypesHelper
+end

@@ -1,0 +1,19 @@
+<% if current_user.role == 'Admin_High'%>
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Id:</b>
+  <%= @series_description_type.id %>
+</p>
+
+<p>
+  <b>Series description type:</b>
+  <%= @series_description_type.series_description_type %>
+</p>
+
+
+<%= link_to 'Edit', edit_series_description_type_path(@series_description_type) %> |
+<%= link_to 'Back', series_description_types_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

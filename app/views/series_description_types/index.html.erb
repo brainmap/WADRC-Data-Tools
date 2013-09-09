@@ -1,0 +1,29 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Listing series_description_types</h1>
+
+<table class="tabular">
+  <tr>
+    <th>Id</th>
+    <th>Series description type</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @series_description_types.each do |series_description_type| %>
+  <tr>
+    <td><%= series_description_type.id %></td>
+    <td><%= series_description_type.series_description_type %></td>
+    <td><%= link_to 'Show', series_description_type %></td>
+    <td><%= link_to 'Edit', edit_series_description_type_path(series_description_type) %></td>
+    <td><%= link_to 'Destroy', series_description_type, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Series description type', new_series_description_type_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>
