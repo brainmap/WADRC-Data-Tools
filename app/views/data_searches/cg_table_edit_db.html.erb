@@ -31,7 +31,7 @@
 	<% @results_cg_tn_cn.each do |cn| %>
 	    <tr><td>&nbsp;</td><td align="left" ><%= cn[0]%></td><td align="left" ><%= cn[1]%></td><td align="left" ><%= cn[2]%></td>
 		<td><small><%= link_to 'edit', '/cg_table_edit_db?cg_action=edit&cg_table_name='+@v_cg_table_name+'&cg_tn_column_name='+cn[0] %></small></td>
-		<td><small><%= link_to 'delete', '/cg_table_edit_db?cg_action=delete&cg_table_name='+@v_cg_table_name+'&cg_tn_column_name='+cn[0] %></small></td></tr>
+		<td><small><%= link_to 'delete', '/cg_table_edit_db?cg_action=delete&cg_table_name='+@v_cg_table_name+'&cg_tn_column_name='+cn[0] ,:confirm => 'Are you sure?'%></small></td></tr>
     <% end%>
 	
 </table>

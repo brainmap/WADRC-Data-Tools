@@ -1944,6 +1944,14 @@ class DataSearchesController < ApplicationController
              sql = "alter table "+v_tn+"_edit change "+v_cn+" "+v_cn_new +" VARCHAR(50) "
              results = connection.execute(sql)
           end
+          # change cg_table column
+          cg_tn = CgTn.where("tn in (?)",v_tn)
+          cg_tn_cn = CgTnCn.where("cg_tn_id in (?) and cn in ('"+v_cn+"')",cg_tn[0].id)
+          if !cg_tn_cn.blank?
+            puts "aaaaa cg_tn_cn="+cg_tn_cn[0].id.to_s
+            cg_tn_cn[0].cn = v_cn_new
+            cg_tn_cn[0].save
+          end      
       elsif params[:cg_action] == "delete"
          v_cn = params[:cg_tn_column_name]
          sql = "alter table "+v_tn+" drop column "+v_cn
@@ -1953,7 +1961,13 @@ class DataSearchesController < ApplicationController
          sql = "alter table "+v_tn+"_new drop column "+v_cn
          results = connection.execute(sql)
          sql = "alter table "+v_tn+"_edit drop column "+v_cn
-         results = connection.execute(sql)        
+         results = connection.execute(sql) 
+         # delete cg_table column
+         cg_tn = CgTn.where("tn in (?)",v_tn)
+         cg_tn_cn = CgTnCn.where("cg_tn_id in (?) and cn in (?)",cg_tn[0].id,v_cn)
+         if !cg_tn_cn.blank?
+           cg_tn_cn[0].delete       
+         end
       elsif params[:cg_action] == "add"
           # loop thru key, check for check box  
           params[:cg_table_edit][:key].each do |v|
