@@ -1302,7 +1302,7 @@ class DataSearchesController < ApplicationController
                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" <= "+@cg_query_tn_cn.value_1
                            end
                          elsif @cg_query_tn_cn.condition == 3
-                           v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" != '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
+                           v_condition =  " (if("+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" IS NULL,'',"+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") )  != '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                            if !v_condition.blank?
                               @local_conditions.push(v_condition)
                               params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" != "+@cg_query_tn_cn.value_1                           
