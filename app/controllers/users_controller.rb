@@ -85,6 +85,23 @@ class UsersController < ApplicationController
      # render :template => "/users/add_user"
   end  
   
+  def user_protocol_role_summary
+    sql = "select protocols.name,protocols.path, users.last_name, users.first_name,users.username
+    from protocols, protocol_roles, users
+    where protocols.id = protocol_roles.protocol_id
+    and protocol_roles.user_id =  users.id
+    order by protocols.name, users.last_name, users.first_name,users.username"
+    connection = ActiveRecord::Base.connection();
+     @results = connection.execute(sql)
+     t = Time.now 
+     @export_file_title ="Protocol/User Panda permission summary "+t.strftime("%m/%d/%Y %I:%M%p")
+     @column_headers = ["Protocol","-","Last Name","First Name","Username"]
+     @column_number =   @column_headers.size
+     respond_to do |format|
+       format.xls # ids_search.xls.erb
+     end
+  end
+  
 =begin
   def create
     cookies.delete :auth_token

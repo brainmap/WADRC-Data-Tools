@@ -192,6 +192,7 @@ WADRCDataTools::Application.routes.draw do
   match '/stop_schedule/:id' ,:controller =>'schedules', :action => 'stop_schedule', :as => :stop_schedule
   
   match '/users/update_role', :controller => 'users', :action => 'update_role', :as => :update_role
+  match '/users/user_protocol_role_summary', :controller => 'users', :action => 'user_protocol_role_summary', :as => :user_protocol_role_summary
   match '/users/control', :controller => 'users', :action => 'control', :as => :control
   match '/users/questionformbase', :controller => 'users', :action => 'questionformbase', :as => :questionformbase
   match '/users/cgbase', :controller => 'users', :action => 'cgbase', :as => :cgbase

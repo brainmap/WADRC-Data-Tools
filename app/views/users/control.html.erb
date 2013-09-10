@@ -5,7 +5,7 @@ Enter the new users ldap login, Fisrt Name, Last Name, and Email. <br>
 Add protocol roles - default is "edit lower level fields" for all protocols which are needed.	<br><br>
 	
 </td></tr>	
-<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td colspan=2>
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td colspan=2><%= link_to("protocol/user permission report", "/users/user_protocol_role_summary.xls")%><br>
 	<%= link_to('Update user PROTOCOL specific role', protocol_roles_path) %><br>
 	Search by the user or protocol. <br>
 	This role is applied only to individual protocol.<br>
@@ -75,6 +75,13 @@ to the radiology_comments index url<br>
 
 <tr><td><%= link_to('Space usage', '/directories') %></td><td colspan=2>Displays size and change in size of directories - populated by scheduled job "dir_size"
 	</td></tr>
+
+	<tr><td><%= link_to('Series Description Maps', '/series_description_maps') %></td><td colspan=2>Series Description Map to series description type - used in searches, asl status and adrc upload scheduled job. New series descriptions are inserted into the series description maps table by the scheduled job "series_description"
+		</td></tr>
+		
+		<tr><td><%= link_to('Series Description Types', '/series_description_types') %></td><td colspan=2>Series Description Type - categorizes series descriptions.
+			</td></tr>
+
 
 <tr><td ><%= link_to('Vgroup NII file counts', '/vgroups/nii_file_cnt') %>
 </td><td colspan=2> Process for counting the # of nii files for each vgroup/mri. Used to write file of nii count/scan procedure for validation of scan import process. This happens automatically as a scan is loaded, and generally never needs to be run anymore.	
