@@ -110,24 +110,24 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
           @conditions = []
           @current_tab = "image_datasets"
           # ALSO IN CG_SEARCH !!!!!!  need to update if added new categories
-          @series_desc_categories = {"ASL" => "ASL", 
-        	"DSC_Perfusion" => "DSC_Perfusion", 
-        	"DTI" => "DTI", 
-        	"Fieldmap" => "Fieldmap", 
-        	"fMRI_Task" => "fMRI_Task", 
-        	"HYDI" => "HYDI", 
-        	"mcDESPOT" => "mcDESPOT", 
-        	"MRA" => "MRA", 
-        	"MT" => "MT", 
-        	"Other" => "Other", 
-        	"PCVIPR" => "PCVIPR", 
-        	"PD/T2" => "PD/T2", 
-        	"resting_fMRI" => "resting_fMRI", 
-        	"SWI" => "SWI", 
-        	"T1_Volumetric" => "T1_Volumetric", 
-        	"T2" => "T2", 
-        	"T2_Flair" => "T2_Flair", 
-        	"T2*" => "T2*"}
+          #           @series_desc_categories = {"ASL" => "ASL", 
+          # "DSC_Perfusion" => "DSC_Perfusion", 
+          # "DTI" => "DTI", 
+          # "Fieldmap" => "Fieldmap", 
+          # "fMRI_Task" => "fMRI_Task", 
+          # "HYDI" => "HYDI", 
+          # "mcDESPOT" => "mcDESPOT", 
+          # "MRA" => "MRA", 
+          # "MT" => "MT", 
+          # "Other" => "Other", 
+          # "PCVIPR" => "PCVIPR", 
+          # "PD/T2" => "PD/T2", 
+          # "resting_fMRI" => "resting_fMRI", 
+          # "SWI" => "SWI", 
+          # "T1_Volumetric" => "T1_Volumetric", 
+          # "T2" => "T2", 
+          # "T2_Flair" => "T2_Flair", 
+          # "T2*" => "T2*"}
           params["search_criteria"] =""
 
           if params[:ids_search].nil?
@@ -160,11 +160,11 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
               params["search_criteria"] = params["search_criteria"] +", Series desc contains "+params[:ids_search][:series_description]
           end
           
-          if !params[:ids_search][:series_category].blank?
-              var = params[:ids_search][:series_category]
-              condition =" image_datasets.series_description  in ( select series_description from series_description_map where series_description_type = '"+var.gsub(/[;:'"()=<>]/, '')+"'  )"
+          if !params[:ids_search][:series_description_type_id].blank?
+              var = params[:ids_search][:series_description_type_id]
+              condition =" image_datasets.series_description  in ( select series_description from series_description_maps where series_description_type_id = '"+var.gsub(/[;:'"()=<>]/, '')+"'  )"
               @conditions.push(condition)
-              params["search_criteria"] = params["search_criteria"] +", Series category is "+params[:ids_search][:series_category]
+              params["search_criteria"] = params["search_criteria"] +", Series category is "+SeriesDescriptionType.find(params[:ids_search][:series_description_type_id]).series_description_type
           end
           
 

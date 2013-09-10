@@ -70,7 +70,8 @@ edit_count = edit_count -1
     </tr>
     <tr>
       <th><%= f.label :Series_category %></th>
-      <td><%= select :ids_search, :series_category, @series_desc_categories.sort_by{ |a,b| a[0]}, :prompt =>"Select a category", :include_blank => true  %></td>
+      <td>
+	 <%= select(:ids_search, :series_description_type_id, SeriesDescriptionType.where("series_description_type not like '%?%'").sort_by(&:series_description_type).collect {|p| [ p.series_description_type, p.id ] }, { :include_blank => "Select a category" }) %></td>
     </tr>
     <tr>
       <th><%= f.label :Series_desc_contains %></th>

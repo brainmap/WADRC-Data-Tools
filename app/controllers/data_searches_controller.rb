@@ -845,24 +845,24 @@ class DataSearchesController < ApplicationController
       
       @image_datasets_tn =  CgTn.where("tn = 'image_datasets' ")
       # ALSO IN IDS_SEARCH !!!!!!  need to update if added new categories
-      @series_desc_categories = {"ASL" => "ASL", 
-    	"DSC_Perfusion" => "DSC_Perfusion", 
-    	"DTI" => "DTI", 
-    	"Fieldmap" => "Fieldmap", 
-    	"fMRI_Task" => "fMRI_Task", 
-    	"HYDI" => "HYDI", 
-    	"mcDESPOT" => "mcDESPOT", 
-    	"MRA" => "MRA", 
-    	"MT" => "MT", 
-    	"Other" => "Other", 
-    	"PCVIPR" => "PCVIPR", 
-    	"PD/T2" => "PD/T2", 
-    	"resting_fMRI" => "resting_fMRI", 
-    	"SWI" => "SWI", 
-    	"T1_Volumetric" => "T1_Volumetric", 
-    	"T2" => "T2", 
-    	"T2_Flair" => "T2_Flair", 
-    	"T2*" => "T2*"}
+      #       @series_desc_categories = {"ASL" => "ASL", 
+      # "DSC_Perfusion" => "DSC_Perfusion", 
+      # "DTI" => "DTI", 
+      # "Fieldmap" => "Fieldmap", 
+      # "fMRI_Task" => "fMRI_Task", 
+      # "HYDI" => "HYDI", 
+      # "mcDESPOT" => "mcDESPOT", 
+      # "MRA" => "MRA", 
+      # "MT" => "MT", 
+      # "Other" => "Other", 
+      # "PCVIPR" => "PCVIPR", 
+      # "PD/T2" => "PD/T2", 
+      # "resting_fMRI" => "resting_fMRI", 
+      # "SWI" => "SWI", 
+      # "T1_Volumetric" => "T1_Volumetric", 
+      # "T2" => "T2", 
+      # "T2_Flair" => "T2_Flair", 
+      # "T2*" => "T2*"}
       
       request_format = request.formats.to_s
       @html_request ="Y"
@@ -923,15 +923,15 @@ class DataSearchesController < ApplicationController
 
          # would like to switch to vgroups.id limit, by run_search_q_data gets conditions, and might expect appointments.id limits
          # build conditions from sp, enumber, rmr, gender, min_age, max_age -- @table_types.push('base')
-         if !params[:cg_search][:series_category].blank? # image_dataset
+         if !params[:cg_search][:series_description_type_id].blank? # image_dataset
             v_ids_tn_id = @image_datasets_tn[0].id
             if params[:cg_search][:join_type][v_ids_tn_id.to_s] == "0" # inner affects full query- outer doesn't affect full query
              v_condition = " vgroups.id in ( select a3.vgroup_id from appointments a3,visits v3, image_datasets ids3 where a3.id = v3.appointment_id 
                                                          and a3.appointment_type = 'mri'
-                                                         and v3.id = ids3.visit_id and ids3.series_description in (select series_description from series_description_map 
-                                                          where series_description_type = '"+params[:cg_search][:series_category]+"' ) ) "
+                                                         and v3.id = ids3.visit_id and ids3.series_description in (select series_description from series_description_maps 
+                                                          where series_description_type_id = '"+params[:cg_search][:series_description_type_id]+"' ) ) "
              @local_conditions.push(v_condition)
-              params["search_criteria"] = params["search_criteria"] +" series description "+params[:cg_search][:series_category]+", "
+              params["search_criteria"] = params["search_criteria"] +" series description "+SeriesDescriptionType.find(params[:cg_search][:series_description_type_id]).series_description_type+", "
             end
          end
          
@@ -1597,7 +1597,7 @@ class DataSearchesController < ApplicationController
     @sql = sql
     # run the sql ==>@results, after some substitutions
     
-    if !params[:cg_search].blank? and !params[:cg_search][:series_category].blank? and !params[:cg_search][:image_dataset_file].blank?
+    if !params[:cg_search].blank? and !params[:cg_search][:series_description_type_id].blank? and !params[:cg_search][:image_dataset_file].blank?
       # image_datasets
       # get list of columns from ids_search
       # @column_headers_ids = ['Date','Protocol','Enumber','RMR','series_description','dicom_series_uid','dcm_file_count','timestamp','scanned_file','image_uid','id','rep_time','glob','path','bold_reps','slices_per_volume','visit.age_at_visit','visit.scanner_source','image_dataset_quality_checks.motion_warning','image_dataset_quality_checks.incomplete_series','image_dataset_quality_checks.omnibus_f_comment','image_dataset_quality_checks.fov_cutoff','image_dataset_quality_checks.banding_comment','image_dataset_quality_checks.spm_mask','image_dataset_quality_checks.garbled_series_comment','image_dataset_quality_checks.motion_warning_comment','image_dataset_quality_checks.user_id','image_dataset_quality_checks.banding','image_dataset_quality_checks.field_inhomogeneity','image_dataset_quality_checks.nos_concerns_comment','image_dataset_quality_checks.garbled_series','image_dataset_quality_checks.created_at','image_dataset_quality_checks.incomplete_series_comment','image_dataset_quality_checks.omnibus_f','image_dataset_quality_checks.other_issues','image_dataset_quality_checks.fov_cutoff_comment','image_dataset_quality_checks.nos_concerns','image_dataset_quality_checks.registration_risk','image_dataset_quality_checks.ghosting_wrapping','image_dataset_quality_checks.field_inhomogeneity_comment','image_dataset_quality_checks.updated_at','image_dataset_quality_checks.registration_risk_comment','image_dataset_quality_checks.ghosting_wrapping_comment','image_dataset_quality_checks.image_dataset_id','image_dataset_quality_checks.spm_mask_comment','image_comments.comment','image_comments.updated_at','image_comments.created_at','image_comments.user_id','image_comments.image_dataset_id','Appt Note'] # need to look up values
@@ -1618,7 +1618,7 @@ class DataSearchesController < ApplicationController
         "image_dataset_quality_checks.omnibus_f","image_dataset_quality_checks.omnibus_f_comment","image_dataset_quality_checks.spm_mask","image_dataset_quality_checks.spm_mask_comment","image_dataset_quality_checks.other_issues",
        "concat(qc_users.last_name,', ',qc_users.first_name)","concat(date_format(image_dataset_quality_checks.created_at,'%m/%d/%Y'),time_format(timediff( time(image_dataset_quality_checks.created_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(date_format(image_dataset_quality_checks.updated_at,'%m/%d/%Y'),time_format(timediff( time(image_dataset_quality_checks.updated_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_dataset_quality_checks.image_dataset_id","concat(date_format(image_comments.updated_at,'%m/%d/%Y'),time_format(timediff( time(image_comments.updated_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(date_format(image_comments.created_at,'%m/%d/%Y'),time_format(timediff( time(image_comments.created_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(users.last_name,', ',users.first_name)","image_comments.image_dataset_id"]
       
-      @local_conditions_ids =["visits.appointment_id = appointments.id", "visits.id = image_datasets.visit_id","image_datasets.series_description in (select series_description from series_description_map where series_description_type = '"+params[:cg_search][:series_category]+"')"]
+      @local_conditions_ids =["visits.appointment_id = appointments.id", "visits.id = image_datasets.visit_id","image_datasets.series_description in (select series_description from series_description_maps where series_description_type_id = '"+params[:cg_search][:series_description_type_id]+"')"]
       @left_join_ids_hash = {
                 "image_datasets" => "LEFT JOIN image_dataset_quality_checks on image_datasets.id = image_dataset_quality_checks.image_dataset_id 
                                      LEFT JOIN users qc_users on image_dataset_quality_checks.user_id = qc_users.id
@@ -1692,7 +1692,7 @@ class DataSearchesController < ApplicationController
       i = i+1
       
     end
-    if @html_request =="N" and !params[:cg_search].blank? and !params[:cg_search][:series_category].blank? and !params[:cg_search][:image_dataset_file].blank?
+    if @html_request =="N" and !params[:cg_search].blank? and !params[:cg_search][:series_description_type_id].blank? and !params[:cg_search][:image_dataset_file].blank?
        @column_number =   @local_column_headers.size
       
     elsif @html_request =="N"  and !@q_data_form_array.blank?

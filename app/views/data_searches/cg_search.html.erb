@@ -379,8 +379,8 @@ v_tn_cn_searchable_hash = []
 
 <% if tn.common_name == "Mri Appointments"    
 	v_category = ""
-	if !params[:cg_search].blank? and !params[:cg_search][:series_category].blank?
-	   v_category = params[:cg_search][:series_category]
+	if !params[:cg_search].blank? and !params[:cg_search][:series_description_type_id].blank?
+	   v_category = params[:cg_search][:series_description_type_id]
 	end
 	v_join_type_ids = ""
 	if !params[:cg_search].blank? and !params[:cg_search][:join_type].blank?  and !params[:cg_search][:join_type][@image_datasets_tn[0].id.to_s].blank?
@@ -390,8 +390,7 @@ v_tn_cn_searchable_hash = []
     <tr><td colspan="2" align="left">
     	<br>
      Select a Series Description Category:&nbsp;&nbsp;
-<%= select  :cg_search, "series_category", options_for_select(@series_desc_categories.sort_by{ |a,b| a[0]}, v_category),
-											              {:prompt => 'Select a category'}  %><br>
+<%= select(:cg_search, :series_description_type_id, SeriesDescriptionType.where("series_description_type not like '%?%'").sort_by(&:series_description_type).collect {|p| [ p.series_description_type, p.id ] },  { :include_blank => "Select a category",:selected => v_category }) %><br>
 
     <small> The image dataset fields will only show up in the <b>[ export file -image dataset ]. </b> </small>
     <br><br>
@@ -438,7 +437,7 @@ v_tn_cn_searchable_hash = []
       <%= submit_tag 'export file'%> 
 
 <% end %>
-<% if !params[:cg_search].blank? and !params[:cg_search][:series_category].blank? %>
+<% if !params[:cg_search].blank? and !params[:cg_search][:series_description_type_id].blank? %>
  <%= form_tag '/cg_search.xls' do%>
     <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
     <%  v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 

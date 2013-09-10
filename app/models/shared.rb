@@ -316,7 +316,7 @@ class Shared  < ActionController::Base
     # get adrc subjectid to upload
     sql = "select distinct subjectid from cg_adrc_upload where sent_flag ='N' and status_flag in ('Y','R') "
     results = connection.execute(sql)
-    # change series_description_map table
+    # changed to series_description_maps table
     v_folder_array = Array.new
     v_scan_desc_type_array = Array.new
     # check for dir in /tmp
@@ -356,12 +356,13 @@ class Shared  < ActionController::Base
       stdin.close
       stdout.close
       stderr.close
-      sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_map.series_description_type 
-                  from vgroups , appointments, visits, image_datasets, series_description_map 
+      sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_types.series_description_type 
+                  from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
-                  and image_datasets.series_description =   series_description_map.series_description
-                  and series_description_map.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','T2','T2 Flair','T2_Flair','T2+Flair','DTI') 
+                  and image_datasets.series_description =   series_description_maps.series_description
+                  and series_description_maps.series_description_type_id = series_description_types.id
+                  and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','T2','T2 Flair','T2_Flair','T2+Flair','DTI') 
                   and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
                   and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
                    order by appointments.appointment_date "
@@ -664,7 +665,7 @@ puts "AAAAAA "+v_call
                              # multiple asl dircectory from image_datasets.path 
                               sql_dir = "select distinct SUBSTRING_INDEX(image_datasets.path,'/',-1) from image_datasets,visits v, appointments a, scan_procedures_vgroups spv, enrollment_vgroup_memberships evm
                                    where image_datasets.visit_id = v.id and v.appointment_id = a.id and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id ="+sp.id.to_s+"
-                                   and evm.enrollment_id ="+enrollment[0].id.to_s+" and a.vgroup_id = evm.vgroup_id and image_datasets.series_description in (select series_description from series_description_map where series_description_type = 'ASL')"
+                                   and evm.enrollment_id ="+enrollment[0].id.to_s+" and a.vgroup_id = evm.vgroup_id and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps,series_description_types where series_description_types.id =series_description_maps.series_description_type and  series_description_types.series_description_type = 'ASL')"
                              v_asl_directory_array = []
                              results_dir = connection.execute(sql_dir)
                              results_dir.each do |d|

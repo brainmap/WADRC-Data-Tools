@@ -1,5 +1,9 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :series_description_maps
+
+  resources :series_description_types
+
   resources :scheduleruns
 
   resources :schedules
