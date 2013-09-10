@@ -2260,7 +2260,46 @@ puts "AAAAAA "+v_call
     ####          @schedulerun.status_flag="E"
     ####    end  
   end
-    
+ 
+  def run_series_description
+      v_base_path = Shared.get_base_path()
+      @schedule = Schedule.where("name in ('series_description')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting series_description"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      sql_insert_base = "Insert into series_description_maps(series_description) values("
+      sql = "select distinct image_datasets.series_description from image_datasets 
+           where image_datasets.series_description not in (select series_description_maps.series_description from series_description_maps)"
+      connection = ActiveRecord::Base.connection();        
+      results = connection.execute(sql)
+      v_cnt = 0
+      v_series_description_listing = ""
+      results.each do |r|
+          v_cnt = v_cnt + 1
+          v_series_description_listing  = v_series_description_listing +r[0]+"\n"
+          sql_insert = sql_insert_base+"'"+r[0]+"')"
+          results_insert = connection.execute(sql_insert)
+      end
+      if v_cnt > 0
+          v_comment = v_comment + "There were "+v_cnt.to_s+" new series descriptions\n"+v_series_description_listing
+      else
+          v_comment = v_comment + "There were "+v_cnt.to_s+" new series descriptions\n"
+      end
+      puts v_comment
+      puts "successful finish series_description' "+v_comment[0..1459]
+      @schedulerun.comment =("successful finish series_description' "+v_comment[0..1459])
+      if !v_comment.include?("ERROR")
+            @schedulerun.status_flag ="Y"
+      end
+      @schedulerun.save
+      @schedulerun.end_time = @schedulerun.updated_at      
+      @schedulerun.save
+
+   end   
     
   # to add columns --
   # change sql_base insert statement
