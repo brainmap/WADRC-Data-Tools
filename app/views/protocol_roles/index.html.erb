@@ -17,7 +17,7 @@
     <th></th>
     <th></th>
   </tr>
-<% if  !params[:protocol_role][:user_id].blank?%>
+<% if  !params[:protocol_role].blank? and !params[:protocol_role][:user_id].blank?%>
   <% @protocol_roles.sort_by { |obj| obj.protocol.name}.each do |protocol_role| %>
     <tr>
       <td><%=  protocol_role.user.username_name %></td>
