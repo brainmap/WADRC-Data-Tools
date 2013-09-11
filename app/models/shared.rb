@@ -2289,7 +2289,6 @@ puts "AAAAAA "+v_call
       else
           v_comment = v_comment + "There were "+v_cnt.to_s+" new series descriptions\n"
       end
-      puts v_comment
       puts "successful finish series_description' "+v_comment[0..1459]
       @schedulerun.comment =("successful finish series_description' "+v_comment[0..1459])
       if !v_comment.include?("ERROR")

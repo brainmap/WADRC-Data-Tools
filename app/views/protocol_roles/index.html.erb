@@ -17,8 +17,19 @@
     <th></th>
     <th></th>
   </tr>
-
-<% @protocol_roles.each do |protocol_role| %>
+<% if  !params[:protocol_role][:user_id].blank?%>
+  <% @protocol_roles.sort_by { |obj| obj.protocol.name}.each do |protocol_role| %>
+    <tr>
+      <td><%=  protocol_role.user.username_name %></td>
+      <td><%= protocol_role.protocol.name %></td>
+      <td><%= protocol_role.role %></td>
+      <td><%= link_to 'Show', protocol_role %></td>
+      <td><%= link_to 'Edit', edit_protocol_role_path(protocol_role) %></td>
+      <td><%= link_to 'Destroy', protocol_role, :confirm => 'Are you sure?', :method => :delete %></td>
+    </tr>
+   <% end %>
+<%else%>
+<% @protocol_roles.sort_by { |obj| obj.user.username_name}.each do |protocol_role| %>
   <tr>
     <td><%=  protocol_role.user.username_name %></td>
     <td><%= protocol_role.protocol.name %></td>
@@ -27,7 +38,9 @@
     <td><%= link_to 'Edit', edit_protocol_role_path(protocol_role) %></td>
     <td><%= link_to 'Destroy', protocol_role, :confirm => 'Are you sure?', :method => :delete %></td>
   </tr>
-<% end %>
+ <% end %>
+<%end%>
+
 </table>
 
 
