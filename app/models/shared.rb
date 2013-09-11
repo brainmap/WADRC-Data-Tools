@@ -2289,6 +2289,11 @@ puts "AAAAAA "+v_call
       else
           v_comment = v_comment + "There were "+v_cnt.to_s+" new series descriptions\n"
       end
+      
+      sql = "select count(distinct image_datasets.series_description) from image_datasets 
+           where image_datasets.series_description not in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id is NULL)"
+      results = connection.execute(sql)
+      v_comment = "\n"+results.first.to_s+" un-categorized series descriptions \n"+v_comment
       puts "successful finish series_description' "+v_comment[0..1459]
       @schedulerun.comment =("successful finish series_description' "+v_comment[0..1459])
       if !v_comment.include?("ERROR")
