@@ -16,6 +16,7 @@
     <th></th>
     <th></th>
     <th></th>
+    <th>Irb and description</th>
   </tr>
 <% if  !params[:protocol_role].blank? and !params[:protocol_role][:user_id].blank?%>
   <% @protocol_roles.sort_by { |obj| obj.protocol.name}.each do |protocol_role| %>
@@ -26,6 +27,14 @@
       <td><%= link_to 'Show', protocol_role %></td>
       <td><%= link_to 'Edit', edit_protocol_role_path(protocol_role) %></td>
       <td><%= link_to 'Destroy', protocol_role, :confirm => 'Are you sure?', :method => :delete %></td>
+<td><% @scan_procedures = ScanProcedure.where("protocol_id in (?)",protocol_role.protocol_id)
+      v_sp_list = []
+      @scan_procedures.each do |sp| 
+	     v_sp_list.push(sp.description)
+	  end
+	%>
+	<%= v_sp_list.join(',')%>	  
+	</td>
     </tr>
    <% end %>
 <%else%>
@@ -37,6 +46,14 @@
     <td><%= link_to 'Show', protocol_role %></td>
     <td><%= link_to 'Edit', edit_protocol_role_path(protocol_role) %></td>
     <td><%= link_to 'Destroy', protocol_role, :confirm => 'Are you sure?', :method => :delete %></td>
+	<td><% @scan_procedures = ScanProcedure.where("protocol_id in (?)",protocol_role.protocol_id)
+	      v_sp_list = []
+	      @scan_procedures.each do |sp| 
+		     v_sp_list.push(sp.description)
+		  end
+		%>
+		<%= v_sp_list.join(',')%>
+		</td>
   </tr>
  <% end %>
 <%end%>
