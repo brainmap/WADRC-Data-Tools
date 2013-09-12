@@ -26,12 +26,18 @@ class Petscan < ActiveRecord::Base
         # check for file with enum 
         vgroup = Vgroup.find(p_vgroup_id)
         (vgroup.enrollments).each do |e|
-          if !Dir.glob(v_path+e.enumber+"*").empty?
+          if !Dir.glob(v_path+e.enumber+"*").empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img").empty?
             v_cnt = 0
             Dir.glob(v_path+e.enumber+"*").each do |f|
                v_file_name = f.gsub(v_path,"")
                v_cnt = v_cnt + 1
             end   
+            if v_cnt < 1
+              Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img").each do |f|
+                 v_file_name = f.gsub(v_path,"")
+                 v_cnt = v_cnt + 1
+              end
+            end
             if v_cnt > 1
               v_file_name = ""
             end      
