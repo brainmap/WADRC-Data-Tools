@@ -607,7 +607,7 @@ puts "AAAAAA "+v_call
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
             v_exclude_sp =[4,10,15,19,32]
             @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
-            @scan_procedures. each do |sp|
+            @scan_procedures.each do |sp|
               v_visit_number =""
               if sp.codename.include?("visit2")
                 v_visit_number ="_v2"
@@ -661,15 +661,23 @@ puts "AAAAAA "+v_call
                              v_t1_fs_flag = "N"
                              v_t1_single = ""
                              v_asl_directory_list =""
+                             v_asl_directory_list_2025 =""
                              
                              # multiple asl dircectory from image_datasets.path 
                               sql_dir = "select distinct SUBSTRING_INDEX(image_datasets.path,'/',-1) from image_datasets,visits v, appointments a, scan_procedures_vgroups spv, enrollment_vgroup_memberships evm
                                    where image_datasets.visit_id = v.id and v.appointment_id = a.id and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id ="+sp.id.to_s+"
-                                   and evm.enrollment_id ="+enrollment[0].id.to_s+" and a.vgroup_id = evm.vgroup_id and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps,series_description_types where series_description_types.id =series_description_maps.series_description_type and  series_description_types.series_description_type = 'ASL')"
+                                   and evm.enrollment_id ="+enrollment[0].id.to_s+" and a.vgroup_id = evm.vgroup_id and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps,series_description_types where series_description_types.id =series_description_maps.series_description_type_id and  series_description_types.series_description_type = 'ASL')"
                              v_asl_directory_array = []
+                             v_asl_directory_2025_array = []
                              results_dir = connection.execute(sql_dir)
                              results_dir.each do |d|
-                                  v_asl_directory_array.push(d)
+                                  v_asl_directory_array.push(d[0])
+                                  # check if a 2025 inversion -- ASL_fmap_[subectid]_2025-[start of dir].nii in v_preprocessed_full_path+"/"+[subjectid]/asl
+                                  v_dir_name_array = d[0].split("_")
+                                  v_file_check = v_preprocessed_full_path+"/"+enrollment[0].enumber+"/asl/ASL_fmap_"+enrollment[0].enumber+"_2025_"+v_dir_name_array[0]+".nii"
+                                  if File.exist?(v_file_check)
+                                      v_asl_directory_2025_array.push(d[0])
+                                  end
                              end
                              if v_asl_directory_array.size > 0
                                 v_asl_directory_list = v_asl_directory_array.join(",") 
@@ -800,8 +808,15 @@ puts "AAAAAA "+v_call
                                                           ,'"+v_asl_1525_registered_to_fs_flag+"','"+v_asl_1525_smoothed_and_warped_flag+"','"+v_asl_2025_registered_to_fs_flag+"',
                                                           '"+v_asl_2025_smoothed_and_warped_flag+"','"+v_pdmap_flag+"','"+v_pdmap_0_flag+"','"+v_pdmap_1525_flag+"','"+v_pdmap_2025_flag+"','"+v_t1_fs_flag+"','"+v_asl_directory_list+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql) 
-                                 if v_asl_fmap_single == "Y" and v_asl_directory_list.split(",").size == 1
-                                      sql = "update cg_asl_status_new set asl_fmap_file_to_use ='"+v_asl_directory_list+"' where asl_fmap_single ='Y' and enrollment_id ="+enrollment[0].id.to_s+" and scan_procedure_id="+sp.id.to_s
+                                 if v_asl_directory_2025_array.size > 1
+                                    # check in acpc which one was used?  is acpc linked to asl?
+                                   
+                                 end
+                                 if v_asl_directory_2025_array.size == 1 # use the 2025 by preference
+                                      sql = "update cg_asl_status_new set asl_fmap_file_to_use ='"+v_asl_directory_2025_array.join(',')+"' where enrollment_id ="+enrollment[0].id.to_s+" and scan_procedure_id="+sp.id.to_s
+                                      results = connection.execute(sql)
+                                 elsif v_asl_fmap_single == "Y" and v_asl_directory_list.split(",").size == 1   # asl_fmap_single ='Y' and ?????
+                                      sql = "update cg_asl_status_new set asl_fmap_file_to_use ='"+v_asl_directory_list+"' where  enrollment_id ="+enrollment[0].id.to_s+" and scan_procedure_id="+sp.id.to_s
                                       results = connection.execute(sql)
                                   end
                              else
@@ -922,7 +937,7 @@ puts "AAAAAA "+v_call
             v_log = v_log + "starting "+r[2]+"   "+ t_now.strftime("%Y%m%d:%H:%M")+"\n"
             v_subjectid_v_num = r[2]
             v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
-            # fs subjects dir
+            # fs subjects dir  --- eventually use good2go fs edited dir as default
             v_fs_subjects_dir = v_base_path+"/preprocessed/modalities/freesurfer/orig_recon"
             if !r[7].blank? 
                 v_fs_subjects_dir = v_base_path+"/preprocessed/modalities/freesurfer/"+r[7]
@@ -1012,6 +1027,12 @@ puts "AAAAAA "+v_call
                 # stdin.close
                 # stdout.close
                 # stderr.close
+                # update cg_asl_status, cg_asl_edit( insert/update)  asl_fmap_file_to_useto asl_fmap_file_used 
+                # if sucessful
+                sql_update = "update cg_asl_status_edit set asl_fmap_file_used = asl_fmap_file_to_use where  asl_subjectid = '"+r[2]+"'"
+                #results_update = connection.execute(sql_update)   # stop from re-running
+                sql_update = "update cg_asl_status_edit set asl_fmap_file_used = asl_fmap_file_to_use where asl_subjectid = '"+r[2]+"'"
+                #results_update = connection.execute(sql_update)   # stop from re-running
              else
                v_log = v_log + "no  \n"
 
