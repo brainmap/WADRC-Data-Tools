@@ -53,7 +53,7 @@ class UsersController < ApplicationController
 
   def add_user
     if !params[:user].nil? 
-     var = "insert into users(username,email,last_name,first_name,role) values('"+params[:user][:username]+"','"+params[:user][:email]+"','"+params[:user][:last_name]+"','"+params[:user][:first_name]+"','"+params[:user][:role]+"')"
+     var = "insert into users(username,email,last_name,first_name,role) values('"+params[:user][:username]+"','"+params[:user][:email]+"','"+params[:user][:last_name].gsub("'","''")+"','"+params[:user][:first_name].gsub("'","''")+"','"+params[:user][:role]+"')"
     connection = ActiveRecord::Base.connection();
      results = connection.execute(var)
 
@@ -71,7 +71,7 @@ class UsersController < ApplicationController
       @user = User.find(params[:user][:id])
          render :template => "/users/edit_user"  
     elsif !params[:user].nil?  && !params[:user][:last_name].nil? 
-     var = "update users set email='"+params[:user][:email]+"',last_name='"+params[:user][:last_name]+"',first_name='"+params[:user][:first_name]+"' where id = "+params[:user][:id]+" "
+     var = "update users set email='"+params[:user][:email]+"',last_name='"+params[:user][:last_name].gsub("'","''")+"',first_name='"+params[:user][:first_name].gsub("'","''")+"' where id = "+params[:user][:id]+" "
     connection = ActiveRecord::Base.connection();
      results = connection.execute(var)
 
