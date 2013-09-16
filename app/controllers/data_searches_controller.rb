@@ -512,7 +512,6 @@ class DataSearchesController < ApplicationController
             #      make one edit_table insert statement  @col_list.push, @value_list.push
             #      make update statement form data_table  @col_value_list.push
             v_cnt = 0
-
             v_key_pipe_array = []
             params[:cg_edit_table][:key_data].each do |k|
               #puts "AAAAAA start of key="+k +" v_cnt = "+v_cnt.to_s
@@ -788,7 +787,7 @@ class DataSearchesController < ApplicationController
         end
         if !v_key.blank? and !@v_key.include?(v_key)  # pushing in edit key rows not in data
             if current_user.role == 'Admin_High'
-                @v_key.push(v_key)
+                # @v_key.push(v_key)   ## hiding edits not in data -- causing problems in delete - displacing the index 0-1-2-... by the exitra edit rows
             end
         end    
         @v_key = @v_key.sort      

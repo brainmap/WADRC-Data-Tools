@@ -662,6 +662,7 @@ puts "AAAAAA "+v_call
                              v_t1_single = ""
                              v_asl_directory_list =""
                              v_asl_directory_list_2025 =""
+                             v_asl_directory_list_1525 =""
                              
                              # multiple asl dircectory from image_datasets.path 
                               sql_dir = "select distinct SUBSTRING_INDEX(image_datasets.path,'/',-1) from image_datasets,visits v, appointments a, scan_procedures_vgroups spv, enrollment_vgroup_memberships evm
@@ -669,6 +670,7 @@ puts "AAAAAA "+v_call
                                    and evm.enrollment_id ="+enrollment[0].id.to_s+" and a.vgroup_id = evm.vgroup_id and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps,series_description_types where series_description_types.id =series_description_maps.series_description_type_id and  series_description_types.series_description_type = 'ASL')"
                              v_asl_directory_array = []
                              v_asl_directory_2025_array = []
+                             v_asl_directory_1525_array = []
                              results_dir = connection.execute(sql_dir)
                              results_dir.each do |d|
                                   v_asl_directory_array.push(d[0])
@@ -677,6 +679,14 @@ puts "AAAAAA "+v_call
                                   v_file_check = v_preprocessed_full_path+"/"+enrollment[0].enumber+"/asl/ASL_fmap_"+enrollment[0].enumber+"_2025_"+v_dir_name_array[0]+".nii"
                                   if File.exist?(v_file_check)
                                       v_asl_directory_2025_array.push(d[0])
+                                  end
+                                  v_file_check = v_preprocessed_full_path+"/"+enrollment[0].enumber+"/asl/ASL_fmap_"+enrollment[0].enumber+"_1525_"+v_dir_name_array[0]+".nii"
+                                  if File.exist?(v_file_check)
+                                      v_asl_directory_1525_array.push(d[0])
+                                  end
+                                  v_file_check = v_preprocessed_full_path+"/"+enrollment[0].enumber+"/asl/ASL_fmap_"+enrollment[0].enumber+"_0_"+v_dir_name_array[0]+".nii"
+                                  if File.exist?(v_file_check)
+                                      v_asl_directory_1525_array.push(d[0])
                                   end
                              end
                              if v_asl_directory_array.size > 0
@@ -812,8 +822,15 @@ puts "AAAAAA "+v_call
                                     # check in acpc which one was used?  is acpc linked to asl?
                                    
                                  end
-                                 if v_asl_directory_2025_array.size == 1 # use the 2025 by preference
-                                      sql = "update cg_asl_status_new set asl_fmap_file_to_use ='"+v_asl_directory_2025_array.join(',')+"' where enrollment_id ="+enrollment[0].id.to_s+" and scan_procedure_id="+sp.id.to_s
+                                 if v_asl_directory_2025_array.size == 1 or v_asl_directory_1525_array.size == 1 # use the 2025 by preference
+                                      v_tmp_asl_dir_array = []
+                                      if v_asl_directory_2025_array.size == 1
+                                         v_tmp_asl_dir_array.push(v_asl_directory_2025_array) 
+                                      end
+                                      if v_asl_directory_1525_array.size == 1
+                                         v_tmp_asl_dir_array.push(v_asl_directory_1525_array) 
+                                      end                                   
+                                      sql = "update cg_asl_status_new set asl_fmap_file_to_use ='"+v_tmp_asl_dir_array.join(',')+"' where enrollment_id ="+enrollment[0].id.to_s+" and scan_procedure_id="+sp.id.to_s
                                       results = connection.execute(sql)
                                  elsif v_asl_fmap_single == "Y" and v_asl_directory_list.split(",").size == 1   # asl_fmap_single ='Y' and ?????
                                       sql = "update cg_asl_status_new set asl_fmap_file_to_use ='"+v_asl_directory_list+"' where  enrollment_id ="+enrollment[0].id.to_s+" and scan_procedure_id="+sp.id.to_s
@@ -842,7 +859,7 @@ puts "AAAAAA "+v_call
              asl_1525_fmap_flag, asl_1525_fmap_single, 
             asl_2025_fmap_flag, asl_2025_fmap_single,
             asl_0_registered_to_fs_flag,asl_0_smoothed_and_warped_flag,asl_1525_registered_to_fs_flag,asl_1525_smoothed_and_warped_flag,
-            asl_2025_registered_to_fs_flag,asl_2025_smoothed_and_warped_flag,pdmap_flag,pdmap_0_flag,pdmap_1525_flag,pdmap_2025_flag,t1_fs_flag,asl_directory_list,asl_fmap_file_to_use,
+            asl_2025_registered_to_fs_flag,asl_2025_smoothed_and_warped_flag,pdmap_flag,pdmap_0_flag,pdmap_1525_flag,pdmap_2025_flag,t1_fs_flag,asl_directory_list,asl_fmap_file_to_use,asl_fmap_file_used,
               enrollment_id,scan_procedure_id",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
@@ -974,65 +991,66 @@ puts "AAAAAA "+v_call
                 v_asl_dir_array = (r[4].gsub(" ","")).split(",")
                 #asl_fmap_file_to_use split into an array --- define loc --- move the loc from above
                 v_asl_dir_array.each do |d|    
-                    v_dir_name_array = d.split("_") # sometimes just want first part of dir name
-                    v_call =  'ssh panda_admin@merida.dom.wisc.edu "'+v_script+' -p '+v_sp_loc+'  -b '+v_subjectid+' -s  '+v_dir_name_array[0] +' -c '+v_coreg_t1+' -fsdir '+v_fs_subjects_dir +' " ' 
+                    v_dir_name_array = d.split("_") # sometimes just want first part of dir name   # -c '+v_coreg_t1+'   --- not specifying
+                    v_call =  'ssh panda_admin@merida.dom.wisc.edu "'+v_script+' -p '+v_sp_loc+'  -b '+v_subjectid+' -s1  '+v_dir_name_array[0] +'  --fsdir '+v_fs_subjects_dir +' " ' 
                     @schedulerun.comment ="str "+r[2]+"/"+d+"; "+v_comment[0..1990]
                     @schedulerun.save
                     puts "rrrrrrr "+v_call
                     v_log = v_log + v_call+"\n"
+                # end
+                    begin
+                        stdin, stdout, stderr = Open3.popen3(v_call)
+                        rescue => msg  
+                           v_log = v_log + msg+"\n"  
+                    end
+                    v_success ="N"
+                    while !stdout.eof?
+                        v_output = stdout.read 1024 
+                        v_log = v_log + v_output  
+                        if (v_log.tr("\n","")).include? "Done    'PVE label estimation and lesion segmentation'"  # NEED TO EDIT!!!!!! 
+                           v_success ="Y"
+                           v_log = v_log + "Process finished ok !!!!!!!!! \n"
+                                    # NEED TO  set do not run flag from R ( sw or fs  ) to N 
+                        end
+                        puts v_output  
+                    end
+                    v_err =""
+                    v_log = v_log +"IN ERROR \n"
+                    while !stderr.eof?
+                        v_err = stderr.read 1024
+                        v_log = v_log +v_err
+                    end
+                    if !v_err.blank?
+                        puts "err="+v_err
+                    end
+                    sql_update = "update cg_asl_status_edit set asl_fmap_file_used = concat(asl_fmap_file_used,'[ "+t.strftime("%Y%m%d")+" "+v_dir_name_array[0]+"]') where  asl_subjectid = '"+r[2]+"'"
+                    results_update = connection.execute(sql_update)   # stop from re-running
+                    sql_update = "update cg_asl_status_edit set asl_fmap_file_used = concat(asl_fmap_file_used,'[ "+t.strftime("%Y%m%d")+" "+v_dir_name_array[0]+"]') where asl_subjectid = '"+r[2]+"'"
+                    results_update = connection.execute(sql_update)   # stop from re-running
+                    if v_success =="Y"
+                          # rerun ask status.. file detect
+                          v_comment = " finished=>"+r[2]+ "; " +v_comment
+                    else
+                          puts " in err"
+                          v_log = v_log +"IN ERROR \n" 
+                          while !stderr.eof?
+                              v_err = stderr.read 1024
+                              v_log = v_log +v_err
+                              v_comment = v_err +" =>"+r[2]+ " ; " +v_comment  
+                          end 
+                          v_error_comment = "error in "+r[2]+" ;"+v_error_comment
+                          # send email to owner
+                          v_schedule_owner_email_array.each do |e|
+                                v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see "+v_log_path
+                                PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
+                          end
+                    end
+                    @schedulerun.comment =v_comment[0..1990]
+                    @schedulerun.save
+                    stdin.close
+                    stdout.close
+                    stderr.close
                 end
-                # begin
-                #                    stdin, stdout, stderr = Open3.popen3(v_call)
-                #                  rescue => msg  
-                #                     v_log = v_log + msg+"\n"  
-                #                  end
-                #                 v_success ="N"
-                #                 while !stdout.eof?
-                #                   v_output = stdout.read 1024 
-                #                   v_log = v_log + v_output  
-                #                   if (v_log.tr("\n","")).include? "Done    'PVE label estimation and lesion segmentation'"  # line wrapping? Done ==> Do\nne
-                #                     v_success ="Y"
-                #                     v_log = v_log + "SUCCESS !!!!!!!!! \n"
-                #                     # NEED TO  set do not run flag from R ( sw or fs  ) to N 
-                #                   end
-                #                   puts v_output  
-                #                  end
-                #                  v_err =""
-                #                  v_log = v_log +"IN ERROR \n"
-                #                  while !stderr.eof?
-                #                     v_err = stderr.read 1024
-                #                     v_log = v_log +v_err
-                #                   end
-                #                  puts "err="+v_err
-                #                  if v_success =="Y"
-                #                    # rerun ask status.. file detect
-                #                    v_comment = " finished=>"+r[2]+ "; " +v_comment
-                #                  else
-                #                   puts " in err"
-                #                   v_log = v_log +"IN ERROR \n" 
-                #                   while !stderr.eof?
-                #                     v_err = stderr.read 1024
-                #                     v_log = v_log +v_err
-                #                     v_comment = v_err +" =>"+r[2]+ " ; " +v_comment  
-                #                    end 
-                #                    v_error_comment = "error in "+r[2]+" ;"+v_error_comment
-                #                    # send email to owner
-                #                    v_schedule_owner_email_array.each do |e|
-                #                      v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see "+v_log_path
-                #                      PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
-                #                    end
-                #                  end
-                # @schedulerun.comment =v_comment[0..1990]
-                # @schedulerun.save
-                # stdin.close
-                # stdout.close
-                # stderr.close
-                # update cg_asl_status, cg_asl_edit( insert/update)  asl_fmap_file_to_useto asl_fmap_file_used 
-                # if sucessful
-                sql_update = "update cg_asl_status_edit set asl_fmap_file_used = asl_fmap_file_to_use where  asl_subjectid = '"+r[2]+"'"
-                #results_update = connection.execute(sql_update)   # stop from re-running
-                sql_update = "update cg_asl_status_edit set asl_fmap_file_used = asl_fmap_file_to_use where asl_subjectid = '"+r[2]+"'"
-                #results_update = connection.execute(sql_update)   # stop from re-running
              else
                v_log = v_log + "no  \n"
 
