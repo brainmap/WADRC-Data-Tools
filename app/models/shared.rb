@@ -705,7 +705,7 @@ puts "AAAAAA "+v_call
                              if !results_fs.blank? and !results_fs.first.blank? and !(results_fs.first)[0].blank?
                                  v_fs_home = (results_fs.first)[0]  
                              end
-                             v_subject_fs_path = v_fs_home_path+v_fs_home+"/"+dir_name_array[0]+"/mri"
+                             v_subject_fs_path = v_fs_home_path+v_fs_home+"/"+dir_name_array[0]+v_visit_number+"/mri"
                              if File.directory?(v_subject_fs_path)
                                   v_dir_array = Dir.entries(v_subject_fs_path)
                                   v_dir_array.each do |f|
@@ -927,7 +927,10 @@ puts "AAAAAA "+v_call
         # asl_smoothed_and_warped_flag , asl_registered_to_fs_flag --- not care, because may re-run or run for ask multiple ?
 
         # if these is only one ask fmap -- should use?????
-        sql = "select distinct enrollment_id, scan_procedure_id, asl_subjectid,asl_fmap_single,asl_fmap_file_to_use,fs_home_to_use from cg_asl_status where  t1_fs_flag = 'Y' and asl_fmap_flag = 'Y' and ( asl_fmap_single = 'Y' or (asl_fmap_single ='N' and asl_fmap_file_to_use  is NOT NULL) ) and pdmap_flag  = 'Y' and t1_fs_flag = 'Y' and  ( do_not_run_process_asl_registered_to_fs = 'R' or do_not_run_process_asl_smoothed_and_warped = 'R') "
+        sql = "select distinct enrollment_id, scan_procedure_id, asl_subjectid,asl_fmap_single,asl_fmap_file_to_use,fs_home_to_use 
+        from cg_asl_status where  t1_fs_flag = 'Y' and asl_fmap_flag = 'Y' 
+        and ( asl_fmap_single = 'Y' or (asl_fmap_single ='N' and asl_fmap_file_to_use  is NOT NULL) ) 
+        and pdmap_flag  = 'Y'  and  ( do_not_run_process_asl_registered_to_fs = 'R' or do_not_run_process_asl_smoothed_and_warped = 'R') "
         results = connection.execute(sql)
         results.each do |r|
             v_break = 0  # need a kill swith
