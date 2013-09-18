@@ -61,6 +61,10 @@ v_user = v_user.gsub("\n","")
       v_shared = Shared.new
       v_shared.run_adrc_upload()
       
+ elsif v_value_1 == "antuano_20130916_upload"
+      v_shared = Shared.new
+      v_shared.run_antuano_20130916_upload()    
+      
  elsif v_value_1 == "test_sftp"
          v_shared = Shared.new
          v_shared.run_sftp()
@@ -100,6 +104,10 @@ v_user = v_user.gsub("\n","")
   elsif v_value_1 == "pib_cereb_tac"
       v_shared = Shared.new
       v_shared.run_pib_cereb_tac()
+      
+  elsif v_value_1 == "selley_20130906_upload"
+      v_shared = Shared.new
+      v_shared.run_selley_20130906_upload()    
  
   elsif v_value_1 == "series_description"
       v_shared = Shared.new
