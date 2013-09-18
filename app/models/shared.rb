@@ -568,6 +568,7 @@ puts "AAAAAA "+v_call
   # status_flag = N means do not upload this subjectid
   def run_antuano_20130916_upload
     v_base_path = Shared.get_base_path()
+     v_process_name = "antuano_20130916_upload"
      @schedule = Schedule.where("name in ('antuano_20130916_upload')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
@@ -577,6 +578,8 @@ puts "AAAAAA "+v_call
       @schedulerun.save
       v_comment = ""
       v_comment_warning =""
+      v_stop_file_name = v_process_name+"_stop"
+      v_stop_file_path = v_log_base+v_stop_file_name
     connection = ActiveRecord::Base.connection();
     
     v_target_dir = "/home/panda_admin/upload_antuano_20130916"
@@ -596,6 +599,16 @@ puts "AAAAAA "+v_call
     # copy over the .nii file, replace subjectid with export_id
     # bzip2 each subjectid dir
     results.each do |r|
+      v_break = 0  # need a kill swith
+       v_log = ""
+      if File.file?(v_stop_file_path)
+        File.delete(v_stop_file_path)
+        v_break = 1
+        v_log = v_log + " STOPPING the results loop"
+        v_comment = " STOPPING the results loop  "+v_comment
+      end
+      break if v_break > 0
+      
       v_comment = "strt "+r[0]+","+v_comment
       @schedulerun.comment =v_comment[0..1990]
       @schedulerun.save
