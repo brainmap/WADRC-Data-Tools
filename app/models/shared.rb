@@ -616,7 +616,7 @@ puts "AAAAAA "+v_call
       sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')"
       results_vgroup = connection.execute(sql_vgroup)
       # mkdir /tmp/adrc_upload/[subjectid]_YYYYMMDD_wisc
-      v_export_id = ()@schedule.id).to_s+"_"+r[3].to_s
+      v_export_id = (@schedule.id).to_s+"_"+r[3].to_s
       v_subject_dir = v_export_id+"_"+(results_vgroup.first)[0].to_s+"_wisc"
       v_parent_dir_target =v_target_dir+"/"+v_subject_dir
       v_call = "ssh panda_admin@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"' "
