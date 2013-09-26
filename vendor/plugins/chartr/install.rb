@@ -9,10 +9,11 @@ Dir.chdir(Dir.getwd.sub(/vendor.*/, '')) do
   ## directory to public/
   ##
 
-  destination = RAILS_ROOT + "/public/javascripts/chartr"
+  # destination = RAILS_ROOT + "/public/javascripts/chartr"
+  destination = Rails.root + "/public/javascripts/chartr"
 
   # Create destination directory (RAILS_ROOT/public/javascripts/chartr)
-  FileUtils.mkdir_p(destination)
+  ####### HASHING OUT ### FileUtils.mkdir_p(destination)
 
   # Copy each file to the destination directory
   ChartrFiles.each do |f|

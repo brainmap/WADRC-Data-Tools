@@ -1,9 +1,9 @@
 source 'http://rubygems.org'
-gem 'rails', '~>3.0.4'
+gem 'rails', '~>3.2'
 
 
 gem 'sqlite3', '~>1.3.3'  # need in metamri
-gem 'mysql2','~>0.2.0'  # not limiting version 20130314, '~>0.2.0'---# went back to limit ACtiveRecord adapter and rails 3.1
+gem 'mysql2' #,'~>0.2.0'  # not limiting version 20130314, '~>0.2.0'---# went back to limit ACtiveRecord adapter and rails 3.1
 gem 'yaml_db'
 
 # Bundle edge Rails instead:
@@ -11,20 +11,21 @@ gem 'yaml_db'
 
 # in production
 # if ENV['RAILS_ENV'] == "production"
-  gem 'metamri'  ,'~>0.2.16'  ####:path => '~>0.2.11'
+   gem 'metamri'  ,'~>0.2.16'  ####:path => '~>0.2.11'
 # else
 #  gem 'metamri', :path => '~/code/metamri'
 # end
 
-gem 'builder', '~>2.1.2'
+gem 'builder' #, '~>2.1.2'
 gem 'RedCloth', '~>4.2.7'
 # gem 'bluecloth', '~>2.1.0'
 gem 'paperclip', '~>2.3.8'
-gem 'ruport', '~>1.6.3'
+# maybe move ruport, acts_as_reportatable, simple_form further down? get the version of depnedencies loaded for other gems first?
+gem 'ruport' ###########, '~>1.6.3'
 gem 'acts_as_reportable'
 gem 'kaminari'
-gem 'meta_where'
-gem 'meta_search'
+########### gem 'meta_where'
+########### gem 'meta_search'
 ##### gem 'rmagick'
 gem 'simple_form'
 gem 'exception_notification', "~> 2.4.1", :require => 'exception_notifier'
@@ -32,8 +33,9 @@ gem 'exception_notification', "~> 2.4.1", :require => 'exception_notifier'
 # Use unicorn as the web server
 # gem 'unicorn'
 
-gem 'jquery-rails'
+########## default in 3.1 ?  gem 'jquery-rails'
 gem "devise", ">= 1.4.9"
+gem 'devise-encryptable'
 gem "devise_ldap_authenticatable"
 gem "cancan"
 # gem "mechanize" # used in radiology model for scaping  # trying to remove nokogiri because of problems with xml lib versions on adrcdev/rvm
@@ -62,8 +64,8 @@ gem 'capistrano', '~>2.5.19'
 # put test-only gems in this group so their generators
 # and rake tasks are available in development mode:
 group :development, :test do
-  gem 'rspec', '~>2.4.0'
-  gem 'rspec-rails', '~>2.4.0'
+  ######### gem 'rspec' #, '~>2.4.0'
+  ######### gem 'rspec-rails' # ,  '~>2.4.0'
   # gem 'gherkin', '~>2.1.5' # trying to remove nokogiri because of problems with xml lib versions on adrcdev/rvm
   # gem 'cucumber', '~>0.7.3' # trying to remove nokogiri because of problems with xml lib versions on adrcdev/rvm
   # gem 'cucumber-rails', '~>0.4.1'
@@ -71,8 +73,8 @@ group :development, :test do
   # gem 'webrat'  # trying to remove nokogiri because of problems with xml lib versions on adrcdev/rvm
   gem 'database_cleaner'
   # gem 'pickle'  # trying to remove nokogiri because of problems with xml lib versions on adrcdev/rvm
-  gem 'autotest-rails'
-  gem 'factory_girl_rails', '~>1.0.1'
+  ########## gem 'autotest-rails'
+  # gem 'factory_girl_rails', '~>1.0.1'
   gem 'chronic'
   gem 'launchy'
   gem 'timecop'
