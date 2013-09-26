@@ -55,7 +55,7 @@
     <% @results.each do |vg| %>
    <%   vgroup = Vgroup.find(vg[1])
         @a =  Appointment.where("vgroup_id in (?)",vgroup.id)
-        a_array =@a.to_a
+        a_array = @a.to_a  
        @visits = Visit.where("appointment_id in (?) ",a_array)
          visit = nil
          @visits.each do |v| 
