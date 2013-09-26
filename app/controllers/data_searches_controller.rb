@@ -866,7 +866,7 @@ class DataSearchesController < ApplicationController
       request_format = request.formats.to_s
       @html_request ="Y"
       case  request_format
-        when "text/html" then  # application/html ?
+        when "[text/html]","text/html" then  # application/html ?
             @html_request ="Y" 
         else
             @html_request ="N"

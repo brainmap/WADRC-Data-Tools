@@ -657,7 +657,7 @@ end
        request_format = request.formats.to_s
        @html_request ="Y"
        case  request_format
-         when "text/html" then # ? application/html
+         when "[text/html]", "text/html" then # ? application/html
            @column_headers = ['Date','Protocol','Enumber','RMR','MRI status','PET status','LP status','LH status','NP status','Questionnaire status'] # need to look up values
                # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
            @fields =["vgroups.transfer_mri", "vgroups.transfer_pet", "vgroups.completedlumbarpuncture", "vgroups.completedblooddraw", "vgroups.completedneuropsych", "vgroups.completedquestionnaire"]      
@@ -697,6 +697,7 @@ end
            connection = ActiveRecord::Base.connection();
            @results2 = connection.execute(sql)
            @temp_results = @results2
+
 
            @results = []   
            i =0
@@ -739,11 +740,10 @@ end
 
              #
 
-             @temp_row = @temp + var
+             @temp_row = @temp+ var
              @results[i] = @temp_row
              i = i+1
            end   
-
          
          @results_total = @results  # pageination makes result count wrong
         # return @vgroups instead? for html -- xls -- go to results -- no pageation

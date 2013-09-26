@@ -1026,7 +1026,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
       request_format = request.formats.to_s
       if v_include_radiology_comments == "1"
           case  request_format
-            when "text/html" then
+            when "[text/html]","text/html" then
               @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path',  'Radiology Comments','Rad Site','Appt Note'] # need to look up values
               # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
               @column_number =   @column_headers.size
@@ -1046,7 +1046,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
       else
          # adjust columns and fields for html vs xls, adjust for radiology comments
          case  request_format
-           when "text/html" then
+           when "[text/html]","text/html" then
              @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path','Mri status','Radiology Outcome','Notes','Appt Note'] # need to look up values
              # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
              @column_number =   @column_headers.size

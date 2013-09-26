@@ -264,7 +264,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
            request_format = request.formats.to_s
            @html_request ="Y"
            case  request_format
-             when "text/html" then # ? application/html
+             when "[text/html]","text/html" then # ? application/html
                @column_headers = ['Date','Protocol','Enumber','RMR','Directory', 'Series Description','Imaging Details','Quality Check', 'Analysis Exclusions',' ' ] # need to look up values
                    # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
                @column_number =   @column_headers.size

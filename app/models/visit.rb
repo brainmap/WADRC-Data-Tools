@@ -40,7 +40,7 @@ class Visit < ActiveRecord::Base
   # before_validation :update_compiled_at_date, :if => Proc.new {|v| v.compile_folder_changed? }
   #scope :complete, where(:compile_folder => "yes")
   #scope :incomplete, where(:compile_folder => "no")
-  scope :recently_imported, where(:created_at.gt => 1.week.ago)
+  scope :recently_imported, lambda{ where("created_at => ?",1.week.ago)   }
   scope :assigned_to, lambda { |user_id|
     { :conditions => { :user_id => user_id } }
   }

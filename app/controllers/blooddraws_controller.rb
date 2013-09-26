@@ -262,7 +262,7 @@ class BlooddrawsController < ApplicationController
    @html_request ="Y"
 
    case  request_format
-     when "text/html" then  # application/html ?
+     when "[text/html]","text/html" then  # application/html ?
        @column_headers = ['Date','Protocol','Enumber','RMR','LH status','LH Note', 'Appt Note'] # need to look up values
        # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
        @column_number =   @column_headers.size
