@@ -102,56 +102,45 @@
   
 <% end %>
 
-<%= link_to 'download csv of this search (this may take a while!)', participant_search_path(:participant_search => params[:participant_search], :format => :csv), :class => 'download_csv' %></p>
+<%= link_to 'download xls', { :controller=>"participants", :action=>"participant_search", :participant_search =>  params[:participant_search] , :format => :xls} %>  </p></p>
 
 
-<table id="participants_index_table" class="tabular">
-	<caption><%= pluralize(@participants.total_count, 'Participant') %><%#= paginated ? pagination_info(@participants) : pluralize(@participants.length, 'Participant') %></caption>
-  <!-- <caption><%= pluralize @participants.count, 'participants' %></caption> -->
-  
+<table class="tabular">  
+  <caption><%= pluralize(@results_total.size, 'Participant') %></caption>
   <thead>
     <tr>
-	    <th>DOB</th>
-	    <th>Gender</th>
-	    <th>Wrap Number</th>
-		<th>ReggieID</th>
-	    <th>Years of Education</th>
-	    <th>Notes</th>
-	    <th>Enroll Number</th>
-	    <!-- <th>ApoE</th> -->
-	    <th></th>
+    <% @column_headers.each do |column_header|%>
+        <th><%= column_header%></th>
+    <% end %>
+      <th></th>
+      <th></th>
     </tr>
   </thead>
-  
-  <tfoot><td colspan=7><%= paginate @participants %></td></tfoot>
+ <!--   add params and order by link to col header!!!!!!!!!!!    -->
+  <tfoot><tr><td colspan=(column_header.size)>
+     <%=    paginate @results %> 
+  </td></tr></tfoot>
 
   <tbody>
-    <% for p in @participants %>
-      <tr>
-        <td><%=h p.dob.year unless p.dob.nil? %></td>
-        <td><%=h p.gender_prompt %></td>
-        <td><%=h p.wrapnum %></td>
-        <td><%=h p.reggieid %></td>
-        <td><%=h p.ed_years %></td>
-        <td>
-          <%= popup_note(p.note.nil? ? "" : "peek", "<p>#{p.note}</p>")%>
-        </td>
-        <td>
-	      <%= p.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %>
-	    </td>
-        <!-- <td>
-          <%#= popup_note(genetic_status(p.apoe_e1, p.apoe_e2), key_val_table('genetic_status_details', {
-            :Allele_1 => allele(p.apoe_e1),
-            :Allele_2 => allele(p.apoe_e2),
-            :Processor => p.apoe_processor
-          }))%>
-        </td> -->
-        <td><%= link_to "view", p %></td>
+    <% @results.each do |result| %>
+       <%  participant = Participant.find(result[@column_headers.size-1])
+            result.delete_at(@column_headers.size-1)
+        %>
+    <tr>
+     <% for i in 0..@column_number %>
+       <%if i == 5 %>
+          <td><%= popup_note('peek', key_val_table('path_popup', { :Note => result[i].to_s })) unless result[i].to_s.blank? %></td>
+        <% else %>  
+        <td><%= result[i] %></td>
+        <% end %>
+     <% end %>
+       <td style="width: 6em;" nowrap><%= link_to 'show', participant %>
+       </td>
       </tr>
     <% end %>
   </tbody>
-  
 </table>
+
 
 <br />
 

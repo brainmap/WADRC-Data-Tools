@@ -176,155 +176,187 @@ class ParticipantsController < ApplicationController
         #enrollment_vgroup_memberships.enrollment_id enrollments.enumber
         
         # age at ANY of the appointments
-
+      
+      @conditions = []
       params[:search] =Hash.new
        if params[:participant_search].nil?
             params[:participant_search] =Hash.new  
        end
+       params["search_criteria"] = ""
         scan_procedure_array =current_user[:view_low_scan_procedure_array]
             scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
-        # Remove default scope if sorting has been requested.
-        @search = Participant.search(params[:search]) 
-          if !params[:participant_search][:scan_procedure_id].blank?
-            @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups
+
+        if !params[:participant_search][:scan_procedure_id].blank?
+              condition =" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups
                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                           and scan_procedures_vgroups.scan_procedure_id in (?))",params[:participant_search][:scan_procedure_id])
-            
-          end
+                           and scan_procedures_vgroups.scan_procedure_id in ("+params[:participant_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+              @conditions.push(condition)
+              @scan_procedures = ScanProcedure.where("id in (?)",params[:participant_search][:scan_procedure_id])
+              params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe            
+        end
 
-          if !params[:participant_search][:enumber].blank?
+        if !params[:participant_search][:enumber].blank?
             
             if params[:participant_search][:enumber].include?(',') # string of enumbers
              v_enumber =  params[:participant_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
-             v_enumber_array = []
-             v_enumber_array = v_enumber.split(",")
-             
-
-             @search =@search.where("  participants.id in (select enrollments.participant_id from participants,   enrollments
+             v_enumber = v_enumber.gsub(/,/,"','")
+             condition =" participants.id in (select enrollments.participant_id from participants,   enrollments
                                         where enrollments.participant_id = participants.id
-                                          and lower(enrollments.enumber) in (?))",v_enumber_array)
-            else
-             @search =@search.where("  participants.id in (select enrollments.participant_id from participants,   enrollments
+                                          and lower(enrollments.enumber) in  ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"
+          
+            else 
+            condition ="  participants.id in (select enrollments.participant_id from participants,   enrollments
                                         where enrollments.participant_id = participants.id
-                                          and lower(enrollments.enumber) in (lower(?)))",params[:participant_search][:enumber])
+                                          and lower(enrollments.enumber) in (lower('"+params[:participant_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
              end
+             @conditions.push(condition)
+             params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:participant_search][:enumber]
           end      
 
           if !params[:participant_search][:rmr].blank? 
-              @search = @search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,vgroups
+              condition ="  participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,vgroups
                                  where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                               and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                               and vgroups.id = enrollment_vgroup_memberships.vgroup_id
-                              and lower(vgroups.rmr) in (lower(?)  ) )",params[:participant_search][:rmr])
+                              and lower(vgroups.rmr) in (lower('"+params[:participant_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
+              @conditions.push(condition)           
+              params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:participant_search][:rmr]
           end
 
-           #  build expected date format --- between, >, < 
-           v_date_latest =""
-           #want all three date parts
 
-           if !params[:participant_search]["#{'latest_timestamp'}(1i)"].blank? && !params[:participant_search]["#{'latest_timestamp'}(2i)"].blank? && !params[:participant_search]["#{'latest_timestamp'}(3i)"].blank?
-                v_date_latest = params[:participant_search]["#{'latest_timestamp'}(1i)"] +"-"+params[:participant_search]["#{'latest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:participant_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
-           end
-
-           v_date_earliest =""
-           #want all three date parts
-
-           if !params[:participant_search]["#{'earliest_timestamp'}(1i)"].blank? && !params[:participant_search]["#{'earliest_timestamp'}(2i)"].blank? && !params[:participant_search]["#{'earliest_timestamp'}(3i)"].blank?
-                 v_date_earliest = params[:participant_search]["#{'earliest_timestamp'}(1i)"] +"-"+params[:participant_search]["#{'earliest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:participant_search]["#{'earliest_timestamp'}(3i)"].rjust(2,"0")
-            end
-
-           if v_date_latest.length>0 && v_date_earliest.length >0
-             @search = @search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments,vgroups
-               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                      and vgroups.id = enrollment_vgroup_memberships.vgroup_id
-                      and   vgroups.date between ? and ? )",v_date_earliest,v_date_latest)
-           elsif v_date_latest.length>0
-             @search = @search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments,vgroups
-                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                       and vgroups.id = enrollment_vgroup_memberships.vgroup_id
-                       and vgroups.date < ?  )",v_date_latest)
-           elsif  v_date_earliest.length >0
-             @search = @search.where(" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments,vgroups
-                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                       and vgroups.id = enrollment_vgroup_memberships.vgroup_id
-                       and vgroups.date > ? )",v_date_earliest)
-            end
-
-            if !params[:participant_search][:gender].blank?
-   
-              @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollments
-                where  enrollments.participant_id = participants.id 
-                       and participants.gender is not NULL and participants.gender in (?) )", params[:participant_search][:gender])
-            end   
+ 
 
             if !params[:participant_search][:wrapnum].blank?
    
-              @search =@search.where(" participants.id in (select enrollments.participant_id from participants,  enrollments
+              condition ="  participants.id in (select enrollments.participant_id from participants,  enrollments
                 where enrollments.participant_id = participants.id 
-                       and participants.wrapnum is not NULL and participants.wrapnum in (?) )", params[:participant_search][:wrapnum])
+                       and participants.wrapnum is not NULL and participants.wrapnum in (lower('"+params[:participant_search][:wrapnum].gsub(/[;:'"()=<>]/, '')+"')   ))"
+              @conditions.push(condition)           
+              params["search_criteria"] = params["search_criteria"] +",  Wrapnum "+params[:participant_search][:wrapnum]
             end
             
             if !params[:participant_search][:reggieid].blank?
    
-              @search =@search.where(" participants.id in (select enrollments.participant_id from participants,   enrollments
+             condition ="  participants.id in (select enrollments.participant_id from participants,   enrollments
                 where  enrollments.participant_id = participants.id 
-                       and participants.reggieid is not NULL and participants.reggieid in (?) )", params[:participant_search][:reggieid])
+                       and participants.reggieid is not NULL and participants.reggieid in (lower('"+params[:participant_search][:reggieid].gsub(/[;:'"()=<>]/, '')+"')   ))"
+              @conditions.push(condition)           
+              params["search_criteria"] = params["search_criteria"] +",  reggieid "+params[:participant_search][:reggieid]
             end
 
          # NEED TO CHANGE TO BE FOR ANY APPOITMENT 
+               #  build expected date format --- between, >, < 
+      v_date_latest =""
+      #want all three date parts
+      if !params[:participant_search]["#{'latest_timestamp'}(1i)"].blank? && !params[:participant_search]["#{'latest_timestamp'}(2i)"].blank? && !params[:participant_search]["#{'latest_timestamp'}(3i)"].blank?
+           v_date_latest = params[:participant_search]["#{'latest_timestamp'}(1i)"] +"-"+params[:participant_search]["#{'latest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:participant_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+      end
+      v_date_earliest =""
+      #want all three date parts
+      if !params[:participant_search]["#{'earliest_timestamp'}(1i)"].blank? && !params[:participant_search]["#{'earliest_timestamp'}(2i)"].blank? && !params[:participant_search]["#{'earliest_timestamp'}(3i)"].blank?
+            v_date_earliest = params[:participant_search]["#{'earliest_timestamp'}(1i)"] +"-"+params[:participant_search]["#{'earliest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:participant_search]["#{'earliest_timestamp'}(3i)"].rjust(2,"0")
+       end
+      v_date_latest = v_date_latest.gsub(/[;:'"()=<>]/, '')
+      v_date_earliest = v_date_earliest.gsub(/[;:'"()=<>]/, '')
+      if v_date_latest.length>0 && v_date_earliest.length >0
+        condition ="  participants.id in  (select vgroups.participant_id from vgroups where vgroups.vgroup_date between '"+v_date_earliest+"' and '"+v_date_latest+"' )"
+        @conditions.push(condition)
+        params["search_criteria"] = params["search_criteria"] +",  vvgroup date between "+v_date_earliest+" and "+v_date_latest
+      elsif v_date_latest.length>0
+        condition ="  participants.id  in (select vgroups.participant_id from vgroups where vgroups.vgroup_date < '"+v_date_latest+"'  )"
+         @conditions.push(condition)
+         params["search_criteria"] = params["search_criteria"] +",  vgroup date before "+v_date_latest 
+      elsif  v_date_earliest.length >0
+        condition ="  participants.id  in (select vgroups.participant_id from vgroups where vgroups.vgroup_date > '"+v_date_earliest+"' )"
+         @conditions.push(condition)
+         params["search_criteria"] = params["search_criteria"] +",  vgroup date after "+v_date_earliest
+       end
+
+       if !params[:participant_search][:gender].blank?
+          condition ="  participants.gender in ("+params[:participant_search][:gender].gsub(/[;:'"()=<>]/, '')+") "
+           @conditions.push(condition)
+           if params[:participant_search][:gender] == 1
+              params["search_criteria"] = params["search_criteria"] +",  sex is Male"
+           elsif params[:participant_search][:gender] == 2
+              params["search_criteria"] = params["search_criteria"] +",  sex is Female"
+           end
+       end   
 
          if !params[:participant_search][:min_age].blank? && params[:participant_search][:max_age].blank?
-             @search = @search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,vgroups
+             condition ="   participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,vgroups
                                 where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                              and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                              and vgroups.id = enrollment_vgroup_memberships.vgroup_id
-                             and floor(DATEDIFF(vgroups.date,participants.dob)/365.25) >= ?   )",params[:participant_search][:min_age])
+                             and floor(DATEDIFF(vgroups.vgroup_date,participants.dob)/365.25) >= "+params[:participant_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+            @conditions.push(condition)
+           params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:participant_search][:min_age]
          elsif params[:participant_search][:min_age].blank? && !params[:participant_search][:max_age].blank?
-              @search = @search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,vgroups
+              condition ="  participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,vgroups
                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                           and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                           and vgroups.id = enrollment_vgroup_memberships.vgroup_id
-                          and floor(DATEDIFF(vgroups.date,participants.dob)/365.25) <= ?   )",params[:participant_search][:max_age])
+                          and floor(DATEDIFF(vgroups.vgroup_date,participants.dob)/365.25) <= "+params[:participant_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+              @conditions.push(condition)
+              params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:participant_search][:max_age]
          elsif !params[:participant_search][:min_age].blank? && !params[:participant_search][:max_age].blank?
-            @search = @search.where("  participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,vgroups
+            condition ="  participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,vgroups
                             where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                         and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                         and vgroups.id = enrollment_vgroup_memberships.vgroup_id
-                        and floor(DATEDIFF(vgroups.date,participants.dob)/365.25) between ? and ?   )",params[:participant_search][:min_age],params[:participant_search][:max_age])
+                        and floor(DATEDIFF(vgroups.vgroup_date,participants.dob)/365.25) between "+params[:participant_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:participant_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+            @conditions.push(condition)
+            params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:participant_search][:min_age]+" and "+params[:participant_search][:max_age]
          end
-# show all the particpants in index page
-#        @search  =  @search.where(" participants.id in     (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups
-#                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-#                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-#                            and Scan_procedures_vgroups.scan_procedure_id in (?))", scan_procedure_array)
-       @participants  =  @search.page(params[:page]) 
 
-        ### LOOK WHERE TITLE IS SHOWING UP
-        @collection_title = 'All participants'
+       # adjust columns and fields for html vs xls
+       request_format = request.formats.to_s
+       @html_request ="Y"
+       case  request_format
+         when "[text/html]","text/html" then # ? application/html
+           @column_headers = ['DOB','Gender','Wrapnum','Reggieid','Years of Education','Notes', 'Enroll Number'] # need to look up values
+               # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+           @column_number =   @column_headers.size
+           @fields =["date_format(participants.dob,'%Y')","lookup_genders.description","participants.wrapnum","participants.reggieid","participants.ed_years","participants.note","participants.id"] 
+              # need to get enumber in line
+            @left_join = ["LEFT JOIN lookup_genders on participants.gender = lookup_genders.id"] # left join needs to be in sql right after the parent table!!!!!!!
+         else    
+           @html_request ="N"          
+            @column_headers = ['DOB','Gender','Wrapnum','Reggieid','Years of Education','Notes', 'Enroll Number']# need to look up values
+                  # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+            @column_number =   @column_headers.size
+            @fields =["date_format(participants.dob,'%Y')","lookup_genders.description","participants.wrapnum","participants.reggieid","participants.ed_years","participants.note","participants.id"] 
+              # need to get enumber in line
+            @left_join = ["LEFT JOIN lookup_genders on participants.gender = lookup_genders.id"] # left join needs to be in sql right after the parent table!!!!!!!   
+                        
+                 
+         end
+       @tables =['participants'] # trigger joins --- vgroups and appointments by default
+       @order_by =["participants.id desc"]
 
-#:initials,
-    limit_visits =  [:user_id ,:transfer_mri,:transfer_pet,:conference,:dicom_dvd,:compile_folder,:id,
-                      :created_at, :updated_at, :research_diagnosis, :consent_form_type, :created_by_id, :dicom_study_uid,:compiled_at]
+      @results = self.run_search_participant   # in the application controller
+      @results_total = @results  # pageination makes result count wrong
+      t = Time.now 
+      if params["search_criteria"].blank?
+        params["search_criteria"] = ""
+      end
+      @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
 
-
-
-    ### if Radiology - pass in params -- do same seach, but call differ respond_to
-    ### add radiology_comments, image_dataset comment, and image_dataset_quality_check columns to visit?
-    ### define what field go out
-    #     light_include_options = :visit
-            export_record = participant_search_path(:participant_search => params[:participant_search], :format => :csv)
-            export_record.gsub!('%28','(')
-            export_record.gsub!('%29',')')
-
-
-            #current_user.id.to_s 
-            # add export_log
+      ### LOOK WHERE TITLE IS SHOWING UP
+      @collection_title = 'All Participants'
       @current_tab = "participants"
-        respond_to do |format|
-          format.html {render :template => "participants/participant_search"}
-          format.csv  { render :csv => @participants.csv_download(@search) }
-        end
+
+         #   export_record.gsub!('%28','(')
+         #   export_record.gsub!('%29',')')
+
+      respond_to do |format|
+        format.xls # pet_search.xls.erb
+        format.xml  { render :xml => @results }    # actually redefined in the xls page    
+        format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(50)} # pet_search.html.erb
+      end
+
+
+
     #    render :template => "visits/participant_search"    
     
   end

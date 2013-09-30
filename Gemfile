@@ -24,8 +24,8 @@ gem 'paperclip', '~>2.3.8'
 gem 'ruport' ###########, '~>1.6.3'
 gem 'acts_as_reportable'
 gem 'kaminari'
-########### gem 'meta_where'
-########### gem 'meta_search'
+####### gem 'meta_search' # needs actionpack 3.0.2 ruby
+####### gem 'meta_where'   # needs arel (2.0.7)  but arel is 3.0.2
 ##### gem 'rmagick'
 gem 'simple_form'
 gem 'exception_notification', "~> 2.4.1", :require => 'exception_notifier'

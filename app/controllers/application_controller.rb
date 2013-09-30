@@ -106,6 +106,49 @@ puts sql
     end   
     return @results
  end
+
+
+ def run_search_participant
+  scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
+  if @tables.size == 1  or @tables.include?("image_datasets")
+     sql = "SELECT distinct participants.id,"+@fields.join(',')+"
+            FROM "+@tables.join(',')+" "+@left_join.join(' ')+"
+            WHERE participants.id in (select vgroups.participant_id from vgroups, scan_procedures_vgroups where 
+                     vgroups.id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") ) "
+
+
+        if @conditions.size > 0
+            sql = sql +" AND "+@conditions.join(' and ')
+        end
+       #conditions - feed thru ActiveRecord? stop sql injection -- replace : ; " ' ( ) = < > - others?
+        if @order_by.size > 0
+          sql = sql +" ORDER BY "+@order_by.join(',')
+        end 
+   end
+
+puts sql    
+    connection = ActiveRecord::Base.connection();
+    @results2 = connection.execute(sql)
+    @temp_results = @results2
+
+    @results = []   
+    i =0
+    @temp_results.each do |var|
+
+      @temp = []
+          sql_enum = "SELECT distinct enrollments.enumber 
+                FROM enrollments, enrollment_vgroup_memberships
+                WHERE enrollments.participant_id = "+var[0].to_s
+          @results_enum = connection.execute(sql_enum)
+          @temp[0] =@results_enum.to_a.join(", ")
+
+      var.delete_at(0) # get rid of participant_id
+       @temp_row  = var.push(@temp[0])
+      @results[i] = @temp_row
+      i = i+1
+    end   
+    return @results
+ end
  
 # for q_data forms -- only run in export?
 def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup)
