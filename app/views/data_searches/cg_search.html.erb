@@ -56,7 +56,8 @@ v_tn_cn_searchable_hash = []
 <table  width="100%" ><tr ><td>&nbsp;</td><td width="20%" nowrap align="right" bgcolor="CFCFCF"><table border="1"><tr><td  >
 	<%= form_for 'cg_search' do |f| %>
 	 <small><%= f.label :select_saved_search%>:</small> 
-	<%= f.select :cg_query_id, @results_stored_search,:include_blank => 'Select a stored search'%>
+
+	<%= f.select( :cg_query_id, @data_for_select_stored_search,{:include_blank => 'Select a stored search'} ) %>
 	<%= f.submit("Retrieve stored query")%>
 	<% end %>
 	</td></tr></table>

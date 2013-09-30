@@ -1540,11 +1540,12 @@ class DataSearchesController < ApplicationController
       
       @sp_array.push("-1") # need something in the array
        # for stored query drop down
-      sql = "select  concat(cg_name,' - ',users.username,' - ', date_format(cg_queries.created_at,'%Y %m %d')),cg_queries.id  
+      sql = "select  concat(cg_name,' - ',users.username,' - ', date_format(cg_queries.created_at,'%Y %m %d')) name,cg_queries.id  
       from cg_queries, users where status_flag != 'N' and cg_queries.user_id = users.id  
          order by save_flag desc, users.username, date_format(cg_queries.created_at,'%Y %m %d') desc"
       connection = ActiveRecord::Base.connection();
       @results_stored_search = connection.execute(sql)
+      @data_for_select_stored_search = @results_stored_search.each { |hash| [hash[0], hash[1]] }
       
       # trim leading ","
       params["search_criteria"] = params["search_criteria"].sub(", ","")
