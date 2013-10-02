@@ -701,7 +701,7 @@ puts "AAAAAA "+v_call
       stderr.close
       
       # fsftp dir when set
-      sql_done = "update cg_antuano_20130916 set done_status ="Y" where subjectid = '"+r[0]+"'"
+      sql_done = "update cg_antuano_20130916 set done_status ='Y' where subjectid = '"+r[0]+"'"
       results_done = connection.execute(sql_done)
   
     end # results
