@@ -73,8 +73,10 @@ puts "q_data_form_id="+params[:q_data_form_id]
 				params["q_data_id["+qfq.question_id.to_s+"]"] =  id.try(:to_s)
 			end
 		  end	
-		  if params["q_data_id["+qfq.question_id.to_s+"]"].length > 0 
-		   @q_data = QDatum.find(params["q_data_id["+qfq.question_id.to_s+"]"])
+		  # added check to see if q_data exisits - cai 20131003 -- not sure how a q_data didn't get made
+		  if params["q_data_id["+qfq.question_id.to_s+"]"].length > 0 and QDatum.exists?(params["q_data_id["+qfq.question_id.to_s+"]"])
+		   #@q_data = QDatum.find(params["q_data_id["+qfq.question_id.to_s+"]"])
+            @q_data = QDatum.find(params["q_data_id["+qfq.question_id.to_s+"]"])
 		  else
 		   @q_data = QDatum.new
 		   @q_data.value_1 = @question.default_val_1

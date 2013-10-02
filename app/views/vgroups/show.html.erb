@@ -93,7 +93,6 @@ edit_count = edit_count -1
 		
 	<% end %>
 	</td></tr>
-
 <tr><td colspan=6 align="left">
 	<% if edit_count > 0 %>
 		<b><%= link_to 'Note', edit_vgroup_path(@vgroup) %>:</b><br>
@@ -111,7 +110,7 @@ edit_count = edit_count -1
 <tr><td colspan=5  align="left">
 	<b>MRI:</b>    <%= visit.blank? ? "None" :""%></td><td >&nbsp;</td><td colspan="1" width="30%" align="right" nowrap <%= show_bool_cell_color(@vgroup.transfer_mri) %> > 
 <% if edit_count > 0 %>
-     <% form_tag( "/vgroups/change_transfer_mri_vgroup",:url => { :controller=>"vgroups",:action => "change_transfer_mri_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
+     <%= form_tag( "/vgroups/change_transfer_mri_vgroup",:url => { :controller=>"vgroups",:action => "change_transfer_mri_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
            <%= hidden_field_tag 'id', @vgroup.id %>
       <%= label_tag :Completed_MRI %> <%= select :vgroup, :transfer_mri, ["no", "yes", "n/a"] %>
      <%= submit_tag("Update") %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -161,7 +160,7 @@ edit_count = edit_count -1
 <tr><td colspan=5  align="left">
 	<b>Petscan: </b><%= @petscans.blank? ? "None" :""%></td><td  >&nbsp;</td><td colspan="1" align="right" nowrap <%= show_bool_cell_color(@vgroup.transfer_pet) %> >
 <% if edit_count > 0 %>
- <% form_tag( "/vgroups/change_transfer_pet_vgroup",:url => { :controller=>"vgroups",:action => "change_transfer_pet_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
+ <%= form_tag( "/vgroups/change_transfer_pet_vgroup",:url => { :controller=>"vgroups",:action => "change_transfer_pet_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
        <%= hidden_field_tag 'id', @vgroup.id %>
   <%= label_tag :Completed_PET %> <%= select :vgroup, :transfer_pet, ["no", "yes", "n/a"] %>&nbsp;
  <%= submit_tag("Update") %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -193,7 +192,7 @@ edit_count = edit_count -1
 <tr><td colspan=5  align="left">
 	<b>Lumbar Puncture: </b><%= @lumbarpunctures.blank? ? "None" :""%></td><td  >&nbsp;</td><td colspan="1" align="right" nowrap <%= show_bool_cell_color(@vgroup.completedlumbarpuncture) %> >
 <% if edit_count > 0 %>
-      <% form_tag( "/vgroups/change_completedlumbarpuncture_vgroup",:url => { :controller=>"vgroups",:action => "change_completedlumbarpuncture_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
+      <%= form_tag( "/vgroups/change_completedlumbarpuncture_vgroup",:url => { :controller=>"vgroups",:action => "change_completedlumbarpuncture_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
       <%= hidden_field_tag 'id', @vgroup.id %>
       <%= label_tag :Completed_LP %> <%= select :vgroup, :completedlumbarpuncture, ["no", "yes", "n/a"] %>&nbsp;
       <%= submit_tag("Update") %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -224,7 +223,7 @@ edit_count = edit_count -1
 <tr><td colspan=5  align="left">
 	<b>Lab Health: </b><%= @blooddraws.blank? ? "None" :""%></td><td  >&nbsp;</td><td colspan="1" align="right" nowrap <%= show_bool_cell_color(@vgroup.completedblooddraw) %> >
 <% if edit_count > 0 %>
-      <% form_tag( "/vgroups/change_completedblooddraw_vgroup",:url => { :controller=>"vgroups",:action => "change_completedblooddraw_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
+      <%= form_tag( "/vgroups/change_completedblooddraw_vgroup",:url => { :controller=>"vgroups",:action => "change_completedblooddraw_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
       <%= hidden_field_tag 'id', @vgroup.id %>
       <%= label_tag :Completed_Lab %> <%= select :vgroup, :completedblooddraw, ["no", "yes", "n/a"] %>&nbsp;
       <%= submit_tag("Update") %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -262,7 +261,7 @@ edit_count = edit_count -1
 <tr><td colspan=5  align="left">
 	<b>Neuro Psych: </b><%= @neuropsyches.blank? ? "None" :""%></td><td  >&nbsp;</td><td colspan="1" align="right" nowrap <%= show_bool_cell_color(@vgroup.completedneuropsych) %> >
 <% if edit_count > 0 %>
-	<% form_tag( "/vgroups/change_completedneuropsych_vgroup",:url => { :controller=>"vgroups",:action => "change_completedneuropsych_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
+	<%= form_tag( "/vgroups/change_completedneuropsych_vgroup",:url => { :controller=>"vgroups",:action => "change_completedneuropsych_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
 		<%= hidden_field_tag 'id', @vgroup.id %>
 		<%= label_tag :Completed_NP %> <%= select :vgroup, :completedneuropsych, ["no", "yes", "n/a"] %>&nbsp;
 		<%= submit_tag("Update") %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -298,7 +297,7 @@ edit_count = edit_count -1
 <tr><td colspan=5  align="left">
 	<b>Questionnaire: </b><%= @questionnaires.blank? ? "None" :""%></td><td  >&nbsp;</td><td colspan="1" align="right" nowrap <%= show_bool_cell_color(@vgroup.completedquestionnaire) %> > 
 <% if edit_count > 0 %>
-	<% form_tag( "/vgroups/change_completedquestionnaire_vgroup",:url => { :controller=>"vgroups",:action => "change_completedquestionnaire_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
+	<%= form_tag( "/vgroups/change_completedquestionnaire_vgroup",:url => { :controller=>"vgroups",:action => "change_completedquestionnaire_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
 		<%= hidden_field_tag 'id', @vgroup.id %>
 		<%= label_tag :Completed_Q %> <%= select :vgroup, :completedquestionnaire, ["no", "yes", "n/a"] %>&nbsp;
 		<%= submit_tag("Update") %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -344,7 +343,7 @@ edit_count = edit_count -1
 
 <br><br><B>Change an appointment to a different vgroup</b><br>
 
-	<% form_tag( "/vgroups/change_appointment_vgroup",:url => { :controller=>"vgroups",:action => "change_appointment_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
+	<%= form_tag( "/vgroups/change_appointment_vgroup",:url => { :controller=>"vgroups",:action => "change_appointment_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
 <%= hidden_field_tag 'id', @vgroup.id %>
   <div class="field">
 	
