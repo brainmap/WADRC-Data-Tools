@@ -617,7 +617,7 @@ end
 
       if !params[:vgroups_search][:scan_procedure_id].blank? and !params[:vgroups_search][:scan_procedure_id][:id].blank?
          condition =" vgroups.id in (select vgroup_id from scan_procedures_vgroups where 
-                                                 scan_procedure_id in ("+params[:vgroups_search][:scan_procedure_id][:id].to_a.join(", ").gsub(/[;:'"()=<>]/, '')+"))"
+                                                 scan_procedure_id in ("+params[:vgroups_search][:scan_procedure_id][:id].gsub(/[;:'"()=<>]/, '')+"))"
          @conditions.push(condition)
          @scan_procedures = ScanProcedure.where("id in (?)",params[:vgroups_search][:scan_procedure_id][:id])
          params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
