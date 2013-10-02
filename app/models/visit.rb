@@ -249,6 +249,7 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
       end   
     # participant_dob.to_s  yyyy-mm-dd
     appointment = Appointment.find(self.appointment_id)
+
     dob = participant_dob ||= age_from_dicom_info[:dob] ||= nil
     if dob.blank?
       age_at_visit = age_from_dicom_info[:age] unless age_from_dicom_info[:age].blank?
@@ -260,15 +261,27 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
   
   def age_from_dicom_info
     @age_info ||= {}
-    return @age_info unless @age_info.blank?
-    
+   return @age_info unless @age_info.blank?
+    # tags[#] sometimes its just returning # -- a string? 
     image_datasets.each do |dataset|
-      if tags = dataset.dicom_taghash
-        @age_info[:age] = tags['0010,1010'][:value].blank? ? nil : tags['0010,1010'][:value].to_i
-        @age_info[:dob] = tags['0010,0030'][:value].blank? ? nil : begin DateTime.parse(tags['0010,0030'][:value]) rescue ArgumentError; nil end
+      if tags = dataset.dicom_taghash       
+        if @age_info[:age].blank? and !tags['0010,1010'].blank? and tags['0010,1010'] != '0010,1010'
+              @age_info[:age] = tags['0010,1010'][:value].blank? ? nil : tags['0010,1010'][:value].to_i  # age
+         end
+         if @age_info[:dob].blank? and !tags['0010,0030'].blank? and tags['0010,0030'] != '0010,0030'
+             @age_info[:dob] = tags['0010,0030'][:value].blank? ? nil : begin DateTime.parse(tags['0010,0030'][:value]) rescue ArgumentError; nil end
+          end
       end
     end
+        # @age_info[:age] ="33"
+        # @age_info[:dob] = nil #19540804
     return @age_info
+ #   @age_info.each do  |f|
+#puts "aaaaaa @age_info.each="+f.to_s
+#    end
+#     @age_info_array = @age_info.each { |hash| [hash[0], hash[1]] }
+#puts "bbbbbb @age_info_array = "+@age_info_array.to_s
+#    return @age_info_array
   end
   
   
@@ -297,7 +310,9 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
     image_datasets.each do |dataset|
       tags = dataset.dicom_taghash
       unless tags.blank?
-        uid = tags['0020,000D'][:value] unless tags['0020,000D'][:value].blank?
+        if tags['0020,000D'] != '0020,000D'
+            uid = tags['0020,000D'][:value] unless tags['0020,000D'][:value].blank?
+        end
       end
     end
     return uid
@@ -312,7 +327,7 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
     return @initials unless @initials.blank?
     
     image_datasets.each do |dataset|
-      if tags = dataset.dicom_taghash
+      if tags = dataset.dicom_taghash and tags['0010,0010'] != '0010,0010'
         @initials = tags['0010,0010'][:value] unless tags['0010,0010'][:value].blank?
       end
     end
