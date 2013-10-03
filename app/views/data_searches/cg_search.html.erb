@@ -39,7 +39,7 @@ v_conditions_between_hash = [['=','0'],['>=','1'],['<=','2'],['!=','3'],['betwee
 @add_cg_tn_id = []
 if !params[:cg_search].blank? and !params[:cg_search][:add_cg_tn_id].blank? 
   params[:cg_search][:add_cg_tn_id].each do |add_cg_tn_id|
-    v_add_cg_tn_id = add_cg_tn_id.to_a.to_s
+    v_add_cg_tn_id = add_cg_tn_id.to_s
     if (!params[:cg_search][:include_add_cg_tn].blank? and !params[:cg_search][:include_add_cg_tn][v_add_cg_tn_id].blank?)
 	   @add_cg_tn_id.push(v_add_cg_tn_id)
 	end

@@ -20,7 +20,7 @@ class SharedController < ActionController::Base
     # check that database table exisits
     sql = " select table_name from information_schema.tables  where table_name='"+@schedule.target_table+"' and table_schema='database_name' "
      v_schema ='panda_production'
-     if RAILS_ENV=="development" 
+     if Rails.env=="development" 
        v_schema ='panda_development'
      end
      v_error_flag = "N"

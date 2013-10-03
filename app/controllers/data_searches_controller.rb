@@ -154,7 +154,7 @@ class DataSearchesController < ApplicationController
     end
     def cg_edit_table
       v_schema ='panda_production'
-      if RAILS_ENV=="development" 
+      if Rails.env=="development" 
         v_schema ='panda_development'
       end
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
@@ -1820,7 +1820,7 @@ class DataSearchesController < ApplicationController
        v_table_name = v_table_name.gsub(' ','_').gsub('"','_').gsub("'","_").gsub("/","_").gsub(".","_").gsub("\\","_").gsub(";","").gsub(":","")
        # check for cg_ tn in database
        v_schema ='panda_production'
-       if RAILS_ENV=="development" 
+       if Rails.env=="development" 
          v_schema ='panda_development'
        end
        sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '"+v_schema+"' AND table_name = '"+v_table_name+"'"
@@ -1873,7 +1873,7 @@ class DataSearchesController < ApplicationController
  
  def cg_edit_table_db
     v_schema ='panda_production'
-    if RAILS_ENV=="development" 
+    if Rails.env=="development" 
        v_schema ='panda_development'
     end
     sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = '"+v_schema+"' 

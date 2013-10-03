@@ -94,7 +94,7 @@ class CgTnsController < ApplicationController
     params[:cg_tn][:join_left_parent_tn] =  params[:cg_tn][:join_left_parent_tn].downcase
     @cg_tn = CgTn.new(params[:cg_tn])
     v_schema ='panda_production'
-    if RAILS_ENV=="development" 
+    if Rails.env=="development" 
       v_schema ='panda_development'
     end
     respond_to do |format|
