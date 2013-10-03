@@ -3,7 +3,7 @@ require 'metamri'
 class RawDataImportsController < ApplicationController
   
   def new
-    @recent_visits = Visit.where(:created_at.lt => 1.month.ago).all
+    @recent_visits = Visit.where("created_at <= DATE_SUB(NOW(), INTERVAL 1 MONTH)").all # where("created_at => ?",1.week.ago)   
     # vipr files need to be bzip2 or they don't get imported into panda
     respond_to do |format|
       format.html # new.html.erb
