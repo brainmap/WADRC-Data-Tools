@@ -349,8 +349,11 @@ class BlooddrawsController < ApplicationController
      @enumbers = @vgroup.enrollments
      
      @appointment = Appointment.find(@blooddraw.appointment_id)
+
      @q_data_form = QDataForm.where("questionform_id="+ q_form_id.to_s+" and appointment_id in (?)",@appointment.id)
+
      @q_data_form = @q_data_form[0]
+
      #params[:appointment_id] = @blooddraw.appointment_id
      @questionform =Questionform.find(q_form_id)
 

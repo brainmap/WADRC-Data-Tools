@@ -18,7 +18,7 @@ edit_count = edit_count -1
 
 <br><br><B>Edit the Directory Path</b> <br>
 
-	<% form_tag( "/visits/change_directory_path",:url => { :controller=>"visits",:action => "change_direcory_path" } ,  :html => { :id => params[:id] }) do |f| %>
+	<%= form_tag( "/visits/change_directory_path",:url => { :controller=>"visits",:action => "change_direcory_path" } ,  :html => { :id => params[:id] }) do |f| %>
 <%= hidden_field_tag 'id', @visit.id %>
   <div class="field">
 	

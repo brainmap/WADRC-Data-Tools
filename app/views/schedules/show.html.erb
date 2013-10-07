@@ -74,7 +74,7 @@ v_full_partial = {"Full Reload"=>"full","Partial Reload/Append"=>"partial"}
 	
 <%    end
       if  @schedule.file_upload_flag == 'Y' %>
-<% form_tag('/shared_file_upload', :method=>'post', :multipart => true) do %>
+<%= form_tag('/shared_file_upload', :method=>'post', :multipart => true) do %>
        <table>
 	</td><td valign="top"><b>Browse for file to upload:</b> <%= file_field_tag "file_name" , :accept => 'text/csv' %></td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Full or Partial upload:</b> 
 		         <%= select_tag :full_partial, options_for_select(v_full_partial,'partial') %>

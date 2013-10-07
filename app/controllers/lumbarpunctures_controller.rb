@@ -137,6 +137,9 @@ class LumbarpuncturesController < ApplicationController
           LookupLumbarpuncture.all.each do |lookup_lp|
               val = nil
               val = params[:lookup_lumbarpuncture_id][lookup_lp.id.to_s].to_s
+              if val.blank?
+                   val = "0"
+              end
               sql = "INSERT INTO lumbarpuncture_results (lumbarpuncture_id,lookup_lumbarpuncture_id,value) VALUES ("+@lumbarpuncture.id.to_s+","+lookup_lp.id.to_s+",'"+val+"')
                     ON DUPLICATE KEY UPDATE value='"+val+"' "
               ActiveRecord::Base.connection.insert_sql sql
