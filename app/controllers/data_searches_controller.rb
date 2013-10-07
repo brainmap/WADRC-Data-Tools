@@ -1594,6 +1594,7 @@ class DataSearchesController < ApplicationController
     sql = sql + " where "+ @local_conditions.uniq.join(" and ")
     sql = sql+" order by "+@order_by.join(",")
     @sql = sql
+    # insert into query_log , with @user.id, date
     # run the sql ==>@results, after some substitutions
     
     if !params[:cg_search].blank? and !params[:cg_search][:series_description_type_id].blank? and !params[:cg_search][:image_dataset_file].blank?

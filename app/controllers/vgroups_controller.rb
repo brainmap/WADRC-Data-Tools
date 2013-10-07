@@ -697,7 +697,6 @@ end
            connection = ActiveRecord::Base.connection();
            @results2 = connection.execute(sql)
            @temp_results = @results2
-
            @results = []   
            i =0
            @temp_results.each do |var|
@@ -743,7 +742,6 @@ end
              @results[i] = @temp_row
              i = i+1
            end   
-
          
          @results_total = @results  # pageination makes result count wrong
         # return @vgroups instead? for html -- xls -- go to results -- no pageation

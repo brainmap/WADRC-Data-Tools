@@ -125,8 +125,9 @@ class CgTnsController < ApplicationController
     @cg_tn = CgTn.find(params[:id])
      params[:cg_tn][:tn] =  params[:cg_tn][:tn].downcase 
      params[:cg_tn][:join_left_parent_tn] =  params[:cg_tn][:join_left_parent_tn].downcase
+     
     respond_to do |format|
-      if @cg_tn.update_attributes(params[:cg_tn])
+      if @cg_tn.update_attributes(params[:cg_tn])     
         format.html { redirect_to(@cg_tn, :notice => 'Cg tn was successfully updated.') }
         format.xml  { head :ok }
       else
