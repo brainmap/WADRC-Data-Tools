@@ -27,6 +27,7 @@
    @q_data_form = QDataForm.new
   end
  params[:q_data_form_id] = @q_data_form.id.to_s
+
 # need front porch --- need consitant participant with enrollment with appointment with visit -- derive other values from one selection
 # just display -- rederive, even with hidden field
 %>
@@ -46,7 +47,7 @@
      value_link_array = [] %>
 <%    results.each do |vl|  
 	  value_link_array << vl.try(:to_s)
-     if vl.try(:to_s) == "participant"    
+     if vl.try(:to_s) == "participant"  or vl.try(:to_s) == '["participant"]'  
         if !params[:participant_id].blank?  %>
              <%= hidden_field_tag("value_1[-1]","") %> <%= hidden_field_tag("value_link[participant_id]",params[:participant_id]) %>
         <% 
@@ -65,10 +66,10 @@
 
        <%     end 
           end%>
-   <% elsif vl.try(:to_s) == "visit"   %> <%= hidden_field_tag("value_link[visit_id]",params[:visit_id]) %>
-   <% elsif vl.try(:to_s) == "appointment"   %><%= hidden_field_tag("value_link[appointment_id]",@appointment.id.to_s) %> 
-   <% elsif vl.try("to_s") == "enrollment"   %> <%= hidden_field_tag("value_link[enrollment_id]",params[:enrollment_id]) %>			
-	<% elsif  vl.try("to_s") == "scan_procedure"   %> <%= hidden_field_tag("value_link[scan_procedure_id]",params[:escan_procedure_id]) %>
+   <% elsif vl.try(:to_s) == "visit" or vl.try(:to_s) == '["visit"]'   %> <%= hidden_field_tag("value_link[visit_id]",params[:visit_id]) %>
+   <% elsif vl.try(:to_s) == "appointment"  or vl.try(:to_s) == '["appointment"]' %><%= hidden_field_tag("value_link[appointment_id]",@appointment.id.to_s) %> 
+   <% elsif vl.try("to_s") == "enrollment"  or vl.try("to_s") == '["enrollment"]'  %> <%= hidden_field_tag("value_link[enrollment_id]",params[:enrollment_id]) %>			
+	<% elsif  vl.try("to_s") == "scan_procedure"  or vl.try("to_s") == '["scan_procedure"]' %> <%= hidden_field_tag("value_link[scan_procedure_id]",params[:scan_procedure_id]) %>
 <%	  end %>
   <% end %>
 <%    # scan_procedure id --- access control, limit participants, visits, etc%>
@@ -86,6 +87,7 @@
 		    results = connection.execute(sql)
 		    results.each do |id|
 				params["q_data_id["+qfq.question_id.to_s+"]"] =  id.try(:to_s)
+				params["q_data_id["+qfq.question_id.to_s+"]"]= params["q_data_id["+qfq.question_id.to_s+"]"].gsub("[","").gsub("]","")
 			end
 		  end	
 		  if params["q_data_id["+qfq.question_id.to_s+"]"].length > 0 

@@ -38,23 +38,23 @@
      value_link_array = [] %>
 <%    results.each do |vl|  
 	  value_link_array << vl.try(:to_s)
-     if vl.try(:to_s) == "participant"   %> Participant: 
+     if vl.try(:to_s) == "participant"  or vl.try(:to_s) == '["participant"]'  %> Participant: 
 	  	<%= collection_select "value_link","participant_id", Participant.all,
 	    	:id, :reggieid, options={ :selected => @q_data_form.participant_id.to_i,:include_blank => "Select a participant" } %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   <% elsif vl.try(:to_s) == "visit"   %> Visit: 
+   <% elsif vl.try(:to_s) == "visit"  or  vl.try(:to_s) == '["visit"]'  %> Visit: 
 			<%= collection_select "value_link","visit_id", Visit.all.sort_by(&:rmr_scan_date),
 				:id, :rmr_scan_date, {:include_blank => "Select a visit", :selected => @q_data_form.visit_id } %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   <% elsif vl.try(:to_s) == "appointment"   %><!-- Appointment: 
+   <% elsif vl.try(:to_s) == "appointment"  or vl.try(:to_s) == '["appointment"]'  %><!-- Appointment: 
 			<%= collection_select "value_link","appointment_id", Visit.all.sort_by(&:rmr_scan_date),
 				:id, :rmr_scan_date, {:include_blank => "Select an appointment", :selected => @q_data_form.appointment_id } %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   -->
-   <% elsif vl.try("to_s") == "enrollment"   %> Enrollment: 
+   <% elsif vl.try("to_s") == "enrollment" or vl.try("to_s") == '["enrollment"]'   %> Enrollment: 
 			<%= collection_select "value_link","enrollment_id", Enrollment.all.sort_by(&:enumber),
 				:id, :enumber, {:include_blank => "Select an enrollment", :selected => @q_data_form.enrollment_id } %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;			
-	<% elsif  vl.try("to_s") == "scan_procedure"   %> Scan Procedure: 
+	<% elsif  vl.try("to_s") == "scan_procedure"  or  vl.try("to_s") == '["scan_procedure"]'  %> Scan Procedure: 
 			<%= collection_select "value_link","scan_procedure_id", ScanProcedure.all.sort_by(&:codename),
 				:id, :codename, {:include_blank => "Select a scan_procedure", :selected => @q_data_form.scan_procedure_id } %>
 <%	  end %>

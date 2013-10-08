@@ -94,6 +94,7 @@ class QuestionformsController < ApplicationController
   
   def question_enter
    # params["q_data_form_id"] = "9"
+
     if params["q_data_form_id"].length > 0
       @q_data_form = QDataForm.find(params["q_data_form_id"])
     else
@@ -102,12 +103,13 @@ class QuestionformsController < ApplicationController
     @q_data_form.participant_id = params["value_link"]["participant_id"]
     @q_data_form.visit_id = params["value_link"]["visit_id"]
     @q_data_form.enrollment_id = params["value_link"]["enrollment_id"]
-    @q_data_form.appointment_id = params["value_link"]["appointment_id"]
+    @q_data_form.appointment_id =  params["value_link"]["appointment_id"]
     @q_data_form.scan_procedure_id = params["value_link"]["scan_procedure_id"]
     @q_data_form.questionform_id = params["questionform_id"]
+
     @q_data_form.user = current_user
     if params["q_data_form_id"].length > 0
-      @q_data_form.update_attributes(@q_data_form)
+      @q_data_form.save  #update_attributes(@q_data_form)
     else
       @q_data_form.save
     end
@@ -153,7 +155,7 @@ class QuestionformsController < ApplicationController
         end
     if v_value_link != "-1"
         if params["q_data_id"][q_id].length  > 0
-          @q_data.update_attributes(@q_data)
+          @q_data.save # update_attributes(@q_data)
         else
           @q_data.save
         end

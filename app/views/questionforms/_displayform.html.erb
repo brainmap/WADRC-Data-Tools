@@ -49,12 +49,12 @@ puts "q_data_form_id="+params[:q_data_form_id]
      value_link_array = [] %>
 <%    results.each do |vl|  
 	  value_link_array << vl.try(:to_s)
-     if vl.try(:to_s) == "participant"   %> 
+     if vl.try(:to_s) == "participant"  or vl.try(:to_s) == '["participant"]'  %> 
              <%= hidden_field_tag("value_1[-1]","") %> <%= hidden_field_tag("value_link[participant_id]",params[:participant_id]) %>
-   <% elsif vl.try(:to_s) == "visit"   %> <%= hidden_field_tag("value_link[visit_id]",params[:visit_id]) %>
-   <% elsif vl.try(:to_s) == "appointment"   %><%= hidden_field_tag("value_link[appointment_id]",@appointment.id.to_s) %>
-   <% elsif vl.try("to_s") == "enrollment"   %> <%= hidden_field_tag("value_link[enrollment_id]",params[:enrollment_id]) %>			
-	<% elsif  vl.try("to_s") == "scan_procedure"   %> <%= hidden_field_tag("value_link[scan_procedure_id]",params[:escan_procedure_id]) %>
+   <% elsif vl.try(:to_s) == "visit"  or vl.try(:to_s) == '["visit"]' %> <%= hidden_field_tag("value_link[visit_id]",params[:visit_id]) %>
+   <% elsif vl.try(:to_s) == "appointment"  or vl.try(:to_s) == '["appointment"]'  %><%= hidden_field_tag("value_link[appointment_id]",@appointment.id.to_s) %>
+   <% elsif vl.try("to_s") == "enrollment" or vl.try("to_s") == '["enrollment"]'    %> <%= hidden_field_tag("value_link[enrollment_id]",params[:enrollment_id]) %>			
+	<% elsif  vl.try("to_s") == "scan_procedure" or vl.try("to_s") == '["scan_procedure"]'  %> <%= hidden_field_tag("value_link[scan_procedure_id]",params[:scan_procedure_id]) %>
 <%	  end %>
   <% end %>
 <%    # scan_procedure id --- access control, limit participants, visits, etc%>
@@ -71,6 +71,7 @@ puts "q_data_form_id="+params[:q_data_form_id]
 		    results = connection.execute(sql)
 		    results.each do |id|
 				params["q_data_id["+qfq.question_id.to_s+"]"] =  id.try(:to_s)
+				params["q_data_id["+qfq.question_id.to_s+"]"]= params["q_data_id["+qfq.question_id.to_s+"]"].gsub("[","").gsub("]","")
 			end
 		  end	
 		  # added check to see if q_data exisits - cai 20131003 -- not sure how a q_data didn't get made
