@@ -126,13 +126,16 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
       begin
         # Skip directories that are links.
         next if File.symlink? dataset.directory
-        
+        puts "ggggggggg imagedatasets "
         # Initialize Thumbnail (or nil)
         # Note: Using Metamri#RawImageDatasetThumbnail Directly
-        metamri_attr_options = {}
+       metamri_attr_options = {}
         begin
   puts "XXXXXXXX before RawImageDatasetThumbnail.new(dataset).thumbnail"
-          metamri_attr_options[:thumb] = File.open(RawImageDatasetThumbnail.new(dataset).thumbnail)
+       v_path_tmp = RawImageDatasetThumbnail.new(dataset).thumbnail
+       puts "hhhh v_path_tmp ="+v_path_tmp
+#       v_image_tmp = File.open(v_path_tmp)
+          metamri_attr_options[:thumb] = File.open(v_path_tmp) #RawImageDatasetThumbnail.new(dataset).thumbnail)
   puts "ZZZZZZZZZZ after RawImageDatasetThumbnail.new(dataset).thumbnail"   # not sure where it fails after this
         rescue StandardError, ScriptError => e
           puts "WWWWWWWWW in rescue RawImageDatasetThumbnail.new(dataset).thumbnail"
@@ -175,8 +178,8 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
       rescue Exception => e
         puts "Error building image_dataset. #{e}"
         raise e
-      ensure
-        metamri_attr_options[:thumb].close if metamri_attr_options[:thumb].kind_of? File
+#      ensure
+#        metamri_attr_options[:thumb].close if metamri_attr_options[:thumb].kind_of? File
       end
     end
  
@@ -198,7 +201,11 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
        visit.appointment_id = appointment.id
     end    
     
-    visit.save
+    if visit.save
+      puts "aaaaaaa saved visit"
+    else
+      puts "bbbbbbb not saved visit"
+    end
     sql = "Delete from scan_procedures_vgroups where vgroup_id ="+vgroup.id.to_s
     connection = ActiveRecord::Base.connection();        
     results = connection.execute(sql)

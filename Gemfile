@@ -11,14 +11,15 @@ gem 'yaml_db'
 
 # in production
 # if ENV['RAILS_ENV'] == "production"
-   gem 'metamri'  ,'~>0.2.16'  ####:path => '~>0.2.11'
+#   gem 'metamri'  ,'~>0.2.16'  ####:path => '~>0.2.11'
 # else
-#  gem 'metamri', :path => '~/code/metamri'
+gem 'metamri', :path => '~/code/metamri'
 # end
 
 gem 'builder' #, '~>2.1.2'
 gem 'RedCloth', '~>4.2.7'
 # gem 'bluecloth', '~>2.1.0'
+gem "cocaine", "0.3.2"
 gem 'paperclip', '~>2.3.8'
 # maybe move ruport, acts_as_reportatable, simple_form further down? get the version of depnedencies loaded for other gems first?
 gem 'ruport' ###########, '~>1.6.3'

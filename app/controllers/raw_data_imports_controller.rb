@@ -12,7 +12,8 @@ class RawDataImportsController < ApplicationController
   
   def create
     @visit_directory_to_scan = params[:raw_data_import][:directory].chomp(' ')
-    if validates_truthiness_of_directory(@visit_directory_to_scan)
+   # if validates_truthiness_of_directory(@visit_directory_to_scan)
+    if File.directory?(@visit_directory_to_scan)
       v = VisitRawDataDirectory.new(@visit_directory_to_scan, params[:raw_data_import][:scan_procedure])
       logger.info "Current User: #{Etc.getlogin}"
       logger.info  "+++ Importing #{v.visit_directory} as part of #{v.scan_procedure_name} +++"
@@ -39,12 +40,16 @@ class RawDataImportsController < ApplicationController
           end
         else
           logger.info @visit.errors
-          flash[:error] = "Awfully sorry, this raw data directory could not be saved to the database. #{@visit.errors}"
+           v_error_tmp =""
+           @visit.errors.each do |r|
+              v_error_tmp = v_error_tmp+" "+r.to_s
+           end
+           flash[:error] = "Awfully sorry, this raw data directory could not be saved to the database. #{@visit.errors} @visit.errors="+v_error_tmp
         end
       end
       redirect_to root_url
     else
-      flash[:error] = "Invalid raw data directory #{@visit_directory_to_scan}, please check your path and try again."
+      flash[:error] = "Invalid raw data directory #{@visit_directory_to_scan}, please check your path and try again. Try running fixrights to cleanup permissions of directory."
       redirect_to new_raw_data_import_path
     end
   end
