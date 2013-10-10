@@ -24,7 +24,7 @@
       <tr>
         <%= "<td>#{begin image_tag(im_ds.thumbnail.url(:thumb)); rescue ArgumentError;end }</td>".html_safe  if include_thumbnails %>
 				<td><%=h im_ds.path_basename %></td>
-        <td><%= ic = Iconv.new('UTF-8//IGNORE', 'UTF-8'); link_to ic.iconv(im_ds.series_description), im_ds %></td>
+        <td><%=  link_to im_ds.series_description.encode("UTF-8", :invalid => :replace, :undef => :replace, :replace => "").force_encoding('UTF-8'), im_ds %></td>
         <td>
           <%= popup_note("peek", key_val_table("image_details", im_ds.details_hash))%>
         </td>

@@ -153,7 +153,9 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
         if dataset.dicom?
           data = ImageDataset.where(:dicom_series_uid => dataset.dicom_series_uid).first
         elsif dataset.pfile? or dataset.geifile?
-          data = ImageDataset.where(:path.matches => dataset.directory, :scanned_file.matches => dataset.scanned_file).first
+          #data = ImageDataset.where(:path => dataset.directory, :scanned_file.matches => dataset.scanned_file).first
+
+          data = ImageDataset.where("path in (?) and scanned_file in (?)", dataset.directory,  dataset.scanned_file).first
         else raise StandardError, "Could not identify type of dataset #{File.join(dataset.directory, datset.scanned_file)}"
         end
       
@@ -178,8 +180,8 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
       rescue Exception => e
         puts "Error building image_dataset. #{e}"
         raise e
-#      ensure
-#        metamri_attr_options[:thumb].close if metamri_attr_options[:thumb].kind_of? File
+      ensure
+        metamri_attr_options[:thumb].close if metamri_attr_options[:thumb].kind_of? File
       end
     end
  
@@ -317,7 +319,7 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
     image_datasets.each do |dataset|
       tags = dataset.dicom_taghash
       unless tags.blank?
-        if tags['0020,000D'] != '0020,000D'
+        if !tags['0020,000D'].blank? and tags['0020,000D'] != '0020,000D'
             uid = tags['0020,000D'][:value] unless tags['0020,000D'][:value].blank?
         end
       end
@@ -334,7 +336,7 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
     return @initials unless @initials.blank?
     
     image_datasets.each do |dataset|
-      if tags = dataset.dicom_taghash and tags['0010,0010'] != '0010,0010'
+      if tags = dataset.dicom_taghash and !tags['0010,0010'].blank? and tags['0010,0010'] != '0010,0010'
         @initials = tags['0010,0010'][:value] unless tags['0010,0010'][:value].blank?
       end
     end

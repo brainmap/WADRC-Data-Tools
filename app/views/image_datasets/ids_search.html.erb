@@ -149,8 +149,8 @@ edit_count = edit_count -1
 		    <% elsif i == 2 %>
 		     <td><%= vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
 		    <% elsif i == 5 %>
-		      <td><%= ic = Iconv.new('UTF-8//IGNORE', 'UTF-8'); link_to ic.iconv(image_dataset.series_description), image_dataset %></td>
-		
+		      <!-- = ic = Iconv.new('UTF-8//IGNORE', 'UTF-8'); link_to ic.iconv(image_dataset.series_description), image_dataset -->
+          <td><%=  link_to image_dataset.series_description.encode("UTF-8", :invalid => :replace, :undef => :replace, :replace => "").force_encoding('UTF-8'), image_dataset %></td>
 		    <% elsif i == 6 %>
 		      <td><%= popup_note("peek", key_val_table("image_details", image_dataset.details_hash))%></td>
 		    <% elsif i == 7 %>

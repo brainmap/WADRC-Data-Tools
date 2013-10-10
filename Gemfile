@@ -19,7 +19,7 @@ gem 'metamri', :path => '~/code/metamri'
 gem 'builder' #, '~>2.1.2'
 gem 'RedCloth', '~>4.2.7'
 # gem 'bluecloth', '~>2.1.0'
-gem "cocaine", "0.3.2"
+gem "cocaine", "0.3.2"   # need older version to work wityh paperclip
 gem 'paperclip', '~>2.3.8'
 # maybe move ruport, acts_as_reportatable, simple_form further down? get the version of depnedencies loaded for other gems first?
 gem 'ruport' ###########, '~>1.6.3'
