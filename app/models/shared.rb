@@ -548,7 +548,7 @@ class Shared  < ActionController::Base
        #  table cg_adrc_upload populated by run_adrc_upload function      
         connection = ActiveRecord::Base.connection();
         # get adrc subjectid to upload
-        sql = "select distinct subjectid from cg_adrc_upload where pcvipr_sent_flag ='N' and pcvipr_status_flag in ('Y','R') "
+        sql = "select distinct subjectid from cg_adrc_upload where pcvipr_sent_flag ='N' and pcvipr_status_flag in ('R') " # ('Y','R') "
         results = connection.execute(sql)
         # changed to series_description_maps table
         v_folder_array = Array.new
@@ -1644,7 +1644,7 @@ puts "AAAAAA "+v_call
         v_stop_file_name = v_process_name+"_stop"
         v_stop_file_path = v_log_base+v_stop_file_name  # use to stop the results loop  
         v_subjectid_v_num = ""              
-        v_script = v_base_path+"/data1/lab_scripts/AslProc/v3/aslproc.sh"
+        v_script = v_base_path+"/data1/lab_scripts/AslProc/v3.1/aslproc.sh"
 
         connection = ActiveRecord::Base.connection();  
        # NEED GLOBAL - non-inversion specific 
@@ -1735,16 +1735,37 @@ puts "AAAAAA "+v_call
                            v_log = v_log + msg+"\n"  
                     end
                     v_success ="N"
+                    v_success_process ="N"
+                    v_success_coregister ="N"
+                    v_success_normalise = "N"
                     while !stdout.eof?
                         v_output = stdout.read 1024 
                         v_log = v_log + v_output  
-                        if (v_log.tr("\n","")).include? "Done    'PVE label estimation and lesion segmentation'"  # NEED TO EDIT!!!!!! 
-                           v_success ="Y"
+                        if (v_log.tr("\n","")).include? "Done    'Coregister: Estimate & Reslice'"   # not very sensitive to success 
+                           v_success_coregister  ="Y"
+                           v_log = v_log + "Coregister: Estimate & Reslice finished ok !!!!!!!!! \n"
+                                    # NEED TO  set do not run flag from R ( sw or fs  ) to N 
+                        end 
+                        if (v_log.tr("\n","")).include? "Done    'Normalise: Estimate & Write'"    # not very sensitive to success  "Done    "'Coregister: Estimate & Reslice'"  
+                           v_success_normalise  ="Y"
+                           v_log = v_log + "Normalise: Estimate & Write finished ok !!!!!!!!! \n"
+                                    # NEED TO  set do not run flag from R ( sw or fs  ) to N 
+                        end
+                        if (v_log.tr("\n","")).include? "processing completed"  # not very sensitive to success  "Done    "'Coregister: Estimate & Reslice'"    "Done    'Normalise: Estimate & Write'"
+                           v_success_process ="Y"
                            v_log = v_log + "Process finished ok !!!!!!!!! \n"
                                     # NEED TO  set do not run flag from R ( sw or fs  ) to N 
                         end
-                        puts v_output  
+                        puts v_output
                     end
+
+                   if v_success_process ="Y" and v_success_coregister  =="Y"  and  v_success_normalise  =="Y" # NEED TO EDIT!!!!!!  # not very sensitive to success  "Done    "'Coregister: Estimate & Reslice'"    "Done    'Normalise: Estimate & Write'"
+                          v_success ="Y"
+                           puts "ccccc whole Process finished ok !!!!!!!!! \n"
+                           v_log = v_log + "whole Process finished ok !!!!!!!!! \n"
+                                    # NEED TO  set do not run flag from R ( sw or fs  ) to N 
+                    end
+
                     v_err =""
                     v_log = v_log +"IN ERROR \n"
                     while !stderr.eof?
