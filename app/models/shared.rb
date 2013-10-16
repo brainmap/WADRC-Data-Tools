@@ -1554,7 +1554,8 @@ puts "AAAAAA "+v_call
                                       v_tmp_asl_dir_array = []
                                       if v_asl_directory_2025_array.size == 1
                                          v_tmp_asl_dir_array.push(v_asl_directory_2025_array) 
-                                      elsif v_asl_directory_1525_array.size == 1
+                                      end
+                                      if v_asl_directory_1525_array.size == 1
                                          v_tmp_asl_dir_array.push(v_asl_directory_1525_array) 
                                       end                                   
                                       sql = "update cg_asl_status_new set asl_fmap_file_to_use ='"+v_tmp_asl_dir_array.join(',')+"' where enrollment_id ="+enrollment[0].id.to_s+" and scan_procedure_id="+sp.id.to_s
