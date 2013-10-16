@@ -278,7 +278,8 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
               @age_info[:age] = tags['0010,1010'][:value].blank? ? nil : tags['0010,1010'][:value].to_i  # age
          end
          if @age_info[:dob].blank? and !tags['0010,0030'].blank? and tags['0010,0030'] != '0010,0030'
-             @age_info[:dob] = tags['0010,0030'][:value].blank? ? nil : begin DateTime.parse(tags['0010,0030'][:value]) rescue ArgumentError; nil end
+             @age_info[:dob] = tags['0010,0030'][:value].blank? ? nil :  Date.strptime(tags['0010,0030'][:value],'%Y%m%d') 
+             # @age_info[:dob] = tags['0010,0030'][:value].blank? ? nil : begin DateTime.parse(tags['0010,0030'][:value]) rescue ArgumentError; nil end   
           end
       end
     end
@@ -388,7 +389,9 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
       when /^(\d{1,2})(\d{1,2})(\d{4})$/  then
         Date.civil($3.to_i, $1.to_i, $2.to_i)
       else
-        Date.parse(rmr_digits)
+         Date.parse(rmr_digits)    #this probably isn't working in 1.9.3, but rmr's not coming thru with dates
+        # might work, not sure of date format
+        # Date.strptime(rmr_digits,'%Y%m%d')
       end
     
       (1990...Date.today.year).include? date.year

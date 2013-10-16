@@ -78,8 +78,8 @@ module ApplicationHelper
   
     if collection.count < 2
       case collection.size
-      when 0; "No #{entry_name.pluralize} found"
-      when 1; "<b>1</b> #{entry_name.capitalize}"
+      when 0 then "No #{entry_name.pluralize} found"
+      when 1 then "<b>1</b> #{entry_name.capitalize}"
       else;   "<b>#{collection.size}</b> #{entry_name.capitalize.pluralize}"
       end
     else
