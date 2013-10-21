@@ -548,7 +548,7 @@ class Shared  < ActionController::Base
        #  table cg_adrc_upload populated by run_adrc_upload function      
         connection = ActiveRecord::Base.connection();
         # get adrc subjectid to upload
-        sql = "select distinct subjectid from cg_adrc_upload where pcvipr_sent_flag ='N' and pcvipr_status_flag in ('R') " # ('Y','R') "
+        sql = "select distinct subjectid from cg_adrc_upload where pcvipr_sent_flag ='N' and pcvipr_status_flag in ('U') " # ('Y','R') "
         results = connection.execute(sql)
         # changed to series_description_maps table
         v_folder_array = Array.new
@@ -1394,8 +1394,9 @@ puts "AAAAAA "+v_call
                              
                              # multiple asl dircectory from image_datasets.path 
                               sql_dir = "select distinct SUBSTRING_INDEX(image_datasets.path,'/',-1) from image_datasets,visits v, appointments a, scan_procedures_vgroups spv, enrollment_vgroup_memberships evm
-                                   where image_datasets.visit_id = v.id and v.appointment_id = a.id and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id ="+sp.id.to_s+"
-                                   and evm.enrollment_id ="+enrollment[0].id.to_s+" and a.vgroup_id = evm.vgroup_id and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps,series_description_types where series_description_types.id =series_description_maps.series_description_type_id and  series_description_types.series_description_type = 'ASL')"
+                                   where image_datasets.visit_id = v.id and v.appointment_id = a.id and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id ="+sp.id.to_s+" 
+                                   and evm.enrollment_id ="+enrollment[0].id.to_s+" and a.vgroup_id = evm.vgroup_id and image_datasets.series_description not like '%Cerebral Blood Flow%'
+                                   and   image_datasets.series_description in (select series_description_maps.series_description from series_description_maps,series_description_types where series_description_types.id =series_description_maps.series_description_type_id and  series_description_types.series_description_type = 'ASL')"
                              v_asl_directory_array = []
                              v_asl_directory_2025_array = []
                              v_asl_directory_1525_array = []
@@ -1557,7 +1558,7 @@ puts "AAAAAA "+v_call
                                       end
                                       if v_asl_directory_1525_array.size == 1
                                          v_tmp_asl_dir_array.push(v_asl_directory_1525_array) 
-                                      end                                   
+                                      end                                  
                                       sql = "update cg_asl_status_new set asl_fmap_file_to_use ='"+v_tmp_asl_dir_array.join(',')+"' where enrollment_id ="+enrollment[0].id.to_s+" and scan_procedure_id="+sp.id.to_s
                                       results = connection.execute(sql)
                                  elsif v_asl_fmap_single == "Y" and v_asl_directory_list.split(",").size == 1   # asl_fmap_single ='Y' and ?????
@@ -1676,6 +1677,16 @@ puts "AAAAAA "+v_call
             sql_update = "update cg_asl_status set do_not_run_process_asl_registered_to_fs = 'N' where do_not_run_process_asl_registered_to_fs = 'R' and asl_subjectid = '"+r[2]+"'"
             results_update = connection.execute(sql_update)   # stop from re-running
             
+            # need to insert row in not there
+            sql_check = "select count(*) from cg_asl_status_edit where asl_subjectid = '"+r[2]+"'"
+            results_check = connection.execute(sql_check)
+            results_check.each do |r_check|
+              if r_check[0] < 1  # expect an edit row -- use edit to set R
+                  sql_insert = "insert into cg_asl_status_edit(asl_subjectid )values('"+r[2]+"')"  
+                  results_insert = connection.execute(sql_insert)
+              end
+            end
+            
             sql_update = "update cg_asl_status_edit set do_not_run_process_asl_smoothed_and_warped = 'N' where do_not_run_process_asl_smoothed_and_warped = 'R' and asl_subjectid = '"+r[2]+"'"
             results_update = connection.execute(sql_update)   # stop from re-running
             sql_update = "update cg_asl_status_edit set do_not_run_process_asl_registered_to_fs = 'N' where do_not_run_process_asl_registered_to_fs = 'R' and asl_subjectid = '"+r[2]+"'"
@@ -1726,6 +1737,7 @@ puts "AAAAAA "+v_call
                     v_call =  'ssh panda_admin@merida.dom.wisc.edu "'+v_script+' -p '+v_sp_loc+'  -b '+v_subjectid+' -s1  '+v_dir_name_array[0] +'  --fsdir '+v_fs_subjects_dir +' " ' 
                     @schedulerun.comment ="str "+r[2]+"/"+d+"; "+v_comment[0..1990]
                     @schedulerun.save
+                    v_comment = "str "+r[2]+"/"+d+"; "+v_comment
                     puts "rrrrrrr "+v_call
                     v_log = v_log + v_call+"\n"
                 # end
@@ -1775,7 +1787,7 @@ puts "AAAAAA "+v_call
                     if !v_err.blank?
                         puts "err="+v_err
                     end
-                    sql_update = "update cg_asl_status_edit set asl_fmap_file_used = concat(asl_fmap_file_used,'[ "+t.strftime("%Y%m%d")+" "+v_dir_name_array[0]+"]') where  asl_subjectid = '"+r[2]+"'"
+                    sql_update = "update cg_asl_status set asl_fmap_file_used = concat(asl_fmap_file_used,'[ "+t.strftime("%Y%m%d")+" "+v_dir_name_array[0]+"]') where  asl_subjectid = '"+r[2]+"'"
                     results_update = connection.execute(sql_update)   # stop from re-running
                     sql_update = "update cg_asl_status_edit set asl_fmap_file_used = concat(asl_fmap_file_used,'[ "+t.strftime("%Y%m%d")+" "+v_dir_name_array[0]+"]') where asl_subjectid = '"+r[2]+"'"
                     results_update = connection.execute(sql_update)   # stop from re-running
