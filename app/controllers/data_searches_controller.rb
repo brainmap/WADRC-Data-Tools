@@ -816,7 +816,7 @@ class DataSearchesController < ApplicationController
 
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       # make the sql -- start with base 
-      @local_column_headers =["Date","Protocol","Enumber","RMR"]
+      @local_column_headers =["Date (vgroup)","Protocol","Enumber","RMR"]
       @local_fields = []
       @local_conditions =[]
       @conditions = [] # for the q_data_search
