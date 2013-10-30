@@ -67,10 +67,10 @@ class VisitsController <  AuthorizedController #  ApplicationController
   end
 
   # GET /visits/:scope
-  def index_by_scope
+  def index_by_scope   # probably not being used
 
     scan_procedure_array =current_user[:view_low_scan_procedure_array]
-    @search = Visit.send(params[:scope]).search(params[:search])
+    @search = Visit.send(params[:scope]).search(params[:search])      # should this be instance_eval 
     @visits = @search.relation.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
     @collection_title = "All #{params[:scope].to_s.gsub('_',' ')} MRI appts"
     render :template => "visits/index"

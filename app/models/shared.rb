@@ -1075,7 +1075,8 @@ puts "AAAAAA "+v_call
                              # multiple asl dircectory from image_datasets.path 
                               sql_dir = "select distinct SUBSTRING_INDEX(image_datasets.path,'/',-1) from image_datasets,visits v, appointments a, scan_procedures_vgroups spv, enrollment_vgroup_memberships evm
                                    where image_datasets.visit_id = v.id and v.appointment_id = a.id and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id ="+sp.id.to_s+"
-                                   and evm.enrollment_id ="+enrollment[0].id.to_s+" and a.vgroup_id = evm.vgroup_id and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps,series_description_types where series_description_types.id =series_description_maps.series_description_type_id and  series_description_types.series_description_type = 'ASL')"
+                                   and evm.enrollment_id ="+enrollment[0].id.to_s+" and a.vgroup_id = evm.vgroup_id 
+                                   and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps,series_description_types where series_description_types.id =series_description_maps.series_description_type_id and  series_description_types.series_description_type = 'ASL')"
                              v_asl_directory_array = []
                              v_asl_directory_2025_array = []
                              v_asl_directory_1525_array = []
@@ -1324,7 +1325,7 @@ puts "AAAAAA "+v_call
         v_stop_file_name = v_process_name+"_stop"
         v_stop_file_path = v_log_base+v_stop_file_name  # use to stop the results loop  
         v_subjectid_v_num = ""              
-        v_script = v_base_path+"/data1/lab_scripts/AslProc/v3/aslproc.sh"
+        v_script = v_base_path+"/data1/lab_scripts/AslProc/v3.1/aslproc.sh"
 
         connection = ActiveRecord::Base.connection();  
        # NEED GLOBAL - non-inversion specific 

@@ -33,7 +33,8 @@ class SchedulesController < ApplicationController
      #  exec v_run_command  -- moved from cron interface to shared function
       if !@schedule.shared_function_name.blank?
          v_shared = Shared.new
-         v_shared.send(@schedule.shared_function_name)
+         # v_shared.send(@schedule.shared_function_name)
+         v_shared.send(@schedule.shared_function_name)    # should this be instance_eval
       end
       respond_to do |format|
         format.html { redirect_to(schedulerun_search_url) }

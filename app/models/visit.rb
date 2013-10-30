@@ -160,15 +160,22 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
         end
       
         meta_attrs = dataset.attributes_for_active_record(metamri_attr_options)
+#puts "zzzzzzzz metamri_attr_options="+metamri_attr_options.to_s
 
         # If the ActiveRecord Visit (visit) has a dataset that already matches the metamri dataset (dataset) on dicom_series_uid, then use it and update its params.  Otherwise, build a new one.
         unless data.blank? # AKA data.kind_of? ImageDataset
-
+#puts "cccccccc meta_attrs="+meta_attrs.to_s
           logger.debug "updating dataset #{data.id} with new metamri attributes"
           data.attributes.merge!(meta_attrs)
           if data.valid?
             visit.image_datasets << data
           else
+             data.errors.messages.values.each do |msg|
+                msg.each do |m|
+                  puts m
+                end
+              end
+
             raise StandardError, "Image Dataset #{data.path} not valid: #{e}"
           end
         else

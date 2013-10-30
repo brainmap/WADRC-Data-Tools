@@ -1,6 +1,6 @@
 class Directory < ActiveRecord::Base
 	has_many :measurements
-	###acts_as_list
+	acts_as_list
 	
 
   def chart(options={})

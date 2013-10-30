@@ -495,10 +495,10 @@ end
     end
   
   # GET /vgroups/:scope
-  def index_by_scope
+  def index_by_scope  # probably not being used
 
     scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
-    @search = Vgroup.send(params[:scope]).search(params[:search])
+    @search = Vgroup.send(params[:scope]).search(params[:search])  # should this be instance_eval
     @visits = @search.relation.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
     @collection_title = "All #{params[:scope].to_s.gsub('_',' ')} Visits"
     render :template => "vgroups/home"
