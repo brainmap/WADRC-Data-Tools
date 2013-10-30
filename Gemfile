@@ -11,9 +11,10 @@ gem 'yaml_db'
 
 # in production
 # if ENV['RAILS_ENV'] == "production"
-#   gem 'metamri'  ,'~>0.2.16'  ####:path => '~>0.2.11'
+#gem 'metamri'  ,'~>0.2.17'  ####:path => '~>0.2.11'  # need to update metamri gem with local changes
 # else
-gem 'metamri', :path => '~/code/metamri'
+#gem 'metamri', :path => '~/code/metamri'
+gem 'metamri', :path => '/Users/caillingworth/code/metamri'
 # end
 
 gem 'builder' #, '~>2.1.2'
@@ -28,6 +29,8 @@ gem 'kaminari'
 ####### gem 'meta_search' # needs actionpack 3.0.2 ruby
 ####### gem 'meta_where'   # needs arel (2.0.7)  but arel is 3.0.2
 ##### gem 'rmagick'
+###### hash out gem simple_form  when doing bundle update rails 
+### then unhash and run bundle update rails again  -- different versions of action pack
 gem 'simple_form'
 gem 'exception_notification', "~> 2.4.1", :require => 'exception_notifier'
 
