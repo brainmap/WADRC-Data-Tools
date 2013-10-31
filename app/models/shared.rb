@@ -1164,7 +1164,8 @@ puts "AAAAAA "+v_call
       @schedulerun.comment =v_comment[0..1990]
       @schedulerun.save
       # update schedulerun comment - prepend 
-      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')"
+      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
+       and v.id in ( select scvg.vgroup_id from scan_procedures_vgroups scvg where scvg.scan_procedure_id  in (26,24))"
       results_vgroup = connection.execute(sql_vgroup)
       # mkdir /tmp/adrc_upload/[subjectid]_YYYYMMDD_wisc
       v_export_id = (@schedule.id).to_s+"_"+r[3].to_s
@@ -2432,6 +2433,234 @@ puts "AAAAAA "+v_call
     
   end
   
+  # data request from goveas, wrap with depression, resting bold/fmri, t2 cube, t2 flair, t1 volumetric, dti -nagesh - FA,MD,L1,L2,L3
+  # from cg_goveas_20131031
+  # done_flag = Y means the files has been uploaded
+  # status_flag = N means do not upload this subjectid
+  def run_goveas_20131031_upload
+    v_base_path = Shared.get_base_path()
+    v_log_base ="/mounts/data/preprocessed/logs/"
+    v_process_name = "goveas_20131031_upload"
+    process_logs_delete_old( v_process_name, v_log_base)
+     @schedule = Schedule.where("name in ('goveas_20131031_upload')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting goveas_20131031_upload"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+      t = Time.now
+      v_date_YM = t.strftime("%Y%m") # just making monthly logs, prepend
+      v_log_name =v_process_name+"_"+v_date_YM
+      v_log_path =v_log_base+v_log_name
+      v_stop_file_name = v_process_name+"_stop"
+      v_stop_file_path = v_log_base+v_stop_file_name
+    connection = ActiveRecord::Base.connection();
+    
+    v_target_dir = "/home/panda_admin/upload_goveas_20131031"
+    v_final_target = "ftp directory tbd"
+    v_series_description_category_array = ['T1_Volumetric','resting_fMRI', 'T2','T2_Flair']
+    v_series_description_category_id_array = [19, 17]
+    sql = "select distinct subjectid, enrollment_id, scan_procedure_id, export_id from cg_goveas_20131031
+           where ( done_flag != 'Y' or done_flag is NULL)
+           and ( status_flag != 'N' or status_flag is NULL)  and subjectid in ('mrt00097', 'pdt00034','pdt00035')"  # sending ppt with incomplete sets
+    results = connection.execute(sql)
+    
+    # get each subject , make target dir with export id
+    # get each series decription / file name / nii file based on series_description_category
+    # mkdir with series_description_category, # of scan - e.g. 3rd T1
+    # copy over the .nii file, replace subjectid with export_id
+    # bzip2 each subjectid dir
+    results.each do |r|
+      v_break = 0  # need a kill swith
+       v_log = ""
+      if File.file?(v_stop_file_path)
+        File.delete(v_stop_file_path)
+        v_break = 1
+        v_log = v_log + " STOPPING the results loop"
+        v_comment = " STOPPING the results loop  "+v_comment
+      end
+      break if v_break > 0
+      
+      v_comment = "strt "+r[0]+","+v_comment
+      @schedulerun.comment =v_comment[0..1990]
+      @schedulerun.save
+      # update schedulerun comment - prepend 
+      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
+                                          and v.id in ( select scvg.vgroup_id from scan_procedures_vgroups scvg where scvg.scan_procedure_id  in (37,26,24)) "
+      results_vgroup = connection.execute(sql_vgroup)
+      # mkdir /tmp/adrc_upload/[subjectid]_YYYYMMDD_wisc
+      v_export_id = (@schedule.id).to_s+"_"+r[3].to_s
+      v_subject_dir = v_export_id+"_"+(results_vgroup.first)[0].to_s+"_wisc"
+      v_parent_dir_target =v_target_dir+"/"+v_subject_dir
+      v_call = "ssh panda_admin@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"' "
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close
+      v_subjectid = r[0].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
+      sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_types.series_description_type 
+                  from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
+                  where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
+                  and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
+                  and image_datasets.series_description =   series_description_maps.series_description
+                  and series_description_maps.series_description_type_id = series_description_types.id
+                  and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','resting_fMRI','resting fMRI','resting+fMRI','T2','T2_Flair','T2+Flair') 
+                  and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = "+r[1].to_s+" and evm.enrollment_id = e.id and e.enumber ='"+ v_subjectid+"')
+                  and vgroups.id in (select spv.vgroup_id from scan_procedures_vgroups spv where spv.scan_procedure_id = "+r[2].to_s+" )
+                   order by appointments.appointment_date "
+      results_dataset = connection.execute(sql_dataset)
+      v_folder_array = [] # how to empty
+      v_scan_desc_type_array = []
+      v_cnt = 1
+      results_dataset.each do |r_dataset|
+            v_series_description_type = r_dataset[5].gsub(" ","_")
+            if !v_scan_desc_type_array.include?(v_series_description_type)
+                 v_scan_desc_type_array.push(v_series_description_type)
+            end
+            v_path = r_dataset[4]
+            v_dir_array = v_path.split("/")
+            v_dir = v_dir_array[(v_dir_array.size - 1)]
+            v_dir_target = v_dir+"_"+v_series_description_type
+            v_path = v_path.gsub("/Volumes/team/","").gsub("/Volumes/team-1/","").gsub("/Data/vtrak1/","")  #v_base_path+"/"+
+            if v_folder_array.include?(v_dir_target)
+              v_dir_target = v_dir_target+"_"+v_cnt.to_s
+              v_cnt = v_cnt +1
+              # might get weird if multiple types have dups - only expect T1/Bravo
+            end
+            v_folder_array.push(v_dir_target)   
+             
+            v_call = "ssh panda_admin@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
+            stdin, stdout, stderr = Open3.popen3(v_call)
+            while !stdout.eof?
+               puts stdout.read 1024    
+            end
+            stdin.close
+            stdout.close
+            stderr.close
+            v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+            v_scan_procedure_path = ScanProcedure.find(r[2]).codename
+            v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/unknown/"+ v_subjectid+"_*_"+v_dir+".nii  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_"+r_dataset[3].gsub(" ","_")+"_"+v_dir+".nii '"
+            stdin, stdout, stderr = Open3.popen3(v_call)
+            while !stdout.eof?
+               puts stdout.read 1024    
+            end
+            stdin.close
+            stdout.close
+            stderr.close
+        
+      end
+
+      # get dti from nagesh - FA, MD, L1, L2, L3  cg_dti_status
+
+      # get pib and rename
+      # dvd in subject space , use  rFS_r<enum>_realignPIB_DVR_HYPR.nii if exists, else use r<enum>_realignPIB_DVR_HYPR.nii
+      # exceptions- pdt00038, pdt00129,pdt00137,pdt00161 - readme describes slices used
+
+      # cg_dti_status only has visit1 -- now 
+      sql_dti = "select distinct appointments.appointment_date, visits.id visit_id 
+                  from vgroups , appointments, visits 
+                  where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
+                  and appointments.id = visits.appointment_id 
+                  and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e, cg_dti_status where evm.enrollment_id = "+r[1].to_s+" and evm.enrollment_id = e.id and e.enumber ='"+ v_subjectid+"' 
+                           and cg_dti_status.enrollment_id = e.id and dti_fa_flag = 'Y')
+                  and vgroups.id in (select spv.vgroup_id from scan_procedures_vgroups spv where spv.scan_procedure_id = "+r[2].to_s+" )            
+                   order by appointments.appointment_date "
+        results_dataset = connection.execute(sql_dti)
+        v_dir_target = "dti"
+        v_dti_array =[]
+        results_dataset.each do |r_dataset|
+          v_call = "ssh panda_admin@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
+          stdin, stdout, stderr = Open3.popen3(v_call)
+          while !stdout.eof?
+             puts stdout.read 1024    
+          end
+          stdin.close
+          stdout.close
+          stderr.close
+          v_preprocessed_path = v_base_path+"/preprocessed/modalities/dti/adluru_pipeline/"
+          v_dir_array = ['FA','MD','L1','L2','L3']
+          v_file_name_hash ={'FA'=>'_combined_fa.nii','MD'=>'_combined_md.nii','L1'=>'_combined_L1.nii','L2'=>'_combined_L2.nii','L3'=>'_combined_L3.nii'}
+          v_dir_array.each do |dir_name|
+            v_dti_array.push('dti-'+dir_name)
+             v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+dir_name+"/"+ v_subjectid+v_file_name_hash[dir_name]+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+v_file_name_hash[dir_name]+"  '"
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                 puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+           end
+        end
+        
+        sql_dir_list = "update cg_goveas_20131031 set dir_list ='"+v_folder_array.join(',')+","+v_dti_array.join(',')+"' where subjectid = '"+r[0]+"'"
+        results_done = connection.execute(sql_dir_list)
+
+      #tar.gz subjectid dir
+      v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
+      v_call =  'ssh panda_admin@merida.dom.wisc.edu "  tar  -C '+v_target_dir+'  -zcf '+v_parent_dir_target+'.tar.gz '+v_subject_dir+'/ "  '
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close
+      # remove subjectid dir
+      v_call = 'ssh panda_admin@merida.dom.wisc.edu " rm -rf '+v_parent_dir_target+' "'
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close
+      
+            # fsftp dir when set
+            # sftp -- shared helper hasthe username /password and address
+        #    v_username = Shared.panda_admin_sftp_username # get from shared helper
+        #    v_passwrd = Shared.panda_admin_sftp_password   # get from shared helperwhich is not on github
+            # switch on new platform
+            #v_username = Shared.panda_user_sftp_username # get from shared helper
+            #v_passwrd = Shared.panda_user_sftp_password   # get from shared helperwhich is not on github
+        #    v_ip = Shared.dom_sftp_host_address # get from shared helper
+        #    v_sftp_dir = Shared.goveas_target_path
+
+            # problem that files are on merida, but panda running from nelson
+            # need to ssh to merida as pand_admin, then sftp
+        #    v_source = "panda_admin@merida.dom.wisc.edu:"+v_target_dir+'/'+v_subject_dir+".tar.gz"
+
+        #    v_target = v_sftp_dir+"/"   #+v_subject_dir+".tar.gz"
+
+      # puts "aaaaaa v_source = "+v_source
+      # puts "bbbbbb v_target = "+v_target
+      #       Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
+      #           sftp.upload!(v_source, v_target)
+      #       end
+      #
+      sql_done = "update cg_goveas_20131031 set done_flag ='Y' where subjectid = '"+r[0]+"'"
+      results_done = connection.execute(sql_done)
+  
+    end # results
+    
+    @schedulerun.comment =("successful finish goveas_20131031_upload "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
+    
+    
+    
+  end
+  
   # to add columns --
   # change sql_base insert statement
   # change  sql = sql_base+  insert statement with values
@@ -3070,7 +3299,9 @@ puts "AAAAAA "+v_call
   # status_flag = N means do not upload this subjectid
   def run_selley_20130906_upload
     v_base_path = Shared.get_base_path()
-     v_process_name = "selley_20130906_upload"
+    v_log_base ="/mounts/data/preprocessed/logs/"
+    v_process_name = "selley_20130906_upload"
+    process_logs_delete_old( v_process_name, v_log_base)
      @schedule = Schedule.where("name in ('selley_20130906_upload')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
@@ -3080,6 +3311,10 @@ puts "AAAAAA "+v_call
       @schedulerun.save
       v_comment = ""
       v_comment_warning =""
+      t = Time.now
+      v_date_YM = t.strftime("%Y%m") # just making monthly logs, prepend
+      v_log_name =v_process_name+"_"+v_date_YM
+      v_log_path =v_log_base+v_log_name
       v_stop_file_name = v_process_name+"_stop"
       v_stop_file_path = v_log_base+v_stop_file_name
     connection = ActiveRecord::Base.connection();
@@ -3095,7 +3330,7 @@ puts "AAAAAA "+v_call
            and scan_category_t1_volumetric = 'Y' 
            and pib_dvr_hypr_flag = 'Y'
            and fdg_summed_flag = 'Y'
-          and global_quality = 'Pass' "
+          and global_quality = 'Pass' " # and subjectid in ('pdt00038', 'pdt00067','pdt00166') "
     results = connection.execute(sql)
     
     # get each subject , make target dir with export id
@@ -3118,7 +3353,8 @@ puts "AAAAAA "+v_call
       @schedulerun.comment =v_comment[0..1990]
       @schedulerun.save
       # update schedulerun comment - prepend 
-      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')"
+      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
+       and v.id in ( select scvg.vgroup_id from scan_procedures_vgroups scvg where scvg.scan_procedure_id  in (26))"
       results_vgroup = connection.execute(sql_vgroup)
       # mkdir /tmp/adrc_upload/[subjectid]_YYYYMMDD_wisc
       v_export_id = (@schedule.id).to_s+"_"+r[3].to_s
@@ -3186,8 +3422,121 @@ puts "AAAAAA "+v_call
       end
 
       # get pib and rename
+      # dvd in subject space , use  rFS_r<enum>_realignPIB_DVR_HYPR.nii if exists, else use r<enum>_realignPIB_DVR_HYPR.nii
+      # exceptions- pdt00038, pdt00129,pdt00137,pdt00161 - readme describes slices used
+      sql_pib = "select distinct appointments.appointment_date, petscans.id petscan_id 
+                  from vgroups , appointments, petscans 
+                  where vgroups.transfer_pet = 'yes' and vgroups.id = appointments.vgroup_id 
+                  and appointments.id = petscans.appointment_id and petscans.lookup_pettracer_id = 1
+                  and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = "+r[1].to_s+" and evm.enrollment_id = e.id and e.enumber ='"+ v_subjectid+"')
+                  and vgroups.id in (select spv.vgroup_id from scan_procedures_vgroups spv where spv.scan_procedure_id = "+r[2].to_s+" )
+                   order by appointments.appointment_date "
+        results_dataset = connection.execute(sql_pib)
+        v_dir_target = "pib"
+        results_dataset.each do |r_dataset|
+          v_call = "ssh panda_admin@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
+          stdin, stdout, stderr = Open3.popen3(v_call)
+          while !stdout.eof?
+             puts stdout.read 1024    
+          end
+          stdin.close
+          stdout.close
+          stderr.close
+          v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+          v_scan_procedure_path = ScanProcedure.find(r[2]).codename
+          if v_subjectid == "pdt00038" or v_subjectid == "pdt00129" or v_subjectid == "pdt00137" or v_subjectid == "pdt00161"
+            v_pib_summed_file = v_subjectid+"_pib_summed.nii"
+            v_readme_file = "README"
+            v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/pib/"+ v_pib_summed_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_pib_summed.nii '"
+            stdin, stdout, stderr = Open3.popen3(v_call)
+            while !stdout.eof?
+               puts stdout.read 1024    
+            end
+            stdin.close
+            stdout.close
+            stderr.close
+            v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/pib/"+ v_readme_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_pib_readme.txt '"
+            stdin, stdout, stderr = Open3.popen3(v_call)
+            while !stdout.eof?
+               puts stdout.read 1024    
+            end
+            stdin.close
+            stdout.close
+            stderr.close
+          else
+             v_rFS_file ="rFS_r"+v_subjectid+"_realignPIB_DVR_HYPR.nii"
+             v_file_name = v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/pib/"+ v_rFS_file
+             if File.exist?(v_file_name)
+                v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/pib/"+ v_rFS_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/rFS_r"+v_export_id+"_realignPIB_DVR_HYPR.nii '"
+             
+              else
+                v_realign_file ="r"+v_subjectid+"_realignPIB_DVR_HYPR.nii"
+                 v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/pib/"+ v_realign_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/r"+v_export_id+"_realignPIB_DVR_HYPR.nii '"
+              end
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                 puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+          end
+        end
 
-      # get fdg and rename
+      # get fdg and rename  petscans.lookup_pettracer_id = 2
+      # summed img in subj space, <enum>_fdg_summed.nii
+      # exception - pdt00067   <enum>_fdg_summed.nii , readme describes slice used
+      sql_fdg = "select distinct appointments.appointment_date, petscans.id petscan_id 
+                  from vgroups , appointments, petscans 
+                  where vgroups.transfer_pet = 'yes' and vgroups.id = appointments.vgroup_id 
+                  and appointments.id = petscans.appointment_id and petscans.lookup_pettracer_id = 2
+                  and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = "+r[1].to_s+" and evm.enrollment_id = e.id and e.enumber ='"+ v_subjectid+"')
+                  and vgroups.id in (select spv.vgroup_id from scan_procedures_vgroups spv where spv.scan_procedure_id = "+r[2].to_s+" )
+                   order by appointments.appointment_date "
+      results_dataset = connection.execute(sql_fdg)
+      v_dir_target = "fdg"
+      results_dataset.each do |r_dataset|
+        v_call = "ssh panda_admin@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+           puts stdout.read 1024    
+        end
+        stdin.close
+        stdout.close
+        stderr.close
+        v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+        v_scan_procedure_path = ScanProcedure.find(r[2]).codename
+        v_fdg_summed_file = v_subjectid+"_fdg_summed.nii"
+        if v_subjectid == "pdt00067" 
+          v_fdg_summed_file = v_subjectid+"_fdg_summed.nii"
+          v_readme_file = "README"
+          v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/fdg/"+ v_fdg_summed_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_fdg_summed.nii '"
+          stdin, stdout, stderr = Open3.popen3(v_call)
+          while !stdout.eof?
+             puts stdout.read 1024    
+          end
+          stdin.close
+          stdout.close
+          stderr.close
+          v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/fdg/"+ v_readme_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_fdg_readme.txt '"
+          stdin, stdout, stderr = Open3.popen3(v_call)
+          while !stdout.eof?
+             puts stdout.read 1024    
+          end
+          stdin.close
+          stdout.close
+          stderr.close
+        else
+          v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/fdg/"+ v_fdg_summed_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_fdg_summed.nii '"
+          stdin, stdout, stderr = Open3.popen3(v_call)
+          while !stdout.eof?
+              puts stdout.read 1024    
+          end
+          stdin.close
+          stdout.close
+          stderr.close
+        end
+      end
       
       #tar.gz subjectid dir
       v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"

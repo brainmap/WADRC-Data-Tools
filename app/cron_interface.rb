@@ -93,6 +93,10 @@ v_user = v_user.gsub("\n","")
       v_shared = Shared.new
       v_shared.run_fdg_status()
       
+  elsif v_value_1 == "goveas_20131031_upload"
+      v_shared = Shared.new
+      v_shared.run_goveas_upload()
+      
   elsif v_value_1 == "lst_116_status"  # getting lst_122 and lst_116 
         v_shared = Shared.new
         v_shared.run_lst_116_status()    
