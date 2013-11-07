@@ -2596,6 +2596,15 @@ puts "AAAAAA "+v_call
               stdin.close
               stdout.close
               stderr.close
+              # some nii.gz
+              v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+dir_name+"/"+ v_subjectid+v_file_name_hash[dir_name]+".gz  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+v_file_name_hash[dir_name]+".gz  '"
+               stdin, stdout, stderr = Open3.popen3(v_call)
+               while !stdout.eof?
+                  puts stdout.read 1024    
+               end
+               stdin.close
+               stdout.close
+               stderr.close
            end
         end
         
