@@ -1,6 +1,6 @@
 class Directory < ActiveRecord::Base
 	has_many :measurements
-	acts_as_list
+	### cai 20131107 - causing error in passenger acts_as_list
 	
 
   def chart(options={})
