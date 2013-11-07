@@ -2465,7 +2465,7 @@ puts "AAAAAA "+v_call
     v_series_description_category_id_array = [19, 17]
     sql = "select distinct subjectid, enrollment_id, scan_procedure_id, export_id from cg_goveas_20131031
            where ( done_flag != 'Y' or done_flag is NULL)
-           and ( status_flag != 'N' or status_flag is NULL)  and subjectid in ('mrt00097', 'pdt00034','pdt00035')"  # sending ppt with incomplete sets
+           and ( status_flag != 'N' or status_flag is NULL) " #  and subjectid in ('mrt00097', 'pdt00034','pdt00035')"  # sending ppt with incomplete sets
     results = connection.execute(sql)
     
     # get each subject , make target dir with export id
