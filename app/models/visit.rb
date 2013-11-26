@@ -174,6 +174,7 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
                  v_thumbnail_base = "/Library/WebServer/WADRC-Data-Tools/shared/system/thumbnails/"
                  visit.image_datasets.each do |ids|
                     v_thumbnail_path = v_thumbnail_base+ids.id.to_s
+                    begin; FileUtils.chown_R('panda_user','panda_group', v_thumbnail_path); rescue; end
                     begin; FileUtils.chmod_R(0775, v_thumbnail_path); rescue; end
                      # the thumbnail dir name comes from ids.id
                  end
