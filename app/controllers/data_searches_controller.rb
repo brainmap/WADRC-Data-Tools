@@ -122,7 +122,7 @@ class DataSearchesController < ApplicationController
     def cg_tables
       @cg_tn_key_y = []
       @cg_tn_key_unique_y = []
-      @cg_tns = CgTn.where("table_type='column_group' and status_flag='Y'").order(:id)
+      @cg_tns = CgTn.where("table_type='column_group' and status_flag='Y'").order(:display_order)
       @cg_tns.each do |cg_tn|
           cg_tn_key_array = []
           cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",cg_tn.id)
@@ -2038,7 +2038,7 @@ class DataSearchesController < ApplicationController
    	  @v_cg_action  = params[:cg_action]
    	end
     @v_data_types=[["varchar","varchar"],["int","int"],["float","float"]]
-    @v_data_sizes=[["1","1"],["10","10"],["50","50"],["100","100"],["500","500"],["2000","2000"]] 
+    @v_data_sizes=[["1","1"],["10","10"],["30","30"],["50","50"],["100","100"],["200","200"],["500","500"],["1000","1000"],["2000","2000"]] 
     
     # determine key_type from columns  
     # enrollment/sp =>subjectid,enrollment_id,scan_procedure_id

@@ -24,10 +24,10 @@ edit_count = edit_count -1
       <th>AdrcNum</th>
       <th>Years of Education</th>
       <th>Notes</th>
-      <!-- <th>APOE status</th>
+      <!-- <th>APOE status</th> -->
       <th>APOEE1</th>
       <th>APOEE2</th>
-      <th>APOE Processor</th> -->
+      <th>APOE Processor</th> 
       <th>Access ID</th>
     </tr>
   </thead>
@@ -45,10 +45,10 @@ edit_count = edit_count -1
       <td>
         <%= popup_note('peek', "<p>#{@participant.note}</p>") unless @participant.note.nil? %>
       </td>
-      <!-- <td><%#= @participant.genetic_status %></td>
-      <td><%#= allele(@participant.apoe_e1) %></td>
-      <td><%#= allele(@participant.apoe_e2) %></td>
-      <td><%#= @participant.apoe_processor %></td> -->
+      <!-- <td><%#= @participant.genetic_status %></td> -->
+      <td><%= allele(@participant.apoe_e1) %></td>
+      <td><%= allele(@participant.apoe_e2) %></td>
+      <td><%= @participant.apoe_processor %></td> 
 			<td><%= @participant.access_id %></td>
     </tr>
   </tbody>
