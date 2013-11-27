@@ -53,13 +53,17 @@ v_user = v_user.gsub("\n","")
     v_shared = Shared.new
     v_shared.run_asl_status()
   
- elsif v_value_1 == "asl_sw_fs_process"
+  elsif v_value_1 == "asl_sw_fs_process"
        v_shared = Shared.new
        v_shared.run_asl_sw_fs_process()
 
-   elsif v_value_1 == "adrc_dti"
+  elsif v_value_1 == "adrc_dti"
       v_shared = Shared.new
       v_shared.run_adrc_dti()
+
+  elsif v_value_1 == "adrc_pcvipr"
+      v_shared = Shared.new
+      v_shared.run_adrc_pcvipr()       
     
  elsif v_value_1 == "adrc_upload"
       v_shared = Shared.new
@@ -70,12 +74,12 @@ v_user = v_user.gsub("\n","")
       v_shared.run_antuano_20130916_upload()    
       
  elsif v_value_1 == "test_sftp"
-         v_shared = Shared.new
-         v_shared.run_sftp()
+      v_shared = Shared.new
+      v_shared.run_sftp()
        
  elsif v_value_1 == "dir_size"
-            v_shared = Shared.new
-            v_shared.run_dir_size()
+      v_shared = Shared.new
+      v_shared.run_dir_size()
       
  elsif v_value_1 == "dti_status"
       v_shared = Shared.new
@@ -88,18 +92,22 @@ v_user = v_user.gsub("\n","")
   elsif v_value_1 == "fdg_status"
       v_shared = Shared.new
       v_shared.run_fdg_status()
+
+  elsif v_value_1 == "goveas_20131031_upload"
+      v_shared = Shared.new
+      v_shared.run_goveas_upload()     
       
   elsif v_value_1 == "lst_116_status"  # getting lst_122 and lst_116 
-        v_shared = Shared.new
-        v_shared.run_lst_116_status()    
+      v_shared = Shared.new
+      v_shared.run_lst_116_status()    
   
   elsif v_value_1 == "lst_122_process" 
-        v_shared = Shared.new
-        v_shared.run_lst_122_process()
+      v_shared = Shared.new
+      v_shared.run_lst_122_process()
         
   elsif v_value_1 == "pet_path"  
-        v_shared = Shared.new
-        v_shared.run_pet_path()
+      v_shared = Shared.new
+      v_shared.run_pet_path()
   
   elsif v_value_1 == "pib_status"
       v_shared = Shared.new
@@ -111,7 +119,11 @@ v_user = v_user.gsub("\n","")
       
   elsif v_value_1 == "selley_20130906_upload"
       v_shared = Shared.new
-      v_shared.run_selley_20130906_upload()    
+      v_shared.run_selley_20130906_upload()  
+
+  elsif v_value_1 == "selley_20130906_upload"
+      v_shared = Shared.new
+      v_shared.run_selley_20130906_upload()   
  
   elsif v_value_1 == "series_description"
       v_shared = Shared.new

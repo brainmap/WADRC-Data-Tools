@@ -170,6 +170,7 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
           if data.valid?
             visit.image_datasets << data
              # change permissions on thumbnail directory in production-- umask 007 is making 775 into 770
+             # just bouncing off root owner
              if Rails.env=="production" 
                  v_thumbnail_base = "/Library/WebServer/WADRC-Data-Tools/shared/system/thumbnails/"
                  visit.image_datasets.each do |ids|
