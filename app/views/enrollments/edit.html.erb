@@ -4,6 +4,7 @@
 # apply limit protocol  on create , edit in create form  
 edit_count =@var.edit_low_scan_procedure_array.split(' ').length 
 edit_count = edit_count -1 
+v_scan_share_hash = [['Ok to share scan with outside request if IRB approval','N'],['Do not share scan via outside rerquest','Y']]
 %> 
 <h1>Editing enrollment</h1>
 
@@ -25,6 +26,10 @@ edit_count = edit_count -1
   <p>
     <%= f.label :withdraw_enrollment? %><br />
     <%= f.text_area :withdrawl_reason, :rows => 3  %>
+  </p>
+  <p>
+    <%= f.label :do_not_share_scans_flag %><br />
+    <%= select :enrollment, :do_not_share_scans_flag, { "Do not share scan via outside rerquest" => "Y", "Ok to share scan with outside request if IRB approval" => "N" }, :selected =>@enrollment.do_not_share_scans_flag %>
   </p>
     <p>
     <%= f.label :set_participant_id_blank? %><br />

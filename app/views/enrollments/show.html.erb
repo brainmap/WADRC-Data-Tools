@@ -13,7 +13,8 @@ edit_count = edit_count -1
   :enumber => @enrollment.enumber,
   :recruitment_source => @enrollment.recruitment_source,
   :study => @enrollment.recruitment_group.blank? ? '' : @enrollment.recruitment_group.study.name,
-  :recruitment_group => @enrollment.recruitment_group.blank? ? '' : @enrollment.recruitment_group.name
+  :recruitment_group => @enrollment.recruitment_group.blank? ? '' : @enrollment.recruitment_group.name,
+  :do_not_share_scans_flag => @enrollment.do_not_share_scans_flag == 'N' ? 'Ok to share scan with outside request if IRB approval'  : 'Do not share scan via outside rerquest'
 })%>
 </div>
 
