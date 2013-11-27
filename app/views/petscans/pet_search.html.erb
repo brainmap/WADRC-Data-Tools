@@ -96,6 +96,10 @@ edit_count = edit_count -1
       <th><%= f.label :pet_status %></th>
       <td><%= select :pet_search, :pet_status, { "yes" => "yes", "no" => "no", "n/a" => "n/a" }, :selected =>"yes", :include_blank => true %></td>
     </tr>
+    <tr>
+      <th><%= f.label :pet_tracer %></th>
+      <td><%= select(:pet_search, :lookup_pettracer_id, LookupPettracer.all.sort_by(&:name).collect {|p| [ p.name_description, p.id ] }, { :include_blank => "Select a tracer" }) %></td>
+    </tr>
   </table>
 <!--
     <tr>

@@ -322,7 +322,7 @@ class ParticipantsController < ApplicationController
             @left_join = ["LEFT JOIN lookup_genders on participants.gender = lookup_genders.id"] # left join needs to be in sql right after the parent table!!!!!!!
          else    
            @html_request ="N"          
-            @column_headers = ['DOB','Gender','Wrapnum','Reggieid','Years of Education','Notes', 'Enroll Number']# need to look up values
+            @column_headers = ['DOB','Gender','Wrapnum','Reggieid','Years of Education','Notes','Apoe_e1','Apoe_e2', 'Enroll Number']# need to look up values
                   # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
             @column_number =   @column_headers.size
             @fields =["date_format(participants.dob,'%Y')","lookup_genders.description","participants.wrapnum","participants.reggieid","participants.ed_years","participants.note","participants.apoe_e1","participants.apoe_e2","participants.id"] 

@@ -49,6 +49,7 @@ class PetscansController < ApplicationController
           params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:petscan_search][:rmr]
       end
 
+
        #  build expected date format --- between, >, < 
        v_date_latest =""
        #want all three date parts
@@ -185,6 +186,12 @@ class PetscansController < ApplicationController
                               where appointments.vgroup_id = vgroups.id and  lower(vgroups.transfer_pet) in (lower('"+params[:pet_search][:pet_status].gsub(/[;:'"()=<>]/, '')+"')   ))"
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  Pet status "+params[:pet_search][:pet_status]
+      end
+
+      if !params[:pet_search][:lookup_pettracer_id].blank? 
+          condition ="  petscans.lookup_pettracer_id in ("+params[:pet_search][:lookup_pettracer_id].gsub(/[;:'"()=<>]/, '')+"   )"
+          @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +",  Tracer "+LookupPettracer.find(params[:pet_search][:lookup_pettracer_id]).description
       end
 
       #  build expected date format --- between, >, < 
