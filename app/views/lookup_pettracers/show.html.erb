@@ -10,7 +10,7 @@
   <%= @lookup_pettracer.description %>
 </p>
 
-
+<% if current_user.role == 'Admin_High'%>
 <%= link_to 'Edit', edit_lookup_pettracer_path(@lookup_pettracer) %> |
 <%= link_to 'Back', lookup_pettracers_path %>
 <% else %>

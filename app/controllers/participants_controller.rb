@@ -37,7 +37,7 @@ class ParticipantsController < ApplicationController
     scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
 #    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
-     
+
      @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
            where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
 

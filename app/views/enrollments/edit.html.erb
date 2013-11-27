@@ -26,6 +26,10 @@ edit_count = edit_count -1
     <%= f.label :withdraw_enrollment? %><br />
     <%= f.text_area :withdrawl_reason, :rows => 3  %>
   </p>
+    <p>
+    <%= f.label :set_participant_id_blank? %><br />
+    <%= check_box( :cleanup, "set_participant_id_blank")%>
+  </p>
   <% if edit_count > 0 %>
   <p>
     <%= f.submit "Update" %>

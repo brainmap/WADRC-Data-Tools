@@ -42,9 +42,12 @@ class EnrollmentsController < ApplicationController
 #     @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships, scan_procedures_visits
 #                   where enrollment_visit_memberships.visit_id = scan_procedures_visits.visit_id and scan_procedures_visits.scan_procedure_id in (?)) ", scan_procedure_array).find(params[:id])
 
-@enrollment = Enrollment.where(" enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
-      where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?)) ", scan_procedure_array).find(params[:id])
-
+     if current_user.role == 'Admin_High' # want to get enrollments not linked to any vgroups -- bypass access control for admin, so can unlink from participant
+         @enrollment = Enrollment.find(params[:id])
+     else
+       @enrollment = Enrollment.where(" enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
+        where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?)) ", scan_procedure_array).find(params[:id])
+     end
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @enrollment }
@@ -67,9 +70,13 @@ class EnrollmentsController < ApplicationController
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
 #    @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
-     @enrollment = Enrollment.where(" enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
-           where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?)) ", scan_procedure_array).find(params[:id])
+    if current_user.role == 'Admin_High'
+        @enrollment = Enrollment.find(params[:id])
      
+    else
+       @enrollment = Enrollment.where(" enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
+           where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?)) ", scan_procedure_array).find(params[:id])
+     end
   end
 
   # POST /enrollments
@@ -95,11 +102,21 @@ class EnrollmentsController < ApplicationController
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
 #    @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
-     @enrollment = Enrollment.where(" enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
+    if current_user.role == 'Admin_High'
+        @enrollment = Enrollment.find(params[:id])
+    else
+          @enrollment = Enrollment.where(" enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
            where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and  scan_procedures_vgroups.scan_procedure_id in (?)) ", scan_procedure_array).find(params[:id])
+    end 
 
     respond_to do |format|
       if @enrollment.update_attributes(params[:enrollment])
+        if current_user.role == 'Admin_High'
+          if !params[:cleanup][:set_participant_id_blank].blank?
+             @enrollment.participant_id = nil
+             @enrollment.save
+          end
+        end
         flash[:notice] = 'Enrollment was successfully updated.'
         format.html { redirect_to(@enrollment) }
         format.xml  { head :ok }
@@ -116,8 +133,12 @@ class EnrollmentsController < ApplicationController
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
 #    @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
-     @enrollment = Enrollment.where(" enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
+    if current_user.role == 'Admin_High'
+        @enrollment = Enrollment.find(params[:id]) 
+    else
+       @enrollment = Enrollment.where(" enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
        where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?)) ", scan_procedure_array).find(params[:id])
+     end
     @enrollment.destroy
 
     respond_to do |format|
