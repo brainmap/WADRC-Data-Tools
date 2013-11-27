@@ -1028,7 +1028,7 @@ class DataSearchesController < ApplicationController
          # loop thru each table
          if !params[:cg_search][:tn_id].blank? 
            params[:cg_search][:tn_id].each do |tn_id|
-            v_tn_id = tn_id.to_a.to_s
+            v_tn_id = tn_id.to_s
             v_cg_tn_array = []  
             # pet with a tracer picked - could be many tracers - artifically make more "tables"
             @cg_tn = CgTn.find(v_tn_id)
@@ -1086,7 +1086,7 @@ class DataSearchesController < ApplicationController
                       v_include_tn = "N"
                       if !params[:cg_search][:cn_id].blank? and !params[:cg_search][:cn_id][v_tn_id].blank?
                         params[:cg_search][:cn_id][v_tn_id].each do |tn_cn_id|
-                           v_tn_cn_id = tn_cn_id.to_a.to_s
+                           v_tn_cn_id = tn_cn_id.to_s
                            if (!params[:cg_search][:condition].blank? and !params[:cg_search][:condition][v_tn_id].blank? and !params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank?) or
                                  (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank? )
                              v_include_tn ="Y"
@@ -1143,7 +1143,7 @@ class DataSearchesController < ApplicationController
                @cg_query_tn_hash[v_tn_id] = @cg_query_tn
                if !params[:cg_search][:cn_id].blank? and !params[:cg_search][:cn_id][v_tn_id].blank?
                  params[:cg_search][:cn_id][v_tn_id].each do |tn_cn_id|
-                   v_tn_cn_id = tn_cn_id.to_a.to_s                  
+                   v_tn_cn_id = tn_cn_id.to_s                  
                    if (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and  !params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank?) or (!params[:cg_search][:condition].blank? and !params[:cg_search][:condition][v_tn_id].blank? and !params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank?)
                        @cg_tn_cn = CgTnCn.find(v_tn_cn_id)
                        @cg_query_tn_cn = CgQueryTnCn.new 
@@ -1466,7 +1466,7 @@ class DataSearchesController < ApplicationController
              else  # try deleting empty params
                if !params[:cg_search][:cn_id][v_tn_id].blank?
                  params[:cg_search][:cn_id][v_tn_id].each do |tn_cn_id|
-                    v_tn_cn_id = tn_cn_id.to_a.to_s
+                    v_tn_cn_id = tn_cn_id.to_s
                     if !params[:cg_search][:condition].blank? and !params[:cg_search][:condition][v_tn_id].blank? and !params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank?
                       if (( params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank? or params[:cg_search][:condition][v_tn_id][v_tn_cn_id] == "") and params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank? )                   
                        params[:cg_search][:cn_id][v_tn_id].delete(v_tn_cn_id.to_s)
@@ -1578,8 +1578,7 @@ class DataSearchesController < ApplicationController
         #run_search_q_data tn_cn_id/tn_id in (686/676,687/677,688/688) common_name = "question fields" vs run_search if 
       end     
       @column_number =   @local_column_headers.size
-
-           
+        
   if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?
     @local_conditions.delete_if {|x| x == "" }   # a blank getting inserted 
     sql = " select distinct "+@local_fields.join(',')+" from "
@@ -1595,6 +1594,8 @@ class DataSearchesController < ApplicationController
     sql = sql + " where "+ @local_conditions.uniq.join(" and ")
     sql = sql+" order by "+@order_by.join(",")
     @sql = sql
+    sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3999]+"')"
+    @results_log = connection.execute(sql_log)
     # run the sql ==>@results, after some substitutions
     
     if !params[:cg_search].blank? and !params[:cg_search][:series_description_type_id].blank? and !params[:cg_search][:image_dataset_file].blank?

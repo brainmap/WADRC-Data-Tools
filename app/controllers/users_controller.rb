@@ -53,7 +53,7 @@ class UsersController < ApplicationController
 
   def add_user
     if !params[:user].nil? 
-     var = "insert into users(username,email,last_name,first_name,role) values('"+params[:user][:username]+"','"+params[:user][:email]+"','"+params[:user][:last_name].gsub("'","''")+"','"+params[:user][:first_name].gsub("'","''")+"','"+params[:user][:role]+"')"
+     var = "insert into users(username,email,last_name,first_name,role,description) values('"+params[:user][:username]+"','"+params[:user][:email]+"','"+params[:user][:last_name].gsub("'","''")+"','"+params[:user][:first_name].gsub("'","''")+"','"+params[:user][:role]+"','"+params[:user][:username]+"')"
     connection = ActiveRecord::Base.connection();
      results = connection.execute(var)
 

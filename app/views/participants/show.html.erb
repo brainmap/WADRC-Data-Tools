@@ -80,4 +80,74 @@ edit_count = edit_count -1
 		for <%= v.scan_procedures.blank? ? "unknown protocol" : v.scan_procedures.collect{|sp| sp.codename}.join(", ") %> 
 		with enumber <%= v.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %>
 	</p>
-<% end -%>
+  <% end 
+@a =  Appointment.where("vgroup_id in ( select vgroups.id from vgroups where vgroups.participant_id in (?) )",@participant.id)
+        a_array =@a.to_a
+     # CHANGE TO GET rmr,enroll,scan_protocol from vgroup
+         @petscans = Petscan.where("appointment_id in (?) ",a_array)
+         @lumbarpunctures = Lumbarpuncture.where("appointment_id in (?) ",a_array)
+         @blooddraws = Blooddraw.where("appointment_id in (?) ",a_array)
+         @neuropsyches = Neuropsych.where("appointment_id in (?) ",a_array)
+        @questionnaires = Questionnaire.where("appointment_id in (?) ",a_array)
+
+%>
+
+<h3>Petscan appointments</h3>
+<%= content_tag(:p, "No petscan appointments for this participant") if @petscans.blank? %>
+<ul>
+  <% @petscans.each do |petscan| 
+        appointment = Appointment.find(petscan.appointment_id)
+        vgroup = Vgroup.find(appointment.vgroup_id)%>
+        <li><%= link_to appointment.appointment_date , petscan %>  <%= LookupPettracer.find(petscan.lookup_pettracer_id).name_description.html_safe %>&nbsp;&nbsp;&nbsp;&nbsp;
+  in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
+  <% end %>
+</ul>
+<% if !@lumbarpunctures.blank?%>
+<h3>Lumbarpuncture appointments</h3>
+<%= content_tag(:p, "No lumbarpuncture appointments for this participant") if @lumbarpunctures.blank? %>
+<ul>
+  <% @lumbarpunctures.each do |lp| 
+        appointment = Appointment.find(lp.appointment_id)
+        vgroup = Vgroup.find(appointment.vgroup_id)%>
+        <li><%= link_to appointment.appointment_date , lp %>  
+  in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
+  <% end %>
+</ul>
+<% end %>
+<% if !@blooddraws.blank?%>
+<h3>Lab Health appointments</h3>
+<%= content_tag(:p, "No lab health appointments for this participant") if @blooddraws.blank? %>
+<ul>
+  <% @blooddraws.each do |lh| 
+        appointment = Appointment.find(lh.appointment_id)
+        vgroup = Vgroup.find(appointment.vgroup_id)%>
+        <li><%= link_to appointment.appointment_date , lh %>  
+  in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
+  <% end %>
+</ul>
+<% end %>
+<% if !@neuropsyches.blank?%>
+<h3>Neuropsyche appointments</h3>
+<%= content_tag(:p, "No neuropsyche appointments for this participant") if @neuropsyches.blank? %>
+<ul>
+  <% @neuropsyches.each do |np| 
+        appointment = Appointment.find(np.appointment_id)
+        vgroup = Vgroup.find(appointment.vgroup_id)%>
+        <li><%= link_to appointment.appointment_date , np %>  
+  in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
+  <% end %>
+</ul>
+<% end %>
+<% if !@questionnaires.blank?%>
+<h3>Questionnaire appointments</h3>
+<%= content_tag(:p, "No questionnaire appointments for this participant") if @questionnaires.blank? %>
+<ul>
+  <% @questionnaires.each do |q| 
+        appointment = Appointment.find(q.appointment_id)
+        vgroup = Vgroup.find(appointment.vgroup_id)%>
+        <li><%= link_to appointment.appointment_date , q %>  
+  in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
+  <% end %>
+</ul>
+
+<% end %>
