@@ -1933,7 +1933,7 @@ puts "AAAAAA "+v_call
     ####          @schedulerun.status_flag="E"
     ####    end
   end  
-  
+    
   # to add columns --
   # change sql_base insert statement
   # change  sql = sql_base+  insert statement with values
@@ -1954,10 +1954,12 @@ puts "AAAAAA "+v_call
             results = connection.execute(sql)
 
             sql_base = "insert into cg_dti_status_new(dti_subjectid,dti_fa_file_name, dti_general_comment,dti_fa_flag,dti_md_file_name,
-                                                dti_md_flag,dti_l1_file_name,dti_l1_flag,dti_l2_file_name,dti_l2_flag,dti_l3_file_name,dti_l3_flag,enrollment_id, scan_procedure_id)values("  
+                                                dti_md_flag,dti_l1_file_name,dti_l1_flag,dti_l2_file_name,dti_l2_flag,dti_l3_file_name,dti_l3_flag,dti_nativefa_file_name,dti_nativefa_flag,dti_nativemd_file_name,dti_nativemd_flag,dti_nativel1_file_name,dti_nativel1_flag,dti_nativel2_file_name,dti_nativel2_flag,dti_nativel3_file_name,dti_nativel3_flag,enrollment_id, scan_procedure_id)values("  
 # just looking in preprocessed for list - but could add the listing from raw later to drive processing 
+# added adrc native below  --- none of the adrc are in the regular  -- but check 
 
             v_preprocessed_path = v_base_path+"/preprocessed/modalities/dti/adluru_pipeline/"
+            v_preprocessed_adrc_native_path = v_base_path+"/preprocessed/modalities/dti/adluru_adrc_native_space/"
             v_preprocessed_full_path = v_preprocessed_path   #+sp.codename
             if File.directory?( v_preprocessed_full_path) # v_raw_full_path)
               if !File.directory?(v_preprocessed_full_path)
@@ -1982,8 +1984,40 @@ puts "AAAAAA "+v_call
                         results.each do |r|
                               v_sp = r[0]
                         end
-                        sql = sql_base+"'"+file_name_array[0]+"','"+v_file_name+"','','"+v_dti_fa_flag+"',NULL,'N',NULL,'N',NULL,'N',NULL,'N',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
+                        sql = sql_base+"'"+file_name_array[0]+"','"+v_file_name+"','','"+v_dti_fa_flag+"',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
                         results = connection.execute(sql)
+                        v_cnt = v_cnt + 1
+                      end
+                  else
+                        #puts "               # NOT exists "+v_raw_full_path
+                  end # check if raw dir exisits
+              end
+              #FA native -- only adrc
+              Dir.glob(v_preprocessed_adrc_native_path+"/nativeFA/*_final_spd_fa.nii*").each do |f|   
+                  v_file_name = f.gsub(v_preprocessed_adrc_native_path+"/nativeFA/","")
+                  file_name_array = v_file_name.split('_')
+                  if file_name_array.size == 8
+                      enrollment = Enrollment.where("enumber in (?)",file_name_array[0])
+                      if !enrollment.blank?
+                        v_dti_nativefa_flag = "Y"
+                        # get v_sp based on subjectid - replace all numbers? look up in scan_procedure -- visit1 
+                        v_subjectid_trim = file_name_array[0].gsub(/[0-9]/,"")
+                        sql = "select id from scan_procedures where subjectid_base ='"+v_subjectid_trim+"' and codename like '%visit1'"
+                        results = connection.execute(sql)
+                        v_sp = 0;
+                        results.each do |r|
+                              v_sp = r[0]
+                        end
+                        # check if file_name_array[0] == dti_subjectid
+                        sql = "select * from cg_dti_status_new where dti_subjectid ='"+file_name_array[0]+"'"
+                        results = connection.execute(sql)
+                        if results.size > 0
+                           sql = "update cg_dti_status_new set dti_nativefa_flag ='"+v_dti_nativefa_flag+"', dti_nativefa_file_name='"+v_file_name+"' where dti_subjectid = '"+file_name_array[0]+"'"
+                           results = connection.execute(sql)
+                        else 
+                           sql = sql_base+"'"+file_name_array[0]+"',NULL,'','N',NULL,'N',NULL,'N',NULL,'N',NULL,'N','"+v_file_name+"','"+v_dti_nativefa_flag+"',NULL,'N',NULL,'N',NULL,'N',NULL,'N',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
+                            results = connection.execute(sql)
+                        end
                         v_cnt = v_cnt + 1
                       end
                   else
@@ -2012,7 +2046,39 @@ puts "AAAAAA "+v_call
                            sql = "update cg_dti_status_new set dti_md_flag ='"+v_dti_md_flag+"', dti_md_file_name='"+v_file_name+"' where dti_subjectid = '"+file_name_array[0]+"'"
                            results = connection.execute(sql)
                         else 
-                           sql = sql_base+"'"+file_name_array[0]+"',NULL,'','N','"+v_file_name+"','"+v_dti_md_flag+"',NULL,'N',NULL,'N',NULL,'N',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
+                           sql = sql_base+"'"+file_name_array[0]+"',NULL,'','N','"+v_file_name+"','"+v_dti_md_flag+"',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
+                           results = connection.execute(sql)
+                        end
+                        v_cnt = v_cnt + 1
+                      end
+                  else
+                        #puts "               # NOT exists "+v_raw_full_path
+                  end # check if raw dir exisits
+              end
+               #MD native -- only adrc
+              Dir.glob(v_preprocessed_adrc_native_path+"/nativeMD/*_final_spd_md.nii*").each do |f|
+                  v_file_name = f.gsub(v_preprocessed_adrc_native_path+"/nativeMD/","")
+                  file_name_array = v_file_name.split('_')
+                  if file_name_array.size == 8
+                      enrollment = Enrollment.where("enumber in (?)",file_name_array[0])
+                      if !enrollment.blank?
+                        v_dti_nativemd_flag = "Y"
+                        # get v_sp based on subjectid - replace all numbers? look up in scan_procedure -- visit1 
+                        v_subjectid_trim = file_name_array[0].gsub(/[0-9]/,"")
+                        sql = "select id from scan_procedures where subjectid_base ='"+v_subjectid_trim+"' and codename like '%visit1'"
+                        results = connection.execute(sql)
+                        v_sp = 0;
+                        results.each do |r|
+                              v_sp = r[0]
+                        end
+                        # check if file_name_array[0] == dti_subjectid
+                        sql = "select * from cg_dti_status_new where dti_subjectid ='"+file_name_array[0]+"'"
+                        results = connection.execute(sql)
+                        if results.size > 0
+                           sql = "update cg_dti_status_new set dti_nativemd_flag ='"+v_dti_nativemd_flag+"', dti_nativemd_file_name='"+v_file_name+"' where dti_subjectid = '"+file_name_array[0]+"'"
+                           results = connection.execute(sql)
+                        else 
+                           sql = sql_base+"'"+file_name_array[0]+"',NULL,'','N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N','"+v_file_name+"','"+v_dti_md_flag+"',NULL,'N',NULL,'N',NULL,'N',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
                            results = connection.execute(sql)
                         end
                         v_cnt = v_cnt + 1
@@ -2044,7 +2110,7 @@ puts "AAAAAA "+v_call
                            sql = "update cg_dti_status_new set dti_l1_flag ='"+v_dti_l1_flag+"', dti_l1_file_name='"+v_file_name+"' where dti_subjectid = '"+file_name_array[0]+"'"
                            results = connection.execute(sql)
                         else 
-                           sql = sql_base+"'"+file_name_array[0]+"',NULL,'','N',NULL,'N','"+v_file_name+"','"+v_dti_l1_flag+"',NULL,'N',NULL,'N',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
+                           sql = sql_base+"'"+file_name_array[0]+"',NULL,'','N',NULL,'N','"+v_file_name+"','"+v_dti_l1_flag+"',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
                            results = connection.execute(sql)
                         end
                         v_cnt = v_cnt + 1
@@ -2054,7 +2120,38 @@ puts "AAAAAA "+v_call
                   end # check if raw dir exisits
               end      
           
-              
+              #L1 native -- only adrc
+              Dir.glob(v_preprocessed_adrc_native_path+"/nativeL1/*_final_spd_lambda1.nii*").each do |f|
+                  v_file_name = f.gsub(v_preprocessed_adrc_native_path+"/nativeL1/","")
+                  file_name_array = v_file_name.split('_')
+                  if file_name_array.size == 8
+                      enrollment = Enrollment.where("enumber in (?)",file_name_array[0])
+                      if !enrollment.blank?
+                        v_dti_nativel1_flag = "Y"
+                        # get v_sp based on subjectid - replace all numbers? look up in scan_procedure -- visit1 
+                        v_subjectid_trim = file_name_array[0].gsub(/[0-9]/,"")
+                        sql = "select id from scan_procedures where subjectid_base ='"+v_subjectid_trim+"' and codename like '%visit1'"
+                        results = connection.execute(sql)
+                        v_sp = 0;
+                        results.each do |r|
+                              v_sp = r[0]
+                        end
+                        # check if file_name_array[0] == dti_subjectid
+                        sql = "select * from cg_dti_status_new where dti_subjectid ='"+file_name_array[0]+"'"
+                        results = connection.execute(sql)
+                        if results.size > 0
+                           sql = "update cg_dti_status_new set dti_nativel1_flag ='"+v_dti_nativel1_flag+"', dti_nativel1_file_name='"+v_file_name+"' where dti_subjectid = '"+file_name_array[0]+"'"
+                           results = connection.execute(sql)
+                        else 
+                           sql = sql_base+"'"+file_name_array[0]+"',NULL,'','N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N','"+v_file_name+"','"+v_dti_nativel1_flag+"',NULL,'N',NULL,'N',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
+                           results = connection.execute(sql)
+                        end
+                        v_cnt = v_cnt + 1
+                      end
+                  else
+                        #puts "               # NOT exists "+v_raw_full_path
+                  end # check if raw dir exisits
+              end
               Dir.glob(v_preprocessed_path+"/L2/*_combined_L2.nii*").each do |f|
                   v_file_name = f.gsub(v_preprocessed_path+"/L2/","")
                   file_name_array = v_file_name.split('_')
@@ -2077,7 +2174,7 @@ puts "AAAAAA "+v_call
                            sql = "update cg_dti_status_new set dti_l2_flag ='"+v_dti_l2_flag+"', dti_l2_file_name='"+v_file_name+"' where dti_subjectid = '"+file_name_array[0]+"'"
                            results = connection.execute(sql)
                         else 
-                           sql = sql_base+"'"+file_name_array[0]+"',NULL,'','N',NULL,'N',NULL,'N','"+v_file_name+"','"+v_dti_l2_flag+"',NULL,'N',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
+                           sql = sql_base+"'"+file_name_array[0]+"',NULL,'','N',NULL,'N',NULL,'N','"+v_file_name+"','"+v_dti_l2_flag+"',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
                            results = connection.execute(sql)
                         end
                         v_cnt = v_cnt + 1
@@ -2086,7 +2183,38 @@ puts "AAAAAA "+v_call
                         #puts "               # NOT exists "+v_raw_full_path
                   end # check if raw dir exisits
               end  
-              
+              #L2 native -- only adrc
+              Dir.glob(v_preprocessed_adrc_native_path+"/nativeL2/*_final_spd_lambda2.nii*").each do |f|
+                  v_file_name = f.gsub(v_preprocessed_adrc_native_path+"/nativeL2/","")
+                  file_name_array = v_file_name.split('_')
+                  if file_name_array.size == 8
+                      enrollment = Enrollment.where("enumber in (?)",file_name_array[0])
+                      if !enrollment.blank?
+                        v_dti_nativel2_flag = "Y"
+                        # get v_sp based on subjectid - replace all numbers? look up in scan_procedure -- visit1 
+                        v_subjectid_trim = file_name_array[0].gsub(/[0-9]/,"")
+                        sql = "select id from scan_procedures where subjectid_base ='"+v_subjectid_trim+"' and codename like '%visit1'"
+                        results = connection.execute(sql)
+                        v_sp = 0;
+                        results.each do |r|
+                              v_sp = r[0]
+                        end
+                        # check if file_name_array[0] == dti_subjectid
+                        sql = "select * from cg_dti_status_new where dti_subjectid ='"+file_name_array[0]+"'"
+                        results = connection.execute(sql)
+                        if results.size > 0
+                           sql = "update cg_dti_status_new set dti_nativel2_flag ='"+v_dti_nativel2_flag+"', dti_nativel2_file_name='"+v_file_name+"' where dti_subjectid = '"+file_name_array[0]+"'"
+                           results = connection.execute(sql)
+                        else 
+                           sql = sql_base+"'"+file_name_array[0]+"',NULL,'','N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N','"+v_file_name+"','"+v_dti_nativel2_flag+"',NULL,'N',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
+                           results = connection.execute(sql)
+                        end
+                        v_cnt = v_cnt + 1
+                      end
+                  else
+                        #puts "               # NOT exists "+v_raw_full_path
+                  end # check if raw dir exisits
+              end
               
               Dir.glob(v_preprocessed_path+"/L3/*_combined_L3.nii*").each do |f|
                   v_file_name = f.gsub(v_preprocessed_path+"/L3/","")
@@ -2110,7 +2238,7 @@ puts "AAAAAA "+v_call
                            sql = "update cg_dti_status_new set dti_l3_flag ='"+v_dti_l3_flag+"', dti_l3_file_name='"+v_file_name+"' where dti_subjectid = '"+file_name_array[0]+"'"
                            results = connection.execute(sql)
                         else 
-                           sql = sql_base+"'"+file_name_array[0]+"',NULL,'','N',NULL,'N',NULL,'N',NULL,'N','"+v_file_name+"','"+v_dti_l3_flag+"',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
+                           sql = sql_base+"'"+file_name_array[0]+"',NULL,'','N',NULL,'N',NULL,'N',NULL,'N','"+v_file_name+"','"+v_dti_l3_flag+"',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
                            results = connection.execute(sql)
                         end
                         v_cnt = v_cnt + 1
@@ -2120,13 +2248,45 @@ puts "AAAAAA "+v_call
                   end # check if raw dir exisits
               end                    
               
+              #L3 native -- only adrc
+              Dir.glob(v_preprocessed_adrc_native_path+"/nativeL3/*_final_spd_lambda3.nii*").each do |f|
+                  v_file_name = f.gsub(v_preprocessed_adrc_native_path+"/nativeL3/","")
+                  file_name_array = v_file_name.split('_')
+                  if file_name_array.size == 8
+                      enrollment = Enrollment.where("enumber in (?)",file_name_array[0])
+                      if !enrollment.blank?
+                        v_dti_nativel3_flag = "Y"
+                        # get v_sp based on subjectid - replace all numbers? look up in scan_procedure -- visit1 
+                        v_subjectid_trim = file_name_array[0].gsub(/[0-9]/,"")
+                        sql = "select id from scan_procedures where subjectid_base ='"+v_subjectid_trim+"' and codename like '%visit1'"
+                        results = connection.execute(sql)
+                        v_sp = 0;
+                        results.each do |r|
+                              v_sp = r[0]
+                        end
+                        # check if file_name_array[0] == dti_subjectid
+                        sql = "select * from cg_dti_status_new where dti_subjectid ='"+file_name_array[0]+"'"
+                        results = connection.execute(sql)
+                        if results.size > 0
+                           sql = "update cg_dti_status_new set dti_nativel3_flag ='"+v_dti_nativel3_flag+"', dti_nativel3_file_name='"+v_file_name+"' where dti_subjectid = '"+file_name_array[0]+"'"
+                           results = connection.execute(sql)
+                        else 
+                           sql = sql_base+"'"+file_name_array[0]+"',NULL,'','N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N',NULL,'N','"+v_file_name+"','"+v_dti_nativel3_flag+"',"+enrollment[0].id.to_s+","+v_sp.to_s+")"
+                           results = connection.execute(sql)
+                        end
+                        v_cnt = v_cnt + 1
+                      end
+                  else
+                        #puts "               # NOT exists "+v_raw_full_path
+                  end # check if raw dir exisits
+              end
               
            end           
            # check move cg_ to cg_old
            # v_shared = Shared.new 
            # move from new to present table -- made into a function  in shared model
            v_comment = self.move_present_to_old_new_to_present("cg_dti_status",
-             "dti_subjectid,dti_fa_file_name, dti_general_comment,dti_fa_flag, dti_fa_comment, dti_fa_global_quality,dti_md_file_name,dti_md_flag, dti_md_comment, dti_md_global_quality, dti_l1_file_name,dti_l1_flag, dti_l1_comment, dti_l1_global_quality,dti_l2_file_name,dti_l2_flag, dti_l2_comment, dti_l2_global_quality, dti_l3_file_name,dti_l3_flag, dti_l3_comment, dti_l3_global_quality,
+             "dti_subjectid,dti_fa_file_name, dti_general_comment,dti_fa_flag, dti_fa_comment, dti_fa_global_quality,dti_md_file_name,dti_md_flag, dti_md_comment, dti_md_global_quality, dti_l1_file_name,dti_l1_flag, dti_l1_comment, dti_l1_global_quality,dti_l2_file_name,dti_l2_flag, dti_l2_comment, dti_l2_global_quality, dti_l3_file_name,dti_l3_flag, dti_l3_comment, dti_l3_global_quality,dti_nativefa_file_name,dti_nativefa_flag,dti_nativemd_file_name,dti_nativemd_flag,dti_nativel1_file_name,dti_nativel1_flag,dti_nativel2_file_name,dti_nativel2_flag,dti_nativel3_file_name,dti_nativel3_flag,
               enrollment_id,scan_procedure_id",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
