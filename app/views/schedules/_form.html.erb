@@ -40,7 +40,7 @@
 <tr><td align="left" colspan=2><b>File Path:</b> <%= f.text_field :file_path, :size => 60 %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<b>Key Type:</b> <%= f.select :key_type, v_key, :selected => @schedule.key_type ? 'enrollment/sp': @schedule.key_type %></td></tr>
 <tr><td align="left" colspan=2><b>Target_Table_columns/order:</b> <%= f.text_field :target_table_columns, :size=>90 %>	</td></tr>
-<tr><td align="left" colspan=2><b>Process Stop File option:</b> <%= f.select :process_stop_file_flag, v_y_n, :selected => @schedule.process_stop_file_flag.blank? ? 'N' :  @schedule.process_stop_file_flag   %> 	</td></tr>
+<tr><td align="left" colspan=2><b>Process Stop File option:</b> <%= f.select :process_stop_file_flag, v_y_n, :selected => @schedule.process_stop_file_flag.blank? ? 'N' :  @schedule.process_stop_file_flag   %><br>( /mounts/data/preprocessed/logs ) 	</td></tr>
 <tr><td align="left" colspan=2>
 <br>
 <B>Owner:</b></td></tr>

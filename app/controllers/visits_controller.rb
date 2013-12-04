@@ -179,6 +179,22 @@ class VisitsController <  AuthorizedController #  ApplicationController
     @appointment = Appointment.find(@visit.appointment_id)
     @vgroup = Vgroup.find(@appointment.vgroup_id)
 
+                 v_thumbnail_base = "/Users/caillingworth/code/WADRC-Data-Tools/public/system/thumbnails/"
+             if Rails.env=="production" 
+                 v_thumbnail_base = "/Library/WebServer/WADRC-Data-Tools/shared/system/thumbnails/"
+              end
+              @visit.image_datasets.each do |ids|
+                    v_thumbnail_path = v_thumbnail_base+ids.id.to_s
+                    puts "aaaaaaaaaaaa v_thumbnail_path=  "+v_thumbnail_path
+                    # problem with umask 007 setting all files to 770 , and files created as non-expected (web server?) user
+                    # FileUtils.chown_R('panda_user','panda_group', v_thumbnail_path); 
+                     # check if file exists,
+                     # check permissions 
+                   if File.directory?(v_thumbnail_path)
+                      FileUtils.chmod_R(0774, v_thumbnail_path)
+                   end 
+              end
+
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @visit }

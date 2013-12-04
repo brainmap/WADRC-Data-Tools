@@ -169,17 +169,6 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
           data.attributes.merge!(meta_attrs)
           if data.valid?
             visit.image_datasets << data
-             # change permissions on thumbnail directory in production-- umask 007 is making 775 into 770
-             # just bouncing off root owner
-             if Rails.env=="production" 
-                 v_thumbnail_base = "/Library/WebServer/WADRC-Data-Tools/shared/system/thumbnails/"
-                 visit.image_datasets.each do |ids|
-                    v_thumbnail_path = v_thumbnail_base+ids.id.to_s
-                    begin; FileUtils.chown_R('panda_user','panda_group', v_thumbnail_path); rescue; end
-                    begin; FileUtils.chmod_R(0775, v_thumbnail_path); rescue; end
-                     # the thumbnail dir name comes from ids.id
-                 end
-              end
           else
              data.errors.messages.values.each do |msg|
                 msg.each do |m|
