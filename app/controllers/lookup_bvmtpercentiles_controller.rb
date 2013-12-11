@@ -15,6 +15,10 @@ class LookupBvmtpercentilesController < ApplicationController
   # GET /lookup_bvmtpercentiles/1.xml
   def show
     @lookup_bvmtpercentile = LookupBvmtpercentile.find(params[:id])
+    # test sending email
+    puts "aaaaaa before test email"
+     PandaMailer.test_email({:send_to => "noreply_johnson_lab@medicine.wisc.edu"}).deliver
+    puts "bbbbbb after test email"
 
     respond_to do |format|
       format.html # show.html.erb

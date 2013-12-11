@@ -15,6 +15,20 @@ class CgTnsController < ApplicationController
   # GET /cg_tns/1.xml
   def show
     @cg_tn = CgTn.find(params[:id])
+    v_datadictionary_base = "/Users/caillingworth/code/WADRC-Data-Tools/public/system/datadictionaries/"
+    if Rails.env=="production"  # problems with umask and permission
+          v_thumbnail_base = "/Library/WebServer/WADRC-Data-Tools/shared/system/datadictionaries/"
+    end
+    v_datadictionary_path = v_datadictionary_base+params[:id].to_s
+    puts "aaaaaaaaaaaa v_datadictionary_path=  "+v_datadictionary_path
+                    # problem with umask 007 setting all files to 770 , and files created as non-expected (web server?) user
+                    # FileUtils.chown_R('panda_user','panda_group', v_thumbnail_path); 
+                     # check if file exists,
+                     # check permissions 
+    if File.directory?(v_datadictionary_path)
+        FileUtils.chmod_R(0774, v_datadictionary_path)
+    end 
+
 
     respond_to do |format|
       format.html # show.html.erb

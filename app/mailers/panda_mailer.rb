@@ -12,6 +12,15 @@ class PandaMailer < ActionMailer::Base
       :subject => "[Data Panda] New Visit: #{visit.rmr}"
     )
   end
+
+  def test_email(email_params)
+     email_params.to_options! 
+     mail(
+      :to => email_params[:send_to], 
+      :subject => "test email localhost:3000"
+    )
+
+  end
   
   def schedule_notice( p_subject,email_params)
     email_params.to_options! 
