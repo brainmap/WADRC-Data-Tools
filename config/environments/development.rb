@@ -52,7 +52,8 @@ WADRCDataTools::Application.configure do
     :authentication => :username,
     :user_name      => email_login,
     :password       => email_password,
-    :tls            => true
+    :tls            => false,
+    :enable_starttls_auto =>true
   }
   
   config.action_mailer.default_url_options = {:host => 'localhost:3000'}
