@@ -1,0 +1,48 @@
+<%  v_y_n = {"Y"=>"Y","N"=>"N"} %>
+<%= form_for(@trfile) do |f| %>
+  <% if @trfile.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@trfile.errors.count, "error") %> prohibited this trfile from being saved:</h2>
+
+      <ul>
+      <% @trfile.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :tr_type %><br />
+    <%= f.select(:trtype_id, Trtype.all.collect {|p| [ p.description, p.id ] },  { :include_blank => "Select a tr type",:selected => @trfile.trtype_id }) %>
+  </div>
+  <div class="field">
+    <%= f.label :subjectid %>: for visit 1 just enter [subjectid], for visit 2 enter [subjectid]_v2 ,e.g. for visit # enter [subjectid]_v#<br />
+    <%= f.text_field :subjectid %>
+  </div>
+  <div class="field">
+    <%= f.label :enrollment_id %> populated from subjectid<br />
+    <%= f.hidden_field :enrollment_id %>
+  </div>
+  <div class="field">
+    <%= f.label :scan_procedure_id %><br />
+         <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
+    <%= collection_select(:trfile, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'choose scan procedure'}, {:multiple =>  false} ) %>
+
+  </div>
+  <div class="field">
+    <%= f.label :image_dataset_id %><br />
+    <% if !(@trfile.trtype_id).nil? and !Trtype.find(@trfile.trtype_id).series_description_type_id.nil? and   !@trfile.enrollment_id.nil? and  !@trfile.scan_procedure_id.nil? %>
+     <%= f.select(:image_dataset_id, @ids.collect {|p| [ p.series_description+" - "+p.path, p.id ] },  { :include_blank => "Select a scan series",:selected => @trfile.image_dataset_id }) %>
+    <%else%>
+  <br>  need  to enter a subjectid, (which maps to an enrollment_id and a scan_procedure,) and have selected a series_description_type in the trtype.
+  <% end %>
+  </div>
+  <div class="field">
+    <%= f.label :status_flag %><br />
+       <%= f.select :status_flag, v_y_n, {:prompt => 'Status?'}  %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

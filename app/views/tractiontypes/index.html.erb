@@ -1,0 +1,43 @@
+<h1>Listing tractiontypes</h1>
+
+<table>
+  <tr>
+    <th>Trtype</th>
+    <th>Description</th>
+    <th>Status flag</th>
+    <th>Display order</th>
+    <th>Display column header 1</th>
+    <th>Export column header 1</th>
+    <th>Values 1</th>
+    <th>Ref table a 1</th>
+    <th>Ref table b 1</th>
+    <th>Triggers 1</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @tractiontypes.each do |tractiontype| %>
+  <tr>
+    <td><%= tractiontype.trtype_id %></td>
+    <td><%= tractiontype.description %></td>
+    <td><%= tractiontype.status_flag %></td>
+    <td><%= tractiontype.display_order %></td>
+    <td><%= tractiontype.display_column_header_1 %></td>
+    <td><%= tractiontype.export_column_header_1 %></td>
+    <td><%= tractiontype.values_1 %></td>
+    <td><%= tractiontype.ref_table_a_1 %></td>
+    <td><%= tractiontype.ref_table_b_1 %></td>
+    <td><%= tractiontype.triggers_1 %></td>
+    <td><%= link_to 'Show', tractiontype %></td>
+    <% if current_user.role == 'Admin_High'%>
+    <td><%= link_to 'Edit', edit_tractiontype_path(tractiontype) %></td>
+    <td><%= link_to 'Destroy', tractiontype, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+    <% end %>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Tractiontype', new_tractiontype_path %>

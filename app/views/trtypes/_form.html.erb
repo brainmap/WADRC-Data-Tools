@@ -1,0 +1,37 @@
+<%  v_y_n = {"Y"=>"Y","N"=>"N"} %>
+
+<%= form_for(@trtype) do |f| %>
+  <% if @trtype.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@trtype.errors.count, "error") %> prohibited this trtype from being saved:</h2>
+
+      <ul>
+      <% @trtype.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :description %><br />
+    <%= f.text_field :description %>
+  </div>
+
+  <div class="field">
+    <%= f.label :series_description_type %><br />
+    <%= f.select(:series_description_type_id, SeriesDescriptionType.where("series_description_type not like '%?%'").sort_by(&:series_description_type).collect {|p| [ p.series_description_type, p.id ] },  { :include_blank => "Select a scan category",:selected => @trtype.series_description_type_id }) %>
+  </div>
+
+  <div class="field">
+    <%= f.label :parameters %><br />
+    <%= f.text_field :parameters %>
+  </div>
+  <div class="field">
+    <%= f.label :status_flag %><br />
+   <%= f.select :status_flag, v_y_n, {:prompt => 'Status?'}  %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

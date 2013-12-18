@@ -1,0 +1,35 @@
+<h1>Listing trtypes</h1>
+
+<table>
+  <tr>
+    <th>Description</th>
+    <th>Parameters</th>
+    <th>Status flag</th>
+    <th>Series Desc Type</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @trtypes.each do |trtype| %>
+  <tr>
+    <td><%= trtype.description %></td>
+    <td><%= trtype.parameters %></td>
+    <td><%= trtype.status_flag %></td>
+    <td>  <%=   if !trtype.series_description_type_id.blank? 
+          SeriesDescriptionType.find(trtype.series_description_type_id).series_description_type 
+     end%></td>
+    <td><%= link_to 'Show', trtype %></td>
+    <% if current_user.role == 'Admin_High'%>
+    <td><%= link_to 'Edit', edit_trtype_path(trtype) %></td>
+    <td><%= link_to 'Destroy', trtype, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+    <%end %>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Trtype', new_trtype_path %> | 
+<%= link_to('Track type actions','/tractiontypes') %> |
+<%= link_to('Track type files','/trfiles') %>

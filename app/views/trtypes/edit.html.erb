@@ -1,0 +1,11 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Editing trtype</h1>
+
+<%= render 'form' %>
+
+<%= link_to 'Show', @trtype %> |
+<%= link_to 'Back', trtypes_path %> | 
+<%= link_to('Track type actions','/tractiontypes') %> |
+<%= link_to('Track type files','/trfiles') %>
+
+<%end%>

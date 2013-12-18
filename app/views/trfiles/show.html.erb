@@ -1,0 +1,40 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Trtype:</b>
+  <%= Trtype.find(@trfile.trtype_id).description %>
+</p>
+
+<p>
+  <b>Subjectid:</b>
+  <%= @trfile.subjectid %>
+</p>
+
+<p>
+  <b>Enrollment:</b>
+  <%= @trfile.enrollment_id %>
+</p>
+
+<p>
+  <b>Scan procedure:</b>
+  <% if !@trfile.scan_procedure_id.nil? %>
+  <%= ScanProcedure.find(@trfile.scan_procedure_id).codename %>
+  <%end%>
+</p>
+
+<p>
+  <b>Image dataset:</b>
+  <% if !@trfile.image_dataset_id.nil? %>
+     <%= ImageDataset.find(@trfile.image_dataset_id).series_description %><br>
+     <%= ImageDataset.find(@trfile.image_dataset_id).path %>
+  <%end %>
+</p>
+
+<p>
+  <b>Status flag:</b>
+  <%= @trfile.status_flag %>
+</p>
+
+
+<%= link_to 'Edit', edit_trfile_path(@trfile) %> |
+<%= link_to 'Back', trfiles_path %>

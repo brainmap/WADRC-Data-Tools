@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Description:</b>
+  <%= @trtype.description %>
+</p>
+
+<p>
+  <b>Series description type:</b>
+  <%= 	if !@trtype.series_description_type_id.blank? 
+	        SeriesDescriptionType.find(@trtype.series_description_type_id).series_description_type 
+	   end%>
+
+</p>
+<p>
+  <b>Parameters:</b>
+  <%= @trtype.parameters %>
+</p>
+<p>
+  <b>Status flag:</b>
+  <%= @trtype.status_flag %>
+</p>
+
+<% if current_user.role == 'Admin_High'%>
+<%= link_to 'Edit', edit_trtype_path(@trtype) %> |
+<% end %>
+<%= link_to 'Back', trtypes_path %> | 
+<%= link_to('Track type actions','/tractiontypes') %> |
+<%= link_to('Track type files','/trfiles') %>

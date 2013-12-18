@@ -1,0 +1,58 @@
+<%  v_y_n = {"Y"=>"Y","N"=>"N"} %>
+<%= form_for(@tractiontype) do |f| %>
+  <% if @tractiontype.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@tractiontype.errors.count, "error") %> prohibited this tractiontype from being saved:</h2>
+
+      <ul>
+      <% @tractiontype.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :trtype_id %><br />
+   <%= f.select(:trtype_id, Trtype.all.collect {|p| [ p.description, p.id ] },  { :include_blank => "Select a tr type",:selected => @tractiontype.trtype_id }) %>
+  </div>
+  <div class="field">
+    <%= f.label :description %><br />
+    <%= f.text_field :description %>
+  </div>
+  <div class="field">
+    <%= f.label :status_flag %><br />
+    <%= f.select :status_flag, v_y_n, {:prompt => 'Status?'}  %>
+  </div>
+  <div class="field">
+    <%= f.label :display_order %><br />
+    <%= f.text_field :display_order %>
+  </div>
+  <div class="field">
+    <%= f.label :display_column_header_1 %><br />
+    <%= f.text_field :display_column_header_1 %>
+  </div>
+  <div class="field">
+    <%= f.label :export_column_header_1 %><br />
+    <%= f.text_field :export_column_header_1 %>
+  </div>
+  <div class="field">
+    <%= f.label :values_1 %>: <small> enter values separated by "|" e.g. Y|N|U </small><br />
+    <%= f.text_field :values_1 %>
+  </div>
+  <div class="field">
+    <%= f.label :ref_table_a_1 %>: <small>same as in questions- either CamelCase of reference table/model e.g. LookupGender, or "lookup_refs" and a key in ref_table_b </small> <br />
+    <%= f.text_field :ref_table_a_1 %>
+  </div>
+  <div class="field">
+    <%= f.label :ref_table_b_1 %>: <small>same as in questions- enter key if "lookup_refs" entered in ref_table_a</small><br />
+    <%= f.text_field :ref_table_b_1 %>
+  </div>
+  <div class="field">
+    <%= f.label :triggers_1 %><br />
+    <%= f.text_field :triggers_1 %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

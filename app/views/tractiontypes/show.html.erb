@@ -1,0 +1,55 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Trtype:</b>
+  <%= @tractiontype.trtype_id %>
+</p>
+
+<p>
+  <b>Description:</b>
+  <%= @tractiontype.description %>
+</p>
+
+<p>
+  <b>Status flag:</b>
+  <%= @tractiontype.status_flag %>
+</p>
+
+<p>
+  <b>Display order:</b>
+  <%= @tractiontype.display_order %>
+</p>
+
+<p>
+  <b>Display column header 1:</b>
+  <%= @tractiontype.display_column_header_1 %>
+</p>
+
+<p>
+  <b>Export column header 1:</b>
+  <%= @tractiontype.export_column_header_1 %>
+</p>
+
+<p>
+  <b>Values 1:</b>
+  <%= @tractiontype.values_1 %>
+</p>
+
+<p>
+  <b>Ref table a 1:</b>
+  <%= @tractiontype.ref_table_a_1 %>
+</p>
+
+<p>
+  <b>Ref table b 1:</b>
+  <%= @tractiontype.ref_table_b_1 %>
+</p>
+
+<p>
+  <b>Triggers 1:</b>
+  <%= @tractiontype.triggers_1 %>
+</p>
+
+
+<%= link_to 'Edit', edit_tractiontype_path(@tractiontype) %> |
+<%= link_to 'Back', tractiontypes_path %>
