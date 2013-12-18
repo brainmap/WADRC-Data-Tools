@@ -1,0 +1,29 @@
+<h1>Listing tredits</h1>
+
+<table>
+  <tr>
+    <th>Trfile</th>
+    <th>User</th>
+    <th>Edit completed flag</th>
+    <th>Status flag</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @tredits.each do |tredit| %>
+  <tr>
+    <td><%= tredit.trfile_id %></td>
+    <td><%= tredit.user_id %></td>
+    <td><%= tredit.edit_completed_flag %></td>
+    <td><%= tredit.status_flag %></td>
+    <td><%= link_to 'Show', tredit %></td>
+    <td><%= link_to 'Edit', edit_tredit_path(tredit) %></td>
+    <td><%= link_to 'Destroy', tredit, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Tredit', new_tredit_path %>

@@ -2,7 +2,9 @@
 
 <p>
   <b>Trtype:</b>
-  <%= @tractiontype.trtype_id %>
+  <%= if !(@tractiontype.trtype_id).nil?
+         Trtype.find(@tractiontype.trtype_id).description
+      end %>
 </p>
 
 <p>
@@ -21,8 +23,18 @@
 </p>
 
 <p>
+  <b>Display in summary:</b>
+  <%= @tractiontype.display_in_summary %>
+</p>
+
+<p>
   <b>Display column header 1:</b>
   <%= @tractiontype.display_column_header_1 %>
+</p>
+
+<p>
+  <b>Display summary column header 1:</b>
+  <%= @tractiontype.display_summary_column_header_1 %>
 </p>
 
 <p>

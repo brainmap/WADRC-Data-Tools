@@ -1,0 +1,26 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Trfile:</b>
+  <% v_trfile = Trfile.find(@tredit.trfile_id) %>
+  <%= v_trfile.subjectid+" -- "+Trtype.find(v_trfile.trtype_id).description %>
+</p>
+
+<p>
+  <b>User:</b>
+  <%= User.find(@tredit.user_id).username_name %>
+</p>
+
+<p>
+  <b>Edit completed flag:</b>
+  <%= @tredit.edit_completed_flag %>
+</p>
+
+<p>
+  <b>Status flag:</b>
+  <%= @tredit.status_flag %>
+</p>
+
+
+<%= link_to 'Edit', edit_tredit_path(@tredit) %> |
+<%= link_to 'Back', tredits_path %>

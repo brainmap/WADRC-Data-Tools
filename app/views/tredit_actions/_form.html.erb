@@ -1,0 +1,33 @@
+<%= form_for(@tredit_action) do |f| %>
+  <% if @tredit_action.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@tredit_action.errors.count, "error") %> prohibited this tredit_action from being saved:</h2>
+
+      <ul>
+      <% @tredit_action.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :tredit_id %><br />
+    <%= f.text_field :tredit_id %>
+  </div>
+  <div class="field">
+    <%= f.label :tractiontype_id %><br />
+    <%= f.text_field :tractiontype_id %>
+  </div>
+  <div class="field">
+    <%= f.label :value %><br />
+    <%= f.text_field :value %>
+  </div>
+  <div class="field">
+    <%= f.label :status_flag %><br />
+    <%= f.text_field :status_flag %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

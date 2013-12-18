@@ -54,21 +54,23 @@ class TrfilesController < ApplicationController
   # POST /trfiles.json
   def create
     @trfile = Trfile.new(params[:trfile])
-    if !params[:trfile][:subjectid].nil?
-        v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload
-        v_sp_id = v_shared.get_sp_id_from_subjectid_v(params[:trfile][:subjectid])
-        if !v_sp_id.nil?
-            params[:trfile][:scan_procedure_id] = v_sp_id
-        end
-        v_subjectid_chop = params[:trfile][:subjectid].gsub('_v2','').gsub('_v3','').gsub('_v4','').gsub('_v5','')
-        v_enrollment = Enrollment.where("enumber in (?)",v_subjectid_chop)
-        if !v_enrollment[0].nil? 
-            params[:trfile][:enrollment_id] = v_enrollment[0].id
-        end
-     end
 
     respond_to do |format|
       if @trfile.save
+    if !(@trfile.subjectid).nil?
+        v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload
+        v_sp_id = v_shared.get_sp_id_from_subjectid_v(@trfile.subjectid)
+        if !v_sp_id.nil?
+            @trfile.scan_procedure_id = v_sp_id
+        end
+        v_subjectid_chop = (@trfile.subjectid).gsub('_v2','').gsub('_v3','').gsub('_v4','').gsub('_v5','')
+        v_enrollment = Enrollment.where("enumber in (?)",v_subjectid_chop)
+        if !v_enrollment[0].nil? 
+            @trfile.enrollment_id = v_enrollment[0].id
+        end
+        @trfile.save
+     end
+
         format.html { redirect_to @trfile, notice: 'Trfile was successfully created.' }
         format.json { render json: @trfile, status: :created, location: @trfile }
       else

@@ -1,4 +1,5 @@
-<%  v_y_n = {"Y"=>"Y","N"=>"N"} %>
+<%  v_y_n = {"Y"=>"Y","N"=>"N"} 
+ v_p_p_f = {"Pass"=>"Pass","Partial"=>"Partial","Fail"=>"Fail"} %>
 <%= form_for(@trfile) do |f| %>
   <% if @trfile.errors.any? %>
     <div id="error_explanation">
@@ -38,7 +39,11 @@
   <br>  need  to enter a subjectid, (which maps to an enrollment_id and a scan_procedure,) and have selected a series_description_type in the trtype.
   <% end %>
   </div>
-  <div class="field">
+    <div class="field">
+    <%= f.label :qc_value %><br />
+       <%= f.select :qc_value, v_p_p_f, {:prompt => 'QC?'}  %>
+  </div>
+    <div class="field">
     <%= f.label :status_flag %><br />
        <%= f.select :status_flag, v_y_n, {:prompt => 'Status?'}  %>
   </div>

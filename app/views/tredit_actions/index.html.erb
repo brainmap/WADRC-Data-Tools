@@ -1,0 +1,29 @@
+<h1>Listing tredit_actions</h1>
+
+<table>
+  <tr>
+    <th>Tredit</th>
+    <th>Tractiontype</th>
+    <th>Value</th>
+    <th>Status flag</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @tredit_actions.each do |tredit_action| %>
+  <tr>
+    <td><%= tredit_action.tredit_id %></td>
+    <td><%= tredit_action.tractiontype_id %></td>
+    <td><%= tredit_action.value %></td>
+    <td><%= tredit_action.status_flag %></td>
+    <td><%= link_to 'Show', tredit_action %></td>
+    <td><%= link_to 'Edit', edit_tredit_action_path(tredit_action) %></td>
+    <td><%= link_to 'Destroy', tredit_action, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Tredit action', new_tredit_action_path %>

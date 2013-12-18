@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Tredit:</b>
+  <%= @tredit_action.tredit_id %>
+</p>
+
+<p>
+  <b>Tractiontype:</b>
+  <%= @tredit_action.tractiontype_id %>
+</p>
+
+<p>
+  <b>Value:</b>
+  <%= @tredit_action.value %>
+</p>
+
+<p>
+  <b>Status flag:</b>
+  <%= @tredit_action.status_flag %>
+</p>
+
+
+<%= link_to 'Edit', edit_tredit_action_path(@tredit_action) %> |
+<%= link_to 'Back', tredit_actions_path %>

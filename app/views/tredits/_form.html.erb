@@ -1,0 +1,35 @@
+<%  v_y_n = {"Y"=>"Y","N"=>"N"}  %>
+
+<%= form_for(@tredit) do |f| %>
+  <% if @tredit.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@tredit.errors.count, "error") %> prohibited this tredit from being saved:</h2>
+
+      <ul>
+      <% @tredit.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :trfile_id %><br />
+         <%= f.select(:trfile_id, @tr_type_subject.collect {|p| [ p[0], p[1] ] },  { :include_blank => "Select a subjectid",:selected => @tredit.trfile_id }) %>
+  </div>
+  <div class="field">
+    <%= f.label :user_id %><br />
+    <%= select(:tredit, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select editor" }) %>
+  </div>
+  <div class="field">
+    <%= f.label :edit_completed_flag %><br />
+    <%= f.select :edit_completed_flag, v_y_n, {:prompt => 'Edit completed?'}  %>
+  </div>
+  <div class="field">
+    <%= f.label :status_flag %><br />
+    <%= f.select :status_flag, v_y_n, {:prompt => 'Status?'}  %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
