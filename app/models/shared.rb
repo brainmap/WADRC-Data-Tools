@@ -146,6 +146,17 @@ class Shared  < ActionController::Base
     end
     return v_email_array    
   end  
+
+  def get_enrollment_id_from_subjectid_v(p_subjectid_v)
+        v_enrollment_id = nil
+        v_subjectid_chop = (p_subjectid_v).gsub('_v2','').gsub('_v3','').gsub('_v4','').gsub('_v5','')
+        v_enrollment = Enrollment.where("enumber in (?)",v_subjectid_chop)
+        if !v_enrollment[0].nil? 
+            v_enrollment_id = v_enrollment[0].id
+        end    
+    return v_enrollment_id
+  end
+
   
   def get_sp_id_from_subjectid_v(p_subjectid_v)
     v_subjectid_chop = p_subjectid_v.gsub(/_v/,"").delete("0-9")

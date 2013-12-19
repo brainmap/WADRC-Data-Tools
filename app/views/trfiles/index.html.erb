@@ -7,6 +7,7 @@
     <th>Enrollment</th>
     <th>Scan procedure</th>
     <th>Image dataset</th>
+    <th>Completed</th>
     <th>QC Value</th>
     <th>Status flag</th>
     <th></th>
@@ -29,6 +30,7 @@
           <%= v_ids.series_description+", "+v_ids.path %>
          <%end%>
       </td>
+      <td><%= trfile.file_completed_flag %></td>
     <td><%= trfile.qc_value %></td>
     <td><%= trfile.status_flag %></td>
     <td><%= link_to 'Show', trfile %></td>

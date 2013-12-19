@@ -1,4 +1,82 @@
 class TrfilesController < ApplicationController
+
+  def trfile_home
+  # make trfile if no trfile_id, also make tredit, and tredit_actions
+  v_comment = ""
+   @trfile = nil
+   if !params[:trfile_action].nil? and params[:trfile_action] =="create"
+     v_subjectid_v = params[:subjectid]
+
+     v_trfile = Trfile.where("subjectid in (?)",v_subjectid_v)
+
+     if !(v_trfile[0]).nil? 
+        v_comment = v_comment + " There was already a file for "+v_subjectid_v
+     else
+       v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload
+       v_sp_id = v_shared.get_sp_id_from_subjectid_v(v_subjectid_v)
+
+        if v_sp_id.nil?
+            v_comment = v_comment+" The subjectid "+v_subjectid_v+" was not mapped to a scan procedure. "
+        end
+        v_enrollment_id = v_shared.get_enrollment_id_from_subjectid_v(v_subjectid_v)
+        if v_enrollment_id.nil?
+            v_comment = v_comment+" The subjectid "+v_subjectid_v+" was not mapped to an enrollment. " 
+        end
+        if !v_sp_id.nil? and !v_enrollment_id.nil?
+           @trfile = Trfile.new
+           @trfile.subjectid = v_subjectid_v
+           @trfile.enrollment_id = v_enrollment_id
+           @trfile.scan_procedure_id = v_sp_id
+           @trfile.trtype_id = params[:id]
+           @trfile.save
+          end 
+      end
+     # output v_comment
+   end # end of create
+
+   if !params[:trfile_action].nil? and ( params[:trfile_action] =="create" or ( params[:trfile_action] == "add_edit" and !params[:frfile_id].nil? ) )
+         if params[:trfile_action] =="add_edit" 
+             @trfile = Trfile.find(params[:trfile_id])
+         end
+         if !@trfile.nil?
+            @tredit = Tredit.new
+            @tredit.trfile_id = @trfile.id
+            @tredit.user_id = current_user.id
+            @tredit.save
+
+            # make all the edit_actions for the tredit
+            v_tractiontypes = Tractiontype.where("trtype_id in (?)",params[:id])
+            if !v_tractiontypes.nil?
+               v_tractiontypes.each do |tat|
+                   v_tredit_action = TreditAction.new
+                   v_tredit_action.tredit_id = @tredit.id
+                   v_tredit_action.tractiontype_id = tat.id
+                   v_tredit_action.save
+               end
+            end
+         end
+   end
+   
+
+  #  get most recent edit, edit_actions 
+  if !params[:trfile_action].nil? and    params[:trfile_action] == "get_edit" and !params[:frfile_id].nil?  and !params[:fredit_id].nil?  
+        @tredit = Tredit.find(params[:fredit_id])
+  elsif !params[:trfile_action].nil? and    params[:trfile_action] == "get_edit" and !params[:frfile_id].nil?  and params[:fredit_id].nil?  
+         @tredits = Tredit.where("trfile_id in (?)",params[:frfile_id]).order("created_at")
+         @tredits.each do |te|
+            @tredit = te # want the last one - newest created_at
+         end
+
+  end
+
+  # get specified edit , edit_action in the form
+
+    respond_to do |format|
+      format.html # index.html.erb
+      #format.json { render json: @trfiles }
+    end
+  end
+
   # GET /trfiles
   # GET /trfiles.json
   def index
@@ -63,11 +141,9 @@ class TrfilesController < ApplicationController
         if !v_sp_id.nil?
             @trfile.scan_procedure_id = v_sp_id
         end
-        v_subjectid_chop = (@trfile.subjectid).gsub('_v2','').gsub('_v3','').gsub('_v4','').gsub('_v5','')
-        v_enrollment = Enrollment.where("enumber in (?)",v_subjectid_chop)
-        if !v_enrollment[0].nil? 
-            @trfile.enrollment_id = v_enrollment[0].id
-        end
+        v_enrollment_id = v_shared.get_enrollment_id_from_subjectid_v(@trfile.subjectid)
+        @trfile.enrollment_id = v_enrollment_id
+
         @trfile.save
      end
 
@@ -90,10 +166,9 @@ class TrfilesController < ApplicationController
         if !v_sp_id.nil?
             params[:trfile][:scan_procedure_id] = v_sp_id
         end
-        v_subjectid_chop = params[:trfile][:subjectid].gsub('_v2','').gsub('_v3','').gsub('_v4','').gsub('_v5','')
-        v_enrollment = Enrollment.where("enumber in (?)",v_subjectid_chop)
-        if !v_enrollment[0].nil? 
-            params[:trfile][:enrollment_id] = v_enrollment[0].id
+        v_enrollment_id = v_shared.get_enrollment_id_from_subjectid_v(params[:trfile][:subjectid])
+        if !v_enrollment_id.nil?
+            params[:trfile][:enrollment_id] = v_enrollment_id
         end
      end
 

@@ -43,6 +43,10 @@
     <%= f.label :qc_value %><br />
        <%= f.select :qc_value, v_p_p_f, {:prompt => 'QC?'}  %>
   </div>
+  <div class="field">
+    <%= f.label :file_completed_flag %><br />
+       <%= f.select :file_completed_flag, v_y_n, {:prompt => 'Completed?'}  %>
+  </div>
     <div class="field">
     <%= f.label :status_flag %><br />
        <%= f.select :status_flag, v_y_n, {:prompt => 'Status?'}  %>

@@ -1,0 +1,83 @@
+
+<%  v_y_n = {"Y"=>"Y","N"=>"N"} %>
+<table class="search_form" >
+	<tr><td colspan="3" align="left"><b>Tracking file processing and edits:</b> <br>
+		<%= form_for 'trtype_home' do |f| %>
+	       <%= f.label :tr_type %>: 
+		   <select onChange="if(this.selectedIndex!=0) self.location=this.options[this.selectedIndex].value">
+		      <option value="">select a Trtype</option>
+		      <% @trtypes.each do |s| %>
+		         <% if (s.id).to_s  == params[:id]  %>
+			         <option  selected="selected" value=/trtype_home/<%=s.id %>><%= s.description %></option>
+		         <%else%>
+	                  <option value=/trtype_home/<%=s.id %>><%= s.description %></option>
+	             <%end%>
+	          <% end %>
+	        </select>
+	<% end %>
+</td></tr>
+<% if !params[:id].nil? %>
+	<tr><td colspan="3" align="left" nowrap>
+      <%= form_for 'trtype_home/'+params[:id] do |f| %>
+      <%= f.label :search %>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= f.label :trfile %>: <%= select(:tr_search,:trfile_id, @trfiles.collect {|p| [ p.subjectid+" - "+ScanProcedure.find(p.scan_procedure_id).codename, p.id ] },  { :include_blank => "Select a subject" }) %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= f.label :scan_procedure %>:      <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
+    <%= collection_select(:tr_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'choose scan procedure'}, {:multiple =>  false} ) %><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= f.label :user_id %>: 
+    <%= select(:tr_search, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select editor" }) %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <%= select(:tr_search,  :file_completed_flag, v_y_n, {:prompt => 'Completed?'} ) %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+<!-- = f.label :compeleted -->
+<%=f.submit 'Run Search'%>
+      <%end%>
+<br>
+</td></tr>
+
+	<tr><td colspan="3">
+		<%= form_tag("/trfile_home/"+params[:id], method: "post") do %>
+           <%= label_tag :subjectid %>: <small>for visit 1 just enter [subjectid], for visit 2 enter [subjectid]_v2 ,e.g. for visit # enter [subjectid]_v#</small><br />
+    <%= text_field_tag  :subjectid ,"",:required=>TRUE %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <%= hidden_field_tag :trfile_action,"create" %>
+           <%= submit_tag 'Make new file'%>
+		<%end %><br>
+ </td></tr>
+<%end # end of if id null%>
+
+ <% if !@trfiles_search.nil? and @trfiles_search.size > 0 %>
+<tr><td colspan="3">  <%= link_to 'download xls', { :controller=>"trtypes", :action=>"trtype_home", :tr_search =>  params[:tr_search] , :format => :xls} %>
+    </td></tr>
+  <%end%>
+
+
+</table><br>
+ <% if !@trfiles_search.nil? %>
+  <table class="tabular">
+  <caption><%= pluralize(@trfiles_search.size, 'File') %></caption>
+  <thead>
+  	<tr><th>Completed</th>
+  	<th>Last Update</th>
+    <th>Subjectid</th><th>Add edit</th><th>Last edit</th>
+    <th>Scan Procedure</th>
+    <th>loop thru edits, loop thru edit summary columns</th></tr>
+
+		<% @trfiles_search.each do |trf| %>
+		<tr><td><%= trf.file_completed_flag %> </td> 
+        <td><%= trf.updated_at %></td>
+        <td><%= trf.subjectid %></td><td> link to add edit </td><td> link to last edit</td>
+        <td><%= ScanProcedure.find(trf.scan_procedure_id).codename %> </td> 
+
+		<%end%>
+     </table>
+  <%end%>
+
+<br><br>
+	add to search not completed, completed, recent, specific trtype search fields<br>
+	make new file - (also makes tredit, tredit_actions)<br>
+	make new edit of a file - specify subjectid - or link off of search results (also makes tredit_actions)<br>
+	edit exisiting edit - link off of search results - or specify subjectid and get last edit <br>
+	view files list - summing page - has search - export - links to actions<br>
+	view file edit list  - has search - export - links to actions<br>
+
+
+<br><br><br>

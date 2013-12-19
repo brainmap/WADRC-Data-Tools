@@ -1,4 +1,8 @@
-<%  v_y_n = {"Y"=>"Y","N"=>"N"} %>
+<%  v_y_n = {"Y"=>"Y","N"=>"N"}
+v_value_type =  [["dropdown","dropdown"],["dropdown_multiple","dropdown_multiple"],["radio_in_line","radio_in_line"],["radio_1_col","radio_1_col"],
+     ["checkbox_in_line","checkbox_in_line"],["checkbox_1_col","checkbox_1_col"],["text","text"],["text_5","text_5"],["text_10","text_10"], ["text_20","text_20"],["text_30","text_30"],
+    ["text_50","text_50"],["text_70","text_70"],["text_90","text_90"],["textarea","textarea"],["textarea_3x60","textarea_3x60"],["date","date"],["time","time"],["date_time","date_time"]]
+ %>
 <%= form_for(@tractiontype) do |f| %>
   <% if @tractiontype.errors.any? %>
     <div id="error_explanation">
@@ -43,6 +47,24 @@
   <div class="field">
     <%= f.label :export_column_header_1 %><br />
     <%= f.text_field :export_column_header_1 %>
+  </div>
+  <div class="field">
+    <%= f.label :display_search_flag %><br />
+   <%= f.select :display_search_flag, v_y_n, {:prompt => 'Include in search?'}  %>
+  </div>
+
+  <div class="field">
+    <%= f.label :form_display_order %><br />
+    <%= f.text_field :form_display_order %>
+  </div>
+  <div class="field">
+    <%= f.label :form_display_label %><br />
+    <%= f.text_field :form_display_label %>
+  </div>
+    <div class="field">
+    <%= f.label :form_display_field_type %><br />
+     <%= f.select :form_display_field_type, options_for_select(v_value_type, @tractiontype.form_display_field_type),
+                {:prompt => 'Select a form field type'}  %>
   </div>
   <div class="field">
     <%= f.label :values_1 %><br />
