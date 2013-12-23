@@ -52,7 +52,7 @@
 
 </table><br>
  <% if !@trfiles_search.nil? %>
-  <table class="tabular">
+  <table  class="tabular" >
   <caption><%= pluralize(@trfiles_search.size, 'File') %></caption>
   <thead>
   	<tr><th>Completed</th>
@@ -61,16 +61,21 @@
     <th>Scan Procedure</th>
     <th>loop thru edits, loop thru edit summary columns</th></tr>
 
-		<% @trfiles_search.each do |trf| %>
+		<% @trfiles_search.each do |trf| 
+            @tredits = Tredit.where("trfile_id = "+(trf.id).to_s).order("tredits.id desc")
+            @tredit = @tredits[0]
+			 %>
 		<tr><td><%= trf.file_completed_flag %> </td> 
         <td><%= trf.updated_at %></td>
-        <td><%= trf.subjectid %></td><td> link to add edit </td><td> link to last edit</td>
+        <td><%= trf.subjectid %></td><td><%= link_to "Add edit","/trfile_home/"+params[:id]+"?trfile_action=add_edit&trfile_id="+trf.id.to_s,{:style=>'color:#000000;'} %></td><td>
+        <% if !@tredit.nil? %>
+        <%= link_to "Last edit","/trfile_home/"+params[:id]+"?trfile_action=get_edit&trfile_id="+(trf.id).to_s ,{:style=>'color:#000000;'}%>
+       <%end%></td>
         <td><%= ScanProcedure.find(trf.scan_procedure_id).codename %> </td> 
 
 		<%end%>
      </table>
   <%end%>
-
 <br><br>
 	add to search not completed, completed, recent, specific trtype search fields<br>
 	make new file - (also makes tredit, tredit_actions)<br>

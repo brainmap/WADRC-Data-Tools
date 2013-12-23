@@ -66,6 +66,10 @@ v_value_type =  [["dropdown","dropdown"],["dropdown_multiple","dropdown_multiple
      <%= f.select :form_display_field_type, options_for_select(v_value_type, @tractiontype.form_display_field_type),
                 {:prompt => 'Select a form field type'}  %>
   </div>
+    <div class="field">
+    <%= f.label :form_col_span %><br />
+     <%= f.text_field :form_col_span %>
+  </div>
   <div class="field">
     <%= f.label :values_1 %><br />
     <%= f.text_field :values_1 %>

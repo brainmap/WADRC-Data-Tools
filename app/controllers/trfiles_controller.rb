@@ -34,7 +34,10 @@ class TrfilesController < ApplicationController
      # output v_comment
    end # end of create
 
-   if !params[:trfile_action].nil? and ( params[:trfile_action] =="create" or ( params[:trfile_action] == "add_edit" and !params[:frfile_id].nil? ) )
+
+
+   if !params[:trfile_action].nil? and ( params[:trfile_action] =="create" or ( params[:trfile_action] == "add_edit" and !params[:trfile_id].nil? ) )
+
          if params[:trfile_action] =="add_edit" 
              @trfile = Trfile.find(params[:trfile_id])
          end
@@ -43,7 +46,6 @@ class TrfilesController < ApplicationController
             @tredit.trfile_id = @trfile.id
             @tredit.user_id = current_user.id
             @tredit.save
-
             # make all the edit_actions for the tredit
             v_tractiontypes = Tractiontype.where("trtype_id in (?)",params[:id])
             if !v_tractiontypes.nil?
@@ -59,13 +61,23 @@ class TrfilesController < ApplicationController
    
 
   #  get most recent edit, edit_actions 
-  if !params[:trfile_action].nil? and    params[:trfile_action] == "get_edit" and !params[:frfile_id].nil?  and !params[:fredit_id].nil?  
-        @tredit = Tredit.find(params[:fredit_id])
-  elsif !params[:trfile_action].nil? and    params[:trfile_action] == "get_edit" and !params[:frfile_id].nil?  and params[:fredit_id].nil?  
-         @tredits = Tredit.where("trfile_id in (?)",params[:frfile_id]).order("created_at")
+  if !params[:trfile_action].nil? and    params[:trfile_action] == "get_edit" and !params[:trfile_id].nil?  and !params[:tredit_id].nil?  
+
+        @tredit = Tredit.find(params[:tredit_id])
+        @trfile = Trfile.find(@tredit.trfile_id)
+        if (@tredit.user_id).nil?
+            @tredit.user_id = current_user.id
+        end
+  elsif !params[:trfile_action].nil? and    params[:trfile_action] == "get_edit" and !params[:trfile_id].nil?  and params[:tredit_id].nil?  
+
+         @tredits = Tredit.where("trfile_id in (?)",params[:trfile_id]).order("created_at")
          @tredits.each do |te|
             @tredit = te # want the last one - newest created_at
          end
+         @trfile = Trfile.find(@tredit.trfile_id)
+        if (@tredit.user_id).nil?
+            @tredit.user_id = current_user.id
+        end
 
   end
 
