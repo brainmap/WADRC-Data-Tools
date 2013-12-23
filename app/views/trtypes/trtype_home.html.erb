@@ -66,7 +66,7 @@
             @tredit = @tredits[0]
 			 %>
 		<tr><td><%= trf.file_completed_flag %> </td> 
-        <td><%= trf.updated_at %></td>
+        <td><%= (trf.updated_at).strftime('%Y-%m-%d %H:%M'  ) %></td>
         <td><%= trf.subjectid %></td><td><%= link_to "Add edit","/trfile_home/"+params[:id]+"?trfile_action=add_edit&trfile_id="+trf.id.to_s,{:style=>'color:#000000;'} %></td><td>
         <% if !@tredit.nil? %>
         <%= link_to "Last edit","/trfile_home/"+params[:id]+"?trfile_action=get_edit&trfile_id="+(trf.id).to_s ,{:style=>'color:#000000;'}%>

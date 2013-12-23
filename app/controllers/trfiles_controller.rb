@@ -80,7 +80,19 @@ class TrfilesController < ApplicationController
         end
 
   end
+    # get all the scan procedures linked to vgroup
+    @trtype = Trtype.find(@trfile.trtype_id)
+    @vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships where enrollment_id in (?) )",@trfile.enrollment_id).where("vgroups.id in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))",@trfile.scan_procedure_id)
+       if !(@trfile.scan_procedure_id).nil? and !(@trfile.enrollment_id).nil? 
+          @ids = ImageDataset.where(" image_datasets.visit_id in (select v1.id from visits v1, appointments a1, scan_procedures_vgroups spvg1, enrollment_vgroup_memberships evg1
+                                                      where v1.appointment_id = a1.id and a1.vgroup_id =spvg1.vgroup_id and a1.vgroup_id = evg1.vgroup_id 
+                                                      and spvg1.scan_procedure_id in (?) 
+                                                      and evg1.enrollment_id in (?)) 
+                                      and image_datasets.series_description in 
+                                       ( select sdm1.series_description from series_description_maps sdm1 where series_description_type_id in (?))",
+                    @trfile.scan_procedure_id ,@trfile.enrollment_id, @trtype.series_description_type_id)
 
+      end
   # get specified edit , edit_action in the form
 
     respond_to do |format|

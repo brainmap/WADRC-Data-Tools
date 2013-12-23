@@ -5,11 +5,20 @@ tredit.id=<%= @tredit.id %><br>
 tredit.user_id=<%= @tredit.user_id %>
 
 <br><br><br>
+<%= form_for('trfile_edit_action') do |f| %>
 <table width="80%" border=1>
+  <tr><td align="left" colspan="3"> <small><b>Scan Protcol(s):</b>  <%= @vgroups[0].scan_procedures.blank? ? "None" : @vgroups[0].scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <b>Enrollment(s):</b> <%= @vgroups[0].enrollments.collect {|e| e.enumber }.join(", ").html_safe %></small>
+  </td></tr>
+  <tr><td align="left" colspan="3"><small><b>Image Dataset:</b></small>
+       <% if !(@trfile.trtype_id).nil? and !Trtype.find(@trfile.trtype_id).series_description_type_id.nil? and   !@trfile.enrollment_id.nil? and  !@trfile.scan_procedure_id.nil? %>
+     <%= f.select(:image_dataset_id, @ids.collect {|p| [ p.series_description+" - "+p.path, p.id ] },  { :include_blank => "Select a scan series",:selected => @trfile.image_dataset_id }) %>
+     <%end%>
+  </td></tr>
 	<tr> <!-- constant accross trtypes -->
 		<td align="left"><small><b>Subjectid_v#:</b></small> <%=@trfile.subjectid %></td>
 		<td align="left"><small><b>Editor:</b></small> <%= select(:tredit, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select editor" ,:selected => @tredit.user_id }) %></td>
-		<td align="left"><small><b>Updated:</b></small><%= @tredit.updated_at %> </td>
+		<td align="left"><small><b>Updated:</b> <%=   @tredit.updated_at.strftime('%Y-%m-%d %H:%M'  ) %> </small></td>
 	</tr>
 <%  v_tractiontypes = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.form_display_order is not null").order(:form_display_order) 
 
@@ -18,7 +27,7 @@ tredit.user_id=<%= @tredit.user_id %>
      v_cnt = 0
      v_tractiontypes.each do |act|
      	if v_cnt < 1 %>
-     	<tr>
+     	<tr> 
      	<%end
          if v_cnt + act.form_col_span > 3 
          	v_cnt = 0
@@ -26,7 +35,78 @@ tredit.user_id=<%= @tredit.user_id %>
      	   </tr><tr>
              
      	  <% end%>
-     	<td align="left" colspan="<%= act.form_col_span%>"><small><b><%=act.form_display_label %> :</b></small> <% @tredit_actions = TreditAction.where("tredit_actions.tredit_id in (?)",@tredit.id).where("tredit_actions.tractiontype_id in (?)",act.id) %> <%= @tredit_actions[0].value %> </td>
+     	<td align="left" colspan="<%= act.form_col_span%>"> <small><b><%=act.form_display_label %> :</b></small> <% @tredit_actions = TreditAction.where("tredit_actions.tredit_id in (?)",@tredit.id).where("tredit_actions.tractiontype_id in (?)",act.id) %> 
+        <% # make the question types
+           if act.form_display_field_type == "checkbox_in_line" 
+               val_array =[]
+             if !@tredit_actions[0].value.blank?
+                      val_array = @tredit_actions[0].value.split(',')
+             end %>
+                   <% if act.ref_table_a_1 == "lookup_refs" 
+           sql = "select ref_value, description from lookup_refs where label ='"+act.ref_table_b_1+"' order by display_order"
+           connection = ActiveRecord::Base.connection();
+             results = connection.execute(sql)
+          %>
+            <% results.each do |theme| %> 
+               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value['+act.id.to_s+"][]", theme[0], checked=val_array.include?( theme[0].to_s) %>
+                <%= theme[1].humanize %>
+            <% end %>
+       <% else 
+             results = ((act.ref_table_a_1).constantize).all.sort_by(&:description)
+           %>
+            <% results.each do |theme| %>
+               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value['+act.id.to_s+"][]", theme.id,  checked=val_array.include?( theme.id.to_s) %>
+                <%= (theme.description) %>
+            <% end %>
+          <% end %>
+
+           <% elsif act.form_display_field_type == "radio_in_line" 
+             val_array =[]
+             if !@tredit_actions[0].value.blank?
+                      val_array = @tredit_actions[0].value.split(',')
+             end %>
+            <% if act.ref_table_a_1 == "lookup_refs" 
+           sql = "select ref_value, description from lookup_refs where label ='"+act.ref_table_b_1+"' order by display_order"
+           connection = ActiveRecord::Base.connection();
+                 results = connection.execute(sql)
+          %>
+            <% results.each do |theme| %>
+                 
+                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value["+act.id.to_s+"][]", theme[0], @tredit_actions[0].value.to_i == theme[0] %>
+                <%= theme[1].humanize %>
+            <% end %>
+       <% else 
+             results = ((act.ref_table_a_1).constantize).all.sort_by(&:description)
+           %>
+            <% results.each do |theme| %>
+             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value["+act.id.to_s+"][]", theme.id,  (@tredit_actions[0].value.to_i == theme.id.to_i)?  true:false    %> <%= theme.description %>
+            <% end %>
+          <% end %>
+
+           <% elsif act.form_display_field_type == "text_10"   
+                act.js ="" %>
+<%= draw_text_field(act.id,"1",10, act.form_default_value,@tredit_actions[0].value,act.js,act.form_required_y_n_1) %>  
+           <% elsif act.form_display_field_type == "text_50" 
+            act.js = "" %>
+           <%= draw_text_field(act.id,"1",50, act.form_default_value,@tredit_actions[0].value,act.js,act.form_required_y_n_1) %>
+
+        <% elsif act.form_display_field_type == "dropdown"
+            if act.ref_table_a_1 == "lookup_refs"  ## use ref_table_b_1 %>
+        <%= collection_select "value",act.id.to_s+"][", LookupRef.where("label = ?",act.ref_table_b_1).sort_by(&:display_order),
+            :ref_value, :description, {:include_blank => "select",:selected => (@tredit_actions[0].value or act.form_default_value)} %>
+      <%  else   %>
+          <%= collection_select "value",act.id.to_s+"][", ((act.ref_table_a_1).constantize).all.sort_by(&:description),
+            :id, :description, {:include_blank => "select",:selected => (@tredit_actions[0].value or act.form_default_value)} %>      
+         <%   end   %>   
+
+         <%   elsif act.form_display_field_type == "textarea_3x60" %>
+<%= draw_text_area(act.id,"1","60x7", act.form_default_value,@tredit_actions[0].value,act.form_required_y_n_1) %>
+
+          <%  end
+
+
+        %>
+        <%= @tredit_actions[0].value %> </td>
    
        <% v_cnt = v_cnt + act.form_col_span
           if v_cnt > 2
@@ -35,4 +115,6 @@ tredit.user_id=<%= @tredit.user_id %>
           <%end
        end
     end %>
+    <tr><td align="left" colspan="3"><%= f.submit('Save') %> </td></tr>
 </table>
+<%end%>
