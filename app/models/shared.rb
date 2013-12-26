@@ -1783,7 +1783,7 @@ puts "AAAAAA "+v_call
                         puts v_output
                     end
 
-                   if v_success_process ="Y" and v_success_coregister  =="Y"  and  v_success_normalise  =="Y" # NEED TO EDIT!!!!!!  # not very sensitive to success  "Done    "'Coregister: Estimate & Reslice'"    "Done    'Normalise: Estimate & Write'"
+                   if v_success_process =="Y" and v_success_coregister  =="Y"  and  v_success_normalise  =="Y" # NEED TO EDIT!!!!!!  # not very sensitive to success  "Done    "'Coregister: Estimate & Reslice'"    "Done    'Normalise: Estimate & Write'"
                           v_success ="Y"
                            puts "ccccc whole Process finished ok !!!!!!!!! \n"
                            v_log = v_log + "whole Process finished ok !!!!!!!!! \n"
