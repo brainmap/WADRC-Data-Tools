@@ -364,13 +364,16 @@ v_user = v_user.gsub("\n","")
           #  its working but must be better way -- getting all the print output from the python script, 
           # exit in python script after "print" return value, loop thru to get the last line
 # problem running in dev -- need to be admin-- make file, then test rest
+
           v_return =  `python #{v_call}`
+
           v_last_return_value = ""
 
-         v_return.each do |line|
+         v_return.each_line do |line|
             v_comment = line + v_comment
             v_last_return_value = line
           end
+
           # evaluate return values v_return(ERROR or SUCCESS)+"|"+yyyymmdd+"|"+(/tmp/)log_file
 ####  added temp row
         #### v_last_return_value = "SUCCESS|"+v_date_stamp+"|tmp.YYYYMMDD.txt"

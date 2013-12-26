@@ -79,7 +79,10 @@ v_value_type =  [["dropdown","dropdown"],["dropdown_multiple","dropdown_multiple
     <%= f.label :form_required_Y_N %><br />
    <%= f.select :form_required_y_n_1, v_y_n, {:prompt => 'Include in search?'}  %>
   </div>
-
+  <div class="field">
+    <%= f.label :form_js %><br />
+   <%= f.text_field :form_js %>
+  </div>
   <div class="field">
     <%= f.label :values_1 %><br />
     <%= f.text_field :values_1 %>

@@ -1,5 +1,47 @@
 class TrfilesController < ApplicationController
 
+  def trfile_edit_action
+    # get params -- tredit_id ==> trfile_id, trype_id 
+    if !params[:tredit_id].nil?
+        @tredit = Tredit.find(params[:tredit_id])
+        @trfile = Trfile.find(@tredit.trfile_id)
+        @trfile.image_dataset_id  = params[:trfile_edit_action][:image_dataset_id]
+        @trfile.file_completed_flag  = params[:trfile_edit_action][:file_completed_flag]
+        @trfile.qc_value  = params[:trfile_edit_action][:qc_value]
+        @trfile.status_flag  = params[:trfile_edit_action][:status_flag]
+        @trfile.save
+        @tredit.user_id = params[:tredit][:user_id]
+        if !params[:value].nil?
+             @tractiontypes = Tractiontype.where("trtype_id in (?)",@trfile.trtype_id).where("tractiontypes.form_display_order is not null")
+             @tractiontypes.each do |ta|
+               @tredit_actions = TreditAction.where("tredit_id in (?)",@tredit.id).where("tractiontype_id in (?)",ta.id)
+              @tredit_action = @tredit_actions[0]
+              v_value = nil
+              if !params["value"][(ta.id).to_s].nil?
+              v_value = params["value"][(ta.id).to_s].join(',')
+      puts "aaaaa "+v_value
+               else
+puts "bbbbbb nil = "+(ta.id).to_s
+              end
+              @tredit_action.value = v_value
+              @tredit_action.save
+
+             end
+
+
+        end
+
+    end
+    # update trfile
+    # update tredit
+    # loop thru traction_edit
+    # redirect back to trtype_home
+    respond_to do |format|
+          format.html { redirect_to( '/trtype_home/'+(@trfile.trtype_id).to_s, :notice => ' ' )}
+    end
+
+  end
+
   def trfile_home
   # make trfile if no trfile_id, also make tredit, and tredit_actions
   v_comment = ""

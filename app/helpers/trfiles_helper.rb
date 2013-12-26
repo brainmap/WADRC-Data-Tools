@@ -1,6 +1,6 @@
 module TrfilesHelper
 	# from Questionform helper
-def draw_text_field(p_question_id, p_value_number,p_size,p_default_value, p_value,p_js,p_required_y_n)
+def trfile_draw_text_field(p_question_id, p_value_number,p_size,p_default_value, p_value,p_js,p_required_y_n)
 
     p_js_array = p_js.split(",")
     
@@ -32,11 +32,12 @@ def draw_text_field(p_question_id, p_value_number,p_size,p_default_value, p_valu
       end
   end
   
-  def draw_text_area(p_question_id, p_value_number,p_size,p_default_value, p_value, p_required_y_n)
+  def trfile_draw_text_area(p_question_id, p_size,p_default_value, p_value, p_required_y_n) # removed p_value_number,
     if p_required_y_n ==  "required"
-      text_area_tag("value_"+p_value_number+"["+p_question_id.to_s+"][]",(p_value.try(:strip) or p_default_value),:size => p_size, :required =>TRUE)
+      text_area_tag("value["+p_question_id.to_s+"][]",(p_value.try(:strip) or p_default_value),:size => p_size, :required =>TRUE)
     else
-      text_area_tag("value_"+p_value_number+"["+p_question_id.to_s+"][]",(p_value.try(:strip) or p_default_value),:size => p_size) 
+      text_area_tag("value["+p_question_id.to_s+"][]",(p_value.try(:strip) or p_default_value),:size => p_size) 
     end
   end
+
 end

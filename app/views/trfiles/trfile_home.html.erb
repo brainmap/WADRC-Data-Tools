@@ -1,14 +1,20 @@
-trfile home
-trfile.id =<%= @trfile.id %><br>
-subjectid=<%= @trfile.subjectid %><br>
-tredit.id=<%= @tredit.id %><br>
-tredit.user_id=<%= @tredit.user_id %>
+<%  v_y_n = {"Y"=>"Y","N"=>"N"}  
+ v_p_p_f = {"Pass"=>"Pass","Partial"=>"Partial","Fail"=>"Fail"} %>
 
 <br><br><br>
-<%= form_for('trfile_edit_action') do |f| %>
-<table width="80%" border=1>
+<%= form_for('trfile_edit_action', :url => {:action => "trfile_edit_action"}) do |f| %>
+<%= hidden_field_tag 'tredit_id',@tredit.id %>
+
+<table width="80%" >
+  <tr><td align="left" colspan="3"> <b> <%= (@trtype.description).humanize %> file edit tracking: </b> </td></tr>
   <tr><td align="left" colspan="3"> <small><b>Scan Protcol(s):</b>  <%= @vgroups[0].scan_procedures.blank? ? "None" : @vgroups[0].scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <b>Enrollment(s):</b> <%= @vgroups[0].enrollments.collect {|e| e.enumber }.join(", ").html_safe %></small>
+   <br>
+    <small><b>File Completed:</b></small> <%= f.select :file_completed_flag, v_y_n, {:prompt => 'Completed?',:selected => @trfile.file_completed_flag}  %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<small><b>QC:</b></small>  <%= f.select :qc_value, v_p_p_f, {:prompt => 'QC?',:selected => @trfile.qc_value}  %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<small><b>Active File:</b></small> <%= f.select :status_flag, v_y_n, {:prompt => 'Active?',:selected => @trfile.status_flag}  %>
   </td></tr>
   <tr><td align="left" colspan="3"><small><b>Image Dataset:</b></small>
        <% if !(@trfile.trtype_id).nil? and !Trtype.find(@trfile.trtype_id).series_description_type_id.nil? and   !@trfile.enrollment_id.nil? and  !@trfile.scan_procedure_id.nil? %>
@@ -59,7 +65,17 @@ tredit.user_id=<%= @tredit.user_id %>
                 <%= (theme.description) %>
             <% end %>
           <% end %>
-
+           <%   elsif act.form_display_field_type == "radio_1_col" %>
+        radio 1 col not implemented yet
+           <%   elsif act.form_display_field_type == "checkbox_1_col" %>
+         checkbox 1 col not iplemented yet
+         <%   elsif act.form_display_field_type == "date" %>
+                 date not implemented yet
+         <%   elsif act.form_display_field_type == "time" %>
+                 time not implemented yet
+         <%   elsif act.form_display_field_type == "date_time" %>
+                 date_time not implemented yet
+          
            <% elsif act.form_display_field_type == "radio_in_line" 
              val_array =[]
              if !@tredit_actions[0].value.blank?
@@ -82,13 +98,20 @@ tredit.user_id=<%= @tredit.user_id %>
              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value["+act.id.to_s+"][]", theme.id,  (@tredit_actions[0].value.to_i == theme.id.to_i)?  true:false    %> <%= theme.description %>
             <% end %>
           <% end %>
-
-           <% elsif act.form_display_field_type == "text_10"   
-                act.js ="" %>
-<%= draw_text_field(act.id,"1",10, act.form_default_value,@tredit_actions[0].value,act.js,act.form_required_y_n_1) %>  
-           <% elsif act.form_display_field_type == "text_50" 
-            act.js = "" %>
-           <%= draw_text_field(act.id,"1",50, act.form_default_value,@tredit_actions[0].value,act.js,act.form_required_y_n_1) %>
+           <% elsif act.form_display_field_type == "text_5"    %>
+<%= trfile_draw_text_field(act.id,"1",5, act.form_default_value,@tredit_actions[0].value,act.form_js,act.form_required_y_n_1) %> 
+           <% elsif act.form_display_field_type == "text_10"    %>
+<%= trfile_draw_text_field(act.id,"1",10, act.form_default_value,@tredit_actions[0].value,act.form_js,act.form_required_y_n_1) %> 
+           <% elsif act.form_display_field_type == "text_20"    %>
+<%= trfile_draw_text_field(act.id,"1",20, act.form_default_value,@tredit_actions[0].value,act.form_js,act.form_required_y_n_1) %>  
+           <% elsif act.form_display_field_type == "text_30"    %>
+<%= trfile_draw_text_field(act.id,"1",30, act.form_default_value,@tredit_actions[0].value,act.form_js,act.form_required_y_n_1) %> 
+           <% elsif act.form_display_field_type == "text_50"  %>
+<%= trfile_draw_text_field(act.id,"1",50, act.form_default_value,@tredit_actions[0].value,act.form_js,act.form_required_y_n_1) %>
+            <% elsif act.form_display_field_type == "text_70"    %>
+<%= trfile_draw_text_field(act.id,"1",70, act.form_default_value,@tredit_actions[0].value,act.form_js,act.form_required_y_n_1) %>  
+           <% elsif act.form_display_field_type == "text_90"    %>
+<%= trfile_draw_text_field(act.id,"1",90, act.form_default_value,@tredit_actions[0].value,act.form_js,act.form_required_y_n_1) %>          
 
         <% elsif act.form_display_field_type == "dropdown"
             if act.ref_table_a_1 == "lookup_refs"  ## use ref_table_b_1 %>
@@ -98,15 +121,16 @@ tredit.user_id=<%= @tredit.user_id %>
           <%= collection_select "value",act.id.to_s+"][", ((act.ref_table_a_1).constantize).all.sort_by(&:description),
             :id, :description, {:include_blank => "select",:selected => (@tredit_actions[0].value or act.form_default_value)} %>      
          <%   end   %>   
-
+        <%   elsif act.form_display_field_type == "textarea" %>
+<%= trfile_draw_text_area(act.id,"80x4", act.form_default_value,@tredit_actions[0].value,act.form_required_y_n_1) %>
          <%   elsif act.form_display_field_type == "textarea_3x60" %>
-<%= draw_text_area(act.id,"1","60x7", act.form_default_value,@tredit_actions[0].value,act.form_required_y_n_1) %>
+<%= trfile_draw_text_area(act.id,"60x7", act.form_default_value,@tredit_actions[0].value,act.form_required_y_n_1) %>
 
           <%  end
 
 
         %>
-        <%= @tredit_actions[0].value %> </td>
+    </td>
    
        <% v_cnt = v_cnt + act.form_col_span
           if v_cnt > 2
