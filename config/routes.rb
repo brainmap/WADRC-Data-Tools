@@ -1,5 +1,20 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :tredit_actions
+
+
+  resources :tredits
+
+
+  resources :tractiontypes
+
+
+  resources :trfiles
+
+
+  resources :trtypes
+
+
   resources :series_description_maps
 
   resources :series_description_types
@@ -204,6 +219,11 @@ WADRCDataTools::Application.routes.draw do
   # moved up to get precidance over devise sign_upmatch '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user
   
    match '/question/clone/:id', :controller=>'questions',:action=>'clone', :as => :clone
+
+
+    match '/trfile_home/:id', :controller => 'trfiles', :action => 'trfile_home', :as => :trfile_home
+    match '/trtype_home/:id', :controller => 'trtypes', :action => 'trtype_home', :as => :trtype_home
+    match '/trtype_home/', :controller => 'trtypes', :action => 'trtype_home', :as => :trtype_home
    
    #match '/vgroups/home', :controller => 'vgroups', :action => 'home', :as => :home
     match '/vgroups/home', :controller => 'vgroups', :action => 'vgroups_search', :as => :home
