@@ -19,18 +19,13 @@ class TrfilesController < ApplicationController
               v_value = nil
               if !params["value"][(ta.id).to_s].nil?
               v_value = params["value"][(ta.id).to_s].join(',')
-      puts "aaaaa "+v_value
                else
-puts "bbbbbb nil = "+(ta.id).to_s
+                  puts "bbbbbb nil = "+(ta.id).to_s
               end
               @tredit_action.value = v_value
               @tredit_action.save
-
              end
-
-
         end
-
     end
     # update trfile
     # update tredit

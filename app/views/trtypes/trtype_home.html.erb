@@ -29,7 +29,10 @@
     <%= select(:tr_search,  :file_completed_flag, v_y_n, {:prompt => 'Completed?'} ) %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 <!-- = f.label :compeleted -->
-<%=f.submit 'Run Search'%>
+<%=f.submit 'Run Search'%> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ <small><%= link_to 'List edits' ,{ :controller=>"tredits", :action=>"tredit_home", :trtype_id =>  params[:id]} %></small>
       <%end%>
 <br>
 </td></tr>

@@ -1,4 +1,21 @@
 class TreditsController < ApplicationController
+
+
+  def tredit_home
+   @trfiles = Trfile.where("trtype_id ="+params[:trtype_id])
+    # get search conditions
+
+    @tredits_search = Tredit.all # apply limits
+
+
+
+    respond_to do |format|
+      format.html # index.html.erb
+      #format.json { render json: @trfiles }
+    end
+
+  end
+  
   # GET /tredits
   # GET /tredits.json
   def index
