@@ -2,15 +2,96 @@ class TreditsController < ApplicationController
 
 
   def tredit_home
+   @tractiontypes = Tractiontype.where("trtype_id in (?)",params[:trtype_id]).where("tractiontypes.display_order is not null").order(:display_order) 
+
+    # base columns
+    @export_file_title =Trtype.find(params[:trtype_id]).description+" file edits"
+    @column_headers_display = ['File Completed','Last Update','Subjectid','Scan Procedure','User']
+    @column_headers = ['File Completed','Last Update','Subjectid','Scan Procedure','User']
+
+    @tractiontypes.each do |act|
+      @column_headers_display.push(act.display_column_header_1)
+      @column_headers.push(act.export_column_header_1)
+    end
+    @column_number = @column_headers.size
+    
    @trfiles = Trfile.where("trtype_id ="+params[:trtype_id])
-    # get search conditions
+   @conditions = ["scan_procedures.id = trfiles.scan_procedure_id "]
+  if !params[:tr_search].nil?
+      @trfiles_search = Trfile.where("trtype_id ="+params[:trtype_id]).order("updated_at desc")
+        if !params[:tr_search][:trfile_id].nil? and params[:tr_search][:trfile_id] > ''
+          @trfiles_search = @trfiles_search.where("id in (?)",params[:tr_search][:trfile_id])
+          @conditions.push(" trfiles.id in ("+params[:tr_search][:trfile_id]+") ")
+        end
+        if !params[:tr_search][:scan_procedure_id].nil? and params[:tr_search][:scan_procedure_id] > ''
+          @trfiles_search = @trfiles_search.where("scan_procedure_id in (?)",params[:tr_search][:scan_procedure_id])
+          @conditions.push(" trfiles.scan_procedure_id in("+params[:tr_search][:scan_procedure_id]+") ")
+        end
+        if !params[:tr_search][:user_id].nil? and params[:tr_search][:user_id] > ''
+          @trfiles_search = @trfiles_search.where("id in (select trfile_id from tredits where user_id in (?))",params[:tr_search][:user_id])
+          @conditions.push(" trfiles.id in (select trfile_id from tredits where user_id in ("+params[:tr_search][:user_id]+")) ")
+        end
+        if !params[:tr_search][:file_completed_flag].nil? and params[:tr_search][:file_completed_flag] > ''
+          @trfiles_search = @trfiles_search.where("file_completed_flag in (?)",params[:tr_search][:file_completed_flag])
+          @conditions.push(" trfiles.file_completed_flag in('"+params[:tr_search][:file_completed_flag]+"') ")
+        end
+    else
+      @trfiles_search = Trfile.where("trtype_id ="+params[:trtype_id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) ").order("updated_at desc")
+      @conditions.push(" trfiles.trtype_id ="+params[:trtype_id]+" ")
+      @conditions.push(" trfiles.updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) ")  # change to pageination
+          
+    end
+        @html_request ="Y"
+         request_format = request.formats.to_s
+         case  request_format
+          when "[text/html]","text/html" then
+            @html_request ="Y"
+          else
+              @html_request ="N"
+          end
+              # get the tredit_action values
+              @db_columns   =["trfiles.id","trfiles.file_completed_flag","trfiles.updated_at","trfiles.subjectid","scan_procedures.codename"]
+              sql = "select "+@db_columns.join(",")+" from scan_procedures, trfiles where "+@conditions.join(' and ') 
+              connection = ActiveRecord::Base.connection();
+              @trfiles_search  =  connection.execute(sql)
+              @tredits_search = []
+              @trfiles_search.each do |trfile|
+                      @tredits = Tredit.where("trfile_id in (?)",trfile[0]).order(:updated_at).reverse_order
+                      @tredits.each do |tredit|
+                        @tredit_row  = []
+                        @tredit_row.push(trfile[1]) # file_completed_flag
+                        @tredit_row.push(tredit.updated_at) #update_at
+                        @tredit_row.push(trfile[3]) #subjectid
+                        @tredit_row.push(trfile[4]) #codenme
+                        @tredit_row.push((User.find(tredit.user_id)).username_name)
+                        @tractiontypes.each do |act|
+                          @tredit_actions = TreditAction.where("tredit_id in (?)",tredit.id).where("tractiontype_id in (?)",act.id)
+                          # translate stored value to display value -- q_data does this by one big join
+                          if  !act.ref_table_a_1.nil? and act.ref_table_a_1 == "lookup_refs" and !(act.ref_table_b_1).nil? and !(@tredit_actions[0].value).nil?
+                             sql_val = "select lookup_refs.description from lookup_refs where label='"+ act.ref_table_b_1+"' and ref_value in ("+@tredit_actions[0].value+")"
+                              vals =  connection.execute(sql_val)
+                               val=[]
+                               vals.each do |v|
+                                 val.push(v[0])
+                               end
+                              @tredit_row.push(val.join(', '))
+                          elsif  !act.ref_table_a_1.blank?  and !(@tredit_actions[0].value).nil?
+                               vals =((act.ref_table_a_1).constantize).where("id in (?)",@tredit_actions[0].value)
+                               @tredit_row.push((vals.first).description)
 
-    @tredits_search = Tredit.all # apply limits
-
+                          else
+                            @tredit_row.push(@tredit_actions[0].value)
+                          end
+                        end
+                        @tredits_search.push(@tredit_row)
+                      end
+                       
+              end
 
 
     respond_to do |format|
       format.html # index.html.erb
+      format.xls 
       #format.json { render json: @trfiles }
     end
 

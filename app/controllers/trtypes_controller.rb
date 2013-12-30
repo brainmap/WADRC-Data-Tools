@@ -29,7 +29,7 @@ class TrtypesController < ApplicationController
          else
           @trfiles_search = Trfile.where("trtype_id ="+params[:id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) ").order("updated_at desc")
           @conditions.push(" trfiles.trtype_id ="+params[:id]+" ")
-          @conditions.push(" trfiles.updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY")
+          @conditions.push(" trfiles.updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")  # change to pageination
           
          end
          @export_file_title =Trtype.find(params[:id]).description+" file edits"

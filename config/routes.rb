@@ -219,7 +219,8 @@ WADRCDataTools::Application.routes.draw do
   # moved up to get precidance over devise sign_upmatch '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user
   
    match '/question/clone/:id', :controller=>'questions',:action=>'clone', :as => :clone
-    
+
+    match '/tredits/tredit_home/:trtype_id', :controller => 'tredits', :action => 'tredit_home', :as => :tredit_home
     match '/tredit_home/:trtype_id', :controller => 'tredits', :action => 'tredit_home', :as => :tredit_home
     match 'trfiles/trfile_edit_action', :controller => 'trfiles', :action => 'trfile_edit_action', :as => :trfile_edit_action
     match '/trfile_home/:id', :controller => 'trfiles', :action => 'trfile_home', :as => :trfile_home

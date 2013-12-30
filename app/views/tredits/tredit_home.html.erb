@@ -1,0 +1,42 @@
+<%  v_y_n = {"Y"=>"Y","N"=>"N"} %>
+<table class="search_form" >
+	<tr><td colspan="3" align="left" nowrap>
+      <%= form_for 'tredit_home/'+params[:trtype_id] do |f| %>
+      <%= label_tag :search %>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= label_tag :trfile %>: <%= select(:tr_search,:trfile_id, @trfiles.collect {|p| [ p.subjectid+" - "+ScanProcedure.find(p.scan_procedure_id).codename, p.id ] },  { :include_blank => "Select a subject" }) %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= label_tag :scan_procedure %>:      <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
+    <%= collection_select(:tr_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'choose scan procedure'}, {:multiple =>  false} ) %><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= label_tag :user_id %>: 
+    <%= select(:tr_search, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select editor" }) %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <%= select(:tr_search,  :file_completed_flag, v_y_n, {:prompt => 'Completed?'} ) %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+<!-- = f.label :compeleted -->
+<%=f.submit 'Run Search'%> 
+      <%end%>
+<br>
+</td></tr>
+<% if !@tredits_search.nil? and  @tredits_search.size > 0 %>
+<tr><td colspan="3">  <small><%= link_to 'download xls', { :controller=>"tredits", :action=>"tredit_home", :tr_search =>  params[:tr_search] ,:format => :xls} %></small>
+    </td></tr>
+  <%end%>
+</table>
+
+<% if !@tredits_search.nil? %>
+  <table  class="tabular" >
+  <caption><%= pluralize(@tredits_search.size, 'File') %></caption>
+  <thead>
+  	<tr><% @column_headers_display.each do |col| %>
+         <th><%= col %></th>
+         <%end%>
+    </tr>
+
+		<% @tredits_search.each do |tre| %>
+<tr> <% tre.each do |val| %>
+  <td>  <%=val %> </td>
+       <%end%>
+</tr>
+   <%end%>
+	</table>
+<%end%>
+<br><br><br><br><br><br><br><br>

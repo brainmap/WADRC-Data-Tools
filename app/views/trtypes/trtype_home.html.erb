@@ -48,7 +48,8 @@
 <%end # end of if id null%>
 
  <% if !@trfiles_search.nil? and @trfiles_search.size > 0 %>
-<tr><td colspan="3">  <%= link_to 'download xls', { :controller=>"trtypes", :action=>"trtype_home", :tr_search =>  params[:tr_search] , :format => :xls} %>
+<tr><td colspan="3">  <small><%= link_to 'download xls', { :controller=>"trtypes", :action=>"trtype_home", :tr_search =>  params[:tr_search] , :format => :xls} %></small>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><%= link_to 'View File Edit List' ,{ :controller=>"tredits" ,:action=>"tredit_home/"+params[:id]} %></small>
     </td></tr>
   <%end%>
 
