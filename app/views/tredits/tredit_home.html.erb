@@ -17,7 +17,8 @@
 <br>
 </td></tr>
 <% if !@tredits_search.nil? and  @tredits_search.size > 0 %>
-<tr><td colspan="3">  <small><%= link_to 'download xls', { :controller=>"tredits", :action=>"tredit_home", :tr_search =>  params[:tr_search] ,:format => :xls} %></small>
+<tr><td colspan="3">  <small><%= link_to 'download xls', { :controller=>"tredits", :action=>"tredit_home", :tr_search =>  params[:tr_search] ,:format => :xls} %></small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <small><%= link_to 'View File List/Home' ,{ :controller=>"trtypes" ,:action=>"trtype_home/"+params[:trtype_id]} %></small>
     </td></tr>
   <%end%>
 </table>
@@ -30,10 +31,18 @@
          <th><%= col %></th>
          <%end%>
     </tr>
+  </thead>
+		<% @tredits_search.each do |tre| 
+       v_cnt = 0%>
 
-		<% @tredits_search.each do |tre| %>
-<tr> <% tre.each do |val| %>
+<tr> <% tre.each do |val| 
+     if v_cnt < 1
+         tredit = Tredit.find(val)
+         v_cnt =1%>
+         <td> <%= link_to "Get edit","/trfile_home/"+params[:trtype_id]+"?trfile_action=get_edit&trfile_id="+(tredit.trfile_id).to_s+"&tredit_id="+val.to_s ,{:style=>'color:#000000;'}%></td>
+         <%else%>
   <td>  <%=val %> </td>
+          <%end%>
        <%end%>
 </tr>
    <%end%>

@@ -36,6 +36,10 @@ v_value_type =  [["dropdown","dropdown"],["dropdown_multiple","dropdown_multiple
     <%= f.label :display_in_summary %><br />
     <%= f.select :display_in_summary, v_y_n, {:prompt => 'Should the column be in the summary?'}  %>
   </div>
+    <div class="field">
+    <%= f.label :summary_peek_flag %><br />
+    <%= f.select :summary_peek_flag, v_y_n, {:prompt => 'Should the column be in the summary as peek?'}  %>
+  </div>
   <div class="field">
     <%= f.label :display_column_header_1 %><br />
     <%= f.text_field :display_column_header_1 %>

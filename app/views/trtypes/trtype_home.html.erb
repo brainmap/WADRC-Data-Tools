@@ -59,14 +59,14 @@
   <table  class="tabular" >
   <caption><%= pluralize(@trfiles_search.size, 'File') %></caption>
   <thead>
-  	<tr><th>Completed</th>
-  	<th>Last Update</th>
-    <th>Subjectid</th><th>Add edit</th><th>Last edit</th>
-    <th>Scan Procedure</th>
-    <th>loop thru edits, loop thru edit summary columns</th></tr>
-
-		<% @trfiles_search.each do |trf| 
-            @tredits = Tredit.where("trfile_id = "+(trf.id).to_s).order("tredits.id desc")
+    <tr><% @column_headers_display.each do |header| %>
+       <th><%= header %></th>
+      <%end%>
+    </tr>
+</thead>
+		<% connection = ActiveRecord::Base.connection();
+     @trfiles_search.each do |trf| 
+            @tredits = Tredit.where("trfile_id = "+(trf.id).to_s).order("tredits.id asc")
             @tredit = @tredits[0]
 			 %>
 		<tr><td><%= trf.file_completed_flag %> </td> 
@@ -76,17 +76,65 @@
         <%= link_to "Last edit","/trfile_home/"+params[:id]+"?trfile_action=get_edit&trfile_id="+(trf.id).to_s ,{:style=>'color:#000000;'}%>
        <%end%></td>
         <td><%= ScanProcedure.find(trf.scan_procedure_id).codename %> </td> 
+        <%   v_cnt = 0
+            @tredits.each do |tredit| 
+              v_shade = 'bgcolor="#BDBDBD"'
+               if v_cnt < 1 
+                  v_shade =  'bgcolor="#BDBDBD"'
+                  v_cnt = 1 
+                else
+                   v_shade =  'bgcolor="#FFFFFF"'
+                   v_cnt = 0
+                end %>
+                  <% v_cell_cnt = 0 
+                  v_peek = ""   # assuming peek is just text, no translate
+                  @tractiontypes_peek.each do |act_peek|
+                       @tredit_actions_peek  = TreditAction.where("tredit_id in (?)",tredit.id).where("tractiontype_id in (?)",act_peek.id)
+                       @tredit_actions_peek.each do |row|
+                          if !(row.value).blank?
+                            v_peek = v_peek + row.value + "; "
+                          end
+                       end
+                  end
+                  @tractiontypes.each do |act| 
+                    # put peek values in first cell 
+                    # summary_peek_flag
+
+
+                    # add link to edit
+                    
+                    v_value = ""
+                    @tredit_actions = TreditAction.where("tredit_id in (?)",tredit.id).where("tractiontype_id in (?)",act.id)
+                    if  !act.ref_table_a_1.nil? and act.ref_table_a_1 == "lookup_refs" and !(act.ref_table_b_1).nil? and !(@tredit_actions[0].value).nil?
+                        sql_val = "select lookup_refs.description from lookup_refs where label='"+ act.ref_table_b_1+"' and ref_value in ("+@tredit_actions[0].value+")"
+                        vals =  connection.execute(sql_val)
+                        val=[]
+                        vals.each do |v|
+                              val.push(v[0])
+                        end
+                        v_value = val.join(', ')
+                    elsif  !act.ref_table_a_1.blank?  and !(@tredit_actions[0].value).nil?
+                        vals =((act.ref_table_a_1).constantize).where("id in (?)",@tredit_actions[0].value)
+                        v_value = (vals.first).description
+                    else
+                        v_value = @tredit_actions[0].value
+                    end
+                    %>
+                 <td <%= v_shade.html_safe%> > <%=v_value %> <% if v_cell_cnt < 1 %> <small><small><%= popup_note('peek', key_val_table('path_popup', { :note => v_peek })) unless v_peek.blank? %></small></small> 
+                  <%= link_to "_","/trfile_home/"+params[:id]+"?trfile_action=get_edit&trfile_id="+(tredit.trfile_id).to_s+"&tredit_id="+(tredit.id).to_s %><%end%></td>
+                    <% v_cell_cnt =  1
+                     end%>
+            <%end%>
+                  
+
+
+
 
 		<%end%>
      </table>
   <%end%>
 <br><br>
-	add to search not completed, completed, recent, specific trtype search fields<br>
-	make new file - (also makes tredit, tredit_actions)<br>
-	make new edit of a file - specify subjectid - or link off of search results (also makes tredit_actions)<br>
-	edit exisiting edit - link off of search results - or specify subjectid and get last edit <br>
-	view files list - summing page - has search - export - links to actions<br>
-	view file edit list  - has search - export - links to actions<br>
+
 
 
 <br><br><br>

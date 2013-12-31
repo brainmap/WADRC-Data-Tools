@@ -4,6 +4,7 @@ class TrtypesController < ApplicationController
 
   def trtype_home
     @trtypes = Trtype.all
+    connection = ActiveRecord::Base.connection();
     if !params[:id].nil?
          @trfiles = Trfile.where("trtype_id ="+params[:id])
          @conditions = ["scan_procedures.id = trfiles.scan_procedure_id "]
@@ -15,8 +16,15 @@ class TrtypesController < ApplicationController
                @conditions.push(" trfiles.id in ("+params[:tr_search][:trfile_id]+") ")
             end
             if !params[:tr_search][:scan_procedure_id].nil? and params[:tr_search][:scan_procedure_id] > ''
-               @trfiles_search = @trfiles_search.where("scan_procedure_id in (?)",params[:tr_search][:scan_procedure_id])
-               @conditions.push(" trfiles.scan_procedure_id in("+params[:tr_search][:scan_procedure_id]+") ")
+               @trfiles_search = @trfiles_search.where("scan_procedure_id in
+                        (select scan_procedure_id from scan_procedures_vgroups where 
+                                              vgroup_id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?)))",params[:tr_search][:scan_procedure_id])
+               @conditions.push("trfiles.scan_procedure_id in
+                    (select scan_procedure_id from scan_procedures_vgroups where 
+                                              vgroup_id in 
+                                              (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in 
+                                                ("+params[:tr_search][:scan_procedure_id]+")))")
+
             end
             if !params[:tr_search][:user_id].nil? and params[:tr_search][:user_id] > ''
                @trfiles_search = @trfiles_search.where("id in (select trfile_id from tredits where user_id in (?))",params[:tr_search][:user_id])
@@ -27,14 +35,24 @@ class TrtypesController < ApplicationController
                @conditions.push(" trfiles.file_completed_flag in('"+params[:tr_search][:file_completed_flag]+"') ")
             end
          else
-          @trfiles_search = Trfile.where("trtype_id ="+params[:id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) ").order("updated_at desc")
+        #  @trfiles_search = Trfile.where("trtype_id ="+params[:id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) ").order("updated_at desc")
+          @trfiles_search = Trfile.where("trtype_id ="+params[:id]).order("updated_at desc")
           @conditions.push(" trfiles.trtype_id ="+params[:id]+" ")
-          @conditions.push(" trfiles.updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")  # change to pageination
+          #@conditions.push(" trfiles.updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")  # change to pageination
           
          end
          @export_file_title =Trtype.find(params[:id]).description+" file edits"
          @column_headers_display = ['Completed','Last Update','Subjectid','Add edit','Last edit','Scan Procedure']
          @column_headers = ['Completed','Last Update','Subjectid','Scan Procedure']
+
+         
+         @tractiontypes = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.display_in_summary = 'Y' ").order(:display_order)
+         @tractiontypes_peek = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.summary_peek_flag = 'Y' ").order(:display_order)
+
+         # need count max number of edits for these trfiles
+          sql = "select max(t1.cnt) from (select count(distinct tredits.id)  cnt from tredits where trfile_id in (select trfiles.id from scan_procedures, trfiles where "+@conditions.join(' and ')+" ) group by tredits.trfile_id ) t1"
+          results =  connection.execute(sql)
+          v_cnt_limit = (results.first)[0].to_i
 
          # add in trtype specific summary columns
          # if export -- do select 
@@ -43,6 +61,11 @@ class TrtypesController < ApplicationController
          case  request_format
           when "[text/html]","text/html" then
               @column_headers_display = ['Completed','Last Update','Subjectid','Add edit','Last edit','Scan Procedure']
+              for counter in  1..v_cnt_limit
+                 @tractiontypes.each do |header|
+                    @column_headers_display.push(header.display_summary_column_header_1)
+                 end
+              end
             else
               @html_request ="N"
               @column_headers = ['Completed','Last Update','Subjectid','Scan Procedure']

@@ -15,6 +15,7 @@ edit_count = edit_count -1
 		<%= link_to 'import MRI appt data', new_raw_data_import_path %>
 	</p>
 <% end %>
+| <%= link_to 'track file edits', trtype_home_path %>
 <% if current_user.role == 'Admin_High'%>
  | <%= link_to('Administration', control_path) %>
 <% end %>

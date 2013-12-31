@@ -6,8 +6,8 @@ class TreditsController < ApplicationController
 
     # base columns
     @export_file_title =Trtype.find(params[:trtype_id]).description+" file edits"
-    @column_headers_display = ['File Completed','Last Update','Subjectid','Scan Procedure','User']
-    @column_headers = ['File Completed','Last Update','Subjectid','Scan Procedure','User']
+    @column_headers_display = ['Edit','File Completed','Last Update','Subjectid','Scan Procedure','User']
+    @column_headers = ['Edit_id','File Completed','Last Update','Subjectid','Scan Procedure','User']
 
     @tractiontypes.each do |act|
       @column_headers_display.push(act.display_column_header_1)
@@ -24,8 +24,14 @@ class TreditsController < ApplicationController
           @conditions.push(" trfiles.id in ("+params[:tr_search][:trfile_id]+") ")
         end
         if !params[:tr_search][:scan_procedure_id].nil? and params[:tr_search][:scan_procedure_id] > ''
-          @trfiles_search = @trfiles_search.where("scan_procedure_id in (?)",params[:tr_search][:scan_procedure_id])
-          @conditions.push(" trfiles.scan_procedure_id in("+params[:tr_search][:scan_procedure_id]+") ")
+          @trfiles_search = @trfiles_search.where("scan_procedure_id in
+                        (select scan_procedure_id from scan_procedures_vgroups where 
+                                              vgroup_id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?)))",params[:tr_search][:scan_procedure_id])
+          @conditions.push("trfiles.scan_procedure_id in
+                    (select scan_procedure_id from scan_procedures_vgroups where 
+                                              vgroup_id in 
+                                              (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in 
+                                                ("+params[:tr_search][:scan_procedure_id]+")))")
         end
         if !params[:tr_search][:user_id].nil? and params[:tr_search][:user_id] > ''
           @trfiles_search = @trfiles_search.where("id in (select trfile_id from tredits where user_id in (?))",params[:tr_search][:user_id])
@@ -59,8 +65,9 @@ class TreditsController < ApplicationController
                       @tredits = Tredit.where("trfile_id in (?)",trfile[0]).order(:updated_at).reverse_order
                       @tredits.each do |tredit|
                         @tredit_row  = []
+                        @tredit_row.push(tredit.id)
                         @tredit_row.push(trfile[1]) # file_completed_flag
-                        @tredit_row.push(tredit.updated_at) #update_at
+                        @tredit_row.push((tredit.updated_at).strftime('%Y-%m-%d %H:%M')  ) #update_at
                         @tredit_row.push(trfile[3]) #subjectid
                         @tredit_row.push(trfile[4]) #codenme
                         @tredit_row.push((User.find(tredit.user_id)).username_name)
@@ -78,7 +85,6 @@ class TreditsController < ApplicationController
                           elsif  !act.ref_table_a_1.blank?  and !(@tredit_actions[0].value).nil?
                                vals =((act.ref_table_a_1).constantize).where("id in (?)",@tredit_actions[0].value)
                                @tredit_row.push((vals.first).description)
-
                           else
                             @tredit_row.push(@tredit_actions[0].value)
                           end

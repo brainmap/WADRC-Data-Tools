@@ -47,7 +47,13 @@ class TrfilesController < ApplicationController
      v_trfile = Trfile.where("subjectid in (?)",v_subjectid_v)
 
      if !(v_trfile[0]).nil? 
-        v_comment = v_comment + " There was already a file for "+v_subjectid_v
+        v_comment = v_comment + " There was already a file for "+v_subjectid_v+". This is the most recent edit."
+        if !v_subjectid_v.include? "_v"
+            v_comment = v_comment + " Did you mean to include _v2 or _v3 or _v# in the subjectid?"
+        end
+        @trfile = v_trfile[0]
+        params[:trfile_action] = "get_edit"
+        params[:trfile_id] = (@trfile.id).to_s
      else
        v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload
        v_sp_id = v_shared.get_sp_id_from_subjectid_v(v_subjectid_v)
@@ -117,6 +123,18 @@ class TrfilesController < ApplicationController
         end
 
   end
+    @tredit_prev = nil
+    @tredit_next = nil
+    tredits = Tredit.where("tredits.trfile_id in (?)", @tredit.trfile_id).order(:id)
+    tredits.each do |tr|
+      if tr.id < @tredit.id
+         @tredit_prev = tr
+      end
+      if tr.id > @tredit.id and @tredit_next.nil?
+         @tredit_next = tr
+      end
+    end
+
     # get all the scan procedures linked to vgroup
     @trtype = Trtype.find(@trfile.trtype_id)
     @vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships where enrollment_id in (?) )",@trfile.enrollment_id).where("vgroups.id in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))",@trfile.scan_procedure_id)
@@ -131,7 +149,9 @@ class TrfilesController < ApplicationController
 
       end
   # get specified edit , edit_action in the form
-
+    if !v_comment.blank?
+     flash[:error] = v_comment
+    end
     respond_to do |format|
       format.html # index.html.erb
       #format.json { render json: @trfiles }
