@@ -2652,7 +2652,7 @@ puts "AAAAAA "+v_call
       @schedulerun.save
       # update schedulerun comment - prepend 
       sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
-                                          and v.id in ( select scvg.vgroup_id from scan_procedures_vgroups scvg where scvg.scan_procedure_id  in (37,26,24) and scvg.scan_procedure_id in ("+r[2]+"")) "
+                                          and v.id in ( select scvg.vgroup_id from scan_procedures_vgroups scvg where scvg.scan_procedure_id  in (37,26,24) and scvg.scan_procedure_id in ("+r[2]+")) "
       results_vgroup = connection.execute(sql_vgroup)
       # mkdir /tmp/adrc_upload/[subjectid]_YYYYMMDD_wisc
       v_export_id = (@schedule.id).to_s+"_"+r[3].to_s
