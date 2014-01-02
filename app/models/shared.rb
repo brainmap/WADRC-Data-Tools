@@ -2627,7 +2627,7 @@ puts "AAAAAA "+v_call
     v_series_description_category_id_array = [19, 17]
     sql = "select distinct subjectid, enrollment_id, scan_procedure_id, export_id from cg_goveas_20131031
            where ( done_flag != 'Y' or done_flag is NULL)
-           and ( status_flag != 'N' or status_flag is NULL) 
+           and ( status_flag = 'R' or status_flag is NULL) 
            and export_id is not null" #  and subjectid in ('mrt00097', 'pdt00034','pdt00035')"  # sending ppt with incomplete sets
     results = connection.execute(sql)
     
@@ -2688,6 +2688,15 @@ puts "AAAAAA "+v_call
             end
             v_path = r_dataset[4]
             v_dir_array = v_path.split("/")
+            v_actual_scan_procedure = v_dir_array[3]
+            if v_dir_array[4] == "mri"
+              v_subjectid_date_actual = v_dir_array[6]
+            else
+                v_subjectid_date_actual = v_dir_array[5]  
+            end
+            v_subject_date_actual_array = v_subject_date_actual.split("_")
+            v_subjectid_actual = v_subject_date_actual_array[0]
+            /mounts/data/raw/johnson.predict.visit2/mri/pdt00070_3267_03222013/dicoms/s02_bravo
             v_dir = v_dir_array[(v_dir_array.size - 1)]
             v_dir_target = v_dir+"_"+v_series_description_type
             v_path = v_path.gsub("/Volumes/team/","").gsub("/Volumes/team-1/","").gsub("/Data/vtrak1/","")  #v_base_path+"/"+
@@ -2707,8 +2716,8 @@ puts "AAAAAA "+v_call
             stdout.close
             stderr.close
             v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-            v_scan_procedure_path = ScanProcedure.find(r[2]).codename
-            v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/unknown/"+ v_subjectid+"_*_"+v_dir+".nii  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_"+r_dataset[3].gsub(" ","_")+"_"+v_dir+".nii '"
+            v_scan_procedure_path = v_actual_scan_procedure # ScanProcedure.find(r[2]).codename
+            v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid_actual+"/unknown/"+ v_subjectid_actual+"_*_"+v_dir+".nii  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_"+r_dataset[3].gsub(" ","_")+"_"+v_dir+".nii '"
             stdin, stdout, stderr = Open3.popen3(v_call)
             while !stdout.eof?
                puts stdout.read 1024    
