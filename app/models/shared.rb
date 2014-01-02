@@ -2696,7 +2696,7 @@ puts "AAAAAA "+v_call
             end
             v_subject_date_actual_array = v_subject_date_actual.split("_")
             v_subjectid_actual = v_subject_date_actual_array[0]
-            /mounts/data/raw/johnson.predict.visit2/mri/pdt00070_3267_03222013/dicoms/s02_bravo
+
             v_dir = v_dir_array[(v_dir_array.size - 1)]
             v_dir_target = v_dir+"_"+v_series_description_type
             v_path = v_path.gsub("/Volumes/team/","").gsub("/Volumes/team-1/","").gsub("/Data/vtrak1/","")  #v_base_path+"/"+
