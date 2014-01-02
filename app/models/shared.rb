@@ -281,7 +281,7 @@ class Shared  < ActionController::Base
     
   end
   
- # subset of adrc_upload -- just dti
+ # subset of adrc_upload -- just dti  -- added pdt, pipr, wmad, mrt, tami, mets - limit to visit1
    def run_adrc_dti  
      v_base_path = Shared.get_base_path()
       @schedule = Schedule.where("name in ('adrc_dti')").first
@@ -296,7 +296,7 @@ class Shared  < ActionController::Base
     #  table cg_adrc_upload populated by run_adrc_upload function      
      connection = ActiveRecord::Base.connection();
      # get adrc subjectid to upload
-     sql = "select distinct subjectid from cg_adrc_upload where dti_sent_flag ='N' and dti_status_flag in ('Y','R') "
+     sql = "select distinct subjectid from cg_adrc_upload where dti_sent_flag ='N' and dti_status_flag in ('Y','R') and ( subjectid not like 'adrc%' or subjectid in ('adrc00046','adrc00068') )"
      results = connection.execute(sql)
      # changed to series_description_maps table
      v_folder_array = Array.new
@@ -325,7 +325,8 @@ class Shared  < ActionController::Base
        @schedulerun.comment =v_comment[0..1990]
        @schedulerun.save
        # update schedulerun comment - prepend 
-       sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')"
+       sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in ( select spvg.vgroup_id from scan_procedures_vgroups spvg, scan_procedures sp where sp.id = spvg.scan_procedure_id and sp.codename like '%visit1' )
+        and v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')"
        results_vgroup = connection.execute(sql_vgroup)
        # mkdir /tmp/adrc_dti/[subjectid]_YYYYMMDD_wisc
        v_subject_dir = r[0]+"_"+(results_vgroup.first)[0].to_s+"_wisc"
@@ -347,6 +348,7 @@ class Shared  < ActionController::Base
                    and series_description_types.series_description_type in ('DTI') 
                    and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
                    and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
+                   and vgroups.id in ( select spvg.vgroup_id from scan_procedures_vgroups spvg, scan_procedures sp where sp.id = spvg.scan_procedure_id and sp.codename like '%visit1' )
                     order by appointments.appointment_date "
        results_dataset = connection.execute(sql_dataset)
        v_folder_array = [] # how to empty
@@ -2625,7 +2627,8 @@ puts "AAAAAA "+v_call
     v_series_description_category_id_array = [19, 17]
     sql = "select distinct subjectid, enrollment_id, scan_procedure_id, export_id from cg_goveas_20131031
            where ( done_flag != 'Y' or done_flag is NULL)
-           and ( status_flag != 'N' or status_flag is NULL) " #  and subjectid in ('mrt00097', 'pdt00034','pdt00035')"  # sending ppt with incomplete sets
+           and ( status_flag != 'N' or status_flag is NULL) 
+           and export_id is not null" #  and subjectid in ('mrt00097', 'pdt00034','pdt00035')"  # sending ppt with incomplete sets
     results = connection.execute(sql)
     
     # get each subject , make target dir with export id
@@ -3123,7 +3126,7 @@ puts "AAAAAA "+v_call
                  # results_update = connection.execute(sql_update)   # rerun wlesion... file detect
                  v_comment = " finished=>"+r[2]+ "; " +v_comment
                else
-                puts " in err"
+                puts " in err v_success != Y "
                 v_log = v_log +"IN ERROR \n" 
                 while !stderr.eof?
                   v_err = stderr.read 1024
