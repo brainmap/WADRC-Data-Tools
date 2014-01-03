@@ -24,13 +24,15 @@ class TrfilesController < ApplicationController
               end
               @tredit_action.value = v_value
               @tredit_action.save
-       #       if @tredit_action.updated_at > @trfile.updated_at or @tredit.updated_at > @trfile.updated_at
-       #              @trfile_updated_at = @tredit_action.updated_at
-       #              if @tredit.updated_at > @trfile.updated_at
-       #                 @trfile_updated_at = @tredit.updated_at
-       #             end
-       #             @trfile.save
-       #       end
+              # trying to get the updated_at to propagate from the tredit_action to tredit/trfile 
+              # not updating updated_at 
+          #    if @tredit_action.updated_at > @trfile.updated_at or @tredit.updated_at > @trfile.updated_at
+           #          @trfile_updated_at = @tredit_action.updated_at
+            #         if @tredit.updated_at > @trfile.updated_at
+             #           @trfile_updated_at = @tredit.updated_at
+              #      end
+               #     @trfile.save
+             # end
              end
         end
     end
@@ -48,7 +50,8 @@ class TrfilesController < ApplicationController
   # make trfile if no trfile_id, also make tredit, and tredit_actions
   v_comment = ""
    @trfile = nil
-   v_display_form = "Y"
+   
+      v_display_form = "Y"
    if !params[:trfile_action].nil? and params[:trfile_action] =="create"
      v_subjectid_v = params[:subjectid]
 
@@ -139,13 +142,23 @@ class TrfilesController < ApplicationController
     @tredit_prev = nil
     @tredit_next = nil
     tredits = Tredit.where("tredits.trfile_id in (?)", @tredit.trfile_id).order(:id)
+    @v_edit_cnt =1
+    @v_last_edit = "N"
+    v_cnt =0
     tredits.each do |tr|
+      v_cnt = v_cnt + 1
       if tr.id < @tredit.id
          @tredit_prev = tr
+      end
+      if tr.id == @tredit.id
+          @v_edit_cnt = v_cnt
       end
       if tr.id > @tredit.id and @tredit_next.nil?
          @tredit_next = tr
       end
+    end
+    if v_cnt == @v_edit_cnt 
+         @v_last_edit = "Y"
     end
   
 

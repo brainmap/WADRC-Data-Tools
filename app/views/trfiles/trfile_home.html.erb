@@ -14,7 +14,7 @@
 <%= hidden_field_tag 'tredit_id',@tredit.id %>
 
 <table width="80%" >
-  <tr><td align="left" colspan="3"> <b> <%= (@trtype.description).humanize %> file edit tracking: </b> </td></tr>
+  <tr><td align="left" colspan="3"> <b> <%= (@trtype.description).humanize %> file edit tracking: </b> <small>Edit #<%= @v_edit_cnt.to_s%> <%if @v_last_edit == "Y" %> (most recent edit)<%end%></small></td></tr>
   <tr><td align="left" colspan="3"> <small><b>Scan Protcol(s):</b>  <%= @vgroups[0].scan_procedures.blank? ? "None" : @vgroups[0].scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <b>Enrollment(s):</b> <%= @vgroups[0].enrollments.collect {|e| e.enumber }.join(", ").html_safe %></small>
    <br>
