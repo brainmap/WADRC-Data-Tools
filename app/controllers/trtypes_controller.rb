@@ -34,16 +34,20 @@ class TrtypesController < ApplicationController
               @trfiles_search = @trfiles_search.where("file_completed_flag in (?)",params[:tr_search][:file_completed_flag])
                @conditions.push(" trfiles.file_completed_flag in('"+params[:tr_search][:file_completed_flag]+"') ")
             end
+            if !params[:tr_search][:qc_value].nil? and params[:tr_search][:qc_value] > ''
+              @trfiles_search = @trfiles_search.where("qc_value in (?)",params[:tr_search][:qc_value])
+               @conditions.push(" trfiles.qc_value in('"+params[:tr_search][:qc_value]+"') ")
+            end
          else
-        #  @trfiles_search = Trfile.where("trtype_id ="+params[:id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) ").order("updated_at desc")
-          @trfiles_search = Trfile.where("trtype_id ="+params[:id]).order("updated_at desc")
+         @trfiles_search = Trfile.where("trtype_id ="+params[:id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 60 DAY) ").order("updated_at desc")
+        #  @trfiles_search = Trfile.where("trtype_id ="+params[:id]).order("updated_at desc")
           @conditions.push(" trfiles.trtype_id ="+params[:id]+" ")
-          #@conditions.push(" trfiles.updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")  # change to pageination
+          @conditions.push(" trfiles.updated_at >= DATE_SUB(NOW(), INTERVAL 60 DAY)")  # change to pageination
           
          end
          @export_file_title =Trtype.find(params[:id]).description+" file edits"
-         @column_headers_display = ['Completed','Last Update','Subjectid','Add edit','Last edit','Scan Procedure']
-         @column_headers = ['Completed','Last Update','Subjectid','Scan Procedure']
+         @column_headers_display = ['Completed','Last Update','Subjectid','Add edit','Last edit','Scan Procedure','QC']
+         @column_headers = ['Completed','Last Update','Subjectid','Scan Procedure','QC']
 
          
          @tractiontypes = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.display_in_summary = 'Y' ").order(:display_order)
@@ -60,16 +64,17 @@ class TrtypesController < ApplicationController
          request_format = request.formats.to_s
          case  request_format
           when "[text/html]","text/html" then
-              @column_headers_display = ['Completed','Last Update','Subjectid','Add edit','Last edit','Scan Procedure']
+              @column_headers_display = ['Completed','Last Update','Subjectid','Add edit','Last edit','Scan Procedure','QC']
               for counter in  1..v_cnt_limit
+                @column_headers_display.push('Edit #'+counter.to_s)
                  @tractiontypes.each do |header|
                     @column_headers_display.push(header.display_summary_column_header_1)
                  end
               end
             else
               @html_request ="N"
-              @column_headers = ['Completed','Last Update','Subjectid','Scan Procedure']
-              @db_columns   =["trfiles.file_completed_flag","trfiles.updated_at","trfiles.subjectid","scan_procedures.codename"]
+              @column_headers = ['Completed','Last Update','Subjectid','Scan Procedure','QC']
+              @db_columns   =["trfiles.file_completed_flag","trfiles.updated_at","trfiles.subjectid","scan_procedures.codename","trfiles.qc_value"]
               sql = "select "+@db_columns.join(",")+" from scan_procedures, trfiles where "+@conditions.join(' and ') 
               connection = ActiveRecord::Base.connection();
               @trfiles_search  =  connection.execute(sql)
@@ -81,7 +86,7 @@ class TrtypesController < ApplicationController
     
     respond_to do |format|
       format.xls 
-      format.html # index.html.erb
+      format.html {@trfiles_search = Kaminari.paginate_array(@trfiles_search).page(params[:page]).per(100)}# index.html.erb
       #format.json { render json: @trtypes }
     end
   end

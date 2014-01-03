@@ -1,5 +1,6 @@
 
-<%  v_y_n = {"Y"=>"Y","N"=>"N"} %>
+<%  v_y_n = {"Y"=>"Y","N"=>"N"} 
+v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
 <table class="search_form" >
 	<tr><td colspan="3" align="left"><b>Tracking file processing and edits:</b> <br>
 		<%= form_for 'trtype_home' do |f| %>
@@ -26,30 +27,27 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= f.label :user_id %>: 
     <%= select(:tr_search, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select editor" }) %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <%= select(:tr_search,  :file_completed_flag, v_y_n, {:prompt => 'Completed?'} ) %>
+    <%= select(:tr_search,  :file_completed_flag, v_y_n, {:prompt => 'File Completed?'} ) %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= select(:tr_search,  :qc_value, v_qc, {:prompt => 'QC Value?'} ) %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
 <!-- = f.label :compeleted -->
-<%=f.submit 'Run Search'%> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
- <small><%= link_to 'List edits' ,{ :controller=>"tredits", :action=>"tredit_home", :trtype_id =>  params[:id]} %></small>
+<%=f.submit 'Run Search'%>
       <%end%>
 <br>
 </td></tr>
-
+<tr><td colspan="3" align="left" nowrap><hr width="80%"></td></tr>
 	<tr><td colspan="3">
 		<%= form_tag("/trfile_home/"+params[:id], method: "post") do %>
            <%= label_tag :subjectid %>: <small>for visit 1 just enter [subjectid], for visit 2 enter [subjectid]_v2 ,e.g. for visit # enter [subjectid]_v#</small><br />
-    <%= text_field_tag  :subjectid ,"",:required=>TRUE %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <%= submit_tag 'Make new file'%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag  :subjectid ,"",:required=>TRUE %>
     <%= hidden_field_tag :trfile_action,"create" %>
-           <%= submit_tag 'Make new file'%>
 		<%end %><br>
  </td></tr>
 <%end # end of if id null%>
 
  <% if !@trfiles_search.nil? and @trfiles_search.size > 0 %>
 <tr><td colspan="3">  <small><%= link_to 'download xls', { :controller=>"trtypes", :action=>"trtype_home", :tr_search =>  params[:tr_search] , :format => :xls} %></small>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><%= link_to 'View File Edit List' ,{ :controller=>"tredits" ,:action=>"tredit_home/"+params[:id]} %></small>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><%= link_to 'View File Edit List' ,{ :controller=>"tredits", :action=>"tredit_home", :trtype_id =>  params[:id]} %></small>
     </td></tr>
   <%end%>
 
@@ -64,6 +62,9 @@
       <%end%>
     </tr>
 </thead>
+    <tfoot><tr><td colspan=(@column_headers_display.size+3)>
+     <%=    paginate @trfiles_search %> 
+  </td></tr></tfoot>
 		<% connection = ActiveRecord::Base.connection();
      @trfiles_search.each do |trf| 
             @tredits = Tredit.where("trfile_id = "+(trf.id).to_s).order("tredits.id asc")
@@ -76,8 +77,11 @@
         <%= link_to "Last edit","/trfile_home/"+params[:id]+"?trfile_action=get_edit&trfile_id="+(trf.id).to_s ,{:style=>'color:#000000;'}%>
        <%end%></td>
         <td><%= ScanProcedure.find(trf.scan_procedure_id).codename %> </td> 
+        <td><%= trf.qc_value %> </td> 
         <%   v_cnt = 0
+             v_edit_cnt = 0
             @tredits.each do |tredit| 
+              v_edit_cnt = v_edit_cnt + 1
               v_shade = 'bgcolor="#BDBDBD"'
                if v_cnt < 1 
                   v_shade =  'bgcolor="#BDBDBD"'
@@ -95,8 +99,9 @@
                             v_peek = v_peek + row.value + "; "
                           end
                        end
-                  end
-                  @tractiontypes.each do |act| 
+                  end %>
+                 <td <%= v_shade.html_safe%> > <%= link_to v_edit_cnt.to_s,"/trfile_home/"+params[:id]+"?trfile_action=get_edit&trfile_id="+(tredit.trfile_id).to_s+"&tredit_id="+(tredit.id).to_s %> </td>
+               <%   @tractiontypes.each do |act| 
                     # put peek values in first cell 
                     # summary_peek_flag
 
@@ -120,8 +125,7 @@
                         v_value = @tredit_actions[0].value
                     end
                     %>
-                 <td <%= v_shade.html_safe%> > <%=v_value %> <% if v_cell_cnt < 1 %> <small><small><%= popup_note('peek', key_val_table('path_popup', { :note => v_peek })) unless v_peek.blank? %></small></small> 
-                  <%= link_to "_","/trfile_home/"+params[:id]+"?trfile_action=get_edit&trfile_id="+(tredit.trfile_id).to_s+"&tredit_id="+(tredit.id).to_s %><%end%></td>
+                 <td <%= v_shade.html_safe%> > <%=v_value %> <% if v_cell_cnt < 1 %> <small><small><%= popup_note('peek', key_val_table('path_popup', { :note => v_peek })) unless v_peek.blank? %></small></small> <%end%></td>
                     <% v_cell_cnt =  1
                      end%>
             <%end%>

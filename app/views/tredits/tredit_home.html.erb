@@ -32,6 +32,9 @@
          <%end%>
     </tr>
   </thead>
+    <tfoot><tr><td colspan=(@column_headers_display.size+3)>
+     <%=    paginate @tredits_search %> 
+  </td></tr></tfoot>
 		<% @tredits_search.each do |tre| 
        v_cnt = 0%>
 

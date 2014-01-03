@@ -355,7 +355,9 @@ v_user = v_user.gsub("\n","")
          time = Time.now
          v_date_stamp = time.strftime("%Y%m%d")
 #### v_date_stamp ="20130117"
+          # no FS on adrcdv2 -- shouldn't process on web server?
           v_call = v_base_path+"/data1/lab_scripts/python_dev/fs_file.py Y"
+          v_call = "ssh panda_user@merida.dom.wisc.edu '"+v_base_path+"/data1/lab_scripts/python_dev/fs_file.py Y'"
           v_comment = "start "+v_call
           @schedulerun.comment = v_comment
           @schedulerun.save
@@ -365,7 +367,8 @@ v_user = v_user.gsub("\n","")
           # exit in python script after "print" return value, loop thru to get the last line
 # problem running in dev -- need to be admin-- make file, then test rest
 
-          v_return =  `python #{v_call}`
+          #v_return =  `python #{v_call}`
+          v_return =  `#{v_call}`
 
           v_last_return_value = ""
 

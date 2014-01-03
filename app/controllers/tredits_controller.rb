@@ -96,7 +96,7 @@ class TreditsController < ApplicationController
 
 
     respond_to do |format|
-      format.html # index.html.erb
+      format.html {@tredits_search = Kaminari.paginate_array(@tredits_search).page(params[:page]).per(100)} # index.html.erb
       format.xls 
       #format.json { render json: @trfiles }
     end

@@ -24,6 +24,13 @@ class TrfilesController < ApplicationController
               end
               @tredit_action.value = v_value
               @tredit_action.save
+       #       if @tredit_action.updated_at > @trfile.updated_at or @tredit.updated_at > @trfile.updated_at
+       #              @trfile_updated_at = @tredit_action.updated_at
+       #              if @tredit.updated_at > @trfile.updated_at
+       #                 @trfile_updated_at = @tredit.updated_at
+       #             end
+       #             @trfile.save
+       #       end
              end
         end
     end
@@ -41,10 +48,11 @@ class TrfilesController < ApplicationController
   # make trfile if no trfile_id, also make tredit, and tredit_actions
   v_comment = ""
    @trfile = nil
+   v_display_form = "Y"
    if !params[:trfile_action].nil? and params[:trfile_action] =="create"
      v_subjectid_v = params[:subjectid]
 
-     v_trfile = Trfile.where("subjectid in (?)",v_subjectid_v)
+     v_trfile = Trfile.where("subjectid in (?)",v_subjectid_v).where("trtype_id in (?)",params[:id])
 
      if !(v_trfile[0]).nil? 
         v_comment = v_comment + " There was already a file for "+v_subjectid_v+". This is the most recent edit."
@@ -60,10 +68,12 @@ class TrfilesController < ApplicationController
 
         if v_sp_id.nil?
             v_comment = v_comment+" The subjectid "+v_subjectid_v+" was not mapped to a scan procedure. "
+            v_display_form = "N"
         end
         v_enrollment_id = v_shared.get_enrollment_id_from_subjectid_v(v_subjectid_v)
         if v_enrollment_id.nil?
             v_comment = v_comment+" The subjectid "+v_subjectid_v+" was not mapped to an enrollment. " 
+            v_display_form = "N"
         end
         if !v_sp_id.nil? and !v_enrollment_id.nil?
            @trfile = Trfile.new
@@ -72,12 +82,12 @@ class TrfilesController < ApplicationController
            @trfile.scan_procedure_id = v_sp_id
            @trfile.trtype_id = params[:id]
            @trfile.save
-          end 
+        else
+          v_display_form = "N"
+        end 
       end
      # output v_comment
    end # end of create
-
-
 
    if !params[:trfile_action].nil? and ( params[:trfile_action] =="create" or ( params[:trfile_action] == "add_edit" and !params[:trfile_id].nil? ) )
 
@@ -123,6 +133,9 @@ class TrfilesController < ApplicationController
         end
 
   end
+  if v_display_form  == "N"
+   # not get anything
+  else
     @tredit_prev = nil
     @tredit_next = nil
     tredits = Tredit.where("tredits.trfile_id in (?)", @tredit.trfile_id).order(:id)
@@ -134,6 +147,7 @@ class TrfilesController < ApplicationController
          @tredit_next = tr
       end
     end
+  
 
     # get all the scan procedures linked to vgroup
     @trtype = Trtype.find(@trfile.trtype_id)
@@ -148,12 +162,17 @@ class TrfilesController < ApplicationController
                     @trfile.scan_procedure_id ,@trfile.enrollment_id, @trtype.series_description_type_id)
 
       end
+    end
   # get specified edit , edit_action in the form
     if !v_comment.blank?
      flash[:error] = v_comment
     end
     respond_to do |format|
-      format.html # index.html.erb
+      if v_display_form  == "N"
+         format.html { redirect_to( '/trtype_home/'+params[:id], :notice => ' ' )}
+      else
+        format.html # index.html.erb
+      end
       #format.json { render json: @trfiles }
     end
   end
