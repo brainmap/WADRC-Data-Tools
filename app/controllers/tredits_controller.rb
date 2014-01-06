@@ -4,7 +4,7 @@ class TreditsController < ApplicationController
   def tredit_home
     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
    @tractiontypes = Tractiontype.where("trtype_id in (?)",params[:trtype_id]).where("tractiontypes.display_order is not null").order(:display_order) 
-
+   @tractiontypes_search = Tractiontype.where("trtype_id in (?)",params[:trtype_id]).where("tractiontypes.display_search_flag = 'Y' ").order(:display_order)
     # base columns
     @export_file_title =Trtype.find(params[:trtype_id]).description+" file edits"
     @column_headers_display = ['Edit','File Completed','Last Update','Subjectid','Scan Procedure','User']
@@ -19,7 +19,22 @@ class TreditsController < ApplicationController
    @trfiles = Trfile.where("trtype_id ="+params[:trtype_id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_array)
    @conditions = ["scan_procedures.id = trfiles.scan_procedure_id ","trfiles.scan_procedure_id in ("+scan_procedure_array.join(',')+")"]
   if !params[:tr_search].nil?
-      @trfiles_search = Trfile.where("trtype_id ="+params[:trtype_id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_array).where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
+       @trfiles_search = Trfile.where("trtype_id ="+params[:trtype_id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_array).where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
+
+       if !@tractiontypes_search.nil? and !params[:tr_search][:tractiontype_id].nil?
+          @tractiontypes_search.each do |act|
+             if !params[:tr_search][:tractiontype_id][(act.id).to_s].nil? and params[:tr_search][:tractiontype_id][(act.id).to_s] > ""
+                @trfiles_search = @trfiles_search.where("trfiles.id in (select tredits.trfile_id from tredits, tredit_actions where
+                                                                      tredits.id = tredit_actions.tredit_id and tredit_actions.tractiontype_id in (?)
+                                                                       and tredit_actions.value in (?) )",act.id, params[:tr_search][:tractiontype_id][(act.id).to_s])
+                @conditions.push(" trfiles.id in (select tredits.trfile_id from tredits, tredit_actions where
+                                                                      tredits.id = tredit_actions.tredit_id and tredit_actions.tractiontype_id in ("+(act.id).to_s+")
+                                                                       and tredit_actions.value in ("+params[:tr_search][:tractiontype_id][(act.id).to_s]+"))")
+                   
+             end
+          end
+        end
+
         if !params[:tr_search][:trfile_id].nil? and params[:tr_search][:trfile_id] > ''
           @trfiles_search = @trfiles_search.where("id in (?)",params[:tr_search][:trfile_id])
           @conditions.push(" trfiles.id in ("+params[:tr_search][:trfile_id]+") ")
@@ -42,6 +57,8 @@ class TreditsController < ApplicationController
           @trfiles_search = @trfiles_search.where("file_completed_flag in (?)",params[:tr_search][:file_completed_flag])
           @conditions.push(" trfiles.file_completed_flag in('"+params[:tr_search][:file_completed_flag]+"') ")
         end
+
+
     else
       @trfiles_search = Trfile.where("trtype_id ="+params[:trtype_id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) ").where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
       @conditions.push(" trfiles.trtype_id ="+params[:trtype_id]+" ")
@@ -64,6 +81,17 @@ class TreditsController < ApplicationController
               @tredits_search = []
               @trfiles_search.each do |trfile|
                       @tredits = Tredit.where("trfile_id in (?)",trfile[0]).order(:updated_at).reverse_order
+                      if !@tractiontypes_search.nil? and !params[:tr_search][:tractiontype_id].nil?
+                        @tractiontypes_search.each do |act|
+                            if !params[:tr_search][:tractiontype_id][(act.id).to_s].nil? and params[:tr_search][:tractiontype_id][(act.id).to_s] > ""
+                               @tredits = @tredits.where("tredits.id in (select tredit_actions.tredit_id from  tredit_actions where
+                                                                       tredit_actions.tractiontype_id in (?)
+                                                                       and tredit_actions.value in (?) )",act.id, params[:tr_search][:tractiontype_id][(act.id).to_s])
+                   
+                            end
+                        end
+                      end
+
                       @tredits.each do |tredit|
                         @tredit_row  = []
                         @tredit_row.push(tredit.id)
