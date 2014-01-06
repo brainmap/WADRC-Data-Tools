@@ -1,10 +1,12 @@
 class TrfilesController < ApplicationController
 
   def trfile_edit_action
+    scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
     # get params -- tredit_id ==> trfile_id, trype_id 
     if !params[:tredit_id].nil?
         @tredit = Tredit.find(params[:tredit_id])
-        @trfile = Trfile.find(@tredit.trfile_id)
+        @trfiles = Trfile.where("trfiles.scan_procedure_id in (?)",scan_procedure_array).where("trfiles.id in (?)",@tredit.trfile_id)
+       @trfile = @trfiles[0]
         @trfile.image_dataset_id  = params[:trfile_edit_action][:image_dataset_id]
         @trfile.file_completed_flag  = params[:trfile_edit_action][:file_completed_flag]
         @trfile.qc_value  = params[:trfile_edit_action][:qc_value]
@@ -47,6 +49,7 @@ class TrfilesController < ApplicationController
   end
 
   def trfile_home
+    scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
   # make trfile if no trfile_id, also make tredit, and tredit_actions
   v_comment = ""
    @trfile = nil
@@ -163,6 +166,9 @@ class TrfilesController < ApplicationController
   
 
     # get all the scan procedures linked to vgroup
+
+    @trfiles = Trfile.where("trfiles.scan_procedure_id in (?)",scan_procedure_array).where("trfiles.id in (?)",@trfile.id)
+    @trfile = @trfiles[0]
     @trtype = Trtype.find(@trfile.trtype_id)
     @vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships where enrollment_id in (?) )",@trfile.enrollment_id).where("vgroups.id in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))",@trfile.scan_procedure_id)
        if !(@trfile.scan_procedure_id).nil? and !(@trfile.enrollment_id).nil? 

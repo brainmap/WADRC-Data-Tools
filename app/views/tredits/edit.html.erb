@@ -1,6 +1,8 @@
+<% if current_user.role == 'Admin_High'%>
 <h1>Editing tredit</h1>
 
 <%= render 'form' %>
 
 <%= link_to 'Show', @tredit %> |
 <%= link_to 'Back', tredits_path %>
+<%end%>

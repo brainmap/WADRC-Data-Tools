@@ -21,6 +21,7 @@
   <%= @tredit.status_flag %>
 </p>
 
-
+<% if current_user.role == 'Admin_High'%>
 <%= link_to 'Edit', edit_tredit_path(@tredit) %> |
 <%= link_to 'Back', tredits_path %>
+<%end%>

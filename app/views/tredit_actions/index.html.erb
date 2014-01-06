@@ -17,9 +17,11 @@
     <td><%= tredit_action.tractiontype_id %></td>
     <td><%= tredit_action.value %></td>
     <td><%= tredit_action.status_flag %></td>
+    <% if current_user.role == 'Admin_High'%>
     <td><%= link_to 'Show', tredit_action %></td>
     <td><%= link_to 'Edit', edit_tredit_action_path(tredit_action) %></td>
     <td><%= link_to 'Destroy', tredit_action, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+    <%end%>
   </tr>
 <% end %>
 </table>

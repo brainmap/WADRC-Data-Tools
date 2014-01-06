@@ -3,14 +3,15 @@ class TrtypesController < ApplicationController
 
 
   def trtype_home
+    scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
     @trtypes = Trtype.all
     connection = ActiveRecord::Base.connection();
     if !params[:id].nil?
-         @trfiles = Trfile.where("trtype_id ="+params[:id])
-         @conditions = ["scan_procedures.id = trfiles.scan_procedure_id "]
+         @trfiles = Trfile.where("trtype_id ="+params[:id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_array)
+         @conditions = ["scan_procedures.id = trfiles.scan_procedure_id ","trfiles.scan_procedure_id in ("+scan_procedure_array.join(',')+")"]
          if !params[:tr_search].nil?
            
-            @trfiles_search = Trfile.where("trtype_id ="+params[:id]).order("updated_at desc")
+            @trfiles_search = Trfile.where("trtype_id ="+params[:id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
             if !params[:tr_search][:trfile_id].nil? and params[:tr_search][:trfile_id] > ''
                @trfiles_search = @trfiles_search.where("id in (?)",params[:tr_search][:trfile_id])
                @conditions.push(" trfiles.id in ("+params[:tr_search][:trfile_id]+") ")
@@ -39,7 +40,7 @@ class TrtypesController < ApplicationController
                @conditions.push(" trfiles.qc_value in('"+params[:tr_search][:qc_value]+"') ")
             end
          else
-         @trfiles_search = Trfile.where("trtype_id ="+params[:id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 60 DAY) ").order("updated_at desc")
+         @trfiles_search = Trfile.where("trtype_id ="+params[:id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 60 DAY) ").where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
         #  @trfiles_search = Trfile.where("trtype_id ="+params[:id]).order("updated_at desc")
           @conditions.push(" trfiles.trtype_id ="+params[:id]+" ")
           @conditions.push(" trfiles.updated_at >= DATE_SUB(NOW(), INTERVAL 60 DAY)")  # change to pageination
@@ -86,7 +87,11 @@ class TrtypesController < ApplicationController
     
     respond_to do |format|
       format.xls 
-      format.html {@trfiles_search = Kaminari.paginate_array(@trfiles_search).page(params[:page]).per(100)}# index.html.erb
+      if !@trfiles_search.nil?
+         format.html {@trfiles_search = Kaminari.paginate_array(@trfiles_search).page(params[:page]).per(100)}# index.html.erb
+      else
+          format.html
+      end
       #format.json { render json: @trtypes }
     end
   end

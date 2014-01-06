@@ -10,6 +10,9 @@
  | <small><%= link_to "Next edit","/trfile_home/"+(@trfile.trtype_id).to_s+"?trfile_action=get_edit&trfile_id="+(@trfile.id).to_s+"&tredit_id="+(@tredit_next.id).to_s ,{:style=>'color:#000000;'}%></small>
  <%end%>
 <br><br><br>
+
+
+
 <%= form_for('trfile_edit_action', :url => {:action => "trfile_edit_action"}) do |f| %>
 <%= hidden_field_tag 'tredit_id',@tredit.id %>
 
@@ -134,12 +137,21 @@
          <%   elsif act.form_display_field_type == "textarea_3x60" %>
 <%= trfile_draw_text_area(act.id,"60x7", act.form_default_value,@tredit_actions[0].value,act.form_required_y_n_1) %>
 
-          <%  end
-
-
-        %>
+          <%  end  %>
+        <% if !(act.triggers_1).nil?  and !(@tredit_actions[0]).nil? and !(@tredit_actions[0].value).nil? # expect structure split "|" array[0]= type of trigger, rest array elements split "=", value/command <enum> pairs
+              v_triggers_array = (act.triggers_1).split("|") 
+              if v_triggers_array[0] == "display_command"  
+                v_triggers_array.delete_at(0)
+                val_array = @tredit_actions[0].value.split(',')
+                v_triggers_array.each do |val_cmd|
+                  v_val_cmd_array = val_cmd.split("=")
+                  if val_array.include?(v_val_cmd_array[0]) %>
+                    <br><%= v_val_cmd_array[1].gsub("<enum>",@trfile.subjectid) %>
+            <%    end
+                end  
+              end
+           end %>
     </td>
-   
        <% v_cnt = v_cnt + act.form_col_span
           if v_cnt > 2
           	v_cnt = 0 %>

@@ -101,7 +101,9 @@ v_value_type =  [["dropdown","dropdown"],["dropdown_multiple","dropdown_multiple
   </div>
   <div class="field">
     <%= f.label :triggers_1 %><br />
-    <%= f.text_field :triggers_1 %>
+    <%= f.text_area :triggers_1 %><br>
+    To display a command based on value, and include subjectid_v#
+    display_command|value_1=command_1 <enum>|value_2=command_2 <enum>|.....
   </div>
   <div class="actions">
     <%= f.submit %>

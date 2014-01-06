@@ -33,9 +33,11 @@
       <td><%= trfile.file_completed_flag %></td>
     <td><%= trfile.qc_value %></td>
     <td><%= trfile.status_flag %></td>
+    <% if current_user.role == 'Admin_High'%>
     <td><%= link_to 'Show', trfile %></td>
     <td><%= link_to 'Edit', edit_trfile_path(trfile) %></td>
     <td><%= link_to 'Destroy', trfile, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+    <%end%>
   </tr>
 <% end %>
 </table>

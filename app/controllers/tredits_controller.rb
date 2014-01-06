@@ -2,6 +2,7 @@ class TreditsController < ApplicationController
 
 
   def tredit_home
+    scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
    @tractiontypes = Tractiontype.where("trtype_id in (?)",params[:trtype_id]).where("tractiontypes.display_order is not null").order(:display_order) 
 
     # base columns
@@ -15,10 +16,10 @@ class TreditsController < ApplicationController
     end
     @column_number = @column_headers.size
     
-   @trfiles = Trfile.where("trtype_id ="+params[:trtype_id])
-   @conditions = ["scan_procedures.id = trfiles.scan_procedure_id "]
+   @trfiles = Trfile.where("trtype_id ="+params[:trtype_id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_array)
+   @conditions = ["scan_procedures.id = trfiles.scan_procedure_id ","trfiles.scan_procedure_id in ("+scan_procedure_array.join(',')+")"]
   if !params[:tr_search].nil?
-      @trfiles_search = Trfile.where("trtype_id ="+params[:trtype_id]).order("updated_at desc")
+      @trfiles_search = Trfile.where("trtype_id ="+params[:trtype_id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_array).where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
         if !params[:tr_search][:trfile_id].nil? and params[:tr_search][:trfile_id] > ''
           @trfiles_search = @trfiles_search.where("id in (?)",params[:tr_search][:trfile_id])
           @conditions.push(" trfiles.id in ("+params[:tr_search][:trfile_id]+") ")
@@ -42,7 +43,7 @@ class TreditsController < ApplicationController
           @conditions.push(" trfiles.file_completed_flag in('"+params[:tr_search][:file_completed_flag]+"') ")
         end
     else
-      @trfiles_search = Trfile.where("trtype_id ="+params[:trtype_id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) ").order("updated_at desc")
+      @trfiles_search = Trfile.where("trtype_id ="+params[:trtype_id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) ").where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
       @conditions.push(" trfiles.trtype_id ="+params[:trtype_id]+" ")
       @conditions.push(" trfiles.updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) ")  # change to pageination
           

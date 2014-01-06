@@ -17,9 +17,11 @@
     <td><%= tredit.user_id %></td>
     <td><%= tredit.edit_completed_flag %></td>
     <td><%= tredit.status_flag %></td>
+    <% if current_user.role == 'Admin_High'%>
     <td><%= link_to 'Show', tredit %></td>
     <td><%= link_to 'Edit', edit_tredit_path(tredit) %></td>
     <td><%= link_to 'Destroy', tredit, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+    <%end%>
   </tr>
 <% end %>
 </table>
