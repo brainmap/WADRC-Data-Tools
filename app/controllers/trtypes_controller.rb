@@ -7,11 +7,27 @@ class TrtypesController < ApplicationController
     @trtypes = Trtype.all
     connection = ActiveRecord::Base.connection();
     if !params[:id].nil?
+         @tractiontypes_search = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.display_search_flag = 'Y' ").order(:display_order)
+
          @trfiles = Trfile.where("trtype_id ="+params[:id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_array)
+
          @conditions = ["scan_procedures.id = trfiles.scan_procedure_id ","trfiles.scan_procedure_id in ("+scan_procedure_array.join(',')+")"]
          if !params[:tr_search].nil?
            
             @trfiles_search = Trfile.where("trtype_id ="+params[:id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
+            if !@tractiontypes_search.nil? and !params[:tr_search][:tractiontype_id].nil?
+                @tractiontypes_search.each do |act|
+                  if !params[:tr_search][:tractiontype_id][(act.id).to_s].nil? and params[:tr_search][:tractiontype_id][(act.id).to_s] > ""
+                    @trfiles_search = @trfiles_search.where("trfiles.id in (select tredits.trfile_id from tredits, tredit_actions where
+                                                                      tredits.id = tredit_actions.tredit_id and tredit_actions.tractiontype_id in (?)
+                                                                       and tredit_actions.value in (?) )",act.id, params[:tr_search][:tractiontype_id][(act.id).to_s])
+                    @conditions.push(" trfiles.id in (select tredits.trfile_id from tredits, tredit_actions where
+                                                                      tredits.id = tredit_actions.tredit_id and tredit_actions.tractiontype_id in ("+(act.id).to_s+")
+                                                                       and tredit_actions.value in ("+params[:tr_search][:tractiontype_id][(act.id).to_s]+"))")
+                   
+                  end
+                end
+            end
             if !params[:tr_search][:trfile_id].nil? and params[:tr_search][:trfile_id] > ''
                @trfiles_search = @trfiles_search.where("id in (?)",params[:tr_search][:trfile_id])
                @conditions.push(" trfiles.id in ("+params[:tr_search][:trfile_id]+") ")
@@ -51,6 +67,7 @@ class TrtypesController < ApplicationController
          @column_headers = ['Completed','Last Update','Subjectid','Scan Procedure','QC']
 
          
+         @tractiontypes_search = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.display_search_flag = 'Y' ").order(:display_order)
          @tractiontypes = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.display_in_summary = 'Y' ").order(:display_order)
          @tractiontypes_peek = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.summary_peek_flag = 'Y' ").order(:display_order)
 

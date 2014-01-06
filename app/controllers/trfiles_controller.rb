@@ -1,7 +1,7 @@
 class TrfilesController < ApplicationController
 
   def trfile_edit_action
-    scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+    scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     # get params -- tredit_id ==> trfile_id, trype_id 
     if !params[:tredit_id].nil?
         @tredit = Tredit.find(params[:tredit_id])
@@ -50,6 +50,7 @@ class TrfilesController < ApplicationController
 
   def trfile_home
     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+    scan_procedure_edit_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
   # make trfile if no trfile_id, also make tredit, and tredit_actions
   v_comment = ""
    @trfile = nil
@@ -58,7 +59,7 @@ class TrfilesController < ApplicationController
    if !params[:trfile_action].nil? and params[:trfile_action] =="create"
      v_subjectid_v = params[:subjectid]
 
-     v_trfile = Trfile.where("subjectid in (?)",v_subjectid_v).where("trtype_id in (?)",params[:id])
+     v_trfile = Trfile.where("subjectid in (?)",v_subjectid_v).where("trtype_id in (?)",params[:id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_edit_array)
 
      if !(v_trfile[0]).nil? 
         v_comment = v_comment + " There was already a file for "+v_subjectid_v+". This is the most recent edit."
@@ -98,7 +99,8 @@ class TrfilesController < ApplicationController
    if !params[:trfile_action].nil? and ( params[:trfile_action] =="create" or ( params[:trfile_action] == "add_edit" and !params[:trfile_id].nil? ) )
 
          if params[:trfile_action] =="add_edit" 
-             @trfile = Trfile.find(params[:trfile_id])
+             @trfiles = Trfile.where("trfiles.id in (?)",params[:trfile_id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_edit_array)
+             @trfile = @trfiles[0]
          end
          if !@trfile.nil?
             @tredit = Tredit.new
