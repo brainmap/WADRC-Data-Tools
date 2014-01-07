@@ -56,7 +56,7 @@
         <% # make the question types
            if act.form_display_field_type == "checkbox_in_line" 
                val_array =[]
-             if !@tredit_actions[0].value.blank?
+             if !@tredit_actions[0].nil? and !@tredit_actions[0].value.blank?
                       val_array = @tredit_actions[0].value.split(',')
              end %>
                    <% if act.ref_table_a_1 == "lookup_refs" 

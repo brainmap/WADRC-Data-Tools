@@ -56,10 +56,10 @@ class TrtypesController < ApplicationController
                @conditions.push(" trfiles.qc_value in('"+params[:tr_search][:qc_value]+"') ")
             end
          else
-         @trfiles_search = Trfile.where("trtype_id ="+params[:id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 60 DAY) ").where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
+         @trfiles_search = Trfile.where("trtype_id ="+params[:id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 120 DAY) ").where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
         #  @trfiles_search = Trfile.where("trtype_id ="+params[:id]).order("updated_at desc")
           @conditions.push(" trfiles.trtype_id ="+params[:id]+" ")
-          @conditions.push(" trfiles.updated_at >= DATE_SUB(NOW(), INTERVAL 60 DAY)")  # change to pageination
+          @conditions.push(" trfiles.updated_at >= DATE_SUB(NOW(), INTERVAL 120 DAY)")  # change to pageination
           
          end
          @export_file_title =Trtype.find(params[:id]).description+" file edits"
