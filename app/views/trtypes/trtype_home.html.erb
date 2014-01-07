@@ -83,6 +83,7 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
   </td></tr></tfoot>
 		<% connection = ActiveRecord::Base.connection();
      @trfiles_search.each do |trf| 
+      v_peek = trf.qc_notes
             @tredits = Tredit.where("trfile_id = "+(trf.id).to_s).order("tredits.id asc")
             @tredit = @tredits[0]
 			 %>
@@ -93,7 +94,7 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
         <%= link_to "Last edit","/trfile_home/"+params[:id]+"?trfile_action=get_edit&trfile_id="+(trf.id).to_s ,{:style=>'color:#000000;'}%>
        <%end%></td>
         <td><%= ScanProcedure.find(trf.scan_procedure_id).codename %> </td> 
-        <td><%= trf.qc_value %> </td> 
+        <td><%= trf.qc_value %> <small><small><%= popup_note('peek', key_val_table('path_popup', { :qc_notes => v_peek })) unless v_peek.blank? %></small></small> </td> 
         <%   v_cnt = 0
              v_edit_cnt = 0
             @tredits.each do |tredit| 

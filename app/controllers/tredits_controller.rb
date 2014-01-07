@@ -81,7 +81,7 @@ class TreditsController < ApplicationController
               @tredits_search = []
               @trfiles_search.each do |trfile|
                       @tredits = Tredit.where("trfile_id in (?)",trfile[0]).order(:updated_at).reverse_order
-                      if !@tractiontypes_search.nil? and !params[:tr_search][:tractiontype_id].nil?
+                      if !@tractiontypes_search.nil? and !params[:tr_search].nil? and !params[:tr_search][:tractiontype_id].nil?
                         @tractiontypes_search.each do |act|
                             if !params[:tr_search][:tractiontype_id][(act.id).to_s].nil? and params[:tr_search][:tractiontype_id][(act.id).to_s] > ""
                                @tredits = @tredits.where("tredits.id in (select tredit_actions.tredit_id from  tredit_actions where
