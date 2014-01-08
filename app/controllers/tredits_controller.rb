@@ -42,7 +42,11 @@ class TreditsController < ApplicationController
         if !params[:tr_search][:scan_procedure_id].nil? and params[:tr_search][:scan_procedure_id] > ''
           @trfiles_search = @trfiles_search.where("scan_procedure_id in
                         (select scan_procedure_id from scan_procedures_vgroups where 
-                                              vgroup_id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?)))",params[:tr_search][:scan_procedure_id])
+                                              vgroup_id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?)))",
+                                             params[:tr_search][:scan_procedure_id])
+          # this retrieves a few extra -- e.g. mets and pdt 
+          
+
           @conditions.push("trfiles.scan_procedure_id in
                     (select scan_procedure_id from scan_procedures_vgroups where 
                                               vgroup_id in 

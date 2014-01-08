@@ -91,8 +91,8 @@ class TrtypesController < ApplicationController
               end
             else
               @html_request ="N"
-              @column_headers = ['Completed','Last Update','Subjectid','Scan Procedure','QC']
-              @db_columns   =["trfiles.file_completed_flag","trfiles.updated_at","trfiles.subjectid","scan_procedures.codename","trfiles.qc_value"]
+              @column_headers = ['Completed','Last Update','Subjectid','Scan Procedure','QC','QC Notes']
+              @db_columns   =["trfiles.file_completed_flag","trfiles.updated_at","trfiles.subjectid","scan_procedures.codename","trfiles.qc_value","trfiles.qc_notes"]
               sql = "select "+@db_columns.join(",")+" from scan_procedures, trfiles where "+@conditions.join(' and ') 
               connection = ActiveRecord::Base.connection();
               @trfiles_search  =  connection.execute(sql)

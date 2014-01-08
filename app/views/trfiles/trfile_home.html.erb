@@ -27,6 +27,10 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <small><b>Active File:</b></small> <%= f.select :status_flag, v_y_n, {:prompt => 'Active?',:selected => @trfile.status_flag}  %>
   </td></tr>
+  <tr><td align="left" colspan="3"> 
+ <small><b>QC notes:</b></small>  <br>
+ <%= f.text_area :qc_notes ,:size => '80X4',:value => @trfile.qc_notes%>
+  </td></tr>
   <tr><td align="left" colspan="3"><small><b>Image Dataset:</b></small>
        <% if !(@trfile.trtype_id).nil? and !Trtype.find(@trfile.trtype_id).series_description_type_id.nil? and   !@trfile.enrollment_id.nil? and  !@trfile.scan_procedure_id.nil? %>
      <%= f.select(:image_dataset_id, @ids.collect {|p| [ p.series_description+" - "+p.path, p.id ] },  { :include_blank => "Select a scan series",:selected => @trfile.image_dataset_id }) %>

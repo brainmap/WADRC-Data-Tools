@@ -87,7 +87,7 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
             @tredits = Tredit.where("trfile_id = "+(trf.id).to_s).order("tredits.id asc")
             @tredit = @tredits[0]
 			 %>
-		<tr><td><%= trf.file_completed_flag %> </td> 
+		<tr><% if trf.file_completed_flag  == 'Y' %><%= show_bool('yes' ) %><%else%><%= show_bool('no' ) %><%end%>
         <td><%= (trf.updated_at).strftime('%Y-%m-%d %H:%M'  ) %></td>
         <td><%= trf.subjectid %></td><td nowrap><small><small><%= link_to "Add edit","/trfile_home/"+params[:id]+"?trfile_action=add_edit&trfile_id="+trf.id.to_s,{:style=>'color:#000000;'} %>
         <br>
