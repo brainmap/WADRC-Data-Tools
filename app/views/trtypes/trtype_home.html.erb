@@ -71,7 +71,7 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
 </table><br>
  <% if !@trfiles_search.nil? %>
   <table  class="tabular" >
-  <caption><%= pluralize(@trfiles_search.size, 'File') %></caption>
+  <caption><%= pluralize(@v_trfiles_search_size, 'File') %></caption>
   <thead>
     <tr><% @column_headers_display.each do |header| %>
        <th><%= header %></th>
@@ -89,9 +89,10 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
 			 %>
 		<tr><td><%= trf.file_completed_flag %> </td> 
         <td><%= (trf.updated_at).strftime('%Y-%m-%d %H:%M'  ) %></td>
-        <td><%= trf.subjectid %></td><td><%= link_to "Add edit","/trfile_home/"+params[:id]+"?trfile_action=add_edit&trfile_id="+trf.id.to_s,{:style=>'color:#000000;'} %></td><td>
+        <td><%= trf.subjectid %></td><td nowrap><small><small><%= link_to "Add edit","/trfile_home/"+params[:id]+"?trfile_action=add_edit&trfile_id="+trf.id.to_s,{:style=>'color:#000000;'} %>
+        <br>
         <% if !@tredit.nil? %>
-        <%= link_to "Last edit","/trfile_home/"+params[:id]+"?trfile_action=get_edit&trfile_id="+(trf.id).to_s ,{:style=>'color:#000000;'}%>
+        <%= link_to "Last edit","/trfile_home/"+params[:id]+"?trfile_action=get_edit&trfile_id="+(trf.id).to_s ,{:style=>'color:#000000;'}%></small></small>
        <%end%></td>
         <td><%= ScanProcedure.find(trf.scan_procedure_id).codename %> </td> 
         <td><%= trf.qc_value %> <small><small><%= popup_note('peek', key_val_table('path_popup', { :qc_notes => v_peek })) unless v_peek.blank? %></small></small> </td> 

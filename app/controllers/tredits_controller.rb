@@ -60,9 +60,10 @@ class TreditsController < ApplicationController
 
 
     else
-      @trfiles_search = Trfile.where("trtype_id ="+params[:trtype_id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) ").where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
+      # @trfiles_search = Trfile.where("trtype_id ="+params[:trtype_id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) ").where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
+      @trfiles_search = Trfile.where("trtype_id ="+params[:trtype_id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
       @conditions.push(" trfiles.trtype_id ="+params[:trtype_id]+" ")
-      @conditions.push(" trfiles.updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) ")  # change to pageination
+      #@conditions.push(" trfiles.updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) ")  # change to pageination
           
     end
         @html_request ="Y"
@@ -125,6 +126,7 @@ class TreditsController < ApplicationController
 
 
     respond_to do |format|
+      @v_tredits_search_size = @tredits_search.size
       format.html {@tredits_search = Kaminari.paginate_array(@tredits_search).page(params[:page]).per(100)} # index.html.erb
       format.xls 
       #format.json { render json: @trfiles }

@@ -56,10 +56,10 @@ class TrtypesController < ApplicationController
                @conditions.push(" trfiles.qc_value in('"+params[:tr_search][:qc_value]+"') ")
             end
          else
-         @trfiles_search = Trfile.where("trtype_id ="+params[:id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 120 DAY) ").where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
-        #  @trfiles_search = Trfile.where("trtype_id ="+params[:id]).order("updated_at desc")
+        # @trfiles_search = Trfile.where("trtype_id ="+params[:id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 120 DAY) ").where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
+         @trfiles_search = Trfile.where("trtype_id ="+params[:id]).order("updated_at desc")
           @conditions.push(" trfiles.trtype_id ="+params[:id]+" ")
-          @conditions.push(" trfiles.updated_at >= DATE_SUB(NOW(), INTERVAL 120 DAY)")  # change to pageination
+          #@conditions.push(" trfiles.updated_at >= DATE_SUB(NOW(), INTERVAL 120 DAY)")  # change to pageination
           
          end
          @export_file_title =Trtype.find(params[:id]).description+" file edits"
@@ -82,7 +82,7 @@ class TrtypesController < ApplicationController
          request_format = request.formats.to_s
          case  request_format
           when "[text/html]","text/html" then
-              @column_headers_display = ['Completed','Last Update','Subjectid','Add edit','Last edit','Scan Procedure','QC']
+              @column_headers_display = ['Completed','Last Update','Subjectid','Edit links','Scan Procedure','QC']
               for counter in  1..v_cnt_limit
                 @column_headers_display.push('Edit #'+counter.to_s)
                  @tractiontypes.each do |header|
@@ -105,6 +105,7 @@ class TrtypesController < ApplicationController
     respond_to do |format|
       format.xls 
       if !@trfiles_search.nil?
+        @v_trfiles_search_size = @trfiles_search.size
          format.html {@trfiles_search = Kaminari.paginate_array(@trfiles_search).page(params[:page]).per(100)}# index.html.erb
       else
           format.html

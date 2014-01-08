@@ -41,7 +41,7 @@
 
 <% if !@tredits_search.nil? %>
   <table  class="tabular" >
-  <caption><%= pluralize(@tredits_search.size, 'File') %></caption>
+  <caption><%= pluralize(@v_tredits_search_size, 'File') %></caption>
   <thead>
   	<tr><% @column_headers_display.each do |col| %>
          <th><%= col %></th>
