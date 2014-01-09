@@ -76,6 +76,10 @@ If the enumber is not already associated with a participant, add the enumber bel
   <%= f.label :fs_yn %><br />
   <%= select :vgroup, :fs_flag, ["Y", "N"] %>
 </div><br>
+<div class="field">
+  <%= f.label :fs_good2go_yn %><br />
+  <%= select :vgroup, :fs_good2go_flag, ["Y", "N"] %>
+</div><br>
 
   <div class="field">
     <%= f.label :note %><br />

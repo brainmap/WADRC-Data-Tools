@@ -86,6 +86,8 @@ edit_count = edit_count -1
 				<b>Compile Folder:</b>				  <%= select :vgroup, :compile_folder, ["no", "yes", "n/a"] %>
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<B>FS Y/N: </B><%= @vgroup.fs_flag%>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<B>FS good2go Y/N: </B><%= @vgroup.fs_good2go_flag%>
 			
 			<% end %>
 		</td></tr></table>

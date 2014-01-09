@@ -331,6 +331,10 @@ v_user = v_user.gsub("\n","")
      v_shared = Shared.new
      v_shared.run_fs_Y_N()
 
+  elsif v_value_1 == "fs_good2go_Y_N"  
+     v_shared = Shared.new
+     v_shared.run_fs_good2go_Y_N()
+
    elsif v_value_1 == "fs_aseg_aparc"  #   rails runner app/cron_interface.rb fs_aseg_aparc
       
       @schedule = Schedule.where("name in ('fs_aseg_aparc')").first

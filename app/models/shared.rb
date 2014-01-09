@@ -156,7 +156,6 @@ class Shared  < ActionController::Base
         end    
     return v_enrollment_id
   end
-
   
   def get_sp_id_from_subjectid_v(p_subjectid_v)
     v_subjectid_chop = p_subjectid_v.gsub(/_v/,"").delete("0-9")
@@ -189,6 +188,39 @@ class Shared  < ActionController::Base
     end
     
     return nil
+  end
+
+
+  def get_sp_visit_num_array
+      connection = ActiveRecord::Base.connection();
+      v_sp_visit1_array = []
+      v_sp_visit2_array = []
+      v_sp_visit3_array = []
+      v_sp_visit4_array = []
+      sql = "select id from scan_procedures where codename like '%visit2'"        
+      results = connection.execute(sql)
+      results.each do |r|
+        v_sp_visit2_array.push(r[0])
+      end      
+      
+      sql = "select id from scan_procedures where codename like '%visit3'"        
+      results = connection.execute(sql)
+      results.each do |r|
+        v_sp_visit3_array.push(r[0])
+      end
+      
+      sql = "select id from scan_procedures where codename like '%visit4'"        
+      results = connection.execute(sql)
+      results.each do |r|
+        v_sp_visit4_array.push(r[0])
+      end
+      
+      sql = "select id from scan_procedures where codename not like '%visit2' and  codename  not like '%visit3' and  codename  not like '%visit4'"        
+      results = connection.execute(sql)
+      results.each do |r|
+        v_sp_visit1_array.push(r[0])
+      end      
+      return v_sp_visit1_array,v_sp_visit2_array,v_sp_visit3_array,v_sp_visit4_array
   end
   
   def get_user_email
@@ -3968,6 +4000,115 @@ puts "AAAAAA "+v_call
     
     
   end
+
+  def get_vgroups_from_enumber_sp(p_subjectid,p_sp_array,p_subjectid_base)
+             vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
+                         where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
+                         and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
+                        and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups,scan_procedures
+                      where scan_procedures_vgroups.scan_procedure_id in (?)
+                      and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
+                     and scan_procedures.subjectid_base in (?))", p_subjectid,p_sp_array,p_subjectid_base)                                                                               
+           
+     return vgroups
+  end
+
+  def run_fs_good2go_Y_N
+    v_base_path = Shared.get_base_path()
+     @schedule = Schedule.where("name in ('fs_good2go_Y_N')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting fs_good2go_Y_N"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+    begin   # catch all exception and put error in comment
+       v_fs_path = v_base_path+"/preprocessed/modalities/freesurfer/good2go/"
+      # ls the dirs and links
+      v_dir_skip =  ['QA', 'fsaverage', 'fsaverage_bkup20121114', '.', '..', 'lh.EC_average','rh.EC_average','qdec','surfer.log']
+      # 'tmp*'  --- just keep dir cleaner
+      # ??? 'pdt00020.long.pdt00020_base',      'pdt00020_base',       'pdt00020_v2.long.pdt00020_base', plq20018.R, plq20024.R
+      # _v2, _v3, _v4 --> visit2,3,4
+      connection = ActiveRecord::Base.connection();
+      v_sp_visit1_array = []
+      v_sp_visit2_array = []
+      v_sp_visit3_array = []
+      v_sp_visit4_array = []
+
+      (v_sp_visit1_array,v_sp_visit2_array,v_sp_visit3_array,v_sp_visit4_array)  = get_sp_visit_num_array()
+            
+      # check for enumber in enrollment, link to enrollment_vgroup_memberships, appointments, visits
+      # limit by _v2, _v3, _v4 in sp via scan_procedures_vgroups , scan_procedures like 'visit2, visit3, visit4
+      # works for when all the processed files in one directory
+      dir_list = Dir.entries(v_fs_path).select { |file| File.directory? File.join(v_fs_path, file)}
+      link_list = Dir.entries(v_fs_path).select { |file| File.symlink? File.join(v_fs_path, file)}
+      dir_list.concat(link_list)
+      v_cnt = 0
+      dir_list.each do |dirname|
+        if !v_dir_skip.include?(dirname) and !dirname.start_with?('tmp')
+          if dirname.include?('_v2')
+            dirname = dirname.gsub(/_v2/,'') # subjectid without the v#
+            v_dirname_chop = dirname.gsub(/[0123456789]/,'') # get start of subjectid
+            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit2_array,v_dirname_chop)                                                                      
+            vgroups.each do |v|
+              if v.fs_good2go_flag != "Y"
+                 v.fs_good2go_flag ="Y"
+                 v.save
+                 v_cnt = v_cnt + 1
+              end
+            end
+          elsif dirname.include?('_v3')
+            dirname = dirname.gsub(/_v3/,'')
+            v_dirname_chop = dirname.gsub(/[0123456789]/,'')
+            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit3_array,v_dirname_chop) 
+            vgroups.each do |v|
+              if v.fs_good2go_flag != "Y"
+                 v.fs_good2go_flag ="Y"
+                 v.save
+                  v_cnt = v_cnt + 1
+              end
+            end
+          elsif dirname.include?('_v4')
+            dirname = dirname.gsub(/_v4/,'')
+            v_dirname_chop = dirname.gsub(/[0123456789]/,'')
+            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit4_array,v_dirname_chop) 
+            vgroups.each do |v|
+              if v.fs_good2go_flag != "Y"
+                 v.fs_good2go_flag ="Y"
+                 v.save
+                  v_cnt = v_cnt + 1
+              end
+            end
+          else
+            v_dirname_chop = dirname.gsub(/[0123456789]/,'')
+            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit1_array,v_dirname_chop) 
+            vgroups.each do |v|
+              if v.fs_good2go_flag != "Y"
+                 v.fs_good2go_flag ="Y"
+                 v.save
+                  v_cnt = v_cnt + 1
+              end
+            end
+          end
+        end
+      end
+ 
+        @schedulerun.comment ="successful finish fs_good2go_Y_N ===set = Y "+v_cnt.to_s
+        @schedulerun.status_flag ="Y"
+        @schedulerun.save
+        @schedulerun.end_time = @schedulerun.updated_at      
+        @schedulerun.save
+      puts " fs_good2go flag set = Y "+v_cnt.to_s
+      rescue Exception => msg
+         v_error = msg.to_s
+         puts "ERROR !!!!!!!"
+         puts v_error
+          @schedulerun.comment =v_error[0..499]
+          @schedulerun.status_flag="E"
+          @schedulerun.save
+      end
+    
+  end
   
   
   def run_fs_Y_N
@@ -3991,30 +4132,7 @@ puts "AAAAAA "+v_call
       v_sp_visit2_array = []
       v_sp_visit3_array = []
       v_sp_visit4_array = []
-      sql = "select id from scan_procedures where codename like '%visit2'"        
-      results = connection.execute(sql)
-      results.each do |r|
-        v_sp_visit2_array.push(r[0])
-      end      
-      
-      sql = "select id from scan_procedures where codename like '%visit3'"        
-      results = connection.execute(sql)
-      results.each do |r|
-        v_sp_visit3_array.push(r[0])
-      end
-      
-      sql = "select id from scan_procedures where codename like '%visit4'"        
-      results = connection.execute(sql)
-      results.each do |r|
-        v_sp_visit4_array.push(r[0])
-      end
-      
-      sql = "select id from scan_procedures where codename not like '%visit2' and  codename  not like '%visit3' and  codename  not like '%visit4'"        
-      results = connection.execute(sql)
-      results.each do |r|
-        v_sp_visit1_array.push(r[0])
-      end      
-      
+      (v_sp_visit1_array,v_sp_visit2_array,v_sp_visit3_array,v_sp_visit4_array)  = get_sp_visit_num_array()
       
       
       # check for enumber in enrollment, link to enrollment_vgroup_memberships, appointments, visits
@@ -4026,15 +4144,9 @@ puts "AAAAAA "+v_call
       dir_list.each do |dirname|
         if !v_dir_skip.include?(dirname) and !dirname.start_with?('tmp')
           if dirname.include?('_v2')
-            dirname = dirname.gsub(/_v2/,'')
-            v_dirname_chop = dirname.gsub(/[0123456789]/,'')
-            vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
-                                                                     where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
-                                                            and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
-                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups,scan_procedures
-                                                                                             where scan_procedures_vgroups.scan_procedure_id in (?)
-                                                                                              and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
-                                                                                              and scan_procedures.subjectid_base in (?))", dirname,v_sp_visit2_array,v_dirname_chop)                                                                               
+            dirname = dirname.gsub(/_v2/,'') # subectid without v#
+            v_dirname_chop = dirname.gsub(/[0123456789]/,'') # start of subjectid
+            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit1_array,v_dirname_chop)                                                                             
             vgroups.each do |v|
               if v.fs_flag != "Y"
                  v.fs_flag ="Y"
@@ -4045,13 +4157,7 @@ puts "AAAAAA "+v_call
           elsif dirname.include?('_v3')
             dirname = dirname.gsub(/_v3/,'')
             v_dirname_chop = dirname.gsub(/[0123456789]/,'')
-            vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
-                                                                     where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
-                                                             and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
-                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups,scan_procedures
-                                                                                             where scan_procedures_vgroups.scan_procedure_id in (?)
-                                                                                              and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
-                                                                                              and scan_procedures.subjectid_base in (?))", dirname,v_sp_visit3_array,v_dirname_chop)
+            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit1_array,v_dirname_chop)
             vgroups.each do |v|
               if v.fs_flag != "Y"
                  v.fs_flag ="Y"
@@ -4062,13 +4168,7 @@ puts "AAAAAA "+v_call
           elsif dirname.include?('_v4')
             dirname = dirname.gsub(/_v4/,'')
             v_dirname_chop = dirname.gsub(/[0123456789]/,'')
-            vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
-                                                                     where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
-                                                             and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
-                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups,scan_procedures
-                                                                                             where scan_procedures_vgroups.scan_procedure_id in (?)
-                                                                                              and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
-                                                                                              and scan_procedures.subjectid_base in (?))", dirname,v_sp_visit4_array,v_dirname_chop)
+            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit1_array,v_dirname_chop)
             vgroups.each do |v|
               if v.fs_flag != "Y"
                  v.fs_flag ="Y"
@@ -4078,13 +4178,7 @@ puts "AAAAAA "+v_call
             end
           else
             v_dirname_chop = dirname.gsub(/[0123456789]/,'')
-            vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
-                                                                     where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
-                                                             and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
-                                                            and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups,scan_procedures
-                                                                                             where scan_procedures_vgroups.scan_procedure_id in (?)
-                                                                                             and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
-                                                                                             and scan_procedures.subjectid_base in (?))", dirname,v_sp_visit1_array,v_dirname_chop)
+            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit1_array,v_dirname_chop)
             vgroups.each do |v|
               if v.fs_flag != "Y"
                  v.fs_flag ="Y"
