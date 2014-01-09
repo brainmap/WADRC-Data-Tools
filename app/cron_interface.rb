@@ -391,24 +391,46 @@ v_user = v_user.gsub("\n","")
           if v_result_array[0] == "SUCCESS"
             connection = ActiveRecord::Base.connection();        
   
+            # want to get orig_recon and good2go
             v_visit_array = ['2','3','4','5']
-            v_file_array = ["aseg","lh.aparc.area","rh.aparc.area"]
-            v_file_header_dict = {}
+            v_file_array = ["aseg","lh.aparc.area","rh.aparc.area","aseg.good2go","lh.aparc.area.good2go","rh.aparc.area.good2go", ]
+            v_file_dir_dict = {}
+            v_file_dir_dict['aseg'] = v_base_path+"/preprocessed/modalities/freesurfer/orig_recon/"
+            v_file_dir_dict['lh.aparc.area'] = v_base_path+"/preprocessed/modalities/freesurfer/orig_recon/"
+            v_file_dir_dict['rh.aparc.area'] = v_base_path+"/preprocessed/modalities/freesurfer/orig_recon/"
+            v_file_dir_dict['aseg.good2go'] = v_base_path+"/preprocessed/modalities/freesurfer/good2go/"
+            v_file_dir_dict['lh.aparc.area.good2go'] = v_base_path+"/preprocessed/modalities/freesurfer/good2go/"
+            v_file_dir_dict['rh.aparc.area.good2go'] = v_base_path+"/preprocessed/modalities/freesurfer/good2go/"
+
+            v_file_header_dict = {}   # cannot just copy header -- need to preserve tabs
             v_file_header_dict['aseg'] = "Measure:volume	Left-Lateral-Ventricle	Left-Inf-Lat-Vent	Left-Cerebellum-White-Matter	Left-Cerebellum-Cortex	Left-Thalamus-Proper	Left-Caudate	Left-Putamen	Left-Pallidum	3rd-Ventricle	4th-Ventricle	Brain-Stem	Left-Hippocampus	Left-Amygdala	CSF	Left-Accumbens-area	Left-VentralDC	Left-vessel	Left-choroid-plexus	Right-Lateral-Ventricle	Right-Inf-Lat-Vent	Right-Cerebellum-White-Matter	Right-Cerebellum-Cortex	Right-Thalamus-Proper	Right-Caudate	Right-Putamen	Right-Pallidum	Right-HippocampusRight-Amygdala	Right-Accumbens-area	Right-VentralDC	Right-vessel	Right-choroid-plexus	5th-Ventricle	WM-hypointensities	Left-WM-hypointensities	Right-WM-hypointensities	non-WM-hypointensities	Left-non-WM-hypointensities	Right-non-WM-hypointensities	Optic-Chiasm	CC_Posterior	CC_Mid_Posterior	CC_Central	CC_Mid_Anterior	CC_Anterior	lhCortexVol	rhCortexVol	CortexVol	lhCorticalWhiteMatterVol	rhCorticalWhiteMatterVol	CorticalWhiteMatterVol	SubCortGrayVol	TotalGrayVol	SupraTentorialVol	IntraCranialVol"
             v_file_header_dict['lh.aparc.area'] = "lh.aparc.area	lh_bankssts_area	lh_caudalanteriorcingulate_area	lh_caudalmiddlefrontal_area	lh_cuneus_area	lh_entorhinal_area	lh_fusiform_area	lh_inferiorparietal_area	lh_inferiortemporal_area	lh_isthmuscingulate_area	lh_lateraloccipital_area	lh_lateralorbitofrontal_area	lh_lingual_area	lh_medialorbitofrontal_area	lh_middletemporal_area	lh_parahippocampal_area	lh_paracentral_area	lh_parsopercularis_area	lh_parsorbitalis_area	lh_parstriangularis_area	lh_pericalcarine_area	lh_postcentral_area	lh_posteriorcingulate_area	lh_precentral_area	lh_precuneus_area	lh_rostralanteriorcingulate_area	lh_rostralmiddlefrontal_area	lh_superiorfrontal_area	lh_superiorparietal_area	lh_superiortemporal_area	lh_supramarginal_area	lh_frontalpole_area	lh_temporalpole_area	lh_transversetemporal_area	lh_insula_area	lh_WhiteSurfArea_area"
             v_file_header_dict['rh.aparc.area'] = "rh.aparc.area	rh_bankssts_area	rh_caudalanteriorcingulate_area	rh_caudalmiddlefrontal_area	rh_cuneus_area	rh_entorhinal_area	rh_fusiform_area	rh_inferiorparietal_area	rh_inferiortemporal_area	rh_isthmuscingulate_area	rh_lateraloccipital_area	rh_lateralorbitofrontal_area	rh_lingual_area	rh_medialorbitofrontal_area	rh_middletemporal_area	rh_parahippocampal_area	rh_paracentral_area	rh_parsopercularis_area	rh_parsorbitalis_area	rh_parstriangularis_area	rh_pericalcarine_area	rh_postcentral_area	rh_posteriorcingulate_area	rh_precentral_area	rh_precuneus_area	rh_rostralanteriorcingulate_area	rh_rostralmiddlefrontal_area	rh_superiorfrontal_area	rh_superiorparietal_area	rh_superiortemporal_area	rh_supramarginal_area	rh_frontalpole_area	rh_temporalpole_area	rh_transversetemporal_area	rh_insula_area	rh_WhiteSurfArea_area"
+            v_file_header_dict['aseg.good2go'] =  v_file_header_dict['aseg']  #"Measure:volume Left-Lateral-Ventricle  Left-Inf-Lat-Vent Left-Cerebellum-White-Matter  Left-Cerebellum-Cortex  Left-Thalamus-Proper  Left-Caudate  Left-Putamen  Left-Pallidum 3rd-Ventricle 4th-Ventricle Brain-Stem  Left-Hippocampus  Left-Amygdala CSF Left-Accumbens-area Left-VentralDC  Left-vessel Left-choroid-plexus Right-Lateral-Ventricle Right-Inf-Lat-Vent  Right-Cerebellum-White-Matter Right-Cerebellum-Cortex Right-Thalamus-Proper Right-Caudate Right-Putamen Right-Pallidum  Right-HippocampusRight-Amygdala Right-Accumbens-area  Right-VentralDC Right-vessel  Right-choroid-plexus  5th-Ventricle WM-hypointensities  Left-WM-hypointensities Right-WM-hypointensities  non-WM-hypointensities  Left-non-WM-hypointensities Right-non-WM-hypointensities  Optic-Chiasm  CC_Posterior  CC_Mid_Posterior  CC_Central  CC_Mid_Anterior CC_Anterior lhCortexVol rhCortexVol CortexVol lhCorticalWhiteMatterVol  rhCorticalWhiteMatterVol  CorticalWhiteMatterVol  SubCortGrayVol  TotalGrayVol  SupraTentorialVol IntraCranialVol"
+            v_file_header_dict['lh.aparc.area.good2go'] = v_file_header_dict['lh.aparc.area']    #  "lh.aparc.area  lh_bankssts_area  lh_caudalanteriorcingulate_area lh_caudalmiddlefrontal_area lh_cuneus_area  lh_entorhinal_area  lh_fusiform_area  lh_inferiorparietal_area  lh_inferiortemporal_area  lh_isthmuscingulate_area  lh_lateraloccipital_area  lh_lateralorbitofrontal_area  lh_lingual_area lh_medialorbitofrontal_area lh_middletemporal_area  lh_parahippocampal_area lh_paracentral_area lh_parsopercularis_area lh_parsorbitalis_area lh_parstriangularis_area  lh_pericalcarine_area lh_postcentral_area lh_posteriorcingulate_area  lh_precentral_area  lh_precuneus_area lh_rostralanteriorcingulate_area  lh_rostralmiddlefrontal_area  lh_superiorfrontal_area lh_superiorparietal_area  lh_superiortemporal_area  lh_supramarginal_area lh_frontalpole_area lh_temporalpole_area  lh_transversetemporal_area  lh_insula_area  lh_WhiteSurfArea_area"
+            v_file_header_dict['rh.aparc.area.good2go'] = v_file_header_dict['rh.aparc.area']   #  "rh.aparc.area  rh_bankssts_area  rh_caudalanteriorcingulate_area rh_caudalmiddlefrontal_area rh_cuneus_area  rh_entorhinal_area  rh_fusiform_area  rh_inferiorparietal_area  rh_inferiortemporal_area  rh_isthmuscingulate_area  rh_lateraloccipital_area  rh_lateralorbitofrontal_area  rh_lingual_area rh_medialorbitofrontal_area rh_middletemporal_area  rh_parahippocampal_area rh_paracentral_area rh_parsopercularis_area rh_parsorbitalis_area rh_parstriangularis_area  rh_pericalcarine_area rh_postcentral_area rh_posteriorcingulate_area  rh_precentral_area  rh_precuneus_area rh_rostralanteriorcingulate_area  rh_rostralmiddlefrontal_area  rh_superiorfrontal_area rh_superiorparietal_area  rh_superiortemporal_area  rh_supramarginal_area rh_frontalpole_area rh_temporalpole_area  rh_transversetemporal_area  rh_insula_area  rh_WhiteSurfArea_area"
+           
             v_old_truncate_dict = {}
             v_old_truncate_dict['aseg'] = "truncate table cg_aseg_old"
             v_old_truncate_dict['lh.aparc.area'] = "truncate table cg_lh_aparc_area_old"
             v_old_truncate_dict['rh.aparc.area'] = "truncate table cg_rh_aparc_area_old" 
+            v_old_truncate_dict['aseg.good2go'] = "truncate table cg_aseg_good2go_old"
+            v_old_truncate_dict['lh.aparc.area.good2go'] = "truncate table cg_lh_aparc_area_good2go_old"
+            v_old_truncate_dict['rh.aparc.area.good2go'] = "truncate table cg_rh_aparc_area_good2go_old" 
             v_truncate_dict = {}
             v_truncate_dict['aseg'] = "truncate table cg_aseg"
             v_truncate_dict['lh.aparc.area'] = "truncate table cg_lh_aparc_area"
             v_truncate_dict['rh.aparc.area'] = "truncate table cg_rh_aparc_area"
+            v_truncate_dict['aseg.good2go'] = "truncate table cg_aseg_good2go"
+            v_truncate_dict['lh.aparc.area.good2go'] = "truncate table cg_lh_aparc_area_good2go"
+            v_truncate_dict['rh.aparc.area.good2go'] = "truncate table cg_rh_aparc_area_good2go"
             v_new_truncate_dict = {}
             v_new_truncate_dict['aseg'] = "truncate table cg_aseg_new"
             v_new_truncate_dict['lh.aparc.area'] = "truncate table cg_lh_aparc_area_new"
             v_new_truncate_dict['rh.aparc.area'] = "truncate table cg_rh_aparc_area_new"
+            v_new_truncate_dict['aseg.good2go'] = "truncate table cg_aseg_good2go_new"
+            v_new_truncate_dict['lh.aparc.area.good2go'] = "truncate table cg_lh_aparc_area_good2go_new"
+            v_new_truncate_dict['rh.aparc.area.good2go'] = "truncate table cg_rh_aparc_area_good2go_new"
             v_sql_base_dict = {}
             v_sql_base_dict['aseg'] ="subjectid,left_lateral_ventricle,left_inf_lat_vent,left_cerebellum_white_matter,left_cerebellum_cortex,
             left_thalamus_proper,left_caudate,left_putamen,left_pallidum,third_ventricle,fourth_ventricle,
@@ -439,6 +461,9 @@ v_user = v_user.gsub("\n","")
             rh_rostralmiddlefrontal_area,rh_superiorfrontal_area,rh_superiorparietal_area,rh_superiortemporal_area,
             rh_supramarginal_area,rh_frontalpole_area,rh_temporalpole_area,rh_transversetemporal_area,
             rh_insula_area,rh_whitesurfarea_area "
+            v_sql_base_dict['aseg.good2go'] = v_sql_base_dict['aseg']
+            v_sql_base_dict['lh.aparc.area.good2go'] = v_sql_base_dict['lh.aparc.area']
+            v_sql_base_dict['rh.aparc.area.good2go'] = v_sql_base_dict['rh.aparc.area']
             
             
             # v_table_array =["cg_aseg","cg_lh_aparc_area", "cg_rh_aparc_area"]
@@ -446,6 +471,7 @@ v_user = v_user.gsub("\n","")
             v_file_dir = v_base_path+"/preprocessed/modalities/freesurfer/orig_recon/"
             # loop thru file array
             v_file_array.each do |f|
+              v_file_dir = v_file_dir_dict[f]
               v_file_name = v_date_stamp+"."+f+".all.txt"
               puts "file name = "+v_file_name
               v_file_path = v_file_dir+v_file_name
@@ -486,6 +512,7 @@ v_user = v_user.gsub("\n","")
                     v_cnt = v_cnt + 1
                   end
                 end
+
                 # update enrollment -- make into a function?
                 sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.enrollment_id = ( select e.id from enrollments e where e.enumber = replace(replace(replace(replace(t.subjectid,'_v2',''),'_v3',''),'_v4',''),'_v5',''))"
                 results = connection.execute(sql)
@@ -499,8 +526,8 @@ v_user = v_user.gsub("\n","")
                   end
                 end
 
-              
                 # report on unmapped rows, not insert unmapped rows 
+
                 sql = "select subjectid, enrollment_id from cg_"+f.gsub(/\./,'_')+"_new where scan_procedure_id is null order by subjectid"
                 results = connection.execute(sql)
                 results.each do |re|
@@ -509,7 +536,7 @@ v_user = v_user.gsub("\n","")
                 if !results.blank?
                    v_comment = "cg_"+f.gsub(/\./,'_')+"_new unmapped subjectid,enrollment_id ="+v_comment
                 end
-                
+
                 # check move cg_ to cg_old
                 sql = "select count(*) from cg_"+f.gsub(/\./,'_')+"_old"
                 results_old = connection.execute(sql)
@@ -531,13 +558,14 @@ v_user = v_user.gsub("\n","")
                 #  truncate cg_ and insert cg_new
                 sql =  v_truncate_dict[f]
                 results = connection.execute(sql)
-                
+
                 sql = "insert into cg_"+f.gsub(/\./,'_')+"("+v_sql_base_dict[f]+",enrollment_id,scan_procedure_id) 
                 select distinct "+v_sql_base_dict[f]+",t.enrollment_id, scan_procedure_id from cg_"+f.gsub(/\./,'_')+"_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
                 # apply edits  -- made into a function  in shared model
+              
                 v_shared.apply_cg_edits(f)
                  
                  v_comment = "finish loading cg_"+f.gsub(/\./,'_')+"   \n"+ v_comment               

@@ -236,6 +236,18 @@ class Shared  < ActionController::Base
     return v_email
    end
   
+  def get_vgroups_from_enumber_sp(p_subjectid,p_sp_array,p_subjectid_base)
+             vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
+                         where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
+                         and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
+                        and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups,scan_procedures
+                      where scan_procedures_vgroups.scan_procedure_id in (?)
+                      and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
+                     and scan_procedures.subjectid_base in (?))", p_subjectid,p_sp_array,p_subjectid_base)                                                                               
+           
+     return vgroups
+  end
+
   def make_schedule_process_stop_file(p_file_path)
     v_value = "stopping process"
     if File.file?(p_file_path)
@@ -3999,18 +4011,6 @@ puts "AAAAAA "+v_call
     ####    end
     
     
-  end
-
-  def get_vgroups_from_enumber_sp(p_subjectid,p_sp_array,p_subjectid_base)
-             vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollments, enrollment_vgroup_memberships 
-                         where enrollments.id = enrollment_vgroup_memberships.enrollment_id and enumber in (?))
-                         and vgroups.id in (select appointments.vgroup_id from appointments where appointment_type = 'mri' )
-                        and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups,scan_procedures
-                      where scan_procedures_vgroups.scan_procedure_id in (?)
-                      and scan_procedures.id = scan_procedures_vgroups.scan_procedure_id 
-                     and scan_procedures.subjectid_base in (?))", p_subjectid,p_sp_array,p_subjectid_base)                                                                               
-           
-     return vgroups
   end
 
   def run_fs_good2go_Y_N
