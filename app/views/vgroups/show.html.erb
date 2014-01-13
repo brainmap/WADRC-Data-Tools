@@ -88,6 +88,15 @@ edit_count = edit_count -1
 				<B>FS Y/N: </B><%= @vgroup.fs_flag%>
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<B>FS good2go Y/N: </B><%= @vgroup.fs_good2go_flag%>
+				<% if !@trfiles.nil? %>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<b>Tracked files:</b> <% @trfiles.each do |f| %>
+                               
+               <%= link_to Trtype.find(f.trtype_id).description ,"/trfile_home/"+f.trtype_id.to_s+"?trfile_action=get_edit&trfile_id="+(f.id).to_s %>
+                                 &nbsp;
+				                    <%end%>
+
+				<% end%>
 			
 			<% end %>
 		</td></tr></table>

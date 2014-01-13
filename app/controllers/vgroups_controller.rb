@@ -131,6 +131,9 @@ class VgroupsController < ApplicationController
   def show
     scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+
+    @trfiles = Trfile.where("trfiles.scan_procedure_id in (select scan_procedure_id from scan_procedures_vgroups where vgroup_id in (?))",@vgroup.id).where("trfiles.enrollment_id in (select enrollment_id from enrollment_vgroup_memberships where vgroup_id in (?))",@vgroup.id)
+
     if current_user.role == 'Admin_High'
         # for changing appointment vgroup_id    
         @appointments = Appointment.order("appointments.appointment_type ASC").where("appointments.vgroup_id in (?)", params[:id])
