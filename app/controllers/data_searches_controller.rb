@@ -1682,14 +1682,25 @@ class DataSearchesController < ApplicationController
           @temp[2] =@results_enum.to_a.join(", ")
           
       else  # need to only get the sp and enums which are displayed - and need object to make link
+
         @temp[1] = var[0].to_s
         @temp[2] = var[0].to_s
+
+
       end 
+      @temp_vgroupid =[]
+      if !params[:longitudinal].nil?  and params[:longitudinal] == "Y"
+          @temp_vgroupid[0] =  var[0].to_s
+      end
       var.delete_at(0) # get rid of vgroup_id
       var.delete_at(0) # get rid of extra copy of appt date
      
-      
-      @temp_row = @temp + var
+      if !params[:longitudinal].nil?  and params[:longitudinal] == "Y"
+        # need vgroup_id in logintudinal to get participant_id or enrollment_id 
+        @temp_row = @temp_vgroupid + @temp + var
+      else
+         @temp_row = @temp + var
+      end
       @results[i] = @temp_row
       i = i+1
       
@@ -1795,11 +1806,39 @@ class DataSearchesController < ApplicationController
     if !params[:longitudinal].nil? and params[:longitudinal] == "Y"
        # need to flip rows so each participant/enrollment has one row with #row* cols
        v_max_length = 0
-       @results_participant = []
-       @participant_size = []
-       @participant_sp = []
-       @participant_enrollment = []
+       @participants = []
+       @enrollments = []
+       @participant_result = {}
+       @participant_size = {}
+       @participant_sp = {}
+       @participant_enrollment = {}
+       @enrollment_result = {}
+       @enrollment_size = {}
+       @enrollment_sp = {}
+       @enrollment_enrollment = {}
        @results.each do |r|
+          v_vgroupid = r[0]
+          v_vgroup  = Vgroup.find(v_vgroupid)
+          r.delete_at(0)
+          if !(v_vgroup.participant_id).nil?
+             if @participant_result[v_vgroup.participant_id].nil? 
+                 @participants.push(v_vgroup.participant_id)
+                 @participant_result[v_vgroup.participant_id] = r
+                 @participant_size[v_vgroup.participant_id] = 1
+                 # @participant_sp    # build up unique list
+                 # @participant_enrollment  # build up unique list
+              else
+                  @participant_result[v_vgroup.participant_id] = r + @participant_result[v_vgroup.participant_id]
+                  @participant_size[v_vgroup.participant_id]  = @participant_size[v_vgroup.participant_id] + 1
+                 # @participant_sp    # build up unique list
+                 # @participant_enrollment  # build up unique list
+              end
+              if v_max_length < @participant_size[v_vgroup.participant_id]
+                 v_max_length = @participant_size[v_vgroup.participant_id]
+              end 
+          else
+             # GET ENROLLMENT_ID
+          end
          # get vgroup -- where is vgroup_id 
          # P_participant_id
          # if vgroup.participant_id null , use enrollment_id
@@ -1817,9 +1856,24 @@ class DataSearchesController < ApplicationController
     #      @participant_sp[P_participant_id] from vgroup
     #      participant_enrollment[P_participant_id] from vgroup
        end
+       @results = []
+       @participants.each do |p|
+                 @results.push(@participant_result[p])
+                 # add new lead columns
+       end
        # make leading header fields for sp's, enrollments', reggie, wrap
-       # make header names with #_
+       # make header names with #_ 
        # loop v_max_length @header
+       @longitudinal_column_headers = []
+       for v_cnt in 1 .. (v_max_length-1)
+             @local_column_headers.each do |col|
+                 @longitudinal_column_headers.push(v_cnt.to_s+"_"+col)
+             end
+       end
+      @local_column_headers = @longitudinal_column_headers
+      # add new lead columns
+      @column_number = @local_column_headers.size
+
     end
 
     @results_total = @results # pageination makes result count wrong
