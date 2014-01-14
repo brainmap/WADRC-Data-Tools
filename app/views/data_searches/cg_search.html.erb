@@ -65,7 +65,7 @@ v_tn_cn_searchable_hash = []
 <% if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?%>
 <tr><td align="center" colspan=2>
 	<%= form_tag '/cg_search.xls' do%>
-	    <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
+	    <% v_link_to_elements = (link_to '/cg_search.xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
 	    <%  v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
 	        v_link_to_elements = v_link_to_elements.gsub(/&amp;method=post">download xls<\/a>/,'')
 	            # trying to trim the empty &'s
@@ -73,7 +73,7 @@ v_tn_cn_searchable_hash = []
 	             v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;')
 	             v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;')
 	             v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;')
-	             v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;')
+	             v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;').gsub(/%5B/,'[').gsub(/%5D/,']')
 	     #        v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'') 
 	     #        v_link_to_elements = v_link_to_elements.gsub(/^&amp;/,'')
 	        v_link_array =[]
@@ -420,7 +420,7 @@ v_tn_cn_searchable_hash = []
              v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;')
              v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;')
              v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;')
-             v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;')
+             v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;').gsub(/%5B/,'[').gsub(/%5D/,']')
      #        v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'') 
      #        v_link_to_elements = v_link_to_elements.gsub(/^&amp;/,'')   
         v_link_array =[]
@@ -438,6 +438,37 @@ v_tn_cn_searchable_hash = []
       <%= submit_tag 'export file'%> 
 
 <% end %>
+
+<%= form_tag '/cg_search.xls' do%>
+    <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
+    <%= hidden_field_tag 'longitudinal','Y' %>
+    <%   v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
+             v_link_to_elements = v_link_to_elements.gsub(/&amp;method=post">download xls<\/a>/,'')
+            # trying to trim the empty &'s
+             v_link_to_elements = v_link_to_elements.gsub(/^&amp;/,'') 
+             v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;')
+             v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;')
+             v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;')
+             v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;').gsub(/%5B/,'[').gsub(/%5D/,']')
+     #        v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'') 
+     #        v_link_to_elements = v_link_to_elements.gsub(/^&amp;/,'')   
+        v_link_array =[]
+        v_link_array = v_link_to_elements.split("\&amp\;") 
+        v_link_array.each do |v| 
+            v_name = ""
+            v_val =""
+	        (v_name,v_val) = v.split('=') %>
+	     <%   if v_name == "cg_search[enumber]"   %>
+	      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
+	       <% else %>	
+            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
+           <% end %>
+       <% end %>
+     <!--- <%= submit_tag 'export longitudinal file'%>  -->
+
+<% end %>
+
+
 <% if !params[:cg_search].blank? and !params[:cg_search][:series_description_type_id].blank? %>
  <%= form_tag '/cg_search.xls' do%>
     <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>

@@ -1687,6 +1687,7 @@ class DataSearchesController < ApplicationController
       end 
       var.delete_at(0) # get rid of vgroup_id
       var.delete_at(0) # get rid of extra copy of appt date
+     
       
       @temp_row = @temp + var
       @results[i] = @temp_row
@@ -1790,7 +1791,37 @@ class DataSearchesController < ApplicationController
            
      end
     end
-    
+    # NEED TO MOVE UP BEFORE DELETE OF VGROUP_ID
+    if !params[:longitudinal].nil? and params[:longitudinal] == "Y"
+       # need to flip rows so each participant/enrollment has one row with #row* cols
+       v_max_length = 0
+       @results_participant = []
+       @participant_size = []
+       @participant_sp = []
+       @participant_enrollment = []
+       @results.each do |r|
+         # get vgroup -- where is vgroup_id 
+         # P_participant_id
+         # if vgroup.participant_id null , use enrollment_id
+         # E_enrollment_id
+    #     if !@results_participant[P_participant_id].nil?
+    #           @results_participant[P_participant_id] = concat(r,@results_participant[P_participant_id])
+    #           @participant_size[P_participant_id] = @participant_size[P_participant_id] + 1
+    #     else
+    #           @results_participant[P_participant_id] = r
+    #           @participant_size[P_participant_id] = 1
+    #     end
+    #     if @participant_size[P_participant_id] > v_max_length
+    #       v_max_length = @participant_size[P_participant_id]
+    #     end
+    #      @participant_sp[P_participant_id] from vgroup
+    #      participant_enrollment[P_participant_id] from vgroup
+       end
+       # make leading header fields for sp's, enrollments', reggie, wrap
+       # make header names with #_
+       # loop v_max_length @header
+    end
+
     @results_total = @results # pageination makes result count wrong
     t = Time.now 
     @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
