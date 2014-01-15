@@ -178,8 +178,10 @@ v_user = v_user.gsub("\n","")
   # dev 
   #/usr/local/bin/rails  runner /Users/caillingworth/code/WADRC-Data-Tools/app/cron_interface.rb sp_series_desc_count
   elsif v_value_1 == "sp_series_desc_count"
-    v_base_path = visit.get_base_path()
-     @schedule = Schedule.where("name in ('sp_series_desc_count')").first
+    
+      v_shared = Shared.new
+      v_base_path = Shared.get_base_path()
+      @schedule = Schedule.where("name in ('sp_series_desc_count')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
       @schedulerun.comment ="starting sp_series_desc_count"

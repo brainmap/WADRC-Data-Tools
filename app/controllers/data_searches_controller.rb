@@ -994,16 +994,16 @@ class DataSearchesController < ApplicationController
 
          if !params[:cg_search][:min_age].blank? && params[:cg_search][:max_age].blank?
             @table_types.push('base')
-             v_condition ="     appointmens.id in (select a2.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments a2
+             v_condition ="     appointments.id in (select a2.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments a2
                                 where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                              and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                              and a2.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                             and floor(DATEDIFF(a2.appointment_date,participants.dob)/365.25) >= "+params[:cg_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                             and  floor(DATEDIFF(a2.appointment_date,participants.dob)/365.25) >= "+params[:cg_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
              @local_conditions.push(v_condition)
              params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:cg_search][:min_age]
          elsif params[:cg_search][:min_age].blank? && !params[:cg_search][:max_age].blank?
              @table_types.push('base')
-              v_condition ="     appointmens.id in (select a2.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments a2
+              v_condition ="     appointments.id in (select a2.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments a2
                                  where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                               and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                               and a2.vgroup_id = enrollment_vgroup_memberships.vgroup_id
@@ -1810,26 +1810,30 @@ class DataSearchesController < ApplicationController
        @enrollments = []
        @participant_result = {}
        @participant_size = {}
-       @participant_sp = {}
-       @participant_enrollment = {}
+       @participant_vgroup = {}
        @enrollment_result = {}
        @enrollment_size = {}
-       @enrollment_sp = {}
-       @enrollment_enrollment = {}
+       @enrollment_vgroup = {}
        @results.each do |r|
           v_vgroupid = r[0]
           v_vgroup  = Vgroup.find(v_vgroupid)
           r.delete_at(0)
+          vgroup_array = []
           if !(v_vgroup.participant_id).nil?
              if @participant_result[v_vgroup.participant_id].nil? 
                  @participants.push(v_vgroup.participant_id)
                  @participant_result[v_vgroup.participant_id] = r
                  @participant_size[v_vgroup.participant_id] = 1
+                 vgroup_array.push(v_vgroupid)
+                 @participant_vgroup[v_vgroup.participant_id] = vgroup_array
                  # @participant_sp    # build up unique list
                  # @participant_enrollment  # build up unique list
               else
                   @participant_result[v_vgroup.participant_id] = r + @participant_result[v_vgroup.participant_id]
                   @participant_size[v_vgroup.participant_id]  = @participant_size[v_vgroup.participant_id] + 1
+                  vgroup_array = @participant_vgroup[v_vgroup.participant_id]
+                  vgroup_array.push(v_vgroupid)
+                  @participant_vgroup[v_vgroup.participant_id] = vgroup_array
                  # @participant_sp    # build up unique list
                  # @participant_enrollment  # build up unique list
               end
@@ -1837,7 +1841,28 @@ class DataSearchesController < ApplicationController
                  v_max_length = @participant_size[v_vgroup.participant_id]
               end 
           else
-             # GET ENROLLMENT_ID
+             # GET ENROLLMENT_ID's  --- this breaks down on dual enrollment
+             enrollment_array = []
+             enrollment_array.push( v_vgroup.enrollments.collect {|e| e.id } )
+             if @enrollment_result[enrollment_array].nil?
+                @enrollments.push(enrollment_array )
+                @enrollment_result[enrollment_array] = r
+                @enrollment_size[enrollment_array] = 1
+                vgroup_array.push(v_vgroupid)
+                @enrollment_vgroup[enrollment_array] = vgroup_array
+
+              else
+                  @enrollment_result[enrollment_array] = r + @enrollment_result[enrollment_array]
+                  @enrollment_size[enrollment_array]   = @enrollment_size[enrollment_array]  + 1
+                  vgroup_array = @participant_vgroup[v_vgroup.participant_id]
+                  vgroup_array.push(v_vgroupid)
+                  @enrollment_vgroup[enrollment_array] = vgroup_array
+
+              end
+              if v_max_length < @enrollment_size[enrollment_array]
+                 v_max_length = @enrollment_size[enrollment_array]
+              end 
+
           end
          # get vgroup -- where is vgroup_id 
          # P_participant_id
@@ -1858,19 +1883,53 @@ class DataSearchesController < ApplicationController
        end
        @results = []
        @participants.each do |p|
+                 longitudinal_base_array = []
+                 sp_array =[]
+                 enrollment_array = []
+                 v_participant = Participant.find(p)
+                 v_vgroups = Vgroup.where("id in (?)",@participant_vgroup[p])
+                 v_vgroups.each do |vg|
+                      sp_array.push(vg.scan_procedures.collect {|sp| sp.codename} )
+                      enrollment_array.push( vg.enrollments.collect {|e| e.enumber } )
+                 end
+                 longitudinal_base_array.push((sp_array.uniq).join(', '))
+                 longitudinal_base_array.push((enrollment_array.uniq).join(', '))
+                 longitudinal_base_array.push(v_participant.reggieid)
+                 longitudinal_base_array.push(v_participant.wrapnum)
+                 @participant_result[p] = longitudinal_base_array + @participant_result[p]
                  @results.push(@participant_result[p])
                  # add new lead columns
        end
+       # breaks down for dual enrollments with no participant_id
+       @enrollments.each do |es|
+                 longitudinal_base_array = []
+                 sp_array =[]
+                 enrollment_array = []
+                 es.each do |e|
+                     v_enumber = (Enrollment.find(e)[0]).enumber
+                     enrollment_array.push(v_enumber)
+                 end
+                 longitudinal_base_array.push('')
+                 longitudinal_base_array.push((enrollment_array.uniq).join(', '))
+                 longitudinal_base_array.push('')
+                 longitudinal_base_array.push('')
+                 @enrollment_result[es] = longitudinal_base_array + @enrollment_result[es]
+                 @results.push(@enrollment_result[es])
+                 # add new lead columns
+       end
+
+
        # make leading header fields for sp's, enrollments', reggie, wrap
        # make header names with #_ 
        # loop v_max_length @header
        @longitudinal_column_headers = []
-       for v_cnt in 1 .. (v_max_length-1)
+       for v_cnt in 1 .. (v_max_length)
              @local_column_headers.each do |col|
                  @longitudinal_column_headers.push(v_cnt.to_s+"_"+col)
              end
        end
-      @local_column_headers = @longitudinal_column_headers
+       v_longitudinal_base_col = ['Protocols','Enumbers','Reggieid','Wrapno']
+      @local_column_headers = v_longitudinal_base_col + @longitudinal_column_headers
       # add new lead columns
       @column_number = @local_column_headers.size
 
