@@ -1,6 +1,7 @@
 require 'visit'
 require 'image_dataset'
 require 'net/sftp'
+require 'open3'
 
 class Shared  < ActionController::Base
   extend SharedHelper
@@ -227,7 +228,7 @@ class Shared  < ActionController::Base
     v_user = `echo $USER`
     v_user = v_user.gsub("\n","")
     v_email = nil
-    if v_user == 'admin' or v_user == 'panda_admin' 
+    if v_user == 'admin' or v_user == 'panda_admin' or v_user == 'panda_user'
        v_email = nil
      else       
        v_users = User.where("username='"+v_user+"'")
@@ -324,14 +325,14 @@ class Shared  < ActionController::Base
       v_username = Shared.adrc_sftp_username # get from shared helper
       v_passwrd = Shared.adrc_sftp_password   # get from shared helperwhich is not on github
       v_ip = Shared.adrc_sftp_host_address # get from shared helper
-      v_source ="/Users/panda_admin/upload_adrc/test_upload.txt"
+      v_source ="/Users/panda_user/upload_adrc/test_upload.txt"
       v_target ="/coho2/home/wisconsin/test_upload.txt"
       Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
            sftp.upload!(v_source, "test_upload.txt")
       end
 
       
-      # need to run from merida as panda_admin-- adrc expects the ip address
+      # need to run from merida as panda_admin/ panda_user-- adrc expects the ip address
     
   end
   
@@ -357,7 +358,7 @@ class Shared  < ActionController::Base
      v_scan_desc_type_array = Array.new
      # check for dir in /tmp
      v_target_dir ="/tmp/adrc_dti"
-     v_target_dir ="/Volumes/Macintosh_HD2/adrc_dti"
+     ###v_target_dir ="/Volumes/Macintosh_HD2/adrc_dti"
      if !File.directory?(v_target_dir)
        v_call = "mkdir "+v_target_dir
        stdin, stdout, stderr = Open3.popen3(v_call)
@@ -506,7 +507,7 @@ class Shared  < ActionController::Base
  # Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0030"].nil? 
  #                                                                                           d["0010,0030"].value = "DOB"; d.write(dcm) 
  #                                                                                               end } 
-         v_call = "rsync -av "+v_parent_dir_target+" panda_admin@merida.dom.wisc.edu:/home/panda_admin/adrc_dti/"
+         v_call = "rsync -av "+v_parent_dir_target+" panda_user@merida.dom.wisc.edu:/home/panda_user/adrc_dti/"
          stdin, stdout, stderr = Open3.popen3(v_call)
          while !stdout.eof?
            puts stdout.read 1024    
@@ -518,7 +519,7 @@ class Shared  < ActionController::Base
          #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
          #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
          v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
-         v_call =  'ssh panda_admin@merida.dom.wisc.edu "  tar  -C /home/panda_admin/adrc_dti  -zcf /home/panda_admin/adrc_dti/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
+         v_call =  'ssh panda_user@merida.dom.wisc.edu "  tar  -C /home/panda_user/adrc_dti  -zcf /home/panda_user/adrc_dti/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
          stdin, stdout, stderr = Open3.popen3(v_call)
          while !stdout.eof?
            puts stdout.read 1024    
@@ -537,7 +538,7 @@ class Shared  < ActionController::Base
             stdout.close
             stderr.close
          # 
-         v_call = 'ssh panda_admin@merida.dom.wisc.edu " rm -rf /home/panda_admin/adrc_dti/'+v_subject_dir+' "'
+         v_call = 'ssh panda_user@merida.dom.wisc.edu " rm -rf /home/panda_user/adrc_dti/'+v_subject_dir+' "'
          stdin, stdout, stderr = Open3.popen3(v_call)
          while !stdout.eof?
            puts stdout.read 1024    
@@ -548,7 +549,7 @@ class Shared  < ActionController::Base
 
 
           # did the tar.gz on merida to avoid mac acl PaxHeader extra directories
-          v_call = "rsync -av panda_admin@merida.dom.wisc.edu:/home/panda_admin/adrc_dti/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
+          v_call = "rsync -av panda_user@merida.dom.wisc.edu:/home/panda_user/adrc_dti/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
           stdin, stdout, stderr = Open3.popen3(v_call)
           while !stdout.eof?
             puts stdout.read 1024    
@@ -610,7 +611,7 @@ class Shared  < ActionController::Base
         v_scan_desc_type_array = Array.new
         # check for dir in /tmp
         v_target_dir ="/tmp/adrc_pcvipr"
-        v_target_dir ="/Volumes/Macintosh_HD2/adrc_pcvipr"
+        #v_target_dir ="/Volumes/Macintosh_HD2/adrc_pcvipr"
         if !File.directory?(v_target_dir)
           v_call = "mkdir "+v_target_dir
           stdin, stdout, stderr = Open3.popen3(v_call)
@@ -797,7 +798,7 @@ class Shared  < ActionController::Base
     #                                                                                           d["0010,0030"].value = "DOB"; d.write(dcm) 
     #                                                                                               end } 
 
-            v_call = "rsync -av "+v_parent_dir_target+" panda_admin@merida.dom.wisc.edu:/home/panda_admin/adrc_pcvipr/"
+            v_call = "rsync -av "+v_parent_dir_target+" panda_user@merida.dom.wisc.edu:/home/panda_user/adrc_pcvipr/"
             stdin, stdout, stderr = Open3.popen3(v_call)
             while !stdout.eof?
               puts stdout.read 1024    
@@ -809,7 +810,7 @@ class Shared  < ActionController::Base
             #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
             #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
             v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
-            v_call =  'ssh panda_admin@merida.dom.wisc.edu "  tar  -C /home/panda_admin/adrc_pcvipr  -zcf /home/panda_admin/adrc_pcvipr/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
+            v_call =  'ssh panda_user@merida.dom.wisc.edu "  tar  -C /home/panda_user/adrc_pcvipr  -zcf /home/panda_user/adrc_pcvipr/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
             stdin, stdout, stderr = Open3.popen3(v_call)
             while !stdout.eof?
               puts stdout.read 1024    
@@ -828,7 +829,7 @@ class Shared  < ActionController::Base
                stdout.close
                stderr.close
             # 
-            v_call = 'ssh panda_admin@merida.dom.wisc.edu " rm -rf /home/panda_admin/adrc_pcvipr/'+v_subject_dir+' "'
+            v_call = 'ssh panda_user@merida.dom.wisc.edu " rm -rf /home/panda_user/adrc_pcvipr/'+v_subject_dir+' "'
             stdin, stdout, stderr = Open3.popen3(v_call)
             while !stdout.eof?
               puts stdout.read 1024    
@@ -839,7 +840,7 @@ class Shared  < ActionController::Base
 
 
              # did the tar.gz on merida to avoid mac acl PaxHeader extra directories
-             v_call = "rsync -av panda_admin@merida.dom.wisc.edu:/home/panda_admin/adrc_pcvipr/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
+             v_call = "rsync -av panda_user@merida.dom.wisc.edu:/home/panda_user/adrc_pcvipr/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
              stdin, stdout, stderr = Open3.popen3(v_call)
              while !stdout.eof?
                puts stdout.read 1024    
@@ -925,7 +926,7 @@ class Shared  < ActionController::Base
     v_scan_desc_type_array = Array.new
     # check for dir in /tmp
     v_target_dir ="/tmp/adrc_upload"
-    v_target_dir ="/Volumes/Macintosh_HD2/adrc_upload"
+    # v_target_dir ="/Volumes/Macintosh_HD2/adrc_upload"
     if !File.directory?(v_target_dir)
       v_call = "mkdir "+v_target_dir
       stdin, stdout, stderr = Open3.popen3(v_call)
@@ -1077,7 +1078,7 @@ puts "AAAAAA "+v_call
 # Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0030"].nil? 
 #                                                                                           d["0010,0030"].value = "DOB"; d.write(dcm) 
 #                                                                                               end } 
-        v_call = "rsync -av "+v_parent_dir_target+" panda_admin@merida.dom.wisc.edu:/home/panda_admin/upload_adrc/"
+        v_call = "rsync -av "+v_parent_dir_target+" panda_user@merida.dom.wisc.edu:/home/panda_user/upload_adrc/"
         stdin, stdout, stderr = Open3.popen3(v_call)
         while !stdout.eof?
           puts stdout.read 1024    
@@ -1089,7 +1090,7 @@ puts "AAAAAA "+v_call
         #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
         #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
         v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
-        v_call =  'ssh panda_admin@merida.dom.wisc.edu "  tar  -C /home/panda_admin/upload_adrc  -zcf /home/panda_admin/upload_adrc/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
+        v_call =  'ssh panda_user@merida.dom.wisc.edu "  tar  -C /home/panda_user/upload_adrc  -zcf /home/panda_user/upload_adrc/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
         stdin, stdout, stderr = Open3.popen3(v_call)
         while !stdout.eof?
           puts stdout.read 1024    
@@ -1108,7 +1109,7 @@ puts "AAAAAA "+v_call
            stdout.close
            stderr.close
         # 
-        v_call = 'ssh panda_admin@merida.dom.wisc.edu " rm -rf /home/panda_admin/upload_adrc/'+v_subject_dir+' "'
+        v_call = 'ssh panda_user@merida.dom.wisc.edu " rm -rf /home/panda_user/upload_adrc/'+v_subject_dir+' "'
         stdin, stdout, stderr = Open3.popen3(v_call)
         while !stdout.eof?
           puts stdout.read 1024    
@@ -1119,7 +1120,7 @@ puts "AAAAAA "+v_call
        
         
          # did the tar.gz on merida to avoid mac acl PaxHeader extra directories
-         v_call = "rsync -av panda_admin@merida.dom.wisc.edu:/home/panda_admin/upload_adrc/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
+         v_call = "rsync -av panda_user@merida.dom.wisc.edu:/home/panda_user/upload_adrc/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
          stdin, stdout, stderr = Open3.popen3(v_call)
          while !stdout.eof?
            puts stdout.read 1024    
@@ -1188,7 +1189,7 @@ puts "AAAAAA "+v_call
       v_stop_file_path = v_log_base+v_stop_file_name
     connection = ActiveRecord::Base.connection();
     
-    v_target_dir = "/home/panda_admin/upload_antuano_20130916"
+    v_target_dir = "/home/panda_user/upload_antuano_20130916"
     v_final_target = "ftp directory tbd"
     v_series_description_category_array = ['T1_Volumetric','resting_fMRI']
     v_series_description_category_id_array = [19, 17]
@@ -1226,7 +1227,7 @@ puts "AAAAAA "+v_call
       v_export_id = (@schedule.id).to_s+"_"+r[3].to_s
       v_subject_dir = v_export_id+"_"+(results_vgroup.first)[0].to_s+"_wisc"
       v_parent_dir_target =v_target_dir+"/"+v_subject_dir
-      v_call = "ssh panda_admin@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"' "
+      v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"' "
       stdin, stdout, stderr = Open3.popen3(v_call)
       while !stdout.eof?
         puts stdout.read 1024    
@@ -1266,7 +1267,7 @@ puts "AAAAAA "+v_call
             end
             v_folder_array.push(v_dir_target)   
              
-            v_call = "ssh panda_admin@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
+            v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
             stdin, stdout, stderr = Open3.popen3(v_call)
             while !stdout.eof?
                puts stdout.read 1024    
@@ -1276,7 +1277,7 @@ puts "AAAAAA "+v_call
             stderr.close
             v_preprocessed_path = v_base_path+"/preprocessed/visits/"
             v_scan_procedure_path = ScanProcedure.find(r[2]).codename
-            v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/unknown/"+ v_subjectid+"_*_"+v_dir+".nii  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_"+r_dataset[3].gsub(" ","_")+"_"+v_dir+".nii '"
+            v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/unknown/"+ v_subjectid+"_*_"+v_dir+".nii  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_"+r_dataset[3].gsub(" ","_")+"_"+v_dir+".nii '"
             stdin, stdout, stderr = Open3.popen3(v_call)
             while !stdout.eof?
                puts stdout.read 1024    
@@ -1289,7 +1290,7 @@ puts "AAAAAA "+v_call
       
       #tar.gz subjectid dir
       v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
-      v_call =  'ssh panda_admin@merida.dom.wisc.edu "  tar  -C '+v_target_dir+'  -zcf '+v_parent_dir_target+'.tar.gz '+v_subject_dir+'/ "  '
+      v_call =  'ssh panda_user@merida.dom.wisc.edu "  tar  -C '+v_target_dir+'  -zcf '+v_parent_dir_target+'.tar.gz '+v_subject_dir+'/ "  '
       stdin, stdout, stderr = Open3.popen3(v_call)
       while !stdout.eof?
         puts stdout.read 1024    
@@ -1298,7 +1299,7 @@ puts "AAAAAA "+v_call
       stdout.close
       stderr.close
       # remove subjectid dir
-      v_call = 'ssh panda_admin@merida.dom.wisc.edu " rm -rf '+v_parent_dir_target+' "'
+      v_call = 'ssh panda_user@merida.dom.wisc.edu " rm -rf '+v_parent_dir_target+' "'
       stdin, stdout, stderr = Open3.popen3(v_call)
       while !stdout.eof?
         puts stdout.read 1024    
@@ -1309,7 +1310,7 @@ puts "AAAAAA "+v_call
       
       # fsftp dir when set
       # sftp -- shared helper hasthe username /password and address
-      v_username = Shared.panda_admin_sftp_username # get from shared helper
+      v_username = Shared.panda_admin_sftp_username # get from shared helper -- leaving as panda_admin
       v_passwrd = Shared.panda_admin_sftp_password   # get from shared helperwhich is not on github
       # switch on new platform
       #v_username = Shared.panda_user_sftp_username # get from shared helper
@@ -1319,7 +1320,7 @@ puts "AAAAAA "+v_call
       
       # problem that files are on merida, but panda running from nelson
       # need to ssh to merida as pand_admin, then sftp
-      v_source = "panda_admin@merida.dom.wisc.edu:"+v_target_dir+'/'+v_subject_dir+".tar.gz"
+      v_source = "panda_user@merida.dom.wisc.edu:"+v_target_dir+'/'+v_subject_dir+".tar.gz"
       
       v_target = v_sftp_dir+"/"   #+v_subject_dir+".tar.gz"
       
@@ -1790,7 +1791,7 @@ puts "AAAAAA "+v_call
                 #asl_fmap_file_to_use split into an array --- define loc --- move the loc from above
                 v_asl_dir_array.each do |d|    
                     v_dir_name_array = d.split("_") # sometimes just want first part of dir name   # -c '+v_coreg_t1+'   --- not specifying
-                    v_call =  'ssh panda_admin@merida.dom.wisc.edu "'+v_script+' -p '+v_sp_loc+'  -b '+v_subjectid+' -s1  '+v_dir_name_array[0] +'  --fsdir '+v_fs_subjects_dir +' " ' 
+                    v_call =  'ssh panda_user@merida.dom.wisc.edu "'+v_script+' -p '+v_sp_loc+'  -b '+v_subjectid+' -s1  '+v_dir_name_array[0] +'  --fsdir '+v_fs_subjects_dir +' " ' 
                     @schedulerun.comment ="str "+r[2]+"/"+d+"; "+v_comment[0..1990]
                     @schedulerun.save
                     v_comment = "str "+r[2]+"/"+d+"; "+v_comment
@@ -2674,7 +2675,7 @@ puts "AAAAAA "+v_call
       v_stop_file_path = v_log_base+v_stop_file_name
     connection = ActiveRecord::Base.connection();
     
-    v_target_dir = "/home/panda_admin/upload_goveas_20131031"
+    v_target_dir = "/home/panda_user/upload_goveas_20131031"
     v_final_target = "ftp directory tbd"
     v_series_description_category_array = ['T1_Volumetric','resting_fMRI', 'T2','T2_Flair']
     v_series_description_category_id_array = [19, 17]
@@ -2711,7 +2712,7 @@ puts "AAAAAA "+v_call
       v_export_id = (@schedule.id).to_s+"_"+r[3].to_s
       v_subject_dir = v_export_id+"_"+(results_vgroup.first)[0].to_s+"_wisc"
       v_parent_dir_target =v_target_dir+"/"+v_subject_dir
-      v_call = "ssh panda_admin@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"' "
+      v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"' "
       stdin, stdout, stderr = Open3.popen3(v_call)
       while !stdout.eof?
         puts stdout.read 1024    
@@ -2762,7 +2763,7 @@ puts "AAAAAA "+v_call
             end
             v_folder_array.push(v_dir_target)   
              
-            v_call = "ssh panda_admin@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
+            v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
             stdin, stdout, stderr = Open3.popen3(v_call)
             while !stdout.eof?
                puts stdout.read 1024    
@@ -2772,7 +2773,7 @@ puts "AAAAAA "+v_call
             stderr.close
             v_preprocessed_path = v_base_path+"/preprocessed/visits/"
             v_scan_procedure_path = v_actual_scan_procedure # ScanProcedure.find(r[2]).codename
-            v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid_actual+"/unknown/"+ v_subjectid_actual+"_*_"+v_dir+".nii  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_"+r_dataset[3].gsub(" ","_")+"_"+v_dir+".nii '"
+            v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid_actual+"/unknown/"+ v_subjectid_actual+"_*_"+v_dir+".nii  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_"+r_dataset[3].gsub(" ","_")+"_"+v_dir+".nii '"
 
             stdin, stdout, stderr = Open3.popen3(v_call)
             while !stdout.eof?
@@ -2803,7 +2804,7 @@ puts "AAAAAA "+v_call
         v_dir_target = "dti"
         v_dti_array =[]
         results_dataset.each do |r_dataset|
-          v_call = "ssh panda_admin@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
+          v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
           stdin, stdout, stderr = Open3.popen3(v_call)
           while !stdout.eof?
              puts stdout.read 1024    
@@ -2816,7 +2817,7 @@ puts "AAAAAA "+v_call
           v_file_name_hash ={'FA'=>'_combined_fa.nii','MD'=>'_combined_md.nii','L1'=>'_combined_L1.nii','L2'=>'_combined_L2.nii','L3'=>'_combined_L3.nii'}
           v_dir_array.each do |dir_name|
             v_dti_array.push('dti-'+dir_name)
-             v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+dir_name+"/"+ v_subjectid+v_file_name_hash[dir_name]+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+v_file_name_hash[dir_name]+"  '"
+             v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+dir_name+"/"+ v_subjectid+v_file_name_hash[dir_name]+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+v_file_name_hash[dir_name]+"  '"
               stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
                  puts stdout.read 1024    
@@ -2825,7 +2826,7 @@ puts "AAAAAA "+v_call
               stdout.close
               stderr.close
               # some nii.gz
-              v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+dir_name+"/"+ v_subjectid+v_file_name_hash[dir_name]+".gz  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+v_file_name_hash[dir_name]+".gz  '"
+              v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+dir_name+"/"+ v_subjectid+v_file_name_hash[dir_name]+".gz  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+v_file_name_hash[dir_name]+".gz  '"
                stdin, stdout, stderr = Open3.popen3(v_call)
                while !stdout.eof?
                   puts stdout.read 1024    
@@ -2841,7 +2842,7 @@ puts "AAAAAA "+v_call
 
       #tar.gz subjectid dir
       v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
-      v_call =  'ssh panda_admin@merida.dom.wisc.edu "  tar  -C '+v_target_dir+'  -zcf '+v_parent_dir_target+'.tar.gz '+v_subject_dir+'/ "  '
+      v_call =  'ssh panda_user@merida.dom.wisc.edu "  tar  -C '+v_target_dir+'  -zcf '+v_parent_dir_target+'.tar.gz '+v_subject_dir+'/ "  '
       stdin, stdout, stderr = Open3.popen3(v_call)
       while !stdout.eof?
         puts stdout.read 1024    
@@ -2850,7 +2851,7 @@ puts "AAAAAA "+v_call
       stdout.close
       stderr.close
       # remove subjectid dir
-      v_call = 'ssh panda_admin@merida.dom.wisc.edu " rm -rf '+v_parent_dir_target+' "'
+      v_call = 'ssh panda_user@merida.dom.wisc.edu " rm -rf '+v_parent_dir_target+' "'
       stdin, stdout, stderr = Open3.popen3(v_call)
       while !stdout.eof?
         puts stdout.read 1024    
@@ -3161,7 +3162,7 @@ puts "AAAAAA "+v_call
               v_multiple_sag_cube_flair_flag = r[5]
               v_sag_cube_flair_to_use = r[6]
               # need to change script to accept v_o_star_nii_file_to_use and v_sag_cube_flair_to_use
-              v_call =  'ssh panda_admin@merida.dom.wisc.edu "'  +v_script+' -p '+v_o_star_nii_sp_loc+'  -b '+v_subjectid+' "  ' 
+              v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+v_o_star_nii_sp_loc+'  -b '+v_subjectid+' "  ' 
               puts "rrrrrrr "+v_call
               v_log = v_log + v_call+"\n"
               begin
@@ -3556,7 +3557,7 @@ puts "AAAAAA "+v_call
       v_stop_file_path = v_log_base+v_stop_file_name
     connection = ActiveRecord::Base.connection();
     
-    v_target_dir = "/home/panda_admin/upload_selley_20130906"
+    v_target_dir = "/home/panda_user/upload_selley_20130906"
     v_final_target = "ftp directory tbd"
     v_series_description_category_array = ['T1_Volumetric','resting_fMRI']
     v_series_description_category_id_array = [19, 17]
@@ -3597,7 +3598,7 @@ puts "AAAAAA "+v_call
       v_export_id = (@schedule.id).to_s+"_"+r[3].to_s
       v_subject_dir = v_export_id+"_"+(results_vgroup.first)[0].to_s+"_wisc"
       v_parent_dir_target =v_target_dir+"/"+v_subject_dir
-      v_call = "ssh panda_admin@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"' "
+      v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"' "
       stdin, stdout, stderr = Open3.popen3(v_call)
       while !stdout.eof?
         puts stdout.read 1024    
@@ -3637,7 +3638,7 @@ puts "AAAAAA "+v_call
             end
             v_folder_array.push(v_dir_target)   
              
-            v_call = "ssh panda_admin@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
+            v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
             stdin, stdout, stderr = Open3.popen3(v_call)
             while !stdout.eof?
                puts stdout.read 1024    
@@ -3647,7 +3648,7 @@ puts "AAAAAA "+v_call
             stderr.close
             v_preprocessed_path = v_base_path+"/preprocessed/visits/"
             v_scan_procedure_path = ScanProcedure.find(r[2]).codename
-            v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/unknown/"+ v_subjectid+"_*_"+v_dir+".nii  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_"+r_dataset[3].gsub(" ","_")+"_"+v_dir+".nii '"
+            v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/unknown/"+ v_subjectid+"_*_"+v_dir+".nii  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_"+r_dataset[3].gsub(" ","_")+"_"+v_dir+".nii '"
             stdin, stdout, stderr = Open3.popen3(v_call)
             while !stdout.eof?
                puts stdout.read 1024    
@@ -3671,7 +3672,7 @@ puts "AAAAAA "+v_call
         results_dataset = connection.execute(sql_pib)
         v_dir_target = "pib"
         results_dataset.each do |r_dataset|
-          v_call = "ssh panda_admin@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
+          v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
           stdin, stdout, stderr = Open3.popen3(v_call)
           while !stdout.eof?
              puts stdout.read 1024    
@@ -3684,7 +3685,7 @@ puts "AAAAAA "+v_call
           if v_subjectid == "pdt00038" or v_subjectid == "pdt00129" or v_subjectid == "pdt00137" or v_subjectid == "pdt00161"
             v_pib_summed_file = v_subjectid+"_pib_summed.nii"
             v_readme_file = "README"
-            v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/pib/"+ v_pib_summed_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_pib_summed.nii '"
+            v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/pib/"+ v_pib_summed_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_pib_summed.nii '"
             stdin, stdout, stderr = Open3.popen3(v_call)
             while !stdout.eof?
                puts stdout.read 1024    
@@ -3692,7 +3693,7 @@ puts "AAAAAA "+v_call
             stdin.close
             stdout.close
             stderr.close
-            v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/pib/"+ v_readme_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_pib_readme.txt '"
+            v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/pib/"+ v_readme_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_pib_readme.txt '"
             stdin, stdout, stderr = Open3.popen3(v_call)
             while !stdout.eof?
                puts stdout.read 1024    
@@ -3704,11 +3705,11 @@ puts "AAAAAA "+v_call
              v_rFS_file ="rFS_r"+v_subjectid+"_realignPIB_DVR_HYPR.nii"
              v_file_name = v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/pib/"+ v_rFS_file
              if File.exist?(v_file_name)
-                v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/pib/"+ v_rFS_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/rFS_r"+v_export_id+"_realignPIB_DVR_HYPR.nii '"
+                v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/pib/"+ v_rFS_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/rFS_r"+v_export_id+"_realignPIB_DVR_HYPR.nii '"
              
               else
                 v_realign_file ="r"+v_subjectid+"_realignPIB_DVR_HYPR.nii"
-                 v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/pib/"+ v_realign_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/r"+v_export_id+"_realignPIB_DVR_HYPR.nii '"
+                 v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/pib/"+ v_realign_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/r"+v_export_id+"_realignPIB_DVR_HYPR.nii '"
               end
               stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
@@ -3733,7 +3734,7 @@ puts "AAAAAA "+v_call
       results_dataset = connection.execute(sql_fdg)
       v_dir_target = "fdg"
       results_dataset.each do |r_dataset|
-        v_call = "ssh panda_admin@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
+        v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
         stdin, stdout, stderr = Open3.popen3(v_call)
         while !stdout.eof?
            puts stdout.read 1024    
@@ -3747,7 +3748,7 @@ puts "AAAAAA "+v_call
         if v_subjectid == "pdt00067" 
           v_fdg_summed_file = v_subjectid+"_fdg_summed.nii"
           v_readme_file = "README"
-          v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/fdg/"+ v_fdg_summed_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_fdg_summed.nii '"
+          v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/fdg/"+ v_fdg_summed_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_fdg_summed.nii '"
           stdin, stdout, stderr = Open3.popen3(v_call)
           while !stdout.eof?
              puts stdout.read 1024    
@@ -3755,7 +3756,7 @@ puts "AAAAAA "+v_call
           stdin.close
           stdout.close
           stderr.close
-          v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/fdg/"+ v_readme_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_fdg_readme.txt '"
+          v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/fdg/"+ v_readme_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_fdg_readme.txt '"
           stdin, stdout, stderr = Open3.popen3(v_call)
           while !stdout.eof?
              puts stdout.read 1024    
@@ -3764,7 +3765,7 @@ puts "AAAAAA "+v_call
           stdout.close
           stderr.close
         else
-          v_call = "ssh panda_admin@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/fdg/"+ v_fdg_summed_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_fdg_summed.nii '"
+          v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/pet/fdg/"+ v_fdg_summed_file+"  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_fdg_summed.nii '"
           stdin, stdout, stderr = Open3.popen3(v_call)
           while !stdout.eof?
               puts stdout.read 1024    
@@ -3777,7 +3778,7 @@ puts "AAAAAA "+v_call
       
       #tar.gz subjectid dir
       v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
-      v_call =  'ssh panda_admin@merida.dom.wisc.edu "  tar  -C '+v_target_dir+'  -zcf '+v_parent_dir_target+'.tar.gz '+v_subject_dir+'/ "  '
+      v_call =  'ssh panda_user@merida.dom.wisc.edu "  tar  -C '+v_target_dir+'  -zcf '+v_parent_dir_target+'.tar.gz '+v_subject_dir+'/ "  '
       stdin, stdout, stderr = Open3.popen3(v_call)
       while !stdout.eof?
         puts stdout.read 1024    
@@ -3786,7 +3787,7 @@ puts "AAAAAA "+v_call
       stdout.close
       stderr.close
       # remove subjectid dir
-      v_call = 'ssh panda_admin@merida.dom.wisc.edu " rm -rf '+v_parent_dir_target+' "'
+      v_call = 'ssh panda_user@merida.dom.wisc.edu " rm -rf '+v_parent_dir_target+' "'
       stdin, stdout, stderr = Open3.popen3(v_call)
       while !stdout.eof?
         puts stdout.read 1024    
@@ -3807,7 +3808,7 @@ puts "AAAAAA "+v_call
 
             # problem that files are on merida, but panda running from nelson
             # need to ssh to merida as pand_admin, then sftp
-            v_source = "panda_admin@merida.dom.wisc.edu:"+v_target_dir+'/'+v_subject_dir+".tar.gz"
+            v_source = "panda_user@merida.dom.wisc.edu:"+v_target_dir+'/'+v_subject_dir+".tar.gz"
 
             v_target = v_sftp_dir+"/"   #+v_subject_dir+".tar.gz"
 

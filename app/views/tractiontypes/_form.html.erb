@@ -16,96 +16,104 @@ v_value_type =  [["dropdown","dropdown"],["dropdown_multiple","dropdown_multiple
     </div>
   <% end %>
 
-  <div class="field">
-    <%= f.label :trtype_id %><br />
+<table><tr><td>
+   <b><%= f.label :trtype_id %>: </b>
     <%= f.select(:trtype_id, Trtype.all.collect {|p| [ p.description, p.id ] },  { :include_blank => "Select a tr type",:selected => @tractiontype.trtype_id }) %>
-  </div>
-  <div class="field">
-    <%= f.label :description %><br />
+  </td>
+  <td>
+   <b><%= f.label :description %>: </b>
     <%= f.text_field :description %>
-  </div>
-  <div class="field">
-    <%= f.label :status_flag %><br />
+  </td>
+  <td><b>
+    <%= f.label :status_flag %>: </b>
    <%= f.select :status_flag, v_y_n, {:prompt => 'Status?'}  %>
-  </div>
-  <div class="field">
-    <%= f.label :display_order %><br />
+  </td>
+  <td><b>
+    <%= f.label :display_order %>: </b>
     <%= f.text_field :display_order %>
-  </div>
-  <div class="field">
-    <%= f.label :display_in_summary %><br />
+  </td>
+</tr><tr>
+  <td><b>
+    <%= f.label :display_in_summary %>: </b>
     <%= f.select :display_in_summary, v_y_n, {:prompt => 'Should the column be in the summary?'}  %>
-  </div>
-    <div class="field">
-    <%= f.label :summary_peek_flag %><br />
+  </td>
+    <td><b>
+    <%= f.label :summary_peek_flag %>: </b>
     <%= f.select :summary_peek_flag, v_y_n, {:prompt => 'Should the column be in the summary as peek?'}  %>
-  </div>
-  <div class="field">
-    <%= f.label :display_column_header_1 %><br />
+  </td>
+  <td><b>
+    <%= f.label :display_column_header_1 %>: </b>
     <%= f.text_field :display_column_header_1 %>
-  </div>
-  <div class="field">
-    <%= f.label :display_summary_column_header_1 %><br />
+  </td>
+  <td><b>
+    <%= f.label :display_summary_column_header_1 %>: </b>
     <%= f.text_field :display_summary_column_header_1 %>
-  </div>
-  <div class="field">
-    <%= f.label :export_column_header_1 %><br />
+  </td>
+  </tr><tr>
+  <td><b>
+    <%= f.label :export_column_header_1 %>: </b>
     <%= f.text_field :export_column_header_1 %>
-  </div>
-  <div class="field">
-    <%= f.label :display_search_flag %><br />
+  </td>
+  <td><b>
+    <%= f.label :display_search_flag %>: </b>
    <%= f.select :display_search_flag, v_y_n, {:prompt => 'Include in search?'}  %>
-  </div>
+  </td>
 
-  <div class="field">
-    <%= f.label :form_display_order %><br />
+  <td><b>
+    <%= f.label :form_display_order %>: </b>
     <%= f.text_field :form_display_order %>
-  </div>
-  <div class="field">
-    <%= f.label :form_display_label %><br />
+  </td>
+  <td><b>
+    <%= f.label :form_display_label %>: </b>
     <%= f.text_field :form_display_label %>
-  </div>
-    <div class="field">
-    <%= f.label :form_display_field_type %><br />
+  </td>
+  </tr><tr>
+    <td><b>
+    <%= f.label :form_display_field_type %>: </b>
      <%= f.select :form_display_field_type, options_for_select(v_value_type, @tractiontype.form_display_field_type),
                 {:prompt => 'Select a form field type'}  %>
-  </div>
-    <div class="field">
-    <%= f.label :form_col_span %><br />
+  </td>
+    <td><b>
+    <%= f.label :form_col_span %>: </b>
      <%= f.text_field :form_col_span %>
-  </div>
+  </td>
 
-  <div class="field">
-    <%= f.label :form_default_value %><br />
+  <td><b>
+    <%= f.label :form_default_value %>: </b>
      <%= f.text_field :form_default_value %>
-  </div>
-  <div class="field">
-    <%= f.label :form_required_Y_N %><br />
+  </td>
+  <td><b>
+    <%= f.label :form_required_Y_N %>: </b>
    <%= f.select :form_required_y_n_1, v_y_n, {:prompt => 'Include in search?'}  %>
-  </div>
-  <div class="field">
-    <%= f.label :form_js %><br />
+  </td>
+  </tr><tr>
+  <td><b>
+    <%= f.label :form_js %>: </b>
    <%= f.text_field :form_js %>
-  </div>
-  <div class="field">
-    <%= f.label :values_1 %><br />
+  </td>
+  <td><b>
+    <%= f.label :values_1 %>: </b>
     <%= f.text_field :values_1 %>
-  </div>
-  <div class="field">
-    <%= f.label :ref_table_a_1 %><br />
+  </td>
+  <td><b>
+    <%= f.label :ref_table_a_1 %>: </b>
     <%= f.text_field :ref_table_a_1 %>
-  </div>
-  <div class="field">
-    <%= f.label :ref_table_b_1 %><br />
+  </td>
+  <td><b>
+    <%= f.label :ref_table_b_1 %>: </b>
     <%= f.text_field :ref_table_b_1 %>
-  </div>
-  <div class="field">
-    <%= f.label :triggers_1 %><br />
+  </td>
+  </tr><tr>
+  <td><b>
+    <%= f.label :triggers_1 %>: </b>
     <%= f.text_area :triggers_1 %><br>
     To display a command based on value, and include subjectid_v#
     display_command|value_1=command_1 <enum>|value_2=command_2 <enum>|.....
-  </div>
+  </td>
+  <td colspn=3 align="left">
   <div class="actions">
     <%= f.submit %>
-  </div>
+    </div
+  </td>
+</tr></table>
 <% end %>
