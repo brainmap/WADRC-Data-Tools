@@ -91,6 +91,8 @@ class SchedulesController < ApplicationController
 
     respond_to do |format|
       if @schedule.save
+        @schedule.target_table = (@schedule.target_table).strip
+        @schedule.save
         format.html { redirect_to(@schedule, :notice => 'Schedule was successfully created.') }
         format.xml  { render :xml => @schedule, :status => :created, :location => @schedule }
       else
@@ -112,6 +114,8 @@ class SchedulesController < ApplicationController
            params[:schedule][:user_ids]=""
            @schedule.update_attributes(params[:schedule])
         end
+        @schedule.target_table = (@schedule.target_table).strip
+        @schedule.save
         format.html { redirect_to(@schedule, :notice => 'Schedule was successfully updated.') }
         format.xml  { head :ok }
       else

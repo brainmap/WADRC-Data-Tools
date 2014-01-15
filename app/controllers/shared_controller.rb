@@ -18,13 +18,13 @@ class SharedController < ActionController::Base
      
      # NEED FULL LOAD - PARTIAL LOAD OPTION --- CHECK FOR KEY
     # check that database table exisits
-    sql = " select table_name from information_schema.tables  where table_name='"+@schedule.target_table+"' and table_schema='database_name' "
+    sql = " select table_name from information_schema.tables  where table_name='"+(@schedule.target_table).strip+"' and table_schema='database_name' "
      v_schema ='panda_production'
      if Rails.env=="development" 
        v_schema ='panda_development'
      end
      v_error_flag = "N"
-     sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '"+v_schema+"' AND table_name = '"+@schedule.target_table+"'"
+     sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '"+v_schema+"' AND table_name = '"+(@schedule.target_table).strip+"'"
      connection = ActiveRecord::Base.connection();        
      results = connection.execute(sql)
      v_cnt = results.first
@@ -33,7 +33,7 @@ class SharedController < ActionController::Base
        v_error_flag = "Y"
      end
     # check that cg_table exists
-    sql = "select COUNT(*) from cg_tns where tn = '"+@schedule.target_table+"'"
+    sql = "select COUNT(*) from cg_tns where tn = '"+(@schedule.target_table).strip+"'"
     results = connection.execute(sql)
     v_cnt = results.first
     if v_cnt[0] < 1
@@ -64,8 +64,8 @@ class SharedController < ActionController::Base
           v_file_columns_included_arr = @schedule.file_columns_included.split(',')
           v_expected_cell_cnt = v_file_columns_included_arr.size
           connection = ActiveRecord::Base.connection();
-          v_sql_base_insert = "insert into "+@schedule.target_table+"_new("+@schedule.target_table_columns+" )values("
-          v_sql = "truncate table "+@schedule.target_table+"_new"
+          v_sql_base_insert = "insert into "+(@schedule.target_table).strip+"_new("+@schedule.target_table_columns+" )values("
+          v_sql = "truncate table "+(@schedule.target_table).strip+"_new"
           results = connection.execute(v_sql)
           
           v_include =[]
@@ -124,20 +124,20 @@ class SharedController < ActionController::Base
             v_file_col_array = (@schedule.file_columns_included).split(',')
             v_table_col_array = (@schedule.target_table_columns).split(',')
             v_table_key_source = v_table_col_array[v_file_col_array.index(@schedule.file_key_source_column)]
-            sql = "update "+@schedule.target_table+"_new  t set t.enrollment_id = ( select e.id from enrollments e where e.enumber = replace(replace(replace(replace(t."+v_table_key_source+",'_v2',''),'_v3',''),'_v4',''),'_v5',''))"
+            sql = "update "+(@schedule.target_table).strip+"_new  t set t.enrollment_id = ( select e.id from enrollments e where e.enumber = replace(replace(replace(replace(t."+v_table_key_source+",'_v2',''),'_v3',''),'_v4',''),'_v5',''))"
             results = connection.execute(sql)
-            sql = "select distinct "+v_table_key_source+" from "+@schedule.target_table+"_new"
+            sql = "select distinct "+v_table_key_source+" from "+(@schedule.target_table).strip+"_new"
             results = connection.execute(sql)
             results.each do |r|
               v_sp_id = v_shared.get_sp_id_from_subjectid_v(r[0])
               if !v_sp_id.blank?
-                sql = "update "+@schedule.target_table+"_new  t set t.scan_procedure_id = "+v_sp_id.to_s+" where "+v_table_key_source+" ='"+r[0]+"'"
+                sql = "update "+(@schedule.target_table).strip+"_new  t set t.scan_procedure_id = "+v_sp_id.to_s+" where "+v_table_key_source+" ='"+r[0]+"'"
                 results = connection.execute(sql)
               end
             end
      
             # report on unmapped rows, not insert unmapped rows 
-            sql = "select "+v_table_key_source+", enrollment_id from "+@schedule.target_table+"_new where scan_procedure_id is null order by "+v_table_key_source
+            sql = "select "+v_table_key_source+", enrollment_id from "+(@schedule.target_table).strip+"_new where scan_procedure_id is null order by "+v_table_key_source
             results = connection.execute(sql)
             results.each do |re|
               v_comment = re.join(' | ')+" ,"+v_comment
@@ -150,7 +150,7 @@ class SharedController < ActionController::Base
             
             # populate non-present rows from present if partial load
             if params[:full_partial] == "partial"
-              v_sql = "insert into "+@schedule.target_table+"_new("+@schedule.target_table_columns+",enrollment_id, scan_procedure_id)  select "+@schedule.target_table_columns+",enrollment_id, scan_procedure_id from "+@schedule.target_table+" where "+@schedule.target_table+"."+v_table_key_source+" not in (select "+v_table_key_source+" from "+@schedule.target_table+"_new)"
+              v_sql = "insert into "+(@schedule.target_table).strip+"_new("+@schedule.target_table_columns+",enrollment_id, scan_procedure_id)  select "+@schedule.target_table_columns+",enrollment_id, scan_procedure_id from "+@schedule.target_table+" where "+@schedule.target_table+"."+v_table_key_source+" not in (select "+v_table_key_source+" from "+@schedule.target_table+"_new)"
               results = connection.execute(v_sql)
             end
             
