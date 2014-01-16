@@ -1138,15 +1138,15 @@ puts "AAAAAA "+v_call
         Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
             sftp.upload!(v_source, v_target)
         end
-
+# WANT TO CHECK TRANSFERS
         v_call = " rm -rf "+v_target_dir+'/'+v_subject_dir+".tar.gz"
-        stdin, stdout, stderr = Open3.popen3(v_call)
-        while !stdout.eof?
-          puts stdout.read 1024    
-         end
-        stdin.close
-        stdout.close
-        stderr.close        
+#        stdin, stdout, stderr = Open3.popen3(v_call)
+#        while !stdout.eof?
+#          puts stdout.read 1024    
+#         end
+#        stdin.close
+#        stdout.close
+#        stderr.close        
         
         sql_sent = "update cg_adrc_upload set sent_flag ='Y' where subjectid ='"+r[0]+"' "
         results_sent = connection.execute(sql_sent)
