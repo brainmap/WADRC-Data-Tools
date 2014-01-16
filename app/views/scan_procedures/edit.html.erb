@@ -1,5 +1,5 @@
+<% v_y_n = {"Yes"=>"Y","No"=>"N"} %>
 <h1>Editing Scan Procedure</h1>
-<%= @scan_procedure.petscan_flag %>
 <%= form_for(@scan_procedure) do |f| %>
   <%= f.error_messages %>
 
@@ -21,7 +21,7 @@
   </p>
   <p>
     <%= f.label :petscan_flag %><br />
-    <%= f.select (:petscan_flag,options_for_select([['Yes','Y'],['No','N']],  @scan_procedure.petscan_flag ),:include_blank => 'Select if petscans can be included in sp' )%>
+      <%= f.select :petscan_flag, v_y_n, :selected => @scan_procedure.petscan_flag , :include_blank => 'Select if petscans can be included in sp'  %> Select if petscans can be included in sp
   </p>
   <p>
     <%= f.submit "Update" %>
