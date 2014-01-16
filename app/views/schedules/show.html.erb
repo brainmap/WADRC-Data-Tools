@@ -18,6 +18,14 @@ v_full_partial = {"Full Reload"=>"full","Partial Reload/Append"=>"partial"}
   <%= @schedule.shared_function_name %>
 </p>
 <p>
+  <b>run_as_user:</b>
+  <%= @schedule.run_as_user %>
+</p>
+<p>
+  <b>run_on_machine:</b>
+  <%= @schedule.run_on_machine%>
+</p>
+<p>
   <b>Parameters:</b>
   <%= @schedule.parameters %>
 </p>

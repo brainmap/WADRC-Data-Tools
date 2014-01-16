@@ -9,6 +9,7 @@ class CronInterface < ActiveRecord::Base
   puts "AAAAAAAAAAA in CronInterface"+v_value_1.to_s+"="
   v_shared = Shared.new
   v_base_path = Shared.get_base_path()
+  puts v_base_path
 
   if v_value_1 == "test"
     v_shared = Shared.new
@@ -91,7 +92,9 @@ v_user = v_user.gsub("\n","")
   
   elsif v_value_1 == "fdg_status"
       v_shared = Shared.new
+      puts " before call to fdg_status"
       v_shared.run_fdg_status()
+      puts " after call to fdg_status"
 
   elsif v_value_1 == "goveas_20131031_upload"
       v_shared = Shared.new
@@ -130,8 +133,9 @@ v_user = v_user.gsub("\n","")
       v_shared.run_series_description()     
             
   elsif v_value_1 == "test_shell"
-    v_base_path = visit.get_base_path()
-    v_base_path = visit.get_base_path()
+    puts "bbbbbbbbb in test shell"
+    v_shared = Shared.new
+    v_base_path = "/mounts/data"
      @schedule = Schedule.where("name in ('test_shell')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
@@ -170,7 +174,7 @@ v_user = v_user.gsub("\n","")
         @schedulerun.save
         # puts "EXIT STATUS:"+status.exitstatus.to_s
 
-  
+        puts "  zzzzzzzz end of test_shell"
   elsif v_value_1 == "t1seg_status"
       v_shared = Shared.new
       v_shared.run_t1seg_status()
@@ -362,8 +366,10 @@ v_user = v_user.gsub("\n","")
          v_date_stamp = time.strftime("%Y%m%d")
 #### v_date_stamp ="20130117"
           # no FS on adrcdv2 -- shouldn't process on web server?
-          v_call = v_base_path+"/data1/lab_scripts/python_dev/fs_file.py Y"
-          v_call = "ssh panda_user@merida.dom.wisc.edu '"+v_base_path+"/data1/lab_scripts/python_dev/fs_file.py Y'"
+          #v_call = v_base_path+"/data1/lab_scripts/python_dev/fs_file.py Y"
+          #v_call = "ssh panda_user@merida.dom.wisc.edu '"+v_base_path+"/data1/lab_scripts/python_dev/fs_file.py Y'"
+         # v_call = v_base_path+"/SysAdmin/production/python/fs_file.py Y"
+          v_call = "ssh panda_user@merida.dom.wisc.edu '"+v_base_path+"/SysAdmin/production/python/fs_file.py Y'"
           v_comment = "start "+v_call
           @schedulerun.comment = v_comment
           @schedulerun.save

@@ -19,7 +19,9 @@
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		<b>Status:</b> <%= f.select :status_flag, v_y_n_e, {:prompt => 'Status?'}  %> </td>
 		 </tr>
-		<tr><td align="left" colspan="2"> <b>shared_function_name:</b> <%= f.text_field :shared_function_name %>
+		<tr><td align="left" colspan="2" nowrap> <b>shared_function_name:</b> <%= f.text_field :shared_function_name %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<b>run_as_user:</b> <%= f.text_field :run_as_user %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<b>run_on_machine:</b> <%= f.text_field :run_on_machine %>
 <tr><td align="left" colspan="2">	<b>Run Command:</b><br>
 	<%= f.text_area :run_command,:size => "140x6" %>
   </td></tr>

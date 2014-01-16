@@ -2538,6 +2538,7 @@ puts "AAAAAA "+v_call
           @schedulerun.start_time = @schedulerun.created_at
           @schedulerun.save
           v_comment = ""
+          puts "in fdg status"
     ####    begin   # catch all exception and put error in comment    
             sql = "truncate table cg_fdg_status_new"
             connection = ActiveRecord::Base.connection();        

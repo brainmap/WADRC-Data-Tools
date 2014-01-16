@@ -12,6 +12,8 @@
     <th>Target table</th>
     <th>Target column</th>
     <th>Owners</th>
+    <th>Run As User</th>
+    <th>Run On Machine</th>
     <th></th>
     <th></th>
     <th></th>
@@ -29,6 +31,8 @@
     <td><%= schedule.target_table %></td>
     <td><%= schedule.target_column %></td>
     <td><%= schedule.users.sort_by(&:username_name).collect {|u|  u.username_name}.join(", ").html_safe %></td>
+        <td><%= schedule.run_as_user%></td>
+            <td><%= schedule.run_on_machine %></td>
     <td><%= link_to 'Show', schedule %></td>
 <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
     <td><%= link_to 'Edit', edit_schedule_path(schedule) %></td>
