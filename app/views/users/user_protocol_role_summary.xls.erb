@@ -8,8 +8,7 @@
 	      <th><%= column_header%></th>
 	    <% end %>	
 	 </tr>
-	 <% @trfiles_search.each do |result| %>
-	    <%    #vgroup different  result.delete_at(@column_headers.size-1) # *.id used to get the * object, not want to display %>
+	 <% @results.each do |result| %>
 		<tr>
 		   <% for i in 0..@column_number-1  # results is an array of arrays%>
 		      <td><%= result[i] %></td>
