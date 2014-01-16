@@ -32,8 +32,8 @@ class CronInterface < ActiveRecord::Base
     
   end  # end test
 
-
-v_username_list = ['admin','panda_admin']  
+# NEED TO BE IN FOR CRON !!!!!!
+v_username_list = ['admin','panda_admin','panda_user']  
 sql = "select users.username from users where role in ('Admin_High','Admin_Low')"
 results = connection.execute(sql)
 results.each do |r|
