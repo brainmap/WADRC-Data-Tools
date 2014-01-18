@@ -52,7 +52,7 @@ gem 'open4'
 # gem 'bzip2-ruby' 
 gem 'escoffier'
 # Deploy with Capistrano
-gem 'capistrano','~>2.15.5'# '~>3.0.1' #~>2.15.5' #, '~>2.5.19'
+gem 'capistrano' #, '~>2.15.5' #~>3.0.1' #~>2.15.5' #, '~>2.5.19'
 
 # To use debugger (ruby-debug for Ruby 1.8.7+, ruby-debug19 for Ruby 1.9.2+)
 # gem 'ruby-debug'
@@ -68,6 +68,9 @@ gem 'capistrano','~>2.15.5'# '~>3.0.1' #~>2.15.5' #, '~>2.5.19'
 # put test-only gems in this group so their generators
 # and rake tasks are available in development mode:
 group :development, :test do
+
+# gem 'capistrano'
+
   ######### gem 'rspec' #, '~>2.4.0'
   ######### gem 'rspec-rails' # ,  '~>2.4.0'
   # gem 'gherkin', '~>2.1.5' # trying to remove nokogiri because of problems with xml lib versions on adrcdev/rvm

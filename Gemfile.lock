@@ -178,7 +178,7 @@ DEPENDENCIES
   acts_as_reportable
   builder
   cancan
-  capistrano (~> 2.15.5)
+  capistrano
   chronic
   cocaine (= 0.3.2)
   database_cleaner
