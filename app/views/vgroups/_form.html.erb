@@ -52,40 +52,47 @@ If the enumber is not already associated with a participant, add the enumber bel
 	<% end %>
 	</td></tr></table>
   </div><br>
+  <table width="80%"><tr><td colspan="2">
 <div class="field">
-  <%= f.label :Compile_Folder %><br />
+  <%= f.label :Compile_Folder %>:
   <%= select :vgroup, :compile_folder, ["no", "yes", "n/a"] %>
-</div><br>
+</div></td><td colspan="2">
 <div class="field">
-  <%= f.label :Which_DVD %><br />
+  <%= f.label :Which_DVD %>:
   <%= text_field :vgroup,:dicom_dvd, :size => 20 %>
-</div><br>
+</div></td></tr><tr><td colspan="2">
 <div class="field">
-  <%= f.label :Entered_by %><br />
+  <%= f.label :Entered_by %>: 
   <%= select(:vgroup, :entered_by, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select who entered data" }) %>
-</div><br>
+</div></td><td colspan="2">
 <div class="field">
-  <%= f.label :QCed_by %><br />
+  <%= f.label :QCed_by %>:
   <%= select(:vgroup, :qc_by, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select who QC'ed data" }) %>
-</div><br>
+</div></td></tr><tr><td  colspan="2">
 <div class="field">
-  <%= f.label :QC_Completed %><br />
+  <%= f.label :QC_Completed %>:
   <%= select :vgroup, :qc_completed, ["no", "yes", "n/a"] %>
-</div><br>
+</div></td>
+<td  colspan="2"> </td></tr>
+<tr><td  colspan="2">
 <div class="field">
-  <%= f.label :fs_yn %><br />
+  <%= f.label :fs_yn %>: 
   <%= select :vgroup, :fs_flag, ["Y", "N"] %>
-</div><br>
+</div></td><td colspan="2">
 <div class="field">
-  <%= f.label :fs_good2go_yn %><br />
+  <%= f.label :fs_good2go_yn %>: 
   <%= select :vgroup, :fs_good2go_flag, ["Y", "N"] %>
-</div><br>
+</div></td> <td>
+   </td> <td>
+</td></tr><tr><td nowrap align="left" colspan="4" border=1>
+<br><br>
+    <%= f.submit 'Update Vgroup Note' %>
 
-  <div class="field">
-    <%= f.label :note %><br />
+    <%= f.label :note %>:<br>
+
     <%= f.text_area :note %>
-  </div>
-	<br>
+
+</td></tr><tr><td colspan="2"><br><br>
 	<B>BE SURE TO SELECT A Scan Procedure !!!!!!!!!!</b><br>
 	<div id="scan_procedure_list">
 	<ul>
@@ -104,7 +111,7 @@ If the enumber is not already associated with a participant, add the enumber bel
 	<% end %>
 	</ul>
 	</div>
-	<br>
+	</td><td colspan="2">
 	<% v_cnt = 0   # not sure why empty field not showing up like in visit mri -- making a blank with the next vgroup[enrollments_attributes][0][id]%>
 	<%= f.fields_for :enrollments do |e| %>
 	<p>
@@ -118,9 +125,10 @@ If the enumber is not already associated with a participant, add the enumber bel
 	   end %>
 	<%= f.label :enumber %>
 	<%= text_field_tag ("vgroup[enrollments_attributes]["+v_cnt.to_s+"][enumber]" )%><br>
-	<br>
+	</td></tr><tr><td colspan="4">
   <div class="actions">
     <%= f.submit %>
   </div>
+</td></tr></table>
 <% end %>
 

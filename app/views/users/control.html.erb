@@ -54,11 +54,9 @@ includes links to making questions, linking a question to a form and setting the
 	<br><br>
 </td></tr>
 
-<tr><td colspan=3>
-     <%= link_to('Track types','/trtypes') %><br>
-     <%= link_to('Track type actions','/tractiontypes') %><br>
-     <%= link_to('Track type files','/trfiles') %><br>
-     <%= link_to('Track type file edits','/tredits') %><br>
+<tr><td colspan=3><%= link_to('Tracker - fields and display properties','/tractiontypes') %> - e.g. field display order and properties in exports, summary page and edit form<br>
+     <%= link_to('Setup tracker types','/trtypes') %> - e.g. Freesurfer edit, freesurfer qc<br>
+     <small><small>(<%= link_to('Tracker files','/trfiles') %>,  <%= link_to('Tracker file edits','/tredits') %></small></small>
 	<br><br>
 </td></tr>
 
@@ -101,6 +99,7 @@ to the radiology_comments index url<br>
 </table>
 
 <br><br>
+Search queries are logged in database table cg_query_log. The web interface has not been made yet.<br><br>
 <%= link_to('Combined Reference Table', '/lookup_refs') %> - lookup_refs 
 <br><br>
 <b>Look up tables:</b> these are normal ruby on rails forms for added values to reference tables. Instead of adding a new lookup table for each new set of references, use the Combined Reference table, lookup_refs <br>
