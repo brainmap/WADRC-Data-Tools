@@ -841,6 +841,8 @@ class DataSearchesController < ApplicationController
       @q_data_headers_hash = Hash.new
       @q_data_tables_hash = Hash.new
       @fields_hash = Hash.new
+
+      @add_cg_tn_id = []
       
       @image_datasets_tn =  CgTn.where("tn = 'image_datasets' ")
       # ALSO IN IDS_SEARCH !!!!!!  need to update if added new categories
@@ -887,6 +889,11 @@ class DataSearchesController < ApplicationController
          @cg_query_tns.each do |cg_query_tn|
            v_tn_id = cg_query_tn.cg_tn_id 
             @cg_query_tn_id_array.push(v_tn_id) # need to retrieve for display on the page
+            # if cg table needd to propagate from search to search
+           v_cg_tn = CgTn.find(v_tn_id)
+           if v_cg_tn.table_type != 'base'   
+             @add_cg_tn_id.push(v_tn_id.to_s) 
+           end
            @cg_query_tn_hash[v_tn_id.to_s] = cg_query_tn  
            @cg_query_tn_cns = CgQueryTnCn.where("cg_query_tn_id = "+cg_query_tn.id.to_s) 
            @cg_query_tn_cns.each do |cg_query_tn_cn|

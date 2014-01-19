@@ -36,7 +36,8 @@ v_conditions_hash = [['=','0'],['>=','1'],['<=','2'],['!=','3'],['is blank','5']
 v_conditions_between_hash = [['=','0'],['>=','1'],['<=','2'],['!=','3'],['between','4'],['is blank','5'],['is not blank','6'],['contains','7']]
 
 # make array of tn_id from cg add table
-@add_cg_tn_id = []
+# @add_cg_tn_id = [] initalized in controller, populated from stored query also
+
 if !params[:cg_search].blank? and !params[:cg_search][:add_cg_tn_id].blank? 
   params[:cg_search][:add_cg_tn_id].each do |add_cg_tn_id|
     v_add_cg_tn_id = add_cg_tn_id.to_s

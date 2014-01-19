@@ -2774,15 +2774,25 @@ puts "AAAAAA "+v_call
             stderr.close
             v_preprocessed_path = v_base_path+"/preprocessed/visits/"
             v_scan_procedure_path = v_actual_scan_procedure # ScanProcedure.find(r[2]).codename
-            v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid_actual+"/unknown/"+ v_subjectid_actual+"_*_"+v_dir+".nii  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_"+r_dataset[3].gsub(" ","_")+"_"+v_dir+".nii '"
+            # check if nii file exists
+            if !Dir.glob(v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid_actual+"/unknown/"+ v_subjectid_actual+"_*_"+v_dir+".nii").empty?
+               puts "FOUND "+v_subjectid_actual+"_*_"+v_dir+".nii "
+               v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid_actual+"/unknown/"+ v_subjectid_actual+"_*_"+v_dir+".nii  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_"+r_dataset[3].gsub(" ","_")+"_"+v_dir+".nii '"
 
-            stdin, stdout, stderr = Open3.popen3(v_call)
-            while !stdout.eof?
-               puts stdout.read 1024    
-            end
-            stdin.close
-            stdout.close
-            stderr.close
+               stdin, stdout, stderr = Open3.popen3(v_call)
+               while !stdout.eof?
+                  puts stdout.read 1024    
+               end
+               stdin.close
+               stdout.close
+               stderr.close
+            else
+              # nii not exists
+              @schedulerun.comment = "MISSING "+v_subjectid_actual+"_*_"+v_dir+".nii; "+@schedulerun.comment
+               @schedulerun.save
+              puts "MISSIING "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid_actual+"/unknown/"+ v_subjectid_actual+"_*_"+v_dir+".nii"
+              v_comment_warning = "MISSIING "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid_actual+"/unknown/"+ v_subjectid_actual+"_*_"+v_dir+".nii" +v_comment_warning
+            end 
         
       end
 
