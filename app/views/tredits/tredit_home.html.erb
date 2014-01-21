@@ -6,8 +6,8 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= label_tag :trfile %>: <%= select(:tr_search,:trfile_id, @trfiles.collect {|p| [ p.subjectid+" - "+ScanProcedure.find(p.scan_procedure_id).codename, p.id ] },  { :include_blank => "Select a subject" }) %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= label_tag :scan_procedure %>:      <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
     <%= collection_select(:tr_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'choose scan procedure'}, {:multiple =>  false} ) %><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= label_tag :user_id %>: 
-    <%= select(:tr_search, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select editor" }) %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= label_tag :user %>: 
+    <%= select(:tr_search, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select user" }) %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <%= select(:tr_search,  :file_completed_flag, v_y_n, {:prompt => 'File Completed?'} ) %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -58,7 +58,7 @@
      if v_cnt < 1
          tredit = Tredit.find(val)
          v_cnt =1%>
-         <td> <%= link_to "Get edit","/trfile_home/"+params[:trtype_id]+"?trfile_action=get_edit&trfile_id="+(tredit.trfile_id).to_s+"&tredit_id="+val.to_s ,{:style=>'color:#000000;'}%></td>
+         <td> <%= link_to "Get "+@v_action_name,"/trfile_home/"+params[:trtype_id]+"?trfile_action=get_edit&trfile_id="+(tredit.trfile_id).to_s+"&tredit_id="+val.to_s ,{:style=>'color:#000000;'}%></td>
          <%else%>
   <td>  <%=val %> </td>
           <%end%>

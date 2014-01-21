@@ -172,6 +172,7 @@ class TrfilesController < ApplicationController
     @trfiles = Trfile.where("trfiles.scan_procedure_id in (?)",scan_procedure_array).where("trfiles.id in (?)",@trfile.id)
     @trfile = @trfiles[0]
     @trtype = Trtype.find(@trfile.trtype_id)
+    @v_action_name = @trtype.action_name
     @vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships where enrollment_id in (?) )",@trfile.enrollment_id).where("vgroups.id in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))",@trfile.scan_procedure_id)
        if !(@trfile.scan_procedure_id).nil? and !(@trfile.enrollment_id).nil? 
           @ids = ImageDataset.where(" image_datasets.visit_id in (select v1.id from visits v1, appointments a1, scan_procedures_vgroups spvg1, enrollment_vgroup_memberships evg1

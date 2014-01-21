@@ -18,6 +18,11 @@
     <%= f.text_field :description %>
   </div>
 
+    <div class="field">
+    <%= f.label :action_name %><br />
+    <%= f.text_field :action_name %>
+  </div>
+
   <div class="field">
     <%= f.label :series_description_type %><br />
     <%= f.select(:series_description_type_id, SeriesDescriptionType.where("series_description_type not like '%?%'").sort_by(&:series_description_type).collect {|p| [ p.series_description_type, p.id ] },  { :include_blank => "Select a scan category",:selected => @trtype.series_description_type_id }) %>

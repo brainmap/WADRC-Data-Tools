@@ -6,7 +6,10 @@ class TrtypesController < ApplicationController
     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
     @trtypes = Trtype.all
     connection = ActiveRecord::Base.connection();
+    @v_action_name ="action"
     if !params[:id].nil?
+
+         @v_action_name = Trtype.find(params[:id]).action_name 
          @tractiontypes_search = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.display_search_flag = 'Y' ").order(:display_order)
 
          @trfiles = Trfile.where("trtype_id ="+params[:id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_array)
@@ -82,7 +85,7 @@ class TrtypesController < ApplicationController
          request_format = request.formats.to_s
          case  request_format
           when "[text/html]","text/html" then
-              @column_headers_display = ['Completed','Last Update','Subjectid','Edit links','Scan Procedure','QC']
+              @column_headers_display = ['Completed','Last Update','Subjectid', @v_action_name.humanize+' links','Scan Procedure','QC']
               for counter in  1..v_cnt_limit
                 @column_headers_display.push('Edit #'+counter.to_s)
                  @tractiontypes.each do |header|

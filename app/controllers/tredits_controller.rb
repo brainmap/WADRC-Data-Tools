@@ -3,6 +3,7 @@ class TreditsController < ApplicationController
 
   def tredit_home
     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+   @v_action_name = Trtype.find(params[:trtype_id]).action_name 
    @tractiontypes = Tractiontype.where("trtype_id in (?)",params[:trtype_id]).where("tractiontypes.display_order is not null").order(:display_order) 
    @tractiontypes_search = Tractiontype.where("trtype_id in (?)",params[:trtype_id]).where("tractiontypes.display_search_flag = 'Y' ").order(:display_order)
     # base columns

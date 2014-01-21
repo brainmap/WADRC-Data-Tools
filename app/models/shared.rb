@@ -2703,7 +2703,7 @@ puts "AAAAAA "+v_call
       break if v_break > 0
       
       v_comment = "strt "+r[0]+","+v_comment
-      @schedulerun.comment =v_comment[0..1990]
+      @schedulerun.comment =v_comment_warning +"; "+v_comment[0..1990]
       @schedulerun.save
       # update schedulerun comment - prepend 
       sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')

@@ -1,13 +1,13 @@
 <%  v_y_n = {"Y"=>"Y","N"=>"N"}  
  v_p_p_f = {"Pass"=>"Pass","Partial"=>"Partial","Fail"=>"Fail"} %>
 <small><%= link_to 'View File List/Home' ,{ :controller=>"trtypes" ,:action=>"trtype_home/"+(@trfile.trtype_id).to_s} %></small> | 
- <small><%= link_to 'View File Edit List' ,{ :controller=>"tredits" ,:action=>"tredit_home/"+(@trfile.trtype_id).to_s} %></small> |
- <small><%= link_to "Add edit","/trfile_home/"+(@trfile.trtype_id).to_s+"?trfile_action=add_edit&trfile_id="+(@trfile.id).to_s,{:style=>'color:#000000;'} %></small>
+ <small><%= link_to 'View File '+@v_action_name.humanize+' List' ,{ :controller=>"tredits" ,:action=>"tredit_home/"+(@trfile.trtype_id).to_s} %></small> |
+ <small><%= link_to "Add "+@v_action_name,"/trfile_home/"+(@trfile.trtype_id).to_s+"?trfile_action=add_edit&trfile_id="+(@trfile.id).to_s,{:style=>'color:#000000;'} %></small>
  <% if !@tredit_prev.nil? %>
- | <small><%= link_to "Prev edit","/trfile_home/"+(@trfile.trtype_id).to_s+"?trfile_action=get_edit&trfile_id="+(@trfile.id).to_s+"&tredit_id="+(@tredit_prev.id).to_s ,{:style=>'color:#000000;'}%></small>
+ | <small><%= link_to "Prev "+@v_action_name,"/trfile_home/"+(@trfile.trtype_id).to_s+"?trfile_action=get_edit&trfile_id="+(@trfile.id).to_s+"&tredit_id="+(@tredit_prev.id).to_s ,{:style=>'color:#000000;'}%></small>
  <%end%>
  <% if !@tredit_next.nil? %>
- | <small><%= link_to "Next edit","/trfile_home/"+(@trfile.trtype_id).to_s+"?trfile_action=get_edit&trfile_id="+(@trfile.id).to_s+"&tredit_id="+(@tredit_next.id).to_s ,{:style=>'color:#000000;'}%></small>
+ | <small><%= link_to "Next "+@v_action_name,"/trfile_home/"+(@trfile.trtype_id).to_s+"?trfile_action=get_edit&trfile_id="+(@trfile.id).to_s+"&tredit_id="+(@tredit_next.id).to_s ,{:style=>'color:#000000;'}%></small>
  <%end%>
 <br><br><br>
 
@@ -17,7 +17,7 @@
 <%= hidden_field_tag 'tredit_id',@tredit.id %>
 
 <table width="80%" >
-  <tr><td align="left" colspan="3"> <b> <%= (@trtype.description).humanize %> file edit tracking: </b> <small>Edit #<%= @v_edit_cnt.to_s%> <%if @v_last_edit == "Y" %> (most recent edit)<%end%></small></td></tr>
+  <tr><td align="left" colspan="3"> <b> <%= (@trtype.description).humanize %> file edit tracking: </b> <small>Edit #<%= @v_edit_cnt.to_s%> <%if @v_last_edit == "Y" %> (most recent <%= @v_action_name %>)<%end%></small></td></tr>
   <tr><td align="left" colspan="3"> <small><b>Scan Protcol(s):</b>  <%= @vgroups[0].scan_procedures.blank? ? "None" : @vgroups[0].scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <b>Enrollment(s):</b> <%= @vgroups[0].enrollments.collect {|e| e.enumber }.join(", ").html_safe %></small>
    <br>
@@ -38,7 +38,7 @@
   </td></tr>
 	<tr> <!-- constant accross trtypes -->
 		<td align="left"><small><b>Subjectid_v#:</b></small> <%=@trfile.subjectid %></td>
-		<td align="left"><small><b>Editor:</b></small> <%= select(:tredit, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select editor" ,:selected => @tredit.user_id }) %></td>
+		<td align="left"><small><b>User:</b></small> <%= select(:tredit, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select user" ,:selected => @tredit.user_id }) %></td>
 		<td align="left"><small><b>Updated:</b> <%=   @tredit.updated_at.strftime('%Y-%m-%d %H:%M'  ) %> </small></td>
 	</tr>
 <%  v_tractiontypes = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.form_display_order is not null").order(:form_display_order) 

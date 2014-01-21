@@ -10,7 +10,10 @@ edit_count = edit_count -1
 <h1>Editing Neuro Psych appt</h1>
 <h3><%= @enumbers.blank? ? @vgroup.rmr : @enumbers.collect{|e| e.enumber }.join(", ") %></h3>
 <%= render :partial => 'new_edit', :locals => { :form_action => 'Edit Neuro Psych appt'} %>
-<br><hr span="70%">
+<br><hr span="70%" size="6" color="green">
+<hr span="70%">
+Save the bottom entries before making/saving any top entiries, and vice versa.
+<hr span="70%" size="6" color="red">
 
 <%= render :partial => 'questionforms/editform', :locals => { :form_action => 'Edit Neuro Psych values'} %>
 
