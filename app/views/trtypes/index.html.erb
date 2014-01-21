@@ -3,6 +3,7 @@
 <table>
   <tr>
     <th>Description</th>
+    <th>Action Name</th>
     <th>Parameters</th>
     <th>Status flag</th>
     <th>Series Desc Type</th>
@@ -14,7 +15,7 @@
 <% @trtypes.each do |trtype| %>
   <tr>
     <td><%= trtype.description %></td>
-    <td><%= trtype.parameters %></td>
+    <td><%= trtype.action_name %></td>
     <td><%= trtype.status_flag %></td>
     <td>  <%=   if !trtype.series_description_type_id.blank? 
           SeriesDescriptionType.find(trtype.series_description_type_id).series_description_type 

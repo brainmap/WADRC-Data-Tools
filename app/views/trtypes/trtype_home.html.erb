@@ -2,7 +2,7 @@
 <%  v_y_n = {"Y"=>"Y","N"=>"N"} 
 v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
 <table class="search_form" >
-	<tr><td colspan="3" align="left"><b>Tracking file processing and edits:</b> <br>
+	<tr><td colspan="3" align="left"><b>Tracking file processing and <%= @v_action_name.pluralize %>:</b> <br>
 		<%= form_for 'trtype_home' do |f| %>
 	       <%= f.label :tr_type %>: 
 		   <select onChange="if(this.selectedIndex!=0) self.location=this.options[this.selectedIndex].value">
@@ -25,7 +25,7 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= f.label :scan_procedure %>:      <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
     <%= collection_select(:tr_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'choose scan procedure'}, {:multiple =>  false} ) %><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= f.label :user_id %>: 
-    <%= select(:tr_search, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select editor" }) %>
+    <%= select(:tr_search, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select user" }) %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <%= select(:tr_search,  :file_completed_flag, v_y_n, {:prompt => 'File Completed?'} ) %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= select(:tr_search,  :qc_value, v_qc, {:prompt => 'QC Value?'} ) %>
@@ -63,7 +63,7 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
 
  <% if !@trfiles_search.nil? and @trfiles_search.size > 0 %>
 <tr><td colspan="3">  <small><%= link_to 'download xls', { :controller=>"trtypes", :action=>"trtype_home", :tr_search =>  params[:tr_search] , :format => :xls} %></small>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><%= link_to 'View File Edit List' ,{ :controller=>"tredits", :action=>"tredit_home", :trtype_id =>  params[:id]} %></small>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><%= link_to 'View File '+@v_action_name.humanize+' List' ,{ :controller=>"tredits", :action=>"tredit_home", :trtype_id =>  params[:id]} %></small>
     </td></tr>
   <%end%>
 
@@ -89,10 +89,10 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
 			 %>
 		<tr><% if trf.file_completed_flag  == 'Y' %><%= show_bool('yes' ) %><%else%><%= show_bool('no' ) %><%end%>
         <td><%= (trf.updated_at).strftime('%Y-%m-%d %H:%M'  ) %></td>
-        <td><%= trf.subjectid %></td><td nowrap><small><small><%= link_to "Add edit","/trfile_home/"+params[:id]+"?trfile_action=add_edit&trfile_id="+trf.id.to_s,{:style=>'color:#000000;'} %>
+        <td><%= trf.subjectid %></td><td nowrap><small><small><%= link_to "Add "+@v_action_name,"/trfile_home/"+params[:id]+"?trfile_action=add_edit&trfile_id="+trf.id.to_s,{:style=>'color:#000000;'} %>
         <br>
         <% if !@tredit.nil? %>
-        <%= link_to "Last edit","/trfile_home/"+params[:id]+"?trfile_action=get_edit&trfile_id="+(trf.id).to_s ,{:style=>'color:#000000;'}%></small></small>
+        <%= link_to "Last "+@v_action_name,"/trfile_home/"+params[:id]+"?trfile_action=get_edit&trfile_id="+(trf.id).to_s ,{:style=>'color:#000000;'}%></small></small>
        <%end%></td>
         <td><%= ScanProcedure.find(trf.scan_procedure_id).codename %> </td> 
         <td><%= trf.qc_value %> <small><small><%= popup_note('peek', key_val_table('path_popup', { :qc_notes => v_peek })) unless v_peek.blank? %></small></small> </td> 
