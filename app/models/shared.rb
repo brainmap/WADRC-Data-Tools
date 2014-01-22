@@ -2786,6 +2786,27 @@ puts "AAAAAA "+v_call
                stdin.close
                stdout.close
                stderr.close
+
+               # check if copied nii file is a directory -- found 2 exapmles
+              v_call = "ssh panda_user@merida.dom.wisc.edu 'ls -dl "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_"+r_dataset[3].gsub(" ","_")+"_"+v_dir+".nii '"
+              puts v_call
+              stdin, stdout, stderr = Open3.popen3(v_call)
+               while !stdout.eof?
+                  v_return = stdout.read 1024  
+                  v_return_array = v_return.split(' ')
+                  if v_return_array[1] == "2"
+                     puts " its a DIRECTORY!!!!!"
+                     @schedulerun.comment = "IT IS A DIRECTORY "+v_subjectid_actual+"_*_"+v_dir+".nii; "+@schedulerun.comment
+                     @schedulerun.save
+                     v_comment_warning = "IT IS A DIRECTORY "+v_subjectid_actual+"_*_"+v_dir+".nii;" +v_comment_warning
+                  end
+
+               end
+               stdin.close
+               stdout.close
+               stderr.close
+
+
             else
               # nii not exists
               @schedulerun.comment = "MISSING "+v_subjectid_actual+"_*_"+v_dir+".nii; "+@schedulerun.comment
