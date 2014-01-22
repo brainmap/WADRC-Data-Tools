@@ -476,7 +476,7 @@ v_tn_cn_searchable_hash = []
     <%  v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
         v_link_to_elements = v_link_to_elements.gsub(/&amp;method=post">download xls<\/a>/,'')
         v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'') 
-        v_link_to_elements = v_link_to_elements.gsub(/^&amp;/,'')   
+        v_link_to_elements = v_link_to_elements.gsub(/^&amp;/,'').gsub(/%5B/,'[').gsub(/%5D/,']')   
         v_link_array =[]
         v_link_array = v_link_to_elements.split("\&amp\;") 
         v_link_array.each do |v| 
