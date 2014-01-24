@@ -4,7 +4,7 @@ class TrtypesController < ApplicationController
 
   def trtype_home
     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
-    @trtypes = Trtype.all
+    @trtypes = Trtype.where("status_flag ='Y' ")
     connection = ActiveRecord::Base.connection();
     @v_action_name ="action"
     if !params[:id].nil?

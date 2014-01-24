@@ -4,13 +4,17 @@ class TrfilesController < ApplicationController
     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     # get params -- tredit_id ==> trfile_id, trype_id 
     if !params[:tredit_id].nil?
+         v_datetime = DateTime.now
         @tredit = Tredit.find(params[:tredit_id])
+        @tredit.updated_at = v_datetime.strftime('%Y-%m-%d %H:%M:%S')
+        @tredit.save
         @trfiles = Trfile.where("trfiles.scan_procedure_id in (?)",scan_procedure_array).where("trfiles.id in (?)",@tredit.trfile_id)
        @trfile = @trfiles[0]
         @trfile.image_dataset_id  = params[:trfile_edit_action][:image_dataset_id]
         @trfile.file_completed_flag  = params[:trfile_edit_action][:file_completed_flag]
         @trfile.qc_value  = params[:trfile_edit_action][:qc_value]
         @trfile.status_flag  = params[:trfile_edit_action][:status_flag]
+        @trfile.updated_at = v_datetime.strftime('%Y-%m-%d %H:%M:%S')
         @trfile.save
         @tredit.user_id = params[:tredit][:user_id]
         if !params[:value].nil?
@@ -25,6 +29,8 @@ class TrfilesController < ApplicationController
                   puts "bbbbbb nil = "+(ta.id).to_s
               end
               @tredit_action.value = v_value
+              v_datetime = DateTime.now
+              @tredit.updated_at = v_datetime.strftime('%Y-%m-%d %H:%M:%S')
               @tredit_action.save
               # trying to get the updated_at to propagate from the tredit_action to tredit/trfile 
               # not updating updated_at 

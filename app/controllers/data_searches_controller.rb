@@ -814,6 +814,7 @@ class DataSearchesController < ApplicationController
    # can not do a self join-- unless two copies of table - unique tn_id, tn_cn_id
     def cg_search   
 
+      v_debug = "N" # Y"
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       # make the sql -- start with base 
       @local_column_headers =["Date (vgroup)","Protocol","Enumber","RMR"]
@@ -873,7 +874,9 @@ class DataSearchesController < ApplicationController
         else
             @html_request ="N"
         end
-      
+      if v_debug == "Y"
+           puts "aaaaaa @html_request= "+@html_request
+       end
       # get stored cg_search
       if !params[:cg_search].blank? and !params[:cg_search][:cg_query_id].blank?
          @cg_query = CgQuery.find(params[:cg_search][:cg_query_id])
@@ -1556,7 +1559,9 @@ class DataSearchesController < ApplicationController
       
       # trim leading ","
       params["search_criteria"] = params["search_criteria"].sub(", ","")
-
+       if v_debug == "Y" and @table_types.blank?
+            puts "DDDDDDDD @table_types blank"
+       end 
 
      # not sure how to use this with base vs column_group or other -- if no table_type, sql is not run below
       if !@table_types.blank? # and !@table_types.index('base').blank?  # extend to cg_enumber, cg_enumber_sp, cg_rmr, cg_rmr_sp, cg_sp, cg_wrapnum, cg_adrcnum, cg_reggieid  
@@ -1585,8 +1590,23 @@ class DataSearchesController < ApplicationController
         #run_search_q_data tn_cn_id/tn_id in (686/676,687/677,688/688) common_name = "question fields" vs run_search if 
       end     
       @column_number =   @local_column_headers.size
-        
+      if v_debug == "Y"
+          puts "hhhhhhhhh line 1592"
+      end
+      if v_debug == "Y" and params[:cg_search].blank?
+            puts "hhhhhhhhh params[:cg_search]  blank "
+      end
+      if v_debug == "Y" and @table_types.blank?
+             puts " hhhhhhhh @table_types   blank"
+      end
+      if v_debug == "Y" and @table_types.index('base').blank?
+           puts "hhhhhhh @table_types.index('base') blank"
+      end
   if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?
+    if v_debug == "Y"
+        puts "jjjjjjjj line 1596"
+    end
+
     @local_conditions.delete_if {|x| x == "" }   # a blank getting inserted 
     sql = " select distinct "+@local_fields.join(',')+" from "
     @all_tables = []
@@ -1604,8 +1624,9 @@ class DataSearchesController < ApplicationController
     sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3999]+"')"
     @results_log = connection.execute(sql_log)
     # run the sql ==>@results, after some substitutions
-    
+
     if !params[:cg_search].blank? and !params[:cg_search][:series_description_type_id].blank? and !params[:cg_search][:image_dataset_file].blank?
+
       # image_datasets
       # get list of columns from ids_search
       # @column_headers_ids = ['Date','Protocol','Enumber','RMR','series_description','dicom_series_uid','dcm_file_count','timestamp','scanned_file','image_uid','id','rep_time','glob','path','bold_reps','slices_per_volume','visit.age_at_visit','visit.scanner_source','image_dataset_quality_checks.motion_warning','image_dataset_quality_checks.incomplete_series','image_dataset_quality_checks.omnibus_f_comment','image_dataset_quality_checks.fov_cutoff','image_dataset_quality_checks.banding_comment','image_dataset_quality_checks.spm_mask','image_dataset_quality_checks.garbled_series_comment','image_dataset_quality_checks.motion_warning_comment','image_dataset_quality_checks.user_id','image_dataset_quality_checks.banding','image_dataset_quality_checks.field_inhomogeneity','image_dataset_quality_checks.nos_concerns_comment','image_dataset_quality_checks.garbled_series','image_dataset_quality_checks.created_at','image_dataset_quality_checks.incomplete_series_comment','image_dataset_quality_checks.omnibus_f','image_dataset_quality_checks.other_issues','image_dataset_quality_checks.fov_cutoff_comment','image_dataset_quality_checks.nos_concerns','image_dataset_quality_checks.registration_risk','image_dataset_quality_checks.ghosting_wrapping','image_dataset_quality_checks.field_inhomogeneity_comment','image_dataset_quality_checks.updated_at','image_dataset_quality_checks.registration_risk_comment','image_dataset_quality_checks.ghosting_wrapping_comment','image_dataset_quality_checks.image_dataset_id','image_dataset_quality_checks.spm_mask_comment','image_comments.comment','image_comments.updated_at','image_comments.created_at','image_comments.user_id','image_comments.image_dataset_id','Appt Note'] # need to look up values
@@ -1666,6 +1687,7 @@ class DataSearchesController < ApplicationController
 #puts sql
 
     @results2 = connection.execute(sql)
+
     @temp_results = @results2
 
     @results = []     
