@@ -3,6 +3,7 @@
 v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
 <table class="search_form" >
 	<tr><td colspan="3" align="left"><b>Tracking file processing and <%= @v_action_name.pluralize %>:</b> <br>
+    <% if params[:id].nil? %>
 		<%= form_for 'trtype_home' do |f| %>
 	       <%= f.label :tr_type %>: 
 		   <select onChange="if(this.selectedIndex!=0) self.location=this.options[this.selectedIndex].value">
@@ -16,11 +17,22 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
 	          <% end %>
 	        </select>
 	<% end %>
+  <%else%>
+<B>Trtype: <%= Trtype.find(params[:id]).description %></B>
+  <%end%>
 </td></tr>
 <% if !params[:id].nil? %>
+  <tr><td colspan="3">
+    <%= form_tag("/trfile_home/"+params[:id], method: "post") do %>
+           <%= label_tag :subjectid %>: <small>for visit 1 just enter [subjectid], for visit 2 enter [subjectid]_v2 ,e.g. for visit # enter [subjectid]_v#</small><br />
+   <%= submit_tag 'Make New File'%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag  :subjectid ,"",:required=>TRUE %>
+    <%= hidden_field_tag :trfile_action,"create" %>
+    <%end %><br><br>
+ </td></tr>
+<tr><td colspan="3" align="left" nowrap><hr width="80%" ></td></tr>
 	<tr><td colspan="3" align="left" nowrap>
       <%= form_for 'trtype_home/'+params[:id] do |f| %>
-      <%= f.label :search %>:<br>
+      <b><%= f.label :search %>:</b><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= f.label :trfile %>: <%= select(:tr_search,:trfile_id, @trfiles.collect {|p| [ p.subjectid+" - "+ScanProcedure.find(p.scan_procedure_id).codename, p.id ] },  { :include_blank => "Select a subject" }) %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= f.label :scan_procedure %>:      <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
     <%= collection_select(:tr_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'choose scan procedure'}, {:multiple =>  false} ) %><br>
@@ -47,18 +59,10 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
    <% end 
 %>
 <!-- = f.label :compeleted -->
-<%=f.submit 'Run Search'%>
+<%=f.submit 'Run Search'%>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <%= label_tag :subjectid %> ( add _v2, _v3, etc ):&nbsp;&nbsp;<%= text_field_tag  "tr_search[subjectid]",""  %>
       <%end%>
 <br>
 </td></tr>
-<tr><td colspan="3" align="left" nowrap><hr width="80%"></td></tr>
-	<tr><td colspan="3">
-		<%= form_tag("/trfile_home/"+params[:id], method: "post") do %>
-           <%= label_tag :subjectid %>: <small>for visit 1 just enter [subjectid], for visit 2 enter [subjectid]_v2 ,e.g. for visit # enter [subjectid]_v#</small><br />
-   <%= submit_tag 'Make new file'%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag  :subjectid ,"",:required=>TRUE %>
-    <%= hidden_field_tag :trfile_action,"create" %>
-		<%end %><br>
- </td></tr>
 <%end # end of if id null%>
 
  <% if !@trfiles_search.nil? and @trfiles_search.size > 0 %>
