@@ -499,6 +499,24 @@ class Shared  < ActionController::Base
                                                                                                d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
                                                                                             end 
                                                                                          end }
+               Dir.glob(v_parent_dir_target+'/*/*/*.1*').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }
+               Dir.glob(v_parent_dir_target+'/*/*/*.2*').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }
+               Dir.glob(v_parent_dir_target+'/*/*/*.3*').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }
 
         ####  end                            
 
@@ -789,6 +807,24 @@ class Shared  < ActionController::Base
                                                                                                   d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
                                                                                                end 
                                                                                             end }
+                  Dir.glob(v_parent_dir_target+'/*/*/*.1*').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                            v_dicom_field_array.each do |dicom_key|
+                                                                                                if !d[dicom_key].nil? 
+                                                                                                  d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                               end 
+                                                                                            end }
+                  Dir.glob(v_parent_dir_target+'/*/*/*.2*').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                            v_dicom_field_array.each do |dicom_key|
+                                                                                                if !d[dicom_key].nil? 
+                                                                                                  d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                               end 
+                                                                                            end }
+                  Dir.glob(v_parent_dir_target+'/*/*/*.3*').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                            v_dicom_field_array.each do |dicom_key|
+                                                                                                if !d[dicom_key].nil? 
+                                                                                                  d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                               end 
+                                                                                            end }
 
            ####  end                            
 
@@ -1019,6 +1055,7 @@ puts "AAAAAA "+v_call
       sql_status = "select status_flag from cg_adrc_upload where subjectid ='"+r[0]+"'"
       results_status = connection.execute(sql_status)
       if v_scan_desc_type_array.size < 4   and (results_status.first)[0] != "R"
+    puts "bbbbb !R or not enough scan types "
         sql_dirlist = "update cg_adrc_upload set general_comment =' NOT ALL SCAN TYPES!!!! "+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
         results_dirlist = connection.execute(sql_dirlist)
         # send email 
@@ -1046,7 +1083,9 @@ puts "AAAAAA "+v_call
       stdout.close
       stderr.close
       else
-      
+         puts "AAAAAAAAA DCM PATH TMP ="+v_parent_dir_target+"/*/*/*.dcm"
+#         /tmp/adrc_upload/adrc00045_20130920_wisc/008_DTI/008
+
         sql_dirlist = "update cg_adrc_upload set dir_list ='"+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
         results_dirlist = connection.execute(sql_dirlist)
 # TURN INTO A LOOP
@@ -1070,6 +1109,24 @@ puts "AAAAAA "+v_call
                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
                                                                                            end 
                                                                                         end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.1*').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.2*').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.3*').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
                                                                                                 
        ####  end                            
                                     
@@ -1078,7 +1135,7 @@ puts "AAAAAA "+v_call
 # Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0030"].nil? 
 #                                                                                           d["0010,0030"].value = "DOB"; d.write(dcm) 
 #                                                                                               end } 
-        v_call = "rsync -av "+v_parent_dir_target+" panda_user@merida.dom.wisc.edu:/home/panda_user/upload_adrc/"
+        v_call = "rsync -av "+v_parent_dir_target+" panda_user@merida.dom.wisc.edu:/home/panda_user/upload_adrc/"+v_subject_dir
         stdin, stdout, stderr = Open3.popen3(v_call)
         while !stdout.eof?
           puts stdout.read 1024    
@@ -1122,14 +1179,14 @@ puts "AAAAAA "+v_call
          # did the tar.gz on merida to avoid mac acl PaxHeader extra directories
          # not need this? 
          # could change sftp to come from ~/upload_adrc
-         v_call = "rsync -av panda_user@merida.dom.wisc.edu:/home/panda_user/upload_adrc/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
-         stdin, stdout, stderr = Open3.popen3(v_call)
-         while !stdout.eof?
-           puts stdout.read 1024    
-          end
-         stdin.close
-         stdout.close
-         stderr.close
+####???         v_call = "rsync -av panda_user@merida.dom.wisc.edu:/home/panda_user/upload_adrc/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
+####         stdin, stdout, stderr = Open3.popen3(v_call)
+####         while !stdout.eof?
+####           puts stdout.read 1024    
+####          end
+####         stdin.close
+####         stdout.close
+####         stderr.close
 
         # sftp -- shared helper hasthe username /password and address
         v_username = Shared.adrc_sftp_username # get from shared helper
@@ -2819,7 +2876,145 @@ puts "AAAAAA "+v_call
         
       end
 
-      # get dti from nagesh - FA, MD, L1, L2, L3  cg_dti_status
+      # get dti raw dicom for this subjectid/sp
+      sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_types.series_description_type 
+                   from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
+                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
+                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
+                   and image_datasets.series_description =   series_description_maps.series_description
+                   and series_description_maps.series_description_type_id = series_description_types.id
+                   and series_description_types.series_description_type in ('DTI') 
+                   and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
+                   and vgroups.id in (select spv.vgroup_id from scan_procedures_vgroups spv where spv.scan_procedure_id = "+r[2].to_s+" )
+                   and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+ v_subjectid+"')
+                    order by appointments.appointment_date "
+      results_dataset = connection.execute(sql_dataset)
+      v_cnt = 1
+      v_dir_target = ""
+      v_scan_desc_type_array = []
+      results_dataset.each do |r_dataset|
+             v_series_description_type = r_dataset[5].gsub(" ","_")
+             if !v_scan_desc_type_array.include?(v_series_description_type)
+                  v_scan_desc_type_array.push(v_series_description_type)
+             end
+             v_path = r_dataset[4]
+             v_dir_array = v_path.split("/")
+             v_dir = v_dir_array[(v_dir_array.size - 1)]
+             v_dir_target = v_dir+"_"+v_series_description_type
+             v_path = v_path.gsub("/Volumes/team/","").gsub("/Volumes/team-1/","").gsub("/Data/vtrak1/","")  #v_base_path+"/"+
+             if v_folder_array.include?(v_dir_target)
+               v_dir_target = v_dir_target+"_"+v_cnt.to_s
+               v_cnt = v_cnt +1
+               # might get weird if multiple types have dups - only expect T1/Bravo
+             end
+  puts "aaaaaa v_dir_target = "+v_dir_target
+             v_folder_array.push(v_dir_target)
+
+              # v_call = "/usr/bin/bunzip2 "+v_parent_dir_target+"/"+v_dir_target+"/*.bz2"
+               v_tmp = "/tmp/"+v_dir_target 
+               v_call = "mise "+v_path+" "+v_parent_dir_target+"/"+v_dir_target   # works where bunzip2 cmd after rsync not work
+               v_call = "mise "+v_path+" "+v_tmp 
+ #puts "v_path = "+v_path
+ #puts "v_parent_dir_target = "+ v_parent_dir_target
+ #puts "v_dir_target="+v_dir_target
+ puts "AAAAAA "+v_call
+              stdin, stdout, stderr = Open3.popen3(v_call)
+               stderr.each {|line|
+                   puts line
+                 }
+                 while !stdout.eof?
+                   puts stdout.read 1024    
+                  end
+              stdin.close
+              stdout.close
+              stderr.close
+              # temp - replace /Volumes/team/ and /Data/vtrak1/ with /Volumes/team-1 in dev
+             # split on / --- get the last dir
+             # make new dir name dir_series_description_type 
+             # check if in v_folder_array , if in v_folder_array , dir_series_description_type => dir_series_description_type_2
+             # add  dir, dir_series_description_type to v_folder_array
+             # cp path ==> /tmp/adrc_dti/[subjectid]_yyymmdd_wisc/dir_series_description_type(_2)
+       end
+
+
+       if v_scan_desc_type_array.size > 0   
+puts "dddddd in ids dicoms"
+puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm" 
+ # TURN INTO A LOOP   
+        v_dicom_field_array =['0010,0030','0010,0010','0008,0050','0008,1030','0010,0020','0040,0254','0008,0080','0008,1010','0009,1002','0009,1030','0018,1000',
+                        '0025,101A','0040,0242','0040,0243']
+        v_dicom_field_value_hash ={'0010,0030'=>'DOB','0010,0010'=>'Name','0008,0050'=>'Accession Number',
+                           '0008,1030'=>'Study Description', '0010,0020'=>'Patient ID','0040,0254'=>'Performed Proc Step Desc',
+                            '0008,0080'=>'Institution Name','0008,1010'=>'Station Name','0009,1002'=>'Private',
+                            '0009,1030'=>'Private','0018,1000'=>'Device Serial Number','0025,101A'=>'Private',
+                            '0040,0242'=>'Performed Station Name','0040,0243'=>'Performed Location'}
+
+
+        # v_dicom_field_array =['0010,0030']
+        # v_dicom_field_value_hash ={'0010,0030'=>'DOB'}
+      ####  v_dicom_field_array.each do |dicom_key|
+                Dir.glob('/tmp/'+v_dir_target+'/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                      v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                                  d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                             end 
+                                                                                       end }
+
+                                                                               
+               Dir.glob('/tmp/'+v_dir_target+'/*/*.0*').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }
+
+              Dir.glob('/tmp/'+v_dir_target+'/*/*.1*').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm)
+                                                                                            end 
+                                                                                         end }   
+             Dir.glob('/tmp/'+v_dir_target+'/*/*.2*').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }   
+             Dir.glob('/tmp/'+v_dir_target+'/*/*.3*').each {|dcm| puts d = DICOM::DObject.new(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }                                                                               
+
+        v_call = "rsync -av /tmp/"+v_dir_target+" panda_user@merida.dom.wisc.edu:"+v_parent_dir_target 
+         stdin, stdout, stderr = Open3.popen3(v_call)
+         while !stdout.eof?
+           puts stdout.read 1024    
+          end
+         stdin.close
+         stdout.close
+         stderr.close
+
+         v_call = "rm -rf /tmp/"+v_dir_target
+         stdin, stdout, stderr = Open3.popen3(v_call)
+         while !stdout.eof?
+           puts stdout.read 1024    
+          end
+         stdin.close
+         stdout.close
+         stderr.close
+
+
+        end                            
+
+ #                             
+ # # #puts "bbbbb dicom clean "+v_parent_dir_target+"/*/"
+ # Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0030"].nil? 
+ #                                                                                           d["0010,0030"].value = "DOB"; d.write(dcm) 
+ #                                                                                               end } 
+
+      # get dti from nagesh - FA, MD, L1, L2, L3  cg_dti_status  -- only some processed - and registerred to a common space 
 
       # get pib and rename
       # dvd in subject space , use  rFS_r<enum>_realignPIB_DVR_HYPR.nii if exists, else use r<enum>_realignPIB_DVR_HYPR.nii
