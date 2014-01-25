@@ -1089,7 +1089,7 @@ puts "AAAAAA "+v_call
                                                                            
         #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
         #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
-        v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
+        #v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
         v_call =  'ssh panda_user@merida.dom.wisc.edu "  tar  -C /home/panda_user/upload_adrc  -zcf /home/panda_user/upload_adrc/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
         stdin, stdout, stderr = Open3.popen3(v_call)
         while !stdout.eof?
@@ -1120,6 +1120,8 @@ puts "AAAAAA "+v_call
        
         
          # did the tar.gz on merida to avoid mac acl PaxHeader extra directories
+         # not need this? 
+         # could change sftp to come from ~/upload_adrc
          v_call = "rsync -av panda_user@merida.dom.wisc.edu:/home/panda_user/upload_adrc/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
          stdin, stdout, stderr = Open3.popen3(v_call)
          while !stdout.eof?
