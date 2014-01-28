@@ -8,8 +8,8 @@ class TreditsController < ApplicationController
    @tractiontypes_search = Tractiontype.where("trtype_id in (?)",params[:trtype_id]).where("tractiontypes.display_search_flag = 'Y' ").order(:display_order)
     # base columns
     @export_file_title =Trtype.find(params[:trtype_id]).description+" file edits"
-    @column_headers_display = ['Edit','File Completed','Last Update','Subjectid','Scan Procedure','User']
-    @column_headers = ['Edit_id','File Completed','Last Update','Subjectid','Scan Procedure','User']
+    @column_headers_display = ['Edit','File Completed','Last Update','Subjectid','Scan Procedure','User','Active']
+    @column_headers = ['Edit_id','File Completed','Last Update','Subjectid','Scan Procedure','User','Active']
 
     @tractiontypes.each do |act|
       @column_headers_display.push(act.display_column_header_1)
@@ -106,6 +106,7 @@ class TreditsController < ApplicationController
                         @tredit_row.push(trfile[3]) #subjectid
                         @tredit_row.push(trfile[4]) #codenme
                         @tredit_row.push((User.find(tredit.user_id)).username_name)
+                        @tredit_row.push(tredit.status_flag)
                         @tractiontypes.each do |act|
                           @tredit_actions = TreditAction.where("tredit_id in (?)",tredit.id).where("tractiontype_id in (?)",act.id)
                           # translate stored value to display value -- q_data does this by one big join

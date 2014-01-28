@@ -6,6 +6,12 @@ class TrfilesController < ApplicationController
     if !params[:tredit_id].nil?
          v_datetime = DateTime.now
         @tredit = Tredit.find(params[:tredit_id])
+        if !params[:tredit].nil? and !params[:tredit][:status_flag].nil?
+            @tredit.status_flag = params[:tredit][:status_flag]
+        end
+        if !params[:tredit].nil? and !params[:tredit][:user_id].nil?
+            @tredit.user_id = params[:tredit][:user_id]
+        end
         @tredit.updated_at = v_datetime.strftime('%Y-%m-%d %H:%M:%S')
         @tredit.save
         @trfiles = Trfile.where("trfiles.scan_procedure_id in (?)",scan_procedure_array).where("trfiles.id in (?)",@tredit.trfile_id)
@@ -152,7 +158,7 @@ class TrfilesController < ApplicationController
   else
     @tredit_prev = nil
     @tredit_next = nil
-    tredits = Tredit.where("tredits.trfile_id in (?)", @tredit.trfile_id).order(:id)
+    tredits = Tredit.where("tredits.trfile_id in (?) and tredits.status_flag ='Y'", @tredit.trfile_id).order(:id)
     @v_edit_cnt =1
     @v_last_edit = "N"
     v_cnt =0
