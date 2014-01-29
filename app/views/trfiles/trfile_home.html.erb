@@ -39,7 +39,12 @@
 	<tr> <!-- constant accross trtypes -->
 		<td align="left"><small><b>Subjectid_v#:</b></small> <%=@trfile.subjectid %></td>
 		<td align="left"><small><b>User:</b></small> <%= select(:tredit, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select user" ,:selected => @tredit.user_id }) %></td>
-		<td align="left"><small><b>Updated:</b> <%=   @tredit.updated_at.strftime('%Y-%m-%d %H:%M'  ) %> </small></td>
+		<td align="left"><small><b>Updated:</b> <%=   @tredit.updated_at.strftime('%Y-%m-%d %H:%M'  ) %> </small>
+
+<% if current_user.role == 'Admin_High' or (current_user.id).to_s == (@tredit.user_id).to_s %>
+      <br>
+    <small><small>Edit Active?: </small></small><%= select( :tredit, :status_flag, v_y_n, {:prompt => 'Active?',:selected => @tredit.status_flag} ) %>
+  <%end%> </td>
 	</tr>
 <%  v_tractiontypes = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.form_display_order is not null").order(:form_display_order) 
 

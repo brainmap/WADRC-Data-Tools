@@ -88,7 +88,7 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
 		<% connection = ActiveRecord::Base.connection();
      @trfiles_search.each do |trf| 
       v_peek = trf.qc_notes
-            @tredits = Tredit.where("trfile_id = "+(trf.id).to_s).order("tredits.id asc")
+            @tredits = Tredit.where("trfile_id = "+(trf.id).to_s+" and status_flag ='Y'").order("tredits.id asc")
             @tredit = @tredits[0]
 			 %>
 		<tr><% if trf.file_completed_flag  == 'Y' %><%= show_bool('yes' ) %><%else%><%= show_bool('no' ) %><%end%>

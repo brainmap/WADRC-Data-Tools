@@ -996,7 +996,7 @@ class Shared  < ActionController::Base
        end
       stdin.close
       stdout.close
-      stderr.close
+      stderr.close   
       sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_types.series_description_type 
                   from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
@@ -1135,7 +1135,7 @@ puts "AAAAAA "+v_call
 # Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.new(dcm); if !d["0010,0030"].nil? 
 #                                                                                           d["0010,0030"].value = "DOB"; d.write(dcm) 
 #                                                                                               end } 
-        v_call = "rsync -av "+v_parent_dir_target+" panda_user@merida.dom.wisc.edu:/home/panda_user/upload_adrc/"+v_subject_dir
+        v_call = "rsync -av "+v_parent_dir_target+" panda_user@merida.dom.wisc.edu:/home/panda_user/upload_adrc/"    #+v_subject_dir
         stdin, stdout, stderr = Open3.popen3(v_call)
         while !stdout.eof?
           puts stdout.read 1024    
@@ -1179,33 +1179,39 @@ puts "AAAAAA "+v_call
          # did the tar.gz on merida to avoid mac acl PaxHeader extra directories
          # not need this? 
          # could change sftp to come from ~/upload_adrc
-####???         v_call = "rsync -av panda_user@merida.dom.wisc.edu:/home/panda_user/upload_adrc/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
-####         stdin, stdout, stderr = Open3.popen3(v_call)
-####         while !stdout.eof?
-####           puts stdout.read 1024    
-####          end
-####         stdin.close
-####         stdout.close
-####         stderr.close
+         v_call = "rsync -av panda_user@merida.dom.wisc.edu:/home/panda_user/upload_adrc/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
+         stdin, stdout, stderr = Open3.popen3(v_call)
+         while !stdout.eof?
+           puts stdout.read 1024    
+          end
+         stdin.close
+         stdout.close
+         stderr.close
 
         # sftp -- shared helper hasthe username /password and address
         v_username = Shared.adrc_sftp_username # get from shared helper
         v_passwrd = Shared.adrc_sftp_password   # get from shared helperwhich is not on github
         v_ip = Shared.adrc_sftp_host_address # get from shared helper
+  puts "dddddddd v_target_dir ="+v_target_dir+"="
+  puts "eeeeeee v_subject_dir ="+v_subject_dir+"="
         v_source = v_target_dir+'/'+v_subject_dir+".tar.gz"
         v_target = v_subject_dir+".tar.gz"
+  puts "gggggg v_source ="+v_source
+  puts "hhhhhhh v_target ="+v_target
+ 
+
         Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
             sftp.upload!(v_source, v_target)
         end
 # WANT TO CHECK TRANSFERS
         v_call = " rm -rf "+v_target_dir+'/'+v_subject_dir+".tar.gz"
-#        stdin, stdout, stderr = Open3.popen3(v_call)
-#        while !stdout.eof?
-#          puts stdout.read 1024    
-#         end
-#        stdin.close
-#        stdout.close
-#        stderr.close        
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close        
         
         sql_sent = "update cg_adrc_upload set sent_flag ='Y' where subjectid ='"+r[0]+"' "
         results_sent = connection.execute(sql_sent)
@@ -1367,21 +1373,21 @@ puts "AAAAAA "+v_call
       stdout.close
       stderr.close
       
-      # fsftp dir when set
+      # fsftp dir when set -- not practical - not using auto move
       # sftp -- shared helper hasthe username /password and address
-      v_username = Shared.panda_admin_sftp_username # get from shared helper -- leaving as panda_admin
-      v_passwrd = Shared.panda_admin_sftp_password   # get from shared helperwhich is not on github
+ #     v_username = Shared.panda_admin_sftp_username # get from shared helper -- leaving as panda_admin
+ #     v_passwrd = Shared.panda_admin_sftp_password   # get from shared helperwhich is not on github
       # switch on new platform
       #v_username = Shared.panda_user_sftp_username # get from shared helper
       #v_passwrd = Shared.panda_user_sftp_password   # get from shared helperwhich is not on github
-      v_ip = Shared.dom_sftp_host_address # get from shared helper
-      v_sftp_dir = Shared.antuano_target_path
+ #     v_ip = Shared.dom_sftp_host_address # get from shared helper
+ #     v_sftp_dir = Shared.antuano_target_path
       
       # problem that files are on merida, but panda running from nelson
       # need to ssh to merida as pand_admin, then sftp
-      v_source = "panda_user@merida.dom.wisc.edu:"+v_target_dir+'/'+v_subject_dir+".tar.gz"
+ #     v_source = "panda_user@merida.dom.wisc.edu:"+v_target_dir+'/'+v_subject_dir+".tar.gz"
       
-      v_target = v_sftp_dir+"/"   #+v_subject_dir+".tar.gz"
+ #     v_target = v_sftp_dir+"/"   #+v_subject_dir+".tar.gz"
       
 # puts "aaaaaa v_source = "+v_source
 # puts "bbbbbb v_target = "+v_target
@@ -4025,21 +4031,21 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       stdout.close
       stderr.close
       
-            # fsftp dir when set
+            # fsftp dir when set - not practical - not using
             # sftp -- shared helper hasthe username /password and address
-            v_username = Shared.panda_admin_sftp_username # get from shared helper
-            v_passwrd = Shared.panda_admin_sftp_password   # get from shared helperwhich is not on github
+    #        v_username = Shared.panda_admin_sftp_username # get from shared helper
+    #        v_passwrd = Shared.panda_admin_sftp_password   # get from shared helperwhich is not on github
             # switch on new platform
             #v_username = Shared.panda_user_sftp_username # get from shared helper
             #v_passwrd = Shared.panda_user_sftp_password   # get from shared helperwhich is not on github
-            v_ip = Shared.dom_sftp_host_address # get from shared helper
-            v_sftp_dir = Shared.selley_target_path
+    #        v_ip = Shared.dom_sftp_host_address # get from shared helper
+    #        v_sftp_dir = Shared.selley_target_path
 
             # problem that files are on merida, but panda running from nelson
             # need to ssh to merida as pand_admin, then sftp
-            v_source = "panda_user@merida.dom.wisc.edu:"+v_target_dir+'/'+v_subject_dir+".tar.gz"
+     #       v_source = "panda_user@merida.dom.wisc.edu:"+v_target_dir+'/'+v_subject_dir+".tar.gz"
 
-            v_target = v_sftp_dir+"/"   #+v_subject_dir+".tar.gz"
+    #      v_target = v_sftp_dir+"/"   #+v_subject_dir+".tar.gz"
 
       # puts "aaaaaa v_source = "+v_source
       # puts "bbbbbb v_target = "+v_target
