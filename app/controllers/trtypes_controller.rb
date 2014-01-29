@@ -79,7 +79,7 @@ class TrtypesController < ApplicationController
          @tractiontypes_peek = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.summary_peek_flag = 'Y' ").order(:display_order)
 
          # need count max number of edits for these trfiles
-          sql = "select max(t1.cnt) from (select count(distinct tredits.id)  cnt from tredits  where status_flag ='Y' and trfile_id in (select trfiles.id from scan_procedures, trfiles where "+@conditions.join(' and ')+" ) group by tredits.trfile_id ) t1"
+          sql = "select max(t1.cnt) from (select count(distinct tredits.id)  cnt from tredits  where status_flag ='Y' and trfile_id in (select trfiles.id from scan_procedures, trfiles where trfiles.trtype_id = "+params[:id]+" and "+@conditions.join(' and ')+" ) group by tredits.trfile_id ) t1"
           results =  connection.execute(sql)
           v_cnt_limit = (results.first)[0].to_i
 
@@ -91,7 +91,7 @@ class TrtypesController < ApplicationController
           when "[text/html]","text/html" then
               @column_headers_display = ['Completed','Last Update','Subjectid', @v_action_name.humanize+' links','Scan Procedure','QC']
               for counter in  1..v_cnt_limit
-                @column_headers_display.push('Edit #'+counter.to_s)
+                @column_headers_display.push(@v_action_name.humanize+' #'+counter.to_s)
                  @tractiontypes.each do |header|
                     @column_headers_display.push(header.display_summary_column_header_1)
                  end
