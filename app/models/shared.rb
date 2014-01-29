@@ -351,7 +351,7 @@ class Shared  < ActionController::Base
     #  table cg_adrc_upload populated by run_adrc_upload function      
      connection = ActiveRecord::Base.connection();
      # get adrc subjectid to upload
-     sql = "select distinct subjectid from cg_adrc_upload where dti_sent_flag ='N' and dti_status_flag in ('Y','R') "
+     sql = "select distinct subjectid , scan_procedure_id from cg_adrc_upload where dti_sent_flag ='N' and dti_status_flag in ('Y','R') "
      results = connection.execute(sql)
      # changed to series_description_maps table
      v_folder_array = Array.new
@@ -380,7 +380,8 @@ class Shared  < ActionController::Base
        @schedulerun.comment =v_comment[0..1990]
        @schedulerun.save
        # update schedulerun comment - prepend 
-       sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')"
+       sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
+                                                                                          and v.id in (select spvg.vgroup_id from scan_procedures_vgroups spvg  where spvg.scan_procedure_id ='"+r[1].to_s+"')"
        results_vgroup = connection.execute(sql_vgroup)
        # mkdir /tmp/adrc_dti/[subjectid]_YYYYMMDD_wisc
        v_subject_dir = r[0]+"_"+(results_vgroup.first)[0].to_s+"_wisc"
@@ -402,6 +403,7 @@ class Shared  < ActionController::Base
                    and series_description_types.series_description_type in ('DTI') 
                    and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
                    and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
+                   and vgroups.id in (select spvg.vgroup_id from scan_procedures_vgroups spvg  where spvg.scan_procedure_id ='"+r[1].to_s+"')
                     order by appointments.appointment_date "
        results_dataset = connection.execute(sql_dataset)
        v_folder_array = [] # how to empty
@@ -1192,12 +1194,9 @@ puts "AAAAAA "+v_call
         v_username = Shared.adrc_sftp_username # get from shared helper
         v_passwrd = Shared.adrc_sftp_password   # get from shared helperwhich is not on github
         v_ip = Shared.adrc_sftp_host_address # get from shared helper
-  puts "dddddddd v_target_dir ="+v_target_dir+"="
-  puts "eeeeeee v_subject_dir ="+v_subject_dir+"="
         v_source = v_target_dir+'/'+v_subject_dir+".tar.gz"
         v_target = v_subject_dir+".tar.gz"
-  puts "gggggg v_source ="+v_source
-  puts "hhhhhhh v_target ="+v_target
+
  
 
         Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|

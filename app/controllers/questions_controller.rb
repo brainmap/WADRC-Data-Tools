@@ -43,8 +43,8 @@ class QuestionsController < ApplicationController
 
   def clone 
     @question_original = Question.find(params[:id])
-    @question_original.description =   @question_original.description+"_CLONE"
-    @question =  @question_original.clone
+    @question =  @question_original.dup # clone doesn't seem to work anymore 
+    @question.description =   @question_original.description+"_CLONE"
     
  respond_to do |format|
    if @question.save
