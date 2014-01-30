@@ -4,8 +4,8 @@ class TreditsController < ApplicationController
   def tredit_home
     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
    @v_action_name = Trtype.find(params[:trtype_id]).action_name 
-   @tractiontypes = Tractiontype.where("trtype_id in (?)",params[:trtype_id]).where("tractiontypes.display_order is not null").order(:display_order) 
-   @tractiontypes_search = Tractiontype.where("trtype_id in (?)",params[:trtype_id]).where("tractiontypes.display_search_flag = 'Y' ").order(:display_order)
+   @tractiontypes = Tractiontype.where("trtype_id in (?)",params[:trtype_id]).where("tractiontypes.status_flag = 'Y' and tractiontypes.display_order is not null").order(:display_order) 
+   @tractiontypes_search = Tractiontype.where("trtype_id in (?)",params[:trtype_id]).where("tractiontypes.status_flag = 'Y' and tractiontypes.display_search_flag = 'Y' ").order(:display_order)
     # base columns
     @export_file_title =Trtype.find(params[:trtype_id]).description+" file edits"
     @column_headers_display = ['Edit','File Completed','Last Update','Subjectid','Scan Procedure','User','Active']

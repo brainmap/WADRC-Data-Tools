@@ -53,7 +53,7 @@
     <small><small>Edit Active?: </small></small><%= select( :tredit, :status_flag, v_y_n, {:prompt => 'Active?',:selected => @tredit.status_flag} ) %>
   <%end%> </td>
 	</tr>
-<%  v_tractiontypes = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.form_display_order is not null").order(:form_display_order) 
+<%  v_tractiontypes = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.status_flag ='Y' and tractiontypes.form_display_order is not null").order(:form_display_order) 
 
    if !v_tractiontypes.nil? 
      v_limit = 3 # 3 cols 

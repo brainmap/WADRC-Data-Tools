@@ -12,7 +12,14 @@
     <%= select(:tr_search,  :file_completed_flag, v_y_n, {:prompt => 'File Completed?'} ) %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <% if !@tractiontypes_search.nil? 
+      v_cnt_search = 0
       @tractiontypes_search.each do |act|
+        v_cnt_search = v_cnt_search + 1
+        if v_cnt_search > 6
+           v_cnt_search = 0 %>
+           <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+           <%
+        end
        if act.ref_table_a_1 == "lookup_refs"  ## use ref_table_b_1 %>
         <%= collection_select "tr_search","tractiontype_id]["+act.id.to_s, LookupRef.where("label = ?",act.ref_table_b_1).sort_by(&:display_order),
             :ref_value, :description, {:include_blank => act.form_display_label+" ?" } %>
