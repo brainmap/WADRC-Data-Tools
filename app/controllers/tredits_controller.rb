@@ -80,7 +80,7 @@ class TreditsController < ApplicationController
               @html_request ="N"
           end
               # get the tredit_action values
-              @db_columns   =["trfiles.id","trfiles.file_completed_flag","trfiles.updated_at","trfiles.subjectid","scan_procedures.codename"]
+              @db_columns   =["trfiles.id","trfiles.file_completed_flag","trfiles.updated_at","concat(trfiles.subjectid,' ',trfiles.secondary_key)","scan_procedures.codename"]
               sql = "select "+@db_columns.join(",")+" from scan_procedures, trfiles where "+@conditions.join(' and ') 
               connection = ActiveRecord::Base.connection();
               @trfiles_search  =  connection.execute(sql)

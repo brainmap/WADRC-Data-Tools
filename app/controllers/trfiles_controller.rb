@@ -70,11 +70,15 @@ class TrfilesController < ApplicationController
       v_display_form = "Y"
    if !params[:trfile_action].nil? and params[:trfile_action] =="create"
      v_subjectid_v = params[:subjectid]
-
-     v_trfile = Trfile.where("subjectid in (?)",v_subjectid_v).where("trtype_id in (?)",params[:id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_edit_array)
-
+     v_secondary_key = ""
+     if !params[:secondary_key].nil?
+       v_secondary_key = params[:secondary_key]
+        v_trfile = Trfile.where("subjectid in (?)",v_subjectid_v).where("secondary_key in (?)",v_secondary_key).where("trtype_id in (?)",params[:id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_edit_array)    
+     else
+        v_trfile = Trfile.where("subjectid in (?)",v_subjectid_v).where("trtype_id in (?)",params[:id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_edit_array)
+     end
      if !(v_trfile[0]).nil? 
-        v_comment = v_comment + " There was already a file for "+v_subjectid_v+". This is the most recent edit."
+        v_comment = v_comment + " There was already a file for "+v_subjectid_v+" "+v_secondary_key+". This is the most recent edit."
         if !v_subjectid_v.include? "_v"
             v_comment = v_comment + " Did you mean to include _v2 or _v3 or _v# in the subjectid?"
         end
@@ -97,6 +101,7 @@ class TrfilesController < ApplicationController
         if !v_sp_id.nil? and !v_enrollment_id.nil?
            @trfile = Trfile.new
            @trfile.subjectid = v_subjectid_v
+           @trfile.secondary_key = v_secondary_key
            @trfile.enrollment_id = v_enrollment_id
            @trfile.scan_procedure_id = v_sp_id
            @trfile.trtype_id = params[:id]

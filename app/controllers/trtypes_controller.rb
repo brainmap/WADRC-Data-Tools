@@ -35,6 +35,10 @@ class TrtypesController < ApplicationController
                @trfiles_search = @trfiles_search.where("subjectid in (?)",params[:tr_search][:subjectid])
                @conditions.push(" trfiles.subjectid in ('"+params[:tr_search][:subjectid]+"') ")
             end
+            if !params[:tr_search][:secondary_key].nil? and params[:tr_search][:secondary_key] > ''
+               @trfiles_search = @trfiles_search.where("secondary_key in (?)",params[:tr_search][:secondary_key])
+               @conditions.push(" trfiles.secondary_key in ('"+params[:tr_search][:secondary_key]+"') ")
+            end
             if !params[:tr_search][:trfile_id].nil? and params[:tr_search][:trfile_id] > ''
                @trfiles_search = @trfiles_search.where("id in (?)",params[:tr_search][:trfile_id])
                @conditions.push(" trfiles.id in ("+params[:tr_search][:trfile_id]+") ")
@@ -99,7 +103,7 @@ class TrtypesController < ApplicationController
             else
               @html_request ="N"
               @column_headers = ['Completed','Last Update','Subjectid','Scan Procedure','QC','QC Notes']
-              @db_columns   =["trfiles.file_completed_flag","trfiles.updated_at","trfiles.subjectid","scan_procedures.codename","trfiles.qc_value","trfiles.qc_notes"]
+              @db_columns   =["trfiles.file_completed_flag","trfiles.updated_at","concat(trfiles.subjectid,' ',trfiles.secondary_key)","scan_procedures.codename","trfiles.qc_value","trfiles.qc_notes"]
               sql = "select "+@db_columns.join(",")+" from scan_procedures, trfiles where "+@conditions.join(' and ') 
               connection = ActiveRecord::Base.connection();
               @trfiles_search  =  connection.execute(sql)
