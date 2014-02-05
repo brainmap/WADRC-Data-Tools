@@ -3536,6 +3536,162 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       @schedulerun.end_time = @schedulerun.updated_at      
       @schedulerun.save
   end
+
+  # insert and update records in trtype_id = 5
+  # walk preprocessed dirs, look for mcd dir and different files
+  # make or update tredit traction_edits values
+  # THIS WILL BREAK ON PLAQUE 
+  def run_mcd_harvest
+    v_base_path = Shared.get_base_path()
+    @schedule = Schedule.where("name in ('mcd_harvest')").first
+    @schedulerun = Schedulerun.new
+    @schedulerun.schedule_id = @schedule.id
+    @schedulerun.comment ="starting mcd_harvest"
+    @schedulerun.save
+    @schedulerun.start_time = @schedulerun.created_at
+    @schedulerun.save
+    v_comment = ""
+    v_error_comment = ""
+    v_target_dir = ""
+    v_preprocessed_full_path = = ""
+    v_trtype_id = 5
+    # walk dirs - scan_procedures 27,29, 26,24,37,44, look for mcd dir
+    v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+    sp_array = [27,29, 26,24,37,44]
+    @scan_procedures = ScanProcedure.where("scan_procedures.id in (?)", sp_array)
+    @scan_procedures.each do |sp|
+        v_visit_number =""
+        if sp.codename.include?("visit2")
+            v_visit_number ="_v2"
+        elsif sp.codename.include?("visit3")
+            v_visit_number ="_v3"
+        elsif sp.codename.include?("visit4")
+            v_visit_number ="_v4"
+        elsif sp.codename.include?("visit5")
+            v_visit_number ="_v5"
+        end   
+        v_preprocessed_full_path = v_preprocessed_path+sp.codename  
+        if File.directory?(v_preprocessed_full_path)
+          sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+"  
+                                    and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id
+                                    and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
+          @results = connection.execute(sql_enum)
+                                    
+          @results.each do |r|
+              v_originalData_flag = "N"
+              v_error_in_log = "N"
+              v_mcdespot_settings_m_flag = "N"
+              v_maskData_flag ="N"
+
+              enrollment = Enrollment.where("enumber='"+r[0]+"'")
+              if !enrollment.blank?
+                v_subjectid_mcd_path = v_preprocessed_full_path+"/"+enrollment[0].enumber+"/mcd"
+                if File.directory?(v_subjectid_mcd_path)
+                  if File.directory?(v_subjectid_mcd_path+"/originalData")
+                      v_originalData_flag = "Y"
+                  end
+                  if File.file?(v_subjectid_mcd_path+"/_mcdespot_setting.m")
+                      v_mcdespot_settings_m_flag = "Y"
+                  end
+                  if File.file?(v_subjectid_mcd_path+"/_mcdespot_log.txt")
+                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('Error')}
+                       v_error_in_log = "Y"
+                       v_error_comment =  v_error_comment =  +"error in "+v_subjectid_mcd_path
+                     end
+                  end
+                  if File.directory?(v_subjectid_mcd_path+"/maskData")
+                      v_maskData_flag = "Y"
+                  end
+                  v_subject_v_num = enrollment[0].enumber + v_visit_number
+                  @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subject_v_num)
+                  if !@trfiles.nil?
+                      # get last edit
+                      @tredits = Tredit.where("trfile_id in (?)",@trfiles[0].id).order("tredits.id desc")
+                      v_tredit_id = @tredits[0].id
+                      # the individual fields
+                      # load = 10
+                      #  mask = 11
+                      v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                      if !v_tractiontypes.nil?
+                         v_tractiontypes.each do |tat|
+                              v_tredit_action = Tractionedit.("where tredit_id in (?)",v_tredit_id).("where tractiontype_id in (?)", tat.id)
+                              if tat.id == 10 
+                                 if v_originalData_flag == "Y" and v_mcdespot_settings_m_flag == "Y" and v_error_in_log == "N" # load
+                                     v_tredit_action.value = "Y"
+                                 else
+                                     v_tredit_action.value = "N"
+                                 end
+                             end
+                             if tat.id == 11 # mask
+                               if v_maskData_flag == "Y"
+                                   v_tredit_action.value = "Y"
+                               else
+                                   v_tredit_action.value = "N"
+                               end
+                             end
+                             v_tredit_action.save 
+
+                          end
+                       end
+
+                  else
+                       # make a trfile, tredit, traction_edit record
+                      @trfile = Trfile.new
+                      @trfile.subjectid = v_subjectid_v_num
+                      # @trfile.secondary_key = v_secondary_key
+                      @trfile.enrollment_id = enrollment[0].id
+                      @trfile.scan_procedure_id = sp.id
+                      @trfile.trtype_id = v_trtype_id
+                      @trfile.save
+                      @tredit = Tredit.new
+                      @tredit.trfile_id = @trfile.id
+                      #@tredit.user_id = current_user.id
+                      @tredit.save
+            # make all the edit_actions for the tredit
+                      v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                      if !v_tractiontypes.nil?
+                         v_tractiontypes.each do |tat|
+                             v_tredit_action = TreditAction.new
+                             v_tredit_action.tredit_id = @tredit.id
+                             v_tredit_action.tractiontype_id = tat.id
+                             if tat.id == 10 
+                                 if v_originalData_flag == "Y" and v_mcdespot_settings_m_flag == "Y" and v_error_in_log == "N" # load
+                                     v_tredit_action.value = "Y"
+                                 else
+                                     v_tredit_action.value = "N"
+                                 end
+                             end
+                             if tat.id == 11 # mask
+                               if v_maskData_flag == "Y"
+                                   v_tredit_action.value = "Y"
+                               else
+                                   v_tredit_action.value = "N"
+                               end
+                             end
+                             v_tredit_action.save
+                           end
+                        end
+
+                  end
+                end
+              end
+          end
+        end
+     end
+     v_comment = v_error_comment+v_comment
+     puts "successful finish mcd_harvest "+v_comment[0..459]
+     @schedulerun.comment =("successful finish mcd_harvest "+v_comment[0..3959])
+     if !v_comment.include?("ERROR")
+        @schedulerun.status_flag ="Y"
+      end
+      @schedulerun.save
+      @schedulerun.end_time = @schedulerun.updated_at      
+      @schedulerun.save
+    
+
+
+  end
   
   # to add columns --
   # change sql_base insert statement
