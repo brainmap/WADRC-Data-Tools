@@ -3557,9 +3557,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     v_trtype_id = 5
     # expect tractiontype_id 10, 11,12,13,14,15 for load, mask, coreg, despot_1, despot_2, mcdespot
     connection = ActiveRecord::Base.connection(); 
-    # walk dirs - scan_procedures 27,29, 26,24,37,44, look for mcd dir
+    # walk dirs - scan_procedures 14,20,21,22,24,26,27,28,29,30,31,33,34,36,37,40,41,42,44,45,46 look for mcd dir - all sp with a mcd
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_array = [27,29, 26,24,37,44]
+    sp_array = [14,20,21,22,24,26,27,28,29,30,31,33,34,36,37,40,41,42,44,45,46]
     @scan_procedures = ScanProcedure.where("scan_procedures.id in (?)", sp_array)
     @scan_procedures.each do |sp|
         v_visit_number =""
