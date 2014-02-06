@@ -2756,7 +2756,10 @@ puts "AAAAAA "+v_call
             v_comment = v_comment + " copying "+v_subject+"; \n"
             if File.directory?(v_dir_source)
            # if not make rsync or mv command
-              v_call = "rsync -av "+v_dir_source+" "+v_good2go_dir
+            #  v_call = "rsync -av "+v_dir_source+" "+v_good2go_dir
+            # using mv instead of rsync 
+              v_call = " mv -n -v "+v_dir_source+" "+v_good2go_dir
+      puts "aaaaaaa "+v_call
               v_comment = v_comment + " "+v_call+"; \n"
               stdin, stdout, stderr = Open3.popen3(v_call)
               while !stderr.eof?
@@ -2769,7 +2772,7 @@ puts "AAAAAA "+v_call
               stdin.close
               stdout.close
               stderr.close
-              v_call = " mv "+v_dir_source+" "+v_good2go_dir
+           
              # v_comment = v_comment + " "+v_call+"; "
             else # no source dir
                v_comment_warning = v_comment_warning +"ERROR - no source dir "+v_subject
