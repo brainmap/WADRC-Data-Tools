@@ -4684,7 +4684,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       dir_list.each do |dirname|
         if !v_dir_skip.include?(dirname) and !dirname.start_with?('tmp')
           if dirname.include?('_v2')
-  puts "aaaaaa _v2= "+dirname
+  #puts "aaaaaa _v2= "+dirname
             dirname = dirname.gsub(/_v2/,'') # subectid without v#
             v_dirname_chop = dirname.gsub(/[0123456789]/,'') # start of subjectid
             vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit2_array,v_dirname_chop)                                                                             
