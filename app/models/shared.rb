@@ -3553,8 +3553,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     v_comment = ""
     v_error_comment = ""
     v_target_dir = ""
-    v_preprocessed_full_path = = ""
+    v_preprocessed_full_path = ""
     v_trtype_id = 5
+    # expect tractiontype_id 10, 11,12,13,14,15 for load, mask, coreg, despot_1, despot_2, mcdespot
+    connection = ActiveRecord::Base.connection(); 
     # walk dirs - scan_procedures 27,29, 26,24,37,44, look for mcd dir
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
     sp_array = [27,29, 26,24,37,44]
@@ -3579,33 +3581,50 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           @results = connection.execute(sql_enum)
                                     
           @results.each do |r|
-              v_originalData_flag = "N"
-              v_error_in_log = "N"
-              v_mcdespot_settings_m_flag = "N"
-              v_maskData_flag ="N"
+              v_change_flag = "N"
+              v_edit_change_flag = "N"
+              v_load_flag = 2 #"N"
+              v_mask_flag = 2 #"N"
+              v_coreg_flag = 2 #"N"
+              v_despot_1_flag = 2 #"N"
+              v_despot_2_flag = 2 #"N"
+              v_mcdespot_flag = 2 #"N"
+              v_error_in_log = 2 #"N"
 
               enrollment = Enrollment.where("enumber='"+r[0]+"'")
               if !enrollment.blank?
                 v_subjectid_mcd_path = v_preprocessed_full_path+"/"+enrollment[0].enumber+"/mcd"
+                v_subjectid_v_num = enrollment[0].enumber + v_visit_number
                 if File.directory?(v_subjectid_mcd_path)
-                  if File.directory?(v_subjectid_mcd_path+"/originalData")
-                      v_originalData_flag = "Y"
-                  end
-                  if File.file?(v_subjectid_mcd_path+"/_mcdespot_setting.m")
-                      v_mcdespot_settings_m_flag = "Y"
-                  end
+
                   if File.file?(v_subjectid_mcd_path+"/_mcdespot_log.txt")
                      if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('Error')}
                        v_error_in_log = "Y"
-                       v_error_comment =  v_error_comment =  +"error in "+v_subjectid_mcd_path
+                       v_error_comment =  v_error_comment +"error in "+v_subjectid_mcd_path
+                     end
+                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('Loading Complete')}
+                       v_load_flag = 1 # "Y"
+                     end
+                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('Masking/BET Complete')}
+                       v_mask_flag = 1 # "Y"
+                     end
+                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('Coreg Complete')}
+                       v_coreg_flag = 1 # "Y"
+                     end
+                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('DESPOT1-HIFI Complete')}
+                       v_despot_1_flag =1 #  "Y"
+                     end
+                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('DESPOT2-FM Complete')}
+                       v_despot_2_flag = 1 # "Y"
+                     end
+                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('Processing Run Complete')}
+                       v_mcdespot_flag = 1 # "Y"
                      end
                   end
-                  if File.directory?(v_subjectid_mcd_path+"/maskData")
-                      v_maskData_flag = "Y"
-                  end
-                  v_subject_v_num = enrollment[0].enumber + v_visit_number
-                  @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subject_v_num)
-                  if !@trfiles.nil?
+
+                  
+                  @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
+                  if !@trfiles.nil? and !@trfiles[0].nil?
                       # get last edit
                       @tredits = Tredit.where("trfile_id in (?)",@trfiles[0].id).order("tredits.id desc")
                       v_tredit_id = @tredits[0].id
@@ -3615,26 +3634,59 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                       v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
                       if !v_tractiontypes.nil?
                          v_tractiontypes.each do |tat|
-                              v_tredit_action = Tractionedit.("where tredit_id in (?)",v_tredit_id).("where tractiontype_id in (?)", tat.id)
-                              if tat.id == 10 
-                                 if v_originalData_flag == "Y" and v_mcdespot_settings_m_flag == "Y" and v_error_in_log == "N" # load
-                                     v_tredit_action.value = "Y"
-                                 else
-                                     v_tredit_action.value = "N"
+                              v_tredit_action = TreditAction.where("tredit_id in (?)",v_tredit_id).where("tractiontype_id in (?)", tat.id)
+                              v_edit_change_flag = "N" 
+                              if tat.id == 10 # load
+                                 if  v_tredit_action[0].value != v_load_flag
+                                     v_change_flag ="Y"
+                                     v_edit_change_flag = "Y"
+                                     v_tredit_action[0].value = v_load_flag
+                                 end
+                             elsif tat.id == 11 # mask
+                                 if  v_tredit_action[0].value != v_mask_flag
+                                     v_change_flag ="Y"
+                                     v_edit_change_flag = "Y"
+                                     v_tredit_action[0].value = v_mask_flag
+                                 end
+                             elsif tat.id == 12 # coreg
+                                 if  v_tredit_action[0].value != v_coreg_flag
+                                     v_change_flag ="Y"
+                                     v_edit_change_flag = "Y"
+                                     v_tredit_action[0].value = v_coreg_flag
+                                 end
+                             elsif tat.id == 13 # despot 1
+                                 if  v_tredit_action[0].value != v_despot_1_flag
+                                     v_change_flag ="Y"
+                                     v_edit_change_flag = "Y"
+                                     v_tredit_action[0].value = v_despot_1_flag
+                                 end
+                             elsif tat.id == 14 # despot 2
+                                 if  v_tredit_action[0].value != v_despot_2_flag
+                                     v_change_flag ="Y"
+                                     v_edit_change_flag = "Y"
+                                     v_tredit_action[0].value = v_despot_2_flag
+                                 end
+                             elsif tat.id == 15 # mcdespot
+                                 if  v_tredit_action[0].value != v_mcdespot_flag
+                                     v_change_flag ="Y"
+                                     v_edit_change_flag = "Y"
+                                     v_tredit_action[0].value = v_mcdespot_flag
                                  end
                              end
-                             if tat.id == 11 # mask
-                               if v_maskData_flag == "Y"
-                                   v_tredit_action.value = "Y"
-                               else
-                                   v_tredit_action.value = "N"
-                               end
+                             if v_edit_change_flag == "Y"
+                                  v_tredit_action[0].save 
                              end
-                             v_tredit_action.save 
-
                           end
                        end
+                       if v_change_flag == "Y"
+                           v_datetime = DateTime.now
+                           @tredits[0].updated_at = v_datetime.strftime('%Y-%m-%d %H:%M:%S')
+                           @tredits[0].save
+                           @trfiles[0].updated_at = v_datetime.strftime('%Y-%m-%d %H:%M:%S')
+                           @trfiles[0].save
 
+                        end
+                       # tredit and trfile updated_at ????
                   else
                        # make a trfile, tredit, traction_edit record
                       @trfile = Trfile.new
@@ -3655,19 +3707,18 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                              v_tredit_action = TreditAction.new
                              v_tredit_action.tredit_id = @tredit.id
                              v_tredit_action.tractiontype_id = tat.id
-                             if tat.id == 10 
-                                 if v_originalData_flag == "Y" and v_mcdespot_settings_m_flag == "Y" and v_error_in_log == "N" # load
-                                     v_tredit_action.value = "Y"
-                                 else
-                                     v_tredit_action.value = "N"
-                                 end
-                             end
-                             if tat.id == 11 # mask
-                               if v_maskData_flag == "Y"
-                                   v_tredit_action.value = "Y"
-                               else
-                                   v_tredit_action.value = "N"
-                               end
+                             if tat.id == 10 # load
+                                v_tredit_action.value = v_load_flag
+                             elsif tat.id == 11 # mask
+                                v_tredit_action.value = v_mask_flag
+                             elsif tat.id == 12 # coreg
+                                v_tredit_action.value = v_coreg_flag
+                             elsif tat.id == 13 # despot 1
+                                v_tredit_action.value = v_despot_1_flag
+                             elsif tat.id == 14 # despot 2
+                                v_tredit_action.value = v_despot_2_flag
+                             elsif tat.id == 15 # mcdespot
+                                v_tredit_action.value = v_mcdespot_flag
                              end
                              v_tredit_action.save
                            end
