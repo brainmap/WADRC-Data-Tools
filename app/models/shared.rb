@@ -3728,6 +3728,8 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                 v_tredit_action.value = v_despot_2_flag
                              elsif tat.id == 15 # mcdespot
                                 v_tredit_action.value = v_mcdespot_flag
+                             elsif tat.id == 17 or tat.id == 18 or tat.id == 19 or tat.id == 20
+                                   v_tredit_action.value = 2
                              end
                              v_tredit_action.save
                            end
