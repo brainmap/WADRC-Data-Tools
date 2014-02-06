@@ -3625,6 +3625,12 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                   
                   @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
                   if !@trfiles.nil? and !@trfiles[0].nil?
+                       if v_error_in_log == "Y"
+                            if !(@trfiles[0].qc_notes).include?("Error in log") 
+                                @trfiles[0].qc_notes = "Error in log "+@trfiles[0].qc_notes
+                                v_change_flag = "Y"
+                            end 
+                       end
                       # get last edit
                       @tredits = Tredit.where("trfile_id in (?)",@trfiles[0].id).order("tredits.id desc")
                       v_tredit_id = @tredits[0].id
@@ -3695,6 +3701,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                       @trfile.enrollment_id = enrollment[0].id
                       @trfile.scan_procedure_id = sp.id
                       @trfile.trtype_id = v_trtype_id
+                      if v_error_in_log == "Y"
+                          @trfile.qc_notes = "Error in log "
+                       end
                       @trfile.save
                       @tredit = Tredit.new
                       @tredit.trfile_id = @trfile.id
@@ -4664,6 +4673,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       v_sp_visit4_array = []
       (v_sp_visit1_array,v_sp_visit2_array,v_sp_visit3_array,v_sp_visit4_array)  = get_sp_visit_num_array()
       
+      #puts "aaaaaaa v_sp_visit2_array ="+v_sp_visit2_array.to_s
       
       # check for enumber in enrollment, link to enrollment_vgroup_memberships, appointments, visits
       # limit by _v2, _v3, _v4 in sp via scan_procedures_vgroups , scan_procedures like 'visit2, visit3, visit4
@@ -4674,9 +4684,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       dir_list.each do |dirname|
         if !v_dir_skip.include?(dirname) and !dirname.start_with?('tmp')
           if dirname.include?('_v2')
+  puts "aaaaaa _v2= "+dirname
             dirname = dirname.gsub(/_v2/,'') # subectid without v#
             v_dirname_chop = dirname.gsub(/[0123456789]/,'') # start of subjectid
-            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit1_array,v_dirname_chop)                                                                             
+            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit2_array,v_dirname_chop)                                                                             
             vgroups.each do |v|
               if v.fs_flag != "Y"
                  v.fs_flag ="Y"
@@ -4687,7 +4698,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           elsif dirname.include?('_v3')
             dirname = dirname.gsub(/_v3/,'')
             v_dirname_chop = dirname.gsub(/[0123456789]/,'')
-            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit1_array,v_dirname_chop)
+            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit3_array,v_dirname_chop)
             vgroups.each do |v|
               if v.fs_flag != "Y"
                  v.fs_flag ="Y"
@@ -4698,7 +4709,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           elsif dirname.include?('_v4')
             dirname = dirname.gsub(/_v4/,'')
             v_dirname_chop = dirname.gsub(/[0123456789]/,'')
-            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit1_array,v_dirname_chop)
+            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit4_array,v_dirname_chop)
             vgroups.each do |v|
               if v.fs_flag != "Y"
                  v.fs_flag ="Y"
