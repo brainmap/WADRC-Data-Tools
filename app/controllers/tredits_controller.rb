@@ -105,7 +105,11 @@ class TreditsController < ApplicationController
                         @tredit_row.push((tredit.updated_at).strftime('%Y-%m-%d %H:%M')  ) #update_at
                         @tredit_row.push(trfile[3]) #subjectid
                         @tredit_row.push(trfile[4]) #codenme
-                        @tredit_row.push((User.find(tredit.user_id)).username_name)
+                        if !(tredit.user_id).nil?
+                           @tredit_row.push((User.find(tredit.user_id)).username_name)
+                        else
+                          @tredit_row.push("panda")
+                        end
                         @tredit_row.push(tredit.status_flag)
                         @tractiontypes.each do |act|
                           @tredit_actions = TreditAction.where("tredit_id in (?)",tredit.id).where("tractiontype_id in (?)",act.id)

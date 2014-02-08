@@ -131,6 +131,9 @@ class TrfilesController < ApplicationController
                    v_tredit_action = TreditAction.new
                    v_tredit_action.tredit_id = @tredit.id
                    v_tredit_action.tractiontype_id = tat.id
+                   if !(tat.form_default_value).blank?
+                         v_tredit_action.value = tat.form_default_value
+                   end
                    v_tredit_action.save
                end
             end

@@ -3609,18 +3609,33 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                        v_load_flag = 1 # "Y"
                      end
                      if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('Masking/BET Complete')}
+                       v_load_flag = 1
                        v_mask_flag = 1 # "Y"
                      end
                      if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('Coreg Complete')}
+                       v_load_flag = 1
+                       v_mask_flag = 1 # "Y"
                        v_coreg_flag = 1 # "Y"
                      end
                      if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('DESPOT1-HIFI Complete')}
+                       v_load_flag = 1
+                       v_mask_flag = 1 # "Y"
+                       v_coreg_flag = 1 # "Y"
                        v_despot_1_flag =1 #  "Y"
                      end
                      if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('DESPOT2-FM Complete')}
+                       v_load_flag = 1
+                       v_mask_flag = 1 # "Y"
+                       v_coreg_flag = 1 # "Y"
+                       v_despot_1_flag =1 #  "Y"
                        v_despot_2_flag = 1 # "Y"
                      end
                      if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('Processing Run Complete')}
+                       v_load_flag = 1
+                       v_mask_flag = 1 # "Y"
+                       v_coreg_flag = 1 # "Y"
+                       v_despot_1_flag =1 #  "Y"
+                       v_despot_2_flag = 1 # "Y"
                        v_mcdespot_flag = 1 # "Y"
                      end
                   end
@@ -3719,6 +3734,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                              v_tredit_action = TreditAction.new
                              v_tredit_action.tredit_id = @tredit.id
                              v_tredit_action.tractiontype_id = tat.id
+                             if !(tat.form_default_value).blank?
+                                 v_tredit_action.value = tat.form_default_value
+                             end
                              if tat.id == 10 # load
                                 v_tredit_action.value = v_load_flag
                              elsif tat.id == 11 # mask
@@ -3731,8 +3749,6 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                 v_tredit_action.value = v_despot_2_flag
                              elsif tat.id == 15 # mcdespot
                                 v_tredit_action.value = v_mcdespot_flag
-                             elsif tat.id == 17 or tat.id == 18 or tat.id == 19 or tat.id == 20
-                                   v_tredit_action.value = 2
                              end
                              v_tredit_action.save
                            end

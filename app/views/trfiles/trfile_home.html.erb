@@ -68,7 +68,21 @@
      	   </tr><tr>
              
      	  <% end%>
-     	<td align="left" colspan="<%= act.form_col_span%>"> <small><b><%=act.form_display_label %> :</b></small> <% @tredit_actions = TreditAction.where("tredit_actions.tredit_id in (?)",@tredit.id).where("tredit_actions.tractiontype_id in (?)",act.id) %> 
+     	<td align="left" colspan="<%= act.form_col_span%>"> <small><b><%=act.form_display_label %> :</b></small> <% @tredit_actions = nil
+      @tredit_actions = TreditAction.where("tredit_actions.tredit_id in (?)",@tredit.id).where("tredit_actions.tractiontype_id in (?)",act.id)
+      if @tredit_actions[0].nil? # added metric?
+       # @tredit_actions = []
+        v_tredit_action = TreditAction.new
+        v_tredit_action.tredit_id = @tredit.id
+        v_tredit_action.tractiontype_id = act.id
+        if !(act.form_default_value).blank?
+            v_tredit_action.value = act.form_default_value
+        end
+        v_tredit_action.save
+        @tredit_actions.push(v_tredit_action)
+      else
+        puts "aaaaaaaa not nil "+act.id.to_s
+      end %> 
         <% # make the question types
            if act.form_display_field_type == "checkbox_in_line" 
                val_array =[]
