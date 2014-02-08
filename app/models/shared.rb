@@ -3644,7 +3644,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                   @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
                   if !@trfiles.nil? and !@trfiles[0].nil?
                        if v_error_in_log == "Y"
-                            if @trfiles[0].qc_notes.nil? or !(@trfiles[0].qc_notes).include?("Error in log") 
+                            if @trfiles[0].qc_notes.nil? 
+                                @trfiles[0].qc_notes = "Error in log "
+                                v_change_flag = "Y"
+                            elsif !(@trfiles[0].qc_notes).include?("Error in log") 
                                 @trfiles[0].qc_notes = "Error in log "+@trfiles[0].qc_notes
                                 v_change_flag = "Y"
                             end 
