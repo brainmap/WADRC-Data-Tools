@@ -151,7 +151,7 @@ class TrfilesController < ApplicationController
         end
   elsif !params[:trfile_action].nil? and    params[:trfile_action] == "get_edit" and !params[:trfile_id].nil?  and params[:tredit_id].nil?  
 
-         @tredits = Tredit.where("trfile_id in (?)",params[:trfile_id]).order("created_at")
+         @tredits = Tredit.where("trfile_id in (?) and status_flag ='Y' ",params[:trfile_id]).order("created_at")
          @tredits.each do |te|
             @tredit = te # want the last one - newest created_at
          end

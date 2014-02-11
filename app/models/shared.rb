@@ -380,9 +380,11 @@ class Shared  < ActionController::Base
        @schedulerun.comment =v_comment[0..1990]
        @schedulerun.save
        # update schedulerun comment - prepend 
-       sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
+       sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")+"')
                                                                                           and v.id in (select spvg.vgroup_id from scan_procedures_vgroups spvg  where spvg.scan_procedure_id ='"+r[1].to_s+"')"
+     
        results_vgroup = connection.execute(sql_vgroup)
+
        # mkdir /tmp/adrc_dti/[subjectid]_YYYYMMDD_wisc
        v_subject_dir = r[0]+"_"+(results_vgroup.first)[0].to_s+"_wisc"
        v_parent_dir_target =v_target_dir+"/"+v_subject_dir
@@ -402,7 +404,7 @@ class Shared  < ActionController::Base
                    and series_description_maps.series_description_type_id = series_description_types.id
                    and series_description_types.series_description_type in ('DTI') 
                    and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
-                   and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
+                   and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")+"')
                    and vgroups.id in (select spvg.vgroup_id from scan_procedures_vgroups spvg  where spvg.scan_procedure_id ='"+r[1].to_s+"')
                     order by appointments.appointment_date "
        results_dataset = connection.execute(sql_dataset)
