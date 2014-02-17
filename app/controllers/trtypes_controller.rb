@@ -139,6 +139,51 @@ class TrtypesController < ApplicationController
   # GET /trtypes/1.json
   def show
     @trtype = Trtype.find(params[:id])
+    # want to make sql for view
+    v_column_array = ["trfiles.subjectid","trfiles.secondary_key","trfiles.enrollment_id","trfiles.scan_procedure_id", "trfiles.file_completed_flag","trfiles.qc_value","trfiles.qc_notes"]
+    v_table_array = ["trfiles"]
+    v_table_conditions =["trfiles.trtype_id = "+params[:id]+" "]
+
+    @tractiontypes = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.form_display_label is not null and tractiontypes.form_display_label >''" ).order(:display_order)
+    @tractiontypes.each do |act|
+        v_value_sql = ""
+        # ("trfiles.id = v_"+act.id.to_s+".trfile_id")
+        v_col = (act.form_display_label).gsub(/ /,"").gsub(/\'/,"_").gsub(/\"/,"_").gsub(/\-/,"_").downcase+"_" 
+        v_column_array.push("v_"+act.id.to_s+"."+v_col) 
+        # need last edit
+        if !act.ref_table_b_1.blank?
+          v_value_sql = "LEFT JOIN  (select "+act.ref_table_a_1+".description "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1+" 
+                      where trfile2.id = tredits.trfile_id 
+                      and tredits.id = tredit_actions.tredit_id 
+                      and tredit_actions.tractiontype_id = "+act.id.to_s+" 
+                      and "+act.ref_table_a_1+".label = '"+act.ref_table_b_1+"'
+                      and tredit_actions.value = "+act.ref_table_a_1+".ref_value
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
+         v_table_array.push(v_value_sql)
+
+        elsif !act.ref_table_a_1.blank?
+          v_value_sql = "LEFT JOIN  (select "+act.ref_table_a_1.pluralize.underscore+".description "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1.pluralize.underscore+" 
+                      where trfile2.id = tredits.trfile_id 
+                      and tredits.id = tredit_actions.tredit_id 
+                      and tredit_actions.tractiontype_id = "+act.id.to_s+" 
+                      and "+act.ref_table_a_1+".label = '"+act.ref_table_b_1+"'
+                      and tredit_actions.value = "+act.ref_table_a_1.pluralize.underscore+".id
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
+         v_table_array.push(v_value_sql)
+
+        else
+          v_value_sql = "LEFT JOIN (select tredit_actions.value "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions 
+                      where trfile2.id = tredits.trfile_id 
+                      and tredits.id = tredit_actions.tredit_id 
+                      and tredit_actions.tractiontype_id = "+act.id.to_s+" 
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
+         v_table_array.push(v_value_sql)
+        end
+
+    end
+    # using LEFT JOIN
+    @sql_view = "select t1.* from ( select "+v_column_array.join(',')+" from "+v_table_array.join(' ')+" where "+v_table_conditions.join(' and ') +" ) t1 "
+
 
     respond_to do |format|
       format.html # show.html.erb

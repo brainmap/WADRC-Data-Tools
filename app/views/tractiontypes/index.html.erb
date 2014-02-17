@@ -2,6 +2,9 @@
 <%= link_to 'New Tractiontype', new_tractiontype_path %>
 <table>
   <tr>
+        <th></th>
+    <th></th>
+    <th></th>
     <th>Trtype</th>
     <th>Description</th>
     <th>Status flag</th>
@@ -23,13 +26,13 @@
     <th>Ref table a 1</th>
     <th>Ref table b 1</th>
     <th>Triggers 1</th>
-    <th></th>
-    <th></th>
-    <th></th>
   </tr>
 
 <% @tractiontypes.each do |tractiontype| %>
   <tr>
+        <td><%= link_to 'Show', tractiontype %></td>
+    <td><%= link_to 'Edit', edit_tractiontype_path(tractiontype) %></td>
+    <td><%= link_to 'Destroy', tractiontype, method: :delete, data: { confirm: 'Are you sure?' } %></td>
     <td><%= if !tractiontype.trtype_id.nil?  
         Trtype.find(tractiontype.trtype_id).description 
         end %></td>
@@ -53,9 +56,6 @@
     <td><%= tractiontype.ref_table_a_1 %></td>
     <td><%= tractiontype.ref_table_b_1 %></td>
     <td><%= tractiontype.triggers_1 %></td>
-    <td><%= link_to 'Show', tractiontype %></td>
-    <td><%= link_to 'Edit', edit_tractiontype_path(tractiontype) %></td>
-    <td><%= link_to 'Destroy', tractiontype, method: :delete, data: { confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>
