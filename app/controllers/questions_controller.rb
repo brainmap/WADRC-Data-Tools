@@ -4,6 +4,18 @@ class QuestionsController < ApplicationController
   # GET /questions.xml
   def index
     @questions = Question.all
+    if !params[:questionform_question].nil? 
+         if (!params[:questionform_question][:questionform_id].nil?  and !params[:questionform_question][:questionform_id].blank? and !params[:questionform_question][:scan_procedure_id].nil?   and !params[:questionform_question][:scan_procedure_id][:id].nil? and !params[:questionform_question][:scan_procedure_id][:id].blank?  )
+             @questions = Question.where("questions.id in ( select question_id from questionform_questions where questionform_id in (?))",params[:questionform_question][:questionform_id]).where("questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id])      
+         elsif !params[:questionform_question][:questionform_id].nil? and params[:questionform_question][:questionform_id] > ''
+             @questions = Question.where("questions.id in ( select question_id from questionform_questions where questionform_id in (?))",params[:questionform_question][:questionform_id])
+           
+         elsif !params[:questionform_question][:scan_procedure_id].nil? and !params[:questionform_question][:scan_procedure_id][:id].nil? and params[:questionform_question][:scan_procedure_id][:id] > ''
+             @questions = Question.where("questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id])
+
+         end         
+
+     end
 
     respond_to do |format|
       format.html # index.html.erb
