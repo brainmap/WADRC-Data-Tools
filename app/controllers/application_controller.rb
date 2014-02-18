@@ -225,7 +225,7 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup)
               @column_headers_q_data.push(@question.export_column_header_3)
 
                # outer join to table.appointment_id  vs vgroups.participant_id
-               if @question.value_link == "appointment" and @question.ref_table_a_1 == "" and @question.ref_table_a_2 == "" and @question.ref_table_a_3 = ""
+               if @question.value_link == "appointment" and @question.ref_table_a_1 == "" and @question.ref_table_a_2 == "" and @question.ref_table_a_3 == ""
                  col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
                  @fields_q_data.push(col_1)
                  col_2 = "a_alias_"+@question.id.to_s+".b_"+@question.id.to_s
@@ -236,7 +236,7 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup)
                  from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
                  @left_join_q_data.push(left_join)
 
-               elsif @question.value_link == "participant" and @question.ref_table_a_1 == "" and @question.ref_table_a_2 == "" and @question.ref_table_a_3 = ""
+               elsif @question.value_link == "participant" and @question.ref_table_a_1 == "" and @question.ref_table_a_2 == "" and @question.ref_table_a_3 == ""
                  col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
                   @fields_q_data.push(col_1)
                   col_2 = "a_alias_"+@question.id.to_s+".b_"+@question.id.to_s
@@ -417,7 +417,7 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup)
             @column_headers_q_data.push(@question.export_column_header_2)
             @column_headers_q_data.push(@question.export_column_header_3)
             # outer join to table.appointment_id  vs vgroups.participant_id
-            if @question.value_link == "appointment" and  @question.ref_table_a_2 == "" and @question.ref_table_a_3 = ""
+            if @question.value_link == "appointment" and  @question.ref_table_a_2 == "" and @question.ref_table_a_3 == ""
               col_2 = "a_alias_"+@question.id.to_s+".b_"+@question.id.to_s
               @fields_q_data.push(col_2)
               col_3 = "a_alias_"+@question.id.to_s+".c_"+@question.id.to_s
@@ -426,7 +426,7 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup)
               from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
               @left_join_q_data.push(left_join)
               
-            elsif @question.value_link == "participant" and  @question.ref_table_a_2 == "" and @question.ref_table_a_3 = ""
+            elsif @question.value_link == "participant" and  @question.ref_table_a_2 == "" and @question.ref_table_a_3 == ""
                col_2 = "a_alias_"+@question.id.to_s+".b_"+@question.id.to_s
                @fields_q_data.push(col_2)
                col_3 = "a_alias_"+@question.id.to_s+".c_"+@question.id.to_s
@@ -498,7 +498,7 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup)
             @column_headers_q_data.push(@question.export_column_header_1)
             @column_headers_q_data.push(@question.export_column_header_3)
             # outer join to table.appointment_id  vs vgroups.participant_id
-            if @question.value_link == "appointment" and @question.ref_table_a_1 == ""  and @question.ref_table_a_3 = ""
+            if @question.value_link == "appointment" and @question.ref_table_a_1 == ""  and @question.ref_table_a_3 == ""
               col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
               @fields_q_data.push(col_1)
               col_3 = "a_alias_"+@question.id.to_s+".c_"+@question.id.to_s
@@ -507,7 +507,7 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup)
               from q_data where q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s 
               @left_join_q_data.push(left_join)
 
-            elsif @question.value_link == "participant" and @question.ref_table_a_1 == "" and @question.ref_table_a_3 = ""
+            elsif @question.value_link == "participant" and @question.ref_table_a_1 == "" and @question.ref_table_a_3 == ""
               col_1 = "a_alias_"+@question.id.to_s+".a_"+@question.id.to_s
                @fields_q_data.push(col_1)
                col_3 = "a_alias_"+@question.id.to_s+".c_"+@question.id.to_s
