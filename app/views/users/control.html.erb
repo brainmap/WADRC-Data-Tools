@@ -32,7 +32,8 @@ The users are ordered by "PRESENT ROLE"- Name . <br>
 <%= link_to('Add protocol', '/protocols') %>  <br><br>
 
 </td></tr>
-
+<% end %>
+<% if current_user.role == 'Admin_High'  or current_user.role == 'Admin_Low'%>
 <tr><td colspan=3>
 <%= link_to('Question Forms', '/users/questionformbase') %>   --- presently used by Lab Health, NeuroPsyche, and Questionaires<br>
 includes links to making questions, linking a question to a form and setting the display order, limiting a question to a scan procedure, and limiting a question form to a scan procedure.
@@ -59,7 +60,8 @@ includes links to making questions, linking a question to a form and setting the
      <small><small>(<%= link_to('Tracker files','/trfiles') %>,  <%= link_to('Tracker file edits','/tredits') %></small></small>
 	<br><br>
 </td></tr>
-
+<%end%>
+<% if current_user.role == 'Admin_High'  %>
 
 <tr><td colspan=3>
  <%= link_to('Edit Radiology Comment links', '/radiology_comments?radiology_comment=""') %>  <br>
