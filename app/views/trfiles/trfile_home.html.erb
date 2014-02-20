@@ -68,7 +68,7 @@
      	   </tr><tr>
              
      	  <% end%>
-     	<td align="left" colspan="<%= act.form_col_span%>"> <small><b><%=act.form_display_label %> :</b></small> <% @tredit_actions = nil
+     	<td align="left" colspan="<%= act.form_col_span%>"> <small><b><%=act.form_display_label.try(:html_safe) %> </b></small> <% @tredit_actions = nil
       @tredit_actions = TreditAction.where("tredit_actions.tredit_id in (?)",@tredit.id).where("tredit_actions.tractiontype_id in (?)",act.id)
       if @tredit_actions[0].nil? # added metric?
        # @tredit_actions = []
@@ -155,12 +155,16 @@
 <%= trfile_draw_text_field(act.id,"1",90, act.form_default_value,@tredit_actions[0].value,act.form_js,act.form_required_y_n_1) %>          
 
         <% elsif act.form_display_field_type == "dropdown"
+            v_prompt = "select?"
+            if !act.prompt.blank?
+                v_prompt = act.prompt
+            end
             if act.ref_table_a_1 == "lookup_refs"  ## use ref_table_b_1 %>
         <%= collection_select "value",act.id.to_s+"][", LookupRef.where("label = ?",act.ref_table_b_1).sort_by(&:display_order),
-            :ref_value, :description, {:include_blank => "select",:selected => (@tredit_actions[0].value or act.form_default_value)} %>
+            :ref_value, :description, {:include_blank => v_prompt ,:selected => (@tredit_actions[0].value or act.form_default_value)} %>
       <%  else   %>
           <%= collection_select "value",act.id.to_s+"][", ((act.ref_table_a_1).constantize).all.sort_by(&:description),
-            :id, :description, {:include_blank => "select",:selected => (@tredit_actions[0].value or act.form_default_value)} %>      
+            :id, :description, {:include_blank => v_prompt,:selected => (@tredit_actions[0].value or act.form_default_value)} %>      
          <%   end   %>   
         <%   elsif act.form_display_field_type == "textarea" %>
 <%= trfile_draw_text_area(act.id,"80x4", act.form_default_value,@tredit_actions[0].value,act.form_required_y_n_1) %>

@@ -182,7 +182,7 @@ class TrtypesController < ApplicationController
 
     end
     # using LEFT JOIN
-    @sql_view = "select t1.* from ( select "+v_column_array.join(',')+" from "+v_table_array.join(' ')+" where "+v_table_conditions.join(' and ') +" ) t1 "
+    @sql_view = "select * from ( select "+v_column_array.join(',')+" from "+v_table_array.join(' ')+" where "+v_table_conditions.join(' and ') +" ) t1"
 
 
     respond_to do |format|

@@ -2769,7 +2769,7 @@ puts "AAAAAA "+v_call
                   v_comment_warning = v_comment_warning  +v_err
                 end
               while !stdout.eof?
-                  puts stdout.read 1024    
+                  v_comment = v_comment + " "+ stdout.read 1024    
               end
               stdin.close
               stdout.close

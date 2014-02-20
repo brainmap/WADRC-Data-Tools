@@ -1,10 +1,14 @@
 <% if current_user.role == 'Admin_High'  or current_user.role == 'Admin_Low'%>
 <table class="tabular">
 <tr><td align="left"><%= link_to('Question Forms', '/questionforms') %></td><td align="left"> -- questions forms have been made for Lab Health (id=12), NeuroPsyche (id=13), and Questionnaire (id=14). This is rarely done. <br></td></tr>
-<tr><td nowrap align="left"><%= link_to('Question Forms Scan Procedures', '/questionform_scan_procedures') %></td><td align="left"> -- questionforms can be limited by scan procedure. This is rarely done.  <br></td></tr>
 <tr><td align="left"><%= link_to('Questions', '/questions') %></td><td align="left">  --- questions are created, and then linked to a question form.<br> Name the [questionform - NP,LabHealth,questionnaire, etc.]_[scan procedure - lmpd, lead, etc.]_[some identifier from question]_[1, 2,,3 ].<br> The questions are groups up to three to a row. It is difficult to move questions which are grouped together,<br>but easy to change the order of the whole row. <br>This is done when a new scan procedure is set up with labhealth, neuropsyche or questionnaires.<br></td></tr>
+<tr><td nowrap align="left"><%= link_to('Questions link to Scan Procedures', '/question_scan_procedures') %> </td><td align="left"> -- A question can be included or excluded based on scan procedure. If neither is specified, the question is accessible to all scan procedures via the questionform.<br> This is done when a new scan procedure is set up with labhealth, neuropsyche or questionnaires. <br>
+LINK A QUESTION TO A SCAN PRCEDURE BEFORE LINKING TO FORM.<br></td></tr>
+
 <tr><td nowrap align="left"><%= link_to('Questions link to Form', '/questionform_questions') %></td><td align="left">  --- After a question is made, it needs to be linked to a questionform. <br>The search will list all the questions linked to a form, ordered by display order, from all the scan procedures. <br>The bottom link - "New Questionform question" lists the unlinked questions which need to be added to forms.<br> This is done when a new scan procedure is set up with labhealth, neuropsyche or questionnaires.<br></td></tr>
-<tr><td nowrap align="left"><%= link_to('Question Scan Procedures', '/question_scan_procedures') %> </td><td align="left"> -- A question can be included or excluded based on scan procedure. If neither is specified, the question is accessible to all scan procedures via the questionform.<br> This is done when a new scan procedure is set up with labhealth, neuropsyche or questionnaires. <br></td></tr>
+
+<tr><td nowrap align="left"><br><br><br></td><td align="left">  <br><br><br><br></td></tr>
+<tr><td nowrap align="left"><%= link_to('Question Forms Scan Procedures', '/questionform_scan_procedures') %></td><td align="left"> -- questionforms can be limited by scan procedure. This is rarely done.  <br></td></tr>
 </table>
 
 

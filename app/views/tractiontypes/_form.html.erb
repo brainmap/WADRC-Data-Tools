@@ -118,9 +118,13 @@ v_value_type =  [["dropdown","dropdown"],["dropdown_multiple","dropdown_multiple
     <td  align="left">
   <div class="actions">
     <%= f.submit %>
-    </div
+    </div>
   </td>
-  <td colspan="3" valign="center"><b>
+    <td><b>
+    <%= f.label :prompt %>: </b>
+    <%= f.text_field :prompt %>
+  </td>
+  <td colspan="2" valign="center"><b>
     <%= f.label :triggers %>: </b>
     <%= f.text_area :triggers_1 %><br>
     <small><small>To display a command based on value, and include subjectid_v#
