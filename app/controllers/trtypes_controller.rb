@@ -7,6 +7,8 @@ class TrtypesController < ApplicationController
     @trtypes = Trtype.where("status_flag ='Y' ")
     connection = ActiveRecord::Base.connection();
     @v_action_name ="action"
+    # SEARCH IS RETURNING TOO MANY - e.g. all mets if seach on pdt , because there was some pdt with mets dual enrollment
+
     if !params[:id].nil?
 
          @v_action_name = Trtype.find(params[:id]).action_name 
@@ -102,11 +104,63 @@ class TrtypesController < ApplicationController
               end
             else
               @html_request ="N"
-              @column_headers = ['Completed','Last Update','Subjectid','Scan Procedure','QC','QC Notes']
+             # @column_headers = ['Completed','Last Update','Subjectid','Scan Procedure','QC','QC Notes']
+             # don't think this is used
               @db_columns   =["trfiles.file_completed_flag","trfiles.updated_at","concat(trfiles.subjectid,' ',trfiles.secondary_key)","scan_procedures.codename","trfiles.qc_value","trfiles.qc_notes"]
-              sql = "select "+@db_columns.join(",")+" from scan_procedures, trfiles where "+@conditions.join(' and ') 
+             # sql = "select "+@db_columns.join(",")+" from scan_procedures, trfiles where "+@conditions.join(' and ') 
+             # connection = ActiveRecord::Base.connection();
+             # @trfiles_search  =  connection.execute(sql)
+
+              # making a select statement from tractiontype parts -- sort of like q_data
+
+              @column_headers = ['Subjectid','Secondary Key','Scan Procedure','Last Update','Completed','QC','QC Notes']
+              v_column_array = ["trfiles.subjectid","trfiles.secondary_key","trfiles.enrollment_id","trfiles.scan_procedure_id", "trfiles.file_completed_flag","trfiles.qc_value","trfiles.qc_notes"]
+              v_column_array = ["trfiles.subjectid","trfiles.secondary_key","scan_procedures.codename","trfiles.updated_at", "trfiles.file_completed_flag","trfiles.qc_value","trfiles.qc_notes"]
+              v_table_array = ["scan_procedures, trfiles"] # weird -- DO NOT JOIN ARRAY with comma 
+               # need trfiles second for left join -- then joining the sql as a table --> no commas
+              v_table_conditions =[" trfiles.trtype_id = "+params[:id]+" "]
+              v_table_conditions.push(@conditions)
+              @tractiontypes = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.form_display_label is not null and tractiontypes.form_display_label >''" ).order(:display_order)
+              @tractiontypes.each do |act|
+                 v_value_sql = ""
+                 # ("trfiles.id = v_"+act.id.to_s+".trfile_id")
+                 @column_headers.push(act.form_display_label)
+                 v_col = (act.form_display_label).gsub(/ /,"").gsub(/\'/,"_").gsub(/\"/,"_").gsub(/\-/,"_").gsub(/\//,"_").downcase+"_" 
+                 v_column_array.push("v_"+act.id.to_s+"."+v_col) 
+
+                 # need last edit
+                 if !act.ref_table_b_1.blank?
+                     v_value_sql = "LEFT JOIN  (select "+act.ref_table_a_1+".description "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1+" 
+                      where trfile2.id = tredits.trfile_id 
+                      and tredits.id = tredit_actions.tredit_id 
+                      and tredit_actions.tractiontype_id = "+act.id.to_s+" 
+                      and "+act.ref_table_a_1+".label = '"+act.ref_table_b_1+"'
+                      and tredit_actions.value = "+act.ref_table_a_1+".ref_value
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
+                     v_table_array.push(v_value_sql)
+                 elsif !act.ref_table_a_1.blank?
+                    v_value_sql = "LEFT JOIN  (select "+act.ref_table_a_1.pluralize.underscore+".description "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1.pluralize.underscore+" 
+                      where trfile2.id = tredits.trfile_id 
+                      and tredits.id = tredit_actions.tredit_id 
+                      and tredit_actions.tractiontype_id = "+act.id.to_s+" 
+                      and "+act.ref_table_a_1+".label = '"+act.ref_table_b_1+"'
+                      and tredit_actions.value = "+act.ref_table_a_1.pluralize.underscore+".id
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
+                    v_table_array.push(v_value_sql)
+                 else
+                    v_value_sql = "LEFT JOIN (select tredit_actions.value "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions 
+                      where trfile2.id = tredits.trfile_id 
+                      and tredits.id = tredit_actions.tredit_id 
+                      and tredit_actions.tractiontype_id = "+act.id.to_s+" 
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
+                    v_table_array.push(v_value_sql)
+                end
+              end
+              # using LEFT JOIN
+              @sql_view = "select * from ( select "+v_column_array.join(',')+" from "+v_table_array.join(' ')+" where "+v_table_conditions.join(' and ') +" ) t1"
               connection = ActiveRecord::Base.connection();
-              @trfiles_search  =  connection.execute(sql)
+              @trfiles_search  =  connection.execute(@sql_view)
+
             end
 
          @column_number = @column_headers.size
@@ -179,7 +233,6 @@ class TrtypesController < ApplicationController
                       and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
          v_table_array.push(v_value_sql)
         end
-
     end
     # using LEFT JOIN
     @sql_view = "select * from ( select "+v_column_array.join(',')+" from "+v_table_array.join(' ')+" where "+v_table_conditions.join(' and ') +" ) t1"
