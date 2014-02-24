@@ -2,7 +2,7 @@
 require 'radiology_comment'
 class LoadComments < ActiveRecord::Base
   # This script will load the radiology_comments rad_path, the comment html, the comment_text, and set the q1_flag
-    past_time = Time.new - (1).month
+    past_time = Time.new - (2).month
   v_past_date = past_time.strftime("%Y-%m-%d")
   @schedule = Schedule.where("name in ('load_radiology_comment')").first
    @schedulerun = Schedulerun.new
@@ -18,13 +18,13 @@ class LoadComments < ActiveRecord::Base
     
    # radiology_comments[0].  seems to only get the first visit????
     # going off of visit, ok if only called once   
-    radiology_comments[0].load_paths(1)
+    radiology_comments[0].load_paths(2)
     v_comment = "\n finish load_paths "+v_comment
 #   radiology_comments = RadiologyComment.where(" trim(radiology_comments.rad_path) is not null and  (radiology_comments.comment_html_1 is null
 #                  OR radiology_comments.comment_header_html_1 is null
 #                  OR radiology_comments.visit_id in (select visits.id from visits where visits.date >  '"+v_past_date+"' )  ) " )
 #    radiology_comments.each do |rc|
-          radiology_comments[0].load_comments(1)
+          radiology_comments[0].load_comments(2)
 #         rc.load_comments(1)
 #     end
      
