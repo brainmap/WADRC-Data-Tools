@@ -2745,10 +2745,20 @@ puts "AAAAAA "+v_call
     @trfiles = Trfile.where("trfiles.trtype_id = 1 and trfiles.file_completed_flag = 'Y'")
     @trfiles.each do |trf|
         # check if in good2go
-        if !trf.secondary_key.nil?
-          v_subject = trf.subjectid+trf.secondary_key
-        else
-          v_subject = trf.subjectid
+        v_subject = trf.subjectid
+        if !trf.secondary_key.nil? 
+          # need [subjectid]_v# ==> [subjectid][secondary_key]_v#
+          if trf.subjectid.include?("_v2")
+            v_subject = (trf.subjectid).gsub(/_v2/,"")+trf.secondary_key+"_v2"
+          elsif trf.subjectid.include?("_v3")
+            v_subject = (trf.subjectid).gsub(/_v3/,"")+trf.secondary_key+"_v3"
+          elsif trf.subjectid.include?("_v4")
+            v_subject = (trf.subjectid).gsub(/_v4/,"")+trf.secondary_key+"_v4"
+          elsif trf.subjectid.include?("_v5")
+            v_subject = (trf.subjectid).gsub(/_v5/,"")+trf.secondary_key+"_v5"
+          else
+             v_subject = trf.subjectid+trf.secondary_key
+          end
         end
         v_dir_source = v_manual_edit_dir+v_subject
         v_dir_target = v_good2go_dir+v_subject
@@ -2769,7 +2779,8 @@ puts "AAAAAA "+v_call
                   v_comment_warning = v_comment_warning  +v_err
                 end
               while !stdout.eof?
-                  v_comment = v_comment + " "+ stdout.read 1024    
+                  v_tmp = (stdout.read 1024)
+                  v_comment = v_comment + " "+ v_tmp   
               end
               stdin.close
               stdout.close
