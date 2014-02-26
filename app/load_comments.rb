@@ -18,13 +18,14 @@ class LoadComments < ActiveRecord::Base
     
    # radiology_comments[0].  seems to only get the first visit????
     # going off of visit, ok if only called once   
-    radiology_comments[0].load_paths(2)
+    radiology_comments[0].load_paths(1)
     v_comment = "\n finish load_paths "+v_comment
 #   radiology_comments = RadiologyComment.where(" trim(radiology_comments.rad_path) is not null and  (radiology_comments.comment_html_1 is null
 #                  OR radiology_comments.comment_header_html_1 is null
 #                  OR radiology_comments.visit_id in (select visits.id from visits where visits.date >  '"+v_past_date+"' )  ) " )
 #    radiology_comments.each do |rc|
-          radiology_comments[0].load_comments(2)
+        # IF THINGS ARE NOT LOADING, LOOK AT THE HTML OF RADIOLOGY SITE - START INDEX - END INDEX 
+          radiology_comments[0].load_comments(1)
 #         rc.load_comments(1)
 #     end
      
