@@ -25,7 +25,8 @@ class LoadComments < ActiveRecord::Base
 #                  OR radiology_comments.visit_id in (select visits.id from visits where visits.date >  '"+v_past_date+"' )  ) " )
 #    radiology_comments.each do |rc|
         # IF THINGS ARE NOT LOADING, LOOK AT THE HTML OF RADIOLOGY SITE - START INDEX - END INDEX 
-          radiology_comments[0].load_comments(1)
+          v_return_comment = ""
+          v_return_comment = radiology_comments[0].load_comments(1)
 #         rc.load_comments(1)
 #     end
      
@@ -34,7 +35,7 @@ class LoadComments < ActiveRecord::Base
             radiology_comments[0].load_text
 #        rc.load_text
 #    end
-  v_comment = "\n finish load text "+v_comment
+  v_comment =v_return_comment+"\n finish load text "+v_comment
    puts "======= finished path and comments load ====="
     @schedulerun.comment =("successful finish load_radiology_comment "+v_comment[0..450])
     @schedulerun.status_flag ="Y"
@@ -45,7 +46,7 @@ class LoadComments < ActiveRecord::Base
       v_error = msg.to_s
       puts "ERROR !!!!!!!"
       puts v_error
-       @schedulerun.comment =v_error[0..499]
+       @schedulerun.comment =v_error[0..499]+v_comment
        @schedulerun.status_flag="E"
        @schedulerun.save
    end
