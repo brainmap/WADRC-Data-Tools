@@ -86,7 +86,7 @@ v_tn_cn_searchable_hash = []
 				<%   if v_name == "cg_search[enumber]"   %>
 			      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
 			    <% else %>	
-	              <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
+	              <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/").gsub(/\+/," ") %>
 	            <% end %>
 	       <% end %>
 	      <%= submit_tag 'export file'%>
@@ -433,7 +433,7 @@ v_tn_cn_searchable_hash = []
 	     <%   if v_name == "cg_search[enumber]"   %>
 	      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
 	       <% else %>	
-            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
+            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/").gsub(/\+/," ") %>	
            <% end %>
        <% end %>
       <%= submit_tag 'export file'%> 
@@ -462,7 +462,7 @@ v_tn_cn_searchable_hash = []
 	     <%   if v_name == "cg_search[enumber]"   %>
 	      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
 	       <% else %>	
-            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
+            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/").gsub(/\+/," ") %>	
            <% end %>
        <% end %>
       <%= submit_tag 'export longitudinal file'%>  
@@ -486,7 +486,7 @@ v_tn_cn_searchable_hash = []
 	     <%   if v_name == "cg_search[enumber]"   %>
 	      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
 	       <% else %>	
-            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
+            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/").gsub(/\+/," ") %>	
            <% end %>
        <% end %>
       <%= hidden_field_tag  "cg_search[image_dataset_file]" , "image_dataset_file" %>
