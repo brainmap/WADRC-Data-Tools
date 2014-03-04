@@ -82,11 +82,17 @@ v_tn_cn_searchable_hash = []
 	        v_link_array.each do |v| 
 	            v_name = ""
 	            v_val =""
-		        (v_name,v_val) = v.split('=')%>
+		        (v_name,v_val) = v.split('=')
+		       
+		        %>
 				<%   if v_name == "cg_search[enumber]"   %>
 			      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
-			    <% else %>	
-	              <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/").gsub(/\+/," ") %>
+			    <% else 
+                       if !v_val.nil?
+                           v_val = CGI.unescape(v_val) # gets rid of gsub(/\%2F/,"/").gsub(/\+/," ")
+                        end
+			        %>	
+	              <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>
 	            <% end %>
 	       <% end %>
 	      <%= submit_tag 'export file'%>
@@ -432,8 +438,12 @@ v_tn_cn_searchable_hash = []
 	        (v_name,v_val) = v.split('=') %>
 	     <%   if v_name == "cg_search[enumber]"   %>
 	      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
-	       <% else %>	
-            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/").gsub(/\+/," ") %>	
+	       <% else 
+                 if !v_val.nil?
+                     v_val = CGI.unescape(v_val) # gets rid of gsub(/\%2F/,"/").gsub(/\+/," ")
+                  end
+	       %>	
+            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
            <% end %>
        <% end %>
       <%= submit_tag 'export file'%> 
@@ -461,8 +471,12 @@ v_tn_cn_searchable_hash = []
 	        (v_name,v_val) = v.split('=') %>
 	     <%   if v_name == "cg_search[enumber]"   %>
 	      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
-	       <% else %>	
-            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/").gsub(/\+/," ") %>	
+	       <% else 
+                       if !v_val.nil?
+                           v_val = CGI.unescape(v_val) # gets rid of gsub(/\%2F/,"/").gsub(/\+/," ")
+                        end
+	       %>	
+            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
            <% end %>
        <% end %>
       <%= submit_tag 'export longitudinal file'%>  
@@ -485,8 +499,12 @@ v_tn_cn_searchable_hash = []
 	        (v_name,v_val) = v.split('=') %>
 	     <%   if v_name == "cg_search[enumber]"   %>
 	      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
-	       <% else %>	
-            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/").gsub(/\+/," ") %>	
+	       <% else 
+                       if !v_val.nil?
+                           v_val = CGI.unescape(v_val) # gets rid of gsub(/\%2F/,"/").gsub(/\+/," ")
+                        end
+	       %>	
+            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
            <% end %>
        <% end %>
       <%= hidden_field_tag  "cg_search[image_dataset_file]" , "image_dataset_file" %>

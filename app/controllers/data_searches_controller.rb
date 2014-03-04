@@ -1,6 +1,7 @@
 # encoding: utf-8
 class DataSearchesController < ApplicationController
    # this isn't used - was a test bed for making sql
+   require 'cgi'
   def index
       # get the tables to join
       # columns and values to add to where
@@ -812,6 +813,7 @@ class DataSearchesController < ApplicationController
       
     end
    # can not do a self join-- unless two copies of table - unique tn_id, tn_cn_id
+   # this has glimpses of maddness and wonder
     def cg_search   
 
       v_debug = "N" # Y"
@@ -830,6 +832,7 @@ class DataSearchesController < ApplicationController
       @sp_array =[]
       @pet_tracer_array = []
       @cg_query_tn_id_array = []
+      @cn_p_vg_array = [] # used to flag column as participant specific
       @cg_query_tn_hash = Hash.new
       @cg_query_tn_cn_hash = Hash.new
       @cg_query_cn_hash = Hash.new
@@ -841,6 +844,7 @@ class DataSearchesController < ApplicationController
       @q_data_left_join_vgroup_hash = Hash.new
       @q_data_headers_hash = Hash.new
       @q_data_tables_hash = Hash.new
+      @q_data_tables_p_vg_hash = Hash.new # used to identify if table is joined on participant_id
       @fields_hash = Hash.new
 
       @add_cg_tn_id = []
@@ -1062,6 +1066,11 @@ class DataSearchesController < ApplicationController
             end
             v_cg_tn_array.each do |tn_object| 
              @cg_tn = tn_object             
+             if (@cg_tn.join_left).downcase.include?("vgroups.participant_id")
+                   @q_data_tables_p_vg_hash[@cg_tn.id] ="participant"
+             else
+                   @q_data_tables_p_vg_hash[@cg_tn.id] ="not_participant"
+             end
              if (!params[:cg_search][:include_tn].blank? and !params[:cg_search][:include_tn][v_tn_id ].blank?) or !params[:cg_search][:join_type][v_tn_id].blank? or (!params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank? and !params[:cg_search][:include_cn][v_tn_id].blank?) or  ( !params[:cg_search][:condition].blank? and !params[:cg_search][:condition][v_tn_id].blank? )  
                 @cg_query_tn = CgQueryTn.new
                 @cg_query_tn.cg_tn_id =v_tn_id
