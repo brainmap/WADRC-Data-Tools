@@ -116,6 +116,21 @@ class Shared  < ActionController::Base
     end
     return v_flag, v_comment
   end
+
+  def get_lookup_refs_description ( p_label, p_value)
+    v_return = ""
+    if !p_value.blank?
+        sql_val = "select lookup_refs.description from lookup_refs where label='"+ p_label+"' and ref_value in ("+p_value+")"
+        connection = ActiveRecord::Base.connection();
+        vals =  connection.execute(sql_val)
+        val=[]
+        vals.each do |v|
+            val.push(v[0])
+        end
+        v_return = val.join(",")
+     end
+     return v_return   
+  end
   
   def get_file_diff(p_script,p_script_dev,p_error_comment,p_comment)
       v_error_comment = p_error_comment

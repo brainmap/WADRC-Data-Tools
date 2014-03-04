@@ -42,6 +42,13 @@ v_display = {"dropdown"=>"dropdown","text"=>"text"}  %>
     <%= f.label :status_flag %><br />
    <%= f.select :status_flag, v_y_n, {:prompt => 'Status?'}  %>
   </div>
+  <div class="field">
+    <%= f.label :triggers %>: </b>
+    <%= f.text_area :triggers_1 %><br>
+    <small><small>To display a command based on value, and include subjectid_v#
+    display_command|value_1=command_1 <enum>|value_2=command_2 <enum>|.....<br></small></small>
+    The triggers are a work in progress.
+  </div>
   <div class="actions">
     <%= f.submit %>
   </div>

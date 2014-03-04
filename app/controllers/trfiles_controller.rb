@@ -2,6 +2,7 @@ class TrfilesController < ApplicationController
 
   def trfile_edit_action
     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+    v_shared = Shared.new
     # get params -- tredit_id ==> trfile_id, trype_id 
     if !params[:tredit_id].nil?
          v_datetime = DateTime.now
@@ -23,37 +24,100 @@ class TrfilesController < ApplicationController
         @trfile.updated_at = v_datetime.strftime('%Y-%m-%d %H:%M:%S')
         @trfile.save
         @tredit.user_id = params[:tredit][:user_id]
+        @trtype = Trtype.find(@trfile.trtype_id)
         if !params[:value].nil?
              @tractiontypes = Tractiontype.where("trtype_id in (?)",@trfile.trtype_id).where("tractiontypes.form_display_order is not null")
              @tractiontypes.each do |ta|
                @tredit_actions = TreditAction.where("tredit_id in (?)",@tredit.id).where("tractiontype_id in (?)",ta.id)
-              @tredit_action = @tredit_actions[0]
-              v_value = nil
-              if !params["value"][(ta.id).to_s].nil?
-              v_value = params["value"][(ta.id).to_s].join(',')
+               @tredit_action = @tredit_actions[0]
+               v_value = nil
+               if !params["value"][(ta.id).to_s].nil?
+                v_value = params["value"][(ta.id).to_s].join(',')
                else
                   puts "bbbbbb nil = "+(ta.id).to_s
+               end
+               @tredit_action.value = v_value
+               v_datetime = DateTime.now
+               @tredit.updated_at = v_datetime.strftime('%Y-%m-%d %H:%M:%S')
+               @tredit_action.save
+
+              if !(ta.triggers_1).blank?
+                  # triggers are a work in progress
+                  v_trigger_array = (ta.triggers_1).split("|")
+                  if v_trigger_array[0] == "update_field"
+                      v_trtype_array = v_trigger_array[1].split("=")
+                      v_trtype_id_array = (v_trtype_array[1].gsub(/\[/,"").gsub(/\]/,"")).split(",")
+                      v_target = v_trigger_array[2]
+                      v_target_field = v_trigger_array[3]
+                      # set the v_target . v_target_field for this subject_id in v_trtype_id_array
+                      if v_target == "trfile"
+                        @target_trfiles = Trfile.where("subjectid in (?) and ( secondary_key in (?) or secondary_key is NULL)", @trfile.subjectid,@trfile.secondary_key).where("trfiles.trtype_id in (?)",v_trtype_id_array)
+                        puts "BBBBBBBBBB "
+                        @target_trfiles.each do |tar|
+                          puts "CCCCCCC tar.id ="+tar.id.to_s+"   v_target_field="+v_target_field
+                               if v_target_field == "qc_value"
+                                   puts "DDDD v_value = "+v_value
+                                   # need to translate tp Pass, Partial,
+                                   v_description = v_shared.get_lookup_refs_description(ta.ref_table_b_1, v_value)
+
+                                  tar.qc_value = v_description
+                                  tar.save
+                                elsif v_target_field == "qc_notes"
+                                  # need to make a composite of all the qc fields into notes
+                                  tar.qc_notes = v_value
+                                  tar.save
+                               end
+                        end
+                      end
+                  end
               end
-              @tredit_action.value = v_value
-              v_datetime = DateTime.now
-              @tredit.updated_at = v_datetime.strftime('%Y-%m-%d %H:%M:%S')
-              @tredit_action.save
-              # trying to get the updated_at to propagate from the tredit_action to tredit/trfile 
-              # not updating updated_at 
-          #    if @tredit_action.updated_at > @trfile.updated_at or @tredit.updated_at > @trfile.updated_at
-           #          @trfile_updated_at = @tredit_action.updated_at
-            #         if @tredit.updated_at > @trfile.updated_at
-             #           @trfile_updated_at = @tredit.updated_at
-              #      end
-               #     @trfile.save
-             # end
              end
+             #update_field|tractiontypes_id=[23,22,24,25,26,27,28,29,30]|trtype_id=[4,1]|trfile|qc_notes
+             if !(@trtype.triggers_1).blank?
+                 v_trigger_array = (@trtype.triggers_1).split("|")
+                 if v_trigger_array[0] == "update_field"
+                    v_tractiontype_array = v_trigger_array[1].split("=")
+                    # get label - value from this tredit and these tractiontype
+                    v_tractiontype_id_array = (v_tractiontype_array[1].gsub(/\[/,"").gsub(/\]/,"")).split(",")
+                    v_composite_value = ""
+                    v_tractiontype_id_array.each do |act_id|
+                        v_tractiontype = Tractiontype.find(act_id)
+                        v_tredit_action = TreditAction.where("tractiontype_id in (?) and tredit_id in (?)",act_id, @tredit.id)
+                        v_tmp_value = v_tredit_action[0].value
+                        if v_tractiontype.ref_table_a_1 == "lookup_refs"
+                               v_tmp_value =  v_shared.get_lookup_refs_description(v_tractiontype.ref_table_b_1, v_tmp_value)
+                        end
+v_composite_value = v_composite_value + "
+     "+v_tractiontype.display_summary_column_header_1+": "+v_tmp_value
+                    end
+
+                    v_trtype_array = v_trigger_array[2].split("=")
+                    # update  matching this trfile.subjectid and these trtype_id
+                    v_trtype_id_array = (v_trtype_array[1].gsub(/\[/,"").gsub(/\]/,"")).split(",")
+
+                    v_target = v_trigger_array[3]
+                    v_target_field = v_trigger_array[4]
+                    if v_target == "trfile"
+                        @target_trfiles = Trfile.where("subjectid in (?) and ( secondary_key in (?) or secondary_key is NULL)", @trfile.subjectid,@trfile.secondary_key).where("trfiles.trtype_id in (?)",v_trtype_id_array)
+                        @target_trfiles.each do |tar|
+                          puts "CCCCCCC tar.id ="+tar.id.to_s+"   v_target_field="+v_target_field
+                               if  v_target_field == "qc_notes"
+                                  # need to make a composite of all the qc fields into notes
+                                  tar.qc_notes = v_composite_value
+                                  tar.save
+                               end
+                        end
+                     end 
+                 end
+            end
         end
     end
     # update trfile
     # update tredit
     # loop thru traction_edit
     # redirect back to trtype_home
+    # if fs qc = trtype_id = 4 , make composite from all fs qc fields 
+
     respond_to do |format|
           format.html { redirect_to( '/trtype_home/'+(@trfile.trtype_id).to_s, :notice => ' ' )}
     end
@@ -71,7 +135,7 @@ class TrfilesController < ApplicationController
    if !params[:trfile_action].nil? and params[:trfile_action] =="create"
      v_subjectid_v = params[:subjectid]
      v_secondary_key = ""
-     if !params[:secondary_key].nil?
+     if !params[:secondary_key].blank?
        v_secondary_key = params[:secondary_key]
         v_trfile = Trfile.where("subjectid in (?)",v_subjectid_v).where("secondary_key in (?)",v_secondary_key).where("trtype_id in (?)",params[:id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_edit_array)    
      else
@@ -105,6 +169,52 @@ class TrfilesController < ApplicationController
            @trfile.enrollment_id = v_enrollment_id
            @trfile.scan_procedure_id = v_sp_id
            @trfile.trtype_id = params[:id]
+           v_trtype = Trtype.find(params[:id])
+           if !(v_trtype.triggers_1).blank?
+              # create_field|tractiontypes_id=[23,24,25,26,27,28,29,30]|trtype_id=[4]|trfile|qc_notes
+                v_trigger_array = (v_trtype.triggers_1).split("|")
+                 if v_trigger_array[0] == "create_field"
+                    v_tractiontype_array = v_trigger_array[1].split("=")
+                    v_trtype_array = v_trigger_array[2].split("=")
+                    # update  matching this trfile.subjectid and these trtype_id
+                    v_trtype_id_array = (v_trtype_array[1].gsub(/\[/,"").gsub(/\]/,"")).split(",")
+                    # get label - value from this tredit and these tractiontype
+                    v_tractiontype_id_array = (v_tractiontype_array[1].gsub(/\[/,"").gsub(/\]/,"")).split(",")
+                    v_composite_value = ""
+                    # need source trfile, expect 1 trfile
+                    v_source_trfiles = Trfile.where("subjectid in (?) and ( secondary_key in (?) or secondary_key is NULL)", @trfile.subjectid,@trfile.secondary_key).where("trfiles.trtype_id in (?)",v_trtype_id_array)
+                     # get last edit
+                     if !v_source_trfiles.nil? and !v_source_trfiles[0].nil?
+                        v_src_tredits = Tredit.where("trfile_id in (?) and status_flag ='Y' ",v_source_trfiles[0].id).order("created_at")
+                        v_src_tredit = nil
+                        v_src_tredits.each do |te|
+                            v_src_tredit = te # want the last one - newest created_at
+                        end    
+                      v_tractiontype_id_array.each do |act_id|
+                        v_tractiontype = Tractiontype.find(act_id)
+
+                        v_tredit_action = TreditAction.where("tractiontype_id in (?) and tredit_id in (?)",act_id, v_src_tredit.id)
+                        v_tmp_value = v_tredit_action[0].value
+                        if v_tractiontype.ref_table_a_1 == "lookup_refs"
+                               v_tmp_value =  v_shared.get_lookup_refs_description(v_tractiontype.ref_table_b_1, v_tmp_value)
+                        end
+v_composite_value = v_composite_value + "
+     "+v_tractiontype.display_summary_column_header_1+": "+v_tmp_value
+                      end
+                      v_target = v_trigger_array[3]
+                      v_target_field = v_trigger_array[4]
+                      if v_target == "trfile"
+                        if v_target_field == "qc_notes"
+                           @trfile.qc_notes = v_composite_value
+                           # want to grab gc_value also
+                           v_description = v_shared.get_lookup_refs_description(ta.ref_table_b_1, v_value)
+                           @trfile.qc_value = v_source_trfiles.qc_value
+                        end
+                      end 
+                    end
+                 end
+
+           end
            @trfile.save
         else
           v_display_form = "N"

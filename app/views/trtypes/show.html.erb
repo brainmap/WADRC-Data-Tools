@@ -24,7 +24,10 @@
   <b>Status flag:</b>
   <%= @trtype.status_flag %>
 </p>
-
+<p>
+  <b>Triogger:</b>
+  <%= @trtype.triggers_1 %>
+</p>
 <% if current_user.role == 'Admin_High'%>
 <%= link_to 'Edit', edit_trtype_path(@trtype) %> |
 <% end %>
