@@ -51,7 +51,11 @@ class TrfilesController < ApplicationController
                       v_target_field = v_trigger_array[3]
                       # set the v_target . v_target_field for this subject_id in v_trtype_id_array
                       if v_target == "trfile"
-                        @target_trfiles = Trfile.where("subjectid in (?) and ( secondary_key in (?) or secondary_key is NULL)", @trfile.subjectid,@trfile.secondary_key).where("trfiles.trtype_id in (?)",v_trtype_id_array)
+                        if !@trfile.secondary_key.blank?
+                           @target_trfiles = Trfile.where("subjectid in (?) and ( secondary_key in (?) )", @trfile.subjectid,@trfile.secondary_key).where("trfiles.trtype_id in (?)",v_trtype_id_array)
+                         else
+                           @target_trfiles = Trfile.where("subjectid in (?) and ( secondary_key in  (?) or secondary_key is NULL)", @trfile.subjectid,@trfile.secondary_key).where("trfiles.trtype_id in (?)",v_trtype_id_array)
+                         end  
                         puts "BBBBBBBBBB "
                         @target_trfiles.each do |tar|
                           puts "CCCCCCC tar.id ="+tar.id.to_s+"   v_target_field="+v_target_field
@@ -98,7 +102,13 @@ v_composite_value = v_composite_value + "
                     v_target = v_trigger_array[3]
                     v_target_field = v_trigger_array[4]
                     if v_target == "trfile"
-                        @target_trfiles = Trfile.where("subjectid in (?) and ( secondary_key in (?) or secondary_key is NULL)", @trfile.subjectid,@trfile.secondary_key).where("trfiles.trtype_id in (?)",v_trtype_id_array)
+                        if !@trfile.secondary_key.blank?
+                           @target_trfiles = Trfile.where("subjectid in (?) and ( secondary_key in (?) )", @trfile.subjectid,@trfile.secondary_key).where("trfiles.trtype_id in (?)",v_trtype_id_array)
+                        else
+                           @target_trfiles = Trfile.where("subjectid in (?) and ( secondary_key in (?) or secondary_key is NULL)", @trfile.subjectid,@trfile.secondary_key).where("trfiles.trtype_id in (?)",v_trtype_id_array)
+
+                        end
+
                         @target_trfiles.each do |tar|
                           puts "CCCCCCC tar.id ="+tar.id.to_s+"   v_target_field="+v_target_field
                                if  v_target_field == "qc_notes"
@@ -182,7 +192,12 @@ v_composite_value = v_composite_value + "
                     v_tractiontype_id_array = (v_tractiontype_array[1].gsub(/\[/,"").gsub(/\]/,"")).split(",")
                     v_composite_value = ""
                     # need source trfile, expect 1 trfile
-                    v_source_trfiles = Trfile.where("subjectid in (?) and ( secondary_key in (?) or secondary_key is NULL)", @trfile.subjectid,@trfile.secondary_key).where("trfiles.trtype_id in (?)",v_trtype_id_array)
+                    if !@trfile.secondary_key.blank?
+                       v_source_trfiles = Trfile.where("subjectid in (?) and ( secondary_key in (?) )", @trfile.subjectid,@trfile.secondary_key).where("trfiles.trtype_id in (?)",v_trtype_id_array)
+                    else
+                       v_source_trfiles = Trfile.where("subjectid in (?) and ( secondary_key in (?) or secondary_key is NULL)", @trfile.subjectid,@trfile.secondary_key).where("trfiles.trtype_id in (?)",v_trtype_id_array)
+                    end
+
                      # get last edit
                      if !v_source_trfiles.nil? and !v_source_trfiles[0].nil?
                         v_src_tredits = Tredit.where("trfile_id in (?) and status_flag ='Y' ",v_source_trfiles[0].id).order("created_at")
