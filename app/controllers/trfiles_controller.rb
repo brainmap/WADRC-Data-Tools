@@ -20,6 +20,7 @@ class TrfilesController < ApplicationController
         @trfile.image_dataset_id  = params[:trfile_edit_action][:image_dataset_id]
         @trfile.file_completed_flag  = params[:trfile_edit_action][:file_completed_flag]
         @trfile.qc_value  = params[:trfile_edit_action][:qc_value]
+        @trfile.qc_notes  = params[:trfile_edit_action][:qc_notes]
         @trfile.status_flag  = params[:trfile_edit_action][:status_flag]
         @trfile.updated_at = v_datetime.strftime('%Y-%m-%d %H:%M:%S')
         @trfile.save
@@ -222,8 +223,8 @@ v_composite_value = v_composite_value + "
                         if v_target_field == "qc_notes"
                            @trfile.qc_notes = v_composite_value
                            # want to grab gc_value also
-                           v_description = v_shared.get_lookup_refs_description(ta.ref_table_b_1, v_value)
-                           @trfile.qc_value = v_source_trfiles.qc_value
+                           #v_description = v_shared.get_lookup_refs_description(ta.ref_table_b_1, v_value)
+                           @trfile.qc_value = v_source_trfiles[0].qc_value
                         end
                       end 
                     end

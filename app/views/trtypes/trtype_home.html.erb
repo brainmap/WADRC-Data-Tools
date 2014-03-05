@@ -24,7 +24,7 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
 <% if !params[:id].nil? %>
   <tr><td colspan="3">
     <%= form_tag("/trfile_home/"+params[:id], method: "post") do %>
-           <%= label_tag :subjectid %>: <small>for visit 1 just enter [subjectid], for visit 2 enter [subjectid]_v2 ,e.g. for visit # enter [subjectid]_v#</small><br />
+           <small><%= label_tag :subjectid %>:</small> <small>for visit 1 just enter [subjectid], for visit 2 enter [subjectid]_v2 ,e.g. for visit # enter [subjectid]_v#</small><br />
    <%= submit_tag 'Make New File'%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag  :subjectid ,"",:required=>TRUE %>
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><%= label_tag :optional_secondary_key %>:&nbsp;&nbsp;</small><%= text_field_tag  :secondary_key ,""%>
     <%= hidden_field_tag :trfile_action,"create" %>
@@ -60,7 +60,7 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
    <% end 
 %>
 <!-- = f.label :compeleted -->
-<%=f.submit 'Run Search'%>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <%= label_tag :subjectid %> ( add _v2, _v3, etc ):&nbsp;&nbsp;<%= text_field_tag  "tr_search[subjectid]",""  %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><%= label_tag :optional_secondary_key %>:&nbsp;&nbsp;</small><%= text_field_tag  "tr_search[secondary_key]" ,""%>
+<%=f.submit 'Run Search'%>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b><big><%= label_tag :subjectid %></big></b> ( add _v2, _v3, etc ):&nbsp;&nbsp;<%= text_field_tag  "tr_search[subjectid]",""  %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><%= label_tag :optional_secondary_key %>:&nbsp;&nbsp;</small><%= text_field_tag  "tr_search[secondary_key]" ,""%>
       <%end%>
 <br>
 </td></tr>
