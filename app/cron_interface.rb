@@ -69,6 +69,10 @@ v_user = v_user.gsub("\n","")
  elsif v_value_1 == "adrc_upload"
       v_shared = Shared.new
       v_shared.run_adrc_upload()
+
+  elsif v_value_1 == "adrc_wahlin_t1_asl_resting"
+      v_shared = Shared.new
+      v_shared.run_adrc_wahlin_t1_asl_resting()  
       
  elsif v_value_1 == "antuano_20130916_upload"
       v_shared = Shared.new

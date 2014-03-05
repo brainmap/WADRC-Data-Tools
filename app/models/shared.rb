@@ -1247,6 +1247,274 @@ puts "AAAAAA "+v_call
       
     
   end
+
+
+
+   # data request from anders wahlin for adrc - t1/resting bold => /unknown, asl => /asl
+  # from cg_adrc_upload 
+  # wahlin_t1_asl_resting_sent_flag = Y means the files has been uploaded
+  # wahlin_t1_asl_resting_status_flag = N means do not upload this subjectid
+  def run_wahlin_t1_asl_resting
+    v_base_path = Shared.get_base_path()
+    v_log_base ="/mounts/data/preprocessed/logs/"
+    v_process_name = "wahlin_t1_asl_resting"
+    process_logs_delete_old( v_process_name, v_log_base)
+     @schedule = Schedule.where("name in ('wahlin_t1_asl_resting')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting wahlin_t1_asl_resting_upload"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+      v_stop_file_name = v_process_name+"_stop"
+      v_stop_file_path = v_log_base+v_stop_file_name
+    connection = ActiveRecord::Base.connection();
+    
+    # t1 and resting bold from /unknown   asl from /asl
+    v_target_dir = "/home/panda_user/wahlin_t1_asl_resting"
+    v_final_target = "ftp directory tbd"
+    v_series_description_category_array = ['T1_Volumetric','resting_fMRI'] #,'ASL']
+    v_series_description_category_id_array = [19, 17] #,1]
+    sql = "select distinct subjectid, enrollment_id, scan_procedure_id from cg_adrc_upload
+           where ( wahlin_t1_asl_resting_sent_flag != 'Y' or wahlin_t1_asl_resting_sent_flag is NULL)
+           and ( wahlin_t1_asl_resting_status_flag != 'N' or wahlin_t1_asl_resting_status_flag is NULL)
+           "
+    results = connection.execute(sql)
+    
+    # get each subject , make target dir 
+    # get each series decription / file name / nii file based on series_description_category
+    # mkdir with series_description_category, # of scan - e.g. 3rd T1
+    # copy over the .nii file, r
+    # bzip2 each subjectid dir
+    results.each do |r|
+      v_break = 0  # need a kill swith
+       v_log = ""
+      if File.file?(v_stop_file_path)
+        File.delete(v_stop_file_path)
+        v_break = 1
+        v_log = v_log + " STOPPING the results loop"
+        v_comment = " STOPPING the results loop  "+v_comment
+      end
+      break if v_break > 0
+      
+      v_comment = "strt "+r[0]+","+v_comment
+      @schedulerun.comment =v_comment[0..1990]
+      @schedulerun.save
+      # update schedulerun comment - prepend 
+      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
+       and v.id in ( select scvg.vgroup_id from scan_procedures_vgroups scvg where scvg.scan_procedure_id  in (22))"
+      results_vgroup = connection.execute(sql_vgroup)
+      # mkdir /tmp/adrc_upload/[subjectid]_YYYYMMDD_wisc
+      v_export_id = (@schedule.id).to_s+"_"+r[0].to_s
+      v_subject_dir = v_export_id+"_"+(results_vgroup.first)[0].to_s+"_wisc"
+      v_parent_dir_target =v_target_dir+"/"+v_subject_dir
+      v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"' "
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close
+      v_subjectid = r[0].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
+      sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_types.series_description_type 
+                  from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
+                  where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
+                  and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
+                  and image_datasets.series_description =   series_description_maps.series_description
+                  and series_description_maps.series_description_type_id = series_description_types.id
+                  and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','resting_fMRI','resting fMRI','resting+fMRI') 
+                  and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = "+r[1].to_s+" and evm.enrollment_id = e.id and e.enumber ='"+ v_subjectid+"')
+                  and vgroups.id in (select spv.vgroup_id from scan_procedures_vgroups spv where spv.scan_procedure_id = "+r[2].to_s+" )
+                   order by appointments.appointment_date "
+      results_dataset = connection.execute(sql_dataset)
+      v_folder_array = [] # how to empty
+      v_scan_desc_type_array = []
+      v_cnt = 1
+      results_dataset.each do |r_dataset|
+            v_series_description_type = r_dataset[5].gsub(" ","_")
+            if !v_scan_desc_type_array.include?(v_series_description_type)
+                 v_scan_desc_type_array.push(v_series_description_type)
+            end
+            v_path = r_dataset[4]
+            v_dir_array = v_path.split("/")
+            v_dir = v_dir_array[(v_dir_array.size - 1)]
+            v_dir_target = v_dir+"_"+v_series_description_type
+            v_path = v_path.gsub("/Volumes/team/","").gsub("/Volumes/team-1/","").gsub("/Data/vtrak1/","")  #v_base_path+"/"+
+            if v_folder_array.include?(v_dir_target)
+              v_dir_target = v_dir_target+"_"+v_cnt.to_s
+              v_cnt = v_cnt +1
+              # might get weird if multiple types have dups - only expect T1/Bravo
+            end
+            v_folder_array.push(v_dir_target)   
+             
+            v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
+            stdin, stdout, stderr = Open3.popen3(v_call)
+            while !stdout.eof?
+               puts stdout.read 1024    
+            end
+            stdin.close
+            stdout.close
+            stderr.close
+            v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+            v_scan_procedure_path = ScanProcedure.find(r[2]).codename
+            v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_preprocessed_path+v_scan_procedure_path+"/"+ v_subjectid+"/unknown/"+ v_subjectid+"_*_"+v_dir+".nii  "+v_parent_dir_target +"/"+v_dir_target+"/"+v_export_id+"_"+r_dataset[3].gsub(" ","_")+"_"+v_dir+".nii '"
+            stdin, stdout, stderr = Open3.popen3(v_call)
+            while !stdout.eof?
+               puts stdout.read 1024    
+            end
+            stdin.close
+            stdout.close
+            stderr.close
+        
+      end
+
+      # get asl
+      v_series_description_category_array = ['ASL']
+      v_series_description_category_id_array = [1]
+      # from the adrc_pcvipr
+                sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_types.series_description_type 
+                      from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
+                      where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
+                      and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
+                      and image_datasets.series_description =   series_description_maps.series_description
+                      and series_description_maps.series_description_type_id = series_description_types.id
+                      and series_description_types.series_description_type in ('ASL') 
+                      and image_datasets.series_description != 'ASL CBF'
+                      and image_datasets.series_description !=  'Cerebral Blood Flow'
+                  and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = "+r[1].to_s+" and evm.enrollment_id = e.id and e.enumber ='"+ v_subjectid+"')
+                  and vgroups.id in (select spv.vgroup_id from scan_procedures_vgroups spv where spv.scan_procedure_id = "+r[2].to_s+" )
+                       order by appointments.appointment_date "
+          results_dataset = connection.execute(sql_dataset)
+          # v_preprocessed_path = v_base_path+"/preprocessed/visits/asthana.adrc-clinical-core.visit1/"
+           v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+          v_scan_procedure_path = ScanProcedure.find(r[2]).codename
+          v_preprocessed_path  = v_preprocessed_path +v_scan_procedure_path+"/"
+          v_cnt = 1
+          results_dataset.each do |r_dataset|
+                v_series_description_type = r_dataset[5].gsub(" ","_")
+                if !v_scan_desc_type_array.include?(v_series_description_type)
+                     v_scan_desc_type_array.push(v_series_description_type)
+                end
+                v_path = r_dataset[4]
+                v_dir_array = v_path.split("/")
+                v_dir = v_dir_array[(v_dir_array.size - 1)]
+                v_dir_target = v_dir+"_"+v_series_description_type
+                v_path = v_path.gsub("/Volumes/team/","").gsub("/Volumes/team-1/","").gsub("/Data/vtrak1/","")  #v_base_path+"/"+
+                if v_folder_array.include?(v_dir_target)
+                  v_dir_target = v_dir_target+"_"+v_cnt.to_s
+                  v_cnt = v_cnt +1
+                  # might get weird if multiple types have dups - only expect T1/Bravo
+                end
+                v_folder_array.push(v_dir_target)
+                v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"/"+v_dir_target+"' "
+            stdin, stdout, stderr = Open3.popen3(v_call)
+            while !stdout.eof?
+               puts stdout.read 1024    
+            end
+            stdin.close
+            stdout.close
+            stderr.close
+    
+                 # temp - replace /Volumes/team/ and /Data/vtrak1/ with /Volumes/team-1 in dev
+                # split on / --- get the last dir
+                # make new dir name dir_series_description_type 
+                # check if in v_folder_array , if in v_folder_array , dir_series_description_type => dir_series_description_type_2
+                # add  dir, dir_series_description_type to v_folder_array
+                # cp path ==> /tmp/adrc_pcvipr/[subjectid]_yyymmdd_wisc/dir_series_description_type(_2)
+
+                      # get the ASL_fmap and PDmap 
+          puts "aaaaaaaaaa v_series_description_type ="+v_series_description_type
+           if v_series_description_type == "ASL"
+              v_asl_nii = v_preprocessed_path+r[0]+"/asl/ASL_fmap_"+r[0]+"_*.nii"
+              v_pdmap_nii = v_preprocessed_path+r[0]+"/asl/PDmap_"+r[0]+"_*.nii"
+              v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av "+ v_asl_nii+" "+v_parent_dir_target+"/"+v_dir_target+"' "
+        puts "ASL ="+v_call
+                 stdin, stdout, stderr = Open3.popen3(v_call)
+                  stderr.each {|line|
+                      puts line
+                    }
+                    while !stdout.eof?
+                      puts stdout.read 1024    
+                     end
+                 stdin.close
+                 stdout.close
+                 stderr.close
+              v_call = "rsync -av "+ v_pdmap_nii+" "+v_parent_dir_target
+              v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av "+ v_pdmap_nii+" "+v_parent_dir_target+"/"+v_dir_target+"' "
+                 stdin, stdout, stderr = Open3.popen3(v_call)
+                  stderr.each {|line|
+                      puts line
+                    }
+                    while !stdout.eof?
+                      puts stdout.read 1024    
+                     end
+                 stdin.close
+                 stdout.close
+                 stderr.close
+           end
+          end
+      
+      #tar.gz subjectid dir
+      v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
+      v_call =  'ssh panda_user@merida.dom.wisc.edu "  tar  -C '+v_target_dir+'  -zcf '+v_parent_dir_target+'.tar.gz '+v_subject_dir+'/ "  '
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close
+      # remove subjectid dir
+      v_call = 'ssh panda_user@merida.dom.wisc.edu " rm -rf '+v_parent_dir_target+' "'
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close
+      
+      # fsftp dir when set -- not practical - not using auto move
+      # sftp -- shared helper hasthe username /password and address
+ #     v_username = Shared.panda_admin_sftp_username # get from shared helper -- leaving as panda_admin
+ #     v_passwrd = Shared.panda_admin_sftp_password   # get from shared helperwhich is not on github
+      # switch on new platform
+      #v_username = Shared.panda_user_sftp_username # get from shared helper
+      #v_passwrd = Shared.panda_user_sftp_password   # get from shared helperwhich is not on github
+ #     v_ip = Shared.dom_sftp_host_address # get from shared helper
+ #     v_sftp_dir = Shared.antuano_target_path
+      
+      # problem that files are on merida, but panda running from nelson
+      # need to ssh to merida as pand_admin, then sftp
+ #     v_source = "panda_user@merida.dom.wisc.edu:"+v_target_dir+'/'+v_subject_dir+".tar.gz"
+      
+ #     v_target = v_sftp_dir+"/"   #+v_subject_dir+".tar.gz"
+      
+# puts "aaaaaa v_source = "+v_source
+# puts "bbbbbb v_target = "+v_target
+#       Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
+#           sftp.upload!(v_source, v_target)
+#       end
+#       
+      
+      sql_done = "update cg_adrc_upload set wahlin_t1_asl_resting_sent_flag ='Y', wahlin_t1_asl_resting_dir_list = '"+ v_folder_array.join(",")+"' where subjectid = '"+r[0]+"'"
+      results_done = connection.execute(sql_done)
+  
+    end # results
+    
+    @schedulerun.comment =("successful finish wahlin_t1_asl_resting_upload "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
+  
+  end
+  
   
   # data request from piero antuano, wrap metabolic, resting bold/fmri and t1 volumetric, johnson.prodict.visit1, johnson.merit.visit1
   # from cg_antuano_20130916 
