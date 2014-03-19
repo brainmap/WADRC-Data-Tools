@@ -641,7 +641,7 @@ class Shared  < ActionController::Base
        #  table cg_adrc_upload populated by run_adrc_upload function      
         connection = ActiveRecord::Base.connection();
         # get adrc subjectid to upload
-        sql = "select distinct subjectid from cg_adrc_upload where pcvipr_sent_flag ='N' and pcvipr_status_flag in ('U') " # ('Y','R') "
+        sql = "select distinct subjectid , scan_procedure_id , enrollment_id from cg_adrc_upload where pcvipr_sent_flag ='N' and pcvipr_status_flag in ('U') " # ('Y','R') "
         results = connection.execute(sql)
         # changed to series_description_maps table
         v_folder_array = Array.new
@@ -666,11 +666,13 @@ class Shared  < ActionController::Base
         @schedulerun.comment =v_comment[0..1990]
         @schedulerun.save
         results.each do |r|
+          v_enumber = r[0].gsub(/_v2/,"").gsub(/_v3/,"").gsub(/_v4/,"").gsub(/_v5/,"")
           v_comment = "strt "+r[0]+","+v_comment
           @schedulerun.comment =v_comment[0..1990]
           @schedulerun.save
           # update schedulerun comment - prepend 
-          sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')"
+          sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.id ='"+r[2].to_s+"')
+                                                   and v.id in ( select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id = "+r[1].to_s+")"
           results_vgroup = connection.execute(sql_vgroup)
           # mkdir /tmp/adrc_pcvipr/[subjectid]_YYYYMMDD_wisc
           v_subject_dir = r[0]+"_"+(results_vgroup.first)[0].to_s+"_wisc"
@@ -694,7 +696,8 @@ class Shared  < ActionController::Base
                       and image_datasets.series_description != 'SRC:PCVIPR CD COMP'
                       and image_datasets.series_description != 'ASL CBF'
                       and image_datasets.series_description !=  'Cerebral Blood Flow'
-                      and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
+                      and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.id ='"+r[2].to_s+"')
+                      and vgroups.id in ( select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id = "+r[1].to_s+")
                        order by appointments.appointment_date "
           results_dataset = connection.execute(sql_dataset)
           v_folder_array = [] # how to empty
@@ -747,8 +750,8 @@ class Shared  < ActionController::Base
                       # get the ASL_fmap and PDmap 
           puts "aaaaaaaaaa v_series_description_type ="+v_series_description_type
            if v_series_description_type == "ASL"
-              v_asl_nii = v_preprocessed_path+r[0]+"/asl/ASL_fmap_"+r[0]+"_*.nii"
-              v_pdmap_nii = v_preprocessed_path+r[0]+"/asl/PDmap_"+r[0]+"_*.nii"
+              v_asl_nii = v_preprocessed_path+v_enumber+"/asl/ASL_fmap_"+v_enumber+"_*.nii"
+              v_pdmap_nii = v_preprocessed_path+v_enumber+"/asl/PDmap_"+v_enumber+"_*.nii"
               v_call = "rsync -av "+ v_asl_nii+" "+v_parent_dir_target
         puts v_call
                  stdin, stdout, stderr = Open3.popen3(v_call)
@@ -777,7 +780,13 @@ class Shared  < ActionController::Base
 
           sql_status = "select pcvipr_status_flag from cg_adrc_upload where subjectid ='"+r[0]+"'"
           results_status = connection.execute(sql_status)
+          if v_scan_desc_type_array.include?("PCVIPR")
+puts "BBBBBBB includes pcvipr , status = "+(results_status.first)[0]
+          end
+
           if !v_scan_desc_type_array.include?("PCVIPR")   and (results_status.first)[0] != "R"
+
+            puts " aaaa no pcvipr , status ! = R"
             # sql_dirlist = "update cg_adrc_upload set general_comment =' NO PCVIPR!!!! "+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
             # results_dirlist = connection.execute(sql_dirlist)
             sql_status = "update cg_adrc_upload set pcvipr_status_flag ='N' where subjectid ='"+r[0]+"' "
