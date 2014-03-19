@@ -34,8 +34,10 @@ class TrtypesController < ApplicationController
                 end
             end
             if !params[:tr_search][:subjectid].nil? and params[:tr_search][:subjectid] > ''
-               @trfiles_search = @trfiles_search.where("subjectid in (?)",params[:tr_search][:subjectid])
-               @conditions.push(" trfiles.subjectid in ('"+params[:tr_search][:subjectid]+"') ")
+               v_subjectid_array = (params[:tr_search][:subjectid].gsub(/ /,"")).split(",")
+  
+               @trfiles_search = @trfiles_search.where("subjectid in (?)",v_subjectid_array) #params[:tr_search][:subjectid])
+               @conditions.push(" trfiles.subjectid in ('"+params[:tr_search][:subjectid].gsub(/ /,"").gsub(/,/,"','")+"') ")
             end
             if !params[:tr_search][:secondary_key].nil? and params[:tr_search][:secondary_key] > ''
                @trfiles_search = @trfiles_search.where("secondary_key in (?)",params[:tr_search][:secondary_key])
