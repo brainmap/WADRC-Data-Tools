@@ -104,6 +104,10 @@ v_user = v_user.gsub("\n","")
       v_shared = Shared.new
       v_shared.run_fs_to_good2go()  
 
+   elsif v_value_1 == "fs_manual_edits_Y_N"
+      v_shared = Shared.new
+      v_shared.run_fs_manual_edits_Y_N()
+
   elsif v_value_1 == "goveas_20131031_upload"
       v_shared = Shared.new
       v_shared.run_goveas_upload()     
