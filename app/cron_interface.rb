@@ -146,7 +146,11 @@ v_user = v_user.gsub("\n","")
  
   elsif v_value_1 == "series_description"
       v_shared = Shared.new
-      v_shared.run_series_description()     
+      v_shared.run_series_description()    
+
+  elsif v_value_1 == "xnat_file"
+      v_shared = Shared.new
+      v_shared.run_xnat_file()  
             
   elsif v_value_1 == "test_shell"
     puts "bbbbbbbbb in test shell"
