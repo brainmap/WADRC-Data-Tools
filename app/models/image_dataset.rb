@@ -33,7 +33,7 @@ class ImageDataset < ActiveRecord::Base
   accepts_nested_attributes_for :physiology_text_files, :allow_destroy => true
   
   
-  serialize :dicom_taghash, Hash      # added Hash
+  serialize :dicom_taghash #, Hash      # added Hash # 20140324 hashed out Hash - ? 1.9.2 ruby? -- seems to work now
  #     attr_unsearchable :dicom_taghash    #   hashed out cai 20130926 -- used in old search ? meta_search, meta_where
   
   delegate :participant, :to => :visit
