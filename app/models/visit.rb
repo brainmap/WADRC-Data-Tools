@@ -280,11 +280,13 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
    return @age_info unless @age_info.blank?
     # tags[#] sometimes its just returning # -- a string? 
     image_datasets.each do |dataset|
-      if tags = dataset.dicom_taghash       
-        if @age_info[:age].blank? and !tags['0010,1010'].blank? and tags['0010,1010'] != '0010,1010'
+      if  dataset.dicom_taghash  
+        tags = dataset.dicom_taghash      
+        if @age_info[:age].blank? and !tags['0010,1010'].blank? and tags['0010,1010'] != '0010,1010' and tags['0010,1010'] != 'XX'
               @age_info[:age] = tags['0010,1010'][:value].blank? ? nil : tags['0010,1010'][:value].to_i  # age
          end
-         if @age_info[:dob].blank? and !tags['0010,0030'].blank? and tags['0010,0030'] != '0010,0030'
+         if @age_info[:dob].blank? and !tags['0010,0030'].blank? and tags['0010,0030'] != '0010,0030' and tags['0010,0030'] != 'XX'
+             # getting XX
              @age_info[:dob] = tags['0010,0030'][:value].blank? ? nil :  Date.strptime(tags['0010,0030'][:value],'%Y%m%d') 
              # @age_info[:dob] = tags['0010,0030'][:value].blank? ? nil : begin DateTime.parse(tags['0010,0030'][:value]) rescue ArgumentError; nil end   
           end
