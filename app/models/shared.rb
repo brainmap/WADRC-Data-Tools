@@ -1523,6 +1523,129 @@ puts "AAAAAA "+v_call
     @schedulerun.save
   
   end
+
+# ADD EXCLUDE SCAN SHARE
+# ADD EXCLUDE SCAN
+  def run_xnat_file
+     v_base_path = Shared.get_base_path()
+    v_log_base ="/mounts/data/preprocessed/logs/"
+    v_process_name = "xnat_file"
+    process_logs_delete_old( v_process_name, v_log_base)
+     @schedule = Schedule.where("name in ('xnat_file')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting xnat_file"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+      v_stop_file_name = v_process_name+"_stop"
+      v_stop_file_path = v_log_base+v_stop_file_name
+    connection = ActiveRecord::Base.connection();
+    t_now = Time.now
+    v_file_name = 'xnat_mri_scan_list_'+ t_now.strftime("%Y%m%d_%H_%M")+".xml"
+    v_file_target_dir = v_base_path+"/admin_only/xnat/"
+    v_file = v_file_target_dir+v_file_name
+     # get adrc only  -- only 20, just T1 and t2, xnat_status_flag =R 
+     v_scan_procedure_array = [22]
+     v_series_description_category_array = ['T1_Volumetric','T2','ASL']
+     v_series_description_category_id_array = [19, 20,1 ]
+     sql = "select distinct a.vgroup_id,  vg.participant_id  
+         from vgroups vg, appointments a, visits v where vg.id = a.vgroup_id and a.id = v.appointment_id
+          and vg.id in ( select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id in ("+v_scan_procedure_array.join(',')+"))
+          and vg.id in ( select evgm.vgroup_id from enrollment_vgroup_memberships evgm, enrollments e,cg_adrc_upload 
+                                 where evgm.enrollment_id = e.id and e.enumber = cg_adrc_upload.subjectid and 
+                                  cg_adrc_upload.xnat_sent_flag = 'N' and cg_adrc_upload.xnat_status_flag ='R') 
+          and vg.transfer_mri ='yes'"
+    results = connection.execute(sql)
+    v_cnt = 0
+    File.open(v_file, "w+") do |f|
+      f.write("<root>")
+    results.each do |r|
+        v_cnt = v_cnt + 1
+        v_vgroup_id = r[0]
+        v_participant = Participant.find(r[1])
+        # LIMITING TO ADRC
+        v_enrollments = Enrollment.where("enumber like 'adrc%'").where("enrollments.id in (select enrollment_id from enrollment_vgroup_memberships where vgroup_id in (?))",r[0])
+        v_enrollment = v_enrollments[0]
+        v_comment = "strt "+v_enrollment.enumber+"; "+v_comment
+        v_gender = ""
+        if v_participant.gender == 2
+          v_gender="F"
+        elsif v_participant.gender == 1
+          v_gender = "M"
+        end
+        v_vgroup_start ="<vgroup>\n\t<internal_cnt>"+v_cnt.to_s+"</internal_cnt>\n"
+        v_vgroup_stop ="</vgroup>"
+        v_string_participant_start="\t<participant>\n\t\t<panda_participant_id>"+v_participant.id.to_s+"</panda_participant_id>\n\t\t<subjectid_adrc>"+v_enrollment.enumber+"</subjectid_adrc>\n\t\t<reggieid>"+v_participant.reggieid.to_s+"</reggieid>\n\t\t<gender>"+v_gender+"</gender>\n\t\t<apoe_e1>"+v_participant.apoe_e1.to_s+"</apoe_e1>\n\t\t<apoe_e2>"+v_participant.apoe_e2.to_s+"</apoe_e2>"
+        v_string_participant_stop = "\n\t</participant>"
+        f.write(v_vgroup_start)
+        f.write(v_string_participant_start+"\n")
+ 
+        sql_appt = "select distinct a.vgroup_id,  v.appointment_id, v.id, vg.participant_id , v.path, date_format(a.appointment_date,'%Y%m%d'),v.scan_number 
+         from vgroups vg, appointments a, visits v where vg.id = a.vgroup_id and a.id = v.appointment_id
+          and vg.id = "+v_vgroup_id.to_s+"
+          and vg.id in ( select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id in ("+v_scan_procedure_array.join(',')+"))
+          and vg.id in ( select evgm.vgroup_id from enrollment_vgroup_memberships evgm, enrollments e,cg_adrc_upload 
+                                 where evgm.enrollment_id = e.id and e.enumber = cg_adrc_upload.subjectid and 
+                                  cg_adrc_upload.xnat_sent_flag = 'N' and cg_adrc_upload.xnat_status_flag ='R') 
+          and vg.transfer_mri ='yes'"
+          results_appt = connection.execute(sql_appt)
+          v_appt_cnt = 0
+          v_folder_array = []
+          results_appt.each do |r_appt|
+             v_appt_cnt = v_appt_cnt + 1
+             v_string_appt_start="\t\t<appointment>\n\t\t\t<internal_appt_cnt>"+v_appt_cnt.to_s+"</internal_appt_cnt>\n\t\t\t<appt_type>mri</appt_type>\n\t\t\t<mri_date>"+r_appt[5]+"</mri_date>\n\t\t\t<exam_number>"+r_appt[6].to_s+"</exam_number>"
+             v_string_appt_stop ="\t\t</appointment>"
+             sql_ids = "select ids.id, ids.series_description, ids.path, sdt.series_description_type 
+             from image_datasets ids, series_description_maps sdm, series_description_types sdt
+             where ids.visit_id = "+r_appt[2].to_s+"  
+                  and ids.series_description =   sdm.series_description
+                  and sdm.series_description_type_id = sdt.id 
+                  and sdt.id in ("+v_series_description_category_id_array.join(',')+")
+                    order by sdt.series_description_type, ids.series_description "
+             ids_results = connection.execute(sql_ids)
+             v_cnt_ids = 0
+             
+
+             f.write(v_string_appt_start+"\n")
+             ids_results.each do |r_ids|
+                v_cnt_ids = v_cnt_ids + 1
+                v_path = r_ids[2]
+                v_dir_array = v_path.split("/")
+                v_dir = v_dir_array[(v_dir_array.size - 1)]
+                v_dir_target = v_dir+"_"+r_ids[1]
+                v_folder_array.push(v_dir_target)
+                v_string = "\t\t\t<ids>\n\t\t\t\t<internal_ids_cnt>"+v_cnt_ids.to_s+"</internal_ids_cnt>\n\t\t\t\t<series_description_type>"+r_ids[3]+"</series_description_type>\n\t\t\t\t<series_description>"+r_ids[1]+"</series_description>\n\t\t\t\t<path>"+r_ids[2]+"</path>\n\t\t\t</ids>\n"
+                f.write(v_string)
+             end
+
+             f.write(v_string_appt_stop)
+           end
+           f.write(v_string_participant_stop)
+           f.write("\n"+v_vgroup_stop+"\n")
+          
+         sql_update = " update cg_adrc_upload set xnat_sent_flag ='Y', xnat_dir_list ='"+v_folder_array.join(',')+"' where
+             subjectid = '"+v_enrollment.enumber+"' and scan_procedure_id in ("+v_scan_procedure_array.join(',')+")"
+        update_results = connection.execute(sql_update)
+
+    end
+    f.write("</root>")
+   end
+  
+    v_comment = "count="+v_cnt.to_s+"; "+v_comment
+
+
+    @schedulerun.comment =("successful finish xnat_file "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
+
+  end
   
   
   # data request from piero antuano, wrap metabolic, resting bold/fmri and t1 volumetric, johnson.prodict.visit1, johnson.merit.visit1
