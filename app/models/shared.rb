@@ -1955,6 +1955,20 @@ puts "AAAAAA "+v_call
                                   if File.exist?(v_file_check)
                                       v_asl_directory_1525_array.push(d[0])
                                   end
+                                  # now check in new structure /images
+                                  v_file_check = v_preprocessed_full_path+"/"+enrollment[0].enumber+"/asl/images/ASL_fmap_"+enrollment[0].enumber+"_2025_"+v_dir_name_array[0]+".nii"
+                                  if File.exist?(v_file_check)
+                                      v_asl_directory_2025_array.push(d[0])
+                                  end
+                                  v_file_check = v_preprocessed_full_path+"/"+enrollment[0].enumber+"/asl/images/ASL_fmap_"+enrollment[0].enumber+"_1525_"+v_dir_name_array[0]+".nii"
+                                  if File.exist?(v_file_check)
+                                      v_asl_directory_1525_array.push(d[0])
+                                  end
+                                  v_file_check = v_preprocessed_full_path+"/"+enrollment[0].enumber+"/asl/images/ASL_fmap_"+enrollment[0].enumber+"_0_"+v_dir_name_array[0]+".nii"
+                                  if File.exist?(v_file_check)
+                                      v_asl_directory_1525_array.push(d[0])
+                                  end
+
                              end
                              if v_asl_directory_array.size > 0
                                 v_asl_directory_list = v_asl_directory_array.join(",") 
@@ -2012,6 +2026,12 @@ puts "AAAAAA "+v_call
                              v_subjectid_asl = v_preprocessed_full_path+"/"+dir_name_array[0]+"/asl"
                              if File.directory?(v_subjectid_asl)
                                   v_dir_array = Dir.entries(v_subjectid_asl)   # need to get date for specific files
+                                  if File.directory?(v_subjectid_asl+"/images")
+                                       v_dir_array.concat(Dir.entries(v_subjectid_asl+"/images") )
+                                  end
+                                  if File.directory?(v_subjectid_asl+"/pproc_v4")
+                                       v_dir_array.concat(Dir.entries(v_subjectid_asl+"/pproc_v4") )
+                                  end
                                   # evalute for asl_registered_to_fs_flag = rFS_ASL_[subjectid]_fmap.nii ,
                                   # asl_smoothed_and_warped_flag = swrFS_ASL_[subjectid]_fmap.nii,
                                   # asl_fmap_flag = [ASL_[subjectid]_[sdir]_fmap.nii or ASL_[subjectid]_fmap.nii],
@@ -2026,16 +2046,19 @@ puts "AAAAAA "+v_call
                                     v_asl_registered_to_fs_flag ="Y"
                                   elsif  f.start_with?("ASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
                                     v_asl_0_fmap_flag = "Y"
+                                    v_asl_1525_fmap_flag = "Y"
                                     v_asl_0_fmap_single ="Y"
                                     if v_asl_fmap_single == ""
                                        v_asl_fmap_single ="Y"
                                      elsif v_asl_fmap_single == "Y"
                                       v_asl_fmap_single = "N"
                                      end
-                                  elsif f.start_with?("swrFS_ASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii") 
+                                  elsif f.start_with?("swASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")  # not doing r_FS 
                                       v_asl_0_smoothed_and_warped_flag = "Y"
+                                      v_asl_1525_smoothed_and_warped_flag = "Y"
                                   elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
-                                      v_asl_0_registered_to_fs_flag ="Y"                                                                         
+                                      v_asl_0_registered_to_fs_flag ="Y"    
+                                      v_asl_1525_registered_to_fs_flag ="Y"                                                                      
                                   elsif   f.start_with?("ASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii")
                                       v_asl_1525_fmap_flag = "Y"
                                       v_asl_1525_fmap_single ="Y"
@@ -2044,7 +2067,7 @@ puts "AAAAAA "+v_call
                                        elsif v_asl_fmap_single == "Y"
                                         v_asl_fmap_single = "N"
                                        end
-                                  elsif f.start_with?("swrFS_ASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii") 
+                                  elsif f.start_with?("swASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii") # not doing r_FS
                                       v_asl_1525_smoothed_and_warped_flag = "Y"
                                   elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii")
                                       v_asl_1525_registered_to_fs_flag ="Y"                                                                       
@@ -2056,7 +2079,7 @@ puts "AAAAAA "+v_call
                                        elsif v_asl_fmap_single == "Y"
                                         v_asl_fmap_single = "N"
                                        end 
-                                  elsif f.start_with?("swrFS_ASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii") 
+                                  elsif f.start_with?("swASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii") # not doing r_FS
                                       v_asl_2025_smoothed_and_warped_flag = "Y"
                                   elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii")
                                       v_asl_2025_registered_to_fs_flag ="Y" 
