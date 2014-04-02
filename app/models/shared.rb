@@ -3154,9 +3154,101 @@ puts "AAAAAA "+v_call
     
   end
 
-  # looks in trfile trtype=1 , file_completed = Y, moved to good2go from manual edit -- not move while in process
+  # looks in freesurfer QC trfile trtype=4 , file_completed = Y, global assessment=Pass ,moved to good2go from manual edit
+  def run_fs_manual_edits_to_good2go
+
+    v_base_path = Shared.get_base_path()
+    v_log_base ="/mounts/data/preprocessed/logs/"
+    v_process_name = "fs_manual_edits_to_good2go"
+    process_logs_delete_old( v_process_name, v_log_base)
+     @schedule = Schedule.where("name in ('fs_manual_edits_to_good2go')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting fs_manual_edits_to_good2go"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+      t = Time.now
+      v_date_YM = t.strftime("%Y%m") # just making monthly logs, prepend
+      v_log_name =v_process_name+"_"+v_date_YM
+      v_log_path =v_log_base+v_log_name
+      v_stop_file_name = v_process_name+"_stop"
+      v_stop_file_path = v_log_base+v_stop_file_name
+    connection = ActiveRecord::Base.connection();
+    v_manual_edit_dir = v_base_path+"/preprocessed/modalities/freesurfer/manual_edits/"
+    v_good2go_dir = v_base_path+"/preprocessed/modalities/freesurfer/good2go/"
+
+        # get trtype = 1, file_completed
+    @trfiles = Trfile.where("trfiles.trtype_id = 4 and trfiles.file_completed_flag = 'Y' and trfiles.qc_value = 'Pass'")
+    @trfiles.each do |trf|
+        # get last edit, check for 
+        # check if in good2go
+        v_subject = trf.subjectid
+        if !trf.secondary_key.nil? 
+          # need [subjectid]_v# ==> [subjectid][secondary_key]_v#
+          if trf.subjectid.include?("_v2")
+            v_subject = (trf.subjectid).gsub(/_v2/,"")+trf.secondary_key+"_v2"
+          elsif trf.subjectid.include?("_v3")
+            v_subject = (trf.subjectid).gsub(/_v3/,"")+trf.secondary_key+"_v3"
+          elsif trf.subjectid.include?("_v4")
+            v_subject = (trf.subjectid).gsub(/_v4/,"")+trf.secondary_key+"_v4"
+          elsif trf.subjectid.include?("_v5")
+            v_subject = (trf.subjectid).gsub(/_v5/,"")+trf.secondary_key+"_v5"
+          else
+             v_subject = trf.subjectid+trf.secondary_key
+          end
+        end
+        v_dir_source = v_manual_edit_dir+v_subject
+        v_dir_target = v_good2go_dir+v_subject
+        if File.directory?(v_dir_target)
+          # already in good2go
+         else
+            v_comment = v_comment + " copying "+v_subject+"; \n"
+            if File.directory?(v_dir_source)
+           # if not make rsync or mv command
+            #  v_call = "rsync -av "+v_dir_source+" "+v_good2go_dir
+            # using mv instead of rsync 
+              v_call = " mv -n -v "+v_dir_source+" "+v_good2go_dir
+      puts "aaaaaaa "+v_call
+              v_comment = v_comment + " "+v_call+"; \n"
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stderr.eof?
+                  v_err = stderr.read 1024
+                  v_comment_warning = v_comment_warning  +v_err
+                end
+              while !stdout.eof?
+                  v_tmp = (stdout.read 1024)
+                  v_comment = v_comment + " "+ v_tmp   
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+           
+             # v_comment = v_comment + " "+v_call+"; "
+            else # no source dir
+               v_comment_warning = v_comment_warning +"ERROR - no source dir "+v_subject
+            end
+
+
+         end
+
+    end
+
+       @schedulerun.comment =("successful finish fs_manual_edits_to_good2go "+v_comment_warning+" "+v_comment[0..3990])
+    if !v_comment.include?("ERROR") and !v_comment_warning.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
+
+  end
+
+  # looks in trfile trtype=1 freesurfer edits, file_completed = Y, moved to good2go from manual edit -- not move while in process
   def run_fs_to_good2go
-        v_base_path = Shared.get_base_path()
+    v_base_path = Shared.get_base_path()
     v_log_base ="/mounts/data/preprocessed/logs/"
     v_process_name = "fs_to_good2go"
     process_logs_delete_old( v_process_name, v_log_base)

@@ -100,6 +100,10 @@ v_user = v_user.gsub("\n","")
       v_shared.run_fdg_status()
       puts " after call to fdg_status"
 
+  elsif v_value_1 == "fs_manual_edits_to_good2go"
+      v_shared = Shared.new
+      v_shared.run_fs_manual_edits_to_good2go()
+
   elsif v_value_1 == "fs_to_good2go"
       v_shared = Shared.new
       v_shared.run_fs_to_good2go()  
