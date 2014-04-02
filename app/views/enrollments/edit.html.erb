@@ -29,7 +29,7 @@ v_scan_share_hash = [['Ok to share scan with outside request if IRB approval','N
   </p>
   <p>
     <%= f.label :do_not_share_scans_flag %><br />
-    <%= select :enrollment, :do_not_share_scans_flag, { "Do not share scan via outside rerquest" => "Y", "Ok to share scan with outside request if IRB approval" => "N" }, :selected =>@enrollment.do_not_share_scans_flag %>
+    <%= select :enrollment, :do_not_share_scans_flag, { "Do not share scan via outside request" => "Y", "Ok to share scan with outside request if IRB approval" => "N" }, :selected =>@enrollment.do_not_share_scans_flag %>
   </p>
     <p>
     <%= f.label :set_participant_id_blank? %><br />

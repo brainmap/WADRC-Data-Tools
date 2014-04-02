@@ -88,7 +88,14 @@ edit_count = edit_count -1
   <p><%= link_to 'perform new quality check', new_image_dataset_image_dataset_quality_check_path(@image_dataset) %></p>
   <% end %>
 </div>
+<div>
+<%= form_for(@image_dataset) do |f| %>
+  <%= f.error_messages %>
+  <%= f.label :do_not_share_scans_flag %>:&nbsp;
+    <%= select :image_dataset, :do_not_share_scans_flag, { "Do not share scan via outside request, quality problems" => "Y", "Ok to share scan with outside request if IRB approval" => "N" }, :selected =>@image_dataset.do_not_share_scans_flag %>&nbsp;&nbsp;<%= f.submit "Update" %>
 
+  <%end%>
+</div>
 <%= clearing_br %>
 
 <%= render :partial => 'image_datasets/streamlined_table', :locals => {:image_datasets => @image_datasets} %>
