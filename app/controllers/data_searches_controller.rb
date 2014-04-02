@@ -924,9 +924,11 @@ class DataSearchesController < ApplicationController
 
        if !params[:cg_search].blank?
           # NEED TO BUILD  v_condition = -- LOOK AT OTHER SEARCHES    --- not saving the image_dataset conditions
+         @cg_query.id = params[:cg_search][:cg_query_id]
          @cg_query.cg_name = params[:cg_search][:cg_name]
          @cg_query.rmr = params[:cg_search][:rmr]
          @cg_query.enumber = params[:cg_search][:enumber]
+         @cg_query.enumber_not_in = params[:cg_search][:enumber_not_in]
          @cg_query.gender = params[:cg_search][:gender]
          @cg_query.min_age = params[:cg_search][:min_age]
          @cg_query.max_age = params[:cg_search][:max_age]
@@ -968,17 +970,22 @@ class DataSearchesController < ApplicationController
 
          if !params[:cg_search][:enumber].blank?
             @table_types.push('base')
+            # adding a not in
+            v_in_not_in = " in "
+            if !params[:cg_search][:enumber_not_in].blank? and params[:cg_search][:enumber_not_in] == "1"
+                v_in_not_in = " not in "
+             end
           
             if params[:cg_search][:enumber].include?(',') # string of enumbers
              v_enumber =  params[:cg_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
              v_enumber = v_enumber.gsub(/,/,"','")
              v_condition ="   appointments.id in (select a2.id from enrollment_vgroup_memberships,enrollments, appointments a2
                   where enrollment_vgroup_memberships.vgroup_id= a2.vgroup_id 
-                   and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"
+                   and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) "+v_in_not_in+" ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"
             else
               v_condition ="   appointments.id in (select a2.id from enrollment_vgroup_memberships,enrollments, appointments a2
                where enrollment_vgroup_memberships.vgroup_id= a2.vgroup_id 
-                and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:cg_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+                and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) "+v_in_not_in+" (lower('"+params[:cg_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
             end
              @local_conditions.push(v_condition)
              params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:cg_search][:enumber]

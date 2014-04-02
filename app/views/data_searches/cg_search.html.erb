@@ -137,7 +137,18 @@ v_tn_cn_searchable_hash = []
 	             <%= text_area  :cg_search, :enumber, :value => @cg_query.enumber, :cols => 30, :rows => 4 %>
 	       <% else %>
                <%= text_field  :cg_search,:enumber, :value => @cg_query.enumber %>
-           <% end %></td>
+           <% end %>   &nbsp;&nbsp;<small><small>(not in)
+           <% 
+              v_enumber_not_in = "FALSE"
+              if @cg_query.enumber_not_in == "1" # should have been setting up above
+                  v_enumber_not_in = "TRUE"
+                  params[:cg_search][:enumber_not_in] = "1"
+              end
+              if !params[:cg_search].blank? and !params[:cg_search][:enumber_not_in].blank? and params[:cg_search][:enumber_not_in] == "1"
+                        v_enumber_not_in = "TRUE"
+              end
+           %>
+<%= check_box_tag "enumber_not_in", "1", v_enumber_not_in == "FALSE" ? FALSE : TRUE , :name => "cg_search[enumber_not_in]" %></small></small></td>
     </tr>
 
     <tr>
@@ -168,7 +179,14 @@ v_tn_cn_searchable_hash = []
     </tr>
     <tr>
       <th colspan="2" align="right"><%= f.label :Save_search_as %>&nbsp;&nbsp;&nbsp;
-      <%= text_field :cg_search, :cg_name, :value => @cg_query.cg_name, :size => 20 %></th>
+      	<% if !params[:cg_search].blank? and !params[:cg_search][:cg_query_id].blank? # problem saving search 
+      		            %>
+
+           <%= text_field :cg_search, :cg_name, :value => @cg_query.cg_name, :size => 20 %>
+         <%else%>
+           <%= text_field :cg_search, :cg_name,  :size => 20 %>
+         <%end%>
+       </th>
     </tr>
     <tr>
       <th colspan="2" align="right"><%= f.label :save_search %>&nbsp;&nbsp;&nbsp;
