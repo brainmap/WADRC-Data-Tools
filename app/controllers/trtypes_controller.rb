@@ -127,7 +127,7 @@ class TrtypesController < ApplicationController
                  v_value_sql = ""
                  # ("trfiles.id = v_"+act.id.to_s+".trfile_id")
                  @column_headers.push(act.form_display_label)
-                 v_col = (act.form_display_label).gsub(/ /,"").gsub(/\'/,"_").gsub(/\"/,"_").gsub(/\-/,"_").gsub(/\//,"_").downcase+"_" 
+                 v_col = (act.form_display_label).gsub(/ /,"").gsub(/\'/,"_").gsub(/\:/,"_").gsub(/\"/,"_").gsub(/\-/,"_").gsub(/\//,"_").downcase+"_" 
                  v_column_array.push("v_"+act.id.to_s+"."+v_col) 
 
                  # need last edit
