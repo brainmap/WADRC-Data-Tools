@@ -45,7 +45,7 @@ class TrfilesController < ApplicationController
               if !(ta.triggers_1).blank?
                   # triggers are a work in progress
                   v_trigger_array = (ta.triggers_1).split("|")
-                  if v_trigger_array[0] == "update_field"
+                  if v_trigger_array[0] == "update_field" # _send_email
                       v_trtype_array = v_trigger_array[1].split("=")
                       v_trtype_id_array = (v_trtype_array[1].gsub(/\[/,"").gsub(/\]/,"")).split(",")
                       v_target = v_trigger_array[2]
@@ -74,13 +74,40 @@ class TrfilesController < ApplicationController
                                end
                         end
                       end
+                      if v_trigger_array[4] == "email_params"
+                          v_user_array = v_trigger_array[5].split("=")
+                          v_user_email = ""
+                          v_user = User.find(74 ) # panda_user
+                          if v_user_array[0] == "user_id"
+                              v_user = User.find(v_user_array[1])
+                              v_user_email = v_user.email
+                          end
+                          v_subject_msg = "msg from tracker"
+                          v_subject_array = v_trigger_array[6].split("=")
+                          if v_subject_array[0] == "subject"
+                              v_subject_msg = v_subject_array[1]
+                          end
+                          v_body_text = "tracker email"
+                          v_body_array = v_trigger_array[7].split("=")
+                          if v_body_array[0] == "body"
+                                 v_body_text = v_body_array[1].gsub(/[user]/,v_user.username).gsub(/[subjectid]/,@trfile.subjectid+" "+@trfile.secondary_key)
+                          end
+                          v_trigger_value = "-1"
+                          v_trigger_value_array = v_trigger_array[8].split("=")
+                          if v_trigger_value_array[0] == "trigger_value"
+                             v_trigger_value = v_trigger_value_array[0]
+                          end
+                          if v_trigger_value == v_value  # send the email
+     
+                          end
+                      end
                   end
               end
              end
              #update_field|tractiontypes_id=[23,22,24,25,26,27,28,29,30]|trtype_id=[4,1]|trfile|qc_notes
              if !(@trtype.triggers_1).blank?
                  v_trigger_array = (@trtype.triggers_1).split("|")
-                 if v_trigger_array[0] == "update_field"
+                 if v_trigger_array[0] == "update_field_send_email"
                     v_tractiontype_array = v_trigger_array[1].split("=")
                     # get label - value from this tredit and these tractiontype
                     v_tractiontype_id_array = (v_tractiontype_array[1].gsub(/\[/,"").gsub(/\]/,"")).split(",")
@@ -118,7 +145,7 @@ v_composite_value = v_composite_value + "
                                   tar.save
                                end
                         end
-                     end 
+                     end
                  end
             end
         end
