@@ -3,6 +3,7 @@
 %>
 <%= form_tag  '/cg_search'  do %>
 <table  width="90%" class="tabular"><tr><th width="50"><small><small>Add to Search</small></small></th><th  nowrap align="left">Table Name</th><th>Data Dictionary</th>
+	<tr><td align="left" colspan="2"><%= submit_tag("add tables checked to search")%> </td></tr>
     <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low' %><th align="left">Edit Table Values</th><% end %>
  </tr>
 	<%    @cg_tns.each do |tn| %>
@@ -21,7 +22,7 @@
 	<% end %>
 
 	<% end %>
-	<tr><td align="left" colspan="2"><%= submit_tag("add tables to search")%> </td></tr>
+	<tr><td align="left" colspan="2"><%= submit_tag("add tables checked to search")%> </td></tr>
 </table>
 
 
