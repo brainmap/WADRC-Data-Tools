@@ -76,21 +76,28 @@ class TrfilesController < ApplicationController
                       end
                       if v_trigger_array[4] == "email_params"
                           v_user_array = v_trigger_array[5].split("=")
-                          v_user_email = ""
+                          v_email = ""
                           v_user = User.find(74 ) # panda_user
+                          v_email_array = [v_user.email]
                           if v_user_array[0] == "user_id"
                               v_user = User.find(v_user_array[1])
                               v_user_email = v_user.email
+                              v_email_array.push(v_user_email)
                           end
-                          v_subject_msg = "msg from tracker"
+                          v_subject = "msg from tracker"
                           v_subject_array = v_trigger_array[6].split("=")
                           if v_subject_array[0] == "subject"
-                              v_subject_msg = v_subject_array[1]
+                              v_subject = v_subject_array[1]
                           end
-                          v_body_text = "tracker email"
+                          v_body = "tracker email"
                           v_body_array = v_trigger_array[7].split("=")
                           if v_body_array[0] == "body"
-                                 v_body_text = v_body_array[1].gsub(/[user]/,v_user.username).gsub(/[subjectid]/,@trfile.subjectid+" "+@trfile.secondary_key)
+                                 v_secondary_key = ""
+                                 if !@trfile.secondary_key.nil?
+                                      v_secondary_key = @trfile.secondary_key
+                                 end
+                                 v_edit_user = User.find(@tredit.user_id)
+                                 v_body = v_body_array[1].gsub(/[user]/,v_edit_user.username).gsub(/[subjectid]/,@trfile.subjectid+" "+v_secondary_key )
                           end
                           v_trigger_value = "-1"
                           v_trigger_value_array = v_trigger_array[8].split("=")
@@ -98,7 +105,11 @@ class TrfilesController < ApplicationController
                              v_trigger_value = v_trigger_value_array[0]
                           end
                           if v_trigger_value == v_value  # send the email
-     
+                            v_subject= v_subject+" "+v_body
+                            v_email_array.each do |address|
+                              puts "AAAAAAA "+address+"  "+v_subject
+                              PandaMailer.schedule_notice(v_subject,{:send_to => address}).deliver
+                            end
                           end
                       end
                   end
