@@ -29,6 +29,15 @@ class PandaMailer < ActionMailer::Base
         :subject => p_subject
       )
     end
+
+      def send_email( p_subject,email_params,p_body)
+    email_params.to_options! 
+      mail(
+        :to => email_params[:send_to],
+        :subject => p_subject,
+        :body => p_body
+      )
+    end
   
   def self.smtp_credentialed?
     !ActionMailer::Base.smtp_settings[:user_name].blank? && !ActionMailer::Base.smtp_settings[:password].blank?

@@ -32,8 +32,13 @@ class TrfilesController < ApplicationController
                @tredit_actions = TreditAction.where("tredit_id in (?)",@tredit.id).where("tractiontype_id in (?)",ta.id)
                @tredit_action = @tredit_actions[0]
                v_value = nil
+               v_previous_value = nil
+               if !@tredit_action.nil?
+                    v_previous_value = @tredit_action.value
+               end
                if !params["value"][(ta.id).to_s].nil?
                 v_value = params["value"][(ta.id).to_s].join(',')
+
                else
                   puts "bbbbbb nil = "+(ta.id).to_s
                end
@@ -45,6 +50,7 @@ class TrfilesController < ApplicationController
               if !(ta.triggers_1).blank?
                   # triggers are a work in progress
                   v_trigger_array = (ta.triggers_1).split("|")
+
                   if v_trigger_array[0] == "update_field" # _send_email
                       v_trtype_array = v_trigger_array[1].split("=")
                       v_trtype_id_array = (v_trtype_array[1].gsub(/\[/,"").gsub(/\]/,"")).split(",")
@@ -57,11 +63,9 @@ class TrfilesController < ApplicationController
                          else
                            @target_trfiles = Trfile.where("subjectid in (?) and ( secondary_key in  (?) or secondary_key is NULL)", @trfile.subjectid,@trfile.secondary_key).where("trfiles.trtype_id in (?)",v_trtype_id_array)
                          end  
-                        puts "BBBBBBBBBB "
                         @target_trfiles.each do |tar|
                           puts "CCCCCCC tar.id ="+tar.id.to_s+"   v_target_field="+v_target_field
                                if v_target_field == "qc_value"
-                                   puts "DDDD v_value = "+v_value
                                    # need to translate tp Pass, Partial,
                                    v_description = v_shared.get_lookup_refs_description(ta.ref_table_b_1, v_value)
 
@@ -79,7 +83,7 @@ class TrfilesController < ApplicationController
                           v_email = ""
                           v_user = User.find(74 ) # panda_user
                           v_email_array = [v_user.email]
-                          if v_user_array[0] == "user_id"
+                          if v_user_array[0] == "user_id_to"
                               v_user = User.find(v_user_array[1])
                               v_user_email = v_user.email
                               v_email_array.push(v_user_email)
@@ -97,18 +101,17 @@ class TrfilesController < ApplicationController
                                       v_secondary_key = @trfile.secondary_key
                                  end
                                  v_edit_user = User.find(@tredit.user_id)
-                                 v_body = v_body_array[1].gsub(/[user]/,v_edit_user.username).gsub(/[subjectid]/,@trfile.subjectid+" "+v_secondary_key )
+                                 v_body = v_body_array[1].gsub(/\[user\]/,v_edit_user.username).gsub(/\[subjectid\]/,@trfile.subjectid+" "+v_secondary_key )
                           end
                           v_trigger_value = "-1"
                           v_trigger_value_array = v_trigger_array[8].split("=")
                           if v_trigger_value_array[0] == "trigger_value"
-                             v_trigger_value = v_trigger_value_array[0]
+                             v_trigger_value = v_trigger_value_array[1]
                           end
-                          if v_trigger_value == v_value  # send the email
-                            v_subject= v_subject+" "+v_body
+                          if v_trigger_value == v_value and v_previous_value != v_value # send the email only if changed 
+                            v_subject= v_subject+"!!!!! --------"
                             v_email_array.each do |address|
-                              puts "AAAAAAA "+address+"  "+v_subject
-                              PandaMailer.schedule_notice(v_subject,{:send_to => address}).deliver
+                              PandaMailer.send_email(v_subject,{:send_to => address},v_body).deliver
                             end
                           end
                       end
