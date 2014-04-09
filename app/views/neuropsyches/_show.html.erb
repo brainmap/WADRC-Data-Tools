@@ -38,5 +38,9 @@
 
 <br style="clear: both" /><br />
 <% if !@q_data_form.blank? %>
+  <% if !@appointment.nil? and !@appointment.questionform_id.blank? 
+           v_questionform = Questionform.find(@appointment.questionform_id) %>
+       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><small><b>Form:</b></small></small><%= v_questionform.description %>
+   <%end%>
 <%= render :partial => 'questionforms/displayform', :locals => { } %>
 <% end %>

@@ -111,6 +111,10 @@ edit_count = edit_count -1
   
   <%= clearing_br %>
   <%= f.submit "Search" %>
+      <% if !@q_forms.nil? and @q_forms.count > 1 # make a dropdown with tab_default ==Y selected %>
+      <%= f.label :select_a_form_for_download %>: <small><small>optional change from default</small></small>  
+      <%= collection_select :q_search, :questionform_id, @q_forms, :id, :description,{:selected => @q_form_default[0].id,:prompt => 'Select a Form'},{:required => true}  %>
+    <%end %>
   
 <% end %>
 

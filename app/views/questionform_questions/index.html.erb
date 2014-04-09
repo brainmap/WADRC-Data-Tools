@@ -1,7 +1,7 @@
 
 
 <%= form_tag '/questionform_questions/index' do %>
-  <%= collection_select :questionform_question,  :questionform_id, Questionform.all(:order =>'entrance_page_type,display_order,description'), :id, :description,{:prompt => 'Select a Form to show the linked Questions'} %>
+  <%= collection_select :questionform_question, :questionform_id, Questionform.where("status_flag ='Y'").sort_by(&:display_order), :id, :description,{:prompt => 'Select a Form to show the linked Questions'},{:required => true}  %>
   <%= submit_tag("Search") %>
 <% end %>
 

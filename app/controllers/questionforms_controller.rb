@@ -3,7 +3,7 @@ class QuestionformsController < ApplicationController
   # GET /questionforms
   # GET /questionforms.xml
   def index
-    @questionforms = Questionform.all(:order =>'entrance_page_type,display_order,description')
+    @questionforms = Questionform.all(:order =>'entrance_page_type,tab_type,display_order,description')
 
     respond_to do |format|
       format.html # index.html.erb
@@ -249,8 +249,12 @@ class QuestionformsController < ApplicationController
 
     
      @questionform = Questionform.find(params["questionform_id"])
+
+     lh_forms = Questionform.where("current_tab ='blooddraws'").where("status_flag = 'Y'")
+     np_forms = Questionform.where("current_tab ='neuropsyches'").where("status_flag = 'Y'")
+     qu_forms = Questionform.where("current_tab ='questionnaires'").where("status_flag = 'Y'")
 # NEED questionform to have path to call + value_link
-  if params["questionform_id"] == "12"   #  need the taget page plus the blooddraw object based on appointment_id -- need to know its an Appointment object
+  if lh_forms.exists?(params["questionform_id"].to_i) # == "12"   #  need the taget page plus the blooddraw object based on appointment_id -- need to know its an Appointment object
     @blooddraw = Blooddraw.where("appointment_id in (?)",params["value_link"]["appointment_id"])
     var = '/blooddraws/'+@blooddraw[0].id.to_s
 
@@ -258,7 +262,7 @@ class QuestionformsController < ApplicationController
       format.html { redirect_to( var, :notice => 'Questionform was successfully updated.' )}
       format.xml  { render :xml => @questionforms }
     end
-  elsif params["questionform_id"] == "13"   #  need the taget page plus the neuropsych object based on appointment_id -- need to know its an Appointment object
+  elsif np_forms.exists?(params["questionform_id"].to_i) # == "13"   #  need the taget page plus the neuropsych object based on appointment_id -- need to know its an Appointment object
       @neuropsych = Neuropsych.where("appointment_id in (?)",params["value_link"]["appointment_id"])
       var = '/neuropsyches/'+@neuropsych[0].id.to_s
 
@@ -266,7 +270,7 @@ class QuestionformsController < ApplicationController
         format.html { redirect_to( var, :notice => 'Questionform was successfully updated.' )}
         format.xml  { render :xml => @questionforms }
       end
-    elsif params["questionform_id"] == "14"   #  need the taget page plus the questionnaire object based on appointment_id -- need to know its an Appointment object
+    elsif qu_forms.exists?(params["questionform_id"].to_i) #== "14"   #  need the taget page plus the questionnaire object based on appointment_id -- need to know its an Appointment object
         @questionnaire = Questionnaire.where("appointment_id in (?)",params["value_link"]["appointment_id"])
         var = '/questionnaires/'+@questionnaire[0].id.to_s
 

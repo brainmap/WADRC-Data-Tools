@@ -127,7 +127,15 @@ class NeuropsychesController < ApplicationController
       @conditions = []
        @current_tab = "neuropsyches"
        params["search_criteria"] =""
-        @q_form_id = 13   # use in data_search_q_data
+       # for search dropdown
+        @q_forms = Questionform.where("current_tab in (?)",@current_tab).where("status_flag in (?)","Y")
+        @q_form_default = @q_forms.where("status_flag='Y'")
+
+       q_form = Questionform.where("current_tab in (?)",@current_tab).where("tab_default_yn in (?)","Y")
+       @q_form_id = q_form[0].id # 13   # use in data_search_q_data
+       if !params[:np_search].nil? and !params[:np_search][:questionform_id].blank?
+           @q_form_id = params[:np_search][:questionform_id]
+        end
 
        if params[:np_search].nil?
             params[:np_search] =Hash.new 
@@ -326,7 +334,9 @@ class NeuropsychesController < ApplicationController
   # GET /neuropsyches/1.xml
   def show
     @current_tab = "neuropsyches"
-    q_form_id = 13
+    q_form = Questionform.where("current_tab in (?)",@current_tab).where("tab_default_yn in (?)","Y")
+    q_form_id = q_form[0].id # 13
+
      scan_procedure_array = []
      scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
 
@@ -334,7 +344,10 @@ class NeuropsychesController < ApplicationController
                                        appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                        and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
-     @appointment = Appointment.find(@neuropsych.appointment_id)                            
+     @appointment = Appointment.find(@neuropsych.appointment_id)     
+     if   !@appointment.questionform_id.blank?
+            q_form_id = @appointment.questionform_id
+     end                     
 
      @neuropsyches = Neuropsych.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                  appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
@@ -396,6 +409,9 @@ class NeuropsychesController < ApplicationController
 
         @neuropsych.appointment_id = @appointment.id
 
+        @q_forms = Questionform.where("current_tab in (?)",@current_tab).where("status_flag in (?)","Y")
+        @q_form_default = @q_forms.where("status_flag='Y'")
+
     respond_to do |format|
       format.html # new.html.erb
       format.xml  { render :xml => @neuropsych }
@@ -405,14 +421,19 @@ class NeuropsychesController < ApplicationController
   # GET /neuropsyches/1/edit
   def edit
     @current_tab = "neuropsyches"
-    q_form_id = 13
+    q_form = Questionform.where("current_tab in (?)",@current_tab).where("tab_default_yn in (?)","Y")
+    q_form_id = q_form[0].id # 13
+
     scan_procedure_array = []
     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @neuropsych = Neuropsych.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @appointment = Appointment.find(@neuropsych.appointment_id)
-    
+    if   !@appointment.questionform_id.blank?
+            q_form_id = @appointment.questionform_id
+    end 
+
     @vgroup = Vgroup.find(@appointment.vgroup_id)
     @enumbers = @vgroup.enrollments
     
@@ -443,7 +464,11 @@ class NeuropsychesController < ApplicationController
   # POST /neuropsyches.xml
   def create
      @current_tab = "neuropsyches"
-     q_form_id = 13
+     q_form = Questionform.where("current_tab in (?)",@current_tab).where("tab_default_yn in (?)","Y")
+     q_form_id = q_form[0].id # 13
+     if !params[:appointment][:questionform_id].blank?
+          q_form_id = params[:appointment][:questionform_id]
+    end
      scan_procedure_array = []
      scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @neuropsych = Neuropsych.new(params[:neuropsych])
@@ -458,6 +483,9 @@ class NeuropsychesController < ApplicationController
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(vgroup_id)
     
     @appointment = Appointment.new
+    if !params[:appointment][:questionform_id].blank?
+          @appointment.questionform_id = params[:appointment][:questionform_id]
+    end
     @appointment.vgroup_id = vgroup_id
     @appointment.appointment_type ='neuropsych'
     @appointment.appointment_date =appointment_date

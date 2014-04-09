@@ -2,36 +2,44 @@
 
 <table  class="tabular">
   <tr>
+    <th></th>
+    <th></th>
+    <th></th>
 	<th></th>
+    <th>Short Description</th>
     <th>Description</th>
     <th>Entrance Page Type</th>
     <th>View Name</th>
     <th>Target Page</th>
     <th>Long description</th>
     <th>Tab Type</th>
+    <th>Current Tab</th>
     <th>Display order</th>
+    <th>Default form for tab</th>
+    <th>Status Flag</th>
     <th>Parent questionform</th>
-    <th></th>
-    <th></th>
-    <th></th>
   </tr>
 
 <% @questionforms.each do |questionform| %>
   <tr>
+    <td><%= link_to 'Show', questionform %></td>
+    <td><%= link_to 'Edit', edit_questionform_path(questionform) %></td>
+    <td><%= link_to 'Destroy', questionform, :confirm => 'Are you sure?', :method => :delete %></td>
 	<td><%= link_to 'Display Form/Questions', '/questionforms/displayform/'+questionform.id.to_s %> </td>
+    <td><%= questionform.short_description %></td>
     <td><%= questionform.description %></td>
     <td><%= questionform.entrance_page_type %></td>
     <td><%= questionform.view_name %>
     <td><%= questionform.target_page %></td>
     <td><%= questionform.long_description %></td>
     <td><%= questionform.tab_type %></td>
+    <td><%= questionform.current_tab %></td>
     <td><%= questionform.display_order %></td>
+    <td><%= questionform.tab_default_yn %></td>
+    <td><%= questionform.status_flag %></td>
     <td><%= if !questionform.parent_questionform_id.blank?
 	Questionform.find(questionform.parent_questionform_id).description
 	end %></td>
-    <td><%= link_to 'Show', questionform %></td>
-    <td><%= link_to 'Edit', edit_questionform_path(questionform) %></td>
-    <td><%= link_to 'Destroy', questionform, :confirm => 'Are you sure?', :method => :delete %></td>
   </tr>
 <% end %>
 </table>

@@ -15,7 +15,7 @@
 
   <div class="field">
     <b><%= f.label :questionform_id %>:</b><br />
-<%= collection_select :questionform_question, :questionform_id, Questionform.all.sort_by(&:display_order), :id, :description,{:prompt => 'Select a Question Form'},{:required => true}  %>
+<%= collection_select :questionform_question, :questionform_id, Questionform.where("status_flag ='Y'").sort_by(&:display_order), :id, :description,{:prompt => 'Select a Question Form'},{:required => true}  %>
   </div><br>
   <div class="field">
     <b>Un-Linked Questions: </b>
@@ -49,7 +49,7 @@
 
   <div class="field">
     <b><%= f.label :questionform_id %>:</b><br />
-<%= collection_select :questionform_question, :questionform_id, Questionform.all.sort_by(&:display_order), :id, :description,{:prompt => 'Select a Question Form'},{:required => true}  %>
+<%= collection_select :questionform_question, :questionform_id, Questionform.where("status_flag ='Y'").sort_by(&:display_order), :id, :description,{:prompt => 'Select a Question Form'},{:required => true}  %>
   </div><br>
   <div class="field">
    <b>Full List Questions:</b>

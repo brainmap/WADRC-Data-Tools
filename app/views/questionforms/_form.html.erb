@@ -1,6 +1,7 @@
 <%
 v_entrance_page_type =[["scan_procedure","scan_procedure"],["scan_procedure, visit","scan_procedure, visit"],["scan_procedure, participant","scan_procedure, participant"],
                ["participant","participant"],["visit","visit"],["vgroup","vgroup"],["appointment","appointment"]]
+v_yn = [["Y","Y"],["N","N"]]
 %>
 
 <%= form_for(@questionform) do |f| %>
@@ -20,17 +21,21 @@ v_entrance_page_type =[["scan_procedure","scan_procedure"],["scan_procedure, vis
     <%= f.label :description %><br />
     <%= f.text_field :description %>
   </div>
+    <div class="field">
+    <%= f.label :short_description %>:<small><small> Used for making links in vgroup.</small></small><br />
+    <%= f.text_field :short_description,{:size => 10, :maxlength => 10} %>
+  </div>
   <div class="field">
-    <%= f.label :entrance_page_type %><br />
+    <%= f.label :entrance_page_type %>:<small><small> For the lh, np and questionnaire tabs entrance page is appointment.</small></small><br />
  <%= f.select :entrance_page_type, options_for_select(v_entrance_page_type, @questionform.entrance_page_type),
 	              {:prompt => 'Select an entrance page type'}  %>
   </div>
   <div class="field">
-    <%= f.label :target_page %><br />
+    <%= f.label :target_page %>:<small><small> I don't think this is actually used for anything yet.</small></small><br />
     <%= f.text_field :target_page %>
   </div>
   <div class="field">
-    <%= f.label :view_name %><br />
+    <%= f.label :view_name %>::<small><small> I don't think this is actually used for anything yet, maybe in cg_search.</small></small><br />
     <%= f.text_field :view_name %>
   </div>
 
@@ -39,15 +44,29 @@ v_entrance_page_type =[["scan_procedure","scan_procedure"],["scan_procedure, vis
     <%= f.text_area :long_description %>
   </div>
   <div class="field">
-    <%= f.label :tab_type %><br />
+    <%= f.label :tab_type %>:<small><small> I don't think this is actually used for anything yet.</small></small><br />
     <%= select :questionform, :tab_type, ["","questionnaire", "np", "lh"] %>
+  </div>
+    <div class="field">
+    <%= f.label :current_tab %>:<small><small> Used to retrieve default form_id for a tab. Could also use appointment type?</small></small><br />
+    <%= select :questionform, :current_tab, ["","questionnaires", "neuropsyches", "blooddraws"] %>
+  </div>
+    <div class="field">
+    <%= f.label :tab_default_form %>:<small><small> If this form is the default form for a tab.</small></small><br />
+ <%= f.select :tab_default_yn, options_for_select(v_yn, @questionform.tab_default_yn),
+                {:prompt => 'Select as default form for tab'}  %>
+  </div>
+      <div class="field">
+    <%= f.label :status_flag %>:<small><small> Whether form is active.</small></small><br />
+ <%= f.select :status_flag, options_for_select(v_yn, @questionform.status_flag),
+                {:prompt => 'Select active Y'}  %>
   </div>
   <div class="field">
     <%= f.label :display_order %><br />
     <%= f.text_field :display_order %>
   </div>
   <div class="field">
-    <%= f.label :parent_questionform_id %><br />
+    <%= f.label :parent_questionform_id %>:<small><small> I don't think this is actually used for anything yet.</small></small><br />
 <%= collection_select :questionform, :parent_questionform_id, Questionform.all.sort_by(&:display_order), :id, :description,{:prompt => 'Select a parent'} %>
 <br> better sorting of parents, flag for if can be parent?
   </div>

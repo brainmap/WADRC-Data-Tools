@@ -128,7 +128,15 @@ class QuestionnairesController < ApplicationController
       @conditions = []
        @current_tab = "questionnaires"
        params["search_criteria"] =""
-       @q_form_id = 14   # use in data_search_q_data
+       # for search dropdown
+        @q_forms = Questionform.where("current_tab in (?)",@current_tab).where("status_flag in (?)","Y")
+        @q_form_default = @q_forms.where("status_flag='Y'")
+
+       q_form = Questionform.where("current_tab in (?)",@current_tab).where("tab_default_yn in (?)","Y")
+       @q_form_id = q_form[0].id # 14   # use in data_search_q_data
+       if !params[:q_search].nil? and !params[:q_search][:questionform_id].blank?
+           @q_form_id = params[:q_search][:questionform_id]
+       end
 
        if params[:q_search].nil?
             params[:q_search] =Hash.new 
@@ -327,7 +335,8 @@ class QuestionnairesController < ApplicationController
   # GET /questionnaires/1.xml
   def show
     @current_tab = "questionnaires"
-    q_form_id = 14
+    q_form = Questionform.where("current_tab in (?)",@current_tab).where("tab_default_yn in (?)","Y")
+    q_form_id = q_form[0].id # 14
      scan_procedure_array = []
      scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
 
@@ -335,7 +344,10 @@ class QuestionnairesController < ApplicationController
                                        appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                        and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
-     @appointment = Appointment.find(@questionnaire.appointment_id)                            
+     @appointment = Appointment.find(@questionnaire.appointment_id)
+     if   !@appointment.questionform_id.blank?
+            q_form_id = @appointment.questionform_id
+     end                             
 
      @questionnaires = Questionnaire.where("questionnaires.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                  appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
@@ -396,6 +408,8 @@ class QuestionnairesController < ApplicationController
     #    @appointment.save  --- save in create step
 
         @questionnaire.appointment_id = @appointment.id
+        @q_forms = Questionform.where("current_tab in (?)",@current_tab).where("status_flag in (?)","Y")
+        @q_form_default = @q_forms.where("status_flag='Y'")
 
     respond_to do |format|
       format.html # new.html.erb
@@ -406,14 +420,17 @@ class QuestionnairesController < ApplicationController
   # GET /questionnaires/1/edit
   def edit
     @current_tab = "questionnaires"
-    q_form_id = 14
+    q_form = Questionform.where("current_tab in (?)",@current_tab).where("tab_default_yn in (?)","Y")
+    q_form_id = q_form[0].id # 14
     scan_procedure_array = []
     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @questionnaire = Questionnaire.where("questionnaires.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @appointment = Appointment.find(@questionnaire.appointment_id)
-    
+    if   !@appointment.questionform_id.blank?
+            q_form_id = @appointment.questionform_id
+    end 
     @vgroup = Vgroup.find(@appointment.vgroup_id)
     @enumbers = @vgroup.enrollments
     
@@ -444,7 +461,11 @@ class QuestionnairesController < ApplicationController
   # POST /questionnaires.xml
   def create
      @current_tab = "questionnaires"
-     q_form_id = 14
+     q_form = Questionform.where("current_tab in (?)",@current_tab).where("tab_default_yn in (?)","Y")
+     q_form_id = q_form[0].id # 14
+     if !params[:appointment][:questionform_id].blank?
+          q_form_id = params[:appointment][:questionform_id]
+     end
      scan_procedure_array = []
      scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @questionnaire = Questionnaire.new(params[:questionnaire])
@@ -458,6 +479,9 @@ class QuestionnairesController < ApplicationController
     vgroup_id =params[:new_appointment_vgroup_id]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(vgroup_id)
     @appointment = Appointment.new
+    if !params[:appointment][:questionform_id].blank?
+          @appointment.questionform_id = params[:appointment][:questionform_id]
+    end
     @appointment.vgroup_id = vgroup_id
     @appointment.appointment_type ='questionnaire'
     @appointment.appointment_date =appointment_date

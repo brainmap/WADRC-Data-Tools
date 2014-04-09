@@ -17,7 +17,7 @@ v_exclude_include = {"Exclude"=>"exclude", "Include"=>"include"}
   <div class="field">
     <%= f.label :questionform_id %><br />
 	
-<%= collection_select :questionform_scan_procedure, :questionform_id, Questionform.all.sort_by(&:display_order), :id, :description,{:prompt => 'Select a Question Form'},{:required => true}  %>
+<%= collection_select :questionform_scan_procedure, :questionform_id, Questionform.where("status_flag='Y'").sort_by(&:display_order), :id, :description,{:prompt => 'Select a Question Form'},{:required => true}  %>
 
   </div>
   <div class="field">

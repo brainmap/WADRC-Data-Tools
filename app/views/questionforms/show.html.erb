@@ -4,11 +4,15 @@
   <b>Description:</b>
   <%= @questionform.description %>
 </p>
-
+<p>
+  <b>Short Description:</b>
+  <%= @questionform.short_description %>
+</p>
 <p>
   <b>Entrance Page Type:</b>
   <%= @questionform.entrance_page_type %>
 </p>
+<p>
   <b>View Name:</b>
   <%= @questionform.view_name %>
 </p>
@@ -25,10 +29,21 @@
   <%= @questionform.tab_type %>
 </p>
 <p>
+  <b>Current Tab:</b>
+  <%= @questionform.current_tab %>
+</p>
+ <p>
+  <b>Tab Default Form:</b>
+  <%= @questionform.tab_default_yn %>
+</p>
+<p>
   <b>Display order:</b>
   <%= @questionform.display_order %>
 </p>
-
+<p>
+  <b>Status Flag:</b>
+  <%= @questionform.status_flag %>
+</p>
 <p>
   <b>Parent questionform:</b>
   <%= if !@questionform.parent_questionform_id.blank?
