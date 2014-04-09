@@ -245,10 +245,17 @@ edit_count = edit_count -1
 <% end %></b></td></tr>
 <tr><td colspan=7  align="left"><table  width="90%">
 	<% v_cnt =0
+	    v_q_forms = Questionform.where("current_tab in (?)","blooddraws").where("status_flag in (?)","Y")
+        v_q_form_default = v_q_forms.where("tab_default_yn='Y'")
+        v_q_form_default_id = v_q_form_default[0].id
 	   @blooddraws.each do |bd|
 		@blooddraw = bd
 		v_cnt = v_cnt + 1
-	   @appointment = Appointment.find(bd.appointment_id)	%>
+	   @appointment = Appointment.find(bd.appointment_id)	
+	    if !@appointment.questionform_id.blank? 
+                   v_q_form_default_id = @appointment.questionform_id
+        end 
+            %>
 	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",blooddraw_path(bd) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_blooddraw_path(bd) ) :"" %></td>
 		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 		<td></td>
@@ -258,7 +265,7 @@ edit_count = edit_count -1
 		 <tr><td align="left" colspan=7>
 			<a id="myHeader1" href="javascript:toggle2_closed('lh<%= v_cnt.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a><br>
 			   <div id="lh<%= v_cnt.to_s%>"  style="display:none">
-				<%= q_form_id=12  
+				<%= q_form_id= v_q_form_default_id # 12  
 				@questionform = Questionform.find(q_form_id)
 				@q_data_form = QDataForm.where("questionform_id="+ q_form_id.to_s+" and appointment_id in (?)",@appointment.id) 
 		     @q_data_form = @q_data_form[0]
@@ -283,10 +290,17 @@ edit_count = edit_count -1
 <% end %></b></td></tr>
 <tr><td colspan=7  align="left"><table  width="90%">
 	<% v_cnt = 0
+	    v_q_forms = Questionform.where("current_tab in (?)","neuropsyches").where("status_flag in (?)","Y")
+        v_q_form_default = v_q_forms.where("tab_default_yn='Y'")
+        v_q_form_default_id = v_q_form_default[0].id
 	   @neuropsyches.each do |np|
 		@neuropsych = np
 		v_cnt = v_cnt + 1
-	   @appointment = Appointment.find(np.appointment_id)	%>
+	   @appointment = Appointment.find(np.appointment_id)	
+	    if !@appointment.questionform_id.blank? 
+                   v_q_form_default_id = @appointment.questionform_id
+        end 
+            	%>
 	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",neuropsych_path(np) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_neuropsych_path(np) ) :"" %></td>
 		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 		<td> </td>
@@ -295,7 +309,7 @@ edit_count = edit_count -1
 		</td></tr>	 <tr><td align="left" colspan=7> 
 				<a id="myHeader1" href="javascript:toggle2_closed('np<%= v_cnt.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a><br>
 				   <div id="np<%= v_cnt.to_s%>"  style="display:none">
-					<%= q_form_id=13  
+					<%= q_form_id= v_q_form_default_id # 13  
 					@questionform = Questionform.find(q_form_id)
 					@q_data_form = QDataForm.where("questionform_id="+ q_form_id.to_s+" and appointment_id in (?)",@appointment.id) 
 			     @q_data_form = @q_data_form[0]
@@ -319,10 +333,17 @@ edit_count = edit_count -1
 <% end %></b></td></tr>
 <tr><td colspan=7  align="left"><table  width="90%">
 	<% v_cnt = 0
+	    v_q_forms = Questionform.where("current_tab in (?)","questionnaires").where("status_flag in (?)","Y")
+        v_q_form_default = v_q_forms.where("tab_default_yn='Y'")
+        v_q_form_default_id = v_q_form_default[0].id
 	   @questionnaires.each do |q|
 		@questionnaire = q
 		v_cnt = v_cnt + 1
-	   @appointment = Appointment.find(q.appointment_id)	%>
+	   @appointment = Appointment.find(q.appointment_id)	
+	    if !@appointment.questionform_id.blank? 
+                   v_q_form_default_id = @appointment.questionform_id
+        end 
+            	%>
 	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",questionnaire_path(q) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_questionnaire_path(q) ) :"" %></td>
 		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 		<td></td>
@@ -331,7 +352,7 @@ edit_count = edit_count -1
 		</td></tr>	<tr><td align="left" colspan=7>
 			<a id="myHeader1" href="javascript:toggle2_closed('questionnaire<%= v_cnt.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a><br>
 		<div id="questionnaire<%= v_cnt.to_s%>" style="display:none">
-						<% q_form_id = 	14  
+						<% q_form_id = 	v_q_form_default_id# 14  
 						@questionform = Questionform.find(q_form_id)
 						@q_data_form = QDataForm.where("questionform_id="+ q_form_id.to_s+" and appointment_id in (?)",@appointment.id)   # THIS IS FAILING when extra space before last "+" [+ q_form_id.to_s +]	
 				      @q_data_form = @q_data_form[0] 

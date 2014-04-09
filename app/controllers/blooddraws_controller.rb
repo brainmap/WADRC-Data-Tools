@@ -129,7 +129,7 @@ class BlooddrawsController < ApplicationController
      params["search_criteria"] =""
        # for search dropdown
         @q_forms = Questionform.where("current_tab in (?)",@current_tab).where("status_flag in (?)","Y")
-        @q_form_default = @q_forms.where("status_flag='Y'")
+        @q_form_default = @q_forms.where("tab_default_yn='Y'")
 
      q_form = Questionform.where("current_tab in (?)",@current_tab).where("tab_default_yn in (?)","Y")
      @q_form_id = q_form[0].id.to_s #  12   # use in data_search_q_data
@@ -413,7 +413,7 @@ class BlooddrawsController < ApplicationController
 
         @blooddraw.appointment_id = @appointment.id
         @q_forms = Questionform.where("current_tab in (?)",@current_tab).where("status_flag in (?)","Y")
-        @q_form_default = @q_forms.where("status_flag='Y'")
+        @q_form_default = @q_forms.where("tab_default_yn='Y'")
     respond_to do |format|
       format.html # new.html.erb
       format.xml  { render :xml => @blooddraw }
