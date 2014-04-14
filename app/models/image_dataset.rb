@@ -69,7 +69,7 @@ class ImageDataset < ActiveRecord::Base
       :Scanned_file => scanned_file,
       :Glob_pattern => glob,
       :Bold_reps => bold_reps,
-      :Rep_time => rep_time_hundredths,
+      :Rep_time => (rep_time_hundredths rescue nil),
       :Slices_per_volume => slices_per_volume 
     }
   end
