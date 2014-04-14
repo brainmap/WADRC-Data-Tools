@@ -345,8 +345,9 @@ class QuestionnairesController < ApplicationController
                                        and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
      @appointment = Appointment.find(@questionnaire.appointment_id)
-     if   !@appointment.questionform_id.blank?
-            q_form_id = @appointment.questionform_id
+     if   !@appointment.questionform_id_list.blank?
+            q_form_id_array = (@appointment.questionform_id_list).split(",")
+            q_form_id  = q_form_id_array[0]
      end                             
 
      @questionnaires = Questionnaire.where("questionnaires.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
@@ -428,8 +429,9 @@ class QuestionnairesController < ApplicationController
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @appointment = Appointment.find(@questionnaire.appointment_id)
-    if   !@appointment.questionform_id.blank?
-            q_form_id = @appointment.questionform_id
+    if   !@appointment.questionform_id_list.blank?
+            q_form_id_array = (@appointment.questionform_id_list).split(",")
+            q_form_id  = q_form_id_array[0]
     end 
     @vgroup = Vgroup.find(@appointment.vgroup_id)
     @enumbers = @vgroup.enrollments
@@ -480,7 +482,7 @@ class QuestionnairesController < ApplicationController
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(vgroup_id)
     @appointment = Appointment.new
     if !params[:appointment][:questionform_id].blank?
-          @appointment.questionform_id = params[:appointment][:questionform_id]
+          @appointment.questionform_id_list = params[:appointment][:questionform_id]
     end
     @appointment.vgroup_id = vgroup_id
     @appointment.appointment_type ='questionnaire'

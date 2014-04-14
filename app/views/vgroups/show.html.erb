@@ -252,8 +252,9 @@ edit_count = edit_count -1
 		@blooddraw = bd
 		v_cnt = v_cnt + 1
 	   @appointment = Appointment.find(bd.appointment_id)	
-	    if !@appointment.questionform_id.blank? 
-                   v_q_form_default_id = @appointment.questionform_id
+	    if !@appointment.questionform_id_list.blank? 
+                   v_q_form_default_id_array = (@appointment.questionform_id_list).split(",")
+                   v_q_form_default_id = v_q_form_default_id_array[0]
         end 
             %>
 	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",blooddraw_path(bd) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_blooddraw_path(bd) ) :"" %></td>
@@ -297,8 +298,9 @@ edit_count = edit_count -1
 		@neuropsych = np
 		v_cnt = v_cnt + 1
 	   @appointment = Appointment.find(np.appointment_id)	
-	    if !@appointment.questionform_id.blank? 
-                   v_q_form_default_id = @appointment.questionform_id
+	    if !@appointment.questionform_id_list.blank? 
+                   v_q_form_default_id_array = (@appointment.questionform_id_list).split(",")
+                   v_q_form_default_id = v_q_form_default_id_array[0]
         end 
             	%>
 	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",neuropsych_path(np) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_neuropsych_path(np) ) :"" %></td>
@@ -340,8 +342,9 @@ edit_count = edit_count -1
 		@questionnaire = q
 		v_cnt = v_cnt + 1
 	   @appointment = Appointment.find(q.appointment_id)	
-	    if !@appointment.questionform_id.blank? 
-                   v_q_form_default_id = @appointment.questionform_id
+	    if !@appointment.questionform_id_list.blank? 
+                   v_q_form_default_id_array = (@appointment.questionform_id_list).split(",")
+                   v_q_form_default_id = v_q_form_default_id_array[0]
         end 
             	%>
 	<tr><td   align="left" width="10%"><%= @appointment.appointment_date%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= link_to("show",questionnaire_path(q) )%>&nbsp;&nbsp;<%= edit_count>0 ? link_to("edit",edit_questionnaire_path(q) ) :"" %></td>

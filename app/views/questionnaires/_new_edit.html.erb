@@ -40,10 +40,12 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
   <%= f.submit 'Save Questionnaire appt' %>
     <% if !@q_forms.nil? and @q_forms.count > 1 # make a dropdown with tab_default ==Y selected %>
     <%= f.label :select_a_form %>: <small><small>optional change from default</small></small>  
-    <%= collection_select :appointment, :questionform_id, @q_forms, :id, :description,{:selected => @q_form_default[0].id,:prompt => 'Select a Form'},{:required => true}  %>
+    <%= collection_select :appointment, :questionform_id_list, @q_forms, :id, :description,{:selected => @q_form_default[0].id,:prompt => 'Select a Form'},{:required => true}  %>
   <%end %>
-    <% if !@appointment.nil? and !@appointment.questionform_id.blank? 
-           v_questionform = Questionform.find(@appointment.questionform_id) %>
+    <% if !@appointment.nil? and !@appointment.questionform_id_list.blank? 
+            v_form_id_array = (@appointment.questionform_id_list).split(",")
+            v_form_id  = v_form_id_array[0]
+           v_questionform = Questionform.find(v_form_id) %>
        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><small><b>Form:</b></small></small><%= v_questionform.description %>
    <%end%>
 

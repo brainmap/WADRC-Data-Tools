@@ -345,8 +345,9 @@ class NeuropsychesController < ApplicationController
                                        and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
      @appointment = Appointment.find(@neuropsych.appointment_id)     
-     if   !@appointment.questionform_id.blank?
-            q_form_id = @appointment.questionform_id
+     if   !@appointment.questionform_id_list.blank?
+            q_form_id_array = (@appointment.questionform_id_list).split(",")
+            q_form_id  = q_form_id_array[0]
      end                     
 
      @neuropsyches = Neuropsych.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
@@ -430,8 +431,9 @@ class NeuropsychesController < ApplicationController
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @appointment = Appointment.find(@neuropsych.appointment_id)
-    if   !@appointment.questionform_id.blank?
-            q_form_id = @appointment.questionform_id
+    if   !@appointment.questionform_id_list.blank?
+            q_form_id_array = (@appointment.questionform_id_list).split(",")
+            q_form_id  = q_form_id_array[0]
     end 
 
     @vgroup = Vgroup.find(@appointment.vgroup_id)
@@ -484,7 +486,7 @@ class NeuropsychesController < ApplicationController
     
     @appointment = Appointment.new
     if !params[:appointment][:questionform_id].blank?
-          @appointment.questionform_id = params[:appointment][:questionform_id]
+          @appointment.questionform_id_list = params[:appointment][:questionform_id]
     end
     @appointment.vgroup_id = vgroup_id
     @appointment.appointment_type ='neuropsych'
