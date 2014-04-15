@@ -305,6 +305,10 @@ edit_count = edit_count -1
 <tr><td colspan=7  align="left"><table  width="90%">
 	<% v_cnt = 0
 	    v_q_forms = Questionform.where("current_tab in (?)","neuropsyches").where("status_flag in (?)","Y")
+        v_q_form_array = []
+	    v_q_forms.each do |f|
+             v_q_form_array.push(f.id)
+	    end
         v_q_form_default = v_q_forms.where("tab_default_yn='Y'")
         v_q_form_default_id = v_q_form_default[0].id
 	   @neuropsyches.each do |np|
@@ -321,17 +325,24 @@ edit_count = edit_count -1
 		<td> </td>
 		</tr>
 		<tr><td colspan="5"><%= @appointment.comment %>
-		</td></tr>	 <tr><td align="left" colspan=7> 
+		</td></tr>	
+    <% @q_data_forms = QDataForm.where("questionform_id in (?)  and appointment_id in (?)",v_q_form_array,@appointment.id) 
+        @q_data_forms.each do |f|
+        q_form_id = f.questionform_id
+        @q_data_form =f
+    %>
+		 <tr><td align="left" colspan=7> 
 				<a id="myHeader1" href="javascript:toggle2_closed('np<%= v_cnt.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a><br>
 				   <div id="np<%= v_cnt.to_s%>"  style="display:none">
-					<%= q_form_id= v_q_form_default_id # 13  
+					<%= # q_form_id= v_q_form_default_id # 13  
 					@questionform = Questionform.find(q_form_id)
-					@q_data_form = QDataForm.where("questionform_id="+ q_form_id.to_s+" and appointment_id in (?)",@appointment.id) 
-			     @q_data_form = @q_data_form[0]
+
 					render :partial => 'neuropsyches/show' , :locals => { :neuropsych => np } %>
 
 				   </div>
 			 </td></tr>
+		 <% v_cnt = v_cnt + 1
+		   end %>
 	<%end %>  </table>		
 </td></tr>
 <tr><td colspan=5  align="left">
@@ -349,6 +360,10 @@ edit_count = edit_count -1
 <tr><td colspan=7  align="left"><table  width="90%">
 	<% v_cnt = 0
 	    v_q_forms = Questionform.where("current_tab in (?)","questionnaires").where("status_flag in (?)","Y")
+	    v_q_form_array = []
+	    v_q_forms.each do |f|
+             v_q_form_array.push(f.id)
+	    end
         v_q_form_default = v_q_forms.where("tab_default_yn='Y'")
         v_q_form_default_id = v_q_form_default[0].id
 	   @questionnaires.each do |q|
@@ -365,17 +380,25 @@ edit_count = edit_count -1
 		<td></td>
 		</tr>
 		<tr><td colspan="5"><%= @appointment.comment %>
-		</td></tr>	<tr><td align="left" colspan=7>
+		</td></tr>
+    <% @q_data_forms = QDataForm.where("questionform_id in (?)  and appointment_id in (?)",v_q_form_array,@appointment.id) 
+        @q_data_forms.each do |f|
+        q_form_id = f.questionform_id
+        @q_data_form =f
+    %>
+		<tr><td align="left" colspan=7>
 			<a id="myHeader1" href="javascript:toggle2_closed('questionnaire<%= v_cnt.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a><br>
 		<div id="questionnaire<%= v_cnt.to_s%>" style="display:none">
-						<% q_form_id = 	v_q_form_default_id# 14  
+						<% #q_form_id = 	v_q_form_default_id# 14  
 						@questionform = Questionform.find(q_form_id)
-						@q_data_form = QDataForm.where("questionform_id="+ q_form_id.to_s+" and appointment_id in (?)",@appointment.id)   # THIS IS FAILING when extra space before last "+" [+ q_form_id.to_s +]	
-				      @q_data_form = @q_data_form[0] 
+						#@q_data_form = QDataForm.where("questionform_id="+ q_form_id.to_s+" and appointment_id in (?)",@appointment.id)   # THIS IS FAILING when extra space before last "+" [+ q_form_id.to_s +]	
+				      #@q_data_form = @q_data_form[0] 
 				%>
 	<%=	render :partial => 'questionnaires/show' , :locals => { :questionnaire => q } %>
 					   </div>
 				 </td></tr>
+		 <% v_cnt = v_cnt + 1
+		   end %>
 	<%end %>  </table>		
 </td></tr>
 </table>
