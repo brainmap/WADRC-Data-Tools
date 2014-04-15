@@ -36,12 +36,18 @@
 
 
 <br style="clear: both" /><br />
+<%= form_for("/questionnaires/"+@questionnaire.id.to_s) do |f| %>
+    <% if !@q_forms.nil? and @q_forms.count > 1 # make a dropdown with tab_default ==Y selected %>
+    <%= f.label :select_a_form %>: <small><small>optional change from default</small></small>  
+    <%= collection_select :appointment, :questionform_id_list, @q_forms, :id, :description,{:selected => @questionform.id,:prompt => 'Select a Form'},{:required => true,:onchange => "window.location.href='/questionnaires/"+@questionnaire.id.to_s+"?appointment[questionform_id_list]='+this.value"  } %>
+    <!-- , :onchange => "alert('SAVE the bottom entries if any changes have been made!!!!!')"  
+    need button to make new form-->
+  <%end %>
+
+<%end%>
 <% if !@q_data_form.blank? %>
-  <% if !@appointment.nil? and !@appointment.questionform_id_list.blank? 
-            v_form_id_array = (@appointment.questionform_id_list).split(",")
-            v_form_id  = v_form_id_array[0]
-           v_questionform = Questionform.find(v_form_id) %>
-       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><small><b>Form:</b></small></small><%= v_questionform.description %>
+  <% if !@questionform.nil? %>
+       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><small><b>Form:</b></small></small><%= @questionform.description %>
    <%end%>
 <%= render :partial => 'questionforms/displayform', :locals => { } %>
 <% end %>

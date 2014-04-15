@@ -333,17 +333,7 @@ class BlooddrawsController < ApplicationController
   # GET /blooddraws/1
   # GET /blooddraws/1.xml
   def show
-
-    @current_tab = "blooddraws"
-     q_form = Questionform.where("current_tab in (?)",@current_tab).where("tab_default_yn in (?)","Y")
-     q_form_id = q_form[0].id # 12
-     if !params[:appointment].nil? and !params[:appointment][:questionform_id_list].blank?
-          q_form_id  = params[:appointment][:questionform_id_list]
-          q_form = Questionform.find(q_form_id)
-     end
-     @q_form_id = q_form_id
-     @q_forms = Questionform.where("current_tab in (?)",@current_tab).where("status_flag in (?)","Y")
-     @q_form_default = @q_forms.where("tab_default_yn='Y'")
+     @current_tab = "blooddraws"
      scan_procedure_array = []
      scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
 
@@ -352,6 +342,26 @@ class BlooddrawsController < ApplicationController
                                        and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
      @appointment = Appointment.find(@blooddraw.appointment_id)
+     @vgroup = Vgroup.find(@appointment.vgroup_id)
+     sp_list = @vgroup.scan_procedures.collect {|sp| sp.id}.join(",")
+     sp_array =[]
+     sp_array = sp_list.split(',').map(&:to_i)
+
+     q_form = Questionform.where("current_tab in (?)",@current_tab).where("tab_default_yn in (?)","Y")
+     q_form_id = q_form[0].id # 12
+     if !params[:appointment].nil? and !params[:appointment][:questionform_id_list].blank?
+          q_form_id  = params[:appointment][:questionform_id_list]
+          q_form = Questionform.find(q_form_id)
+     end
+     @q_form_id = q_form_id
+     @q_forms = Questionform.where("current_tab in (?)",@current_tab).where("status_flag in (?)","Y").where("questionforms.id not in (select questionform_id from questionform_scan_procedures)
+                                                                 or (questionforms.id in 
+                                                                         (select questionform_id from questionform_scan_procedures where  include_exclude ='include' and scan_procedure_id in ("+sp_array.join(',')+"))
+                                                                      and
+                                                                  questionforms.id  not in 
+                                              (select questionform_id from questionform_scan_procedures where include_exclude ='exclude' and scan_procedure_id in ("+sp_array.join(',')+")))")
+     @q_form_default = @q_forms.where("tab_default_yn='Y'")
+
      if   !@appointment.questionform_id_list.blank? and (params[:appointment].nil?  or (!params[:appointment].nil? and  params[:appointment][:questionform_id_list].blank?) )
             q_form_id_array = (@appointment.questionform_id_list).split(",")
             q_form_id  = q_form_id_array[0]
@@ -366,21 +376,15 @@ class BlooddrawsController < ApplicationController
      @older_blooddraw = idx + 1 >= @blooddraws.size ? nil : @blooddraws[idx + 1]
      @newer_blooddraw = idx - 1 < 0 ? nil : @blooddraws[idx - 1]
 
-     @vgroup = Vgroup.find(@appointment.vgroup_id)
      @participant = @vgroup.try(:participant)
      @enumbers = @vgroup.enrollments
-     
-     @appointment = Appointment.find(@blooddraw.appointment_id)
 
      @q_data_form = QDataForm.where("questionform_id="+ q_form_id.to_s+" and appointment_id in (?)",@appointment.id)
-
      @q_data_form = @q_data_form[0]
-
      #params[:appointment_id] = @blooddraw.appointment_id
      @questionform =Questionform.find(q_form_id)
 
      # NEED SCAN PROC ARRAY FOR VGROUP  --- change to vgroup!!
-
       @a =  Appointment.where("vgroup_id in (?)",@appointment.vgroup_id)
 # switching to vgroup sp
 #         a_array =@a.to_a
@@ -390,12 +394,6 @@ class BlooddrawsController < ApplicationController
 # 	       visit = v
 # 	     end  
 # 	  sp_list = visit.scan_procedures.collect {|sp| sp.id}.join(",")
- 	  
- 	  vgroup = Vgroup.find(@appointment.vgroup_id)
- 	  sp_list = vgroup.scan_procedures.collect {|sp| sp.id}.join(",")
-
- 	  sp_array =[]
- 	  sp_array = sp_list.split(',').map(&:to_i)
  	  @scanprocedures = ScanProcedure.where("id in (?)",sp_array)
 
     respond_to do |format|
@@ -418,9 +416,18 @@ class BlooddrawsController < ApplicationController
         @appointment.appointment_date = (Vgroup.find(vgroup_id)).vgroup_date
         @appointment.appointment_type ='blood_draw'
     #    @appointment.save  --- save in create step
-
         @blooddraw.appointment_id = @appointment.id
-        @q_forms = Questionform.where("current_tab in (?)",@current_tab).where("status_flag in (?)","Y")
+        sp_list = @vgroup.scan_procedures.collect {|sp| sp.id}.join(",")
+        sp_array =[]
+        sp_array = sp_list.split(',').map(&:to_i)
+
+        @q_forms = Questionform.where("current_tab in (?)",@current_tab).where("status_flag in (?)","Y").where("questionforms.id not in (select questionform_id from questionform_scan_procedures)
+                                                                 or (questionforms.id in 
+                                                                         (select questionform_id from questionform_scan_procedures where  include_exclude ='include' and scan_procedure_id in ("+sp_array.join(',')+"))
+                                                                      and
+                                                                  questionforms.id  not in 
+                                              (select questionform_id from questionform_scan_procedures where include_exclude ='exclude' and scan_procedure_id in ("+sp_array.join(',')+")))")
+     
         @q_form_default = @q_forms.where("tab_default_yn='Y'")
     respond_to do |format|
       format.html # new.html.erb
@@ -450,16 +457,24 @@ class BlooddrawsController < ApplicationController
           q_form_id  = q_form_id_array[0]
           q_form = Questionform.find(q_form_id)
     end
-
     # NEED TO ADD LIMIT BY SCAN PROCEDURE
-    @q_forms = Questionform.where("current_tab in (?)",@current_tab).where("status_flag in (?)","Y")
+    sp_list = @vgroup.scan_procedures.collect {|sp| sp.id}.join(",")
+    sp_array =[]
+    sp_array = sp_list.split(',').map(&:to_i)
+
+    @q_forms = Questionform.where("current_tab in (?)",@current_tab).where("status_flag in (?)","Y").where("questionforms.id not in (select questionform_id from questionform_scan_procedures)
+                                                                 or (questionforms.id in 
+                                                                         (select questionform_id from questionform_scan_procedures where  include_exclude ='include' and scan_procedure_id in ("+sp_array.join(',')+"))
+                                                                      and
+                                                                  questionforms.id  not in 
+                                              (select questionform_id from questionform_scan_procedures where include_exclude ='exclude' and scan_procedure_id in ("+sp_array.join(',')+")))")
+     
     @q_form_default = @q_forms.where("tab_default_yn='Y'")
     
     @q_data_forms = QDataForm.where("questionform_id="+q_form_id.to_s+" and appointment_id in (?)",@appointment.id)
     @q_data_form = @q_data_forms[0]
     #params[:appointment_id] = @blooddraw.appointment_id
     @questionform =Questionform.find(q_form_id)
-
      if @q_data_form.nil?
         @q_data_form = QDataForm.new
         @q_data_form.appointment_id = @appointment.id
@@ -478,12 +493,7 @@ class BlooddrawsController < ApplicationController
 	  #     visit = v
 	   #  end  
 	  #sp_list = visit.scan_procedures.collect {|sp| sp.id}.join(",")
-	  vgroup = Vgroup.find(@appointment.vgroup_id)
- 	  sp_list = vgroup.scan_procedures.collect {|sp| sp.id}.join(",")
-	  sp_array =[]
-	  sp_array = sp_list.split(',').map(&:to_i)
 	  @scanprocedures = ScanProcedure.where("id in (?)",sp_array)
-
   end
 
   # POST /blooddraws
@@ -524,7 +534,7 @@ class BlooddrawsController < ApplicationController
   @appointment.save
   @blooddraw.appointment_id = @appointment.id
 
-puts  @blooddraw.appointment_id.to_s
+   # puts  @blooddraw.appointment_id.to_s
   @q_data_form = QDataForm.new
   @q_data_form.appointment_id = @appointment.id
   @q_data_form.questionform_id = q_form_id

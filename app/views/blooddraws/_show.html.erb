@@ -54,7 +54,7 @@
 
 
 <br style="clear: both" /><br />
-<%= form_for("/blooddraw/"+@blooddraw.id.to_s) do |f| %>
+<%= form_for("/blooddraws/"+@blooddraw.id.to_s) do |f| %>
     <% if !@q_forms.nil? and @q_forms.count > 1 # make a dropdown with tab_default ==Y selected %>
     <%= f.label :select_a_form %>: <small><small>optional change from default</small></small>  
     <%= collection_select :appointment, :questionform_id_list, @q_forms, :id, :description,{:selected => @questionform.id,:prompt => 'Select a Form'},{:required => true,:onchange => "window.location.href='/blooddraws/"+@blooddraw.id.to_s+"?appointment[questionform_id_list]='+this.value"  } %>
