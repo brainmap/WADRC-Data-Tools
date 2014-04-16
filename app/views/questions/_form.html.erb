@@ -104,15 +104,21 @@ The question can have up to three parts.<br>
 <%= f.select :global_update_1, options_for_select(v_global_update, @question.global_update_1),
 	              {:prompt => 'Select if updates should be global'}  %>
  </div>
+  </td><td>       
+ <div class="field">
+   <%= f.label :global_update_insert_1 %><br />
+<%= f.select :global_update_insert_1, options_for_select(v_global_update, @question.global_update_insert_1),
+                {:prompt => 'Select if updates with insert should be global'}  %>
+ </div>
 </td><td>
 	  <div class="field">
-	    <%= f.label :access_table_1 %><br />
-	    <%= f.text_field :access_table_1 %>
+	    <small><small><%= f.label :access_table_1 %></small></small><br />
+	    <%= f.text_field :access_table_1 , :size=>10 %>
 	  </div>
 	</td><td>
 		<div class="field">
-		  <%= f.label :access_column_1 %><br />
-		  <%= f.text_field :access_column_1 %>
+		  <small><small><%= f.label :access_column_1 %></small></small><br />
+		  <%= f.text_field :access_column_1, :size=>10 %>
 		 </div>
 </td></tr></table>
 <table width="100%" ><tr><td>
@@ -206,15 +212,21 @@ The question can have up to three parts.<br>
 <%= f.select :global_update_2, options_for_select(v_global_update, @question.global_update_2),
 	              {:prompt => 'Select if updates should be global'}  %>
  </div>
+   </td><td>       
+ <div class="field">
+   <%= f.label :global_update_insert_2 %><br />
+<%= f.select :global_update_insert_2, options_for_select(v_global_update, @question.global_update_insert_2),
+                {:prompt => 'Select if updates with insert should be global'}  %>
+ </div>
 </td><td>
 	  <div class="field">
-	    <%= f.label :access_table_2 %><br />
-	    <%= f.text_field :access_table_2 %>
+	    <small><small><%= f.label :access_table_2 %></small></small><br />
+	    <%= f.text_field :access_table_2, :size=>10 %>
 	  </div>
 	</td><td>
 		<div class="field">
-		  <%= f.label :access_column_2 %><br />
-		  <%= f.text_field :access_column_2 %>
+		  <small><small><%= f.label :access_column_2 %></small></small><br />
+		  <%= f.text_field :access_column_2, :size=>10 %>
 		 </div>
 </td></tr></table>
 <table width="100%" ><tr><td>
@@ -308,15 +320,21 @@ The question can have up to three parts.<br>
 <%= f.select :global_update_3, options_for_select(v_global_update, @question.global_update_3),
 	              {:prompt => 'Select if updates should be global'}  %>
  </div>
+   </td><td>       
+ <div class="field">
+   <%= f.label :global_update_insert_3 %><br />
+<%= f.select :global_update_insert_3, options_for_select(v_global_update, @question.global_update_insert_3),
+                {:prompt => 'Select if updates with insert should be global'}  %>
+ </div>
 </td><td>
 	  <div class="field">
-	    <%= f.label :access_table_3 %><br />
-	    <%= f.text_field :access_table_3 %>
+	    <small><small><%= f.label :access_table_3 %></small></small><br />
+	    <%= f.text_field :access_table_3 , :size=>10%>
 	  </div>
 	</td><td>
 		<div class="field">
-		  <%= f.label :access_column_3 %><br />
-		  <%= f.text_field :access_column_3 %>
+		  <small><small><%= f.label :access_column_3 %></small></small><br />
+		  <%= f.text_field :access_column_3, :size=>10 %>
 		 </div>
 	</td></tr></table>
 <table width="100%" ><tr><td>

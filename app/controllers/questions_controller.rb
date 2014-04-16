@@ -41,6 +41,9 @@ class QuestionsController < ApplicationController
     @question.global_update_1 ='N'
     @question.global_update_2 ='N'
     @question.global_update_3 ='N'
+    @question.global_update_insert_1 ='N'
+    @question.global_update_insert_2 ='N'
+    @question.global_update_insert_3 ='N'
     @question.status = 'active'
     respond_to do |format|
       format.html # new.html.erb
