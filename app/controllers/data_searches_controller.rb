@@ -836,6 +836,7 @@ class DataSearchesController < ApplicationController
       @cg_query_tn_hash = Hash.new
       @cg_query_tn_cn_hash = Hash.new
       @cg_query_cn_hash = Hash.new
+      @cg_query_tn_not_in_hash = Hash.new
       params["search_criteria"] =""
       ####@headers_q_data = []
       @q_data_form_array = []
@@ -1092,6 +1093,32 @@ class DataSearchesController < ApplicationController
                     @local_tables.push(@cg_tn.tn)  
                     @local_tables_alias_hash[@cg_tn.tn] =  @cg_tn.alias                         
                     @local_conditions.push(@cg_tn.join_right)
+                 
+                elsif @cg_query_tn.join_type == 2 # NOT IN , but also need an outer join if any cols selected 
+                   # build up sql for vgroup not in 
+                   # @cg_query_tn_not_in_hash 
+                     if @cg_tn.join_left_parent_tn == "vgroups"
+                       v_not_in_condition =" select not_in_"+v_tn_id.to_s+".id from "+@cg_tn.tn+","+@cg_tn.join_left_parent_tn+" not_in_"+v_tn_id.to_s+" where "+@cg_tn.join_right
+                     else 
+                       v_not_in_condition =" select not_in_"+v_tn_id.to_s+".vgroup_id from "+@cg_tn.tn+","+@cg_tn.join_left_parent_tn+" not_in_"+v_tn_id.to_s+" where "+@cg_tn.join_right
+                      end
+                   # need to add conditions to not_in_condition and divert from normal left join conditions
+                    @cg_query_tn_not_in_hash[v_tn_id] = v_not_in_condition 
+                   if !params[:cg_search][:include_cn].blank? and !params[:cg_search][:include_cn][v_tn_id].blank?
+      
+                         # NEED TO DO OUTER JOIN 
+                         @table_types.push(@cg_tn.table_type)
+                            # need to add outer as part of table length !!!!! THIS HAS TO BE FIXED
+                         if @local_tables.index(@cg_tn.join_left_parent_tn).blank?   # WHAT ABOUT ALIAS                        
+                                  @local_tables.push(@cg_tn.join_left_parent_tn)  
+                                  @local_tables_alias_hash[@cg_tn.join_left_parent_tn] =   @cg_tn.join_left_parent_tn                             
+                         end
+                         if ! @tables_left_join_hash[@cg_tn.join_left_parent_tn ].blank?
+                              @tables_left_join_hash[@cg_tn.join_left_parent_tn ] = @cg_tn.join_left+"  "+ @tables_left_join_hash[@cg_tn.join_left_parent_tn ]
+                         else
+                              @tables_left_join_hash[@cg_tn.join_left_parent_tn ] = @cg_tn.join_left
+                         end
+                   end
                     
                 elsif @cg_query_tn.join_type == 1  # outer join joins  # NEED PARENT TABLE join_left_parent_tn
                     @table_types.push(@cg_tn.table_type)
@@ -1311,53 +1338,85 @@ class DataSearchesController < ApplicationController
                               v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" = '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"'"
                            end
                            if !v_condition.blank?
-                              @local_conditions.push(v_condition)
-                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" = "+@cg_query_tn_cn.value_1
+                              if !params[:cg_search][:join_type][v_tn_id].blank? and params[:cg_search][:join_type][v_tn_id] == "2" 
+                                 @cg_query_tn_not_in_hash[v_tn_id] = @cg_query_tn_not_in_hash[v_tn_id]+" and "+v_condition
+                              else
+                                  @local_conditions.push(v_condition)
+                                  params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" = "+@cg_query_tn_cn.value_1
+                              end
                            end
                          elsif @cg_query_tn_cn.condition ==  1
                            v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" >= '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                            if !v_condition.blank?
-                              @local_conditions.push(v_condition)
-                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" >= "+@cg_query_tn_cn.value_1
+                              if !params[:cg_search][:join_type][v_tn_id].blank? and params[:cg_search][:join_type][v_tn_id] == "2" 
+                                 @cg_query_tn_not_in_hash[v_tn_id] = @cg_query_tn_not_in_hash[v_tn_id]+" and "+v_condition
+                              else
+                                  @local_conditions.push(v_condition)
+                                  params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" >= "+@cg_query_tn_cn.value_1
+                              end
                            end
                          elsif @cg_query_tn_cn.condition == 2
                            v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" <= '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                            if !v_condition.blank?
-                             @local_conditions.push(v_condition)
-                             params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" <= "+@cg_query_tn_cn.value_1
+                              if !params[:cg_search][:join_type][v_tn_id].blank? and params[:cg_search][:join_type][v_tn_id] == "2" 
+                                 @cg_query_tn_not_in_hash[v_tn_id] = @cg_query_tn_not_in_hash[v_tn_id]+" and "+v_condition
+                              else
+                                 @local_conditions.push(v_condition)
+                                 params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" <= "+@cg_query_tn_cn.value_1
+                              end
                            end
                          elsif @cg_query_tn_cn.condition == 3
                            v_condition =  " (if("+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" IS NULL,'',"+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") )  != '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                            if !v_condition.blank?
-                              @local_conditions.push(v_condition)
-                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" != "+@cg_query_tn_cn.value_1                           
+                              if !params[:cg_search][:join_type][v_tn_id].blank? and params[:cg_search][:join_type][v_tn_id] == "2" 
+                                 @cg_query_tn_not_in_hash[v_tn_id] = @cg_query_tn_not_in_hash[v_tn_id]+" and "+v_condition
+                              else
+                                @local_conditions.push(v_condition)
+                                params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" != "+@cg_query_tn_cn.value_1      
+                              end                     
                            end
                          elsif @cg_query_tn_cn.condition == 4
                            v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" between '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' and '"+ @cg_query_tn_cn.value_2.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                            if !v_condition.blank?
-                              @local_conditions.push(v_condition)
-                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" between "+@cg_query_tn_cn.value_1+" and "+ @cg_query_tn_cn.value_2
+                              if !params[:cg_search][:join_type][v_tn_id].blank? and params[:cg_search][:join_type][v_tn_id] == "2" 
+                                 @cg_query_tn_not_in_hash[v_tn_id] = @cg_query_tn_not_in_hash[v_tn_id]+" and "+v_condition
+                              else
+                                @local_conditions.push(v_condition)
+                                params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" between "+@cg_query_tn_cn.value_1+" and "+ @cg_query_tn_cn.value_2
+                              end      
                            end
                          elsif @cg_query_tn_cn.condition == 5
                            v_condition = " ( trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") is NULL or trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") = '' ) "
                            if !v_condition.blank?
-                              @local_conditions.push(v_condition)
-                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" is blank"
+                              if !params[:cg_search][:join_type][v_tn_id].blank? and params[:cg_search][:join_type][v_tn_id] == "2" 
+                                 @cg_query_tn_not_in_hash[v_tn_id] = @cg_query_tn_not_in_hash[v_tn_id]+" and "+v_condition
+                              else
+                                @local_conditions.push(v_condition)
+                                params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" is blank"
+                              end
                            end
                          elsif @cg_query_tn_cn.condition == 6
                            v_condition = " trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") is NOT NULL and  trim( "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+")  != '' "
                            if !v_condition.blank?
-                              @local_conditions.push(v_condition)
-                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" is not blank "
+                              if !params[:cg_search][:join_type][v_tn_id].blank? and params[:cg_search][:join_type][v_tn_id] == "2" 
+                                 @cg_query_tn_not_in_hash[v_tn_id] = @cg_query_tn_not_in_hash[v_tn_id]+" and "+v_condition
+                              else
+                                @local_conditions.push(v_condition)
+                                params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" is not blank "
+                              end  
                            end  
                          elsif @cg_query_tn_cn.condition == 7
                            v_condition = "  "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" like '%"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"%' "
                            if !v_condition.blank?
-                              @local_conditions.push(v_condition)
-                              params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" contains "+@cg_query_tn_cn.value_1
+                              if !params[:cg_search][:join_type][v_tn_id].blank? and params[:cg_search][:join_type][v_tn_id] == "2" 
+                                 @cg_query_tn_not_in_hash[v_tn_id] = @cg_query_tn_not_in_hash[v_tn_id]+" and "+v_condition
+                              else
+                                @local_conditions.push(v_condition)
+                                params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" contains "+@cg_query_tn_cn.value_1
+                              end
                            end
                          end
-                       end                
+                       end            
                      
                        if params[:cg_search][:save_search] == "1"    
                           @cg_query_tn_cn.save
@@ -1552,10 +1611,15 @@ class DataSearchesController < ApplicationController
                params[:cg_search][:include_tn].delete(v_tn_id.to_s)
              end
            end
+
+             if !@cg_query_tn_not_in_hash[v_tn_id].nil?
+                            v_not_in_condition = " vgroups.id not in ("+@cg_query_tn_not_in_hash[v_tn_id]+")"
+                            @local_conditions.push(v_not_in_condition)
+                            params["search_criteria"] = params["search_criteria"] +", NOT IN ("+@cg_query_tn_not_in_hash[v_tn_id]+")"
+             end  
+
           end 
          end
-         
-         
        end
       end 
 
