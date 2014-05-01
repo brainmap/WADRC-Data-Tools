@@ -4,6 +4,11 @@ class LookupPettracersController < ApplicationController
   # GET /lookup_pettracers.xml
   def index
     @lookup_pettracers = LookupPettracer.all
+    # all sams ids done - 43,22,37,38,44,41,45
+    @image_datasets = ImageDataset.where("image_datasets.visit_id in ( select visits.id from visits , appointments, scan_procedures_vgroups 
+                                                                 where visits.appointment_id = appointments.id 
+                                                                 and appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
+                                                                 and scan_procedures_vgroups.scan_procedure_id in (43))")
 
     respond_to do |format|
       format.html # index.html.erb

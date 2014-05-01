@@ -5,6 +5,7 @@
 <p><%= "DICOM header not available." %></p>
 <% elsif dataset.dicom_taghash.to_s[0,3] == "---" %>
 <p><%= "DICOM header not available. (Not being converted to hash properly.)" %></p>
+<!-- there are :value with multi-row values   -->
 <% else %>
 	<table class="tabular">
 		<tr>
