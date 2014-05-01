@@ -11,7 +11,7 @@ gem 'yaml_db'
 
 # in production
 # if ENV['RAILS_ENV'] == "production"
-gem 'metamri'  ,'~>0.2.19'  ####:path => '~>0.2.11'  # need to update metamri gem with local changes
+gem 'metamri'  ,'~>0.2.21'  ####:path => '~>0.2.11'  # need to update metamri gem with local changes
 # else
 #gem 'metamri', :path => '~/code/metamri'
 #gem 'metamri', :path => '/Users/caillingworth/code/metamri'
