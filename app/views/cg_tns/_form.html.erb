@@ -1,4 +1,4 @@
-<%  v_table_type = {"base"=>"base","column_group"=>"column_group"}
+<%  v_table_type = {"base"=>"base","column_group"=>"column_group","tracker"=>"tracker"}
  v_y_n = {"Y"=>"Y","N"=>"N"}%>
 
 
@@ -48,6 +48,9 @@
 						    <%= f.label :table_editable %>: 
 							<%= f.select :editable_flag, options_for_select(v_y_n, @cg_tn.editable_flag),
 								              {:prompt => 'Select editable'}  %>							
+ </td></tr></table>
+ <table><tr><td><%= f.label :tracker_type %>:
+ 	<%= collection_select('cg_tn', :tracker_id,Trtype.where("status_flag ='Y' ").order(:description), :id, :description,  {:prompt => 'Choose tracker if table type is tracker'}, {:multiple =>  false} ) %>
  </td></tr></table>
 </div>
 <br>

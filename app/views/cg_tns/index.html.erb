@@ -9,6 +9,7 @@
     <th>Join right</th>
     <th>Display order</th>
     <th>Table type</th>
+    <th>Tracker type</th>
     <th>Table active status</th>
     <th>Table editable</th>
     <th>Owners</th>
@@ -26,6 +27,7 @@
     <td><%= cg_tn.join_right %></td>
     <td><%= cg_tn.display_order %></td>
     <td><%= cg_tn.table_type %></td>
+    <td><% if !cg_tn.tracker_id.nil? %><%= Trtype.find(cg_tn.tracker_id).description %><%end%></td>
     <td><%= cg_tn.status_flag %></td>
     <td><%= cg_tn.editable_flag %></td>
     <td><%= cg_tn.users.sort_by(&:username_name).collect {|u|  u.username_name}.join(", ").html_safe %></td>

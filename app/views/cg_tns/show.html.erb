@@ -25,6 +25,9 @@
   <b>Table type:</b>
   <%= @cg_tn.table_type %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <b>Tracker type:</b>
+  <%= Trtype.find(@cg_tn.tracker_id).description %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <b>Table active status:</b>
   <%= @cg_tn.status_flag %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
