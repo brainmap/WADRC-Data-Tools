@@ -2,9 +2,9 @@
 
 %>
 <%= form_tag  '/cg_search'  do %>
-<table  width="90%" class="tabular"><tr><th width="50"><small><small>Add to Search</small></small></th><th  nowrap align="left">Table Name</th><th>Data Dictionary</th>
-	<tr><td align="left" colspan="2"><%= submit_tag("add tables checked to search")%> </td></tr>
-    <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low' %><th align="left">Edit Table Values</th><% end %>
+<table  width="90%" class="tabular"><tr><th width="50"><small><small>Add to Search</small></small></th><th  nowrap align="left">Table Name
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= submit_tag("add tables checked to search")%> </th><th>Data Dictionary</th>
+    <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low' %><th  align="right">Edit Table Values</th><% end %>
  </tr>
 	<%    @cg_tns.each do |tn| %>
 	 <tr><td><%= hidden_field(:cg_search, "add_cg_tn_id][", :value=>tn.id.to_s) %>

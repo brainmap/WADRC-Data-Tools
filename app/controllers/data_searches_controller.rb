@@ -1701,7 +1701,7 @@ class DataSearchesController < ApplicationController
     sql = sql + " where "+ @local_conditions.uniq.join(" and ")
     sql = sql+" order by "+@order_by.join(",")
     @sql = sql
-    sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3999]+"')"
+    sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3990]+"')"
     @results_log = connection.execute(sql_log)
     # run the sql ==>@results, after some substitutions
 
