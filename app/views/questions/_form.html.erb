@@ -35,12 +35,12 @@ The question can have up to three parts.<br>
     </div>
   <% end %>
   <div class="field">
-    <%= f.label :description %><br />
+    <%= f.label :description %>&nbsp;&nbsp;&nbsp;<small><small>Use consistent desc so your questions group in dropdowns - e.g. [form]_[study abrev]_[question group]_#</small></small><br />
     <%= f.text_field :description, :size=>120 %>
   </div>
-<table width="80%" ><tr><td>
+<table width="80%" ><tr><td nowrap>
   <div class="field">
-    <%= f.label :value_link %><br />
+    <%= f.label :value_link %>&nbsp;<small><small>Normally = Appointment. What the question results are linked with.</small></small><br />
  <%= f.select :value_link, options_for_select(v_value_link, @question.value_link),
 	              {:prompt => 'Select a value link'}  %>
   </div>
@@ -53,16 +53,17 @@ The question can have up to three parts.<br>
 </td></tr></table>
 <hr width="90%" size="5" noshade>
   <div class="field">
-    <%= f.label :heading_1 %><br />
+    <%= f.label :heading_1 %>&nbsp;<small><small>Bolder font, optional, add &lt br &gt to move display down page</small></small><br />
     <%= f.text_field :heading_1 , :size=>120 %>
   </div>
   <div class="field">
-    <%= f.label :phrase_a_1 %><br />
+    <%= f.label :phrase_a_1 %>&nbsp;<small><small>Text displayed right before question.</small></small><br />
     <%= f.text_field :phrase_a_1 , :size=>120 %>
   </div>
 <table width="100%" ><tr><td>
   <div class="field">
     <%= f.label :value_type_1 %><br />
+   <small><small>entry type and size</small></small><br>
  <%= f.select :value_type_1, options_for_select(v_value_type, @question.value_type_1),
 	              {:prompt => 'Select a question type'}  %>
   </div>
@@ -75,11 +76,13 @@ The question can have up to three parts.<br>
 </td><td>	
   <div class="field">
     <%= f.label :ref_table_a_1 %><br />
+    <small><small>specifies dropdown etc. display- usually lookup_refs</small></small><br>
     <%= f.text_field :ref_table_a_1 %>
   </div>
 </td><td>
   <div class="field">
     <%= f.label :ref_table_b_1 %><br />
+    <small><small>label field from lookup_refs <%= link_to('make label/values', '/lookup_refs') %></small></small><br>
     <%= f.text_field :ref_table_b_1 %>
   </div>
 </td><td>
@@ -91,11 +94,13 @@ The question can have up to three parts.<br>
 <table width="100%" ><tr><td>
 	  <div class="field">
 	    <%= f.label :base_table_1 %><br />
+    <small><small>Table which is target of global update</small></small><br>
 	    <%= f.text_field :base_table_1 %>
 	  </div>
 	</td><td>
 		<div class="field">
 		  <%= f.label :base_column_1 %><br />
+    <small><small>Column which is target of global update</small></small><br>
 		  <%= f.text_field :base_column_1 %>
 		 </div>
 	</td><td>				
@@ -112,34 +117,36 @@ The question can have up to three parts.<br>
  </div>
 </td><td>
 	  <div class="field">
+      <small><small>Ignore - historical</small></small><br>
 	    <small><small><%= f.label :access_table_1 %></small></small><br />
 	    <%= f.text_field :access_table_1 , :size=>10 %>
 	  </div>
 	</td><td>
 		<div class="field">
+      <small><small>Ignore - historical</small></small><br>
 		  <small><small><%= f.label :access_column_1 %></small></small><br />
 		  <%= f.text_field :access_column_1, :size=>10 %>
 		 </div>
 </td></tr></table>
 <table width="100%" ><tr><td>
   <div class="field">
-    <%= f.label :phrase_b_1 %><br />
+    <%= f.label :phrase_b_1 %>&nbsp;<small><small>Text displayed right after question.</small></small><br />
     <%= f.text_field :phrase_b_1, :size=>60  %>
   </div>
 </td><td>
   <div class="field">
-    <%= f.label :phrase_c_1 %><br />
+    <%= f.label :phrase_c_1 %>&nbsp;<small><small>More text displayed right after question.</small></small><br />
     <%= f.text_field :phrase_c_1, :size=>60  %>
   </div>
 </td></tr></table>
 <table width="100%" ><tr><td>
   <div class="field">
-    <%= f.label :js_1 %><br />
+    <%= f.label :js_1 %>&nbsp;&nbsp;<small><small>e.g. numeric , other javascript checks can be added</small></small><br />
     <%= f.text_field :js_1, :size=>60  %>
   </div>
 </td><td>
   <div class="field">
-    <%= f.label :prompt_1 %><br />
+    <%= f.label :prompt_1 %>&nbsp;&nbsp;<small><small>phrase in dropdown</small></small><br />
     <%= f.text_field :prompt_1, :size=>60  %>
   </div>
 </td></tr></table>
@@ -150,27 +157,28 @@ The question can have up to three parts.<br>
 	  </div>
 	</td><td>
 	  <div class="field">
-	    <%= f.label :col_span_1 %><br />
+	    <%= f.label :col_span_1 %>&nbsp;&nbsp;<small><small>Ignore - not implemented</small></small><br />
 	    <%= f.text_field :col_span_1 %>
 	  </div>
 	</td><td>
 		<div class="field">
-		  <%= f.label :align_1 %><br />
+		  <%= f.label :align_1 %>&nbsp;&nbsp;<small><small>Ignore - not implemented</small></small><br />
 		  <%= f.text_field :align_1 %>
 		 </div>
 	</td></tr></table>
 <hr width="90%" size="5" noshade>
   <div class="field">
-    <%= f.label :heading_2 %><br />
+    <%= f.label :heading_2 %>&nbsp;<small><small>Bolder font, optional, add &lt br &gt to move display down page</small></small><br />
     <%= f.text_field :heading_2 , :size=>120 %>
   </div>
   <div class="field">
-    <%= f.label :phrase_a_2 %><br />
+    <%= f.label :phrase_a_2 %>&nbsp;<small><small>Text displayed right before question.</small></small><br />
     <%= f.text_field :phrase_a_2 , :size=>120 %>
   </div>
 <table width="100%" ><tr><td>
   <div class="field">
     <%= f.label :value_type_2 %><br />
+   <small><small>entry type and size</small></small><br>
  <%= f.select :value_type_2, options_for_select(v_value_type, @question.value_type_2),
 	              {:prompt => 'Select a 2nd question type'}  %>
   </div>
@@ -183,11 +191,13 @@ The question can have up to three parts.<br>
 </td><td>
   <div class="field">
     <%= f.label :ref_table_a_2 %><br />
+    <small><small>specifies dropdown etc. display- usually lookup_refs</small></small><br>
     <%= f.text_field :ref_table_a_2 %>
   </div>
 </td><td>
   <div class="field">
     <%= f.label :ref_table_b_2 %><br />
+    <small><small>label field from lookup_refs <%= link_to('make label/values', '/lookup_refs') %></small></small><br>
     <%= f.text_field :ref_table_b_2 %>
   </div>
 </td><td>
@@ -199,11 +209,13 @@ The question can have up to three parts.<br>
 <table width="100%" ><tr><td>
 	  <div class="field">
 	    <%= f.label :base_table_2 %><br />
+    <small><small>Table which is target of global update</small></small><br>
 	    <%= f.text_field :base_table_2 %>
 	  </div>
 	</td><td>
 		<div class="field">
 		  <%= f.label :base_column_2 %><br />
+    <small><small>Column which is target of global update</small></small><br>
 		  <%= f.text_field :base_column_2 %>
 		 </div>
 	</td><td>				
@@ -220,34 +232,36 @@ The question can have up to three parts.<br>
  </div>
 </td><td>
 	  <div class="field">
+      <small><small>Ignore - historical</small></small><br>
 	    <small><small><%= f.label :access_table_2 %></small></small><br />
 	    <%= f.text_field :access_table_2, :size=>10 %>
 	  </div>
 	</td><td>
 		<div class="field">
+      <small><small>Ignore - historical</small></small><br>
 		  <small><small><%= f.label :access_column_2 %></small></small><br />
 		  <%= f.text_field :access_column_2, :size=>10 %>
 		 </div>
 </td></tr></table>
 <table width="100%" ><tr><td>
   <div class="field">
-    <%= f.label :phrase_b_2 %><br />
+    <%= f.label :phrase_b_2 %>&nbsp;<small><small>Text displayed right after question.</small></small><br />
     <%= f.text_field :phrase_b_2, :size=>60 %>
   </div>
 </td><td>
   <div class="field">
-    <%= f.label :phrase_c_2 %><br />
+    <%= f.label :phrase_c_2 %>&nbsp;<small><small>More text displayed right after question.</small></small><br />
     <%= f.text_field :phrase_c_2, :size=>60 %>
   </div>
 </td></tr></table>
 <table width="100%" ><tr><td>
   <div class="field">
-    <%= f.label :js_2 %><br />
+    <%= f.label :js_2 %>&nbsp;&nbsp;<small><small>e.g. numeric , other javascript checks can be added</small></small><br />
     <%= f.text_field :js_2, :size=>60 %>
   </div>
 </td><td>
   <div class="field">
-    <%= f.label :prompt_2 %><br />
+    <%= f.label :prompt_2 %>&nbsp;&nbsp;<small><small>phrase in dropdown</small></small><br />
     <%= f.text_field :prompt_2, :size=>60 %>
   </div>
 </td></tr></table>
@@ -258,27 +272,28 @@ The question can have up to three parts.<br>
 	  </div>
 	</td><td>
 	  <div class="field">
-	    <%= f.label :col_span_2 %><br />
+	    <%= f.label :col_span_2 %>&nbsp;&nbsp;<small><small>Ignore - not implemented</small></small><br />
 	    <%= f.text_field :col_span_2 %>
 	  </div>
 	</td><td>
 		<div class="field">
-		  <%= f.label :align_2 %><br />
+		  <%= f.label :align_2 %>&nbsp;&nbsp;<small><small>Ignore - not implemented</small></small><br />
 		  <%= f.text_field :align_2 %>
 		 </div>
 	</td></tr></table>
 <hr width="90%" size="5" noshade>
   <div class="field">
-    <%= f.label :heading_3 %><br />
+    <%= f.label :heading_3 %>&nbsp;<small><small>Bolder font, optional, add &lt br &gt to move display down page</small></small><br />
     <%= f.text_field :heading_3 , :size=>120 %>
   </div>
   <div class="field">
-    <%= f.label :phrase_a_3 %><br />
+    <%= f.label :phrase_a_3 %>&nbsp;<small><small>Text displayed right before question.</small></small><br />
     <%= f.text_field :phrase_a_3, :size=>120  %>
   </div>
 <table width="100%" ><tr><td>
   <div class="field">
     <%= f.label :value_type_3 %><br />
+   <small><small>entry type and size</small></small><br>
  <%= f.select :value_type_3, options_for_select(v_value_type, @question.value_type_3),
 	              {:prompt => 'Select a 3rd question type'}  %>
   </div>
@@ -291,11 +306,13 @@ The question can have up to three parts.<br>
 	</td><td>
   <div class="field">
     <%= f.label :ref_table_a_3 %><br />
+    <small><small>specifies dropdown etc. display- usually lookup_refs</small></small><br>
     <%= f.text_field :ref_table_a_3 %>
   </div>
 </td><td>
   <div class="field">
     <%= f.label :ref_table_b_3 %><br />
+    <small><small>label field from lookup_refs <%= link_to('make label/values', '/lookup_refs') %></small></small><br>
     <%= f.text_field :ref_table_b_3 %>
   </div>
 </td><td>
@@ -307,11 +324,13 @@ The question can have up to three parts.<br>
 <table width="100%" ><tr><td>
 	  <div class="field">
 	    <%= f.label :base_table_3 %><br />
+    <small><small>Table which is target of global update</small></small><br>
 	    <%= f.text_field :base_table_3 %>
 	  </div>
 	</td><td>
 		<div class="field">
 		  <%= f.label :base_column_3 %><br />
+    <small><small>Column which is target of global update</small></small><br>
 		  <%= f.text_field :base_column_3 %>
 		 </div>
 	</td><td>				
@@ -328,34 +347,36 @@ The question can have up to three parts.<br>
  </div>
 </td><td>
 	  <div class="field">
+      <small><small>Ignore - historical</small></small><br>
 	    <small><small><%= f.label :access_table_3 %></small></small><br />
 	    <%= f.text_field :access_table_3 , :size=>10%>
 	  </div>
 	</td><td>
 		<div class="field">
+      <small><small>Ignore - historical</small></small><br>
 		  <small><small><%= f.label :access_column_3 %></small></small><br />
 		  <%= f.text_field :access_column_3, :size=>10 %>
 		 </div>
 	</td></tr></table>
 <table width="100%" ><tr><td>
   <div class="field">
-    <%= f.label :phrase_b_3 %><br />
+    <%= f.label :phrase_b_3 %>&nbsp;<small><small>Text displayed right after question.</small></small><br />
     <%= f.text_field :phrase_b_3, :size=>60 %>
   </div>
 </td><td>
   <div class="field">
-    <%= f.label :phrase_c_3 %><br />
+    <%= f.label :phrase_c_3 %>&nbsp;<small><small>More text displayed right after question.</small></small><br />
     <%= f.text_field :phrase_c_3 , :size=>60%>
   </div>
 </td></tr></table>
 <table width="100%" ><tr><td>
   <div class="field">
-    <%= f.label :js_3 %><br />
+    <%= f.label :js_3 %>&nbsp;&nbsp;<small><small>e.g. numeric , other javascript checks can be added</small></small><br />
     <%= f.text_field :js_3, :size=>60 %>
   </div>
 </td><td>
   <div class="field">
-    <%= f.label :prompt_3 %><br />
+    <%= f.label :prompt_3 %>&nbsp;&nbsp;<small><small>phrase in dropdown</small></small><br />
     <%= f.text_field :prompt_3 , :size=>60%>
   </div>
 </td></tr></table>
@@ -366,21 +387,21 @@ The question can have up to three parts.<br>
 	  </div>
 	</td><td>
 	  <div class="field">
-	    <%= f.label :col_span_3 %><br />
+	    <%= f.label :col_span_3 %>&nbsp;&nbsp;<small><small>Ignore - not implemented</small></small><br />
 	    <%= f.text_field :col_span_3 %>
 	  </div>
 	</td><td>
 		<div class="field">
-		  <%= f.label :align_3 %><br />
+		  <%= f.label :align_3 %>&nbsp;&nbsp;<small><small>Ignore - not implemented</small></small><br />
 		  <%= f.text_field :align_3 %>
 		 </div>
 	</td></tr></table>
 <hr width="90%" size="5" noshade>
   <div class="field">
-    <%= f.label :parent_question_id %><br />
+    <%= f.label :parent_question_id %>&nbsp;<small><small>Not really implemented - ignore.</small></small>&nbsp;&nbsp;&nbsp;
 <%= collection_select :question, :parent_question_id, Question.all.sort_by(&:description), :id, :description,{:prompt => 'Select a Parent Question'} %>
   </div>
-
+<br>
   <div class="actions">
     <%= f.submit %>
   </div>

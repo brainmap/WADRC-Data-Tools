@@ -1,5 +1,7 @@
+<table width="90%" border="2"><tr><td>
 
 <H2>Unlinked Questions</H2>
+This is for linking a new question to a form.
 <%= form_for(@questionform_question) do |f| %>
   <% if @questionform_question.errors.any? %>
     <div id="error_explanation">
@@ -31,9 +33,11 @@
     <%= f.submit %>
   </div>
 <% end %>
-
-<br><br><br><br><br><br>
-<H3>Full list of Questions</H3>
+<br><br><br>
+</td></tr>
+<tr><td>
+<H3>Full list of Questions and EDITs</H3>
+This is for editing the display order of a question already linked to a form.
 <%= form_for(@questionform_question) do |f| %>
   <% if @questionform_question.errors.any? %>
     <div id="error_explanation">
@@ -64,3 +68,5 @@
     <%= f.submit %>
   </div>
 <% end %>
+
+</td></tr></table>

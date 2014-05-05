@@ -3,7 +3,7 @@ class QuestionformsController < ApplicationController
   # GET /questionforms
   # GET /questionforms.xml
   def index
-    @questionforms = Questionform.all(:order =>'entrance_page_type,tab_type,display_order,description')
+    @questionforms = Questionform.all(:order =>'status_flag desc, entrance_page_type,tab_type,display_order,description')
 
     respond_to do |format|
       format.html # index.html.erb
@@ -159,6 +159,7 @@ class QuestionformsController < ApplicationController
         else
           @q_data.save
         end
+        # global_update_insert further down
         if @question.global_update_1 == "Y" and  !params["value_1"][q_id].blank? 
           sql = "update q_data set value_1 = '"+@q_data.value_1+"'
                    where question_id = "+@q_data.question_id.to_s+"
@@ -242,7 +243,95 @@ class QuestionformsController < ApplicationController
               connection = ActiveRecord::Base.connection();        
               results = connection.execute(sql)
           end
+        end  
+        # ALSO NEED date and by who
+        if @question.global_update_insert_1 == "Y" and  !params["value_1"][q_id].blank? 
+          sql = "update q_data set value_1 = '"+@q_data.value_1+"'
+                   where question_id = "+@q_data.question_id.to_s+"
+                   and value_link ="+@q_data.value_link.to_s
+          connection = ActiveRecord::Base.connection();        
+          results = connection.execute(sql)
+                   
+          if !@question.base_table_1.blank? and !@question.base_column_1.blank?
+            if @question.base_table_1 == "appointments" or @question.base_table_1 == "participants" 
+              if @q_data.value_1 == ""    # problem on unique index on wrapnum and reggieid
+                sql ="update  "+@question.base_table_1+"
+                    set "+@question.base_table_1+"."+@question.base_column_1+" = NULL 
+                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s        
+               else
+                sql ="update  "+@question.base_table_1+"
+                    set "+@question.base_table_1+"."+@question.base_column_1+" = '"+@q_data.value_1+"'
+                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s   
+              end                                         
+            else                        
+            sql ="update  "+@question.base_table_1+"
+                  set "+@question.base_table_1+"."+@question.base_column_1+" = '"+@q_data.value_1+"'
+                  where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+            end
+              connection = ActiveRecord::Base.connection();        
+              results = connection.execute(sql)
+          end
+        end
+        
+        if @question.global_update_insert_2 == "Y" and  !params["value_2"][q_id].blank? 
+          sql = "update q_data set value_2 = '"+@q_data.value_2+"'
+                   where question_id = "+@q_data.question_id.to_s+"
+                   and value_link ="+@q_data.value_link.to_s
+          connection = ActiveRecord::Base.connection();        
+          results = connection.execute(sql)
+                   
+          if !@question.base_table_2.blank? and !@question.base_column_2.blank?
+            if @question.base_table_2 == "appointments" or @question.base_table_2 == "participants" 
+              if @q_data.value_2 == ""   # problem on unique index on wrapnum and reggieid
+                sql ="update  "+@question.base_table_2+"
+                      set "+@question.base_table_2+"."+@question.base_column_2+" = NULL
+                      where "+@question.value_link+"s.id = "+@q_data.value_link.to_s
+              else              
+                sql ="update  "+@question.base_table_2+"
+                    set "+@question.base_table_2+"."+@question.base_column_2+" = '"+@q_data.value_2+"'
+                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s 
+              end             
+            else
+            sql ="update  "+@question.base_table_2+"
+                  set "+@question.base_table_2+"."+@question.base_column_2+" = '"+@q_data.value_2+"'
+                  where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+            end
+              connection = ActiveRecord::Base.connection();      
+              results = connection.execute(sql)
+          end
         end        
+        
+        if @question.global_update_insert_3 == "Y" and  !params["value_3"][q_id].blank? 
+          sql = "update q_data set value_3 = '"+@q_data.value_3+"'
+                   where question_id = "+@q_data.question_id.to_s+"
+                   and value_link ="+@q_data.value_link.to_s
+          connection = ActiveRecord::Base.connection();        
+          results = connection.execute(sql)
+                   
+          if !@question.base_table_3.blank? and !@question.base_column_3.blank?
+            if @question.base_table_3 == "appointments" or @question.base_table_3 == "participants" 
+              if @q_data.value_3 == ""  # problem on unique index on wrapnum and reggieid
+                sql ="update  "+@question.base_table_3+"
+                    set "+@question.base_table_3+"."+@question.base_column_3+" = NULL
+                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s              
+                
+              else              
+                sql ="update  "+@question.base_table_3+"
+                    set "+@question.base_table_3+"."+@question.base_column_3+" = '"+@q_data.value_3+"'
+                    where "+@question.value_link+"s.id = "+@q_data.value_link.to_s 
+              end             
+            else
+            sql ="update  "+@question.base_table_3+"
+                  set "+@question.base_table_3+"."+@question.base_column_3+" = '"+@q_data.value_3+"'
+                  where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+             end
+              connection = ActiveRecord::Base.connection();        
+              results = connection.execute(sql)
+          end
+        end 
+
+
+
        end  
       end
     end

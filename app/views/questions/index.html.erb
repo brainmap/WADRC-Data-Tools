@@ -5,7 +5,7 @@
 
  <%= form_tag '/questions/index' do %>
   <% v_form_id_array =[] ; v_form_id_array.push(12); v_form_id_array.push(13) ; v_form_id_array.push(14) %>
-  <%= collection_select :questionform_question,  :questionform_id, Questionform.where("id in (12,13,14)").order(:entrance_page_type,:display_order,:description), :id, :description,{:prompt => 'Select a Form to show the linked Questions'} %>
+  <%= collection_select :questionform_question,  :questionform_id, Questionform.where("status_flag in ('Y')").order(:entrance_page_type,:display_order,:description), :id, :description,{:prompt => 'Select a Form to show the linked Questions'} %>
   <br>
   <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
 <%= collection_select('questionform_question[scan_procedure_id]', :id,ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'Choose scan procedure'}, {:multiple =>  false} ) %>
@@ -24,6 +24,7 @@
     <th></th>
     <th></th>
     <th></th>
+    <th>Display Order(s)</th>
 	<th>Description</th>
     <th>Value Link</th>
     <th>Heading 1</th>
@@ -96,7 +97,13 @@
     <td><%= link_to 'Edit', edit_question_path(question) %></td>
     <td><%= link_to 'Destroy', question, :confirm => 'Are you sure?', :method => :delete %></td>
     <td><%= link_to 'Clone', '/questions/clone/'+question.id.to_s %></td>
-    <td><%= question.description %></td>
+    <td><% v_questionform_question = QuestionformQuestion.where("question_id in (?)",question.id) 
+            v_qq_display_order_array = []
+            v_questionform_question.each do |qq| 
+                  v_qq_display_order_array.push(qq.display_order) 
+            end %>
+            <%= v_qq_display_order_array.join(",") %></td>
+    <td align="left"><%= question.description %></td>
     <td><%= question.value_link %></td>
     <td><%= question.heading_1 %></td>
     <td><%= question.phrase_a_1 %></td>
