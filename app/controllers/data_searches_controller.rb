@@ -827,7 +827,7 @@ class DataSearchesController < ApplicationController
       @conditions = [] # for the q_data_search
       @conditions_bak = []
       @local_tables =[] # need to add outer join to table, -- 
-      @local_tables_alias_hash =Hash.new # need to make pet tracer select 
+      @local_tables_alias_hash =Hash.new # need to make pet tracer select -- tracker?
       @table_types =[] 
       @tables_left_join_hash = Hash.new
       @joins = [] # just inner joins
@@ -1068,6 +1068,62 @@ class DataSearchesController < ApplicationController
                      @local_tables_alias_hash[@cg_tn.tn] = @cg_tn.alias
                      v_cg_tn_array.push(@cg_tn)
                 end
+            elsif @cg_tn.table_type == "tracker"
+                     @cg_tn.alias = @cg_tn.tn
+    v_tracker_column_array = ["scan_procedures_vgroups.vgroup_id",   "trfiles.subjectid","trfiles.secondary_key","trfiles.enrollment_id","trfiles.scan_procedure_id", "trfiles.file_completed_flag","trfiles.qc_value","trfiles.qc_notes"]
+    # just putting the tables in with common -- problem with left joins and commas from the array join -- need trfiles last in tn list
+    v_tracker_table_array = ["scan_procedures_vgroups,enrollment_vgroup_memberships,trfiles"]
+    v_tracker_table_conditions =[" trfiles.trtype_id = "+@cg_tn.tracker_id.to_s+" ", "scan_procedures_vgroups.scan_procedure_id = trfiles.scan_procedure_id",
+                             "enrollment_vgroup_memberships.enrollment_id = trfiles.enrollment_id", "scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id"]
+
+    @tractiontypes = Tractiontype.where("trtype_id in (?)",@cg_tn.tracker_id).where("tractiontypes.form_display_label is not null and tractiontypes.form_display_label >''" ).order(:display_order)
+    @tractiontypes.each do |act|
+        v_value_sql = ""
+        # ("trfiles.id = v_"+act.id.to_s+".trfile_id")
+        v_col = (act.form_display_label).gsub(/ /,"").gsub(/\'/,"_").gsub(/\"/,"_").gsub(/\-/,"_").downcase+"_" 
+        v_tracker_column_array.push("v_"+act.id.to_s+"."+v_col) 
+        # need last edit
+        if !act.ref_table_b_1.blank?
+          v_value_sql = "LEFT JOIN  (select "+act.ref_table_a_1+".description "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1+" 
+                      where trfile2.id = tredits.trfile_id 
+                      and tredits.id = tredit_actions.tredit_id 
+                      and tredit_actions.tractiontype_id = "+act.id.to_s+" 
+                      and "+act.ref_table_a_1+".label = '"+act.ref_table_b_1+"'
+                      and tredit_actions.value = "+act.ref_table_a_1+".ref_value
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
+         v_tracker_table_array.push(v_value_sql)
+
+        elsif !act.ref_table_a_1.blank?
+          v_value_sql = "LEFT JOIN  (select "+act.ref_table_a_1.pluralize.underscore+".description "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1.pluralize.underscore+" 
+                      where trfile2.id = tredits.trfile_id 
+                      and tredits.id = tredit_actions.tredit_id 
+                      and tredit_actions.tractiontype_id = "+act.id.to_s+" 
+                      and "+act.ref_table_a_1+".label = '"+act.ref_table_b_1+"'
+                      and tredit_actions.value = "+act.ref_table_a_1.pluralize.underscore+".id
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
+         v_tracker_table_array.push(v_value_sql)
+
+        else
+          v_value_sql = "LEFT JOIN (select tredit_actions.value "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions 
+                      where trfile2.id = tredits.trfile_id 
+                      and tredits.id = tredit_actions.tredit_id 
+                      and tredit_actions.tractiontype_id = "+act.id.to_s+" 
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
+         v_tracker_table_array.push(v_value_sql)
+        end
+    end
+    # using LEFT JOIN
+    v_tracker_sql = "( select "+v_tracker_column_array.join(',')+" from "+v_tracker_table_array.join('   ')+" where "+v_tracker_table_conditions.join(' and ') +" ) "
+
+
+
+
+                     @cg_tn.tn = v_tracker_sql +@cg_tn.alias
+                     @cg_tn.join_right = @cg_tn.alias+".vgroup_id = vgroups.id"
+                     @cg_tn.join_left ="LEFT JOIN "+v_tracker_sql +"  "+@cg_tn.alias+" on  vgroups.id = "+@cg_tn.alias+".vgroup_id"
+                     @local_tables_alias_hash[@cg_tn.tn] = @cg_tn.alias
+                     v_cg_tn_array.push(@cg_tn)                 
+
             else
                 @cg_tn = CgTn.find(v_tn_id)  
                 @cg_tn.alias = @cg_tn.tn
