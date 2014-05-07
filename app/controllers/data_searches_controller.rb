@@ -1673,7 +1673,7 @@ class DataSearchesController < ApplicationController
              if !@cg_query_tn_not_in_hash[v_tn_id].nil?
                             v_not_in_condition = " vgroups.id not in ("+@cg_query_tn_not_in_hash[v_tn_id]+")"
                             @local_conditions.push(v_not_in_condition)
-                            params["search_criteria"] = params["search_criteria"] +", NOT IN ("+@cg_query_tn_not_in_hash[v_tn_id]+")"
+                            params["search_criteria"] = params["search_criteria"] +", NOT IN ("+CgTn.find(v_tn_id).tn+")"
              end  
 
           end 

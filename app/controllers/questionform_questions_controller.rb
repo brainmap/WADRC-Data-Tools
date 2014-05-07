@@ -4,29 +4,27 @@ class QuestionformQuestionsController < ApplicationController
   # GET /questionform_questions.xml
   def index
     # default to most recently edited form
-    if params[:questionform_question].blank?
+    if params[:questionform_question].blank? or params[:questionform_question] == ''
       @questionform_questions = QuestionformQuestion.find_by_sql("select questionforms.description,questionform_questions.id,questionform_questions.questionform_id,questionform_questions.question_id,
-             questionform_questions.display_order
-             from questionform_questions, questionforms where questionform_questions.questionform_id=questionforms.id
+             questionform_questions.display_order from questionform_questions, questionforms where questionform_questions.questionform_id=questionforms.id
              and questionform_questions.questionform_id in (select distinct questionform_id from questionform_questions where updated_at in (select max(updated_at) from questionform_questions))
-              order by questionforms.description, questionform_questions.display_order ")
+              order by questionform_questions.display_order,questionforms.description ")
     else  
       @questionform_questions = QuestionformQuestion.find_by_sql("select questionforms.description,questionform_questions.id,questionform_questions.questionform_id,questionform_questions.question_id,
-             questionform_questions.display_order
-             from questionform_questions, questionforms where questionform_questions.questionform_id=questionforms.id
+             questionform_questions.display_order from questionform_questions, questionforms where questionform_questions.questionform_id=questionforms.id
              and questionform_questions.questionform_id in ("+params[:questionform_question][:questionform_id]+")
-              order by questionforms.description, questionform_questions.display_order ")
+              order by  questionform_questions.display_order,questionforms.description ")
     end
   
-    @questionform_questions = QuestionformQuestion.all
+    #@questionform_questions = QuestionformQuestion.all
         if !params[:questionform_question].nil? 
          if (!params[:questionform_question][:questionform_id].nil?  and !params[:questionform_question][:questionform_id].blank? and !params[:questionform_question][:scan_procedure_id].nil?   and !params[:questionform_question][:scan_procedure_id][:id].nil? and !params[:questionform_question][:scan_procedure_id][:id].blank?  )
-             @questionform_questions = QuestionformQuestion.where("question_id in ( select question_id from questionform_questions where questionform_id in (?))",params[:questionform_question][:questionform_id]).where("question_id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id])      
+             @questionform_questions = QuestionformQuestion.where("question_id in ( select question_id from questionform_questions where questionform_id in (?))",params[:questionform_question][:questionform_id]).where("question_id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id]).order(:display_order)      
          elsif !params[:questionform_question][:questionform_id].nil? and params[:questionform_question][:questionform_id] > ''
-             @questionform_questions = QuestionformQuestion.where("question_id in ( select question_id from questionform_questions where questionform_id in (?))",params[:questionform_question][:questionform_id])
+             @questionform_questions = QuestionformQuestion.where("question_id in ( select question_id from questionform_questions where questionform_id in (?))",params[:questionform_question][:questionform_id]).order(:display_order) 
            
          elsif !params[:questionform_question][:scan_procedure_id].nil? and !params[:questionform_question][:scan_procedure_id][:id].nil? and params[:questionform_question][:scan_procedure_id][:id] > ''
-             @questionform_questions = QuestionformQuestion.where("question_id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id])
+             @questionform_questions = QuestionformQuestion.where("question_id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id]).order(:display_order) 
 
          end         
 

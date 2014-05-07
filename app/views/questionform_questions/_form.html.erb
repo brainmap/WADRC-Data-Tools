@@ -26,7 +26,7 @@ This is for linking a new question to a form.
 
   <div class="field">
     <b><%= f.label :display_order %>:</b><br />
-    <%= f.text_field :display_order %> The display order will autopopulate with the next display order for the selected form.
+    <%= f.text_field :display_order , :onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}" %> The display order will autopopulate with the next display order for the selected form.
   </div>
 
   <div class="actions">
@@ -61,7 +61,7 @@ This is for editing the display order of a question already linked to a form.
   </div><br>
   <div class="field">
     <b><%= f.label :display_order %>:</b><br />
-    <%= f.number_field :display_order, :onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}" %> The display order will autopopulate with the next display order for the selected form.
+    <%= f.number_field :display_order , :onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}" %> The display order will autopopulate with the next display order for the selected form.
   </div>
 
   <div class="actions">
