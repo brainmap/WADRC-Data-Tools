@@ -100,6 +100,10 @@ v_user = v_user.gsub("\n","")
       v_shared.run_fdg_status()
       puts " after call to fdg_status"
 
+  elsif v_value_1 == "fjell_20140506_upload"
+      v_shared = Shared.new
+      v_shared.run_fjell_20140506_upload()  
+
   elsif v_value_1 == "fs_manual_edits_to_good2go"
       v_shared = Shared.new
       v_shared.run_fs_manual_edits_to_good2go()
@@ -115,6 +119,10 @@ v_user = v_user.gsub("\n","")
   elsif v_value_1 == "goveas_20131031_upload"
       v_shared = Shared.new
       v_shared.run_goveas_upload()     
+
+  elsif v_value_1 == "hyunwoo_20140520_upload"
+      v_shared = Shared.new
+      v_shared.run_hyunwoo_20140520_upload()   
       
   elsif v_value_1 == "lst_116_status"  # getting lst_122 and lst_116 
       v_shared = Shared.new
@@ -139,10 +147,6 @@ v_user = v_user.gsub("\n","")
   elsif v_value_1 == "pib_cereb_tac"
       v_shared = Shared.new
       v_shared.run_pib_cereb_tac()
-      
-  elsif v_value_1 == "selley_20130906_upload"
-      v_shared = Shared.new
-      v_shared.run_selley_20130906_upload()  
 
   elsif v_value_1 == "selley_20130906_upload"
       v_shared = Shared.new
