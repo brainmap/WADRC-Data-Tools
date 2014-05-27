@@ -1759,7 +1759,20 @@ class DataSearchesController < ApplicationController
     sql = sql + " where "+ @local_conditions.uniq.join(" and ")
     sql = sql+" order by "+@order_by.join(",")
     @sql = sql
-    sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3990]+"')"
+    if !sql.gsub("'","''")[11971..15960].nil?
+       sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text,sql_text_2,sql_text_3,sql_text_4)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3990]+"','"+sql.gsub("'","''")[3991..7980]+"','"+sql.gsub("'","''")[7981..11970]+"','"+sql.gsub("'","''")[11971..15960]+"')"
+     elsif !sql.gsub("'","''")[7981..11970].nil?
+       sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text,sql_text_2,sql_text_3)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3990]+"','"+sql.gsub("'","''")[3991..7980]+"','"+sql.gsub("'","''")[7981..11970]+"')"
+     elsif !sql.gsub("'","''")[3991..7980].nil?
+        sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text,sql_text_2)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3990]+"','"+sql.gsub("'","''")[3991..7980]+"'')"
+     else
+        sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3990]+"')"
+     end
+       
+
+
+
+
     @results_log = connection.execute(sql_log)
     # run the sql ==>@results, after some substitutions
 
