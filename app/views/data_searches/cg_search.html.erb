@@ -254,6 +254,20 @@ v_tn_cn_searchable_hash = []
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<% end %>
 	</td></tr>
+<% elsif tn.common_name == "Participants"%>
+<tr><td colspan="5">Participant Centric output:&nbsp;&nbsp;&nbsp;
+           <% 
+              v_participant_centric = "FALSE"
+              if @cg_query.participant_centric == "1" # should have been setting up above
+                  v_participant_centric = "TRUE"
+                  params[:cg_search][:participant_centric] = "1"
+              end
+              if !params[:cg_search].blank? and !params[:cg_search][:participant_centric].blank? and params[:cg_search][:participant_centric] == "1"
+                        v_participant_centric = "TRUE"
+              end
+           %>
+<%= check_box_tag "participant_centric", "1", v_participant_centric == "FALSE" ? FALSE : TRUE , :name => "cg_search[participant_centric]" %>
+	</td></tr>
 <% end %>
              <tr><td><%= hidden_field(:cg_search, "tn_id][", :value=>tn.id.to_s) %>
   <%= check_box_tag "include_tns", "1", v_include_tn == "FALSE" ? FALSE : TRUE , :name => "cg_search[include_tn]["+tn.id.to_s+"]", :onclick =>"checkbox_cascade(this,'"+tn.id.to_s+"')"%></td>
@@ -506,7 +520,9 @@ v_tn_cn_searchable_hash = []
             <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
            <% end %>
        <% end %>
+       <% if  @cg_query.participant_centric != "1" %>
       <%= submit_tag 'export longitudinal file'%>  
+        <% end %>
 
 <% end %>
 
@@ -559,7 +575,15 @@ v_tn_cn_searchable_hash = []
 		
 	</td></tr></tfoot>
 		 <% @results.each do |result| %>
-		    <%  vgroup = Vgroup.find(result[1])
+		    <%  
+         if @cg_query.participant_centric == "1" %>
+           <tr>
+           	<% for i in 0..@column_number-1  # results is an array of arrays%>
+			      <td><%= result[i] %></td>
+            <% end %>
+           </tr>
+        <% else
+		    vgroup = Vgroup.find(result[1])
 		
 		      #result.delete_at(@local_column_headers.size-1) # *.id used to get the * object, not want to display %>
 			<tr>
@@ -575,7 +599,9 @@ v_tn_cn_searchable_hash = []
                 <% end %>
 			   <% end %>
 		    </tr>
-		 <% end %>
+		 <% 
+            end
+		 end %>
 	</table>
 
 

@@ -821,6 +821,7 @@ class DataSearchesController < ApplicationController
       v_debug = "N" # Y"
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       # make the sql -- start with base 
+
       @local_column_headers =["Date (vgroup)","Protocol","Enumber","RMR"]
       @local_fields = []
       @local_conditions =[]
@@ -932,6 +933,7 @@ class DataSearchesController < ApplicationController
          @cg_query.rmr = params[:cg_search][:rmr]
          @cg_query.enumber = params[:cg_search][:enumber]
          @cg_query.enumber_not_in = params[:cg_search][:enumber_not_in]
+         @cg_query.participant_centric = params[:cg_search][:participant_centric]
          @cg_query.gender = params[:cg_search][:gender]
          @cg_query.min_age = params[:cg_search][:min_age]
          @cg_query.max_age = params[:cg_search][:max_age]
@@ -1713,9 +1715,13 @@ class DataSearchesController < ApplicationController
         @local_tables.push("scan_procedures_vgroups")
         @local_tables_alias_hash["scan_procedures_vgroups"]
         @fields_front =[]
-        @fields_front.push("vgroups.id vgroup_id")
-        @fields_front.push("vgroups.vgroup_date")
-        @fields_front.push("vgroups.rmr")
+        if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0
+           # do not want to add vgroup centric columns
+        else
+            @fields_front.push("vgroups.id vgroup_id")
+            @fields_front.push("vgroups.vgroup_date")
+            @fields_front.push("vgroups.rmr")
+        end
         @local_fields = @fields_front.concat(@local_fields)
         #@local_conditions.push("vgroups.id = appointments.vgroup_id")
         @local_conditions.push("scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") ")
@@ -1727,6 +1733,12 @@ class DataSearchesController < ApplicationController
      
         #run_search_q_data tn_cn_id/tn_id in (686/676,687/677,688/688) common_name = "question fields" vs run_search if 
       end     
+      if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0
+          @local_column_headers.delete("Date (vgroup)")
+          @local_column_headers.delete("Protocol")
+          @local_column_headers.delete("Enumber")
+          @local_column_headers.delete("RMR")
+      end
       @column_number =   @local_column_headers.size
       if v_debug == "Y"
           puts "hhhhhhhhh line 1592"
@@ -1846,7 +1858,7 @@ class DataSearchesController < ApplicationController
     @temp_results.each do |var|
       @temp = []
       @temp[0] = var[1] # want appt date first
-      if @html_request =="N" 
+      if @html_request =="N"  and @local_fields.length() > 0 and (@cg_query.participant_centric.nil? or (!@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1" ) )
           sql_sp = "SELECT distinct scan_procedures.codename 
                 FROM scan_procedures, scan_procedures_vgroups
                 WHERE scan_procedures.id = scan_procedures_vgroups.scan_procedure_id
@@ -1862,19 +1874,24 @@ class DataSearchesController < ApplicationController
           @temp[2] =@results_enum.to_a.join(", ")
           
       else  # need to only get the sp and enums which are displayed - and need object to make link
-
-        @temp[1] = var[0].to_s
-        @temp[2] = var[0].to_s
-
+        if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1" and  @local_fields.length() > 0 
+           # not do anything
+        else
+           @temp[1] = var[0].to_s
+           @temp[2] = var[0].to_s
+        end
 
       end 
       @temp_vgroupid =[]
       if !params[:longitudinal].nil?  and params[:longitudinal] == "Y"
           @temp_vgroupid[0] =  var[0].to_s
       end
-      var.delete_at(0) # get rid of vgroup_id
-      var.delete_at(0) # get rid of extra copy of appt date
-     
+      if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1" and  @local_fields.length() > 0
+        @temp = []
+      else
+        var.delete_at(0) # get rid of vgroup_id
+        var.delete_at(0) # get rid of extra copy of appt date
+      end
       if !params[:longitudinal].nil?  and params[:longitudinal] == "Y"
         # need vgroup_id in logintudinal to get participant_id or enrollment_id 
         @temp_row = @temp_vgroupid + @temp + var
