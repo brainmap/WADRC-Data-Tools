@@ -104,17 +104,17 @@ v_user = v_user.gsub("\n","")
       v_shared = Shared.new
       v_shared.run_fjell_20140506_upload()  
 
-  elsif v_value_1 == "fs_manual_edits_to_good2go"
+  elsif v_value_1 == "fs_move_qc_pass_to_good2go"
       v_shared = Shared.new
-      v_shared.run_fs_manual_edits_to_good2go()
+      v_shared.run_fs_move_qc_pass_to_good2go()
 
-  elsif v_value_1 == "fs_to_good2go"
+  elsif v_value_1 == "fs_move_edit_file_complete_to_good2go"
       v_shared = Shared.new
-      v_shared.run_fs_to_good2go()  
+      v_shared.run_fs_move_edit_file_complete_to_good2go()  
 
-   elsif v_value_1 == "fs_manual_edits_Y_N"
+   elsif v_value_1 == "fs_Y_N_manual_edits"
       v_shared = Shared.new
-      v_shared.run_fs_manual_edits_Y_N()
+      v_shared.run_fs_Y_N_manual_edits()
 
   elsif v_value_1 == "goveas_20131031_upload"
       v_shared = Shared.new
@@ -365,9 +365,9 @@ v_user = v_user.gsub("\n","")
      v_shared = Shared.new
      v_shared.run_fs_Y_N()
 
-  elsif v_value_1 == "fs_good2go_Y_N"  
+  elsif v_value_1 == "fs_Y_N_good2go"  
      v_shared = Shared.new
-     v_shared.run_fs_good2go_Y_N()
+     v_shared.run_fs_Y_N_good2go()
 
    elsif v_value_1 == "fs_aseg_aparc"  #   rails runner app/cron_interface.rb fs_aseg_aparc
       

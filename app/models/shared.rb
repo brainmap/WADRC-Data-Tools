@@ -3523,7 +3523,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
 
 
   # looks in freesurfer QC trfile trtype=4 , file_completed = Y, global assessment=Pass ,moved to good2go from manual edit
-  def run_fs_manual_edits_to_good2go
+  def run_fs_move_qc_pass_to_good2go
 
     v_base_path = Shared.get_base_path()
     v_log_base ="/mounts/data/preprocessed/logs/"
@@ -3615,7 +3615,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
   end
 
   # looks in trfile trtype=1 freesurfer edits, file_completed = Y, moved to good2go from manual edit -- not move while in process
-  def run_fs_to_good2go
+  def run_fs_move_edit_file_complete_to_good2go
     v_base_path = Shared.get_base_path()
     v_log_base ="/mounts/data/preprocessed/logs/"
     v_process_name = "fs_to_good2go"
@@ -5761,7 +5761,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     
   end
   
-  def run_fs_manual_edits_Y_N
+  def run_fs_Y_N_manual_edits
     v_base_path = Shared.get_base_path()
      @schedule = Schedule.where("name in ('fs_manual_edits_Y_N')").first
       @schedulerun = Schedulerun.new
@@ -5862,7 +5862,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
   end
   
 
-  def run_fs_good2go_Y_N
+  def run_fs_Y_N_good2go
     v_base_path = Shared.get_base_path()
      @schedule = Schedule.where("name in ('fs_good2go_Y_N')").first
       @schedulerun = Schedulerun.new
