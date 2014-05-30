@@ -2052,9 +2052,10 @@ class DataSearchesController < ApplicationController
                   @enrollment_result[enrollment_array] = r + @enrollment_result[enrollment_array]
                   @enrollment_size[enrollment_array]   = @enrollment_size[enrollment_array]  + 1
                   vgroup_array = @participant_vgroup[v_vgroup.participant_id]
-                 ### ???? if !v_vgroupid.nil? # some record lacking vgroup?
+                 if vgroup_array.nil? # some record lacking vgroup?  will break further down 
+                      vgroup_array = []
                        vgroup_array.push(v_vgroupid)
-                  #### end
+                  end
                   @enrollment_vgroup[enrollment_array] = vgroup_array
 
               end
@@ -2105,8 +2106,12 @@ class DataSearchesController < ApplicationController
                  sp_array =[]
                  enrollment_array = []
                  es.each do |e|
-                     v_enumber = (Enrollment.find(e)[0]).enumber
-                     enrollment_array.push(v_enumber)
+                    # problems with a nil somewhere
+                       v_tmp_enumbers = Enrollment.find(e)
+                     if !v_tmp_enumbers[0].nil?
+                       v_enumber = (v_tmp_enumbers[0]).enumber
+                       enrollment_array.push(v_enumber)
+                     end
                  end
                  longitudinal_base_array.push('')
                  longitudinal_base_array.push((enrollment_array.uniq).join(', '))
