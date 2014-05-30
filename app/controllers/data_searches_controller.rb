@@ -1858,7 +1858,7 @@ class DataSearchesController < ApplicationController
     @temp_results.each do |var|
       @temp = []
       @temp[0] = var[1] # want appt date first
-      if @html_request =="N"  and @local_fields.length() > 0 and (@cg_query.participant_centric.nil? or (!@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1" ) )
+      if @html_request =="N"  and @local_fields.length() > 0 and (@cg_query.participant_centric.nil? or (!@cg_query.participant_centric.nil? and @cg_query.participant_centric != "1" ) )
           sql_sp = "SELECT distinct scan_procedures.codename 
                 FROM scan_procedures, scan_procedures_vgroups
                 WHERE scan_procedures.id = scan_procedures_vgroups.scan_procedure_id
@@ -2052,7 +2052,9 @@ class DataSearchesController < ApplicationController
                   @enrollment_result[enrollment_array] = r + @enrollment_result[enrollment_array]
                   @enrollment_size[enrollment_array]   = @enrollment_size[enrollment_array]  + 1
                   vgroup_array = @participant_vgroup[v_vgroup.participant_id]
-                  vgroup_array.push(v_vgroupid)
+                 ### ???? if !v_vgroupid.nil? # some record lacking vgroup?
+                       vgroup_array.push(v_vgroupid)
+                  #### end
                   @enrollment_vgroup[enrollment_array] = vgroup_array
 
               end
