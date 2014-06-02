@@ -827,6 +827,7 @@ class DataSearchesController < ApplicationController
       @local_conditions =[]
       @conditions = [] # for the q_data_search
       @conditions_bak = []
+      @local_order_by = []
       @local_tables =[] # need to add outer join to table, -- 
       @local_tables_alias_hash =Hash.new # need to make pet tracer select -- tracker?
       @table_types =[] 
@@ -1058,6 +1059,11 @@ class DataSearchesController < ApplicationController
             v_cg_tn_array = []  
             # pet with a tracer picked - could be many tracers - artifically make more "tables"
             @cg_tn = CgTn.find(v_tn_id)
+            # get all order_by_flag=Y cols
+            v_cg_tn_cns = CgTnCn.where("cg_tn_id in (?) and order_by_flag in (?)",v_tn_id,'Y')
+            v_cg_tn_cns.each do |n|    
+                 @local_order_by.push(n.cn+" DESC")
+            end
             if @cg_tn.tn == "view_petscan_appts" and !params[:cg_search][:pet_tracer_id].blank?
                 # need to loop thru each pet tracer picked
                 params[:cg_search][:pet_tracer_id].each do |tr|
@@ -1734,10 +1740,14 @@ class DataSearchesController < ApplicationController
         #run_search_q_data tn_cn_id/tn_id in (686/676,687/677,688/688) common_name = "question fields" vs run_search if 
       end     
       if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0
+          @order_by = @local_order_by+@order_by
           @local_column_headers.delete("Date (vgroup)")
           @local_column_headers.delete("Protocol")
           @local_column_headers.delete("Enumber")
           @local_column_headers.delete("RMR")
+      end
+      if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0 and !params[:longitudinal].nil? and params[:longitudinal] == "Y"
+                @local_fields = ["vgroups.participant_id"].concat(@local_fields)
       end
       @column_number =   @local_column_headers.size
       if v_debug == "Y"
@@ -1999,8 +2009,62 @@ class DataSearchesController < ApplicationController
            
      end
     end
+
+    if !params[:longitudinal].nil? and params[:longitudinal] == "Y" and !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0  
+# UP TO HERE 
+       # first colum IS participant id -- no sp or enrollment cols in summary
+       v_max_length = 0
+       @participants = []
+       @participant_result = {}
+       @participant_size = {}
+       @results.each do |r|
+          v_participant_id = r[0] 
+  puts "aaaaaa p.id="+v_participant_id.to_s
+          # some null participant_id
+          r.delete_at(0)
+          # ??? getting 2 
+          r.delete_at(0)
+          if @participant_result[v_participant_id].nil? and !v_participant_id.nil? and v_participant_id > ''
+             puts "bbbbp.id="+v_participant_id.to_s+"===" +r[0].to_s+"==="+r[1].to_s
+
+                 @participants.push(v_participant_id)
+                 @participant_result[v_participant_id] = r
+                 @participant_size[v_participant_id] = 1
+                 # @participant_sp    # build up unique list
+                 # @participant_enrollment  # build up unique list
+          elsif !v_participant_id.nil? and v_participant_id > ''
+                 @participant_result[v_participant_id] = r + @participant_result[v_participant_id]
+                 puts "ccccp.id="+v_participant_id.to_s+"==="+ r[0].to_s+"==="+r[1].to_s
+                 @participant_size[v_participant_id]  = @participant_size[v_participant_id] + 1
+          end
+          if !v_participant_id.nil? and v_participant_id > '' and v_max_length < @participant_size[v_participant_id]
+                 v_max_length = @participant_size[v_participant_id]
+          end
+       end 
+       @results = []
+       @participants.each do |p|
+                 longitudinal_base_array = []
+                 v_participant = Participant.find(p)
+                 longitudinal_base_array.push(v_participant.reggieid)
+                 longitudinal_base_array.push(v_participant.wrapnum)
+                 @participant_result[p] = longitudinal_base_array + @participant_result[p]
+                 @results.push(@participant_result[p])
+                 # add new lead columns
+       end
+
+       @longitudinal_column_headers = []
+       for v_cnt in 1 .. (v_max_length)
+             @local_column_headers.each do |col|
+                 @longitudinal_column_headers.push(v_cnt.to_s+"_"+col)
+             end
+       end
+       v_longitudinal_base_col = ['Reggieid','Wrapno']
+      @local_column_headers = v_longitudinal_base_col + @longitudinal_column_headers
+      # add new lead columns
+      @column_number = @local_column_headers.size
+
     # NEED TO MOVE UP BEFORE DELETE OF VGROUP_ID
-    if !params[:longitudinal].nil? and params[:longitudinal] == "Y"
+    elsif !params[:longitudinal].nil? and params[:longitudinal] == "Y"
        # need to flip rows so each participant/enrollment has one row with #row* cols
        v_max_length = 0
        @participants = []

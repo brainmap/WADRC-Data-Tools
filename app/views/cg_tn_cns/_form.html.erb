@@ -48,8 +48,8 @@ load next column? : <%= select_tag 'load_next_column', options_for_select(v_y_n,
 	<%= f.select :data_type, options_for_select(v_data_type, @cg_tn_cn.data_type),
 	              {:prompt => 'Select column data type'}  %>
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	 <%= f.label :status_active %>: <%= f.select :status_flag, options_for_select(v_y_n, @cg_tn_cn.status_flag),
-										              {:prompt => 'Select table status'}  %>	
+	 <%= f.label :order_by %>: <%= f.select :order_by_flag, options_for_select(v_y_n, @cg_tn_cn.order_by_flag),
+										              {:prompt => 'Select to order by column'}  %>	
 			
   </div><br>
 

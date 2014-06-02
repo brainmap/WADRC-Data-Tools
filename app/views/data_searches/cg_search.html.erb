@@ -520,9 +520,9 @@ v_tn_cn_searchable_hash = []
             <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
            <% end %>
        <% end %>
-       <% if  @cg_query.participant_centric != "1" %>
+       
       <%= submit_tag 'export longitudinal file'%>  
-        <% end %>
+        
 
 <% end %>
 
