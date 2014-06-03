@@ -827,7 +827,6 @@ class DataSearchesController < ApplicationController
       @local_conditions =[]
       @conditions = [] # for the q_data_search
       @conditions_bak = []
-      @local_order_by = []
       @local_tables =[] # need to add outer join to table, -- 
       @local_tables_alias_hash =Hash.new # need to make pet tracer select -- tracker?
       @table_types =[] 
@@ -1059,11 +1058,6 @@ class DataSearchesController < ApplicationController
             v_cg_tn_array = []  
             # pet with a tracer picked - could be many tracers - artifically make more "tables"
             @cg_tn = CgTn.find(v_tn_id)
-            # get all order_by_flag=Y cols
-            v_cg_tn_cns = CgTnCn.where("cg_tn_id in (?) and order_by_flag in (?)",v_tn_id,'Y')
-            v_cg_tn_cns.each do |n|    
-                 @local_order_by.push(n.cn+" DESC")
-            end
             if @cg_tn.tn == "view_petscan_appts" and !params[:cg_search][:pet_tracer_id].blank?
                 # need to loop thru each pet tracer picked
                 params[:cg_search][:pet_tracer_id].each do |tr|
@@ -1740,7 +1734,6 @@ class DataSearchesController < ApplicationController
         #run_search_q_data tn_cn_id/tn_id in (686/676,687/677,688/688) common_name = "question fields" vs run_search if 
       end     
       if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0
-          @order_by = @local_order_by+@order_by
           @local_column_headers.delete("Date (vgroup)")
           @local_column_headers.delete("Protocol")
           @local_column_headers.delete("Enumber")
@@ -1772,6 +1765,18 @@ class DataSearchesController < ApplicationController
     @all_tables = []
     @local_tables.uniq.each do |tn|   # need left join right after parent tn
        v_tn = tn
+       # get order bys 
+       if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0
+           v_tmp_tns = CgTn.where("tn in (?)", v_tn)
+           v_tmp_tns.each do |v_tmp|
+                v_cg_tn_cns = CgTnCn.where("cg_tn_id in (?) and order_by_flag in (?)",v_tmp.id,'Y')
+                 v_cg_tn_cns.each do |n| 
+                     @order_by = [n.cn+" DESC"].concat(@order_by)
+                 end
+
+           end
+
+       end
        if !@tables_left_join_hash[tn].blank?
           v_tn = v_tn +" "+ @tables_left_join_hash[tn] 
        end
@@ -1781,14 +1786,14 @@ class DataSearchesController < ApplicationController
     sql = sql + " where "+ @local_conditions.uniq.join(" and ")
     sql = sql+" order by "+@order_by.join(",")
     @sql = sql
-    if !sql.gsub("'","''")[11971..15960].nil?
-       sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text,sql_text_2,sql_text_3,sql_text_4)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3990]+"','"+sql.gsub("'","''")[3991..7980]+"','"+sql.gsub("'","''")[7981..11970]+"','"+sql.gsub("'","''")[11971..15960]+"')"
-     elsif !sql.gsub("'","''")[7981..11970].nil?
-       sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text,sql_text_2,sql_text_3)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3990]+"','"+sql.gsub("'","''")[3991..7980]+"','"+sql.gsub("'","''")[7981..11970]+"')"
-     elsif !sql.gsub("'","''")[3991..7980].nil?
-        sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text,sql_text_2)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3990]+"','"+sql.gsub("'","''")[3991..7980]+"'')"
+    if !sql.gsub("'","''")[11911..15880].nil?
+       sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text,sql_text_2,sql_text_3,sql_text_4)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3970]+"','"+sql.gsub("'","''")[3971..7940]+"','"+sql.gsub("'","''")[7941..11910]+"','"+sql.gsub("'","''")[11911..15880]+"')"
+     elsif !sql.gsub("'","''")[7941..11910].nil?
+       sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text,sql_text_2,sql_text_3)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3970]+"','"+sql.gsub("'","''")[3971..7940]+"','"+sql.gsub("'","''")[7941..11910]+"')"
+     elsif !sql.gsub("'","''")[3971..7940].nil?
+        sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text,sql_text_2)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3970]+"','"+sql.gsub("'","''")[3971..7940]+"')"
      else
-        sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3990]+"')"
+        sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3970]+"')"
      end
        
 
