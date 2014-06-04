@@ -827,6 +827,7 @@ class DataSearchesController < ApplicationController
       @local_conditions =[]
       @conditions = [] # for the q_data_search
       @conditions_bak = []
+      @all_table_ids_in_query = [] # trying to get a list of inner/outer join tables for participant_centric order by
       @local_tables =[] # need to add outer join to table, -- 
       @local_tables_alias_hash =Hash.new # need to make pet tracer select -- tracker?
       @table_types =[] 
@@ -1147,6 +1148,9 @@ class DataSearchesController < ApplicationController
                   @cg_query_tn.include_tn = 1
                 end
                 @cg_query_tn.join_type = params[:cg_search][:join_type][v_tn_id]
+                if @cg_query_tn.join_type != 2 # exclude NOT IN
+                     @all_table_ids_in_query.push(v_tn_id)
+                end
 
                 if @cg_query_tn.join_type == 0  # inner join joins  
                     @table_types.push(@cg_tn.table_type)                     
@@ -1206,7 +1210,7 @@ class DataSearchesController < ApplicationController
                            end  
                         end
                       end
-                    if v_include_tn == "Y"                       
+                    if v_include_tn == "Y"                    
                         if params[:cg_search][:join_type][v_tn_id].blank? and !@cg_tn.join_left.blank?  # setting default to outer join
                            @table_types.push(@cg_tn.table_type)
                                     # need to add outer as part of table length !!!!! THIS HAS TO BE FIXED
@@ -1763,20 +1767,17 @@ class DataSearchesController < ApplicationController
     @local_conditions.delete_if {|x| x == "" }   # a blank getting inserted 
     sql = " select distinct "+@local_fields.join(',')+" from "
     @all_tables = []
+    # participant_centic order by 
+    if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0
+       @all_table_ids_in_query.each do |r|
+             v_cg_tn_cns = CgTnCn.where("cg_tn_id in (?) and order_by_flag in (?)",r,'Y')
+             v_cg_tn_cns.each do |n| 
+                     @order_by = [n.cn+" DESC"].concat(@order_by)
+             end
+       end
+    end
     @local_tables.uniq.each do |tn|   # need left join right after parent tn
        v_tn = tn
-       # get order bys 
-       if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0
-           v_tmp_tns = CgTn.where("tn in (?)", v_tn)
-           v_tmp_tns.each do |v_tmp|
-                v_cg_tn_cns = CgTnCn.where("cg_tn_id in (?) and order_by_flag in (?)",v_tmp.id,'Y')
-                 v_cg_tn_cns.each do |n| 
-                     @order_by = [n.cn+" DESC"].concat(@order_by)
-                 end
-
-           end
-
-       end
        if !@tables_left_join_hash[tn].blank?
           v_tn = v_tn +" "+ @tables_left_join_hash[tn] 
        end
