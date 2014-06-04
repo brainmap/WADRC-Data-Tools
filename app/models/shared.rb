@@ -776,6 +776,34 @@ class Shared  < ActionController::Base
                  stdout.close
                  stderr.close
            end
+           # some have new asl/image structure
+           if v_series_description_type == "ASL"
+              v_asl_nii = v_preprocessed_path+v_enumber+"/asl/images/ASL_fmap_"+v_enumber+"_*.nii"
+              v_pdmap_nii = v_preprocessed_path+v_enumber+"/asl/images/PDmap_"+v_enumber+"_*.nii"
+              v_call = "rsync -av "+ v_asl_nii+" "+v_parent_dir_target
+        puts v_call
+                 stdin, stdout, stderr = Open3.popen3(v_call)
+                  stderr.each {|line|
+                      puts line
+                    }
+                    while !stdout.eof?
+                      puts stdout.read 1024    
+                     end
+                 stdin.close
+                 stdout.close
+                 stderr.close
+              v_call = "rsync -av "+ v_pdmap_nii+" "+v_parent_dir_target
+                 stdin, stdout, stderr = Open3.popen3(v_call)
+                  stderr.each {|line|
+                      puts line
+                    }
+                    while !stdout.eof?
+                      puts stdout.read 1024    
+                     end
+                 stdin.close
+                 stdout.close
+                 stderr.close
+           end
           end
 
           sql_status = "select pcvipr_status_flag from cg_adrc_upload where subjectid ='"+r[0]+"'"
@@ -1439,6 +1467,34 @@ puts "AAAAAA "+v_call
            if v_series_description_type == "ASL"
               v_asl_nii = v_preprocessed_path+r[0]+"/asl/ASL_fmap_"+r[0]+"_*.nii"
               v_pdmap_nii = v_preprocessed_path+r[0]+"/asl/PDmap_"+r[0]+"_*.nii"
+              v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av "+ v_asl_nii+" "+v_parent_dir_target+"/"+v_dir_target+"' "
+        puts "ASL ="+v_call
+                 stdin, stdout, stderr = Open3.popen3(v_call)
+                  stderr.each {|line|
+                      puts line
+                    }
+                    while !stdout.eof?
+                      puts stdout.read 1024    
+                     end
+                 stdin.close
+                 stdout.close
+                 stderr.close
+              v_call = "rsync -av "+ v_pdmap_nii+" "+v_parent_dir_target
+              v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av "+ v_pdmap_nii+" "+v_parent_dir_target+"/"+v_dir_target+"' "
+                 stdin, stdout, stderr = Open3.popen3(v_call)
+                  stderr.each {|line|
+                      puts line
+                    }
+                    while !stdout.eof?
+                      puts stdout.read 1024    
+                     end
+                 stdin.close
+                 stdout.close
+                 stderr.close
+           end
+            if v_series_description_type == "ASL"
+              v_asl_nii = v_preprocessed_path+r[0]+"/asl/images/ASL_fmap_"+r[0]+"_*.nii"
+              v_pdmap_nii = v_preprocessed_path+r[0]+"/asl/images/PDmap_"+r[0]+"_*.nii"
               v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av "+ v_asl_nii+" "+v_parent_dir_target+"/"+v_dir_target+"' "
         puts "ASL ="+v_call
                  stdin, stdout, stderr = Open3.popen3(v_call)
