@@ -23,6 +23,10 @@
     <%= f.label :petscan_flag %><br />
       <%= f.select :petscan_flag, v_y_n, :selected => @scan_procedure.petscan_flag , :include_blank => 'Select if petscans can be included in sp'  %> Select if petscans can be included in sp
   </p>
+      <p>
+    <%= f.label :petscan_tracer_file_size %><br />
+    <%= f.text_field :petscan_tracer_file_size %> Enter [tracer_id]:[size]|[tracer_id]:[size]|etc.
+  </p>
   <p>
     <%= f.submit "Update" %>
   </p>

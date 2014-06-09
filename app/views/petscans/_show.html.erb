@@ -2,6 +2,18 @@
 <div id="visit_heading">
   <p><%= @petscan.ecatfilename %></p><br>
   <p><%= @petscan.path %></p>
+  <% if !@petscan.path.nil? %>
+<br><p>size <%= File.stat(@petscan.path).size %>
+     <% if !@petscan_tracer_file_size.nil? and !@petscan_tracer_file_size[@petscan.lookup_pettracer_id.to_s].nil? 
+           if @petscan_tracer_file_size[@petscan.lookup_pettracer_id.to_s] == File.stat(@petscan.path).size.to_s %>
+                -File is expected size
+            <%else%>
+                <BIG> -FILE IS NOT THE EXPECTED SIZE </BIG>
+
+          <%end%>
+     <% end %>
+</p>
+  <%end%>
 </div>
 
 

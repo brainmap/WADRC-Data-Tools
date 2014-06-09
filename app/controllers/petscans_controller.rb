@@ -334,6 +334,19 @@ class PetscansController < ApplicationController
     @participant = @vgroup.try(:participant)
     @enumbers = @vgroup.enrollments
 
+    # get tracer size array for the scan procedures petscan_tracer_file_size   = tracer_id:size|tracer_id:size| etc
+    @petscan_tracer_file_size = {}
+    v_scan_procedures = ScanProcedure.where("scan_procedures.id in ( select scan_procedure_id from scan_procedures_vgroups where vgroup_id in (?))", @vgroup.id) 
+    v_scan_procedures.each do |sp|
+        if !sp.petscan_tracer_file_size.nil?
+              v_tmp_tracer_size = sp.petscan_tracer_file_size.split("|")
+              v_tmp_tracer_size.each do |tr|
+                v_tmp_size = tr.split(":")
+                @petscan_tracer_file_size[v_tmp_size[0]] = v_tmp_size[1]
+              end
+        end
+    end
+
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @petscan }
