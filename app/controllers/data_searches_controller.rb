@@ -1834,9 +1834,11 @@ class DataSearchesController < ApplicationController
                                      LEFT JOIN users on image_comments.user_id = users.id" }
       @tables_ids =['visits','image_datasets'] # trigger joins --- vgroups and appointments by default
       @order_by_ids =["appointments.appointment_date DESC", "vgroups.rmr"]
+      @local_tables.each do |tmp|
+      end
       @tables_ids.concat(@local_tables)
       @local_conditions_ids.concat(@local_conditions)
-      @left_join_ids_hash.merge(@tables_left_join_hash)
+      # merge not working ???? @left_join_ids_hash.merge(@tables_left_join_hash)
       # make sql based on parts
       sql_ids = " select distinct "+@fields_ids.join(',')+" from "
       @all_tables_ids = []
@@ -1845,6 +1847,9 @@ class DataSearchesController < ApplicationController
          if !@left_join_ids_hash[tn].blank?
             v_tn = v_tn +" "+ @left_join_ids_hash[tn] 
          end
+         if !@tables_left_join_hash[tn].blank?
+            v_tn = v_tn +" "+ @tables_left_join_hash[tn] 
+         end
          @all_tables_ids.push(v_tn)
       end
       sql_ids = sql_ids + @all_tables_ids.uniq.join(", ")
@@ -1852,6 +1857,8 @@ class DataSearchesController < ApplicationController
       sql_ids = sql_ids+" order by "+@order_by_ids.join(",")
       puts sql_ids
       sql = sql_ids
+
+
 #       @column_headers_ids = ['Date','Protocol','Enumber','RMR','series_description','dicom_series_uid','dcm_file_count','timestamp','scanned_file','image_uid','id','rep_time','glob','path','bold_reps','slices_per_volume','visit.age_at_visit','visit.scanner_source','image_dataset_quality_checks.motion_warning','image_dataset_quality_checks.incomplete_series','image_dataset_quality_checks.omnibus_f_comment','image_dataset_quality_checks.fov_cutoff','image_dataset_quality_checks.banding_comment','image_dataset_quality_checks.spm_mask','image_dataset_quality_checks.garbled_series_comment','image_dataset_quality_checks.motion_warning_comment','image_dataset_quality_checks.user_id','image_dataset_quality_checks.banding','image_dataset_quality_checks.field_inhomogeneity','image_dataset_quality_checks.nos_concerns_comment','image_dataset_quality_checks.garbled_series','image_dataset_quality_checks.created_at','image_dataset_quality_checks.incomplete_series_comment','image_dataset_quality_checks.omnibus_f','image_dataset_quality_checks.other_issues','image_dataset_quality_checks.fov_cutoff_comment','image_dataset_quality_checks.nos_concerns','image_dataset_quality_checks.registration_risk','image_dataset_quality_checks.ghosting_wrapping','image_dataset_quality_checks.field_inhomogeneity_comment','image_dataset_quality_checks.updated_at','image_dataset_quality_checks.registration_risk_comment','image_dataset_quality_checks.ghosting_wrapping_comment','image_dataset_quality_checks.image_dataset_id','image_dataset_quality_checks.spm_mask_comment','image_comments.comment','image_comments.updated_at','image_comments.created_at','image_comments.user_id','image_comments.image_dataset_id','Appt Note'] # need to look up values
  #      @column_headers_ids =   ['Date','Protocol','Enumber','RMR','series_description','dicom_series_uid','dcm_file_count','timestamp','scanned_file','image_uid','id','rep_time','glob','path','bold_reps','slices_per_volume','visit.age_at_visit','visit.scanner_source','image_comments.comment',
  # 'image_dataset_quality_checks.incomplete_series','image_dataset_quality_checks.incomplete_series_comment','image_dataset_quality_checks.garbled_series','image_dataset_quality_checks.garbled_series_comment','image_dataset_quality_checks.fov_cutoff','image_dataset_quality_checks.fov_cutoff_comment','image_dataset_quality_checks.field_inhomogeneity','image_dataset_quality_checks.field_inhomogeneity_comment','image_dataset_quality_checks.ghosting_wrapping','image_dataset_quality_checks.ghosting_wrapping_comment',
