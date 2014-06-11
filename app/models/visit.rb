@@ -194,6 +194,7 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
  
     visit.created_by = created_by
     # added 20120502 to make mri appointment and the vgroup
+    logger.debug "aaaaaaaaa before visit.appointment_id.blank?"
     if visit.appointment_id.blank?
        appointment = Appointment.create
        appointment.appointment_type ='mri'
@@ -208,6 +209,10 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
        vital.appointment_id = appointment.id
        vital.save
        visit.appointment_id = appointment.id
+    else
+       # not sure why there would be a visit.appointment_id -- getting an error in sql = "Delete from scan_procedures_vgroups where vgroup_id ="+vgroup.id.to_s ???
+       appointment = Appointment.find(visit.appointment_id)
+       vgroup = Vgroup.find(appointment.vgroup_id)
     end    
     
     if visit.save
