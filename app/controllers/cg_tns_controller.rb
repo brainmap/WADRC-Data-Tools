@@ -4,7 +4,11 @@ class CgTnsController < ApplicationController
   # GET /cg_tns.xml
   def index
     @cg_tns = CgTn.all
-
+    if !params[:search].nil? 
+         if !params[:search][:table_type].blank? 
+            @cg_tns = CgTn.where("cg_tns.table_type in (?)",params[:search][:table_type])
+         end
+    end
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => @cg_tns }

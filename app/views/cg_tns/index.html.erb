@@ -1,7 +1,25 @@
+
+ <%  v_table_type = { "all table types"=>"","column_group"=>"column_group", "tracker"=>"tracker","combio"=>"combio","scan_export"=>"scan_export","base"=>"base"} %>
+
+ <%= form_tag '/cg_tns_index' do %>
+         <%= label_tag :select_table_type %>&nbsp;&nbsp;   
+                      <%= collection_select('search', 'table_type', v_table_type, :last, :first) %>
+<br>
+
+  
+
+
+  <%= submit_tag("Search") %>
+  <table width="90%"><tr><td align="right"><%= link_to 'New Cg tn', new_cg_tn_path %> |
+<%= link_to('Column Group search/load', '/users/cgbase') %> </td></tr></table>
+<% end %> 
 <h1>Listing cg_tns</h1>
 
 <table  class="tabular">
   <tr>
+        <th></th>
+    <th></th>
+    <th></th>
     <th>Tn</th>
     <th>Common name</th>
     <th>Join left</th>
@@ -13,13 +31,15 @@
     <th>Table active status</th>
     <th>Table editable</th>
     <th>Owners</th>
-    <th></th>
-    <th></th>
-    <th></th>
   </tr>
 
 <% @cg_tns.each do |cg_tn| %>
   <tr>
+        <td><%= link_to 'Show', cg_tn %></td>
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
+    <td><%= link_to 'Edit', edit_cg_tn_path(cg_tn) %></td>
+    <td><%= link_to 'Destroy', cg_tn, :confirm => 'Are you sure?', :method => :delete %></td>
+<% end %>
     <td><%= cg_tn.tn %></td>
     <td><%= cg_tn.common_name %></td>
     <td><%= cg_tn.join_left %></td>
@@ -31,11 +51,7 @@
     <td><%= cg_tn.status_flag %></td>
     <td><%= cg_tn.editable_flag %></td>
     <td><%= cg_tn.users.sort_by(&:username_name).collect {|u|  u.username_name}.join(", ").html_safe %></td>
-    <td><%= link_to 'Show', cg_tn %></td>
-<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
-    <td><%= link_to 'Edit', edit_cg_tn_path(cg_tn) %></td>
-    <td><%= link_to 'Destroy', cg_tn, :confirm => 'Are you sure?', :method => :delete %></td>
-<% end %>
+
   </tr>
 <% end %>
 </table>

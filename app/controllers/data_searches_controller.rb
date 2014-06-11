@@ -125,6 +125,8 @@ class DataSearchesController < ApplicationController
       @cg_tn_key_unique_y = []
       @cg_tns = CgTn.where("table_type='column_group' and status_flag='Y'").order(:display_order)
       @cg_tracker_tns = CgTn.where("table_type='tracker' and status_flag='Y'").order(:display_order) 
+      @cg_combio_tns = CgTn.where("table_type='combio' and status_flag='Y'").order(:display_order) 
+      @cg_scan_export_tns = CgTn.where("table_type='scan_export' and status_flag='Y'").order(:display_order) 
       # no edit/key things with tracker
       @cg_tns.each do |cg_tn|
           cg_tn_key_array = []
