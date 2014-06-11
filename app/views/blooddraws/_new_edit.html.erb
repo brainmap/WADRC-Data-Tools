@@ -87,8 +87,11 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
        <%=  hidden_field_tag( 'new_appointment_vgroup_id',params[:new_appointment_vgroup_id]) %>
   <% end %>
   <br style="clear:both" />
-
-  <%= f.submit  'Save Lab Health appt'  %>
+<% if params[:new_appointment_vgroup_id].blank?%>
+  <%= f.submit  'Save Lab Health appt', :confirm => 'Do not continue if changes to bottom form have not been saved!!!'  %>
+<% else %>
+      <%= f.submit  'Save Lab Health appt' %>
+<% end %>
 
   <% if !@q_forms.nil? and @q_forms.count > 1 # make a dropdown with tab_default ==Y selected %>
     <% if !@questionform.nil? %>
