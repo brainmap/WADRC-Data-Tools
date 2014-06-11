@@ -412,7 +412,12 @@ class VgroupsController < ApplicationController
     end
     if v_cnt > 0
        # also want to set participant in vgroup
+       @vgroup.rmr = params[:vgroup][:rmr]
        set_participant_in_enrollment(@vgroup.rmr, enumber_array)
+       # picking up participant_id in set_participant_in_enrollment, but being wiped out by blank params[:vgroup][:participant_id]
+       if params[:vgroup][:participant_id].blank?
+             params[:vgroup][:participant_id] = @vgroup.participant_id.to_s
+       end
     end
     
     params[:vgroup].delete('enrollments_attributes') 
@@ -548,7 +553,7 @@ def set_participant_in_enrollment( rmr, enumber_array)
         end         
          
   end 
-  
+
   # check if vgroup.participant_id is blank 
   if !participant_id.blank?
     # HOW TO DO THE CHAINED FIND?
