@@ -191,6 +191,7 @@ WADRCDataTools::Application.routes.draw do
     match '/q_search' , :controller => 'questionnaires', :action => 'q_search', :as =>:q_search
     match '/ids_search' , :controller => 'image_datasets', :action => 'ids_search', :as =>:ids_search
   
+    match '/enrollment_search' , :controller => 'enrollments', :action => 'enrollment_search', :as =>:enrollment_search
     match '/participant_search' , :controller => 'participants', :action => 'participant_search', :as =>:participant_search
   match '/cg_search' , :controller => 'data_searches', :action => 'cg_search', :as =>:cg_search
   match '/cg_tables' , :controller => 'data_searches', :action => 'cg_tables', :as =>:cg_tables
@@ -199,6 +200,8 @@ WADRCDataTools::Application.routes.draw do
       match '/cg_table_edit_db' , :controller => 'data_searches', :action => 'cg_edit_table_db', :as =>:cg_edit_table_db
   match '/schedulerun_search' , :controller => 'scheduleruns', :action => 'schedulerun_search', :as =>:schedulerun_search
   match '/shared_file_upload' , :controller => 'shared', :action => 'file_upload', :as =>:file_upload
+
+  match '/cg_tns_index' , :controller => 'cg_tns', :action => 'index', :as =>:index
   
     match '/cg_tn_cns/tn_cols/:id' , :controller => 'cg_tn_cns', :action => 'tn_cols', :as =>:tn_cols
     match '/cg_tns/create_from_cg_tn_db' , :controller => 'cg_tns', :action => 'create_from_cg_tn_db', :as =>:create_from_cg_tn_db
@@ -209,6 +212,7 @@ WADRCDataTools::Application.routes.draw do
   match '/users/update_role', :controller => 'users', :action => 'update_role', :as => :update_role
   match '/users/user_protocol_role_summary', :controller => 'users', :action => 'user_protocol_role_summary', :as => :user_protocol_role_summary
   match '/users/control', :controller => 'users', :action => 'control', :as => :control
+  match '/users/participant_missing', :controller => 'users', :action => 'participant_missing', :as => :participant_missing
   match '/users/questionformbase', :controller => 'users', :action => 'questionformbase', :as => :questionformbase
   match '/users/cgbase', :controller => 'users', :action => 'cgbase', :as => :cgbase
   match '/users/add_user', :controller => 'users', :action => 'add_user', :as => :add_user

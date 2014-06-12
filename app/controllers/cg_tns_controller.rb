@@ -21,7 +21,7 @@ class CgTnsController < ApplicationController
     @cg_tn = CgTn.find(params[:id])
     v_datadictionary_base = "/Users/caillingworth/code/WADRC-Data-Tools/public/system/datadictionaries/"
     if Rails.env=="production"  # problems with umask and permission
-          v_thumbnail_base = "/Library/WebServer/WADRC-Data-Tools/shared/system/datadictionaries/"
+          v_datadictionary_base  = "/Library/WebServer/WADRC-Data-Tools/shared/system/datadictionaries/"
     end
     v_datadictionary_path = v_datadictionary_base+params[:id].to_s
     puts "aaaaaaaaaaaa v_datadictionary_path=  "+v_datadictionary_path
