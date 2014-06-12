@@ -413,10 +413,16 @@ class VgroupsController < ApplicationController
     if v_cnt > 0
        # also want to set participant in vgroup
        @vgroup.rmr = params[:vgroup][:rmr]
+       v_current_vgroup_participant_id = @vgroup.participant_id
        set_participant_in_enrollment(@vgroup.rmr, enumber_array)
+       if !v_current_vgroup_participant_id.blank? and v_current_vgroup_participant_id != @vgroup.participant_id # this might be prevented in set_part...
+            flash[:warning] = "The participant from the enumber/RMRaic######  does not match the previous vgroup participant !!!!!!   "
+       end
        # picking up participant_id in set_participant_in_enrollment, but being wiped out by blank params[:vgroup][:participant_id]
        if params[:vgroup][:participant_id].blank?
              params[:vgroup][:participant_id] = @vgroup.participant_id.to_s
+      elsif params[:vgroup][:participant_id] != @vgroup.participant_id.to_s # real problem - crossing 2 participants
+           flash[:warning] = "The participant selected does not match the RMRaic######  participant !!!!!!   "
        end
     end
     
