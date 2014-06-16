@@ -529,6 +529,9 @@ end
              @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
           end
         end
+        if !params[:appointment].nil? and !params[:appointment][:appointment_coordinator].nil?
+            @appointment.appointment_coordinator = params[:appointment][:appointment_coordinator]
+        end
         @appointment.save
 
         @vgroup.transfer_mri = params[:vgroup][:transfer_mri]

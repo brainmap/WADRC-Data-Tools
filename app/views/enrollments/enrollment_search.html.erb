@@ -12,7 +12,6 @@ edit_count = edit_count -1
 </div>
 
 <h3>Criteria:</h3>
-aaaaaa
 <%= form_for 'enrollment_search' do |f| %>
 <!--
   <table class="search_form">
@@ -115,9 +114,14 @@ aaaaaa
   <caption><%= pluralize(@results_total.size, 'enrollment') %></caption>
   <thead>
     <tr>
-      <th>Enrollment date</th>
       <th>enumber</th>
+      <th>Vgroups</th>
+      <th>Reggieid</th>
+      <th>WRAP Num</th>
+      <th>other enums</th>
+ <!--     <th>Enrollment date</th>
       <th>Recruitment source</th>
+    -->
       <th></th>
     </tr>
   </thead>
@@ -129,12 +133,27 @@ aaaaaa
   <tbody>
         <% @results.each do |result| %>
        <%  enrollment = Enrollment.find(result[@column_headers.size-1])
+           participant = nil
+           enrollments = nil
+           if !enrollment.participant_id.blank?
+               participant = Participant.find(enrollment.participant_id )
+               enrollments = Enrollment.where("participant_id in (?)",enrollment.participant_id)               
+           end
             result.delete_at(@column_headers.size-1)
         %>
       <tr>
+        
+        <td><%= link_to(enrollment.enumber, enrollment) %></td>
+      <td>  <% enrollment.vgroups.each do |vgroup| %>
+    <%= link_to vgroup.vgroup_date, vgroup %> in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %>&nbsp;&nbsp;
+  <% end %></td>
+      <td><% if !participant.nil? %><%= participant.reggieid %><%end%></td>
+      <td><% if !participant.nil? %><%= participant.wrapnum %><%end%></td>
+      <td><%= enrollments.nil? ? "" : enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
+<!--
         <td><%=h enrollment.enroll_date %></td>
-        <td><%=h enrollment.enumber %></td>
         <td><%=h enrollment.recruitment_source %></td>
+  -->
         <td>
           <%= link_to 'Show', enrollment %>
 <% if edit_count >30 %>
