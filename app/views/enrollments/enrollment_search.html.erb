@@ -1,0 +1,158 @@
+<%
+@var = current_user
+# assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+# apply limit protocol  on create , edit in create form  
+edit_count =@var.edit_low_scan_procedure_array.split(' ').length 
+edit_count = edit_count -1 
+%>
+
+<div id="heading_and_link">
+  <h1>Search Enrollment</h1>
+</p>
+</div>
+
+<h3>Criteria:</h3>
+aaaaaa
+<%= form_for 'enrollment_search' do |f| %>
+<!--
+  <table class="search_form">
+	<tr>
+    <th><%= f.label :scan_procedures %></th>
+    <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
+    <td><%= collection_select(:enrollment_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename, {}, {:multiple =>  true}) %></td>
+  </tr></table>
+-->
+<table class="search_form">
+	<tr><td><%= f.label :scan_procedures %><br>
+	<div id="scan_procedure_list">
+	<ul>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_visits where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
+		<li>
+			<%#= f.fields_for scan_procedure do |scan_fields| %>
+				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
+				<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
+			<%# end %>
+		</li>
+		<li>
+			<%= check_box_tag "visit_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'enrollment_search[scan_procedure_id][]' %>
+			<%= label_tag '', scan_procedure.codename %>
+		</li>
+	<% end %>
+	</ul>
+	</div>
+	
+	  </td></tr></table>
+<!-- visits/find.html.erb has a nice checkbox -- from some metasearch plugin?  -->
+  <table class="search_form">
+
+    <tr>
+      <th><%= f.label :enumber %></th>
+      <td><%= f.text_field :enumber %></td>
+    </tr>
+
+    <tr>
+      <th>RMR</th>
+      <td><%= f.text_field :rmr %></td>
+    </tr>
+    <tr>
+      <th>Reggie ID</th>
+      <td><%= f.text_field :reggieid %></td>
+    </tr>
+    <tr>
+      <th>Wrap Number</th>
+      <td><%= f.text_field :wrapnum %></td>
+    </tr>
+
+    <tr>
+      <th><%= f.label :scan_date_before %></th>
+      <td><%= f.date_select "latest_timestamp", :start_year => 1995, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :scan_date_after %></th>
+      <td><%= f.date_select :earliest_timestamp, :start_year => 1995, :include_blank => true %></td>
+    </tr>
+  </table>
+
+
+  <table class="search_form">
+    <tr>
+      <th><%= f.label :gender %></th>
+      <td><%= select :enrollment_search, :gender, { "M" => 1, "F" => 2 }, :include_blank => true %></td>
+    </tr>
+
+    <tr>
+      <th><%= f.label :minimum_age %></th>
+      <td><%= select :enrollment_search, :min_age, (1..110).to_a, :include_blank => true %><B> (the age at visit date) </B></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_age %></th>
+      <td><%= select :enrollment_search, :max_age, (1..110).to_a, :include_blank => true %></td>
+    </tr>
+  </table>
+<!--
+    <tr>
+      <th><%= f.label :minimum_education_years %></th>
+      <td><%= select :image_search, :min_ed_years, (0..25).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :maximum_education_years %></th>
+      <td><%= select :image_search, :max_ed_years, (0..25).to_a, :include_blank => true %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :apoe_status %></th>
+      <td><%= select :image_search, :apoe_status, { "negative" => 0, "positive" => 1 }, :include_blank => true %></td>
+    </tr>
+  </table>
+-->
+  
+  <%= clearing_br %>
+  <%= f.submit "Search" %>
+  
+<% end %>
+
+<%= link_to 'download xls', { :controller=>"enrollments", :action=>"enrollment_search", :enrollment_search =>  params[:enrollment_search] , :format => :xls} %>  </p></p>
+<table class="tabular">
+  <caption><%= pluralize(@results_total.size, 'enrollment') %></caption>
+  <thead>
+    <tr>
+      <th>Enrollment date</th>
+      <th>enumber</th>
+      <th>Recruitment source</th>
+      <th></th>
+    </tr>
+  </thead>
+    <tfoot><tr><td colspan=(column_header.size)>
+     <%=    paginate @results %> 
+  </td></tr></tfoot>
+
+
+  <tbody>
+        <% @results.each do |result| %>
+       <%  enrollment = Enrollment.find(result[@column_headers.size-1])
+            result.delete_at(@column_headers.size-1)
+        %>
+      <tr>
+        <td><%=h enrollment.enroll_date %></td>
+        <td><%=h enrollment.enumber %></td>
+        <td><%=h enrollment.recruitment_source %></td>
+        <td>
+          <%= link_to 'Show', enrollment %>
+<% if edit_count >30 %>
+          <%= link_to 'Edit', edit_enrollment_path(enrollment) %>
+          <%= link_to 'Destroy', enrollment, :confirm => 'Are you sure?', :method => :delete %>
+<% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br />
+<% if edit_count > 30 %>
+<%= link_to 'New enrollment', new_enrollment_path %>
+<% end %>
+
+
+<br />
+
+<%# link_to 'New enrollment', new_enrollment_path %>
