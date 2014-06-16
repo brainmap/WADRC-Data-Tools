@@ -5905,7 +5905,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
         @schedulerun.save
         @schedulerun.end_time = @schedulerun.updated_at      
         @schedulerun.save
-      puts " fs_manual_edits flag set = Y "+v_cnt.to_s
+      puts " successful finish fs_manual_edits_Y_N flag set = Y "+v_cnt.to_s
       rescue Exception => msg
          v_error = msg.to_s
          puts "ERROR !!!!!!!"
@@ -6006,7 +6006,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
         @schedulerun.save
         @schedulerun.end_time = @schedulerun.updated_at      
         @schedulerun.save
-      puts " fs_good2go flag set = Y "+v_cnt.to_s
+      puts " successful finish fs_good2go_Y_N flag set = Y "+v_cnt.to_s
       rescue Exception => msg
          v_error = msg.to_s
          puts "ERROR !!!!!!!"
@@ -6105,7 +6105,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
         @schedulerun.save
         @schedulerun.end_time = @schedulerun.updated_at      
         @schedulerun.save
-      puts " fs_flag set = Y "+v_cnt.to_s
+      puts " successful finish  fs_flag set = Y "+v_cnt.to_s
       rescue Exception => msg
          v_error = msg.to_s
          puts "ERROR !!!!!!!"
