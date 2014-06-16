@@ -527,6 +527,9 @@ class NeuropsychesController < ApplicationController
     @appointment.appointment_type ='neuropsych'
     @appointment.appointment_date =appointment_date
     @appointment.comment = params[:appointment][:comment]
+    if !params[:appointment].nil? and !params[:appointment][:appointment_coordinator].nil?
+            @appointment.appointment_coordinator = params[:appointment][:appointment_coordinator]
+    end
     @appointment.user = current_user
     if !@vgroup.participant_id.blank?
       @participant = Participant.find(@vgroup.participant_id)
@@ -615,6 +618,9 @@ class NeuropsychesController < ApplicationController
         @vgroup = Vgroup.find(@appointment.vgroup_id)
         @appointment.comment = params[:appointment][:comment]
         @appointment.appointment_date =appointment_date
+        if !params[:appointment].nil? and !params[:appointment][:appointment_coordinator].nil?
+            @appointment.appointment_coordinator = params[:appointment][:appointment_coordinator]
+        end
         if !@vgroup.participant_id.blank?
           @participant = Participant.find(@vgroup.participant_id)
           if !@participant.dob.blank?

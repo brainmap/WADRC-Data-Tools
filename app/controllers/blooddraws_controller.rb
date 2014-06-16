@@ -524,6 +524,9 @@ class BlooddrawsController < ApplicationController
   @appointment.appointment_type ='blood_draw'
   @appointment.appointment_date =appointment_date
   @appointment.comment = params[:appointment][:comment]
+  if !params[:appointment].nil? and !params[:appointment][:appointment_coordinator].nil?
+            @appointment.appointment_coordinator = params[:appointment][:appointment_coordinator]
+  end
   @appointment.user = current_user
   if !@vgroup.participant_id.blank?
     @participant = Participant.find(@vgroup.participant_id)
@@ -617,6 +620,9 @@ class BlooddrawsController < ApplicationController
             @appointment = Appointment.find(@blooddraw.appointment_id)
             @vgroup = Vgroup.find(@appointment.vgroup_id)
             @appointment.comment = params[:appointment][:comment]
+            if !params[:appointment].nil? and !params[:appointment][:appointment_coordinator].nil?
+                @appointment.appointment_coordinator = params[:appointment][:appointment_coordinator]
+            end
             @appointment.appointment_date =appointment_date
             if !@vgroup.participant_id.blank?
               @participant = Participant.find(@vgroup.participant_id)

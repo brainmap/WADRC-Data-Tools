@@ -9,6 +9,7 @@
       :Lab_Health_appt_date => @appointment.appointment_date,
       :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
       :RMR_Number => @vgroup.rmr,
+      :Appt_Coordinator =>@appointment.appointment_coordinator.blank? ? "" : Employee.find(@appointment.appointment_coordinator).name,
      :Participant => @participant.nil? ? nil : link_to('view participant', @participant)
     }) %>
   </div>

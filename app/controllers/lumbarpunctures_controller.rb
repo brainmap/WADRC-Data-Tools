@@ -100,6 +100,9 @@ class LumbarpuncturesController < ApplicationController
     @appointment.appointment_type ='lumbar_puncture'
     @appointment.appointment_date =appointment_date
     @appointment.comment = params[:appointment][:comment]
+    if !params[:appointment].nil? and !params[:appointment][:appointment_coordinator].nil?
+                @appointment.appointment_coordinator = params[:appointment][:appointment_coordinator]
+    end
     @appointment.user = current_user
     if !@vgroup.participant_id.blank?
       @participant = Participant.find(@vgroup.participant_id)
@@ -215,6 +218,9 @@ class LumbarpuncturesController < ApplicationController
             @appointment = Appointment.find(@lumbarpuncture.appointment_id)
             @vgroup = Vgroup.find(@appointment.vgroup_id)
             @appointment.comment = params[:appointment][:comment]
+            if !params[:appointment].nil? and !params[:appointment][:appointment_coordinator].nil?
+                @appointment.appointment_coordinator = params[:appointment][:appointment_coordinator]
+            end
             @appointment.appointment_date =appointment_date
             if !@vgroup.participant_id.blank?
               @participant = Participant.find(@vgroup.participant_id)

@@ -14,6 +14,7 @@
       :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
       :RMR_Number => @vgroup.rmr,
       :LP_Abnormality_Found =>  @lumbarpuncture.lpabnormality == 1 ? "Yes" : "No" ,
+       :Appt_Coordinator =>@appointment.appointment_coordinator.blank? ? "" : Employee.find(@appointment.appointment_coordinator).name,
       :Participant => @participant.nil? ? nil : link_to('view participant', @participant)
     }) %>
   </div>

@@ -36,6 +36,10 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
 	    <tr><td colspan="2">
 		<small>Select "n/a" if the Lab Health will not be done.</small>
 		</td></tr>
+    <tr>
+      <td><br><%= f.label(:appointment_coordinator) %></td>
+      <td><br><%= select(:appointment, :appointment_coordinator, Employee.all.sort_by(&:name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Select Appt Coordinator" }) %></td>
+    </tr>
 <!--      <tr>
         <td><%= f.label :Date_Lab_Health_Entered %>   </td>
         <td>

@@ -2,7 +2,7 @@
 <div id="visit_heading">
   <p><%= @petscan.ecatfilename %></p><br>
   <p><%= @petscan.path %></p>
-  <% if !@petscan.path.nil? %>
+  <% if !@petscan.path.blank? %>
 <br><p>size <%= File.stat(@petscan.path).size %>
      <% if !@petscan_tracer_file_size.nil? and !@petscan_tracer_file_size[@petscan.lookup_pettracer_id.to_s].nil? 
            if @petscan_tracer_file_size[@petscan.lookup_pettracer_id.to_s] == File.stat(@petscan.path).size.to_s %>
@@ -26,6 +26,7 @@
       :Tracer => @petscan.lookup_pettracer_id.nil? ? nil : LookupPettracer.find(@petscan.lookup_pettracer_id).name_description.html_safe,
       :Net_Injected_Dose => @petscan.netinjecteddose.nil? ? nil :  @petscan.netinjecteddose.to_s+" mci",
       :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
+      :Appt_Coordinator =>@appointment.appointment_coordinator.blank? ? "" : Employee.find(@appointment.appointment_coordinator).name,
       :RMR_Number => @vgroup.rmr,
       :Range =>  @petscan.range,
       :Injection_time => @petscan.injecttiontime.nil? ? nil : @petscan.injecttiontime.hour.to_s.rjust(2,'0')+":"+@petscan.injecttiontime.min.to_s.rjust(2,'0'),
