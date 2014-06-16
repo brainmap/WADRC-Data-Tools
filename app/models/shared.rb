@@ -674,7 +674,7 @@ class Shared  < ActionController::Base
           sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.id ='"+r[2].to_s+"')
                                                    and v.id in ( select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id = "+r[1].to_s+")
 and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.appointment_id
-and  visit.path like '%dempsey.plaque%' and replace(visits.path,'raw','') not like '%R%' )"
+and  visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','') not like '%R%' )"
 #REMOVE LAST 2 DEMPSEY LINES -- KEEPING R and not R separate
           results_vgroup = connection.execute(sql_vgroup)
           # mkdir /tmp/adrc_pcvipr/[subjectid]_YYYYMMDD_wisc
@@ -701,7 +701,7 @@ and  visit.path like '%dempsey.plaque%' and replace(visits.path,'raw','') not li
                       and image_datasets.series_description !=  'Cerebral Blood Flow'
                       and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.id ='"+r[2].to_s+"')
                       and vgroups.id in ( select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id = "+r[1].to_s+")
-and ( visit.path like '%dempsey.plaque%' and replace(visits.path,'raw','') not like '%R%')     
+and ( visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','') not like '%R%')     
                        order by appointments.appointment_date "
 #REMOVE LAST 2 DEMPSEY LINES -- KEEPING R and not R separate
           results_dataset = connection.execute(sql_dataset)
