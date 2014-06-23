@@ -5,6 +5,13 @@ class UsersController < ApplicationController
     before_filter :authenticate_user!
      
 
+  def participant_missing
+      sql ="select p.id, p.dob,p.gender from participants p where dob is null or dob ='' or gender is null or gender = '' and p.id in ( select participant_id from vgroups)"
+     connection = ActiveRecord::Base.connection();
+     @participants = connection.execute(sql)
+
+     render :template => "users/participant_missing"
+  end
 
   def index 
     @users = User.all
@@ -53,15 +60,19 @@ class UsersController < ApplicationController
 
   def add_user
     if !params[:user].nil? 
-     var = "insert into users(username,email,last_name,first_name,role,description) values('"+params[:user][:username]+"','"+params[:user][:email]+"','"+params[:user][:last_name].gsub("'","''")+"','"+params[:user][:first_name].gsub("'","''")+"','"+params[:user][:role]+"','"+params[:user][:username]+"')"
-    connection = ActiveRecord::Base.connection();
-     results = connection.execute(var)
-
-     respond_to do |format|
-          flash[:notice] = 'User was successfully updated.'
+      connection = ActiveRecord::Base.connection();
+      users = User.where("username in (?)",params[:user][:username])
+      if !users[0].nil?
+          flash[:notice] = params[:user][:username]+' User already exists!!!!!.'
+       else
+        var = "insert into users(username,email,last_name,first_name,role,description) values('"+params[:user][:username]+"','"+params[:user][:email]+"','"+params[:user][:last_name].gsub("'","''")+"','"+params[:user][:first_name].gsub("'","''")+"','"+params[:user][:role]+"','"+params[:user][:username]+"')"
+        results = connection.execute(var)
+        flash[:notice] = 'User was successfully updated.'
+       end
+        respond_to do |format|
           format.html { redirect_to('/protocol_roles') }
           format.xml  { head :ok }
-      end
+        end
     end
      # render :template => "/users/add_user"
   end  
