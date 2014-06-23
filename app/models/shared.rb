@@ -5824,10 +5824,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
   
   def run_fs_Y_N_manual_edits
     v_base_path = Shared.get_base_path()
-     @schedule = Schedule.where("name in ('fs_manual_edits_Y_N')").first
+     @schedule = Schedule.where("name in ('fs_Y_N_manual_edits')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
-      @schedulerun.comment ="starting fs_manual_edits_Y_N"
+      @schedulerun.comment ="starting fs_Y_N_manual_edits"
       @schedulerun.save
       @schedulerun.start_time = @schedulerun.created_at
       @schedulerun.save
@@ -5925,10 +5925,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
 
   def run_fs_Y_N_good2go
     v_base_path = Shared.get_base_path()
-     @schedule = Schedule.where("name in ('fs_good2go_Y_N')").first
+     @schedule = Schedule.where("name in ('fs_Y_N_good2go')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
-      @schedulerun.comment ="starting fs_good2go_Y_N"
+      @schedulerun.comment ="starting fs_iY_N_good2go"
       @schedulerun.save
       @schedulerun.start_time = @schedulerun.created_at
       @schedulerun.save
