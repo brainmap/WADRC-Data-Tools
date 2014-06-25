@@ -27,22 +27,24 @@
 <% else %>
   Your <%= current_user.role %> role does not allow access. 
 <% end %>
-
+<!--
 <br><br> This is just a testing of if image dataset dicom_hashtags are hashes vs strings. Multi-row values caused errors in 0.8.0 dicom gem.
 <br><br>
 Get all sams ids, try to address as a hash, catch exception, log visit_id, image_dataset_id, visit path, image_dataset path <br>
 use visit_id to delete visit in dev, re-load deleted visit path, <br>
 update prod using image_dataset path match and limited in prod by image_dataset_id<br><br>
 
-<% @image_datasets.each do |ids| 
+< @image_datasets.each do |ids| 
      begin
         ids.dicom_taghash.sort_by{|k,v| k}.each do |tag,info|  
           break
         end 
      rescue 
         v_visit = Visit.find(ids.visit_id)
-        %>
-      <%= ids.visit_id.to_s+"|"+v_visit.path+"|"+ids.id.to_s+"|"+ids.path %><br>
-      <% end
+        >
+      <= ids.visit_id.to_s+"|"+v_visit.path+"|"+ids.id.to_s+"|"+ids.path ><br>
+      < end
 
-end %>
+end >
+
+-->
