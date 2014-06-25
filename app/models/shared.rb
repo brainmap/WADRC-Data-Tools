@@ -667,14 +667,17 @@ class Shared  < ActionController::Base
         @schedulerun.save
         results.each do |r|
           v_enumber = r[0].gsub(/_v2/,"").gsub(/_v3/,"").gsub(/_v4/,"").gsub(/_v5/,"")
+# CHANGED FOR R
+          v_enumber_r = v_enumber+".R"
           v_comment = "strt "+r[0]+","+v_comment
           @schedulerun.comment =v_comment[0..1990]
           @schedulerun.save
+# CHANGED FOR R
           # update schedulerun comment - prepend 
           sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.id ='"+r[2].to_s+"')
                                                    and v.id in ( select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id = "+r[1].to_s+")
 and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.appointment_id
-and  visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','') not like '%R%' )"
+and  visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','')  like '%R%' )"
 #REMOVE LAST 2 DEMPSEY LINES -- KEEPING R and not R separate
           results_vgroup = connection.execute(sql_vgroup)
           # mkdir /tmp/adrc_pcvipr/[subjectid]_YYYYMMDD_wisc
@@ -688,6 +691,7 @@ and  visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','') not l
           stdin.close
           stdout.close
           stderr.close
+# CHANGED FOR R
           sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_types.series_description_type 
                       from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                       where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
@@ -701,7 +705,7 @@ and  visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','') not l
                       and image_datasets.series_description !=  'Cerebral Blood Flow'
                       and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.id ='"+r[2].to_s+"')
                       and vgroups.id in ( select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id = "+r[1].to_s+")
-and ( visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','') not like '%R%')     
+and ( visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','')  like '%R%')     
                        order by appointments.appointment_date "
 #REMOVE LAST 2 DEMPSEY LINES -- KEEPING R and not R separate
           results_dataset = connection.execute(sql_dataset)
@@ -755,8 +759,8 @@ and ( visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','') not 
                       # get the ASL_fmap and PDmap 
           puts "aaaaaaaaaa v_series_description_type ="+v_series_description_type
            if v_series_description_type == "ASL"
-              v_asl_nii = v_preprocessed_path+v_enumber+"/asl/ASL_fmap_"+v_enumber+"_*.nii"
-              v_pdmap_nii = v_preprocessed_path+v_enumber+"/asl/PDmap_"+v_enumber+"_*.nii"
+              v_asl_nii = v_preprocessed_path+v_enumber_r+"/asl/ASL_fmap_"+v_enumber_r+"_*.nii"
+              v_pdmap_nii = v_preprocessed_path+v_enumber_r+"/asl/PDmap_"+v_enumber_r+"_*.nii"
               v_call = "rsync -av "+ v_asl_nii+" "+v_parent_dir_target
         puts v_call
                  stdin, stdout, stderr = Open3.popen3(v_call)
@@ -783,8 +787,8 @@ and ( visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','') not 
            end
            # some have new asl/image structure
            if v_series_description_type == "ASL"
-              v_asl_nii = v_preprocessed_path+v_enumber+"/asl/images/ASL_fmap_"+v_enumber+"_*.nii"
-              v_pdmap_nii = v_preprocessed_path+v_enumber+"/asl/images/PDmap_"+v_enumber+"_*.nii"
+              v_asl_nii = v_preprocessed_path+v_enumber_r+"/asl/images/ASL_fmap_"+v_enumber_r+"_*.nii"
+              v_pdmap_nii = v_preprocessed_path+v_enumber_r+"/asl/images/PDmap_"+v_enumber_r+"_*.nii"
               v_call = "rsync -av "+ v_asl_nii+" "+v_parent_dir_target
         puts v_call
                  stdin, stdout, stderr = Open3.popen3(v_call)
@@ -810,8 +814,8 @@ and ( visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','') not 
                  stderr.close
            end
           end
-
-          sql_status = "select pcvipr_status_flag from cg_adrc_upload where subjectid ='"+r[0]+"'"
+# CHANGED TO STOP R DELETE
+          sql_status = "select pcvipr_status_flag from cg_adrc_upload where subjectid ='"+r[0]+"' and  1 = 0"
           results_status = connection.execute(sql_status)
           if v_scan_desc_type_array.include?("PCVIPR")
 puts "BBBBBBB includes pcvipr , status = "+(results_status.first)[0]
@@ -823,7 +827,8 @@ puts "BBBBBBB includes pcvipr , status = "+(results_status.first)[0]
             # sql_dirlist = "update cg_adrc_upload set general_comment =' NO PCVIPR!!!! "+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
             # results_dirlist = connection.execute(sql_dirlist)
             sql_status = "update cg_adrc_upload set pcvipr_status_flag ='N' where subjectid ='"+r[0]+"' "
-            results_sent = connection.execute(sql_status)
+  # CHANGED FOR R
+       #     results_sent = connection.execute(sql_status)
             # send email 
             v_subject = "adrc_pcvipr "+r[0]+" is missing some scan types --- set status_flag ='R' to send  : scans ="+v_folder_array.join(", ")
             v_email = "noreply_johnson_lab@medicine.wisc.edu"
@@ -850,7 +855,8 @@ puts "BBBBBBB includes pcvipr , status = "+(results_status.first)[0]
           stderr.close
           else
 
-            sql_dirlist = "update cg_adrc_upload set pcvipr_dir_list ='"+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
+            sql_dirlist = "update cg_adrc_upload set pcvipr_dir_list ='"+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' 
+                 and pcvipr_sent_flag ='N' "
             results_dirlist = connection.execute(sql_dirlist)
     # TURN INTO A LOOP
             v_dicom_field_array =['0010,0030','0010,0010']
@@ -956,7 +962,7 @@ puts "BBBBBBB includes pcvipr , status = "+(results_status.first)[0]
             stdout.close
             stderr.close        
 
-            sql_sent = "update cg_adrc_upload set pcvipr_sent_flag ='Y' where subjectid ='"+r[0]+"' "
+            sql_sent = "update cg_adrc_upload set pcvipr_sent_flag ='Y' where subjectid ='"+r[0]+"' and pcvipr_sent_flag ='N'"
             results_sent = connection.execute(sql_sent)
           end
           v_comment = "end "+r[0]+","+v_comment
