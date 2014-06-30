@@ -1,3 +1,4 @@
+<% if current_user.role == 'Admin_High'%>
 <%= form_for(@petfile) do |f| %>
   <% if @petfile.errors.any? %>
     <div id="error_explanation">
@@ -35,3 +36,5 @@
     <%= f.submit %>
   </div>
 <% end %>
+
+<%end %>

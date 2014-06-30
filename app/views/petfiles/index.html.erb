@@ -1,3 +1,4 @@
+<% if current_user.role == 'Admin_High'%>
 <h1>Listing petfiles</h1>
 
 <table>
@@ -29,3 +30,4 @@
 <br />
 
 <%= link_to 'New Petfile', new_petfile_path %>
+<%end%>

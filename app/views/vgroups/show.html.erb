@@ -179,6 +179,7 @@ edit_count = edit_count -1
 <tr><td colspan=7  align="left"><table width="90%">
 	<%  v_cnt = 0
 	   @petscans.each do |p| 
+	   	  @petfiles = Petfile.where("petscan_id in (?)", p.id)
 		v_cnt = v_cnt + 1 
 		@petscan = p
 		@appointment = Appointment.find(p.appointment_id) %>
