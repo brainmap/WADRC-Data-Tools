@@ -1,0 +1,30 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Id:</b>
+  <%= @petfile.id %>
+</p>
+
+<p>
+  <b>Petscan:</b>
+  <%= @petfile.petscan_id %>
+</p>
+
+<p>
+  <b>File name:</b>
+  <%= @petfile.file_name %>
+</p>
+
+<p>
+  <b>Path:</b>
+  <%= @petfile.path %>
+</p>
+
+<p>
+  <b>Note:</b>
+  <%= @petfile.note %>
+</p>
+
+
+<%= link_to 'Edit', edit_petfile_path(@petfile) %> |
+<%= link_to 'Back', petfiles_path %>

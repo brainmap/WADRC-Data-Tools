@@ -1,5 +1,6 @@
 <%
 v_yes_no_display = [["Yes","1"], ["No","0"]]
+v_autodetect =  [["AutoDetect File On","On"],["AutoDetect File Off","Off"]]
 %>
 <% javascript_tag 'defaults' %>
 <div id="new_edit_form">
@@ -42,8 +43,35 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
       <%= f.label :Scan_Start_time %><br />
       <%= select_time( @petscan.scanstarttime,:field_name =>'scanstartt][',:include_blank => true) %><br />
     </p>
+   <p>
+    <%= f.label :Petscan_Files %> 
+    <% v_detect = "On" 
+      if !@petfiles.nil? and @petfiles.length >0 
+         v_detect = "Off"
+      end %>
+    <%= select  :petfile,"petfile_autodetect", options_for_select(v_autodetect, v_detect  ),
+                            {:prompt => 'Autodetect file based on tracer and subjectid?'}  %>
 
-	
+ <table><tr><th>File name</th><th>Path</th><th><small><small>Delete</small></small></tr>
+	<% 
+     @petfiles.each do |pf|   
+    %>
+    <%= hidden_field :petfile, "id][" ,:value=>pf.id.to_s %>
+   <tr><td><%= text_field :petfile, "file_name]["+pf.id.to_s ,:size=>30, :value=>pf.file_name %> </td>
+    <td><%= text_field :petfile,  "path]["+pf.id.to_s , :size=> 80 ,:value=>pf.path%> </td>
+    <td><%= check_box  :petfile, "delete_petfile_id]["+pf.id.to_s %></td></tr>   
+          <tr><td colspan="3"><%= text_area( :petfile,"note]["+pf.id.to_s, :value=>pf.note , :cols => "99", :rows => "3" ) %><br><br>
+      </td></tr>  
+   <%end %>
+   <%= hidden_field :petfile, "id][" ,:value=>0.to_s %>
+    <tr><td><%= text_field :petfile, "file_name]["+0.to_s, :size=>30 %> </td>
+      <td><%= text_field :petfile, "path]["+0.to_s , :size=> 80 %> </td><td>&nbsp;</td></tr> 
+      <tr><td colspan="3"><%= text_area( :petfile,"note]["+0.to_s, :cols => "99", :rows => "3" ) %>
+      </td></tr>
+   </table>
+   
+   </p>  
+
   </div>
   <div class="three_col_mid">
     <table>
@@ -95,7 +123,11 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
 		<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 	<tr><td><%= f.label :Blood_Glucose %> </td>
 		<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-	 </tr></table>    
+  <tr><td><%= f.label :Weight_lbs %> </td>
+    <td><%=  text_field_tag( 'weight',v.weight==991?"":v.weight, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+    <tr><td><%= f.label :Height_inches %> </td>
+    <td><%=  text_field_tag( 'height',v.height==991?"":v.height, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+	 </table>    
 	<%=  hidden_field_tag( 'vital_id',v.id) %>
          
 <%       end
@@ -111,7 +143,11 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
 		<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 	<tr><td><%= f.label :Blood_Glucose %> </td>
 		<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-	 </tr></table>
+    <tr><td><%= f.label :Weight_lbs %> </td>
+    <td><%=  text_field_tag( 'weight',v.weight==991?"":v.weight, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+    <tr><td><%= f.label :Height_inches %> </td>
+    <td><%=  text_field_tag( 'height',v.height==991?"":v.height, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+	</table>
 <%   end %>
 
   </div>

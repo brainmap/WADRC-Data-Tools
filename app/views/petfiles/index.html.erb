@@ -1,0 +1,31 @@
+<h1>Listing petfiles</h1>
+
+<table>
+  <tr>
+    <th>Id</th>
+    <th>Petscan</th>
+    <th>File name</th>
+    <th>Path</th>
+    <th>Note</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @petfiles.each do |petfile| %>
+  <tr>
+    <td><%= petfile.id %></td>
+    <td><%= petfile.petscan_id %></td>
+    <td><%= petfile.file_name %></td>
+    <td><%= petfile.path %></td>
+    <td><%= petfile.note %></td>
+    <td><%= link_to 'Show', petfile %></td>
+    <td><%= link_to 'Edit', edit_petfile_path(petfile) %></td>
+    <td><%= link_to 'Destroy', petfile, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Petfile', new_petfile_path %>

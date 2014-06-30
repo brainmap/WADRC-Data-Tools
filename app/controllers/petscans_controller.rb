@@ -318,6 +318,7 @@ class PetscansController < ApplicationController
     @petscan = Petscan.where("petscans.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    @petfiles = Petfile.where("petscan_id in (?)",@petscan.id)
 
     @appointment = Appointment.find(@petscan.appointment_id)                            
 
@@ -358,6 +359,7 @@ class PetscansController < ApplicationController
   def new
     @current_tab = "petscans"
     @petscan = Petscan.new
+    @petfiles = Petfile.where("petscan_id in (?)",@petscan.id) 
     vgroup_id = params[:id]
     @vgroup = Vgroup.find(vgroup_id)
     @enumbers = @vgroup.enrollments
@@ -383,6 +385,7 @@ class PetscansController < ApplicationController
      @petscan = Petscan.where("petscans.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                        appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                        and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+     @petfiles = Petfile.where("petscan_id in (?)",@petscan.id) 
      @appointment = Appointment.find(@petscan.appointment_id) 
      @vgroup = Vgroup.find(@appointment.vgroup_id)
      @enumbers = @vgroup.enrollments
@@ -523,6 +526,8 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
       @vital.bp_systol = params[:bp_systol]
       @vital.bp_diastol = params[:bp_diastol]
       @vital.bloodglucose = params[:bloodglucose]
+      @vital.weight = params[:weight]
+      @vital.height = params[:height]
       @vital.save
     else
       @vital = Vital.new
@@ -531,9 +536,40 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
       @vital.bp_systol = params[:bp_systol]
       @vital.bp_diastol = params[:bp_diastol]
       @vital.bloodglucose = params[:bloodglucose]
+      @vital.weight = params[:weight]
+      @vital.height = params[:height]
       @vital.save      
     end
     
+     if !params[:petfile].blank? and !params[:petfile][:id].blank?
+      params[:petfile][:id].each do |pf_id|
+         if pf_id == "0" 
+             if !params[:petfile][:file_name][0.to_s].blank? # insert new
+                @petfile = Petfile.new
+                @petfile.petscan_id = @petscan.id
+                @petfile.file_name = params[:petfile][:file_name][0.to_s]
+                @petfile.path =  params[:petfile][:path][0.to_s]
+                @petfile.note =  params[:petfile][:note][0.to_s]
+                @petfile.save
+             end
+          else # update old
+              @petfile = Petfile.find(pf_id)
+              if !params[:petfile][:delete_petfile_id].blank? 
+                if !params[:petfile][:delete_petfile_id][pf_id].blank? 
+                end
+              end
+              if !params[:petfile][:delete_petfile_id].blank?   and !params[:petfile][:delete_petfile_id][pf_id].blank? and params[:petfile][:delete_petfile_id][pf_id] == "1"
+                @petfile.delete
+              else
+                @petfile.petscan_id = @petscan.id
+                @petfile.file_name = params[:petfile][:file_name][pf_id]
+                @petfile.path =  params[:petfile][:path][pf_id]
+                @petfile.note =  params[:petfile][:note][pf_id]
+                @petfile.save
+              end
+          end
+       end
+     end
 
     respond_to do |format|
       if @petscan.update_attributes(params[:petscan])
@@ -544,6 +580,27 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
         sql_sp = "select distinct scan_procedure_id from scan_procedures_vgroups where scan_procedures_vgroups.vgroup_id ="+@appointment.vgroup_id.to_s
         results_sp = connection.execute(sql_sp)  
         results_sp.each do |r_sp|
+               if !params[:petfile].blank? and !params[:petfile][:petfile_autodetect].blank? and params[:petfile][:petfile_autodetect] == "On"
+                        @petfiles_found = @petscan.get_pet_files(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
+                        @petfiles_found.each do |pf_name|  # make sure not already in database with this petscan.id
+                            v_petfile_check = Petfile.where("file_name in (?) and petscan_id in (?)", pf_name,@petscan.id)
+                            v_path = @petscan.get_pet_path(r_sp[0], pf_name, @petscan.lookup_pettracer_id)
+                            if !v_petfile_check.nil? and v_petfile_check.length > 0
+                                 v_petfile_check.each do |pf_check|
+                                    if pf_check.path.blank? and !v_path.blank?
+                                       pf_check.path = v_path
+                                       pf_check.save
+                                    end
+                                 end
+                            else
+                              v_new_petfile = Petfile.new
+                              v_new_petfile.petscan_id = @petscan.id
+                              v_new_petfile.file_name = pf_name
+                              v_new_petfile.path =  v_path
+                              v_new_petfile.save
+                            end
+                        end
+               end
             if @petscan.ecatfilename.blank?
               puts "aaaaa blank ecatfilename"
               @petscan.ecatfilename = @petscan.get_pet_file(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)

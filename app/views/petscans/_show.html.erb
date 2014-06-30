@@ -1,9 +1,9 @@
 
 <div id="visit_heading">
-  <p><%= @petscan.ecatfilename %></p><br>
-  <p><%= @petscan.path %></p>
-  <% if !@petscan.path.blank? %>
-<br><p>size <%= File.stat(@petscan.path).size %>
+   <p><%= @petscan.ecatfilename %></p><br>
+   <p><%= @petscan.path %></p>
+   <% if !@petscan.path.blank? %>
+    <br><p>size <%= File.stat(@petscan.path).size %>
      <% if !@petscan_tracer_file_size.nil? and !@petscan_tracer_file_size[@petscan.lookup_pettracer_id.to_s].nil? 
            if @petscan_tracer_file_size[@petscan.lookup_pettracer_id.to_s] == File.stat(@petscan.path).size.to_s %>
                 -File is expected size
@@ -12,10 +12,19 @@
 
           <%end%>
      <% end %>
-</p>
-  <%end%>
+    </p>
+    <%end%>
 </div>
-
+<% if !@petfiles.nil? and @petfiles.length >0 %>
+<div id="test">
+    <table width="80%"><tr><th align="left" width="30%">File Name</th><th align="left" width="50%">Path</th></tr>
+    <% @petfiles.each do |pf| %>
+      <tr><td align="left"><%= pf.file_name %></td><td align="left"><%= pf.path %></td></tr>
+      <tr><td colspan="2" align="left"><%= pf.note %></td></tr>
+    <%end%>
+  </table>
+</div>
+<%end%>
 
 <div id="leftcol" class="two_col_left">
   <h3>Summary:</h3>
@@ -66,11 +75,24 @@
      <%= vital.bp_systol==991 ?  "" :("BP Systol: "+vital.bp_systol.to_s+"<br>").html_safe %>
      <%= vital.bp_diastol==991 ?  "" :("BP Diastol: "+vital.bp_diastol.to_s+"<br>").html_safe %>
      <%= vital.bloodglucose==991 ?  "" :("Blood Glucose: "+vital.bloodglucose.to_s+"<br>").html_safe %>
+     <%= vital.weight==991 ?  "" :("Weight lbs: "+vital.weight.to_s+"<br>").html_safe %>
+     <%= vital.height==991 ?  "" :("Height inches: "+vital.height.to_s+"<br>").html_safe %>
 </div>
 
 <%    end 
   end %>
 </div>
+
+<!--
+<br><p>size <= File.stat(@petscan.path).size >
+     <if !@petscan_tracer_file_size.nil? and !@petscan_tracer_file_size[@petscan.lookup_pettracer_id.to_s].nil? 
+           if @petscan_tracer_file_size[@petscan.lookup_pettracer_id.to_s] == File.stat(@petscan.path).size.to_s >
+                -File is expected size
+            <else>
+                <BIG> -FILE IS NOT THE EXPECTED SIZE </BIG>
+
+          <end>
+     < end >  -->
 
 
 <br style="clear: both" /><br />
