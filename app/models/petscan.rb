@@ -12,7 +12,7 @@ class Petscan < ActiveRecord::Base
       @appointment =Appointment.find(self.appointment_id)
       return @appointment
   end
-  
+  # ONLY ONE FILE
   def get_pet_file(p_sp_id, p_tracer_id, p_vgroup_id)
     # ???? '1_asthana.adrc-clinical-core.visit1'=>'', '2_bendlin.tami.visit1'=>'', '1_bendlin.wmad.visit1'=>'','1_bendlin.mets.visit1'=> '',    '2_bendlin.mets.visit1'=> ''
     # 2_ries.mosaic.visit1    3_ries.mosaic.visit1
@@ -70,7 +70,7 @@ class Petscan < ActiveRecord::Base
     end
     return v_file_name
   end
-
+  # MORE THAN ONE FILE!!!!!!
   def get_pet_files(p_sp_id, p_tracer_id, p_vgroup_id)
     # ???? '1_asthana.adrc-clinical-core.visit1'=>'', '2_bendlin.tami.visit1'=>'', '1_bendlin.wmad.visit1'=>'','1_bendlin.mets.visit1'=> '',    '2_bendlin.mets.visit1'=> ''
     # 2_ries.mosaic.visit1    3_ries.mosaic.visit1
@@ -89,32 +89,32 @@ class Petscan < ActiveRecord::Base
         v_path = v_base_path+"/raw/"+v_pet_target_hash[v_key]+"/"
         # check for file with enum 
         vgroup = Vgroup.find(p_vgroup_id)
-        (vgroup.enrollments).each do |e|
-          if !Dir.glob(v_path+e.enumber+"*").empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img").empty?
+        (vgroup.enrollments).each do |e|   # need case insensitive match 
+          if !Dir.glob(v_path+e.enumber+"*", File::FNM_CASEFOLD).empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).empty?
             v_cnt = 0
-            Dir.glob(v_path+e.enumber+"*").each do |f|
+            Dir.glob(v_path+e.enumber+"*", File::FNM_CASEFOLD).each do |f|
                v_file_names.push(f.gsub(v_path,""))
                v_cnt = v_cnt + 1
             end   
             if v_cnt < 1
-              Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img").each do |f|
+              Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).each do |f|
                  v_file_names.push(f.gsub(v_path,""))
                  v_cnt = v_cnt + 1
               end
             end
-          elsif !Dir.glob(v_path+e.enumber.upcase+"*").empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1].upcase+"*.img").empty?
-            v_cnt = 0
-            Dir.glob(v_path+e.enumber.upcase+"*").each do |f|
-               v_file_names.push(f.gsub(v_path,""))
-               v_cnt = v_cnt + 1
-            end   
-            if v_cnt < 1
-              Dir.glob(v_path+"*"+e.enumber[1..-1].upcase+"*.img").each do |f|
-                 v_file_names.push(f.gsub(v_path,""))
-                 v_cnt = v_cnt + 1
-              end
-            end
-           else    
+          #elsif (!Dir.glob(v_path+e.enumber.upcase+"*").empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1].upcase+"*.img").empty?) and 1==2
+          #  v_cnt = 0
+          #  Dir.glob(v_path+e.enumber.upcase+"*").each do |f|
+          #     v_file_names.push(f.gsub(v_path,""))
+          #     v_cnt = v_cnt + 1
+          #  end   
+          #  if v_cnt < 1
+          #    Dir.glob(v_path+"*"+e.enumber[1..-1].upcase+"*.img").each do |f|
+          #       v_file_names.push(f.gsub(v_path,""))
+          #       v_cnt = v_cnt + 1
+          #    end
+          #  end
+          # else    
           end
         end
     else
@@ -132,7 +132,8 @@ class Petscan < ActiveRecord::Base
          '1_johnson.predict.visit1'=>'johnson.predict.visit1/pet/PIB-visit1','2_johnson.predict.visit2'=>'johnson.predict.visit2/pet/FDG',
          '1_johnson.predict.visit2'=>'johnson.predict.visit2/pet/PIB','2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
          '2_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/FDG',    '3_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/WAY',
-         '2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG' }
+         '2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
+         '5_bendlin.pbr28.visit1'=>'bendlin.pbr28.visit1/pet/PBR' }
     v_sp = ScanProcedure.find(p_sp_id)
     v_key = p_tracer_id.to_s+"_"+v_sp.codename
     v_path = ""
