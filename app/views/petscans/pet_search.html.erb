@@ -147,10 +147,10 @@ edit_count = edit_count -1
 
   <tbody>
     <% @results.each do |result| %>
-       <%  petscan = Petscan.find(result[@column_headers.size-1])
+       <%  petscan = Petscan.find(result[0]) #@column_headers.size-1])
            appointment = Appointment.find(petscan.appointment_id) 
            vgroup = Vgroup.find(appointment.vgroup_id)
-           result.delete_at(@column_headers.size-1)
+           result.delete_at(0) # @column_headers.size-1)
         %>
 	  <tr>
 	   <% for i in 0..@column_number-1 %>

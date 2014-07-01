@@ -3,7 +3,7 @@ class PetscansController < ApplicationController
   # GET /petscans
   # GET /petscans.xml
  
-  def petscan_search
+  def petscan_search # OLD -- use pet_search
      @current_tab = "petscans"
      params["search_criteria"] =""
 
@@ -21,6 +21,7 @@ class PetscansController < ApplicationController
 #      @search = Petscan.find_by_sql(sql)
 #     @search = Petscan.where("petscans.appointment_id in (select appointments.id from appointments)").all
       @search = Petscan.search(params[:search])    # parms search makes something which works with where?
+     # need to find max number of petfiles for this mix of sp's
 
       if !params[:petscan_search][:scan_procedure_id].blank?
          @search =@search.where("petscans.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
@@ -117,8 +118,7 @@ class PetscansController < ApplicationController
     @search =  @search.where("petscans.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                                appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                                and scan_procedure_id in (?))", scan_procedure_array)
-
-
+ 
     @petscans =  @search.page(params[:page])
 
     ### LOOK WHERE TITLE IS SHOWING UP
@@ -131,8 +131,13 @@ class PetscansController < ApplicationController
   end
 
   def pet_search
+
+     scan_procedure_array = []
+     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)   # applied in application search
       # make @conditions from search form input, access control in application controller run_search
       @conditions = []
+      v_petfile_conditions = [] # need to find max number of petfiles - some have 1, some 2 , etc, for this mix of scan procedures
+         # just using sp as an approximation
       @current_tab = "petscans"
       params["search_criteria"] =""
 
@@ -141,11 +146,17 @@ class PetscansController < ApplicationController
            params[:pet_search][:pet_status] = "yes"
       end
 
+       v_petfile_condition = " petscans.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
+                                                appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
+                                                and scan_procedure_id in ("+scan_procedure_array.join(",")+"))"
+       v_petfile_conditions.push(v_petfile_condition)
+
       if !params[:pet_search][:scan_procedure_id].blank?
          condition =" petscans.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                                 appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                                 and scan_procedure_id in ("+params[:pet_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
          @conditions.push(condition)
+         v_petfile_conditions.push(condition)
          @scan_procedures = ScanProcedure.where("id in (?)",params[:pet_search][:scan_procedure_id])
          params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
       end
@@ -262,27 +273,61 @@ class PetscansController < ApplicationController
        # trim leading ","
        params["search_criteria"] = params["search_criteria"].sub(", ","")
 
+      v_petfile_conditions.push("petscans.id = petfiles.petscan_id")
+      sql_petfile_cnt = "select max(cnt) from 
+     (select    count(petfiles.id) cnt, petscans.id from petfiles, petscans where "+v_petfile_conditions.join(" and ")+ " group by petscans.id) t2"
+      connection = ActiveRecord::Base.connection();
+      results_petfile_cnt= connection.execute(sql_petfile_cnt) 
+       @v_petfile_cnt = 0
+       @v_petfile_cnt = results_petfile_cnt.first[0]
+       # IS THIS VISIBLE FROM self.run_search?????
+       # ADD COLUMNS -- END OF LIST
+       # REMOVE file,path fields , insert extra petfile(s) columns if 
+
        # adjust columns and fields for html vs xls
        request_format = request.formats.to_s
        @html_request ="Y"
        case  request_format
          when "[text/html]","text/html" then # ? application/html
            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Path','Note','Pet status','Appt Note'] # need to look up values
+          if !@v_petfile_cnt.nil?
+            i = @v_petfile_cnt
+            k = 1
+            while i > 0
+               @column_headers.push("Pet_file_"+k.to_s)
+               @column_headers.push("Pet_path_"+k.to_s)
+               @column_headers.push("Pet_note_"+k.to_s)
+               k = k + 1
+              i = i -1
+            end
+          end
                # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
            @column_number =   @column_headers.size
            @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename","petscans.path",
-                 "petscans.petscan_note","vgroups.transfer_pet","petscans.id"] # vgroups.id vgroup_id always first, include table name
+                 "petscans.petscan_note","vgroups.transfer_pet","petscans.id","appointments.comment"] # vgroups.id vgroup_id always first, include table name
             @left_join = ["LEFT JOIN lookup_pettracers on petscans.lookup_pettracer_id = lookup_pettracers.id",
                     "LEFT JOIN employees on petscans.enteredpetscanwho = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
          else    
            @html_request ="N"          
-            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Path','Dose','Injection Time','Scan Start','Note','Range','Pet status','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt','Appt Note'] # need to look up values
+            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Path','Dose','Injection Time','Scan Start','Note','Range','Pet status','BP Systol','BP Diastol','Pulse','Blood Glucose','Weight','Height','Age at Appt','Appt Note'] # need to look up values
+          if !@v_petfile_cnt.nil?
+            i = @v_petfile_cnt
+            k = 1
+            while i > 0
+               @column_headers.push("Pet_file_"+k.to_s)
+               @column_headers.push("Pet_path_"+k.to_s)
+               @column_headers.push("Pet_note_"+k.to_s)
+              k = k + 1
+              i = i -1
+            end
+           end
+
                   # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
             @column_number =   @column_headers.size
             @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename","petscans.path","petscans.netinjecteddose",
                     "time_format(timediff( time(petscans.injecttiontime),subtime(utc_time(),time(localtime()))),'%H:%i')",
                     "time_format(timediff( time(scanstarttime),subtime(utc_time(),time(localtime()))),'%H:%i')",
-                    "petscans.petscan_note","petscans.range","vgroups.transfer_pet","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","petscans.id"] # vgroups.id vgroup_id always first, include table name 
+                    "petscans.petscan_note","petscans.range","vgroups.transfer_pet","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","vitals.weight","vitals.height","appointments.age_at_appointment","petscans.id","appointments.comment"] # vgroups.id vgroup_id always first, include table name 
             @left_join = ["LEFT JOIN lookup_pettracers on petscans.lookup_pettracer_id = lookup_pettracers.id",
                         "LEFT JOIN vitals on petscans.appointment_id = vitals.appointment_id  "] # left join needs to be in sql right after the parent table!!!!!!!   
                         # "LEFT JOIN employees on petscans.enteredpetscanwho = employees.id",             
@@ -291,7 +336,7 @@ class PetscansController < ApplicationController
        @tables =['petscans'] # trigger joins --- vgroups and appointments by default
        @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
 
-      @results = self.run_search   # in the application controller
+      @results = self.run_search_pet   # in the application controller
       @results_total = @results  # pageination makes result count wrong
       t = Time.now 
       @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")

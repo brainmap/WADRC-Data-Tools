@@ -9,7 +9,7 @@
 	    <% end %>	
 	 </tr>
 	 <% @results.each do |result| %>
-	    <%     result.delete_at(@column_headers.size-1) # *.id used to get the * object, not want to display %>
+	    <%     result.delete_at(0) #@column_headers.size-1) # *.id used to get the * object, not want to display %>
 		<tr>
 		   <% for i in 0..@column_number-1  # results is an array of arrays%>
 		      <td><%= result[i] %></td>
