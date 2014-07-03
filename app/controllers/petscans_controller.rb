@@ -160,12 +160,12 @@ class PetscansController < ApplicationController
          @scan_procedures = ScanProcedure.where("id in (?)",params[:pet_search][:scan_procedure_id])
          params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
       end
-
-      if !params[:pet_search][:ecatfilename].blank?
-          var = "%"+params[:pet_search][:ecatfilename].downcase+"%"
-          condition =" petscans.ecatfilename  like '"+var.gsub(/[;:'"()=<>]/, '')+"' "
+      # moved file_name to petfiles from petscans
+      if !params[:pet_search][:file_name].blank?
+          var = "%"+params[:pet_search][:file_name].downcase+"%"
+          condition =" petscans.id in ( select petfiles.petscan_id from petfiles where petfiles.file_name  like '"+var.gsub(/[;:'"()=<>]/, '')+"' )"
           @conditions.push(condition)
-          params["search_criteria"] = params["search_criteria"] +", Ecat file "+params[:pet_search][:ecatfilename]
+          params["search_criteria"] = params["search_criteria"] +", File name "+params[:pet_search][:file_name]
       end
       
       if !params[:pet_search][:enumber].blank?
@@ -289,7 +289,7 @@ class PetscansController < ApplicationController
        @html_request ="Y"
        case  request_format
          when "[text/html]","text/html" then # ? application/html
-           @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Path','Note','Pet status','Appt Note'] # need to look up values
+           @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Note','Pet status','Appt Note'] # need to look up values
           if !@v_petfile_cnt.nil?
             i = @v_petfile_cnt
             k = 1
@@ -303,13 +303,13 @@ class PetscansController < ApplicationController
           end
                # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
            @column_number =   @column_headers.size
-           @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename","petscans.path",
+           @fields =["lookup_pettracers.name pettracer",
                  "petscans.petscan_note","vgroups.transfer_pet","petscans.id","appointments.comment"] # vgroups.id vgroup_id always first, include table name
             @left_join = ["LEFT JOIN lookup_pettracers on petscans.lookup_pettracer_id = lookup_pettracers.id",
                     "LEFT JOIN employees on petscans.enteredpetscanwho = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
          else    
            @html_request ="N"          
-            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Ecatfile','Path','Dose','Injection Time','Scan Start','Note','Range','Pet status','BP Systol','BP Diastol','Pulse','Blood Glucose','Weight','Height','Age at Appt','Appt Note'] # need to look up values
+            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Dose','Injection Time','Scan Start','Note','Range','Pet status','BP Systol','BP Diastol','Pulse','Blood Glucose','Weight','Height','Age at Appt','Appt Note'] # need to look up values
           if !@v_petfile_cnt.nil?
             i = @v_petfile_cnt
             k = 1
@@ -324,7 +324,7 @@ class PetscansController < ApplicationController
 
                   # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
             @column_number =   @column_headers.size
-            @fields =["lookup_pettracers.name pettracer","petscans.ecatfilename","petscans.path","petscans.netinjecteddose",
+            @fields =["lookup_pettracers.name pettracer","petscans.netinjecteddose",
                     "time_format(timediff( time(petscans.injecttiontime),subtime(utc_time(),time(localtime()))),'%H:%i')",
                     "time_format(timediff( time(scanstarttime),subtime(utc_time(),time(localtime()))),'%H:%i')",
                     "petscans.petscan_note","petscans.range","vgroups.transfer_pet","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","vitals.weight","vitals.height","appointments.age_at_appointment","petscans.id","appointments.comment"] # vgroups.id vgroup_id always first, include table name 

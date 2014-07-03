@@ -13,10 +13,8 @@ v_autodetect =  [["AutoDetect File On","On"],["AutoDetect File Off","Off"]]
       <%= f.label :date %><br />
       <%= date_select :appointment, :appointment_date, :include_blank => true, :end_year => Time.now.year + 1 %><br />
     </p>
-    <p>
-      <%= f.label :Ecat_Filename %><br />
-      <%= f.text_field :ecatfilename %>
-    </p>
+       <!-- switched to petfiles.file_name, but leaving old autodetect petscans.ecatfilename running -->
+      <%= f.hidden_field :ecatfilename %>
     <p>
       <%= f.label :Tracer %><br />
      <%= select(:petscan, :lookup_pettracer_id, LookupPettracer.all.sort_by(&:name).collect {|p| [ p.name_description, p.id ] }, { :include_blank => "Select a tracer" }) %>
@@ -30,10 +28,8 @@ v_autodetect =  [["AutoDetect File On","On"],["AutoDetect File Off","Off"]]
       <%= f.label :range %><br />
       <%= f.text_field :range,:size => 6 %>
     </p>
-    <p>
-      <%= f.label :Path %><br />
-      <%= f.text_field :path , :size=> 80 %>
-    </p>
+       <!-- switched to petfiles.path, but leaving old petscans.path autodetect running -->
+      <%= f.hidden_field :path , :size=> 80 %>
     <p>
       <%= f.label :Injection_time %><br />
       <%= select_time(@petscan.injecttiontime ,:field_name =>'injectiont][',:include_blank => true )%><br />
