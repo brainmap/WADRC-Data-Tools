@@ -23,7 +23,9 @@ class Petscan < ActiveRecord::Base
          '1_johnson.predict.visit2'=>'johnson.predict.visit2/pet/PIB','2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
          '2_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/FDG',    '3_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/WAY',
          '2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
-         '5_bendlin.pbr28.visit1'=>'bendlin.pbr28.visit1/pet/PBR' }
+         '5_bendlin.pbr28.visit1'=>'bendlin.pbr28.visit1/pet/PBR',
+          '2_ADNI-2'=>'ADNI-2/pet/FDG', 
+           '6_ADNI-2'=>'ADNI-2/pet/AV45'}
     v_sp = ScanProcedure.find(p_sp_id)
     v_key = p_tracer_id.to_s+"_"+v_sp.codename
     v_file_name = ""
@@ -81,7 +83,9 @@ class Petscan < ActiveRecord::Base
          '1_johnson.predict.visit2'=>'johnson.predict.visit2/pet/PIB','2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
          '2_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/FDG',    '3_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/WAY',
          '2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
-         '5_bendlin.pbr28.visit1'=>'bendlin.pbr28.visit1/pet/PBR' }
+         '5_bendlin.pbr28.visit1'=>'bendlin.pbr28.visit1/pet/PBR' ,
+          '2_ADNI-2'=>'ADNI-2/pet/FDG', 
+           '6_ADNI-2'=>'ADNI-2/pet/AV45'}
     v_sp = ScanProcedure.find(p_sp_id)
     v_key = p_tracer_id.to_s+"_"+v_sp.codename
     v_file_names = []
@@ -133,7 +137,9 @@ class Petscan < ActiveRecord::Base
          '1_johnson.predict.visit2'=>'johnson.predict.visit2/pet/PIB','2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
          '2_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/FDG',    '3_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/WAY',
          '2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
-         '5_bendlin.pbr28.visit1'=>'bendlin.pbr28.visit1/pet/PBR' }
+         '5_bendlin.pbr28.visit1'=>'bendlin.pbr28.visit1/pet/PBR',
+          '2_ADNI-2'=>'ADNI-2/pet/FDG', 
+           '6_ADNI-2'=>'ADNI-2/pet/AV45' }
     v_sp = ScanProcedure.find(p_sp_id)
     v_key = p_tracer_id.to_s+"_"+v_sp.codename
     v_path = ""
