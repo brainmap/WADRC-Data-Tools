@@ -5698,7 +5698,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
             connection = ActiveRecord::Base.connection();        
             results = connection.execute(sql)
 
-            sql_base = "insert into cg_t1seg_status_new(t1seg_subjectid, t1seg_general_comment,t1seg_smoothed_and_warped_flag,o_star_nii_flag,multiple_o_star_nii_flag,enrollment_id, scan_procedure_id)values("  
+            sql_base = "insert into cg_t1seg_status_new(t1seg_subjectid, t1seg_general_comment,t1seg_smoothed_and_warped_flag,o_star_nii_flag,multiple_o_star_nii_flag,enrollment_id, scan_procedure_id,gm,wm,csf)values("  
             v_raw_path = v_base_path+"/raw"
             v_mri = "/mri"
             no_mri_path_sp_list =['asthana.adrc-clinical-core.visit1',
@@ -5751,7 +5751,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                              v_subjectid_unknown = v_preprocessed_full_path+"/"+dir_name_array[0]+"/unknown"
                              v_o_star_nii_flag ="N"
                              v_multiple_o_star_nii_flag ="N"
-                             
+                             v_gm =""
+                             v_wm = ""
+                             v_csf = ""
                              if File.directory?(v_subjectid_t1seg)
                                   v_dir_array = Dir.entries(v_subjectid_t1seg)   # need to get date for specific files
                                   # evalute for t1seg_ac_pc_flag = rFS_t1seg_[subjectid]_fmap.nii ,
@@ -5761,9 +5763,24 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                 v_t1seg_ac_pc_flag ="N"
                                 v_t1seg_smoothed_and_warped_flag = "N"
                                 v_dir_array.each do |f|
-                                  
                                   if f.start_with?("smwc1o"+dir_name_array[0])  and f.end_with?(".nii")
                                     v_t1seg_smoothed_and_warped_flag = "Y"
+                                  end
+                                  if f == "segtotals.txt"  #  one row in file, comma sep
+                                     v_tmp_data = "" 
+                                     v_tmp_data_array = []  
+                                     ftxt = File.open(v_subjectid_t1seg+"/segtotals.txt", "r") 
+                                     ftxt.each_line do |line|
+                                        v_tmp_data += line
+                                     end
+                                     ftxt.close
+
+                                     v_tmp_data_array = v_tmp_data.split(",")
+                                     if v_tmp_data_array.length >2
+                                        v_gm =v_tmp_data_array[0]
+                                        v_wm  = v_tmp_data_array[1]
+                                        v_csf = v_tmp_data_array[2]
+                                     end
                                   end
                                 end
                                 if File.directory?(v_subjectid_unknown)
@@ -5782,10 +5799,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                   end
                                 end
                                 
-                                sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','','"+v_t1seg_smoothed_and_warped_flag+"','"+ v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','','"+v_t1seg_smoothed_and_warped_flag+"','"+ v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_gm+"','"+v_wm+"','"+v_csf+"')"
                                  results = connection.execute(sql)
                              else
-                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL)"
                                  results = connection.execute(sql)
                              end # check for subjectid asl dir
                          else
@@ -5801,7 +5818,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
             # v_shared = Shared.new 
              # move from new to present table -- made into a function  in shared model
              v_comment = self.move_present_to_old_new_to_present("cg_t1seg_status",
-             "t1seg_subjectid, t1seg_general_comment, t1seg_smoothed_and_warped_flag, t1seg_smoothed_and_warped_comment, t1seg_smoothed_and_warped_global_quality,o_star_nii_flag,multiple_o_star_nii_flag,enrollment_id,scan_procedure_id",
+             "t1seg_subjectid, t1seg_general_comment, t1seg_smoothed_and_warped_flag, t1seg_smoothed_and_warped_comment, t1seg_smoothed_and_warped_global_quality,o_star_nii_flag,multiple_o_star_nii_flag,enrollment_id,scan_procedure_id,gm,wm,csf",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
 

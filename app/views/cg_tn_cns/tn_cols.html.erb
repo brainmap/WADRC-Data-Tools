@@ -33,7 +33,7 @@
      <td bgcolor="#A8A8A8"><%= cg_tn_cn.cn %></td>
     <%end%>
     <td><%= select_tag 'status_flag['+cg_tn_cn.id.to_s+']', options_for_select(v_y_n, cg_tn_cn.status_flag)  %></td>
-    <td><%= number_field_tag 'display_order['+cg_tn_cn.id.to_s+']' ,cg_tn_cn.display_order,:size=>15 ,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}"%></td>
+    <td><%= text_field_tag 'display_order['+cg_tn_cn.id.to_s+']' ,cg_tn_cn.display_order,:size=>15 ,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}"%></td>
     <td><%= cg_tn_cn.key_column_flag %></td>
     <td><%= cg_tn_cn.searchable_flag %></td>
     <td><%= cg_tn_cn.condition_between_flag %></td>
