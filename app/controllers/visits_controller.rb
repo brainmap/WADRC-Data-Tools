@@ -168,6 +168,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find_by_id(params[:id])
     # Grab the visits within 1 month +- visit date for "previous" and "back" hack.
     @visits = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).where(:date => @visit.date-1.month..@visit.date+1.month).all
+    # might be giving errors if user not have perms on some of visits????
     idx = @visits.index(@visit)
     @older_visit = idx + 1 >= @visits.size ? nil : @visits[idx + 1]
     @newer_visit = idx - 1 < 0 ? nil : @visits[idx - 1]

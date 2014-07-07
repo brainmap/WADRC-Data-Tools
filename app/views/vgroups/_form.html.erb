@@ -26,8 +26,16 @@ If the enumber is not already associated with a participant, add the enumber bel
 
   <div class="field">
 	<table><tr><td>
-    <%= f.label :rmr %><br />
-    <%= f.text_field :rmr %>
+    <%= f.label :rmr %> &nbsp;&nbsp;&nbsp;<%= f.text_field :rmr %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+
+    <%= f.label :reggieid %>&nbsp;&nbsp;&nbsp;
+    <% if !@participant.nil? 
+    	  if @participant.reggieid.to_s  > ""%>
+             <%= @participant.reggieid.to_s.rjust(6,"0") %>
+          <% end
+    else %>
+    <%= text_field :participant,:reggieid , :size=>25 %>
+    <%end%><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
    </td><td>
 	<% if current_user.role == 'Admin_High'   #is_a_number?(@vgroup.rmr[6..11]) %>

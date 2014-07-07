@@ -180,7 +180,9 @@ class VgroupsController < ApplicationController
   def edit
     scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
-    
+    if !@vgroup.participant_id.nil?
+        @participant = Participant.find(@vgroup.participant_id)
+    end
     if current_user.role == 'Admin_High'
         # for changing appointment vgroup_id    
         @appointments = Appointment.order("appointments.appointment_type ASC").where("appointments.vgroup_id in (?)", params[:id])
@@ -209,7 +211,41 @@ class VgroupsController < ApplicationController
     #  @vgroup.rmr =params[:vgroup][:rmr]
     #  @vgroup.vgroup_date = params[:vgroup]["#{'vgroup_date'}(1i)"] +"-"+params[:vgroup]["#{'vgroup_date'}(2i)"].rjust(2,"0")+"-"+params[:vgroup]["#{'vgroup_date'}(3i)"].rjust(2,"0")
     # this gets messy - probably multiple inserts
-    
+    if  !params[:participant].nil? and !params[:participant][:reggieid].blank?
+         v_participant = Participant.where("reggieid in (?)",params[:participant][:reggieid].rjust(6,"0"))
+         if !v_participant[0].nil? and params[:vgroup][:participant_id].blank?
+            if !params[:vgroup][:rmr].blank?
+              if (params[:vgroup][:rmr])[0..5] == "RMRaic" && is_a_number?((params[:vgroup][:rmr])[6..11]) && (params[:vgroup][:rmr]).length == 12
+                    reggieid_rmr = (params[:vgroup][:rmr])[6..11]
+                    v_participant_rmr = Participant.where(" reggieid in (?)",reggieid_rmr)
+                    if !v_participant_rmr[0].nil? and v_participant_rmr[0].id != v_participant[0].id
+                        flash[:warning] = "The participants from the reggieid and RMRaic######  do not match !!!!!!  SOMETHING IS AMISS! "
+                    else
+                       params[:vgroup][:participant_id] = v_participant[0].id.to_s
+                    end
+              end
+            else
+          puts "CCCCCCCC"+v_participant[0].id.to_s
+              params[:vgroup][:participant_id] = v_participant[0].id.to_s
+              # not sure why setting params not carrying thru
+              @vgroup.participant_id = v_participant[0].id.to_s
+            end
+          elsif !params[:vgroup][:participant_id].blank? 
+              if (params[:vgroup][:rmr])[0..5] == "RMRaic" && is_a_number?((params[:vgroup][:rmr])[6..11]) && (params[:vgroup][:rmr]).length == 12
+                    reggieid_rmr = (params[:vgroup][:rmr])[6..11]
+                    v_participant_rmr = Participant.where(" reggieid in (?)",reggieid_rmr)
+                    if !v_participant_rmr[0].nil? and v_participant_rmr[0].id != params[:vgroup][:participant_id]
+                        flash[:warning] = "The participants from the PARTICIPANT and RMRaic######  do not match !!!!!!  SOMETHING IS AMISS! "
+                        params[:vgroup][:participant_id] = nil
+                    end
+              end
+              if !params[:vgroup][:participant_id].blank? and params[:vgroup][:participant_id] != v_participant[0].id
+                 flash[:warning] = "The participants from the reggieid and PARTICIPANT   do not match !!!!!!  SOMETHING IS AMISS! "
+                  params[:vgroup].delete :participant_id
+              end
+         end
+    end
+
     respond_to do |format|
       v_enrollment_id_array = []
       v_enrollment_array = []
@@ -336,7 +372,6 @@ class VgroupsController < ApplicationController
         format.html { redirect_to(@vgroup, :notice => 'Vgroup was successfully created.') }
         format.xml  { render :xml => @vgroup, :status => :created, :location => @vgroup }
       else
-        puts "ddddddddd"
         format.html { render :action => "new" }
         format.xml  { render :xml => @vgroup.errors, :status => :unprocessable_entity }
       end
@@ -346,7 +381,6 @@ class VgroupsController < ApplicationController
   # PUT /vgroups/1
   # PUT /vgroups/1.xml
   def update
-    puts "bbbbbbbb"
     scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     # removed attr_accessible  in model and ok now - update attributes not doing updates
@@ -355,7 +389,19 @@ class VgroupsController < ApplicationController
     #   @vgroup.participant_id =params[:vgroup][:participant_id]
     #   @vgroup.rmr =params[:vgroup][:rmr]
     #   @vgroup.vgroup_date = params[:vgroup]["#{'vgroup_date'}(1i)"] +"-"+params[:vgroup]["#{'vgroup_date'}(2i)"].rjust(2,"0")+"-"+params[:vgroup]["#{'vgroup_date'}(3i)"].rjust(2,"0")
-    
+    if params[:vgroup][:participant_id].blank?
+         @vgroup.participant_id = nil
+         @vgroup.save
+    end
+
+        # shoe horning in the reggieid 
+    if @vgroup.participant_id.nil? and !params[:participant].nil? and !params[:participant][:reggieid].blank?
+         v_participant = Participant.where("reggieid in (?)",params[:participant][:reggieid].rjust(6,"0"))
+         if !v_participant[0].nil? and params[:vgroup][:participant_id].blank?
+          @vgroup.participant_id = v_participant[0].id
+          params[:vgroup][:participant_id] = v_participant[0].id.to_s
+         end
+    end
     
     # getting undefined method `to_sym' error -- somethng is nil 
     # just trying to delete 
@@ -369,6 +415,7 @@ class VgroupsController < ApplicationController
          v_destroy = params[:vgroup][:enrollments_attributes][cnt.to_s][:_destroy] #(value.to_s)[(value.to_s).index("_destroy")+8,(value.to_s).length] 
          if v_destroy.to_s == "1"
              enrollment_id = enrollment_id.sub("_destroy1","")
+             sql = "Delete from enrollment_vgroup_memberships where vgroup_id ="+@vgroup.id.to_s+" and enrollment_id ="+enrollment_id
              connection = ActiveRecord::Base.connection();
              results = connection.execute(sql)
              params[:vgroup][:enrollments_attributes][cnt.to_s] = nil
@@ -422,11 +469,12 @@ class VgroupsController < ApplicationController
        if params[:vgroup][:participant_id].blank?
              params[:vgroup][:participant_id] = @vgroup.participant_id.to_s
       elsif params[:vgroup][:participant_id] != @vgroup.participant_id.to_s # real problem - crossing 2 participants
-           flash[:warning] = "The participant selected does not match the RMRaic######  participant !!!!!!   "
+           flash[:warning] = "The participant selected does not match the Reggieid/RMRaic######  participant !!!!!!   "
        end
     end
     
     params[:vgroup].delete('enrollments_attributes') 
+
     
     respond_to do |format|
       if @vgroup.update_attributes(params[:vgroup])  #@vgroup.save #update_attributes(params[:vgroup])
