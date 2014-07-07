@@ -215,7 +215,7 @@ class VgroupsController < ApplicationController
          v_participant = Participant.where("reggieid in (?)",params[:participant][:reggieid].rjust(6,"0"))
          if !v_participant[0].nil? and params[:vgroup][:participant_id].blank?
             if !params[:vgroup][:rmr].blank?
-              if (params[:vgroup][:rmr])[0..5] == "RMRaic" && is_a_number?((params[:vgroup][:rmr])[6..11]) && (params[:vgroup][:rmr]).length == 12
+              if (params[:vgroup][:rmr])[0..5] == "RMRaic" && (params[:vgroup][:rmr][6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && (params[:vgroup][:rmr]).length == 12
                     reggieid_rmr = (params[:vgroup][:rmr])[6..11]
                     v_participant_rmr = Participant.where(" reggieid in (?)",reggieid_rmr)
                     if !v_participant_rmr[0].nil? and v_participant_rmr[0].id != v_participant[0].id
@@ -225,13 +225,12 @@ class VgroupsController < ApplicationController
                     end
               end
             else
-          puts "CCCCCCCC"+v_participant[0].id.to_s
               params[:vgroup][:participant_id] = v_participant[0].id.to_s
               # not sure why setting params not carrying thru
-              @vgroup.participant_id = v_participant[0].id.to_s
+              @vgroup.participant_id = v_participant[0].id
             end
-          elsif !params[:vgroup][:participant_id].blank? 
-              if (params[:vgroup][:rmr])[0..5] == "RMRaic" && is_a_number?((params[:vgroup][:rmr])[6..11]) && (params[:vgroup][:rmr]).length == 12
+         elsif !params[:vgroup][:participant_id].blank? 
+              if (params[:vgroup][:rmr])[0..5] == "RMRaic" && (params[:vgroup][:rmr][6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && (params[:vgroup][:rmr]).length == 12
                     reggieid_rmr = (params[:vgroup][:rmr])[6..11]
                     v_participant_rmr = Participant.where(" reggieid in (?)",reggieid_rmr)
                     if !v_participant_rmr[0].nil? and v_participant_rmr[0].id != params[:vgroup][:participant_id]
@@ -243,9 +242,17 @@ class VgroupsController < ApplicationController
                  flash[:warning] = "The participants from the reggieid and PARTICIPANT   do not match !!!!!!  SOMETHING IS AMISS! "
                   params[:vgroup].delete :participant_id
               end
+          elsif (params[:vgroup][:rmr])[0..5] == "RMRaic" && (params[:vgroup][:rmr][6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && (params[:vgroup][:rmr]).length == 12
+               # pick up later - let RMRaic take precident
+          elsif v_participant[0].nil? and (params[:participant][:reggieid]=~ /\A[-+]?[0-9]*\.?[0-9]+\Z/)  # make a new participant
+            v_new_participant = Participant.new
+            v_new_participant.reggieid = params[:participant][:reggieid].rjust(6,"0")
+            v_new_participant.save
+            params[:vgroup][:participant_id] = v_new_participant.id.to_s
+              # not sure why setting params not carrying thru
+            @vgroup.participant_id = v_new_participant.id
          end
     end
-
     respond_to do |format|
       v_enrollment_id_array = []
       v_enrollment_array = []
@@ -272,7 +279,7 @@ class VgroupsController < ApplicationController
                 @vgroup.participant_id = enrollment[0].participant_id
                 @vgroup.save
             elsif  (@vgroup.participant_id).blank? and !(@vgroup.rmr).blank?
-                if (@vgroup.rmr)[0..5] == "RMRaic" && is_a_number?((@vgroup.rmr)[6..11]) && (@vgroup.rmr).length == 12
+                if (@vgroup.rmr)[0..5] == "RMRaic" &&    ((@vgroup.rmr)[6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && (@vgroup.rmr).length == 12
                     reggieid = (@vgroup.rmr)[6..11]
                     v_participant = Participant.where(" reggieid in (?)",reggieid)
                     v_participant_id = v_participant[0].try(:id).to_s
@@ -286,7 +293,7 @@ class VgroupsController < ApplicationController
             end
           else  # make a new enrollment with this participant-- only works for participant selected
             if  (@vgroup.participant_id).blank? and !(@vgroup.rmr).blank?
-                if (@vgroup.rmr)[0..5] == "RMRaic" && is_a_number?((@vgroup.rmr)[6..11]) && (@vgroup.rmr).length == 12
+                if (@vgroup.rmr)[0..5] == "RMRaic" && ((@vgroup.rmr)[6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ )&& (@vgroup.rmr).length == 12
                     reggieid = (@vgroup.rmr)[6..11]
                     v_participant = Participant.where(" reggieid in (?)",reggieid)
                     v_participant_id = v_participant[0].try(:id).to_s
@@ -513,6 +520,9 @@ class VgroupsController < ApplicationController
         if @vgroup.participant_id.blank? and !params[:make_participant_flag].blank? and params[:make_participant_flag] == "Y"
           # make new participant-- no data
           @participant = Participant.new
+          if !params[:participant].nil? and !params[:participant][:reggieid].blank? and (params[:participant][:reggieid]=~ /\A[-+]?[0-9]*\.?[0-9]+\Z/)
+              @participant.reggieid = params[:participant][:reggieid].rjust(6,"0")
+          end
           @participant.save
           @vgroup.participant_id = @participant.id
           @vgroup.save
@@ -559,7 +569,7 @@ def set_participant_in_enrollment( rmr, enumber_array)
   if participant_id.blank?
     # if rmr starts with RMRaic and last 6 chars are digits
     # look for a participant with this reggieID
-    if rmr[0..5] == "RMRaic" && is_a_number?(rmr[6..11]) && rmr.length == 12
+    if rmr[0..5] == "RMRaic" && ((rmr)[6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && rmr.length == 12
          reggieid = rmr[6..11]
          @participant = Participant.where(" reggieid in (?)",reggieid)
          participant_id = @participant[0].try(:id).to_s
@@ -570,7 +580,7 @@ def set_participant_in_enrollment( rmr, enumber_array)
           participant_id = @participant[0].try(:id).to_s           
     end
     # if still blank, and good rmr format, insert new partipant
-    if participant_id.blank? && rmr[0..5] == "RMRaic" && is_a_number?(rmr[6..11]) && rmr.length == 12
+    if participant_id.blank? && rmr[0..5] == "RMRaic" && ((rmr)[6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && rmr.length == 12
         # do insert , get participant_id
          
          @participant = Participant.new
