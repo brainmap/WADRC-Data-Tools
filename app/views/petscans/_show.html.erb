@@ -20,6 +20,18 @@
     <table width="80%"><tr><th align="left" width="30%">File Name</th><th align="left" width="50%">Path</th></tr>
     <% @petfiles.each do |pf| %>
       <tr><td align="left"><%= pf.file_name %></td><td align="left"><%= pf.path %></td></tr>
+
+   <% if !pf.path.blank? %>
+       <tr><td > <small><small>size <%= File.stat(pf.path).size %></small></small></td>
+        <% if !@petscan_tracer_file_size_multiple.nil? and !@petscan_tracer_file_size_multiple[@petscan.lookup_pettracer_id.to_s].nil? 
+              if @petscan_tracer_file_size_multiple[@petscan.lookup_pettracer_id.to_s].include?(File.stat(pf.path).size.to_s) %>
+                  <td><small><small> -File is one of the expected sizes for this scan procedure/tracer</small></small></td></tr>
+               <%else%>
+                  <td > <BIG> -FILE IS NOT THE EXPECTED SIZE </BIG><%= @petscan_tracer_file_size_multiple[@petscan.lookup_pettracer_id.to_s].join(", ") %></td></tr>
+              <%end%>
+        <% end %>
+    <%end%> 
+
       <tr><td colspan="2" align="left"><%= pf.note %></td></tr>
     <%end%>
   </table>

@@ -18,19 +18,27 @@ class Petscan < ActiveRecord::Base
     # 2_ries.mosaic.visit1    3_ries.mosaic.visit1
     # tracer 1=pib, 2=fdg, 3=way, 4=015
     v_base_path = Shared.get_base_path()
-    v_pet_target_hash ={'1_johnson.pipr.visit1'=>'johnson.pipr.visit1/pet','2_johnson.predict.visit1'=>'johnson.predict.visit1/pet/FDG-visit1',
-         '1_johnson.predict.visit1'=>'johnson.predict.visit1/pet/PIB-visit1','2_johnson.predict.visit2'=>'johnson.predict.visit2/pet/FDG',
-         '1_johnson.predict.visit2'=>'johnson.predict.visit2/pet/PIB','2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
-         '2_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/FDG',    '3_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/WAY',
-         '2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
-         '5_bendlin.pbr28.visit1'=>'bendlin.pbr28.visit1/pet/PBR',
-          '2_ADNI-2'=>'ADNI-2/pet/FDG', 
-           '6_ADNI-2'=>'ADNI-2/pet/AV45'}
+    #v_pet_target_hash ={'1_johnson.pipr.visit1'=>'johnson.pipr.visit1/pet','2_johnson.predict.visit1'=>'johnson.predict.visit1/pet/FDG-visit1',
+    #     '1_johnson.predict.visit1'=>'johnson.predict.visit1/pet/PIB-visit1','2_johnson.predict.visit2'=>'johnson.predict.visit2/pet/FDG',
+    #     '1_johnson.predict.visit2'=>'johnson.predict.visit2/pet/PIB','2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
+    #     '2_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/FDG',    '3_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/WAY',
+    #     '2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
+    #     '5_bendlin.pbr28.visit1'=>'bendlin.pbr28.visit1/pet/PBR',
+    #      '2_ADNI-2'=>'ADNI-2/pet/FDG', 
+    #       '6_ADNI-2'=>'ADNI-2/pet/AV45'}
     v_sp = ScanProcedure.find(p_sp_id)
-    v_key = p_tracer_id.to_s+"_"+v_sp.codename
+    v_pet_target_path = ""
+    v_tracer_path_array = v_sp.petscan_tracer_path.split("|")
+    v_tracer_path_array.each do |tr|
+        v_tracer_path = tr.split(":")
+        if v_tracer_path[0] == p_tracer_id.to_s
+            v_pet_target_path = v_tracer_path[1]
+        end
+    end
+    #v_key = p_tracer_id.to_s+"_"+v_sp.codename
     v_file_name = ""
-    if !v_pet_target_hash[v_key].blank?
-        v_path = v_base_path+"/raw/"+v_pet_target_hash[v_key]+"/"
+    if !v_pet_target_path.blank?
+        v_path = v_base_path+"/raw/"+v_pet_target_path+"/"
         # check for file with enum 
         vgroup = Vgroup.find(p_vgroup_id)
         (vgroup.enrollments).each do |e|
@@ -78,19 +86,19 @@ class Petscan < ActiveRecord::Base
     # 2_ries.mosaic.visit1    3_ries.mosaic.visit1
     # tracer 1=pib, 2=fdg, 3=way, 4=015
     v_base_path = Shared.get_base_path()
-    v_pet_target_hash ={'1_johnson.pipr.visit1'=>'johnson.pipr.visit1/pet','2_johnson.predict.visit1'=>'johnson.predict.visit1/pet/FDG-visit1',
-         '1_johnson.predict.visit1'=>'johnson.predict.visit1/pet/PIB-visit1','2_johnson.predict.visit2'=>'johnson.predict.visit2/pet/FDG',
-         '1_johnson.predict.visit2'=>'johnson.predict.visit2/pet/PIB','2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
-         '2_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/FDG',    '3_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/WAY',
-         '2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
-         '5_bendlin.pbr28.visit1'=>'bendlin.pbr28.visit1/pet/PBR' ,
-          '2_ADNI-2'=>'ADNI-2/pet/FDG', 
-           '6_ADNI-2'=>'ADNI-2/pet/AV45'}
     v_sp = ScanProcedure.find(p_sp_id)
-    v_key = p_tracer_id.to_s+"_"+v_sp.codename
+    v_pet_target_path = ""
+    v_tracer_path_array = v_sp.petscan_tracer_path.split("|")
+    v_tracer_path_array.each do |tr|
+        v_tracer_path = tr.split(":")
+        if v_tracer_path[0] == p_tracer_id.to_s
+            v_pet_target_path = v_tracer_path[1]
+        end
+    end
+    #v_key = p_tracer_id.to_s+"_"+v_sp.codename
     v_file_names = []
-    if !v_pet_target_hash[v_key].blank?
-        v_path = v_base_path+"/raw/"+v_pet_target_hash[v_key]+"/"
+    if !v_pet_target_path.blank? #v_pet_target_hash[v_key].blank?
+        v_path = v_base_path+"/raw/"+v_pet_target_path+"/" #v_pet_target_hash[v_key]+"/"
         # check for file with enum 
         vgroup = Vgroup.find(p_vgroup_id)
         (vgroup.enrollments).each do |e|   # need case insensitive match 
@@ -132,19 +140,27 @@ class Petscan < ActiveRecord::Base
     # 2_ries.mosaic.visit1    3_ries.mosaic.visit1
     # tracer 1=pib, 2=fdg, 3=way, 4=015
     v_base_path = Shared.get_base_path()
-    v_pet_target_hash ={'1_johnson.pipr.visit1'=>'johnson.pipr.visit1/pet','2_johnson.predict.visit1'=>'johnson.predict.visit1/pet/FDG-visit1',
-         '1_johnson.predict.visit1'=>'johnson.predict.visit1/pet/PIB-visit1','2_johnson.predict.visit2'=>'johnson.predict.visit2/pet/FDG',
-         '1_johnson.predict.visit2'=>'johnson.predict.visit2/pet/PIB','2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
-         '2_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/FDG',    '3_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/WAY',
-         '2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
-         '5_bendlin.pbr28.visit1'=>'bendlin.pbr28.visit1/pet/PBR',
-          '2_ADNI-2'=>'ADNI-2/pet/FDG', 
-           '6_ADNI-2'=>'ADNI-2/pet/AV45' }
+    #v_pet_target_hash ={'1_johnson.pipr.visit1'=>'johnson.pipr.visit1/pet','2_johnson.predict.visit1'=>'johnson.predict.visit1/pet/FDG-visit1',
+    #     '1_johnson.predict.visit1'=>'johnson.predict.visit1/pet/PIB-visit1','2_johnson.predict.visit2'=>'johnson.predict.visit2/pet/FDG',
+    #     '1_johnson.predict.visit2'=>'johnson.predict.visit2/pet/PIB','2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
+    #     '2_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/FDG',    '3_ries.mosaic.visit1'=>'ries.mosaic.visit1/pet/WAY',
+    #     '2_johnson.rhesus.visit2'=>'johnson.rhesus.visit2/pet/FDG',
+    #     '5_bendlin.pbr28.visit1'=>'bendlin.pbr28.visit1/pet/PBR',
+    #      '2_ADNI-2'=>'ADNI-2/pet/FDG', 
+    #       '6_ADNI-2'=>'ADNI-2/pet/AV45' }
     v_sp = ScanProcedure.find(p_sp_id)
-    v_key = p_tracer_id.to_s+"_"+v_sp.codename
+    v_pet_target_path = ""
+    v_tracer_path_array = v_sp.petscan_tracer_path.split("|")
+    v_tracer_path_array.each do |tr|
+        v_tracer_path = tr.split(":")
+        if v_tracer_path[0] == p_tracer_id.to_s
+            v_pet_target_path = v_tracer_path[1]
+        end
+    end
+    #v_key = p_tracer_id.to_s+"_"+v_sp.codename
     v_path = ""
-    if !v_pet_target_hash[v_key].blank?
-        v_path = v_base_path+"/raw/"+v_pet_target_hash[v_key]+"/"+p_file_name
+    if !v_pet_target_path.blank?
+        v_path = v_base_path+"/raw/"+v_pet_target_path+"/"+p_file_name
     else
         puts "AAAAAAAAA "+v_key+"   "+p_file_name
     end

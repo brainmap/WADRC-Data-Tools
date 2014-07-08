@@ -382,6 +382,7 @@ class PetscansController < ApplicationController
 
     # get tracer size array for the scan procedures petscan_tracer_file_size   = tracer_id:size|tracer_id:size| etc
     @petscan_tracer_file_size = {}
+    @petscan_tracer_file_size_multiple = {}
     v_scan_procedures = ScanProcedure.where("scan_procedures.id in ( select scan_procedure_id from scan_procedures_vgroups where vgroup_id in (?))", @vgroup.id) 
     v_scan_procedures.each do |sp|
         if !sp.petscan_tracer_file_size.nil?
@@ -389,6 +390,11 @@ class PetscansController < ApplicationController
               v_tmp_tracer_size.each do |tr|
                 v_tmp_size = tr.split(":")
                 @petscan_tracer_file_size[v_tmp_size[0]] = v_tmp_size[1]
+                if @petscan_tracer_file_size_multiple[v_tmp_size[0]].nil?
+                   @petscan_tracer_file_size_multiple[v_tmp_size[0]] = [v_tmp_size[1]]
+                else
+                  @petscan_tracer_file_size_multiple[v_tmp_size[0]] = @petscan_tracer_file_size_multiple[v_tmp_size[0]].push(v_tmp_size[1])
+                end
               end
         end
     end
