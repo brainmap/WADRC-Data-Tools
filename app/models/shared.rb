@@ -628,7 +628,7 @@ class Shared  < ActionController::Base
    # subset of adrc_upload -- just pcvipr, asl raw, asl_fmap, pdmap
       def run_adrc_pcvipr  
         v_base_path = Shared.get_base_path()
-        v_preprocessed_path = v_base_path+"/preprocessed/visits/asthana.adrc-clinical-core.visit1/"
+        v_preprocessed_path = v_base_path+"/preprocessed/visits/"
          @schedule = Schedule.where("name in ('adrc_pcvipr')").first
           @schedulerun = Schedulerun.new
           @schedulerun.schedule_id = @schedule.id
@@ -666,9 +666,12 @@ class Shared  < ActionController::Base
         @schedulerun.comment =v_comment[0..1990]
         @schedulerun.save
         results.each do |r|
+          v_sp_id = r[1]
+          v_scan_procedure = ScanProcedure.find(v_sp_id)
+          v_preprocessed_path = v_preprocessed_path+v_scan_procedure.codename+"/"
           v_enumber = r[0].gsub(/_v2/,"").gsub(/_v3/,"").gsub(/_v4/,"").gsub(/_v5/,"")
 # CHANGED FOR R
-          v_enumber_r = v_enumber+".R"
+          v_enumber_r = v_enumber  # +".R" #".R"
           v_comment = "strt "+r[0]+","+v_comment
           @schedulerun.comment =v_comment[0..1990]
           @schedulerun.save
@@ -676,8 +679,9 @@ class Shared  < ActionController::Base
           # update schedulerun comment - prepend 
           sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.id ='"+r[2].to_s+"')
                                                    and v.id in ( select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id = "+r[1].to_s+")
-and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.appointment_id
-and  visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','')  like '%R%' )"
+and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.appointment_id  )"
+
+#and  visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','')  like '%R%' )"
 #REMOVE LAST 2 DEMPSEY LINES -- KEEPING R and not R separate
           results_vgroup = connection.execute(sql_vgroup)
           # mkdir /tmp/adrc_pcvipr/[subjectid]_YYYYMMDD_wisc
@@ -704,9 +708,9 @@ and  visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','')  like
                       and image_datasets.series_description != 'ASL CBF'
                       and image_datasets.series_description !=  'Cerebral Blood Flow'
                       and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.id ='"+r[2].to_s+"')
-                      and vgroups.id in ( select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id = "+r[1].to_s+")
-and ( visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','')  like '%R%')     
+                      and vgroups.id in ( select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id = "+r[1].to_s+")   
                        order by appointments.appointment_date "
+                       #and ( visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','')  like '%R%') 
 #REMOVE LAST 2 DEMPSEY LINES -- KEEPING R and not R separate
           results_dataset = connection.execute(sql_dataset)
           v_folder_array = [] # how to empty
@@ -815,13 +819,13 @@ and ( visits.path like '%dempsey.plaque%' and replace(visits.path,'raw','')  lik
            end
           end
 # CHANGED TO STOP R DELETE
-          sql_status = "select pcvipr_status_flag from cg_adrc_upload where subjectid ='"+r[0]+"' and  1 = 0"
+          sql_status = "select pcvipr_status_flag from cg_adrc_upload where subjectid ='"+r[0]+"' "
           results_status = connection.execute(sql_status)
           if v_scan_desc_type_array.include?("PCVIPR")
-puts "BBBBBBB includes pcvipr , status = "+(results_status.first)[0]
+#puts "BBBBBBB includes pcvipr , status = "+(results_status.first)[0]
           end
 
-          if !v_scan_desc_type_array.include?("PCVIPR")   and (results_status.first)[0] != "R"
+          if !v_scan_desc_type_array.include?("PCVIPR")   and  (results_status.first)[0] != "R"
 
             puts " aaaa no pcvipr , status ! = R"
             # sql_dirlist = "update cg_adrc_upload set general_comment =' NO PCVIPR!!!! "+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
@@ -996,7 +1000,9 @@ puts "BBBBBBB includes pcvipr , status = "+(results_status.first)[0]
     connection = ActiveRecord::Base.connection();
     sql = "truncate table cg_adrc_upload_new"       
     results = connection.execute(sql)
-    sql = "insert into cg_adrc_upload_new(subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,status_comment,dir_list) select subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,status_comment,dir_list from cg_adrc_upload "
+    sql = "insert into cg_adrc_upload_new(subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,status_comment,dir_list,  dti_sent_flag, dti_status_flag,  dti_dir_list ,  pcvipr_sent_flag,  pcvipr_status_flag,  pcvipr_dir_list ,
+  wahlin_t1_asl_resting_sent_flag,  wahlin_t1_asl_resting_status_flag, wahlin_t1_asl_resting_dir_list ,xnat_sent_flag,  xnat_status_flag,  xnat_dir_list ) select subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,status_comment,dir_list, dti_sent_flag, dti_status_flag,  dti_dir_list ,  pcvipr_sent_flag,  pcvipr_status_flag,  pcvipr_dir_list ,
+  wahlin_t1_asl_resting_sent_flag,  wahlin_t1_asl_resting_status_flag, wahlin_t1_asl_resting_dir_list ,xnat_sent_flag,  xnat_status_flag,  xnat_dir_list  from cg_adrc_upload "
     results = connection.execute(sql)
     # recruit new adrc scans ---   change 
     v_weeks_back = "2"
@@ -1012,8 +1018,11 @@ puts "BBBBBBB includes pcvipr , status = "+(results_status.first)[0]
           sql2 = "insert into cg_adrc_upload_new (subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,dti_sent_flag,dti_status_flag) values('"+r[0]+"','N','Y', "+enrollment[0].id.to_s+",22,'N','Y')"
           results2 = connection.execute(sql2)
     end
+
+
     v_comment = self.move_present_to_old_new_to_present("cg_adrc_upload",
-    "subjectid, general_comment, sent_flag, sent_comment, status_flag, status_comment, dir_list,enrollment_id, scan_procedure_id,dti_sent_flag,dti_status_flag,dti_dir_list",
+    "subjectid, general_comment, sent_flag, sent_comment, status_flag, status_comment, dir_list,enrollment_id, scan_procedure_id,dti_sent_flag,dti_status_flag,dti_dir_list,  pcvipr_sent_flag,  pcvipr_status_flag,  pcvipr_dir_list ,
+  wahlin_t1_asl_resting_sent_flag,  wahlin_t1_asl_resting_status_flag, wahlin_t1_asl_resting_dir_list ,xnat_sent_flag,  xnat_status_flag,  xnat_dir_list ",
                    "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
 
@@ -1296,7 +1305,21 @@ puts "AAAAAA "+v_call
     
   end
 
+def run_batch_visit_import
+    v_base_path = "/mounts/data/raw/ADNI-2/mri/"
+    v_scan_procedure_id = "49"
+    v_dir = "127_S_5266_6212_07302013"
+    #params[:raw_data_import] =""
+    #params[:raw_data_import][:directory] = v_base_path+ v_dir
+    #params[:raw_data_import][:scan_procedure] = v_scan_procedure
+    v_raw_data_import = RawDataImport.new
+    v_raw_data_import.create( directory:"/mounts/data/raw/ADNI-2/mri/127_S_5266_6212_07302013",scan_proceure:"49")
+    # not sure how to specify controller raw_data_import which does not have a model
 
+
+
+
+end
 
    # data request from anders wahlin for adrc - t1/resting bold => /unknown, asl => /asl
   # from cg_adrc_upload 
