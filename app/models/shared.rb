@@ -3729,12 +3729,12 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
 
     v_base_path = Shared.get_base_path()
     v_log_base ="/mounts/data/preprocessed/logs/"
-    v_process_name = "fs_manual_edits_to_good2go"
+    v_process_name = "fs_move_qc_pass_to_good2go"
     process_logs_delete_old( v_process_name, v_log_base)
-     @schedule = Schedule.where("name in ('fs_manual_edits_to_good2go')").first
+     @schedule = Schedule.where("name in ('fs_move_qc_pass_to_good2go')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
-      @schedulerun.comment ="starting fs_manual_edits_to_good2go"
+      @schedulerun.comment ="starting fs_move_qc_pass_to_good2goo"
       @schedulerun.save
       @schedulerun.start_time = @schedulerun.created_at
       @schedulerun.save
@@ -3806,7 +3806,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
 
     end
 
-       @schedulerun.comment =("successful finish fs_manual_edits_to_good2go "+v_comment_warning+" "+v_comment[0..3990])
+       @schedulerun.comment =("successful finish fs_move_qc_pass_to_good2go "+v_comment_warning+" "+v_comment[0..3990])
     if !v_comment.include?("ERROR") and !v_comment_warning.include?("ERROR")
           @schedulerun.status_flag ="Y"
     end
@@ -3820,12 +3820,12 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
   def run_fs_move_edit_file_complete_to_good2go
     v_base_path = Shared.get_base_path()
     v_log_base ="/mounts/data/preprocessed/logs/"
-    v_process_name = "fs_to_good2go"
+    v_process_name = "fs_move_edit_file_complete_to_good2go"
     process_logs_delete_old( v_process_name, v_log_base)
-     @schedule = Schedule.where("name in ('fs_to_good2go')").first
+     @schedule = Schedule.where("name in ('fs_move_edit_file_complete_to_good2go')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
-      @schedulerun.comment ="starting fs_to_good2go"
+      @schedulerun.comment ="starting fs_move_edit_file_complete_to_good2go"
       @schedulerun.save
       @schedulerun.start_time = @schedulerun.created_at
       @schedulerun.save
@@ -3896,7 +3896,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
 
     end
 
-       @schedulerun.comment =("successful finish fs_to_good2go "+v_comment_warning+" "+v_comment[0..3990])
+       @schedulerun.comment =("successful finish fs_move_edit_file_complete_to_good2go "+v_comment_warning+" "+v_comment[0..3990])
     if !v_comment.include?("ERROR") and !v_comment_warning.include?("ERROR")
           @schedulerun.status_flag ="Y"
     end
