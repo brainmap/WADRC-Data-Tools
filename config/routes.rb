@@ -1,5 +1,8 @@
 WADRCDataTools::Application.routes.draw do
   
+  resources :petfiles
+
+
   resources :tredit_actions
 
 

@@ -2,6 +2,7 @@ require 'visit'
 require 'image_dataset'
 require 'net/sftp'
 require 'open3'
+require 'metamri'
 
 class Shared  < ActionController::Base
   extend SharedHelper
@@ -1306,19 +1307,130 @@ puts "AAAAAA "+v_call
   end
 
 def run_batch_visit_import
+
+  v_log_base ="/mounts/data/preprocessed/logs/"
+      v_process_name = "batch_visit_import"
+    process_logs_delete_old( v_process_name, v_log_base)
+     @schedule = Schedule.where("name in ('batch_visit_import')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting batch_visit_import"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+      v_stop_file_name = v_process_name+"_stop"
+      v_stop_file_path = v_log_base+v_stop_file_name
+    connection = ActiveRecord::Base.connection();
+
+    v_current_user = User.find("30")
+   # = Shared.get_base_path()
     v_base_path = "/mounts/data/raw/ADNI-2/mri/"
-    v_scan_procedure_id = "49"
-    v_dir = "127_S_5266_6212_07302013"
+    #v_scan_procedure_id = "49"
+    v_scan_procedure = ScanProcedure.find(49)
+    v_dir_array = ["099_S_2146_4976_12072012","099_S_2146_6735_11042013","127_S_0112_4739_01182012","127_S_0112_5509_01232013","127_S_0112_936_01232014","127_S_0259_1154_04092014","127_S_0259_4898_04022012","127_S_0259_58_04192013","127_S_0260_1215_05082014","127_S_0260_4994_04262012","127_S_0260_64_04232013","127_S_0925_4562_11092011","127_S_0925_5368_11142012","127_S_0925_785_11132013","127_S_1032_4686_12152011","127_S_1032_5409_12042012","127_S_1032_835_12042013","127_S_1419_4252_08242011","127_S_1427_4232_08192011","127_S_1427_502_08192013","127_S_1427_5278_08152012","127_S_2213_3191_12012011","127_S_2213_4982_12102012","127_S_2213_6743_12172013","127_S_2234_3278_12192011","127_S_2234_5152_01252013","127_S_2234_6747_12182013","127_S_4148_3093_11092011","127_S_4148_3568_02162012","127_S_4148_4425_08302012","127_S_4148_6312_08152013","127_S_4197_2556_08222011","127_S_4197_3204_12052011","127_S_4197_3557_02152012","127_S_4197_4352_08142012","127_S_4197_6453_09102013","127_S_4198_2602_09012011","127_S_4198_3210_12062011","127_S_4198_3814_03282012","127_S_4198_4453_09062012","127_S_4198_6509_09242013","127_S_4210_2635_09082011","127_S_4210_3241_12122011","127_S_4210_3774_03222012","127_S_4210_4599_10012012","127_S_4240_2724_09232011","127_S_4240_3257_12142011","127_S_4240_3827_03292012","127_S_4240_4560_09252012","127_S_4240_6527_09272013","127_S_4240_6529_09272013","127_S_4301_2938_10242011","127_S_4301_3422_01242012","127_S_4301_4046_05102012","127_S_4301_4866_11082012","127_S_4301_6640_11192013","127_S_4500_3513_02082012","127_S_4500_4039_05092012","127_S_4500_4326_08082012","127_S_4500_5608_04112013","127_S_4500_6986_02182014","127_S_4604_3762_03212012","127_S_4604_4038_06142012","127_S_4604_4545_09202012","127_S_4604_5597_04102013","127_S_4604_7179_03262014","127_S_4624_3968_05312012","127_S_4624_4449_09052012","127_S_4624_4995_12122012","127_S_4624_6085_07082013","127_S_4645_3864_04042012","127_S_4645_4174_07092012","127_S_4645_4738_10192012","127_S_4645_5606_04112013","127_S_4645_7292_04172014","127_S_4749_3965_05312012","127_S_4765_4006_06082012","127_S_4765_4583_09272012","127_S_4765_4984_12102012","127_S_4765_6005_06192013","127_S_4765_7511_06122014","127_S_4843_4232_07182012","127_S_4843_4824_11012012","127_S_4843_6369_08262013","127_S_4844_4231_07182012","127_S_4844_4823_11012012","127_S_4844_6377_08272013","127_S_4928_4445_09052012","127_S_4928_5009_12142012","127_S_4928_5428_03142013","127_S_4928_6651_11202013","127_S_4940_4533_09192012","127_S_4940_5007_12142012","127_S_4940_5487_03252013","127_S_4940_6562_10032013","127_S_4992_4778_10252012","127_S_4992_5166_01282013","127_S_4992_5680_04252013","127_S_4992_6791_11112013","127_S_5028_4890_11142012","127_S_5028_5308_02202013","127_S_5028_5927_06052013","127_S_5028_6723_12122013","127_S_5028_6814_01132014","127_S_5056_5044_01032013","127_S_5056_5673_04242013","127_S_5056_6159_07222013","127_S_5056_6930_02062014","127_S_5058_5081_01102013","127_S_5058_5713_05012013","127_S_5058_6121_07152013","127_S_5067_5211_02042013","127_S_5067_5757_05072013","127_S_5067_6259_08052013","127_S_5095_5352_02272013","127_S_5095_5846_05212013","127_S_5095_6487_09172013","127_S_5095_7123_03172014","127_S_5132_5676_04252013","127_S_5132_6186_07252013","127_S_5132_7354_05012014","127_S_5168_5980_06142013","127_S_5185_6379_08272013","127_S_5200_5951_06102013","127_S_5200_6513_09242013","127_S_5218_6026_06242013","127_S_5228_6025_06242013","127_S_5266_6212_07302013"]
     #params[:raw_data_import] =""
     #params[:raw_data_import][:directory] = v_base_path+ v_dir
     #params[:raw_data_import][:scan_procedure] = v_scan_procedure
-    v_raw_data_import = RawDataImport.new
-    v_raw_data_import.create( directory:"/mounts/data/raw/ADNI-2/mri/127_S_5266_6212_07302013",scan_proceure:"49")
+    #v_raw_data_import = RawDataImport.new
+    #v_raw_data_import.create( directory:"/mounts/data/raw/ADNI-2/mri/127_S_5266_6212_07302013",scan_proceure:"49")
     # not sure how to specify controller raw_data_import which does not have a model
+v_dir_array.each do |v_dir|
+    # MAKING COPY OF RAW_DATA_IMPORTS_CONTROLLER.rb create
+    @visit_directory_to_scan = (v_base_path + v_dir).chomp(' ')
+if File.directory?(@visit_directory_to_scan)
+      v = VisitRawDataDirectory.new(@visit_directory_to_scan, v_scan_procedure.codename )
+      logger.info "Current User: #{Etc.getlogin}"
+      logger.info  "+++ Importing #{v.visit_directory} as part of #{v.scan_procedure_name} +++"
+       @schedulerun.comment = @schedulerun.comment + "Current User: #{Etc.getlogin}"
+       @schedulerun.comment = @schedulerun.comment + "+++ Importing #{v.visit_directory} as part of #{v.scan_procedure_name} +++"
+       @schedulerun.save
+
+      begin
+        v.scan
+      rescue Exception => e
+        v = nil
+        #flash[:error] = "Awfully sorry, this raw data directory could not be scanned. #{e}"
+        @schedulerun.comment = @schedulerun.comment +  "Awfully sorry, this raw data directory could not be scanned. #{e}"
+        v_comment_warning = v_comment_warning +  "Awfully sorry, this raw data directory could not be scanned. #{e}"
+        @schedulerun.save
+      end
+      unless v.nil?
+        puts "GGGGGGGGGG before Visit.create_or_update_from_metamri"
+        @visit = Visit.create_or_update_from_metamri(v, created_by = v_current_user)
+        unless @visit.new_record?
+          #flash[:notice] = "Sucessfully imported raw data directory."
+          v_appointment = Appointment.find( @visit.appointment_id)
+           v_vgroup = Vgroup.find(v_appointment.vgroup_id)
+           v_vgroup.transfer_mri = "yes"
+          v_vgroup.save
+          v_dir_array = v_dir.split("_")
+          v_enumber = v_dir_array[0]+"_"+v_dir_array[1]+"_"+v_dir_array[2]
+          v_enrollments = Enrollment.where("enumber in (?)", v_enumber)
+          if !v_enrollments[0].nil?
+              v_enrollment = v_enrollments[0]
+          else
+           v_enrollment = Enrollment.new
+          end
+
+           v_enrollment.enumber= v_enumber
+           v_enrollment.save
+           sql = "insert into enrollment_vgroup_memberships(vgroup_id, enrollment_id) values("+v_vgroup.id.to_s+","+v_enrollment.id.to_s+")" 
+           results = connection.execute(sql)
+
+           sql = "insert into enrollment_visit_memberships(visit_id, enrollment_id) values("+@visit.id.to_s+","+v_enrollment.id.to_s+")"
+           results = connection.execute(sql)
+          @schedulerun.comment = @schedulerun.comment +  "Sucessfully imported raw data directory."
+           @schedulerun.save
+          
+          
+          begin
+            PandaMailer.visit_confirmation(@visit, {:send_to => "noreply_johnson_lab@medicine.wisc.edu"}).deliver
+            #flash[:notice] = flash[:notice].to_s + "; Email was succesfully sent."
+            @schedulerun.comment = @schedulerun.comment + " Email was succesfully sent."
+             @schedulerun.save
+          rescue Errno::ECONNREFUSED, LoadError, OpenSSL::SSL::SSLError => load_error
+            logger.info load_error
+            #flash[:error] = "Sorry, your email was not delivered: " + load_error.to_s
+            @schedulerun.comment = @schedulerun.comment + "Sorry, your email was not delivered: " + load_error.to_s
+             @schedulerun.save
+          rescue Timeout::Error => timeout_error
+            logger.info timeout_error
+            #flash[:error] = "Sorry, mail took too long to be delivered: " + timeout_error.to_s
+            @schedulerun.comment = @schedulerun.comment + "Sorry, mail took too long to be delivered: " + timeout_error.to_s
+             @schedulerun.save
+          end
+        else
+          logger.info @visit.errors
+           v_error_tmp =""
+           @visit.errors.each do |r|
+              v_error_tmp = v_error_tmp+" "+r.to_s
+           end
+           #flash[:error] = "Awfully sorry, this raw data directory could not be saved to the database. #{@visit.errors} @visit.errors="+v_error_tmp
+           @schedulerun.comment = @schedulerun.comment + "Awfully sorry, this raw data directory could not be saved to the database. #{@visit.errors} @visit.errors="+v_error_tmp
+           v_comment_warning = v_comment_warning  + "Awfully sorry, this raw data directory could not be saved to the database. #{@visit.errors} @visit.errors="+v_error_tmp
+            @schedulerun.save
+        end
+      end
+      puts "aaaaaa redirect_to root_url"
+    else
+      #flash[:error] = "Invalid raw data directory #{@visit_directory_to_scan}, please check your path and try again. Try running fixrights to cleanup permissions of directory."
+      @schedulerun.comment = @schedulerun.comment +  "Invalid raw data directory #{@visit_directory_to_scan}, please check your path and try again. Try running fixrights to cleanup permissions of directory."
+      v_comment_warning = v_comment_warning +"Invalid raw data directory #{@visit_directory_to_scan}, please check your path and try again. Try running fixrights to cleanup permissions of directory."
+       @schedulerun.save
+      puts " bbbbbbb redirect_to new_raw_data_import_path"
+    end
 
 
-
-
+    @schedulerun.comment =("successful finish batch_visit_import "+v_comment_warning+" "+@schedulerun.comment[0..1990])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
+end
 end
 
    # data request from anders wahlin for adrc - t1/resting bold => /unknown, asl => /asl
@@ -5825,8 +5937,26 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','','"+v_t1seg_smoothed_and_warped_flag+"','"+ v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_gm+"','"+v_wm+"','"+v_csf+"')"
                                  results = connection.execute(sql)
                              else
+                              if File.directory?(v_subjectid_unknown)
+                                  v_dir_array = Dir.entries(v_subjectid_unknown)
+                                  v_o_star_nii_flag ="N"
+                                  v_multiple_o_star_nii_flag ="N"
+                                  v_o_star_cnt = 0
+                                  v_dir_array.each do |f|
+                                    if f.start_with?("o") and f.end_with?(".nii")
+                                      v_o_star_nii_flag = "Y"
+                                      v_o_star_cnt = v_o_star_cnt+ 1
+                                      if v_o_star_cnt > 1
+                                        v_multiple_o_star_nii_flag ="Y"
+                                      end
+                                    end
+                                  end
+                                  sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','"+ v_o_star_nii_flag+"','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL)"
+                                 results = connection.execute(sql)
+                                else
                                  sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL)"
                                  results = connection.execute(sql)
+                                end
                              end # check for subjectid asl dir
                          else
                            #puts "no enrollment "+dir_name_array[0]

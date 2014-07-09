@@ -76,7 +76,11 @@ v_user = v_user.gsub("\n","")
       
  elsif v_value_1 == "antuano_20130916_upload"
       v_shared = Shared.new
-      v_shared.run_antuano_20130916_upload()    
+      v_shared.run_antuano_20130916_upload()  
+
+ elsif v_value_1 == "batch_visit_import"  
+      v_shared = Shared.new
+      v_shared.run_batch_visit_import() 
       
  elsif v_value_1 == "test_sftp"
       v_shared = Shared.new
