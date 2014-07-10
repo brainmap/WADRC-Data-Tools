@@ -3806,7 +3806,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
 
     end
 
-       @schedulerun.comment =("successful finish fs_move_qc_pass_to_good2go "+v_comment_warning+" "+v_comment[0..3990])
+       @schedulerun.comment =("successful finish fs_move_qc_pass_to_good2go "+v_comment_warning+" "+v_comment[0..3950])
     if !v_comment.include?("ERROR") and !v_comment_warning.include?("ERROR")
           @schedulerun.status_flag ="Y"
     end
@@ -3896,7 +3896,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
 
     end
 
-       @schedulerun.comment =("successful finish fs_move_edit_file_complete_to_good2go "+v_comment_warning+" "+v_comment[0..3990])
+       @schedulerun.comment =("successful finish fs_move_edit_file_complete_to_good2go "+v_comment_warning+" "+v_comment )   #[0..3990])
     if !v_comment.include?("ERROR") and !v_comment_warning.include?("ERROR")
           @schedulerun.status_flag ="Y"
     end
@@ -5322,6 +5322,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       results = connection.execute(sql)
       v_cnt = 0
       results.each do |r|
+
         # get sp 
         sql_sp = "select distinct scan_procedure_id from scan_procedures_vgroups where scan_procedures_vgroups.vgroup_id ="+r[3].to_s 
         # could limit by scan_procedures.petscan_flag, but don't trust its being populated
