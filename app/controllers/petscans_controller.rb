@@ -502,8 +502,9 @@ class PetscansController < ApplicationController
       end
       if (@petscan.path).blank? and !(@petscan.ecatfilename).blank?
         v_path = @petscan.get_pet_path(r_sp[0], @petscan.ecatfilename, @petscan.lookup_pettracer_id)
-        if v_path > ""
+        if !v_path.blank?
               @petscan.path = v_path
+
         end
       end
     end
@@ -659,7 +660,7 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
             v_path = ""
             if !@petscan.ecatfilename.blank?
                v_path = @petscan.get_pet_path(r_sp[0], @petscan.ecatfilename, @petscan.lookup_pettracer_id)
-               if v_path > ""
+               if !v_path.blank?
                  @petscan.path = v_path
                  @petscan.save 
                end

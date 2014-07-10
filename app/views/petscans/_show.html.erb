@@ -3,15 +3,16 @@
  <!--  <p><%= @petscan.ecatfilename %></p><br>
    <p><%= @petscan.path %></p>
    <% if !@petscan.path.blank? %>
-    <br><p>size <%= File.stat(@petscan.path).size %>
-     <% if !@petscan_tracer_file_size.nil? and !@petscan_tracer_file_size[@petscan.lookup_pettracer_id.to_s].nil? 
-           if @petscan_tracer_file_size[@petscan.lookup_pettracer_id.to_s] == File.stat(@petscan.path).size.to_s %>
-                -File is expected size
-            <%else%>
-                <BIG> -FILE IS NOT THE EXPECTED SIZE </BIG>
-
-          <%end%>
-     <% end %>
+     <% if File.exists?(@petscan.path) %>
+       <br><p>size <%= File.stat(@petscan.path).size %>
+       <% if !@petscan_tracer_file_size.nil? and !@petscan_tracer_file_size[@petscan.lookup_pettracer_id.to_s].nil? 
+             if @petscan_tracer_file_size[@petscan.lookup_pettracer_id.to_s] == File.stat(@petscan.path).size.to_s %>
+                  -File is expected size
+              <%else%>
+                  <BIG> -FILE IS NOT THE EXPECTED SIZE </BIG>
+            <%end%>
+       <% end %>
+      <% end %>
     </p>
     <%end%> -->
 </div>
@@ -21,7 +22,7 @@
     <% @petfiles.each do |pf| %>
       <tr><td align="left"><%= pf.file_name %></td><td align="left"><%= pf.path %></td></tr>
 
-   <% if !pf.path.blank? %>
+   <% if !pf.path.blank? and File.exists?(pf.path)%>
        <tr><td > <small><small>size <%= File.stat(pf.path).size %></small></small></td>
         <% if !@petscan_tracer_file_size_multiple.nil? and !@petscan_tracer_file_size_multiple[@petscan.lookup_pettracer_id.to_s].nil? 
               if @petscan_tracer_file_size_multiple[@petscan.lookup_pettracer_id.to_s].include?(File.stat(pf.path).size.to_s) %>

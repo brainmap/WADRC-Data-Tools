@@ -150,19 +150,21 @@ class Petscan < ActiveRecord::Base
     #       '6_ADNI-2'=>'ADNI-2/pet/AV45' }
     v_sp = ScanProcedure.find(p_sp_id)
     v_pet_target_path = ""
-    v_tracer_path_array = v_sp.petscan_tracer_path.split("|")
-    v_tracer_path_array.each do |tr|
-        v_tracer_path = tr.split(":")
-        if v_tracer_path[0] == p_tracer_id.to_s
-            v_pet_target_path = v_tracer_path[1]
-        end
-    end
+    if !v_sp.petscan_tracer_path.blank?
+      v_tracer_path_array = v_sp.petscan_tracer_path.split("|")
+      v_tracer_path_array.each do |tr|
+          v_tracer_path = tr.split(":")
+          if v_tracer_path[0] == p_tracer_id.to_s
+              v_pet_target_path = v_tracer_path[1]
+          end
+      end
+     end
     #v_key = p_tracer_id.to_s+"_"+v_sp.codename
     v_path = ""
     if !v_pet_target_path.blank?
         v_path = v_base_path+"/raw/"+v_pet_target_path+"/"+p_file_name
     else
-        puts "AAAAAAAAA "+v_key+"   "+p_file_name
+        puts "AAAAAAAAA "+p_tracer_id.to_s+"_"+v_sp.codename+"   "+p_file_name
     end
     if File.exists?(v_path)
       return v_path

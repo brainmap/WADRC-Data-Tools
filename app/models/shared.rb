@@ -5316,8 +5316,8 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       v_comment = ""
       
       sql = "select distinct  petscans.id, petscans.appointment_id, petscans.ecatfilename, appointments.vgroup_id , petscans.lookup_pettracer_id
-        from petscans, appointments where petscans.path is null and petscans.ecatfilename is not null and petscans.lookup_pettracer_id is not null
-        and appointments.id = petscans.appointment_id"
+        from petscans, appointments where (petscans.path is null or petscans.path ='') and petscans.ecatfilename is not null and petscans.lookup_pettracer_id is not null
+        and appointments.id = petscans.appointment_id "
       connection = ActiveRecord::Base.connection();        
       results = connection.execute(sql)
       v_cnt = 0
@@ -5330,7 +5330,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
         results_sp.each do |r_sp|
             # pass to function so can use in petscan edit
             v_petscan = Petscan.find(r[0])
+  puts "aaaaaa petscan_id = "+r[0].to_s
             v_return_path = ""     
+            # GET SINGLE petscan file -- old version , still running
             v_return_path = v_petscan.get_pet_path(r_sp[0], r[2], r[4])  # pass in sp, file name, tracerid
             if v_return_path > ""
               v_petscan.path = v_return_path
@@ -5338,8 +5340,38 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
               v_cnt = v_cnt + 1
             end
         end
-        
       end
+            sql = "select distinct  petscans.id, petscans.appointment_id, petscans.ecatfilename, appointments.vgroup_id , petscans.lookup_pettracer_id
+        from petscans, appointments where petscans.id in ( select petfiles.petscan_id  from petfiles where (petfiles.path is null or petfiles.path  = '') and petfiles.file_name is not null)
+            and petscans.lookup_pettracer_id is not null
+        and appointments.id = petscans.appointment_id "
+      connection = ActiveRecord::Base.connection();        
+      results = connection.execute(sql)
+      v_cnt = 0
+      results.each do |r|
+
+        # get sp 
+        sql_sp = "select distinct scan_procedure_id from scan_procedures_vgroups where scan_procedures_vgroups.vgroup_id ="+r[3].to_s 
+        # could limit by scan_procedures.petscan_flag, but don't trust its being populated
+        results_sp = connection.execute(sql_sp)   
+        results_sp.each do |r_sp|
+            # pass to function so can use in petscan edit
+            v_petscan = Petscan.find(r[0])
+  puts "bbb petscan_id = "+r[0].to_s
+            ## petfiles - multiples , new version
+            v_petfiles = Petfile.where("petfiles.petscan_id in (?) ",v_petscan.id)
+            v_petfiles.each do |pf|  # make sure not already in database with this petscan.id
+                            v_path = v_petscan.get_pet_path(r_sp[0], pf.file_name, v_petscan.lookup_pettracer_id)
+                            if pf.path.blank? and !v_path.blank?
+                                       pf.path = v_path
+                                       pf.save
+                            end
+              end
+        end
+      end
+      # get pet PATHSSSSSSS
+
+      
       v_comment = " petscan paths update ="+v_cnt.to_s+"  "+v_comment
       @schedulerun.comment =("successful finish pet_path "+v_comment[0..459])
       if !v_comment.include?("ERROR")
