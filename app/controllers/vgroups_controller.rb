@@ -336,18 +336,25 @@ class VgroupsController < ApplicationController
             end                    
            end    
         end  
+puts "aaaaaaa"
         if !(@vgroup.participant_id).blank?   # how will this interact with load visit? participant_id is probably blank until the enumber update in mri
           sql = "select enrollments.id from enrollments where participant_id ="+@vgroup.participant_id.to_s 
           # this is going to cause problems if there are multiple enrollments for a participant?
- 
+ puts "bbbbbb"
           connection = ActiveRecord::Base.connection();        
           participants_results = connection.execute(sql)
           # is there a better way to get the results?
           participants_results.each do |r|
               v_enrollment_array.each do |e|
                 if (e.participant_id).nil?
-                    e.participant_id = @vgroup.participant_id
-                    e.save
+puts "cccccc"
+                    if !@vgroup.participant_id.blank? and @vgroup.participant_id != e.participant_id
+  puts "dddddd"
+                         flash[:warning] = "The participants from the PARTICIPANT and subjectid  do not match !!!!!!  SOMETHING IS AMISS! "
+                    else 
+                         e.participant_id = @vgroup.participant_id
+                         e.save
+                    end
                 end
               end
               sql = "select count(*) cnt from enrollment_vgroup_memberships where vgroup_id = "+@vgroup.id.to_s+" and enrollment_id="+(r[0]).to_s
@@ -561,6 +568,9 @@ def set_participant_in_enrollment( rmr, enumber_array)
     @e = Enrollment.where("enumber ='"+enum+"'")
      if !@e[0].participant_id.blank?
          participant_id = @e[0].participant_id
+         if !@vgroup.participant_id.blank? and @vgroup.participant_id != participant_id
+              flash[:warning] = "There are MISSMATCHES in  enumber/Reggieid/RMRaic######  participant !!!!!!  SOMETHING IS AMISS!!! "
+         end
      else
          blank_participant_id ="Y"
      end
