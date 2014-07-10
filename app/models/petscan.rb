@@ -76,7 +76,7 @@ class Petscan < ActiveRecord::Base
           end
         end
     else
-        puts "AAAAAAAAA "+v_key+"   no path for sp in hash"
+        #puts "AAAAAAAAA "+v_key+"   no path for sp in hash"
     end
     return v_file_name
   end
@@ -130,7 +130,7 @@ class Petscan < ActiveRecord::Base
           end
         end
     else
-        puts "AAAAAAAAA "+v_key+"   no path for sp in hash"
+        #puts "AAAAAAAAA "+v_key+"   no path for sp in hash"
     end
     return v_file_names
   end
