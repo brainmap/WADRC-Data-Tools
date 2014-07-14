@@ -203,7 +203,28 @@ class VgroupsController < ApplicationController
   # POST /vgroups
   # POST /vgroups.xml
   def create
+    # PROBLEM WITH SAVE vgroup IF ENUMBER ALREADY EXISTS !!!!
     @vgroup = Vgroup.new(params[:vgroup]) 
+    connection = ActiveRecord::Base.connection();
+    v_param_vgroup_participant_id = ''
+    if !params[:vgroup][:participant_id].blank?
+       v_param_vgroup_participant_id =  params[:vgroup][:participant_id]
+    end
+    # want to check for participant_id mis-match - reggieid rmraic, enumber and vgroup
+    v_reggieid_participant_id = ''
+    if !params[:participant].nil? and !params[:participant][:reggieid].blank?
+       v_reggieid_participants = Participant.where("reggieid in (?)",params[:participant][:reggieid].rjust(6,"0"))
+       if !v_reggieid_participants.nil? and !v_reggieid_participants[0].nil?
+          v_reggieid_participant_id = v_reggieid_participants[0].id
+       end
+    end
+    v_rmraic_participant_id = ''
+    if !params[:vgroup][:rmr].blank?  && params[:vgroup][:rmr] [0..5] == "RMRaic" && ((params[:vgroup][:rmr] )[6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && params[:vgroup][:rmr] .length == 12
+         v_reggieid = params[:vgroup][:rmr][6..11]
+         v_rmraic_participants = Participant.where(" reggieid in (?)",v_reggieid)
+         v_rmraic_participant_id = v_rmraic_participants[0].try(:id).to_s
+    end   
+    v_enumber_participant_ids = [] 
     # removed attr_accessible in model and now ok --not sure why vgroup params not getting saved -- same in update  -- something with the mess of enrollments?
     #  @vgroup.compile_folder = params[:vgroup][:compile_folder]
     #  @vgroup.note =params[:vgroup][:note]
@@ -219,7 +240,7 @@ class VgroupsController < ApplicationController
                     reggieid_rmr = (params[:vgroup][:rmr])[6..11]
                     v_participant_rmr = Participant.where(" reggieid in (?)",reggieid_rmr)
                     if !v_participant_rmr[0].nil? and v_participant_rmr[0].id != v_participant[0].id
-                        flash[:warning] = "The participants from the reggieid and RMRaic######  do not match !!!!!!  SOMETHING IS AMISS! "
+                       # flash[:warning] = "The participants from the reggieid and RMRaic######  do not match !!!!!!  SOMETHING IS AMISS! "
                     else
                        params[:vgroup][:participant_id] = v_participant[0].id.to_s
                     end
@@ -233,14 +254,6 @@ class VgroupsController < ApplicationController
               if (params[:vgroup][:rmr])[0..5] == "RMRaic" && (params[:vgroup][:rmr][6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && (params[:vgroup][:rmr]).length == 12
                     reggieid_rmr = (params[:vgroup][:rmr])[6..11]
                     v_participant_rmr = Participant.where(" reggieid in (?)",reggieid_rmr)
-                    if !v_participant_rmr[0].nil? and v_participant_rmr[0].id != params[:vgroup][:participant_id]
-                        flash[:warning] = "The participants from the PARTICIPANT and RMRaic######  do not match !!!!!!  SOMETHING IS AMISS! "
-                        params[:vgroup][:participant_id] = nil
-                    end
-              end
-              if !params[:vgroup][:participant_id].blank? and params[:vgroup][:participant_id] != v_participant[0].id
-                 flash[:warning] = "The participants from the reggieid and PARTICIPANT   do not match !!!!!!  SOMETHING IS AMISS! "
-                  params[:vgroup].delete :participant_id
               end
           elsif (params[:vgroup][:rmr])[0..5] == "RMRaic" && (params[:vgroup][:rmr][6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && (params[:vgroup][:rmr]).length == 12
                # pick up later - let RMRaic take precident
@@ -305,21 +318,27 @@ class VgroupsController < ApplicationController
                     end
                 end
             end
-            if !(@vgroup.participant_id).blank?
-                sql = " insert into enrollments(enumber,participant_id)values('"+params[:vgroup][:enrollments_attributes]["0"][:enumber].gsub(/[;:'"()=<>]/, '')+"',"+@vgroup.participant_id.to_s+")"
-                results = connection.execute(sql) 
+            if !(@vgroup.participant_id).blank? 
                 @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
-                v_enrollment_array.push.push(@enrollment[0])
+                if @enrollment[0].nil?
+                   sql = " insert into enrollments(enumber,participant_id)values('"+params[:vgroup][:enrollments_attributes]["0"][:enumber].gsub(/[;:'"()=<>]/, '')+"',"+@vgroup.participant_id.to_s+")"
+                   results = connection.execute(sql) 
+                   @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+                end
+                v_enrollment_array.push(@enrollment[0])
                 v_evg_check = EnrollmentVgroupMembership.where("vgroup_id in (?) and enrollment_id in (?)",@vgroup.id,@enrollment[0].id)
                 if v_evg_check.nil?
                   sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment[0].id).to_s+")"      
                   results = connection.execute(sql)
                 end
             else
-                sql = " insert into enrollments(enumber)values('"+params[:vgroup][:enrollments_attributes]["0"][:enumber].gsub(/[;:'"()=<>]/, '')+"' )"  
-                results = connection.execute(sql)
                 # need to add
                 @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+                if @enrollment[0].nil?
+                  sql = " insert into enrollments(enumber)values('"+params[:vgroup][:enrollments_attributes]["0"][:enumber].gsub(/[;:'"()=<>]/, '')+"' )"
+                  results = connection.execute(sql)
+                  @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+                end
                 v_enrollment_id_array.push(@enrollment[0].id)
                 v_enrollment_array.push(@enrollment[0])
                 v_evg_check = EnrollmentVgroupMembership.where("vgroup_id in (?) and enrollment_id in (?)",@vgroup.id,@enrollment[0].id)
@@ -336,21 +355,16 @@ class VgroupsController < ApplicationController
             end                    
            end    
         end  
-puts "aaaaaaa"
         if !(@vgroup.participant_id).blank?   # how will this interact with load visit? participant_id is probably blank until the enumber update in mri
           sql = "select enrollments.id from enrollments where participant_id ="+@vgroup.participant_id.to_s 
-          # this is going to cause problems if there are multiple enrollments for a participant?
- puts "bbbbbb"
-          connection = ActiveRecord::Base.connection();        
+          # this is going to cause problems if there are multiple enrollments for a participant?        
           participants_results = connection.execute(sql)
           # is there a better way to get the results?
           participants_results.each do |r|
               v_enrollment_array.each do |e|
                 if (e.participant_id).nil?
-puts "cccccc"
                     if !@vgroup.participant_id.blank? and @vgroup.participant_id != e.participant_id
-  puts "dddddd"
-                         flash[:warning] = "The participants from the PARTICIPANT and subjectid  do not match !!!!!!  SOMETHING IS AMISS! "
+                       #  flash[:warning] = "The participants from the PARTICIPANT and subjectid  do not match !!!!!!  SOMETHING IS AMISS! "
                     else 
                          e.participant_id = @vgroup.participant_id
                          e.save
@@ -383,6 +397,71 @@ puts "cccccc"
       #      results = connection.execute(sql)        
       #    end
       #  end
+                        # check for other vgroups with same sp and enumber within 1 month
+          v_near_vgroups = Vgroup.where("vgroups.id != "+@vgroup.id.to_s+" 
+            and STR_TO_DATE('"+@vgroup.vgroup_date.strftime('%m/%d/%Y')+"','%m/%d/%Y')  between (vgroups.vgroup_date - interval 1 month ) and (vgroups.vgroup_date + interval 1 month ) 
+                  and vgroups.id in ( select evgm.vgroup_id from enrollment_vgroup_memberships evgm where evgm.enrollment_id in
+                                                (select evgm2.enrollment_id from enrollment_vgroup_memberships evgm2 where 
+                                                          evgm2.vgroup_id = "+@vgroup.id.to_s+"))")
+          v_near_vgroup_msg = ""
+          if !v_near_vgroups.nil?
+              v_near_vgroups.each do |nvg|
+                 v_near_vgroup_msg = v_near_vgroup_msg + " There is a EXISTING vgroup with the same enumber on "+nvg.vgroup_date.to_s+".    "
+              end
+              if !v_near_vgroup_msg.blank?
+                  if !flash[:warning].blank?
+                     flash[:warning] = flash[:warning] + v_near_vgroup_msg
+                  else
+                     flash[:warning] =  v_near_vgroup_msg
+                  end
+              end
+          end
+           
+          v_tmp_cnt = 0
+           v_tmp_enumber_array = []
+           params[:vgroup][:enrollments_attributes].each do|cnt, value|
+              v_tmp_cnt = v_tmp_cnt + 1
+              if !params[:vgroup][:enrollments_attributes][cnt.to_s][:id].blank?
+                 v_enrollments = Enrollment.where("enumber in (?) and participant_id is not NULL",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
+                 if !v_enrollments.nil? and !(v_enrollments[0].participant_id).blank?
+                     v_enumber_participant_ids.push(v_enrollments[0].participant_id)
+                 end
+              end
+           end 
+
+                    # check for participant vgroup, rmraic, reggieid, enumber mismatch
+          v_mismatch_participant_msg = ""
+          if v_rmraic_participant_id != '' and  v_reggieid_participant_id != '' and v_rmraic_participant_id !=  v_reggieid_participant_id 
+              v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - reggieid participant and RMRaicxxxxxx participant. "
+          end
+          if v_param_vgroup_participant_id != '' and  v_reggieid_participant_id != '' and v_param_vgroup_participant_id !=  v_reggieid_participant_id 
+              v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - reggieid participant and selected participant. "
+          end
+          if v_param_vgroup_participant_id != '' and  v_rmraic_participant_id != '' and v_param_vgroup_participant_id !=  v_rmraic_participant_id 
+              v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - RMRaicxxxxxxparticipant and selected participant. "
+          end
+
+          if !v_enumber_participant_ids.nil? and !v_enumber_participant_ids[0].nil?
+             v_enumber_participant_ids.each do |ee|
+                if v_reggieid_participant_id != '' and v_reggieid_participant_id !=  ee 
+                    v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - enumber participant and reggieid participant. "
+                end
+                if v_rmraic_participant_id != '' and v_rmraic_participant_id !=  ee 
+                    v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - enumber participant and RMRaicxxxxxx participant. "
+                end
+                if v_param_vgroup_participant_id != '' and v_param_vgroup_participant_id !=  ee 
+                    v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - enumber participant and selected participant. "
+                end
+             end
+          end
+          if !v_mismatch_participant_msg.blank?
+               if !flash[:warning].blank?
+                  flash[:warning] = flash[:warning] + v_mismatch_participant_msg
+               else
+                  flash[:warning] =  v_mismatch_participant_msg
+               end
+          end
+
         format.html { redirect_to(@vgroup, :notice => 'Vgroup was successfully created.') }
         format.xml  { render :xml => @vgroup, :status => :created, :location => @vgroup }
       else
@@ -403,10 +482,33 @@ puts "cccccc"
     #   @vgroup.participant_id =params[:vgroup][:participant_id]
     #   @vgroup.rmr =params[:vgroup][:rmr]
     #   @vgroup.vgroup_date = params[:vgroup]["#{'vgroup_date'}(1i)"] +"-"+params[:vgroup]["#{'vgroup_date'}(2i)"].rjust(2,"0")+"-"+params[:vgroup]["#{'vgroup_date'}(3i)"].rjust(2,"0")
+   
+    v_param_vgroup_participant_id = ''
     if params[:vgroup][:participant_id].blank?
          @vgroup.participant_id = nil
          @vgroup.save
+    else
+       v_param_vgroup_participant_id =  params[:vgroup][:participant_id]
     end
+    # want to check for participant_id mis-match - reggieid rmraic, enumber and vgroup
+    v_vgroup_participant_id = ''
+    if !@vgroup.participant_id.nil?
+       v_vgroup_participant_id = @vgroup.participant_id
+    end
+    v_reggieid_participant_id = ''
+    if !params[:participant].nil? and !params[:participant][:reggieid].blank?
+       v_reggieid_participants = Participant.where("reggieid in (?)",params[:participant][:reggieid].rjust(6,"0"))
+       if !v_reggieid_participants.nil? and !v_reggieid_participants[0].nil?
+          v_reggieid_participant_id = v_reggieid_participants[0].id
+       end
+    end
+    v_rmraic_participant_id = ''
+    if !params[:vgroup][:rmr].blank?  && params[:vgroup][:rmr] [0..5] == "RMRaic" && ((params[:vgroup][:rmr] )[6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && params[:vgroup][:rmr] .length == 12
+         v_reggieid = params[:vgroup][:rmr][6..11]
+         v_rmraic_participants = Participant.where(" reggieid in (?)",v_reggieid)
+         v_rmraic_participant_id = v_rmraic_participants[0].try(:id).to_s
+    end   
+    v_enumber_participant_ids = [] # could be multiples -- get below 
 
         # shoe horning in the reggieid 
     if @vgroup.participant_id.nil? and !params[:participant].nil? and !params[:participant][:reggieid].blank?
@@ -436,6 +538,10 @@ puts "cccccc"
              #v_destroy = 0
          else
            enumber_array << params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber]
+           v_enrollments = Enrollment.where("enumber in (?) and participant_id is not NULL",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
+           if !v_enrollments.nil? and !(v_enrollments[0].participant_id).blank?
+              v_enumber_participant_ids.push(v_enrollments[0].participant_id)
+           end 
          end
        else
          if !params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].blank?
@@ -453,10 +559,11 @@ puts "cccccc"
                   end
               end
            else  # make a new enrollment with this participant-- only works for participant selected
-             if !(@vgroup.participant_id).blank?
+            @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
+             if !(@vgroup.participant_id).blank? and @enrollment[0].nil?
                  sql = " insert into enrollments(enumber,participant_id)values('"+params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].gsub(/[;:'"()=<>]/, '')+"',"+@vgroup.participant_id.to_s+")"
                  results = connection.execute(sql) 
-             else
+             elsif v_enrollments[0].nil?
                  sql = " insert into enrollments(enumber)values('"+params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].gsub(/[;:'"()=<>]/, '')+"' )"  
                  results = connection.execute(sql)
               end
@@ -476,14 +583,9 @@ puts "cccccc"
        @vgroup.rmr = params[:vgroup][:rmr]
        v_current_vgroup_participant_id = @vgroup.participant_id
        set_participant_in_enrollment(@vgroup.rmr, enumber_array)
-       if !v_current_vgroup_participant_id.blank? and v_current_vgroup_participant_id != @vgroup.participant_id # this might be prevented in set_part...
-            flash[:warning] = "The participant from the enumber/RMRaic######  does not match the previous vgroup participant !!!!!!   "
-       end
        # picking up participant_id in set_participant_in_enrollment, but being wiped out by blank params[:vgroup][:participant_id]
        if params[:vgroup][:participant_id].blank?
              params[:vgroup][:participant_id] = @vgroup.participant_id.to_s
-      elsif params[:vgroup][:participant_id] != @vgroup.participant_id.to_s # real problem - crossing 2 participants
-           flash[:warning] = "The participant selected does not match the Reggieid/RMRaic######  participant !!!!!!   "
        end
     end
     
@@ -533,6 +635,7 @@ puts "cccccc"
           @participant.save
           @vgroup.participant_id = @participant.id
           @vgroup.save
+
           @enrollments = Enrollment.where("enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships 
                                                   where vgroup_id in ("+@vgroup.id.to_s+" ))")
            @enrollments.each do |e|
@@ -545,6 +648,71 @@ puts "cccccc"
           # link participant_id to enrollments
           # link participant_id to vgroup
         end
+
+                  # check for other vgroups with same sp and enumber within 1 month
+          v_near_vgroups = Vgroup.where("vgroups.id != "+@vgroup.id.to_s+" 
+            and STR_TO_DATE('"+@vgroup.vgroup_date.strftime('%m/%d/%Y')+"','%m/%d/%Y')  between (vgroups.vgroup_date - interval 1 month ) and (vgroups.vgroup_date + interval 1 month ) 
+                  and vgroups.id in ( select evgm.vgroup_id from enrollment_vgroup_memberships evgm where evgm.enrollment_id in
+                                                (select evgm2.enrollment_id from enrollment_vgroup_memberships evgm2 where 
+                                                          evgm2.vgroup_id = "+@vgroup.id.to_s+"))")
+          v_near_vgroup_msg = ""
+          if !v_near_vgroups.nil?
+              v_near_vgroups.each do |nvg|
+                 v_near_vgroup_msg = v_near_vgroup_msg + " There is a EXISTING vgroup with the same enumber on "+nvg.vgroup_date.to_s+".    "
+              end
+              if !v_near_vgroup_msg.blank?
+                  if !flash[:warning].blank?
+                     flash[:warning] = flash[:warning] + v_near_vgroup_msg
+                  else
+                     flash[:warning] =  v_near_vgroup_msg
+                  end
+              end
+          end
+
+                    # check for participant vgroup, rmraic, reggieid, enumber mismatch
+          v_mismatch_participant_msg = ""
+          if v_vgroup_participant_id != '' and  v_reggieid_participant_id != '' and v_vgroup_participant_id !=  v_reggieid_participant_id 
+              v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - reggieid participant and selected participant. "
+          end
+          if v_vgroup_participant_id != '' and  v_rmraic_participant_id != '' and v_vgroup_participant_id !=  v_rmraic_participant_id 
+              v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - RMRaicxxxxxx participant and selected participant. "
+          end
+          if v_rmraic_participant_id != '' and  v_reggieid_participant_id != '' and v_rmraic_participant_id !=  v_reggieid_participant_id 
+              v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - reggieid participant and RMRaicxxxxxx participant. "
+          end
+          if v_param_vgroup_participant_id != '' and  v_vgroup_participant_id != '' and v_param_vgroup_participant_id !=  v_vgroup_participant_id 
+              v_mismatch_participant_msg = v_mismatch_participant_msg +" minor MISMATCH - previous selected participant and selected participant. "
+          end
+          if v_param_vgroup_participant_id != '' and  v_reggieid_participant_id != '' and v_param_vgroup_participant_id !=  v_reggieid_participant_id 
+              v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - reggieid participant and selected participant. "
+          end
+          if v_param_vgroup_participant_id != '' and  v_rmraic_participant_id != '' and v_param_vgroup_participant_id !=  v_rmraic_participant_id 
+              v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - RMRaicxxxxxxparticipant and selected participant. "
+          end
+
+          if !v_enumber_participant_ids.nil? and !v_enumber_participant_ids[0].nil?
+             v_enumber_participant_ids.each do |ee|
+                if v_vgroup_participant_id != '' and v_vgroup_participant_id !=  ee 
+                    v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - enumber participant and selected participant. "
+                end
+                if v_reggieid_participant_id != '' and v_reggieid_participant_id !=  ee 
+                    v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - enumber participant and reggieid participant. "
+                end
+                if v_rmraic_participant_id != '' and v_rmraic_participant_id !=  ee 
+                    v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - enumber participant and RMRaicxxxxxx participant. "
+                end
+                if v_param_vgroup_participant_id != '' and v_param_vgroup_participant_id !=  ee 
+                    v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - enumber participant and selected participant. "
+                end
+             end
+          end
+          if !v_mismatch_participant_msg.blank?
+               if !flash[:warning].blank?
+                  flash[:warning] = flash[:warning] + v_mismatch_participant_msg
+               else
+                  flash[:warning] =  v_mismatch_participant_msg
+               end
+          end
         format.html { redirect_to(@vgroup) }
         format.xml  { head :ok }
       else
@@ -568,9 +736,6 @@ def set_participant_in_enrollment( rmr, enumber_array)
     @e = Enrollment.where("enumber ='"+enum+"'")
      if !@e[0].participant_id.blank?
          participant_id = @e[0].participant_id
-         if !@vgroup.participant_id.blank? and @vgroup.participant_id != participant_id
-              flash[:warning] = "There are MISSMATCHES in  enumber/Reggieid/RMRaic######  participant !!!!!!  SOMETHING IS AMISS!!! "
-         end
      else
          blank_participant_id ="Y"
      end
