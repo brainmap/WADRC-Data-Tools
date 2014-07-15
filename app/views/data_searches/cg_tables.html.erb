@@ -20,7 +20,8 @@
     <td> &nbsp;</td>
 	<%end%>
 	<% if @cg_tn_key_unique_y[tn.id] != "Y"%>
-	 <td> The key column(s) are not unique.<br> Duplicate keys: <%= @cg_tn_key_unique_y[tn.id] %></td>
+	 <td>  <%= popup_note('peek', key_val_table('path_popup', { :duplicate_keys => "The key column(s) are not unique.<br> Duplicate keys:"+@cg_tn_key_unique_y[tn.id]  }))  %>
+	 	</td>
 	<% end %>
       </tr>
 	<% end %>

@@ -5851,12 +5851,14 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
   # change sql_base insert statement
   # change  sql = sql_base+  insert statement with values
   # change  self.move_present_to_old_new_to_present  
+  # getting t1_seg seg totals 
+  # also getting first calculated volumes into cg_first_calculated_volumes
   def run_t1seg_status
         v_base_path = Shared.get_base_path()
          @schedule = Schedule.where("name in ('t1seg_status')").first
           @schedulerun = Schedulerun.new
           @schedulerun.schedule_id = @schedule.id
-          @schedulerun.comment ="starting t1seg_status"
+          @schedulerun.comment ="starting t1seg_status and first calculated volumes"
           @schedulerun.save
           @schedulerun.start_time = @schedulerun.created_at
           @schedulerun.save
@@ -5867,6 +5869,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
             results = connection.execute(sql)
 
             sql_base = "insert into cg_t1seg_status_new(t1seg_subjectid, t1seg_general_comment,t1seg_smoothed_and_warped_flag,o_star_nii_flag,multiple_o_star_nii_flag,enrollment_id, scan_procedure_id,gm,wm,csf,secondary_key)values("  
+            sql_first_base = "insert into cg_first_calculated_volumes_new(subjectid,general_comment,enrollment_id, scan_procedure_id,secondary_key,l_accu_mm_cube,l_amyg_mm_cube,l_caud_mm_cube,l_hipp_mm_cube,l_pall_mm_cube,l_puta_mm_cube,l_thal_mm_cube,r_accu_mm_cube,r_amyg_mm_cube,r_caud_mm_cube,r_hipp_mm_cube,r_pall_mm_cube,r_puta_mm_cube,r_thal_mm_cube)values("  
             v_raw_path = v_base_path+"/raw"
             v_mri = "/mri"
             no_mri_path_sp_list =['asthana.adrc-clinical-core.visit1',
@@ -5916,7 +5919,56 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                          enrollment = Enrollment.where("enumber in (?)",dir_name_array[0])
                          if !enrollment.blank?
                              v_subjectid_t1seg = v_preprocessed_full_path+"/"+dir_name_array[0]+"/t1_aligned_newseg"
+                             v_subjectid_first = v_preprocessed_full_path+"/"+dir_name_array[0]+"/first"
                              v_subjectid_unknown = v_preprocessed_full_path+"/"+dir_name_array[0]+"/unknown"
+                             if File.directory?(v_subjectid_first)
+                                  v_first_volume_hash = {}
+                                  v_dir_array = Dir.entries(v_subjectid_first)
+                                  v_dir_array.each do |f|
+                                     if f == dir_name_array[0]+"_first_roi_vol.csv"  #  two row in file, comma sep, first row header
+                                         v_tmp_data = "" 
+                                         v_tmp_header_data = ""
+                                         v_tmp_data_array = []  
+                                         v_tmp_header_data_array = []
+                                         ftxt = File.open(v_subjectid_first+"/"+dir_name_array[0]+"_first_roi_vol.csv", "r") 
+                                         v_tmp_cnt = 0
+                                         ftxt.each_line do |line|
+                                              if v_tmp_cnt < 1
+                                                  v_tmp_header_data = line
+                                              else
+                                                  v_tmp_data += line
+                                              end
+                                              v_tmp_cnt = v_tmp_cnt + 1
+                                         end
+                                         ftxt.close
+                                         v_tmp_header_data_array = v_tmp_header_data.strip.split(",")
+                                         v_tmp_data_array = v_tmp_data.strip.split(",")
+                                         if v_tmp_data_array.length >2 and v_tmp_header_data_array.length > 2
+                                             v_tmp_cnt = 0
+                                             v_tmp_header_data_array.each do |hdr|
+                                               v_first_volume_hash[hdr.downcase] = v_tmp_data_array[v_tmp_cnt]
+                                               v_tmp_cnt = v_tmp_cnt + 1
+                                             end 
+                                  #l_accu_mm_cube,  l_amyg_mm_cube,l_caud_mm_cube ,l_hipp_mm_cube,l_pall_mm_cube,l_puta_mm_cube,  l_thal_mm_cube ,r_accu_mm_cube ,r_amyg_mm_cube,r_caud_mm_cube, r_hipp_mm_cube,r_pall_mm_cube,    r_puta_mm_cube,r_thal_mm_cube
+                                           sql = sql_first_base+"'"+dir_name_array[0]+v_visit_number+"','',"+enrollment[0].id.to_s+","+sp.id.to_s+",null
+                                             ,'"+v_first_volume_hash["l_accu"]+"','"+v_first_volume_hash["l_amyg"]+"','"+v_first_volume_hash["l_caud"]+"','"+v_first_volume_hash["l_hipp"]+"','"+v_first_volume_hash["l_pall"]+"'
+                                            ,'"+v_first_volume_hash["l_puta"]+"','"+v_first_volume_hash["l_thal"]+"','"+v_first_volume_hash["r_accu"]+"','"+v_first_volume_hash["r_amyg"]+"','"+v_first_volume_hash["r_caud"]+"'
+                                            ,'"+v_first_volume_hash["r_hipp"]+"','"+v_first_volume_hash["r_pall"]+"','"+v_first_volume_hash["r_puta"]+"','"+v_first_volume_hash['r_thal']+"')"
+                                            results = connection.execute(sql)
+                                          end
+
+                                     end
+                                  end
+                                  if v_first_volume_hash.length < 1
+                                       sql = sql_first_base+"'"+dir_name_array[0]+v_visit_number+"','no calculated volumes in first directory',"+enrollment[0].id.to_s+","+sp.id.to_s+",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)"
+                                       results = connection.execute(sql)
+                                  end
+                             else
+                               sql = sql_first_base+"'"+dir_name_array[0]+v_visit_number+"','no first calculated volumes directory',"+enrollment[0].id.to_s+","+sp.id.to_s+",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)"
+                                 results = connection.execute(sql)
+                             end
+
+
                              v_o_star_nii_flag ="N"
                              v_multiple_o_star_nii_flag ="N"
                              v_gm =""
@@ -5943,7 +5995,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                      end
                                      ftxt.close
 
-                                     v_tmp_data_array = v_tmp_data.split(",")
+                                     v_tmp_data_array = v_tmp_data.strip.split(",")
                                      if v_tmp_data_array.length >2
                                         v_gm =v_tmp_data_array[0]
                                         v_wm  = v_tmp_data_array[1]
@@ -5990,7 +6042,8 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                  sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,NULL)"
                                  results = connection.execute(sql)
                                 end
-                             end # check for subjectid asl dir
+                             end # check for subjectid t1 dir
+
                          else
                            #puts "no enrollment "+dir_name_array[0]
                          end # check for enrollment
@@ -5998,14 +6051,61 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                          enrollment = Enrollment.where("concat(enumber,'.R') in (?) or concat(enumber,'a') in (?) or concat(enumber,'b') in (?) or concat(enumber,'c') in (?) or concat(enumber,'d') in (?) or concat(enumber,'e') in (?)",dir_name_array[0],dir_name_array[0],dir_name_array[0],dir_name_array[0],dir_name_array[0],dir_name_array[0])
                          if !enrollment.blank?
                              v_secondary_key = dir_name_array[0]
-                             v_secondary_key.gsub(enrollment[0].enumber, "") 
+                             v_secondary_key = v_secondary_key.tr(enrollment[0].enumber, "") 
                              v_subjectid_t1seg = v_preprocessed_full_path+"/"+dir_name_array[0]+"/t1_aligned_newseg"
+                             v_subjectid_first = v_preprocessed_full_path+"/"+dir_name_array[0]+"/first"
                              v_subjectid_unknown = v_preprocessed_full_path+"/"+dir_name_array[0]+"/unknown"
                              v_o_star_nii_flag ="N"
                              v_multiple_o_star_nii_flag ="N"
                              v_gm =""
                              v_wm = ""
                              v_csf = ""
+                             if File.directory?(v_subjectid_first)
+                                  v_first_volume_hash = {}
+                                  v_dir_array = Dir.entries(v_subjectid_first)
+                                  v_dir_array.each do |f|
+                                     if f == dir_name_array[0]+"_first_roi_vol.csv"  #  two row in file, comma sep, first row header
+                                         v_tmp_data = "" 
+                                         v_tmp_header_data = ""
+                                         v_tmp_data_array = []  
+                                         v_tmp_header_data_array = []
+                                         ftxt = File.open(v_subjectid_first+"/"+dir_name_array[0]+"_first_roi_vol.csv", "r") 
+                                         v_tmp_cnt = 0
+                                         ftxt.each_line do |line|
+                                              if v_tmp_cnt < 1
+                                                  v_tmp_header_data = line
+                                              else
+                                                  v_tmp_data += line
+                                              end
+                                              v_tmp_cnt = v_tmp_cnt + 1
+                                         end
+                                         ftxt.close
+                                         v_tmp_header_data_array = v_tmp_header_data.strip.split(",")
+                                         v_tmp_data_array = v_tmp_data.strip.split(",")
+                                         if v_tmp_data_array.length >2 and v_tmp_header_data_array.length > 2
+                                             v_tmp_cnt = 0
+                                             v_tmp_header_data_array.each do |hdr|
+                                               v_first_volume_hash[hdr.downcase] = v_tmp_data_array[v_tmp_cnt]
+                                               v_tmp_cnt = v_tmp_cnt + 1
+                                             end
+                                  #l_accu,  l_amyg,l_caud ,l_hipp,l_pall,l_puta,  l_thal ,r_accu ,r_amyg,r_caud, r_hipp,r_pall,    r_puta,r_thal
+                                            sql = sql_first_base+"'"+enrollment[0].enumber+v_visit_number+"','',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_secondary_key+"'
+                                             ,'"+v_first_volume_hash["l_accu"]+"','"+v_first_volume_hash["l_amyg"]+"','"+v_first_volume_hash["l_caud"]+"','"+v_first_volume_hash["l_hipp"]+"','"+v_first_volume_hash["l_pall"]+"'
+                                             ,'"+v_first_volume_hash["l_puta"]+"','"+v_first_volume_hash["l_thal"]+"','"+v_first_volume_hash["r_accu"]+"','"+v_first_volume_hash["r_amyg"]+"','"+v_first_volume_hash["r_caud"]+"'
+                                            ,'"+v_first_volume_hash["r_hipp"]+"','"+v_first_volume_hash["r_pall"]+"','"+v_first_volume_hash["r_puta"]+"','"+v_first_volume_hash["r_thal"]+"')"
+                                            results = connection.execute(sql)
+                                          end
+
+                                     end
+                                  end
+                                  if v_first_volume_hash.length < 1
+                                       sql = sql_first_base+"'"+enrollment[0].enumber+v_visit_number+"','no calculated volumes in first directory',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_secondary_key+"',null,null,null,null,null,null,null,null,null,null,null,null,null,null)"
+                                       results = connection.execute(sql)
+                                  end
+                             else
+                               sql = sql_first_base+"'"+enrollment[0].enumber+v_visit_number+"','no first calculated volumes directory',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_secondary_key+"',null,null,null,null,null,null,null,null,null,null,null,null,null,null)"
+                                 results = connection.execute(sql)
+                             end
                              if File.directory?(v_subjectid_t1seg)
                                   v_dir_array = Dir.entries(v_subjectid_t1seg)   # need to get date for specific files
                                   # evalute for t1seg_ac_pc_flag = rFS_t1seg_[subjectid]_fmap.nii ,
@@ -6027,7 +6127,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                      end
                                      ftxt.close
 
-                                     v_tmp_data_array = v_tmp_data.split(",")
+                                     v_tmp_data_array = v_tmp_data.strip.split(",")
                                      if v_tmp_data_array.length >2
                                         v_gm =v_tmp_data_array[0]
                                         v_wm  = v_tmp_data_array[1]
@@ -6068,10 +6168,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                       end
                                     end
                                   end
-                                  sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','"+ v_o_star_nii_flag+"','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,NULL)"
+                                  sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','"+ v_o_star_nii_flag+"','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,'"+v_secondary_key+"')"
                                  results = connection.execute(sql)
                                 else
-                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,NULL)"
+                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,'"+v_secondary_key+"')"
                                  results = connection.execute(sql)
                                 end
                              end # check for subjectid asl dir
@@ -6090,13 +6190,17 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
              v_comment = self.move_present_to_old_new_to_present("cg_t1seg_status",
              "t1seg_subjectid, t1seg_general_comment, t1seg_smoothed_and_warped_flag, t1seg_smoothed_and_warped_comment, t1seg_smoothed_and_warped_global_quality,o_star_nii_flag,multiple_o_star_nii_flag,enrollment_id,scan_procedure_id,gm,wm,csf,secondary_key",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
-
-
              # apply edits  -- made into a function  in shared model
              self.apply_cg_edits('cg_t1seg_status')
 
-             puts "successful finish t1seg_status "+v_comment[0..459]
-              @schedulerun.comment =("successful finish t1seg_status "+v_comment[0..459])
+             v_comment = self.move_present_to_old_new_to_present("cg_first_calculated_volumes",
+             "subjectid, general_comment,enrollment_id,scan_procedure_id,secondary_key,l_accu_mm_cube,l_amyg_mm_cube,l_caud_mm_cube,l_hipp_mm_cube,l_pall_mm_cube,l_puta_mm_cube,l_thal_mm_cube,r_accu_mm_cube,r_amyg_mm_cube,r_caud_mm_cube,r_hipp_mm_cube,r_pall_mm_cube,r_puta_mm_cube,r_thal_mm_cube",
+                            "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
+             # apply edits  -- made into a function  in shared model
+             self.apply_cg_edits('cg_first_calculated_volumes')
+
+             puts "successful finish t1seg_status and first calculated volumes"+v_comment[0..459]
+              @schedulerun.comment =("successful finish t1seg_status  and first calculated volumes"+v_comment[0..459])
               if !v_comment.include?("ERROR")
                  @schedulerun.status_flag ="Y"
                end

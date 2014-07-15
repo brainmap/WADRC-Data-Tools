@@ -1411,7 +1411,7 @@ class DataSearchesController < ApplicationController
                                   params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" = "+@cg_query_tn_cn.value_1
                               end
                            end
-                         elsif @cg_query_tn_cn.condition ==  1
+                         elsif @cg_query_tn_cn.condition ==  1 and !@cg_query_tn_cn.value_1.nil?
                            v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" >= '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                            if !v_condition.blank?
                               if !params[:cg_search][:join_type][v_tn_id].blank? and params[:cg_search][:join_type][v_tn_id] == "2" 
@@ -1421,7 +1421,7 @@ class DataSearchesController < ApplicationController
                                   params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" >= "+@cg_query_tn_cn.value_1
                               end
                            end
-                         elsif @cg_query_tn_cn.condition == 2
+                         elsif @cg_query_tn_cn.condition == 2 and !@cg_query_tn_cn.value_1.nil?
                            v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" <= '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                            if !v_condition.blank?
                               if !params[:cg_search][:join_type][v_tn_id].blank? and params[:cg_search][:join_type][v_tn_id] == "2" 
@@ -1431,7 +1431,7 @@ class DataSearchesController < ApplicationController
                                  params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" <= "+@cg_query_tn_cn.value_1
                               end
                            end
-                         elsif @cg_query_tn_cn.condition == 3
+                         elsif @cg_query_tn_cn.condition == 3 and !@cg_query_tn_cn.value_1.nil?
                            v_condition =  " (if("+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" IS NULL,'',"+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+") )  != '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                            if !v_condition.blank?
                               if !params[:cg_search][:join_type][v_tn_id].blank? and params[:cg_search][:join_type][v_tn_id] == "2" 
@@ -1441,7 +1441,7 @@ class DataSearchesController < ApplicationController
                                 params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" != "+@cg_query_tn_cn.value_1      
                               end                     
                            end
-                         elsif @cg_query_tn_cn.condition == 4
+                         elsif @cg_query_tn_cn.condition == 4 and !@cg_query_tn_cn.value_1.nil?  and !@cg_query_tn_cn.value_2.nil?
                            v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" between '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' and '"+ @cg_query_tn_cn.value_2.gsub("'","''").gsub(/[;:"()=<>]/, '')+"' "
                            if !v_condition.blank?
                               if !params[:cg_search][:join_type][v_tn_id].blank? and params[:cg_search][:join_type][v_tn_id] == "2" 
@@ -1471,7 +1471,7 @@ class DataSearchesController < ApplicationController
                                 params["search_criteria"] = params["search_criteria"] +", "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" is not blank "
                               end  
                            end  
-                         elsif @cg_query_tn_cn.condition == 7
+                         elsif @cg_query_tn_cn.condition == 7 and !@cg_query_tn_cn.value_1.nil?
                            v_condition = "  "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" like '%"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"%' "
                            if !v_condition.blank?
                               if !params[:cg_search][:join_type][v_tn_id].blank? and params[:cg_search][:join_type][v_tn_id] == "2" 
