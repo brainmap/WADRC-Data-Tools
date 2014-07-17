@@ -423,7 +423,7 @@ class VgroupsController < ApplicationController
               v_tmp_cnt = v_tmp_cnt + 1
               if !params[:vgroup][:enrollments_attributes][cnt.to_s][:id].blank?
                  v_enrollments = Enrollment.where("enumber in (?) and participant_id is not NULL",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
-                 if !v_enrollments.nil? and !(v_enrollments[0].participant_id).blank?
+                 if !v_enrollments.nil? and !v_enrollments[0].nil? and !(v_enrollments[0].participant_id).blank?
                      v_enumber_participant_ids.push(v_enrollments[0].participant_id)
                  end
               end
@@ -539,7 +539,7 @@ class VgroupsController < ApplicationController
          else
            enumber_array << params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber]
            v_enrollments = Enrollment.where("enumber in (?) and participant_id is not NULL",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
-           if !v_enrollments.nil? and !(v_enrollments[0].participant_id).blank?
+           if !v_enrollments.nil? and !v_enrollments[0].nil? and !(v_enrollments[0].participant_id).blank?
               v_enumber_participant_ids.push(v_enrollments[0].participant_id)
            end 
          end
