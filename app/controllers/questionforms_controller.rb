@@ -178,10 +178,16 @@ class QuestionformsController < ApplicationController
                     set "+@question.base_table_1+"."+@question.base_column_1+" = '"+@q_data.value_1+"'
                     where "+@question.value_link+"s.id = "+@q_data.value_link.to_s   
               end                                         
-            else                        
-            sql ="update  "+@question.base_table_1+"
+            else    
+              if @q_data.value_1 == "" # problem with "" and integer field
+                 sql ="update  "+@question.base_table_1+"
+                  set "+@question.base_table_1+"."+@question.base_column_1+" =  NULL
+                  where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+              else                    
+                 sql ="update  "+@question.base_table_1+"
                   set "+@question.base_table_1+"."+@question.base_column_1+" = '"+@q_data.value_1+"'
                   where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+               end
             end
               connection = ActiveRecord::Base.connection();        
               results = connection.execute(sql)
@@ -207,9 +213,15 @@ class QuestionformsController < ApplicationController
                     where "+@question.value_link+"s.id = "+@q_data.value_link.to_s 
               end             
             else
-            sql ="update  "+@question.base_table_2+"
+              if @q_data.value_2 == "" # problem with "" and integer field
+                sql ="update  "+@question.base_table_2+"
+                  set "+@question.base_table_2+"."+@question.base_column_2+" = NULL
+                  where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+              else
+                sql ="update  "+@question.base_table_2+"
                   set "+@question.base_table_2+"."+@question.base_column_2+" = '"+@q_data.value_2+"'
                   where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+              end
             end
               connection = ActiveRecord::Base.connection();      
               results = connection.execute(sql)
@@ -235,10 +247,16 @@ class QuestionformsController < ApplicationController
                     set "+@question.base_table_3+"."+@question.base_column_3+" = '"+@q_data.value_3+"'
                     where "+@question.value_link+"s.id = "+@q_data.value_link.to_s 
               end             
-            else
-            sql ="update  "+@question.base_table_3+"
+            else 
+              if @q_data.value_3 == "" # problem with "" and integer field
+                sql ="update  "+@question.base_table_3+"
+                  set "+@question.base_table_3+"."+@question.base_column_3+" = NULL
+                  where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+              else
+                sql ="update  "+@question.base_table_3+"
                   set "+@question.base_table_3+"."+@question.base_column_3+" = '"+@q_data.value_3+"'
                   where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+              end
              end
               connection = ActiveRecord::Base.connection();        
               results = connection.execute(sql)
@@ -263,10 +281,16 @@ class QuestionformsController < ApplicationController
                     set "+@question.base_table_1+"."+@question.base_column_1+" = '"+@q_data.value_1+"'
                     where "+@question.value_link+"s.id = "+@q_data.value_link.to_s   
               end                                         
-            else                        
-            sql ="update  "+@question.base_table_1+"
-                  set "+@question.base_table_1+"."+@question.base_column_1+" = '"+@q_data.value_1+"'
-                  where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+            else    
+                 if @q_data.value_1 == ""  # problem with "" and integer field  
+                        sql ="update  "+@question.base_table_1+"
+                        set "+@question.base_table_1+"."+@question.base_column_1+" = NULL
+                        where "+@question.value_link+"_id = "+@q_data.value_link.to_s 
+                 else                 
+                    sql ="update  "+@question.base_table_1+"
+                        set "+@question.base_table_1+"."+@question.base_column_1+" = '"+@q_data.value_1+"'
+                        where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+                 end
             end
               connection = ActiveRecord::Base.connection();        
               results = connection.execute(sql)
@@ -292,9 +316,15 @@ class QuestionformsController < ApplicationController
                     where "+@question.value_link+"s.id = "+@q_data.value_link.to_s 
               end             
             else
-            sql ="update  "+@question.base_table_2+"
+              if @q_data.value_2 == "" # problem with "" and integer field  
+                 sql ="update  "+@question.base_table_2+"
+                  set "+@question.base_table_2+"."+@question.base_column_2+" = NULL
+                  where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+              else
+                 sql ="update  "+@question.base_table_2+"
                   set "+@question.base_table_2+"."+@question.base_column_2+" = '"+@q_data.value_2+"'
                   where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+               end
             end
               connection = ActiveRecord::Base.connection();      
               results = connection.execute(sql)
@@ -321,17 +351,20 @@ class QuestionformsController < ApplicationController
                     where "+@question.value_link+"s.id = "+@q_data.value_link.to_s 
               end             
             else
-            sql ="update  "+@question.base_table_3+"
-                  set "+@question.base_table_3+"."+@question.base_column_3+" = '"+@q_data.value_3+"'
-                  where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+                  if @q_data.value_3 == ""  # problem with "" and integer field 
+                    sql ="update  "+@question.base_table_3+"
+                       set "+@question.base_table_3+"."+@question.base_column_3+" = NULL
+                       where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+                  else
+                    sql ="update  "+@question.base_table_3+"
+                       set "+@question.base_table_3+"."+@question.base_column_3+" = '"+@q_data.value_3+"'
+                       where "+@question.value_link+"_id = "+@q_data.value_link.to_s
+                  end
              end
               connection = ActiveRecord::Base.connection();        
               results = connection.execute(sql)
           end
         end 
-
-
-
        end  
       end
     end
