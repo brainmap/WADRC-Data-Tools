@@ -560,6 +560,24 @@ v_user = v_user.gsub("\n","")
                 # update enrollment -- make into a function?
                 sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.enrollment_id = ( select e.id from enrollments e where e.enumber = replace(replace(replace(replace(t.subjectid,'_v2',''),'_v3',''),'_v4',''),'_v5',''))"
                 results = connection.execute(sql)
+                # secondary key
+                # select all where enrollment_id is null
+                # match enumber plus .R, b, c, d , 
+                # set secondary key
+                sql = "select subjectid from cg_"+f.gsub(/\./,'_')+"_new where enrollment_id is null order by subjectid"
+                results = connection.execute(sql)
+                results.each do |re|
+                    enrollment = Enrollment.where("concat(enumber,'.R') in (?) or concat(enumber,'a') in (?) or concat(enumber,'b') in (?) or concat(enumber,'c') in (?) or concat(enumber,'d') in (?) or concat(enumber,'e') in (?)",re[0],re[0],re[0],re[0],re[0],re[0])
+                    if !enrollment.blank?
+                             v_secondary_key = re[0]
+                             v_secondary_key = v_secondary_key.tr(enrollment[0].enumber, "") 
+                             sql = "update cg_"+f.gsub(/\./,'_')+"_new  t set t.enrollment_id = "+enrollment[0].id.to_s+", secondary_key='"+v_secondary_key+"', subjectid='"+enrollment[0].enumber+"' where subjectid='"+re[0]+"'"
+                             results = connection.execute(sql)
+                    end
+                end
+
+                
+
                 sql = "select subjectid from cg_"+f.gsub(/\./,'_')+"_new"
                 results = connection.execute(sql)
                 results.each do |r|
@@ -569,6 +587,8 @@ v_user = v_user.gsub("\n","")
                     results = connection.execute(sql)
                   end
                 end
+
+
 
                 # report on unmapped rows, not insert unmapped rows 
 
