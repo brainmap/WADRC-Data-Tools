@@ -369,6 +369,10 @@ v_user = v_user.gsub("\n","")
      v_shared = Shared.new
      v_shared.run_fs_Y_N()
 
+  elsif v_value_1 == "fs_Y_N_donebutbad"  
+     v_shared = Shared.new
+     v_shared.run_fs_Y_N_donebutbad()
+
   elsif v_value_1 == "fs_Y_N_good2go"  
      v_shared = Shared.new
      v_shared.run_fs_Y_N_good2go()

@@ -6319,6 +6319,105 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     
   end
   
+    def run_fs_Y_N_donebutbad
+    v_base_path = Shared.get_base_path()
+     @schedule = Schedule.where("name in ('fs_Y_N_donebutbad')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting fs_iY_N_donebutbad"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+    begin   # catch all exception and put error in comment
+       v_fs_path = v_base_path+"/preprocessed/modalities/freesurfer/donebutbad/"
+      # ls the dirs and links
+      v_dir_skip =  ['QA', 'fsaverage', 'fsaverage_bkup20121114', '.', '..', 'lh.EC_average','rh.EC_average','qdec','surfer.log']
+      # 'tmp*'  --- just keep dir cleaner
+      # ??? 'pdt00020.long.pdt00020_base',      'pdt00020_base',       'pdt00020_v2.long.pdt00020_base', plq20018.R, plq20024.R
+      # _v2, _v3, _v4 --> visit2,3,4
+      connection = ActiveRecord::Base.connection();
+      v_sp_visit1_array = []
+      v_sp_visit2_array = []
+      v_sp_visit3_array = []
+      v_sp_visit4_array = []
+
+      (v_sp_visit1_array,v_sp_visit2_array,v_sp_visit3_array,v_sp_visit4_array)  = get_sp_visit_num_array()
+            
+      # check for enumber in enrollment, link to enrollment_vgroup_memberships, appointments, visits
+      # limit by _v2, _v3, _v4 in sp via scan_procedures_vgroups , scan_procedures like 'visit2, visit3, visit4
+      # works for when all the processed files in one directory
+      dir_list = Dir.entries(v_fs_path).select { |file| File.directory? File.join(v_fs_path, file)}
+      link_list = Dir.entries(v_fs_path).select { |file| File.symlink? File.join(v_fs_path, file)}
+      dir_list.concat(link_list)
+      v_cnt = 0
+            # need to reset everything -- dirs moved from donebutbad 
+      v_sql = "update vgroups set fs_donebutbad_flag = 'N'"
+      results = connection.execute(v_sql)
+      dir_list.each do |dirname|
+        if !v_dir_skip.include?(dirname) and !dirname.start_with?('tmp')
+          if dirname.include?('_v2')
+            dirname = dirname.gsub(/_v2/,'') # subjectid without the v#
+            v_dirname_chop = dirname.gsub(/[0123456789]/,'') # get start of subjectid
+            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit2_array,v_dirname_chop)                                                                      
+            vgroups.each do |v|
+              if v.fs_donebutbad_flag != "Y"
+                 v.fs_donebutbad_flag ="Y"
+                 v.save
+                 v_cnt = v_cnt + 1
+              end
+            end
+          elsif dirname.include?('_v3')
+            dirname = dirname.gsub(/_v3/,'')
+            v_dirname_chop = dirname.gsub(/[0123456789]/,'')
+            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit3_array,v_dirname_chop) 
+            vgroups.each do |v|
+              if v.fs_donebutbad_flag != "Y"
+                 v.fs_donebutbad_flag ="Y"
+                 v.save
+                  v_cnt = v_cnt + 1
+              end
+            end
+          elsif dirname.include?('_v4')
+            dirname = dirname.gsub(/_v4/,'')
+            v_dirname_chop = dirname.gsub(/[0123456789]/,'')
+            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit4_array,v_dirname_chop) 
+            vgroups.each do |v|
+              if v.fs_donebutbad_flag != "Y"
+                 v.fs_donebutbad_flag ="Y"
+                 v.save
+                  v_cnt = v_cnt + 1
+              end
+            end
+          else
+            v_dirname_chop = dirname.gsub(/[0123456789]/,'')
+            vgroups = get_vgroups_from_enumber_sp(dirname,v_sp_visit1_array,v_dirname_chop) 
+            vgroups.each do |v|
+              if v.fs_donebutbad_flag != "Y"
+                 v.fs_donebutbad_flag ="Y"
+                 v.save
+                  v_cnt = v_cnt + 1
+              end
+            end
+          end
+        end
+      end
+ 
+        @schedulerun.comment ="successful finish fs_donebutbad_Y_N ===set = Y "+v_cnt.to_s
+        @schedulerun.status_flag ="Y"
+        @schedulerun.save
+        @schedulerun.end_time = @schedulerun.updated_at      
+        @schedulerun.save
+      puts " successful finish fs_donebutbad_Y_N flag set = Y "+v_cnt.to_s
+      rescue Exception => msg
+         v_error = msg.to_s
+         puts "ERROR !!!!!!!"
+         puts v_error
+          @schedulerun.comment =v_error[0..499]
+          @schedulerun.status_flag="E"
+          @schedulerun.save
+      end
+    
+  end
 
   def run_fs_Y_N_good2go
     v_base_path = Shared.get_base_path()
