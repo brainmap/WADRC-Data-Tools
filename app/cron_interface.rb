@@ -623,8 +623,8 @@ v_user = v_user.gsub("\n","")
                 sql =  v_truncate_dict[f]
                 results = connection.execute(sql)
 
-                sql = "insert into cg_"+f.gsub(/\./,'_')+"("+v_sql_base_dict[f]+",enrollment_id,scan_procedure_id) 
-                select distinct "+v_sql_base_dict[f]+",t.enrollment_id, scan_procedure_id from cg_"+f.gsub(/\./,'_')+"_new t
+                sql = "insert into cg_"+f.gsub(/\./,'_')+"("+v_sql_base_dict[f]+",enrollment_id,scan_procedure_id,secondary_key) 
+                select distinct "+v_sql_base_dict[f]+",t.enrollment_id, scan_procedure_id,secondary_key from cg_"+f.gsub(/\./,'_')+"_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
