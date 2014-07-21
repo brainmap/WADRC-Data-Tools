@@ -178,6 +178,9 @@ v_user = v_user.gsub("\n","")
       v_comment = ""
       v_command = v_base_path+"/data1/lab_scripts/python_dev/test_shell.sh "+v_base_path+"/preprocessed/visits/johnson.predict.visit1/pdt00126/LST_116 "+v_base_path+"/preprocessed/visits/johnson.predict.visit1/pdt00126/LST_116/watlas_wm.nii "
 
+
+     # testing ids check
+     v_shared.run_test()
 # --- calls one gets exit status   -- test_shell calls internal function 
 #       status = POpen4::popen4(v_command) do |stdout, stderr |
 #           puts "stdout     : #{ stdout.read.strip }"

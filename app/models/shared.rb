@@ -105,6 +105,24 @@ class Shared  < ActionController::Base
     
     
   end
+
+  def check_ids_for_severe_or_incomplete( p_ids_id)
+    v_ok_flag = "Y"  # defaulting to Y , no severe or incomplete
+       v_idss = ImageDataset.where("image_datasets.id in (?)", p_ids_id).where("image_datasets.id in ( select image_dataset_quality_checks.image_dataset_id 
+                       from image_dataset_quality_checks where image_dataset_quality_checks.image_dataset_id in (?) and  ( image_dataset_quality_checks.incomplete_series  = 'Incomplete'  
+or   image_dataset_quality_checks.garbled_series  = 'Severe'  
+or  image_dataset_quality_checks.fov_cutoff  = 'Severe'  
+or  image_dataset_quality_checks.field_inhomogeneity  = 'Severe'   
+or  image_dataset_quality_checks.ghosting_wrapping  = 'Severe' 
+ or  image_dataset_quality_checks.banding  = 'Severe'  
+or  image_dataset_quality_checks.registration_risk  = 'Severe'  
+or  image_dataset_quality_checks.motion_warning  = 'Severe'  
+or   image_dataset_quality_checks.omnibus_f  = 'Severe'  or  spm_mask  = 'Severe'))", p_ids_id)
+     if !v_idss.nil? and !v_idss[0].nil?
+         v_ok_flag = "N"
+     end
+     return v_ok_flag
+  end
   
   def compare_file_header(p_standard_header,p_file_header)
     v_comment =""
@@ -1089,6 +1107,10 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
       v_scan_desc_type_array = []
       v_cnt = 1
       results_dataset.each do |r_dataset|
+         v_ids_ok_flag = "Y"
+         v_ids_id = r_dataset[2]
+         v_ids_ok_flag = self.check_ids_for_severe_or_incomplete(v_ids_id)
+         if v_ids_ok_flag == "Y" # no quality check severe or incomplete
             v_series_description_type = r_dataset[5].gsub(" ","_")
             if !v_scan_desc_type_array.include?(v_series_description_type)
                  v_scan_desc_type_array.push(v_series_description_type)
@@ -1127,6 +1149,7 @@ puts "AAAAAA "+v_call
             # check if in v_folder_array , if in v_folder_array , dir_series_description_type => dir_series_description_type_2
             # add  dir, dir_series_description_type to v_folder_array
             # cp path ==> /tmp/adrc_upload/[subjectid]_yyymmdd_wisc/dir_series_description_type(_2)
+         end # skipping if qc severe or incomplete    
       end
 
       sql_status = "select status_flag from cg_adrc_upload where subjectid ='"+r[0]+"'"
@@ -5846,6 +5869,17 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       @schedulerun.save
 
    end   
+
+   def run_test
+          v_return = self.check_ids_for_severe_or_incomplete(10708)
+          puts "aaaaaaa vid=894, ids=10708 "+v_return
+
+        v_return = self.check_ids_for_severe_or_incomplete(49790)
+          puts "bbb vid=2861, ids=49790 "+v_return
+
+
+
+   end
     
   # to add columns --
   # change sql_base insert statement
