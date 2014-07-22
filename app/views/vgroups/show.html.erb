@@ -82,12 +82,18 @@ edit_count = edit_count -1
 		</td></tr>
 		<tr><td colspan="5" align="left">
 			<b>Which DVD:  </b><%= text_field :vgroup,:dicom_dvd, :size => 20 %>
-			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			   <small><small>
 				<b>Compile Folder:</b>				  <%= select :vgroup, :compile_folder, ["no", "yes", "n/a"] %>
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<B>FS Y/N: </B><%= @vgroup.fs_flag%>
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<B>FS good2go Y/N: </B><%= @vgroup.fs_good2go_flag%>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<B>FS manual edits Y/N: </B><%= @vgroup.fs_manual_edits_flag%>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<B>FS donebutbad Y/N: </B><%= @vgroup.fs_donebutbad_flag%>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</small></small>
 				<% if !@trfiles.nil? %>
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<b>Tracked files:</b> <% @trfiles.each do |f| %>
