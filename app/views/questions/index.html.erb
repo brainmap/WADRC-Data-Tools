@@ -1,7 +1,8 @@
 <table width="100%"><tr><td align="right">
 	<%= link_to 'New Question', new_question_path %> |
 	<%= link_to('Question Forms Base', questionformbase_path) %>
-	</td></tr></table>
+	</td></tr>
+<tr><td align="right"><small> <%= link_to('Batch update question display order', '/questionform_questions') %></small></td></tr></table>
 
  <%= form_tag '/questions/index' do %>
   <% v_form_id_array =[] ; v_form_id_array.push(12); v_form_id_array.push(13) ; v_form_id_array.push(14) %>

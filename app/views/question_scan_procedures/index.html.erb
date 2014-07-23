@@ -20,9 +20,11 @@ Limits a question to only be displayed (include) or not displayed ( exclude) for
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
+<table width="100%"><tr><td align="right">
 <%= link_to 'Link Question to scan procedure', new_question_scan_procedure_path %> |
 <%= link_to('Question Forms Base', questionformbase_path) %>
+<br> <small> <%= link_to('Batch update question display order', '/questionform_questions') %></small>
+</td></tr></table>
 <% end %>  
 
 <table class="tabular">
