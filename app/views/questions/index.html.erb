@@ -5,10 +5,10 @@
 
  <%= form_tag '/questions/index' do %>
   <% v_form_id_array =[] ; v_form_id_array.push(12); v_form_id_array.push(13) ; v_form_id_array.push(14) %>
-  <%= collection_select :questionform_question,  :questionform_id, Questionform.where("status_flag in ('Y')").order(:entrance_page_type,:display_order,:description), :id, :description,{:prompt => 'Select a Form to show the linked Questions'} %>
+  <%= collection_select :questionform_question,  :questionform_id, Questionform.where("status_flag in ('Y')").order(:entrance_page_type,:display_order,:description), :id, :description,:prompt => 'Select a Form to show the linked Questions', :multiple => false, :selected => @v_questionform_id  %>
   <br>
   <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
-<%= collection_select('questionform_question[scan_procedure_id]', :id,ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'Choose scan procedure'}, {:multiple =>  false} ) %>
+<%= collection_select('questionform_question[scan_procedure_id]', :id,ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  :prompt => 'Choose scan procedure', :multiple =>  false, :selected =>@v_scan_procedure_id ) %>
 <br>
 
   

@@ -3,6 +3,15 @@ class QuestionformQuestionsController < ApplicationController
   # GET /questionform_questions
   # GET /questionform_questions.xml
   def index
+    # update display order 
+    if !params[:questionform_question].nil?  and !params[:questionform_question][:questionform_id].blank? and !params[:questionform_question][:scan_procedure_id].nil?   and !params[:questionform_question][:scan_procedure_id][:id].nil? and !params[:questionform_question][:scan_procedure_id][:id].blank?  and !params[:question_id].nil?
+              params[:question_id].each do |q_id|
+                @questionform_questions_disp_order = QuestionformQuestion.where("question_id in (?)", q_id).where("question_id in ( select question_id from questionform_questions where questionform_id in (?))",params[:questionform_question][:questionform_id]).where("question_id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id])
+                @questionform_questions_disp_order[0].display_order = params[:display_order][q_id]
+                @questionform_questions_disp_order[0].save
+             end
+    end
+
     # default to most recently edited form
     if params[:questionform_question].blank? or params[:questionform_question] == ''
       @questionform_questions = QuestionformQuestion.find_by_sql("select questionforms.description,questionform_questions.id,questionform_questions.questionform_id,questionform_questions.question_id,
@@ -17,13 +26,21 @@ class QuestionformQuestionsController < ApplicationController
     end
   
     #@questionform_questions = QuestionformQuestion.all
+        @v_edit_display_order = "N" # only allow display order edit if questionform and scan_procedure both selected
+        @v_scan_procedure_id = ""
+        @v_questionform_id =  ""
         if !params[:questionform_question].nil? 
          if (!params[:questionform_question][:questionform_id].nil?  and !params[:questionform_question][:questionform_id].blank? and !params[:questionform_question][:scan_procedure_id].nil?   and !params[:questionform_question][:scan_procedure_id][:id].nil? and !params[:questionform_question][:scan_procedure_id][:id].blank?  )
+              @v_scan_procedure_id = params[:questionform_question][:scan_procedure_id][:id]
+              @v_questionform_id = params[:questionform_question][:questionform_id]
+              @v_edit_display_order =  "Y"
              @questionform_questions = QuestionformQuestion.where("question_id in ( select question_id from questionform_questions where questionform_id in (?))",params[:questionform_question][:questionform_id]).where("question_id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id]).order(:display_order)      
          elsif !params[:questionform_question][:questionform_id].nil? and params[:questionform_question][:questionform_id] > ''
+             @v_questionform_id = params[:questionform_question][:questionform_id]
              @questionform_questions = QuestionformQuestion.where("question_id in ( select question_id from questionform_questions where questionform_id in (?))",params[:questionform_question][:questionform_id]).order(:display_order) 
            
          elsif !params[:questionform_question][:scan_procedure_id].nil? and !params[:questionform_question][:scan_procedure_id][:id].nil? and params[:questionform_question][:scan_procedure_id][:id] > ''
+             @v_scan_procedure_id = params[:questionform_question][:scan_procedure_id][:id]
              @questionform_questions = QuestionformQuestion.where("question_id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id]).order(:display_order) 
 
          end         
