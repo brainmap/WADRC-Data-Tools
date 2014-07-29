@@ -431,13 +431,13 @@ class VgroupsController < ApplicationController
 
                     # check for participant vgroup, rmraic, reggieid, enumber mismatch
           v_mismatch_participant_msg = ""
-          if v_rmraic_participant_id != '' and  v_reggieid_participant_id != '' and v_rmraic_participant_id !=  v_reggieid_participant_id 
+          if v_rmraic_participant_id != '' and  v_reggieid_participant_id != '' and v_rmraic_participant_id.to_s !=  v_reggieid_participant_id.to_s 
               v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - reggieid participant and RMRaicxxxxxx participant. "
           end
-          if v_param_vgroup_participant_id != '' and  v_reggieid_participant_id != '' and v_param_vgroup_participant_id !=  v_reggieid_participant_id 
+          if v_param_vgroup_participant_id != '' and  v_reggieid_participant_id != '' and v_param_vgroup_participant_id.to_s !=  v_reggieid_participant_id.to_s 
               v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - reggieid participant and selected participant. "
           end
-          if v_param_vgroup_participant_id != '' and  v_rmraic_participant_id != '' and v_param_vgroup_participant_id !=  v_rmraic_participant_id 
+          if v_param_vgroup_participant_id != '' and  v_rmraic_participant_id != '' and v_param_vgroup_participant_id.to_s !=  v_rmraic_participant_id.to_s 
               v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - RMRaicxxxxxxparticipant and selected participant. "
           end
 
@@ -671,22 +671,22 @@ class VgroupsController < ApplicationController
 
                     # check for participant vgroup, rmraic, reggieid, enumber mismatch
           v_mismatch_participant_msg = ""
-          if v_vgroup_participant_id != '' and  v_reggieid_participant_id != '' and v_vgroup_participant_id !=  v_reggieid_participant_id 
+          if v_vgroup_participant_id != '' and  v_reggieid_participant_id != '' and v_vgroup_participant_id.to_s !=  v_reggieid_participant_id.to_s 
               v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - reggieid participant and selected participant. "
           end
-          if v_vgroup_participant_id != '' and  v_rmraic_participant_id != '' and v_vgroup_participant_id !=  v_rmraic_participant_id 
+          if v_vgroup_participant_id != '' and  v_rmraic_participant_id != '' and v_vgroup_participant_id.to_s !=  v_rmraic_participant_id.to_s 
               v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - RMRaicxxxxxx participant and selected participant. "
           end
-          if v_rmraic_participant_id != '' and  v_reggieid_participant_id != '' and v_rmraic_participant_id !=  v_reggieid_participant_id 
+          if v_rmraic_participant_id != '' and  v_reggieid_participant_id != '' and v_rmraic_participant_id.to_s !=  v_reggieid_participant_id.to_s 
               v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - reggieid participant and RMRaicxxxxxx participant. "
           end
-          if v_param_vgroup_participant_id != '' and  v_vgroup_participant_id != '' and v_param_vgroup_participant_id !=  v_vgroup_participant_id 
-              v_mismatch_participant_msg = v_mismatch_participant_msg +" minor MISMATCH - previous selected participant and selected participant. "
+          if v_param_vgroup_participant_id != '' and  v_vgroup_participant_id != '' and v_param_vgroup_participant_id.to_s !=  v_vgroup_participant_id.to_s 
+              v_mismatch_participant_msg = v_mismatch_participant_msg +" minor MISMATCH - previous selected participant and selected participant."
           end
-          if v_param_vgroup_participant_id != '' and  v_reggieid_participant_id != '' and v_param_vgroup_participant_id !=  v_reggieid_participant_id 
+          if v_param_vgroup_participant_id != '' and  v_reggieid_participant_id != '' and v_param_vgroup_participant_id.to_s !=  v_reggieid_participant_id.to_s 
               v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - reggieid participant and selected participant. "
           end
-          if v_param_vgroup_participant_id != '' and  v_rmraic_participant_id != '' and v_param_vgroup_participant_id !=  v_rmraic_participant_id 
+          if v_param_vgroup_participant_id != '' and  v_rmraic_participant_id != '' and v_param_vgroup_participant_id.to_s !=  v_rmraic_participant_id.to_s 
               v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - RMRaicxxxxxxparticipant and selected participant. "
           end
 
