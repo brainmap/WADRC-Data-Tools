@@ -4924,7 +4924,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                  v_error_comment = "error in "+r[2]+" ;"+v_error_comment
                  # send email to owner
                  v_schedule_owner_email_array.each do |e|
-                   v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see "+v_log_path
+                   v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see ==> "+v_log_path+" <== ALl the output from process is in the file."
                    PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
                  end
                end
