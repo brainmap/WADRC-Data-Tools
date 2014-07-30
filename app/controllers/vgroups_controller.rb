@@ -153,8 +153,9 @@ class VgroupsController < ApplicationController
                 (vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships 
                                         where enrollment_vgroup_memberships.enrollment_id in
                                                   (select enrollment_id from enrollment_vgroup_memberships where vgroup_id in (?))
-              or vgroups.id in (select id from vgroups where rmr in (?))
-                              ))", params[:id],params[:id],@vgroup.rmr)
+              or vgroups.id in (select id from vgroups where rmr in (?) and rmr is not NULL and rmr != '')
+              or vgroups.id in (select id from vgroups where participant_id in (?) and participant_id is not NULL and participant_id != '')
+                              ))", params[:id],params[:id],@vgroup.rmr,@vgroup.participant_id)
         
     end
     respond_to do |format|
