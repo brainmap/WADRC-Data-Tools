@@ -1151,7 +1151,7 @@ class DataSearchesController < ApplicationController
                 end
                 @cg_query_tn.join_type = params[:cg_search][:join_type][v_tn_id]
                 if @cg_query_tn.join_type != 2 # exclude NOT IN
-                     @all_table_ids_in_query.push(v_tn_id)
+              ### getting populated elsewhere - only want ones which are included       @all_table_ids_in_query.push(v_tn_id)
                 end
 
                 if @cg_query_tn.join_type == 0  # inner join joins  
@@ -1159,6 +1159,7 @@ class DataSearchesController < ApplicationController
                     @local_tables.push(@cg_tn.tn)  
                     @local_tables_alias_hash[@cg_tn.tn] =  @cg_tn.alias                         
                     @local_conditions.push(@cg_tn.join_right)
+                    @all_table_ids_in_query.push(@cg_tn.id)
                  
                 elsif @cg_query_tn.join_type == 2 # NOT IN , but also need an outer join if any cols selected 
                    # build up sql for vgroup not in 
@@ -1188,6 +1189,7 @@ class DataSearchesController < ApplicationController
                     
                 elsif @cg_query_tn.join_type == 1  # outer join joins  # NEED PARENT TABLE join_left_parent_tn
                     @table_types.push(@cg_tn.table_type)
+                    @all_table_ids_in_query.push(@cg_tn.id)
                             # need to add outer as part of table length !!!!! THIS HAS TO BE FIXED
                     if @local_tables.index(@cg_tn.join_left_parent_tn).blank?   # WHAT ABOUT ALIAS                        
                                   @local_tables.push(@cg_tn.join_left_parent_tn)  
@@ -1212,7 +1214,8 @@ class DataSearchesController < ApplicationController
                            end  
                         end
                       end
-                    if v_include_tn == "Y"                    
+                    if v_include_tn == "Y"   
+                        @all_table_ids_in_query.push(@cg_tn.id)                 
                         if params[:cg_search][:join_type][v_tn_id].blank? and !@cg_tn.join_left.blank?  # setting default to outer join
                            @table_types.push(@cg_tn.table_type)
                                     # need to add outer as part of table length !!!!! THIS HAS TO BE FIXED
@@ -1771,13 +1774,15 @@ class DataSearchesController < ApplicationController
     @all_tables = []
     # participant_centic order by 
     if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0
-       @all_table_ids_in_query.each do |r|
+       @all_table_ids_in_query.uniq.each do |r|
              v_cg_tn_cns = CgTnCn.where("cg_tn_id in (?) and order_by_flag in (?)",r,'Y')
-             v_cg_tn_cns.each do |n| 
-                     @order_by = [n.cn+" DESC"].concat(@order_by)
+             v_cg_tn_cns.each do |n|   # need to only include tables which are in tn_id in select  #ERROR!!!
+                     v_temp_tn = CgTn.find(n.cg_tn_id)
+                     @order_by = [v_temp_tn.tn+"."+n.cn+" DESC"].concat(@order_by)  # might be problem if alias is used
              end
        end
     end
+    
     @local_tables.uniq.each do |tn|   # need left join right after parent tn
        v_tn = tn
        if !@tables_left_join_hash[tn].blank?
