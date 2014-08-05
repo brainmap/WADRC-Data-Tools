@@ -81,7 +81,7 @@ to the radiology_comments index url<br>
 <br><br>
 </td></tr>
 
-<tr><td><%= link_to('Space usage', '/directories') %></td><td colspan=2>Displays size and change in size of directories - populated by scheduled job "dir_size"
+<tr><td><a href="http://braindata.dom.wisc.edu/mrtg/">Brainmap space</a><br><%= link_to('Space usage', '/directories') %></td><td colspan=2>Displays size and change in size of directories - populated by scheduled job "dir_size"
 	</td></tr>
 
 	<tr><td><%= link_to('Series Description Maps', '/series_description_maps') %></td><td colspan=2>Series Description Map to series description type - used in searches, asl status and adrc upload scheduled job. New series descriptions are inserted into the series description maps table by the scheduled job "series_description"
@@ -152,7 +152,7 @@ this is production<br>
 <%= link_to('Visit Frequency', lookup_visitfrequencies_path) %> <br>
 <% end %>
 
-	
+<%= link_to('Participant missing dob/gender','/users/participant_missing') %> <br>
 	
 	
 	
