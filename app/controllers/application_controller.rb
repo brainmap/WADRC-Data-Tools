@@ -51,6 +51,9 @@ def run_search
         if @conditions.size > 0
             sql = sql +" AND "+@conditions.join(' and ')
         end
+        if !@group_by.nil? and @group_by.size > 0
+             sql = sql +@group_by
+        end
        #conditions - feed thru ActiveRecord? stop sql injection -- replace : ; " ' ( ) = < > - others?
         if @order_by.size > 0
           sql = sql +" ORDER BY "+@order_by.join(',')
