@@ -2,6 +2,45 @@
 class QuestionformQuestionsController < ApplicationController
   # GET /questionform_questions
   # GET /questionform_questions.xml
+  def index_sp_questions 
+     # copy all the questions from one sp/questionform to another sp,
+       # exclude ones already there
+     if !params[:questionform_question][:scan_procedure_id].nil? and !params[:questionform_question][:scan_procedure_id][:id].nil? and params[:questionform_question][:scan_procedure_id][:id] > ''
+             v_new_scan_procedure_id = params[:questionform_question][:scan_procedure_id][:id]
+             v_orig_scan_procedure_id = params[:orig_scan_procedure_id]
+             v_questionform_id = params[:questionform_question][:questionform_id]
+             v_question_scan_procedures = QuestionScanProcedure.where("question_id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))
+                                                             and question_id not in (select question_id from question_scan_procedures where scan_procedure_id in (?))
+                                                             and question_id in ( select question_id from questionform_questions where questionform_id in (?))",
+                                                             v_orig_scan_procedure_id,v_new_scan_procedure_id,v_questionform_id ) 
+             v_question_scan_procedures.each do |qfq|
+                v_question_scan_procedure = QuestionScanProcedure.new
+                v_question_scan_procedure.question_id = qfq.question_id
+                v_question_scan_procedure.include_exclude = qfq.include_exclude
+                v_question_scan_procedure.scan_procedure_id = v_new_scan_procedure_id
+                v_question_scan_procedure.save
+             end
+      end
+      @questionform_questions = QuestionformQuestion.find_by_sql("select questionforms.description,questionform_questions.id,questionform_questions.questionform_id,questionform_questions.question_id,
+             questionform_questions.display_order from questionform_questions, questionforms where questionform_questions.questionform_id=questionforms.id
+             and questionform_questions.questionform_id in ("+params[:questionform_question][:questionform_id]+")
+              order by  questionform_questions.display_order,questionforms.description ")
+        @v_edit_display_order = "N" # only allow display order edit if questionform and scan_procedure both selected
+        @v_scan_procedure_id = ""
+        @v_questionform_id =  params[:questionform_question][:questionform_id]
+        if !params[:questionform_question].nil? and  !params[:questionform_question][:scan_procedure_id].nil? and !params[:questionform_question][:scan_procedure_id][:id].nil? and params[:questionform_question][:scan_procedure_id][:id] > ''
+              @v_scan_procedure_id = params[:questionform_question][:scan_procedure_id][:id]
+              @v_edit_display_order =  "Y"
+             @questionform_questions = QuestionformQuestion.where("question_id in ( select question_id from questionform_questions where questionform_id in (?))",params[:questionform_question][:questionform_id]).where("question_id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id]).order(:display_order)   
+
+         end
+         # not carrying over the params to index -- need to then do re-search
+    respond_to do |format|
+      format.html { redirect_to('/questionform_questions') }
+      format.xml  { render :xml => @questionform_questions }
+    end
+  end
+
   def index
     # update display order 
     if !params[:questionform_question].nil?  and !params[:questionform_question][:questionform_id].blank? and !params[:questionform_question][:scan_procedure_id].nil?   and !params[:questionform_question][:scan_procedure_id][:id].nil? and !params[:questionform_question][:scan_procedure_id][:id].blank?  and !params[:question_id].nil?
