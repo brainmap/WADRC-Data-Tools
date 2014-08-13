@@ -305,6 +305,10 @@ class VgroupsController < ApplicationController
                     end
                 end
             end
+            if (enrollment[0].participant_id).nil? and !(@vgroup.participant_id).blank? 
+                 enrollment[0].participant_id = @vgroup.participant_id
+                 enrollment[0].save
+             end
           else  # make a new enrollment with this participant-- only works for participant selected
             if  (@vgroup.participant_id).blank? and !(@vgroup.rmr).blank?
                 if (@vgroup.rmr)[0..5] == "RMRaic" && ((@vgroup.rmr)[6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ )&& (@vgroup.rmr).length == 12
@@ -570,11 +574,13 @@ class VgroupsController < ApplicationController
               end
                  # need to add
                  @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
-                 @enrollment_vgroup_membership = EnrollmentVgroupMembership.where("enrollment_id in (?)",@enrollment[0].id)
-                 if @enrollment_vgroup_membership.blank?
-                     sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment[0].id).to_s+")"      
-                     results = connection.execute(sql)
-                 end                   
+                 if !@enrollment.nil? and !@enrollment[0].blank?
+                    @enrollment_vgroup_membership = EnrollmentVgroupMembership.where("enrollment_id in (?)",@enrollment[0].id)
+                    if @enrollment_vgroup_membership.blank?
+                        sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment[0].id).to_s+")"      
+                        results = connection.execute(sql)
+                    end 
+                  end                  
             end    
          end
        end
