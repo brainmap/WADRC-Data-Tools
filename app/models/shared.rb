@@ -1456,6 +1456,283 @@ if File.directory?(@visit_directory_to_scan)
 end
 end
 
+# Kate Sprecher Sleep study needs t1 - clean out dicom
+def run_sleep_t1
+
+    v_base_path = Shared.get_base_path()
+    v_log_base ="/mounts/data/preprocessed/logs/"
+    v_process_name = "sleep_t1"
+    process_logs_delete_old( v_process_name, v_log_base)
+     @schedule = Schedule.where("name in ('sleep_t1')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting sleep_t1"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+      v_stop_file_name = v_process_name+"_stop"
+      v_stop_file_path = v_log_base+v_stop_file_name
+    connection = ActiveRecord::Base.connection();
+
+    # fill in missing enrollmentid/scan_procedure_id
+    sql = "select distinct subjectid from cg_sleep_t1 where enrollment_id is NULL or scan_procedure_id is NULL"
+    results_blanks = connection.execute(sql)
+    results_blanks.each do |r|
+       v_subjectid_visit_num = r[0]
+       v_subjectid = r[0].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
+       v_scan_procedure_id = get_sp_id_from_subjectid_v(v_subjectid_visit_num)
+       v_enrollment_id = get_enrollment_id_from_subjectid_v(v_subjectid_visit_num)
+       sql_update = "update cg_sleep_t1 set enrollment_id = "+v_enrollment_id.to_s+", 
+                       scan_procedure_id = "+v_scan_procedure_id.to_s+" 
+                       where subjectid ='"+v_subjectid_visit_num+"'"
+       if !v_scan_procedure_id.blank? and !v_enrollment_id.blank?
+          results = connection.execute(sql_update)
+       end
+    end
+    
+    # t1 and resting bold from /unknown   asl from /asl
+    v_target_dir = "/home/panda_user/upload_sleep_t1"
+    v_final_target = "ftp directory tbd"
+    v_series_description_category_array = ['T1_Volumetric'] #,'ASL']
+    v_series_description_category_id_array = [19] #,1]
+    sql = "select distinct subjectid, enrollment_id, scan_procedure_id from cg_sleep_t1
+           where ( sleep_sent_flag != 'Y' or sleep_sent_flag is NULL)
+           and ( sleep_status_flag != 'N' or sleep_status_flag is NULL)
+           and enrollment_id is not NULL 
+           and scan_procedure_id is not NULL
+           "
+    results = connection.execute(sql)
+    # get each subject , make target dir 
+    # get each series decription / file name / nii file based on series_description_category
+    # mkdir with series_description_category, # of scan - e.g. 3rd T1
+    # copy over the .nii file, r
+    # bzip2 each subjectid dir
+    results.each do |r|
+      v_break = 0  # need a kill swith
+       v_log = ""
+      if File.file?(v_stop_file_path)
+        File.delete(v_stop_file_path)
+        v_break = 1
+        v_log = v_log + " STOPPING the results loop"
+        v_comment = " STOPPING the results loop  "+v_comment
+      end
+      break if v_break > 0
+      
+      v_comment = "strt "+r[0]+","+v_comment
+      @schedulerun.comment =v_comment[0..1990]
+      @schedulerun.save
+      # update schedulerun comment - prepend 
+      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
+       and v.id in ( select scvg.vgroup_id from scan_procedures_vgroups scvg where scvg.scan_procedure_id  in ("+r[2].to_s+"))"
+      results_vgroup = connection.execute(sql_vgroup)
+      # mkdir /tmp/adrc_upload/[subjectid]_YYYYMMDD_wisc
+      v_export_id = (@schedule.id).to_s+"_"+r[0].to_s
+      v_subject_dir = v_export_id+"_"+(results_vgroup.first)[0].to_s+"_wisc"
+      v_parent_dir_target =v_target_dir+"/"+v_subject_dir
+      v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_parent_dir_target +"' "
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close
+      v_subjectid = r[0].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
+      sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_types.series_description_type 
+                  from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
+                  where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
+                  and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
+                  and image_datasets.series_description =   series_description_maps.series_description
+                  and series_description_maps.series_description_type_id = series_description_types.id
+                  and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1') 
+                  and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = "+r[1].to_s+" and evm.enrollment_id = e.id and e.enumber ='"+ v_subjectid+"')
+                  and vgroups.id in (select spv.vgroup_id from scan_procedures_vgroups spv where spv.scan_procedure_id = "+r[2].to_s+" )
+                   order by appointments.appointment_date "
+
+      results_dataset = connection.execute(sql_dataset)
+      v_cnt = 1
+      v_dir_target = ""
+      v_scan_desc_type_array = []
+      v_folder_array = [] # how to empty
+      results_dataset.each do |r_dataset|
+             v_series_description_type = r_dataset[5].gsub(" ","_")
+             if !v_scan_desc_type_array.include?(v_series_description_type)
+                  v_scan_desc_type_array.push(v_series_description_type)
+             end
+             v_path = r_dataset[4]
+             v_dir_array = v_path.split("/")
+             v_dir = v_dir_array[(v_dir_array.size - 1)]
+             v_dir_target = v_dir+"_"+v_series_description_type
+             v_path = v_path.gsub("/Volumes/team/","").gsub("/Volumes/team-1/","").gsub("/Data/vtrak1/","")  #v_base_path+"/"+
+             if v_folder_array.include?(v_dir_target)
+               v_dir_target = v_dir_target+"_"+v_cnt.to_s
+               v_cnt = v_cnt +1
+               # might get weird if multiple types have dups - only expect T1/Bravo
+             end
+  puts "aaaaaa v_dir_target = "+v_dir_target
+             v_folder_array.push(v_dir_target)
+
+              # v_call = "/usr/bin/bunzip2 "+v_parent_dir_target+"/"+v_dir_target+"/*.bz2"
+               v_tmp = "/tmp/"+v_dir_target 
+               v_call = "mise "+v_path+" "+v_parent_dir_target+"/"+v_dir_target   # works where bunzip2 cmd after rsync not work
+               v_call = "mise "+v_path+" "+v_tmp 
+ #puts "v_path = "+v_path
+ #puts "v_parent_dir_target = "+ v_parent_dir_target
+ #puts "v_dir_target="+v_dir_target
+ puts "AAAAAA "+v_call
+              stdin, stdout, stderr = Open3.popen3(v_call)
+               stderr.each {|line|
+                   puts line
+                 }
+                 while !stdout.eof?
+                   puts stdout.read 1024    
+                  end
+              stdin.close
+              stdout.close
+              stderr.close
+              # temp - replace /Volumes/team/ and /Data/vtrak1/ with /Volumes/team-1 in dev
+             # split on / --- get the last dir
+             # make new dir name dir_series_description_type 
+             # check if in v_folder_array , if in v_folder_array , dir_series_description_type => dir_series_description_type_2
+             # add  dir, dir_series_description_type to v_folder_array
+             # cp path ==> /tmp/adrc_dti/[subjectid]_yyymmdd_wisc/dir_series_description_type(_2)
+       end
+
+
+       if v_scan_desc_type_array.size > 0   
+puts "dddddd in ids dicoms"
+puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm" 
+ # TURN INTO A LOOP   
+        v_dicom_field_array =['0010,0030','0010,0010','0008,0050','0008,1030','0010,0020','0040,0254','0008,0080','0008,1010','0009,1002','0009,1030','0018,1000',
+                        '0025,101A','0040,0242','0040,0243']
+        v_dicom_field_value_hash ={'0010,0030'=>'DOB','0010,0010'=>'Name','0008,0050'=>'Accession Number',
+                           '0008,1030'=>'Study Description', '0010,0020'=>'Patient ID','0040,0254'=>'Performed Proc Step Desc',
+                            '0008,0080'=>'Institution Name','0008,1010'=>'Station Name','0009,1002'=>'Private',
+                            '0009,1030'=>'Private','0018,1000'=>'Device Serial Number','0025,101A'=>'Private',
+                            '0040,0242'=>'Performed Station Name','0040,0243'=>'Performed Location'}
+
+
+        # v_dicom_field_array =['0010,0030']
+        # v_dicom_field_value_hash ={'0010,0030'=>'DOB'}
+      ####  v_dicom_field_array.each do |dicom_key|
+                Dir.glob('/tmp/'+v_dir_target+'/*/*.dcm').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                      v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                                  d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                             end 
+                                                                                       end }
+
+                                                                               
+               Dir.glob('/tmp/'+v_dir_target+'/*/*.0*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }
+
+              Dir.glob('/tmp/'+v_dir_target+'/*/*.1*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm)
+                                                                                            end 
+                                                                                         end }   
+             Dir.glob('/tmp/'+v_dir_target+'/*/*.2*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }   
+             Dir.glob('/tmp/'+v_dir_target+'/*/*.3*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }                                                                               
+
+        v_call = "rsync -av /tmp/"+v_dir_target+" panda_user@merida.dom.wisc.edu:"+v_parent_dir_target 
+         stdin, stdout, stderr = Open3.popen3(v_call)
+         while !stdout.eof?
+           puts stdout.read 1024    
+          end
+         stdin.close
+         stdout.close
+         stderr.close
+
+         v_call = "rm -rf /tmp/"+v_dir_target
+         stdin, stdout, stderr = Open3.popen3(v_call)
+         while !stdout.eof?
+           puts stdout.read 1024    
+          end
+         stdin.close
+         stdout.close
+         stderr.close
+
+
+        end                            
+
+
+     
+      #tar.gz subjectid dir
+      v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
+      v_call =  'ssh panda_user@merida.dom.wisc.edu "  tar  -C '+v_target_dir+'  -zcf '+v_parent_dir_target+'.tar.gz '+v_subject_dir+'/ "  '
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close
+      # remove subjectid dir
+      v_call = 'ssh panda_user@merida.dom.wisc.edu " rm -rf '+v_parent_dir_target+' "'
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close
+      
+      # fsftp dir when set -- not practical - not using auto move
+      # sftp -- shared helper hasthe username /password and address
+ #     v_username = Shared.panda_admin_sftp_username # get from shared helper -- leaving as panda_admin
+ #     v_passwrd = Shared.panda_admin_sftp_password   # get from shared helperwhich is not on github
+      # switch on new platform
+      #v_username = Shared.panda_user_sftp_username # get from shared helper
+      #v_passwrd = Shared.panda_user_sftp_password   # get from shared helperwhich is not on github
+ #     v_ip = Shared.dom_sftp_host_address # get from shared helper
+ #     v_sftp_dir = Shared.antuano_target_path
+      
+      # problem that files are on merida, but panda running from nelson
+      # need to ssh to merida as pand_admin, then sftp
+ #     v_source = "panda_user@merida.dom.wisc.edu:"+v_target_dir+'/'+v_subject_dir+".tar.gz"
+      
+ #     v_target = v_sftp_dir+"/"   #+v_subject_dir+".tar.gz"
+      
+# puts "aaaaaa v_source = "+v_source
+# puts "bbbbbb v_target = "+v_target
+#       Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
+#           sftp.upload!(v_source, v_target)
+#       end
+#       
+      
+      sql_done = "update cg_sleep_t1 set sleep_sent_flag ='Y', sleep_dir_list = '"+ v_folder_array.join(",")+"' where subjectid = '"+r[0]+"'"
+      results_done = connection.execute(sql_done)
+  
+    end # results
+    
+    @schedulerun.comment =("successful finish sleep_t1_upload "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
+
+
+  end
+
    # data request from anders wahlin for adrc - t1/resting bold => /unknown, asl => /asl
   # from cg_adrc_upload 
   # wahlin_t1_asl_resting_sent_flag = Y means the files has been uploaded
