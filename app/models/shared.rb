@@ -1456,6 +1456,148 @@ if File.directory?(@visit_directory_to_scan)
 end
 end
 
+  def run_fsl_first_volumes
+
+    v_base_path = Shared.get_base_path()
+    v_log_base ="/mounts/data/preprocessed/logs/"
+    v_process_name = "fsl_first_volumes"
+    v_script_dev = v_base_path+"/data1/lab_scripts/first_labsetup.sh"
+    v_script = v_base_path+"/SysAdmin/production/first_labsetup.sh"
+    # only in dev
+    v_script = v_script_dev
+    process_logs_delete_old( v_process_name, v_log_base)
+     @schedule = Schedule.where("name in ('fsl_first_volumes')").first
+      v_runner_email = self.get_user_email()  #  want to send errors to the user running the process
+      v_schedule_owner_email_array = []
+      if !v_runner_email.blank?
+        v_schedule_owner_email_array.push(v_runner_email)
+      else
+        v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+      end
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting fsl_first_volumes"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+      v_error_comment = ""
+      v_secondary_key_array =["b","c","d","e",".R"]
+      t = Time.now
+      v_date_YM = t.strftime("%Y%m") # just making monthly logs, prepend
+      v_log_name =v_process_name+"_"+v_date_YM
+      v_log_path =v_log_base+v_log_name 
+      v_stop_file_name = v_process_name+"_stop"
+      v_stop_file_path = v_log_base+v_stop_file_name
+    connection = ActiveRecord::Base.connection();
+
+    v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+    sp_exclude_array = [-1]
+    @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
+    @scan_procedures.each do |sp|
+        v_visit_number =""
+        if sp.codename.include?("visit2")
+            v_visit_number ="_v2"
+        elsif sp.codename.include?("visit3")
+            v_visit_number ="_v3"
+        elsif sp.codename.include?("visit4")
+            v_visit_number ="_v4"
+        elsif sp.codename.include?("visit5")
+            v_visit_number ="_v5"
+        end   
+        v_preprocessed_full_path = v_preprocessed_path+sp.codename  
+        if File.directory?(v_preprocessed_full_path)
+          sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+"  
+                                    and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id
+                                    and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
+          @results = connection.execute(sql_enum)
+                                    
+          @results.each do |r|
+              enrollment = Enrollment.where("enumber='"+r[0]+"'")
+              if !enrollment.blank?
+                v_log = ""
+                v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
+                v_subjectid = enrollment[0].enumber
+                v_subjectid_v_num = enrollment[0].enumber + v_visit_number
+                v_subjectid_unknown =v_subjectid_path+"/unknown"
+                v_subjectid_array = []
+                if File.directory?(v_subjectid_unknown)
+                     v_subjectid_array.push(v_subjectid)
+                 end
+                 v_secondary_key_array.each do |k|
+                    if File.directory?(v_subjectid_path+k+"/unknown")
+                        v_subjectid_array.push((v_subjectid+k))
+                    end
+                 end
+
+                v_subjectid_array.each do |subj|
+                  v_subjectid = subj
+                  v_subjectid_v_num = subj + v_visit_number
+                  v_subjectid_path = v_preprocessed_full_path+"/"+subj
+                  v_subjectid_unknown =v_subjectid_path+"/unknown"
+                  if File.directory?(v_subjectid_unknown)   # need to also look for [subjectid]b,c,d,.R
+                    v_dir_array = Dir.entries(v_subjectid_unknown)
+                    v_dir_array.each do |f|
+                    if f.start_with?("o") and f.end_with?(".nii")
+                        # check for t1_aligned_newseg
+                        v_subjectid_first =v_subjectid_path+"/first"
+                        if File.directory?(v_subjectid_first) or !File.directory?(v_subjectid_first)
+                          if !File.file?(v_subjectid_first+"/"+v_subjectid+"_first_roi_vol.csv") 
+#puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_t1_aligned_newseg
+                             v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+'  "  ' 
+                             v_log = v_log + v_call+"\n"
+                             begin
+                               stdin, stdout, stderr = Open3.popen3(v_call)
+                               rescue => msg  
+                                  v_log = v_log + msg+"\n"  
+                             end
+                             v_success ="N"
+                             while !stdout.eof?
+                                v_output = stdout.read 1024 
+                                v_log = v_log + v_output  
+                                if (v_log.tr("\n","")).include? "get_totals.m output saved to"  # line wrapping? Done ==> Do\nne
+                                  v_success ="Y"
+                                  v_log = v_log + "SUCCESS !!!!!!!!! \n"
+                                end
+                                puts v_output  
+                             end
+                             v_err =""
+                             v_log = v_log +"IN ERROR \n"
+                             while !stderr.eof?
+                               v_err = stderr.read 1024
+                               v_log = v_log +v_err
+                              end
+                              if v_err > ""
+                                 v_schedule_owner_email_array.each do |e|
+                                    v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see ==> "+v_log_path+" <== ALl the output from process is in the file."
+                                    PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
+                                end
+                              end
+                   #           puts "err="+v_err
+                              process_log_append(v_log_path, v_log)
+                          end
+                        end
+                    end
+                   end 
+                  end 
+                end
+              end
+           end
+        end
+     end
+
+    @schedulerun.comment =("successful finish fsl_first_volumes "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
+    
+  end
+
 # Kate Sprecher Sleep study needs t1 - clean out dicom
 def run_sleep_t1
 
@@ -1731,6 +1873,147 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     @schedulerun.save
 
 
+  end
+
+  def run_t1seg_gm_wm_csf_volumes
+
+    v_base_path = Shared.get_base_path()
+    v_log_base ="/mounts/data/preprocessed/logs/"
+    v_process_name = "t1seg_gm_wm_csf_volumes"
+    v_script_dev = v_base_path+"/data1/lab_scripts/t1segproc.sh"
+    v_script = v_base_path+"/SysAdmin/production/t1segproc.sh"
+    # only in dev
+    v_script = v_script_dev
+    process_logs_delete_old( v_process_name, v_log_base)
+     @schedule = Schedule.where("name in ('t1seg_gm_wm_csf_volumes')").first
+      v_runner_email = self.get_user_email()  #  want to send errors to the user running the process
+      v_schedule_owner_email_array = []
+      if !v_runner_email.blank?
+        v_schedule_owner_email_array.push(v_runner_email)
+      else
+        v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+      end
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting t1seg_gm_wm_csf_volumes"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+      v_error_comment = ""
+      t = Time.now
+      v_date_YM = t.strftime("%Y%m") # just making monthly logs, prepend
+      v_log_name =v_process_name+"_"+v_date_YM
+      v_log_path =v_log_base+v_log_name 
+      v_stop_file_name = v_process_name+"_stop"
+      v_stop_file_path = v_log_base+v_stop_file_name
+    connection = ActiveRecord::Base.connection();
+    v_secondary_key_array =["b","c","d","e",".R"]
+    v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+    sp_exclude_array = [33,40]
+    @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
+    @scan_procedures.each do |sp|
+        v_visit_number =""
+        if sp.codename.include?("visit2")
+            v_visit_number ="_v2"
+        elsif sp.codename.include?("visit3")
+            v_visit_number ="_v3"
+        elsif sp.codename.include?("visit4")
+            v_visit_number ="_v4"
+        elsif sp.codename.include?("visit5")
+            v_visit_number ="_v5"
+        end   
+        v_preprocessed_full_path = v_preprocessed_path+sp.codename  
+        if File.directory?(v_preprocessed_full_path)
+          sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+"  
+                                    and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id
+                                    and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
+          @results = connection.execute(sql_enum)
+                                    
+          @results.each do |r|
+              enrollment = Enrollment.where("enumber='"+r[0]+"'")
+              if !enrollment.blank?
+                v_log = ""
+                v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
+                v_subjectid = enrollment[0].enumber
+                v_subjectid_v_num = enrollment[0].enumber + v_visit_number
+                v_subjectid_unknown =v_subjectid_path+"/unknown"
+                v_subjectid_array = []
+                if File.directory?(v_subjectid_unknown)
+                     v_subjectid_array.push(v_subjectid)
+                 end
+                 v_secondary_key_array.each do |k|
+                    if File.directory?(v_subjectid_path+k+"/unknown")
+                        v_subjectid_array.push((v_subjectid+k))
+                    end
+                 end
+
+                v_subjectid_array.each do |subj|
+                  v_subjectid = subj
+                  v_subjectid_v_num = subj + v_visit_number
+                  v_subjectid_path = v_preprocessed_full_path+"/"+subj
+                  v_subjectid_unknown =v_subjectid_path+"/unknown"
+                  if File.directory?(v_subjectid_unknown)
+                    v_dir_array = Dir.entries(v_subjectid_unknown)
+                    v_dir_array.each do |f|
+                    if f.start_with?("o") and f.end_with?(".nii")
+                        # check for t1_aligned_newseg
+                        v_subjectid_t1_aligned_newseg =v_subjectid_path+"/t1_aligned_newseg"
+                        if File.directory?(v_subjectid_t1_aligned_newseg) or !File.directory?(v_subjectid_t1_aligned_newseg) # makes file
+                          if !File.file?(v_subjectid_t1_aligned_newseg+"/segtotals.txt")
+#puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_t1_aligned_newseg
+                             v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+' --all "  ' 
+                             v_log = v_log + v_call+"\n"
+                             begin
+                               stdin, stdout, stderr = Open3.popen3(v_call)
+                               rescue => msg  
+                                  v_log = v_log + msg+"\n"  
+                             end
+                             v_success ="N"
+                             while !stdout.eof?
+                                v_output = stdout.read 1024 
+                                v_log = v_log + v_output  
+                                if (v_log.tr("\n","")).include? "get_totals.m output saved to"  # line wrapping? Done ==> Do\nne
+                                  v_success ="Y"
+                                  v_log = v_log + "SUCCESS !!!!!!!!! \n"
+                                end
+                                puts v_output  
+                             end
+                             v_err =""
+                             v_log = v_log +"IN ERROR \n"
+                             while !stderr.eof?
+                               v_err = stderr.read 1024
+                               v_log = v_log +v_err
+                              end
+                              if v_err > ""
+                                 v_schedule_owner_email_array.each do |e|
+                                    v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see ==> "+v_log_path+" <== ALl the output from process is in the file."
+                                    PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
+                                end
+                              end
+                   #           puts "err="+v_err
+                              process_log_append(v_log_path, v_log)
+                          end
+                        end
+                    end
+                   end 
+                  end 
+                end
+              end
+           end
+        end
+     end
+
+    @schedulerun.comment =("successful finish t1seg_gm_wm_csf_volumes "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
+    
   end
 
    # data request from anders wahlin for adrc - t1/resting bold => /unknown, asl => /asl
@@ -5142,7 +5425,6 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
             if File.directory?(v_subjectid_unknown)
                   v_dir_array = Dir.entries(v_subjectid_unknown)
                   v_dir_array.each do |f|
-                    
                     if f.start_with?("o") and f.end_with?(".nii")
                         v_o_star_nii_sp_loc = v_loc_parts_array[0]
                         v_log = v_log + "acpc file found \n"

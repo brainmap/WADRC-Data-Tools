@@ -120,6 +120,10 @@ v_user = v_user.gsub("\n","")
       v_shared = Shared.new
       v_shared.run_fs_Y_N_manual_edits()
 
+    elsif v_value_1 == "fsl_first_volumes"
+      v_shared = Shared.new
+      v_shared.run_fsl_first_volumes()  
+
   elsif v_value_1 == "goveas_20131031_upload"
       v_shared = Shared.new
       v_shared.run_goveas_upload()     
@@ -160,9 +164,13 @@ v_user = v_user.gsub("\n","")
       v_shared = Shared.new
       v_shared.run_series_description()  
 
-    elsif v_value_1 == "sleep_t1"
+  elsif v_value_1 == "sleep_t1"
       v_shared = Shared.new
       v_shared.run_sleep_t1()    
+
+  elsif v_value_1 == "t1seg_gm_wm_csf_volumes"
+      v_shared = Shared.new
+      v_shared.run_t1seg_gm_wm_csf_volumes()  
 
   elsif v_value_1 == "xnat_file"
       v_shared = Shared.new
