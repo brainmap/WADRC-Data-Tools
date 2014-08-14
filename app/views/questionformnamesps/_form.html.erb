@@ -1,0 +1,29 @@
+<%= form_for(@questionformnamesp) do |f| %>
+  <% if @questionformnamesp.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@questionformnamesp.errors.count, "error") %> prohibited this questionformnamesp from being saved:</h2>
+
+      <ul>
+      <% @questionformnamesp.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :scan_procedure_id %><br />
+   <%= collection_select :questionformnamesp, :scan_procedure_id, ScanProcedure.all.sort_by(&:codename), :id, :codename,{:prompt => 'Select a Scan Procedure'},{:required => true}  %>
+  </div>
+  <div class="field">
+    <%= f.label :questionform_id %><br />
+   <%= collection_select :questionformnamesp, :questionform_id, Questionform.where("status_flag='Y'").sort_by(&:display_order), :id, :description,{:prompt => 'Select a Question Form'},{:required => true}  %>
+  </div>
+  <div class="field">
+    <%= f.label :form_name %><br />
+    <%= f.text_field :form_name %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

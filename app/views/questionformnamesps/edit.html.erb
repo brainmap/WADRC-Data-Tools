@@ -1,0 +1,8 @@
+<% if current_user.role == 'Admin_High'>
+	<h1>Editing questionformnamesp</h1>
+
+<%= render 'form' %>
+
+<%= link_to 'Show', @questionformnamesp %> |
+<%= link_to 'Back', questionformnamesps_path %>
+<%end%>

@@ -1,0 +1,22 @@
+<% if current_user.role == 'Admin_High'>
+	<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Questionform:</b>
+  <%= Questionform.find(@questionformnamesp.questionform_id).description %>
+</p>
+
+<p>
+  <b>Scan procedure:</b>
+<%= ScanProcedure.find(@questionformnamesp.scan_procedure_id).codename%>
+</p>
+
+<p>
+  <b>Form name:</b>
+  <%= @questionformnamesp.form_name %>
+</p>
+
+
+<%= link_to 'Edit', edit_questionformnamesp_path(@questionformnamesp) %> |
+<%= link_to 'Back', questionformnamesps_path %>
+<%end%>

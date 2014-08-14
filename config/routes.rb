@@ -1,5 +1,9 @@
 WADRCDataTools::Application.routes.draw do
-  
+
+
+  resources :questionformnamesps
+
+
   resources :petfiles
 
 
@@ -226,6 +230,7 @@ WADRCDataTools::Application.routes.draw do
   # moved up to get precidance over devise sign_upmatch '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user
   
    match '/question/clone/:id', :controller=>'questions',:action=>'clone', :as => :clone
+   match '/questionform_questions/index_sp_questions', :controller=>'questionform_questions',:action=>'index_sp_questions', :as => :index_sp_questions
 
     match '/tredits/tredit_home/:trtype_id', :controller => 'tredits', :action => 'tredit_home', :as => :tredit_home
     match '/tredit_home/:trtype_id', :controller => 'tredits', :action => 'tredit_home', :as => :tredit_home

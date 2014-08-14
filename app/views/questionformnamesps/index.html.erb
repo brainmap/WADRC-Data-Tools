@@ -1,0 +1,27 @@
+<h1>Listing questionformnamesps</h1>
+
+<table>
+  <tr>
+    <th>Questionform</th>
+    <th>Scan procedure</th>
+    <th>Form name</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @questionformnamesps.each do |questionformnamesp| %>
+  <tr>
+    <td><%= Questionform.find(questionformnamesp.questionform_id).description %></td>
+    <td><%= ScanProcedure.find(questionformnamesp.scan_procedure_id).codename%> </td>
+    <td><%= questionformnamesp.form_name %></td>
+    <td><%= link_to 'Show', questionformnamesp %></td>
+    <td><%= link_to 'Edit', edit_questionformnamesp_path(questionformnamesp) %></td>
+    <td><%= link_to 'Destroy', questionformnamesp, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Questionformnamesp', new_questionformnamesp_path %>
