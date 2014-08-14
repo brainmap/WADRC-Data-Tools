@@ -1544,7 +1544,7 @@ end
                         # check for t1_aligned_newseg
                         v_subjectid_first =v_subjectid_path+"/first"
                         if File.directory?(v_subjectid_first) or !File.directory?(v_subjectid_first)
-                          if !File.file?(v_subjectid_first+"/"+v_subjectid+"_first_roi_vol.csv") 
+                          if !File.file?(v_subjectid_first+"/"+v_subjectid+"_first_roi_vol.csv")  
 #puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_t1_aligned_newseg
                              v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+'  "  ' 
                              v_log = v_log + v_call+"\n"
@@ -1557,7 +1557,7 @@ end
                              while !stdout.eof?
                                 v_output = stdout.read 1024 
                                 v_log = v_log + v_output  
-                                if (v_log.tr("\n","")).include? "get_totals.m output saved to"  # line wrapping? Done ==> Do\nne
+                                if (v_log.tr("\n","")).include? "first_mult_bcorr"   # in log "BrStem_first.vtk to save"  # line wrapping? Done ==> Do\nne
                                   v_success ="Y"
                                   v_log = v_log + "SUCCESS !!!!!!!!! \n"
                                 end
@@ -1576,6 +1576,10 @@ end
                                 end
                               end
                    #           puts "err="+v_err
+                              if v_success == "N"
+                                 v_comment_warning = " "+ v_subjectid_v_num +"; "+v_comment_warning 
+                                 v_log = "warning on "+ v_subjectid_v_num +"; "+v_log
+                              end
                               process_log_append(v_log_path, v_log)
                           end
                         end
@@ -1587,8 +1591,10 @@ end
            end
         end
      end
-
-    @schedulerun.comment =("successful finish fsl_first_volumes "+v_comment_warning+" "+v_comment[0..1990])
+    if v_comment_warning > ""
+        v_comment_warning = "warning on "+v_comment_warning
+    end
+    @schedulerun.comment =("successful finish fsl_first_volumes "+v_comment_warning+" "+v_comment[0..3900])
     if !v_comment.include?("ERROR")
           @schedulerun.status_flag ="Y"
     end
@@ -1962,7 +1968,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                         # check for t1_aligned_newseg
                         v_subjectid_t1_aligned_newseg =v_subjectid_path+"/t1_aligned_newseg"
                         if File.directory?(v_subjectid_t1_aligned_newseg) or !File.directory?(v_subjectid_t1_aligned_newseg) # makes file
-                          if !File.file?(v_subjectid_t1_aligned_newseg+"/segtotals.txt")
+                          if !File.file?(v_subjectid_t1_aligned_newseg+"/segtotals.txt") 
 #puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_t1_aligned_newseg
                              v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+' --all "  ' 
                              v_log = v_log + v_call+"\n"
@@ -1994,6 +2000,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                 end
                               end
                    #           puts "err="+v_err
+                              if v_success == "N"
+                                 v_comment_warning = " "+ v_subjectid_v_num +"; "+v_comment_warning 
+                                 v_log = "warning on "+ v_subjectid_v_num +"; "+v_log
+                              end
                               process_log_append(v_log_path, v_log)
                           end
                         end
@@ -2005,8 +2015,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
            end
         end
      end
-
-    @schedulerun.comment =("successful finish t1seg_gm_wm_csf_volumes "+v_comment_warning+" "+v_comment[0..1990])
+    if v_comment_warning > ""
+        v_comment_warning = "warning on "+v_comment_warning
+    end
+    @schedulerun.comment =("successful finish t1seg_gm_wm_csf_volumes "+v_comment_warning+" "+v_comment[0..3900])
     if !v_comment.include?("ERROR")
           @schedulerun.status_flag ="Y"
     end
