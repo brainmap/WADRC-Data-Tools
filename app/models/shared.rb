@@ -1544,7 +1544,8 @@ end
                         # check for t1_aligned_newseg
                         v_subjectid_first =v_subjectid_path+"/first"
                         if File.directory?(v_subjectid_first) or !File.directory?(v_subjectid_first)
-                          if !File.file?(v_subjectid_first+"/"+v_subjectid+"_first_roi_vol.csv")  
+                          if !File.file?(v_subjectid_first+"/"+v_subjectid+"_first_roi_vol.csv")
+                            v_comment = "str "+v_subjectid_v_num+";"+v_comment  
 #puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_t1_aligned_newseg
                              v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+'  "  ' 
                              v_log = v_log + v_call+"\n"
@@ -1969,6 +1970,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                         v_subjectid_t1_aligned_newseg =v_subjectid_path+"/t1_aligned_newseg"
                         if File.directory?(v_subjectid_t1_aligned_newseg) or !File.directory?(v_subjectid_t1_aligned_newseg) # makes file
                           if !File.file?(v_subjectid_t1_aligned_newseg+"/segtotals.txt") 
+                             v_comment = "str "+v_subjectid_v_num+";"+v_comment
 #puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_t1_aligned_newseg
                              v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+' --all "  ' 
                              v_log = v_log + v_call+"\n"
