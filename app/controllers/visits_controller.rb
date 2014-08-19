@@ -938,7 +938,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
          condition ="  visits.id in (select image_datasets.visit_id from image_datasets
           where lower(image_datasets.series_description) like '"+var.gsub(/[;:'"()=<>]/, '')+"' )"
           @conditions.push(condition)
-          params["search_criteria"] = params["search_criteria"] +", Series description "+params[:visit_search][:series_description]
+          params["search_criteria"] = params["search_criteria"] +", Series description "+params[:mri_search][:series_description]
       end      
 
       if !params[:mri_search][:enumber].blank?
