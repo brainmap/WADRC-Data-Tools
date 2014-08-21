@@ -446,8 +446,8 @@ v_tn_cn_searchable_hash = []
 	<tr><td colspan="7" align="right"><hr></td></tr>
 <%          end %>
 	<tr><td colspan="2" align="left" ><%= f.submit("run search")%></td><td colspan="4" align="right">&nbsp;</td><td width=2>
-		<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low' %>
-		       <smal><small><%= popup_note('.', @sql ) unless @sql.to_s.blank? %></small></small>
+		<% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low') or current_user.id == 97  or current_user.id == 98  %>
+		       <small><small><%= popup_note('.', @sql ) unless @sql.to_s.blank? %></small></small>
 		<% end %></td></tr>
 <%     end
 %>
