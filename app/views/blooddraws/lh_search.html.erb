@@ -118,7 +118,9 @@ edit_count =  edit_count -1
   
 <% end %>
 
-<%= link_to 'download xls', { :controller=>"blooddraws", :action=>"lh_search", :lh_search =>  params[:lh_search] , :format => :xls} %>  </p>
+<%= link_to 'download xls', { :controller=>"blooddraws", :action=>"lh_search", :lh_search =>  params[:lh_search] , :format => :xls} %>  <br>
+<%= link_to 'raw data download xls', { :controller=>"blooddraws", :action=>"lh_search", :lh_search =>  params[:lh_search] , :p_raw_data =>"Y",:format => :xls} %>  </p>
+ 
 
 
 <table class="tabular">  

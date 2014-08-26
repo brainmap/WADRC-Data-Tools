@@ -119,9 +119,9 @@ edit_count = edit_count -1
 <% end %>
 
 
-<%= link_to 'download xls', { :controller=>"questionnaires", :action=>"q_search", :q_search =>  params[:q_search] , :format => :xls} %>  </p>
-
-
+<%= link_to 'download xls', { :controller=>"questionnaires", :action=>"q_search", :q_search =>  params[:q_search] , :format => :xls} %>  <br>
+<%= link_to 'raw data download xls', { :controller=>"questionnaires", :action=>"q_search", :q_search =>  params[:q_search] ,:p_raw_data =>"Y", :format => :xls} %> 
+</p>
 
 <table class="tabular">  
   <caption><%= pluralize(@results_total.size, 'Questionnaire appt') %></caption>

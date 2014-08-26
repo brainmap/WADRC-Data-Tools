@@ -127,6 +127,10 @@ class BlooddrawsController < ApplicationController
     @conditions = []
      @current_tab = "blooddraws"
      params["search_criteria"] =""
+     v_raw_data ="N"
+     if !params[:p_raw_data].nil? and !params[:p_raw_data].blank?
+         v_raw_data = params[:p_raw_data]
+     end 
        # for search dropdown
         @q_forms = Questionform.where("current_tab in (?)",@current_tab).where("status_flag in (?)","Y")
         @q_form_default = @q_forms.where("tab_default_yn='Y'")
@@ -300,7 +304,7 @@ class BlooddrawsController < ApplicationController
    elsif @html_request == "N"
         @left_join_vgroup = []
 #puts "ffffffff @left_join="+@left_join.to_s
-        @results = self.run_search_q_data(@tables,@fields ,@left_join,@left_join_vgroup)  # in the application controller
+        @results = self.run_search_q_data(@tables,@fields ,@left_join,@left_join_vgroup,v_raw_data)  # in the application controller
         @column_number =   @column_headers.size
    end
        
