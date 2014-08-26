@@ -16,9 +16,15 @@ class LookupBvmtpercentilesController < ApplicationController
   def show
     @lookup_bvmtpercentile = LookupBvmtpercentile.find(params[:id])
     # test sending email
-    puts "aaaaaa before test email"
-     PandaMailer.test_email({:send_to => "noreply_johnson_lab@medicine.wisc.edu"}).deliver
-    puts "bbbbbb after test email"
+    begin
+          puts "aaaaaa before test email"
+          PandaMailer.test_email({:send_to => "noreply_johnson_lab@medicine.wisc.edu"}).deliver
+          puts "bbbbbb after test email"
+          flash[:notice] = "Email was succesfully sent."
+    rescue StandardError => error
+      logger.info error
+      flash[:error] = "Sorry, your email was not delivered: " + error.to_s
+    end
 
     respond_to do |format|
       format.html # show.html.erb

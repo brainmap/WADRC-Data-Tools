@@ -3,8 +3,8 @@ class LookupRefsController < ApplicationController
   # GET /lookup_refs
   # GET /lookup_refs.xml
   def index
-    @lookup_refs = LookupRef.all
-
+  # want most recent at top
+  @lookup_refs = LookupRef.order("id DESC" ).all
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => @lookup_refs }
@@ -74,8 +74,9 @@ class LookupRefsController < ApplicationController
   # DELETE /lookup_refs/1.xml
   def destroy
     @lookup_ref = LookupRef.find(params[:id])
-    @lookup_ref.destroy
-
+    if current_user.role == 'Admin_High'
+      @lookup_ref.destroy
+    end
     respond_to do |format|
       format.html { redirect_to(lookup_refs_url) }
       format.xml  { head :ok }

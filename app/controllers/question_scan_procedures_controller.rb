@@ -3,7 +3,7 @@ class QuestionScanProceduresController < ApplicationController
   # GET /question_scan_procedures
   # GET /question_scan_procedures.xml
   def index
-    @question_scan_procedures = QuestionScanProcedure.all
+    @question_scan_procedures = QuestionScanProcedure.order("id DESC" ).all
         if !params[:questionform_question].nil? 
          if (!params[:questionform_question][:questionform_id].nil?  and !params[:questionform_question][:questionform_id].blank? and !params[:questionform_question][:scan_procedure_id].nil?   and !params[:questionform_question][:scan_procedure_id][:id].nil? and !params[:questionform_question][:scan_procedure_id][:id].blank?  )
              @question_scan_procedures = QuestionScanProcedure.where("question_id in ( select question_id from questionform_questions where questionform_id in (?))",params[:questionform_question][:questionform_id]).where("question_id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id])      

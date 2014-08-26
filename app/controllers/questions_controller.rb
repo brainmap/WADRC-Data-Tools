@@ -3,7 +3,7 @@ class QuestionsController < ApplicationController
   # GET /questions
   # GET /questions.xml
   def index
-    @questions = Question.all
+    @questions = Question.order("id DESC" ).all
     @v_scan_procedure_id = ""
     @v_questionform_id =  ""
     if !params[:questionform_question].nil? 
