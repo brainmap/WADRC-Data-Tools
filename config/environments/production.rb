@@ -64,7 +64,7 @@ WADRCDataTools::Application.configure do
 
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    :address        => 'pop.medicine.wisc.edu',
+    :address        => 'smtp.medicine.wisc.edu',
     :port           => 587,
     :authentication => :username,
     :user_name      => email_login,
