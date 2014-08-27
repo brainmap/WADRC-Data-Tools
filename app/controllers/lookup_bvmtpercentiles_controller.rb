@@ -18,7 +18,7 @@ class LookupBvmtpercentilesController < ApplicationController
     # test sending email
     begin
           puts "aaaaaa before test email"
-          PandaMailer.test_email({:send_to => "noreply_johnson_lab@medicine.wisc.edu"}).deliver
+          puts "AAAAA="+PandaMailer.test_email({:send_to => "noreply_johnson_lab@medicine.wisc.edu"}).deliver.to_s
           puts "bbbbbb after test email"
           flash[:notice] = "Email was succesfully sent."
     rescue StandardError => error
