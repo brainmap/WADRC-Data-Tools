@@ -136,6 +136,18 @@ or   image_dataset_quality_checks.omnibus_f  = 'Severe'  or  spm_mask  = 'Severe
     return v_flag, v_comment
   end
 
+  def get_age_at_appointment(p_visit_id)
+     v_age_at_appointment = ""
+     sql = "select distinct a.age_at_appointment from appointments a, visits v 
+            where a.id = v.appointment_id and v.id =  "+p_visit_id.to_s
+        connection = ActiveRecord::Base.connection();
+        results =  connection.execute(sql)
+        results.each do |a|
+            v_age_at_appointment = a[0]
+        end
+     return   v_age_at_appointment
+   end
+
   def get_lookup_refs_description ( p_label, p_value)
     v_return = ""
     if !p_value.blank?
@@ -2342,6 +2354,23 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       v_stop_file_name = v_process_name+"_stop"
       v_stop_file_path = v_log_base+v_stop_file_name
     connection = ActiveRecord::Base.connection();
+    sql = "insert into cg_xnat (subjectid, enrollment_id, scan_procedure_id, project_1)
+           select distinct e.enumber, e.id, 22,'ADRC'
+              from vgroups vg,appointments a, visits v,  enrollments e, enrollment_vgroup_memberships evgm, scan_procedures_vgroups spvg
+              where a.vgroup_id = evgm.vgroup_id
+               and a.vgroup_id = spvg.vgroup_id
+               and a.vgroup_id = vg.id
+               and vg.transfer_mri = 'yes'
+               and a.appointment_type ='mri'
+               and a.id = v.appointment_id
+               and v.id in ( select ids.visit_id from image_datasets ids, image_dataset_quality_checks idsqc
+                      where ids.id = idsqc.image_dataset_id)
+               and e.id = evgm.enrollment_id
+               and e.enumber like 'adrc%'
+               and spvg.scan_procedure_id = 22
+              and e.id not in ( select x2.enrollment_id from cg_xnat x2 where x2.scan_procedure_id = 22 and x2.project_1 = 'ADRC')"
+    results = connection.execute(sql)
+
     t_now = Time.now
     v_file_name = 'xnat_mri_scan_list_'+ t_now.strftime("%Y%m%d_%H_%M")+".xml"
     v_file_target_dir = v_base_path+"/admin_only/xnat/"
@@ -2353,9 +2382,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
      sql = "select distinct a.vgroup_id,  vg.participant_id  
          from vgroups vg, appointments a, visits v where vg.id = a.vgroup_id and a.id = v.appointment_id
           and vg.id in ( select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id in ("+v_scan_procedure_array.join(',')+"))
-          and vg.id in ( select evgm.vgroup_id from enrollment_vgroup_memberships evgm, enrollments e,cg_adrc_upload 
-                                 where evgm.enrollment_id = e.id and e.enumber = cg_adrc_upload.subjectid and 
-                                  cg_adrc_upload.xnat_sent_flag = 'N' and cg_adrc_upload.xnat_status_flag ='R') 
+          and vg.id in ( select evgm.vgroup_id from enrollment_vgroup_memberships evgm, enrollments e,cg_xnat
+                                 where evgm.enrollment_id = e.id and e.enumber = cg_xnat.subjectid and 
+                                  cg_xnat.xnat_sent_flag = 'N' and cg_xnat.xnat_status_flag ='R' and cg_xnat.project_1 = 'ADRC') 
           and vg.transfer_mri ='yes'"
     results = connection.execute(sql)
     v_cnt = 0
@@ -2386,16 +2415,17 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
          from vgroups vg, appointments a, visits v where vg.id = a.vgroup_id and a.id = v.appointment_id
           and vg.id = "+v_vgroup_id.to_s+"
           and vg.id in ( select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id in ("+v_scan_procedure_array.join(',')+"))
-          and vg.id in ( select evgm.vgroup_id from enrollment_vgroup_memberships evgm, enrollments e,cg_adrc_upload 
-                                 where evgm.enrollment_id = e.id and e.enumber = cg_adrc_upload.subjectid and 
-                                  cg_adrc_upload.xnat_sent_flag = 'N' and cg_adrc_upload.xnat_status_flag ='R') 
+          and vg.id in ( select evgm.vgroup_id from enrollment_vgroup_memberships evgm, enrollments e,cg_xnat 
+                                 where evgm.enrollment_id = e.id and e.enumber = cg_xnat.subjectid and 
+                                  cg_xnat.xnat_sent_flag = 'N' and cg_xnat.xnat_status_flag ='R') 
           and vg.transfer_mri ='yes'"
           results_appt = connection.execute(sql_appt)
           v_appt_cnt = 0
           v_folder_array = []
           results_appt.each do |r_appt|
+             v_age_at_appointment = self.get_age_at_appointment(r_appt[2])
              v_appt_cnt = v_appt_cnt + 1
-             v_string_appt_start="\t\t<appointment>\n\t\t\t<internal_appt_cnt>"+v_appt_cnt.to_s+"</internal_appt_cnt>\n\t\t\t<appt_type>mri</appt_type>\n\t\t\t<mri_date>"+r_appt[5]+"</mri_date>\n\t\t\t<exam_number>"+r_appt[6].to_s+"</exam_number>"
+             v_string_appt_start="\t\t<appointment>\n\t\t\t<internal_appt_cnt>"+v_appt_cnt.to_s+"</internal_appt_cnt>\n\t\t\t<appt_type>mri</appt_type>\n\t\t\t<mri_date>"+r_appt[5]+"</mri_date>\n\t\t\t<exam_number>"+r_appt[6].to_s+"</exam_number>\n\t\t\t<age_at_appointment>"+v_age_at_appointment.to_s+"</age_at_appointment>"
              v_string_appt_stop ="\t\t</appointment>"
              sql_ids = "select ids.id, ids.series_description, ids.path, sdt.series_description_type 
              from image_datasets ids, series_description_maps sdm, series_description_types sdt
@@ -2410,14 +2440,19 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
 
              f.write(v_string_appt_start+"\n")
              ids_results.each do |r_ids|
-                v_cnt_ids = v_cnt_ids + 1
-                v_path = r_ids[2]
-                v_dir_array = v_path.split("/")
-                v_dir = v_dir_array[(v_dir_array.size - 1)]
-                v_dir_target = v_dir+"_"+r_ids[1]
-                v_folder_array.push(v_dir_target)
-                v_string = "\t\t\t<ids>\n\t\t\t\t<internal_ids_cnt>"+v_cnt_ids.to_s+"</internal_ids_cnt>\n\t\t\t\t<series_description_type>"+r_ids[3]+"</series_description_type>\n\t\t\t\t<series_description>"+r_ids[1]+"</series_description>\n\t\t\t\t<path>"+r_ids[2]+"</path>\n\t\t\t</ids>\n"
-                f.write(v_string)
+                v_ids_ok_flag = "Y"
+                v_ids_id = r_ids[0]
+                v_ids_ok_flag = self.check_ids_for_severe_or_incomplete(v_ids_id)
+                if v_ids_ok_flag == "Y" 
+                   v_cnt_ids = v_cnt_ids + 1
+                   v_path = r_ids[2]
+                   v_dir_array = v_path.split("/")
+                   v_dir = v_dir_array[(v_dir_array.size - 1)]
+                   v_dir_target = v_dir+"_"+r_ids[1]
+                   v_folder_array.push(v_dir_target)
+                   v_string = "\t\t\t<ids>\n\t\t\t\t<internal_ids_cnt>"+v_cnt_ids.to_s+"</internal_ids_cnt>\n\t\t\t\t<series_description_type>"+r_ids[3]+"</series_description_type>\n\t\t\t\t<series_description>"+r_ids[1]+"</series_description>\n\t\t\t\t<path>"+r_ids[2]+"</path>\n\t\t\t</ids>\n"
+                   f.write(v_string)
+                end
              end
 
              f.write(v_string_appt_stop)
@@ -2425,8 +2460,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
            f.write(v_string_participant_stop)
            f.write("\n"+v_vgroup_stop+"\n")
           
-         sql_update = " update cg_adrc_upload set xnat_sent_flag ='Y', xnat_dir_list ='"+v_folder_array.join(',')+"' where
-             subjectid = '"+v_enrollment.enumber+"' and scan_procedure_id in ("+v_scan_procedure_array.join(',')+")"
+         sql_update = " update cg_xnat set xnat_sent_flag ='Y', xnat_dir_list ='"+v_folder_array.join(',')+"' where
+              cg_xnat.project_1 = 'ADRC' 
+             and subjectid = '"+v_enrollment.enumber+"' and scan_procedure_id in ("+v_scan_procedure_array.join(',')+")"
         update_results = connection.execute(sql_update)
 
     end
