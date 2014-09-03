@@ -15,7 +15,7 @@
     <td><%= Questionform.find(questionform_scan_procedure.questionform_id).description %></td><td align=center> | </td>
     <td><%= ScanProcedure.find(questionform_scan_procedure.scan_procedure_id).codename%> </td>
     <td><%= questionform_scan_procedure.include_exclude %></td>
-    <% if current_user.role == 'Admin_High'>
+    <% if current_user.role == 'Admin_High' %>
     <td><%= link_to 'Show', questionform_scan_procedure %></td>
     <td><%= link_to 'Edit', edit_questionform_scan_procedure_path(questionform_scan_procedure) %></td>
     <td><%= link_to 'Destroy', questionform_scan_procedure, :confirm => 'Are you sure?', :method => :delete %></td>
