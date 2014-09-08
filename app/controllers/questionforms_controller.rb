@@ -143,14 +143,61 @@ class QuestionformsController < ApplicationController
         @q_data.value_link = v_value_link
         @q_data.q_data_form_id = @q_data_form.id
         @q_data.question_id = q_id
-                 
-        if !params["value_1"][q_id].blank? 
+        if @question.value_type_1 == "time"
+          if !params["value_1"][q_id]["(4i)"].blank? && !params["value_1"][q_id]["(5i)"].blank? 
+           @q_data.value_1 =  params["value_1"][q_id]["(4i)"] +"-"+params["value_1"][q_id]["(5i)"]
+           #.rjust(2,"0")+"-"+params[:mri_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+           end
+
+        elsif @question.value_type_1 == "date"
+         if !params["value_1"][q_id]["(1i)"].blank? && !params["value_1"][q_id]["(2i)"].blank? && !params["value_1"][q_id]["(3i)"].blank? 
+           @q_data.value_1 =  params["value_1"][q_id]["(1i)"] +"-"+params["value_1"][q_id]["(2i)"] +"-"+params["value_1"][q_id]["(2i)"]
+           #.rjust(2,"0")+"-"+params[:mri_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+           end
+        elsif @question.value_type_1 =="date_time"
+         if !params["value_1"][q_id]["(1i)"].blank? && !params["value_1"][q_id]["(2i)"].blank?  && !params["value_1"][q_id]["(3i)"].blank? 
+           @q_data.value_1 =  params["value_1"][q_id]["(1i)"] +"-"+params["value_1"][q_id]["(2i)"] +"-"+params["value_1"][q_id]["(2i)"] +"-"+ params["value_1"][q_id]["(4i)"] +"-"+params["value_1"][q_id]["(5i)"]
+           #.rjust(2,"0")+"-"+params[:mri_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+           end
+        elsif !params["value_1"][q_id].blank? 
           @q_data.value_1 = params["value_1"][q_id].join(',').gsub("'","''")
         end
-        if !params["value_2"][q_id].blank? 
+        if @question.value_type_2 == "time"
+          if !params["value_2"][q_id]["(4i)"].blank? && !params["value_2"][q_id]["(5i)"].blank? 
+           @q_data.value_2 =  params["value_2"][q_id]["(4i)"] +"-"+params["value_2"][q_id]["(5i)"]
+           #.rjust(2,"0")+"-"+params[:mri_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+           end
+
+        elsif @question.value_type_2 == "date"
+         if !params["value_2"][q_id]["(1i)"].blank? && !params["value_2"][q_id]["(2i)"].blank? && !params["value_2"][q_id]["(3i)"].blank? 
+           @q_data.value_2 =  params["value_2"][q_id]["(1i)"] +"-"+params["value_2"][q_id]["(2i)"]+"-"+params["value_2"][q_id]["(3i)"]
+           #.rjust(2,"0")+"-"+params[:mri_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+           end
+        elsif @question.value_type_2 =="date_time"
+         if !params["value_2"][q_id]["(1i)"].blank? && !params["value_2"][q_id]["(2i)"].blank? && !params["value_2"][q_id]["(3i)"].blank? 
+           @q_data.value_2 =  params["value_2"][q_id]["(1i)"] +"-"+params["value_2"][q_id]["(2i)"]+"-"+params["value_2"][q_id]["(3i)"] +"-"+ params["value_2"][q_id]["(4i)"] +"-"+params["value_2"][q_id]["(5i)"]
+           #.rjust(2,"0")+"-"+params[:mri_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+           end
+        elsif !params["value_2"][q_id].blank? 
           @q_data.value_2 = params["value_2"][q_id].join(',').gsub("'","''")
         end
-        if !params["value_3"][q_id].blank? 
+        if @question.value_type_3 == "time"
+          if !params["value_3"][q_id]["(4i)"].blank? && !params["value_3"][q_id]["(5i)"].blank? 
+           @q_data.value_3 =  params["value_3"][q_id]["(4i)"] +"-"+params["value_3"][q_id]["(5i)"]
+           #.rjust(2,"0")+"-"+params[:mri_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+           end
+
+        elsif @question.value_type_3 == "date"
+         if !params["value_3"][q_id]["(1i)"].blank? && !params["value_3"][q_id]["(2i)"].blank? && !params["value_3"][q_id]["(3i)"].blank? 
+           @q_data.value_3 = params["value_3"][q_id]["(1i)"] +"-"+params["value_3"][q_id]["(2i)"]+"-"+params["value_3"][q_id]["(3i)"]
+           #.rjust(2,"0")+"-"+params[:mri_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+           end
+        elsif @question.value_type_3 =="date_time"
+         if !params["value_3"][q_id]["(1i)"].blank? && !params["value_3"][q_id]["(2i)"].blank? && !params["value_3"][q_id]["(3i)"].blank? && !params["value_3"][q_id]["(4i)"].blank? && !params["value_3"][q_id]["(5i)"].blank? 
+           @q_data.value_3 =  params["value_3"][q_id]["(1i)"] +"-"+params["value_3"][q_id]["(2i)"]+"-"+params["value_3"][q_id]["(3i)"] +"-"+params["value_3"][q_id]["(4i)"] +"-"+params["value_3"][q_id]["(5i)"]
+           #.rjust(2,"0")+"-"+params[:mri_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+           end
+        elsif !params["value_3"][q_id].blank? 
           @q_data.value_3 = params["value_3"][q_id].join(',').gsub("'","''")
         end
     if v_value_link != "-1"

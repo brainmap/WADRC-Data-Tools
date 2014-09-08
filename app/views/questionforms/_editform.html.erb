@@ -183,6 +183,12 @@
 			  	<%= collection_select "value_1",@question.id.to_s+"][", ((@question.ref_table_a_1).constantize).all.sort_by(&:description),
 			    	:id, :description, {:include_blank => @question.prompt_1,:selected => (@q_data.value_1 or @question.default_val_1)} %>			
 		     <%   end   %>
+        <% elsif @question.value_type_1 == "date"  %>
+            <%= date_select "value_1",@question.id.to_s+"][", :value => @q_data.value_1 %><%= @q_data.value_1 %>
+        <% elsif @question.value_type_1 == "date_time"  %>
+            <%= datetime_select "value_1",@question.id.to_s+"][", :value => @q_data.value_1 %><%= @q_data.value_1 %>
+        <% elsif @question.value_type_1 == "time"  %>
+            <%= time_select "value_1",@question.id.to_s+"][", :value => @q_data.value_1 %><%= @q_data.value_1 %>
 		<% elsif @question.value_type_1 == "text_5"  %>
 			<% #question_id, value_number,size %>
 			<%= draw_text_field(@question.id,"1",5, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>
@@ -305,6 +311,12 @@
 				  	<%= collection_select "value_2",@question.id.to_s+"][", ((@question.ref_table_a_2).constantize).all.sort_by(&:description),
 				    	:id, :description, {:include_blank => @question.prompt_2,:selected => (@q_data.value_2 or @question.default_val_2)} %>
 			     <%   end   %>
+			 <% elsif @question.value_type_2 == "date"  %>
+                 <%= date_select "value_2",@question.id.to_s+"][", :value => @q_data.value_2 %><%= @q_data.value_2 %>
+             <% elsif @question.value_type_2 == "date_time"  %>
+                 <%= datetime_select "value_2",@question.id.to_s+"][", :value => @q_data.value_2 %><%= @q_data.value_2 %>
+             <% elsif @question.value_type_2 == "time"  %>
+                 <%= time_select "value_2",@question.id.to_s+"][", :value => @q_data.value_2 %><%= @q_data.value_2 %>
 			<% elsif @question.value_type_2 == "text_5"  %>
 						<% #question_id, value_number,size %>
 				<%= draw_text_field(@question.id,"2",5, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>
@@ -427,6 +439,12 @@
 				  	<%= collection_select "value_3",@question.id.to_s+"][", ((@question.ref_table_a_3).constantize).all.sort_by(&:description),
 				    	:id, :description, {:include_blank => @question.prompt_3,:selected => (@q_data.value_3 or @question.default_val_3)} %>
 			     <%   end   %>
+			 <% elsif @question.value_type_3 == "date"  %>
+                  <%= date_select "value_3",@question.id.to_s+"][", :value => @q_data.value_3 %><%= @q_data.value_3 %>
+             <% elsif @question.value_type_3 == "date_time"  %>
+                  <%= datetime_select "value_3",@question.id.to_s+"][", :value => @q_data.value_3 %><%= @q_data.value_3 %>
+             <% elsif @question.value_type_3 == "time"  %>
+                  <%= time_select "value_3",@question.id.to_s+"][", :value => @q_data.value_3 %><%= @q_data.value_3 %>
 			<% elsif @question.value_type_3 == "text_5"  %>
 					 <%= draw_text_field(@question.id,"3",5, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>
 			<% elsif @question.value_type_3 == "text_10"  %>
