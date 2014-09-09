@@ -45,6 +45,8 @@ class LookupRefsController < ApplicationController
 
     respond_to do |format|
       if @lookup_ref.save
+        @lookup_ref.label = (@lookup_ref.label).strip
+        @lookup_ref.save
         format.html { redirect_to(@lookup_ref, :notice => 'Lookup ref was successfully created.') }
         format.xml  { render :xml => @lookup_ref, :status => :created, :location => @lookup_ref }
       else
@@ -61,6 +63,8 @@ class LookupRefsController < ApplicationController
 
     respond_to do |format|
       if @lookup_ref.update_attributes(params[:lookup_ref])
+        @lookup_ref.label = (@lookup_ref.label).strip
+        @lookup_ref.save
         format.html { redirect_to(@lookup_ref, :notice => 'Lookup ref was successfully updated.') }
         format.xml  { head :ok }
       else

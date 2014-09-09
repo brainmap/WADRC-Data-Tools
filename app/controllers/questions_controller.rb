@@ -89,6 +89,16 @@ class QuestionsController < ApplicationController
 
     respond_to do |format|
       if @question.save
+          @question.ref_table_a_1 = (@question.ref_table_a_1).strip
+          @question.ref_table_b_1 = (@question.ref_table_b_1).strip
+          @question.ref_table_a_2 = (@question.ref_table_a_2).strip
+          @question.ref_table_b_2 = (@question.ref_table_b_2).strip
+          @question.ref_table_a_3 = (@question.ref_table_a_3).strip
+          @question.ref_table_b_3 = (@question.ref_table_b_3).strip
+          @question.js_1 = (@question.js_1).strip
+          @question.js_2 = (@question.js_2).strip
+          @question.js_3 = (@question.js_3).strip
+          @question.save
         format.html { redirect_to(@question, :notice => 'Question was successfully created.') }
         format.xml  { render :xml => @question, :status => :created, :location => @question }
       else
@@ -105,6 +115,16 @@ class QuestionsController < ApplicationController
 
     respond_to do |format|
       if @question.update_attributes(params[:question])
+          @question.ref_table_a_1 = (@question.ref_table_a_1).strip
+          @question.ref_table_b_1 = (@question.ref_table_b_1).strip
+          @question.ref_table_a_2 = (@question.ref_table_a_2).strip
+          @question.ref_table_b_2 = (@question.ref_table_b_2).strip
+          @question.ref_table_a_3 = (@question.ref_table_a_3).strip
+          @question.ref_table_b_3 = (@question.ref_table_b_3).strip
+          @question.js_1 = (@question.js_1).strip
+          @question.js_2 = (@question.js_2).strip
+          @question.js_3 = (@question.js_3).strip
+          @question.save
         format.html { redirect_to(@question, :notice => 'Question was successfully updated.') }
         format.xml  { head :ok }
       else
