@@ -2661,6 +2661,59 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     @schedulerun.save
   
   end
+
+  def run_apoe_fill
+        v_base_path = Shared.get_base_path()
+         @schedule = Schedule.where("name in ('apoe_fill')").first
+          @schedulerun = Schedulerun.new
+          @schedulerun.schedule_id = @schedule.id
+          @schedulerun.comment ="starting apoe_fill"
+          @schedulerun.save
+          @schedulerun.start_time = @schedulerun.created_at
+          @schedulerun.save
+          v_comment = ""
+          v_comment_warning = ""
+
+     connection = ActiveRecord::Base.connection();
+     sql = "update cg_apoe_fill set participant_id = ( select enrollments.participant_id from enrollments where enrollments.id = cg_apoe_fill.enrollment_id)"
+     results = connection.execute(sql)
+
+      sql = "update cg_apoe_fill set apoe_e1 =replace((substring_index(genotype,'/',1) ),'E',''),
+                             apoe_e2 = replace((substring(genotype,(instr(genotype,'/')+1))),'E','') "
+      results = connection.execute(sql)
+
+       sql = "update participants set apoe_e1 = ( select cg_apoe_fill.apoe_e1 from cg_apoe_fill where cg_apoe_fill.participant_id = participants.id)
+               where ( participants.apoe_e1 = 0 or participants.apoe_e1  is null)
+               and participants.id in ( select cg_apoe_fill.participant_id from cg_apoe_fill where apoe_e1 is not null)"
+        results = connection.execute(sql)
+
+             sql = "update participants set apoe_e2 = ( select cg_apoe_fill.apoe_e2 from cg_apoe_fill where cg_apoe_fill.participant_id = participants.id)
+               where ( participants.apoe_e2 = 0 or participants.apoe_e2 is null)
+               and participants.id in ( select cg_apoe_fill.participant_id from cg_apoe_fill where apoe_e2 is not null)"
+
+      results = connection.execute(sql)
+
+            sql = "select cg_apoe_fill.subjectid, cg_apoe_fill.genotype,  cg_apoe_fill.apoe_e1,  cg_apoe_fill.apoe_e2, 
+             participants.apoe_e1, participants.apoe_e2
+              from  cg_apoe_fill, participants where 
+              cg_apoe_fill.participant_id = participants.id
+              and (  (cg_apoe_fill.apoe_e1 != participants.apoe_e1 and participants.apoe_e1 != 0 and participants.apoe_e1 is not null)
+                     or  cg_apoe_fill.apoe_e2 != participants.apoe_e2 and participants.apoe_e2 != 0 and participants.apoe_e2 is not null)"
+
+      results = connection.execute(sql)
+       results.each do |r|
+           v_comment= v_comment+" Differences="+r.join("-|  ")
+       end
+
+   @schedulerun.comment =("successful finish apoe_fill "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
+
+   end 
   
   # to add columns --
   # change sql_base insert statement
