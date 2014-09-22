@@ -1794,14 +1794,15 @@ class DataSearchesController < ApplicationController
     sql = sql + " where "+ @local_conditions.uniq.join(" and ")
     sql = sql+" order by "+@order_by.join(",")
     @sql = sql
-    if !sql.gsub("'","''")[11911..15880].nil?
-       sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text,sql_text_2,sql_text_3,sql_text_4)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3970]+"','"+sql.gsub("'","''")[3971..7940]+"','"+sql.gsub("'","''")[7941..11910]+"','"+sql.gsub("'","''")[11911..15880]+"')"
-     elsif !sql.gsub("'","''")[7941..11910].nil?
-       sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text,sql_text_2,sql_text_3)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3970]+"','"+sql.gsub("'","''")[3971..7940]+"','"+sql.gsub("'","''")[7941..11910]+"')"
-     elsif !sql.gsub("'","''")[3971..7940].nil?
-        sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text,sql_text_2)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3970]+"','"+sql.gsub("'","''")[3971..7940]+"')"
+    v_sql_log = sql.gsub("'","")
+    if !v_sql_log[11911..15880].nil?
+       sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text,sql_text_2,sql_text_3,sql_text_4)values('"+@user.id.to_s+"',NOW(),NOW(),'"+v_sql_log[0..3970]+"','"+v_sql_log[3971..7940]+"','"+v_sql_log[7941..11910]+"','"+v_sql_log[11911..15880]+"')"
+     elsif !v_sql_log[7941..11910].nil?
+       sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text,sql_text_2,sql_text_3)values('"+@user.id.to_s+"',NOW(),NOW(),'"+v_sql_log[0..3970]+"','"+v_sql_log[3971..7940]+"','"+v_sql_log[7941..11910]+"')"
+     elsif !v_sql_log[3971..7940].nil?
+        sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text,sql_text_2)values('"+@user.id.to_s+"',NOW(),NOW(),'"+v_sql_log[0..3970]+"','"+v_sql_log[3971..7940]+"')"
      else
-        sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text)values('"+@user.id.to_s+"',NOW(),NOW(),'"+sql.gsub("'","''")[0..3970]+"')"
+        sql_log = "insert into cg_query_log(user_id,created_at,updated_at,sql_text)values('"+@user.id.to_s+"',NOW(),NOW(),'"+v_sql_log[0..3970]+"')"
      end
        
 
