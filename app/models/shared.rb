@@ -5492,8 +5492,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       v_stop_file_name = v_process_name+"_stop"
       v_stop_file_path = v_log_base+v_stop_file_name  # use to stop the results loop  
       v_subjectid_v_num = ""              
-      v_script_dev = v_base_path+"/data1/lab_scripts/LST/LST.sh"
+      v_script_dev = v_base_path+"/data1/lab_scripts/lstproc.sh"   #LST/LST.sh"
       v_script = v_base_path+"/SysAdmin/production/LST/LST.sh"
+      v_script  = v_script_dev   # using the dev script
       (v_error_comment,v_comment) =get_file_diff(v_script,v_script_dev,v_error_comment,v_comment)
 
       connection = ActiveRecord::Base.connection();  
