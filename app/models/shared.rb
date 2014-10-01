@@ -5298,12 +5298,13 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           @schedulerun.start_time = @schedulerun.created_at
           @schedulerun.save
           v_comment = ""
+          v_secondary_key_array =["","b","c","d","e",".R"]
     ####    begin   # catch all exception and put error in comment    
             sql = "truncate table cg_lst_116_status_new"
             connection = ActiveRecord::Base.connection();        
             results = connection.execute(sql)
 
-            sql_base = "insert into cg_lst_116_status_new(lst_subjectid, lst_general_comment,wlesion_030_flag,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,multiple_sag_cube_flair_flag,wlesion_030_flag_lst_116,enrollment_id, scan_procedure_id,lst_lesion)values("  
+            sql_base = "insert into cg_lst_116_status_new(lst_subjectid, lst_general_comment,wlesion_030_flag,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,multiple_sag_cube_flair_flag,wlesion_030_flag_lst_116,enrollment_id, scan_procedure_id,lst_lesion,secondary_key)values("  
             v_raw_path = v_base_path+"/raw"
             v_mri = "/mri"
             no_mri_path_sp_list =['asthana.adrc-clinical-core.visit1',
@@ -5350,7 +5351,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                     Dir.entries(v_raw_full_path).select { |file| File.directory? File.join(v_raw_full_path, file)}.each do |dir|
                       dir_name_array = dir.split('_')
                       if dir_name_array.size == 3
-                         enrollment = Enrollment.where("enumber in (?)",dir_name_array[0])
+                        v_secondary_key_array.each do |k|
+                         v_secondary_key = k
+                         enrollment = Enrollment.where("concat(enumber,'"+v_secondary_key+"') in (?)",dir_name_array[0])
                          if !enrollment.blank?
                              v_comment =""
                              v_wlesion_030_flag ="N"
@@ -5429,12 +5432,13 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                              if v_wlesion_030_flag == "N" and v_wlesion_030_flag_lst_116 == "N"
                                    v_comment ="no LST_116 or LST_122 product ;" +v_comment                               
                              end # check for subjectid asl dir
-                             sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','"+v_comment+"','"+v_wlesion_030_flag+"','"+v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"','"+v_sag_cube_flair_flag+"','"+v_multiple_sag_cube_flair_flag+"','"+v_wlesion_030_flag_lst_116+"',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_lst_lesion_value+"')"
+                             sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','"+v_comment+"','"+v_wlesion_030_flag+"','"+v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"','"+v_sag_cube_flair_flag+"','"+v_multiple_sag_cube_flair_flag+"','"+v_wlesion_030_flag_lst_116+"',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_lst_lesion_value+"','"+v_secondary_key+"')"
                                results = connection.execute(sql)
                              
                          else
                            #puts "no enrollment "+dir_name_array[0]
                          end # check for enrollment
+                       end # loop thru possible secondary key
                       end # check that dir name is in expected format [subjectid]_exam#_MMDDYY - just test size of array
                     end # loop thru the subjectids
                  else
@@ -5445,7 +5449,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
             # v_shared = Shared.new 
              # move from new to present table -- made into a function  in shared model
              v_comment = self.move_present_to_old_new_to_present("cg_lst_116_status",
-             "lst_subjectid, lst_general_comment,wlesion_030_flag, wlesion_030_comment, wlesion_030_global_quality,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,multiple_sag_cube_flair_flag,wlesion_030_flag_lst_116, wlesion_030_comment_lst_116, wlesion_030_global_quality_lst_116, enrollment_id,scan_procedure_id,lst_lesion",
+             "lst_subjectid, lst_general_comment,wlesion_030_flag, wlesion_030_comment, wlesion_030_global_quality,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,multiple_sag_cube_flair_flag,wlesion_030_flag_lst_116, wlesion_030_comment_lst_116, wlesion_030_global_quality_lst_116, enrollment_id,scan_procedure_id,lst_lesion,secondary_key",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
 
