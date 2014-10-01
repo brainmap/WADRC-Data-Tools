@@ -5303,7 +5303,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
             connection = ActiveRecord::Base.connection();        
             results = connection.execute(sql)
 
-            sql_base = "insert into cg_lst_116_status_new(lst_subjectid, lst_general_comment,wlesion_030_flag,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,multiple_sag_cube_flair_flag,wlesion_030_flag_lst_116,enrollment_id, scan_procedure_id)values("  
+            sql_base = "insert into cg_lst_116_status_new(lst_subjectid, lst_general_comment,wlesion_030_flag,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,multiple_sag_cube_flair_flag,wlesion_030_flag_lst_116,enrollment_id, scan_procedure_id,lst_lesion)values("  
             v_raw_path = v_base_path+"/raw"
             v_mri = "/mri"
             no_mri_path_sp_list =['asthana.adrc-clinical-core.visit1',
@@ -5359,6 +5359,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                              v_multiple_o_star_nii_flag ="N"
                              v_sag_cube_flair_flag ="N"
                              v_multiple_sag_cube_flair_flag ="N"
+                             v_lst_lesion_value = ""
                              v_subjectid_unknown = v_preprocessed_full_path+"/"+dir_name_array[0]+"/unknown"
                              v_subjectid_lst_116 = v_preprocessed_full_path+"/"+dir_name_array[0]+"/LST/LST_116"
                              v_subjectid_lst_122 = v_preprocessed_full_path+"/"+dir_name_array[0]+"/LST/LST_122"
@@ -5366,7 +5367,6 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                   v_dir_array = Dir.entries(v_subjectid_lst_116)   # need to get date for specific files
                                 v_wlesion_030_flag_lst_116 ="N"
                                 v_dir_array.each do |f|
-                                  
                                   if f.start_with?("wlesion_030_m"+dir_name_array[0]+"_Sag-CUBE-FLAIR_") and f.end_with?("_cubet2flair.nii")
                                     v_wlesion_030_flag_lst_116 = "Y"
                                    end
@@ -5382,6 +5382,16 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                     if ( f.start_with?("wlesion_lbm3_030_rm"+dir_name_array[0]+"_Sag-CUBE-FLAIR_") or f.start_with?("wlesion_lbm3_030_rm"+dir_name_array[0]+"_Sag-CUBE-flair_") ) and f.end_with?(".nii")
                                       v_wlesion_030_flag = "Y"
                                     end
+                                     if f.start_with?("tlv_lesion") and f.end_with?(".txt")
+                                       v_tmp_data = "" 
+                                       v_tmp_data_array = []  
+                                       ftxt = File.open(v_subjectid_lst_122+"/"+f, "r") 
+                                       ftxt.each_line do |line|
+                                          v_tmp_data += line
+                                       end
+                                       ftxt.close
+                                       v_lst_lesion_value = v_tmp_data.strip
+                                     end
                                   end
                                   v_comment = 'LST 122 dir ;'+v_comment
                              end
@@ -5419,7 +5429,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                              if v_wlesion_030_flag == "N" and v_wlesion_030_flag_lst_116 == "N"
                                    v_comment ="no LST_116 or LST_122 product ;" +v_comment                               
                              end # check for subjectid asl dir
-                             sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','"+v_comment+"','"+v_wlesion_030_flag+"','"+v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"','"+v_sag_cube_flair_flag+"','"+v_multiple_sag_cube_flair_flag+"','"+v_wlesion_030_flag_lst_116+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                             sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','"+v_comment+"','"+v_wlesion_030_flag+"','"+v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"','"+v_sag_cube_flair_flag+"','"+v_multiple_sag_cube_flair_flag+"','"+v_wlesion_030_flag_lst_116+"',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_lst_lesion_value+"')"
                                results = connection.execute(sql)
                              
                          else
@@ -5435,7 +5445,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
             # v_shared = Shared.new 
              # move from new to present table -- made into a function  in shared model
              v_comment = self.move_present_to_old_new_to_present("cg_lst_116_status",
-             "lst_subjectid, lst_general_comment,wlesion_030_flag, wlesion_030_comment, wlesion_030_global_quality,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,multiple_sag_cube_flair_flag,wlesion_030_flag_lst_116, wlesion_030_comment_lst_116, wlesion_030_global_quality_lst_116, enrollment_id,scan_procedure_id",
+             "lst_subjectid, lst_general_comment,wlesion_030_flag, wlesion_030_comment, wlesion_030_global_quality,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,multiple_sag_cube_flair_flag,wlesion_030_flag_lst_116, wlesion_030_comment_lst_116, wlesion_030_global_quality_lst_116, enrollment_id,scan_procedure_id,lst_lesion",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
 
