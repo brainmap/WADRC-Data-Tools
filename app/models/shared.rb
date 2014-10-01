@@ -5495,11 +5495,103 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       v_script_dev = v_base_path+"/data1/lab_scripts/lstproc.sh"   #LST/LST.sh"
       v_script = v_base_path+"/SysAdmin/production/LST/LST.sh"
       v_script  = v_script_dev   # using the dev script
+      v_script_only_tlv = v_script+" --only_tlv"
       (v_error_comment,v_comment) =get_file_diff(v_script,v_script_dev,v_error_comment,v_comment)
 
       connection = ActiveRecord::Base.connection();  
+      # catchup on only_tlv - run everywhere except plq
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where lst_subjectid in ('adrc00403','adrc00529' ) and if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y'  and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) ) and (  lst_subjectid not like 'shp%') " #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
+     
+      results = connection.execute(sql)
+      results.each do |r|
+          v_break = 0  # need a kill swith
+           v_log = ""
+          if File.file?(v_stop_file_path)
+            File.delete(v_stop_file_path)
+            v_break = 1
+            v_log = v_log + " STOPPING the results loop"
+            v_comment = " STOPPING the results loop  "+v_comment
+          end
+          break if v_break > 0
+            
+          t_now = Time.now
+          v_log = v_log + "starting only_tlv"+r[2]+"   "+ t_now.strftime("%Y%m%d:%H:%M")+"\n"
+          v_subjectid_v_num = r[2]
+          v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
+          # get location
+          sql_loc = "select distinct v.path from visits v where v.appointment_id in (select a.id from appointments a, enrollment_vgroup_memberships evg, scan_procedures_vgroups spv where a.vgroup_id = evg.vgroup_id  and evg.enrollment_id = "+r[0].to_s+"  and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id = "+r[1].to_s+")"
+          results_loc = connection.execute(sql_loc)
+          v_o_star_nii_sp_loc = ""
+          v_tlv_lesion_txt = "blank"
+          results_loc.each do |loc|
+            # could have 2 locations dual enrollment with 2 appointments - look for where o*.nii loc
+            v_loc_path = loc[0]
+            v_loc_path = v_loc_path.gsub(v_base_path+"/raw/","")
+            v_loc_parts_array = v_loc_path.split("/")
+            v_subjectid_unknown =v_base_path+"/preprocessed/visits/"+v_loc_parts_array[0]+"/"+v_subjectid+"/unknown"
+            if File.directory?(v_subjectid_unknown)
+                  v_dir_array = Dir.entries(v_subjectid_unknown)
+                  v_dir_array.each do |f|
+                    if f.start_with?("o") and f.end_with?(".nii")
+                        v_o_star_nii_sp_loc = v_loc_parts_array[0]
+                        v_log = v_log + "acpc file found \n"
+                    end
+                  end 
+            end
+            v_expected_tlv_file = v_base_path+"/preprocessed/visits/"+v_loc_parts_array[0]+"/"+v_subjectid+"/LST/LST_122"
+            if File.directory?(v_expected_tlv_file)
+                  v_dir_array = Dir.entries(v_expected_tlv_file)
+                  v_dir_array.each do |f|
+                    if f.start_with?("tlv_lesion") and f.end_with?(".txt")
+                        v_tlv_lesion_txt = "not blank"
+                        v_log = v_log + "tlv_lesion file found \n"
+                    end
+                  end 
+            end
+          end
+          # check for tlv file
+
+          if v_o_star_nii_sp_loc > "" and v_tlv_lesion_txt != "not blank"
+              # call processing script- need to have LST toolbox on gru, merida or edna
+              # v_call =  v_script+" -p "+v_o_star_nii_sp_loc+"  -b "+v_subjectid
+              @schedulerun.comment ="str "+r[2]+"; "+v_comment[0..1990]
+              @schedulerun.save
+              v_multiple_o_star_nii_flag = r[3]
+              v_o_star_nii_file_to_use = r[4]
+              v_multiple_sag_cube_flair_flag = r[5]
+              v_sag_cube_flair_to_use = r[6]
+              # need to change script to accept v_o_star_nii_file_to_use and v_sag_cube_flair_to_use
+              v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script_only_tlv+' -p '+v_o_star_nii_sp_loc+'  -b '+v_subjectid+' "  ' 
+              puts "rrrrrrr "+v_call
+              v_log = v_log + v_call+"\n"
+              begin
+                 stdin, stdout, stderr = Open3.popen3(v_call)
+               rescue => msg  
+                  v_log = v_log + msg+"\n"  
+               end
+               v_err =""               
+                while !stderr.eof?
+                  v_err = stderr.read 1024
+                  v_log = v_log +v_err
+                  v_comment = v_err +" =>"+r[2]+ " ; " +v_comment  
+                 end
+              @schedulerun.comment =v_comment[0..1990]
+              @schedulerun.save
+              stdin.close
+              stdout.close
+              stderr.close
+           else
+             v_log = v_log + "no acpc \n"
+
+           end
+           process_log_append(v_log_path, v_log)
+      end       
+    v_comment = v_error_comment+v_comment
+ 
+
+
       # do_not_run_process_wlesion_030 == Y means do not run
-      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) ) and (  lst_subjectid not like 'shp%') #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from AAAcg_lst_116_status where if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) ) and (  lst_subjectid not like 'shp%') " #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
       results = connection.execute(sql)
       results.each do |r|
           v_break = 0  # need a kill swith
