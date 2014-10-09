@@ -2524,7 +2524,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       connection = ActiveRecord::Base.connection();        
       results = connection.execute(sql)
 
-      sql_base = "insert into cg_rbm_ics_new(subjectid,secondary_key,enrollment_id, scan_procedure_id,source_file,volume1_gm,volume2_wm,volume3_csf,tissue_seg_dir_flag)values(" 
+      sql_base = "insert into cg_rbm_icv_new(subjectid,secondary_key,enrollment_id, scan_procedure_id,source_file,volume1_gm,volume2_wm,volume3_csf,tissue_seg_dir_flag)values(" 
       v_comment = ""
       v_comment_warning =""
       v_error_comment = ""
