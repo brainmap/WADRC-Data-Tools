@@ -2687,7 +2687,8 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                     v_csf = ""
                                      v_tmp_data_array = v_tmp_data.strip.split(",")
                                      if v_tmp_data_array.length >2
-                                        v_file = v_tmp_data_array[0]
+                                        v_file = v_tmp_data_array[0].gsub(/'/,"")
+                                    
                                         v_gm =v_tmp_data_array[1]
                                         v_wm  = v_tmp_data_array[2]
                                         v_csf = v_tmp_data_array[3]
