@@ -2578,7 +2578,22 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
 
                 v_subjectid_array.each do |subj|
                   v_subjectid = subj
-                  v_subjectid_v_num = subj + v_visit_number
+                  v_subjectid_actual = subj
+                  v_secondary_key = ""
+                  v_secondary_key_array.each do |k|
+                    # if subjectid ends in secondary key, trim off
+                    # get last character
+                    v_last_char = v_subjectid.reverse[0,1].reverse
+                    v_last_two_char = v_subjectid.reverse[0,2].reverse
+                    if v_last_char == k
+                        v_secondary_key = k
+                        v_subjectid_actual = v_subjectid[0..-2]
+                    elsif v_last_two_char == k
+                        v_secondary_key = k
+                        v_subjectid_actual = v_subjectid[0..-3]
+                    end
+                  end
+                  v_subjectid_v_num = v_subjectid_actual + v_visit_number
                   v_subjectid_path = v_preprocessed_full_path+"/"+subj
                   v_subjectid_unknown =v_subjectid_path+"/unknown"
                   if File.directory?(v_subjectid_unknown)
