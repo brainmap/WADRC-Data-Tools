@@ -2436,8 +2436,12 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                      v_tmp_data = "" 
                                      v_tmp_data_array = []  
                                      ftxt = File.open(v_subjectid_tissue_seg+"/tissue_volumes.csv", "r") 
+                                     v_cnt = 1
                                      ftxt.each_line do |line|
-                                        v_tmp_data = line
+                                        if v_cnt == 2
+                                           v_tmp_data = line
+                                        end
+                                        v_cnt = v_cnt + 1
                                      end
                                      ftxt.close
                                     v_file = ""
@@ -2619,8 +2623,12 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                      v_tmp_data = "" 
                                      v_tmp_data_array = []  
                                      ftxt = File.open(v_subjectid_tissue_seg+"/tissue_volumes.csv", "r") 
+                                     v_cnt = 1
                                      ftxt.each_line do |line|
-                                        v_tmp_data = line
+                                        if v_cnt == 2
+                                           v_tmp_data = line
+                                        end
+                                        v_cnt = v_cnt + 1
                                      end
                                      ftxt.close
                                     v_file = ""
@@ -2665,8 +2673,12 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                      v_tmp_data = "" 
                                      v_tmp_data_array = []  
                                      ftxt = File.open(v_subjectid_tissue_seg+"/tissue_volumes.csv", "r") 
+                                     v_cnt = 1
                                      ftxt.each_line do |line|
-                                        v_tmp_data = line
+                                        if v_cnt == 2
+                                           v_tmp_data = line
+                                        end
+                                        v_cnt = v_cnt + 1
                                      end
                                      ftxt.close
                                     v_file = ""
