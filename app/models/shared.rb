@@ -1894,17 +1894,17 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
 
   end
 
-  def run_t1seg_gm_wm_csf_volumes
+  def run_t1seg_spm8_gm_wm_csf_volumes
 
     v_base_path = Shared.get_base_path()
     v_log_base ="/mounts/data/preprocessed/logs/"
-    v_process_name = "t1seg_gm_wm_csf_volumes"
-    v_script_dev = v_base_path+"/data1/lab_scripts/t1segproc.sh"
-    v_script = v_base_path+"/SysAdmin/production/t1segproc.sh"
+    v_process_name = "t1seg_spm8_gm_wm_csf_volumes"
+    v_script_dev = v_base_path+"/data1/lab_scripts/T1SegProc/v4.1/t1segproc.sh"
+    v_script = v_base_path+"/SysAdmin/production/T1SegProc/v4.1/t1segproc.sh"
     # only in dev
     v_script = v_script_dev
     process_logs_delete_old( v_process_name, v_log_base)
-     @schedule = Schedule.where("name in ('t1seg_gm_wm_csf_volumes')").first
+     @schedule = Schedule.where("name in ('t1seg_spm8_gm_wm_csf_volumes')").first
       v_runner_email = self.get_user_email()  #  want to send errors to the user running the process
       v_schedule_owner_email_array = []
       if !v_runner_email.blank?
@@ -1914,7 +1914,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       end
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
-      @schedulerun.comment ="starting t1seg_gm_wm_csf_volumes"
+      @schedulerun.comment ="starting t1seg_spm8_gm_wm_csf_volumes"
       @schedulerun.save
       @schedulerun.start_time = @schedulerun.created_at
       @schedulerun.save
@@ -2032,7 +2032,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     if v_comment_warning > ""
         v_comment_warning = "warning on "+v_comment_warning
     end
-    @schedulerun.comment =("successful finish t1seg_gm_wm_csf_volumes "+v_comment_warning+" "+v_comment[0..3900])
+    @schedulerun.comment =("successful finish t1seg_spm8_gm_wm_csf_volumes "+v_comment_warning+" "+v_comment[0..3900])
     if !v_comment.include?("ERROR")
           @schedulerun.status_flag ="Y"
     end
@@ -2334,6 +2334,368 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     @schedulerun.save
   
   end
+
+  def run_tissueseg_spm12
+
+    v_base_path = Shared.get_base_path()
+    v_log_base ="/mounts/data/preprocessed/logs/"
+    v_process_name = "tissueseg_spm12"
+    v_script_dev = v_base_path+"/data1/lab_scripts/T1SegProc/v5/t1segproc.sh"
+    v_script = v_base_path+"/SysAdmin/production/T1SegProc/v5/t1segproc.sh"
+    # only in dev
+    v_script = v_script_dev
+    process_logs_delete_old( v_process_name, v_log_base)
+     @schedule = Schedule.where("name in ('tissueseg_spm12')").first
+      v_runner_email = self.get_user_email()  #  want to send errors to the user running the process
+      v_schedule_owner_email_array = []
+      if !v_runner_email.blank?
+        v_schedule_owner_email_array.push(v_runner_email)
+      else
+        v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+      end
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting tissueseg_spm12"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+      v_error_comment = ""
+      t = Time.now
+      v_date_YM = t.strftime("%Y%m") # just making monthly logs, prepend
+      v_log_name =v_process_name+"_"+v_date_YM
+      v_log_path =v_log_base+v_log_name 
+      v_stop_file_name = v_process_name+"_stop"
+      v_stop_file_path = v_log_base+v_stop_file_name
+    connection = ActiveRecord::Base.connection();
+    v_secondary_key_array =["b","c","d","e",".R"]
+    v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+    sp_exclude_array = [33,40]
+    @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
+    @scan_procedures.each do |sp|
+        v_visit_number =""
+        if sp.codename.include?("visit2")
+            v_visit_number ="_v2"
+        elsif sp.codename.include?("visit3")
+            v_visit_number ="_v3"
+        elsif sp.codename.include?("visit4")
+            v_visit_number ="_v4"
+        elsif sp.codename.include?("visit5")
+            v_visit_number ="_v5"
+        end   
+        v_preprocessed_full_path = v_preprocessed_path+sp.codename  
+        if File.directory?(v_preprocessed_full_path)
+          sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+"  
+                                    and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id
+                                    and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
+          @results = connection.execute(sql_enum)
+                                    
+          @results.each do |r|
+              enrollment = Enrollment.where("enumber='"+r[0]+"'")
+              if !enrollment.blank?
+                v_log = ""
+                v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
+                v_subjectid = enrollment[0].enumber
+                v_subjectid_v_num = enrollment[0].enumber + v_visit_number
+                v_subjectid_unknown =v_subjectid_path+"/unknown"
+                v_subjectid_array = []
+                if File.directory?(v_subjectid_unknown)
+                     v_subjectid_array.push(v_subjectid)
+                 end
+                 v_secondary_key_array.each do |k|
+                    if File.directory?(v_subjectid_path+k+"/unknown")
+                        v_subjectid_array.push((v_subjectid+k))
+                    end
+                 end
+
+                v_subjectid_array.each do |subj|
+                  v_subjectid = subj
+                  v_subjectid_v_num = subj + v_visit_number
+                  v_subjectid_path = v_preprocessed_full_path+"/"+subj
+                  v_subjectid_unknown =v_subjectid_path+"/unknown"
+                  if File.directory?(v_subjectid_unknown)
+                    v_dir_array = Dir.entries(v_subjectid_unknown)
+                    v_dir_array.each do |f|
+                    if f.start_with?("o") and f.end_with?(".nii")
+                        # check for tissue_seg
+                        v_subjectid_tissue_seg =v_subjectid_path+"/tissue_seg"
+                        if !File.directory?(v_subjectid_tissue_seg)  # or !File.directory?(v_subjectid_tissue_seg) # makes file
+                             v_comment = "str "+v_subjectid_v_num+";"+v_comment
+#puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_tissue_seg
+                             v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+'  "  ' 
+                             v_log = v_log + v_call+"\n"
+                             begin
+                               stdin, stdout, stderr = Open3.popen3(v_call)
+                               rescue => msg  
+                                  v_log = v_log + msg+"\n"  
+                             end
+                             v_success ="N"
+                             # open file, look for values 
+                                     v_tmp_data = "" 
+                                     v_tmp_data_array = []  
+                                     ftxt = File.open(v_subjectid_tissue_seg+"/tissue_volumes.csv", "r") 
+                                     ftxt.each_line do |line|
+                                        v_tmp_data += line
+                                     end
+                                     ftxt.close
+                                    v_file = ""
+                                    v_gm = ""
+                                    v_wm = ""
+                                    v_csf = ""
+                                     v_tmp_data_array = v_tmp_data.strip.split(",")
+                                     if v_tmp_data_array.length >2
+                                        v_file = v_tmp_data_array[0]
+                                        v_gm =v_tmp_data_array[1]
+                                        v_wm  = v_tmp_data_array[2]
+                                        v_csf = v_tmp_data_array[3]
+                                     end
+                                    if v_wm > ""
+                                       v_success ="Y"
+                                       v_log = v_log + "SUCCESS !!!!!!!!! \n"
+                                     end
+                             v_err =""
+                             v_log = v_log +"IN ERROR \n"
+                             while !stderr.eof?
+                               v_err = stderr.read 1024
+                               v_log = v_log +v_err
+                              end
+                              if v_err > ""
+                                 v_schedule_owner_email_array.each do |e|
+                                    v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see ==> "+v_log_path+" <== ALl the output from process is in the file."
+                                    PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
+                                end
+                              end
+                   #           puts "err="+v_err
+                              if v_success == "N"
+                                 v_comment_warning = " "+ v_subjectid_v_num +"; "+v_comment_warning 
+                                 v_log = "warning on "+ v_subjectid_v_num +"; "+v_log
+                              end
+                              process_log_append(v_log_path, v_log)
+                        end
+                    end
+                   end 
+                  end 
+                end
+              end
+           end
+        end
+     end
+    if v_comment_warning > ""
+        v_comment_warning = "warning on "+v_comment_warning
+    end
+    @schedulerun.comment =("successful finish tissueseg_spm12 "+v_comment_warning+" "+v_comment[0..3900])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
+    
+  end
+
+
+  def run_tissueseg_spm12_gm_wm_csf_volumes
+
+    v_base_path = Shared.get_base_path()
+    v_log_base ="/mounts/data/preprocessed/logs/"
+    v_process_name = "tissueseg_spm12_gm_wm_csf_volumes"
+    v_script_dev = v_base_path+"/data1/lab_scripts/rbmicvproc.sh"
+    v_script = v_base_path+"/SysAdmin/production/rbmicvproc.sh"
+    # only in dev
+    v_script = v_script_dev
+    process_logs_delete_old( v_process_name, v_log_base)
+     @schedule = Schedule.where("name in ('tissueseg_spm12_gm_wm_csf_volumes')").first
+      v_runner_email = self.get_user_email()  #  want to send errors to the user running the process
+      v_schedule_owner_email_array = []
+      if !v_runner_email.blank?
+        v_schedule_owner_email_array.push(v_runner_email)
+      else
+        v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+      end
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting tissueseg_spm12_gm_wm_csf_volumes"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      sql = "truncate table cg_rbm_icv_new"
+      connection = ActiveRecord::Base.connection();        
+      results = connection.execute(sql)
+
+      sql_base = "insert into cg_rbm_ics_new(subjectid,secondary_key,enrollment_id, scan_procedure_id,source_file,volume1_gm,volume2_wm,volume3_csf,tissue_seg_dir_flag)values(" 
+      v_comment = ""
+      v_comment_warning =""
+      v_error_comment = ""
+      t = Time.now
+      v_date_YM = t.strftime("%Y%m") # just making monthly logs, prepend
+      v_log_name =v_process_name+"_"+v_date_YM
+      v_log_path =v_log_base+v_log_name 
+      v_stop_file_name = v_process_name+"_stop"
+      v_stop_file_path = v_log_base+v_stop_file_name
+    connection = ActiveRecord::Base.connection();
+    v_secondary_key_array =["b","c","d","e",".R"]
+    v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+    sp_exclude_array = [33,40]
+    @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
+    @scan_procedures.each do |sp|
+        v_visit_number =""
+        if sp.codename.include?("visit2")
+            v_visit_number ="_v2"
+        elsif sp.codename.include?("visit3")
+            v_visit_number ="_v3"
+        elsif sp.codename.include?("visit4")
+            v_visit_number ="_v4"
+        elsif sp.codename.include?("visit5")
+            v_visit_number ="_v5"
+        end   
+        v_preprocessed_full_path = v_preprocessed_path+sp.codename  
+        if File.directory?(v_preprocessed_full_path)
+          sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+"  
+                                    and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id
+                                    and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
+          @results = connection.execute(sql_enum)
+                                    
+          @results.each do |r|
+              enrollment = Enrollment.where("enumber='"+r[0]+"'")
+              if !enrollment.blank?
+                v_log = ""
+                v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
+                v_subjectid = enrollment[0].enumber
+                v_subjectid_v_num = enrollment[0].enumber + v_visit_number
+                v_subjectid_unknown =v_subjectid_path+"/unknown"
+                v_subjectid_array = []
+                if File.directory?(v_subjectid_unknown)
+                     v_subjectid_array.push(v_subjectid)
+                 end
+                 v_secondary_key_array.each do |k|
+                    if File.directory?(v_subjectid_path+k+"/unknown")
+                        v_subjectid_array.push((v_subjectid+k))
+                    end
+                 end
+
+                v_subjectid_array.each do |subj|
+                  v_subjectid = subj
+                  v_subjectid_v_num = subj + v_visit_number
+                  v_subjectid_path = v_preprocessed_full_path+"/"+subj
+                  v_subjectid_unknown =v_subjectid_path+"/unknown"
+                  if File.directory?(v_subjectid_unknown)
+                    v_dir_array = Dir.entries(v_subjectid_unknown)
+                    v_dir_array.each do |f|
+                    if f.start_with?("o") and f.end_with?(".nii")
+                        # check for tissue_seg
+                        v_subjectid_tissue_seg =v_subjectid_path+"/tissue_seg"
+                        if File.directory?(v_subjectid_tissue_seg)  # or !File.directory?(v_subjectid_tissue_seg) # makes file
+                          if !File.file?(v_subjectid_tissue_seg+"/tissue_volumes.csv") 
+                             v_comment = "str "+v_subjectid_v_num+";"+v_comment
+#puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_tissue_seg
+                             v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+'  "  ' 
+                             v_log = v_log + v_call+"\n"
+                             begin
+                               stdin, stdout, stderr = Open3.popen3(v_call)
+                               rescue => msg  
+                                  v_log = v_log + msg+"\n"  
+                             end
+                             v_success ="N"
+                             if File.file?(v_subjectid_tissue_seg+"/tissue_volumes.csv") 
+                               # open file, look for values 
+                                     v_tmp_data = "" 
+                                     v_tmp_data_array = []  
+                                     ftxt = File.open(v_subjectid_tissue_seg+"/tissue_volumes.csv", "r") 
+                                     ftxt.each_line do |line|
+                                        v_tmp_data += line
+                                     end
+                                     ftxt.close
+                                    v_file = ""
+                                    v_gm = ""
+                                    v_wm = ""
+                                    v_csf = ""
+                                     v_tmp_data_array = v_tmp_data.strip.split(",")
+                                     if v_tmp_data_array.length >2
+                                        v_file = v_tmp_data_array[0]
+                                        v_gm =v_tmp_data_array[1]
+                                        v_wm  = v_tmp_data_array[2]
+                                        v_csf = v_tmp_data_array[3]
+                                     end
+                                    if v_wm > ""
+                                       v_success ="Y"
+                                       v_log = v_log + "SUCCESS !!!!!!!!! \n"
+                                     end
+
+                             end
+                             v_err =""
+                             v_log = v_log +"IN ERROR \n"
+                             while !stderr.eof?
+                               v_err = stderr.read 1024
+                               v_log = v_log +v_err
+                              end
+                              if v_err > ""
+                                 v_schedule_owner_email_array.each do |e|
+                                    v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see ==> "+v_log_path+" <== ALl the output from process is in the file."
+                                    PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
+                                end
+                              end
+                   #           puts "err="+v_err
+                              if v_success == "N"
+                                 v_comment_warning = " "+ v_subjectid_v_num +"; "+v_comment_warning 
+                                 v_log = "warning on "+ v_subjectid_v_num +"; "+v_log
+                              end
+                              process_log_append(v_log_path, v_log)
+                          end
+                        end                          #harvest
+                        if File.file?(v_subjectid_tissue_seg+"/tissue_volumes.csv") 
+                               # open file, look for values 
+                                     v_tmp_data = "" 
+                                     v_tmp_data_array = []  
+                                     ftxt = File.open(v_subjectid_tissue_seg+"/tissue_volumes.csv", "r") 
+                                     ftxt.each_line do |line|
+                                        v_tmp_data += line
+                                     end
+                                     ftxt.close
+                                    v_file = ""
+                                    v_gm = ""
+                                    v_wm = ""
+                                    v_csf = ""
+                                     v_tmp_data_array = v_tmp_data.strip.split(",")
+                                     if v_tmp_data_array.length >2
+                                        v_file = v_tmp_data_array[0]
+                                        v_gm =v_tmp_data_array[1]
+                                        v_wm  = v_tmp_data_array[2]
+                                        v_csf = v_tmp_data_array[3]
+                                     end
+                                     
+sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"', "+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_file+"','"+v_gm+"','"+v_wm+"','"+v_csf+"','Y')"
+                                 results = connection.execute(sql)
+                             else
+sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"', "+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,NULL,'N')"
+                                 results = connection.execute(sql)
+                        end
+                    end
+                   end 
+                  end 
+                end
+              end
+           end
+        end
+     end
+    if v_comment_warning > ""
+        v_comment_warning = "warning on "+v_comment_warning
+    end
+    v_comment = self.move_present_to_old_new_to_present("cg_rbm_icv",
+             "subjectid,secondary_key,enrollment_id, scan_procedure_id,source_file,volume1_gm,volume2_wm,volume3_csf,tissue_seg_dir_flag",
+                            "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
+    @schedulerun.comment =("successful finish tissueseg_spm12_gm_wm_csf_volumes "+v_comment_warning+" "+v_comment[0..3900])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
+    
+  end
+
 
 # ADD EXCLUDE SCAN SHARE
 # ADD EXCLUDE SCAN

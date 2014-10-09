@@ -170,11 +170,20 @@ v_user = v_user.gsub("\n","")
 
   elsif v_value_1 == "sleep_t1"
       v_shared = Shared.new
-      v_shared.run_sleep_t1()    
+      v_shared.run_sleep_t1()   
 
-  elsif v_value_1 == "t1seg_gm_wm_csf_volumes"
+
+  elsif v_value_1 == "t1seg_spm8_gm_wm_csf_volumes" # volumes being harvested in t1seg_status
       v_shared = Shared.new
-      v_shared.run_t1seg_gm_wm_csf_volumes()  
+      v_shared.run_t1seg_spm8_gm_wm_csf_volumes()
+
+  elsif v_value_1 == "tissueseg_spm12"
+      v_shared = Shared.new
+      v_shared.run_tissueseg_spm12()  
+
+  elsif v_value_1 == "tissueseg_spm12_gm_wm_csf_volumes" # harvests
+      v_shared = Shared.new
+      v_shared.run_tissueseg_spm12_gm_wm_csf_volumes()  
 
   elsif v_value_1 == "xnat_file"
       v_shared = Shared.new
