@@ -2433,8 +2433,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                              end
                              v_success ="N"
                              # open file, look for values 
-                                     v_tmp_data = "" 
-                                     v_tmp_data_array = []  
+                              v_tmp_data = "" 
+                              v_tmp_data_array = [] 
+                              if File.file?(v_subjectid_tissue_seg+"/tissue_volumes.csv")
                                      ftxt = File.open(v_subjectid_tissue_seg+"/tissue_volumes.csv", "r") 
                                      v_cnt = 1
                                      ftxt.each_line do |line|
@@ -2459,9 +2460,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                        v_success ="Y"
                                        v_log = v_log + "SUCCESS !!!!!!!!! \n"
                                      end
-                             v_err =""
-                             v_log = v_log +"IN ERROR \n"
-                             while !stderr.eof?
+                              end     
+                              v_err =""
+                              v_log = v_log +"IN ERROR \n"
+                              while !stderr.eof?
                                v_err = stderr.read 1024
                                v_log = v_log +v_err
                               end
