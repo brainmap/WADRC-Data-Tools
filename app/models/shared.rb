@@ -2615,7 +2615,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                  v_log = "warning on tissue seg volumes"+ v_subjectid_v_num +"; "+v_log
 
                           end
-                          if !File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b99.txt") 
+                          if !File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt") 
                              v_comment = "str "+v_subjectid_v_num+";"+v_comment
 #puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_tissue_seg
                              v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+'  "  ' 
@@ -2626,21 +2626,21 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                   v_log = v_log + msg+"\n"  
                              end
                              v_success ="N"
-                             if File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b99.txt") 
+                             if File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt") 
                                # open file, look for values 
                                      v_tmp_data = "" 
-                                     ftxt = File.open(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b99.txt", "r") 
+                                     ftxt = File.open(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt", "r") 
                                      v_cnt = 1
                                      ftxt.each_line do |line|
                                         if v_cnt == 1
-                                           v_tmp_data = line
+                                           v_tmp_data = line.gsub("\n","").gsub("\r","")
                                         end
                                         v_cnt = v_cnt + 1
                                      end
                                      ftxt.close
                                     v_rbm_icv = ""
-                                     if v_tmp_data.chomp() > ''
-                                        v_rbm_icv  = v_tmp_data.chomp()
+                                     if v_tmp_data > ''
+                                        v_rbm_icv  = v_tmp_data
                                      end
                                     if v_wm > ""
                                        v_success ="Y"
@@ -2694,18 +2694,18 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                         v_wm  = v_tmp_data_array[2]
                                         v_csf = v_tmp_data_array[3]
                                      end
-                                     if File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b99.txt") 
+                                     if File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt") 
                                         v_tmp_data = "" 
-                                       ftxt = File.open(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b99.txt", "r") 
+                                       ftxt = File.open(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt", "r") 
                                        v_cnt = 1
                                        ftxt.each_line do |line|
                                         if v_cnt == 1
-                                           v_tmp_data = line
+                                           v_tmp_data = line.gsub("\n","").gsub("\r","")
                                         end
                                         v_cnt = v_cnt + 1
                                        end
                                        ftxt.close
-                                       if v_tmp_data.chomp() > ''
+                                       if v_tmp_data > ''
                                           v_rbm_icv  = v_tmp_data.chomp()
                                        end
                                      end
