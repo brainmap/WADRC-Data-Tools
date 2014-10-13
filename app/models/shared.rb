@@ -2530,7 +2530,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       connection = ActiveRecord::Base.connection();        
       results = connection.execute(sql)
 
-      sql_base = "insert into cg_rbm_icv_new(subjectid,secondary_key,enrollment_id, scan_procedure_id,source_file,volume1_gm,volume2_wm,volume3_csf,tissue_seg_dir_flag)values(" 
+      sql_base = "insert into cg_rbm_icv_new(subjectid,secondary_key,enrollment_id, scan_procedure_id,source_file,volume1_gm,volume2_wm,volume3_csf,tissue_seg_dir_flag,rbm_icv)values(" 
       v_comment = ""
       v_comment_warning =""
       v_error_comment = ""
@@ -2608,8 +2608,14 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                     if f.start_with?("o") and f.end_with?(".nii")
                         # check for tissue_seg
                         v_subjectid_tissue_seg =v_subjectid_path+"/tissue_seg"
+                        v_subjectid_rbm_icv =v_subjectid_path+"/rbm_icv"
                         if File.directory?(v_subjectid_tissue_seg)  # or !File.directory?(v_subjectid_tissue_seg) # makes file
                           if !File.file?(v_subjectid_tissue_seg+"/tissue_volumes.csv") 
+                                v_comment_warning = " "+ v_subjectid_v_num +"; "+v_comment_warning 
+                                 v_log = "warning on tissue seg volumes"+ v_subjectid_v_num +"; "+v_log
+
+                          end
+                          if !File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b99.txt") 
                              v_comment = "str "+v_subjectid_v_num+";"+v_comment
 #puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_tissue_seg
                              v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+'  "  ' 
@@ -2620,29 +2626,21 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                   v_log = v_log + msg+"\n"  
                              end
                              v_success ="N"
-                             if File.file?(v_subjectid_tissue_seg+"/tissue_volumes.csv") 
+                             if File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b99.txt") 
                                # open file, look for values 
                                      v_tmp_data = "" 
-                                     v_tmp_data_array = []  
-                                     ftxt = File.open(v_subjectid_tissue_seg+"/tissue_volumes.csv", "r") 
+                                     ftxt = File.open(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b99.txt", "r") 
                                      v_cnt = 1
                                      ftxt.each_line do |line|
-                                        if v_cnt == 2
+                                        if v_cnt == 1
                                            v_tmp_data = line
                                         end
                                         v_cnt = v_cnt + 1
                                      end
                                      ftxt.close
-                                    v_file = ""
-                                    v_gm = ""
-                                    v_wm = ""
-                                    v_csf = ""
-                                     v_tmp_data_array = v_tmp_data.strip.split(",")
-                                     if v_tmp_data_array.length >2
-                                        v_file = v_tmp_data_array[0]
-                                        v_gm =v_tmp_data_array[1]
-                                        v_wm  = v_tmp_data_array[2]
-                                        v_csf = v_tmp_data_array[3]
+                                    v_rbm_icv = ""
+                                     if v_tmp_data.chomp() > ''
+                                        v_rbm_icv  = v_tmp_data.chomp()
                                      end
                                     if v_wm > ""
                                        v_success ="Y"
@@ -2665,7 +2663,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                    #           puts "err="+v_err
                               if v_success == "N"
                                  v_comment_warning = " "+ v_subjectid_v_num +"; "+v_comment_warning 
-                                 v_log = "warning on "+ v_subjectid_v_num +"; "+v_log
+                                 v_log = "warning on rbm icv "+ v_subjectid_v_num +"; "+v_log
                               end
                               process_log_append(v_log_path, v_log)
                           end
@@ -2687,6 +2685,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                     v_gm = ""
                                     v_wm = ""
                                     v_csf = ""
+                                    v_rbm_icv = ""
                                      v_tmp_data_array = v_tmp_data.strip.split(",")
                                      if v_tmp_data_array.length >2
                                         v_file = v_tmp_data_array[0].gsub(/'/,"")
@@ -2695,11 +2694,26 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                         v_wm  = v_tmp_data_array[2]
                                         v_csf = v_tmp_data_array[3]
                                      end
+                                     if File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b99.txt") 
+                                        v_tmp_data = "" 
+                                       ftxt = File.open(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b99.txt", "r") 
+                                       v_cnt = 1
+                                       ftxt.each_line do |line|
+                                        if v_cnt == 1
+                                           v_tmp_data = line
+                                        end
+                                        v_cnt = v_cnt + 1
+                                       end
+                                       ftxt.close
+                                       if v_tmp_data.chomp() > ''
+                                          v_rbm_icv  = v_tmp_data.chomp()
+                                       end
+                                     end
                                      
-sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"', "+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_file+"','"+v_gm+"','"+v_wm+"','"+v_csf+"','Y')"
+sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"', "+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_file+"','"+v_gm+"','"+v_wm+"','"+v_csf+"','Y','"+v_rbm_icv+"')"
                                  results = connection.execute(sql)
                              else
-sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"', "+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,NULL,'N')"
+sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"', "+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,NULL,'N',NULL)"
                                  results = connection.execute(sql)
                         end
                     end
