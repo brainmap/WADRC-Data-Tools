@@ -2728,7 +2728,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
         v_comment_warning = "warning on "+v_comment_warning
     end
     v_comment = self.move_present_to_old_new_to_present("cg_rbm_icv",
-             "subjectid,secondary_key,enrollment_id, scan_procedure_id,source_file,volume1_gm,volume2_wm,volume3_csf,tissue_seg_dir_flag",
+             "subjectid,secondary_key,enrollment_id, scan_procedure_id,source_file,volume1_gm,volume2_wm,volume3_csf,tissue_seg_dir_flag,rbm_icv",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
     @schedulerun.comment =("successful finish tissueseg_spm12_gm_wm_csf_volumes "+v_comment_warning+" "+v_comment[0..3900])
     if !v_comment.include?("ERROR")
