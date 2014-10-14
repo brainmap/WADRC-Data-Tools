@@ -1543,7 +1543,7 @@ end
                         v_subjectid_array.push((v_subjectid+k))
                     end
                  end
-
+                v_subjectid_array = v_subjectid_array.uniq
                 v_subjectid_array.each do |subj|
                   v_subjectid = subj
                   v_subjectid_v_num = subj + v_visit_number
@@ -1968,7 +1968,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                         v_subjectid_array.push((v_subjectid+k))
                     end
                  end
-
+                v_subjectid_array = v_subjectid_array.uniq
                 v_subjectid_array.each do |subj|
                   v_subjectid = subj
                   v_subjectid_v_num = subj + v_visit_number
@@ -2409,7 +2409,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                         v_subjectid_array.push((v_subjectid+k))
                     end
                  end
-
+                v_subjectid_array = v_subjectid_array.uniq
                 v_subjectid_array.each do |subj|
                   v_subjectid = subj
                   v_subjectid_v_num = subj + v_visit_number
@@ -2581,7 +2581,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                         v_subjectid_array.push((v_subjectid+k))
                     end
                  end
-
+                v_subjectid_array = v_subjectid_array.uniq
                 v_subjectid_array.each do |subj|
                   v_subjectid = subj
                   v_subjectid_actual = subj
