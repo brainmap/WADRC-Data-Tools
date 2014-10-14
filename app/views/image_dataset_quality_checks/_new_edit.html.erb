@@ -95,7 +95,7 @@ edit_count = edit_count -1
 
     <h3>Miscellaneous</h3>
     <p>
-      <%= f.label 'Registration risks (e.g., large vetricles)?' %>
+     Registration risks (e.g., large vetricles)?
       <%= select :image_dataset_quality_check, :registration_risk, qualopts, :default => 'Pass' %>
       <a id="myHeader1" href="javascript:toggle2('registration_risk_comment','myHeader2');" ><%= image_tag('comment_bubble.gif')%></a><br>
      <% if @image_dataset_quality_check.registration_risk_comment.blank? %>
@@ -107,7 +107,7 @@ edit_count = edit_count -1
      <% end %>
     </p>
     <p>
-      <%= f.label 'Not Otherwise Specified (NOS) concerns (e.g., other artifacts)?'%>
+      Not Otherwise Specified (NOS) concerns (e.g., other artifacts)?
       <%= select :image_dataset_quality_check, :nos_concerns, ['NA', 'Pass', 'Mild', 'Moderate', 'Severe'], :default => 'NA' %>
       <a id="myHeader1" href="javascript:toggle2('nos_concerns_comment','myHeader2');" ><%= image_tag('comment_bubble.gif')%></a><br>
     <% if @image_dataset_quality_check.nos_concerns_comment.blank? %>
