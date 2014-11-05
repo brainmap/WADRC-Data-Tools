@@ -2628,7 +2628,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                   v_log = v_log + msg+"\n"  
                              end
                              v_success ="N"
-                             if File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt") unless(sp_exclude_array.include?(sp.id) )
+                             if File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt") and !(sp_exclude_array.include?(sp.id) )
                                # open file, look for values 
                                      v_tmp_data = "" 
                                      ftxt = File.open(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt", "r") 
