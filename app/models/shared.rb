@@ -2543,7 +2543,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     connection = ActiveRecord::Base.connection();
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_exclude_array = [33,40]
+    sp_exclude_array = [-1 ] # if tissuesegmentation run on plaque, ok to run rbm [33,40]
     # @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     # applying exclusion further down to prevent running the process
     @scan_procedures = ScanProcedure.all 
