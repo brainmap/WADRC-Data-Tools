@@ -2617,7 +2617,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                  v_log = "warning on tissue seg volumes"+ v_subjectid_v_num +"; "+v_log
 
                           end
-                          if !File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt") 
+                          if !File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt")  and !(sp_exclude_array.include?(sp.id) )
                              v_comment = "str "+v_subjectid_v_num+";"+v_comment
 #puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_tissue_seg
                              v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+'  "  ' 
@@ -2628,7 +2628,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                   v_log = v_log + msg+"\n"  
                              end
                              v_success ="N"
-                             if File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt") and !(sp_exclude_array.include?(sp.id) )
+                             if File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt")
                                # open file, look for values 
                                      v_tmp_data = "" 
                                      ftxt = File.open(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt", "r") 
