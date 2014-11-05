@@ -2544,7 +2544,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
     sp_exclude_array = [33,40]
-    @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
+    # @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
+    # applying exclusion further down to prevent running the process
+    @scan_procedures = ScanProcedure.all 
     @scan_procedures.each do |sp|
         v_visit_number =""
         if sp.codename.include?("visit2")
@@ -2626,7 +2628,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                   v_log = v_log + msg+"\n"  
                              end
                              v_success ="N"
-                             if File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt") 
+                             if File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt") unless(sp_exclude_array.include?(sp.id) 
                                # open file, look for values 
                                      v_tmp_data = "" 
                                      ftxt = File.open(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt", "r") 
@@ -4323,6 +4325,8 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
   end
 
   # to add columns --
+  # change the cg_table in database
+  # change the cg_search table
   # change sql_base insert statement
   # change  sql = sql_base+  insert statement with values
   # change  self.move_present_to_old_new_to_present
@@ -4370,7 +4374,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                elsif sp.codename.include?("visit5")
                   v_visit_number ="_v5"
                end
-
+                # petscans.lookup_pettracer_id = 2 ==> fdg
                 v_preprocessed_full_path = v_preprocessed_path+sp.codename
                 sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups, vgroups, appointments, petscans, enrollment_vgroup_memberships
                                     where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" and  vgroups.transfer_pet = 'yes'  
@@ -4408,7 +4412,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                                 
                              sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','','"+v_fdg_registered_to_fs_flag+"','"+v_fdg_scaled_registered_to_fs_flag+"','"+v_fdg_smoothed_and_warped_flag+"','"+v_fdg_scaled_smoothed_and_warped_flag+"','"+v_fdg_summed_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
-                             else
+                             else   # just insert empty row
                                  sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','no fdg dir','N','N','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              end # check for subjectid asl dir
