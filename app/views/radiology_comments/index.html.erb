@@ -4,7 +4,7 @@
 RMR: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <%= text_field_tag "radiology_comment[rmr]" %><br>
 <%= collection_select :radiology_comment, :protocol_id, Protocol.all.sort_by(&:name), :id, :name, :prompt => 'choose a protocol' %>
-  <%= submit_tag("Search") %>
+  <%= submit_tag("Search") %> <b> the search is not working </b>
 <% end %>
 
 <table   class="tabular">

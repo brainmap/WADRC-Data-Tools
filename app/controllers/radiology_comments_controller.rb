@@ -28,17 +28,17 @@ class RadiologyCommentsController < ApplicationController
      #@catch = params[:radiology_comment]
      past_time = Time.new - 3.month
      v_past_date = past_time.strftime("%Y-%m-%d")
-    if params[:radiology_comment][:rmr].try(:blank?) && params[:radiology_comment][:protocol_id].try(:blank?)
+     if !params[:radiology_comment].nil?  and !params[:radiology_comment].blank?
 
        @radiology_comments = RadiologyComment.where("radiology_comments.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)
                                        and scan_procedures_visits.visit_id in (select visits.id from visits where visits.date > '"+v_past_date+"'))", scan_procedure_array).all
      # get last 3 months or pagation
     else
-      if !params[:radiology_comment][:rmr].blank? && params[:radiology_comment][:protocol_id].blank?
+      if  !(params[:radiology_comment][:rmr]).nil?  && params[:radiology_comment][:protocol_id].blank?
 
         @radiology_comments = RadiologyComment.where("radiology_comments.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)
                             and scan_procedures_visits.visit_id in (select visits.id from visits where visits.rmr in (?)))", scan_procedure_array,params[:radiology_comment][:rmr]).all
-      
+           
      elsif  params[:radiology_comment][:rmr].blank? && !params[:radiology_comment][:protocol_id].blank?
       # @protocol_roles = ProtocolRole.where("protocol_id in  (?)", params[:radiology_comment][:protocol_id]).all
         @radiology_comments = RadiologyComment.where("radiology_comments.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)
@@ -53,7 +53,7 @@ class RadiologyCommentsController < ApplicationController
                                                                             scan_procedure_array,params[:radiology_comment][:protocol_id],params[:radiology_comment][:rmr]).all
       end
 
-   end
+    end
      if @radiology_comments.nil?
        @radiology_comments = RadiologyComment.where("radiology_comments.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)
                                        and scan_procedures_visits.visit_id in (select visits.id from visits where visits.date > '"+v_past_date+"'))", scan_procedure_array).all
