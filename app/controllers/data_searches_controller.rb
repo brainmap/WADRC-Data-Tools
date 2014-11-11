@@ -1050,10 +1050,17 @@ class DataSearchesController < ApplicationController
            params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:cg_search][:min_age]+" and "+params[:cg_search][:max_age]
          end    
          @conditions_bak.concat(@local_conditions)     
-         if params[:cg_search][:save_search] == "1"    
+         if params[:cg_search][:save_search] == "1" 
             @cg_query.save
             params[:cg_search][:cg_query_id] = @cg_query.id.to_s
+         else
+             @cg_query.log_flag ="Y"
+             @cg_query.save
+             @cg_query.log_flag = "N"
+             params[:cg_search][:cg_query_id] = @cg_query.id.to_s
          end 
+         # lsaving all queries as a log for UP protocol checks
+
          # loop thru each table
          if !params[:cg_search][:tn_id].blank? 
            params[:cg_search][:tn_id].each do |tn_id|
@@ -1259,9 +1266,9 @@ class DataSearchesController < ApplicationController
                  end
                end         
                # need hash with cg_tn_id as key
-               if params[:cg_search][:save_search] == "1"    
+            #always save- for log    if params[:cg_search][:save_search] == "1"    
                   @cg_query_tn.save
-               end
+             #  end
                @cg_query_tn_hash[v_tn_id] = @cg_query_tn
                if !params[:cg_search][:cn_id].blank? and !params[:cg_search][:cn_id][v_tn_id].blank?
                  params[:cg_search][:cn_id][v_tn_id].each do |tn_cn_id|
@@ -1487,9 +1494,9 @@ class DataSearchesController < ApplicationController
                          end
                        end            
                      
-                       if params[:cg_search][:save_search] == "1"    
+                       # always save for logging if params[:cg_search][:save_search] == "1"    
                           @cg_query_tn_cn.save
-                       end
+                       #end
                        @cg_query_cn_hash[v_tn_cn_id] = @cg_query_tn_cn  
                        if !params[:cg_search][:condition].blank? and !params[:cg_search][:condition][v_tn_id].blank? and ( params[:cg_search][:condition][v_tn_id][v_tn_cn_id].blank? or params[:cg_search][:condition][v_tn_id][v_tn_cn_id] == "") and (!params[:cg_search][:include_cn][v_tn_id].blank? and (params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id].blank? or params[:cg_search][:include_cn][v_tn_id][v_tn_cn_id] == "" ))
                            params[:cg_search][:cn_id][v_tn_id].delete(v_tn_cn_id)
@@ -1698,10 +1705,18 @@ class DataSearchesController < ApplicationController
       
       
       @sp_array.push("-1") # need something in the array
+      v_log_flag ="N"
        # for stored query drop down
       sql = "select  concat(cg_name,' - ',users.username,' - ', date_format(cg_queries.created_at,'%Y %m %d')) name,cg_queries.id  
-      from cg_queries, users where status_flag != 'N' and cg_queries.user_id = users.id  
+      from cg_queries, users where status_flag != 'N' and cg_queries.user_id = users.id  and log_flag ='"+v_log_flag+"' 
          order by save_flag desc, users.username, date_format(cg_queries.created_at,'%Y %m %d') desc"
+      if !params[:admin_query_check].nil? and !params[:admin_query_check][:user_id].blank? 
+         v_log_flag ="Y" # getting saved and logged - not re-logging saved
+         sql = "select  concat(users.username,' - ', date_format(cg_queries.created_at,'%Y %m %d'),'-',cg_queries.id) name,cg_queries.id  
+         from cg_queries, users where status_flag != 'N' and cg_queries.user_id = users.id  
+         and cg_queries.user_id = "+params[:admin_query_check][:user_id]+"
+         order by save_flag desc, users.username, date_format(cg_queries.created_at,'%Y %m %d') desc"
+      end
       connection = ActiveRecord::Base.connection();
       @results_stored_search = connection.execute(sql)
       @data_for_select_stored_search = @results_stored_search.each { |hash| [hash[0], hash[1]] }

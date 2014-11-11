@@ -10,6 +10,10 @@
 <tr><td nowrap align="left"><%= link_to('Scheduled Jobs', '/schedules') %></td><td align="left">--- New Schedule link at bottom of page. Define name of scheduled job, name of shared function, run command ( used in crontab, copy/paste into terminal as panda_admin, or via run button) , owner who can run job, whether job is active (still need to stop in crontab), optional parameters and description, cg_table and columns if involved, if a file upload populates the cg_table. <br></td></tr>
 
 <tr><td nowrap align="left"><%= link_to('Runs -Scheduled Jobs', '/schedulerun_search') %></td><td align="left"> logging of recent scheduled jobs runs.<br></td></tr>
+<tr><td nowrap align="left"><b>Admin check logged querries</b> ( for UP protocol)</td><td align="left"> <%= form_tag  '/cg_search' ,{:target =>'_blank'} do %>
+<%= collection_select :admin_query_check, :user_id, User.where(" users.username not like '%left%' ").all.sort_by(&:username_name), :id, :username_name, :prompt => 'choose user' %>
+	  <%= submit_tag("checked logged searches")%><%end%><br></td></tr>
+
 </table>
 
 <%else %>	
