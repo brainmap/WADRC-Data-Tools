@@ -889,7 +889,7 @@ class DataSearchesController < ApplicationController
            puts "aaaaaa @html_request= "+@html_request
        end
       # get stored cg_search
-      if !params[:cg_search].blank? and !params[:cg_search][:cg_query_id].blank?
+      if !params[:cg_search].blank? and !params[:cg_search][:cg_query_id].blank? 
          @cg_query = CgQuery.find(params[:cg_search][:cg_query_id])
         if !@cg_query.scan_procedure_id_list.blank?
            @sp_array = @cg_query.scan_procedure_id_list.split(",")
@@ -1049,15 +1049,19 @@ class DataSearchesController < ApplicationController
            @local_conditions.push(v_condition)
            params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:cg_search][:min_age]+" and "+params[:cg_search][:max_age]
          end    
-         @conditions_bak.concat(@local_conditions)     
+         @conditions_bak.concat(@local_conditions) 
+
          if params[:cg_search][:save_search] == "1" 
+            params[:cg_search][:log_flag] = "N"
             @cg_query.save
-            params[:cg_search][:cg_query_id] = @cg_query.id.to_s
+            params[:cg_search][:cg_query_id] = @cg_query.id.to_s # being used in export file don't populate unless save search
+            params[:cg_search][:cg_query_id_log] = @cg_query.id.to_s
          else
+             params[:cg_search][:log_flag] = "Y"
              @cg_query.log_flag ="Y"
              @cg_query.save
              @cg_query.log_flag = "N"
-             params[:cg_search][:cg_query_id] = @cg_query.id.to_s
+             params[:cg_search][:cg_query_id_log] = @cg_query.id.to_s
          end 
          # lsaving all queries as a log for UP protocol checks
 
@@ -1895,7 +1899,7 @@ class DataSearchesController < ApplicationController
     end
     # more image_dataset column things below
 
-#puts sql
+puts "bbbbb "+sql
 
     @results2 = connection.execute(sql)
 
@@ -1948,7 +1952,7 @@ class DataSearchesController < ApplicationController
       end
       @results[i] = @temp_row
       i = i+1
-      
+ puts "aaaaa results "+i.to_s     
     end
     if @html_request =="N" and !params[:cg_search].blank? and !params[:cg_search][:series_description_type_id].blank? and !params[:cg_search][:image_dataset_file].blank?
        @column_number =   @local_column_headers.size
