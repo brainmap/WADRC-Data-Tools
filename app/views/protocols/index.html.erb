@@ -7,6 +7,7 @@
     <th>Abbr</th>
     <th>Path</th>
     <th>Description</th>
+    <th>Parent Protocol</th>
     <th></th>
     <th></th>
     <th></th>
@@ -18,6 +19,9 @@
     <td><%= protocol.abbr %></td>
     <td><%= protocol.path %></td>
     <td><%= protocol.description %></td>
+    <td><% if !(protocol.parent_protocol_id).nil? and !(protocol.parent_protocol_id).to_s.empty?%>
+      <%= (Protocol.find(protocol.parent_protocol_id)).name %>
+      <% end %></td>
     <td><%= link_to 'Show', protocol %></td>
     <td><%= link_to 'Edit', edit_protocol_path(protocol) %></td>
     <td><%= link_to 'Destroy', protocol, :confirm => 'Are you sure?', :method => :delete %></td>

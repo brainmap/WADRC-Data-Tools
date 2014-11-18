@@ -27,6 +27,10 @@
     <%= f.label :description %><br />
     <%= f.text_field :description %>
   </div>
+    <div class="field">
+    <%= f.label :parent_protocol %><br />
+    <%= collection_select :protocol, :parent_protocol_id, Protocol.all.sort_by(&:id), :id, :name, :prompt => 'choose a parent protocol' %>
+  </div>
   <div class="actions">
     <%= f.submit %>
   </div>
