@@ -233,7 +233,7 @@ class User < ActiveRecord::Base
              @current_self_protocol = self.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(self.id).to_s+"
                                                                       union
    select distinct id from protocols where parent_protocol_id in (SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(self.id).to_s+")") 
-             
+              
              @current_self_protocol.each do |p2|
                protocol_array << p2.protocol_id
                end
