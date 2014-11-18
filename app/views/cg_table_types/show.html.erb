@@ -1,0 +1,22 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Description:</b>
+  <%= @cg_table_type.description %>
+</p>
+
+<p>
+  <b>Table type:</b>
+  <%= @cg_table_type.table_type %>
+</p>
+
+<p>
+  <b>Protocol:</b>
+<% if !(@cg_table_type.protocol_id).nil? and !(@cg_table_type.protocol_id).to_s.empty?%>
+<%= (Protocol.find(@cg_table_type.protocol_id)).name %>
+<% end %>
+</p>
+
+
+<%= link_to 'Edit', edit_cg_table_type_path(@cg_table_type) %> |
+<%= link_to 'Back', cg_table_types_path %>

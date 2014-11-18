@@ -1,0 +1,30 @@
+<%= form_for(@cg_table_type) do |f| %>
+  <% if @cg_table_type.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@cg_table_type.errors.count, "error") %> prohibited this cg_table_type from being saved:</h2>
+
+      <ul>
+      <% @cg_table_type.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :description %><br />
+    <%= f.text_field :description %>
+  </div>
+  <div class="field">
+    <%= f.label :table_type %><br />
+    <%= f.text_field :table_type %>
+  </div>
+  <div class="field">
+    <%= f.label :protocol_id %><br />
+    
+    <%= collection_select :cg_table_type, :protocol_id, Protocol.all.sort_by(&:id), :id, :name, :prompt => 'choose an access control protocol' %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

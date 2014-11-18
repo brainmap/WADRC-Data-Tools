@@ -1,0 +1,2 @@
+module CgTableTypesHelper
+end
