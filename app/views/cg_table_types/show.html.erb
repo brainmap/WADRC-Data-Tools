@@ -17,6 +17,7 @@
 <% end %>
 </p>
 
-
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
 <%= link_to 'Edit', edit_cg_table_type_path(@cg_table_type) %> |
+<% end %>
 <%= link_to 'Back', cg_table_types_path %>

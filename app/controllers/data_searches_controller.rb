@@ -121,12 +121,25 @@ class DataSearchesController < ApplicationController
     end
     
     def cg_tables
+      scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       @cg_tn_key_y = []
       @cg_tn_key_unique_y = []
-      @cg_tns = CgTn.where("table_type='column_group' and status_flag='Y'").order(:display_order)
-      @cg_tracker_tns = CgTn.where("table_type='tracker' and status_flag='Y'").order(:display_order) 
-      @cg_combio_tns = CgTn.where("table_type='combio' and status_flag='Y'").order(:display_order) 
-      @cg_scan_export_tns = CgTn.where("table_type='scan_export' and status_flag='Y'").order(:display_order) 
+      @cg_tns = CgTn.where("table_type='column_group' and status_flag='Y' and table_type in 
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order) 
+      @cg_tracker_tns = CgTn.where("table_type='tracker' and status_flag='Y' and table_type in 
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order)  
+      @cg_combio_tns = CgTn.where("table_type='combio' and status_flag='Y' and table_type in 
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order)  
+      @cg_scan_export_tns = CgTn.where("table_type='scan_export' and status_flag='Y' and table_type in 
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order)  
+      @cg_up_tns = CgTn.where("table_type='up' and status_flag='Y' and table_type in 
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order) 
+       if !params[:archive_up_tables].nil? and params[:archive_up_tables] == "Y"
+      @cg_up_archive_tns = CgTn.where("table_type='up_archive' and status_flag='Y' and table_type in 
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order) 
+       end
+
+   
       # no edit/key things with tracker
       @cg_tns.each do |cg_tn|
           cg_tn_key_array = []
@@ -822,6 +835,7 @@ class DataSearchesController < ApplicationController
 
       v_debug = "N" # Y"
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
+      @scan_procedure_list = scan_procedure_list
       # make the sql -- start with base 
 
       @local_column_headers =["Date (vgroup)","Protocol","Enumber","RMR"]
@@ -876,7 +890,7 @@ class DataSearchesController < ApplicationController
       # "T2" => "T2", 
       # "T2_Flair" => "T2_Flair", 
       # "T2*" => "T2*"}
-      
+     
       request_format = request.formats.to_s
       @html_request ="Y"
       case  request_format
@@ -886,7 +900,7 @@ class DataSearchesController < ApplicationController
             @html_request ="N"
         end
       if v_debug == "Y"
-           puts "aaaaaa @html_request= "+@html_request
+          # puts "aaaaaa @html_request= "+@html_request
        end
       # get stored cg_search
       if !params[:cg_search].blank? and !params[:cg_search][:cg_query_id].blank? 
@@ -899,8 +913,10 @@ class DataSearchesController < ApplicationController
             @pet_tracer_array = @cg_query.pet_tracer_id_list.split(",")
          end
 
-         @cg_query_tns =  CgQueryTn.where("cg_query_id = "+@cg_query.id.to_s)
+         @cg_query_tns =  CgQueryTn.where("cg_query_id = "+@cg_query.id.to_s).where("cg_tn_id in ( select cg_tns.id from cg_tns where cg_tns.table_type in 
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+")))")
          @cg_query_tns.each do |cg_query_tn|
+
            v_tn_id = cg_query_tn.cg_tn_id 
             @cg_query_tn_id_array.push(v_tn_id) # need to retrieve for display on the page
             # if cg table needd to propagate from search to search
@@ -1069,6 +1085,7 @@ class DataSearchesController < ApplicationController
          if !params[:cg_search][:tn_id].blank? 
            params[:cg_search][:tn_id].each do |tn_id|
             v_tn_id = tn_id.to_s
+
             v_cg_tn_array = []  
             # pet with a tracer picked - could be many tracers - artifically make more "tables"
             @cg_tn = CgTn.find(v_tn_id)
@@ -1952,7 +1969,7 @@ puts "bbbbb "+sql
       end
       @results[i] = @temp_row
       i = i+1
- puts "aaaaa results "+i.to_s     
+# puts "aaaaa results "+i.to_s     
     end
     if @html_request =="N" and !params[:cg_search].blank? and !params[:cg_search][:series_description_type_id].blank? and !params[:cg_search][:image_dataset_file].blank?
        @column_number =   @local_column_headers.size
@@ -2061,7 +2078,7 @@ puts "bbbbb "+sql
        @participant_size = {}
        @results.each do |r|
           v_participant_id = r[0] 
-  puts "aaaaaa p.id="+v_participant_id.to_s
+ # puts "aaaaaa p.id="+v_participant_id.to_s
           # some null participant_id
           r.delete_at(0)
           # ??? getting 2 
@@ -2403,7 +2420,7 @@ puts "bbbbb "+sql
           cg_tn = CgTn.where("tn in (?)",v_tn)
           cg_tn_cn = CgTnCn.where("cg_tn_id in (?) and cn in ('"+v_cn+"')",cg_tn[0].id)
           if !cg_tn_cn.blank?
-            puts "aaaaa cg_tn_cn="+cg_tn_cn[0].id.to_s
+          #  puts "aaaaa cg_tn_cn="+cg_tn_cn[0].id.to_s
             cg_tn_cn[0].cn = v_cn_new
             cg_tn_cn[0].save
           end      

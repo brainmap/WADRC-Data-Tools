@@ -17,9 +17,11 @@
     <td><% if !(cg_table_type.protocol_id).nil? and !(cg_table_type.protocol_id).to_s.empty?%>
       <%= (Protocol.find(cg_table_type.protocol_id)).name %>
       <% end %></td>
+      <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
     <td><%= link_to 'Show', cg_table_type %></td>
     <td><%= link_to 'Edit', edit_cg_table_type_path(cg_table_type) %></td>
     <td><%= link_to 'Destroy', cg_table_type, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+    <% end %>
   </tr>
 <% end %>
 </table>

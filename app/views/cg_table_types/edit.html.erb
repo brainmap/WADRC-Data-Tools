@@ -1,6 +1,8 @@
+
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
 <h1>Editing cg_table_type</h1>
 
 <%= render 'form' %>
-
+<% end %>
 <%= link_to 'Show', @cg_table_type %> |
 <%= link_to 'Back', cg_table_types_path %>
