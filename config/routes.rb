@@ -1,6 +1,9 @@
 WADRCDataTools::Application.routes.draw do
 
 
+  resources :cg_table_types
+
+
   resources :questionformnamesps
 
 
