@@ -989,14 +989,14 @@ class DataSearchesController < ApplicationController
              v_enumber = v_enumber.gsub(/,/,"','")
              v_condition ="   appointments.id in (select a2.id from enrollment_vgroup_memberships,enrollments, appointments a2
                   where enrollment_vgroup_memberships.vgroup_id= a2.vgroup_id 
-                   and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) "+v_in_not_in+" ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"
+                   and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) "+v_in_not_in+" ('"+v_enumber.gsub(/[\\;:"()=<>]/, '')+"'))"
             else
               v_condition ="   appointments.id in (select a2.id from enrollment_vgroup_memberships,enrollments, appointments a2
                where enrollment_vgroup_memberships.vgroup_id= a2.vgroup_id 
-                and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) "+v_in_not_in+" (lower('"+params[:cg_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+                and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) "+v_in_not_in+" (lower('"+params[:cg_search][:enumber].gsub(/[\\;:'"()=<>]/, '')+"')))"
             end
              @local_conditions.push(v_condition)
-             params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:cg_search][:enumber]
+             params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:cg_search][:enumber].gsub(/\\/,"")
          end      
 
          if !params[:cg_search][:rmr].blank? 
