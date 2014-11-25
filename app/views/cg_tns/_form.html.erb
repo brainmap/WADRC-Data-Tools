@@ -1,5 +1,4 @@
-<%  v_table_type = {"base"=>"base","column_group"=>"column_group","tracker"=>"tracker","combio"=>"combio","scan_export"=>"scan_export","up"=>"up","up_archive"=>"up_archive"}
- v_y_n = {"Y"=>"Y","N"=>"N"}%>
+<%   v_y_n = {"Y"=>"Y","N"=>"N"}%>
 
 
 <%= form_for(@cg_tn, :html => {:multipart => true}) do |f| %>
@@ -38,8 +37,8 @@
     <%= f.label :display_order %>:    <%= f.number_field :display_order ,:SIZE=> 15,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}"%>
  </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
     <%= f.label :table_type %>: 
-	<%= f.select :table_type, options_for_select(v_table_type, @cg_tn.table_type),
-		              {:prompt => 'Select table type'}  %>
+
+  <%= collection_select 'cg_tn', :table_type, CgTableType.where(" status_flag ='Y' ").all.sort_by(&:table_type), :table_type, :table_type, :prompt => 'Select table types',:value => @cg_tn.table_type %>
  </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 					    <%= f.label :status_active %>: 
 						<%= f.select :status_flag, options_for_select(v_y_n, @cg_tn.status_flag),
