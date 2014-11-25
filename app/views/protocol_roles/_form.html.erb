@@ -26,7 +26,10 @@
   <div class="field">
     <%= f.label :role %><br />
     <!--  f.text_field :role --><%= collection_select :protocol_role, :role, Role.all.sort_by(&:role), :role, :description, :prompt => 'choose a role' %> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>"edit lower level fields" is the common setting</small> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>"view lower level fields" (data viewing) <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"edit lower level fields" (data entry) are the common settings</small> 
   </div>
   <div class="actions">
     <%= f.submit %>
