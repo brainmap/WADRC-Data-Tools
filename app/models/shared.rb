@@ -2607,7 +2607,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                   if File.directory?(v_subjectid_unknown)
                     v_dir_array = Dir.entries(v_subjectid_unknown)
                     v_dir_array.each do |f|
-                    if f.start_with?("o") and f.end_with?(".nii")
+                    if (f.start_with?("o") and f.end_with?(".nii") ) or v_subjectid_actual.include?("shp")
                         # check for tissue_seg
                         v_subjectid_tissue_seg =v_subjectid_path+"/tissue_seg"
                         v_subjectid_rbm_icv =v_subjectid_path+"/rbm_icv"
@@ -4348,7 +4348,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
 
             sql_base = "insert into cg_fdg_status_new(fdg_subjectid, fdg_general_comment,fdg_registered_to_fs_flag,fdg_scaled_registered_to_fs_flag,fdg_smoothed_and_warped_flag,fdg_scaled_smoothed_and_warped_flag,fdg_summed_flag,enrollment_id, scan_procedure_id)values("  
 
-
+    # just populating fdg_summed_flag
             v_preprocessed_path = v_base_path+"/preprocessed/visits/"
             # get list of scan_procedure codename -- exclude 4, 10, 15, 19, 32, 
                 # ??? johnson.pc vs johnsonpc4000.visit1 vs pc_4000
@@ -4387,7 +4387,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                  @results.each do |r|
                      enrollment = Enrollment.where("enumber='"+r[0]+"'")
                      if !enrollment.blank?
-                        v_subjectid_fdg = v_preprocessed_full_path+"/"+enrollment[0].enumber+"/pet/fdg"
+                        v_subjectid_fdg = v_preprocessed_full_path+"/"+enrollment[0].enumber+"/pet/fdg/pproc_v5"
                         if File.directory?(v_subjectid_fdg)
                             v_dir_array = Dir.entries(v_subjectid_fdg)   # need to get date for specific files
                             v_fdg_registered_to_fs_flag ="N"
@@ -4397,15 +4397,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                             v_fdg_summed_flag = "N"
                             v_dir_array.each do |f|
                               
-                               if f.start_with?("swr") and f.end_with?("summed.nii")
-                                  v_fdg_smoothed_and_warped_flag = "Y"
-                               elsif f.start_with?("swr") and f.end_with?("scaled.nii")
-                                  v_fdg_scaled_smoothed_and_warped_flag = "Y"
-                               elsif f.start_with?("rFS") and f.end_with?("summed.nii")
-                                  v_fdg_registered_to_fs_flag ="Y"
-                               elsif f.start_with?("rFS") and f.end_with?("scaled.nii")
-                                  v_fdg_scaled_registered_to_fs_flag ="Y"                                  
-                               elsif f.start_with?(enrollment[0].enumber) and f.end_with?("fdg_summed.nii")
+                               if f.start_with?("wr") and f.end_with?("summed.nii")
                                   v_fdg_summed_flag ="Y"
                                 end
                               end
@@ -6375,7 +6367,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
          @schedule = Schedule.where("name in ('pib_cereb_tac')").first
           @schedulerun = Schedulerun.new
           @schedulerun.schedule_id = @schedule.id
-          @schedulerun.comment ="starting pib_status"
+          @schedulerun.comment ="starting pib_cereb_tac"
           @schedulerun.save
           @schedulerun.start_time = @schedulerun.created_at
           @schedulerun.save
