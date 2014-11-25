@@ -5,6 +5,7 @@
     <th>Description</th>
     <th>Table type</th>
     <th>Protocol</th>
+   <th>Active Status</th>
     <th></th>
     <th></th>
     <th></th>
@@ -17,6 +18,7 @@
     <td><% if !(cg_table_type.protocol_id).nil? and !(cg_table_type.protocol_id).to_s.empty?%>
       <%= (Protocol.find(cg_table_type.protocol_id)).name %>
       <% end %></td>
+      <td><%= cg_table_type.status_flag %></td>
       <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
     <td><%= link_to 'Show', cg_table_type %></td>
     <td><%= link_to 'Edit', edit_cg_table_type_path(cg_table_type) %></td>

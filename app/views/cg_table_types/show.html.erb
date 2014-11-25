@@ -16,7 +16,10 @@
 <%= (Protocol.find(@cg_table_type.protocol_id)).name %>
 <% end %>
 </p>
-
+<p>
+  <b>Active status:</b>
+  <%= @cg_table_type.status_flag %>
+</p>
 <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
 <%= link_to 'Edit', edit_cg_table_type_path(@cg_table_type) %> |
 <% end %>

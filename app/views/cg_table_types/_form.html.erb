@@ -1,3 +1,4 @@
+<%  v_y_n = {"Y"=>"Y","N"=>"N"}%>
 <%= form_for(@cg_table_type) do |f| %>
   <% if @cg_table_type.errors.any? %>
     <div id="error_explanation">
@@ -23,6 +24,11 @@
     <%= f.label :protocol_id %><br />
     
     <%= collection_select :cg_table_type, :protocol_id, Protocol.all.sort_by(&:id), :id, :name, :prompt => 'choose an access control protocol' %>
+  </div>
+  <div class="field">
+   <%= f.label :status_active %><br>
+            <%= f.select :status_flag, options_for_select(v_y_n, @cg_table_type.status_flag),
+                            {:prompt => 'Select table type status'}  %>
   </div>
   <div class="actions">
     <%= f.submit %>
