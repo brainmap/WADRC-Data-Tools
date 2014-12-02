@@ -2743,6 +2743,325 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
   end
 
 
+# for the scan share consortium - upload to washu
+  def run_washu_upload  
+    v_base_path = Shared.get_base_path()
+     @schedule = Schedule.where("name in ('washu_upload')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting washu_upload"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+    connection = ActiveRecord::Base.connection();
+     v_scan_procedures = [20,24,26,36,41]  # how to only get adrc impact? 
+    # recruit new  scans ---   change 
+    v_weeks_back = "2"  # cwant to give time for quality checks etc.  
+    sql = "select distinct enrollments.enumber,scan_procedures_vgroups.scan_procedure_id from enrollments,enrollment_vgroup_memberships, vgroups, scan_procedures_vgroups   
+            where  scan_procedures_vgroups.scan_procedure_id in ("+v_scan_procedures.join(",")+")
+              and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
+              and vgroups.id = scan_procedures_vgroups.vgroup_id
+              and enrollment_vgroup_memberships.enrollment_id = enrollments.id
+              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL "+v_weeks_back+" WEEK)             
+              and enrollments.enumber NOT IN ( select subjectid from cg_washu_upload where scan_procedure_id = scan_procedures_vgroups.scan_procedure_id )
+              and vgroups.transfer_mri ='yes'"
+    results = connection.execute(sql)
+    results.each do |r|
+          enrollment = Enrollment.where("enumber in (?)",r[0])
+          sql2 = "insert into cg_washu_upload (subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id) values('"+r[0]+"','N','Y', "+enrollment[0].id.to_s+","+r[1].to_s+")"
+          results2 = connection.execute(sql2)
+    end
+
+    
+    # get  subjectid to upload    # USING G AS LIMIT FOR TESTING
+    sql = "select distinct subjectid,scan_procedure_id,export_id from cg_washu_upload where sent_flag ='N' and status_flag in ('G') " # ('Y','R') "
+    results = connection.execute(sql)
+    # changed to series_description_maps table
+    v_folder_array = Array.new
+    v_scan_desc_type_array = Array.new
+    # check for dir in /tmp
+    v_target_dir ="/tmp/washu_upload"
+    # v_target_dir ="/Volumes/Macintosh_HD2/washu_upload"
+    if !File.directory?(v_target_dir)
+      v_call = "mkdir "+v_target_dir
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close
+    end
+    v_comment = " :list of subjectid "+v_comment
+    results.each do |r|
+      v_comment = r[0]+","+v_comment
+    end
+    @schedulerun.comment =v_comment[0..1990]
+    @schedulerun.save
+    results.each do |r|
+      v_export_id = r[2]
+      v_comment = "strt "+r[0]+","+v_comment
+      @schedulerun.comment =v_comment[0..1990]
+      @schedulerun.save
+      # update schedulerun comment - prepend 
+      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
+                                                            evm.enrollment_id = e.id and e.enumber ='"+r[0]+"' and spvg.scan_procedure_id ='"+r[1].to_s+"' and e.do_not_share_scans_flag ='N')"
+      results_vgroup = connection.execute(sql_vgroup)
+      # mkdir /tmp/washu_upload/[subjectid]_YYYYMMDD_wisc
+      v_subject_dir = r[0]+"_"+(results_vgroup.first)[0].to_s+"_wisc"+v_export_id.to_s
+      v_parent_dir_target =v_target_dir+"/"+v_subject_dir
+      v_call = "mkdir "+v_parent_dir_target
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close   
+      sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_types.series_description_type 
+                  from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
+                  where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
+                  and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
+                  and (image_datasets.do_not_share_scans_flag is NULL or image_datasets.do_not_share_scans_flag ='N')
+                  and image_datasets.series_description =   series_description_maps.series_description
+                  and series_description_maps.series_description_type_id = series_description_types.id
+                  and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','T2','T2 Flair','T2_Flair','T2+Flair','DTI','ASL','resting_fMRI') 
+                  and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
+                  and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg 
+                    where spvg.vgroup_id = evm.vgroup_id and evm.enrollment_id = e.id and e.enumber ='"+r[0]+"' and spvg.scan_procedure_id ='"+r[1].to_s+"')
+                   order by appointments.appointment_date "
+      results_dataset = connection.execute(sql_dataset)
+      v_folder_array = [] # how to empty
+      v_scan_desc_type_array = []
+      v_cnt = 1
+      results_dataset.each do |r_dataset|
+         v_ids_ok_flag = "Y"
+         v_ids_id = r_dataset[2]
+         v_ids_ok_flag = self.check_ids_for_severe_or_incomplete(v_ids_id) # ADD THE DO NOT SHARE
+         if v_ids_ok_flag == "Y" # no quality check severe or incomplete
+            v_series_description_type = r_dataset[5].gsub(" ","_")
+            if !v_scan_desc_type_array.include?(v_series_description_type)
+                 v_scan_desc_type_array.push(v_series_description_type)
+            end
+            v_path = r_dataset[4]
+            v_dir_array = v_path.split("/")
+            v_dir = v_dir_array[(v_dir_array.size - 1)]
+            v_dir_target = v_dir+"_"+v_series_description_type
+            v_path = v_path.gsub("/Volumes/team/","").gsub("/Volumes/team-1/","").gsub("/Data/vtrak1/","")  #v_base_path+"/"+
+            if v_folder_array.include?(v_dir_target)
+              v_dir_target = v_dir_target+"_"+v_cnt.to_s
+              v_cnt = v_cnt +1
+              # might get weird if multiple types have dups - only expect T1/Bravo
+            end
+            v_folder_array.push(v_dir_target)
+
+             # v_call = "/usr/bin/bunzip2 "+v_parent_dir_target+"/"+v_dir_target+"/*.bz2"
+              v_call = "mise "+v_path+" "+v_parent_dir_target+"/"+v_dir_target   # works where bunzip2 cmd after rsync not work
+#puts "v_path = "+v_path
+#puts "v_parent_dir_target = "+ v_parent_dir_target
+#puts "v_dir_target="+v_dir_target
+puts "AAAAAA "+v_call
+             stdin, stdout, stderr = Open3.popen3(v_call)
+              stderr.each {|line|
+                  puts line
+                }
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                 end
+             stdin.close
+             stdout.close
+             stderr.close
+             # temp - replace /Volumes/team/ and /Data/vtrak1/ with /Volumes/team-1 in dev
+            # split on / --- get the last dir
+            # make new dir name dir_series_description_type 
+            # check if in v_folder_array , if in v_folder_array , dir_series_description_type => dir_series_description_type_2
+            # add  dir, dir_series_description_type to v_folder_array
+            # cp path ==> /tmp/washu_upload/[subjectid]_yyymmdd_wisc/dir_series_description_type(_2)
+         end # skipping if qc severe or incomplete    
+      end
+
+      sql_status = "select status_flag from cg_washu_upload where subjectid ='"+r[0]+"' and scan_procedure_id = '"+r[1].to_s+"'"
+      results_status = connection.execute(sql_status)
+      if v_scan_desc_type_array.size < 6   and (results_status.first)[0] != "R"
+    puts "bbbbb !R or not enough scan types "
+        sql_dirlist = "update cg_washu_upload set general_comment =' NOT ALL SCAN TYPES!!!! "+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' and scan_procedure_id = '"+r[1].to_s+"'"
+        results_dirlist = connection.execute(sql_dirlist)
+        # send email 
+        v_subject = "washu_upload "+r[0]+" is missing some scan types --- set status_flag ='R' to send  : scans ="+v_folder_array.join(", ")
+        v_email = "noreply_johnson_lab@medicine.wisc.edu"
+        PandaMailer.schedule_notice(v_subject,{:send_to => v_email}).deliver
+
+        # mail(
+        #   :from => "noreply_johnson_lab@medicine.wisc.edu"
+        #   :to => "noreply_johnson_lab@medicine.wisc.edu", 
+        #   :subject => v_subject
+        # )
+        PandaMailer.schedule_notice(v_subject,{:send_to => "noreply_johnson_lab@medicine.wisc.edu"}).deliver
+         v_comment_warning = v_comment_warning+"  "+v_scan_desc_type_array.size.to_s+" scan type "+r[0]+" sp"+r[1].to_s
+      v_call = "rm -rf "+v_parent_dir_target
+# puts "BBBBBBBB "+v_call
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      stderr.each {|line|
+           puts line
+      }
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end   
+      stdin.close
+      stdout.close
+      stderr.close
+      else
+         puts "AAAAAAAAA DCM PATH TMP ="+v_parent_dir_target+"/*/*/*.dcm"
+#         /tmp/washu_upload/adrc00045_20130920_wisc/008_DTI/008
+
+        sql_dirlist = "update cg_washu_upload set dir_list ='"+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' and scan_procedure_id = '"+r[1].to_s+"'"
+        results_dirlist = connection.execute(sql_dirlist)
+# TURN INTO A LOOP
+        v_dicom_field_array =['0010,0030','0010,0010','0008,0050','0008,1030','0010,0020','0040,0254','0008,0080','0008,1010','0009,1002','0009,1030','0018,1000',
+                        '0025,101A','0040,0242','0040,0243']
+        v_dicom_field_value_hash ={'0010,0030'=>'DOB','0010,0010'=>'Name','0008,0050'=>'Accession Number',
+                           '0008,1030'=>'Study Description', '0010,0020'=>'Patient ID','0040,0254'=>'Performed Proc Step Desc',
+                            '0008,0080'=>'Institution Name','0008,1010'=>'Station Name','0009,1002'=>'Private',
+                            '0009,1030'=>'Private','0018,1000'=>'Device Serial Number','0025,101A'=>'Private',
+                            '0040,0242'=>'Performed Station Name','0040,0243'=>'Performed Location'}
+     ####  v_dicom_field_array.each do |dicom_key|
+               Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                     v_dicom_field_array.each do |dicom_key|
+                                                                                           if !d[dicom_key].nil? 
+                                                                                                 d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                      end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.1*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.2*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.3*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+                                                                                                
+       ####  end                            
+                                    
+#                             
+# # #puts "bbbbb dicom clean "+v_parent_dir_target+"/*/"
+# Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.read(dcm); if !d["0010,0030"].nil? 
+#                                                                                           d["0010,0030"].value = "DOB"; d.write(dcm) 
+#                                                                                               end } 
+        v_call = "rsync -av "+v_parent_dir_target+" panda_user@merida.dom.wisc.edu:/home/panda_user/upload_washu/"    #+v_subject_dir
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+                                                                           
+        #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
+        #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
+        #v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
+        v_call =  'ssh panda_user@merida.dom.wisc.edu "  tar  -C /home/panda_user/upload_washu  -zcf /home/panda_user/upload_washu/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+        puts "bbbbbbb "+v_call
+
+        v_call = ' rm -rf '+v_target_dir+'/'+v_subject_dir
+           stdin, stdout, stderr = Open3.popen3(v_call)
+           while !stdout.eof?
+             puts stdout.read 1024    
+            end
+           stdin.close
+           stdout.close
+           stderr.close
+        # 
+        v_call = 'ssh panda_user@merida.dom.wisc.edu " rm -rf /home/panda_user/upload_washu/'+v_subject_dir+' "'
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+       
+        
+         # did the tar.gz on merida to avoid mac acl PaxHeader extra directories
+         # not need this? 
+         # could change sftp to come from ~/upload_washu
+         v_call = "rsync -av panda_user@merida.dom.wisc.edu:/home/panda_user/upload_washu/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
+         stdin, stdout, stderr = Open3.popen3(v_call)
+         while !stdout.eof?
+           puts stdout.read 1024    
+          end
+         stdin.close
+         stdout.close
+         stderr.close
+
+####        # sftp -- shared helper hasthe username /password and address
+####        v_username = Shared.washu_sftp_username # get from shared helper
+####        v_passwrd = Shared.washu_sftp_password   # get from shared helperwhich is not on github
+####        v_ip = Shared.washu_sftp_host_address # get from shared helper
+        v_source = v_target_dir+'/'+v_subject_dir+".tar.gz"
+        v_target = v_subject_dir+".tar.gz"
+
+ 
+
+####        Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
+####            sftp.upload!(v_source, v_target)
+####        end
+# WANT TO CHECK TRANSFERS
+        v_call = " rm -rf "+v_target_dir+'/'+v_subject_dir+".tar.gz"
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close        
+        
+        sql_sent = "update cg_washu_upload set sent_flag ='Y' where subjectid ='"+r[0]+"'   and scan_procedure_id = '"+r[1].to_s+"'"
+        results_sent = connection.execute(sql_sent)
+      end
+      v_comment = "end "+r[0]+","+v_comment
+      @schedulerun.comment =v_comment[0..1990]
+      @schedulerun.save 
+    end
+              
+    @schedulerun.comment =("successful finish washu_upload "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+       @schedulerun.status_flag ="Y"
+     end
+     @schedulerun.save
+     @schedulerun.end_time = @schedulerun.updated_at      
+     @schedulerun.save          
+      
+    
+  end
+
+ 
+
+
 # ADD EXCLUDE SCAN SHARE
 # ADD EXCLUDE SCAN
   def run_xnat_file
@@ -5788,6 +6107,16 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                       v_wlesion_030_flag = "Y"
                                     end
                                      if f.start_with?("tlv_lesion") and f.end_with?(".txt")
+                                       v_tmp_data = "" 
+                                       v_tmp_data_array = []  
+                                       ftxt = File.open(v_subjectid_lst_122+"/"+f, "r") 
+                                       ftxt.each_line do |line|
+                                          v_tmp_data += line
+                                       end
+                                       ftxt.close
+                                       v_lst_lesion_value = v_tmp_data.strip
+                                     
+                                    elsif f.start_with?("tlv_b_") and f.include?("lesion") and f.end_with?(".txt")
                                        v_tmp_data = "" 
                                        v_tmp_data_array = []  
                                        ftxt = File.open(v_subjectid_lst_122+"/"+f, "r") 
