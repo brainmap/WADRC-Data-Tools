@@ -35,6 +35,11 @@
     <%= f.label :rmraic_reggieid_flag %><br />
       <%= f.select :rmraic_reggieid_flag, v_y_n, :selected => @scan_procedure.rmraic_reggieid_flag , :include_blank => 'Select if reggieid in RMRaicXXXXXX format for in sp'  %> Select if reggieid in RMRaicXXXXXX format for in sp
   </p>
+      <p>
+    <%= f.label :make_participant_flag %><br />
+      <%= f.select :make_participant_flag, v_y_n, :selected => @scan_procedure.make_participant_flag , :include_blank => 'Select if reggieid NOT in RMRaicXXXXXX format for in sp'  %> Select if reggieid NOT in RMRaicXXXXXX format for in sp<br>
+      <B>Makes a participant, but no reggieid link</B>
+  </p>
 
 
   <p>

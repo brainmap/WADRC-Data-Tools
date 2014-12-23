@@ -466,7 +466,26 @@ class VgroupsController < ApplicationController
                   flash[:warning] =  v_mismatch_participant_msg
                end
           end
-
+          # works in create - not during import - makes participant if blank and   sp.make_participant_flag == 'Y'
+        if (@vgroup.participant_id).blank?
+            # check if sp.make_participant_flag == 'Y'
+            @scan_procedures = ScanProcedure.where("scan_procedures.id in ( select scan_procedure_id from scan_procedures_vgroups where vgroup_id in (?))",@vgroup.id )
+            @scan_procedures.each do |sp|
+              if sp.make_participant_flag == "Y"  and (@vgroup.participant_id).blank?
+                 v_new_participant = Participant.new
+                 v_new_participant.save
+                 @vgroup.participant_id = v_new_participant.id
+                 @vgroup.save
+                 @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+                 @enrollment.each do |ee|
+                   if (ee.participant_id).blank?
+                      ee.participant_id = v_new_participant.id
+                      ee.save
+                   end
+                 end
+              end
+            end
+        end
         format.html { redirect_to(@vgroup, :notice => 'Vgroup was successfully created.') }
         format.xml  { render :xml => @vgroup, :status => :created, :location => @vgroup }
       else
@@ -720,6 +739,28 @@ class VgroupsController < ApplicationController
                   flash[:warning] =  v_mismatch_participant_msg
                end
           end
+
+        # works in update - makes participant if blank and   sp.make_participant_flag == 'Y'
+        if (@vgroup.participant_id).blank?
+            # check if sp.make_participant_flag == 'Y'
+            @scan_procedures = ScanProcedure.where("scan_procedures.id in ( select scan_procedure_id from scan_procedures_vgroups where vgroup_id in (?))",@vgroup.id )
+            @scan_procedures.each do |sp|
+              if sp.make_participant_flag == "Y"  and (@vgroup.participant_id).blank?
+                 v_new_participant = Participant.new
+                 v_new_participant.save
+                 @vgroup.participant_id = v_new_participant.id
+                 @vgroup.save
+                 @enrollment = Enrollment.where("enrollments.id in ( select enrollment_id from enrollment_vgroup_memberships where vgroup_id in (?) )",@vgroup.id )
+                 @enrollment.each do |ee|
+                   if (ee.participant_id).blank?
+                      ee.participant_id = v_new_participant.id
+                      ee.save
+                   end
+                 end
+              end
+            end
+        end
+
         format.html { redirect_to(@vgroup) }
         format.xml  { head :ok }
       else
