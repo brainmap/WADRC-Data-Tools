@@ -185,6 +185,10 @@ v_user = v_user.gsub("\n","")
       v_shared = Shared.new
       v_shared.run_tissueseg_spm12_gm_wm_csf_volumes()  
 
+   elsif v_value_1 == "washu_upload"
+      v_shared = Shared.new
+      v_shared.run_washu_upload()
+
   elsif v_value_1 == "xnat_file"
       v_shared = Shared.new
       v_shared.run_xnat_file()  
