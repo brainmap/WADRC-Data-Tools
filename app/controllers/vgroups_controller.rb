@@ -437,24 +437,24 @@ class VgroupsController < ApplicationController
                     # check for participant vgroup, rmraic, reggieid, enumber mismatch
           v_mismatch_participant_msg = ""
           if v_rmraic_participant_id != '' and  v_reggieid_participant_id != '' and v_rmraic_participant_id.to_s !=  v_reggieid_participant_id.to_s 
-              v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - reggieid participant and RMRaicxxxxxx participant. "
+              v_mismatch_participant_msg = v_mismatch_participant_msg +"  MISMATCH - reggieid participant and RMRaicxxxxxx participant. "
           end
           if v_param_vgroup_participant_id != '' and  v_reggieid_participant_id != '' and v_param_vgroup_participant_id.to_s !=  v_reggieid_participant_id.to_s 
-              v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - reggieid participant and selected participant. "
+              v_mismatch_participant_msg = v_mismatch_participant_msg +"  MISMATCH - reggieid participant and selected participant. "
           end
           if v_param_vgroup_participant_id != '' and  v_rmraic_participant_id != '' and v_param_vgroup_participant_id.to_s !=  v_rmraic_participant_id.to_s 
-              v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - RMRaicxxxxxxparticipant and selected participant. "
+              v_mismatch_participant_msg = v_mismatch_participant_msg +"  MISMATCH - RMRaicxxxxxxparticipant and selected participant. "
           end
 
           if !v_enumber_participant_ids.nil? and !v_enumber_participant_ids[0].nil?
              v_enumber_participant_ids.each do |ee|
-                if v_reggieid_participant_id != '' and v_reggieid_participant_id !=  ee 
+                if v_reggieid_participant_id != '' and v_reggieid_participant_id.to_s !=  ee.to_s 
                     v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - enumber participant and reggieid participant. "
                 end
-                if v_rmraic_participant_id != '' and v_rmraic_participant_id !=  ee 
+                if v_rmraic_participant_id != '' and v_rmraic_participant_id.to_s !=  ee.to_s 
                     v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - enumber participant and RMRaicxxxxxx participant. "
                 end
-                if v_param_vgroup_participant_id != '' and v_param_vgroup_participant_id !=  ee 
+                if v_param_vgroup_participant_id != '' and v_param_vgroup_participant_id.to_s !=  ee.to_s 
                     v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - enumber participant and selected participant. "
                 end
              end
@@ -718,16 +718,16 @@ class VgroupsController < ApplicationController
 
           if !v_enumber_participant_ids.nil? and !v_enumber_participant_ids[0].nil?
              v_enumber_participant_ids.each do |ee|
-                if v_vgroup_participant_id != '' and v_vgroup_participant_id !=  ee 
+                if v_vgroup_participant_id != '' and v_vgroup_participant_id.to_s !=  ee.to_s 
                     v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - enumber participant and selected participant. "
                 end
-                if v_reggieid_participant_id != '' and v_reggieid_participant_id !=  ee 
+                if v_reggieid_participant_id != '' and v_reggieid_participant_id.to_s !=  ee.to_s 
                     v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - enumber participant and reggieid participant. "
                 end
-                if v_rmraic_participant_id != '' and v_rmraic_participant_id !=  ee 
+                if v_rmraic_participant_id != '' and v_rmraic_participant_id.to_s !=  ee.to_s 
                     v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - enumber participant and RMRaicxxxxxx participant. "
                 end
-                if v_param_vgroup_participant_id != '' and v_param_vgroup_participant_id !=  ee 
+                if v_param_vgroup_participant_id != '' and v_param_vgroup_participant_id.to_s !=  ee.to_s 
                     v_mismatch_participant_msg = v_mismatch_participant_msg +" MISMATCH - enumber participant and selected participant. "
                 end
              end
