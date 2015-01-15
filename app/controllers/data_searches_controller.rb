@@ -2285,6 +2285,208 @@ puts "bbbbb "+sql
  #def run_search
 #   copy of def index in application_controller  -- so other controllers can get at  -- need for csv export
 # end
+def cg_up_load
+     v_up_table_name = params[:up_table_name]
+     v_up_display_table_name = params[:up_display_table_name]
+     v_up_table_yyyymmdd = params[:up_table_yyyymmdd]
+     v_up_table_name_key_column = params[:up_table_name_key_column]
+     v_key_type = params[:key_type]
+     v_source_up_table_name = params[:source_up_table_name]
+     v_source_schema = params[:source_schema]
+
+       v_schema ='panda_production'
+       if Rails.env=="development" 
+         v_schema ='panda_development'
+       end
+      v_msg = ""
+      v_definition_table ="cg_up_table_definitions_new"
+      # THIS NEEDS TO NOT WIPE OUT THE TABLE EACH RELOAD
+      # check in cg_up_table_definitions_new   for v_up_table_name
+      v_msg = "UP table definition not found in "+v_definition_table
+
+      #check if exisiting table v_up_table_name +/- v_up_table_yyyymmdd
+      v_tn = v_up_table_name+"_"+v_up_table_yyyymmdd
+      sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '"+v_schema+"' AND table_name = '"+v_tn+"' "
+      connection = ActiveRecord::Base.connection();        
+      results = connection.execute(sql)
+      v_cnt = results.first
+      if v_cnt[0].to_i > 0
+          v_msg = "Reloading existing UP Table "+v_tn
+          v_cg_tns_archive = CgTn.where("tn in (?)", v_tn)
+          v_cg_tns_archive.status_flag ='N'
+          v_cg_tns_archive.save
+          # if exisiting with same v_up_table_yyyymmdd => replace contents  === new-present-old-edit?
+          # check that all columns are the same
+          # change status in cg_search so not there while load
+          # load from source schema, source table
+          # update key columns
+          #change cg_search status = active
+          v_cg_tns_archive.status_flag ='Y'
+          v_cg_tns_archive.save
+      else
+        sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '"+v_schema+"'
+             AND table_name like '"+v_up_table_name+"%' AND table_name in (select table_name from cg_tns where table_type = 'up')"
+        connection = ActiveRecord::Base.connection();        
+        results = connection.execute(sql)
+        v_cnt = results.first
+        if v_cnt[0].to_i > 0
+            v_msg = "Archiving exisiting UP Table"
+            v_cg_tns_archive = CgTn.where("tn like '?%' and table_type ='up'",v_up_table_name)
+            v_cg_tns_archive.table_type = "up_archive"
+            v_cg_tns_archive.save
+             #if exisiting with different v_up_table_yyyymmdd => change table type to up_archive
+        end   
+        v_msg = "Loading UP Table "+v_tn 
+        v_create_sql = "CREATE table "+v_schema+"."+v_tn+"("
+
+        # add key columns
+        if v_key_type == "enrollment/sp"
+             v_create_sql = v_create_sql+" enrollment_id int,
+                                           scan_procedure_id int"
+        elsif v_key_type == "reggieid-kc-participant_id"
+             v_create_sql = v_create_sql+" participant_id int "
+        elsif v_key_type == "wrapnum-kc-participant_id"
+             v_create_sql = v_create_sql+" participant_id int "
+        elsif v_key_type == "adrcnum-kc-participant_id"
+             v_create_sql = v_create_sql+" participant_id int "
+        end 
+
+        v_col_array = []
+        v_key_col_array = []
+        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_function from "+v_definition_table+" where table_name ='"+v_up_table_name+"'"   
+        result_cols = connection.execute(v_sql_cols)
+        result_cols.each do |col|
+              v_col_array.push(col[0])
+              if col[3] == "key"
+                 v_key_col_array.push(col[0])
+              end
+              if col[1] == "VARCHAR"
+                  v_create_sql = v_create_sql+", "+col[0]+"   VARCHAR("+col[2]+") "
+              elsif col[1] =="INT"
+                   if col[2] >""
+                      v_create_sql = v_create_sql+", "+col[0]+"   INT("+col[2]+") "
+                   else
+                      v_create_sql = v_create_sql+", "+col[0]+"   INT "
+                   end
+              elsif col[1] == "DATE"
+                     v_create_sql = v_create_sql+", "+col[0]+"   DATE "
+              elsif col[1] == "DATETIME"
+                     v_create_sql = v_create_sql+", "+col[0]+"   DATETIME "
+              elsif col[1] == "TEXT"
+                     v_create_sql = v_create_sql+", "+col[0]+"   TEXT "
+              end
+         end
+         v_create_sql = v_create_sql+")"
+          # make new table with v_up_table_yyyymmdd, 
+         results = connection.execute(v_create_sql)   # new-present-old_edit ?
+
+       v_insert_sql = "INSERT INTO "+v_schema+"."+v_tn+"("
+        v_insert_end_sql = ") "
+        v_select_sql =" SELECT "
+        v_select_end_sql = " FROM "+v_source_schema+"."+v_source_up_table_name
+        
+        # load from source schema, source table
+        v_insert_sql = v_insert_sql+v_col_array.join(",")+v_insert_end_sql+v_select_sql+v_col_array.join(",")+v_select_end_sql
+        results = connection.execute(v_insert_sql)
+
+         # update key columns -- expect one key column
+         v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload             
+        if v_key_type == "enrollment/sp"
+            v_key_col = v_key_col_array[0]
+            sql = "update "+v_schema+"."+v_tn+"  t set t.enrollment_id = ( select e.id from enrollments e where e.enumber = replace(replace(replace(replace(t."+v_key_col+",'_v2',''),'_v3',''),'_v4',''),'_v5',''))"
+                      results = connection.execute(sql)
+                      sql = "select distinct "+v_key_col+" from "+v_schema+"."+v_tn
+                      results = connection.execute(sql)
+                      results.each do |r|
+                        v_sp_id = v_shared.get_sp_id_from_subjectid_v(r[0])
+                        if !v_sp_id.blank?
+                          sql = "update "+v_schema+"."+v_tn+"  t set t.scan_procedure_id = "+v_sp_id.to_s+" where "+v_key_col+" ='"+r[0]+"'"
+                          results = connection.execute(sql)
+                        end
+                      end
+
+        elsif v_key_type == "reggieid-kc-participant_id"
+             sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct p.id from participants p where p.reggieid = t."+v_key_col+")"
+              results = connection.execute(sql) 
+        elsif v_key_type == "wrapnum-kc-participant_id"
+             sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct p.id from participants p where p.wrapnum = t."+v_key_col+")"
+              results = connection.execute(sql) 
+        elsif v_key_type == "adrcnum-kc-participant_id"
+             sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct p.id from participants p where p.adrcnum = t."+v_key_col+")"
+              results = connection.execute(sql) 
+        end 
+      
+
+         # make new cg_search table - inactive
+                v_cg_search = CgTn.new
+         # make new cg_search table 
+    v_cg_search.tn =  v_tn.downcase
+    v_tn = v_tn.downcase 
+    v_cg_search.common_name = v_up_display_table_name
+    v_cg_search.editable_flag ="N"
+    v_cg_search.status_flag ="N"   # wait till add all the columns
+    v_cg_search.table_type ="up"
+    sql = "select max(display_order) from cg_tns where table_type ='up'"
+    connection = ActiveRecord::Base.connection();
+    @results = connection.execute(sql)
+    v_display_order = (@results.first.to_s.to_i)+1
+    v_cg_search.display_order = v_display_order.to_s
+    if v_key_type == 'enrollment/sp'
+      v_cg_search.join_left_parent_tn ="vgroups"
+      v_cg_search.join_left ="LEFT JOIN "+v_tn+" on vgroups.id in ( select spv2.vgroup_id from scan_procedures_vgroups spv2 where spv2.scan_procedure_id = "+v_tn+".scan_procedure_id and spv2.vgroup_id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships where enrollment_vgroup_memberships.enrollment_id = "+v_tn+".enrollment_id))"
+      v_cg_search.join_right ="appointments.appointment_type is not NULL and scan_procedures_vgroups.scan_procedure_id = "+v_tn+".scan_procedure_id and vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships where enrollment_vgroup_memberships.enrollment_id = "+v_tn+".enrollment_id)"
+    elsif v_key_type  == 'participant_id'
+      v_cg_search.join_left_parent_tn ="vgroups"
+      v_cg_search.join_left="LEFT JOIN "+v_tn+" on vgroups.participant_id = "+v_tn+".participant_id"
+      v_cg_search.join_right="vgroups.participant_id = "+v_tn+".participant_id"
+    elsif v_key_type  == 'reggieid-kc-participant_id'
+      v_cg_search.join_left_parent_tn ="vgroups"
+      v_cg_search.join_left="LEFT JOIN "+v_tn+" on vgroups.participant_id = "+v_tn+".participant_id"
+      v_cg_search.join_right="vgroups.participant_id = "+v_tn+".participant_id"      
+    elsif v_key_type  == 'wrapnum-kc-participant_id'
+      v_cg_search.join_left_parent_tn ="vgroups"
+      v_cg_search.join_left="LEFT JOIN "+v_tn+" on vgroups.participant_id = "+v_tn+".participant_id"
+      v_cg_search.join_right="vgroups.participant_id = "+v_tn+".participant_id"      
+    elsif v_key_type  == 'adrcnum-kc-participant_id'
+      v_cg_search.join_left_parent_tn ="vgroups"
+      v_cg_search.join_left="LEFT JOIN "+v_tn+" on vgroups.participant_id = "+v_tn+".participant_id"
+      v_cg_search.join_right="vgroups.participant_id = "+v_tn+".participant_id"      
+    end
+    v_cg_search.save
+
+    # add columns 
+         # change cg_search status = active
+         #
+        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_display from "+v_definition_table+" where table_name ='"+v_up_table_name+"' order by display_order"   
+        result_cols = connection.execute(v_sql_cols)
+        v_cnt =1
+        result_cols.each do |col|
+              v_cnt = v_cnt + 1
+              v_cg_tn_cn = CgTnCn.new
+              v_cg_tn_cn.display_order = v_cnt
+             if col[1] == "DATE"
+              v_cg_tn_cn.data_type ="date"
+            elsif col[1].include?('int')
+              v_cg_tn_cn.data_type ="integer"
+            elsif col[1] == "FLOAT"
+               v_cg_tn_cn.data_type ="float"
+            elsif col[1].include?('VARCHAR')
+               v_cg_tn_cn.data_type ="string"
+            elsif col[1].include?('TEXT')
+               v_cg_tn_cn.data_type ="string"
+            end
+            v_cg_tn_cn.cn = col[0]
+            v_cg_tn_cn.common_name = col[3]
+              v_cg_tn_cn.cg_tn_id = v_cg_search.id
+              v_cg_tn_cn.save
+        end
+        v_cg_search.status_flag ="Y"
+        v_cg_search.save 
+      end
+        flash[:notice] = 'Everything is fine '+v_up_table_name+'  '+v_up_display_table_name+'     '+v_up_table_yyyymmdd+'    '+v_up_table_name_key_column+'     '+v_key_type+'    '+v_source_up_table_name+'    '+v_source_schema
+       render :template => "data_searches/cg_up_load"
+
+end
 
  def cg_create_table_db
      if !params[:key_type].blank? and !params[:table_name_base].blank?
@@ -2436,9 +2638,12 @@ puts "bbbbb "+sql
          results = connection.execute(sql) 
          # delete cg_table column
          cg_tn = CgTn.where("tn in (?)",v_tn)
-         cg_tn_cn = CgTnCn.where("cg_tn_id in (?) and cn in (?)",cg_tn[0].id,v_cn)
-         if !cg_tn_cn.blank?
-           cg_tn_cn[0].delete       
+         # getting nil error
+         if !v_cn.blank? and !cg_tn.blank? and !cg_tn[0].blank? and !(cg_tn[0].id).blank?
+           cg_tn_cn = CgTnCn.where("cg_tn_id in (?) and cn in (?)",cg_tn[0].id,v_cn)
+           if !cg_tn_cn.blank?
+             cg_tn_cn[0].delete       
+           end
          end
       elsif params[:cg_action] == "add"
           # loop thru key, check for check box  

@@ -1,6 +1,6 @@
 <%  v_y_n = {"Y"=>"Y","N"=>"N"}
     v_y_n_e = {"Y"=>"Y","N"=>"N","E"=>"E"}  # is E used anywhere ?
-    v_key = {"enumber and visit# mapped to enrollment/scan_procedure"=>"enrollment/sp","reggieid-kc-participant_id"=>"reggieid-kc-participant_id","wrapnum-kc-participant_id"=>"wrapnum-kc-participant_id","adrcnum-kc-participant_id"=>"adrcnum-kc-participant_id"}
+    v_key = {"enumber and visit# mapped to enrollment/scan_procedure"=>"enrollment/sp","reggieid-kc-participant_id"=>"reggieid-kc-participant_id","wrapnum-kc-participant_id"=>"wrapnum-kc-participant_id","adrcnum-kc-participant_id"=>"adrcnum-kc-participant_id","No Key"=>"no_key"}
 %>
 <%= form_for(@schedule) do |f| %>
   <% if @schedule.errors.any? %>
