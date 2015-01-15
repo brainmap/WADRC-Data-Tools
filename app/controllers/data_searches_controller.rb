@@ -2293,7 +2293,7 @@ def cg_up_load
      v_key_type = params[:key_type]
      v_source_up_table_name = params[:source_up_table_name]
      v_source_schema = params[:source_schema]
-
+  if !v_up_table_name.blank? and  !v_up_display_table_name.blank? and  !v_up_table_yyyymmdd.blank? and  !v_up_table_name_key_column.blank? and  !v_key_type.blank? and  !v_source_up_table_name.blank? and  !v_source_schema.blank?
        v_schema ='panda_production'
        if Rails.env=="development" 
          v_schema ='panda_development'
@@ -2483,7 +2483,10 @@ def cg_up_load
         v_cg_search.status_flag ="Y"
         v_cg_search.save 
       end
-        flash[:notice] = 'Everything is fine '+v_up_table_name+'  '+v_up_display_table_name+'     '+v_up_table_yyyymmdd+'    '+v_up_table_name_key_column+'     '+v_key_type+'    '+v_source_up_table_name+'    '+v_source_schema
+       flash[:notice] = 'Everything is fine '+v_up_table_name+'  '+v_up_display_table_name+'     '+v_up_table_yyyymmdd+'    '+v_up_table_name_key_column+'     '+v_key_type+'    '+v_source_up_table_name+'    '+v_source_schema
+    else
+         flash[:notice] = 'All the fields are required'
+    end # if blank fields  
        render :template => "data_searches/cg_up_load"
 
 end
