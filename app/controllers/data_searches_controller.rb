@@ -2477,6 +2477,7 @@ def cg_up_load
             end
             v_cg_tn_cn.cn = col[0]
             v_cg_tn_cn.common_name = col[3]
+            v_cg_tn_cn.export_name = col[3]
               v_cg_tn_cn.cg_tn_id = v_cg_search.id
               v_cg_tn_cn.save
         end
