@@ -2285,6 +2285,7 @@ puts "bbbbb "+sql
  #def run_search
 #   copy of def index in application_controller  -- so other controllers can get at  -- need for csv export
 # end
+# make_in_source_schema, load_from_source_schema
 def cg_up_load
      v_up_table_name = params[:up_table_name]
      v_up_display_table_name = params[:up_display_table_name]
@@ -2293,22 +2294,68 @@ def cg_up_load
      v_key_type = params[:key_type]
      v_source_up_table_name = params[:source_up_table_name]
      v_source_schema = params[:source_schema]
-  if !v_up_table_name.blank? and  !v_up_display_table_name.blank? and  !v_up_table_yyyymmdd.blank? and  !v_up_table_name_key_column.blank? and  !v_key_type.blank? and  !v_source_up_table_name.blank? and  !v_source_schema.blank?
-       v_schema ='panda_production'
-       if Rails.env=="development" 
-         v_schema ='panda_development'
-       end
-      v_msg = ""
-      v_definition_table ="cg_up_table_definitions_new"
+     v_make_load_table_schema = params[:make_load_table_schema]
+  if (!v_up_table_name.blank? and  !v_up_display_table_name.blank? and  !v_up_table_yyyymmdd.blank? and  !v_up_table_name_key_column.blank? and  !v_key_type.blank? and  !v_source_up_table_name.blank? and  !v_source_schema.blank? and !v_make_load_table_schema.blank?)
+    v_schema ='panda_production'
+    if Rails.env=="development" 
+      v_schema ='panda_development'
+    end
+    v_msg = ""
+    v_definition_table ="cg_up_table_definitions_new"
+    connection = ActiveRecord::Base.connection();
       # THIS NEEDS TO NOT WIPE OUT THE TABLE EACH RELOAD
       # check in cg_up_table_definitions_new   for v_up_table_name
-      v_msg = "UP table definition not found in "+v_definition_table
+    v_sql = "Select count(*) from "+v_definition_table+" where table_name ='"+v_up_table_name+"'"  
+    results = connection.execute(v_sql)
+    v_cnt = results.first
+    if v_cnt[0].to_i > 0 
+      # in definitions table , go ahead
+     if  v_make_load_table_schema == "make_in_source_schema"  # make in source schema
+        v_msg = "Making table in source schema"
+        v_sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '"+v_source_schema+"' AND table_name = '"+v_source_up_table_name+"' "     
+        results = connection.execute(v_sql)
+        v_cnt = results.first
+        if v_cnt[0].to_i > 0
+               v_msg = v_source_up_table_name+" table already exists in source schema "+v_source_schema
+        else
+          v_create_sql = "CREATE table "+v_source_schema+"."+v_source_up_table_name+"("
+          v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_function from "+v_definition_table+" where table_name ='"+v_up_table_name+"'"   
+        result_cols = connection.execute(v_sql_cols)
+        v_loop_cnt = 0
+        result_cols.each do |col|
+              if v_loop_cnt > 0
+                v_create_sql = v_create_sql+", "
+              else
+                 v_loop_cnt = 1
+              end
+              if col[1] == "VARCHAR"
+                  v_create_sql = v_create_sql+" "+col[0]+"   VARCHAR("+col[2]+") "
+              elsif col[1] =="INT"
+                   if col[2] >""
+                      v_create_sql = v_create_sql+" "+col[0]+"   INT("+col[2]+") "
+                   else
+                      v_create_sql = v_create_sql+" "+col[0]+"   INT "
+                   end
+              elsif col[1] == "DATE"
+                     v_create_sql = v_create_sql+" "+col[0]+"   DATE "
+              elsif col[1] == "DATETIME"
+                     v_create_sql = v_create_sql+" "+col[0]+"   DATETIME "
+              elsif col[1] == "TEXT"
+                     v_create_sql = v_create_sql+" "+col[0]+"   TEXT "
+              end
+         end
 
+         v_create_sql = v_create_sql+")"
+          # make new table in source schema 
+         results = connection.execute(v_create_sql) 
+         v_msg = v_source_up_table_name+" table made in source schema "+v_source_schema
+        end
+        flash[:notice] = v_msg
+     else
       #check if exisiting table v_up_table_name +/- v_up_table_yyyymmdd
       v_tn = v_up_table_name+"_"+v_up_table_yyyymmdd
-      sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '"+v_schema+"' AND table_name = '"+v_tn+"' "
-      connection = ActiveRecord::Base.connection();        
-      results = connection.execute(sql)
+      v_sql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '"+v_schema+"' AND table_name = '"+v_tn+"' "     
+      results = connection.execute(v_sql)
       v_cnt = results.first
       if v_cnt[0].to_i > 0
           v_msg = "Reloading existing UP Table "+v_tn
@@ -2319,7 +2366,7 @@ def cg_up_load
           # drop table, remake, load
           v_sql = "DROP TABLE "+v_schema+"."+v_tn
           results = connection.execute(v_sql)
-        v_msg = "Loading UP Table "+v_tn 
+        v_msg = v_msg+"; Dropped UP Table "+v_tn 
         v_create_sql = "CREATE table "+v_schema+"."+v_tn+"("
 
         # add key columns
@@ -2362,7 +2409,7 @@ def cg_up_load
          v_create_sql = v_create_sql+")"
           # make new table with v_up_table_yyyymmdd, 
          results = connection.execute(v_create_sql)   # new-present-old_edit ?
-
+       v_msg = v_msg+"; Created table "+v_tn
        v_insert_sql = "INSERT INTO "+v_schema+"."+v_tn+"("
         v_insert_end_sql = ") "
         v_select_sql =" SELECT "
@@ -2371,7 +2418,7 @@ def cg_up_load
         # load from source schema, source table
         v_insert_sql = v_insert_sql+v_col_array.join(",")+v_insert_end_sql+v_select_sql+v_col_array.join(",")+v_select_end_sql
         results = connection.execute(v_insert_sql)
-
+        v_msg = v_msg+"; Inserted data into table "+v_tn
          # update key columns -- expect one key column
          v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload             
         if v_key_type == "enrollment/sp"
@@ -2398,7 +2445,7 @@ def cg_up_load
              sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct p.id from participants p where p.adrcnum = t."+v_key_col+")"
               results = connection.execute(sql) 
         end
-
+        v_msg = v_msg+"; Updated key column in table "+v_tn
           # update cg_serach columns  -- want to keep as many cn.id's for stored query
           v_cg_tns_archive[0].common_name = v_up_display_table_name
           v_cg_tn_cns = CgTnCn.where("cg_tn_id in (?)", v_cg_tns_archive[0].id)
@@ -2452,7 +2499,7 @@ def cg_up_load
             v_cg_tns_archive[0].save
              #if exisiting with different v_up_table_yyyymmdd => change table type to up_archive
         end   
-        v_msg = "Loading UP Table "+v_tn 
+        v_msg = "Create UP Table "+v_tn 
         v_create_sql = "CREATE table "+v_schema+"."+v_tn+"("
 
         # add key columns
@@ -2505,7 +2552,7 @@ def cg_up_load
         # load from source schema, source table
         v_insert_sql = v_insert_sql+v_col_array.join(",")+v_insert_end_sql+v_select_sql+v_col_array.join(",")+v_select_end_sql
         results = connection.execute(v_insert_sql)
-
+        v_msg = v_msg+"; Insert data into table "+v_tn
          # update key columns -- expect one key column
          v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload             
         if v_key_type == "enrollment/sp"
@@ -2534,7 +2581,7 @@ def cg_up_load
               results = connection.execute(sql) 
         end 
       
-
+        v_msg = v_msg+"; Updated key column in table "+v_tn
          # make new cg_search table - inactive
                 v_cg_search = CgTn.new
          # make new cg_search table 
@@ -2602,7 +2649,13 @@ def cg_up_load
         v_cg_search.status_flag ="Y"
         v_cg_search.save 
       end
-       flash[:notice] = 'Everything is fine '+v_up_table_name+'  '+v_up_display_table_name+'     '+v_up_table_yyyymmdd+'    '+v_up_table_name_key_column+'     '+v_key_type+'    '+v_source_up_table_name+'    '+v_source_schema
+       flash[:notice] = v_msg+'; Everything is fine '+v_up_table_name+'  '+v_up_display_table_name+'     '+v_up_table_yyyymmdd+'    '+v_up_table_name_key_column+'     '+v_key_type+'    '+v_source_up_table_name+'    '+v_source_schema
+     
+      end # make in source schema
+     else
+          v_msg = "UP table definition not found in "+v_definition_table
+          flash[:notice] = v_msg
+      end
     else
          flash[:notice] = 'All the fields are required'
     end # if blank fields  
