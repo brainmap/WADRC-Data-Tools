@@ -1,5 +1,4 @@
-<% # want 0008   0010     0018   by default
- %>
+
 
 <% if dataset.dicom_taghash.blank? %>
 <p><%= "DICOM header not available." %></p>
@@ -11,12 +10,17 @@
 		<tr>
 			<th>Name</th> <th>Tag</th> <th>Value</th>
 		</tr>
-	<% dataset.dicom_taghash.sort_by{|k,v| k}.each do |tag,info| %>
+	<% 
+	 dataset.dicom_taghash.sort_by{|k,v| k}.each do |tag,info| %>
 		<tr>
-			<td><%= tag %></td>
+			<td><%= tag%></td>
 			<td><%= info[:name] %></td>
-			<td><strong><%= info[:value] %></strong></td>
+			<%  # problem with non UTF-8 characters coming in dicoms
+			    info[:value].to_s.encode!('UTF-16', :undef => :replace, :invalid => :replace, :replace => "")
+			    info[:value].to_s.encode!('UTF-8') %>
+						<td><strong><%= info[:value]  %></strong></td>
 		</tr>
+	
 	<% end  %>
 	</table>
 <% end %>
