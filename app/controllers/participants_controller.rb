@@ -156,7 +156,7 @@ class ParticipantsController < ApplicationController
         if !@participant.dob.blank?
            @appointments = Appointment.where("appointments.vgroup_id in (select vgroups.id from vgroups where participant_id is not null and participant_id in (?))", params[:id])
            @appointments.each do |appt|
-              appt.age_at_appointment = ((appt.appointment_date - @participant.dob)/365.25).floor
+              appt.age_at_appointment = ((appt.appointment_date - @participant.dob)/365.25).round(2)
               appt.save
            end
         end
@@ -296,7 +296,7 @@ class ParticipantsController < ApplicationController
                                 where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                              and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                              and vgroups.id = enrollment_vgroup_memberships.vgroup_id
-                             and floor(DATEDIFF(vgroups.vgroup_date,participants.dob)/365.25) >= "+params[:participant_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                             and round((DATEDIFF(vgroups.vgroup_date,participants.dob)/365.25),2) >= "+params[:participant_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
             @conditions.push(condition)
            params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:participant_search][:min_age]
          elsif params[:participant_search][:min_age].blank? && !params[:participant_search][:max_age].blank?
@@ -304,7 +304,7 @@ class ParticipantsController < ApplicationController
                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                           and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                           and vgroups.id = enrollment_vgroup_memberships.vgroup_id
-                          and floor(DATEDIFF(vgroups.vgroup_date,participants.dob)/365.25) <= "+params[:participant_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                          and round((DATEDIFF(vgroups.vgroup_date,participants.dob)/365.25),2) <= "+params[:participant_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
               @conditions.push(condition)
               params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:participant_search][:max_age]
          elsif !params[:participant_search][:min_age].blank? && !params[:participant_search][:max_age].blank?
@@ -312,7 +312,7 @@ class ParticipantsController < ApplicationController
                             where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                         and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                         and vgroups.id = enrollment_vgroup_memberships.vgroup_id
-                        and floor(DATEDIFF(vgroups.vgroup_date,participants.dob)/365.25) between "+params[:participant_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:participant_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                        and round((DATEDIFF(vgroups.vgroup_date,participants.dob)/365.25),2) between "+params[:participant_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:participant_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
             @conditions.push(condition)
             params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:participant_search][:min_age]+" and "+params[:participant_search][:max_age]
          end

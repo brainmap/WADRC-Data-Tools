@@ -94,21 +94,21 @@ class PetscansController < ApplicationController
                                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                             and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                             and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                            and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) >= ?   )",params[:petscan_search][:min_age])
+                            and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= ?   )",params[:petscan_search][:min_age])
             params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:petscan_search][:min_age]
         elsif params[:petscan_search][:min_age].blank? && !params[:petscan_search][:max_age].blank?
              @search = @search.where("  petscans.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
                                 where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                              and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                              and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                         and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) <= ?   )",params[:petscan_search][:max_age])
+                         and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= ?   )",params[:petscan_search][:max_age])
             params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:petscan_search][:max_age]
         elsif !params[:petscan_search][:min_age].blank? && !params[:petscan_search][:max_age].blank?
            @search = @search.where("   petscans.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                            and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                       and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) between ? and ?   )",params[:petscan_search][:min_age],params[:petscan_search][:max_age])
+                       and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between ? and ?   )",params[:petscan_search][:min_age],params[:petscan_search][:max_age])
           params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:petscan_search][:min_age]+" and "+params[:petscan_search][:max_age]
         end
         # trim leading ","
@@ -250,7 +250,7 @@ class PetscansController < ApplicationController
                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                            and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                           and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) >= "+params[:pet_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                           and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:pet_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
             @conditions.push(condition)
            params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:pet_search][:min_age]
        elsif params[:pet_search][:min_age].blank? && !params[:pet_search][:max_age].blank?
@@ -258,7 +258,7 @@ class PetscansController < ApplicationController
                                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                             and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                             and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                        and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) <= "+params[:pet_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                        and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:pet_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
            @conditions.push(condition)
            params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:pet_search][:max_age]
        elsif !params[:pet_search][:min_age].blank? && !params[:pet_search][:max_age].blank?
@@ -266,7 +266,7 @@ class PetscansController < ApplicationController
                              where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                           and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                           and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                      and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) between "+params[:pet_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:pet_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                      and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:pet_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:pet_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
          @conditions.push(condition)
          params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:pet_search][:min_age]+" and "+params[:pet_search][:max_age]
        end
@@ -487,7 +487,7 @@ class PetscansController < ApplicationController
     if !@vgroup.participant_id.blank?
       @participant = Participant.find(@vgroup.participant_id)
       if !@participant.dob.blank?
-         @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+         @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).round(2)
       end
     end
     @appointment.save
@@ -732,7 +732,7 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
         if !@vgroup.participant_id.blank?
           @participant = Participant.find(@vgroup.participant_id)
           if !@participant.dob.blank?
-             @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+             @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).round(2)
           end
         end
         @appointment.save

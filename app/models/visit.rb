@@ -298,7 +298,7 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
     if dob.blank?
       age_at_visit = age_from_dicom_info[:age] unless age_from_dicom_info[:age].blank?
     else
-      age_at_visit = ((appointment.appointment_date - dob)/365.25).floor
+      age_at_visit = ((appointment.appointment_date - dob)/365.25).round(2)
     end
     return age_at_visit
   end

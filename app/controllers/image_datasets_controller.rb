@@ -238,7 +238,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
                                   where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                                and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                                and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                               and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) >= "+params[:ids_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                               and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:ids_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
                 @conditions.push(condition)
                params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:ids_search][:min_age]
            elsif params[:ids_search][:min_age].blank? && !params[:ids_search][:max_age].blank?
@@ -246,7 +246,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
                                    where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                                 and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                                 and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                            and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) <= "+params[:ids_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                            and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:ids_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
                @conditions.push(condition)
                params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:ids_search][:max_age]
            elsif !params[:ids_search][:min_age].blank? && !params[:ids_search][:max_age].blank?
@@ -254,7 +254,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
                                  where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                               and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                               and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                          and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) between "+params[:ids_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:ids_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                          and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:ids_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:ids_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
              @conditions.push(condition)
              params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:ids_search][:min_age]+" and "+params[:ids_search][:max_age]
            end

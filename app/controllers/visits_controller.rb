@@ -301,7 +301,7 @@ end
        if !@vgroup.participant_id.blank?
          @participant = Participant.find(@vgroup.participant_id)
          if !@participant.dob.blank?
-            @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+            @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).round(2)
          end
        end
        @appointment.save
@@ -527,7 +527,7 @@ end
         if !@vgroup.participant_id.blank?
           @participant = Participant.find(@vgroup.participant_id)
           if !@participant.dob.blank?
-             @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+             @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).round(2)
           end
         end
         if !params[:appointment].nil? and !params[:appointment][:appointment_coordinator].nil?
@@ -819,21 +819,21 @@ end
                                where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                             and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id 
                             and visits.id = enrollment_visit_memberships.visit_id
-                            and floor(DATEDIFF(visits.date,participants.dob)/365.25) >= ?   )",params[:visit_search][:min_age])
+                            and round((DATEDIFF(visits.date,participants.dob)/365.25),2) >= ?   )",params[:visit_search][:min_age])
             params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:visit_search][:min_age]
         elsif params[:visit_search][:min_age].blank? && !params[:visit_search][:max_age].blank?
              @search = @search.where("  visits.id in (select enrollment_visit_memberships.visit_id from participants,  enrollment_visit_memberships, enrollments, scan_procedures_visits,visits
                              where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                          and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id 
                          and visits.id = enrollment_visit_memberships.visit_id
-                         and floor(DATEDIFF(visits.date,participants.dob)/365.25) <= ?   )",params[:visit_search][:max_age])
+                         and round((DATEDIFF(visits.date,participants.dob)/365.25),2) <= ?   )",params[:visit_search][:max_age])
             params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:visit_search][:max_age]
         elsif !params[:visit_search][:min_age].blank? && !params[:visit_search][:max_age].blank?
            @search = @search.where("  visits.id in (select enrollment_visit_memberships.visit_id from participants,  enrollment_visit_memberships, enrollments, scan_procedures_visits,visits
                            where enrollment_visit_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                        and  scan_procedures_visits.visit_id = enrollment_visit_memberships.visit_id 
                        and visits.id = enrollment_visit_memberships.visit_id
-                       and floor(DATEDIFF(visits.date,participants.dob)/365.25) between ? and ?   )",params[:visit_search][:min_age],params[:visit_search][:max_age])
+                       and round((DATEDIFF(visits.date,participants.dob)/365.25),2) between ? and ?   )",params[:visit_search][:min_age],params[:visit_search][:max_age])
           params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:visit_search][:min_age]+" and "+params[:visit_search][:max_age]
         end
         # trim leading ","
@@ -1015,7 +1015,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                            and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                           and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) >= "+params[:mri_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                           and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:mri_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
             @conditions.push(condition)
            params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:mri_search][:min_age]
        elsif params[:mri_search][:min_age].blank? && !params[:mri_search][:max_age].blank?
@@ -1023,7 +1023,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
                                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                             and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                             and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                        and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) <= "+params[:mri_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                        and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:mri_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
            @conditions.push(condition)
            params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:mri_search][:max_age]
        elsif !params[:mri_search][:min_age].blank? && !params[:mri_search][:max_age].blank?
@@ -1031,7 +1031,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
                              where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                           and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                           and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                      and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) between "+params[:mri_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:mri_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                      and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:mri_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:mri_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
          @conditions.push(condition)
          params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:mri_search][:min_age]+" and "+params[:mri_search][:max_age]
        end

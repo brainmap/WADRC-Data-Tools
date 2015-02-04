@@ -86,21 +86,21 @@ class BlooddrawsController < ApplicationController
                                 where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                              and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                              and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                             and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) >= ?   )",params[:blooddraw_search][:min_age])
+                             and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= ?   )",params[:blooddraw_search][:min_age])
              params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:blooddraw_search][:min_age]
          elsif params[:blooddraw_search][:min_age].blank? && !params[:blooddraw_search][:max_age].blank?
               @search = @search.where("  blooddraws.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
                                  where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                               and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                               and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                          and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) <= ?   )",params[:blooddraw_search][:max_age])
+                          and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= ?   )",params[:blooddraw_search][:max_age])
              params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:blooddraw_search][:max_age]
          elsif !params[:blooddraw_search][:min_age].blank? && !params[:blooddraw_search][:max_age].blank?
             @search = @search.where("   blooddraws.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
                                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                             and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                             and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                        and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) between ? and ?   )",params[:blooddraw_search][:min_age],params[:blooddraw_search][:max_age])
+                        and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between ? and ?   )",params[:blooddraw_search][:min_age],params[:blooddraw_search][:max_age])
            params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:blooddraw_search][:min_age]+" and "+params[:blooddraw_search][:max_age]
          end
          # trim leading ","
@@ -246,7 +246,7 @@ class BlooddrawsController < ApplicationController
                                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                             and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                             and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                            and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) >= "+params[:lh_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                            and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:lh_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
             @conditions.push(condition)
             params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:lh_search][:min_age]
         elsif params[:lh_search][:min_age].blank? && !params[:lh_search][:max_age].blank?
@@ -254,7 +254,7 @@ class BlooddrawsController < ApplicationController
                                 where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                              and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                              and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                         and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) <= "+params[:lh_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                         and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:lh_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
             @conditions.push(condition)
             params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:lh_search][:max_age]
         elsif !params[:lh_search][:min_age].blank? && !params[:lh_search][:max_age].blank?
@@ -262,7 +262,7 @@ class BlooddrawsController < ApplicationController
                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                            and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                       and floor(DATEDIFF(appointments.appointment_date,participants.dob)/365.25) between "+params[:lh_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:lh_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                       and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:lh_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:lh_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:lh_search][:min_age]+" and "+params[:lh_search][:max_age]
         end
@@ -535,7 +535,7 @@ class BlooddrawsController < ApplicationController
   if !@vgroup.participant_id.blank?
     @participant = Participant.find(@vgroup.participant_id)
     if !@participant.dob.blank?
-       @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+       @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).round(2)
     end
   end
   @appointment.save
@@ -631,7 +631,7 @@ class BlooddrawsController < ApplicationController
             if !@vgroup.participant_id.blank?
               @participant = Participant.find(@vgroup.participant_id)
               if !@participant.dob.blank?
-                 @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).floor
+                 @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).round(2)
               end
             end
 
