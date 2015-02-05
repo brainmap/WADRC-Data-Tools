@@ -30,6 +30,12 @@ class EnrollmentsController < ApplicationController
        params["search_criteria"] = ""
         scan_procedure_array =current_user[:view_low_scan_procedure_array]
             scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+                  hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
 
         if !params[:enrollment_search][:scan_procedure_id].blank?
               condition =" enrollments.id in (select enrollments.id from enrollments,  enrollment_vgroup_memberships, scan_procedures_vgroups
@@ -208,6 +214,13 @@ class EnrollmentsController < ApplicationController
   # GET /enrollments.xml
   def index
        scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+
+             hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     # Hack for Autocomplete Enrollment Number AJAX Search
     #if params[:search].kind_of? String
     #  search_hash = {:enumber_contains => params[:search]}
@@ -234,6 +247,12 @@ class EnrollmentsController < ApplicationController
   # GET /enrollments/1.xml
   def show
     scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
 #    @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
 #     @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships, scan_procedures_visits
@@ -265,6 +284,12 @@ class EnrollmentsController < ApplicationController
   # GET /enrollments/1/edit
   def edit
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
 #    @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
     if current_user.role == 'Admin_High'
@@ -297,6 +322,12 @@ class EnrollmentsController < ApplicationController
   # PUT /enrollments/1.xml
   def update
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
 #    @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
     if current_user.role == 'Admin_High'
@@ -328,6 +359,12 @@ class EnrollmentsController < ApplicationController
   # DELETE /enrollments/1.xml
   def destroy
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
 #    @enrollment = Enrollment.where(" enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
     if current_user.role == 'Admin_High'

@@ -1,4 +1,6 @@
-<div id="heading_and_link">
+<% if @hide_page_flag == "Y" 
+  else %> 
+  <div id="heading_and_link">
   <h1>Search Participant</h1>
 </p>
 </div>
@@ -145,3 +147,4 @@
 <br />
 
 <%# link_to 'New participant', new_participant_path %>
+<%end%>

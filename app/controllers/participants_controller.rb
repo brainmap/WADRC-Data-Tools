@@ -12,6 +12,11 @@ class ParticipantsController < ApplicationController
   # GET /participants.xml
   def index
     scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+          hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end  
 #    @search = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).search(params[:search])
      
@@ -35,6 +40,12 @@ class ParticipantsController < ApplicationController
   # GET /participants/1.xml
   def show
     scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+    hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end  
+
 #    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
 
@@ -71,6 +82,11 @@ class ParticipantsController < ApplicationController
   # GET /participants/1/edit
   def edit
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+    hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end  
 #    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
      @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in 
@@ -137,6 +153,11 @@ class ParticipantsController < ApplicationController
   # PUT /participants/1.xml
   def update
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+    hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end  
 #    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
      @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
@@ -193,6 +214,11 @@ class ParticipantsController < ApplicationController
        params["search_criteria"] = ""
         scan_procedure_array =current_user[:view_low_scan_procedure_array]
             scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+                      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end  
 
         if !params[:participant_search][:scan_procedure_id].blank?
               condition =" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups
@@ -373,6 +399,11 @@ class ParticipantsController < ApplicationController
   # DELETE /participants/1.xml
   def destroy
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+    hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end  
 #    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
      

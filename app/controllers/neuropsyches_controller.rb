@@ -11,7 +11,13 @@ class NeuropsychesController < ApplicationController
        end
 
        scan_procedure_array = []
-       scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)   
+       scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)  
+             hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end 
 
   #    @neuropsyches = Blooddraw.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
   #                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
@@ -148,6 +154,13 @@ class NeuropsychesController < ApplicationController
 
        scan_procedure_array = []
        scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)   
+
+             hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
 
   #    @neuropsyches = Blooddraw.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
   #                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
@@ -340,6 +353,12 @@ class NeuropsychesController < ApplicationController
     @current_tab = "neuropsyches"
      scan_procedure_array = []
      scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+           hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
 
      @neuropsych = Neuropsych.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                        appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
@@ -445,6 +464,12 @@ class NeuropsychesController < ApplicationController
     @current_tab = "neuropsyches"
     scan_procedure_array = []
     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     @neuropsych = Neuropsych.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
@@ -512,6 +537,12 @@ class NeuropsychesController < ApplicationController
     end
      scan_procedure_array = []
      scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+           hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     @neuropsych = Neuropsych.new(params[:neuropsych])
 
 
@@ -587,6 +618,12 @@ class NeuropsychesController < ApplicationController
   def update
     scan_procedure_array = []
     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
 
     @neuropsych = Neuropsych.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
@@ -648,6 +685,12 @@ class NeuropsychesController < ApplicationController
   def destroy
     scan_procedure_array = []
     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
      
     @neuropsych = Neuropsych.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 

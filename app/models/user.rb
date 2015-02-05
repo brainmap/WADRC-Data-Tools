@@ -49,7 +49,11 @@ class User < ActiveRecord::Base
   def edit_low_scan_procedure_array
       var = set_edit_view_array('edit_low_scan_procedure_array')
       "#{var}"
-  end  
+  end 
+  def hide_date_flag_array
+    var = set_edit_view_array('hide_date_flag_array')
+    "#{var}"
+  end 
 =begin # hiding calls since not using yet
   def admin_low_scan_procedure_array
        var = set_edit_view_array('admin_low_scan_procedure_array')
@@ -139,6 +143,14 @@ class User < ActiveRecord::Base
       self[:edit_high_protocol_array] = [0]
       self[:admin_low_protocol_array] = [0]
       self[:admin_high_protocol_array] = [0]
+
+      self[:hide_date_flag_array]=[] 
+      protocol_array = []
+      @current_self_protocol = self.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where user_id = "+(self.id).to_s+" and protocol_id in (select id from protocols where hide_date_flag ='Y')")
+      @current_self_protocol.each do |p2|
+              protocol_array << p2.protocol_id
+      end
+      self[:hide_date_flag_array] = protocol_array
       
        @roles_in_pr.each do |p| 
           if p.role == "Edit_High"
@@ -232,7 +244,9 @@ class User < ActiveRecord::Base
               protocol_array = []
              @current_self_protocol = self.protocol_roles.find_by_sql("SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(self.id).to_s+"
                                                                       union
-   select distinct id from protocols where parent_protocol_id in (SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(self.id).to_s+")") 
+   select distinct id from protocols where parent_protocol_id in (SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(self.id).to_s+")
+                                                                   union
+   select distinct id from protocols where parent_protocol_id in (SELECT distinct id from protocols where parent_protocol_id in (SELECT distinct protocol_id from protocol_roles where role = '"+p.role+"' and user_id = "+(self.id).to_s+") )") 
               
              @current_self_protocol.each do |p2|
                protocol_array << p2.protocol_id
@@ -357,8 +371,9 @@ class User < ActiveRecord::Base
       #  self[:edit_low_scan_procedure_array] = [-1]
       #  self[:edit_low_protocol_array] = [-1]
      #  self[:view_low_scan_procedure_array] =[-1,-2,-3]
-
-     if(field == 'view_low_scan_procedure_array')
+      if(field == 'hide_date_flag_array')
+          return self[:hide_date_flag_array] .join(' ')
+     elsif(field == 'view_low_scan_procedure_array')
        return self[:view_low_scan_procedure_array].join(' ')
       elsif(field == 'edit_low_scan_procedure_array')
         return self[:edit_low_scan_procedure_array].join(' ')

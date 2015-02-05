@@ -1,4 +1,6 @@
-<%   @current_tab = "image_datasets"
+<% if @hide_page_flag == "Y" 
+  else %> 
+  <%   @current_tab = "image_datasets"
 %>
 
 <%
@@ -169,4 +171,4 @@ edit_count = edit_count -1
     <% end %>
   </tbody>
 </table>
-
+<%end%>

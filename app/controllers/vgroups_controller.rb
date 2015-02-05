@@ -4,6 +4,12 @@ class VgroupsController < ApplicationController
   # GET /vgroups.xml
   def index
     scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     @vgroups = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).all
 
     respond_to do |format|
@@ -130,6 +136,12 @@ class VgroupsController < ApplicationController
   # GET /vgroups/1.xml
   def show
     scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
     @trfiles = Trfile.where("trfiles.scan_procedure_id in (select scan_procedure_id from scan_procedures_vgroups where vgroup_id in (?))",@vgroup.id).where("trfiles.enrollment_id in (select enrollment_id from enrollment_vgroup_memberships where vgroup_id in (?))",@vgroup.id)
@@ -180,6 +192,12 @@ class VgroupsController < ApplicationController
   # GET /vgroups/1/edit
   def edit
     scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     if !@vgroup.participant_id.nil?
         @participant = Participant.find(@vgroup.participant_id)
@@ -499,6 +517,12 @@ class VgroupsController < ApplicationController
   # PUT /vgroups/1.xml
   def update
     scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     # removed attr_accessible  in model and ok now - update attributes not doing updates
     #   @vgroup.compile_folder = params[:vgroup][:compile_folder]
@@ -863,6 +887,12 @@ end
   def index_by_scope  # probably not being used
 
     scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     @search = Vgroup.send(params[:scope]).search(params[:search])  # should this be instance_eval
     @visits = @search.relation.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
     @collection_title = "All #{params[:scope].to_s.gsub('_',' ')} Visits"
@@ -877,6 +907,12 @@ end
   def index_by_user_id
 
     scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     
     @user = User.find(params[:user_login])
     @search = Vgroup.assigned_to(@user.id).search
@@ -907,6 +943,12 @@ end
 
   def index_by_scan_procedure  
     scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     if !params[:search].blank? && !params[:search][:meta_sort].blank?
       @search = Vgroup.unscoped.search(params[:search]) 
     else
@@ -931,6 +973,12 @@ end
   
   def index_by_enumber  
     scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     if !params[:search].blank? && !params[:search][:meta_sort].blank?
       @search = Vgroup.unscoped.search(params[:search]) 
     else
@@ -964,6 +1012,12 @@ end
       # slightly different -- no joins in appointment, so can't use common search
       scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
       scan_procedure_list = scan_procedure_array.map(&:to_i).join(',')
+            hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
       # make @conditions from search form input, access control in application controller run_search
       @conditions = []
       @current_tab = "vgroups"
@@ -1171,6 +1225,12 @@ end
   
   def home
     scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     # Remove default scope if sorting has been requested.
     if !params[:search].blank? && !params[:search][:meta_sort].blank?
       @search = Vgroup.unscoped.search(params[:search]) 
@@ -1191,6 +1251,12 @@ end
   # DELETE /vgroups/1.xml
   def destroy
     scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @vgroup.destroy
 

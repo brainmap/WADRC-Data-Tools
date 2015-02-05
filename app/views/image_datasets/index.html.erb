@@ -1,4 +1,5 @@
-
+<% if @hide_page_flag == "Y" 
+  else %>
 <div id="search">
 	<table><tr><td>
 	<%= simple_form_for @search do |f| %>
@@ -43,3 +44,4 @@
 <%= render :partial => 'image_datasets', :locals => { :image_datasets => @image_datasets, :total_count => @total_count } %>
 <br />
 
+<%end %>

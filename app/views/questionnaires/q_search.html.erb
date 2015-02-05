@@ -1,4 +1,6 @@
-<%   @current_tab = "questionnaires"
+<% if @hide_page_flag == "Y" 
+  else %>
+  <%   @current_tab = "questionnaires"
 %>
 
 <%
@@ -181,6 +183,6 @@ edit_count = edit_count -1
   </tbody>
 </table>
 
-
+<%end%>
 
 

@@ -23,6 +23,13 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
   # GET /image_datasets.xml
   def index
     scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     # caused error -- using old search meta_search -- gem not added
 #    @sp_array = []
 #    if params[:visit_id]
@@ -107,6 +114,13 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
       
 
       def ids_search
+
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
           # make @conditions from search form input, access control in application controller run_search
           @conditions = []
           @current_tab = "image_datasets"
@@ -326,6 +340,13 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
   # GET /image_datasets/1.xml
   def show
     scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @visit = @image_dataset.visit
     @image_datasets = @visit.image_datasets
@@ -354,6 +375,13 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
   # GET /image_datasets/1/edit
   def edit
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
   end
 
@@ -387,6 +415,12 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
   # PUT /image_datasets/1.xml
   def update
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
     respond_to do |format|
@@ -405,6 +439,12 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
   # DELETE /image_datasets/1.xml
   def destroy
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @image_dataset.destroy
 

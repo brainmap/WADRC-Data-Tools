@@ -8,6 +8,7 @@
     <th>Path</th>
     <th>Description</th>
     <th>Parent Protocol</th>
+    <th>Hide Dates</th>
     <th></th>
     <th></th>
     <th></th>
@@ -22,6 +23,7 @@
     <td><% if !(protocol.parent_protocol_id).nil? and !(protocol.parent_protocol_id).to_s.empty?%>
       <%= (Protocol.find(protocol.parent_protocol_id)).name %>
       <% end %></td>
+  <td><%= protocol.hide_date_flag %></td>
     <td><%= link_to 'Show', protocol %></td>
     <td><%= link_to 'Edit', edit_protocol_path(protocol) %></td>
     <td><%= link_to 'Destroy', protocol, :confirm => 'Are you sure?', :method => :delete %></td>

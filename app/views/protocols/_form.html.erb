@@ -1,3 +1,4 @@
+<% v_y_n = {"Yes"=>"Y","No"=>"N"} %>
 <%= form_for(@protocol) do |f| %>
   <% if @protocol.errors.any? %>
     <div id="error_explanation">
@@ -31,6 +32,13 @@
     <%= f.label :parent_protocol %><br />
     <%= collection_select :protocol, :parent_protocol_id, Protocol.all.sort_by(&:id), :id, :name, :prompt => 'choose a parent protocol' %>
   </div>
+  <div class="field">
+    <%= f.label :hide_date_flag %><br />
+        <%= f.select :hide_date_flag, v_y_n, :selected =>@protocol.hide_date_flag , :include_blank => 'Select value'  %><br>
+        Select if protocol should only be for search and hide all dates
+  </div>
+
+
   <div class="actions">
     <%= f.submit %>
   </div>

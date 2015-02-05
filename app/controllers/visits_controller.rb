@@ -17,6 +17,12 @@ class VisitsController <  AuthorizedController #  ApplicationController
   def index
 
      scan_procedure_array =current_user[:view_low_scan_procedure_array]
+           hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
      # Remove default scope if sorting has been requested.
      if !params[:search].blank? && !params[:search][:meta_sort].blank?
        @search = Visit.unscoped.search(params[:search]) 
@@ -157,6 +163,12 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # GET /visits/find
   def find
     scan_procedure_array =current_user[:view_low_scan_procedure_array]
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     @search = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).search(params[:search])
   end
 
@@ -164,6 +176,12 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # GET /visits/1.xml
   def show
     scan_procedure_array =current_user[:view_low_scan_procedure_array]
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
   
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find_by_id(params[:id])
     # Grab the visits within 1 month +- visit date for "previous" and "back" hack.
@@ -251,7 +269,13 @@ end
 
   # GET /visits/1/edit
   def edit
-    scan_procedure_array =current_user[:edit_low_scan_procedure_array ]   
+    scan_procedure_array =current_user[:edit_low_scan_procedure_array ]
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end   
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @visit.enrollments.build # if @visit.enrollments.blank?
     @mriscantask = Mriscantask.where("visit_id in (?) and (lookup_set_id not in (8) or lookup_set_id is NULL)",@visit.id)
@@ -348,6 +372,12 @@ end
   # PUT /visits/1.xml
   def update
      scan_procedure_array =current_user[:edit_low_scan_procedure_array] 
+           hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
      delete_scantask_array = []
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
@@ -689,6 +719,12 @@ end
   # can also get edit_low_scan_procedure_array from user, but its got spaces 
    #  scan_procedure_array =@user[:edit_low_scan_procedure_array]
     scan_procedure_array =(@user.edit_low_scan_procedure_array).split(' ').map(&:to_i) 
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     
     
@@ -742,6 +778,13 @@ end
    end
     #scan_procedure_array =current_user[:view_low_scan_procedure_array]
     scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
     # Remove default scope if sorting has been requested.
     @search = Visit.search(params[:search]) 
       if !params[:visit_search][:scan_procedure_id].blank?
@@ -915,6 +958,13 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
 
   def mri_search
       # make @conditions from search form input, access control in application controller run_search
+
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
       @conditions = []
       @current_tab = "visit_search"
       params["search_criteria"] =""
