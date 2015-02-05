@@ -6,6 +6,7 @@
     <th>Id</th>
     <th>Series description type</th>
     <th>Series description</th>
+    <th>Count by Scan Protocol</th>
     <th></th>
     <th></th>
     <th></th>
@@ -18,6 +19,14 @@
 	        SeriesDescriptionType.find(series_description_map.series_description_type_id).series_description_type 
 	   end%></td>
     <td><%= series_description_map.series_description %></td>
+    <td><% sdsps = SeriesDescriptionScanProcedure.where("series_description_scan_procedures.series_description_id in ( select series_descriptions.id from series_descriptions where trim(long_description) in (?) )",series_description_map.series_description.strip)
+        v_sp_cnt_array = Array.new
+         sdsps.each do |sdsp|
+               v_sp = ScanProcedure.find(sdsp.scan_procedure_id)
+               v_sp_cnt_array.push(v_sp.codename+"  cnt ="+(sdsp.scan_count).to_s)
+          end %>
+          <%= v_sp_cnt_array.join(", ") %>
+    </td>
     <td><%= link_to 'Show', series_description_map %></td>
     <td><%= link_to 'Edit', edit_series_description_map_path(series_description_map) %></td>
     <td><%= link_to 'Destroy', series_description_map, :confirm => 'Are you sure?', :method => :delete %></td>

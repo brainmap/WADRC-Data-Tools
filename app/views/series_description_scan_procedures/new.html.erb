@@ -1,0 +1,7 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>New series_description_scan_procedure</h1>
+
+<%= render 'form' %>
+
+<%= link_to 'Back', series_description_scan_procedures_path %>
+<% end %>

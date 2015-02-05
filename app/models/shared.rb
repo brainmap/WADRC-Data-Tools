@@ -1553,12 +1553,11 @@ end
                     v_dir_array = Dir.entries(v_subjectid_unknown)
                     v_dir_array.each do |f|
                     if f.start_with?("o") and f.end_with?(".nii")
-                        # check for t1_aligned_newseg
+                        # check for first dir 
                         v_subjectid_first =v_subjectid_path+"/first"
                         if File.directory?(v_subjectid_first) or !File.directory?(v_subjectid_first)
                           if !File.file?(v_subjectid_first+"/"+v_subjectid+"_first_roi_vol.csv")
                             v_comment = "str "+v_subjectid_v_num+";"+v_comment  
-#puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_t1_aligned_newseg
                              v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+'  "  ' 
                              v_log = v_log + v_call+"\n"
                              begin
@@ -7521,7 +7520,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
   
   end
  
- 
+ # messy - a series_description table with id- legacy, and a series_description_maps table with just description
   def run_series_description
       v_base_path = Shared.get_base_path()
       @schedule = Schedule.where("name in ('series_description')").first
@@ -7550,13 +7549,45 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       else
           v_comment = v_comment + "There were "+v_cnt.to_s+" new series descriptions\n"
       end
+            sql_insert_base = "Insert into series_descriptions(long_description) values("
+      sql = "select distinct image_datasets.series_description from image_datasets 
+           where image_datasets.series_description not in (select series_descriptions.long_description from series_descriptions)"
+      connection = ActiveRecord::Base.connection();        
+      results = connection.execute(sql)
+      v_cnt = 0
+      v_series_description_listing = ""
+      results.each do |r|
+          v_cnt = v_cnt + 1
+          v_series_description_listing  = v_series_description_listing +r[0]+"\n"
+          sql_insert = sql_insert_base+"'"+r[0]+"')"
+          results_insert = connection.execute(sql_insert)
+      end
       
       sql = "select count(distinct image_datasets.series_description) from image_datasets 
            where image_datasets.series_description not in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id is NULL)"
       results = connection.execute(sql)
       v_comment = "\n"+results.first.to_s+" un-categorized series descriptions \n"+v_comment
-      puts "successful finish series_description' "+v_comment[0..1459]
-      @schedulerun.comment =("successful finish series_description' "+v_comment[0..1459])
+      puts "successful finish series_description harvest' "+v_comment[0..1459]
+      @schedulerun.comment =("successful finish series_description harvest, starting count harvest' "+v_comment[0..1459])
+
+       sql = "select spvg.scan_procedure_id, series_descriptions.id series_description_id, count(ids.id)
+            from series_descriptions , scan_procedures_vgroups spvg, image_datasets ids, visits v, appointments a
+            where a.id = v.appointment_id  and v.id = ids.visit_id
+            and a.vgroup_id = spvg.vgroup_id and trim(series_descriptions.long_description) = trim(ids.series_description)
+            group by spvg.scan_procedure_id, series_description_id"
+      results = connection.execute(sql)
+      if results.count > 0  
+          sql_truncate = "truncate table series_description_scan_procedures"
+          results_truncate = connection.execute(sql_truncate)
+          results.each do |r|
+             v_new = SeriesDescriptionScanProcedure.new
+             v_new.scan_procedure_id = r[0]
+             v_new.series_description_id = r[1]
+             v_new.scan_count = r[2]
+             v_new.save
+          end
+      end
+
       if !v_comment.include?("ERROR")
             @schedulerun.status_flag ="Y"
       end

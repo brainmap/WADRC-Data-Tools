@@ -1,0 +1,22 @@
+<% if current_user.role == 'Admin_High'%>
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Series description:</b>
+  <%= @series_description_scan_procedure.series_description_id %>
+</p>
+
+<p>
+  <b>Scan procedure:</b>
+  <%= @series_description_scan_procedure.scan_procedure_id %>
+</p>
+
+<p>
+  <b>Scan count:</b>
+  <%= @series_description_scan_procedure.scan_count %>
+</p>
+
+
+<%= link_to 'Edit', edit_series_description_scan_procedure_path(@series_description_scan_procedure) %> |
+<%= link_to 'Back', series_description_scan_procedures_path %>
+<% end %>
