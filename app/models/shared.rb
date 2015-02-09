@@ -1563,7 +1563,7 @@ end
                              begin
                                stdin, stdout, stderr = Open3.popen3(v_call)
                                rescue => msg  
-                                  v_log = v_log + msg+"\n"  
+                                  v_log = v_log +"IN RESCUE ERROR " +msg+"\n" 
                              end
                              v_success ="N"
                              while !stdout.eof?
@@ -2373,120 +2373,126 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     sp_exclude_array = [33,40]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     @scan_procedures.each do |sp|
-        v_visit_number =""
-        if sp.codename.include?("visit2")
+      v_visit_number =""
+      if sp.codename.include?("visit2")
             v_visit_number ="_v2"
-        elsif sp.codename.include?("visit3")
+      elsif sp.codename.include?("visit3")
             v_visit_number ="_v3"
-        elsif sp.codename.include?("visit4")
+      elsif sp.codename.include?("visit4")
             v_visit_number ="_v4"
-        elsif sp.codename.include?("visit5")
+      elsif sp.codename.include?("visit5")
             v_visit_number ="_v5"
-        end   
-        v_preprocessed_full_path = v_preprocessed_path+sp.codename  
-        if File.directory?(v_preprocessed_full_path)
-          sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
+      end   
+      v_preprocessed_full_path = v_preprocessed_path+sp.codename  
+      v_log_msg = "Starting scan protocol "+v_preprocessed_full_path
+      process_log_append(v_log_path, v_log_msg)
+      if File.directory?(v_preprocessed_full_path)
+        sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
                                     where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+"  
                                     and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id
                                     and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
-          @results = connection.execute(sql_enum)
+        @results = connection.execute(sql_enum)
                                     
-          @results.each do |r|
-              enrollment = Enrollment.where("enumber='"+r[0]+"'")
-              if !enrollment.blank?
-                v_log = ""
-                v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
-                v_subjectid = enrollment[0].enumber
-                v_subjectid_v_num = enrollment[0].enumber + v_visit_number
-                v_subjectid_unknown =v_subjectid_path+"/unknown"
-                v_subjectid_array = []
-                if File.directory?(v_subjectid_unknown)
-                     v_subjectid_array.push(v_subjectid)
-                 end
-                 v_secondary_key_array.each do |k|
-                    if File.directory?(v_subjectid_path+k+"/unknown")
-                        v_subjectid_array.push((v_subjectid+k))
-                    end
-                 end
-                v_subjectid_array = v_subjectid_array.uniq
-                v_subjectid_array.each do |subj|
-                  v_subjectid = subj
-                  v_subjectid_v_num = subj + v_visit_number
-                  v_subjectid_path = v_preprocessed_full_path+"/"+subj
-                  v_subjectid_unknown =v_subjectid_path+"/unknown"
-                  if File.directory?(v_subjectid_unknown)
-                    v_dir_array = Dir.entries(v_subjectid_unknown)
-                    v_dir_array.each do |f|
-                    if f.start_with?("o") and f.end_with?(".nii")
-                        # check for tissue_seg
-                        v_subjectid_tissue_seg =v_subjectid_path+"/tissue_seg"
-                        if !File.directory?(v_subjectid_tissue_seg)  # or !File.directory?(v_subjectid_tissue_seg) # makes file
-                             v_comment = "str "+v_subjectid_v_num+";"+v_comment
-#puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_tissue_seg
-                             v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+'  "  ' 
-                             v_log = v_log + v_call+"\n"
-                             begin
-                               stdin, stdout, stderr = Open3.popen3(v_call)
-                               rescue => msg  
-                                  v_log = v_log + msg+"\n"  
-                             end
-                             v_success ="N"
-                             # open file, look for values 
-                              v_tmp_data = "" 
-                              v_tmp_data_array = [] 
-                              if File.file?(v_subjectid_tissue_seg+"/tissue_volumes.csv")
-                                     ftxt = File.open(v_subjectid_tissue_seg+"/tissue_volumes.csv", "r") 
-                                     v_cnt = 1
-                                     ftxt.each_line do |line|
-                                        if v_cnt == 2
-                                           v_tmp_data = line
-                                        end
-                                        v_cnt = v_cnt + 1
-                                     end
-                                     ftxt.close
-                                    v_file = ""
-                                    v_gm = ""
-                                    v_wm = ""
-                                    v_csf = ""
-                                     v_tmp_data_array = v_tmp_data.strip.split(",")
-                                     if v_tmp_data_array.length >2
-                                        v_file = v_tmp_data_array[0]
-                                        v_gm =v_tmp_data_array[1]
-                                        v_wm  = v_tmp_data_array[2]
-                                        v_csf = v_tmp_data_array[3]
-                                     end
-                                    if v_wm > ""
-                                       v_success ="Y"
-                                       v_log = v_log + "SUCCESS !!!!!!!!! \n"
-                                     end
-                              end     
-                              v_err =""
-                              v_log = v_log +"IN ERROR \n"
-                              while !stderr.eof?
-                               v_err = stderr.read 1024
-                               v_log = v_log +v_err
-                              end
-                              if v_err > ""
-                                 v_schedule_owner_email_array.each do |e|
-                                    v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see ==> "+v_log_path+" <== ALl the output from process is in the file."
-                                    PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
-                                end
-                              end
-                   #           puts "err="+v_err
-                              if v_success == "N"
-                                 v_comment_warning = " "+ v_subjectid_v_num +"; "+v_comment_warning 
-                                 v_log = "warning on "+ v_subjectid_v_num +"; "+v_log
-                              end
-                              process_log_append(v_log_path, v_log)
-                        end
-                    end
-                   end 
-                  end 
+        @results.each do |r|
+          enrollment = Enrollment.where("enumber='"+r[0]+"'")
+          if !enrollment.blank?
+            v_log = ""
+            v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
+            v_subjectid = enrollment[0].enumber
+            v_subjectid_v_num = enrollment[0].enumber + v_visit_number
+            v_subjectid_unknown =v_subjectid_path+"/unknown"
+            v_subjectid_array = []
+            begin
+              if File.directory?(v_subjectid_unknown)
+                v_subjectid_array.push(v_subjectid)
+              end
+              v_secondary_key_array.each do |k|
+                if File.directory?(v_subjectid_path+k+"/unknown")
+                  v_subjectid_array.push((v_subjectid+k))
                 end
               end
-           end
-        end
-     end
+             rescue => msg  
+                v_log = v_log + "IN RESCUE ERROR "+msg+"\n"  
+            end
+            v_subjectid_array = v_subjectid_array.uniq
+            v_subjectid_array.each do |subj|
+              v_subjectid = subj
+              v_subjectid_v_num = subj + v_visit_number
+              v_subjectid_path = v_preprocessed_full_path+"/"+subj
+              v_subjectid_unknown =v_subjectid_path+"/unknown"
+              if File.directory?(v_subjectid_unknown)
+                v_dir_array = Dir.entries(v_subjectid_unknown)
+                v_dir_array.each do |f|
+                  if f.start_with?("o") and f.end_with?(".nii")
+                    # check for tissue_seg
+                    v_subjectid_tissue_seg =v_subjectid_path+"/tissue_seg"
+                      if !File.directory?(v_subjectid_tissue_seg)  # or !File.directory?(v_subjectid_tissue_seg) # makes file
+                        v_comment = "str "+v_subjectid_v_num+";"+v_comment
+#puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_tissue_seg
+                        v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+'  "  ' 
+                        v_log = v_log + v_call+"\n"
+                        begin
+                          stdin, stdout, stderr = Open3.popen3(v_call)
+                          rescue => msg  
+                            v_log = v_log + msg+"\n"  
+                        end
+                        v_success ="N"
+                        # open file, look for values 
+                        v_tmp_data = "" 
+                        v_tmp_data_array = [] 
+                        if File.file?(v_subjectid_tissue_seg+"/tissue_volumes.csv")
+                          ftxt = File.open(v_subjectid_tissue_seg+"/tissue_volumes.csv", "r") 
+                          v_cnt = 1
+                          ftxt.each_line do |line|
+                            if v_cnt == 2
+                              v_tmp_data = line
+                            end
+                            v_cnt = v_cnt + 1
+                          end
+                          ftxt.close
+                          v_file = ""
+                          v_gm = ""
+                          v_wm = ""
+                          v_csf = ""
+                          v_tmp_data_array = v_tmp_data.strip.split(",")
+                          if v_tmp_data_array.length >2
+                            v_file = v_tmp_data_array[0]
+                            v_gm =v_tmp_data_array[1]
+                            v_wm  = v_tmp_data_array[2]
+                            v_csf = v_tmp_data_array[3]
+                          end
+                          if v_wm > ""
+                            v_success ="Y"
+                            v_log = v_log + "SUCCESS !!!!!!!!! \n"
+                          end
+                        end     
+                        v_err =""
+                        v_log = v_log +"IN ERROR \n"
+                        while !stderr.eof?
+                          v_err = stderr.read 1024
+                          v_log = v_log +v_err
+                        end
+                        if v_err > ""
+                          v_schedule_owner_email_array.each do |e|
+                          v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see ==> "+v_log_path+" <== ALl the output from process is in the file."
+                          PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
+                        end
+                      end
+                      #           puts "err="+v_err
+                      if v_success == "N"
+                        v_comment_warning = " "+ v_subjectid_v_num +"; "+v_comment_warning 
+                        v_log = "warning on "+ v_subjectid_v_num +"; "+v_log
+                      end
+                      process_log_append(v_log_path, v_log)
+                    end
+                  end # if tissue seg
+                end  # if acpc file
+              end  # if unknown dir
+            end # subject array
+          end  # enum not blank
+        end #  results loop
+      end   # full path exisits
+    end   # scan procedure loop
     if v_comment_warning > ""
         v_comment_warning = "warning on "+v_comment_warning
     end
