@@ -1,3 +1,5 @@
+Based on the rmr, scan_number and the the rad_path, radiology comments will be retieved 
+M-F from the Radiology web site.
 <%= form_for(@radiology_comment) do |f| %>
   <% if @radiology_comment.errors.any? %>
     <div id="error_explanation">
@@ -98,6 +100,10 @@
   <div class="field">
     <%= f.label :load_date %><br />
     <%= f.date_select :load_date %>
+  </div>
+    <div class="field">
+    <b>Reset all comment and content text  fields to NULL</b>&nbsp;&nbsp;&nbsp;
+    <%= check_box_tag :comment_to_null %>
   </div>
   <div class="actions">
     <%= f.submit %>

@@ -82,6 +82,15 @@ class RadiologyCommentsController < ApplicationController
   # GET /radiology_comments/new.xml
   def new
     @radiology_comment = RadiologyComment.new
+    if !params[:visit_id].empty?
+           @radiology_comment.visit_id = params[:visit_id]
+           v_visit = Visit.find(params[:visit_id])
+           @radiology_comment.rmr = v_visit.rmr
+           @radiology_comment.rmr_rad = v_visit.rmr
+           @radiology_comment.scan_number = v_visit.scan_number
+           @radiology_comment.save
+
+    end
 
     respond_to do |format|
       format.html # new.html.erb
@@ -120,6 +129,27 @@ class RadiologyCommentsController < ApplicationController
 
     respond_to do |format|
       if @radiology_comment.update_attributes(params[:radiology_comment])
+         if(!params[:comment_to_null].empty?)
+                  @radiology_comment.comment_html_1 = nil
+                  @radiology_comment.comment_html_2 = nil
+                  @radiology_comment.comment_html_3 = nil
+                  @radiology_comment.comment_html_4 = nil
+                  @radiology_comment.comment_html_5 = nil
+                  @radiology_comment.comment_text_1 = nil
+                  @radiology_comment.comment_text_2 = nil
+                  @radiology_comment.comment_text_3 = nil
+                  @radiology_comment.comment_text_4 = nil
+                  @radiology_comment.comment_text_5 = nil
+                  @radiology_comment.comment_header_html_1 = nil
+                  @radiology_comment.comment_header_html_2 = nil
+                  @radiology_comment.comment_header_html_3 = nil
+                  @radiology_comment.comment_header_html_4 = nil
+                  @radiology_comment.comment_header_html_5 = nil
+                  @radiology_comment.comment_header_html_6 = nil
+                  @radiology_comment.q1_flag = nil
+                  @radiology_comment.q2_flag = nil
+                  @radiology_comment.save
+         end
         format.html { redirect_to(@radiology_comment, :notice => 'Radiology comment was successfully updated.') }
         format.xml  { head :ok }
       else
