@@ -129,7 +129,7 @@ class RadiologyCommentsController < ApplicationController
 
     respond_to do |format|
       if @radiology_comment.update_attributes(params[:radiology_comment])
-         if(!params[:comment_to_null].empty?)
+         if( !params[:comment_to_null].nil? and !params[:comment_to_null].empty?)
                   @radiology_comment.comment_html_1 = nil
                   @radiology_comment.comment_html_2 = nil
                   @radiology_comment.comment_html_3 = nil
