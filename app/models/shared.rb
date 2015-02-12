@@ -3667,6 +3667,7 @@ puts "AAAAAA "+v_call
             asl_1525_fmap_flag,asl_1525_fmap_single,asl_2025_fmap_flag,asl_2025_fmap_single,
             asl_0_registered_to_fs_flag,asl_0_smoothed_and_warped_flag,asl_1525_registered_to_fs_flag,asl_1525_smoothed_and_warped_flag,
             asl_2025_registered_to_fs_flag,asl_2025_smoothed_and_warped_flag,pdmap_flag,pdmap_0_flag,pdmap_1525_flag,pdmap_2025_flag,t1_fs_flag,asl_directory_list,
+            asl_preproc_v5_1525,asl_preproc_v5_2025,default_subjectspace_masks_v5_1525,default_subjectspace_masks_v5_2025,
             enrollment_id, scan_procedure_id)values("  
             v_raw_path = v_base_path+"/raw"
             v_mri = "/mri"
@@ -3745,7 +3746,11 @@ puts "AAAAAA "+v_call
                              v_asl_directory_list =""
                              v_asl_directory_list_2025 =""
                              v_asl_directory_list_1525 =""
-                             
+                             v_asl_preproc_v5_1525 = "N"
+                             v_asl_preproc_v5_2025 = "N"
+                             v_default_subjectspace_masks_v5_1525 = "N"
+                             v_default_subjectspace_masks_v5_2025 = "N"
+
                              # multiple asl dircectory from image_datasets.path 
                               sql_dir = "select distinct SUBSTRING_INDEX(image_datasets.path,'/',-1) from image_datasets,visits v, appointments a, scan_procedures_vgroups spv, enrollment_vgroup_memberships evm
                                    where image_datasets.visit_id = v.id and v.appointment_id = a.id and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id ="+sp.id.to_s+"
@@ -3803,41 +3808,17 @@ puts "AAAAAA "+v_call
                                  v_fs_home = (results_fs.first)[0]  
                              end
                              v_subject_fs_path = v_fs_home_path+v_fs_home+"/"+dir_name_array[0]+v_visit_number+"/mri"
-                             if File.directory?(v_subject_fs_path)
-                                  v_dir_array = Dir.entries(v_subject_fs_path)
-                                  v_dir_array.each do |f|
-                                    
-                                    if f == "T1.mgz"
-                                      v_t1_fs_flag = "Y"
+                           #  if File.directory?(v_subject_fs_path)
+                           #       v_dir_array = Dir.entries(v_subject_fs_path)
+                           #       v_dir_array.each do |f|      
+                           #         if f == "T1.mgz"
+                           #           v_t1_fs_flag = "Y"
                                       # v_t1_single ????
-                                     end
-                                  end
-                                  
-                              end
+                           #         end
+                           #       end                               
+                           #   end
                              
                              
-                             v_subjectid_asl_bkup = v_preprocessed_full_path+"/"+dir_name_array[0]+"/asl_bkup"
-                             if File.directory?(v_subjectid_asl_bkup)
-                                  v_dir_array = Dir.entries(v_subjectid_asl_bkup)   # need to get date for specific files
-                                  # evalute for asl_registered_to_fs_flag = rFS_ASL_[subjectid]_fmap.nii ,
-                                  # asl_smoothed_and_warped_flag = swrFS_ASL_[subjectid]_fmap.nii,
-                                  # asl_fmap_flag = [ASL_[subjectid]_[sdir]_fmap.nii or ASL_[subjectid]_fmap.nii],
-                                  # asl_fmap_single = ASL_[subjectid]_fmap.nii
-                             
-                                v_dir_array.each do |f|
-                                  
-                                  if f == "swrFS_ASL_"+dir_name_array[0]+"_fmap.nii"
-                                    v_asl_bkup_smoothed_and_warped_flag = "Y"
-                                  elsif  f == "rFS_ASL_"+dir_name_array[0]+"_fmap.nii"
-                                    v_asl_bkup_registered_to_fs_flag ="Y"
-                                  elsif  f == "ASL_"+dir_name_array[0]+"_fmap.nii"
-                                    v_asl_bkup_fmap_flag = "Y"
-                                    v_asl_bkup_fmap_single ="Y"
-                                  elsif  f.start_with?("ASL_"+dir_name_array[0]) and f.end_with?("_fmap.nii")
-                                    v_asl_bkup_fmap_flag = "Y"
-                                  end
-                                end
-                             end
                              
                              v_subjectid_asl = v_preprocessed_full_path+"/"+dir_name_array[0]+"/asl"
                              if File.directory?(v_subjectid_asl)
@@ -3845,8 +3826,24 @@ puts "AAAAAA "+v_call
                                   if File.directory?(v_subjectid_asl+"/images")
                                        v_dir_array.concat(Dir.entries(v_subjectid_asl+"/images") )
                                   end
-                                  if File.directory?(v_subjectid_asl+"/pproc_v4")
-                                       v_dir_array.concat(Dir.entries(v_subjectid_asl+"/pproc_v4") )
+                                  if File.directory?(v_subjectid_asl+"/pproc_v5")
+                                       v_dir_array.concat(Dir.entries(v_subjectid_asl+"/pproc_v5") )
+                                       if File.directory?(v_subjectid_asl+"/pproc_v5/masks/roi_summary")
+                                          Dir.entries(v_subjectid_asl+"/pproc_v5/masks/roi_summary").each do |f|
+                                              v_asl_directory_2025_array.each do |d| 
+                                                v_dir_tmp_array = d.split("_")
+                                                if  f.start_with?(dir_name_array[0]+"_"+v_dir_tmp_array[0]) and f.end_with?("ASL_ROIs_invXgm.csv")
+                                                  v_default_subjectspace_masks_v5_2025 = "Y"
+                                                 end
+                                              end
+                                              v_asl_directory_1525_array.each do |d|
+                                                v_dir_tmp_array = d.split("_")
+                                                if  f.start_with?(dir_name_array[0]+"_"+v_dir_tmp_array[0]) and f.end_with?("ASL_ROIs_invXgm.csv")
+                                                  v_default_subjectspace_masks_v5_1525 = "Y"
+                                                end
+                                              end
+                                          end
+                                       end
                                   end
                                   # evalute for asl_registered_to_fs_flag = rFS_ASL_[subjectid]_fmap.nii ,
                                   # asl_smoothed_and_warped_flag = swrFS_ASL_[subjectid]_fmap.nii,
@@ -3858,8 +3855,8 @@ puts "AAAAAA "+v_call
                                   
                                   if f == "swrFS_ASL_"+dir_name_array[0]+"_fmap.nii"
                                     v_asl_smoothed_and_warped_flag = "Y"
-                                  elsif  f == "rFS_ASL_"+dir_name_array[0]+"_fmap.nii"
-                                    v_asl_registered_to_fs_flag ="Y"
+                                 # elsif  f == "rFS_ASL_"+dir_name_array[0]+"_fmap.nii"
+                                 #   v_asl_registered_to_fs_flag ="Y"
                                   elsif  f.start_with?("ASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
                                     v_asl_0_fmap_flag = "Y"
                                     v_asl_1525_fmap_flag = "Y"
@@ -3869,12 +3866,12 @@ puts "AAAAAA "+v_call
                                      elsif v_asl_fmap_single == "Y"
                                       v_asl_fmap_single = "N"
                                      end
-                                  elsif f.start_with?("swASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")  # not doing r_FS 
-                                      v_asl_0_smoothed_and_warped_flag = "Y"
-                                      v_asl_1525_smoothed_and_warped_flag = "Y"
-                                  elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
-                                      v_asl_0_registered_to_fs_flag ="Y"    
-                                      v_asl_1525_registered_to_fs_flag ="Y"                                                                      
+                                 # elsif f.start_with?("swASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")  # not doing r_FS 
+                                 #     v_asl_0_smoothed_and_warped_flag = "Y"
+                                 #     v_asl_1525_smoothed_and_warped_flag = "Y"
+                                 # elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
+                                 #     v_asl_0_registered_to_fs_flag ="Y"    
+                                 #     v_asl_1525_registered_to_fs_flag ="Y"                                                                      
                                   elsif   f.start_with?("ASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii")
                                       v_asl_1525_fmap_flag = "Y"
                                       v_asl_1525_fmap_single ="Y"
@@ -3883,10 +3880,10 @@ puts "AAAAAA "+v_call
                                        elsif v_asl_fmap_single == "Y"
                                         v_asl_fmap_single = "N"
                                        end
-                                  elsif f.start_with?("swASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii") # not doing r_FS
-                                      v_asl_1525_smoothed_and_warped_flag = "Y"
-                                  elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii")
-                                      v_asl_1525_registered_to_fs_flag ="Y"                                                                       
+                                  #elsif f.start_with?("swASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii") # not doing r_FS
+                                  #    v_asl_1525_smoothed_and_warped_flag = "Y"
+                                  #elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii")
+                                  #    v_asl_1525_registered_to_fs_flag ="Y"                                                                       
                                   elsif   f.start_with?("ASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii")
                                       v_asl_2025_fmap_flag = "Y"
                                       v_asl_2025_fmap_single ="Y" 
@@ -3895,18 +3892,24 @@ puts "AAAAAA "+v_call
                                        elsif v_asl_fmap_single == "Y"
                                         v_asl_fmap_single = "N"
                                        end 
-                                  elsif f.start_with?("swASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii") # not doing r_FS
-                                      v_asl_2025_smoothed_and_warped_flag = "Y"
-                                  elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii")
-                                      v_asl_2025_registered_to_fs_flag ="Y" 
-                                  elsif   f.start_with?("PDmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
-                                      v_pdmap_0_flag = "Y" 
-                                  elsif   f.start_with?("PDmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii")
-                                      v_pdmap_1525_flag = "Y"
-                                  elsif   f.start_with?("PDmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii")
-                                      v_pdmap_2025_flag = "Y"                                                
-                                  end
-                                  
+                                 # elsif f.start_with?("swASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii") # not doing r_FS
+                                 #     v_asl_2025_smoothed_and_warped_flag = "Y"
+                                 # elsif  f.start_with?("rFS_ASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii")
+                                 #     v_asl_2025_registered_to_fs_flag ="Y" 
+                                 # elsif   f.start_with?("PDmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
+                                 #     v_pdmap_0_flag = "Y" 
+                                 # elsif   f.start_with?("PDmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii")
+                                 #     v_pdmap_1525_flag = "Y"
+                                 # elsif   f.start_with?("PDmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii")
+                                 #     v_pdmap_2025_flag = "Y" 
+                                  elsif   f.start_with?("swrASL_fmap_"+dir_name_array[0]+"_0_") and f.end_with?(".nii")
+                                      v_asl_preproc_v5_1525 = "Y" 
+puts "ppppppp "+dir_name_array[0]
+                                  elsif   f.start_with?("swrASL_fmap_"+dir_name_array[0]+"_1525_") and f.end_with?(".nii")
+                                      v_asl_preproc_v5_1525 = "Y"
+                                  elsif   f.start_with?("swrASL_fmap_"+dir_name_array[0]+"_2025_") and f.end_with?(".nii")
+                                      v_asl_preproc_v5_2025 = "Y" 
+                                  end                                                          
                                   if v_asl_0_fmap_flag == "Y" or v_asl_1525_fmap_flag == "Y" or v_asl_2025_fmap_flag == "Y"
                                     v_asl_fmap_flag = "Y"
                                   end 
@@ -3916,13 +3919,13 @@ puts "AAAAAA "+v_call
                                   end                                 
                                 end
                              end
-                             if File.directory?(v_subjectid_asl) or  File.directory?(v_subjectid_asl_bkup)
+                             if File.directory?(v_subjectid_asl) # or  File.directory?(v_subjectid_asl_bkup)
                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','','"+v_asl_registered_to_fs_flag+"','"+v_asl_smoothed_and_warped_flag+"','"+v_asl_fmap_flag+"',
                                                            '"+v_asl_fmap_single+"','"+v_asl_bkup_registered_to_fs_flag+"','"+v_asl_bkup_smoothed_and_warped_flag+"','"+v_asl_bkup_fmap_flag+"',
                                                            '"+v_asl_bkup_fmap_single+"','"+v_asl_0_fmap_flag+"', '"+v_asl_0_fmap_single+"','"+v_asl_1525_fmap_flag+"', '"+v_asl_1525_fmap_single+"',
                                                           '"+v_asl_2025_fmap_flag+"', '"+v_asl_2025_fmap_single+"','"+v_asl_0_registered_to_fs_flag+"','"+v_asl_0_smoothed_and_warped_flag+"'
                                                           ,'"+v_asl_1525_registered_to_fs_flag+"','"+v_asl_1525_smoothed_and_warped_flag+"','"+v_asl_2025_registered_to_fs_flag+"',
-                                                          '"+v_asl_2025_smoothed_and_warped_flag+"','"+v_pdmap_flag+"','"+v_pdmap_0_flag+"','"+v_pdmap_1525_flag+"','"+v_pdmap_2025_flag+"','"+v_t1_fs_flag+"','"+v_asl_directory_list+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                                          '"+v_asl_2025_smoothed_and_warped_flag+"','"+v_pdmap_flag+"','"+v_pdmap_0_flag+"','"+v_pdmap_1525_flag+"','"+v_pdmap_2025_flag+"','"+v_t1_fs_flag+"','"+v_asl_directory_list+"','"+v_asl_preproc_v5_1525+"','"+v_asl_preproc_v5_2025+"','"+v_default_subjectspace_masks_v5_1525+"','"+v_default_subjectspace_masks_v5_2025+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql) 
                                  if v_asl_directory_2025_array.size > 1
                                     # check in acpc which one was used?  is acpc linked to asl?
@@ -3943,7 +3946,7 @@ puts "AAAAAA "+v_call
                                       results = connection.execute(sql)
                                   end
                              else
-                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no ASL or ASL_bkup dir','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no ASL or ASL_bkup dir','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','N','','N','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              end # check for subjectid asl dir
                          else
@@ -3965,7 +3968,7 @@ puts "AAAAAA "+v_call
              asl_1525_fmap_flag, asl_1525_fmap_single, 
             asl_2025_fmap_flag, asl_2025_fmap_single,
             asl_0_registered_to_fs_flag,asl_0_smoothed_and_warped_flag,asl_1525_registered_to_fs_flag,asl_1525_smoothed_and_warped_flag,
-            asl_2025_registered_to_fs_flag,asl_2025_smoothed_and_warped_flag,pdmap_flag,pdmap_0_flag,pdmap_1525_flag,pdmap_2025_flag,t1_fs_flag,asl_directory_list,asl_fmap_file_to_use,asl_fmap_file_used,
+            asl_2025_registered_to_fs_flag,asl_2025_smoothed_and_warped_flag,pdmap_flag,pdmap_0_flag,pdmap_1525_flag,pdmap_2025_flag,t1_fs_flag,asl_directory_list,asl_fmap_file_to_use,asl_fmap_file_used,asl_preproc_v5_1525,asl_preproc_v5_2025,default_subjectspace_masks_v5_1525,default_subjectspace_masks_v5_2025,
               enrollment_id,scan_procedure_id",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
