@@ -4869,7 +4869,7 @@ puts "ppppppp "+dir_name_array[0]
             connection = ActiveRecord::Base.connection();        
             results = connection.execute(sql)
 
-            sql_base = "insert into cg_fdg_status_new(fdg_subjectid, fdg_general_comment,fdg_registered_to_fs_flag,fdg_scaled_registered_to_fs_flag,fdg_smoothed_and_warped_flag,fdg_scaled_smoothed_and_warped_flag,fdg_summed_flag,enrollment_id, scan_procedure_id)values("  
+            sql_base = "insert into cg_fdg_status_new(fdg_subjectid, fdg_general_comment,fdg_registered_to_fs_flag,fdg_scaled_registered_to_fs_flag,fdg_smoothed_and_warped_flag,fdg_scaled_smoothed_and_warped_flag,fdg_summed_flag,fdg_preproc_v5,default_subjectspace_masks_v5,enrollment_id, scan_procedure_id)values("  
 
     # just populating fdg_summed_flag
             v_preprocessed_path = v_base_path+"/preprocessed/visits/"
@@ -4918,17 +4918,24 @@ puts "ppppppp "+dir_name_array[0]
                             v_fdg_smoothed_and_warped_flag = "N"
                             v_fdg_scaled_smoothed_and_warped_flag = "N"
                             v_fdg_summed_flag = "N"
+                            v_fdg_preproc_v5 = "N"
+                            v_default_subjectspace_masks_v5 = "N"
                             v_dir_array.each do |f|
+                              if f.start_with?("swr"+enrollment[0].enumber+"_summed.nii")
+                                  v_fdg_preproc_v5 ="Y"
+                              end
                               
+    ## NEED v_default_subjectspace_masks_v5
+
                                if f.start_with?("wr") and f.end_with?("summed.nii")
                                   v_fdg_summed_flag ="Y"
                                 end
                               end
                                 
-                             sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','','"+v_fdg_registered_to_fs_flag+"','"+v_fdg_scaled_registered_to_fs_flag+"','"+v_fdg_smoothed_and_warped_flag+"','"+v_fdg_scaled_smoothed_and_warped_flag+"','"+v_fdg_summed_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                             sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','','"+v_fdg_registered_to_fs_flag+"','"+v_fdg_scaled_registered_to_fs_flag+"','"+v_fdg_smoothed_and_warped_flag+"','"+v_fdg_scaled_smoothed_and_warped_flag+"','"+v_fdg_summed_flag+"','"+v_fdg_preproc_v5+"','"+v_default_subjectspace_masks_v5+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              else   # just insert empty row
-                                 sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','no fdg dir','N','N','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                                 sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','no fdg dir','N','N','N','N','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
                              end # check for subjectid asl dir
                       else
@@ -4940,7 +4947,7 @@ puts "ppppppp "+dir_name_array[0]
             # v_shared = Shared.new 
              # move from new to present table -- made into a function  in shared model
              v_comment = self.move_present_to_old_new_to_present("cg_fdg_status",
-             "fdg_subjectid, fdg_general_comment,fdg_registered_to_fs_flag, fdg_registered_to_fs_comment, fdg_registered_to_fs_global_quality,fdg_scaled_registered_to_fs_flag, fdg_scaled_registered_to_fs_comment, fdg_scaled_registered_to_fs_global_quality,fdg_smoothed_and_warped_flag, fdg_smoothed_and_warped_comment, fdg_smoothed_and_warped_global_quality,fdg_scaled_smoothed_and_warped_flag, fdg_scaled_smoothed_and_warped_comment, fdg_scaled_smoothed_and_warped_global_quality,fdg_summed_flag,enrollment_id,scan_procedure_id",
+             "fdg_subjectid, fdg_general_comment,fdg_registered_to_fs_flag, fdg_registered_to_fs_comment, fdg_registered_to_fs_global_quality,fdg_scaled_registered_to_fs_flag, fdg_scaled_registered_to_fs_comment, fdg_scaled_registered_to_fs_global_quality,fdg_smoothed_and_warped_flag, fdg_smoothed_and_warped_comment, fdg_smoothed_and_warped_global_quality,fdg_scaled_smoothed_and_warped_flag, fdg_scaled_smoothed_and_warped_comment, fdg_scaled_smoothed_and_warped_global_quality,fdg_summed_flag,fdg_preproc_v5,default_subjectspace_masks_v5,enrollment_id,scan_procedure_id",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
 
 
