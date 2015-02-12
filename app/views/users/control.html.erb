@@ -1,5 +1,5 @@
 <% if current_user.role == 'Admin_High'%>
-<table><tr><td colspan=3>
+<table><tr bgcolor="#FFFED9"><td colspan=3>
 <%= link_to('Add user', '/users/add_user') %>  <br>
 Enter the new users ldap login, Fisrt Name, Last Name, and Email. <br>
 Add protocol roles - default is "edit lower level fields" for all protocols which are needed.	<br><br>
@@ -34,7 +34,7 @@ The users are ordered by "PRESENT ROLE"- Name . <br>
 </td></tr>
 <% end %>
 <% if current_user.role == 'Admin_High'  or current_user.role == 'Admin_Low'%>
-<tr><td colspan=3>
+<tr bgcolor="#ECFFE0"><td colspan=3>
 <%= link_to('Question Forms', '/users/questionformbase') %>   --- presently used by Lab Health, NeuroPsyche, and Questionaires<br>
 includes links to making questions, linking a question to a form and setting the display order, limiting a question to a scan procedure, and limiting a question form to a scan procedure.
 <br>
@@ -42,7 +42,7 @@ includes links to making questions, linking a question to a form and setting the
 <br><br>
 </td></tr>
 
-<tr><td colspan=3>
+<tr bgcolor="#E8FFF6"><td colspan=3>
 <%= link_to('Column Group tables set up search/load - Scheduled jobs', '/users/cgbase') %> --- make a cg_table available in the Search tab, define cg_table_columns (join to vgroup,  column display order, show/hide column in search/export, whether the column is searchable). A cg_table needs to have first been created in the database (below).<br>
 -- Define scheduled jobs, which may populate a cg_table. The actually scheduling of a job is defined in the crontab, but the job outcome is logged in scheduleruns.
 <br><br>
@@ -50,14 +50,14 @@ includes links to making questions, linking a question to a form and setting the
 <br><br>
 </td></tr>
 
-<tr><td colspan=3>
+<tr bgcolor="#E0F0FF"><td colspan=3>
 	<%= link_to('Create Column Group table in database', '/data_searches/cg_create_table_db') %>  -- just make the cg_table in the database. Needed before can add a cg_table to a process or the search.
 	<br>
 	<%= link_to('Add columns to Column Group table in database', '/data_searches/cg_edit_table_db') %> -- added or changing columns of a cg_table in the database.
 	<br><br>
 </td></tr>
 
-<tr><td colspan=3><%= link_to('Tracker - fields and display properties','/tractiontypes') %> - e.g. field display order and properties in exports, summary page and edit form<br>
+<tr bgcolor="#F0E8FF"><td colspan=3><%= link_to('Tracker - fields and display properties','/tractiontypes') %> - e.g. field display order and properties in exports, summary page and edit form<br>
      <%= link_to('Setup tracker types','/trtypes') %> - e.g. Freesurfer edit, freesurfer qc<br>
      <small><small>(<%= link_to('Tracker files','/trfiles') %>,  <%= link_to('Tracker file edits','/tredits') %></small></small>
 	<br><br>
@@ -65,7 +65,7 @@ includes links to making questions, linking a question to a form and setting the
 <%end%>
 <% if current_user.role == 'Admin_High'  %>
 
-<tr><td colspan=3>
+<tr  bgcolor="#FFE8F7"><td colspan=3>
  <%= link_to('Edit Radiology Comment links', '/radiology_comments?radiology_comment=""') %>  <br>
 The rad_path retrieves the radiology comments linked to a visit. Harvesting of the rad_path
 from the Radiology website is dependent on a RMR and scan_number. If the RMR or scan_number

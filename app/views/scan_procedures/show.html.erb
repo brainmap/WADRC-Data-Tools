@@ -20,5 +20,7 @@
 </div>
 subjectid_base   is a duplication of the protocol.abbr
 <p>
+    <% if current_user.role == 'Admin_High'%>
 <%= link_to 'Edit this scan procedure', edit_scan_procedure_path(@scan_procedure) %>
+   <%end%>
 </p>
