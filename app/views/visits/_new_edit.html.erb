@@ -124,6 +124,10 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
       <td><%= f.label(:appointment_coordinator) %></td>
       <td><%= select(:appointment, :appointment_coordinator, Employee.all.sort_by(&:name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Select Appt Coordinator" }) %></td>
     </tr>
+     	<tr>
+      <td><%= f.label(:secondary_key) %></td>
+      <td><%= text_field(:appointment, :secondary_key) %></td>
+    </tr>
 
     </table>
 <%     @vitals = Vital.where("vitals.appointment_id in (?)",@visit.appointment_id)     

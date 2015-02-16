@@ -563,6 +563,9 @@ end
         if !params[:appointment].nil? and !params[:appointment][:appointment_coordinator].nil?
             @appointment.appointment_coordinator = params[:appointment][:appointment_coordinator]
         end
+        if !params[:appointment].nil? and !params[:appointment][:secondary_key].nil?
+            @appointment.secondary_key = params[:appointment][:secondary_key]
+        end
         @appointment.save
 
         @vgroup.transfer_mri = params[:vgroup][:transfer_mri]
