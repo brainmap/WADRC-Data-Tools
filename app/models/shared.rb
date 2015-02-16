@@ -2761,40 +2761,66 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
       v_comment = ""
       v_comment_warning =""
     connection = ActiveRecord::Base.connection();
+    v_scan_procedure_exclude = [21,28,31,34]
      v_scan_procedures = [20,24,26,36,41]  # how to only get adrc impact? 
+     #not limiting by protocol #scan_procedures_vgroups.scan_procedure_id in ("+v_scan_procedures.join(",")+")
      # getting adrc impact from t_adrc_impact_20150105  --- change to get from refreshing table?
-     v_pet_tracer_array = [1] # ,2] # pib and fdg
+     v_pet_tracer_array = [1] #,2] # pib and fdg
 
      v_scan_type_limit = 1 
      v_series_desc_array =['T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','T2','T2 Flair','T2_Flair','T2+Flair','DTI','ASL','resting_fMRI']
      v_series_desc_nii_hash = {'nothing'=>"Y"} #{ 'T1 Volumetic'=>"Y",'T1 Volumetric'=>"Y",'T1+Volumetric'=>"Y",'T1_Volumetric'=>"Y",'T1'=>"Y"}
     # recruit new  scans ---   change 
-    v_weeks_back = "2"  # cwant to give time for quality checks etc.  
-    sql = "select distinct enrollments.enumber,scan_procedures_vgroups.scan_procedure_id, enrollments.id, enrollments.participant_id,
+    v_weeks_back = "2"  # cwant to give time for quality checks etc. 
+    # NEED TO LIMIT ADRC BY LP --- NEED TO REFRESH ADRC IMPACT 
+    sql = "select distinct vgroups.id, vgroups.participant_id,
               vgroups.transfer_mri, vgroups.transfer_pet
-              from enrollments,enrollment_vgroup_memberships, vgroups, scan_procedures_vgroups   
-            where  ( scan_procedures_vgroups.scan_procedure_id in ("+v_scan_procedures.join(",")+")
+              from enrollments,enrollment_vgroup_memberships, vgroups, scan_procedures_vgroups,participants    
+            where participants.id = vgroups.participant_id and
+             ( (participants.wrapnum is not null and participants.wrapnum > '')
                or vgroups.participant_id in ( select t_adrc_impact_20150105.participant_id from t_adrc_impact_20150105 where participant_id is not null)
               )
               and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
               and vgroups.id = scan_procedures_vgroups.vgroup_id
+              and scan_procedures_vgroups.scan_procedure_id not in ("+v_scan_procedure_exclude.join(",")+")
               and enrollment_vgroup_memberships.enrollment_id = enrollments.id
-              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL "+v_weeks_back+" WEEK)             
-              and enrollments.enumber NOT IN ( select subjectid from cg_washu_upload 
+              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL "+v_weeks_back+" WEEK)  
+              and enrollments.do_not_share_scans_flag ='N'           
+              and vgroups.id NOT IN ( select vgroup_id from cg_washu_upload 
                                          where scan_procedure_id = scan_procedures_vgroups.scan_procedure_id )
-              and ( vgroups.transfer_mri ='yes' or vgroups.transfer_mri ='yes') "
+              and ( ( vgroups.transfer_mri ='yes' and vgroups.transfer_pet ='yes' and vgroups.id 
+                  in ( select appointments.vgroup_id from appointments, petscans where petscans.appointment_id = appointments.id
+                           and petscans.lookup_pettracer_id = 1))  
+                  or 
+                 (vgroups.transfer_mri ='yes'  and enrollments.id in ( select enrollment_id from cg_csf) )
+                 or 
+                 (vgroups.transfer_mri ='yes' and vgroups.completedlumbarpuncture = 'yes' and vgroups.id 
+                  in ( select appointments.vgroup_id from appointments, lumbarpunctures where lumbarpunctures.appointment_id = appointments.id 
+                  and lumbarpunctures.lpsuccess = 1) ) )"
     results = connection.execute(sql)
     results.each do |r|
-          enrollment = Enrollment.where("enumber in (?)",r[0])
+          enrollments = Enrollment.where("id in (select enrollment_id from enrollment_vgroup_memberships where vgroup_id in(?))",r[0])
+          enrollment_enumbers_array = []
+          enrollments.each do |e|
+                    enrollment_enumbers_array.push(e.enumber)
+          end
+          enrollment_enumbers = enrollment_enumbers_array.join(",")
+          scan_procedures = ScanProcedure.where("id in (select scan_procedure_id from scan_procedures_vgroups where vgroup_id in(?))",r[0])
+          scan_procedure_codename_array = []
+          scan_procedures.each do |e|
+                    scan_procedure_codename_array.push(e.codename)
+          end
+          scan_procedure_codenames = scan_procedure_codename_array.join(",")
           v_mri_status_flag = "N"
           v_pet_status_flag ="N"
-          if (r[4].to_s == "yes")
+          if (r[2].to_s == "yes")
                v_mri_status_flag = "Y" 
           end
-          if (r[5].to_s == "yes")
+          if (r[3].to_s == "yes")
                v_pet_status_flag = "Y" 
           end
-          sql2 = "insert into cg_washu_upload (subjectid,mri_sent_flag,mri_status_flag, pet_sent_flag,pet_status_flag,enrollment_id, scan_procedure_id,participant_id) values('"+r[0]+"','N','"+v_mri_status_flag+"', 'N','"+v_pet_status_flag+"', "+enrollment[0].id.to_s+","+r[1].to_s+","+r[3].to_s+")"
+          sql2 = "insert into cg_washu_upload (vgroup_id,mri_sent_flag,mri_status_flag, pet_sent_flag,pet_status_flag,participant_id,enumbers,codenames) 
+          values('"+r[0].to_s+"','N','"+v_mri_status_flag+"', 'N','"+v_pet_status_flag+"',"+r[1].to_s+",'"+enrollment_enumbers+"','"+scan_procedure_codenames+"')"
           results2 = connection.execute(sql2)
     end
 
@@ -2826,24 +2852,25 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
       stderr.close
     end
     #PET
-    sql = "select distinct subjectid,scan_procedure_id,export_id from cg_washu_upload where pet_sent_flag ='N' and pet_status_flag in ('G') " # ('Y','R') "
+    sql = "select distinct vgroup_id,export_id,enumbers from cg_washu_upload where pet_sent_flag ='N' and pet_status_flag in ('G') " # ('Y','R') "
     results = connection.execute(sql)
 
-    v_comment = " :list of subjectid "+v_comment
+    v_comment = " :list of vgroupids"+v_comment
     results.each do |r|
-      v_comment = r[0]+","+v_comment
+
+      v_comment = r[0].to_s+","+v_comment
     end
     @schedulerun.comment =v_comment[0..1990]
     @schedulerun.save
     results.each do |r|
-      v_subject_id = r[0]
-      v_export_id = r[2]
-      v_comment = "strt "+r[0]+","+v_comment
+      v_vgroup_id = r[0].to_s
+      v_export_id = r[1]
+      v_comment = "strt "+v_vgroup_id+","+v_comment
       @schedulerun.comment =v_comment[0..1990]
       @schedulerun.save
       # update schedulerun comment - prepend 
-      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
-                                                            evm.enrollment_id = e.id and e.enumber ='"+r[0]+"' and spvg.scan_procedure_id ='"+r[1].to_s+"' and e.do_not_share_scans_flag ='N')"
+      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id = "+v_vgroup_id+" and v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
+                                                            evm.enrollment_id = e.id and  e.do_not_share_scans_flag ='N')"
       results_vgroup = connection.execute(sql_vgroup)
       # mkdir /tmp/washu_upload/[subjectid]_YYYYMMDD_wisc
       v_subject_dir = v_export_id.to_s+"_"+(results_vgroup.first)[0].to_s+"_pet_wisc"
@@ -2862,8 +2889,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                   and appointments.id = petscans.appointment_id and petscans.id = petfiles.petscan_id
                   and petscans.lookup_pettracer_id = lookup_pettracers.id
                   and petscans.lookup_pettracer_id in ("+v_pet_tracer_array.join(",")+") 
-                  and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg 
-                    where spvg.vgroup_id = evm.vgroup_id and evm.enrollment_id = e.id and e.enumber ='"+r[0]+"' and spvg.scan_procedure_id ='"+r[1].to_s+"')
+                  and vgroups.id  = "+v_vgroup_id+" 
                    order by appointments.appointment_date "
       results_pet = connection.execute(sql_pet)
       v_folder_array = [] # how to empty
@@ -2876,7 +2902,13 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
           end
          v_petfile_path = r_dataset[4]
          v_petfile_name = (r_dataset[4].split("/")).last
-         v_petfile_target_name = v_tracer+"_"+v_petfile_name.gsub(v_subject_id,v_export_id.to_s )
+         #/mounts/data/raw/johnson.pipr.visit1/pet/pipr00001_2ef_c95_de11.v
+         v_enumbers_array = r[2].split(",")
+         v_enumbers_array.each do |e|
+               v_subject_id = e
+               v_petfile_name = v_petfile_name.gsub(v_subject_id,v_export_id.to_s )
+         end
+         v_petfile_target_name = v_tracer+"_"+v_petfile_name
          v_call = "rsync -av "+v_petfile_path+" "+v_parent_dir_target+"/"+v_petfile_target_name               
          stdin, stdout, stderr = Open3.popen3(v_call)
          stderr.each {|line|
@@ -2965,31 +2997,31 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
         stdout.close
         stderr.close        
         
-        sql_sent = "update cg_washu_upload set pet_sent_flag ='Y' where subjectid ='"+r[0]+"'   and scan_procedure_id = '"+r[1].to_s+"'"
+        sql_sent = "update cg_washu_upload set pet_sent_flag ='Y' where vgroup_id ='"+r[0].to_s+"'  "
         results_sent = connection.execute(sql_sent)   
 
     end
 
     # get  subjectid to upload    # USING G AS LIMIT FOR TESTING
     #MRI
-    sql = "select distinct subjectid,scan_procedure_id,export_id from cg_washu_upload where mri_sent_flag ='N' and mri_status_flag in ('G') " # ('Y','R') "
+    sql = "select distinct vgroup_id,export_id from cg_washu_upload where mri_sent_flag ='N' and mri_status_flag in ('G') " # ('Y','R') "
     results = connection.execute(sql)
 
-    v_comment = " :list of subjectid "+v_comment
+    v_comment = " :list of vgroupid "+v_comment
     results.each do |r|
-      v_comment = r[0]+","+v_comment
+      v_comment = r[0].to_s+","+v_comment
     end
     @schedulerun.comment =v_comment[0..1990]
     @schedulerun.save
     results.each do |r|
-      v_subject_id = r[0]
-      v_export_id = r[2]
-      v_comment = "strt "+r[0]+","+v_comment
+      v_vgroup_id = r[0].to_s
+      v_export_id = r[1].to_s
+      v_comment = "strt "+v_vgroup_id+","+v_comment
       @schedulerun.comment =v_comment[0..1990]
       @schedulerun.save
       # update schedulerun comment - prepend 
-      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
-                                                            evm.enrollment_id = e.id and e.enumber ='"+r[0]+"' and spvg.scan_procedure_id ='"+r[1].to_s+"' and e.do_not_share_scans_flag ='N')"
+      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id = "+v_vgroup_id+" and v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
+                                                            evm.enrollment_id = e.id  and e.do_not_share_scans_flag ='N')"
       results_vgroup = connection.execute(sql_vgroup)
       # mkdir /tmp/washu_upload/[subjectid]_YYYYMMDD_wisc
       v_subject_dir = v_export_id.to_s+"_"+(results_vgroup.first)[0].to_s+"_mri_wisc"
@@ -3011,8 +3043,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                   and series_description_maps.series_description_type_id = series_description_types.id
                   and series_description_types.series_description_type in ('"+v_series_desc_array.join("','")+"') 
                   and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
-                  and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg 
-                    where spvg.vgroup_id = evm.vgroup_id and evm.enrollment_id = e.id and e.enumber ='"+r[0]+"' and spvg.scan_procedure_id ='"+r[1].to_s+"')
+                  and vgroups.id = "+v_vgroup_id+" 
                    order by appointments.appointment_date "
       results_dataset = connection.execute(sql_dataset)
       v_folder_array = [] # how to empty
@@ -3038,6 +3069,9 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
             v_nii_flag = "N"
   ####          v_nii_file_name =  [subjectid]_[series_description /replace " " with -] , _[] , path- split / , last value]
             v_path_dir_array = r_dataset[4].split("/")
+            #/mounts/data/raw/wrap140/wrp002_5938_03072008/001
+            v_subject_vgroup_array = v_path_dir_array[4].split("_")
+            v_subject_id = v_subject_vgroup_array[0]
             v_nii_file_name = v_subject_id+"_"+r_dataset[3].gsub(/ /,"-")+"_"+v_path_dir_array.last+".nii"
             v_nii_file_path = v_base_path+"/preprocessed/visits/"+v_path_dir_array[4].to_s+"/"+v_subject_id+"/unknown/"+v_nii_file_name
 
@@ -3083,14 +3117,14 @@ puts "AAAAAA "+v_call
          end # skipping if qc severe or incomplete    
       end
 
-      sql_status = "select mri_status_flag from cg_washu_upload where subjectid ='"+r[0]+"' and scan_procedure_id = '"+r[1].to_s+"'"
+      sql_status = "select mri_status_flag from cg_washu_upload where vgroup_id ='"+r[0].to_s+"' "
       results_status = connection.execute(sql_status)
       if v_scan_desc_type_array.size < v_scan_type_limit   and (results_status.first)[0] != "R"
     puts "bbbbb !R or not enough scan types "
-        sql_dirlist = "update cg_washu_upload set general_comment =' NOT ALL SCAN TYPES!!!! "+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' and scan_procedure_id = '"+r[1].to_s+"'"
+        sql_dirlist = "update cg_washu_upload set general_comment =' NOT ALL SCAN TYPES!!!! "+v_folder_array.join(", ")+"' where vgroup_id ='"+r[0].to_s+"' "
         results_dirlist = connection.execute(sql_dirlist)
         # send email 
-        v_subject = "washu_upload "+r[0]+" is missing some scan types --- set mri_status_flag ='R' to send  : scans ="+v_folder_array.join(", ")
+        v_subject = "washu_upload "+r[0].to_s+" is missing some scan types --- set mri_status_flag ='R' to send  : scans ="+v_folder_array.join(", ")
         v_email = "noreply_johnson_lab@medicine.wisc.edu"
         PandaMailer.schedule_notice(v_subject,{:send_to => v_email}).deliver
 
@@ -3100,7 +3134,7 @@ puts "AAAAAA "+v_call
         #   :subject => v_subject
         # )
         PandaMailer.schedule_notice(v_subject,{:send_to => "noreply_johnson_lab@medicine.wisc.edu"}).deliver
-         v_comment_warning = v_comment_warning+"  "+v_scan_desc_type_array.size.to_s+" scan type "+r[0]+" sp"+r[1].to_s
+         v_comment_warning = v_comment_warning+"  "+v_scan_desc_type_array.size.to_s+" scan type "+r[0].to_s+" sp"+r[1].to_s
       v_call = "rm -rf "+v_parent_dir_target
 # puts "BBBBBBBB "+v_call
       stdin, stdout, stderr = Open3.popen3(v_call)
@@ -3117,7 +3151,7 @@ puts "AAAAAA "+v_call
          puts "AAAAAAAAA DCM PATH TMP ="+v_parent_dir_target+"/*/*/*.dcm"
 #         /tmp/washu_upload/adrc00045_20130920_wisc/008_DTI/008
 
-        sql_dirlist = "update cg_washu_upload set mri_dir_list ='"+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' and scan_procedure_id = '"+r[1].to_s+"'"
+        sql_dirlist = "update cg_washu_upload set mri_dir_list ='"+v_folder_array.join(", ")+"' where vgroup_id ='"+r[0].to_s+"' "
         results_dirlist = connection.execute(sql_dirlist)
 # TURN INTO A LOOP
         v_dicom_field_array =['0010,0030','0010,0010','0008,0050','0008,1030','0010,0020','0040,0254','0008,0080','0008,1010','0009,1002','0009,1030','0018,1000',
@@ -3153,6 +3187,24 @@ puts "AAAAAA "+v_call
                                                                                            end 
                                                                                         end }
               Dir.glob(v_parent_dir_target+'/*/*/*.3*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.4*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.5*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.6*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
                                                                                         v_dicom_field_array.each do |dicom_key|
                                                                                             if !d[dicom_key].nil? 
                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
@@ -3241,10 +3293,10 @@ puts "AAAAAA "+v_call
         stdout.close
         stderr.close        
         
-        sql_sent = "update cg_washu_upload set mri_sent_flag ='Y' where subjectid ='"+r[0]+"'   and scan_procedure_id = '"+r[1].to_s+"'"
+        sql_sent = "update cg_washu_upload set mri_sent_flag ='Y' where VGROUP_id ='"+r[0].to_s+"'  "
         results_sent = connection.execute(sql_sent)
       end
-      v_comment = "end "+r[0]+","+v_comment
+      v_comment = "end "+r[0].to_s+","+v_comment
       @schedulerun.comment =v_comment[0..1990]
       @schedulerun.save 
     end
