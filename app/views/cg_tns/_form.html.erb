@@ -46,7 +46,11 @@
 	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 						    <%= f.label :table_editable %>: 
 							<%= f.select :editable_flag, options_for_select(v_y_n, @cg_tn.editable_flag),
-								              {:prompt => 'Select editable'}  %>							
+								              {:prompt => 'Select editable'}  %>	
+                              &nbsp;&nbsp;&nbsp; 
+              <%= f.label :secondary_key_flag %>: 
+            <%= f.select :secondary_key_flag, options_for_select(v_y_n, @cg_tn.secondary_key_flag),
+                            {:prompt => 'Select secondary_key_flag'}  %>						
  </td></tr></table>
  <table><tr><td><%= f.label :tracker_type %>:
  	<%= collection_select('cg_tn', :tracker_id,Trtype.where("status_flag ='Y' ").order(:description), :id, :description,  {:prompt => 'Choose tracker if table type is tracker'}, {:multiple =>  false} ) %>

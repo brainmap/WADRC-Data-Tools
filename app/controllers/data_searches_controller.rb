@@ -837,7 +837,7 @@ class DataSearchesController < ApplicationController
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       @scan_procedure_list = scan_procedure_list
       # make the sql -- start with base 
-
+      v_secondary_key_tn_array =[]
       @local_column_headers =["Date (vgroup)","Protocol","Enumber","RMR"]
       @local_fields = []
       @local_conditions =[]
@@ -1356,7 +1356,8 @@ class DataSearchesController < ApplicationController
                            @left_join_vgroup = []
                            @column_headers_q_data =[]
                            @headers_q_data =[]
-
+                                 
+                           # trying to get secondary key in conditions
                            @conditions.concat(@conditions_bak)
                            # @conditions  captured above, after first set of form elements - mainly want sp limit
                            # define q_data form_id  
@@ -1818,6 +1819,16 @@ class DataSearchesController < ApplicationController
              end
        end
     end
+    # ADDING A JOIN ON THE SECONDARY KEY - Will nor probably work for alias or trackers 
+    # always expect column called secondary_key
+    @all_table_ids_in_query.uniq.each do |r|
+        v_temp_tn = CgTn.find(r)
+        if v_temp_tn.secondary_key_flag == "Y"
+           v_secondary_key_join =" coalesce(appointments.secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,'') "
+          @local_conditions.push(v_secondary_key_join) 
+        end
+
+    end 
     
     @local_tables.uniq.each do |tn|   # need left join right after parent tn
        v_tn = tn

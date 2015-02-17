@@ -30,6 +30,7 @@
     <th>Tracker type</th>
     <th>Table active status</th>
     <th>Table editable</th>
+    <th>Table has secondary key</th>
     <th>Owners</th>
   </tr>
 
@@ -50,6 +51,7 @@
     <td><% if !cg_tn.tracker_id.nil? %><%= Trtype.find(cg_tn.tracker_id).description %><%end%></td>
     <td><%= cg_tn.status_flag %></td>
     <td><%= cg_tn.editable_flag %></td>
+    <td><%= cg_tn.secondary_key_flag %></td>
     <td><%= cg_tn.users.sort_by(&:username_name).collect {|u|  u.username_name}.join(", ").html_safe %></td>
 
   </tr>
