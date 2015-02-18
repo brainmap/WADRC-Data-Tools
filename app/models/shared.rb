@@ -2761,7 +2761,8 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
       v_comment = ""
       v_comment_warning =""
     connection = ActiveRecord::Base.connection();
-    v_scan_procedure_exclude = [21,28,31,34]
+    # shp, alz, pc, adni, dodadni, lmpd
+    v_scan_procedure_exclude = [21,28,31,34,15,19,23,35,44,51,50,49]
      v_scan_procedures = [20,24,26,36,41]  # how to only get adrc impact? 
      #not limiting by protocol #scan_procedures_vgroups.scan_procedure_id in ("+v_scan_procedures.join(",")+")
      # getting adrc impact from t_adrc_impact_20150105  --- change to get from refreshing table?
@@ -2778,7 +2779,8 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
               from enrollments,enrollment_vgroup_memberships, vgroups, scan_procedures_vgroups,participants    
             where participants.id = vgroups.participant_id and
              ( (participants.wrapnum is not null and participants.wrapnum > '')
-               or vgroups.participant_id in ( select t_adrc_impact_20150105.participant_id from t_adrc_impact_20150105 where participant_id is not null)
+               or vgroups.participant_id in ( select t_adrc_impact_control_20150216.participant_id 
+                       from t_adrc_impact_control_20150216 where participant_id is not null and lp_completed_flag ='Y')
               )
               and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
               and vgroups.id = scan_procedures_vgroups.vgroup_id
@@ -2790,11 +2792,18 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                                          where scan_procedure_id = scan_procedures_vgroups.scan_procedure_id )
               and ( ( vgroups.transfer_mri ='yes' and vgroups.transfer_pet ='yes' and vgroups.id 
                   in ( select appointments.vgroup_id from appointments, petscans where petscans.appointment_id = appointments.id
-                           and petscans.lookup_pettracer_id = 1))  
+                           and petscans.lookup_pettracer_id = 1)
+                        and vgroups.participant_id in (select p.id from participants p where wrapnum is not null and wrapnum > ''))  
                   or 
-                 (vgroups.transfer_mri ='yes'  and enrollments.id in ( select enrollment_id from cg_csf) )
+                 (vgroups.transfer_mri ='yes'  and enrollments.id in ( select enrollment_id from cg_csf) 
+                         and vgroups.participant_id in (select p.id from participants p where wrapnum is not null and wrapnum > ''))
                  or 
-                 (vgroups.transfer_mri ='yes' and vgroups.completedlumbarpuncture = 'yes' and vgroups.id 
+                 (vgroups.transfer_mri ='yes'  and vgroups.participant_id in ( select t_adrc_impact_control_20150216.participant_id 
+                       from t_adrc_impact_control_20150216 where participant_id is not null and lp_completed_flag ='Y') )
+                 or 
+                 (vgroups.transfer_mri ='yes' and vgroups.completedlumbarpuncture = 'yes' 
+                  and vgroups.participant_id in (select p.id from participants p where wrapnum is not null and wrapnum > '')
+                  and vgroups.id 
                   in ( select appointments.vgroup_id from appointments, lumbarpunctures where lumbarpunctures.appointment_id = appointments.id 
                   and lumbarpunctures.lpsuccess = 1) ) )"
     results = connection.execute(sql)
@@ -3003,8 +3012,11 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
     end
 
     # get  subjectid to upload    # USING G AS LIMIT FOR TESTING
-    #MRI
-    sql = "select distinct vgroup_id,export_id from cg_washu_upload where mri_sent_flag ='N' and mri_status_flag in ('G') " # ('Y','R') "
+    #MRI  switching to appointment
+    sql = "select distinct cg_washu_upload.vgroup_id,export_id,appointments.id from cg_washu_upload,appointments 
+     where appointments.vgroup_id = cg_washu_upload.vgroup_id and
+            appointments.appointment_type = 'mri'
+            and    mri_sent_flag ='N' and mri_status_flag in ('G') " # ('Y','R') "
     results = connection.execute(sql)
 
     v_comment = " :list of vgroupid "+v_comment
@@ -3013,18 +3025,30 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
     end
     @schedulerun.comment =v_comment[0..1990]
     @schedulerun.save
+    v_past_vgroup_id = "0"
+    v_cnt = 1
     results.each do |r|
       v_vgroup_id = r[0].to_s
+      if v_vgroup_id  != v_past_vgroup_id
+            v_past_vgroup_id = v_vgroup_id
+            v_cnt = 1
+      else
+            v_cnt = v_cnt + 1
+      end
       v_export_id = r[1].to_s
+      v_appointment_id = r[2].to_s
       v_comment = "strt "+v_vgroup_id+","+v_comment
       @schedulerun.comment =v_comment[0..1990]
       @schedulerun.save
       # update schedulerun comment - prepend 
-      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id = "+v_vgroup_id+" and v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
+      sql_vgroup = "select DATE_FORMAT(max(a.appointment_date),'%Y%m%d' ),DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from appointments a,vgroups v where v.id = "+v_vgroup_id+" 
+                          and v.id = a.vgroup_id and a.id = "+v_appointment_id+"
+                           and v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
                                                             evm.enrollment_id = e.id  and e.do_not_share_scans_flag ='N')"
+puts "PPPPP = apptid="+v_appointment_id+"  sql="+sql_vgroup      
       results_vgroup = connection.execute(sql_vgroup)
       # mkdir /tmp/washu_upload/[subjectid]_YYYYMMDD_wisc
-      v_subject_dir = v_export_id.to_s+"_"+(results_vgroup.first)[0].to_s+"_mri_wisc"
+      v_subject_dir = v_export_id.to_s+"_"+(results_vgroup.first)[1].to_s+"_"+(results_vgroup.first)[0].to_s+"_"+v_cnt.to_s+"_mri_wisc"
       v_parent_dir_target =v_target_dir+"/"+v_subject_dir
       v_call = "mkdir "+v_parent_dir_target
       stdin, stdout, stderr = Open3.popen3(v_call)
@@ -3043,7 +3067,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                   and series_description_maps.series_description_type_id = series_description_types.id
                   and series_description_types.series_description_type in ('"+v_series_desc_array.join("','")+"') 
                   and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
-                  and vgroups.id = "+v_vgroup_id+" 
+                  and vgroups.id = "+v_vgroup_id+"  and appointments.id = "+v_appointment_id+"
                    order by appointments.appointment_date "
       results_dataset = connection.execute(sql_dataset)
       v_folder_array = [] # how to empty
@@ -3151,7 +3175,7 @@ puts "AAAAAA "+v_call
          puts "AAAAAAAAA DCM PATH TMP ="+v_parent_dir_target+"/*/*/*.dcm"
 #         /tmp/washu_upload/adrc00045_20130920_wisc/008_DTI/008
 
-        sql_dirlist = "update cg_washu_upload set mri_dir_list ='"+v_folder_array.join(", ")+"' where vgroup_id ='"+r[0].to_s+"' "
+        sql_dirlist = "update cg_washu_upload set mri_dir_list =concat('"+v_folder_array.join(", ")+"',mri_dir_list) where vgroup_id ='"+r[0].to_s+"' "
         results_dirlist = connection.execute(sql_dirlist)
 # TURN INTO A LOOP
         v_dicom_field_array =['0010,0030','0010,0010','0008,0050','0008,1030','0010,0020','0040,0254','0008,0080','0008,1010','0009,1002','0009,1030','0018,1000',
@@ -4976,23 +5000,27 @@ puts "ppppppp "+dir_name_array[0]
                               if f.start_with?("swr"+enrollment[0].enumber+"_summed.nii")
                                   v_fdg_preproc_v5 ="Y"
                               end
-                              
-    ## NEED v_default_subjectspace_masks_v5
-
-                               if f.start_with?("wr") and f.end_with?("summed.nii")
-                                  v_fdg_summed_flag ="Y"
-                                end
+                              if File.directory?(v_subjectid_fdg+"/masks")
+                                v_dir_masks_array = Dir.entries(v_subjectid_fdg+"/masks") 
+                                if (v_dir_masks_array.length > 55) # expect 56 , assume all files are masks
+                                      v_default_subjectspace_masks_v5 = "Y"
+                                end  
                               end
+
+                              if f.start_with?("wr") and f.end_with?("summed.nii")
+                                  v_fdg_summed_flag ="Y"
+                              end
+                            end
                                 
-                             sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','','"+v_fdg_registered_to_fs_flag+"','"+v_fdg_scaled_registered_to_fs_flag+"','"+v_fdg_smoothed_and_warped_flag+"','"+v_fdg_scaled_smoothed_and_warped_flag+"','"+v_fdg_summed_flag+"','"+v_fdg_preproc_v5+"','"+v_default_subjectspace_masks_v5+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
+                            sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','','"+v_fdg_registered_to_fs_flag+"','"+v_fdg_scaled_registered_to_fs_flag+"','"+v_fdg_smoothed_and_warped_flag+"','"+v_fdg_scaled_smoothed_and_warped_flag+"','"+v_fdg_summed_flag+"','"+v_fdg_preproc_v5+"','"+v_default_subjectspace_masks_v5+"',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
-                             else   # just insert empty row
+                        else   # just insert empty row
                                  sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','no fdg dir','N','N','N','N','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+")"
                                  results = connection.execute(sql)
-                             end # check for subjectid asl dir
-                      else
+                        end # check for subjectid asl dir
+                     else
                            #puts "no enrollment "+dir_name_array[0]
-                      end # check for enrollment
+                     end # check for enrollment
                  end # loop thru the subjectids
             end            
             # check move cg_ to cg_old
