@@ -1,6 +1,9 @@
 <%
 v_yes_no_display = [["Yes","1"], ["No","0"]]
 v_0_30_min_display = [["0","0"], ["30","30"]]
+v_needlesize_display = [["25 x 3.5","25 x 3.5"],["25 x 4","25 x 4"],["24 x 3.5","24 x 3.5"],
+["24 x 4","24 x 4"],["24 x 4.5","24 x 4.5"],["24 x 6","24 x 6"]]
+v_yes_no_na_display = [["Yes","yes"], ["No","no"], ["n/a","n/a"]]
 %>
 <% javascript_tag 'defaults' %>
 <div id="new_edit_form">
@@ -22,7 +25,7 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
       <%= f.label :Fast_Completed %>&nbsp;&nbsp;&nbsp;</td><td width="10">
 		<%= f.select :completedlpfast, options_for_select(v_yes_no_display, @lumbarpuncture.completedlpfast),
 							              {:prompt => 'Select if the lumbarpuncture fast was completed'} %></td></tr>
-     <tr><td><%= f.label :Fast_Total_Time %>&nbsp;&nbsp;&nbsp;</td><td width="10" nowrap> 
+     <tr  ><td><%= f.label :Fast_Total_Time %>&nbsp;&nbsp;&nbsp;</td><td width="10" nowrap> 
 	
 	<%= f.select :lpfasttotaltime, options_for_select(0..48, @lumbarpuncture.lpfasttotaltime),
 						              {:prompt => 'Select hrs'} %> <small>hrs </small>
@@ -69,6 +72,19 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
     <tr><td colspan="2">
 	<small>Select "n/a" if the LP will not be done.</small>
 	</td></tr>
+	    <tr>
+      <td>24 hr Followup Headache</td>
+      <td>
+	<%= f.select :followupheadache, options_for_select(v_yes_no_na_display, @lumbarpuncture.followupheadache),
+						              {:prompt => 'Select ....'} %>  
+	</td>
+    </tr>
+        <tr>
+      <td>Needle Size</td>
+      <td><%= f.select :needlesize, options_for_select(v_needlesize_display, @lumbarpuncture.needlesize),
+						              {:prompt => 'Select ....'} %> 
+	</td>
+    </tr>
 	      	<tr>
       <td><br><%= f.label(:appointment_coordinator) %></td>
       <td><br><%= select(:appointment, :appointment_coordinator, Employee.all.sort_by(&:name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Select Appt Coordinator" }) %></td>

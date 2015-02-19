@@ -15,7 +15,9 @@
       :RMR_Number => @vgroup.rmr,
       :LP_Abnormality_Found =>  @lumbarpuncture.lpabnormality == 1 ? "Yes" : "No" ,
        :Appt_Coordinator =>@appointment.appointment_coordinator.blank? ? "" : Employee.find(@appointment.appointment_coordinator).name,
-      :Participant => @participant.nil? ? nil : link_to('view participant', @participant)
+      :Participant => @participant.nil? ? nil : link_to('view participant', @participant),
+      :Needle_Size => @lumbarpuncture.needlesize,
+            "24_hr_Followup_Headache" => @lumbarpuncture.followupheadache
     }) %>
   </div>
 
