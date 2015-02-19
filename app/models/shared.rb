@@ -2878,7 +2878,10 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
       @schedulerun.comment =v_comment[0..1990]
       @schedulerun.save
       # update schedulerun comment - prepend 
-      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id = "+v_vgroup_id+" and v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
+    
+      sql_vgroup = "select round((DATEDIFF(max(v.vgroup_date),p.dob)/365.25),2) from vgroups v, participants p where 
+                 v.participant_id = p.id
+                 v.id = "+v_vgroup_id+" and v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
                                                             evm.enrollment_id = e.id and  e.do_not_share_scans_flag ='N')"
       results_vgroup = connection.execute(sql_vgroup)
       # mkdir /tmp/washu_upload/[subjectid]_YYYYMMDD_wisc
@@ -3041,8 +3044,12 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
       @schedulerun.comment =v_comment[0..1990]
       @schedulerun.save
       # update schedulerun comment - prepend 
-      sql_vgroup = "select DATE_FORMAT(max(a.appointment_date),'%Y%m%d' ),DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from appointments a,vgroups v where v.id = "+v_vgroup_id+" 
+
+      sql_vgroup = "select round((DATEDIFF(a.appointment_date,p.dob)/365.25),2),
+      round((DATEDIFF(v.vgroup_date,p.dob)/365.25),2),
+      a.id from appointments a,vgroups v,participants p where v.id = "+v_vgroup_id+" 
                           and v.id = a.vgroup_id and a.id = "+v_appointment_id+"
+                          and v.participant_id = p.id
                            and v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
                                                             evm.enrollment_id = e.id  and e.do_not_share_scans_flag ='N')"
 puts "PPPPP = apptid="+v_appointment_id+"  sql="+sql_vgroup      
@@ -3177,14 +3184,16 @@ puts "AAAAAA "+v_call
 
         sql_dirlist = "update cg_washu_upload set mri_dir_list =concat('"+v_folder_array.join(", ")+"',mri_dir_list) where vgroup_id ='"+r[0].to_s+"' "
         results_dirlist = connection.execute(sql_dirlist)
-# TURN INTO A LOOP
+# TURN INTO A LOOP -- need to get rid of dates 
         v_dicom_field_array =['0010,0030','0010,0010','0008,0050','0008,1030','0010,0020','0040,0254','0008,0080','0008,1010','0009,1002','0009,1030','0018,1000',
-                        '0025,101A','0040,0242','0040,0243']
+                        '0025,101A','0040,0242','0040,0243','0008,0020','0008,0021','0008,0022','0008,0023','0040,0244']
         v_dicom_field_value_hash ={'0010,0030'=>'DOB','0010,0010'=>'Name','0008,0050'=>'Accession Number',
                            '0008,1030'=>'Study Description', '0010,0020'=>'Patient ID','0040,0254'=>'Performed Proc Step Desc',
                             '0008,0080'=>'Institution Name','0008,1010'=>'Station Name','0009,1002'=>'Private',
                             '0009,1030'=>'Private','0018,1000'=>'Device Serial Number','0025,101A'=>'Private',
-                            '0040,0242'=>'Performed Station Name','0040,0243'=>'Performed Location'}
+                            '0040,0242'=>'Performed Station Name','0040,0243'=>'Performed Location',
+                            '0008,0020'=>'Study Date','0008,0021'=>'Series Date','0008,0022'=>'Acquisition Date',   
+                            '0008,0023'=>'Content Date','0040,0244'=>'Performed Procedure Step Start Date'}
      ####  v_dicom_field_array.each do |dicom_key|
                Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.read(dcm); 
                                                                                      v_dicom_field_array.each do |dicom_key|
