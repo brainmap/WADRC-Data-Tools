@@ -2788,7 +2788,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
               and enrollment_vgroup_memberships.enrollment_id = enrollments.id
               and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL "+v_weeks_back+" WEEK)  
               and enrollments.do_not_share_scans_flag ='N'           
-              and vgroups.id NOT IN ( select vgroup_id from cg_washu_upload 
+              and vgroups.id NOT IN ( select cg_washu_upload.vgroup_id from cg_washu_upload 
                                          where scan_procedure_id = scan_procedures_vgroups.scan_procedure_id )
               and ( ( vgroups.transfer_mri ='yes' and vgroups.transfer_pet ='yes' and vgroups.id 
                   in ( select appointments.vgroup_id from appointments, petscans where petscans.appointment_id = appointments.id
