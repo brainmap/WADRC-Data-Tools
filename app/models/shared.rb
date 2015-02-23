@@ -2881,7 +2881,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
     
       sql_vgroup = "select round((DATEDIFF(max(v.vgroup_date),p.dob)/365.25),2) from vgroups v, participants p where 
                  v.participant_id = p.id
-                 v.id = "+v_vgroup_id+" and v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
+                and v.id = "+v_vgroup_id+" and v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
                                                             evm.enrollment_id = e.id and  e.do_not_share_scans_flag ='N')"
       results_vgroup = connection.execute(sql_vgroup)
       # mkdir /tmp/washu_upload/[subjectid]_YYYYMMDD_wisc
