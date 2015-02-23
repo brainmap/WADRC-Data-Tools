@@ -2774,13 +2774,13 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
     # recruit new  scans ---   change 
     v_weeks_back = "2"  # cwant to give time for quality checks etc. 
     # NEED TO LIMIT ADRC BY LP --- NEED TO REFRESH ADRC IMPACT 
+    #  t_adrc_impact_control_20150216 where participant_id is not null and lp_completed_flag ='Y')
     sql = "select distinct vgroups.id, vgroups.participant_id,
               vgroups.transfer_mri, vgroups.transfer_pet
               from enrollments,enrollment_vgroup_memberships, vgroups, scan_procedures_vgroups,participants    
             where participants.id = vgroups.participant_id and
              ( (participants.wrapnum is not null and participants.wrapnum > '')
-               or vgroups.participant_id in ( select t_adrc_impact_control_20150216.participant_id 
-                       from t_adrc_impact_control_20150216 where participant_id is not null and lp_completed_flag ='Y')
+               or vgroups.participant_id in ( select t_washu_adrc_20150215.participant_id from t_washu_adrc_20150215)
               )
               and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
               and vgroups.id = scan_procedures_vgroups.vgroup_id
@@ -2798,8 +2798,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                  (vgroups.transfer_mri ='yes'  and enrollments.id in ( select enrollment_id from cg_csf) 
                          and vgroups.participant_id in (select p.id from participants p where wrapnum is not null and wrapnum > ''))
                  or 
-                 (vgroups.transfer_mri ='yes'  and vgroups.participant_id in ( select t_adrc_impact_control_20150216.participant_id 
-                       from t_adrc_impact_control_20150216 where participant_id is not null and lp_completed_flag ='Y') )
+                 (vgroups.transfer_mri ='yes'  and vgroups.participant_id in (  select t_washu_adrc_20150215.participant_id from t_washu_adrc_20150215) )
                  or 
                  (vgroups.transfer_mri ='yes' and vgroups.completedlumbarpuncture = 'yes' 
                   and vgroups.participant_id in (select p.id from participants p where wrapnum is not null and wrapnum > '')
