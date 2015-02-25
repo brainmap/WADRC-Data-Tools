@@ -1812,7 +1812,7 @@ class DataSearchesController < ApplicationController
     end
 
     @local_conditions.delete_if {|x| x == "" }   # a blank getting inserted 
-    sql = " select distinct "+@local_fields.join(',')+" from "
+   # moved further down - hide cols sql = " select distinct "+@local_fields.join(',')+" from "
     @all_tables = []
     # participant_centic order by 
     if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0
@@ -1826,8 +1826,14 @@ class DataSearchesController < ApplicationController
     end
     # ADDING A JOIN ON THE SECONDARY KEY - Will nor probably work for alias or trackers 
     # always expect column called secondary_key
-    v_includes_view_mri_appts = 'N'
+    v_includes_view_mri_appts = "N"
+    v_includes_hide_date_tns  = "N"
     v_tn_cn_match_mri_path_array = []
+    v_table_type_hide_date_array = []
+    v_table_types = CgTableType.where(" hide_date_flag = 'Y'")
+    v_table_types.each do |tt|
+         v_table_type_hide_date_array.push(tt.table_type)
+    end 
     @all_table_ids_in_query.uniq.each do |r|
         v_temp_tn = CgTn.find(r)
         if v_temp_tn.secondary_key_flag == "Y"
@@ -1836,7 +1842,10 @@ class DataSearchesController < ApplicationController
         end
         # if include mri table, and table with a column with match_mri_path_flag 
         if v_temp_tn.tn == 'view_mri_appts'
-             v_includes_view_mri_appts = 'Y'
+             v_includes_view_mri_appts = "Y"
+        end
+        if (v_table_type_hide_date_array.include? v_temp_tn.table_type)
+          v_includes_hide_date_tns  = "Y"
         end
         v_tmp_tn_cns = CgTnCn.where("cg_tn_id in (?) and match_mri_path_flag ='Y' ",v_temp_tn.id)
         v_tmp_tn_cns.each do |cn|
@@ -1848,6 +1857,24 @@ class DataSearchesController < ApplicationController
              v_mri_path_match_join = " view_mri_appts.path LIKE CONCAT('%',"+tn_cn+",'%') "
              @local_conditions.push(v_mri_path_match_join ) 
          end
+    end
+
+    if v_includes_hide_date_tns  == "Y"
+        # need to exclude hide columns   # format tn.cn
+        @local_fields.each do |lf|
+            v_temp_split = lf.split(".")
+            v_temp_tn = CgTn.where("tn in (?)",v_temp_split[0])
+            if !v_temp_tn.nil? and !v_temp_tn.first.blank?
+               v_temp_cn = CgTnCn.where("cg_tn_id in (?) and  cn in (?) and hide_column_flag = 'Y'", v_temp_tn.first.id,v_temp_split[1])
+               if !v_temp_cn.nil? and !v_temp_cn.first.blank?
+                    @local_column_headers.delete_at((@local_fields.index(lf)+1))
+                    @local_fields.delete(lf)
+               end
+            end
+        end
+        sql = " select distinct "+@local_fields.join(',')+" from "
+    else
+        sql = " select distinct "+@local_fields.join(',')+" from "
     end
     
     @local_tables.uniq.each do |tn|   # need left join right after parent tn
@@ -1884,6 +1911,27 @@ class DataSearchesController < ApplicationController
       # image_datasets
       # get list of columns from ids_search
       # @column_headers_ids = ['Date','Protocol','Enumber','RMR','series_description','dicom_series_uid','dcm_file_count','timestamp','scanned_file','image_uid','id','rep_time','glob','path','bold_reps','slices_per_volume','visit.age_at_visit','visit.scanner_source','image_dataset_quality_checks.motion_warning','image_dataset_quality_checks.incomplete_series','image_dataset_quality_checks.omnibus_f_comment','image_dataset_quality_checks.fov_cutoff','image_dataset_quality_checks.banding_comment','image_dataset_quality_checks.spm_mask','image_dataset_quality_checks.garbled_series_comment','image_dataset_quality_checks.motion_warning_comment','image_dataset_quality_checks.user_id','image_dataset_quality_checks.banding','image_dataset_quality_checks.field_inhomogeneity','image_dataset_quality_checks.nos_concerns_comment','image_dataset_quality_checks.garbled_series','image_dataset_quality_checks.created_at','image_dataset_quality_checks.incomplete_series_comment','image_dataset_quality_checks.omnibus_f','image_dataset_quality_checks.other_issues','image_dataset_quality_checks.fov_cutoff_comment','image_dataset_quality_checks.nos_concerns','image_dataset_quality_checks.registration_risk','image_dataset_quality_checks.ghosting_wrapping','image_dataset_quality_checks.field_inhomogeneity_comment','image_dataset_quality_checks.updated_at','image_dataset_quality_checks.registration_risk_comment','image_dataset_quality_checks.ghosting_wrapping_comment','image_dataset_quality_checks.image_dataset_id','image_dataset_quality_checks.spm_mask_comment','image_comments.comment','image_comments.updated_at','image_comments.created_at','image_comments.user_id','image_comments.image_dataset_id','Appt Note'] # need to look up values
+       if @hide_page_flag  == "Y"
+        @column_headers_ids =   ['Protocol','Enumber','RMR','series_description','dicom_series_uid','dcm_file_count','timestamp','scanned_file','image_uid','id','rep_time','glob','path','bold_reps','slices_per_volume','visit.age_at_visit','visit.scanner_source','image_comments.comment',
+   'image_dataset_quality_checks.incomplete_series','image_dataset_quality_checks.incomplete_series_comment','image_dataset_quality_checks.garbled_series','image_dataset_quality_checks.garbled_series_comment','image_dataset_quality_checks.fov_cutoff','image_dataset_quality_checks.fov_cutoff_comment','image_dataset_quality_checks.field_inhomogeneity','image_dataset_quality_checks.field_inhomogeneity_comment','image_dataset_quality_checks.ghosting_wrapping','image_dataset_quality_checks.ghosting_wrapping_comment',
+   'image_dataset_quality_checks.banding','image_dataset_quality_checks.banding_comment','image_dataset_quality_checks.registration_risk','image_dataset_quality_checks.registration_risk_comment','image_dataset_quality_checks.nos_concerns','image_dataset_quality_checks.nos_concerns_comment','image_dataset_quality_checks.motion_warning','image_dataset_quality_checks.motion_warning_comment',
+      'image_dataset_quality_checks.omnibus_f','image_dataset_quality_checks.omnibus_f_comment','image_dataset_quality_checks.spm_mask','image_dataset_quality_checks.spm_mask_comment','image_dataset_quality_checks.other_issues',
+      'image_dataset_quality_checks.user_id','image_dataset_quality_checks.image_dataset_id','image_comments.user_id','image_comments.image_dataset_id','Appt Note'] # need to look up values
+          
+          # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+      @column_number_ids =   @column_headers_ids.size
+      # try left joins on quality check tables, user name
+      # weird utc transformations -- utc in db but timestamps from files seem different
+      # @fields_ids = ["vgroups.id","vgroups.vgroup_date","vgroups.rmr","image_datasets.series_description","image_datasets.dicom_series_uid","image_datasets.dcm_file_count","concat(date_format(image_datasets.timestamp,'%m/%d/%Y'),time_format(timediff( time(image_datasets.timestamp),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_datasets.scanned_file","image_datasets.image_uid","image_datasets.id","image_datasets.rep_time","image_datasets.glob","image_datasets.path","image_datasets.bold_reps","image_datasets.slices_per_volume","appointments.age_at_appointment","visits.scanner_source","image_dataset_quality_checks.motion_warning","image_dataset_quality_checks.incomplete_series","image_dataset_quality_checks.omnibus_f_comment","image_dataset_quality_checks.fov_cutoff","image_dataset_quality_checks.banding_comment","image_dataset_quality_checks.spm_mask","image_dataset_quality_checks.garbled_series_comment","image_dataset_quality_checks.motion_warning_comment","concat(qc_users.last_name,', ',qc_users.first_name)","image_dataset_quality_checks.banding","image_dataset_quality_checks.field_inhomogeneity","image_dataset_quality_checks.nos_concerns_comment","image_dataset_quality_checks.garbled_series","concat(date_format(image_dataset_quality_checks.created_at,'%m/%d/%Y'),time_format(timediff( time(image_dataset_quality_checks.created_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_dataset_quality_checks.incomplete_series_comment","image_dataset_quality_checks.omnibus_f","image_dataset_quality_checks.other_issues","image_dataset_quality_checks.fov_cutoff_comment","image_dataset_quality_checks.nos_concerns","image_dataset_quality_checks.registration_risk","image_dataset_quality_checks.ghosting_wrapping","image_dataset_quality_checks.field_inhomogeneity_comment","concat(date_format(image_dataset_quality_checks.updated_at,'%m/%d/%Y'),time_format(timediff( time(image_dataset_quality_checks.updated_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_dataset_quality_checks.registration_risk_comment","image_dataset_quality_checks.ghosting_wrapping_comment","image_dataset_quality_checks.image_dataset_id","image_dataset_quality_checks.spm_mask_comment","image_comments.comment","concat(date_format(image_comments.updated_at,'%m/%d/%Y'),time_format(timediff( time(image_comments.updated_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(date_format(image_comments.created_at,'%m/%d/%Y'),time_format(timediff( time(image_comments.created_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(users.last_name,', ',users.first_name)","image_comments.image_dataset_id"]
+      @fields_ids =["vgroups.id","vgroups.rmr","image_datasets.series_description","image_datasets.dicom_series_uid","image_datasets.dcm_file_count","concat(date_format(image_datasets.timestamp,'%m/%d/%Y'),time_format(timediff( time(image_datasets.timestamp),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_datasets.scanned_file","image_datasets.image_uid","image_datasets.id","image_datasets.rep_time","image_datasets.glob","image_datasets.path","image_datasets.bold_reps","image_datasets.slices_per_volume","appointments.age_at_appointment","visits.scanner_source","group_concat(image_comments.comment separator ', ')",
+"image_dataset_quality_checks.incomplete_series","image_dataset_quality_checks.incomplete_series_comment","image_dataset_quality_checks.garbled_series","image_dataset_quality_checks.garbled_series_comment","image_dataset_quality_checks.fov_cutoff","image_dataset_quality_checks.fov_cutoff_comment","image_dataset_quality_checks.field_inhomogeneity","image_dataset_quality_checks.field_inhomogeneity_comment","image_dataset_quality_checks.ghosting_wrapping","image_dataset_quality_checks.ghosting_wrapping_comment",
+"image_dataset_quality_checks.banding","image_dataset_quality_checks.banding_comment","image_dataset_quality_checks.registration_risk","image_dataset_quality_checks.registration_risk_comment","image_dataset_quality_checks.nos_concerns","image_dataset_quality_checks.nos_concerns_comment","image_dataset_quality_checks.motion_warning","image_dataset_quality_checks.motion_warning_comment",
+        "image_dataset_quality_checks.omnibus_f","image_dataset_quality_checks.omnibus_f_comment","image_dataset_quality_checks.spm_mask","image_dataset_quality_checks.spm_mask_comment","image_dataset_quality_checks.other_issues",
+       "concat(qc_users.last_name,', ',qc_users.first_name)","image_dataset_quality_checks.image_dataset_id","concat(users.last_name,', ',users.first_name)","image_comments.image_dataset_id"]
+      
+
+       else
+
         @column_headers_ids =   ['Date (vgroup)','Protocol','Enumber','RMR','series_description','dicom_series_uid','dcm_file_count','timestamp','scanned_file','image_uid','id','rep_time','glob','path','bold_reps','slices_per_volume','visit.age_at_visit','visit.scanner_source','image_comments.comment',
    'image_dataset_quality_checks.incomplete_series','image_dataset_quality_checks.incomplete_series_comment','image_dataset_quality_checks.garbled_series','image_dataset_quality_checks.garbled_series_comment','image_dataset_quality_checks.fov_cutoff','image_dataset_quality_checks.fov_cutoff_comment','image_dataset_quality_checks.field_inhomogeneity','image_dataset_quality_checks.field_inhomogeneity_comment','image_dataset_quality_checks.ghosting_wrapping','image_dataset_quality_checks.ghosting_wrapping_comment',
    'image_dataset_quality_checks.banding','image_dataset_quality_checks.banding_comment','image_dataset_quality_checks.registration_risk','image_dataset_quality_checks.registration_risk_comment','image_dataset_quality_checks.nos_concerns','image_dataset_quality_checks.nos_concerns_comment','image_dataset_quality_checks.motion_warning','image_dataset_quality_checks.motion_warning_comment',
@@ -1900,7 +1948,7 @@ class DataSearchesController < ApplicationController
 "image_dataset_quality_checks.banding","image_dataset_quality_checks.banding_comment","image_dataset_quality_checks.registration_risk","image_dataset_quality_checks.registration_risk_comment","image_dataset_quality_checks.nos_concerns","image_dataset_quality_checks.nos_concerns_comment","image_dataset_quality_checks.motion_warning","image_dataset_quality_checks.motion_warning_comment",
         "image_dataset_quality_checks.omnibus_f","image_dataset_quality_checks.omnibus_f_comment","image_dataset_quality_checks.spm_mask","image_dataset_quality_checks.spm_mask_comment","image_dataset_quality_checks.other_issues",
        "concat(qc_users.last_name,', ',qc_users.first_name)","concat(date_format(image_dataset_quality_checks.created_at,'%m/%d/%Y'),time_format(timediff( time(image_dataset_quality_checks.created_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(date_format(image_dataset_quality_checks.updated_at,'%m/%d/%Y'),time_format(timediff( time(image_dataset_quality_checks.updated_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_dataset_quality_checks.image_dataset_id","concat(date_format(image_comments.updated_at,'%m/%d/%Y'),time_format(timediff( time(image_comments.updated_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(date_format(image_comments.created_at,'%m/%d/%Y'),time_format(timediff( time(image_comments.created_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(users.last_name,', ',users.first_name)","image_comments.image_dataset_id"]
-      
+      end
       @local_conditions_ids =["visits.appointment_id = appointments.id", "visits.id = image_datasets.visit_id","image_datasets.series_description in (select series_description from series_description_maps where series_description_type_id = '"+params[:cg_search][:series_description_type_id]+"')"]
       @left_join_ids_hash = {
                 "image_datasets" => "LEFT JOIN image_dataset_quality_checks on image_datasets.id = image_dataset_quality_checks.image_dataset_id 
