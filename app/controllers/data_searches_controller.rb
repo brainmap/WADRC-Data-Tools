@@ -1821,14 +1821,29 @@ class DataSearchesController < ApplicationController
     end
     # ADDING A JOIN ON THE SECONDARY KEY - Will nor probably work for alias or trackers 
     # always expect column called secondary_key
+    v_includes_view_mri_appts = 'N'
+    v_tn_cn_match_mri_path_array = []
     @all_table_ids_in_query.uniq.each do |r|
         v_temp_tn = CgTn.find(r)
         if v_temp_tn.secondary_key_flag == "Y"
            v_secondary_key_join =" coalesce(appointments.secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,'') "
           @local_conditions.push(v_secondary_key_join) 
         end
-
+        # if include mri table, and table with a column with match_mri_path_flag 
+        if v_temp_tn.tn == 'view_mri_appts'
+             v_includes_view_mri_appts = 'Y'
+        end
+        v_tmp_tn_cns = CgTnCn.where("cg_tn_id in (?) and match_mri_path_flag ='Y' ",v_temp_tn.id)
+        v_tmp_tn_cns.each do |cn|
+              v_tn_cn_match_mri_path_array.push(v_temp_tn.tn+"."+cn.cn)
+        end
     end 
+    if v_includes_view_mri_appts == "Y"
+         v_tn_cn_match_mri_path_array.uniq.each do |tn_cn|
+             v_mri_path_match_join = " view_mri_appts.path LIKE CONCAT('%',"+tn_cn+",'%') "
+             @local_conditions.push(v_mri_path_match_join ) 
+         end
+    end
     
     @local_tables.uniq.each do |tn|   # need left join right after parent tn
        v_tn = tn
