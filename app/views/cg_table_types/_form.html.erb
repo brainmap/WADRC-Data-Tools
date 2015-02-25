@@ -30,6 +30,11 @@
             <%= f.select :status_flag, options_for_select(v_y_n, @cg_table_type.status_flag),
                             {:prompt => 'Select table type status'}  %>
   </div>
+    <div class="field">
+   <%= f.label :hide_date_flag %><br>
+            <%= f.select :hide_date_flag, options_for_select(v_y_n, @cg_table_type.hide_date_flag),
+                            {:prompt => 'Select if should hide dates in all queries'}  %>
+  </div>
   <div class="actions">
     <%= f.submit %>
   </div>

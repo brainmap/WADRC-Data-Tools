@@ -20,6 +20,9 @@
   <b>Active status:</b>
   <%= @cg_table_type.status_flag %>
 </p>
+  <b>Hide dates in all queries:</b>
+  <%= @cg_table_type.hide_date_flag %>
+</p>
 <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
 <%= link_to 'Edit', edit_cg_table_type_path(@cg_table_type) %> |
 <% end %>
