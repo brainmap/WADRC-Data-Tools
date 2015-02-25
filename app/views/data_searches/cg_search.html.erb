@@ -290,7 +290,11 @@ v_tn_cn_searchable_hash = []
 	<div id="tn_<%=tn.id.to_s %>"  >
 		<table>
 			
-              <% @cg_tn_cn = CgTnCn.where("cg_tn_id ="+tn.id.to_s+" and status_flag= 'Y'").order("display_order")
+              <% if @hide_page_flag == "Y"
+                @cg_tn_cn = CgTnCn.where("cg_tn_id ="+tn.id.to_s+" and hide_column_flag = 'N' and status_flag= 'Y'").order("display_order")
+              	  else
+               @cg_tn_cn = CgTnCn.where("cg_tn_id ="+tn.id.to_s+" and status_flag= 'Y'").order("display_order")
+                  end
                  @cg_query_cn_hash = @cg_query_tn_cn_hash[tn.id.to_s] 
                  @cg_tn_cn.each do |cn|  
 	                v_include_cn = "FALSE" 

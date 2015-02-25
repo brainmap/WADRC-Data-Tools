@@ -836,6 +836,11 @@ class DataSearchesController < ApplicationController
       v_debug = "N" # Y"
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       @scan_procedure_list = scan_procedure_list
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end 
       # make the sql -- start with base 
       v_secondary_key_tn_array =[]
       @local_column_headers =["Date (vgroup)","Protocol","Enumber","RMR"]
