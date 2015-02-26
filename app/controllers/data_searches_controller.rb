@@ -955,7 +955,14 @@ class DataSearchesController < ApplicationController
          @cg_query.id = params[:cg_search][:cg_query_id]
          @cg_query.cg_name = params[:cg_search][:cg_name]
          @cg_query.rmr = params[:cg_search][:rmr]
+         if !params[:cg_search][:enumber].blank?
+            params[:cg_search][:enumber] = params[:cg_search][:enumber].gsub(/ /,'').gsub(/\t/,'').gsub(/\n/,'').gsub(/\r/,'')
+         end
          @cg_query.enumber = params[:cg_search][:enumber]
+         if !params[:cg_search][:enumber_not_in].blank?
+             params[:cg_search][:enumber_not_in] = params[:cg_search][:enumber_not_in].gsub(/ /,'').gsub(/\t/,'').gsub(/\n/,'').gsub(/\r/,'')
+          end
+
          @cg_query.enumber_not_in = params[:cg_search][:enumber_not_in]
          @cg_query.participant_centric = params[:cg_search][:participant_centric]
          @cg_query.gender = params[:cg_search][:gender]
@@ -1434,7 +1441,7 @@ class DataSearchesController < ApplicationController
                          if @cg_query_tn_cn.condition == 0 
                            # letting wrapno, reggieid, adrcnum be IN () condition
                            if @cg_query_tn_cn.value_1.include?(',') and ((@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.wrapnum" or (@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.adrcnum" or (@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.reggieid" )
-                              @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/ /,'').gsub(/'/,'')
+                              @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/ /,'').gsub(/'/,'').gsub(/ /,'').gsub(/\t/,'').gsub(/\n/,'').gsub(/\r/,'')
                               @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/,/,"','")
                               v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" in ( '"+@cg_query_tn_cn.value_1.gsub(/[;:"()=<>]/, '')+"')"
                            else
