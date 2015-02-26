@@ -1859,7 +1859,7 @@ class DataSearchesController < ApplicationController
               v_tn_cn_match_mri_path_array.push(v_temp_tn.tn+"."+cn.cn)
         end
     end 
-    if v_includes_view_mri_appts == "Y"
+    if v_includes_view_mri_appts == "Y"   # ACTING AS INNER JOIN, NEED TO MAKE OUTER ?????
          v_tn_cn_match_mri_path_array.uniq.each do |tn_cn|
              v_mri_path_match_join = " view_mri_appts.path LIKE CONCAT('%',"+tn_cn+",'%') "
              @local_conditions.push(v_mri_path_match_join ) 
@@ -2013,6 +2013,9 @@ puts "bbbbb "+sql
     @temp_results.each do |var|
       @temp = []
       @temp[0] = var[1] # want appt date first
+         if @hide_page_flag == "Y" 
+             @temp[0] = ""
+        end
       if @html_request =="N"  and @local_fields.length() > 0 and (@cg_query.participant_centric.nil? or (!@cg_query.participant_centric.nil? and @cg_query.participant_centric != "1" ) )
           sql_sp = "SELECT distinct scan_procedures.codename 
                 FROM scan_procedures, scan_procedures_vgroups
