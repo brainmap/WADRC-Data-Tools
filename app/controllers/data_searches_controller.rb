@@ -1843,9 +1843,13 @@ class DataSearchesController < ApplicationController
     end 
     @all_table_ids_in_query.uniq.each do |r|
         v_temp_tn = CgTn.find(r)
-        if v_temp_tn.secondary_key_flag == "Y"
-           v_secondary_key_join =" coalesce(appointments.secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,'') "
-          @local_conditions.push(v_secondary_key_join) 
+        if  (@local_tables.include?v_temp_tn.tn) or  v_temp_tn.tn == 'view_mri_appts'  
+           if v_temp_tn.secondary_key_flag == "Y"
+              v_secondary_key_join =" coalesce(appointments.secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,'') "
+              @local_conditions.push(v_secondary_key_join) 
+           end
+        else 
+           # need to add to outer join
         end
         # if include mri table, and table with a column with match_mri_path_flag 
         if v_temp_tn.tn == 'view_mri_appts'
@@ -1861,8 +1865,20 @@ class DataSearchesController < ApplicationController
     end 
     if v_includes_view_mri_appts == "Y"   # ACTING AS INNER JOIN, NEED TO MAKE OUTER ?????
          v_tn_cn_match_mri_path_array.uniq.each do |tn_cn|
-             v_mri_path_match_join = " view_mri_appts.path LIKE CONCAT('%',"+tn_cn+",'%') "
-             @local_conditions.push(v_mri_path_match_join ) 
+            v_temp_split = tn_cn.split(".")
+            if (@local_tables.include?v_temp_split[0])
+               v_mri_path_match_join = " view_mri_appts.path LIKE CONCAT('%',substring("+tn_cn+",1,6),'%') "
+               @local_conditions.push(v_mri_path_match_join ) 
+            else 
+               # need to add to outer join --- move 
+               # LEFT JOIN cg_rbm_icv on vgroups.id in ( select spv2.vgroup_id from scan_procedures_vgroups spv2 where spv2.scan_procedure_id = cg_rbm_icv.scan_procedure_id and spv2.vgroup_id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships where enrollment_vgroup_memberships.enrollment_id = cg_rbm_icv.enrollment_id))  
+               # to view_mri_appts
+               # if secondary key, if path match
+               # add
+               #     and  view_mri_appts.path LIKE CONCAT('%',substring(cg_rbm_icv.subjectid,1,6),'%')  
+               #     and coalesce(view_mri_appts.secondary_key,'') = coalesce(cg_rbm_icv.secondary_key,'')
+
+            end
          end
     end
 
