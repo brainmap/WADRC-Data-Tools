@@ -853,6 +853,7 @@ class DataSearchesController < ApplicationController
       @local_tables_alias_hash =Hash.new # need to make pet tracer select -- tracker?
       @table_types =[] 
       @tables_left_join_hash = Hash.new
+      @tables_secondary_key_join_hash = Hash.new
       @joins = [] # just inner joins
       @sp_array =[]
       @pet_tracer_array = []
@@ -1841,8 +1842,18 @@ class DataSearchesController < ApplicationController
     v_table_types.each do |tt|
          v_table_type_hide_date_array.push(tt.table_type)
     end 
+
+    # adding in secondary key and path like to inner joins
+    # changing outer join if has a path like -- also then changing for the outer join to include secondary key
+    # I think the secondary key and path like always/usually happen together
+    # this is a mess based on asumptions
+    #  but seems to be working 
+    # weird part is changing the outer joins from vgroups to view_mri_appts
     @all_table_ids_in_query.uniq.each do |r|
         v_temp_tn = CgTn.find(r)
+        if v_temp_tn.secondary_key_flag == "Y"
+            @tables_secondary_key_join_hash[v_temp_tn.tn] = " coalesce(view_mri_appts.secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,'') "
+        end
         if  (@local_tables.include?v_temp_tn.tn) or  v_temp_tn.tn == 'view_mri_appts'  
            if v_temp_tn.secondary_key_flag == "Y"
               v_secondary_key_join =" coalesce(appointments.secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,'') "
@@ -1877,9 +1888,37 @@ class DataSearchesController < ApplicationController
                # add
                #     and  view_mri_appts.path LIKE CONCAT('%',substring(cg_rbm_icv.subjectid,1,6),'%')  
                #     and coalesce(view_mri_appts.secondary_key,'') = coalesce(cg_rbm_icv.secondary_key,'')
+               @local_tables.uniq.each do |tn|
+                       if !@tables_left_join_hash[tn].nil? and @tables_left_join_hash[tn].include? "LEFT JOIN "+v_temp_split[0]+" on vgroups.id"
+                           v_left_join_temp = @tables_left_join_hash[tn].split("LEFT JOIN")
+                           @tables_left_join_hash[tn] = ""
+                           v_replaced = ""
+                           v_left_join_temp.each do |lj|
+                               lj = "LEFT JOIN"+lj
+                               if lj.include? "LEFT JOIN "+v_temp_split[0]+" on"
+                                  v_replaced = lj.gsub("LEFT JOIN "+v_temp_split[0]+" on vgroups.id", "LEFT JOIN "+v_temp_split[0]+" on view_mri_appts.mri_vgroup_id")
+                                  v_replaced = v_replaced +" and view_mri_appts.path LIKE CONCAT('%',substring("+tn_cn+",1,6),'%') "
+                                  if !@tables_secondary_key_join_hash[v_temp_split[0]].nil?
+                                     v_replaced = v_replaced +" and "+@tables_secondary_key_join_hash[v_temp_split[0]]
+                                  end
+                               end
+                           end
+                           v_left_join_temp.each do |lj|
+                               lj = "LEFT JOIN"+lj
+                               if lj.include? "LEFT JOIN "+v_temp_split[0]+" on" or lj == "LEFT JOIN"
+
+                               elsif lj.include? "LEFT JOIN view_mri_appts"
+                                     @tables_left_join_hash[tn] = @tables_left_join_hash[tn]+" "+lj+" "+v_replaced
+                               else
+                                    @tables_left_join_hash[tn] = @tables_left_join_hash[tn]+" "+lj
+                               end
+                           end
+                      end
+              end
 
             end
          end
+         # need same thing for path and secondary key
     end
 
     if v_includes_hide_date_tns  == "Y"
