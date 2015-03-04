@@ -100,7 +100,10 @@ edit_count = edit_count -1
   <% @petscans.each do |petscan| 
         appointment = Appointment.find(petscan.appointment_id)
         vgroup = Vgroup.find(appointment.vgroup_id)%>
-        <li><%= link_to appointment.appointment_date , petscan %>  <%= LookupPettracer.find(petscan.lookup_pettracer_id).name_description.html_safe %>&nbsp;&nbsp;&nbsp;&nbsp;
+        <li><%= link_to appointment.appointment_date , petscan %> 
+          <% if !petscan.lookup_pettracer_id.nil? %>
+         <%= LookupPettracer.find(petscan.lookup_pettracer_id).name_description.html_safe %>
+         <%end%>&nbsp;&nbsp;&nbsp;&nbsp;
   in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
   <% end %>
 </ul>
