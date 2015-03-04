@@ -1,3 +1,6 @@
+<% if @hide_page_flag == "Y" 
+  else %>
+
 <%
 
 # assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
@@ -25,3 +28,4 @@ edit_count = edit_count -1
 
 
 <%=  render :partial => 'blooddraws/show' %>
+<%end %>

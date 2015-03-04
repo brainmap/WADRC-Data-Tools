@@ -1,4 +1,6 @@
-<%  v_y_n = {"Y"=>"Y","N"=>"N"} %>
+<% if @hide_page_flag == "Y" 
+  else %>
+  <%  v_y_n = {"Y"=>"Y","N"=>"N"} %>
 <table class="search_form" >
 	<tr><td colspan="3" align="left" nowrap>
       <%= form_for 'tredit_home/'+params[:trtype_id] do |f| %>
@@ -75,3 +77,4 @@
 	</table>
 <%end%>
 <br><br><br><br><br><br><br><br>
+<%end%>

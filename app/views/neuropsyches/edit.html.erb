@@ -1,4 +1,6 @@
-<%  # assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
+<% if @hide_page_flag == "Y" 
+  else %>
+  <%  # assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
 # apply limit protocol  on create , edit in create form  
  edit_low_scan_procedure_array = []
 edit_low_scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
@@ -21,3 +23,4 @@ Save the bottom entries before making/saving any top entiries, and vice versa.
  | <%= link_to 'Vgroup', Vgroup.find(@appointment.vgroup_id) %>
 
 <% end %>
+<%end%>

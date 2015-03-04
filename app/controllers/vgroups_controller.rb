@@ -1173,9 +1173,13 @@ end
       @collection_title = 'All Vgroups'
 
       respond_to do |format|
-        format.xls # vgroups_search.xls.erb
-        format.xml  { render :xml => @results }       
-        format.html   {@results = Kaminari.paginate_array(@results).page(params[:page]).per(50)}# vgroups_search.html.erb
+        if @hide_page_flag == 'Y'
+           format.html { redirect_to '/cg_search' }
+        else
+           format.xls # vgroups_search.xls.erb
+           format.xml  { render :xml => @results }       
+           format.html   {@results = Kaminari.paginate_array(@results).page(params[:page]).per(50)}# vgroups_search.html.erb
+         end
       end
     end
 
@@ -1217,7 +1221,8 @@ end
        end
 
       respond_to do |format|
-        format.html # new.html.erb
+           format.html # new.html.erb
+      
       end
     end
 

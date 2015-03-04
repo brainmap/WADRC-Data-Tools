@@ -1,4 +1,5 @@
-
+<% if @hide_page_flag == "Y" 
+  else %>
 <%
 @var = current_user
 # assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
@@ -442,6 +443,7 @@ edit_count = edit_count -1
 	<% end %>	
 
 <% end %>	
+<%end%>
 
 
 

@@ -1,4 +1,6 @@
-<%
+<% if @hide_page_flag == "Y" 
+  else %>
+  <%
 @var = current_user
 # assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
 # apply limit protocol  on create , edit in create form  
@@ -60,3 +62,4 @@ edit_count = edit_count -1
 
 <%= link_to 'Show', @participant %> |
 <%= link_to 'Back', '/participant_search' %>
+<%end%>

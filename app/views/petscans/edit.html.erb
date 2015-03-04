@@ -1,4 +1,6 @@
-<%
+<% if @hide_page_flag == "Y" 
+  else %>
+  <%
 
 # assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
 # apply limit protocol  on create , edit in create form  
@@ -18,3 +20,4 @@ edit_count = edit_count -1
 | <%= link_to 'Delete this Petscan appt', @petscan, :confirm => "Are you sure you want to delete this Petscan appt?", :method => :delete %>
  | <%= link_to 'Vgroup', Vgroup.find(@appointment.vgroup_id) %>
 <% end %>
+<%end%>

@@ -1,4 +1,6 @@
-<table id="participants_index_table" class="tabular">
+<% if @hide_page_flag == "Y" 
+  else %>
+  <table id="participants_index_table" class="tabular">
   <!-- <caption><%= pluralize @participants.count, 'participants' %></caption> -->
   
   <thead>
@@ -42,5 +44,6 @@
 </table>
 
 <br />
+<%end%>
 
 <%# link_to 'New participant', new_participant_path %>

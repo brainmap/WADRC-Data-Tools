@@ -3,6 +3,12 @@ class TreditsController < ApplicationController
 
   def tredit_home
     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
    @v_action_name = Trtype.find(params[:trtype_id]).action_name 
    @tractiontypes = Tractiontype.where("trtype_id in (?)",params[:trtype_id]).where("tractiontypes.status_flag = 'Y' and tractiontypes.display_order is not null").order(:display_order) 
    @tractiontypes_search = Tractiontype.where("trtype_id in (?)",params[:trtype_id]).where("tractiontypes.status_flag = 'Y' and tractiontypes.display_search_flag = 'Y' ").order(:display_order)

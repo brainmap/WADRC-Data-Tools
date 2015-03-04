@@ -1,4 +1,5 @@
-
+<% if @hide_page_flag == "Y" 
+  else %>
 <%  v_y_n = {"Y"=>"Y","N"=>"N"} 
 v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
 <table class="search_form" >
@@ -169,3 +170,4 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
 
 
 <br><br><br>
+<%end%>

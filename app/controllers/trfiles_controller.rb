@@ -179,6 +179,12 @@ v_composite_value = v_composite_value + "
   def trfile_home
     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
     scan_procedure_edit_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
   # make trfile if no trfile_id, also make tredit, and tredit_actions
   v_comment = ""
    @trfile = nil

@@ -53,6 +53,12 @@ class LumbarpuncturesController < ApplicationController
   # GET /lumbarpunctures/new
   # GET /lumbarpunctures/new.xml
   def new
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
        @current_tab = "lumbarpunctures"
     @lumbarpuncture = Lumbarpuncture.new
         vgroup_id = params[:id]
