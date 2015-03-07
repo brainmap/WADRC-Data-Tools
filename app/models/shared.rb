@@ -2472,7 +2472,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                           v_err = stderr.read 1024
                           v_log = v_log +v_err
                         end
-                        if v_err > ""
+                        if v_err > "" and !v_err.include? "No window system found.  Java option 'MWT' ignored."
                           v_schedule_owner_email_array.each do |e|
                           v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see ==> "+v_log_path+" <== ALl the output from process is in the file."
                           PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver

@@ -20,6 +20,32 @@
   <%= @lookup_ref.label %>
 </p>
 
-
-<%= link_to 'Edit', edit_lookup_ref_path(@lookup_ref) %> |
+<% if current_user.role == 'Admin_High'%>
+  <%= link_to 'Edit', edit_lookup_ref_path(@lookup_ref) %> |
+<%end%>
 <%= link_to 'Back', lookup_refs_path %>
+
+<br><br><B>Protocols and forms which use this label.</B>
+<% if @sp_qf.count > 0 %>
+<table>
+<% @sp_qf.each do |r| %>
+ <tr><td><%=r.html_safe %></td></tr>
+<%end%>
+</table>
+<%else%>
+   There are no forms linked to protocols using this label.
+ <%end%>
+
+
+<br><br><B>Protocols, forms and subjectid records which have saved this ref_value in the database.</B>
+<% if @sp_qf_enum.count > 0 %>
+<table>
+<% @sp_qf_enum.each do |r| %>
+ <tr><td><%=r.html_safe %></td></tr>
+<%end%>
+</table>
+<%else%>
+   There are no records with this ref_value, label saved in the database.
+ <%end%>
+
+

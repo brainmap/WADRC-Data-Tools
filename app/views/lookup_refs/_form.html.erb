@@ -13,21 +13,22 @@
 
   <div class="field">
     <%= f.label :ref_value %><br />
-    <%= f.text_field :ref_value %>
+    <%= f.text_field :ref_value, :required => true %> <small>This is the value saved in the database.</small>
   </div>
   <div class="field">
     <%= f.label :description %><br />
-    <%= f.text_field :description %>
+    <%= f.text_field :description, :required => true %><small>This is the value which is displayed and exported.</small>
   </div>
   <div class="field">
     <%= f.label :display_order %><br />
     <%= f.text_field :display_order %>
   </div>
   <div class="field">
-    <%= f.label :label %><br />
-    <%= f.text_field :label %>
+    <%= f.label :label, :required => true %><br />
+    <%= f.text_field :label %><small>This identifies the group of ref_value/descriptions in a dropdown.</small>
   </div>
   <div class="actions">
     <%= f.submit %>
   </div>
 <% end %>
+
