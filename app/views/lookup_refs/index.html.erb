@@ -1,7 +1,7 @@
 <h1>Combined Reference Table listing</h1>
 Used to make dropdown lists, checkboxes, radio button desc in forms.<br>
 <% if current_user.role == 'Admin_High'  or current_user.role == 'Admin_Low'%>
-    <%= link_to 'New Lookup ref', new_lookup_ref_path %>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ask the Admin to update or delete Combined Reference table records.
+    <%= link_to 'New Lookup ref', new_lookup_ref_path %>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If the label is linked to a question, ask the Admin to update or delete Combined Reference table records.
 <%end%>
 <br><br>
 <table>

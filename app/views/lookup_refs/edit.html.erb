@@ -1,4 +1,4 @@
-<% if current_user.role == 'Admin_High' %>
+<% if current_user.role == 'Admin_High' or (current_user.role == 'Admin_Low'  and @q.count == 0 ) %>
 <h1>Editing Combined Reference Table -lookup_ref</h1>
 
 <%= render 'form' %>

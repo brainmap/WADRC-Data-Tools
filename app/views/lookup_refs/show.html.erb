@@ -20,7 +20,7 @@
   <%= @lookup_ref.label %>
 </p>
 
-<% if current_user.role == 'Admin_High'%>
+<% if current_user.role == 'Admin_High' or (current_user.role == 'Admin_Low'  and @q.count == 0 )%>
   <%= link_to 'Edit', edit_lookup_ref_path(@lookup_ref) %> |
 <%end%>
 <%= link_to 'Back', lookup_refs_path %>

@@ -16,6 +16,18 @@ class LookupRefsController < ApplicationController
   def show
     @lookup_ref = LookupRef.find(params[:id])
 
+    sql = "select distinct q.id
+                 from lookup_refs lr,  questions q
+                        where ( lr.label = q.ref_table_b_1 or lr.label = q.ref_table_b_2 or lr.label = q.ref_table_b_3)
+                        and lr.id = "+params[:id]
+    connection = ActiveRecord::Base.connection();
+    @q = []
+    @results = connection.execute(sql)
+    @results.each do |r|
+         @q.push(r[0])
+    end
+
+
     sql = "select distinct sp.codename, qf.description
                  from lookup_refs lr, scan_procedures sp, questions q, question_scan_procedures qsp, 
                         questionform_questions qfq ,
@@ -301,9 +313,18 @@ if params[:lookup_ref][:ref_value] != @lookup_ref.ref_value.to_s
     flash[:notice] = flash[:notice] +" The ref_value can not be changed. "
 end
 
-
+    sql = "select distinct q.id
+                 from lookup_refs lr,  questions q
+                        where ( lr.label = q.ref_table_b_1 or lr.label = q.ref_table_b_2 or lr.label = q.ref_table_b_3)
+                        and lr.id = "+params[:id]
+    connection = ActiveRecord::Base.connection();
+    @q = []
+    @results = connection.execute(sql)
+    @results.each do |r|
+         @q.push(r[0])
+    end
     respond_to do |format|
-      if ( current_user.role == 'Admin_High' and !(params[:lookup_ref][:label]).strip.empty?  and !(params[:lookup_ref][:ref_value]).empty?  and !(params[:lookup_ref][:description]).strip.empty?  and (params[:lookup_ref][:label]).strip == @lookup_ref.label   and params[:lookup_ref][:ref_value] == @lookup_ref.ref_value.to_s and @lookup_ref.update_attributes(params[:lookup_ref]) )
+      if ( (current_user.role == 'Admin_High' or @q.count == 0 ) and !(params[:lookup_ref][:label]).strip.empty?  and !(params[:lookup_ref][:ref_value]).empty?  and !(params[:lookup_ref][:description]).strip.empty?  and (params[:lookup_ref][:label]).strip == @lookup_ref.label   and params[:lookup_ref][:ref_value] == @lookup_ref.ref_value.to_s and @lookup_ref.update_attributes(params[:lookup_ref]) )
         @lookup_ref.label = (@lookup_ref.label).strip
         @lookup_ref.save
         format.html { redirect_to(@lookup_ref, :notice => 'Lookup ref was successfully updated.') }
