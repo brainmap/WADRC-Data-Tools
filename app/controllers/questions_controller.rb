@@ -35,6 +35,29 @@ class QuestionsController < ApplicationController
   def show
     @question = Question.find(params[:id])
 
+        sql = "select distinct sp.codename, qf.description
+                 from   questions q
+                                LEFT JOIN    question_scan_procedures qsp
+                                      on q.id = qsp.question_id
+                                      LEFT JOIN scan_procedures sp 
+                                            on qsp.scan_procedure_id = sp.id, 
+                        questionform_questions qfq ,
+                          questionforms qf 
+                              LEFT JOIN questionformnamesps  qfsp on qfsp.questionform_id = qf.id
+                        where q.id = qfq.question_id 
+                        and qfq.questionform_id = qf.id 
+                        and q.id = "+params[:id]+" order by qf.description,sp.codename"
+    connection = ActiveRecord::Base.connection();
+    @sp_qf = []
+    @results = connection.execute(sql)
+    @results.each do |r|
+         if(!r[0].nil?)
+              @sp_qf.push(r[1]+"</td><td>"+r[0])
+          else
+              @sp_qf.push(r[1]+"</td><td>")
+          end
+    end
+
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @question }
@@ -60,6 +83,28 @@ class QuestionsController < ApplicationController
 
   # GET /questions/1/edit
   def edit
+        sql = "select distinct sp.codename, qf.description
+                 from   questions q
+                                LEFT JOIN    question_scan_procedures qsp
+                                      on q.id = qsp.question_id
+                                      LEFT JOIN scan_procedures sp 
+                                            on qsp.scan_procedure_id = sp.id, 
+                        questionform_questions qfq ,
+                          questionforms qf 
+                              LEFT JOIN questionformnamesps  qfsp on qfsp.questionform_id = qf.id
+                        where q.id = qfq.question_id 
+                        and qfq.questionform_id = qf.id 
+                        and q.id = "+params[:id]+" order by qf.description,sp.codename"
+    connection = ActiveRecord::Base.connection();
+    @sp_qf = []
+    @results = connection.execute(sql)
+    @results.each do |r|
+         if(!r[0].nil?)
+              @sp_qf.push(r[1]+"</td><td>"+r[0])
+          else
+              @sp_qf.push(r[1]+"</td><td>")
+          end
+    end
     @question = Question.find(params[:id])
   end
 
