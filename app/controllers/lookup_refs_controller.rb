@@ -146,9 +146,9 @@ class LookupRefsController < ApplicationController
                         questionform_questions qfq , appointments a, enrollment_vgroup_memberships evgm,
                           questionforms qf 
                               LEFT JOIN questionformnamesps  qfsp on qfsp.questionform_id = qf.id
-                        where ( ( lr.label = q.ref_table_b_1 and qd.value_1)
-                                 or (lr.label = q.ref_table_b_2 and qd.value_2)
-                                 or (lr.label = q.ref_table_b_3 and qd.value_3) )
+                        where ( ( lr.label = q.ref_table_b_1 and qd.value_1  = lr.ref_value)
+                                 or (lr.label = q.ref_table_b_2 and qd.value_2 = lr.ref_value)
+                                 or (lr.label = q.ref_table_b_3 and qd.value_3 = lr.ref_value) )
                         and q.id = qsp.question_id
                         and qsp.scan_procedure_id = sp.id
                         and q.id = qfq.question_id 
@@ -175,9 +175,9 @@ class LookupRefsController < ApplicationController
                         questionform_questions qfq , 
                           questionforms qf 
                               LEFT JOIN questionformnamesps  qfsp on qfsp.questionform_id = qf.id
-                        where ( ( lr.label = q.ref_table_b_1 and qd.value_1)
-                                 or (lr.label = q.ref_table_b_2 and qd.value_2)
-                                 or (lr.label = q.ref_table_b_3 and qd.value_3) )
+                        where ( ( lr.label = q.ref_table_b_1 and qd.value_1 = lr.ref_value)
+                                 or (lr.label = q.ref_table_b_2 and qd.value_2 = lr.ref_value)
+                                 or (lr.label = q.ref_table_b_3 and qd.value_3 = lr.ref_value) )
                         and q.id = qsp.question_id
                         and qsp.scan_procedure_id = sp.id
                         and q.id = qfq.question_id 
@@ -258,9 +258,9 @@ sql = "select distinct sp.codename, qf.description
                         questionform_questions qfq , appointments a, enrollment_vgroup_memberships evgm,
                           questionforms qf 
                               LEFT JOIN questionformnamesps  qfsp on qfsp.questionform_id = qf.id
-                        where ( ( lr.label = q.ref_table_b_1 and qd.value_1)
-                                 or (lr.label = q.ref_table_b_2 and qd.value_2)
-                                 or (lr.label = q.ref_table_b_3 and qd.value_3) )
+                        where ( ( lr.label = q.ref_table_b_1 and qd.value_1 = lr.ref_value)
+                                 or (lr.label = q.ref_table_b_2 and qd.value_2 = lr.ref_value)
+                                 or (lr.label = q.ref_table_b_3 and qd.value_3 = lr.ref_value) )
                         and q.id = qsp.question_id
                         and qsp.scan_procedure_id = sp.id
                         and q.id = qfq.question_id 
@@ -287,9 +287,9 @@ sql = "select distinct sp.codename, qf.description
                         questionform_questions qfq , 
                           questionforms qf 
                               LEFT JOIN questionformnamesps  qfsp on qfsp.questionform_id = qf.id
-                        where ( ( lr.label = q.ref_table_b_1 and qd.value_1)
-                                 or (lr.label = q.ref_table_b_2 and qd.value_2)
-                                 or (lr.label = q.ref_table_b_3 and qd.value_3) )
+                        where ( ( lr.label = q.ref_table_b_1 and qd.value_1 = lr.ref_value)
+                                 or (lr.label = q.ref_table_b_2 and qd.value_2 = lr.ref_value)
+                                 or (lr.label = q.ref_table_b_3 and qd.value_3 = lr.ref_value) )
                         and q.id = qsp.question_id
                         and qsp.scan_procedure_id = sp.id
                         and q.id = qfq.question_id 
@@ -349,9 +349,9 @@ end
                         questionform_questions qfq , appointments a, enrollment_vgroup_memberships evgm,
                           questionforms qf 
                               LEFT JOIN questionformnamesps  qfsp on qfsp.questionform_id = qf.id
-                        where ( ( lr.label = q.ref_table_b_1 and qd.value_1)
-                                 or (lr.label = q.ref_table_b_2 and qd.value_2)
-                                 or (lr.label = q.ref_table_b_3 and qd.value_3) )
+                        where ( ( lr.label = q.ref_table_b_1 and qd.value_1 = lr.ref_value)
+                                 or (lr.label = q.ref_table_b_2 and qd.value_2 = lr.ref_value)
+                                 or (lr.label = q.ref_table_b_3 and qd.value_3 = lr.ref_value) )
                         and q.id = qsp.question_id
                         and qsp.scan_procedure_id = sp.id
                         and q.id = qfq.question_id 
@@ -378,9 +378,9 @@ end
                         questionform_questions qfq , 
                           questionforms qf 
                               LEFT JOIN questionformnamesps  qfsp on qfsp.questionform_id = qf.id
-                        where ( ( lr.label = q.ref_table_b_1 and qd.value_1)
-                                 or (lr.label = q.ref_table_b_2 and qd.value_2)
-                                 or (lr.label = q.ref_table_b_3 and qd.value_3) )
+                        where ( ( lr.label = q.ref_table_b_1 and qd.value_1 = lr.ref_value)
+                                 or (lr.label = q.ref_table_b_2 and qd.value_2 = lr.ref_value)
+                                 or (lr.label = q.ref_table_b_3 and qd.value_3 = lr.ref_value) )
                         and q.id = qsp.question_id
                         and qsp.scan_procedure_id = sp.id
                         and q.id = qfq.question_id 
