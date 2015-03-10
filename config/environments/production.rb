@@ -48,7 +48,7 @@ WADRCDataTools::Application.configure do
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
 
-  config.gem 'RedCloth', :lib => 'redcloth'
+  #config.gem 'RedCloth', :lib => 'redcloth'
   
   # If you would like to add custom email credentials, you can do it with environment variables.
   # Set your login and password with DATAPANDA_EMAIL_LOGIN and DATAPANDA_EMAIL_PASSWORD
