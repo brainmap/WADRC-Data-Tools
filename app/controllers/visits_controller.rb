@@ -197,10 +197,10 @@ class VisitsController <  AuthorizedController #  ApplicationController
     @mriscantask = Mriscantask.where("visit_id in (?) and (lookup_set_id not in (8) or lookup_set_id is NULL)",@visit.id)
     @appointment = Appointment.find(@visit.appointment_id)
     @vgroup = Vgroup.find(@appointment.vgroup_id)
-
-                 v_thumbnail_base = "/Users/caillingworth/code/WADRC-Data-Tools/public/system/thumbnails/"
+              v_app_base_path = Rails.root
+                 v_thumbnail_base = v_app_base_path.to_s+"/public/system/thumbnails/"
              if Rails.env=="production" 
-                 v_thumbnail_base = "/Library/WebServer/WADRC-Data-Tools/shared/system/thumbnails/"
+                 v_thumbnail_base = v_app_base_path.to_s+"/shared/system/thumbnails/"
               end
               @visit.image_datasets.each do |ids|
                     v_thumbnail_path = v_thumbnail_base+ids.id.to_s

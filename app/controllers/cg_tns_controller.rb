@@ -19,9 +19,10 @@ class CgTnsController < ApplicationController
   # GET /cg_tns/1.xml
   def show
     @cg_tn = CgTn.find(params[:id])
-    v_datadictionary_base = "/Users/caillingworth/code/WADRC-Data-Tools/public/system/datadictionaries/"
+    v_app_base_path = Rails.root
+    v_datadictionary_base = v_app_base_path.to_s+"/public/system/datadictionaries/"
     if Rails.env=="production"  # problems with umask and permission
-          v_datadictionary_base  = "/Library/WebServer/WADRC-Data-Tools/shared/system/datadictionaries/"
+          v_datadictionary_base  = v_app_base_path.to_s+"/shared/system/datadictionaries/"
     end
     v_datadictionary_path = v_datadictionary_base+params[:id].to_s
     puts "aaaaaaaaaaaa v_datadictionary_path=  "+v_datadictionary_path
