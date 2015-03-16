@@ -11,6 +11,7 @@
     <th>Petscan Tracer File Path</th>
     <th>RMRaic Reggieid Flag</th>
     <th>Make Participant Flag</th>
+    <th>Alternative rmr_dicom_field</th>
     
 
 	  <th>Total</th>
@@ -31,6 +32,7 @@
        <td><%=h scan_procedure.petscan_tracer_path%></td>
        <td><%=h scan_procedure.rmraic_reggieid_flag %></td>
        <td><%=h scan_procedure.make_participant_flag %></td>
+       <td><%=h scan_procedure.rmr_dicom_field %></td>
 			<td><%=h scan_procedure.vgroups.count %></td>
       <td>
         <%= link_to '@', scan_procedure %>

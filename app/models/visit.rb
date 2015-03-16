@@ -111,6 +111,37 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
     # Build an ActiveRecord Visit object using available attributes from metamri.
     # We need to handle Old Studies involving GE I-Files, which don't have any true UID
     visit_attrs = v.attributes_for_active_record.merge(:scan_procedure_ids => [sp.id])
+    v_alternative_rmr_dicom_header_field = ""
+    sps = [sp]
+    # metmri expects the RMRaicXXXXXX in 0010,0020  Patient ID
+    # the A$ study is putting the RMRaic###### in 0008,005
+    # at the scan procedure level , adding alternative rmr field
+    # is getting the rmr correctly, but not making the participant via reggieid
+    sps.each do |sss|
+       if !sss.rmr_dicom_field.nil? and !(sss.rmr_dicom_field).empty?
+          v_alternative_rmr_dicom_header_field = sss.rmr_dicom_field
+        end
+    end
+    if !v_alternative_rmr_dicom_header_field.empty?  #0008,0050|Accession Number
+      v_rmr_dicom = v_alternative_rmr_dicom_header_field.split("|")
+      #  visit_attrs[:rmr] ="RMRaic006918"
+      absfilepath= (v.datasets.first).directory
+      if File.exist?("#{File.join(absfilepath, "I0001.dcm")}.bz2")
+         file_to_scan = Pathname.new("#{File.join(absfilepath, "I0001.dcm")}.bz2").local_copy(Dir.mktmpdir).to_s
+         absfilepath = File.expand_path(file_to_scan)
+
+        @current_hdr_reader = "printraw"
+         header = `printraw '#{absfilepath}' 2> /dev/null`
+         header = header.encode("UTF-8", :invalid => :replace, :undef => :replace, :replace => "").force_encoding('UTF-8')
+         if ( header.chomp != "" and header.length > 400)
+              visit_attrs[:rmr] = header[v_rmr_dicom[0]].value
+          else
+            header = DICOM::DObject.read(absfilepath)
+            visit_attrs[:rmr] = header[v_rmr_dicom[0]].value
+         end
+      end
+    end
+
     if visit_attrs[:dicom_study_uid]
       visit = Visit.find_or_initialize_by_dicom_study_uid(visit_attrs)
     else

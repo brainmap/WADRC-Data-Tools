@@ -41,7 +41,10 @@
       <%= f.select :make_participant_flag, v_y_n, :selected => @scan_procedure.make_participant_flag , :include_blank => 'Select if reggieid NOT in RMRaicXXXXXX format for in sp'  %> Select if reggieid NOT in RMRaicXXXXXX format for in sp<br>
       <B>Makes a participant, but no reggieid link</B>
   </p>
-
+        <p>
+    <b>Alternative RMR dicom field</b><br />
+    <%= f.text_field :rmr_dicom_field %> Enter [####,####]|[description] e.g. 0008,0050|Accession Number.
+  </p>
 
   <p>
     <%= f.submit "Update" %>
