@@ -1485,7 +1485,7 @@ end
       end
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
-      @schedulerun.comment ="starting change_log"
+      @schedulerun.comment ="starting change_log - If the source table has been altered, the target table also has to be altered!!!."
       @schedulerun.save
       @schedulerun.start_time = @schedulerun.created_at
       @schedulerun.save
