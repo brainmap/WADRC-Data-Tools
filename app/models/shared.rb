@@ -1468,6 +1468,91 @@ if File.directory?(@visit_directory_to_scan)
 end
 end
 
+   # backs up all the updates to all the question related tables
+   # backup table need to be altered if the source tables are altered
+  def run_change_log
+    v_base_path = Shared.get_base_path()
+    v_log_base ="/mounts/data/preprocessed/logs/"
+    v_process_name = "change_log"
+   process_logs_delete_old( v_process_name, v_log_base)
+     @schedule = Schedule.where("name in ('change_log')").first
+      v_runner_email = self.get_user_email()  #  want to send errors to the user running the process
+      v_schedule_owner_email_array = []
+      if !v_runner_email.blank?
+        v_schedule_owner_email_array.push(v_runner_email)
+      else
+        v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+      end
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting change_log"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+      t = Time.now
+      v_date_YM = t.strftime("%Y%m") # just making monthly logs, prepend
+      v_log_name =v_process_name+"_"+v_date_YM
+      v_log_path =v_log_base+v_log_name 
+    connection = ActiveRecord::Base.connection();
+    @schedulerun.comment =@schedulerun.comment+" str q_data;"
+    @schedulerun.save
+    sql ="insert into change_log_q_data
+    select * from q_data where updated_at > (select max(updated_at )   from change_log_q_data )"
+    @results = connection.execute(sql)
+    @schedulerun.comment =@schedulerun.comment+" str q_data_forms;"
+    @schedulerun.save
+
+    sql ="insert into change_log_q_data_forms
+    select * from q_data_forms where updated_at > (select max(updated_at )     from change_log_q_data_forms )"
+    @results = connection.execute(sql)
+    @schedulerun.comment =@schedulerun.comment+" str question_scan_procedures;"
+    @schedulerun.save
+    sql ="insert into change_log_question_scan_procedures
+    select * from question_scan_procedures where updated_at > (select max(updated_at )    from change_log_question_scan_procedures )"
+    @results = connection.execute(sql)
+    @schedulerun.comment =@schedulerun.comment+" str questionform_questions;"
+    @schedulerun.save
+    sql ="insert into change_log_questionform_questions
+    select * from questionform_questions where updated_at > (select max(updated_at )   from change_log_questionform_questions )"
+    @results = connection.execute(sql)
+    @schedulerun.comment =@schedulerun.comment+" str questionform_scan_procedures;"
+    @schedulerun.save
+    sql ="insert into change_log_questionform_scan_procedures
+    select * from questionform_scan_procedures where updated_at > (select max(updated_at )     from change_log_questionform_scan_procedures )"
+    @results = connection.execute(sql)
+    @schedulerun.comment =@schedulerun.comment+" str questionforms;"
+    @schedulerun.save
+    sql ="insert into change_log_questionforms
+    select * from questionforms where updated_at > (select max(updated_at )    from change_log_questionforms )"
+    @results = connection.execute(sql)
+    @schedulerun.comment =@schedulerun.comment+" str questions;"
+    @schedulerun.save
+    sql ="insert into change_log_questions
+    select * from questions where updated_at > (select max(updated_at )    from change_log_questions )"
+    @results = connection.execute(sql)
+    @schedulerun.comment =@schedulerun.comment+" str questionformnamesps;"
+    @schedulerun.save
+    sql ="insert into change_log_questionformnamesps
+    select * from questionformnamesps where updated_at > (select max(updated_at )    from change_log_questionformnamesps )"
+    @results = connection.execute(sql)
+    @schedulerun.comment =@schedulerun.comment+" str lookup_refs;"
+    @schedulerun.save
+    sql ="insert into change_log_lookup_refs
+    select * from lookup_refs where updated_at > (select max(updated_at )     from change_log_lookup_refs )"
+    @results = connection.execute(sql)
+
+
+    @schedulerun.comment =("successful finish change_log "+v_comment_warning+" "+@schedulerun.comment[0..1990])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
+  end
+
   def run_fsl_first_volumes
 
     v_base_path = Shared.get_base_path()

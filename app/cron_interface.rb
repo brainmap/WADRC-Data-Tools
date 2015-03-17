@@ -86,6 +86,10 @@ v_user = v_user.gsub("\n","")
       v_shared = Shared.new
       v_shared.run_batch_visit_import() 
       
+ elsif v_value_1 == "change_log"  
+      v_shared = Shared.new
+      v_shared.run_change_log() 
+      
  elsif v_value_1 == "test_sftp"
       v_shared = Shared.new
       v_shared.run_sftp()
