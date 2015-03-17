@@ -3,7 +3,7 @@ gem 'rails', '~>3.2'
 
 
 gem 'sqlite3', '~>1.3.3'  # need in metamri
-gem 'mysql2' ,'~>0.3.11'  # not limiting version 20130314, '~>0.2.0'---# went back to limit ACtiveRecord adapter and rails 3.1
+gem 'mysql2' #,'~>0.2.0'  # not limiting version 20130314, '~>0.2.0'---# went back to limit ACtiveRecord adapter and rails 3.1
 gem 'yaml_db'
 
 # Bundle edge Rails instead:
@@ -18,7 +18,7 @@ gem 'metamri'  ,'~>0.2.21'  ####:path => '~>0.2.11'  # need to update metamri ge
 # end
 
 gem 'builder' #, '~>2.1.2'
-gem 'RedCloth', '~>4.2.7'   # changed from '~>4.2.7'  -- problem with lib vs ext on 4.2.9 and redcloth_scan file
+gem 'RedCloth', '~>4.2.7'
 # gem 'bluecloth', '~>2.1.0'
 gem "cocaine", "0.3.2"   # need older version to work wityh paperclip
 gem 'paperclip', '~>2.3.8'
