@@ -1,6 +1,48 @@
 <%
 v_exclude_include = {"Exclude"=>"exclude", "Include"=>"include"}
 %>
+<table width="90%" border="2"><tr><td>
+
+<H2>Unlinked Questions</H2>
+This is for linking a new question to a Scan Procedure.
+<%= form_for(@question_scan_procedure) do |f| %>
+  <% if @question_scan_procedure.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@question_scan_procedure.errors.count, "error") %> prohibited this question_scan_procedure from being saved:</h2>
+
+      <ul>
+      <% @question_scan_procedure.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <b><%= f.label :scan_procedure_id %></b>REQUIRED*<br />
+<%= collection_select :question_scan_procedure, :scan_procedure_id, ScanProcedure.all.sort_by(&:codename), :id, :codename,{:prompt => 'Select a Scan Procedure'},{:required => true}  %>
+  </div><br>
+  <div class="field">
+    <b>Un-Linked Questions: </b>
+<%= collection_select :question_scan_procedure, "question_id", Question.find_by_sql("select * from questions where questions.id not in (select question_id from question_scan_procedures) order by id desc"), :id, :description,{:prompt => 'Select a Question- unlinked questions'},{:required => true}  %>REQUIRED*
+  </div><br>
+  <div class="field">
+    <b><%= f.label :include_exclude %></b> REQUIRED*<br />
+ <%= f.select :include_exclude, options_for_select(v_exclude_include, @question_scan_procedure.include_exclude),
+                {:prompt => 'Select whether to exclude or include this question for this scan procedure'},:required => true %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
+<br><br><br>
+</td></tr>
+<tr><td>
+<H3>Full list of Questions and EDITs</H3>
+This is for editing the display order of a question already linked to a scan procedure.
+
+
+
 <%= form_for(@question_scan_procedure) do |f| %>
   <% if @question_scan_procedure.errors.any? %>
     <div id="error_explanation">
@@ -31,3 +73,4 @@ v_exclude_include = {"Exclude"=>"exclude", "Include"=>"include"}
     <%= f.submit %>
   </div>
 <% end %>
+</td></tr></table>
