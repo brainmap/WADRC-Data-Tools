@@ -16,8 +16,10 @@
     <td><%= ScanProcedure.find(questionformnamesp.scan_procedure_id).codename%> </td>
     <td><%= questionformnamesp.form_name %></td>
     <td><%= link_to 'Show', questionformnamesp %></td>
+    <% if current_user.role == 'Admin_High' %>
     <td><%= link_to 'Edit', edit_questionformnamesp_path(questionformnamesp) %></td>
     <td><%= link_to 'Destroy', questionformnamesp, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+    <%end %>
   </tr>
 <% end %>
 </table>
