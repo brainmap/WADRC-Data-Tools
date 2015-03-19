@@ -6741,6 +6741,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           sql_loc = "select distinct v.path from visits v where v.appointment_id in (select a.id from appointments a, enrollment_vgroup_memberships evg, scan_procedures_vgroups spv where a.vgroup_id = evg.vgroup_id  and evg.enrollment_id = "+r[0].to_s+"  and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id = "+r[1].to_s+")"
           results_loc = connection.execute(sql_loc)
           v_o_star_nii_sp_loc = ""
+          v_tlv_lesion_txt = "blank"
           results_loc.each do |loc|
             # could have 2 locations dual enrollment with 2 appointments - look for where o*.nii loc
             v_loc_path = loc[0]
@@ -6756,9 +6757,20 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                     end
                   end 
             end
+            v_expected_tlv_file = v_base_path+"/preprocessed/visits/"+v_loc_parts_array[0]+"/"+v_subjectid+"/LST/LST_122"
+            if File.directory?(v_expected_tlv_file)
+                  v_dir_array = Dir.entries(v_expected_tlv_file)
+                  v_dir_array.each do |f|
+                    if ( f.start_with?("tlv_lesion") or f.start_with?("tlv_b_000_lesion") ) and f.end_with?(".txt")
+                        v_tlv_lesion_txt = "not blank"
+                        v_log = v_log + "tlv_lesion file found \n"
+                    end
+                  end 
+            end
           end
+
           
-          if v_o_star_nii_sp_loc > ""
+          if v_o_star_nii_sp_loc > "" and v_tlv_lesion_txt != "not blank"
               # call processing script- need to have LST toolbox on gru, merida or edna
               # v_call =  v_script+" -p "+v_o_star_nii_sp_loc+"  -b "+v_subjectid
               @schedulerun.comment ="str "+r[2]+"; "+v_comment[0..1990]
