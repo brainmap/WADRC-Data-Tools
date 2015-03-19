@@ -6522,7 +6522,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                   v_sag_cube_flair_cnt = 0
                                   v_dir_array.each do |f|
                                     
-                                    if (f.include? "Sag-CUBE-FLAIR" or f.include? "Sag-CUBE-flair" ) and f.end_with?(".nii")
+                                    if (f.include? "Sag-CUBE-FLAIR" or f.include? "Sag-CUBE-flair"  or f.include?"Sag-CUBE-T2-FLAIR") and f.end_with?(".nii")
                                       v_sag_cube_flair_flag = "Y"
                                       v_sag_cube_flair_cnt = v_sag_cube_flair_cnt + 1
                                       if v_sag_cube_flair_cnt > 1
@@ -6624,12 +6624,12 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       v_script_dev = v_base_path+"/data1/lab_scripts/lstproc.sh"   #LST/LST.sh"
       v_script = v_base_path+"/SysAdmin/production/LST/LST.sh"
       v_script  = v_script_dev   # using the dev script
-      v_script_only_tlv = v_script+" --only_tlv"
+      v_script_only_tlv = v_script+" --only_tlv"  # running whole thing -- just use v_script in call
       (v_error_comment,v_comment) =get_file_diff(v_script,v_script_dev,v_error_comment,v_comment)
 
       connection = ActiveRecord::Base.connection();  
-      # catchup on only_tlv - run everywhere except plq
-      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where lst_subjectid = 'SKIP THIS' and  if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y'  and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) ) and (  lst_subjectid not like 'shp%') " #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
+      #NORMALLY THIS IS NOT RUN  catchup on only_tlv - run everywhere except plq
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where subjectid='DO NOT RUN THIS' and if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y'  and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) ) and (  lst_subjectid not like 'shp%') and (  lst_subjectid not like 'plq%')  " #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
      
       results = connection.execute(sql)
       results.each do |r|
@@ -6718,7 +6718,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     v_comment = v_error_comment+v_comment
  
 
-
+      # THIS IS THE MAIN RUN
       # do_not_run_process_wlesion_030 == Y means do not run
       sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) ) and (  lst_subjectid not like 'shp%') " #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
       results = connection.execute(sql)
