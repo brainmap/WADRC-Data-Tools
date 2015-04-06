@@ -193,7 +193,7 @@ DEPENDENCIES
   kaminari
   launchy
   metamri (~> 0.2.21)
-  mysql2 (~> 0.3.18)
+  mysql2
   open4
   paperclip (~> 2.3.8)
   rack-mini-profiler
