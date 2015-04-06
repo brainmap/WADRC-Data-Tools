@@ -50,7 +50,7 @@ gem 'rvm-capistrano'
 gem 'open4'
 # gem 'POpen4', '~>0.1.4'
 #gem 'bzip2-ruby' 
-gem 'escoffier'
+## trying without just to get going gem 'escoffier'
 # Deploy with Capistrano
 gem 'capistrano' #, '~>2.15.5' #~>3.0.1' #~>2.15.5' #, '~>2.5.19'
 
