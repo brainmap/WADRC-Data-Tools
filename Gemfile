@@ -18,7 +18,7 @@ gem 'metamri'  ,'~>0.2.21'  ####:path => '~>0.2.11'  # need to update metamri ge
 # end
 
 gem 'builder' #, '~>2.1.2'
-gem 'RedCloth', '~>4.2.7'
+### gem 'RedCloth', '~>4.2.7'
 # gem 'bluecloth', '~>2.1.0'
 gem "cocaine", "0.3.2"   # need older version to work wityh paperclip
 gem 'paperclip', '~>2.3.8'
