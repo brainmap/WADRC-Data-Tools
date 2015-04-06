@@ -43,7 +43,7 @@ gem 'devise-encryptable'
 gem "devise_ldap_authenticatable"
 gem "cancan"
 # gem "mechanize" # used in radiology model for scaping  # trying to remove nokogiri because of problems with xml lib versions on adrcdev/rvm
-gem 'hpricot'
+## trying without just to get going gem 'hpricot'
 
 gem 'rvm-capistrano'
 # gem 'mini_magick' # needs newer ruby 1.9.2 to work with ruby dicom
