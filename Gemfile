@@ -18,7 +18,7 @@ gem 'metamri'  ,'~>0.2.21'  ####:path => '~>0.2.11'  # need to update metamri ge
 # end
 
 gem 'builder' #, '~>2.1.2'
-### trying to get running gem 'RedCloth', '~>4.2.7'
+gem 'RedCloth', '~>4.2.7'
 # gem 'bluecloth', '~>2.1.0'
 gem "cocaine", "0.3.2"   # need older version to work wityh paperclip
 gem 'paperclip', '~>2.3.8'
@@ -43,13 +43,13 @@ gem 'devise-encryptable'
 gem "devise_ldap_authenticatable"
 gem "cancan"
 # gem "mechanize" # used in radiology model for scaping  # trying to remove nokogiri because of problems with xml lib versions on adrcdev/rvm
-### trying to get running gem "hpricot"
+gem 'hpricot'
 
 gem 'rvm-capistrano'
 # gem 'mini_magick' # needs newer ruby 1.9.2 to work with ruby dicom
 gem 'open4'
 # gem 'POpen4', '~>0.1.4'
-gem 'bzip2-ruby' 
+#gem 'bzip2-ruby' 
 gem 'escoffier'
 # Deploy with Capistrano
 gem 'capistrano' #, '~>2.15.5' #~>3.0.1' #~>2.15.5' #, '~>2.5.19'
