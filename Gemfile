@@ -31,7 +31,7 @@ gem 'kaminari'
 ##### gem 'rmagick'
 ###### hash out gem simple_form  when doing bundle update rails 
 ### then unhash and run bundle update rails again  -- different versions of action pack
-gem 'simple_form'
+##### gem 'simple_form'
 gem 'exception_notification', "~> 2.4.1", :require => 'exception_notifier'
 
 # Use unicorn as the web server
@@ -50,7 +50,7 @@ gem 'rvm-capistrano'
 gem 'open4'
 # gem 'POpen4', '~>0.1.4'
 #gem 'bzip2-ruby' 
-## trying without just to get going gem 'escoffier'
+gem 'escoffier'
 # Deploy with Capistrano
 gem 'capistrano' #, '~>2.15.5' #~>3.0.1' #~>2.15.5' #, '~>2.5.19'
 
