@@ -38,9 +38,9 @@ gem 'exception_notification', "~> 2.4.1", :require => 'exception_notifier'
 # gem 'unicorn'
 
 ########## default in 3.1 ?  gem 'jquery-rails'
-gem "devise", ">= 1.4.9"
-gem 'devise-encryptable'
-gem "devise_ldap_authenticatable"
+gem "devise", "3.1.1" #   ">= 1.4.9"
+gem 'devise-encryptable', '0.1.2'
+gem "devise_ldap_authenticatable", "0.8.1"
 gem "cancan"
 # gem "mechanize" # used in radiology model for scaping  # trying to remove nokogiri because of problems with xml lib versions on adrcdev/rvm
 gem 'hpricot'

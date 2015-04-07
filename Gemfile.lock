@@ -33,7 +33,7 @@ GEM
       ruport (>= 1.6.0)
     addressable (2.3.8)
     arel (3.0.3)
-    bcrypt (3.1.10)
+    bcrypt-ruby (3.1.2)
     builder (3.0.4)
     bzip2-ruby (0.2.7)
     cancan (1.6.10)
@@ -47,16 +47,15 @@ GEM
     cocaine (0.3.2)
     color (1.7.1)
     database_cleaner (1.4.1)
-    devise (3.4.1)
-      bcrypt (~> 3.0)
+    devise (3.1.1)
+      bcrypt-ruby (~> 3.0)
       orm_adapter (~> 0.1)
       railties (>= 3.2.6, < 5)
-      responders
       thread_safe (~> 0.1)
       warden (~> 1.2.3)
-    devise-encryptable (0.2.0)
+    devise-encryptable (0.1.2)
       devise (>= 2.1.0)
-    devise_ldap_authenticatable (0.8.3)
+    devise_ldap_authenticatable (0.8.1)
       devise (>= 3.0)
       net-ldap (>= 0.3.1, < 0.6.0)
     dicom (0.9.6)
@@ -136,8 +135,6 @@ GEM
     rake (10.4.2)
     rdoc (3.12.2)
       json (~> 1.4)
-    responders (1.1.2)
-      railties (>= 3.2, < 4.2)
     ruport (1.6.3)
       fastercsv
       pdf-writer (= 1.1.8)
@@ -185,9 +182,9 @@ DEPENDENCIES
   chronic
   cocaine (= 0.3.2)
   database_cleaner
-  devise (>= 1.4.9)
-  devise-encryptable
-  devise_ldap_authenticatable
+  devise (= 3.1.1)
+  devise-encryptable (= 0.1.2)
+  devise_ldap_authenticatable (= 0.8.1)
   escoffier
   exception_notification (~> 2.4.1)
   hirb (~> 0.4.5)
