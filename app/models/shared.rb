@@ -2697,7 +2697,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                   if File.directory?(v_subjectid_unknown)
                     v_dir_array = Dir.entries(v_subjectid_unknown)
                     v_dir_array.each do |f|
-                    if (f.start_with?("o") and f.end_with?(".nii") ) or v_subjectid_actual.include?("shp")
+                    if (f.start_with?("o") and f.end_with?(".nii") ) # or v_subjectid_actual.include?("shp")
                         # check for tissue_seg
                         v_subjectid_tissue_seg =v_subjectid_path+"/tissue_seg"
                         v_subjectid_rbm_icv =v_subjectid_path+"/rbm_icv"
@@ -6388,7 +6388,94 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
 
    end
 
-    
+  def run_image_dataset_default_bravo
+      v_base_path = Shared.get_base_path()
+      @schedule = Schedule.where("name in ('image_dataset_default_bravo')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting image_dataset_default_bravo"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning = ""
+      v_secondary_key_array =["","b","c","d","e",".R"]
+      v_ids_id_array = []
+      connection = ActiveRecord::Base.connection();  
+       # image_datasets.use_as_default_scan_flag
+       # loop thru all mri appointments
+          # get   path, directory, secondary key, subjectid, all T1 series descriptions
+          # look for o[subjectid][secondarkey]_[series description]_[dicomdir/replace.].nii
+      sql = "SELECT visits.id, visits.path, appointments.secondary_key FROM visits, appointments 
+                        where appointments.id = visits.appointment_id  
+                        and visits.id in ( select image_datasets.visit_id from image_datasets,series_description_maps where 
+                                  image_datasets.series_description = series_description_maps.series_description
+                                  and  series_description_maps.series_description_type_id = 19)"      
+      results = connection.execute(sql)
+      results.each do |r|
+         v_visit_id = r[0]
+         v_secondary_key = r[2]
+         v_path = r[1]
+         v_path_array = v_path.split('/')
+         v_subjectdir_array = v_path_array[v_path_array.count-1].split('_')
+         v_protocol = v_path_array[v_path_array.count-2]
+         v_preprocessing_path_unknown = "/mounts/data/preprocessed/visits/"+v_protocol+"/"+v_subjectdir_array[0]+"/unknown/"
+         # get all the T1 series description and path/dir, check for o[match]
+         sql_image_datasets = "SELECT image_datasets.id, image_datasets.path, image_datasets.series_description   
+                             FROM image_datasets where image_datasets.visit_id = "+v_visit_id.to_s+"
+                             AND image_datasets.series_description IN (SELECT series_description_maps.series_description 
+                                               FROM series_description_maps WHERE 
+                                               series_description_maps.series_description_type_id = 19)"
+          results_ids = connection.execute(sql_image_datasets)
+          v_cnt = 0
+          v_ids_id_array.clear
+          results_ids.each do |r_ids|
+              v_image_dataset_id = r_ids[0]
+              v_series_description = r_ids[2]
+              v_ids_path_array = r_ids[1].split("/")
+              v_id = v_ids_path_array.count-1
+              v_dicom_dir = v_ids_path_array[v_id]
+              v_acpc_file_name = "o"+v_subjectdir_array[0]+"_"+v_series_description.gsub(".","").gsub("-","_").gsub(" ","_")+"_"+v_dicom_dir.gsub(".","")+".nii"        
+              if File.directory?(v_preprocessing_path_unknown)
+                  v_dir_array = Dir.entries(v_preprocessing_path_unknown)
+                  sql_set_flag = "UPDATE image_datasets set image_datasets.use_as_default_scan_flag = NULL
+                                        WHERE image_datasets.id = "+v_image_dataset_id.to_s
+                  results_set_flag = connection.execute(sql_set_flag)
+                  v_dir_array.each do |f|
+                      f = f.gsub("-","_")
+                    if f.start_with?(v_acpc_file_name)
+                       v_ids_id_array.push(v_image_dataset_id)
+                       v_cnt = v_cnt + 1
+                       sql_set_flag = "UPDATE image_datasets set image_datasets.use_as_default_scan_flag = 'Y'
+                                        WHERE image_datasets.id = "+v_image_dataset_id.to_s
+                    else
+                       sql_set_flag = "UPDATE image_datasets set image_datasets.use_as_default_scan_flag = 'N'
+                                        WHERE image_datasets.id = "+v_image_dataset_id.to_s
+                    end
+                    results_set_flag = connection.execute(sql_set_flag)
+                  end 
+              end
+          end
+          if(v_cnt > 1)
+              v_ids_id_array.each do |ids_id|
+                  sql_set_flag = "UPDATE image_datasets set image_datasets.use_as_default_scan_flag = NULL
+                                        WHERE image_datasets.id = "+ids_id.to_s
+                  results_set_flag = connection.execute(sql_set_flag)
+              end
+          end
+      end
+
+      @schedulerun.comment =("successful finish image_dataset_default_bravo "+v_comment_warning+" "+v_comment[0..1990])
+     if !v_comment.include?("ERROR")
+        @schedulerun.status_flag ="Y"
+      end
+      @schedulerun.save
+      @schedulerun.end_time = @schedulerun.updated_at      
+      @schedulerun.save  
+
+  end  
+
+
   # to add columns --
   # change sql_base insert statement
   # change  sql = sql_base+  insert statement with values
