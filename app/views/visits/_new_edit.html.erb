@@ -128,6 +128,11 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
       <td><%= f.label(:secondary_key) %></td>
       <td><%= text_field(:appointment, :secondary_key) %></td>
     </tr>
+    	<tr>
+      <td><%= f.label(:use_as_default_mri_flag) %></td>
+      <td><%= f.select :use_as_default_mri_flag, ["Y", "N", ""] %></td>
+    </tr>
+
 
     </table>
 <%     @vitals = Vital.where("vitals.appointment_id in (?)",@visit.appointment_id)     
