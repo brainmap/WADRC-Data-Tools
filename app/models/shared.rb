@@ -6407,10 +6407,11 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           # get   path, directory, secondary key, subjectid, all T1 series descriptions
           # look for o[subjectid][secondarkey]_[series description]_[dicomdir/replace.].nii
       sql = "SELECT visits.id, visits.path, appointments.secondary_key FROM visits, appointments 
-                        where appointments.id = visits.appointment_id  
+                        where appointments.id = visits.appointment_id  and visits.id = 1726
                         and visits.id in ( select image_datasets.visit_id from image_datasets,series_description_maps where 
                                   image_datasets.series_description = series_description_maps.series_description
-                                  and  series_description_maps.series_description_type_id = 19)"      
+                                  and  series_description_maps.series_description_type_id = 19)"  
+puts "TTTTTTTTT"    
       results = connection.execute(sql)
       results.each do |r|
          v_visit_id = r[0]
@@ -6423,6 +6424,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
          # get all the T1 series description and path/dir, check for o[match]
          sql_image_datasets = "SELECT image_datasets.id, image_datasets.path, image_datasets.series_description   
                              FROM image_datasets where image_datasets.visit_id = "+v_visit_id.to_s+"
+                              and (image_datasets.lock_default_scan_flag != 'Y' or image_datasets.lock_default_scan_flag  is NULL)
                              AND image_datasets.series_description IN (SELECT series_description_maps.series_description 
                                                FROM series_description_maps WHERE 
                                                series_description_maps.series_description_type_id = 19)"
@@ -6435,7 +6437,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
               v_ids_path_array = r_ids[1].split("/")
               v_id = v_ids_path_array.count-1
               v_dicom_dir = v_ids_path_array[v_id]
-              v_acpc_file_name = "o"+v_subjectdir_array[0]+"_"+v_series_description.gsub(".","").gsub("-","_").gsub(" ","_")+"_"+v_dicom_dir.gsub(".","")+".nii"        
+              v_acpc_file_name = "o"+v_subjectdir_array[0]+"_"+v_series_description.gsub(".","").gsub("-","_").gsub(" ","_")+"_"+v_dicom_dir.gsub(".","")+".nii"                 
               if File.directory?(v_preprocessing_path_unknown)
                   v_dir_array = Dir.entries(v_preprocessing_path_unknown)
                   sql_set_flag = "UPDATE image_datasets set image_datasets.use_as_default_scan_flag = NULL
@@ -6448,11 +6450,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                        v_cnt = v_cnt + 1
                        sql_set_flag = "UPDATE image_datasets set image_datasets.use_as_default_scan_flag = 'Y'
                                         WHERE image_datasets.id = "+v_image_dataset_id.to_s
-                    else
-                       sql_set_flag = "UPDATE image_datasets set image_datasets.use_as_default_scan_flag = 'N'
-                                        WHERE image_datasets.id = "+v_image_dataset_id.to_s
+                        results_set_flag = connection.execute(sql_set_flag)
                     end
-                    results_set_flag = connection.execute(sql_set_flag)
+                    
                   end 
               end
           end
