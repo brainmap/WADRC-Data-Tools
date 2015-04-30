@@ -288,7 +288,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
                 @left_join = [ ] # left join needs to be in sql right after the parent table!!!!!!!
              else    
                @html_request ="N"          
-                @column_headers = ['Date','Protocol','Enumber','RMR','series_description','dicom_series_uid','dcm_file_count','timestamp','scanned_file','image_uid','id','rep_time','glob','path','bold_reps','slices_per_volume','visit.age_at_visit','visit.scanner_source','image_comments.comment',
+                @column_headers = ['Date','Protocol','Enumber','RMR','series_description','Use as default scan','dicom_series_uid','dcm_file_count','timestamp','scanned_file','image_uid','id','rep_time','glob','path','bold_reps','slices_per_volume','visit.age_at_visit','visit.scanner_source','image_comments.comment',
          'image_dataset_quality_checks.incomplete_series','image_dataset_quality_checks.incomplete_series_comment','image_dataset_quality_checks.garbled_series','image_dataset_quality_checks.garbled_series_comment','image_dataset_quality_checks.fov_cutoff','image_dataset_quality_checks.fov_cutoff_comment','image_dataset_quality_checks.field_inhomogeneity','image_dataset_quality_checks.field_inhomogeneity_comment','image_dataset_quality_checks.ghosting_wrapping','image_dataset_quality_checks.ghosting_wrapping_comment',
          'image_dataset_quality_checks.banding','image_dataset_quality_checks.banding_comment','image_dataset_quality_checks.registration_risk','image_dataset_quality_checks.registration_risk_comment','image_dataset_quality_checks.nos_concerns','image_dataset_quality_checks.nos_concerns_comment','image_dataset_quality_checks.motion_warning','image_dataset_quality_checks.motion_warning_comment',
             'image_dataset_quality_checks.omnibus_f','image_dataset_quality_checks.omnibus_f_comment','image_dataset_quality_checks.spm_mask','image_dataset_quality_checks.spm_mask_comment','image_dataset_quality_checks.other_issues',
@@ -301,7 +301,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
                 # try left joins on quality check tables, user name
                 # weird utc transformations -- utc in db but timestamps from files seem different
                 # NEED TO GET GROUP BY by row "group_concat(image_comments.comment separator ', ')"
-                @fields =["image_datasets.series_description","image_datasets.dicom_series_uid","image_datasets.dcm_file_count","concat(date_format(image_datasets.timestamp,'%m/%d/%Y'),time_format(timediff( time(image_datasets.timestamp),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_datasets.scanned_file","image_datasets.image_uid","image_datasets.id","image_datasets.rep_time","image_datasets.glob","image_datasets.path","image_datasets.bold_reps","image_datasets.slices_per_volume","appointments.age_at_appointment","visits.scanner_source","group_concat(image_comments.comment separator ', ')",
+                @fields =["image_datasets.series_description","image_datasets.use_as_default_scan_flag","image_datasets.dicom_series_uid","image_datasets.dcm_file_count","concat(date_format(image_datasets.timestamp,'%m/%d/%Y'),time_format(timediff( time(image_datasets.timestamp),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_datasets.scanned_file","image_datasets.image_uid","image_datasets.id","image_datasets.rep_time","image_datasets.glob","image_datasets.path","image_datasets.bold_reps","image_datasets.slices_per_volume","appointments.age_at_appointment","visits.scanner_source","group_concat(image_comments.comment separator ', ')",
         "image_dataset_quality_checks.incomplete_series","image_dataset_quality_checks.incomplete_series_comment","image_dataset_quality_checks.garbled_series","image_dataset_quality_checks.garbled_series_comment","image_dataset_quality_checks.fov_cutoff","image_dataset_quality_checks.fov_cutoff_comment","image_dataset_quality_checks.field_inhomogeneity","image_dataset_quality_checks.field_inhomogeneity_comment","image_dataset_quality_checks.ghosting_wrapping","image_dataset_quality_checks.ghosting_wrapping_comment",
      "image_dataset_quality_checks.banding","image_dataset_quality_checks.banding_comment","image_dataset_quality_checks.registration_risk","image_dataset_quality_checks.registration_risk_comment","image_dataset_quality_checks.nos_concerns","image_dataset_quality_checks.nos_concerns_comment","image_dataset_quality_checks.motion_warning","image_dataset_quality_checks.motion_warning_comment",
                   "image_dataset_quality_checks.omnibus_f","image_dataset_quality_checks.omnibus_f_comment","image_dataset_quality_checks.spm_mask","image_dataset_quality_checks.spm_mask_comment","image_dataset_quality_checks.other_issues",
@@ -350,6 +350,16 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @visit = @image_dataset.visit
     @image_datasets = @visit.image_datasets
+    @lock_default_scan_flag_parse = "N|"
+    if @image_dataset.lock_default_scan_flag == "Y"
+       if @image_dataset.use_as_default_scan_flag == "Y"
+            @lock_default_scan_flag_parse = "Y|Y"
+        elsif @image_dataset.use_as_default_scan_flag == "N"
+            @lock_default_scan_flag_parse = "Y|N"
+        else
+            @lock_default_scan_flag_parse = "Y|"
+        end
+    end
     
     @image_comment = ImageComment.new
     @image_comments = @image_dataset.image_comments
@@ -422,6 +432,15 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
         @hide_page_flag = 'Y'
       end
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    if !params[:lock_default_scan_flag_parse].blank?  
+           v_lock_default_scan_array = params[:lock_default_scan_flag_parse].split("|")
+            @image_dataset.lock_default_scan_flag = v_lock_default_scan_array[0]
+            if v_lock_default_scan_array[1] == ''
+                  @image_dataset.use_as_default_scan_flag =nil
+            else
+                  @image_dataset.use_as_default_scan_flag = v_lock_default_scan_array[1]
+            end
+    end
 
     respond_to do |format|
       if @image_dataset.update_attributes(params[:image_dataset])
