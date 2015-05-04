@@ -3,7 +3,7 @@ gem 'rails', '~>3.2'
 
 
 gem 'sqlite3', '~>1.3.3'  # need in metamri
-gem 'mysql2' #,'~>0.2.0'  # not limiting version 20130314, '~>0.2.0'---# went back to limit ACtiveRecord adapter and rails 3.1
+gem 'mysql2'  # ,'~>0.3.13'  # not limiting version 20130314, '~>0.2.0'---# went back to limit ACtiveRecord adapter and rails 3.1
 gem 'yaml_db'
 
 # Bundle edge Rails instead:
@@ -18,7 +18,7 @@ gem 'metamri'  ,'~>0.2.21'  ####:path => '~>0.2.11'  # need to update metamri ge
 # end
 
 gem 'builder' #, '~>2.1.2'
-gem 'RedCloth', '~>4.2.7'
+gem 'RedCloth' #, '~>4.2.7'
 # gem 'bluecloth', '~>2.1.0'
 gem "cocaine", "0.3.2"   # need older version to work wityh paperclip
 gem 'paperclip', '~>2.3.8'
@@ -38,18 +38,19 @@ gem 'exception_notification', "~> 2.4.1", :require => 'exception_notifier'
 # gem 'unicorn'
 
 ########## default in 3.1 ?  gem 'jquery-rails'
-gem "devise", ">= 1.4.9"
-gem 'devise-encryptable'
-gem "devise_ldap_authenticatable"
+gem "devise", "3.1.1" #   ">= 1.4.9"
+
+gem 'devise-encryptable', '0.1.2'
+gem "devise_ldap_authenticatable", "0.8.1"
 gem "cancan"
 # gem "mechanize" # used in radiology model for scaping  # trying to remove nokogiri because of problems with xml lib versions on adrcdev/rvm
-gem "hpricot"
+gem 'hpricot'
 
 gem 'rvm-capistrano'
 # gem 'mini_magick' # needs newer ruby 1.9.2 to work with ruby dicom
 gem 'open4'
 # gem 'POpen4', '~>0.1.4'
-# gem 'bzip2-ruby' 
+#gem 'bzip2-ruby' 
 gem 'escoffier'
 # Deploy with Capistrano
 gem 'capistrano' #, '~>2.15.5' #~>3.0.1' #~>2.15.5' #, '~>2.5.19'
