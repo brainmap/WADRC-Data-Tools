@@ -1953,7 +1953,8 @@ class DataSearchesController < ApplicationController
     # It might be the order in which LEFT JOINs get added based on insert order in database
     # if 2 or more cg_tables linked to sp/en getting LEFT JOIN  LEFT JOIN - repeat???
     # try temp fix -- wonky 
-    sql = sql.gsub("LEFT JOIN  LEFT JOIN","LEFT JOIN  ")
+    sql = sql.gsub("LEFT JOIN  ","LEFT JOIN ")
+    sql = sql.gsub("LEFT JOIN LEFT JOIN","LEFT JOIN ")
     @sql = sql
     v_sql_log = sql.gsub("'","")
     if !v_sql_log[11911..15880].nil?
