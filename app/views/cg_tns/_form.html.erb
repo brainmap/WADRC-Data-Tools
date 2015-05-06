@@ -50,7 +50,11 @@
                               &nbsp;&nbsp;&nbsp; 
               <%= f.label :secondary_key_flag %>: 
             <%= f.select :secondary_key_flag, options_for_select(v_y_n, @cg_tn.secondary_key_flag),
-                            {:prompt => 'Select secondary_key_flag'}  %>						
+                            {:prompt => 'Select secondary_key_flag'}  %>	
+      </td></tr>
+      <tr><td colspan="3">
+                            <B>The secondary key flag expects the table to have a column called [secondary_key]. The tables are joined on secondary_key, which might make an inner join behave outer joinish.</b> 
+                            <br> Related issues are columns which are flaged as match_mri_path_flag ( trys to eliminate duplicates from dual enrollments), secondary_key_protocol_flag and secondary_key_visitno_flag ( for joining the UP protocol tables ). Getting rid of the multiple rows in the search joins without lossing rows to an inner join is a PROBLEM.
  </td></tr></table>
  <table><tr><td><%= f.label :tracker_type %>:
  	<%= collection_select('cg_tn', :tracker_id,Trtype.where("status_flag ='Y' ").order(:description), :id, :description,  {:prompt => 'Choose tracker if table type is tracker'}, {:multiple =>  false} ) %>

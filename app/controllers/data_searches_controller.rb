@@ -899,6 +899,7 @@ class DataSearchesController < ApplicationController
      
       request_format = request.formats.to_s
       @html_request ="Y"
+      # html and non-html have different column_names as output
       case  request_format
         when "[text/html]","text/html" then  # application/html ?
             @html_request ="Y" 
@@ -908,7 +909,8 @@ class DataSearchesController < ApplicationController
       if v_debug == "Y"
           # puts "aaaaaa @html_request= "+@html_request
        end
-      # get stored cg_search
+      # get stored cg_search - this populates all the params like a submited search
+      # @cg_query carries the search parameters from saved search or from search params
       if !params[:cg_search].blank? and !params[:cg_search][:cg_query_id].blank? 
          @cg_query = CgQuery.find(params[:cg_search][:cg_query_id])
         if !@cg_query.scan_procedure_id_list.blank?
@@ -1106,7 +1108,7 @@ class DataSearchesController < ApplicationController
                 # need to loop thru each pet tracer picked
                 params[:cg_search][:pet_tracer_id].each do |tr|
                      @cg_tn = CgTn.find(v_tn_id)
-                     # remake the @cg_tn with pet_tracer_id
+                     # remake the @cg_tn with pet_tracer_id  - alias includes tracer so can have multiple pet
                      @cg_tn.alias = @cg_tn.tn+"_"+tr
                      @cg_tn.tn = "(select * from view_petscan_appts where view_petscan_appts.lookup_pettracer_id = '"+tr+"')  "+@cg_tn.alias
                      @cg_tn.join_right = "view_petscan_appts_"+tr+".petscan_vgroup_id = vgroups.id"
@@ -1114,70 +1116,68 @@ class DataSearchesController < ApplicationController
                      @local_tables_alias_hash[@cg_tn.tn] = @cg_tn.alias
                      v_cg_tn_array.push(@cg_tn)
                 end
-            elsif @cg_tn.table_type == "tracker"
-                     @cg_tn.alias = @cg_tn.tn
-    v_tracker_column_array = ["scan_procedures_vgroups.vgroup_id",   "trfiles.subjectid","trfiles.secondary_key","trfiles.enrollment_id","trfiles.scan_procedure_id", "trfiles.file_completed_flag","trfiles.qc_value","trfiles.qc_notes"]
+            elsif @cg_tn.table_type == "tracker"  # e.g. fs edit, mcd trackers
+                @cg_tn.alias = @cg_tn.tn
+                v_tracker_column_array = ["scan_procedures_vgroups.vgroup_id",   "trfiles.subjectid","trfiles.secondary_key","trfiles.enrollment_id","trfiles.scan_procedure_id", "trfiles.file_completed_flag","trfiles.qc_value","trfiles.qc_notes"]
     # just putting the tables in with common -- problem with left joins and commas from the array join -- need trfiles last in tn list
-    v_tracker_table_array = ["scan_procedures_vgroups,enrollment_vgroup_memberships,trfiles"]
-    v_tracker_table_conditions =[" trfiles.trtype_id = "+@cg_tn.tracker_id.to_s+" ", "scan_procedures_vgroups.scan_procedure_id = trfiles.scan_procedure_id",
+                v_tracker_table_array = ["scan_procedures_vgroups,enrollment_vgroup_memberships,trfiles"]
+                v_tracker_table_conditions =[" trfiles.trtype_id = "+@cg_tn.tracker_id.to_s+" ", "scan_procedures_vgroups.scan_procedure_id = trfiles.scan_procedure_id",
                              "enrollment_vgroup_memberships.enrollment_id = trfiles.enrollment_id", "scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id"]
 
-    @tractiontypes = Tractiontype.where("trtype_id in (?)",@cg_tn.tracker_id).where("tractiontypes.form_display_label is not null and tractiontypes.form_display_label >''" ).order(:display_order)
-    @tractiontypes.each do |act|
-        v_value_sql = ""
-        # ("trfiles.id = v_"+act.id.to_s+".trfile_id")
-        v_col = (act.form_display_label).gsub(/ /,"").gsub(/\'/,"_").gsub(/\"/,"_").gsub(/\-/,"_").downcase+"_" 
-        v_tracker_column_array.push("v_"+act.id.to_s+"."+v_col) 
-        # need last edit
-        if !act.ref_table_b_1.blank?
-          v_value_sql = "LEFT JOIN  (select "+act.ref_table_a_1+".description "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1+" 
+                @tractiontypes = Tractiontype.where("trtype_id in (?)",@cg_tn.tracker_id).where("tractiontypes.form_display_label is not null and tractiontypes.form_display_label >''" ).order(:display_order)
+                @tractiontypes.each do |act|
+                    v_value_sql = ""
+                    # ("trfiles.id = v_"+act.id.to_s+".trfile_id")
+                    v_col = (act.form_display_label).gsub(/ /,"").gsub(/\'/,"_").gsub(/\"/,"_").gsub(/\-/,"_").downcase+"_" 
+                    v_tracker_column_array.push("v_"+act.id.to_s+"."+v_col) 
+                    # need last edit
+                    if !act.ref_table_b_1.blank?
+                      v_value_sql = "LEFT JOIN  (select "+act.ref_table_a_1+".description "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1+" 
                       where trfile2.id = tredits.trfile_id 
                       and tredits.id = tredit_actions.tredit_id 
                       and tredit_actions.tractiontype_id = "+act.id.to_s+" 
                       and "+act.ref_table_a_1+".label = '"+act.ref_table_b_1+"'
                       and tredit_actions.value = "+act.ref_table_a_1+".ref_value
                       and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
-         v_tracker_table_array.push(v_value_sql)
+                      v_tracker_table_array.push(v_value_sql)
 
-        elsif !act.ref_table_a_1.blank?
-          v_value_sql = "LEFT JOIN  (select "+act.ref_table_a_1.pluralize.underscore+".description "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1.pluralize.underscore+" 
+                    elsif !act.ref_table_a_1.blank?
+                      v_value_sql = "LEFT JOIN  (select "+act.ref_table_a_1.pluralize.underscore+".description "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1.pluralize.underscore+" 
                       where trfile2.id = tredits.trfile_id 
                       and tredits.id = tredit_actions.tredit_id 
                       and tredit_actions.tractiontype_id = "+act.id.to_s+" 
                       and "+act.ref_table_a_1+".label = '"+act.ref_table_b_1+"'
                       and tredit_actions.value = "+act.ref_table_a_1.pluralize.underscore+".id
                       and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
-         v_tracker_table_array.push(v_value_sql)
+                      v_tracker_table_array.push(v_value_sql)
 
-        else
-          v_value_sql = "LEFT JOIN (select tredit_actions.value "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions 
+                    else
+                      v_value_sql = "LEFT JOIN (select tredit_actions.value "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions 
                       where trfile2.id = tredits.trfile_id 
                       and tredits.id = tredit_actions.tredit_id 
                       and tredit_actions.tractiontype_id = "+act.id.to_s+" 
                       and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
-         v_tracker_table_array.push(v_value_sql)
-        end
-    end
-    # using LEFT JOIN
-    v_tracker_sql = "( select "+v_tracker_column_array.join(',')+" from "+v_tracker_table_array.join('   ')+" where "+v_tracker_table_conditions.join(' and ') +" ) "
+                      v_tracker_table_array.push(v_value_sql)
+                    end
+                end
+                # using LEFT JOIN
+                v_tracker_sql = "( select "+v_tracker_column_array.join(',')+" from "+v_tracker_table_array.join('   ')+" where "+v_tracker_table_conditions.join(' and ') +" ) "
 
+                @cg_tn.tn = v_tracker_sql +@cg_tn.alias
+                @cg_tn.join_right = @cg_tn.alias+".vgroup_id = vgroups.id"
+                @cg_tn.join_left ="LEFT JOIN "+v_tracker_sql +"  "+@cg_tn.alias+" on  vgroups.id = "+@cg_tn.alias+".vgroup_id"
+                @local_tables_alias_hash[@cg_tn.tn] = @cg_tn.alias
+                v_cg_tn_array.push(@cg_tn)                 
 
-
-
-                     @cg_tn.tn = v_tracker_sql +@cg_tn.alias
-                     @cg_tn.join_right = @cg_tn.alias+".vgroup_id = vgroups.id"
-                     @cg_tn.join_left ="LEFT JOIN "+v_tracker_sql +"  "+@cg_tn.alias+" on  vgroups.id = "+@cg_tn.alias+".vgroup_id"
-                     @local_tables_alias_hash[@cg_tn.tn] = @cg_tn.alias
-                     v_cg_tn_array.push(@cg_tn)                 
-
-            else
+            else # just a regular table
                 @cg_tn = CgTn.find(v_tn_id)  
                 @cg_tn.alias = @cg_tn.tn
                 v_cg_tn_array.push(@cg_tn)
                 @local_tables_alias_hash[@cg_tn.tn] =  @cg_tn.alias
             end
             v_cg_tn_array.each do |tn_object| 
-             @cg_tn = tn_object             
+             @cg_tn = tn_object  
+             # q_data are the questionaire forms -- hiding because of performance issues -- export in tab searches           
              if (@cg_tn.join_left).downcase.include?("vgroups.participant_id")
                    @q_data_tables_p_vg_hash[@cg_tn.id] ="participant"
              else
@@ -1405,6 +1405,7 @@ class DataSearchesController < ApplicationController
                                 else
                                       @tables_left_join_hash["vgroups" ] = vg
                                 end  
+    puts "AAAAA line 1408 vg left joins="+@tables_left_join_hash["vgroups" ]
                            end   
                            #### don't think this is needed@local_fields.concat(@fields)
                            @left_join.each do |lj|
@@ -1413,6 +1414,7 @@ class DataSearchesController < ApplicationController
                               else
                                     @tables_left_join_hash[v_join_left_tn ] = lj
                               end
+    puts "BBBBBB line 1417 other left join "+@tables_left_join_hash[v_join_left_tn ]
                            end 
                            @cg_search_q_data = nil                          
                          end
@@ -1803,7 +1805,7 @@ class DataSearchesController < ApplicationController
       end
       @column_number =   @local_column_headers.size
       if v_debug == "Y"
-          puts "hhhhhhhhh line 1592"
+          puts "hhhhhhhhh line 1808"
       end
       if v_debug == "Y" and params[:cg_search].blank?
             puts "hhhhhhhhh params[:cg_search]  blank "
@@ -1816,7 +1818,7 @@ class DataSearchesController < ApplicationController
       end
   if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?
     if v_debug == "Y"
-        puts "jjjjjjjj line 1596"
+        puts "jjjjjjjj line 1821"
     end
 
     @local_conditions.delete_if {|x| x == "" }   # a blank getting inserted 
@@ -1854,6 +1856,8 @@ class DataSearchesController < ApplicationController
         if v_temp_tn.secondary_key_flag == "Y"
             @tables_secondary_key_join_hash[v_temp_tn.tn] = " coalesce(view_mri_appts.secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,'') "
         end
+        # add in secondary_key_protocol
+        # add in secondary_key_visitno
         if  (@local_tables.include?v_temp_tn.tn) or  v_temp_tn.tn == 'view_mri_appts'  
            if v_temp_tn.secondary_key_flag == "Y"
               v_secondary_key_join =" coalesce(appointments.secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,'') "
@@ -1878,6 +1882,7 @@ class DataSearchesController < ApplicationController
          v_tn_cn_match_mri_path_array.uniq.each do |tn_cn|
             v_temp_split = tn_cn.split(".")
             if (@local_tables.include?v_temp_split[0])
+                # this gets rid of matches between dual enrollments -- pdt and lead etc.
                v_mri_path_match_join = " view_mri_appts.path LIKE CONCAT('%',substring("+tn_cn+",1,6),'%') "
                @local_conditions.push(v_mri_path_match_join ) 
             else 
@@ -1888,6 +1893,7 @@ class DataSearchesController < ApplicationController
                # add
                #     and  view_mri_appts.path LIKE CONCAT('%',substring(cg_rbm_icv.subjectid,1,6),'%')  
                #     and coalesce(view_mri_appts.secondary_key,'') = coalesce(cg_rbm_icv.secondary_key,'')
+               # THIS IS WHERE THE DOUBLE LEFT JOIN S ARE COMING FROM
                @local_tables.uniq.each do |tn|
                        if !@tables_left_join_hash[tn].nil? and @tables_left_join_hash[tn].include? "LEFT JOIN "+v_temp_split[0]+" on vgroups.id"
                            v_left_join_temp = @tables_left_join_hash[tn].split("LEFT JOIN")
@@ -1896,7 +1902,7 @@ class DataSearchesController < ApplicationController
                            v_left_join_temp.each do |lj|
                                lj = "LEFT JOIN"+lj
                                if lj.include? "LEFT JOIN "+v_temp_split[0]+" on"
-                                  v_replaced = lj.gsub("LEFT JOIN "+v_temp_split[0]+" on vgroups.id", "LEFT JOIN "+v_temp_split[0]+" on view_mri_appts.mri_vgroup_id")
+                                  v_replaced = v_replaced +" "+lj.gsub("LEFT JOIN "+v_temp_split[0]+" on vgroups.id", "LEFT JOIN "+v_temp_split[0]+" on view_mri_appts.mri_vgroup_id")
                                   v_replaced = v_replaced +" and view_mri_appts.path LIKE CONCAT('%',substring("+tn_cn+",1,6),'%') "
                                   if !@tables_secondary_key_join_hash[v_temp_split[0]].nil?
                                      v_replaced = v_replaced +" and "+@tables_secondary_key_join_hash[v_temp_split[0]]
@@ -1905,8 +1911,8 @@ class DataSearchesController < ApplicationController
                            end
                            v_left_join_temp.each do |lj|
                                lj = "LEFT JOIN"+lj
-                               if lj.include? "LEFT JOIN "+v_temp_split[0]+" on" or lj == "LEFT JOIN"
-
+                               if lj.include? "LEFT JOIN "+v_temp_split[0]+" on" or lj.strip == "LEFT JOIN"
+                                # don't do anything 
                                elsif lj.include? "LEFT JOIN view_mri_appts"
                                      @tables_left_join_hash[tn] = @tables_left_join_hash[tn]+" "+lj+" "+v_replaced
                                else
@@ -1949,12 +1955,6 @@ class DataSearchesController < ApplicationController
     sql = sql + @all_tables.uniq.join(", ")
     sql = sql + " where "+ @local_conditions.uniq.join(" and ")
     sql = sql+" order by "+@order_by.join(",")
-    # in prod getting error - no error in dev????
-    # It might be the order in which LEFT JOINs get added based on insert order in database
-    # if 2 or more cg_tables linked to sp/en getting LEFT JOIN  LEFT JOIN - repeat???
-    # try temp fix -- wonky 
-    sql = sql.gsub("LEFT JOIN  ","LEFT JOIN ")
-    sql = sql.gsub("LEFT JOIN LEFT JOIN","LEFT JOIN ")
     @sql = sql
     v_sql_log = sql.gsub("'","")
     if !v_sql_log[11911..15880].nil?

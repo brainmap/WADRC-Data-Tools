@@ -86,7 +86,8 @@ load next column? : <%= select_tag 'load_next_column', options_for_select(v_y_n,
                         {:prompt => 'Select y/n match mri path'}  %>
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   </div>
-
+<br>
+match_mri_path_flag ( trys to eliminate duplicates from dual enrollments), secondary_key_protocol_flag and secondary_key_visitno_flag ( for joining the UP protocol tables ). Getting rid of the multiple rows in the search joins without lossing rows to an inner join is a PROBLEM.
 <br>
 
   <div class="actions">
