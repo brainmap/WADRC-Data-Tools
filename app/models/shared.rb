@@ -6420,6 +6420,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
          v_path_array = v_path.split('/')
          v_subjectdir_array = v_path_array[v_path_array.count-1].split('_')
          v_protocol = v_path_array[v_path_array.count-2]
+         if( v_protocol == 'mri')
+                v_protocol = v_path_array[v_path_array.count-3]
+         end
+         # old protocols didn't have the /mri in the raw path
          v_preprocessing_path_unknown = "/mounts/data/preprocessed/visits/"+v_protocol+"/"+v_subjectdir_array[0]+"/unknown/"
          # get all the T1 series description and path/dir, check for o[match]
          sql_image_datasets = "SELECT image_datasets.id, image_datasets.path, image_datasets.series_description   
@@ -6437,7 +6441,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
               v_ids_path_array = r_ids[1].split("/")
               v_id = v_ids_path_array.count-1
               v_dicom_dir = v_ids_path_array[v_id]
-              v_acpc_file_name = "o"+v_subjectdir_array[0]+"_"+v_series_description.gsub(".","").gsub("-","_").gsub(" ","_")+"_"+v_dicom_dir.gsub(".","")+".nii"                 
+              v_acpc_file_name = "o"+v_subjectdir_array[0]+"_"+v_series_description.gsub(".","").gsub("-","_").gsub(" ","_")+"_"+v_dicom_dir.gsub(".","")+".nii"                       
               if File.directory?(v_preprocessing_path_unknown)
                   v_dir_array = Dir.entries(v_preprocessing_path_unknown)
                   sql_set_flag = "UPDATE image_datasets set image_datasets.use_as_default_scan_flag = NULL
