@@ -6441,6 +6441,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
               v_ids_path_array = r_ids[1].split("/")
               v_id = v_ids_path_array.count-1
               v_dicom_dir = v_ids_path_array[v_id]
+              if( v_dicom_dir.include?("."))
+                  v_dicom_dir_array = v_dicom_dir.split(".")
+                  v_dicom_dir = v_dicom_dir_array[0]
+              end
               v_acpc_file_name = "o"+v_subjectdir_array[0]+"_"+v_series_description.gsub(".","").gsub("-","_").gsub(" ","_")+"_"+v_dicom_dir.gsub(".","")+".nii"                       
               if File.directory?(v_preprocessing_path_unknown)
                   v_dir_array = Dir.entries(v_preprocessing_path_unknown)
