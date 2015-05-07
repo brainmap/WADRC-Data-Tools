@@ -85,6 +85,7 @@ class SharedController < ActionController::Base
             v_internal_cnt = 0
             if v_cnt > 0
              # WHAT ABOUT CSV WITH LAST BATCH OF CELLS BLANK
+puts "AAAAA "+v_content_array[v_cnt]
               csv = CSV.parse(v_content_array[v_cnt])
               csv.each do  |c_row|
                  v_internal_cnt = 0

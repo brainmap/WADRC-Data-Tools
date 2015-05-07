@@ -6407,11 +6407,11 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           # get   path, directory, secondary key, subjectid, all T1 series descriptions
           # look for o[subjectid][secondarkey]_[series description]_[dicomdir/replace.].nii
       sql = "SELECT visits.id, visits.path, appointments.secondary_key FROM visits, appointments 
-                        where appointments.id = visits.appointment_id  and visits.id = 1726
+                        where appointments.id = visits.appointment_id  
                         and visits.id in ( select image_datasets.visit_id from image_datasets,series_description_maps where 
                                   image_datasets.series_description = series_description_maps.series_description
                                   and  series_description_maps.series_description_type_id = 19)"  
-puts "TTTTTTTTT"    
+  
       results = connection.execute(sql)
       results.each do |r|
          v_visit_id = r[0]

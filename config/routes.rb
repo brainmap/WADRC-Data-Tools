@@ -1,6 +1,9 @@
 WADRCDataTools::Application.routes.draw do
 
 
+  resources :series_description_scan_procedures
+
+
   resources :cg_table_types
 
 
