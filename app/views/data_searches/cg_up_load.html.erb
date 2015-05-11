@@ -14,10 +14,11 @@ v_key_type = [["enumber and visit# mapped to enrollment/scan_procedure","enrollm
     <H2>Make, archive and load an UP table in the database and cg_search</H2><br>
 	 <table width="100%">
 	 	<tr><td align="left"><div class="field">
-	    <B>UP Table Name:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "up_table_name" ,nil, :required => true%></div>
+	    <B>UP Table Name:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "up_table_name" ,nil, :required => true, :size =>90%></div>
 		</td></tr>
 		<tr><td align="left"><div class="field">
-	    <B>UP Display Table Name:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "up_display_table_name" %>  <small>Include the date stamp YYYYMMDD in the display name</small></div>
+	    <B>UP Display Table Name:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	    <%= text_field_tag "up_display_table_name", nil,:size =>90 %>  <small>Include the date stamp YYYYMMDD in the display name</small></div>
 		</td></tr>
 		<tr><td align="left"><div class="field">
 	    <B>Date Stamp:</B>&nbsp;&nbsp;&nbsp;<small>YYYYMMDD</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "up_table_yyyymmdd",nil, :required => true %></div>
@@ -27,11 +28,11 @@ v_key_type = [["enumber and visit# mapped to enrollment/scan_procedure","enrollm
 		</td></tr>
 			 	<tr><td align="left"><div class="field">
 	    <B>Key Type:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= select_tag "key_type", options_for_select([["enumber and visit# mapped to enrollment/scan_procedure","enrollment/sp"],
-["reggieid-participant_id","reggieid-kc-participant_id"],["wrapnum-participant_id","wrapnum-kc-participant_id"],["adrcnum-participant_id","adrcnum-kc-participant_id"]], "enrollment/sp")%></div>
+["reggieid-participant_id","reggieid-kc-participant_id"],["wrapnum-participant_id","wrapnum-kc-participant_id"],["adrcnum-participant_id","adrcnum-kc-participant_id"], ["subjectid-participant_id","subjectid-kc-participant_id"]], "enrollment/sp")%></div>
 		</td></tr>
 		<tr><td align="left"><div class="field">
 	    <B>Source Table Name:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	    <%= text_field_tag "source_up_table_name", nil , :size => 60 , :required => true%></div>
+	    <%= text_field_tag "source_up_table_name", nil , :size => 90 , :required => true%></div>
 		</td></tr>
         <tr><td  align="left">
 	    <B>Source Schema</B>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -40,6 +41,10 @@ v_key_type = [["enumber and visit# mapped to enrollment/scan_procedure","enrollm
 		        <tr><td  align="left">
 	    <B>Load from Source Schema or make empty table in Source Schema</B>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <%= select_tag "make_load_table_schema", options_for_select(v_make_load_table_schema, "load_from_source_schema")%>
+		</td></tr>
+			 	<tr><td align="left"><div class="field">
+	    <B>Append or Full Replace or Update with non-blank:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= select_tag "append_full_replace", options_for_select([["append","append"],
+["full_replace","full_replace"],["update_non_blank","update_non_blank"]], "full_replace")%></div>
 		</td></tr>
 	   <tr><td  align="left">
 						  <div class="actions">
