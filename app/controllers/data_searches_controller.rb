@@ -2445,6 +2445,7 @@ def cg_up_load
      v_source_up_table_name = params[:source_up_table_name]
      v_source_schema = params[:source_schema]
      v_make_load_table_schema = params[:make_load_table_schema]
+
   if (!v_up_table_name.blank? and  !v_up_display_table_name.blank? and  !v_up_table_yyyymmdd.blank? and  !v_up_table_name_key_column.blank? and  !v_key_type.blank? and  !v_source_up_table_name.blank? and  !v_source_schema.blank? and !v_make_load_table_schema.blank?)
     v_schema ='panda_production'
     if Rails.env=="development" 
@@ -2455,9 +2456,10 @@ def cg_up_load
     connection = ActiveRecord::Base.connection();
       # THIS NEEDS TO NOT WIPE OUT THE TABLE EACH RELOAD
       # check in cg_up_table_definitions_new   for v_up_table_name
-    v_sql = "Select count(*) from "+v_definition_table+" where table_name ='"+v_up_table_name+"'"  
+    v_sql = "Select count(*) from "+v_definition_table+" where target_table ='"+v_up_table_name+"'"  
     results = connection.execute(v_sql)
     v_cnt = results.first
+
     if v_cnt[0].to_i > 0 
       # in definitions table , go ahead
      if  v_make_load_table_schema == "make_in_source_schema"  # make in source schema
@@ -2469,7 +2471,7 @@ def cg_up_load
                v_msg = v_source_up_table_name+" table already exists in source schema "+v_source_schema
         else
           v_create_sql = "CREATE table "+v_source_schema+"."+v_source_up_table_name+"("
-          v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_function from "+v_definition_table+" where table_name ='"+v_up_table_name+"'"   
+          v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_function, col_format from "+v_definition_table+" where table_name ='"+v_up_table_name+"'"   
         result_cols = connection.execute(v_sql_cols)
         v_loop_cnt = 0
         result_cols.each do |col|
@@ -2493,6 +2495,10 @@ def cg_up_load
               elsif col[1] == "TEXT"
                      v_create_sql = v_create_sql+" "+col[0]+"   TEXT "
               end
+               if col[3] == "date"  # making a colname_date   DATE and age_at_activity
+                      v_create_sql = v_create_sql+" "+col[0]+"_date   DATE "
+                      v_create_sql = v_create_sql+" "+col[0]+"_age_at_activity   FLOAT "
+               end
          end
 
          v_create_sql = v_create_sql+")"
@@ -2508,21 +2514,27 @@ def cg_up_load
       results = connection.execute(v_sql)
       v_cnt = results.first
       if v_cnt[0].to_i > 0
+         # if
           v_msg = "Reloading existing UP Table "+v_tn
           v_cg_tns_archive = CgTn.where("tn in (?)", v_tn)
           v_cg_tns_archive[0].status_flag ='N'
           v_cg_tns_archive[0].save
           # if exisiting with same v_up_table_yyyymmdd => replace contents  === new-present-old-edit?
           # drop table, remake, load
-          v_sql = "DROP TABLE "+v_schema+"."+v_tn
-          results = connection.execute(v_sql)
-        v_msg = v_msg+"; Dropped UP Table "+v_tn 
+        if ( !params[:append_full_replace].empty? and params[:append_full_replace] == "full_replace" )
+           v_sql = "DROP TABLE "+v_schema+"."+v_tn
+           results = connection.execute(v_sql)
+           v_msg = v_msg+"; Dropped UP Table "+v_tn 
+         end
+  # NEED TO DO !!!!! collect key_columns/subjectid/reggiied/secondary_key_protocol, secondary_key_visitno
         v_create_sql = "CREATE table "+v_schema+"."+v_tn+"("
 
         # add key columns
         if v_key_type == "enrollment/sp"
              v_create_sql = v_create_sql+" enrollment_id int,
                                            scan_procedure_id int"
+        elsif v_key_type == "subjectid-kc-participant_id"
+             v_create_sql = v_create_sql+" participant_id int "
         elsif v_key_type == "reggieid-kc-participant_id"
              v_create_sql = v_create_sql+" participant_id int "
         elsif v_key_type == "wrapnum-kc-participant_id"
@@ -2533,11 +2545,20 @@ def cg_up_load
 
         v_col_array = []
         v_key_col_array = []
-        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_function from "+v_definition_table+" where table_name ='"+v_up_table_name+"'"   
+        v_col_multi_key_array = []
+        # need to make _date and _age_at_activity cols, and do upddate based on format
+        v_date_source_col_array = []
+        v_date_date_col_hash = {}
+        v_date_format_col_hash = {}
+        v_age_at_activity_col_hash = {}
+        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_function, col_format from "+v_definition_table+" where target_table ='"+v_up_table_name+"'"   
         result_cols = connection.execute(v_sql_cols)
         result_cols.each do |col|
               v_col_array.push(col[0])
-              if col[3] == "key"
+              if col[3] == "subjectid" or col[3] == "secondary_key_protocol" or col[3] == "secondary_key_visitno" or col[0] == "secondary_key"
+                  v_col_multi_key_array.push(col[0])
+              end 
+              if col[3] == "subjectid"
                  v_key_col_array.push(col[0])
               end
               if col[1] == "VARCHAR"
@@ -2555,11 +2576,28 @@ def cg_up_load
               elsif col[1] == "TEXT"
                      v_create_sql = v_create_sql+", "+col[0]+"   TEXT "
               end
+              if col[3] == "date"  # making a colname_date   DATE and age_at_activity
+                      v_date_source_col_array.push(col[0])
+                      v_date_date_col_hash[col[0]] = col[0]+"_date"
+                      v_date_format_col_hash[col[0]] = col[4]
+                      v_age_at_activity_col_hash[col[0]] = col[0]+"_age_at_activity"
+                      v_create_sql = v_create_sql+", "+col[0]+"_date   DATE "
+                      v_create_sql = v_create_sql+", "+col[0]+"_age_at_activity   FLOAT "
+              end
          end
          v_create_sql = v_create_sql+")"
-          # make new table with v_up_table_yyyymmdd, 
-         results = connection.execute(v_create_sql)   # new-present-old_edit ?
-       v_msg = v_msg+"; Created table "+v_tn
+         if ( !params[:append_full_replace].empty? and params[:append_full_replace] == "full_replace" )
+             # make new table with v_up_table_yyyymmdd, 
+            results = connection.execute(v_create_sql)   # new-present-old_edit ?
+            v_msg = v_msg+"; Created table "+v_tn
+         end
+         if ( !params[:append_full_replace].empty? and params[:append_full_replace] == "append" )
+# NEED TO DO !!! delete exisiting rows based on key column/subjectid/secondary_key_protocol, secondary_key
+               v_delete_sql = " DELETE FROM "+v_schema+"."+v_tn+" WHERE coalesce('',"+ v_col_multi_key_array.join(",'=|',") +")  IN 
+                        (SELECT coalesce('',"+ v_col_multi_key_array.join(",'=|',") +") FROM "+v_source_schema+"."+v_source_up_table_name+")"
+               results = connection.execute(v_delete_sql)
+               v_msg = v_msg+"; Deleted shared data  for append from table "+v_tn
+         end
        v_insert_sql = "INSERT INTO "+v_schema+"."+v_tn+"("
         v_insert_end_sql = ") "
         v_select_sql =" SELECT "
@@ -2584,7 +2622,10 @@ def cg_up_load
                           results = connection.execute(sql)
                         end
                       end
-
+        elsif v_key_type == "subjectid-kc-participant_id"
+            v_key_col = v_key_col_array[0]
+             sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct e.participant_id from enrollments e where e.enumber = replace(replace(replace(replace(t."+v_key_col+",'_v2',''),'_v3',''),'_v4',''),'_v5',''))"
+              results = connection.execute(sql) 
         elsif v_key_type == "reggieid-kc-participant_id"
              sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct p.id from participants p where p.reggieid = t."+v_key_col+")"
               results = connection.execute(sql) 
@@ -2595,11 +2636,42 @@ def cg_up_load
              sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct p.id from participants p where p.adrcnum = t."+v_key_col+")"
               results = connection.execute(sql) 
         end
+
+        v_date_source_col_array.each do |key|
+             # make the date
+             v_date_format = '%m/%d/%Y'
+             if v_date_format_col_hash[key] == "MM/DD/YY"
+                  v_date_format = '%m/%d/%y'
+             elsif v_date_format_col_hash[key] == "MM/D/YY"
+                  v_date_format = '%m/%e/%y'
+             end
+
+            sql = "UPDATE "+v_schema+"."+v_tn+"  t set "+v_date_date_col_hash[key]+" = str_to_date("+key+",'"+v_date_format+"') where "+key+"  > '' and "+key+" IS NOT NULL "
+            results = connection.execute(sql) 
+            if v_key_type == "enrollment/sp" # use enrollment_id to link to participant
+                sql = "UPDATE "+v_schema+"."+v_tn+"  t set "+v_age_at_activity_col_hash[key]+" = 
+                    ( SELECT distinct round((DATEDIFF( "+v_date_date_col_hash[key]+",  p.dob)/365.25),2)  FROM participants p,enrollments e
+                                           where p.dob is not null and p.dob > '' and e.participant_id = p.id
+                                             and e.id = t.enrollment_id)
+                        WHERE  "+v_date_date_col_hash[key]+"  > '' and "+v_date_date_col_hash[key]+" IS NOT NULL
+                        AND t.enrollment_id IS NOT NULL AND t.enrollment_id >'' "
+            results = connection.execute(sql) 
+
+            elsif v_key_type == "subjectid-kc-participant_id" or v_key_type == "reggieid-kc-participant_id"   or v_key_type == "wrapnum-kc-participant_id" or v_key_type == "adrcnum-kc-participant_id"
+                 sql = "UPDATE "+v_schema+"."+v_tn+"  t set "+v_age_at_activity_col_hash[key]+" = 
+                    ( SELECT distinct round((DATEDIFF( "+v_date_date_col_hash[key]+",  p.dob)/365.25),2)  FROM participants p
+                                           where p.dob is not null and p.dob > ''
+                                           and t.participant_id = p.id)
+                        WHERE  "+v_date_date_col_hash[key]+"  > '' and "+v_date_date_col_hash[key]+" IS NOT NULL
+                        AND t.participant_id IS NOT NULL AND t.participant_id >'' "
+            results = connection.execute(sql) 
+            end
+        end
         v_msg = v_msg+"; Updated key column in table "+v_tn
           # update cg_serach columns  -- want to keep as many cn.id's for stored query
           v_cg_tns_archive[0].common_name = v_up_display_table_name
           v_cg_tn_cns = CgTnCn.where("cg_tn_id in (?)", v_cg_tns_archive[0].id)
-        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_display from "+v_definition_table+" where table_name ='"+v_up_table_name+"' order by display_order"   
+        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_display,col_function, col_format from "+v_definition_table+" where target_table ='"+v_up_table_name+"' order by display_order"   
         result_cols = connection.execute(v_sql_cols)
         v_cnt =1
         result_cols.each do |col|
@@ -2613,6 +2685,7 @@ def cg_up_load
               v_cg_tn_cn.display_order = v_cnt
              if col[1] == "DATE"
               v_cg_tn_cn.data_type ="date"
+              v_cg_tn_cn.hide_column_flag = "Y"
             elsif col[1].include?('int')
               v_cg_tn_cn.data_type ="integer"
             elsif col[1] == "FLOAT"
@@ -2625,7 +2698,34 @@ def cg_up_load
             v_cg_tn_cn.cn = col[0]
             v_cg_tn_cn.common_name = col[3]
             v_cg_tn_cn.export_name = col[3]
-              v_cg_tn_cn.cg_tn_id = v_cg_tns_archive[0].id
+            if col[4] == "secondary_key_visitno"
+                  v_cg_tn_cn.secondary_key_visitno_flag = "Y"
+            elsif col[4] == "secondary_key_protocol"
+                  v_cg_tn_cn.secondary_key_protocol_flag = "Y"
+            elsif col[4] == "date"
+                # need date_date and age_at_activity calculate
+                #v_cg_tn_cn..order_by_flag = "Y"
+                v_cg_tn_cn.hide_column_flag = "Y"
+                if ( v_date_date_col_hash[col[0]] > '')
+                    v_cg_tn_cn.cn = v_date_date_col_hash[col[0]]
+                    v_cg_tn_cn.order_by_flag = "Y"
+                    v_cg_tn_cn.data_type ="date"
+                end
+                if ( v_age_at_activity_col_hash[col[0]] > '')
+                    v_cg_tn_cn_age = CgTnCn.new
+                    v_cnt = v_cnt + 1
+                    v_cg_tn_cn_age.display_order = v_cnt
+                    v_cg_tn_cn_age.cn = v_age_at_activity_col_hash[col[0]]
+                    v_cg_tn_cn_age.order_by_flag = "Y"
+                    v_cg_tn_cn_age.common_name = col[3]+" age at activity"
+                    v_cg_tn_cn_age.export_name = col[3]+" age at activity"
+                    v_cg_tn_cn_age.cg_tn_id = v_cg_tns_archive[0].id
+                    v_cg_tn_cn_age.data_type ="float"
+                    v_cg_tn_cn_age.save
+                end
+
+            end
+            v_cg_tn_cn.cg_tn_id = v_cg_tns_archive[0].id
               v_cg_tn_cn.save
         end
 
@@ -2656,6 +2756,8 @@ def cg_up_load
         if v_key_type == "enrollment/sp"
              v_create_sql = v_create_sql+" enrollment_id int,
                                            scan_procedure_id int"
+        elsif v_key_type == "subjectid-kc-participant_id"
+             v_create_sql = v_create_sql+" participant_id int "
         elsif v_key_type == "reggieid-kc-participant_id"
              v_create_sql = v_create_sql+" participant_id int "
         elsif v_key_type == "wrapnum-kc-participant_id"
@@ -2666,12 +2768,16 @@ def cg_up_load
 
         v_col_array = []
         v_key_col_array = []
-        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_function from "+v_definition_table+" where table_name ='"+v_up_table_name+"'"   
+        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_function,col_format from "+v_definition_table+" where target_table ='"+v_up_table_name+"'"   
         result_cols = connection.execute(v_sql_cols)
-
+        # need to make _date and _age_at_activity cols, and do upddate based on format
+        v_date_source_col_array = []
+        v_date_date_col_hash = {}
+        v_date_format_col_hash = {}
+        v_age_at_activity_col_hash = {}
         result_cols.each do |col|
               v_col_array.push(col[0])
-              if col[3] == "key"
+              if col[3] == "subjectid"
                  v_key_col_array.push(col[0])
               end
               if col[1] == "VARCHAR"
@@ -2688,6 +2794,14 @@ def cg_up_load
                      v_create_sql = v_create_sql+", "+col[0]+"   DATETIME "
               elsif col[1] == "TEXT"
                      v_create_sql = v_create_sql+", "+col[0]+"   TEXT "
+              end
+              if col[3] == "date"  # making a colname_date   DATE and age_at_activity
+                      v_date_source_col_array.push(col[0])
+                      v_date_date_col_hash[col[0]] = col[0]+"_date"
+                      v_date_format_col_hash[col[0]] = col[4]
+                      v_age_at_activity_col_hash[col[0]] = col[0]+"_age_at_activity"
+                      v_create_sql = v_create_sql+", "+col[0]+"_date   DATE "
+                      v_create_sql = v_create_sql+", "+col[0]+"_age_at_activity   FLOAT "
               end
          end
          v_create_sql = v_create_sql+")"
@@ -2719,7 +2833,10 @@ def cg_up_load
                           results = connection.execute(sql)
                         end
                       end
-
+        elsif v_key_type == "subjectid-kc-participant_id"
+          v_key_col = v_key_col_array[0]
+             sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct e.participant_id from enrollments e where e.enumber = replace(replace(replace(replace(t."+v_key_col+",'_v2',''),'_v3',''),'_v4',''),'_v5',''))"
+              results = connection.execute(sql)
         elsif v_key_type == "reggieid-kc-participant_id"
              sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct p.id from participants p where p.reggieid = t."+v_key_col+")"
               results = connection.execute(sql) 
@@ -2730,6 +2847,37 @@ def cg_up_load
              sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct p.id from participants p where p.adrcnum = t."+v_key_col+")"
               results = connection.execute(sql) 
         end 
+        v_date_source_col_array.each do |key|
+             # make the date
+             v_date_format = '%m/%d/%Y'
+             if v_date_format_col_hash[key] == "MM/DD/YY"
+                  v_date_format = '%m/%d/%y'
+             elsif v_date_format_col_hash[key] == "MM/D/YY"
+                  v_date_format = '%m/%e/%y'
+             end
+               
+            sql = "UPDATE "+v_schema+"."+v_tn+"  t set "+v_date_date_col_hash[key]+" = str_to_date("+key+",'"+v_date_format+"') where "+key+"  > '' and "+key+" IS NOT NULL "
+            results = connection.execute(sql) 
+            if v_key_type == "enrollment/sp" # use enrollment_id to link to participant
+                sql = "UPDATE "+v_schema+"."+v_tn+"  t set "+v_age_at_activity_col_hash[key]+" = 
+                    ( SELECT distinct round((DATEDIFF( "+v_date_date_col_hash[key]+",  p.dob)/365.25),2)  FROM participants p,enrollments e
+                                           where p.dob is not null and p.dob > '' and e.participant_id = p.id
+                                             and e.id = t.enrollment_id)
+                        WHERE  "+v_date_date_col_hash[key]+"  > '' and "+v_date_date_col_hash[key]+" IS NOT NULL
+                        AND t.enrollment_id IS NOT NULL AND t.enrollment_id >'' "
+            results = connection.execute(sql) 
+
+            elsif v_key_type == "subjectid-kc-participant_id" or v_key_type == "reggieid-kc-participant_id"   or v_key_type == "wrapnum-kc-participant_id" or v_key_type == "adrcnum-kc-participant_id"
+                 sql = "UPDATE "+v_schema+"."+v_tn+"  t set "+v_age_at_activity_col_hash[key]+" = 
+                    ( SELECT distinct round((DATEDIFF( "+v_date_date_col_hash[key]+",  p.dob)/365.25),2)  FROM participants p
+                                           where p.dob is not null and p.dob > ''
+                                           and t.participant_id = p.id)
+                        WHERE  "+v_date_date_col_hash[key]+"  > '' and "+v_date_date_col_hash[key]+" IS NOT NULL
+                        AND t.participant_id IS NOT NULL AND t.participant_id >'' "
+            results = connection.execute(sql) 
+            end 
+
+        end
       
         v_msg = v_msg+"; Updated key column in table "+v_tn
          # make new cg_search table - inactive
@@ -2754,6 +2902,10 @@ def cg_up_load
       v_cg_search.join_left_parent_tn ="vgroups"
       v_cg_search.join_left="LEFT JOIN "+v_tn+" on vgroups.participant_id = "+v_tn+".participant_id"
       v_cg_search.join_right="vgroups.participant_id = "+v_tn+".participant_id"
+    elsif v_key_type  == 'subjectid-kc-participant_id'
+      v_cg_search.join_left_parent_tn ="vgroups"
+      v_cg_search.join_left="LEFT JOIN "+v_tn+" on vgroups.participant_id = "+v_tn+".participant_id"
+      v_cg_search.join_right="vgroups.participant_id = "+v_tn+".participant_id"     
     elsif v_key_type  == 'reggieid-kc-participant_id'
       v_cg_search.join_left_parent_tn ="vgroups"
       v_cg_search.join_left="LEFT JOIN "+v_tn+" on vgroups.participant_id = "+v_tn+".participant_id"
@@ -2772,7 +2924,7 @@ def cg_up_load
     # add columns 
          # change cg_search status = active
          #
-        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_display from "+v_definition_table+" where table_name ='"+v_up_table_name+"' order by display_order"   
+        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_display, col_function, col_format from "+v_definition_table+" where target_table ='"+v_up_table_name+"' order by display_order"   
         result_cols = connection.execute(v_sql_cols)
         v_cnt =1
         result_cols.each do |col|
@@ -2781,6 +2933,7 @@ def cg_up_load
               v_cg_tn_cn.display_order = v_cnt
              if col[1] == "DATE"
               v_cg_tn_cn.data_type ="date"
+              v_cg_tn_cn.hide_column_flag = "Y"
             elsif col[1].include?('int')
               v_cg_tn_cn.data_type ="integer"
             elsif col[1] == "FLOAT"
@@ -2793,6 +2946,33 @@ def cg_up_load
             v_cg_tn_cn.cn = col[0]
             v_cg_tn_cn.common_name = col[3]
             v_cg_tn_cn.export_name = col[3]
+           if col[4] == "secondary_key_visitno" 
+                  v_cg_tn_cn.secondary_key_visitno_flag = "Y"
+            elsif col[4] == "secondary_key_protocol"
+                  v_cg_tn_cn.secondary_key_protocol_flag = "Y"
+            elsif col[4] == "date"
+                # need date_date and age_at_activity calculate
+                #v_cg_tn_cn..order_by_flag = "Y"
+                v_cg_tn_cn.hide_column_flag = "Y"
+                if ( v_date_date_col_hash[col[0]] > '')
+                    v_cg_tn_cn.cn = v_date_date_col_hash[col[0]]
+                    v_cg_tn_cn.order_by_flag = "Y"
+                    v_cg_tn_cn.data_type ="date"
+                end
+                if ( v_age_at_activity_col_hash[col[0]] > '')
+                    v_cg_tn_cn_age = CgTnCn.new
+                    v_cnt = v_cnt + 1
+                    v_cg_tn_cn_age.display_order = v_cnt
+                    v_cg_tn_cn_age.cn = v_age_at_activity_col_hash[col[0]]
+                    v_cg_tn_cn_age.order_by_flag = "Y"
+                    v_cg_tn_cn_age.common_name = col[3]+" age at activity"
+                    v_cg_tn_cn_age.export_name = col[3]+" age at activity"
+                    v_cg_tn_cn_age.cg_tn_id = v_cg_search.id
+                    v_cg_tn_cn_age.data_type ="float"
+                    v_cg_tn_cn_age.save
+                end
+
+            end
               v_cg_tn_cn.cg_tn_id = v_cg_search.id
               v_cg_tn_cn.save
         end
