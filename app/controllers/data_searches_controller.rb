@@ -2710,6 +2710,7 @@ def cg_up_load
                     v_cg_tn_cn.cn = v_date_date_col_hash[col[0]]
                     v_cg_tn_cn.order_by_flag = "Y"
                     v_cg_tn_cn.data_type ="date"
+                    v_cg_tn_cn.status_flag ="N" # hiding up date field
                 end
                 if ( v_age_at_activity_col_hash[col[0]] > '')
                     v_cg_tn_cn_age = CgTnCn.new
@@ -2958,6 +2959,7 @@ def cg_up_load
                     v_cg_tn_cn.cn = v_date_date_col_hash[col[0]]
                     v_cg_tn_cn.order_by_flag = "Y"
                     v_cg_tn_cn.data_type ="date"
+                    v_cg_tn_cn.status_flag ="N" # hiding up date field
                 end
                 if ( v_age_at_activity_col_hash[col[0]] > '')
                     v_cg_tn_cn_age = CgTnCn.new
