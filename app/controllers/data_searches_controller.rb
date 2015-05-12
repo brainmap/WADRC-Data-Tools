@@ -1795,10 +1795,10 @@ class DataSearchesController < ApplicationController
         #run_search_q_data tn_cn_id/tn_id in (686/676,687/677,688/688) common_name = "question fields" vs run_search if 
       end     
       if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0
-          @local_column_headers.delete("Date (vgroup)")
-          @local_column_headers.delete("Protocol")
-          @local_column_headers.delete("Enumber")
-          @local_column_headers.delete("RMR")
+          @local_column_headers.delete_at(@local_column_headers.index("Date (vgroup)"))
+          @local_column_headers.delete_at(@local_column_headers.index("Protocol"))
+          @local_column_headers.delete_at(@local_column_headers.index("Enumber"))
+          @local_column_headers.delete_at(@local_column_headers.index("RMR"))
       end
       if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0 and !params[:longitudinal].nil? and params[:longitudinal] == "Y"
                 @local_fields = ["vgroups.participant_id"].concat(@local_fields)
@@ -1851,13 +1851,64 @@ class DataSearchesController < ApplicationController
     # this is a mess based on asumptions
     #  but seems to be working 
     # weird part is changing the outer joins from vgroups to view_mri_appts
+
+ # add in secondary_key_protocol -- 
+        @tables_secondary_key_protocol = CgTn.where("cg_tns.id  in (?) and cg_tns.id in (select cg_tn_cns.cg_tn_id from cg_tn_cns where cg_tn_cns.secondary_key_protocol_flag = 'Y')",  @all_table_ids_in_query)  
+        if @tables_secondary_key_protocol.count > 1
+           v_key_protocol_cnt = 0
+           v_key_protocol_base_table = ""
+           v_key_protocol_base_col = ""
+           v_key_protocol_next_table = ""
+           v_key_protocol_next_col = ""
+           @tables_secondary_key_protocol.each do |tn|
+              if v_key_protocol_cnt < 1
+                v_key_protocol_cnt = v_key_protocol_cnt +1
+                v_key_protocol_base_table = tn.tn
+                v_cn_secondary_key_protocol = CgTnCn.where("cg_tn_id in (?) and secondary_key_protocol_flag = 'Y' ",tn.id)
+                v_key_protocol_base_col = v_cn_secondary_key_protocol.first.cn
+               else
+                  v_key_protocol_cnt = v_key_protocol_cnt +1
+                v_key_protocol_next_table = tn.tn
+                v_cn_secondary_key_protocol = CgTnCn.where("cg_tn_id in (?) and secondary_key_protocol_flag = 'Y' ",tn.id)
+                v_key_protocol_next_col = v_cn_secondary_key_protocol.first.cn
+              v_secondary_key_protocol_join =" coalesce("+v_key_protocol_base_table+"."+v_key_protocol_base_col+",'') = coalesce("+v_key_protocol_next_table+"."+v_key_protocol_next_col+",'') "        
+              @local_conditions.push(v_secondary_key_protocol_join) 
+               end
+           end
+        end
+       
+                 # add in secondary_key_visitno
+        @tables_secondary_key_visitno = CgTn.where("cg_tns.id  in (?) and cg_tns.id in (select cg_tn_cns.cg_tn_id from cg_tn_cns where cg_tn_cns.secondary_key_visitno_flag = 'Y')", @all_table_ids_in_query)
+        if @tables_secondary_key_visitno.count > 1
+           v_key_visitno_cnt = 0
+           v_key_visitno_base_table = ""
+           v_key_visitno_base_col = ""
+           v_key_visitno_next_table = ""
+           v_key_visitno_next_col = ""
+           @tables_secondary_key_visitno.each do |tn|
+              if v_key_visitno_cnt < 1
+                v_key_visitno_cnt = v_key_visitno_cnt +1
+                v_key_visitno_base_table = tn.tn
+                v_cn_secondary_key_visitno = CgTnCn.where("cg_tn_id in (?) and secondary_key_visitno_flag = 'Y' ",tn.id)
+                v_key_visitno_base_col = v_cn_secondary_key_visitno.first.cn
+               else
+                  v_key_visitno_cnt = v_key_visitno_cnt +1
+                v_key_visitno_next_table = tn.tn
+                v_cn_secondary_key_visitno = CgTnCn.where("cg_tn_id in (?) and secondary_key_visitno_flag = 'Y' ",tn.id)
+                v_key_visitno_next_col = v_cn_secondary_key_visitno.first.cn
+              v_secondary_key_visitno_join =" coalesce("+v_key_visitno_base_table+"."+v_key_visitno_base_col+",'') = coalesce("+v_key_visitno_next_table+"."+v_key_visitno_next_col+",'') "
+              @local_conditions.push(v_secondary_key_visitno_join) 
+               end
+           end
+        end
+
+
     @all_table_ids_in_query.uniq.each do |r|
         v_temp_tn = CgTn.find(r)
         if v_temp_tn.secondary_key_flag == "Y"
             @tables_secondary_key_join_hash[v_temp_tn.tn] = " coalesce(view_mri_appts.secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,'') "
         end
-        # add in secondary_key_protocol
-        # add in secondary_key_visitno
+
         if  (@local_tables.include?v_temp_tn.tn) or  v_temp_tn.tn == 'view_mri_appts'  
            if v_temp_tn.secondary_key_flag == "Y"
               v_secondary_key_join =" coalesce(appointments.secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,'') "
@@ -1933,7 +1984,7 @@ class DataSearchesController < ApplicationController
             v_temp_split = lf.split(".")
             v_temp_tn = CgTn.where("tn in (?)",v_temp_split[0])
             if !v_temp_tn.nil? and !v_temp_tn.first.blank?
-               v_temp_cn = CgTnCn.where("cg_tn_id in (?) and  cn in (?) and hide_column_flag = 'Y'", v_temp_tn.first.id,v_temp_split[1])
+               v_temp_cn = CgTnCn.where("cg_tn_id in (?) and  cn in (?) and hide_column_flag = 'Y' and status_flag ='Y'", v_temp_tn.first.id,v_temp_split[1])
                if !v_temp_cn.nil? and !v_temp_cn.first.blank?
                     @local_column_headers.delete_at((@local_fields.index(lf)+1))
                     @local_fields.delete(lf)
@@ -1979,8 +2030,9 @@ class DataSearchesController < ApplicationController
       # image_datasets
       # get list of columns from ids_search
       # @column_headers_ids = ['Date','Protocol','Enumber','RMR','series_description','dicom_series_uid','dcm_file_count','timestamp','scanned_file','image_uid','id','rep_time','glob','path','bold_reps','slices_per_volume','visit.age_at_visit','visit.scanner_source','image_dataset_quality_checks.motion_warning','image_dataset_quality_checks.incomplete_series','image_dataset_quality_checks.omnibus_f_comment','image_dataset_quality_checks.fov_cutoff','image_dataset_quality_checks.banding_comment','image_dataset_quality_checks.spm_mask','image_dataset_quality_checks.garbled_series_comment','image_dataset_quality_checks.motion_warning_comment','image_dataset_quality_checks.user_id','image_dataset_quality_checks.banding','image_dataset_quality_checks.field_inhomogeneity','image_dataset_quality_checks.nos_concerns_comment','image_dataset_quality_checks.garbled_series','image_dataset_quality_checks.created_at','image_dataset_quality_checks.incomplete_series_comment','image_dataset_quality_checks.omnibus_f','image_dataset_quality_checks.other_issues','image_dataset_quality_checks.fov_cutoff_comment','image_dataset_quality_checks.nos_concerns','image_dataset_quality_checks.registration_risk','image_dataset_quality_checks.ghosting_wrapping','image_dataset_quality_checks.field_inhomogeneity_comment','image_dataset_quality_checks.updated_at','image_dataset_quality_checks.registration_risk_comment','image_dataset_quality_checks.ghosting_wrapping_comment','image_dataset_quality_checks.image_dataset_id','image_dataset_quality_checks.spm_mask_comment','image_comments.comment','image_comments.updated_at','image_comments.created_at','image_comments.user_id','image_comments.image_dataset_id','Appt Note'] # need to look up values
-       if @hide_page_flag  == "Y"
-        @column_headers_ids =   ['Protocol','Enumber','RMR','series_description','use_as_default_scan','dicom_series_uid','dcm_file_count','timestamp','scanned_file','image_uid','id','rep_time','glob','path','bold_reps','slices_per_volume','visit.age_at_visit','visit.scanner_source','image_comments.comment',
+       if @hide_page_flag  == "Y"   # e.g. UP Only -- weird delete of rmr value -- puyting twice    
+        # removing path,'timestamp'
+        @column_headers_ids =   ['RMR','Protocol','Enumber','series_description','use_as_default_scan','dicom_series_uid','dcm_file_count','scanned_file','image_uid','id','rep_time','glob','bold_reps','slices_per_volume','visit.age_at_visit','visit.scanner_source','image_comments.comment',
    'image_dataset_quality_checks.incomplete_series','image_dataset_quality_checks.incomplete_series_comment','image_dataset_quality_checks.garbled_series','image_dataset_quality_checks.garbled_series_comment','image_dataset_quality_checks.fov_cutoff','image_dataset_quality_checks.fov_cutoff_comment','image_dataset_quality_checks.field_inhomogeneity','image_dataset_quality_checks.field_inhomogeneity_comment','image_dataset_quality_checks.ghosting_wrapping','image_dataset_quality_checks.ghosting_wrapping_comment',
    'image_dataset_quality_checks.banding','image_dataset_quality_checks.banding_comment','image_dataset_quality_checks.registration_risk','image_dataset_quality_checks.registration_risk_comment','image_dataset_quality_checks.nos_concerns','image_dataset_quality_checks.nos_concerns_comment','image_dataset_quality_checks.motion_warning','image_dataset_quality_checks.motion_warning_comment',
       'image_dataset_quality_checks.omnibus_f','image_dataset_quality_checks.omnibus_f_comment','image_dataset_quality_checks.spm_mask','image_dataset_quality_checks.spm_mask_comment','image_dataset_quality_checks.other_issues',
@@ -1991,7 +2043,8 @@ class DataSearchesController < ApplicationController
       # try left joins on quality check tables, user name
       # weird utc transformations -- utc in db but timestamps from files seem different
       # @fields_ids = ["vgroups.id","vgroups.vgroup_date","vgroups.rmr","image_datasets.series_description","image_datasets.dicom_series_uid","image_datasets.dcm_file_count","concat(date_format(image_datasets.timestamp,'%m/%d/%Y'),time_format(timediff( time(image_datasets.timestamp),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_datasets.scanned_file","image_datasets.image_uid","image_datasets.id","image_datasets.rep_time","image_datasets.glob","image_datasets.path","image_datasets.bold_reps","image_datasets.slices_per_volume","appointments.age_at_appointment","visits.scanner_source","image_dataset_quality_checks.motion_warning","image_dataset_quality_checks.incomplete_series","image_dataset_quality_checks.omnibus_f_comment","image_dataset_quality_checks.fov_cutoff","image_dataset_quality_checks.banding_comment","image_dataset_quality_checks.spm_mask","image_dataset_quality_checks.garbled_series_comment","image_dataset_quality_checks.motion_warning_comment","concat(qc_users.last_name,', ',qc_users.first_name)","image_dataset_quality_checks.banding","image_dataset_quality_checks.field_inhomogeneity","image_dataset_quality_checks.nos_concerns_comment","image_dataset_quality_checks.garbled_series","concat(date_format(image_dataset_quality_checks.created_at,'%m/%d/%Y'),time_format(timediff( time(image_dataset_quality_checks.created_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_dataset_quality_checks.incomplete_series_comment","image_dataset_quality_checks.omnibus_f","image_dataset_quality_checks.other_issues","image_dataset_quality_checks.fov_cutoff_comment","image_dataset_quality_checks.nos_concerns","image_dataset_quality_checks.registration_risk","image_dataset_quality_checks.ghosting_wrapping","image_dataset_quality_checks.field_inhomogeneity_comment","concat(date_format(image_dataset_quality_checks.updated_at,'%m/%d/%Y'),time_format(timediff( time(image_dataset_quality_checks.updated_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_dataset_quality_checks.registration_risk_comment","image_dataset_quality_checks.ghosting_wrapping_comment","image_dataset_quality_checks.image_dataset_id","image_dataset_quality_checks.spm_mask_comment","image_comments.comment","concat(date_format(image_comments.updated_at,'%m/%d/%Y'),time_format(timediff( time(image_comments.updated_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(date_format(image_comments.created_at,'%m/%d/%Y'),time_format(timediff( time(image_comments.created_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(users.last_name,', ',users.first_name)","image_comments.image_dataset_id"]
-      @fields_ids =["vgroups.id","vgroups.rmr","image_datasets.series_description","image_datasets.use_as_default_scan_flag","image_datasets.dicom_series_uid","image_datasets.dcm_file_count","concat(date_format(image_datasets.timestamp,'%m/%d/%Y'),time_format(timediff( time(image_datasets.timestamp),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_datasets.scanned_file","image_datasets.image_uid","image_datasets.id","image_datasets.rep_time","image_datasets.glob","image_datasets.path","image_datasets.bold_reps","image_datasets.slices_per_volume","appointments.age_at_appointment","visits.scanner_source","group_concat(image_comments.comment separator ', ')",
+      # removed "path,"concat(date_format(image_datasets.timestamp,'%m/%d/%Y'),time_format(timediff( time(image_datasets.timestamp),subtime(utc_time(),time(localtime()))),' %H:%i'))","
+      @fields_ids =["vgroups.id","vgroups.rmr","image_datasets.series_description","image_datasets.use_as_default_scan_flag","image_datasets.dicom_series_uid","image_datasets.dcm_file_count","image_datasets.scanned_file","image_datasets.image_uid","image_datasets.id","image_datasets.rep_time","image_datasets.glob","image_datasets.bold_reps","image_datasets.slices_per_volume","appointments.age_at_appointment","visits.scanner_source","group_concat(image_comments.comment separator ', ')",
 "image_dataset_quality_checks.incomplete_series","image_dataset_quality_checks.incomplete_series_comment","image_dataset_quality_checks.garbled_series","image_dataset_quality_checks.garbled_series_comment","image_dataset_quality_checks.fov_cutoff","image_dataset_quality_checks.fov_cutoff_comment","image_dataset_quality_checks.field_inhomogeneity","image_dataset_quality_checks.field_inhomogeneity_comment","image_dataset_quality_checks.ghosting_wrapping","image_dataset_quality_checks.ghosting_wrapping_comment",
 "image_dataset_quality_checks.banding","image_dataset_quality_checks.banding_comment","image_dataset_quality_checks.registration_risk","image_dataset_quality_checks.registration_risk_comment","image_dataset_quality_checks.nos_concerns","image_dataset_quality_checks.nos_concerns_comment","image_dataset_quality_checks.motion_warning","image_dataset_quality_checks.motion_warning_comment",
         "image_dataset_quality_checks.omnibus_f","image_dataset_quality_checks.omnibus_f_comment","image_dataset_quality_checks.spm_mask","image_dataset_quality_checks.spm_mask_comment","image_dataset_quality_checks.other_issues",
@@ -2075,7 +2128,11 @@ puts "bbbbb "+sql
       @temp = []
       @temp[0] = var[1] # want appt date first
          if @hide_page_flag == "Y" 
+              if !params[:cg_search].blank? and !params[:cg_search][:series_description_type_id].blank? and !params[:cg_search][:image_dataset_file].blank?
+                  # alread doing something with vgroup date????
+              else
              @temp[0] = ""
+              end
         end
       if @html_request =="N"  and @local_fields.length() > 0 and (@cg_query.participant_centric.nil? or (!@cg_query.participant_centric.nil? and @cg_query.participant_centric != "1" ) )
           sql_sp = "SELECT distinct scan_procedures.codename 
@@ -2710,7 +2767,7 @@ def cg_up_load
                     v_cg_tn_cn.cn = v_date_date_col_hash[col[0]]
                     v_cg_tn_cn.order_by_flag = "Y"
                     v_cg_tn_cn.data_type ="date"
-                    v_cg_tn_cn.status_flag ="N" # hiding up date field
+                    v_cg_tn_cn.status_flag ="N" # hiding up date field ?????
                 end
                 if ( v_age_at_activity_col_hash[col[0]] > '')
                     v_cg_tn_cn_age = CgTnCn.new
@@ -2959,7 +3016,7 @@ def cg_up_load
                     v_cg_tn_cn.cn = v_date_date_col_hash[col[0]]
                     v_cg_tn_cn.order_by_flag = "Y"
                     v_cg_tn_cn.data_type ="date"
-                    v_cg_tn_cn.status_flag ="N" # hiding up date field
+                    v_cg_tn_cn.status_flag ="N" # hiding up date field  ????
                 end
                 if ( v_age_at_activity_col_hash[col[0]] > '')
                     v_cg_tn_cn_age = CgTnCn.new
