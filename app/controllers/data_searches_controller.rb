@@ -1902,16 +1902,16 @@ class DataSearchesController < ApplicationController
            end
         end
 
-
+     # secondary_ket likes coalesce( col, ''), but the secondary_key_protocol/visitno likes coalesce(col1,col2,'') ???? why ????
     @all_table_ids_in_query.uniq.each do |r|
         v_temp_tn = CgTn.find(r)
         if v_temp_tn.secondary_key_flag == "Y"
-            @tables_secondary_key_join_hash[v_temp_tn.tn] = " coalesce(view_mri_appts.secondary_key,"+v_temp_tn.tn+".secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,view_mri_appts.secondary_key,'') "
+            @tables_secondary_key_join_hash[v_temp_tn.tn] = " coalesce(view_mri_appts.secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,'') "
         end
 
         if  (@local_tables.include?v_temp_tn.tn) or  v_temp_tn.tn == 'view_mri_appts'  
            if v_temp_tn.secondary_key_flag == "Y"
-              v_secondary_key_join =" coalesce(appointments.secondary_key,"+v_temp_tn.tn+".secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,appointments.secondary_key,'') "
+              v_secondary_key_join =" coalesce(appointments.secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,'') "
               @local_conditions.push(v_secondary_key_join) 
            end
         else 
