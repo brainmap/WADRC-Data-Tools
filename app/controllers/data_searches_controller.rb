@@ -1871,7 +1871,7 @@ class DataSearchesController < ApplicationController
                 v_key_protocol_next_table = tn.tn
                 v_cn_secondary_key_protocol = CgTnCn.where("cg_tn_id in (?) and secondary_key_protocol_flag = 'Y' ",tn.id)
                 v_key_protocol_next_col = v_cn_secondary_key_protocol.first.cn
-              v_secondary_key_protocol_join =" coalesce("+v_key_protocol_base_table+"."+v_key_protocol_base_col+",'') = coalesce("+v_key_protocol_next_table+"."+v_key_protocol_next_col+",'') "        
+              v_secondary_key_protocol_join =" coalesce("+v_key_protocol_base_table+"."+v_key_protocol_base_col+","+v_key_protocol_next_table+"."+v_key_protocol_next_col+",'') = coalesce("+v_key_protocol_next_table+"."+v_key_protocol_next_col+","+v_key_protocol_base_table+"."+v_key_protocol_base_col+",'') "        
               @local_conditions.push(v_secondary_key_protocol_join) 
                end
            end
@@ -1896,7 +1896,7 @@ class DataSearchesController < ApplicationController
                 v_key_visitno_next_table = tn.tn
                 v_cn_secondary_key_visitno = CgTnCn.where("cg_tn_id in (?) and secondary_key_visitno_flag = 'Y' ",tn.id)
                 v_key_visitno_next_col = v_cn_secondary_key_visitno.first.cn
-              v_secondary_key_visitno_join =" coalesce("+v_key_visitno_base_table+"."+v_key_visitno_base_col+",'') = coalesce("+v_key_visitno_next_table+"."+v_key_visitno_next_col+",'') "
+              v_secondary_key_visitno_join =" coalesce("+v_key_visitno_base_table+"."+v_key_visitno_base_col+","+v_key_visitno_next_table+"."+v_key_visitno_next_col+",'') = coalesce("+v_key_visitno_next_table+"."+v_key_visitno_next_col+","+v_key_visitno_base_table+"."+v_key_visitno_base_col+",'') "
               @local_conditions.push(v_secondary_key_visitno_join) 
                end
            end
@@ -1906,12 +1906,12 @@ class DataSearchesController < ApplicationController
     @all_table_ids_in_query.uniq.each do |r|
         v_temp_tn = CgTn.find(r)
         if v_temp_tn.secondary_key_flag == "Y"
-            @tables_secondary_key_join_hash[v_temp_tn.tn] = " coalesce(view_mri_appts.secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,'') "
+            @tables_secondary_key_join_hash[v_temp_tn.tn] = " coalesce(view_mri_appts.secondary_key,"+v_temp_tn.tn+".secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,view_mri_appts.secondary_key,'') "
         end
 
         if  (@local_tables.include?v_temp_tn.tn) or  v_temp_tn.tn == 'view_mri_appts'  
            if v_temp_tn.secondary_key_flag == "Y"
-              v_secondary_key_join =" coalesce(appointments.secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,'') "
+              v_secondary_key_join =" coalesce(appointments.secondary_key,"+v_temp_tn.tn+".secondary_key,'') = coalesce("+v_temp_tn.tn+".secondary_key,appointments.secondary_key,'') "
               @local_conditions.push(v_secondary_key_join) 
            end
         else 
@@ -2585,11 +2585,12 @@ def cg_up_load
          end
   # NEED TO DO !!!!! collect key_columns/subjectid/reggiied/secondary_key_protocol, secondary_key_visitno
         v_create_sql = "CREATE table "+v_schema+"."+v_tn+"("
-
+        v_create_index_key_type = "create index ind_key_"+v_tn+" ON "+v_schema+"."+v_tn+"(participant_id)"
         # add key columns
         if v_key_type == "enrollment/sp"
              v_create_sql = v_create_sql+" enrollment_id int,
                                            scan_procedure_id int"
+        v_create_index_key_type = "create index ind_key_"+v_tn+" ON "+v_schema+"."+v_tn+"(enrollment_id,scan_procedure_id)"
         elsif v_key_type == "subjectid-kc-participant_id"
              v_create_sql = v_create_sql+" participant_id int "
         elsif v_key_type == "reggieid-kc-participant_id"
@@ -2646,6 +2647,7 @@ def cg_up_load
          if ( !params[:append_full_replace].empty? and params[:append_full_replace] == "full_replace" )
              # make new table with v_up_table_yyyymmdd, 
             results = connection.execute(v_create_sql)   # new-present-old_edit ?
+            results = connection.execute(v_create_index_key_type)
             v_msg = v_msg+"; Created table "+v_tn
          end
          if ( !params[:append_full_replace].empty? and params[:append_full_replace] == "append" )
@@ -2811,9 +2813,11 @@ def cg_up_load
         v_create_sql = "CREATE table "+v_schema+"."+v_tn+"("
 
         # add key columns
+        v_create_index_key_type = "create index ind_key_"+v_tn+" ON "+v_schema+"."+v_tn+"(participant_id)"
         if v_key_type == "enrollment/sp"
              v_create_sql = v_create_sql+" enrollment_id int,
                                            scan_procedure_id int"
+          v_create_index_key_type = "create index ind_key_"+v_tn+" ON "+v_schema+"."+v_tn+"(enrollment_id,scan_procedure_id)"
         elsif v_key_type == "subjectid-kc-participant_id"
              v_create_sql = v_create_sql+" participant_id int "
         elsif v_key_type == "reggieid-kc-participant_id"
@@ -2865,6 +2869,7 @@ def cg_up_load
          v_create_sql = v_create_sql+")"
           # make new table with v_up_table_yyyymmdd, 
          results = connection.execute(v_create_sql)   # new-present-old_edit ?
+         results = connection.execute(v_create_index_key_type)
 
        v_insert_sql = "INSERT INTO "+v_schema+"."+v_tn+"("
         v_insert_end_sql = ") "
