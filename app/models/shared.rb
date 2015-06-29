@@ -8250,6 +8250,11 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
              # apply edits  -- made into a function  in shared model
              self.apply_cg_edits('cg_t1seg_status')
 
+             # not sure why blank rows accumulating 
+             sql = "delete from cg_first_calculated_volumes where l_accu_mm_cube is null and subjectid in 
+                        (select subjectid from cg_first_calculated_volumes_new where l_accu_mm_cube is not null)"
+             results = connection.execute(sql)
+
              v_comment = self.move_present_to_old_new_to_present("cg_first_calculated_volumes",
              "subjectid, general_comment,enrollment_id,scan_procedure_id,secondary_key,l_accu_mm_cube,l_amyg_mm_cube,l_caud_mm_cube,l_hipp_mm_cube,l_pall_mm_cube,l_puta_mm_cube,l_thal_mm_cube,r_accu_mm_cube,r_amyg_mm_cube,r_caud_mm_cube,r_hipp_mm_cube,r_pall_mm_cube,r_puta_mm_cube,r_thal_mm_cube",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
