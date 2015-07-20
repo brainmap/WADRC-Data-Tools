@@ -5,8 +5,9 @@ Enter the new users ldap login, Fisrt Name, Last Name, and Email. <br>
 Add protocol roles - default is "edit lower level fields" for all protocols which are needed.	<br><br>
 	
 </td></tr>	
-<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td colspan=2><%= link_to("protocol/user permission report", "/users/user_protocol_role_summary.xls")%><br>
-	<%= link_to('Update user PROTOCOL specific role', protocol_roles_path) %><br>
+<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td colspan=2><%= link_to('Update user PROTOCOL specific role', protocol_roles_path) %>
+
+	&nbsp;&nbsp;&nbsp;<small><small><%= link_to("protocol/user permission report", "/users/user_protocol_role_summary.xls")%></small></small><br>
 	Search by the user or protocol. <br>
 	This role is applied only to individual protocol.<br>
 	A user can have multiple roles for a specific protocol. These roles are applied 
