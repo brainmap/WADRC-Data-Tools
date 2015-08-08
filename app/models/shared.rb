@@ -1,5 +1,6 @@
 require 'visit'
 require 'image_dataset'
+require 'net/ssh'
 require 'net/sftp'
 require 'open3'
 require 'metamri'
@@ -1306,12 +1307,28 @@ puts "AAAAAA "+v_call
         v_ip = Shared.adrc_sftp_host_address # get from shared helper
         v_source = v_target_dir+'/'+v_subject_dir+".tar.gz"
         v_target = v_subject_dir+".tar.gz"
+       v_comment = " BEFORE SFTP "+v_comment 
+       @schedulerun.comment = v_comment[0..1990]+@schedulerun.comment
+       @schedulerun.save 
 
- 
+# problems with locking up with NACC new sftp server 20150806
+#        Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
+#            sftp.upload!(v_source, v_target)
+#        end
+# trying Net::SSH
+Rails.logger.info("Creating SFTP connection")
+session=Net::SSH.start(v_ip,v_username, :password=>v_passwrd,:port=>22)
+sftp=Net::SFTP::Session.new(session).connect!
+Rails.logger.info("SFTP Connection created, uploading files.")
+sftp.upload!(v_source, v_target)
+Rails.logger.info("First file uploaded.")
+Rails.logger.info("Connection terminated.")
 
-        Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
-            sftp.upload!(v_source, v_target)
-        end
+
+        v_comment = " AFTER SFTP "+v_comment 
+       @schedulerun.comment = v_comment[0..1990]+@schedulerun.comment
+       @schedulerun.save 
+
 # WANT TO CHECK TRANSFERS
         v_call = " rm -rf "+v_target_dir+'/'+v_subject_dir+".tar.gz"
         stdin, stdout, stderr = Open3.popen3(v_call)
