@@ -1316,13 +1316,15 @@ puts "AAAAAA "+v_call
 #            sftp.upload!(v_source, v_target)
 #        end
 # trying Net::SSH
-Rails.logger.info("Creating SFTP connection")
-session=Net::SSH.start(v_ip,v_username, :password=>v_passwrd,:port=>22)
-sftp=Net::SFTP::Session.new(session).connect!
-Rails.logger.info("SFTP Connection created, uploading files.")
-sftp.upload!(v_source, v_target)
-Rails.logger.info("First file uploaded.")
-Rails.logger.info("Connection terminated.")
+
+#still problem
+#Rails.logger.info("Creating SFTP connection")
+#session=Net::SSH.start(v_ip,v_username, :password=>v_passwrd,:port=>22)
+#sftp=Net::SFTP::Session.new(session).connect!
+#Rails.logger.info("SFTP Connection created, uploading files.")
+#sftp.upload!(v_source, v_target)
+#Rails.logger.info("First file uploaded.")
+#Rails.logger.info("Connection terminated.")
 
 
         v_comment = " AFTER SFTP "+v_comment 
