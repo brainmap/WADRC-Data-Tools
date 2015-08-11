@@ -30,7 +30,7 @@
 	  :Age_at_Visit => @visit.age_at_visit,
 	 :MRI_Tech =>@visit.mritech.blank? ? "" : Employee.find(@visit.mritech).name,
    :Appt_Coordinator =>@appointment.appointment_coordinator.blank? ? "" : Employee.find(@appointment.appointment_coordinator).name,
-      :Secondaty_Key =>@appointment.secondary_key.blank? ? "" : @appointment.secondary_key,
+      :Secondary_Key =>@appointment.secondary_key.blank? ? "" : @appointment.secondary_key,
       :Use_As_Default_Mri_Flag =>@visit.use_as_default_mri_flag.blank? ? "" : @visit.use_as_default_mri_flag,
 	:Scan_Start_Time =>@visit.mristarttime.nil? ? nil : @visit.mristarttime.hour.to_s.rjust(2,'0')+":"+@visit.mristarttime.min.to_s.rjust(2,'0'),
 	:Scan_End_Time =>@visit.mriendtime.nil? ? nil : @visit.mriendtime.hour.to_s.rjust(2,'0')+":"+@visit.mriendtime.min.to_s.rjust(2,'0'),
