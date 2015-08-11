@@ -105,6 +105,10 @@ v_user = v_user.gsub("\n","")
   elsif v_value_1 == "epi_rest_status"
       v_shared = Shared.new
       v_shared.run_epi_rest_status()  
+
+   elsif v_value_1 == "error_repeat_schedulerun"
+      v_shared = Shared.new
+      v_shared.run_error_repeat_schedulerun()       
   
   elsif v_value_1 == "fdg_status"
       v_shared = Shared.new
@@ -432,6 +436,7 @@ v_user = v_user.gsub("\n","")
        @schedulerun.save
        v_return_flag =""
        v_return_comment =""
+       v_comment_base = @schedulerun.comment
      begin  
         # to do 
           # define tables, table_edit, add to cg tables/search 

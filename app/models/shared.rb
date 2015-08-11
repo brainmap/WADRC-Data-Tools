@@ -1607,11 +1607,13 @@ end
       v_stop_file_name = v_process_name+"_stop"
       v_stop_file_path = v_log_base+v_stop_file_name
     connection = ActiveRecord::Base.connection();
-
+    v_comment_base = @schedulerun.comment
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
     sp_exclude_array = [-1]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     @scan_procedures.each do |sp|
+        @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
+        @schedulerun.save
         v_visit_number =""
         if sp.codename.include?("visit2")
             v_visit_number ="_v2"
@@ -1637,6 +1639,8 @@ end
                 v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
                 v_subjectid = enrollment[0].enumber
                 v_subjectid_v_num = enrollment[0].enumber + v_visit_number
+                @schedulerun.comment = "start "+v_subjectid_v_num+" "+v_comment_base
+                @schedulerun.save
                 v_subjectid_unknown =v_subjectid_path+"/unknown"
                 v_subjectid_array = []
                 if File.directory?(v_subjectid_unknown)
@@ -2030,12 +2034,15 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       v_log_path =v_log_base+v_log_name 
       v_stop_file_name = v_process_name+"_stop"
       v_stop_file_path = v_log_base+v_stop_file_name
+      v_comment_base = @schedulerun.comment
     connection = ActiveRecord::Base.connection();
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
     sp_exclude_array = [33,40]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     @scan_procedures.each do |sp|
+      @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
+      @schedulerun.save
         v_visit_number =""
         if sp.codename.include?("visit2")
             v_visit_number ="_v2"
@@ -2061,6 +2068,8 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                 v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
                 v_subjectid = enrollment[0].enumber
                 v_subjectid_v_num = enrollment[0].enumber + v_visit_number
+                @schedulerun.comment = "start "+v_subjectid_v_num+" "+v_comment_base
+                @schedulerun.save
                 v_subjectid_unknown =v_subjectid_path+"/unknown"
                 v_subjectid_array = []
                 if File.directory?(v_subjectid_unknown)
@@ -2471,12 +2480,15 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       v_log_path =v_log_base+v_log_name 
       v_stop_file_name = v_process_name+"_stop"
       v_stop_file_path = v_log_base+v_stop_file_name
+      v_comment_base = @schedulerun.comment
     connection = ActiveRecord::Base.connection();
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
     sp_exclude_array = [33,40]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     @scan_procedures.each do |sp|
+       @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
+      @schedulerun.save
       v_visit_number =""
       if sp.codename.include?("visit2")
             v_visit_number ="_v2"
@@ -2504,6 +2516,8 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
             v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
             v_subjectid = enrollment[0].enumber
             v_subjectid_v_num = enrollment[0].enumber + v_visit_number
+            @schedulerun.comment = "start "+v_subjectid_v_num+" "+v_comment_base
+            @schedulerun.save
             v_subjectid_unknown =v_subjectid_path+"/unknown"
             v_subjectid_array = []
             begin
@@ -2656,7 +2670,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     # @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     # applying exclusion further down to prevent running the process
     @scan_procedures = ScanProcedure.all 
+    v_comment_base = @schedulerun.comment
     @scan_procedures.each do |sp|
+      @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
+      @schedulerun.save
         v_visit_number =""
         if sp.codename.include?("visit2")
             v_visit_number ="_v2"
@@ -2682,6 +2699,8 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                 v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
                 v_subjectid = enrollment[0].enumber
                 v_subjectid_v_num = enrollment[0].enumber + v_visit_number
+                @schedulerun.comment = "start "+v_subjectid_v_num+" "+v_comment_base
+                @schedulerun.save
                 v_subjectid_unknown =v_subjectid_path+"/unknown"
                 v_subjectid_array = []
                 if File.directory?(v_subjectid_unknown)
@@ -5035,6 +5054,60 @@ puts "ppppppp "+dir_name_array[0]
     
   end
 
+  def run_error_repeat_schedulerun
+          @schedule = Schedule.where("name in ('error_repeat_schedulerun')").first
+          @schedulerun = Schedulerun.new
+          @schedulerun.schedule_id = @schedule.id
+          @schedulerun.comment ="starting error_repeat_schedulerun"
+          @schedulerun.save
+          @schedulerun.start_time = @schedulerun.created_at
+          @schedulerun.save
+          v_comment = ""
+          puts "in error_repeat_schedulerun"
+          v_status_n_threshold = 2;
+
+           # get all sched jobs started yesterday which status = N
+           # and then check if last 2-3 instances of job also N
+           # send email 
+          v_sql ="SELECT distinct t1.schedule_id ,t2.name FROM scheduleruns t1, schedules t2 WHERE t1.status_flag = 'N'
+              AND t1.start_time > (NOW() - interval 1 day) 
+              AND t1.schedule_id = t2.id"
+          connection = ActiveRecord::Base.connection();        
+          @results = connection.execute(v_sql)
+          @results.each do |r|
+               v_cnt = 0
+               v_sql_check = "    SELECT t3.schedule_id, t3.status_flag, t3.start_time FROM
+                     (select t2.schedule_id , t2.status_flag, t2.start_time FROM scheduleruns t2
+                        where t2.schedule_id in  ("+r[0].to_s+") order by t2.start_time DESC LIMIT 3) as t3"
+
+               @check_results = connection.execute(v_sql_check)
+               @check_results.each do |cr|
+                  if(cr[1] == "N")
+                      v_cnt = v_cnt + 1
+                  end
+               end
+               if(v_cnt > v_status_n_threshold)
+                  # send email
+                  v_subject = "Repeated Failure ==>[ "+r[1]+" ]<== schedule run "
+                    @schedulerun.comment = v_subject+" ;"+@schedulerun.comment
+                    v_comment = v_subject+" ;"+v_comment
+                     @schedulerun.save
+                  v_email = "noreply_johnson_lab@medicine.wisc.edu"
+                  PandaMailer.schedule_notice(v_subject,{:send_to => v_email}).deliver
+               end
+           end 
+
+          puts "successful finish error_repeat_schedulerun "+v_comment[0..459]
+          @schedulerun.comment =("successful finish error_repeat_scheduleruns "+v_comment[0..459])
+          if !v_comment.include?("ERROR")
+                 @schedulerun.status_flag ="Y"
+          end
+          @schedulerun.save
+          @schedulerun.end_time = @schedulerun.updated_at      
+          @schedulerun.save 
+
+  end
+
   # to add columns --
   # change the cg_table in database
   # change the cg_search table
@@ -6740,7 +6813,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       v_script  = v_script_dev   # using the dev script
       v_script_only_tlv = v_script+" --only_tlv"  # running whole thing -- just use v_script in call
       (v_error_comment,v_comment) =get_file_diff(v_script,v_script_dev,v_error_comment,v_comment)
-
+      v_comment_base = @schedulerun.comment
       connection = ActiveRecord::Base.connection();  
       #NORMALLY THIS IS NOT RUN  catchup on only_tlv - run everywhere except plq
       sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where lst_subjectid='DO NOT RUN THIS' and if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y'  and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) ) and (  lst_subjectid not like 'shp%') and (  lst_subjectid not like 'plq%')  " #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
@@ -6760,6 +6833,8 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           t_now = Time.now
           v_log = v_log + "starting only_tlv"+r[2]+"   "+ t_now.strftime("%Y%m%d:%H:%M")+"\n"
           v_subjectid_v_num = r[2]
+          @schedulerun.comment = "start "+v_subjectid_v_num+" "+v_comment_base
+           @schedulerun.save
           v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
           # get location
           sql_loc = "select distinct v.path from visits v where v.appointment_id in (select a.id from appointments a, enrollment_vgroup_memberships evg, scan_procedures_vgroups spv where a.vgroup_id = evg.vgroup_id  and evg.enrollment_id = "+r[0].to_s+"  and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id = "+r[1].to_s+")"
@@ -6980,11 +7055,14 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     v_trtype_id = 5
     # expect tractiontype_id 10, 11,12,13,14,15 for load, mask, coreg, despot_1, despot_2, mcdespot
     connection = ActiveRecord::Base.connection(); 
+    v_comment_base = @schedulerun.comment
     # walk dirs - scan_procedures 14,20,21,22,24,26,27,28,29,30,31,33,34,36,37,40,41,42,44,45,46 look for mcd dir - all sp with a mcd
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
     sp_array = [14,20,21,22,24,26,27,28,29,30,31,33,34,36,37,40,41,42,44,45,46]
     @scan_procedures = ScanProcedure.where("scan_procedures.id in (?)", sp_array)
     @scan_procedures.each do |sp|
+        @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
+        @schedulerun.save
         v_visit_number =""
         if sp.codename.include?("visit2")
             v_visit_number ="_v2"
@@ -7018,6 +7096,8 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
               if !enrollment.blank?
                 v_subjectid_mcd_path = v_preprocessed_full_path+"/"+enrollment[0].enumber+"/mcd"
                 v_subjectid_v_num = enrollment[0].enumber + v_visit_number
+                @schedulerun.comment = "start "+v_subjectid_v_num+" "+v_comment_base
+                @schedulerun.save
                 if File.directory?(v_subjectid_mcd_path)
 
                   if File.file?(v_subjectid_mcd_path+"/_mcdespot_log.txt")
@@ -7943,7 +8023,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
             sql = "truncate table cg_t1seg_status_new"
             connection = ActiveRecord::Base.connection();        
             results = connection.execute(sql)
-
+            v_comment_base = @schedulerun.comment
             sql_base = "insert into cg_t1seg_status_new(t1seg_subjectid, t1seg_general_comment,t1seg_smoothed_and_warped_flag,o_star_nii_flag,multiple_o_star_nii_flag,enrollment_id, scan_procedure_id,gm,wm,csf,secondary_key)values("  
             sql_first_base = "insert into cg_first_calculated_volumes_new(subjectid,general_comment,enrollment_id, scan_procedure_id,secondary_key,l_accu_mm_cube,l_amyg_mm_cube,l_caud_mm_cube,l_hipp_mm_cube,l_pall_mm_cube,l_puta_mm_cube,l_thal_mm_cube,r_accu_mm_cube,r_amyg_mm_cube,r_caud_mm_cube,r_hipp_mm_cube,r_pall_mm_cube,r_puta_mm_cube,r_thal_mm_cube)values("  
             v_raw_path = v_base_path+"/raw"
@@ -7968,6 +8048,8 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
             v_exclude_sp =[4,10,15,19,32]
             @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
             @scan_procedures.each do |sp|
+              @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
+              @schedulerun.save
               v_visit_number =""
               if sp.codename.include?("visit2")
                 v_visit_number ="_v2"
@@ -7994,6 +8076,8 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                       if dir_name_array.size == 3 
                          enrollment = Enrollment.where("enumber in (?)",dir_name_array[0])
                          if !enrollment.blank?
+                             @schedulerun.comment = "start "+dir_name_array[0]+" "+sp.codename+" "+v_comment_base
+                             @schedulerun.save
                              v_subjectid_t1seg = v_preprocessed_full_path+"/"+dir_name_array[0]+"/t1_aligned_newseg"
                              v_subjectid_first = v_preprocessed_full_path+"/"+dir_name_array[0]+"/first"
                              v_subjectid_unknown = v_preprocessed_full_path+"/"+dir_name_array[0]+"/unknown"
