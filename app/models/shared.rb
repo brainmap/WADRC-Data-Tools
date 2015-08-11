@@ -5090,7 +5090,7 @@ puts "ppppppp "+dir_name_array[0]
                   # send email
                   v_subject = "Repeated Failure ==>[ "+r[1]+" ]<== schedule run "
                     @schedulerun.comment = v_subject+" ;"+@schedulerun.comment
-                    v_comment = v_subject+" ;"+v_comment
+                    v_comment = v_subject+" ERROR ;"+v_comment
                      @schedulerun.save
                   v_email = "noreply_johnson_lab@medicine.wisc.edu"
                   PandaMailer.schedule_notice(v_subject,{:send_to => v_email}).deliver
