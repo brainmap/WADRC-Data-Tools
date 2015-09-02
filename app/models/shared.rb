@@ -2547,7 +2547,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                       if !File.directory?(v_subjectid_tissue_seg)  # or !File.directory?(v_subjectid_tissue_seg) # makes file
                         v_comment = "str "+v_subjectid_v_num+";"+v_comment
 #puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_tissue_seg
-                        v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+'  "  ' 
+                        v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+' " ' 
                         v_log = v_log + v_call+"\n"
                         begin
                           stdin, stdout, stderr = Open3.popen3(v_call)
@@ -2748,7 +2748,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                           if !File.file?(v_subjectid_rbm_icv+"/volume_"+v_subjectid+"_rbm_icv_b90.txt")  and !(sp_exclude_array.include?(sp.id) )
                              v_comment = "str "+v_subjectid_v_num+";"+v_comment
 #puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_tissue_seg
-                             v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+'  "  ' 
+                             v_call =  'ssh panda_user@merida.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+'"' 
                              v_log = v_log + v_call+"\n"
                              begin
                                stdin, stdout, stderr = Open3.popen3(v_call)
@@ -8020,6 +8020,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           @schedulerun.save
           v_comment = ""
     ####    begin   # catch all exception and put error in comment    
+            sql = "truncate table cg_t1seg_status_new"
+            connection = ActiveRecord::Base.connection();        
+            results = connection.execute(sql)
             sql = "truncate table cg_t1seg_status_new"
             connection = ActiveRecord::Base.connection();        
             results = connection.execute(sql)
