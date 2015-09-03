@@ -217,6 +217,9 @@ or   image_dataset_quality_checks.omnibus_f  = 'Severe'  or  spm_mask  = 'Severe
     elsif p_subjectid_v.include?('_v5')
           v_visit_number = 5
     end
+    if(v_subjectid_chop.include? "wscs")
+       v_subjectid_chop = "wscs"  # they have another letter 
+    end
     if v_visit_number > 1
       scan_procedures = ScanProcedure.where("subjectid_base ='"+v_subjectid_chop+"' and codename like '%visit"+v_visit_number.to_s+"'")
     else
