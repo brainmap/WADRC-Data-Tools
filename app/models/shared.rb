@@ -2888,11 +2888,12 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
       v_comment_warning =""
     connection = ActiveRecord::Base.connection();
     # shp, alz, pc, adni, dodadni, lmpd
-    v_scan_procedure_exclude = [21,28,31,34,15,19,23,35,44,51,50,49]
-     v_scan_procedures = [20,24,26,36,41]  # how to only get adrc impact? 
+    v_scan_procedure_exclude =   [21,28,31,34,15,19,23,35,44,51,50,49,20,24,26,36,41] # [21,28,31,34,15,19,23,35,44,51,50,49]
+    # just get the predicttau
+     v_scan_procedures = [58]  #[20,24,26,36,41,58]  # how to only get adrc impact? 
      #not limiting by protocol #scan_procedures_vgroups.scan_procedure_id in ("+v_scan_procedures.join(",")+")
      # getting adrc impact from t_adrc_impact_20150105  --- change to get from refreshing table?
-     v_pet_tracer_array = [1] #,2] # pib and fdg
+     v_pet_tracer_array = [1,7] #,2] # pib and fdg and thk5117  
 
      v_scan_type_limit = 1 
      v_series_desc_array =['T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','T2','T2 Flair','T2_Flair','T2+Flair','DTI','ASL','resting_fMRI']
@@ -2901,12 +2902,15 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
     v_weeks_back = "2"  # cwant to give time for quality checks etc. 
     # NEED TO LIMIT ADRC BY LP --- NEED TO REFRESH ADRC IMPACT 
     #  t_adrc_impact_control_20150216 where participant_id is not null and lp_completed_flag ='Y')
+     #(participants.wrapnum is not null and participants.wrapnum > '')
+     # only want the tau
     sql = "select distinct vgroups.id, vgroups.participant_id,
               vgroups.transfer_mri, vgroups.transfer_pet
               from enrollments,enrollment_vgroup_memberships, vgroups, scan_procedures_vgroups,participants    
             where participants.id = vgroups.participant_id and
-             ( (participants.wrapnum is not null and participants.wrapnum > '')
-               or vgroups.participant_id in ( select t_washu_adrc_20150215.participant_id from t_washu_adrc_20150215)
+             ( 
+                (vgroups.participant_id*-1) in ( select t_washu_adrc_20150215.participant_id from t_washu_adrc_20150215)
+               or vgroups.participant_id in ( select t_washu_predicttau_20150909.participant_id from t_washu_predicttau_20150909)
               )
               and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
               and vgroups.id = scan_procedures_vgroups.vgroup_id
@@ -2918,13 +2922,13 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                                          where scan_procedure_id = scan_procedures_vgroups.scan_procedure_id )
               and ( ( vgroups.transfer_mri ='yes' and vgroups.transfer_pet ='yes' and vgroups.id 
                   in ( select appointments.vgroup_id from appointments, petscans where petscans.appointment_id = appointments.id
-                           and petscans.lookup_pettracer_id = 1)
+                           and petscans.lookup_pettracer_id in (1,7) )
                         and vgroups.participant_id in (select p.id from participants p where wrapnum is not null and wrapnum > ''))  
                   or 
                  (vgroups.transfer_mri ='yes'  and enrollments.id in ( select enrollment_id from cg_csf) 
                          and vgroups.participant_id in (select p.id from participants p where wrapnum is not null and wrapnum > ''))
                  or 
-                 (vgroups.transfer_mri ='yes'  and vgroups.participant_id in (  select t_washu_adrc_20150215.participant_id from t_washu_adrc_20150215) )
+                 (vgroups.transfer_mri ='yes'  and vgroups.participant_id in (  select t_washu_predicttau_20150909.participant_id from t_washu_predicttau_20150909) )
                  or 
                  (vgroups.transfer_mri ='yes' and vgroups.completedlumbarpuncture = 'yes' 
                   and vgroups.participant_id in (select p.id from participants p where wrapnum is not null and wrapnum > '')
@@ -3020,7 +3024,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
       stdin.close
       stdout.close
       stderr.close 
-      sql_pet = "select distinct appointments.appointment_date, petscans.id petscan_id, petfiles.id petfile_id, lookup_pettracers.name, petfiles.path
+      sql_pet = "select distinct appointments.appointment_date, petscans.id petscan_id, petfiles.id petfile_id, lookup_pettracers.name, petfiles.path,petscans.lookup_pettracer_id
                   from vgroups , appointments, petscans, lookup_pettracers, petfiles  
                   where vgroups.transfer_pet = 'yes' and vgroups.id = appointments.vgroup_id 
                   and appointments.id = petscans.appointment_id and petscans.id = petfiles.petscan_id
@@ -3033,30 +3037,78 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
       v_tracer_array = []
       v_cnt = 1
       results_pet.each do |r_dataset|
+        v_subject_id = ""
          v_tracer = r_dataset[3].gsub(/ /,"_").gsub(/\[/,"_").gsub(/\]/,"_")
           if !v_tracer_array.include?(v_tracer)
                  v_tracer_array.push(v_tracer)
           end
          v_petfile_path = r_dataset[4]
          v_petfile_name = (r_dataset[4].split("/")).last
+         v_pettracer_id = r_dataset[5]
          #/mounts/data/raw/johnson.pipr.visit1/pet/pipr00001_2ef_c95_de11.v
          v_enumbers_array = r[2].split(",")
          v_enumbers_array.each do |e|
                v_subject_id = e
                v_petfile_name = v_petfile_name.gsub(v_subject_id,v_export_id.to_s )
          end
-         v_petfile_target_name = v_tracer+"_"+v_petfile_name
-         v_call = "rsync -av "+v_petfile_path+" "+v_parent_dir_target+"/"+v_petfile_target_name               
-         stdin, stdout, stderr = Open3.popen3(v_call)
-         stderr.each {|line|
-            puts line
-          }
-          while !stdout.eof?
-              puts stdout.read 1024    
+          if v_pettracer_id.to_s != "7"
+            v_petfile_target_name = v_tracer+"_"+v_petfile_name
+            v_call = "rsync -av "+v_petfile_path+" "+v_parent_dir_target+"/"+v_petfile_target_name               
+            stdin, stdout, stderr = Open3.popen3(v_call)
+            stderr.each {|line|
+               puts line
+            }
+            while !stdout.eof?
+                 puts stdout.read 1024    
+            end
+            stdin.close
+            stdout.close
+            stderr.close
           end
-          stdin.close
-          stdout.close
-          stderr.close
+          # tau 
+          if v_pettracer_id.to_s == "7"
+             v_processed_path = v_base_path+"/preprocessed/outside_batches/TauPredict/20150811_TauPredict/"
+             v_enumbers_array.each do |e|
+               v_subject_id = e
+               v_source_file = "m"+v_subject_id+"_T1_FS.nii"
+               v_export_file_name = "m"+v_export_id.to_s+"_T1_FS_"+v_tracer+".nii"
+               v_check_path = v_processed_path+v_subject_id+"/"+v_source_file
+               # check if exisits
+               if(File.file?v_check_path)
+                   v_call = "rsync -av "+v_check_path+" "+v_parent_dir_target+"/"+v_export_file_name               
+                   stdin, stdout, stderr = Open3.popen3(v_call)
+                   stderr.each {|line|
+                      puts line
+                   }
+                   while !stdout.eof?
+                       puts stdout.read 1024    
+                   end
+                   stdin.close
+                   stdout.close
+                   stderr.close
+               end
+
+       
+               v_source_file = "Coreg_"+v_subject_id+"HYPR_DVR.nii"
+               v_export_file_name = "Coreg_"+v_export_id.to_s+"HYPR_DVR_"+v_tracer+".nii"
+               v_check_path = v_processed_path+v_subject_id+"/"+v_source_file
+               # check if exisits
+               if(File.file?v_check_path)
+                   v_call = "rsync -av "+v_check_path+" "+v_parent_dir_target+"/"+v_export_file_name               
+                   stdin, stdout, stderr = Open3.popen3(v_call)
+                   stderr.each {|line|
+                      puts line
+                   }
+                   while !stdout.eof?
+                       puts stdout.read 1024    
+                   end
+                   stdin.close
+                   stdout.close
+                   stderr.close
+               end
+             end
+          end
+
        end
 
             v_call = "rsync -av "+v_parent_dir_target+" panda_user@merida.dom.wisc.edu:/home/panda_user/upload_washu/"    #+v_subject_dir
