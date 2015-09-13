@@ -2903,7 +2903,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
     # NEED TO LIMIT ADRC BY LP --- NEED TO REFRESH ADRC IMPACT 
     #  t_adrc_impact_control_20150216 where participant_id is not null and lp_completed_flag ='Y')
      #(participants.wrapnum is not null and participants.wrapnum > '')
-     # only want the tau
+     # only want the tau  - petid=7 
     sql = "select distinct vgroups.id, vgroups.participant_id,
               vgroups.transfer_mri, vgroups.transfer_pet
               from enrollments,enrollment_vgroup_memberships, vgroups, scan_procedures_vgroups,participants    
@@ -2920,17 +2920,17 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
               and enrollments.do_not_share_scans_flag ='N'           
               and vgroups.id NOT IN ( select cg_washu_upload.vgroup_id from cg_washu_upload 
                                          where scan_procedure_id = scan_procedures_vgroups.scan_procedure_id )
-              and ( ( vgroups.transfer_mri ='yes' and vgroups.transfer_pet ='yes' and vgroups.id 
+              and ( ( (vgroups.transfer_mri ='yes' or vgroups.transfer_mri !='yes') and vgroups.transfer_pet ='yes' and vgroups.id 
                   in ( select appointments.vgroup_id from appointments, petscans where petscans.appointment_id = appointments.id
-                           and petscans.lookup_pettracer_id in (1,7) )
-                        and vgroups.participant_id in (select p.id from participants p where wrapnum is not null and wrapnum > ''))  
+                           and petscans.lookup_pettracer_id in (7) )
+                       )  
                   or 
-                 (vgroups.transfer_mri ='yes'  and enrollments.id in ( select enrollment_id from cg_csf) 
+                 (vgroups.transfer_mri ='yesSKIP'  and enrollments.id in ( select enrollment_id from cg_csf) 
                          and vgroups.participant_id in (select p.id from participants p where wrapnum is not null and wrapnum > ''))
                  or 
-                 (vgroups.transfer_mri ='yes'  and vgroups.participant_id in (  select t_washu_predicttau_20150909.participant_id from t_washu_predicttau_20150909) )
+                 (vgroups.transfer_mri ='yesSKIP'  and vgroups.participant_id in (  select t_washu_predicttau_20150909.participant_id from t_washu_predicttau_20150909) )
                  or 
-                 (vgroups.transfer_mri ='yes' and vgroups.completedlumbarpuncture = 'yes' 
+                 (vgroups.transfer_mri ='yesSKIP' and vgroups.completedlumbarpuncture = 'yes' 
                   and vgroups.participant_id in (select p.id from participants p where wrapnum is not null and wrapnum > '')
                   and vgroups.id 
                   in ( select appointments.vgroup_id from appointments, lumbarpunctures where lumbarpunctures.appointment_id = appointments.id 
@@ -3066,7 +3066,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
             stderr.close
           end
           # tau 
-          if v_pettracer_id.to_s == "7"
+          if v_pettracer_id.to_s == "7"    # only want tau
              v_processed_path = v_base_path+"/preprocessed/outside_batches/TauPredict/20150811_TauPredict/"
              v_enumbers_array.each do |e|
                v_subject_id = e
