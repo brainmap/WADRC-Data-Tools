@@ -2893,7 +2893,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      v_scan_procedures = [58]  #[20,24,26,36,41,58]  # how to only get adrc impact? 
      #not limiting by protocol #scan_procedures_vgroups.scan_procedure_id in ("+v_scan_procedures.join(",")+")
      # getting adrc impact from t_adrc_impact_20150105  --- change to get from refreshing table?
-     v_pet_tracer_array = [1,7] #,2] # pib and fdg and thk5117  
+     v_pet_tracer_array = [7] #1,2] # pib and fdg and thk5117  
 
      v_scan_type_limit = 1 
      v_series_desc_array =['T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','T2','T2 Flair','T2_Flair','T2+Flair','DTI','ASL','resting_fMRI']
@@ -3051,9 +3051,11 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                v_subject_id = e
                v_petfile_name = v_petfile_name.gsub(v_subject_id,v_export_id.to_s )
          end
-          if v_pettracer_id.to_s != "7"
+          if 1 == 2 and v_pettracer_id.to_s != "7"
             v_petfile_target_name = v_tracer+"_"+v_petfile_name
             v_call = "rsync -av "+v_petfile_path+" "+v_parent_dir_target+"/"+v_petfile_target_name               
+puts("this petid= "+v_pettracer_id.to_s )
+puts(v_call)
             stdin, stdout, stderr = Open3.popen3(v_call)
             stderr.each {|line|
                puts line
@@ -3070,12 +3072,13 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
              v_processed_path = v_base_path+"/preprocessed/outside_batches/TauPredict/20150811_TauPredict/"
              v_enumbers_array.each do |e|
                v_subject_id = e
-               v_source_file = "m"+v_subject_id+"_T1_FS.nii"
-               v_export_file_name = "m"+v_export_id.to_s+"_T1_FS_"+v_tracer+".nii"
+               v_source_file = v_subject_id+"_T1_FS.nii"
+               v_export_file_name = v_export_id.to_s+"_T1_FS_"+v_tracer+".nii"
                v_check_path = v_processed_path+v_subject_id+"/"+v_source_file
                # check if exisits
                if(File.file?v_check_path)
                    v_call = "rsync -av "+v_check_path+" "+v_parent_dir_target+"/"+v_export_file_name               
+puts(v_call)
                    stdin, stdout, stderr = Open3.popen3(v_call)
                    stderr.each {|line|
                       puts line
@@ -3095,6 +3098,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                # check if exisits
                if(File.file?v_check_path)
                    v_call = "rsync -av "+v_check_path+" "+v_parent_dir_target+"/"+v_export_file_name               
+puts( v_call)
                    stdin, stdout, stderr = Open3.popen3(v_call)
                    stderr.each {|line|
                       puts line
