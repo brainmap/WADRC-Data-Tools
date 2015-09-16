@@ -232,6 +232,19 @@ or   image_dataset_quality_checks.omnibus_f  = 'Severe'  or  spm_mask  = 'Severe
     if v_cnt > 1
       puts "MULTIPLE SP "+p_subjectid_v
     end
+    if v_cnt < 1
+        v_subjectid = p_subjectid_v.gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
+
+        scan_procedures = ScanProcedure.where("scan_procedures.id in 
+          ( select spvg.scan_procedure_id from scan_procedures_vgroups spvg,enrollment_vgroup_memberships evgm, enrollments e
+              where  spvg.vgroup_id = evgm.vgroup_id and e.id = evgm.enrollment_id and e.enumber ='"+v_subjectid+"' ) and codename like '%visit"+v_visit_number.to_s+"'")
+        scan_procedures.each do |sp|
+           v_cnt = v_cnt +1
+        end
+        if v_cnt > 1
+            puts "MULTIPLE SP "+p_subjectid_v
+        end
+    end
     
     scan_procedures.each do |sp|
       # puts sp.codename+"= codename"
