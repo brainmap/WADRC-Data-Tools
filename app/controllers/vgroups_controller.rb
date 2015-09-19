@@ -142,7 +142,13 @@ class VgroupsController < ApplicationController
       if hide_date_flag_array.count > 0
         @hide_page_flag = 'Y'
       end
-    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find_by_id(params[:id])
+    # if the vgroup is not linked to a scan protocol, the access control breaks down
+    # to get at vgroups without sp's need to be admin - also check that not linked to any sp
+    @scan_procedures_vgroups = ScanProcedure.where("scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  vgroup_id in (?))",params[:id]) 
+    if(@vgroup.nil? and  current_user.role == 'Admin_High' and @scan_procedures_vgroups.size <1)
+         @vgroup = Vgroup.find(params[:id])
+     end 
 
     @trfiles = Trfile.where("trfiles.scan_procedure_id in (select scan_procedure_id from scan_procedures_vgroups where vgroup_id in (?))",@vgroup.id).where("trfiles.enrollment_id in (select enrollment_id from enrollment_vgroup_memberships where vgroup_id in (?))",@vgroup.id)
 
@@ -198,7 +204,15 @@ class VgroupsController < ApplicationController
       if hide_date_flag_array.count > 0
         @hide_page_flag = 'Y'
       end
-    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find_by_id(params[:id])
+   # if the vgroup is not linked to a scan protocol, the access control breaks down
+    # to get at vgroups without sp's need to be admin - also check that not linked to any sp
+    @scan_procedures_vgroups = ScanProcedure.where("scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  vgroup_id in (?))",params[:id]) 
+
+    if(@vgroup.nil? and  current_user.role == 'Admin_High' and @scan_procedures_vgroups.size <1)
+         @vgroup = Vgroup.find(params[:id])
+     end 
+
     if !@vgroup.participant_id.nil?
         @participant = Participant.find(@vgroup.participant_id)
     end
@@ -523,7 +537,14 @@ class VgroupsController < ApplicationController
       if hide_date_flag_array.count > 0
         @hide_page_flag = 'Y'
       end
-    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find_by_id(params[:id])
+   # if the vgroup is not linked to a scan protocol, the access control breaks down
+    # to get at vgroups without sp's need to be admin - also check that not linked to any sp
+    @scan_procedures_vgroups = ScanProcedure.where("scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  vgroup_id in (?))",params[:id]) 
+
+    if(@vgroup.nil? and  current_user.role == 'Admin_High' and @scan_procedures_vgroups.size <1)
+         @vgroup = Vgroup.find(params[:id])
+     end 
     # removed attr_accessible  in model and ok now - update attributes not doing updates
     #   @vgroup.compile_folder = params[:vgroup][:compile_folder]
     #   @vgroup.note =params[:vgroup][:note]
@@ -1262,7 +1283,13 @@ end
       if hide_date_flag_array.count > 0
         @hide_page_flag = 'Y'
       end
-    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+    @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find_by_id(params[:id])
+    # if the vgroup is not linked to a scan protocol, the access control breaks down
+    # to get at vgroups without sp's need to be admin - also check that not linked to any sp
+    @scan_procedures_vgroups = ScanProcedure.where("scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  vgroup_id in (?))",params[:id]) 
+    if(@vgroup.nil? and  current_user.role == 'Admin_High' and @scan_procedures_vgroups.size <1)
+         @vgroup = Vgroup.find(params[:id])
+     end 
     @vgroup.destroy
 
     respond_to do |format|
