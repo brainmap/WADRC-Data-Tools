@@ -805,6 +805,24 @@ class VgroupsController < ApplicationController
               end
             end
         end
+        # updating adrcnum in participant - this will update the participant is adrcnum null/blank and participant linked to an adrc visit
+        # even when this visit is not with adrc
+        if (!@vgroup.participant_id).blank?
+              sql ="UPDATE participants p
+SET p.adrcnum = (SELECT DISTINCT e2.enumber FROM enrollments e2, enrollment_vgroup_memberships evgm,scan_procedures_vgroups spvg, vgroups vg
+WHERE e2.participant_id = p.id   
+AND e2.id = evgm.enrollment_id 
+             AND evgm.vgroup_id = spvg.vgroup_id
+AND vg.id = spvg.vgroup_id   AND vg.participant_id = p.id
+                         AND spvg.scan_procedure_id IN ( SELECT sp.id FROM scan_procedures sp WHERE sp.codename LIKE 'asthana.adrc-clinical-core.visit%'  )
+                         AND e2.enumber LIKE 'adrc%') 
+WHERE (p.adrcnum IS NULL or p.adrcnum = '')
+AND p.id IN (SELECT vg2.participant_id FROM vgroups vg2, scan_procedures_vgroups spvg2 WHERE vg2.id = spvg2.vgroup_id 
+                     AND spvg2.scan_procedure_id in (SELECT sp2.id FROM scan_procedures sp2 WHERE sp2.codename LIKE 'asthana.adrc-clinical-core.visit%'))
+AND p.id in ("+@vgroup.participant_id.to_s+")"
+        connection = ActiveRecord::Base.connection();
+        results = connection.execute(sql) 
+        end  
 
         format.html { redirect_to(@vgroup) }
         format.xml  { head :ok }
