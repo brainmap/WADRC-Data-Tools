@@ -1341,14 +1341,39 @@ puts "AAAAAA "+v_call
 #sftp.upload!(v_source, v_target)
 #Rails.logger.info("First file uploaded.")
 #Rails.logger.info("Connection terminated.")
+       # sftp_adrc_uplod.py  keeps calling sftp_adrc_uplod.sh until the uploaded file size is right
+       # then it move file to /home/panda_user/upload_adrc/sent
+       v_call_sftp = 'ssh panda_user@merida.dom.wisc.edu "/home/panda_user/upload_adrc/sftp_adrc_upload.py" '
+        stdin, stdout, stderr = Open3.popen3(v_call_sftp)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close 
 
+        # need to check that file is uploaded/moved to /sent
+        v_call = 'ssh panda_user@merida.dom.wisc.edu "ls /home/panda_user/upload_adrc/'+v_subject_dir+'.tar.gz"'
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+           v_return = stdout.read 1024  
+           #v_return_array = v_return.split(' ')
+           if v_return.include?("No such file or directory") 
+              @schedulerun.comment = " ERROR in sftp "+@schedulerun.comment
+              @schedulerun.save
+              v_comment_warning = " ERROR in sftp " +v_comment_warning
+           end  
+         end
+        stdin.close
+        stdout.close
+        stderr.close  
 
         v_comment = " AFTER SFTP "+v_comment 
        @schedulerun.comment = v_comment[0..1990]+@schedulerun.comment
        @schedulerun.save 
 
 # WANT TO CHECK TRANSFERS
-        v_call = " rm -rf "+v_target_dir+'/'+v_subject_dir+".tar.gz"
+        v_call = " rm -rf "+v_target_dir+"/"+v_subject_dir+".tar.gz"
         stdin, stdout, stderr = Open3.popen3(v_call)
         while !stdout.eof?
           puts stdout.read 1024    
