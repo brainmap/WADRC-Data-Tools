@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 gem 'rails', '~>3.2'
 
-
+gem 'activerecord-mysql2-adapter'
 gem 'sqlite3', '~>1.3.3'  # need in metamri
 gem 'mysql2' #,'~>0.2.0'  # not limiting version 20130314, '~>0.2.0'---# went back to limit ACtiveRecord adapter and rails 3.1
 gem 'yaml_db'
