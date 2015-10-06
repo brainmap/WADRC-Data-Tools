@@ -1,7 +1,7 @@
 require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
-
+require 'devise'
 #### require 'iconv'
 ####require 'rack/ssl-enforcer'
 ### require 'rack/ssl'
