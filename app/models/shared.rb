@@ -19,7 +19,7 @@ class Shared  < ActionController::Base
   def self.selley_target_path; selley_target end
   
   def test_return( p_var)
-    return "AAAAAAAAAAAAA"+p_var
+    return "BBBBBBAAAAAAAAAAAAA"+p_var
   end
   
   def apply_cg_edits(p_tn)
