@@ -177,6 +177,7 @@ DEPENDENCIES
   RedCloth
   acts_as_reportable
   builder
+  bzip2-ruby (= 0.2.7)
   cancan
   capistrano
   chronic
@@ -188,7 +189,7 @@ DEPENDENCIES
   escoffier
   exception_notification (~> 2.4.1)
   hirb (~> 0.4.5)
-  hpricot
+  hpricot (= 0.8.6)
   json
   kaminari
   launchy
