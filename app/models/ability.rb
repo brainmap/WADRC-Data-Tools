@@ -31,6 +31,8 @@ class Ability
   user[:edit_high_protocol_array] = [0]
   user[:admin_low_protocol_array] = [0]
   user[:admin_high_protocol_array] = [0]
+
+
   
 
    @roles_in_pr.each do |p| 

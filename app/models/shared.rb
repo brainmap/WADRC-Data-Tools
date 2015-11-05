@@ -952,20 +952,21 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
     # Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.read(dcm); if !d["0010,0030"].nil? 
     #                                                                                           d["0010,0030"].value = "DOB"; d.write(dcm) 
     #                                                                                               end } 
-
-            v_call = "rsync -av "+v_parent_dir_target+" panda_user@merida.dom.wisc.edu:/home/panda_user/adrc_pcvipr/"
-            stdin, stdout, stderr = Open3.popen3(v_call)
-            while !stdout.eof?
-              puts stdout.read 1024    
-             end
-            stdin.close
-            stdout.close
-            stderr.close
+        # keeping on brainapps - doing tar gz there - not has the probelm of mac adding extra directories
+          #  v_call = "rsync -av "+v_parent_dir_target+" panda_user@merida.dom.wisc.edu:/home/panda_user/adrc_pcvipr/"
+          #  stdin, stdout, stderr = Open3.popen3(v_call)
+          #  while !stdout.eof?
+          #    puts stdout.read 1024    
+          #   end
+          #  stdin.close
+          #  stdout.close
+          #  stderr.close
 
             #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
             #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
-            v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
-            v_call =  'ssh panda_user@merida.dom.wisc.edu "  tar  -C /home/panda_user/adrc_pcvipr  -zcf /home/panda_user/adrc_pcvipr/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
+         #   v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
+         #   v_call =  'ssh panda_user@merida.dom.wisc.edu "  tar  -C /home/panda_user/adrc_pcvipr  -zcf /home/panda_user/adrc_pcvipr/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
+            v_call =  "  tar  -C "+v_target_dir+"  -zcf "+v_target_dir+"/"+v_subject_dir+".tar.gz "+v_subject_dir+"/ "  
             stdin, stdout, stderr = Open3.popen3(v_call)
             while !stdout.eof?
               puts stdout.read 1024    
@@ -975,7 +976,7 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
             stderr.close
             puts "bbbbbbb "+v_call
 
-            v_call = ' rm -rf '+v_target_dir+'/'+v_subject_dir
+            v_call = "rm -rf "+v_target_dir+"/"+v_subject_dir
                stdin, stdout, stderr = Open3.popen3(v_call)
                while !stdout.eof?
                  puts stdout.read 1024    
@@ -984,35 +985,35 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
                stdout.close
                stderr.close
             # 
-            v_call = 'ssh panda_user@merida.dom.wisc.edu " rm -rf /home/panda_user/adrc_pcvipr/'+v_subject_dir+' "'
-            stdin, stdout, stderr = Open3.popen3(v_call)
-            while !stdout.eof?
-              puts stdout.read 1024    
-             end
-            stdin.close
-            stdout.close
-            stderr.close
+            #v_call = 'ssh panda_user@merida.dom.wisc.edu " rm -rf /home/panda_user/adrc_pcvipr/'+v_subject_dir+' "'
+          #  stdin, stdout, stderr = Open3.popen3(v_call)
+          #  while !stdout.eof?
+          #    puts stdout.read 1024    
+          #   end
+          #  stdin.close
+          #  stdout.close
+          #  stderr.close
 
 
              # did the tar.gz on merida to avoid mac acl PaxHeader extra directories
-             v_call = "rsync -av panda_user@merida.dom.wisc.edu:/home/panda_user/adrc_pcvipr/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
-             stdin, stdout, stderr = Open3.popen3(v_call)
-             while !stdout.eof?
-               puts stdout.read 1024    
-              end
-             stdin.close
-             stdout.close
-             stderr.close
+          #   v_call = "rsync -av panda_user@merida.dom.wisc.edu:/home/panda_user/adrc_pcvipr/"+v_subject_dir+".tar.gz "+v_target_dir+'/'+v_subject_dir+".tar.gz"
+          #   stdin, stdout, stderr = Open3.popen3(v_call)
+          #   while !stdout.eof?
+          #     puts stdout.read 1024    
+          #    end
+          #   stdin.close
+          #   stdout.close
+          #   stderr.close
 
 
-            v_call = " rm -rf "+v_target_dir+'/'+v_subject_dir+".tar.gz"
-            stdin, stdout, stderr = Open3.popen3(v_call)
-            while !stdout.eof?
-              puts stdout.read 1024    
-             end
-            stdin.close
-            stdout.close
-            stderr.close        
+         #   v_call = " rm -rf "+v_target_dir+'/'+v_subject_dir+".tar.gz"
+         #   stdin, stdout, stderr = Open3.popen3(v_call)
+         #   while !stdout.eof?
+         #     puts stdout.read 1024    
+         #    end
+         #   stdin.close
+         #   stdout.close
+         #   stderr.close        
 
             sql_sent = "update cg_adrc_upload set pcvipr_sent_flag ='Y' where subjectid ='"+r[0]+"' and pcvipr_sent_flag ='N'"
             results_sent = connection.execute(sql_sent)
