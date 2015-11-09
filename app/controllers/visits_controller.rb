@@ -541,7 +541,39 @@ end
       end
     end 
     
+    # image_datasets.dicom_hashtag is weird -hard to pull out the field value
+    # using ruby -- IF visit_id = 762
+
     # getting error when trying to add enumber ??? try changing thye enum format chars[xxxx(x)]digits[xxxx]
+    if (@visit.mri_coil_name).blank?
+        if @visit.id == 762
+            @temp_imagedatasets = ImageDataset.all
+            @temp_imagedatasets.each do |dataset|
+              if  dataset.dicom_taghash  
+                tags = dataset.dicom_taghash      
+                if !tags['0018,1250'].blank? and tags['0018,1250'] != '0018,1250' and tags['0018,1250'][:value] != ''
+                  dataset.mri_coil_name  = tags['0018,1250'][:value].blank? ? nil : tags['0018,1250'][:value].to_s  
+                  dataset.save
+                end
+              end 
+            end
+        end
+
+       @mri_coil_name = @visit.mri_coil_name_from_dicom_info 
+       @visit.mri_coil_name = @mri_coil_name[:name]  unless @mri_coil_name[:name].blank?
+       # doing update if ids mri_coil_name instead of changing metamri
+
+       @visit.image_datasets.each do |dataset|
+        if  dataset.dicom_taghash  
+          tags = dataset.dicom_taghash      
+          if !tags['0018,1250'].blank? and tags['0018,1250'] != '0018,1250' and tags['0018,1250'][:value] != ''
+              dataset.mri_coil_name  = tags['0018,1250'][:value].blank? ? nil : tags['0018,1250'][:value].to_s  
+              dataset.save
+          end
+        end 
+       end
+
+    end
             
     respond_to do |format|
       if @visit.update_attributes(attributes)

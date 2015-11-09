@@ -333,6 +333,21 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
     end
     return age_at_visit
   end
+
+  def mri_coil_name_from_dicom_info  # 32 vs 8
+      @mri_coil_info ||= {}
+    return @mri_coil_info unless @mri_coil_info.blank?
+    # tags[#] sometimes its just returning # -- a string? 
+    image_datasets.each do |dataset|
+      if  dataset.dicom_taghash  
+        tags = dataset.dicom_taghash      
+        if @mri_coil_info[:name].blank? and !tags['0018,1250'].blank? and tags['0018,1250'] != '0018,1250' and tags['0018,1250'][:value] != ''
+              @mri_coil_info[:name] = tags['0018,1250'][:value].blank? ? nil : tags['0018,1250'][:value].to_s  # age
+         end
+      end 
+    end
+    return @mri_coil_info 
+  end
   
   def age_from_dicom_info
     @age_info ||= {}
