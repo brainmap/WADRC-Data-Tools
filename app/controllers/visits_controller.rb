@@ -549,7 +549,7 @@ end
         if @visit.id == 762
             @temp_imagedatasets = ImageDataset.all
             @temp_imagedatasets.each do |dataset|
-              if  dataset.dicom_taghash  
+              if  dataset.dicom_taghash and dataset.mri_coil_name.blank?  
                 tags = dataset.dicom_taghash      
                 if !tags['0018,1250'].blank? and tags['0018,1250'] != '0018,1250' and tags['0018,1250'][:value] != ''
                   dataset.mri_coil_name  = tags['0018,1250'][:value].blank? ? nil : tags['0018,1250'][:value].to_s  
