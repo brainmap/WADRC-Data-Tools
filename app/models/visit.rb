@@ -334,6 +334,7 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
     return age_at_visit
   end
 
+ # there are multiple mri_coil_name from different ids in the same scan - trying to 
   def mri_coil_name_from_dicom_info  # 32 vs 8
       @mri_coil_info ||= {}
     return @mri_coil_info unless @mri_coil_info.blank?
@@ -341,11 +342,20 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
     image_datasets.each do |dataset|
       if  dataset.dicom_taghash  
         tags = dataset.dicom_taghash      
-        if @mri_coil_info[:name].blank? and !tags['0018,1250'].blank? and tags['0018,1250'] != '0018,1250' and tags['0018,1250'][:value] != ''
+        if @mri_coil_info[:name].blank? and !tags['0018,1250'].blank? and tags['0018,1250'] != '0018,1250' and tags['0018,1250'][:value] != '' and tags['0018,1250'][:value] !=  'HDNV Array'  and tags['0018,1250'][:value] != 'Perfusion ROIs'  and tags['0018,1250'][:value] != 'BODY'   and tags['0018,1250'][:value] != 'FMT (color)'  and tags['0018,1250'][:value] != 'MTT(CVP) (color)' and tags['0018,1250'][:value] != 'flow:SVDbc (color)' and tags['0018,1250'][:value] !=  'rCBV (color)'  and tags['0018,1250'][:value] != 'rCBV'  and tags['0018,1250'][:value] != 'flow:SVD (bc)' and tags['0018,1250'][:value] != 'FMT' and tags['0018,1250'][:value] != 'MTT(CVP)'
               @mri_coil_info[:name] = tags['0018,1250'][:value].blank? ? nil : tags['0018,1250'][:value].to_s  # age
          end
       end 
     end
+     # retry with no restriction
+        image_datasets.each do |dataset|
+      if  dataset.dicom_taghash  
+        tags = dataset.dicom_taghash      
+        if @mri_coil_info[:name].blank? and !tags['0018,1250'].blank? and tags['0018,1250'] != '0018,1250' and tags['0018,1250'][:value] != ''
+              @mri_coil_info[:name] = tags['0018,1250'][:value].blank? ? nil : tags['0018,1250'][:value].to_s  # age
+         end
+      end 
+    end 
     return @mri_coil_info 
   end
   

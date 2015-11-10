@@ -546,20 +546,25 @@ end
 
     # getting error when trying to add enumber ??? try changing thye enum format chars[xxxx(x)]digits[xxxx]
     if (@visit.mri_coil_name).blank?
-        if @visit.id == 762
-            @temp_imagedatasets = ImageDataset.all
-            @temp_imagedatasets.each do |dataset|
-              if  dataset.dicom_taghash and dataset.mri_coil_name.blank?  
-                tags = dataset.dicom_taghash      
-                if !tags['0018,1250'].blank? and tags['0018,1250'] != '0018,1250' and tags['0018,1250'][:value] != ''
-                  dataset.mri_coil_name  = tags['0018,1250'][:value].blank? ? nil : tags['0018,1250'][:value].to_s  
-                  dataset.save
-                end
-              end 
-            end
-        end
+        # was doing a batch image_dataset update triggers by an update in visit 762
+      ##  if @visit.id == 762
+      ##      @temp_imagedatasets = ImageDataset.where("images_datasets.mri_coil_name is null and image_datasets.scanned_file like '%dcm%'")
+      ##      @temp_imagedatasets.each do |dataset|
+      ##        if  dataset.dicom_taghash and dataset.mri_coil_name.blank?  
+      ##          tags = dataset.dicom_taghash      
+      ##          if !tags['0018,1250'].blank? and tags['0018,1250'] != '0018,1250' and tags['0018,1250'][:value] != ''
+      ##            dataset.mri_coil_name  = tags['0018,1250'][:value].blank? ? nil : tags['0018,1250'][:value].to_s  
+      ##            dataset.save
+      ##          end
+      ##        end 
+      ##      end
+      ##  end
 
        @mri_coil_name = @visit.mri_coil_name_from_dicom_info 
+       # excluding 
+       #'HDNV Array','Perfusion ROIs','BODY','FMT (color)','MTT(CVP) (color)','flow:SVDbc (color)', 'rCBV (color)','rCBV','flow:SVD (bc)','FMT','MTT(CVP)'
+       # getting 2 mri_coil_name in scan
+
        @visit.mri_coil_name = @mri_coil_name[:name]  unless @mri_coil_name[:name].blank?
        # doing update if ids mri_coil_name instead of changing metamri
 
