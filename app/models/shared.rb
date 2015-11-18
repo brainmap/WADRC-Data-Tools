@@ -8063,7 +8063,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       puts "successful finish series_description harvest' "+v_comment[0..1459]
       @schedulerun.comment =("successful finish series_description harvest, starting count harvest' "+v_comment[0..1459])
 
-       sql = "select spvg.scan_procedure_id, series_descriptions.id series_description_id, count(ids.id)
+       sql = "select spvg.scan_procedure_id, series_descriptions.id series_description_id, count(ids.id),count(distinct a.vgroup_id)
             from series_descriptions , scan_procedures_vgroups spvg, image_datasets ids, visits v, appointments a
             where a.id = v.appointment_id  and v.id = ids.visit_id
             and a.vgroup_id = spvg.vgroup_id and trim(series_descriptions.long_description) = trim(ids.series_description)
@@ -8077,6 +8077,39 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
              v_new.scan_procedure_id = r[0]
              v_new.series_description_id = r[1]
              v_new.scan_count = r[2]
+             v_new.scan_count_all = r[3]
+             v_new.scan_count_last_20 = 0
+             v_new.scan_count_last_5 = 0
+             # run scan_count_20
+            sql_20 = "select a_spvg.scan_procedure_id, series_descriptions.id series_description_id, count(distinct a_spvg.vgroup_id)
+            from series_descriptions , image_datasets ids, visits v, 
+            ( SELECT appointments.vgroup_id, appointments.id, scan_procedures_vgroups.scan_procedure_id FROM appointments, scan_procedures_vgroups  
+             where  appointments.vgroup_id =  scan_procedures_vgroups.vgroup_id
+             and scan_procedures_vgroups.scan_procedure_id = "+r[0].to_s+"
+             ORDER BY appointments.appointment_date  DESC LIMIT 20) a_spvg
+              where a_spvg.id = v.appointment_id and v.id = ids.visit_id
+              and series_descriptions.id ="+r[1].to_s+"
+              and trim(series_descriptions.long_description) = trim(ids.series_description)
+                group by a_spvg.scan_procedure_id, series_description_id"
+             results_20 = connection.execute(sql_20)
+             results_20.each do |r_20|
+                    v_new.scan_count_last_20 = r_20[2]
+             end
+             #run scan_count_5
+          sql_5 = "select a_spvg.scan_procedure_id, series_descriptions.id series_description_id, count(distinct a_spvg.vgroup_id)
+            from series_descriptions , image_datasets ids, visits v, 
+            ( SELECT appointments.vgroup_id, appointments.id, scan_procedures_vgroups.scan_procedure_id FROM appointments, scan_procedures_vgroups  
+             where  appointments.vgroup_id =  scan_procedures_vgroups.vgroup_id
+             and scan_procedures_vgroups.scan_procedure_id = "+r[0].to_s+"
+             ORDER BY appointments.appointment_date  DESC LIMIT 5) a_spvg
+              where a_spvg.id = v.appointment_id and v.id = ids.visit_id
+              and series_descriptions.id ="+r[1].to_s+"
+              and trim(series_descriptions.long_description) = trim(ids.series_description)
+                group by a_spvg.scan_procedure_id, series_description_id"
+             results_5 = connection.execute(sql_5)
+             results_5.each do |r_5|
+                    v_new.scan_count_last_5 = r_5[2]
+             end
              v_new.save
           end
       end

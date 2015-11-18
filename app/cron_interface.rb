@@ -393,6 +393,56 @@ v_user = v_user.gsub("\n","")
            end
       end
       puts "successful finish sp_series_desc_count "+v_comment[0..459]
+
+      # series_desc 20/5 count 
+      sql = "truncate table t_sp_series_desc_vgroup_count_freq"      
+      results = connection.execute(sql)
+      sql = "select distinct sdsp.scan_procedure_id, sp.codename from series_description_scan_procedures sdsp, scan_procedures sp 
+               where sdsp.scan_procedure_id = sp.id"
+      results = connection.execute(sql)
+      results.each do |r|
+          v_scan_procedure_id = r[0]
+          v_codename = r[1]
+          sql_total = "select count(distinct vg.id) from  vgroups vg , scan_procedures_vgroups spvg 
+                        where vg.id = spvg.vgroup_id and spvg.scan_procedure_id ="+v_scan_procedure_id.to_s+"
+                         and vg.transfer_mri ='yes'"
+          results_total = connection.execute(sql_total)
+          v_sp_total = results_total.first[0]
+          sql_fraction = "select sd.long_description, sdsp.scan_count_all, sdsp.scan_count_last_20,sdsp.scan_count_last_5
+                  from series_descriptions sd, series_description_scan_procedures sdsp
+                  where  sdsp.scan_procedure_id = "+v_scan_procedure_id.to_s+"
+                  and sdsp.series_description_id = sd.id "
+          results_fraction = connection.execute(sql_fraction)
+          #insert into t_sp_series_desc_vgroup_count_freq
+          results_fraction.each do |r_fraction|
+             sql_insert ="insert into t_sp_series_desc_vgroup_count_freq (codename,
+              series_description,vgroup_total,vgroup_series_desc_total,vgroup_total_fraction_of_all,
+vgroup_20_total,vgroup_20_fraction_of_20,vgroup_5_total,vgroup_5_fraction_of_5 ) 
+      values('"+v_codename+"','"+r_fraction[0]+"',"+v_sp_total.to_s+","+r_fraction[1].to_s+",("+r_fraction[1].to_s+"/"+v_sp_total.to_s+"),"+r_fraction[2].to_s+",("+r_fraction[2].to_s+"/20),"+r_fraction[3].to_s+",("+r_fraction[3].to_s+"/5))"
+            results_insert = connection.execute(sql_insert)
+          end
+      end
+      # get sp from last month -- codename
+      sql = "select distinct scan_procedures.codename from scan_procedures, scan_procedures_vgroups spg2, vgroups vg
+                                        where scan_procedures.id = spg2.scan_procedure_id and vg.id=spg2.vgroup_id  and vg.vgroup_date >  adddate(curdate(),'-181')"                            
+      results = connection.execute(sql)
+      results.each do |r|
+           puts "codename="+r[0]
+           v_comment = "\n codename="+r[0]+v_comment
+           sql_internal = "select codename,series_description,vgroup_total_fraction_of_all,vgroup_20_fraction_of_20,vgroup_5_fraction_of_5
+                          from t_sp_series_desc_vgroup_count_freq
+                         where t_sp_series_desc_vgroup_count_freq.codename='"+r[0]+"' order by series_description "
+           results_internal = connection.execute(sql_internal)
+           # open file for codename
+           v_file = v_dir_path+r[0]+"_series_desc_vgroup_cnt.txt"
+           File.open(v_file, "w+") do |f|
+             results_internal.each do |rc|
+               f.write(rc[0]+"\t"+rc[1]+"\t"+rc[2].to_s+"\t"+rc[3].to_s+"\t"+rc[4].to_s+"\n")
+               # write a tab separated row
+             end
+           end
+      end
+
        @schedulerun.comment =("successful finish sp_series_desc_count "+v_comment[0..459])
        @schedulerun.status_flag ="Y"
         @schedulerun.save
