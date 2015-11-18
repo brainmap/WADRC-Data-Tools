@@ -408,6 +408,14 @@ v_user = v_user.gsub("\n","")
                          and vg.transfer_mri ='yes'"
           results_total = connection.execute(sql_total)
           v_sp_total = results_total.first[0]
+          v_5 = 5
+          v_20 = 20
+          if(v_sp_total < 5 )
+            v_5 = v_sp_total
+            v_20 = v_sp_total
+          elsif(v_sp_total < 20)
+             v_20 = v_sp_total
+          end
           sql_fraction = "select sd.long_description, sdsp.scan_count_all, sdsp.scan_count_last_20,sdsp.scan_count_last_5
                   from series_descriptions sd, series_description_scan_procedures sdsp
                   where  sdsp.scan_procedure_id = "+v_scan_procedure_id.to_s+"
@@ -418,7 +426,7 @@ v_user = v_user.gsub("\n","")
              sql_insert ="insert into t_sp_series_desc_vgroup_count_freq (codename,
               series_description,vgroup_total,vgroup_series_desc_total,vgroup_total_fraction_of_all,
 vgroup_20_total,vgroup_20_fraction_of_20,vgroup_5_total,vgroup_5_fraction_of_5 ) 
-      values('"+v_codename+"','"+r_fraction[0]+"',"+v_sp_total.to_s+","+r_fraction[1].to_s+",("+r_fraction[1].to_s+"/"+v_sp_total.to_s+"),"+r_fraction[2].to_s+",("+r_fraction[2].to_s+"/20),"+r_fraction[3].to_s+",("+r_fraction[3].to_s+"/5))"
+      values('"+v_codename+"','"+r_fraction[0]+"',"+v_sp_total.to_s+","+r_fraction[1].to_s+",("+r_fraction[1].to_s+"/"+v_sp_total.to_s+"),"+r_fraction[2].to_s+",("+r_fraction[2].to_s+"/"+v_20.to_s+"),"+r_fraction[3].to_s+",("+r_fraction[3].to_s+"/"+v_5.to_s+"))"
             results_insert = connection.execute(sql_insert)
           end
       end
