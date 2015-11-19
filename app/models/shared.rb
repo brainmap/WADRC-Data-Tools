@@ -8064,8 +8064,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       @schedulerun.comment =("successful finish series_description harvest, starting count harvest' "+v_comment[0..1459])
 
        sql = "select spvg.scan_procedure_id, series_descriptions.id series_description_id, count(ids.id),count(distinct a.vgroup_id)
-            from series_descriptions , scan_procedures_vgroups spvg, image_datasets ids, visits v, appointments a
-            where a.id = v.appointment_id  and v.id = ids.visit_id
+            from series_descriptions , scan_procedures_vgroups spvg, image_datasets ids, visits v, appointments a,
+            vgroups vg
+            where a.id = v.appointment_id  and v.id = ids.visit_id  and a.vgroup_id = vg.id
+            and vg.transfer_mri ='yes' and a.appointment_type = 'mri'
             and a.vgroup_id = spvg.vgroup_id and trim(series_descriptions.long_description) = trim(ids.series_description)
             group by spvg.scan_procedure_id, series_description_id"
       results = connection.execute(sql)
@@ -8083,8 +8085,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
              # run scan_count_20
             sql_20 = "select a_spvg.scan_procedure_id, series_descriptions.id series_description_id, count(distinct a_spvg.vgroup_id)
             from series_descriptions , image_datasets ids, visits v, 
-            ( SELECT appointments.vgroup_id, appointments.id, scan_procedures_vgroups.scan_procedure_id FROM appointments, scan_procedures_vgroups  
-             where  appointments.vgroup_id =  scan_procedures_vgroups.vgroup_id
+            ( SELECT appointments.vgroup_id, appointments.id, scan_procedures_vgroups.scan_procedure_id FROM appointments, scan_procedures_vgroups ,vgroups vg 
+             where  appointments.vgroup_id =  scan_procedures_vgroups.vgroup_id and appointments.vgroup_id = vg.id
+            and vg.transfer_mri ='yes' and appointments.appointment_type = 'mri'
              and scan_procedures_vgroups.scan_procedure_id = "+r[0].to_s+"
              ORDER BY appointments.appointment_date  DESC LIMIT 20) a_spvg
               where a_spvg.id = v.appointment_id and v.id = ids.visit_id
@@ -8098,8 +8101,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
              #run scan_count_5
           sql_5 = "select a_spvg.scan_procedure_id, series_descriptions.id series_description_id, count(distinct a_spvg.vgroup_id)
             from series_descriptions , image_datasets ids, visits v, 
-            ( SELECT appointments.vgroup_id, appointments.id, scan_procedures_vgroups.scan_procedure_id FROM appointments, scan_procedures_vgroups  
-             where  appointments.vgroup_id =  scan_procedures_vgroups.vgroup_id
+            ( SELECT appointments.vgroup_id, appointments.id, scan_procedures_vgroups.scan_procedure_id FROM appointments, scan_procedures_vgroups,vgroups vg  
+             where  appointments.vgroup_id =  scan_procedures_vgroups.vgroup_id  and appointments.vgroup_id = vg.id
+            and vg.transfer_mri ='yes' and appointments.appointment_type = 'mri'
              and scan_procedures_vgroups.scan_procedure_id = "+r[0].to_s+"
              ORDER BY appointments.appointment_date  DESC LIMIT 5) a_spvg
               where a_spvg.id = v.appointment_id and v.id = ids.visit_id
