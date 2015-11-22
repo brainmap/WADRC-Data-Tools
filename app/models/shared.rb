@@ -3604,6 +3604,25 @@ puts "AAAAAA "+v_call
               and e.id not in ( select x2.enrollment_id from cg_xnat x2 where x2.scan_procedure_id = 22 and x2.project_1 = 'ADRC')"
     results = connection.execute(sql)
 
+    # update export_id  -- replace subjectid in file name and xml file
+    # need to make table of xnat_participant_id --- linkto export_id update cg_xnat
+  #  sql ="truncate table cg_xnat_exportid"
+  #  results = connection.execute(sql)
+    # CLOSE
+    sql = "insert into cg_xnat_exportid(participant_id)  select distinct e.participant_id from cg_xnat , enrollments e 
+        where cg_xnat.enrollment_id = e.id and cg_xnat.export_id is  NULL"
+    results = connection.execute(sql)
+    # expect unique key issue
+    sql = "insert into cg_random(export_id)(select FLOOR((RAND()*10000000)+2) from cg_xnat_exportid where export_id is NULL)"
+    results = connection.execute(sql)
+    sql = "update cg_xnat_exportid set cg_xnat_exportid.export_id = ( select cg_random.export_id 
+                 from cg_random where cg_random.id = cg_xnat_exportid.id)"
+         results = connection.execute(sql)
+     sql ="update cg_xnat set cg_xnat.export_id = ( select distinct cg_xnat_exportid.export_id 
+              from cg_xnat_exportid, enrollments e where cg_xnat_exportid.participant_id= e.participant_id
+               and e.id = cg_xnat.enrollment_id)"
+    results = connection.execute(sql)
+
     t_now = Time.now
     v_file_name = 'xnat_mri_scan_list_'+ t_now.strftime("%Y%m%d_%H_%M")+".xml"
     v_file_target_dir = v_base_path+"/admin_only/xnat/"
@@ -3630,6 +3649,10 @@ puts "AAAAAA "+v_call
         # LIMITING TO ADRC
         v_enrollments = Enrollment.where("enumber like 'adrc%'").where("enrollments.id in (select enrollment_id from enrollment_vgroup_memberships where vgroup_id in (?))",r[0])
         v_enrollment = v_enrollments[0]
+        sql_exportid = "select cg_xnat.export_id from cg_xnat where participant_id = "+v_enrollment.id.to_s
+        results_exportid = connection.execute(sql_exportid)
+        v_export_id = results_exportid.first[0]
+
         v_comment = "strt "+v_enrollment.enumber+"; "+v_comment
         v_gender = ""
         if v_participant.gender == 2
@@ -3639,7 +3662,8 @@ puts "AAAAAA "+v_call
         end
         v_vgroup_start ="<vgroup>\n\t<internal_cnt>"+v_cnt.to_s+"</internal_cnt>\n"
         v_vgroup_stop ="</vgroup>"
-        v_string_participant_start="\t<participant>\n\t\t<panda_participant_id>"+v_participant.id.to_s+"</panda_participant_id>\n\t\t<subjectid_adrc>"+v_enrollment.enumber+"</subjectid_adrc>\n\t\t<reggieid>"+v_participant.reggieid.to_s+"</reggieid>\n\t\t<gender>"+v_gender+"</gender>\n\t\t<apoe_e1>"+v_participant.apoe_e1.to_s+"</apoe_e1>\n\t\t<apoe_e2>"+v_participant.apoe_e2.to_s+"</apoe_e2>"
+        v_string_participant_start="\t<participant>\n\t\t<panda_participant_id>"+v_participant.id.to_s+"</panda_participant_id>\n\t\t<subjectid_adrc>"+v_enrollment.enumber+"</subjectid_adrc>\n\t\t<reggieid>"+v_participant.reggieid.to_s+"</reggieid>\n\t\t<gender>"+v_gender+"</gender>\n\t\t<apoe_e1>"+v_participant.apoe_e1.to_s+"</apoe_e1>\n\t\t<apoe_e2>"+v_participant.apoe_e2.to_s+"</apoe_e2><export_id>"+nt = Participant.find(r[1])
+        +"</export_id>"
         v_string_participant_stop = "\n\t</participant>"
         f.write(v_vgroup_start)
         f.write(v_string_participant_start+"\n")
