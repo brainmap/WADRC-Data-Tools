@@ -3625,7 +3625,11 @@ puts "AAAAAA "+v_call
 
     t_now = Time.now
     v_file_name = 'xnat_mri_scan_list_'+ t_now.strftime("%Y%m%d_%H_%M")+".xml"
-    v_file_target_dir = v_base_path+"/admin_only/xnat/"
+    if Rails.env=="production"   
+        v_file_target_dir = v_base_path+"/analyses/panda/xnat/"
+    else
+      v_file_target_dir = v_base_path+"/admin_only/xnat/"
+    end
     v_file = v_file_target_dir+v_file_name
      # get adrc only  -- only 20, just T1 and t2, xnat_status_flag =R 
      v_scan_procedure_array = [22]
@@ -6329,6 +6333,299 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     
   end
 
+
+
+   def run_helpern_20151125_upload  
+     v_base_path = Shared.get_base_path()
+      @schedule = Schedule.where("name in ('helpern_20151125_upload')").first
+       @schedulerun = Schedulerun.new
+       @schedulerun.schedule_id = @schedule.id
+       @schedulerun.comment ="starting helpern_20151125_upload"
+       @schedulerun.save
+       @schedulerun.start_time = @schedulerun.created_at
+       @schedulerun.save
+       v_comment = ""
+       v_comment_warning =""
+    #  table cg_helpern_20151125 populated with HYDI groups  
+     connection = ActiveRecord::Base.connection();
+     # get adrc subjectid to upload
+     sql = "select distinct subjectid , scan_procedure_id,export_id from cg_helpern_20151125 where done_flag ='N' and status_flag in ('Y','R') "
+     results = connection.execute(sql)
+     # changed to series_description_maps table
+     v_folder_array = Array.new
+     v_scan_desc_type_array = Array.new
+     # check for dir in /tmp
+     v_target_dir ="/tmp/helpern_20151125_upload"
+     if Rails.env=="production" 
+        v_final_dir = "/home/panda_user/"
+     else
+        v_final_dir = "~/"
+     end
+
+     if !File.directory?(v_target_dir)
+       v_call = "mkdir "+v_target_dir
+       stdin, stdout, stderr = Open3.popen3(v_call)
+       while !stdout.eof?
+         puts stdout.read 1024    
+        end
+       stdin.close
+       stdout.close
+       stderr.close
+     end
+     v_comment = " :list of subjectid "+v_comment
+     results.each do |r|
+       v_comment = r[0]+","+v_comment
+     end
+     @schedulerun.comment =v_comment[0..1990]
+     @schedulerun.save
+     v_cnt_subject = 0 # using instead of date stamp
+     results.each do |r|
+       v_cnt_subject = v_cnt_subject+1
+       v_comment = "strt "+r[0]+","+v_comment
+       @schedulerun.comment =v_comment[0..1990]
+       @schedulerun.save
+       # update schedulerun comment - prepend 
+       sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")+"')
+                                                                                          and v.id in (select spvg.vgroup_id from scan_procedures_vgroups spvg  where spvg.scan_procedure_id ='"+r[1].to_s+"')"
+     
+       results_vgroup = connection.execute(sql_vgroup)
+       v_subjectid = r[0].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
+       v_export_id = "exportid_"+r[2].to_s
+       # mkdir /tmp/helpern_20151125_upload/[exportid]_YYYYMMDD_wisc
+       #v_cnt_subject  -- instead of date
+       #### v_subject_dir = v_export_id+"_"+(results_vgroup.first)[0].to_s+"_wisc"
+       v_subject_dir = v_export_id+"_"+v_cnt_subject.to_s+"_wisc"
+       v_parent_dir_target =v_target_dir+"/"+v_subject_dir
+       v_call = "mkdir "+v_parent_dir_target
+       stdin, stdout, stderr = Open3.popen3(v_call)
+       while !stdout.eof?
+         puts stdout.read 1024    
+        end
+       stdin.close
+       stdout.close
+       stderr.close
+       sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_types.series_description_type 
+                   from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
+                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
+                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
+                   and image_datasets.series_description =   series_description_maps.series_description
+                   and series_description_maps.series_description_type_id = series_description_types.id
+                   and series_description_types.series_description_type in ('HYDI') 
+                   and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")+"')
+                   and vgroups.id in (select spvg.vgroup_id from scan_procedures_vgroups spvg  where spvg.scan_procedure_id ='"+r[1].to_s+"')
+                    order by appointments.appointment_date "
+       results_dataset = connection.execute(sql_dataset)
+       v_folder_array = [] # how to empty
+       v_scan_desc_type_array = []
+       v_cnt = 1
+       results_dataset.each do |r_dataset|
+             v_series_description_type = r_dataset[5].gsub(" ","_")
+             if !v_scan_desc_type_array.include?(v_series_description_type)
+                  v_scan_desc_type_array.push(v_series_description_type)
+             end
+             v_path = r_dataset[4]
+             v_dir_array = v_path.split("/")
+             v_dir = v_dir_array[(v_dir_array.size - 1)]
+             v_dir_target = v_dir+"_"+v_series_description_type
+             v_path = v_path.gsub("/Volumes/team/","").gsub("/Volumes/team-1/","").gsub("/Data/vtrak1/","")  #v_base_path+"/"+
+             if v_folder_array.include?(v_dir_target)
+               v_dir_target = v_dir_target+"_"+v_cnt.to_s
+               v_cnt = v_cnt +1
+               # might get weird if multiple types have dups - only expect T1/Bravo
+             end
+             v_folder_array.push(v_dir_target)
+
+              # v_call = "/usr/bin/bunzip2 "+v_parent_dir_target+"/"+v_dir_target+"/*.bz2"
+               v_call = "mise "+v_path+" "+v_parent_dir_target+"/"+v_dir_target   # works where bunzip2 cmd after rsync not work
+ #puts "v_path = "+v_path
+ #puts "v_parent_dir_target = "+ v_parent_dir_target
+ #puts "v_dir_target="+v_dir_target
+ puts "AAAAAA "+v_call
+              stdin, stdout, stderr = Open3.popen3(v_call)
+               stderr.each {|line|
+                   puts line
+                 }
+                 while !stdout.eof?
+                   puts stdout.read 1024    
+                  end
+              stdin.close
+              stdout.close
+              stderr.close
+              # temp - replace /Volumes/team/ and /Data/vtrak1/ with /Volumes/team-1 in dev
+             # split on / --- get the last dir
+             # make new dir name dir_series_description_type 
+             # check if in v_folder_array , if in v_folder_array , dir_series_description_type => dir_series_description_type_2
+             # add  dir, dir_series_description_type to v_folder_array
+             # cp path ==> /tmp/hyunwoo_20140520_upload/[subjectid]_yyymmdd_wisc/dir_series_description_type(_2)
+       end
+
+       sql_status = "select status_flag from cg_helpern_20151125 where subjectid ='"+r[0]+"'"
+       results_status = connection.execute(sql_status)
+       if v_scan_desc_type_array.size < 1   and (results_status.first)[0] != "R"
+         # sql_dirlist = "update cg_hyunwoo_20140520 set general_comment =' NOT ALL SCAN TYPES!!!! "+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
+         # results_dirlist = connection.execute(sql_dirlist)
+         sql_status = "update cg_helpern_20151125 set status_flag ='N' where subjectid ='"+r[0]+"' "
+         results_sent = connection.execute(sql_status)
+         # send email 
+         v_subject = "helpern_20151125_upload "+r[0]+" is missing some scan types --- set status_flag ='R' to send  : scans ="+v_folder_array.join(", ")
+         v_email = "noreply_johnson_lab@medicine.wisc.edu"
+         PandaMailer.schedule_notice(v_subject,{:send_to => v_email}).deliver
+
+         # mail(
+         #   :from => "noreply_johnson_lab@medicine.wisc.edu"
+         #   :to => "noreply_johnson_lab@medicine.wisc.edu", 
+         #   :subject => v_subject
+         # )
+         PandaMailer.schedule_notice(v_subject,{:send_to => "noreply_johnson_lab@medicine.wisc.edu"}).deliver
+          v_comment_warning = v_comment_warning+"  "+v_scan_desc_type_array.size.to_s+" scan type "+r[0]
+       v_call = "rm -rf "+v_parent_dir_target
+ # puts "BBBBBBBB "+v_call
+       stdin, stdout, stderr = Open3.popen3(v_call)
+       stderr.each {|line|
+            puts line
+       }
+       while !stdout.eof?
+         puts stdout.read 1024    
+        end   
+       stdin.close
+       stdout.close
+       stderr.close
+       else
+
+         sql_dirlist = "update cg_helpern_20151125 set dir_list ='"+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
+         results_dirlist = connection.execute(sql_dirlist)
+ # TURN INTO A LOOP
+         v_dicom_field_array =['0010,0030','0010,0010','0008,0050','0008,1030','0010,0020','0010,21b0','0040,0254','0008,0020','0008,0021','0008,0022','0008,0023','0008,0030','0040,0244','0040,0245']
+         v_dicom_field_value_hash ={'0010,0030'=>'DOB','0010,0010'=>'Name','0008,0050'=>'RMR','0008,1030'=>'ID','0010,0020'=>'ID','0010,21b0'=>'ID','0040,0254'=>'ID','0008,0020'=>'date','0008,0021'=>'date','0008,0022'=>'date','0008,0023'=>'date','0008,0030'=>'date','0040,0244'=>'date','0040,0245'=>'date'}
+      ####  v_dicom_field_array.each do |dicom_key|
+                Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                      v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                                  d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                             end 
+                                                                                       end }
+               Dir.glob(v_parent_dir_target+'/*/*/*.*0').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }
+               Dir.glob(v_parent_dir_target+'/*/*/*.*1').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }
+               Dir.glob(v_parent_dir_target+'/*/*/*.*2').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }
+               Dir.glob(v_parent_dir_target+'/*/*/*.*3').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }
+               Dir.glob(v_parent_dir_target+'/*/*/*.*4').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }
+               Dir.glob(v_parent_dir_target+'/*/*/*.*5').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }
+               Dir.glob(v_parent_dir_target+'/*/*/*.*6').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }
+               Dir.glob(v_parent_dir_target+'/*/*/*.*7').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }
+               Dir.glob(v_parent_dir_target+'/*/*/*.*8').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }
+               Dir.glob(v_parent_dir_target+'/*/*/*.*9').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                         v_dicom_field_array.each do |dicom_key|
+                                                                                             if !d[dicom_key].nil? 
+                                                                                               d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                         end }
+
+        ####  end                            
+
+ #                             
+ # # #puts "bbbbb dicom clean "+v_parent_dir_target+"/*/"
+ # Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.read(dcm); if !d["0010,0030"].nil? 
+ #                                                                                           d["0010,0030"].value = "DOB"; d.write(dcm) 
+ #                                                                                               end } 
+
+         #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
+         #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
+         v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
+         stdin, stdout, stderr = Open3.popen3(v_call)
+         while !stdout.eof?
+           puts stdout.read 1024    
+          end
+         stdin.close
+         stdout.close
+         stderr.close
+         puts "bbbbbbb "+v_call
+
+         v_call = "rsync -av "+v_target_dir+"/"+v_subject_dir+".tar.gz "+v_final_dir+"upload_helpern_20151125/"
+         stdin, stdout, stderr = Open3.popen3(v_call)
+         while !stdout.eof?
+           puts stdout.read 1024    
+          end
+         stdin.close
+         stdout.close
+         stderr.close
+        puts "bbbbbbb "+v_call
+   
+         v_call = ' rm -rf '+v_target_dir+'/'+v_subject_dir
+            stdin, stdout, stderr = Open3.popen3(v_call)
+            while !stdout.eof?
+              puts stdout.read 1024    
+             end
+            stdin.close
+            stdout.close
+            stderr.close
+        puts "bbbbbbb "+v_call
+
+
+         sql_sent = "update cg_helpern_20151125 set done_flag ='Y' where subjectid ='"+r[0]+"' "
+         results_sent = connection.execute(sql_sent)
+       end
+       v_comment = "end "+r[0]+","+v_comment
+       @schedulerun.comment =v_comment[0..1990]
+       @schedulerun.save 
+     end
+
+     @schedulerun.comment =("successful finish helpern_20151125_upload "+v_comment_warning+" "+v_comment[0..1990])
+     if !v_comment.include?("ERROR")
+        @schedulerun.status_flag ="Y"
+      end
+      @schedulerun.save
+      @schedulerun.end_time = @schedulerun.updated_at      
+      @schedulerun.save          
+
+
+   end
+
+##################################################################
     
  # starting with pet with v1/v2 -- just T1_Volumetric
    def run_hyunwoo_20140520_upload  
