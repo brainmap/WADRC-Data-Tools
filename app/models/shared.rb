@@ -3587,8 +3587,8 @@ puts "AAAAAA "+v_call
       v_stop_file_name = v_process_name+"_stop"
       v_stop_file_path = v_log_base+v_stop_file_name
     connection = ActiveRecord::Base.connection();
-    sql = "insert into cg_xnat (subjectid, enrollment_id, scan_procedure_id, project_1)
-           select distinct e.enumber, e.id, 22,'ADRC'
+    sql = "insert into cg_xnat (subjectid, enrollment_id, scan_procedure_id, project_1,vgroup_id)
+           select distinct e.enumber, e.id, 22,'ADRC',vg.id
               from vgroups vg,appointments a, visits v,  enrollments e, enrollment_vgroup_memberships evgm, scan_procedures_vgroups spvg
               where a.vgroup_id = evgm.vgroup_id
                and a.vgroup_id = spvg.vgroup_id
@@ -8383,12 +8383,12 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       v_comment = "\n"+results.first.to_s+" un-categorized series descriptions \n"+v_comment
       puts "successful finish series_description harvest' "+v_comment[0..1459]
       @schedulerun.comment =("successful finish series_description harvest, starting count harvest' "+v_comment[0..1459])
-
+      # exclduing pfiles
        sql = "select spvg.scan_procedure_id, series_descriptions.id series_description_id, count(ids.id),count(distinct a.vgroup_id)
             from series_descriptions , scan_procedures_vgroups spvg, image_datasets ids, visits v, appointments a,
             vgroups vg
             where a.id = v.appointment_id  and v.id = ids.visit_id  and a.vgroup_id = vg.id
-            and vg.transfer_mri ='yes' and a.appointment_type = 'mri'
+            and vg.transfer_mri ='yes' and a.appointment_type = 'mri' and ids.scanned_file not like 'P%'
             and a.vgroup_id = spvg.vgroup_id and trim(series_descriptions.long_description) = trim(ids.series_description)
             group by spvg.scan_procedure_id, series_description_id"
       results = connection.execute(sql)
