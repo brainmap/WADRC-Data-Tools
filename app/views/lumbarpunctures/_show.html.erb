@@ -17,6 +17,8 @@
        :Appt_Coordinator =>@appointment.appointment_coordinator.blank? ? "" : Employee.find(@appointment.appointment_coordinator).name,
       :Participant => @participant.nil? ? nil : link_to('view participant', @participant),
       :Needle_Size => @lumbarpuncture.needlesize,
+  :LP_Start_Time =>@lumbarpuncture.lpstarttime.nil? ? nil : @lumbarpuncture.lpstarttime.hour.to_s.rjust(2,'0')+":"+@lumbarpuncture.lpstarttime.min.to_s.rjust(2,'0'),
+  :LP_End_Time =>@lumbarpuncture.lpendtime.nil? ? nil : @lumbarpuncture.lpendtime.hour.to_s.rjust(2,'0')+":"+@lumbarpuncture.lpendtime.min.to_s.rjust(2,'0'),
             "24_hr_Followup_Headache" => @lumbarpuncture.followupheadache
     }) %>
   </div>

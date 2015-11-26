@@ -39,7 +39,7 @@ v_yes_no_na_display = [["Yes","yes"], ["No","no"], ["n/a","n/a"]]
     <tr><td nowrap>
       LP Abnormality Found&nbsp;&nbsp;&nbsp;</td><td>
 		<%= f.select :lpabnormality, options_for_select(v_yes_no_display, @lumbarpuncture.lpabnormality),
-							              {:prompt => 'Select if the lumbarpuncture was abnormal'} %></td></tr>
+							              {:prompt => 'Select if the lumbarpuncture was abnormal'} %></td></tr>							              
 </table>
     <p>
 	<p>
@@ -88,6 +88,14 @@ v_yes_no_na_display = [["Yes","yes"], ["No","no"], ["n/a","n/a"]]
 	      	<tr>
       <td><br><%= f.label(:appointment_coordinator) %></td>
       <td><br><%= select(:appointment, :appointment_coordinator, Employee.all.sort_by(&:name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Select Appt Coordinator" }) %></td>
+    </tr>
+    	<tr>
+      <td><%= f.label(:LP_Start_Time) %></td>
+      <td> <%= select_time( @lumbarpuncture.lpstarttime,:field_name =>'lpstartt][', :include_blank => true) %></td>
+    </tr>
+	<tr>
+      <td><%= f.label(:LP_End_Time) %></td>
+      <td> <%= select_time( @lumbarpuncture.lpendtime,:field_name =>'lpendt][', :include_blank => true) %></td>
     </tr>
 <!--
     <tr>

@@ -101,6 +101,24 @@ class LumbarpuncturesController < ApplicationController
   # POST /lumbarpunctures
   # POST /lumbarpunctures.xml
   def create
+            params[:date][:lpstartt][0]="1899"
+             params[:date][:lpstartt][1]="12"
+             params[:date][:lpstartt][2]="30"       
+             lpstarttime = nil
+            if !params[:date][:lpstartt][0].blank? && !params[:date][:lpstartt][1].blank? && !params[:date][:lpstartt][2].blank? && !params[:date][:lpstartt][3].blank? && !params[:date][:lpstartt][4].blank?
+        lpstarttime =  params[:date][:lpstartt][0]+"-"+params[:date][:lpstartt][1]+"-"+params[:date][:lpstartt][2]+" "+params[:date][:lpstartt][3]+":"+params[:date][:lpstartt][4]
+             params[:lumbarpuncture][:lpstarttime] = lpstarttime
+            end
+
+         params[:date][:lpendt][0]="1899"
+         params[:date][:lpendt][1]="12"
+         params[:date][:lpendt][2]="30"       
+          lpendtime = nil
+        if !params[:date][:lpendt][0].blank? && !params[:date][:lpendt][1].blank? && !params[:date][:lpendt][2].blank? && !params[:date][:lpendt][3].blank? && !params[:date][:lpendt][4].blank?
+    lpendtime =  params[:date][:lpendt][0]+"-"+params[:date][:lpendt][1]+"-"+params[:date][:lpendt][2]+" "+params[:date][:lpendt][3]+":"+params[:date][:lpendt][4]
+         params[:lumbarpuncture][:lpendtime] = lpendtime 
+        end
+
      @current_tab = "lumbarpunctures"
      scan_procedure_array = []
      scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
@@ -207,7 +225,24 @@ class LumbarpuncturesController < ApplicationController
         if !params[:appointment]["#{'appointment_date'}(1i)"].blank? && !params[:appointment]["#{'appointment_date'}(2i)"].blank? && !params[:appointment]["#{'appointment_date'}(3i)"].blank?
              appointment_date = params[:appointment]["#{'appointment_date'}(1i)"] +"-"+params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")+"-"+params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
         end
+              params[:date][:lpstartt][0]="1899"
+             params[:date][:lpstartt][1]="12"
+             params[:date][:lpstartt][2]="30"       
+             lpstarttime = nil
+            if !params[:date][:lpstartt][0].blank? && !params[:date][:lpstartt][1].blank? && !params[:date][:lpstartt][2].blank? && !params[:date][:lpstartt][3].blank? && !params[:date][:lpstartt][4].blank?
+        lpstarttime =  params[:date][:lpstartt][0]+"-"+params[:date][:lpstartt][1]+"-"+params[:date][:lpstartt][2]+" "+params[:date][:lpstartt][3]+":"+params[:date][:lpstartt][4]
+             params[:lumbarpuncture][:lpstarttime] = lpstarttime
+            end
 
+         params[:date][:lpendt][0]="1899"
+         params[:date][:lpendt][1]="12"
+         params[:date][:lpendt][2]="30"       
+          lpendtime = nil
+        if !params[:date][:lpendt][0].blank? && !params[:date][:lpendt][1].blank? && !params[:date][:lpendt][2].blank? && !params[:date][:lpendt][3].blank? && !params[:date][:lpendt][4].blank?
+    lpendtime =  params[:date][:lpendt][0]+"-"+params[:date][:lpendt][1]+"-"+params[:date][:lpendt][2]+" "+params[:date][:lpendt][3]+":"+params[:date][:lpendt][4]
+         params[:lumbarpuncture][:lpendtime] = lpendtime
+        end
+        
         # ok to update vitals even if other update fail
         if !params[:vital_id].blank?
           @vital = Vital.find(params[:vital_id])
