@@ -293,6 +293,8 @@ end
             if !params[:date][:mristartt][0].blank? && !params[:date][:mristartt][1].blank? && !params[:date][:mristartt][2].blank? && !params[:date][:mristartt][3].blank? && !params[:date][:mristartt][4].blank?
         mristarttime =  params[:date][:mristartt][0]+"-"+params[:date][:mristartt][1]+"-"+params[:date][:mristartt][2]+" "+params[:date][:mristartt][3]+":"+params[:date][:mristartt][4]
              params[:visit][:mristarttime] = mristarttime
+             params[:visit][:mristarttime_hour] = params[:date][:mristartt][3]
+             params[:visit][:mristarttime_minute] =params[:date][:mristartt][4]
             end
 
          params[:date][:mriendt][0]="1899"
@@ -302,6 +304,8 @@ end
         if !params[:date][:mriendt][0].blank? && !params[:date][:mriendt][1].blank? && !params[:date][:mriendt][2].blank? && !params[:date][:mriendt][3].blank? && !params[:date][:mriendt][4].blank?
     mriendtime =  params[:date][:mriendt][0]+"-"+params[:date][:mriendt][1]+"-"+params[:date][:mriendt][2]+" "+params[:date][:mriendt][3]+":"+params[:date][:mriendt][4]
          params[:visit][:mriendtime] = mriendtime
+         params[:visit][:mriendtime_hour] = params[:date][:mriendt][3]
+        params[:visit][:mriendtime_minute] =params[:date][:mriendt][4]
         end
     @visit = Visit.new(params[:visit])
     @visit.user = current_user
@@ -388,6 +392,8 @@ end
             if !params[:date][:mristartt][0].blank? && !params[:date][:mristartt][1].blank? && !params[:date][:mristartt][2].blank? && !params[:date][:mristartt][3].blank? && !params[:date][:mristartt][4].blank?
         mristarttime =  params[:date][:mristartt][0]+"-"+params[:date][:mristartt][1]+"-"+params[:date][:mristartt][2]+" "+params[:date][:mristartt][3]+":"+params[:date][:mristartt][4]
              params[:visit][:mristarttime] = mristarttime
+             params[:visit][:mristarttime_hour] = params[:date][:mristartt][3]
+             params[:visit][:mristarttime_minute] =params[:date][:mristartt][4]
             end
 
          params[:date][:mriendt][0]="1899"
@@ -397,6 +403,8 @@ end
         if !params[:date][:mriendt][0].blank? && !params[:date][:mriendt][1].blank? && !params[:date][:mriendt][2].blank? && !params[:date][:mriendt][3].blank? && !params[:date][:mriendt][4].blank?
     mriendtime =  params[:date][:mriendt][0]+"-"+params[:date][:mriendt][1]+"-"+params[:date][:mriendt][2]+" "+params[:date][:mriendt][3]+":"+params[:date][:mriendt][4]
          params[:visit][:mriendtime] = mriendtime
+         params[:visit][:mriendtime_hour] = params[:date][:mriendt][3]
+        params[:visit][:mriendtime_minute] =params[:date][:mriendt][4]
         end
 
     # hiding the protocols in checkbox which user not have access to, if any add in to attributes before update
@@ -1182,11 +1190,11 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
              @left_join = [ ] # left join needs to be in sql right after the parent table!!!!!!!
            else
              @html_request ="N"
-             @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path',  'Completed Fast','Fast hrs','Fast min','Mri status','Radiology Outcome','Notes','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt','Appt Note'] # need to look up values
+             @column_headers = ['Date','Protocol','Enumber','RMR','Scan','Path',  'Completed Fast','Fast hrs','Fast min','MRI start Hour', 'MRI start Minute','MRI end Hour', 'MRI end Minute','Mri status','Radiology Outcome','Notes','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt','Appt Note'] # need to look up values
              # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
              @column_number =   @column_headers.size
              @fields =["visits.scan_number","visits.path","CASE visits.completedmrifast WHEN 1 THEN 'Yes' ELSE 'No' end",
-               "visits.mrifasttotaltime","visits.mrifasttotaltime_min","vgroups.transfer_mri","radiology_outcome","visits.notes","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","visits.id"] # vgroups.id vgroup_id always first, include table name
+               "visits.mrifasttotaltime","visits.mrifasttotaltime_min","visits.mristarttime_hour","visits.mristarttime_minute","visits.mriendtime_hour","visits.mriendtime_minute","vgroups.transfer_mri","radiology_outcome","visits.notes","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","visits.id"] # vgroups.id vgroup_id always first, include table name
              @left_join = ["LEFT JOIN vitals on visits.appointment_id = vitals.appointment_id" ] # left join needs to be in sql right after the parent table!!!!!!!
            end
         @tables =['visits'] # trigger joins --- vgroups and appointments by default  

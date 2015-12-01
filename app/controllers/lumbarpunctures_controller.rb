@@ -108,6 +108,9 @@ class LumbarpuncturesController < ApplicationController
             if !params[:date][:lpstartt][0].blank? && !params[:date][:lpstartt][1].blank? && !params[:date][:lpstartt][2].blank? && !params[:date][:lpstartt][3].blank? && !params[:date][:lpstartt][4].blank?
         lpstarttime =  params[:date][:lpstartt][0]+"-"+params[:date][:lpstartt][1]+"-"+params[:date][:lpstartt][2]+" "+params[:date][:lpstartt][3]+":"+params[:date][:lpstartt][4]
              params[:lumbarpuncture][:lpstarttime] = lpstarttime
+             params[:lumbarpuncture][:lpstarttime_hour] = params[:date][:lpstartt][3]
+             params[:lumbarpuncture][:lpstarttime_minute] =params[:date][:lpstartt][4]
+
             end
 
          params[:date][:lpendt][0]="1899"
@@ -117,6 +120,8 @@ class LumbarpuncturesController < ApplicationController
         if !params[:date][:lpendt][0].blank? && !params[:date][:lpendt][1].blank? && !params[:date][:lpendt][2].blank? && !params[:date][:lpendt][3].blank? && !params[:date][:lpendt][4].blank?
     lpendtime =  params[:date][:lpendt][0]+"-"+params[:date][:lpendt][1]+"-"+params[:date][:lpendt][2]+" "+params[:date][:lpendt][3]+":"+params[:date][:lpendt][4]
          params[:lumbarpuncture][:lpendtime] = lpendtime 
+        params[:lumbarpuncture][:lpendtime_hour] = params[:date][:lpendt][3]
+        params[:lumbarpuncture][:lpendtime_minute] =params[:date][:lpendt][4]
         end
 
      @current_tab = "lumbarpunctures"
@@ -232,6 +237,8 @@ class LumbarpuncturesController < ApplicationController
             if !params[:date][:lpstartt][0].blank? && !params[:date][:lpstartt][1].blank? && !params[:date][:lpstartt][2].blank? && !params[:date][:lpstartt][3].blank? && !params[:date][:lpstartt][4].blank?
         lpstarttime =  params[:date][:lpstartt][0]+"-"+params[:date][:lpstartt][1]+"-"+params[:date][:lpstartt][2]+" "+params[:date][:lpstartt][3]+":"+params[:date][:lpstartt][4]
              params[:lumbarpuncture][:lpstarttime] = lpstarttime
+             params[:lumbarpuncture][:lpstarttime_hour] = params[:date][:lpstartt][3]
+             params[:lumbarpuncture][:lpstarttime_minute] =params[:date][:lpstartt][4]
             end
 
          params[:date][:lpendt][0]="1899"
@@ -241,6 +248,8 @@ class LumbarpuncturesController < ApplicationController
         if !params[:date][:lpendt][0].blank? && !params[:date][:lpendt][1].blank? && !params[:date][:lpendt][2].blank? && !params[:date][:lpendt][3].blank? && !params[:date][:lpendt][4].blank?
     lpendtime =  params[:date][:lpendt][0]+"-"+params[:date][:lpendt][1]+"-"+params[:date][:lpendt][2]+" "+params[:date][:lpendt][3]+":"+params[:date][:lpendt][4]
          params[:lumbarpuncture][:lpendtime] = lpendtime
+        params[:lumbarpuncture][:lpendtime_hour] = params[:date][:lpendt][3]
+        params[:lumbarpuncture][:lpendtime_minute] =params[:date][:lpendt][4]
         end
         
         # ok to update vitals even if other update fail
@@ -567,13 +576,13 @@ class LumbarpuncturesController < ApplicationController
           @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
         else
               @html_request ="N"
-              @column_headers = ['Date','Protocol','Enumber','RMR','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','LP status','24hr Headache','Needle Size','LP Note','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt', 'Appt Note'] # need to look up values
+              @column_headers = ['Date','Protocol','Enumber','RMR','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','LP status','24hr Headache','Needle Size','LP start Hour', 'LP start Minute','LP end Hour', 'LP end Minute','LP Note','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt', 'Appt Note'] # need to look up values
               # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
               @column_number =   @column_headers.size
               @fields =["CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'Yes' ELSE 'No' end ","CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'Yes' ELSE 'No' end" ,"lumbarpunctures.lpfollownote",
                  "concat(employees.first_name,' ',employees.last_name)",
                 "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'Yes' ELSE 'No' end",
-                "lumbarpunctures.lpfasttotaltime","lumbarpunctures.lpfasttotaltime_min","vgroups.completedlumbarpuncture","lumbarpunctures.followupheadache","lumbarpunctures.needlesize","lumbarpunctures.lumbarpuncture_note","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
+                "lumbarpunctures.lpfasttotaltime","lumbarpunctures.lpfasttotaltime_min","vgroups.completedlumbarpuncture","lumbarpunctures.followupheadache","lumbarpunctures.needlesize","lumbarpunctures.lpstarttime_hour","lumbarpunctures.lpstarttime_minute","lumbarpunctures.lpendtime_hour","lumbarpunctures.lpendtime_minute","lumbarpunctures.lumbarpuncture_note","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
               @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id",
                             "LEFT JOIN vitals on lumbarpunctures.appointment_id = vitals.appointment_id"] # left join needs to be in sql right after the parent table!!!!!!!
         end
