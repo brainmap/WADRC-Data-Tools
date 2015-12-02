@@ -115,8 +115,14 @@ If the enumber is not already associated with a participant, add the enumber bel
 		<%= e.label :enumber %>
 		<%= e.check_box :_destroy unless e.object.new_record?  %>
 		<%= e.label :_destroy, "Remove?" unless e.object.new_record? %>
-		<%= e.text_field_with_auto_complete :enumber, {},
-			        { :method => :get, :url => enrollments_path(:format => :js), :param_name => 'search' } %>
+
+    <% if e.object.new_record? %>
+      <%= e.text_field_with_auto_complete :enumber, {},
+                { :method => :get, :url => enrollments_path(:format => :js), :param_name => 'search' } %>
+    <%else%>
+                 <%= e.object.enumber %>
+                <%= e.hidden_field :enumber %>
+     <%end%>
 	</p>
 	<%    v_cnt = v_cnt + 1
 	   end %>
