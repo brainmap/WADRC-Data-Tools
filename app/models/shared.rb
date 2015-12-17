@@ -3618,9 +3618,14 @@ puts "AAAAAA "+v_call
     sql = "update cg_xnat_exportid set cg_xnat_exportid.export_id = ( select cg_random.export_id 
                  from cg_random where cg_random.id = cg_xnat_exportid.id)"
          results = connection.execute(sql)
+    sql ="update cg_xnat set cg_xnat.participant_id = ( select distinct e.participant_id
+              from  enrollments e where  e.id = cg_xnat.enrollment_id)"
+    results = connection.execute(sql)
+    # what if participant_id is null?
      sql ="update cg_xnat set cg_xnat.export_id = ( select distinct cg_xnat_exportid.export_id 
               from cg_xnat_exportid, enrollments e where cg_xnat_exportid.participant_id= e.participant_id
-               and e.id = cg_xnat.enrollment_id)"
+               and e.id = cg_xnat.enrollment_id)
+           where cg_xnat.participant_id is not null"
     results = connection.execute(sql)
 
     t_now = Time.now
@@ -3653,7 +3658,7 @@ puts "AAAAAA "+v_call
         # LIMITING TO ADRC
         v_enrollments = Enrollment.where("enumber like 'adrc%'").where("enrollments.id in (select enrollment_id from enrollment_vgroup_memberships where vgroup_id in (?))",r[0])
         v_enrollment = v_enrollments[0]
-        sql_exportid = "select cg_xnat.export_id from cg_xnat where participant_id = "+v_enrollment.id.to_s
+        sql_exportid = "select cg_xnat.export_id from cg_xnat where enrollment_id = "+v_enrollment.id.to_s
         results_exportid = connection.execute(sql_exportid)
         v_export_id = results_exportid.first[0]
 
@@ -3666,8 +3671,7 @@ puts "AAAAAA "+v_call
         end
         v_vgroup_start ="<vgroup>\n\t<internal_cnt>"+v_cnt.to_s+"</internal_cnt>\n"
         v_vgroup_stop ="</vgroup>"
-        v_string_participant_start="\t<participant>\n\t\t<panda_participant_id>"+v_participant.id.to_s+"</panda_participant_id>\n\t\t<subjectid_adrc>"+v_enrollment.enumber+"</subjectid_adrc>\n\t\t<reggieid>"+v_participant.reggieid.to_s+"</reggieid>\n\t\t<gender>"+v_gender+"</gender>\n\t\t<apoe_e1>"+v_participant.apoe_e1.to_s+"</apoe_e1>\n\t\t<apoe_e2>"+v_participant.apoe_e2.to_s+"</apoe_e2><export_id>"+nt = Participant.find(r[1])
-        +"</export_id>"
+        v_string_participant_start="\t<participant>\n\t\t<panda_participant_id>"+v_participant.id.to_s+"</panda_participant_id>\n\t\t<subjectid_adrc>"+v_enrollment.enumber+"</subjectid_adrc>\n\t\t<reggieid>"+v_participant.reggieid.to_s+"</reggieid>\n\t\t<gender>"+v_gender+"</gender>\n\t\t<apoe_e1>"+v_participant.apoe_e1.to_s+"</apoe_e1>\n\t\t<apoe_e2>"+v_participant.apoe_e2.to_s+"</apoe_e2><export_id>"+v_export_id.to_s+"</export_id>"
         v_string_participant_stop = "\n\t</participant>"
         f.write(v_vgroup_start)
         f.write(v_string_participant_start+"\n")
@@ -6404,13 +6408,15 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
        stdin.close
        stdout.close
        stderr.close
+       # 'T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1',
+       #HYDI
        sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_types.series_description_type 
                    from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                    where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                    and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
                    and image_datasets.series_description =   series_description_maps.series_description
                    and series_description_maps.series_description_type_id = series_description_types.id
-                   and series_description_types.series_description_type in ('HYDI') 
+                   and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1') 
                    and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")+"')
                    and vgroups.id in (select spvg.vgroup_id from scan_procedures_vgroups spvg  where spvg.scan_procedure_id ='"+r[1].to_s+"')
                     order by appointments.appointment_date "
