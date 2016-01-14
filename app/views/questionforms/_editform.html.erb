@@ -300,7 +300,7 @@
 		<%  end %>		
 	  <% end %>
 	  <%if !@question.phrase_c_1.blank? %>
-		<%=  @question.phrase_c_1 %>  
+		<%=  @question.phrase_c_1.try(:html_safe) %>  
 	  <% end %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	  <%if !@question.heading_2.blank? %>
@@ -444,7 +444,7 @@
 			<%  end %>
 		  <% end %>	
 	  <%if !@question.phrase_c_2.blank? %>
-		<%=  @question.phrase_c_2 %>  
+		<%=  @question.phrase_c_2.try(:html_safe) %>  
 	  <% end %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	  <%if !@question.heading_3.blank? %>
@@ -588,7 +588,7 @@
 			<%  end %>
 		  <% end %>		
 	  <%if !@question.phrase_c_3.blank? %>
-		<%=  @question.phrase_c_3 %>  
+		<%=  @question.phrase_c_3.try(:html_safe) %>  
 	  <% end %>	  
 	</td></tr>	
 	<% end %>
