@@ -81,7 +81,7 @@ GEM
     mail (2.5.4)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
-    metamri (0.2.22)
+    metamri (0.2.24)
       activeresource (~> 3.0)
       dicom (~> 0.9.5)
       hirb (~> 0.4)
@@ -193,7 +193,7 @@ DEPENDENCIES
   json
   kaminari
   launchy
-  metamri (~> 0.2.21)
+  metamri (~> 0.2.24)
   mysql2
   open4
   paperclip (~> 2.3.8)
