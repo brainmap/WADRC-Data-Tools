@@ -53,7 +53,7 @@ class ParticipantsController < ApplicationController
                     and vgroups.participant_id in (?) and scan_procedures_vgroups.scan_procedure_id in (?)) ", params[:id],scan_procedure_array)
      if(@participants.blank?)
          @participants = Participant.where("participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
-           where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?))",scan_procedure_array)
+           where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?)))",scan_procedure_array)
      end
      # problems if no vgroup or enumber -- no way to link to scan procedure and access control
      @participant = @participants.find(params[:id])
