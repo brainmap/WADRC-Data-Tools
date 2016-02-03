@@ -570,7 +570,7 @@ class LumbarpuncturesController < ApplicationController
           @column_headers = ['Date','Protocol','Enumber','RMR','LP status','LP abnormality','LP success','LP followup','Completed Fast','24hr Headache','Needle Size','LP Note', 'Appt Note'] # need to look up values
           # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
           @column_number =   @column_headers.size
-          @fields =["vgroups.completedlumbarpuncture", "CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'yes' ELSE 'no' end" ,"CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'yes' ELSE 'no' end ","lumbarpunctures.lpfollownote",
+          @fields =["vgroups.completedlumbarpuncture", "CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'yes' ELSE 'no' end" ,"CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'yes' WHEN 2 THEN 'unk' ELSE 'no' end ","lumbarpunctures.lpfollownote",
             "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'yes' ELSE 'no' end","lumbarpunctures.followupheadache","lumbarpunctures.needlesize",
             "lumbarpunctures.lumbarpuncture_note","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
           @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
@@ -579,7 +579,7 @@ class LumbarpuncturesController < ApplicationController
               @column_headers = ['Date','Protocol','Enumber','RMR','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','LP status','24hr Headache','Needle Size','LP start Hour', 'LP start Minute','LP end Hour', 'LP end Minute','LP Note','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt', 'Appt Note'] # need to look up values
               # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
               @column_number =   @column_headers.size
-              @fields =["CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'Yes' ELSE 'No' end ","CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'Yes' ELSE 'No' end" ,"lumbarpunctures.lpfollownote",
+              @fields =["CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'Yes' WHEN 2 THEN 'unk' ELSE 'No' end ","CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'Yes' ELSE 'No' end" ,"lumbarpunctures.lpfollownote",
                  "concat(employees.first_name,' ',employees.last_name)",
                 "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'Yes' ELSE 'No' end",
                 "lumbarpunctures.lpfasttotaltime","lumbarpunctures.lpfasttotaltime_min","vgroups.completedlumbarpuncture","lumbarpunctures.followupheadache","lumbarpunctures.needlesize","lumbarpunctures.lpstarttime_hour","lumbarpunctures.lpstarttime_minute","lumbarpunctures.lpendtime_hour","lumbarpunctures.lpendtime_minute","lumbarpunctures.lumbarpuncture_note","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name

@@ -10,7 +10,7 @@
       :MD_for_Lumbarpuncture => @lumbarpuncture.lp_exam_md_id.nil? ? nil : Employee.find(@lumbarpuncture.lp_exam_md_id).name,
       :LP_Fast_Completed => @lumbarpuncture.completedlpfast == 1 ? "Yes" : "No",
 	  :LP_Fast_Total_Time => @lumbarpuncture.lpfasttotaltime.nil?  ? @lumbarpuncture.lpfasttotaltime_min.nil? ? nil : @lumbarpuncture.lpfasttotaltime.to_s+" hrs : "+@lumbarpuncture.lpfasttotaltime_min.to_s+" mins" :  @lumbarpuncture.lpfasttotaltime.to_s+" hrs : "+@lumbarpuncture.lpfasttotaltime_min.to_s+" mins" ,
-      :LP_Successful => @lumbarpuncture.lpsuccess == 1 ? "Yes" : "No",
+      :LP_Successful => @lumbarpuncture.lpsuccess == 1 ? "Yes" : @lumbarpuncture.lpsuccess == 0 ? "No" : "Unknown",
       :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
       :RMR_Number => @vgroup.rmr,
       :LP_Abnormality_Found =>  @lumbarpuncture.lpabnormality == 1 ? "Yes" : "No" ,

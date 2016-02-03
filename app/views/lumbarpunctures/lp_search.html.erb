@@ -117,7 +117,7 @@ edit_count =   edit_count -1
 	    <% elsif i == 5  %>
 	     <%= show_bool(result[i].to_s ) %>
 	    <% elsif i == 6 %>
-	     <%= show_bool(result[i].to_s ) %>
+	     <%= show_bool_unk(result[i].to_s ) %>
 	    <% elsif i == 7 %>
 	      <td><%= popup_note('peek', key_val_table('path_popup', { :LPFollowup => result[i].to_s })) unless result[i].to_s.blank? %></td>
 	    <% elsif i == 8 %>

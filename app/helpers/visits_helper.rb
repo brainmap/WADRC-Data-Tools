@@ -13,6 +13,22 @@ module VisitsHelper
     return html.html_safe
   end
   
+    def show_bool_unk(field)
+    html = case field
+    when "yes" then
+      "<td style='background-color: #bbffbb; min-width: 1.5em; max-width: 3em;'>yes</td>"
+    when "no" then 
+      "<td style='background-color: #cccccc; min-width: 1.5em; max-width: 3em;'>no</td>"
+    when "unk" then 
+      "<td style='background-color: #cccccc; min-width: 1.5em; max-width: 3em;'>unk</td>"
+    when "n/a" then
+      "<td style='background-color: #ffbbbb; min-width: 1.5em; max-width: 3em;'>n/a</td>"
+    else 
+      "<td>#{field}</td>"
+    end
+    return html.html_safe
+  end 
+
   def show_bool_cell_color(field)
     html = case field
     when "yes" then
