@@ -4,6 +4,10 @@ require 'net/ssh'
 require 'net/sftp'
 require 'open3'
 require 'metamri'
+#require 'net/http'
+#require 'net/https'
+#require 'net/http/post/multipart'
+#require 'json'  
 
 class Shared  < ActionController::Base
   extend SharedHelper
@@ -1126,7 +1130,8 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
        end
       stdin.close
       stdout.close
-      stderr.close   
+      stderr.close 
+      # T2 ==> ?EpiT2* ????  
       sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_types.series_description_type 
                   from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
@@ -1190,7 +1195,7 @@ puts "AAAAAA "+v_call
       sql_status = "select status_flag from cg_adrc_upload where subjectid ='"+r[0]+"'"
       results_status = connection.execute(sql_status)
       # changing from 4 to 3 - DTI not going anymore
-      if v_scan_desc_type_array.size < 3   and (results_status.first)[0] != "R"
+      if v_scan_desc_type_array.size < 2   and (results_status.first)[0] != "R"
     puts "bbbbb !R or not enough scan types "
         sql_dirlist = "update cg_adrc_upload set general_comment =' NOT ALL SCAN TYPES!!!! "+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
         results_dirlist = connection.execute(sql_dirlist)
@@ -1535,12 +1540,70 @@ if File.directory?(@visit_directory_to_scan)
 end
 end
 
+def fetch_cookie
 
-# can get non-controlled page
+puts "in fetch_cookie"
+  # Booked API: Authentication (POST )
+
+  begin
+    uri = URI('https://full_path')
+    uri_str = 'index page'
+
+   puts uri.host
+   puts uri.port
+     
+   #puts Net::HTTP.get_response(URI('https:/booked.dom.wisc.edu/booked/Web/')).body
+
+    @http=Net::HTTP.new(uri.host, 443)
+    @http.use_ssl = true
+    @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+@http.start() {|http|
+req = Net::HTTP::Get.new('index page')
+
+# CONNECTING BUT NOT LOGGING IN
+req.basic_auth 'email', 'password'
+#req.set_form_data({'email' => 'testuser', 'password' => 'grA3W8!fg0'})
+req.set_form_data( {
+      'email' => 'test',
+      'password' => ,
+      'language' => 'en_us',
+      'login' => 'submit',
+      'resume' => '',
+   })
+
+v_net_response = http.request(req)
+ @response = v_net_response.body
+}
+ doc = Hpricot(@response)
+ doc_string = doc.to_s
+ puts doc_string
+
+puts "next try"
+    # Create client
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    data = {
+      'email' => 'test',
+      'password' => ,
+      'language' => 'en_us',
+      'login' => 'submit',
+      'resume' => '',
+   }
+   body = URI.encode_www_form(data)
+       # Create Request
+    ####req =  Net::HTTP::Post.new(uri) 
+    #HTTP Request failed (undefined method `empty?' for #<URI::HTTPS:0x007fbc9ed04780>)
+
+  rescue StandardError => e
+    puts "HTTP Request failed (#{e.message})"
+  end 
+end
+
 # not logging in email/password   field names
 def run_booked_disconnect_tracker
-   v_booked_user =  '' #Shared.booked_disconnect_user
-   v_booked_pwd = '' # Shared.booked_disconnect_pwd
+   v_booked_user =  'testuser' #Shared.booked_disconnect_user
+   v_booked_pwd =  # Shared.booked_disconnect_pwd
    v_booked_address_base = 'url'  #enter page' #Shared.booked_address_page
    v_booked_address_page = 'page'  #enter address' #Shared.booked_address_base
 
@@ -1549,22 +1612,31 @@ def run_booked_disconnect_tracker
       @schedulerun.schedule_id = @schedule.id
       @schedulerun.comment ="starting batch_visit_import"
       @schedulerun.save
+puts " before fetch_cookie"
+fetch_cookie
 
-@http=Net::HTTP.new(v_booked_address_base, 443)
-@http.use_ssl = true
-@http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-@http.start() {|http|
-req = Net::HTTP::Get.new(v_booked_address_page)
-req.basic_auth v_booked_user, v_booked_pwd
-req.set_form_data({'username' => 'email', 'password' => 'password'})
-v_net_response = http.request(req)
- @response = v_net_response.body
-}
+
+#result = fetch_data(fetch_cookie)
+#result_hash = JSON.parse(result.body) 
+
+
+
+
+##@http=Net::HTTP.new(v_booked_address_base, 443)
+##@http.use_ssl = true
+##@http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+##@http.start() {|http|
+##req = Net::HTTP::Get.new(v_booked_address_page)
+##req.basic_auth v_booked_user, v_booked_pwd
+##req.set_form_data({'username' => 'email', 'password' => 'password'})
+##v_net_response = http.request(req)
+## @response = v_net_response.body
+##}
 #form name="login"
      # booked 
-   #url = URI.parse("https://booked.medicine.wisc.edu/booked/Web/index.php")
+   #url = URI.parse("https://full_path")
    #req = Net::HTTP::Post.new(url.path)
-   #req.basic_auth 'testuser' ,v_booked_pwd
+   #req.basic_auth 'test' ,v_booked_pwd
     #req.set_form_data({'email' => v_booked_user, 'password' => 'v_booked_pwd})
   #  sock = Net::HTTP.new(url.host, url.port)
   #  sock.use_ssl = true
@@ -1574,9 +1646,9 @@ v_net_response = http.request(req)
 #    }
 
 
- doc = Hpricot(@response)
- doc_string = doc.to_s
- puts doc_string
+ ##doc = Hpricot(@response)
+ ##doc_string = doc.to_s
+ ##puts doc_string
  #@schedulerun.comment = doc_string
  @schedulerun.save
 
