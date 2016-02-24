@@ -1229,6 +1229,14 @@ puts "AAAAAA "+v_call
 
         sql_dirlist = "update cg_adrc_upload set dir_list ='"+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
         results_dirlist = connection.execute(sql_dirlist)
+        File.delete(v_parent_dir_target+'/*.yaml')
+        File.delete(v_parent_dir_target+'/*/*.yaml')
+        File.delete(v_parent_dir_target+'/*/*/*.yaml')
+        File.delete(v_parent_dir_target+'/*/*/*/*.yaml')
+        File.delete(v_parent_dir_target+'/*.json')
+        File.delete(v_parent_dir_target+'/*/*.json')
+        File.delete(v_parent_dir_target+'/*/*/*.json')
+        File.delete(v_parent_dir_target+'/*/*/*/*.json')
 # TURN INTO A LOOP
         v_dicom_field_array =['0010,0030','0010,0010','0008,0050','0008,1030','0010,0020','0040,0254','0008,0080','0008,1010','0009,1002','0009,1030','0018,1000',
                         '0025,101A','0040,0242','0040,0243']
@@ -1539,120 +1547,6 @@ if File.directory?(@visit_directory_to_scan)
     @schedulerun.save
 end
 end
-
-def fetch_cookie
-
-puts "in fetch_cookie"
-  # Booked API: Authentication (POST )
-
-  begin
-    uri = URI('https://full_path')
-    uri_str = 'index page'
-
-   puts uri.host
-   puts uri.port
-     
-   #puts Net::HTTP.get_response(URI('https:/booked.dom.wisc.edu/booked/Web/')).body
-
-    @http=Net::HTTP.new(uri.host, 443)
-    @http.use_ssl = true
-    @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-@http.start() {|http|
-req = Net::HTTP::Get.new('index page')
-
-# CONNECTING BUT NOT LOGGING IN
-req.basic_auth 'email', 'password'
-#req.set_form_data({'email' => 'testuser', 'password' => 'grA3W8!fg0'})
-req.set_form_data( {
-      'email' => 'test',
-      'password' => ,
-      'language' => 'en_us',
-      'login' => 'submit',
-      'resume' => '',
-   })
-
-v_net_response = http.request(req)
- @response = v_net_response.body
-}
- doc = Hpricot(@response)
- doc_string = doc.to_s
- puts doc_string
-
-puts "next try"
-    # Create client
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    data = {
-      'email' => 'test',
-      'password' => ,
-      'language' => 'en_us',
-      'login' => 'submit',
-      'resume' => '',
-   }
-   body = URI.encode_www_form(data)
-       # Create Request
-    ####req =  Net::HTTP::Post.new(uri) 
-    #HTTP Request failed (undefined method `empty?' for #<URI::HTTPS:0x007fbc9ed04780>)
-
-  rescue StandardError => e
-    puts "HTTP Request failed (#{e.message})"
-  end 
-end
-
-# not logging in email/password   field names
-def run_booked_disconnect_tracker
-   v_booked_user =  'testuser' #Shared.booked_disconnect_user
-   v_booked_pwd =  # Shared.booked_disconnect_pwd
-   v_booked_address_base = 'url'  #enter page' #Shared.booked_address_page
-   v_booked_address_page = 'page'  #enter address' #Shared.booked_address_base
-
-        @schedule = Schedule.where("name in ('booked_disconnect_tracker')").first
-      @schedulerun = Schedulerun.new
-      @schedulerun.schedule_id = @schedule.id
-      @schedulerun.comment ="starting batch_visit_import"
-      @schedulerun.save
-puts " before fetch_cookie"
-fetch_cookie
-
-
-#result = fetch_data(fetch_cookie)
-#result_hash = JSON.parse(result.body) 
-
-
-
-
-##@http=Net::HTTP.new(v_booked_address_base, 443)
-##@http.use_ssl = true
-##@http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-##@http.start() {|http|
-##req = Net::HTTP::Get.new(v_booked_address_page)
-##req.basic_auth v_booked_user, v_booked_pwd
-##req.set_form_data({'username' => 'email', 'password' => 'password'})
-##v_net_response = http.request(req)
-## @response = v_net_response.body
-##}
-#form name="login"
-     # booked 
-   #url = URI.parse("https://full_path")
-   #req = Net::HTTP::Post.new(url.path)
-   #req.basic_auth 'test' ,v_booked_pwd
-    #req.set_form_data({'email' => v_booked_user, 'password' => 'v_booked_pwd})
-  #  sock = Net::HTTP.new(url.host, url.port)
-  #  sock.use_ssl = true
-  #  res = sock.start {|http| http.request(req) 
-#v_net_response = http.request(req)
-# @response = v_net_response.body
-#    }
-
-
- ##doc = Hpricot(@response)
- ##doc_string = doc.to_s
- ##puts doc_string
- #@schedulerun.comment = doc_string
- @schedulerun.save
-
-end
    # backs up all the updates to all the question related tables
    # backup table need to be altered if the source tables are altered
   def run_change_log
@@ -1888,6 +1782,563 @@ end
     @schedulerun.end_time = @schedulerun.updated_at      
     @schedulerun.save
     
+  end
+
+    
+  def run_generic_upload   # CHNAGE _STATUS_FLAG = Y !!!!!!!
+    v_base_path = Shared.get_base_path()
+     @schedule = Schedule.where("name in ('generic_upload')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting generic_upload"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning ="" 
+     v_weeks_back = "2"  # cwant to give time for quality checks etc. 
+    connection = ActiveRecord::Base.connection();
+    # get from cg_generic_upload_config 
+     v_wisc_siteid ="wisc" 
+     v_scan_procedure_exclude =   [8,21,28,31,34,53,64,55,56,57,22,65,64,67,47,12,16]
+     v_scan_procedures = [4,29,27,14,15,19,24,36,35,20,26,41,16,11,37,38,39,58,66]  
+     v_pet_tracer_array = [1,2]  
+     v_scan_type_limit = 1 
+     v_series_desc_array =['T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','DTI','resting_fMRI'] # just t1,'T2','T2 Flair','T2_Flair','T2+Flair','ASL']
+     v_series_desc_nii_hash = {'nothing'=>"Y"}    #{ 'T1 Volumetic'=>"Y",'T1 Volumetric'=>"Y",'T1+Volumetric'=>"Y",'T1_Volumetric'=>"Y",'T1'=>"Y"} 
+     # doing recruitment outside this function
+     v_generic_participant_tn = "cg_apoewrap_participants"
+     v_generic_upload_tn = "cg_apoewrap_upload"  
+     v_machine ="merida" 
+     # MAKE SURE panda_user is member of rvm group on machine 
+     # sudo usermod -G rvm panda_user 
+     v_run_status_flag = "R"
+     v_generic_target_path = "/home/panda_user/upload_apoewrap/merida/" 
+     v_generic_tmp_target_path = "/tmp/upload_apoewrap"
+
+      #SFTP AND RM FLAGS   -- user name/password from helper
+    # get from cg_generic_upload_config 
+          sql = "select distinct value_group from cg_generic_upload_config where status_flag='Y'  and variable_name ='value_group'"  
+     results = connection.execute(sql)  
+     v_value_group = results.first[0]
+    puts "value_group ="+v_value_group
+    sql = "select variable_name, variable_value from cg_generic_upload_config where status_flag ='Y' and value_group ='"+v_value_group+"'"
+     results = connection.execute(sql)
+     results.each do |r|
+puts " "+r[0]+"  ="+r[1]
+        if(r[0] == "machine") # MAKE SURE IT PANDA_USER OIS MEMBER OF rvm GROUP
+            v_machine =r[1]
+        elsif(r[0] == "run_status_flag")
+
+           v_run_status_flag =r[1]
+           puts " v_run_status_flag="+v_run_status_flag
+        elsif(r[0] == "generic_target_path")
+           v_generic_target_path =r[1]
+        elsif(r[0] == "generic_tmp_target_path")
+           v_generic_tmp_target_path =r[1]
+        elsif(r[0] == "generic_upload_tn")
+           v_generic_upload_tn =r[1]
+        elsif(r[0] == "generic_participant_tn")
+              v_generic_participant_tn =r[1]  
+        elsif(r[0] == "wisc_siteid")
+            v_wisc_siteid =r[1] 
+        elsif(r[0] == "scan_procedure_exclude")
+            v_scan_procedure_exclude =r[1].split(",").map { |s| s.to_i }  
+        elsif(r[0] == "scan_procedures")
+            v_scan_procedures =r[1].split(",").map { |s| s.to_i }
+        elsif(r[0] == "pet_tracer")
+            v_pet_tracer_array =r[1].split(",").map { |s| s.to_i }
+        elsif(r[0] == "scan_type_limit")
+             v_scan_type_limit =r[1] 
+        elsif(r[0] == "series_desc_array")
+             v_series_desc_array =r[1].split(",")
+        end
+     end
+
+    v_folder_array = Array.new
+    v_scan_desc_type_array = Array.new
+    # check for dir in /tmp   # still like doing thgings in /tmp, then rsync and rm 
+    v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "cd /tmp; mkdir  '+v_generic_tmp_target_path+'"'
+    stdin, stdout, stderr = Open3.popen3(v_call)
+    while !stdout.eof?
+      puts stdout.read 1024    
+     end
+    stdin.close
+    stdout.close
+    stderr.close
+ 
+     #PET
+    sql = "select distinct vgroup_id,export_id,enumbers from "+v_generic_upload_tn+" where pet_sent_flag ='N' and pet_status_flag in ('"+v_run_status_flag+"')
+            and  vgroup_id in  ( select vg.id from vgroups vg,appointments a, petscans pet  
+                         where transfer_pet ='yes' and vg.id = a.vgroup_id and a.id = pet.appointment_id and pet.lookup_pettracer_id in ("+v_pet_tracer_array.join(",")+"))" # ('Y','R') "
+    results = connection.execute(sql)
+
+    v_comment = " :list of vgroupids"+v_comment
+    results.each do |r|
+      v_comment = r[0].to_s+","+v_comment
+    end
+    @schedulerun.comment =v_comment[0..1990]
+    @schedulerun.save
+    results.each do |r|
+      v_vgroup_id = r[0].to_s
+      v_export_id = v_wisc_siteid+r[1].to_s.rjust(6,padstr='0')
+      v_comment = "strt "+v_vgroup_id+","+v_comment
+      @schedulerun.comment =v_comment[0..1990]
+      @schedulerun.save
+      # update schedulerun comment - prepend 
+    
+      sql_vgroup = "select round((DATEDIFF(max(v.vgroup_date),p.dob)/365.25),2) from vgroups v, participants p where 
+                 v.participant_id = p.id
+                and v.id = "+v_vgroup_id+" and v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
+                                                            evm.enrollment_id = e.id and  e.do_not_share_scans_flag ='N')"
+      results_vgroup = connection.execute(sql_vgroup)
+      # mkdir /tmp/padi_upload/[subjectid]_YYYYMMDD_wisc
+      v_age = (results_vgroup.first)[0].to_s
+      v_subject_dir = v_export_id+"_"+v_age.gsub(/\./,"")+"_pet"
+      v_parent_dir_target =v_generic_tmp_target_path+"/"+v_subject_dir
+      v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "cd '+v_generic_tmp_target_path+'; mkdir  '+v_subject_dir+'"' 
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close 
+      sql_pet = "select distinct appointments.appointment_date, petscans.id petscan_id, petfiles.id petfile_id, lookup_pettracers.name, petfiles.path,petscans.lookup_pettracer_id
+                  from vgroups , appointments, petscans, lookup_pettracers, petfiles  
+                  where vgroups.transfer_pet = 'yes' and vgroups.id = appointments.vgroup_id 
+                  and appointments.id = petscans.appointment_id and petscans.id = petfiles.petscan_id
+                  and petscans.lookup_pettracer_id = lookup_pettracers.id
+                  and petscans.lookup_pettracer_id in ("+v_pet_tracer_array.join(",")+") 
+                  and vgroups.id  = "+v_vgroup_id+" 
+                   order by appointments.appointment_date "
+      results_pet = connection.execute(sql_pet)
+      v_folder_array = [] # how to empty
+      v_tracer_array = []
+      v_cnt = 1
+      results_pet.each do |r_dataset|
+        v_subject_id = ""
+         v_tracer = r_dataset[3].gsub(/ /,"_").gsub(/\[/,"_").gsub(/\]/,"_")
+          if !v_tracer_array.include?(v_tracer)
+                 v_tracer_array.push(v_tracer)
+          end
+         v_petfile_path = r_dataset[4]
+         v_petfile_name = (r_dataset[4].split("/")).last
+         v_pettracer_id = r_dataset[5]
+         #/mounts/data/raw/johnson.pipr.visit1/pet/pipr00001_2ef_c95_de11.v
+         v_enumbers_array = r[2].split(",")
+         v_enumbers_array.each do |e|
+               v_subject_id = e
+               v_petfile_name = v_petfile_name.gsub(v_subject_id,v_export_id )
+         end
+          if  v_pet_tracer_array.include? v_pettracer_id
+            v_petfile_target_name = v_tracer+"_"+v_petfile_name
+            v_call ='ssh panda_user@'+v_machine+'.dom.wisc.edu " rsync -av '+v_petfile_path+' '+v_parent_dir_target+'/'+v_petfile_target_name+' "'             
+            puts("this petid= "+v_pettracer_id.to_s )
+            stdin, stdout, stderr = Open3.popen3(v_call)
+            stderr.each {|line|
+               puts line
+            }
+            while !stdout.eof?
+                 puts stdout.read 1024    
+            end
+            stdin.close
+            stdout.close
+            stderr.close
+          end
+       end
+
+         v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "rsync -av '+v_parent_dir_target+'  '+v_generic_target_path+'"'    #+v_subject_dir
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+#UP TO HERE                                                                          
+        #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
+        #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
+        #v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
+        ## switch to zop for xnat 
+        ## v_call =  'ssh panda_user@'+v_machine+'.dom.wisc.edu "  tar  -C /home/panda_user/upload_padi  -zcf /home/panda_user/upload_padi/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
+
+        #v_call =  'ssh panda_user@'+v_machine+'.dom.wisc.edu " cd '+v_generic_target_path+'; zip -r '+v_subject_dir+'.zip '+v_subject_dir+'  "  '      
+        v_call =  'ssh panda_user@'+v_machine+'.dom.wisc.edu " cd '+v_generic_target_path+'; /bin/tar -zcf '+v_subject_dir+'.tar.gz '+v_subject_dir+'/  "  '      
+    stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+        puts "bbbbbbb "+v_call
+
+        v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "  rm -rf '+v_generic_tmp_target_path+'/'+v_subject_dir+'"'
+           stdin, stdout, stderr = Open3.popen3(v_call)
+           while !stdout.eof?
+             puts stdout.read 1024    
+            end
+           stdin.close
+           stdout.close
+           stderr.close
+        # 
+        v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "  rm -rf '+v_generic_target_path+'/'+v_subject_dir+'"' 
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+       
+        
+         # did the tar.gz on merida to avoid mac acl PaxHeader extra directories
+         # not need this? 
+         # could change sftp to come from ~/upload_padi
+ #        v_call = "rsync -av panda_user@"+v_machine+".dom.wisc.edu:/home/panda_user/upload_padi/"+v_subject_dir+".zip "+v_target_dir+'/'+v_subject_dir+".zip"
+ #        stdin, stdout, stderr = Open3.popen3(v_call)
+ #        while !stdout.eof?
+ #          puts stdout.read 1024    
+ #         end
+ #        stdin.close
+ #        stdout.close
+ #        stderr.close
+
+####        # sftp -- shared helper hasthe username /password and address
+####        v_username = Shared.padi_sftp_username # get from shared helper
+####        v_passwrd = Shared.padi_sftp_password   # get from shared helperwhich is not on github
+####        v_ip = Shared.padi_sftp_host_address # get from shared helper
+       # v_source = v_target_dir+'/'+v_subject_dir+".zip"
+       # v_target = v_subject_dir+".zip"
+
+ 
+
+####        Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
+####            sftp.upload!(v_source, v_target)
+####        end
+# WANT TO CHECK TRANSFERS
+ #       v_call = " rm -rf "+v_target_dir+'/'+v_subject_dir+".zip"
+ #       stdin, stdout, stderr = Open3.popen3(v_call)
+ #       while !stdout.eof?
+ #         puts stdout.read 1024    
+ #        end
+ #       stdin.close
+ #       stdout.close
+ #       stderr.close        
+        
+        sql_sent = "update "+v_generic_upload_tn+" set pet_sent_flag ='Y' where vgroup_id ='"+r[0].to_s+"'  "
+        results_sent = connection.execute(sql_sent)   
+
+    end   
+#MRI start
+    # get  subjectid to upload    # USING v_run_status_flag AS LIMIT FOR EACH RUN
+    #MRI  switching to appointment
+    sql = "select distinct "+v_generic_upload_tn+".vgroup_id,export_id,appointments.id from "+v_generic_upload_tn+",appointments 
+     where appointments.vgroup_id = "+v_generic_upload_tn+".vgroup_id and
+            appointments.appointment_type = 'mri'
+            and    mri_sent_flag ='N' and mri_status_flag in ('"+v_run_status_flag+"') " # ('Y','R') "
+    results = connection.execute(sql)
+
+    v_comment = " :list of vgroupid "+v_comment
+    results.each do |r|
+      v_comment = r[0].to_s+","+v_comment
+    end
+    @schedulerun.comment =v_comment[0..1990]
+    @schedulerun.save
+    v_past_vgroup_id = "0"
+    v_cnt = 1
+    results.each do |r|
+      v_vgroup_id = r[0].to_s
+      if v_vgroup_id  != v_past_vgroup_id
+            v_past_vgroup_id = v_vgroup_id
+            v_cnt = 1
+      else
+            v_cnt = v_cnt + 1
+      end
+      v_export_id  =v_wisc_siteid+r[1].to_s.rjust(6,padstr='0')
+      v_appointment_id = r[2].to_s
+      v_comment = "strt "+v_vgroup_id+","+v_comment
+      @schedulerun.comment =v_comment[0..1990]
+      @schedulerun.save
+      # update schedulerun comment - prepend 
+      # just using appt date
+      sql_vgroup = "select round((DATEDIFF(a.appointment_date,p.dob)/365.25),2),
+      round((DATEDIFF(v.vgroup_date,p.dob)/365.25),2),
+      a.id from appointments a,vgroups v,participants p where v.id = "+v_vgroup_id+" 
+                          and v.id = a.vgroup_id and a.id = "+v_appointment_id+"
+                          and v.participant_id = p.id
+                           and v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
+                                                            evm.enrollment_id = e.id  and e.do_not_share_scans_flag ='N')"     
+      results_vgroup = connection.execute(sql_vgroup)
+      # mkdir /tmp/padi_upload/[subjectid]_YYYYMMDD_wisc
+       # just using appt age "_"+(results_vgroup.first)[1].to_s+
+      v_age = ((results_vgroup.first)[0].to_s).gsub(/\./,"")
+      v_subject_dir = v_export_id+"_"+((results_vgroup.first)[0].to_s).gsub(/\./,"")+"_"+v_cnt.to_s+"_mri"
+      v_parent_dir_target =v_generic_tmp_target_path+"/"+v_subject_dir
+      v_call =  'ssh panda_user@'+v_machine+'.dom.wisc.edu "mkdir '+v_parent_dir_target+'"'
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close   
+      sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_types.series_description_type 
+                  from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
+                  where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
+                  and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
+                  and (image_datasets.do_not_share_scans_flag is NULL or image_datasets.do_not_share_scans_flag ='N')
+                  and (image_datasets.lock_default_scan_flag != 'Y' or image_datasets.lock_default_scan_flag  is NULL)
+                  and image_datasets.series_description =   series_description_maps.series_description
+                  and series_description_maps.series_description_type_id = series_description_types.id
+                  and series_description_types.series_description_type in ('"+v_series_desc_array.join("','")+"') 
+                  and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
+                  and vgroups.id = "+v_vgroup_id+"  and appointments.id = "+v_appointment_id+"
+                   order by appointments.appointment_date "
+
+      results_dataset = connection.execute(sql_dataset)
+      v_folder_array = [] # how to empty
+      v_scan_desc_type_array = []
+      v_cnt = 1
+      results_dataset.each do |r_dataset|
+         v_ids_ok_flag = "Y"
+         v_ids_id = r_dataset[2]
+         v_ids_ok_flag = self.check_ids_for_severe_or_incomplete(v_ids_id) # ADD THE DO NOT SHARE
+         if v_ids_ok_flag == "Y" # no quality check severe or incomplete
+            v_series_description_type = r_dataset[5].gsub(" ","_")
+            v_path = r_dataset[4]
+            v_dir_array = v_path.split("/")
+            v_dir = v_dir_array[(v_dir_array.size - 1)]
+            v_dir_target = v_dir+"_"+v_series_description_type
+            v_path = v_path.gsub("/Volumes/team/","").gsub("/Volumes/team-1/","").gsub("/Data/vtrak1/","")  #v_base_path+"/"+
+            if v_folder_array.include?(v_dir_target)
+              v_dir_target = v_dir_target+"_"+v_cnt.to_s
+              v_cnt = v_cnt +1
+              # might get weird if multiple types have dups - only expect T1/Bravo
+            end
+            v_folder_array.push(v_dir_target)
+            v_nii_flag = "N"   
+            #NOT SO SURE ABOUT THE NII
+  ####          v_nii_file_name =  [subjectid]_[series_description /replace " " with -] , _[] , path- split / , last value]
+            v_path_dir_array = r_dataset[4].split("/")
+            #/mounts/data/raw/wrap140/wrp002_5938_03072008/001
+            v_subject_vgroup_array = v_path_dir_array[4].split("_")
+            v_subject_id = v_subject_vgroup_array[0]
+            v_nii_file_name = v_subject_id+"_"+r_dataset[3].gsub(/ /,"-")+"_"+v_path_dir_array.last+".nii"
+            v_nii_file_path = v_base_path+"/preprocessed/visits/"+v_path_dir_array[4].to_s+"/"+v_subject_id+"/unknown/"+v_nii_file_name
+
+            if(v_series_desc_nii_hash[r_dataset[5]] == "Y")
+                v_nii_flag = "Y"
+                v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "rsync -av '+v_nii_file_path+' '+v_parent_dir_target+'/'+v_export_id+'_'+r_dataset[3].gsub(/ /,"-")+'_'+v_path_dir_array.last+'.nii "'                
+                stdin, stdout, stderr = Open3.popen3(v_call)
+                 stderr.each {|line|
+                     puts line
+                  }
+                 while !stdout.eof?
+                    puts stdout.read 1024    
+                 end
+                 stdin.close
+                 stdout.close
+                 stderr.close
+            end
+            if !v_scan_desc_type_array.include?(v_series_description_type)
+                 v_scan_desc_type_array.push(v_series_description_type)
+            end
+             # v_call = "/usr/bin/bunzip2 "+v_parent_dir_target+"/"+v_dir_target+"/*.bz2"
+             # v_call = "mise "+v_path+" "+v_parent_dir_target+"/"+v_dir_target   # works where bunzip2 cmd after rsync not work 
+              v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "cp -r '+v_path+' '+v_parent_dir_target+'/'+v_dir_target+' "' 
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              stderr.each {|line|
+                  puts line
+                }
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                 end
+             stdin.close
+             stdout.close
+             stderr.close  
+
+              v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "cd '+v_parent_dir_target+'/'+v_dir_target+'/;bunzip2 *.bz2 "' 
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              stderr.each {|line|
+                  puts line
+                }
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                 end
+             stdin.close
+             stdout.close
+             stderr.close
+
+             v_delete_array = ["*.yaml","*/*.yaml","*/*/*.yaml","*.json","*/*.json","*/*/*.json","*.txt","*/*.txt","*/*/*.txt"] 
+             v_delete_array.each do |v_match|
+               v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "rm -rf  '+v_parent_dir_target+'/'+v_dir_target+'/'+v_match+' "' 
+               stdin, stdout, stderr = Open3.popen3(v_call)
+               stderr.each {|line|
+                  puts line
+                }
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                 end
+               stdin.close
+               stdout.close
+               stderr.close 
+              end
+
+                         # CHECK if script works
+           #####  
+               v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "/mounts/data/SysAdmin/production/dicom_clean_replace.rb     '+v_parent_dir_target+'/'+v_dir_target+'  '+v_export_id+'  '+v_age+'"' 
+               puts v_call
+               stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                 puts stdout.read 1024    
+              end
+              while !stderr.eof?
+                v_comment = "ERROR IN dicom_clean_replace.rb, "+v_comment
+                 puts stderr.read 1024    
+        
+              end   
+              stdin.close
+              stdout.close
+              stderr.close 
+            
+
+             
+             # temp - replace /Volumes/team/ and /Data/vtrak1/ with /Volumes/team-1 in dev
+            # split on / --- get the last dir
+            # make new dir name dir_series_description_type 
+            # check if in v_folder_array , if in v_folder_array , dir_series_description_type => dir_series_description_type_2
+            # add  dir, dir_series_description_type to v_folder_array
+            # cp path ==> /tmp/padi_upload/[subjectid]_yyymmdd_wisc/dir_series_description_type(_2)
+         end # skipping if qc severe or incomplete    
+      end
+
+      sql_status = "select mri_status_flag from "+v_generic_upload_tn+" where vgroup_id ='"+r[0].to_s+"' "
+      results_status = connection.execute(sql_status)
+      if v_scan_desc_type_array.size < v_scan_type_limit   and (results_status.first)[0] != "R"
+        sql_dirlist = "update "+v_generic_upload_tn+" set general_comment =' NOT ALL SCAN TYPES!!!! "+v_folder_array.join(", ")+"' where vgroup_id ='"+r[0].to_s+"' "
+        results_dirlist = connection.execute(sql_dirlist)
+        # send email 
+        v_subject = "generic_upload "+r[0].to_s+" is missing some scan types --- set mri_status_flag ='R' to send  : scans ="+v_folder_array.join(", ")
+        v_email = "noreply_johnson_lab@medicine.wisc.edu"
+        PandaMailer.schedule_notice(v_subject,{:send_to => v_email}).deliver
+        #PandaMailer.schedule_notice(v_subject,{:send_to => "noreply_johnson_lab@medicine.wisc.edu"}).deliver
+         v_comment_warning = v_comment_warning+"  "+v_scan_desc_type_array.size.to_s+" scan type "+r[0].to_s+" sp"+r[1].to_s
+      v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu " rm -rf '+v_parent_dir_target+'"'
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      stderr.each {|line|
+           puts line
+      }
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end   
+      stdin.close
+      stdout.close
+      stderr.close
+      else
+#         puts "AAAAAAAAA DCM PATH TMP ="+v_parent_dir_target+"/*/*/*.dcm"
+#         /tmp/padi_upload/adrc00045_20130920_wisc/008_DTI/008
+
+        sql_dirlist = "update "+v_generic_upload_tn+" set mri_dir_list =concat('"+v_folder_array.join(", ")+"',mri_dir_list) where vgroup_id ='"+r[0].to_s+"' "
+        results_dirlist = connection.execute(sql_dirlist) 
+             
+     # CHECK if script works
+     #####  
+
+        v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "/mounts/data/SysAdmin/production/dicom_clean_replace.rb     '+v_parent_dir_target+'  '+v_export_id+'  '+v_age+'"'
+        puts v_call
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+
+        v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu " rsync -av '+v_parent_dir_target+'  '+v_generic_target_path+'"'    #+v_subject_dir
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+                                                                           
+        #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
+        #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
+        #v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
+        # switching to zip for xnat
+        v_call =  'ssh panda_user@'+v_machine+'.dom.wisc.edu " cd '+v_generic_target_path+'; tar -zcf '+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
+        #v_call =  'ssh panda_user@'+v_machine+'.dom.wisc.edu " cd /home/panda_user/upload_padi/; zip -r '+v_subject_dir+'.zip '+v_subject_dir+' "  '
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+        puts "bbbbbbb "+v_call
+
+        v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu " rm -rf '+v_generic_target_path+'/'+v_subject_dir+'"'
+           stdin, stdout, stderr = Open3.popen3(v_call)
+           while !stdout.eof?
+             puts stdout.read 1024    
+            end
+           stdin.close
+           stdout.close
+           stderr.close
+        # 
+        v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu " rm -rf '+v_generic_tmp_target_path+'/'+v_subject_dir+' "'
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+       
+
+####        # sftp -- shared helper hasthe username /password and address
+####        v_username = Shared.padi_sftp_username # get from shared helper
+####        v_passwrd = Shared.padi_sftp_password   # get from shared helperwhich is not on github
+####        v_ip = Shared.padi_sftp_host_address # get from shared helper
+#        v_source = v_target_dir+'/'+v_subject_dir+".zip"
+#        v_target = v_subject_dir+".tar.gz"
+
+ 
+
+####        Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
+####            sftp.upload!(v_source, v_target)
+####        end
+# WANT TO CHECK TRANSFERS
+#        v_call = " rm -rf "+v_target_dir+'/'+v_subject_dir+".tar.gz"
+#        stdin, stdout, stderr = Open3.popen3(v_call)
+#        while !stdout.eof?
+#          puts stdout.read 1024    
+#         end
+#        stdin.close
+#        stdout.close
+#        stderr.close        
+        
+        sql_sent = "update "+v_generic_upload_tn+" set mri_sent_flag ='Y' where VGROUP_id ='"+r[0].to_s+"'  "
+        results_sent = connection.execute(sql_sent)
+      end
+      v_comment = "end "+r[0].to_s+","+v_comment
+      @schedulerun.comment =v_comment[0..1990]
+      @schedulerun.save 
+    end
+              
+    @schedulerun.comment =("successful finish generic_upload "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+       @schedulerun.status_flag ="Y"
+     end
+     @schedulerun.save
+     @schedulerun.end_time = @schedulerun.updated_at      
+     @schedulerun.save          
+      
+
+#MRI end
   end
 
   # for the scan share consortium - upload to padi
