@@ -2216,7 +2216,7 @@ puts " "+r[0]+"  ="+r[1]
 
       sql_status = "select mri_status_flag from "+v_generic_upload_tn+" where vgroup_id ='"+r[0].to_s+"' "
       results_status = connection.execute(sql_status)
-      if v_scan_desc_type_array.size < v_scan_type_limit   and (results_status.first)[0] != "R"
+      if v_scan_desc_type_array.size < v_scan_type_limit.to_i   and (results_status.first)[0] != "R"
         sql_dirlist = "update "+v_generic_upload_tn+" set general_comment =' NOT ALL SCAN TYPES!!!! "+v_folder_array.join(", ")+"' where vgroup_id ='"+r[0].to_s+"' "
         results_dirlist = connection.execute(sql_dirlist)
         # send email 
