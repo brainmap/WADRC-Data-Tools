@@ -1874,7 +1874,7 @@ puts " "+r[0]+"  ="+r[1]
             and  vgroup_id in  ( select vg.id from vgroups vg,appointments a, petscans pet  
                          where transfer_pet ='yes' and vg.id = a.vgroup_id and a.id = pet.appointment_id and pet.lookup_pettracer_id in ("+v_pet_tracer_array.join(",")+"))" # ('Y','R') "
     results = connection.execute(sql)
-    v_comment =  " ||| "+v_machine+" status_flafg="+v_run_status_flag+" ||| "+v_comment
+    v_comment =  " ||| "+v_machine+" status_flag="+v_run_status_flag+" ||| "+v_comment
     v_comment = " :list of vgroupids"+v_comment
     results.each do |r|
       v_comment = r[0].to_s+","+v_comment
@@ -2042,7 +2042,7 @@ puts " "+r[0]+"  ="+r[1]
             appointments.appointment_type = 'mri'
             and    mri_sent_flag ='N' and mri_status_flag in ('"+v_run_status_flag+"') " # ('Y','R') "
     results = connection.execute(sql)
-    v_comment =  " ||| "+v_machine+" status_flafg="+v_run_status_flag+" ||| "+v_comment
+    v_comment =  " ||| "+v_machine+" status_flag="+v_run_status_flag+" ||| "+v_comment
     v_comment = " :list of vgroupid "+v_comment
     results.each do |r|
       v_comment = r[0].to_s+","+v_comment
