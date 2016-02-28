@@ -1815,6 +1815,7 @@ end
      v_run_status_flag = "R"
      v_generic_target_path = "/home/panda_user/upload_apoewrap/merida/" 
      v_generic_tmp_target_path = "/tmp/upload_apoewrap"
+     v_stop_status_value ="NONE"
 
       #SFTP AND RM FLAGS   -- user name/password from helper
     # get from cg_generic_upload_config 
@@ -1829,7 +1830,6 @@ puts " "+r[0]+"  ="+r[1]
         if(r[0] == "machine") # MAKE SURE IT PANDA_USER OIS MEMBER OF rvm GROUP
             v_machine =r[1]
         elsif(r[0] == "run_status_flag")
-
            v_run_status_flag =r[1]
            puts " v_run_status_flag="+v_run_status_flag
         elsif(r[0] == "generic_target_path")
@@ -1852,6 +1852,8 @@ puts " "+r[0]+"  ="+r[1]
              v_scan_type_limit =r[1] 
         elsif(r[0] == "series_desc_array")
              v_series_desc_array =r[1].split(",")
+        elsif(r[0] == "stop_status_value")
+           v_stop_status_value =r[1]
         end
      end
 
@@ -1872,7 +1874,7 @@ puts " "+r[0]+"  ="+r[1]
             and  vgroup_id in  ( select vg.id from vgroups vg,appointments a, petscans pet  
                          where transfer_pet ='yes' and vg.id = a.vgroup_id and a.id = pet.appointment_id and pet.lookup_pettracer_id in ("+v_pet_tracer_array.join(",")+"))" # ('Y','R') "
     results = connection.execute(sql)
-
+    v_comment =  " ||| "+v_machine+" status_flafg="+v_run_status_flag+" ||| "+v_comment
     v_comment = " :list of vgroupids"+v_comment
     results.each do |r|
       v_comment = r[0].to_s+","+v_comment
@@ -1880,6 +1882,7 @@ puts " "+r[0]+"  ="+r[1]
     @schedulerun.comment =v_comment[0..1990]
     @schedulerun.save
     results.each do |r|
+     if(v_stop_status_value != 'ALL' and v_stop_status_value != v_run_status_flag)
       v_vgroup_id = r[0].to_s
       v_export_id = v_wisc_siteid+r[1].to_s.rjust(6,padstr='0')
       v_comment = "strt "+v_vgroup_id+","+v_comment
@@ -2029,7 +2032,7 @@ puts " "+r[0]+"  ="+r[1]
         
         sql_sent = "update "+v_generic_upload_tn+" set pet_sent_flag ='Y' where vgroup_id ='"+r[0].to_s+"'  "
         results_sent = connection.execute(sql_sent)   
-
+     end # stop_status_value
     end   
 #MRI start
     # get  subjectid to upload    # USING v_run_status_flag AS LIMIT FOR EACH RUN
@@ -2039,7 +2042,7 @@ puts " "+r[0]+"  ="+r[1]
             appointments.appointment_type = 'mri'
             and    mri_sent_flag ='N' and mri_status_flag in ('"+v_run_status_flag+"') " # ('Y','R') "
     results = connection.execute(sql)
-
+    v_comment =  " ||| "+v_machine+" status_flafg="+v_run_status_flag+" ||| "+v_comment
     v_comment = " :list of vgroupid "+v_comment
     results.each do |r|
       v_comment = r[0].to_s+","+v_comment
@@ -2049,6 +2052,8 @@ puts " "+r[0]+"  ="+r[1]
     v_past_vgroup_id = "0"
     v_cnt = 1
     results.each do |r|
+     if(v_stop_status_value != 'ALL' and v_stop_status_value != v_run_status_flag)
+      v_folder_array = [] # how to empty
       v_vgroup_id = r[0].to_s
       if v_vgroup_id  != v_past_vgroup_id
             v_past_vgroup_id = v_vgroup_id
@@ -2098,9 +2103,10 @@ puts " "+r[0]+"  ="+r[1]
                    order by appointments.appointment_date "
 
       results_dataset = connection.execute(sql_dataset)
-      v_folder_array = [] # how to empty
+
       v_scan_desc_type_array = []
       v_cnt = 1
+      v_this_dir_list_array =[]
       results_dataset.each do |r_dataset|
          v_ids_ok_flag = "Y"
          v_ids_id = r_dataset[2]
@@ -2239,7 +2245,7 @@ puts " "+r[0]+"  ="+r[1]
       else
 #         puts "AAAAAAAAA DCM PATH TMP ="+v_parent_dir_target+"/*/*/*.dcm"
 #         /tmp/padi_upload/adrc00045_20130920_wisc/008_DTI/008
-
+        # concat on null = nulll
         sql_dirlist = "update "+v_generic_upload_tn+" set mri_dir_list =concat('"+v_folder_array.join(", ")+"',mri_dir_list) where vgroup_id ='"+r[0].to_s+"' "
         results_dirlist = connection.execute(sql_dirlist) 
              
@@ -2320,9 +2326,9 @@ puts " "+r[0]+"  ="+r[1]
 #        stdin.close
 #        stdout.close
 #        stderr.close        
-        
-        sql_sent = "update "+v_generic_upload_tn+" set mri_sent_flag ='Y' where VGROUP_id ='"+r[0].to_s+"'  "
+        sql_sent = "update "+v_generic_upload_tn+" set mri_sent_flag ='Y', mri_dir_list ='"+v_folder_array.join(", ")+"'' where vgroup_id ='"+r[0].to_s+"'  "
         results_sent = connection.execute(sql_sent)
+       end #stop_status_value
       end
       v_comment = "end "+r[0].to_s+","+v_comment
       @schedulerun.comment =v_comment[0..1990]
