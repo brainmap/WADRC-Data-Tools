@@ -1237,6 +1237,10 @@ puts "AAAAAA "+v_call
         File.delete(v_parent_dir_target+'/*/*.json')
         File.delete(v_parent_dir_target+'/*/*/*.json')
         File.delete(v_parent_dir_target+'/*/*/*/*.json')
+        File.delete(v_parent_dir_target+'/*.pickle')
+        File.delete(v_parent_dir_target+'/*/*.pickle')
+        File.delete(v_parent_dir_target+'/*/*/*.pickle')
+        File.delete(v_parent_dir_target+'/*/*/*/*.pickle')
 # TURN INTO A LOOP
         v_dicom_field_array =['0010,0030','0010,0010','0008,0050','0008,1030','0010,0020','0040,0254','0008,0080','0008,1010','0009,1002','0009,1030','0018,1000',
                         '0025,101A','0040,0242','0040,0243']
@@ -2192,7 +2196,7 @@ puts " "+r[0]+"  ="+r[1]
              stdout.close
              stderr.close
 
-             v_delete_array = ["*.yaml","*/*.yaml","*/*/*.yaml","*.json","*/*.json","*/*/*.json","*.txt","*/*.txt","*/*/*.txt"] 
+             v_delete_array = ["*.yaml","*/*.yaml","*/*/*.yaml","*.json","*/*.json","*/*/*.json","*.txt","*/*.txt","*/*/*.txt","*.pickle","*/*.pickle","*/*/*.pickle"] 
              v_delete_array.each do |v_match|
                v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "rm -rf  '+v_parent_dir_target+'/'+v_dir_target+'/'+v_match+' "' 
                stdin, stdout, stderr = Open3.popen3(v_call)
