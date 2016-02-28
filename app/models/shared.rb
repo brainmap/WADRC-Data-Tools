@@ -2326,7 +2326,7 @@ puts " "+r[0]+"  ="+r[1]
 #        stdin.close
 #        stdout.close
 #        stderr.close        
-        sql_sent = "update "+v_generic_upload_tn+" set mri_sent_flag ='Y', mri_dir_list ='"+v_folder_array.join(", ")+"'' where vgroup_id ='"+r[0].to_s+"'  "
+        sql_sent = "update "+v_generic_upload_tn+" set mri_sent_flag ='Y', mri_dir_list ='"+v_folder_array.join(", ")+"' where vgroup_id ='"+r[0].to_s+"'  "
         results_sent = connection.execute(sql_sent)
        end #stop_status_value
       end
