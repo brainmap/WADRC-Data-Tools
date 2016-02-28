@@ -1874,7 +1874,7 @@ puts " "+r[0]+"  ="+r[1]
             and  vgroup_id in  ( select vg.id from vgroups vg,appointments a, petscans pet  
                          where transfer_pet ='yes' and vg.id = a.vgroup_id and a.id = pet.appointment_id and pet.lookup_pettracer_id in ("+v_pet_tracer_array.join(",")+"))" # ('Y','R') "
     results = connection.execute(sql)
-    v_comment =  " ||| "+v_machine+" status_flag="+v_run_status_flag+" ||| "+v_comment
+    v_comment =  " ||| "+v_machine+" status_flag="+v_run_status_flag+"  stop="+v_stop_status_value+"||| "+v_comment
     v_comment = " :list of vgroupids"+v_comment
     results.each do |r|
       v_comment = r[0].to_s+","+v_comment
@@ -1882,6 +1882,14 @@ puts " "+r[0]+"  ="+r[1]
     @schedulerun.comment =v_comment[0..1990]
     @schedulerun.save
     results.each do |r|
+     sql_check = "select variable_name, variable_value from cg_generic_upload_config where status_flag ='Y' and value_group ='"+v_value_group+"' and variable_name ='stop_status_value'"
+     results_check = connection.execute(sql_check)
+     results_check.each do |r_check|
+        if(r_check[0] == "stop_status_value")
+           v_stop_status_value =r_check[1]
+        end
+     end
+
      if(v_stop_status_value != 'ALL' and v_stop_status_value != v_run_status_flag)
       v_vgroup_id = r[0].to_s
       v_export_id = v_wisc_siteid+r[1].to_s.rjust(6,padstr='0')
@@ -2052,6 +2060,13 @@ puts " "+r[0]+"  ="+r[1]
     v_past_vgroup_id = "0"
     v_cnt = 1
     results.each do |r|
+     sql_check = "select variable_name, variable_value from cg_generic_upload_config where status_flag ='Y' and value_group ='"+v_value_group+"' and variable_name ='stop_status_value'"
+     results_check = connection.execute(sql_check)
+     results_check.each do |r_check|
+        if(r_check[0] == "stop_status_value")
+           v_stop_status_value =r_check[1]
+        end
+     end
      if(v_stop_status_value != 'ALL' and v_stop_status_value != v_run_status_flag)
       v_folder_array = [] # how to empty
       v_vgroup_id = r[0].to_s
