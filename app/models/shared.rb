@@ -2091,6 +2091,7 @@ puts " "+r[0]+"  ="+r[1]
       round((DATEDIFF(v.vgroup_date,p.dob)/365.25),2),
       a.id from appointments a,vgroups v,participants p where v.id = "+v_vgroup_id+" 
                           and v.id = a.vgroup_id and a.id = "+v_appointment_id+"
+                          and a.appointment_type = 'mri'
                           and v.participant_id = p.id
                            and v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
                                                             evm.enrollment_id = e.id  and e.do_not_share_scans_flag ='N')"     
@@ -2170,6 +2171,17 @@ puts " "+r[0]+"  ="+r[1]
             if !v_scan_desc_type_array.include?(v_series_description_type)
                  v_scan_desc_type_array.push(v_series_description_type)
             end
+              v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "rm -rf '+v_parent_dir_target+'/'+v_dir_target+' "' 
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              stderr.each {|line|
+                  puts line
+                }
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                 end
+             stdin.close
+             stdout.close
+             stderr.close 
              # v_call = "/usr/bin/bunzip2 "+v_parent_dir_target+"/"+v_dir_target+"/*.bz2"
              # v_call = "mise "+v_path+" "+v_parent_dir_target+"/"+v_dir_target   # works where bunzip2 cmd after rsync not work 
               v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "cp -r '+v_path+' '+v_parent_dir_target+'/'+v_dir_target+' "' 
