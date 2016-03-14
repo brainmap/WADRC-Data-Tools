@@ -1229,18 +1229,42 @@ puts "AAAAAA "+v_call
 
         sql_dirlist = "update cg_adrc_upload set dir_list ='"+v_folder_array.join(", ")+"' where subjectid ='"+r[0]+"' "
         results_dirlist = connection.execute(sql_dirlist)
-        File.delete(v_parent_dir_target+'/*.yaml')
-        File.delete(v_parent_dir_target+'/*/*.yaml')
-        File.delete(v_parent_dir_target+'/*/*/*.yaml')
-        File.delete(v_parent_dir_target+'/*/*/*/*.yaml')
-        File.delete(v_parent_dir_target+'/*.json')
-        File.delete(v_parent_dir_target+'/*/*.json')
-        File.delete(v_parent_dir_target+'/*/*/*.json')
-        File.delete(v_parent_dir_target+'/*/*/*/*.json')
-        File.delete(v_parent_dir_target+'/*.pickle')
-        File.delete(v_parent_dir_target+'/*/*.pickle')
-        File.delete(v_parent_dir_target+'/*/*/*.pickle')
-        File.delete(v_parent_dir_target+'/*/*/*/*.pickle')
+        if(File.exist?(v_parent_dir_target+'/*.yaml') )
+          File.delete(v_parent_dir_target+'/*.yaml')
+        end
+        if(File.exist?(v_parent_dir_target+'/*/*.yaml') )
+          File.delete(v_parent_dir_target+'/*/*.yaml')
+        end
+        if(File.exist?(v_parent_dir_target+'/*/*/*.yaml') )
+          File.delete(v_parent_dir_target+'/*/*/*.yaml')
+        end
+        if(File.exist?(v_parent_dir_target+'/*/*/*/*.yaml') )
+          File.delete(v_parent_dir_target+'/*/*/*/*.yaml')
+        end
+        if(File.exist?(v_parent_dir_target+'/*.json') )
+          File.delete(v_parent_dir_target+'/*.json')
+        end
+        if(File.exist?(v_parent_dir_target+'/*/*.json') )
+          File.delete(v_parent_dir_target+'/*/*.json')
+        end
+        if(File.exist?(v_parent_dir_target+'/*/*/*.json') )
+          File.delete(v_parent_dir_target+'/*/*/*.json')
+        end
+        if(File.exist?(v_parent_dir_target+'/*/*/*/*.json') )
+          File.delete(v_parent_dir_target+'/*/*/*/*.json')
+        end
+        if(File.exist?(v_parent_dir_target+'/*.pickle') )
+          File.delete(v_parent_dir_target+'/*.pickle')
+        end
+        if(File.exist?(v_parent_dir_target+'/*/*.pickle') )
+          File.delete(v_parent_dir_target+'/*/*.pickle')
+        end
+        if(File.exist?(v_parent_dir_target+'/*/*/*.pickle') )
+          File.delete(v_parent_dir_target+'/*/*/*.pickle')
+        end
+        if(File.exist?(v_parent_dir_target+'/*/*/*/*.pickle') )
+          File.delete(v_parent_dir_target+'/*/*/*/*.pickle')
+        end
 # TURN INTO A LOOP
         v_dicom_field_array =['0010,0030','0010,0010','0008,0050','0008,1030','0010,0020','0040,0254','0008,0080','0008,1010','0009,1002','0009,1030','0018,1000',
                         '0025,101A','0040,0242','0040,0243']
