@@ -102,8 +102,8 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
         <td><%= select :visit, :conference, ["no", "yes", "n/a"] %></td>
       </tr>  -->
 	<tr>
-      <td><%= f.label(:mritech) %></td>
-      <td><%= select(:visit, :mritech, Employee.all.sort_by(&:name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Select MRI Tech" }) %></td>
+      <td><%= f.label(:mritech) %></td><!-- from .all.sort_by(&:name) -->
+      <td><%= select(:visit, :mritech, Employee.find(:all, :order=>"status,first_name,last_name").collect {|p| [ p.name, p.id ] }, { :include_blank => "Select MRI Tech" }) %></td>
     </tr>
 	<tr>
       <td><%= f.label(:Scan_Start_Time) %></td>
