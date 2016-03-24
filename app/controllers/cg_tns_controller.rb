@@ -34,7 +34,19 @@ class CgTnsController < ApplicationController
         FileUtils.chmod_R(0774, v_datadictionary_path)
     end 
 
-
+    v_datadictionary_base = v_app_base_path.to_s+"/public/system/datadictionary2s/"
+    if Rails.env=="production"  # problems with umask and permission
+          v_datadictionary_base  = v_app_base_path.to_s+"/shared/system/datadictionary2s/"
+    end
+    v_datadictionary_path = v_datadictionary_base+params[:id].to_s
+    puts "aaaaaaaaaaaa v_datadictionary_path=  "+v_datadictionary_path
+                    # problem with umask 007 setting all files to 770 , and files created as non-expected (web server?) user
+                    # FileUtils.chown_R('panda_user','panda_group', v_thumbnail_path); 
+                     # check if file exists,
+                     # check permissions 
+    if File.directory?(v_datadictionary_path)
+        FileUtils.chmod_R(0774, v_datadictionary_path)
+    end
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @cg_tn }
@@ -140,7 +152,7 @@ class CgTnsController < ApplicationController
   # PUT /cg_tns/1.xml
   def update
     
-    # puts "aaaaaaa datadictionary = "+params[:cg_tn][:datadictionary].content_type
+   # puts "aaaaaaa datadictionary = "+params[:cg_tn][:datadictionary].content_type
     @cg_tn = CgTn.find(params[:id])
      params[:cg_tn][:tn] =  params[:cg_tn][:tn].downcase 
      params[:cg_tn][:join_left_parent_tn] =  params[:cg_tn][:join_left_parent_tn].downcase

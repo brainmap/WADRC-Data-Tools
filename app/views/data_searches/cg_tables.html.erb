@@ -12,6 +12,9 @@
 		     <td><%= tn.common_name %> </td><td>
 		<% if !tn.datadictionary_file_name.blank?%>
 		<small><small><%= link_to 'Download', tn.datadictionary.url %> <%= tn.datadictionary_file_name%></small></small>
+		<% end %> 
+	<% if !tn.datadictionary2_file_name.blank?%>
+		<small><small><%= link_to ' Download2', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
 		<% end %></td>
 		
 	<% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low' or tn.users.include?( current_user) ) and tn.editable_flag == "Y" and @cg_tn_key_y[tn.id] == "Y"  and @cg_tn_key_unique_y[tn.id] == "Y"%>
@@ -33,7 +36,11 @@
 		     <td><%= tn.common_name %> </td><td>
 		<% if !tn.datadictionary_file_name.blank?%>
 		<small><small><%= link_to 'Download', tn.datadictionary.url %> <%= tn.datadictionary_file_name%></small></small>
-		<% end %></td> <td> &nbsp;</td></tr>
+		<% end %>
+		<% if !tn.datadictionary2_file_name.blank?%>
+		<small><small><%= link_to 'Download2', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
+		<% end %>
+	</td> <td> &nbsp;</td></tr>
 
 	     <% end %>
 	  <% end %>
@@ -45,6 +52,9 @@
 		     <td><%= tn.common_name %> </td><td>
 		<% if !tn.datadictionary_file_name.blank?%>
 		<small><small><%= link_to 'Download', tn.datadictionary.url %> <%= tn.datadictionary_file_name%></small></small>
+		<% end %>
+			<% if !tn.datadictionary2_file_name.blank?%>
+		<small><small><%= link_to 'Download2', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
 		<% end %></td> <td> &nbsp;</td></tr>
 
 	     <% end %>
@@ -58,6 +68,9 @@
 		     <td><%= tn.common_name %> </td><td>
 		<% if !tn.datadictionary_file_name.blank?%>
 		<small><small><%= link_to 'Download', tn.datadictionary.url %> <%= tn.datadictionary_file_name%></small></small>
+		<% end %>
+		<% if !tn.datadictionary2_file_name.blank?%>
+		<small><small><%= link_to 'Download2', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
 		<% end %></td> <td> &nbsp;</td></tr>
 
 	     <% end %>
@@ -71,6 +84,9 @@
 		     <td><%= tn.common_name %> </td><td>
 		<% if !tn.datadictionary_file_name.blank?%>
 		<small><small><%= link_to 'Download', tn.datadictionary.url %> <%= tn.datadictionary_file_name%></small></small>
+		<% end %>
+		<% if !tn.datadictionary2_file_name.blank?%>
+		<small><small><%= link_to 'Download2', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
 		<% end %></td> <td> &nbsp;</td></tr>
 
 	     <% end %>
@@ -83,6 +99,9 @@
 		     <td><%= tn.common_name %> </td><td>
 		<% if !tn.datadictionary_file_name.blank?%>
 		<small><small><%= link_to 'Download', tn.datadictionary.url %> <%= tn.datadictionary_file_name%></small></small>
+		<% end %>
+		<% if !tn.datadictionary2_file_name.blank?%>
+		<small><small><%= link_to 'Download', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
 		<% end %></td> <td> &nbsp;</td></tr>
 
 	     <% end %>

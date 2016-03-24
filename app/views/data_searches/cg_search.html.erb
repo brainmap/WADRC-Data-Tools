@@ -282,6 +282,9 @@ v_tn_cn_searchable_hash = []
 					    <% end %>		
 							</td><td>&nbsp;</td><td><% if !tn.datadictionary_file_name.blank?%>
 							<small><small><%= link_to 'DataDictionary', tn.datadictionary.url %></small></small>
+							<% end %>
+							<% if !tn.datadictionary2_file_name.blank?%>
+							<small><small><%= link_to 'DataDictionary2/Expanatory', tn.datadictionary2.url %></small></small>
 							<% end %></td><td>&nbsp;
 								
 											<a id="myHeader1" href="javascript:toggle2_closed('tn_<%=tn.id.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a>
