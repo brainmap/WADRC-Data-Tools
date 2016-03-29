@@ -115,7 +115,7 @@ edit_count = edit_count -1
 &nbsp;&nbsp;&nbsp;
 <%= date_select :consent_form,'date'  %>
 &nbsp;&nbsp;&nbsp;
-     <%= submit_tag("Change") %>&nbsp;
+     <%= submit_tag("Add/Update") %>&nbsp;
      <% @consent_form_vgroups.each do |cfvg|
      	cf = ConsentForm.find(cfvg.consent_form_id) %>
 <%= cf.description %>&nbsp;&nbsp;<%= cfvg.consent_date %> <small><small>(delete 
