@@ -113,7 +113,7 @@ edit_count = edit_count -1
            <%= hidden_field_tag 'id', @vgroup.id %>
  <%= collection_select :consent_form, 'id', ConsentForm.where("consent_forms.id in (select consent_form_id from consent_form_scan_procedures where scan_procedure_id in (?)) OR consent_forms.id not in (select consent_form_id from consent_form_scan_procedures) ",@scan_procedures_vgroups).sort_by(&:description), :id, :description,{:prompt => 'Select a Consent Form'},{ } %> 
 &nbsp;&nbsp;&nbsp;
-<%= date_select :consent_form,'date'  %>
+<%= date_select :consent_form,'date' ,:start_year => 2009, :end_year => Time.now.year %>
 &nbsp;&nbsp;&nbsp;
      <%= submit_tag("Add/Update") %>&nbsp;
      <% @consent_form_vgroups.each do |cfvg|
