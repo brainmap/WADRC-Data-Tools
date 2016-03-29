@@ -132,6 +132,32 @@ class VgroupsController < ApplicationController
      end  
   end
 
+  def change_consent_form_vgroup
+    new_consent_form_id = params[:consent_form][:id]
+    new_consent_form_date = params["consent_form"]["date(1i)"].to_s+"-"+params["consent_form"]["date(2i)"].rjust(2,"0").to_s+"-"+params["consent_form"]["date(3i)"].rjust(2,"0").to_s
+    consent_forms = params[:consent_form]["delete"]
+    if !consent_forms.nil?
+       consent_forms.each do |v_index,v_val|
+             if v_val == "1"
+                existing_consent_form_vgroup = ConsentFormVgroup.find(v_index)
+                existing_consent_form_vgroup.destroy
+             end
+       end
+    end
+    if  !new_consent_form_id.empty? 
+       consent_form_vgroup = ConsentFormVgroup.new
+       consent_form_vgroup.vgroup_id = params[:id]
+       consent_form_vgroup.consent_form_id = new_consent_form_id
+       consent_form_vgroup.consent_date = new_consent_form_date
+       consent_form_vgroup.user_id = current_user.id
+       consent_form_vgroup.save
+    end                 
+    respond_to do |format|
+       format.html { redirect_to( '/vgroups/'+params[:id], :notice => ' ' )}
+       format.xml  { render :xml => @vgroup }
+     end
+  end
+
   # GET /vgroups/1
   # GET /vgroups/1.xml
   def show
@@ -146,6 +172,10 @@ class VgroupsController < ApplicationController
     # if the vgroup is not linked to a scan protocol, the access control breaks down
     # to get at vgroups without sp's need to be admin - also check that not linked to any sp
     @scan_procedures_vgroups = ScanProcedure.where("scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  vgroup_id in (?))",params[:id]) 
+    @consent_forms = ConsentForm.where("consent_forms.id in (select consent_form_id from consent_form_scan_procedures where scan_procedure_id in (?)) OR consent_forms.id not in (select consent_form_id from consent_form_scan_procedures) ",@scan_procedures_vgroups)
+    @consent_form_vgroups = ConsentFormVgroup.where("consent_form_vgroups.vgroup_id in  (?) and status_flag ='Y' ",params[:id]) 
+
+
     if(@vgroup.nil? and  current_user.role == 'Admin_High' and @scan_procedures_vgroups.size <1)
          @vgroup = Vgroup.find(params[:id])
      end 

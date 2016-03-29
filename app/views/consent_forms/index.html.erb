@@ -1,0 +1,35 @@
+<h1>Listing consent_forms</h1>
+
+<table>
+  <tr>
+    <th>Id</th>
+    <th>Description</th>
+    <th>Status flag</th>
+    <th>Scan Procedure(s)</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @consent_forms.each do |consent_form| %>
+  <tr>
+    <td><%= consent_form.id %></td>
+    <td><%= consent_form.description %></td>
+    <td><%= consent_form.status_flag %></td>
+    <td><% @scan_procedures_consent_forms = ScanProcedure.where("scan_procedures.id in (select scan_procedure_id from consent_form_scan_procedures where  consent_form_id in (?))",consent_form.id.to_s) 
+     @scan_procedures_consent_forms.each do |sp| %>
+&nbsp;&nbsp;<%= sp.codename %> ;
+<%end%>
+
+
+     </td> 
+    <td><%= link_to 'Show', consent_form %></td>
+    <td><%= link_to 'Edit', edit_consent_form_path(consent_form) %></td>
+    <td><%= link_to 'Destroy', consent_form, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Consent form', new_consent_form_path %>

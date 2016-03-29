@@ -1,0 +1,15 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Consent form:</b>
+  <%= @consent_form_scan_procedure.consent_form_id %>
+</p>
+
+<p>
+  <b>Scan procedure:</b>
+  <%= @consent_form_scan_procedure.scan_procedure_id %>
+</p>
+
+
+<%= link_to 'Edit', edit_consent_form_scan_procedure_path(@consent_form_scan_procedure) %> |
+<%= link_to 'Back', consent_form_scan_procedures_path %>

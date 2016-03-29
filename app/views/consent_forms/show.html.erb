@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Id:</b>
+  <%= @consent_form.id %>
+</p>
+
+<p>
+  <b>Description:</b>
+  <%= @consent_form.description %>
+</p>
+
+<p>
+  <b>Status flag:</b>
+  <%= @consent_form.status_flag %>
+</p>
+<p>
+	<b>Scan Procedure(s)</B><br>
+<%  @scan_procedures_consent_forms.each do |sp| %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= sp.codename %> <br>
+<%end%><br>
+
+
+<%= link_to 'Edit', edit_consent_form_path(@consent_form) %> |
+<%= link_to 'Back', consent_forms_path %>

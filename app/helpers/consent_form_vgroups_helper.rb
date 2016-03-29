@@ -1,0 +1,2 @@
+module ConsentFormVgroupsHelper
+end

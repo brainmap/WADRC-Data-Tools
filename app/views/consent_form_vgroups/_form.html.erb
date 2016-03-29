@@ -1,0 +1,37 @@
+<%= form_for(@consent_form_vgroup) do |f| %>
+  <% if @consent_form_vgroup.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@consent_form_vgroup.errors.count, "error") %> prohibited this consent_form_vgroup from being saved:</h2>
+
+      <ul>
+      <% @consent_form_vgroup.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :vgroup_id %><br />
+    <%= f.number_field :vgroup_id %>
+  </div>
+  <div class="field">
+    <%= f.label :consent_form_id %><br />
+    <%= f.number_field :consent_form_id %>
+  </div>
+  <div class="field">
+    <%= f.label :user_id %><br />
+    <%= f.number_field :user_id %>
+  </div>
+  <div class="field">
+    <%= f.label :status_flag %><br />
+    <%= f.text_field :status_flag %>
+  </div>
+  <div class="field">
+    <%= f.label :consent_date %><br />
+    <%= f.date_select :consent_date %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

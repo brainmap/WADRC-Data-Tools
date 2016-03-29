@@ -1,0 +1,25 @@
+<h1>Listing consent_form_scan_procedures</h1>
+
+<table>
+  <tr>
+    <th>Consent form</th>
+    <th>Scan procedure</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @consent_form_scan_procedures.each do |consent_form_scan_procedure| %>
+  <tr>
+    <td><%= consent_form_scan_procedure.consent_form_id %></td>
+    <td><%= consent_form_scan_procedure.scan_procedure_id %></td>
+    <td><%= link_to 'Show', consent_form_scan_procedure %></td>
+    <td><%= link_to 'Edit', edit_consent_form_scan_procedure_path(consent_form_scan_procedure) %></td>
+    <td><%= link_to 'Destroy', consent_form_scan_procedure, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Consent form scan procedure', new_consent_form_scan_procedure_path %>

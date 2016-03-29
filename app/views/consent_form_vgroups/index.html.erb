@@ -1,0 +1,31 @@
+<h1>Listing consent_form_vgroups</h1>
+
+<table>
+  <tr>
+    <th>Vgroup</th>
+    <th>Consent form</th>
+    <th>User</th>
+    <th>Status flag</th>
+    <th>Consent date</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @consent_form_vgroups.each do |consent_form_vgroup| %>
+  <tr>
+    <td><%= consent_form_vgroup.vgroup_id %></td>
+    <td><%= consent_form_vgroup.consent_form_id %></td>
+    <td><%= consent_form_vgroup.user_id %></td>
+    <td><%= consent_form_vgroup.status_flag %></td>
+    <td><%= consent_form_vgroup.consent_date %></td>
+    <td><%= link_to 'Show', consent_form_vgroup %></td>
+    <td><%= link_to 'Edit', edit_consent_form_vgroup_path(consent_form_vgroup) %></td>
+    <td><%= link_to 'Destroy', consent_form_vgroup, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Consent form vgroup', new_consent_form_vgroup_path %>

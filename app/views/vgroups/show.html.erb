@@ -107,6 +107,23 @@ edit_count = edit_count -1
 		</td></tr></table>
 	<% end %>
 	</td></tr>
+<tr>
+<td colspan=6 align="left"> 
+     <%= form_tag( "/vgroups/change_consent_form_vgroup",:url => { :controller=>"vgroups",:action => "change_consent_form_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
+           <%= hidden_field_tag 'id', @vgroup.id %>
+ <%= collection_select :consent_form, 'id', ConsentForm.where("consent_forms.id in (select consent_form_id from consent_form_scan_procedures where scan_procedure_id in (?)) OR consent_forms.id not in (select consent_form_id from consent_form_scan_procedures) ",@scan_procedures_vgroups).sort_by(&:description), :id, :description,{:prompt => 'Select a Consent Form'},{ } %> 
+&nbsp;&nbsp;&nbsp;
+<%= date_select :consent_form,'date'  %>
+&nbsp;&nbsp;&nbsp;
+     <%= submit_tag("Change") %>&nbsp;
+     <% @consent_form_vgroups.each do |cfvg|
+     	cf = ConsentForm.find(cfvg.consent_form_id) %>
+<%= cf.description %>&nbsp;&nbsp;<%= cfvg.consent_date %> <small><small>(delete 
+<%= check_box("consent_form","delete]["+cfvg.id.to_s,{})%>)</small></small> ;
+     	<%end%>
+	<% end %>
+</td>
+</tr>	
 <tr><td colspan=6 align="left">
 	<% if edit_count > 0 %>
 		<b><%= link_to 'Note', edit_vgroup_path(@vgroup) %>:</b><br>

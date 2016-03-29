@@ -1,0 +1,25 @@
+<%= form_for(@consent_form_scan_procedure) do |f| %>
+  <% if @consent_form_scan_procedure.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@consent_form_scan_procedure.errors.count, "error") %> prohibited this consent_form_scan_procedure from being saved:</h2>
+
+      <ul>
+      <% @consent_form_scan_procedure.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :consent_form_id %><br />
+    <%= f.number_field :consent_form_id %>
+  </div>
+  <div class="field">
+    <%= f.label :scan_procedure_id %><br />
+    <%= f.number_field :scan_procedure_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,30 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Vgroup:</b>
+  <%= @consent_form_vgroup.vgroup_id %>
+</p>
+
+<p>
+  <b>Consent form:</b>
+  <%= @consent_form_vgroup.consent_form_id %>
+</p>
+
+<p>
+  <b>User:</b>
+  <%= @consent_form_vgroup.user_id %>
+</p>
+
+<p>
+  <b>Status flag:</b>
+  <%= @consent_form_vgroup.status_flag %>
+</p>
+
+<p>
+  <b>Consent date:</b>
+  <%= @consent_form_vgroup.consent_date %>
+</p>
+
+
+<%= link_to 'Edit', edit_consent_form_vgroup_path(@consent_form_vgroup) %> |
+<%= link_to 'Back', consent_form_vgroups_path %>

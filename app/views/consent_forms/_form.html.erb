@@ -1,0 +1,48 @@
+
+<% v_status = {"Y"=>"Y", "N"=>"N"}   %>
+<%= form_for(@consent_form) do |f| %>
+  <% if @consent_form.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@consent_form.errors.count, "error") %> prohibited this consent_form from being saved:</h2>
+
+      <ul>
+      <% @consent_form.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+    <%= f.hidden_field :id %>
+
+  <div class="field">
+    <%= f.label :description %><br />
+    <%= f.text_field :description %>
+  </div>
+  <div class="field">
+    <%= f.label :status_flag %><br />
+     <%= f.select :status_flag, options_for_select(v_status, @consent_form.status_flag),
+                {:prompt => 'Select a status'}  %>
+  </div>
+    <B>BE SURE TO SELECT A Scan Procedure !!!!!!!!!!</b><br>
+  <div id="scan_procedure_list">
+  <ul>
+  <% scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ')
+  ScanProcedure.where(" scan_procedures.id in (?)",  scan_procedure_array).all.sort_by(&:codename).each do |scan_procedure| %>
+    <li>
+      <%#= f.fields_for scan_procedure do |scan_fields| %>
+        <%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
+        <%#= f.label :scan_procedure_ids, scan_procedure.codename %>
+      <%# end %>
+    </li>
+    <li>
+      <%= check_box_tag "consent_form_scan_procedure_ids", scan_procedure.id, @consent_form.scan_procedures.include?(scan_procedure), :name => 'consent_form[scan_procedure_ids][]' %>
+      <%= label_tag '', scan_procedure.codename %>
+    </li>
+  <% end %>
+  </ul>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

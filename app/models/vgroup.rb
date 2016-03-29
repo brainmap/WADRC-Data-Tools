@@ -9,6 +9,11 @@ class Vgroup < ActiveRecord::Base
   has_many :enrollment_vgroup_memberships,:dependent => :destroy
   has_many :enrollments, :through => :enrollment_vgroup_memberships, :uniq => true
   accepts_nested_attributes_for :enrollments, :reject_if => :all_blank, :allow_destroy => true
+
+   has_many :consent_form_vgroups,:dependent => :destroy
+  has_many :consent_forms, :through => :consent_form_vgroups, :uniq => true
+  accepts_nested_attributes_for :consent_forms, :reject_if => :all_blank, :allow_destroy => true
+
 #  before_validation :lookup_enrollments
   delegate :enumber, :to => :enrollment, :prefix => true
   

@@ -1,6 +1,18 @@
 WADRCDataTools::Application.routes.draw do
 
 
+  resources :consent_form_vgroups
+
+
+  resources :consent_form_scan_procedures
+
+
+  resources :consent_forms
+
+
+  resources :tnfiles
+
+
   resources :series_description_scan_procedures
 
 
@@ -268,7 +280,7 @@ WADRCDataTools::Application.routes.draw do
    match '/vgroups/change_completedblooddraw_vgroup', :controller => 'vgroups', :action => 'change_completedblooddraw_vgroup', :as =>:change_completedblooddraw_vgroup
    match '/vgroups/change_completedneuropsych_vgroup', :controller => 'vgroups', :action => 'change_completedneuropsych_vgroup', :as =>:change_completedneuropsych_vgroup
    match '/vgroups/change_completedquestionnaire_vgroup', :controller => 'vgroups', :action => 'change_completedquestionnaire_vgroup', :as =>:change_completedquestionnaire_vgroup
-
+   match 'vgroups/change_consent_form_vgroup',:controller => 'vgroups', :action => 'change_consent_form_vgroup', :as =>:change_consent_form_vgroup
   
    resources :vgroups
   resources :studies
