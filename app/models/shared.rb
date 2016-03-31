@@ -1933,17 +1933,18 @@ puts " "+r[0]+"  ="+r[1]
       results_vgroup = connection.execute(sql_vgroup)
       # mkdir /tmp/padi_upload/[subjectid]_YYYYMMDD_wisc
       v_age = (results_vgroup.first)[0].to_s
-      v_subject_dir = v_export_id+"_"+v_age.gsub(/\./,"")+"_pet"
-      v_parent_dir_target =v_generic_tmp_target_path+"/"+v_subject_dir
-      v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "cd '+v_generic_tmp_target_path+'; mkdir  '+v_subject_dir+'"' 
-      stdin, stdout, stderr = Open3.popen3(v_call)
-      while !stdout.eof?
-        puts stdout.read 1024    
-       end
-      stdin.close
-      stdout.close
-      stderr.close 
-      sql_pet = "select distinct appointments.appointment_date, petscans.id petscan_id, petfiles.id petfile_id, lookup_pettracers.name, petfiles.path,petscans.lookup_pettracer_id
+      if v_age.gsub(/\./,"") > ""   # no age if enumber on do not share list
+        v_subject_dir = v_export_id+"_"+v_age.gsub(/\./,"")+"_pet"
+        v_parent_dir_target =v_generic_tmp_target_path+"/"+v_subject_dir
+        v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "cd '+v_generic_tmp_target_path+'; mkdir  '+v_subject_dir+'"' 
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+        end
+        stdin.close
+        stdout.close
+        stderr.close 
+        sql_pet = "select distinct appointments.appointment_date, petscans.id petscan_id, petfiles.id petfile_id, lookup_pettracers.name, petfiles.path,petscans.lookup_pettracer_id
                   from vgroups , appointments, petscans, lookup_pettracers, petfiles  
                   where vgroups.transfer_pet = 'yes' and vgroups.id = appointments.vgroup_id 
                   and appointments.id = petscans.appointment_id and petscans.id = petfiles.petscan_id
@@ -1951,50 +1952,50 @@ puts " "+r[0]+"  ="+r[1]
                   and petscans.lookup_pettracer_id in ("+v_pet_tracer_array.join(",")+") 
                   and vgroups.id  = "+v_vgroup_id+" 
                    order by appointments.appointment_date "
-      results_pet = connection.execute(sql_pet)
-      v_folder_array = [] # how to empty
-      v_tracer_array = []
-      v_cnt = 1
-      results_pet.each do |r_dataset|
-        v_subject_id = ""
-         v_tracer = r_dataset[3].gsub(/ /,"_").gsub(/\[/,"_").gsub(/\]/,"_")
-          if !v_tracer_array.include?(v_tracer)
+        results_pet = connection.execute(sql_pet)
+        v_folder_array = [] # how to empty
+        v_tracer_array = []
+        v_cnt = 1
+        results_pet.each do |r_dataset|
+           v_subject_id = ""
+           v_tracer = r_dataset[3].gsub(/ /,"_").gsub(/\[/,"_").gsub(/\]/,"_")
+           if !v_tracer_array.include?(v_tracer)
                  v_tracer_array.push(v_tracer)
-          end
-         v_petfile_path = r_dataset[4]
-         v_petfile_name = (r_dataset[4].split("/")).last
-         v_pettracer_id = r_dataset[5]
-         #/mounts/data/raw/johnson.pipr.visit1/pet/pipr00001_2ef_c95_de11.v
-         v_enumbers_array = r[2].split(",")
-         v_enumbers_array.each do |e|
+           end
+           v_petfile_path = r_dataset[4]
+           v_petfile_name = (r_dataset[4].split("/")).last
+           v_pettracer_id = r_dataset[5]
+           #/mounts/data/raw/johnson.pipr.visit1/pet/pipr00001_2ef_c95_de11.v
+           v_enumbers_array = r[2].split(",")
+           v_enumbers_array.each do |e|
                v_subject_id = e
                v_petfile_name = v_petfile_name.gsub(v_subject_id,v_export_id )
-         end
-          if  v_pet_tracer_array.include? v_pettracer_id
-            v_petfile_target_name = v_tracer+"_"+v_petfile_name
-            v_call ='ssh panda_user@'+v_machine+'.dom.wisc.edu " rsync -av '+v_petfile_path+' '+v_parent_dir_target+'/'+v_petfile_target_name+' "'             
-            puts("this petid= "+v_pettracer_id.to_s )
-            stdin, stdout, stderr = Open3.popen3(v_call)
-            stderr.each {|line|
+           end
+           if  v_pet_tracer_array.include? v_pettracer_id
+             v_petfile_target_name = v_tracer+"_"+v_petfile_name
+             v_call ='ssh panda_user@'+v_machine+'.dom.wisc.edu " rsync -av '+v_petfile_path+' '+v_parent_dir_target+'/'+v_petfile_target_name+' "'             
+             puts("this petid= "+v_pettracer_id.to_s )
+             stdin, stdout, stderr = Open3.popen3(v_call)
+             stderr.each {|line|
                puts line
-            }
-            while !stdout.eof?
+             }
+             while !stdout.eof?
                  puts stdout.read 1024    
-            end
-            stdin.close
-            stdout.close
-            stderr.close
-          end
-       end
+             end
+             stdin.close
+             stdout.close
+             stderr.close
+           end
+         end
 
          v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "rsync -av '+v_parent_dir_target+'  '+v_generic_target_path+'"'    #+v_subject_dir
-        stdin, stdout, stderr = Open3.popen3(v_call)
-        while !stdout.eof?
-          puts stdout.read 1024    
+         stdin, stdout, stderr = Open3.popen3(v_call)
+         while !stdout.eof?
+           puts stdout.read 1024    
          end
-        stdin.close
-        stdout.close
-        stderr.close
+         stdin.close
+         stdout.close
+         stderr.close
 #UP TO HERE                                                                          
         #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
         #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
@@ -2003,33 +2004,33 @@ puts " "+r[0]+"  ="+r[1]
         ## v_call =  'ssh panda_user@'+v_machine+'.dom.wisc.edu "  tar  -C /home/panda_user/upload_padi  -zcf /home/panda_user/upload_padi/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
 
         #v_call =  'ssh panda_user@'+v_machine+'.dom.wisc.edu " cd '+v_generic_target_path+'; zip -r '+v_subject_dir+'.zip '+v_subject_dir+'  "  '      
-        v_call =  'ssh panda_user@'+v_machine+'.dom.wisc.edu " cd '+v_generic_target_path+'; /bin/tar -zcf '+v_subject_dir+'.tar.gz '+v_subject_dir+'/  "  '      
-    stdin, stdout, stderr = Open3.popen3(v_call)
-        while !stdout.eof?
-          puts stdout.read 1024    
+         v_call =  'ssh panda_user@'+v_machine+'.dom.wisc.edu " cd '+v_generic_target_path+'; /bin/tar -zcf '+v_subject_dir+'.tar.gz '+v_subject_dir+'/  "  '      
+         stdin, stdout, stderr = Open3.popen3(v_call)
+         while !stdout.eof?
+           puts stdout.read 1024    
          end
-        stdin.close
-        stdout.close
-        stderr.close
-        puts "bbbbbbb "+v_call
+         stdin.close
+         stdout.close
+         stderr.close
+         puts "bbbbbbb "+v_call
 
-        v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "  rm -rf '+v_generic_tmp_target_path+'/'+v_subject_dir+'"'
-           stdin, stdout, stderr = Open3.popen3(v_call)
-           while !stdout.eof?
+          v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "  rm -rf '+v_generic_tmp_target_path+'/'+v_subject_dir+'"'
+          stdin, stdout, stderr = Open3.popen3(v_call)
+          while !stdout.eof?
              puts stdout.read 1024    
-            end
-           stdin.close
-           stdout.close
-           stderr.close
+          end
+          stdin.close
+          stdout.close
+          stderr.close
         # 
-        v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "  rm -rf '+v_generic_target_path+'/'+v_subject_dir+'"' 
-        stdin, stdout, stderr = Open3.popen3(v_call)
-        while !stdout.eof?
-          puts stdout.read 1024    
-         end
-        stdin.close
-        stdout.close
-        stderr.close
+          v_call = 'ssh panda_user@'+v_machine+'.dom.wisc.edu "  rm -rf '+v_generic_target_path+'/'+v_subject_dir+'"' 
+          stdin, stdout, stderr = Open3.popen3(v_call)
+          while !stdout.eof?
+            puts stdout.read 1024    
+          end
+          stdin.close
+          stdout.close
+          stderr.close
        
         
          # did the tar.gz on merida to avoid mac acl PaxHeader extra directories
@@ -2066,8 +2067,9 @@ puts " "+r[0]+"  ="+r[1]
  #       stdout.close
  #       stderr.close        
         
-        sql_sent = "update "+v_generic_upload_tn+" set pet_sent_flag ='Y' where vgroup_id ='"+r[0].to_s+"'  "
-        results_sent = connection.execute(sql_sent)   
+          sql_sent = "update "+v_generic_upload_tn+" set pet_sent_flag ='Y' where vgroup_id ='"+r[0].to_s+"'  "
+          results_sent = connection.execute(sql_sent) 
+        end # enumber in not share  
      end # stop_status_value
     end   
 #MRI start
@@ -2076,7 +2078,9 @@ puts " "+r[0]+"  ="+r[1]
     sql = "select distinct "+v_generic_upload_tn+".vgroup_id,export_id,appointments.id from "+v_generic_upload_tn+",appointments 
      where appointments.vgroup_id = "+v_generic_upload_tn+".vgroup_id and
             appointments.appointment_type = 'mri'
-            and    mri_sent_flag ='N' and mri_status_flag in ('"+v_run_status_flag+"') " # ('Y','R') "
+            and    mri_sent_flag ='N' and mri_status_flag in ('"+v_run_status_flag+"') 
+            and "+v_generic_upload_tn+".vgroup_id  in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
+                                                            evm.enrollment_id = e.id  and e.do_not_share_scans_flag ='N')" # ('Y','R') "
     results = connection.execute(sql)
     v_comment =  " ||| "+v_machine+" status_flag="+v_run_status_flag+" ||| "+v_comment
     v_comment = " :list of vgroupid "+v_comment
@@ -2147,7 +2151,6 @@ puts " "+r[0]+"  ="+r[1]
                    order by appointments.appointment_date "
 
       results_dataset = connection.execute(sql_dataset)
-
       v_scan_desc_type_array = []
       v_cnt = 1
       v_this_dir_list_array =[]

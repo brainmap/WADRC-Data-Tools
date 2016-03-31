@@ -1448,7 +1448,8 @@ class DataSearchesController < ApplicationController
                               @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/,/,"','")
                               v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" in ( '"+@cg_query_tn_cn.value_1.gsub(/[;:"()=<>]/, '')+"')"
                            else
-                              v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" = '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;:"()=<>]/, '')+"'"
+                              # letting : thru in seach on mri coil dropdown
+                              v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" = '"+@cg_query_tn_cn.value_1.gsub("'","''").gsub(/[;"()=<>]/, '')+"'"
                            end
                            if !v_condition.blank?
                               if !params[:cg_search][:join_type][v_tn_id].blank? and params[:cg_search][:join_type][v_tn_id] == "2" 
