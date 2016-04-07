@@ -5269,7 +5269,7 @@ puts "AAAAAA "+v_call
                 # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
                 # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
-            v_exclude_sp =[4,10,15,19,32]
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
             @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
             @scan_procedures.each do |sp|
               v_visit_number =""
@@ -6311,7 +6311,7 @@ puts "ppppppp "+dir_name_array[0]
                 # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
                 # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
-            v_exclude_sp =[4,10,15,19,32]
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
             @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
             @scan_procedures. each do |sp|
               v_visit_number =""
@@ -6519,7 +6519,7 @@ puts "ppppppp "+dir_name_array[0]
                 # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
                 # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
-            v_exclude_sp =[4,10,15,19,32]
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
             @scan_procedures = ScanProcedure.where("petscan_flag='Y' and id not in (?)",v_exclude_sp)  # NEED ONLY sp with fdg, but filter later
             @scan_procedures. each do |sp|
                v_visit_number =""
@@ -8285,7 +8285,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                 # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
                 # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
-            v_exclude_sp =[4,10,15,19,32]
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
             @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
             @scan_procedures. each do |sp|
               v_visit_number =""
@@ -8980,7 +8980,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                 # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
                 # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
-            v_exclude_sp =[4,10,15,19,32]
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
             @scan_procedures = ScanProcedure.where("petscan_flag='Y' and id not in (?)",v_exclude_sp)  # NEED ONLY sp with pib, but filter later
             @scan_procedures. each do |sp|
                v_visit_number =""
@@ -9199,7 +9199,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                 # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
                 # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
-            v_exclude_sp =[4,10,15,19,32]
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
             @scan_procedures = ScanProcedure.where("petscan_flag='Y' and id not in (?)",v_exclude_sp)  # NEED ONLY sp with pib, but filter later
             @scan_procedures. each do |sp|
                v_visit_number =""
@@ -9756,7 +9756,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                 # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
                 # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
-            v_exclude_sp =[4,10,15,19,32]
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
             @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
             @scan_procedures.each do |sp|
               @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
