@@ -333,6 +333,7 @@ class VgroupsController < ApplicationController
       v_enrollment_id_array = []
       v_enrollment_array = []
       enumber_array = []
+      @vgroup.do_not_share_scans = ""
       if @vgroup.save
         params[:id] = @vgroup.id.to_s
         #problems with new enumber
@@ -341,7 +342,14 @@ class VgroupsController < ApplicationController
           # getting enrollments if enumber already in enrollments
           connection = ActiveRecord::Base.connection();
           enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+        v_do_not_share_scans_flag ="N"
+        if !enrollment.blank?
+            v_do_not_share_scans_flag ="Y"
+        end
           enrollment.each do |e|
+             if e.do_not_share_scans_flag.blank? or e.do_not_share_scans_flag != "Y"
+                v_do_not_share_scans_flag ="N" 
+             end
              v_enrollment_array.push(e)
              v_enrollment_id_array.push(e.id)
              v_evg_check = EnrollmentVgroupMembership.where("vgroup_id in (?) and enrollment_id in (?)",@vgroup.id,e.id)
@@ -351,6 +359,10 @@ class VgroupsController < ApplicationController
              end
           end
           if !enrollment.blank?
+            if v_do_not_share_scans_flag == "Y"
+                 @vgroup.do_not_share_scans = "DO NOT SHARE"
+                 @vgroup.save
+            end
             if !(enrollment[0].participant_id).nil? and (@vgroup.participant_id).blank? 
                 @vgroup.participant_id = enrollment[0].participant_id
                 @vgroup.save
@@ -749,6 +761,26 @@ class VgroupsController < ApplicationController
           # link participant_id to enrollments
           # link participant_id to vgroup
         end
+        @vgroup.do_not_share_scans = ""
+        @vgroup.save
+        v_do_not_share_scans_flag ="N"
+        @enrollments = Enrollment.where("enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships 
+                                                  where vgroup_id in ("+@vgroup.id.to_s+" ))")
+        if !@enrollments.blank?
+            v_do_not_share_scans_flag ="Y"
+        end
+        @enrollments.each do |e|
+             if e.do_not_share_scans_flag.blank? or e.do_not_share_scans_flag != "Y"
+                v_do_not_share_scans_flag ="N" 
+             end
+         end
+       if !@enrollments.blank?
+            if v_do_not_share_scans_flag == "Y"
+                 @vgroup.do_not_share_scans = "DO NOT SHARE"
+                 @vgroup.save
+            end
+        end
+
 
                   # check for other vgroups with same sp and enumber within 1 month
           v_near_vgroups = Vgroup.where("vgroups.id != "+@vgroup.id.to_s+" 

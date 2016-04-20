@@ -345,6 +345,20 @@ class EnrollmentsController < ApplicationController
              @enrollment.participant_id = nil
              @enrollment.save
           end
+          connection = ActiveRecord::Base.connection();
+          if @enrollment.do_not_share_scans_flag  == "Y"
+              sql = "update vgroups set vgroups.do_not_share_scans ='DO NOT SHARE' 
+                        where vgroups.id in ( select enrollment_vgroup_memberships.vgroup_id 
+                                               from enrollment_vgroup_memberships 
+                                                where enrollment_vgroup_memberships.enrollment_id = "+params[:id]+") "
+              @results = connection.execute(sql)
+          else
+              sql = "update vgroups set vgroups.do_not_share_scans = NULL
+                        where vgroups.id in ( select enrollment_vgroup_memberships.vgroup_id 
+                                               from enrollment_vgroup_memberships 
+                                                where enrollment_vgroup_memberships.enrollment_id = "+params[:id]+") "
+               @results = connection.execute(sql)
+          end
         end
         flash[:notice] = 'Enrollment was successfully updated.'
         format.html { redirect_to(@enrollment) }

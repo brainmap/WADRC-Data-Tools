@@ -624,7 +624,15 @@ end
         sql = "select distinct enrollment_id from enrollment_visit_memberships where visit_id in (select visits.id from visits, appointments where appointments.id = visits.appointment_id and appointments.vgroup_id ="+@vgroup.id.to_s+")"
         connection = ActiveRecord::Base.connection();        
         results = connection.execute(sql)
+        v_do_not_share_scans_flag ="N"
+        if results.count > 0
+            v_do_not_share_scans_flag ="Y"
+        end
         results.each do |e|
+          enrollment = Enrollment.find(e[0])
+          if enrollment.do_not_share_scans_flag.empty? or enrollment.do_not_share_scans_flag != "Y"
+            v_do_not_share_scans_flag ="N" 
+          end
           sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+e[0].to_s+")"
           connection = ActiveRecord::Base.connection();        
           results = connection.execute(sql)
@@ -634,6 +642,11 @@ end
             results = connection.execute(sql)                    
           end
         end 
+        if v_do_not_share_scans_flag == "Y"
+             @vgroup.do_not_share_scans = "DO NOT SHARE"
+        else
+             @vgroup.do_not_share_scans = ""
+        end
         #### REPEAT FOR SP  
 
         sql = "Delete from scan_procedures_vgroups where vgroup_id ="+@vgroup.id.to_s
