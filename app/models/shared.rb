@@ -472,7 +472,7 @@ or   image_dataset_quality_checks.omnibus_f  = 'Severe'  or  spm_mask  = 'Severe
                    from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                    where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                    and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
-                   and image_datasets.series_description =   series_description_maps.series_description
+                   and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                    and series_description_maps.series_description_type_id = series_description_types.id
                    and series_description_types.series_description_type in ('DTI') 
                    and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
@@ -757,7 +757,7 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
                       from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                       where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                       and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
-                      and image_datasets.series_description =   series_description_maps.series_description
+                      and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                       and series_description_maps.series_description_type_id = series_description_types.id
                       and series_description_types.series_description_type in ('PCVIPR','ASL') 
                       and image_datasets.series_description != 'SRC:PCVIPR Mag COMP'
@@ -1136,7 +1136,7 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
                   from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
-                  and image_datasets.series_description =   series_description_maps.series_description
+                  and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                   and series_description_maps.series_description_type_id = series_description_types.id
                   and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','T2','T2 Flair','T2_Flair','T2+Flair','DTI') 
                   and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
@@ -2143,7 +2143,7 @@ puts " "+r[0]+"  ="+r[1]
                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
                   and (image_datasets.do_not_share_scans_flag is NULL or image_datasets.do_not_share_scans_flag ='N')
                   and (image_datasets.lock_default_scan_flag != 'Y' or image_datasets.lock_default_scan_flag  is NULL)
-                  and image_datasets.series_description =   series_description_maps.series_description
+                  and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                   and series_description_maps.series_description_type_id = series_description_types.id
                   and series_description_types.series_description_type in ('"+v_series_desc_array.join("','")+"') 
                   and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
@@ -2732,7 +2732,7 @@ puts "PPPPP = apptid="+v_appointment_id+"  sql="+sql_vgroup
                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
                   and (image_datasets.do_not_share_scans_flag is NULL or image_datasets.do_not_share_scans_flag ='N')
                   and (image_datasets.lock_default_scan_flag != 'Y' or image_datasets.lock_default_scan_flag  is NULL)
-                  and image_datasets.series_description =   series_description_maps.series_description
+                  and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                   and series_description_maps.series_description_type_id = series_description_types.id
                   and series_description_types.series_description_type in ('"+v_series_desc_array.join("','")+"') 
                   and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
@@ -3098,7 +3098,7 @@ def run_sleep_t1
                   from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
-                  and image_datasets.series_description =   series_description_maps.series_description
+                  and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                   and series_description_maps.series_description_type_id = series_description_types.id
                   and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1') 
                   and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = "+r[1].to_s+" and evm.enrollment_id = e.id and e.enumber ='"+ v_subjectid+"')
@@ -3513,7 +3513,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                   from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
-                  and image_datasets.series_description =   series_description_maps.series_description
+                  and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                   and series_description_maps.series_description_type_id = series_description_types.id
                   and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','resting_fMRI','resting fMRI','resting+fMRI') 
                   and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = "+r[1].to_s+" and evm.enrollment_id = e.id and e.enumber ='"+ v_subjectid+"')
@@ -3569,7 +3569,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                       from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                       where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                       and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
-                      and image_datasets.series_description =   series_description_maps.series_description
+                      and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                       and series_description_maps.series_description_type_id = series_description_types.id
                       and series_description_types.series_description_type in ('ASL') 
                       and image_datasets.series_description != 'ASL CBF'
@@ -4534,7 +4534,7 @@ puts "PPPPP = apptid="+v_appointment_id+"  sql="+sql_vgroup
                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
                   and (image_datasets.do_not_share_scans_flag is NULL or image_datasets.do_not_share_scans_flag ='N')
-                  and image_datasets.series_description =   series_description_maps.series_description
+                  and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                   and series_description_maps.series_description_type_id = series_description_types.id
                   and series_description_types.series_description_type in ('"+v_series_desc_array.join("','")+"') 
                   and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
@@ -5065,7 +5065,7 @@ puts "AAAAAA "+v_call
                   from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
-                  and image_datasets.series_description =   series_description_maps.series_description
+                  and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                   and series_description_maps.series_description_type_id = series_description_types.id
                   and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','resting_fMRI','resting fMRI','resting+fMRI') 
                   and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = "+r[1].to_s+" and evm.enrollment_id = e.id and e.enumber ='"+ v_subjectid+"')
@@ -6688,7 +6688,7 @@ puts "ppppppp "+dir_name_array[0]
                   from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
-                  and image_datasets.series_description =   series_description_maps.series_description
+                  and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                   and series_description_maps.series_description_type_id = series_description_types.id
                   and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','resting_fMRI','resting fMRI','resting+fMRI','T2','T2_Flair','T2+Flair') 
                   and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = "+r[1].to_s+" and evm.enrollment_id = e.id and e.enumber ='"+ v_subjectid+"')
@@ -6784,7 +6784,7 @@ puts "ppppppp "+dir_name_array[0]
                    from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                    where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                    and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
-                   and image_datasets.series_description =   series_description_maps.series_description
+                   and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                    and series_description_maps.series_description_type_id = series_description_types.id
                    and series_description_types.series_description_type in ('DTI') 
                    and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
@@ -7238,7 +7238,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                   from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
-                  and image_datasets.series_description =   series_description_maps.series_description
+                  and LOWER(image_datasets.series_description)=   LOWER(series_description_maps.series_description)
                   and series_description_maps.series_description_type_id = series_description_types.id
                   and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','resting_fMRI','resting fMRI','resting+fMRI','T2','T2_Flair','T2+Flair') 
                   and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = "+r[1].to_s+" and evm.enrollment_id = e.id and e.enumber ='"+ v_subjectid+"')
@@ -7334,7 +7334,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                    from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                    where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                    and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
-                   and image_datasets.series_description =   series_description_maps.series_description
+                   and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                    and series_description_maps.series_description_type_id = series_description_types.id
                    and series_description_types.series_description_type in ('DTI') 
                    and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
@@ -7658,7 +7658,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                    from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                    where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                    and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
-                   and image_datasets.series_description =   series_description_maps.series_description
+                   and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                    and series_description_maps.series_description_type_id = series_description_types.id
                    and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1') 
                    and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")+"')
@@ -7941,7 +7941,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                    from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                    where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                    and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
-                   and image_datasets.series_description =   series_description_maps.series_description
+                   and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                    and series_description_maps.series_description_type_id = series_description_types.id
                    and series_description_types.series_description_type in ('T1_Volumetric') 
                    and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")+"')
@@ -8170,7 +8170,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       sql = "SELECT visits.id, visits.path, appointments.secondary_key FROM visits, appointments 
                         where appointments.id = visits.appointment_id  
                         and visits.id in ( select image_datasets.visit_id from image_datasets,series_description_maps where 
-                                  image_datasets.series_description = series_description_maps.series_description
+                                  LOWER(image_datasets.series_description) = LOWER(series_description_maps.series_description)
                                   and  series_description_maps.series_description_type_id = 19)"  
   
       results = connection.execute(sql)
@@ -9362,7 +9362,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                   from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
                   where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
                   and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
-                  and image_datasets.series_description =   series_description_maps.series_description
+                  and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
                   and series_description_maps.series_description_type_id = series_description_types.id
                   and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','resting_fMRI','resting fMRI','resting+fMRI') 
                   and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = "+r[1].to_s+" and evm.enrollment_id = e.id and e.enumber ='"+ v_subjectid+"')
