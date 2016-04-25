@@ -2511,7 +2511,7 @@ puts " "+r[0]+"  ="+r[1]
       stderr.close
     end
     #PET
-    sql = "select distinct vgroup_id,export_id,enumbers from cg_padi_upload where pet_sent_flag ='N' and pet_status_flag in ('G') " # ('Y','R') "
+    sql = "select distinct vgroup_id,export_id,enumbers,cg_padi_upload.pet_visit_number from cg_padi_upload where pet_sent_flag ='N' and pet_status_flag in ('G') " # ('Y','R') "
     results = connection.execute(sql)
 
     v_comment = " :list of vgroupids"+v_comment
@@ -2524,6 +2524,7 @@ puts " "+r[0]+"  ="+r[1]
     results.each do |r|
       v_vgroup_id = r[0].to_s
       v_export_id = v_wisc_siteid+r[1].to_s.rjust(4,padstr='0')
+      v_visit_number = "v"+r[2].to_s
       v_comment = "strt "+v_vgroup_id+","+v_comment
       @schedulerun.comment =v_comment[0..1990]
       @schedulerun.save
@@ -2535,8 +2536,10 @@ puts " "+r[0]+"  ="+r[1]
                                                             evm.enrollment_id = e.id and  e.do_not_share_scans_flag ='N')"
       results_vgroup = connection.execute(sql_vgroup)
       # mkdir /tmp/padi_upload/[subjectid]_YYYYMMDD_wisc
-      v_age = (results_vgroup.first)[0].to_s
-      v_subject_dir = v_export_id+"_"+v_age.gsub(/\./,"")+"_pet"
+      # switching from age_at_appt , to v#, and somehow also passing age_at_appt linked to file name
+      ####v_age = (results_vgroup.first)[0].to_s
+      ####v_subject_dir = v_export_id+"_"+v_age.gsub(/\./,"")+"_pet"
+      v_subject_dir = v_export_id+"_"+v_visit_number+"_pet"
       v_parent_dir_target =v_target_dir+"/"+v_subject_dir
       v_call = "mkdir "+v_parent_dir_target
       stdin, stdout, stderr = Open3.popen3(v_call)
@@ -2675,7 +2678,7 @@ v_call =  'ssh panda_user@merida.dom.wisc.edu " cd /home/panda_user/upload_padi/
 
     # get  subjectid to upload    # USING G AS LIMIT FOR TESTING
     #MRI  switching to appointment
-    sql = "select distinct cg_padi_upload.vgroup_id,export_id,appointments.id from cg_padi_upload,appointments 
+    sql = "select distinct cg_padi_upload.vgroup_id,export_id,appointments.id,cg_padi_upload.mri_visit_number from cg_padi_upload,appointments 
      where appointments.vgroup_id = cg_padi_upload.vgroup_id and
             appointments.appointment_type = 'mri'
             and    mri_sent_flag ='N' and mri_status_flag in ('G') " # ('Y','R') "
@@ -2699,6 +2702,7 @@ v_call =  'ssh panda_user@merida.dom.wisc.edu " cd /home/panda_user/upload_padi/
       end
       v_export_id  =v_wisc_siteid+r[1].to_s.rjust(4,padstr='0')
       v_appointment_id = r[2].to_s
+      v_visit_number = "v"+r[3].to_s
       v_comment = "strt "+v_vgroup_id+","+v_comment
       @schedulerun.comment =v_comment[0..1990]
       @schedulerun.save
@@ -2715,8 +2719,10 @@ puts "PPPPP = apptid="+v_appointment_id+"  sql="+sql_vgroup
       results_vgroup = connection.execute(sql_vgroup)
       # mkdir /tmp/padi_upload/[subjectid]_YYYYMMDD_wisc
        # just using appt age "_"+(results_vgroup.first)[1].to_s+
-      v_age = ((results_vgroup.first)[0].to_s).gsub(/\./,"")
-      v_subject_dir = v_export_id+"_"+((results_vgroup.first)[0].to_s).gsub(/\./,"")+"_"+v_cnt.to_s+"_mri"
+       # switching from age_at_appt to v#, and somehow also send the age_appt to link up with file name
+      #####v_age = ((results_vgroup.first)[0].to_s).gsub(/\./,"")
+      ####v_subject_dir = v_export_id+"_"+((results_vgroup.first)[0].to_s).gsub(/\./,"")+"_"+v_cnt.to_s+"_mri"
+      v_subject_dir = v_export_id+"_"+v_visit_number+"_"+v_cnt.to_s+"_mri"
       v_parent_dir_target =v_target_dir+"/"+v_subject_dir
       v_call = "mkdir "+v_parent_dir_target
       stdin, stdout, stderr = Open3.popen3(v_call)
@@ -2854,8 +2860,8 @@ puts "AAAAAA "+v_call
                             '0008,0080'=>'Institution Name','0008,1010'=>'Station Name','0009,1002'=>'Private',
                             '0009,1030'=>'Private','0018,1000'=>'Device Serial Number','0025,101A'=>'Private',
                             '0040,0242'=>'Performed Station Name','0040,0243'=>'Performed Location',
-                            '0008,0020'=>'Study Date','0008,0021'=>'Series Date','0008,0022'=>'Acquisition Date',   
-                            '0008,0023'=>'Content Date','0040,0244'=>'Performed Procedure Step Start Date'}
+                            '0008,0020'=>'19720101','0008,0021'=>'19720101','0008,0022'=>'19720101',   
+                            '0008,0023'=>'19720101','0040,0244'=>'19720101'}
      ####  v_dicom_field_array.each do |dicom_key|
                Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.read(dcm); 
                                                                                      v_dicom_field_array.each do |dicom_key|
