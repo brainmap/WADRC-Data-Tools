@@ -2495,6 +2495,8 @@ puts " "+r[0]+"  ="+r[1]
                                  where cg_padi_participants.participant_id = cg_padi_upload.participant_id)"
      results = connection.execute(sql)
 
+     # add mri_visit_number  and pet_visit_number   update !!!!!!!!!!!!!!!
+
     v_folder_array = Array.new
     v_scan_desc_type_array = Array.new
     # check for dir in /tmp
@@ -2511,7 +2513,7 @@ puts " "+r[0]+"  ="+r[1]
       stderr.close
     end
     #PET
-    sql = "select distinct vgroup_id,export_id,enumbers,cg_padi_upload.pet_visit_number from cg_padi_upload where pet_sent_flag ='N' and pet_status_flag in ('G') " # ('Y','R') "
+    sql = "select distinct vgroup_id,export_id,enumbers,cg_padi_upload.pet_visit_number from cg_padi_upload where pet_sent_flag ='N' and pet_status_flag in ('G') and pet_visit_number is not null" # ('Y','R') "
     results = connection.execute(sql)
 
     v_comment = " :list of vgroupids"+v_comment
@@ -2524,7 +2526,7 @@ puts " "+r[0]+"  ="+r[1]
     results.each do |r|
       v_vgroup_id = r[0].to_s
       v_export_id = v_wisc_siteid+r[1].to_s.rjust(4,padstr='0')
-      v_visit_number = "v"+r[2].to_s
+      v_visit_number = "v"+r[3].to_s
       v_comment = "strt "+v_vgroup_id+","+v_comment
       @schedulerun.comment =v_comment[0..1990]
       @schedulerun.save
@@ -2681,7 +2683,7 @@ v_call =  'ssh panda_user@merida.dom.wisc.edu " cd /home/panda_user/upload_padi/
     sql = "select distinct cg_padi_upload.vgroup_id,export_id,appointments.id,cg_padi_upload.mri_visit_number from cg_padi_upload,appointments 
      where appointments.vgroup_id = cg_padi_upload.vgroup_id and
             appointments.appointment_type = 'mri'
-            and    mri_sent_flag ='N' and mri_status_flag in ('G') " # ('Y','R') "
+            and    mri_sent_flag ='N' and mri_status_flag in ('G') and mri_visit_number is not null " # ('Y','R') "
     results = connection.execute(sql)
 
     v_comment = " :list of vgroupid "+v_comment
@@ -2856,7 +2858,7 @@ puts "AAAAAA "+v_call
         v_dicom_field_array =['0010,0030','0010,0010','0008,0050','0008,1030','0010,0020','0040,0254','0008,0080','0008,1010','0009,1002','0009,1030','0018,1000',
                         '0025,101A','0040,0242','0040,0243','0008,0020','0008,0021','0008,0022','0008,0023','0040,0244']
         v_dicom_field_value_hash ={'0010,0030'=>'DOB','0010,0010'=>v_export_id,'0008,0050'=>'Accession Number',
-                           '0008,1030'=>'Study Description', '0010,0020'=>v_age,'0040,0254'=>'Performed Proc Step Desc',
+                           '0008,1030'=>'Study Description', '0010,0020'=>v_visit_number,'0040,0254'=>'Performed Proc Step Desc',
                             '0008,0080'=>'Institution Name','0008,1010'=>'Station Name','0009,1002'=>'Private',
                             '0009,1030'=>'Private','0018,1000'=>'Device Serial Number','0025,101A'=>'Private',
                             '0040,0242'=>'Performed Station Name','0040,0243'=>'Performed Location',
