@@ -140,6 +140,7 @@ class QuestionnairesController < ApplicationController
        end 
        # for search dropdown
         @q_forms = Questionform.where("current_tab in (?)",@current_tab).where("status_flag in (?)","Y")
+
         @q_form_default = @q_forms.where("tab_default_yn='Y'")
 
        q_form = Questionform.where("current_tab in (?)",@current_tab).where("tab_default_yn in (?)","Y")
@@ -161,6 +162,22 @@ class QuestionnairesController < ApplicationController
       if hide_date_flag_array.count > 0
         @hide_page_flag = 'Y'
       end 
+
+     # swapping out q_form description if different name linked to scan_procedures 
+     @q_forms.each do |f|
+            if !params[:q_search][:scan_procedure_id].blank?
+                @spformdisplays = Questionformnamesp.where("questionform_id in (?) and scan_procedure_id in (?) and scan_procedure_id in (?)",f.id,scan_procedure_array,params[:q_search][:scan_procedure_id])
+
+            else
+                @spformdisplays = Questionformnamesp.where("questionform_id in (?) and scan_procedure_id in (?) ",f.id,scan_procedure_array)
+            end     
+            if !@spformdisplays.nil?
+              v_form_name = @spformdisplays.sort_by(&:form_name).collect {|sp| sp.form_name }.join(", ")
+              if !v_form_name.empty?
+                  f.description = f.description+","+v_form_name
+              end
+            end
+     end
 
   #    @questionnaires = Blooddraw.where("questionnaires.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
   #                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
@@ -323,10 +340,27 @@ class QuestionnairesController < ApplicationController
    end
      @results_total = @results  # pageination makes result count wrong
      t = Time.now 
-     @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
+     v_display_form_name = ""
+     if !params[:q_search][:scan_procedure_id].blank?
+        @spformdisplays = Questionformnamesp.where("questionform_id in (?) and scan_procedure_id in (?) and scan_procedure_id in (?)",@q_form_id,scan_procedure_array,params[:q_search][:scan_procedure_id])
+      else
+        @spformdisplays = Questionformnamesp.where("questionform_id in (?) and scan_procedure_id in (?) ",@q_form_id,scan_procedure_array)
+      end     
+      if !@spformdisplays.nil?
+         v_form_name = @spformdisplays.sort_by(&:form_name).collect {|sp| sp.form_name }.join(", ")
+          if !v_form_name.empty?
+             v_display_form_name = v_form_name
+          else
+              q_form = Questionform.find(@q_form_id)
+              v_display_form_name = q_form.description
+          end
+      end
+
+
+     @export_file_title =v_display_form_name+" Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
     
      ### LOOK WHERE TITLE IS SHOWING UP
-     @collection_title = 'All Questionnaire appts'
+     @collection_title = v_display_form_name+' All Questionnaire appts'
 
      respond_to do |format|
        format.xls # lp_search.xls.erb
@@ -384,6 +418,17 @@ class QuestionnairesController < ApplicationController
                                                                       and
                                                                   questionforms.id  not in 
                                               (select questionform_id from questionform_scan_procedures where include_exclude ='exclude' and scan_procedure_id in ("+sp_array.join(',')+")))")
+     # swapping out q_form description if different name linked to scan_procedures 
+     @q_forms.each do |f|
+            @spformdisplays = Questionformnamesp.where("questionform_id in (?) and scan_procedure_id in (?)",f.id,sp_array)
+            if !@spformdisplays.nil?
+              v_form_name = @spformdisplays.sort_by(&:form_name).collect {|sp| sp.form_name }.join(", ")
+              if !v_form_name.empty?
+                  f.description = v_form_name
+              end
+            end
+     end
+
      @q_form_default = @q_forms.where("tab_default_yn='Y'")
 
      if   !@appointment.questionform_id_list.blank?
@@ -508,7 +553,16 @@ class QuestionnairesController < ApplicationController
                                                                       and
                                                                   questionforms.id  not in 
                                               (select questionform_id from questionform_scan_procedures where include_exclude ='exclude' and scan_procedure_id in ("+sp_array.join(',')+")))")
-     
+           # swapping out q_form description if different name linked to scan_procedures 
+     @q_forms.each do |f|
+            @spformdisplays = Questionformnamesp.where("questionform_id in (?) and scan_procedure_id in (?)",f.id,sp_array)
+            if !@spformdisplays.nil?
+              v_form_name = @spformdisplays.sort_by(&:form_name).collect {|sp| sp.form_name }.join(", ")
+              if !v_form_name.empty?
+                  f.description = v_form_name
+              end
+            end
+     end
     @q_form_default = @q_forms.where("tab_default_yn='Y'")
     
     @q_data_forms = QDataForm.where("questionform_id="+q_form_id.to_s+" and appointment_id in (?)",@appointment.id)

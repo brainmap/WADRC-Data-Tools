@@ -11,7 +11,10 @@ edit_count = edit_count -1
 %>
 <% if edit_count > 0 %>
 <h1>Editing Lab Health appt</h1>
-<h3><%= @enumbers.blank? ? @vgroup.rmr : @enumbers.collect{|e| e.enumber }.join(", ") %></h3>
+<h3><%= @enumbers.blank? ? @vgroup.rmr : @enumbers.collect{|e| e.enumber }.join(", ") %>
+&nbsp;&nbsp;&nbsp;&nbsp;    <%= key_val_table("visit_details", {
+     :Study_Protocol => @vgroup.scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe,
+    }) %></h3>
 <%= render :partial => 'new_edit', :locals => { :form_action => 'Edit Blooddraw appt'} %>
 <br><hr span="70%" size="6" color="green">
 <hr span="70%">

@@ -10,7 +10,8 @@
       :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
       :RMR_Number => @vgroup.rmr,
       :Appt_Coordinator =>@appointment.appointment_coordinator.blank? ? "" : Employee.find(@appointment.appointment_coordinator).name,
-     :Participant => @participant.nil? ? nil : link_to('view participant', @participant)
+     :Participant => @participant.nil? ? nil : link_to('view participant', @participant),
+     :Study_Protocol => @vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, '/lh_search?lh_search[scan_procedure_id][]='+sp.id.to_s)}.join(", ").html_safe,
     }) %>
   </div>
 
