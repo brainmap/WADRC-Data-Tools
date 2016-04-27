@@ -172,7 +172,10 @@ class QuestionnairesController < ApplicationController
                 @spformdisplays = Questionformnamesp.where("questionform_id in (?) and scan_procedure_id in (?) ",f.id,scan_procedure_array)
             end     
             if !@spformdisplays.nil?
-              v_form_name = @spformdisplays.sort_by(&:form_name).collect {|sp| sp.form_name }.join(", ")
+              v_form_name = @spformdisplays.sort_by(&:form_name).collect {|sp| sp.form_name }.join("|")
+              v_form_name_array = v_form_name.split("|")
+              v_form_name_array = v_form_name_array.uniq
+              v_form_name = v_form_name_array.join(", ")
               if !v_form_name.empty?
                   f.description = f.description+","+v_form_name
               end
