@@ -209,6 +209,13 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 			<% end%>
 		<% if !mst.image_dataset_id.blank?%>
 		<tr><td colsapn="8" align = "left"><b><%= ImageDataset.find(mst.image_dataset_id).series_description %></b></td><tr>
+		    <% if !@image_comments.where("image_dataset_id in (?)",mst.image_dataset_id ).blank? %>
+		  <tr><td colspan="7" align="left">
+              <% @image_comments.where("image_dataset_id in (?)",mst.image_dataset_id ).each do |cmnt| %>
+                         <%= RedCloth.new(cmnt.comment.blank? ? "" : cmnt.comment).to_html.gsub("<p>","").gsub("</p>","").html_safe %>;&nbsp;&nbsp;
+               <%end%>
+            </td></tr>
+		    <%end%>
 		<% end %>
 		<tr><td><%= select("mriscantask[lookup_scantask_id]",mst.id, LookupScantask.all.sort_by(&:description).collect {|p| [ p.description, p.id ] }, { :selected =>mst.lookup_scantask_id.try(:to_s),:prompt => "Select a scan task", :include_blank => true } )%>   
 			<%=  hidden_field_tag( "mriscantask[mriscantask_id][]",mst.id.to_s) %>

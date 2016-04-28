@@ -1397,6 +1397,9 @@ class DataSearchesController < ApplicationController
                            # get all results, index by link_id/link type in array, add fields, reuslts to end of query -- what if 2 form_id's-- keep adding in
                            # if > 25 , keep getting results and adding to array with same key
                     # get form_id named arrays - column names, results , leave question_field column as marker
+                    # REMOVED q_form LH, NP, Q   data export from cg_search - view that joined all teh 3-question rows into one row took to long
+                    # now can only export LH, NP, Q data is in the LH, NP, Q tabs
+                    # also the form name/sp is only displayed in the LH,NP,Q tabs
            
                            # ??? PROBLEM WITH participant?
                            @left_join_vgroup.each do |vg|

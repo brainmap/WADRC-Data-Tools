@@ -191,6 +191,9 @@ class VisitsController <  AuthorizedController #  ApplicationController
     @older_visit = idx + 1 >= @visits.size ? nil : @visits[idx + 1]
     @newer_visit = idx - 1 < 0 ? nil : @visits[idx - 1]
    
+        @image_comments = ImageComment.where("image_comments.image_dataset_id in ( select image_datasets.id from image_datasets,scan_procedures_visits
+         where image_datasets.visit_id = scan_procedures_visits.visit_id and scan_procedures_visits.scan_procedure_id in (?) and image_datasets.visit_id in (?))", scan_procedure_array,@visit.id) 
+
     @image_datasets = @visit.image_datasets.page(params[:page])
     @participant = @visit.try(:enrollments).first.try(:participant) 
     @enumbers = @visit.enrollments
@@ -281,6 +284,9 @@ end
     @mriscantask = Mriscantask.where("visit_id in (?) and (lookup_set_id not in (8) or lookup_set_id is NULL)",@visit.id)
     @appointment = Appointment.find(@visit.appointment_id)
     @vgroup = Vgroup.find(@appointment.vgroup_id)
+         @image_comments = ImageComment.where("image_comments.image_dataset_id in ( select image_datasets.id from image_datasets,scan_procedures_visits
+         where image_datasets.visit_id = scan_procedures_visits.visit_id and scan_procedures_visits.scan_procedure_id in (?) and image_datasets.visit_id in (?))", scan_procedure_array,@visit.id) 
+
   end
 
   # POST /visits
