@@ -478,15 +478,29 @@ end
        end
       end
       mri_id_int = mri_id.to_i
+  
       if mri_id_int < 0 
+
         if !params[:mriscantask][:lookup_set_id][mri_id].blank? or 
            !params[:mriscantask][:lookup_scantask_id][mri_id].blank? or 
                     !params[:mriscantask][:task_order][mri_id].blank? or
                           !params[:mriscantask][:logfilerecorded][mri_id].blank? or 
                                   !params[:mriscantask][:tasknote][mri_id].blank? or 
                                                   !params[:mriscantask][:image_dataset_id][mri_id].blank? 
+
+            if !params[:mriscantask][:tasknote][mri_id].blank? and !params[:mriscantask][:image_dataset_id][mri_id].blank? and    
+       params[:mriscantask][:lookup_set_id][mri_id].blank? and  params[:mriscantask][:lookup_scantask_id][mri_id].blank? and 
+                    params[:mriscantask][:task_order][mri_id].blank? and  params[:mriscantask][:logfilerecorded][mri_id].blank? 
+              @image_comment = ImageComment.new
+              @image_comment.image_dataset_id = params[:mriscantask][:image_dataset_id][mri_id]
+              @image_comment.comment = params[:mriscantask][:tasknote][mri_id]
+              @image_comment.user = current_user
+              @image_comment.save
+              params[:mriscantask][:tasknote][mri_id] = ""
+            end   # still need to make the scantask linked to ids            
             @mriscantask = Mriscantask.new
             @mriscantask.lookup_set_id = params[:mriscantask][:lookup_set_id][mri_id]
+            
             if !params[:mriscantask][:lookup_scantask_id][mri_id].blank?
               @mriscantask.lookup_scantask_id = params[:mriscantask][:lookup_scantask_id][mri_id]
             end
@@ -516,10 +530,22 @@ end
                 @mriperformance.accuracypercentage =params[:mriperformance][:accuracypercentage][mp_id]
                 @mriperformance.save
               end
-             end
-          end
+            end
+        end
       else
 
+       if !params[:mriscantask][:tasknote][mri_id].blank? and !params[:mriscantask][:image_dataset_id][mri_id].blank? and    
+       params[:mriscantask][:lookup_set_id][mri_id].blank? and  params[:mriscantask][:lookup_scantask_id][mri_id].blank? and 
+                    params[:mriscantask][:task_order][mri_id].blank? and  params[:mriscantask][:logfilerecorded][mri_id].blank? 
+           @image_comment = ImageComment.new
+           @image_comment.image_dataset_id = params[:mriscantask][:image_dataset_id][mri_id]
+           @image_comment.comment = params[:mriscantask][:tasknote][mri_id]
+           @image_comment.user = current_user
+           @image_comment.save
+           # this isn't doing the Redcloth markup language?
+            # got stringify error when used image_comments_controller create 
+            # @image_comment = @image_dataset.image_comments.build(params[:image_comment])
+       else   
         @mriscantask = Mriscantask.find(mri_id_int)
         @mriscantask.lookup_set_id = params[:mriscantask][:lookup_set_id][mri_id]
         if !params[:mriscantask][:lookup_scantask_id][mri_id].nil?
@@ -551,7 +577,8 @@ end
             @mriperformance.accuracypercentage =params[:mriperformance][:accuracypercentage][mp_id]
             @mriperformance.save
           end
-         end
+        end
+       end # comment only
       end
     end 
     
