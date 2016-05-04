@@ -41,7 +41,14 @@
           <%#= link_to '&', edit_image_dataset_path(im_ds) %>
           <%#= link_to 'X', im_ds, :confirm => 'Are you sure?', :method => :delete %>
         </td> -->
-      </tr>
+       </tr>
+       <% if !@image_comments.where("image_dataset_id in (?)",im_ds.id ).blank? %>
+          <tr><td colspan="5" align="left">
+              <% @image_comments.where("image_dataset_id in (?)",im_ds.id ).each do |cmnt| %>
+                         <%= RedCloth.new(cmnt.comment.blank? ? "" : cmnt.comment).to_html.gsub("<p>","").gsub("</p>","").html_safe %>&nbsp;<small><small>(<%= cmnt.user.username %>)</small></small>;&nbsp;&nbsp;
+               <%end%>
+          </td></tr>
+       <%end%>
     <% end %>
   </tbody>
 

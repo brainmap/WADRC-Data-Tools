@@ -43,7 +43,8 @@ edit_count = edit_count -1
 	<table  class="tabular_no_shade"><tr><th colsapn="4"  align="left">Scan Series</th><th align="left">Set</th><th align="left">Order</th><th align="left">LogFile Recorded</th></tr>
 	<% @mriscantask.each do |mst|%>
 	<% if !mst.image_dataset_id.blank?%>
-	<tr><td colsapn="7" align = "left"><b><%= ImageDataset.find(mst.image_dataset_id).series_description %></b></td><tr>
+	<tr><td colsapn="7" align = "left"><b><%= ImageDataset.find(mst.image_dataset_id).series_description %></b></td></tr>
+	<!--
 	   <% if !@image_comments.where("image_dataset_id in (?)",mst.image_dataset_id ).blank? %>
 		  <tr><td colspan="7" align="left">
               <% @image_comments.where("image_dataset_id in (?)",mst.image_dataset_id ).each do |cmnt| %>
@@ -51,6 +52,7 @@ edit_count = edit_count -1
                <%end%>
             </td></tr>
 		<%end%>
+	-->
 	<% end %>
 	<tr><td colsapn="4" align="left"><%= mst.lookup_scantask_id.blank? ? "" : LookupScantask.find(mst.lookup_scantask_id).description %>      </td>
 		<td  align="left"><%= mst.lookup_set_id.blank? ? "" :LookupSet.find(mst.lookup_set_id).description %>      </td>
