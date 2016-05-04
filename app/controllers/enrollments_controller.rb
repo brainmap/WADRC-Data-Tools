@@ -306,6 +306,7 @@ class EnrollmentsController < ApplicationController
   # POST /enrollments.xml
   def create
     @enrollment = Enrollment.new(params[:enrollment])
+ 
 
     respond_to do |format|
       if @enrollment.save

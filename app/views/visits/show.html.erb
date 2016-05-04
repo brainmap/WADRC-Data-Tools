@@ -44,15 +44,6 @@ edit_count = edit_count -1
 	<% @mriscantask.each do |mst|%>
 	<% if !mst.image_dataset_id.blank?%>
 	<tr><td colsapn="7" align = "left"><b><%= ImageDataset.find(mst.image_dataset_id).series_description %></b></td></tr>
-	<!--
-	   <% if !@image_comments.where("image_dataset_id in (?)",mst.image_dataset_id ).blank? %>
-		  <tr><td colspan="7" align="left">
-              <% @image_comments.where("image_dataset_id in (?)",mst.image_dataset_id ).each do |cmnt| %>
-                         <%= RedCloth.new(cmnt.comment.blank? ? "" : cmnt.comment).to_html.gsub("<p>","").gsub("</p>","").html_safe %>&nbsp;<small><small>(<%= cmnt.user.username %>)</small></small>;&nbsp;&nbsp;
-               <%end%>
-            </td></tr>
-		<%end%>
-	-->
 	<% end %>
 	<tr><td colsapn="4" align="left"><%= mst.lookup_scantask_id.blank? ? "" : LookupScantask.find(mst.lookup_scantask_id).description %>      </td>
 		<td  align="left"><%= mst.lookup_set_id.blank? ? "" :LookupSet.find(mst.lookup_set_id).description %>      </td>

@@ -334,7 +334,7 @@ class VgroupsController < ApplicationController
       v_enrollment_array = []
       enumber_array = []
       @vgroup.do_not_share_scans = ""
-      if @vgroup.save
+      if @vgroup.save  # save being blocked if enumber already exists
         params[:id] = @vgroup.id.to_s
         #problems with new enumber
         if !params[:vgroup][:enrollments_attributes]["0"][:enumber].blank?
