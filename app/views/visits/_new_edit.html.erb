@@ -212,6 +212,8 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 		    <% if !@image_comments.where("image_dataset_id in (?)",mst.image_dataset_id ).blank? %>
 		  <tr><td colspan="7" align="left">
               <% @image_comments.where("image_dataset_id in (?)",mst.image_dataset_id ).each do |cmnt| %>
+
+              <%= check_box_tag( "mriscantask[imagedataset][destroy]["+mst.image_dataset_id.to_s+"]["+cmnt.id.to_s+"]")   %><%= f.label :_destroy, "Del Comment" %>&nbsp;&nbsp;
                          <%= RedCloth.new(cmnt.comment.blank? ? "" : cmnt.comment).to_html.gsub("<p>","").gsub("</p>","").html_safe %>&nbsp;<small><small>(<%= cmnt.user.username %>)</small></small>;&nbsp;&nbsp;
                <%end%>
             </td></tr>
@@ -226,7 +228,7 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 			  </td>
 			<td><%= select("mriscantask[logfilerecorded]",mst.id,[['No',"0"],["Yes","-1"]],{ :selected =>mst.logfilerecorded.try(:to_s), :include_blank => "Log?" })  %>  </td>
 			<td colspan=4  align="left"> 
-				<%=  text_field_tag( "mriscantask[tasknote]["+mst.id.to_s+"]",mst.tasknote, :size => 60) %>&nbsp;<%= check_box_tag( "mriscantask[destroy]["+mst.id.to_s+"]")   %><%= f.label :_destroy, "Del" %>  </td>
+				<%=  text_field_tag( "mriscantask[tasknote]["+mst.id.to_s+"]",mst.tasknote, :size => 60) %>&nbsp;<%= check_box_tag( "mriscantask[destroy]["+mst.id.to_s+"]")   %><%= f.label :_destroy, "Del Task" %>  </td>
 			</tr>
 			<% if !mst.p_file.blank? or !mst.reps.blank? or !mst.moved.blank? or !mst.eyecontact.blank? or !mst.preday.blank? or !mst.concerns.blank? or !mst.has_concerns.blank? %>
 			<tr>	

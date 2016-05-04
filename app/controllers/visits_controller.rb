@@ -468,6 +468,17 @@ end
     						
     mriscantask_id_array = params[:mriscantask][:mriscantask_id]  
     mriscantask_id_array.each do |mri_id|
+      # delete the ids comment
+      if !params[:mriscantask][:image_dataset_id].blank? and !params[:mriscantask][:image_dataset_id][mri_id].blank? and
+             !params[:mriscantask][:imagedataset].blank? and !params[:mriscantask][:imagedataset][:destroy].blank? and 
+                 !params[:mriscantask][:imagedataset][:destroy][params[:mriscantask][:image_dataset_id][mri_id]].blank?
+           params[:mriscantask][:imagedataset][:destroy][params[:mriscantask][:image_dataset_id][mri_id]].each do |ids_comment|
+puts "DELETE COMMENT "+ids_comment.to_s
+              @image_comment = ImageComment.where("image_comments.image_dataset_id in (?) ",params[:mriscantask][:image_dataset_id][mri_id]).find(ids_comment[0])
+              @image_comment.destroy
+           end
+      end 
+
       if !params[:mriscantask][:destroy].blank?
        if !params[:mriscantask][:destroy][mri_id].blank?
         if !delete_scantask_array.blank?
