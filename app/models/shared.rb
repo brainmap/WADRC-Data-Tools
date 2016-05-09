@@ -8389,7 +8389,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                   v_sag_cube_flair_cnt = 0
                                   v_dir_array.each do |f|
                                     
-                                    if (f.include? "Sag-CUBE-FLAIR" or f.include? "Sag-CUBE-flair"  or f.include?"Sag-CUBE-T2-FLAIR") and !f.include?"PU:" and f.end_with?(".nii")
+                                    if (f.include? "Sag-CUBE-FLAIR" or f.include? "Sag-CUBE-flair"  or f.include?"Sag-CUBE-T2-FLAIR") and !f.include?"PU" and f.end_with?(".nii")
                                       v_sag_cube_flair_flag = "Y"
                                       v_sag_cube_flair_cnt = v_sag_cube_flair_cnt + 1
                                       if v_sag_cube_flair_cnt > 1
