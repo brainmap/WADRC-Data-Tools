@@ -8315,15 +8315,17 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                 v_preprocessed_full_path = v_preprocessed_path+sp.codename
                 if File.directory?(v_raw_full_path)
                     if !File.directory?(v_preprocessed_full_path)
-                        puts "preprocessed path NOT exists "+v_preprocessed_full_path
+                        #puts "preprocessed path NOT exists "+v_preprocessed_full_path
                      end
                     Dir.entries(v_raw_full_path).select { |file| File.directory? File.join(v_raw_full_path, file)}.each do |dir|
                       dir_name_array = dir.split('_')
                       if dir_name_array.size == 3
                         v_secondary_key_array.each do |k|
                          v_secondary_key = k
+                         #puts "dir="+dir_name_array[0]+" key="+k
                          enrollment = Enrollment.where("concat(enumber,'"+v_secondary_key+"') in (?)",dir_name_array[0])
                          if !enrollment.blank?
+                             #puts "enrollment found"
                              v_comment =""
                              v_wlesion_030_flag ="N"
                              v_wlesion_030_flag_lst_116 ="N"
@@ -8377,8 +8379,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                   end
                                   v_comment = 'LST 122 dir ;'+v_comment
                              end
-                             
+                            #puts "check for unknown "+v_subjectid_unknown
                              if File.directory?(v_subjectid_unknown)
+                                  #puts "unknown found"
                                   v_dir_array = Dir.entries(v_subjectid_unknown)   # need to get date for specific files
                                   v_o_star_nii_flag ="N"
                                   v_multiple_o_star_nii_flag ="N"
@@ -8386,7 +8389,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                   v_sag_cube_flair_cnt = 0
                                   v_dir_array.each do |f|
                                     
-                                    if (f.include? "Sag-CUBE-FLAIR" or f.include? "Sag-CUBE-flair"  or f.include?"Sag-CUBE-T2-FLAIR") and f.end_with?(".nii")
+                                    if (f.include? "Sag-CUBE-FLAIR" or f.include? "Sag-CUBE-flair"  or f.include?"Sag-CUBE-T2-FLAIR") and !f.include?"PU:" and f.end_with?(".nii")
                                       v_sag_cube_flair_flag = "Y"
                                       v_sag_cube_flair_cnt = v_sag_cube_flair_cnt + 1
                                       if v_sag_cube_flair_cnt > 1
@@ -8412,6 +8415,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                    v_comment ="no LST_116 or LST_122 product ;" +v_comment                               
                              end # check for subjectid asl dir
                              sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','"+v_comment+"','"+v_wlesion_030_flag+"','"+v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"','"+v_sag_cube_flair_flag+"','"+v_multiple_sag_cube_flair_flag+"','"+v_wlesion_030_flag_lst_116+"',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_lst_lesion_value+"','"+v_secondary_key+"')"
+                         #puts "insert="+dir_name_array[0]+v_visit_number     
                                results = connection.execute(sql)
                              
                          else
@@ -8427,10 +8431,11 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
             # check move cg_ to cg_old
             # v_shared = Shared.new 
              # move from new to present table -- made into a function  in shared model
+            # puts "before mv from new to present"
              v_comment = self.move_present_to_old_new_to_present("cg_lst_116_status",
              "lst_subjectid, lst_general_comment,wlesion_030_flag, wlesion_030_comment, wlesion_030_global_quality,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,multiple_sag_cube_flair_flag,wlesion_030_flag_lst_116, wlesion_030_comment_lst_116, wlesion_030_global_quality_lst_116, enrollment_id,scan_procedure_id,lst_lesion,secondary_key",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
-
+            # puts "after mv from new to present"
 
              # apply edits  -- made into a function  in shared model
              self.apply_cg_edits('cg_lst_116_status')
