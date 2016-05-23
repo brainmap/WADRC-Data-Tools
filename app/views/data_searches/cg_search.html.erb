@@ -256,7 +256,7 @@ v_tn_cn_searchable_hash = []
 	<% end %>
 	</td></tr>
 <% elsif tn.common_name == "Participants"%>
-<tr><td colspan="5">Participant Centric output:&nbsp;&nbsp;&nbsp;
+<tr><td colspan="5"><b><big>Participant Centric output:&nbsp;&nbsp;&nbsp;</big></b>
            <% 
               v_participant_centric = "FALSE"
               if @cg_query.participant_centric == "1" # should have been setting up above
@@ -608,7 +608,7 @@ v_tn_cn_searchable_hash = []
                     <% end %>
 			      <%else%>
                     <% if i == 0 %>
-                       <td><%= link_to vgroup.vgroup_date.to_s(:datetime_military), vgroup %></td>
+                       <td> <% if vgroup.vgroup_date  > (DateTime.now - 100.year) %><%= link_to vgroup.vgroup_date.to_s(:datetime_military), vgroup %><%else%> <small>placeholder</small><%end%></td>
                     <% elsif i== 1%>
    <td><%= vgroup.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, '/vgroups/vgroups_search?vgroups_search[scan_procedure_id][id]='+sp.id.to_s)}.join(", ").html_safe %></td>
                     <% elsif i== 2%>

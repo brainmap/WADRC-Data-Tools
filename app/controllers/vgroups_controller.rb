@@ -560,6 +560,22 @@ class VgroupsController < ApplicationController
               end
             end
         end
+        # check if placeholder appt exisits on another vg 
+        if !(@vgroup.participant_id).blank?
+          appointments_placeholder = Appointment.where("appointments.appointment_type = 'placeholder' and appointments.vgroup_id in (select vgroups.id from vgroups where vgroups.participant_id in (?))",@vgroup.participant_id)
+          appointments_placeholder.each do |apl|
+              appointments_other = Appointment.where("appointments.appointment_type IS NOT NULL and appointments.appointment_type != 'placeholder' and appointments.vgroup_id in (?)",apl.vgroup_id)
+              if !appointments_other.blank?
+                    apl.destroy
+              else
+                  @apl_vgroup = Vgroup.find(apl.vgroup_id)
+                  apl.destroy
+                  if !@apl_vgroup.blank?
+                           @apl_vgroup.destroy
+                  end
+              end
+          end
+        end
         format.html { redirect_to(@vgroup, :notice => 'Vgroup was successfully created.') }
         format.xml  { render :xml => @vgroup, :status => :created, :location => @vgroup }
       else
@@ -884,6 +900,20 @@ AND p.id IN (SELECT vg2.participant_id FROM vgroups vg2, scan_procedures_vgroups
 AND p.id in ("+@vgroup.participant_id.to_s+")"
         connection = ActiveRecord::Base.connection();
         results = connection.execute(sql) 
+        # look for other vg - appt placeholder 
+          appointments_placeholder = Appointment.where("appointments.appointment_type = 'placeholder' and appointments.vgroup_id in (select vgroups.id from vgroups where vgroups.participant_id in (?))",@vgroup.participant_id)
+          appointments_placeholder.each do |apl|
+              appointments_other = Appointment.where("appointments.appointment_type IS NOT NULL and appointments.appointment_type != 'placeholder' and appointments.vgroup_id in (?)",apl.vgroup_id)
+              if !appointments_other.blank?
+                    apl.destroy
+              else
+                  @apl_vgroup = Vgroup.find(apl.vgroup_id)
+                  apl.destroy
+                  if !@apl_vgroup.blank?
+                           @apl_vgroup.destroy
+                  end
+              end
+          end
         end  
 
         format.html { redirect_to(@vgroup) }

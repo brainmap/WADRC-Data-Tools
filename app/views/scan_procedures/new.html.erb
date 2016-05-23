@@ -29,6 +29,23 @@
     <%= f.label :petscan_tracer_file_size %><br />
     <%= f.text_field :petscan_tracer_file_size %> Enter [tracer_id]:[size]|[tracer_id]:[size]|etc.
   </p>
+    <p>
+    <%= f.label :petscan_tracer_path %><br />
+    <%= f.text_field :petscan_tracer_path ,:size=>"170"%><br> Enter [tracer_id]:[path]|[tracer_id]:[path]|etc.
+  </p>
+    <p>
+    <%= f.label :rmraic_reggieid_flag %><br />
+      <%= f.select :rmraic_reggieid_flag, v_y_n, :selected => @scan_procedure.rmraic_reggieid_flag , :include_blank => 'Select if reggieid in RMRaicXXXXXX format for in sp'  %> Select if reggieid in RMRaicXXXXXX format for in sp
+  </p>
+      <p>
+    <%= f.label :make_participant_flag %><br />
+      <%= f.select :make_participant_flag, v_y_n, :selected => @scan_procedure.make_participant_flag , :include_blank => 'Select if reggieid NOT in RMRaicXXXXXX format for in sp'  %> Select if reggieid NOT in RMRaicXXXXXX format for in sp<br>
+      <B>Makes a participant, but no reggieid link</B>
+  </p>
+        <p>
+    <b>Alternative RMR dicom field</b><br />
+    <%= f.text_field :rmr_dicom_field %> Enter [####,####]|[description] e.g. 0008,0050|Accession Number.
+  </p>
   <p>
     <%= f.submit "Create" %>
   </p>
@@ -38,3 +55,6 @@
 <%= link_to 'List Protocols', protocols_path %> |
 <%= link_to 'New Protocol', new_protocol_path %>
 <%end%>
+
+
+

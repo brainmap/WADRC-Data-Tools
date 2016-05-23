@@ -178,7 +178,9 @@ class ParticipantsController < ApplicationController
            @appointments = Appointment.where("appointments.vgroup_id in (select vgroups.id from vgroups where participant_id is not null and participant_id in (?))", params[:id])
            @appointments.each do |appt|
               appt.age_at_appointment = ((appt.appointment_date - @participant.dob)/365.25).round(2)
-              appt.save
+              if appt.age_at_appointment > 0
+                 appt.save
+              end
            end
         end
         

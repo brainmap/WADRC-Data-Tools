@@ -81,7 +81,8 @@
 	if ( ((vital.pulse.blank?? 911 :vital.pulse) < 911) or
 		      ((vital.bp_systol.blank?? 911 :vital.bp_systol) < 911 ) or 
 		        ( (vital.bp_diastol.blank?? 911 :vital.bp_diastol) < 911) or 
-		           ((vital.bloodglucose.blank?? 911 :vital.bloodglucose) < 911)  )%>
+		           ((vital.bloodglucose.blank?? 911 :vital.bloodglucose) < 911) or
+                 !vital.weight.blank? or !vital.height.blankl? )%>
 	
 <h4>Vitals:</h4>
 <div id="vital" class="sticky">
