@@ -60,7 +60,7 @@ def run_search
         end 
    end
 
-puts sql    
+puts "aaa run_search="+sql    
     connection = ActiveRecord::Base.connection();
     @results2 = connection.execute(sql)
     @temp_results = @results2
@@ -811,13 +811,14 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
         end
         @results_q_data =[]
         v_limit = 10  # like the chunk approach issue with multiple appts in a vgroup and multiple enrollments
+        # when increased, get repeat rows
         @column_headers.push(*@column_headers_q_data)
 
-        if @fields_q_data.size < v_limit # should be less than 61 table limit
+        if @fields_q_data.size < v_limit # should be less than 61 table limit  # this makes multiple rows
                    fields.push(*@fields_q_data)
                    p_left_join.push(*@left_join_q_data)
                    left_join_vgroup.push(*@left_join_vgroup_q_data)
-        else # get data in v_limit sized chunks
+        else # get data in v_limit sized chunks  # this does weird bleed over of row data if different sp'd have different questions
           @fields_q_data.each_slice(v_limit) do |fields_local|
             @results_q_data_temp = []
             # get all the aliases, find in @left_join_q_data and @left_join_vgroup_q_data
@@ -852,7 +853,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
               if @conditions.size > 0
                   sql = sql +" AND "+@conditions.join(' and ')
               end
-               #puts sql
+              #weird cross row issues when mixing q_data across sp's with different set of questions
+              @results_q_data_temp = []
               @results_q_data_temp = connection.execute(sql)
               # @results_q_data
               # getting duplicate appts??-- multiple enrollments
@@ -945,10 +947,18 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
         # last var field is comment, next last field is id 
         # what if no appointment match and 
         if !@results_q_data[appointment_id].blank? and @html_request =="N"
-          @temp_end = [var.last]
+
+          t_appt_comment = var.last
+          @temp_end = []
+          @temp_end.push(t_appt_comment) #var.last)
           var.pop
           var.pop
-          @temp_row = @temp+var+@results_q_data[appointment_id]+@temp_end
+           # doing some end delete to get rid of id in non-q-data results
+           # just adding comment twice so can delete once
+           @delete_end = [t_appt_comment]
+            @temp_row = []
+          @temp_row = @temp+var+@results_q_data[appointment_id].push(t_appt_comment)+@delete_end
+
         end
       @results[i] = @temp_row
       i = i+1
