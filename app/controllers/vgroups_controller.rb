@@ -534,6 +534,9 @@ class VgroupsController < ApplicationController
              end
           end
           if !v_mismatch_participant_msg.blank?
+              # send email
+              PandaMailer.send_email(v_mismatch_participant_msg,{:send_to => "noreply_johnson_lab@medicine.wisc.edu"},v_mismatch_participant_msg).deliver
+     
                if !flash[:warning].blank?
                   flash[:warning] = flash[:warning] + v_mismatch_participant_msg
                else
@@ -856,6 +859,8 @@ class VgroupsController < ApplicationController
              end
           end
           if !v_mismatch_participant_msg.blank?
+               PandaMailer.send_email(v_mismatch_participant_msg,{:send_to => "noreply_johnson_lab@medicine.wisc.edu"},v_mismatch_participant_msg).deliver
+     
                if !flash[:warning].blank?
                   flash[:warning] = flash[:warning] + v_mismatch_participant_msg
                else
