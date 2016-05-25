@@ -810,7 +810,7 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
           
         end
         @results_q_data =[]
-        v_limit = 10  # like the chunk approach issue with multiple appts in a vgroup and multiple enrollments
+        v_limit =  10  # like the chunk approach issue with multiple appts in a vgroup and multiple enrollments
         # when increased, get repeat rows
         @column_headers.push(*@column_headers_q_data)
 
@@ -854,6 +854,9 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                   sql = sql +" AND "+@conditions.join(' and ')
               end
               #weird cross row issues when mixing q_data across sp's with different set of questions
+              # think the sql is letting values cross sps  -- participant_id is in some questions 
+              # linking to vgroups.participant_id, but not getting values link==appt id
+          puts "bbbbbbb q_data 858= "+sql
               @results_q_data_temp = []
               @results_q_data_temp = connection.execute(sql)
               # @results_q_data

@@ -11,7 +11,7 @@ v_value_type =	[["dropdown","dropdown"],["dropdown_multiple","dropdown_multiple"
 v_status = {"Active"=>"active","InActive"=>"inactive"}
 v_required_yn = {"Required"=>"required","Not Required"=>"not_required"}
 
-v_value_link ={"appointment"=>"appointment", "visit"=>"visit", "participant"=>"participant","enrollment"=>"enrollment"}
+v_value_link ={"appointment"=>"appointment", "(DO NOT USE) visit"=>"visit", "(DO NOT USE) participant"=>"participant","(DO NOT USE) enrollment"=>"enrollment"}
 v_global_update = {"Y"=>"Y","N"=>"N"}
 %>
 The question can have up to three parts.<br>
@@ -42,8 +42,9 @@ The question can have up to three parts.<br>
   <div class="field">
     <%= f.label :value_link %>&nbsp;<small><small>Normally = Appointment. What the question results are linked with.</small></small><br />
  <%= f.select :value_link, options_for_select(v_value_link, @question.value_link),
-	              {:prompt => 'Select a value link'}  %>
-  </div>
+	              {:prompt => 'Select a value link'}  %><br>
+                <B>USE APPOINTMENT!!! as value link, unless just text </B>
+  </div>  -participant linkage is causing problems
 </td><td>
   <div class="field">
     <%= f.label :status %><br />
