@@ -7,9 +7,11 @@
     <th>Series description type</th>
     <th>Series description</th>
     <th>Count by Scan Protocol</th>
+    <% if current_user.role == 'Admin_High'%>
     <th></th>
     <th></th>
     <th></th>
+    <%end%>
   </tr>
 
 <% @series_description_maps.each do |series_description_map| %>
@@ -27,9 +29,11 @@
           end %>
           <%= v_sp_cnt_array.join(", ") %>
     </td>
+    <% if current_user.role == 'Admin_High'%>
     <td><%= link_to 'Show', series_description_map %></td>
     <td><%= link_to 'Edit', edit_series_description_map_path(series_description_map) %></td>
     <td><%= link_to 'Destroy', series_description_map, :confirm => 'Are you sure?', :method => :delete %></td>
+    <%end%>
   </tr>
 <% end %>
 </table>
