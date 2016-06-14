@@ -1078,7 +1078,7 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
           sql2 = "insert into cg_adrc_upload_new (subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,dti_sent_flag,dti_status_flag) values('"+r[0]+"','N','Y', "+enrollment[0].id.to_s+",22,'N','Y')"
           results2 = connection.execute(sql2)
     end
-     # need to adjust v_weeks_back  to cover 2015-08-05
+     # its going to grab ~70 -need to adjust v_weeks_back  to cover 2015-08-05
         sql = "select distinct enrollments.enumber from enrollments,enrollment_vgroup_memberships, vgroups, scan_procedures_vgroups  where enrollments.enumber like 'adrc%' 
               and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
               and enrollment_vgroup_memberships.enrollment_id = enrollments.id
@@ -1091,7 +1091,7 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
     results.each do |r|
           enrollment = Enrollment.where("enumber in (?)",r[0])
           sql2 = "insert into cg_adrc_upload_new (subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,dti_sent_flag,dti_status_flag) values('"+r[0]+"_v2','N','Y', "+enrollment[0].id.to_s+",65,'N','Y')"
-         ###### results2 = connection.execute(sql2)
+          results2 = connection.execute(sql2)
     end
 
 
