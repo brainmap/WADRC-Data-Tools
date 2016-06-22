@@ -2532,7 +2532,7 @@ def cg_up_load
                v_msg = v_source_up_table_name+" table already exists in source schema "+v_source_schema
         else
           v_create_sql = "CREATE table "+v_source_schema+"."+v_source_up_table_name+"("
-          v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_function, col_format from "+v_definition_table+" where table_name ='"+v_up_table_name+"'"   
+          v_sql_cols = "Select distinct lower(col_db), upper(col_type), col_size,col_function, col_format from "+v_definition_table+" where table_name ='"+v_up_table_name+"'"   
         result_cols = connection.execute(v_sql_cols)
         v_loop_cnt = 0
         result_cols.each do |col|
@@ -2613,7 +2613,7 @@ def cg_up_load
         v_date_date_col_hash = {}
         v_date_format_col_hash = {}
         v_age_at_activity_col_hash = {}
-        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_function, col_format from "+v_definition_table+" where target_table ='"+v_up_table_name+"'"   
+        v_sql_cols = "Select distinct lower(col_db), upper(col_type), col_size,col_function, col_format from "+v_definition_table+" where target_table ='"+v_up_table_name+"'"   
         result_cols = connection.execute(v_sql_cols)
         result_cols.each do |col|
               v_col_array.push(col[0])
