@@ -2834,7 +2834,7 @@ def cg_up_load
 
         v_col_array = []
         v_key_col_array = []
-        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_function,col_format from "+v_definition_table+" where target_table ='"+v_up_table_name+"'"   
+        v_sql_cols = "Select distinct lower(col_db), upper(col_type), col_size,col_function,col_format from "+v_definition_table+" where target_table ='"+v_up_table_name+"'"   
         result_cols = connection.execute(v_sql_cols)
         # need to make _date and _age_at_activity cols, and do upddate based on format
         v_date_source_col_array = []
