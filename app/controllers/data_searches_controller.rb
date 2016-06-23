@@ -2701,24 +2701,24 @@ def cg_up_load
         elsif v_key_type == "subjectid-kc-participant_id"
             v_key_col = v_key_col_array[0]
              sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct e.participant_id from enrollments e where e.enumber = replace(replace(replace(replace(t."+v_key_col+",'_v2',''),'_v3',''),'_v4',''),'_v5',''))
-             where  t.participant_id  is null"
+             where  t.participant_id  is null and t."+v_key_col+" is not null and t."+v_key_col+" > '' "
               results = connection.execute(sql) 
         elsif v_key_type == "reggieid-kc-participant_id"
             v_key_col = v_key_col_array[0]
              sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct p.id from participants p where p.reggieid = t."+v_key_col+")
-             where  t.participant_id  is null"
+             where  t.participant_id  is null and t."+v_key_col+" is not null and t."+v_key_col+" > '' "
               results = connection.execute(sql) 
         elsif v_key_type == "wrapnum-kc-participant_id"
              v_key_col = v_key_col_array[0]
              sql = "update "+v_schema+"."+v_tn+"  t 
              set t.participant_id = ( select distinct p.id from participants p where p.wrapnum = t."+v_key_col+")
-             where t.participant_id  is null"
+             where t.participant_id  is null  and t."+v_key_col+" is not null and t."+v_key_col+" > '' "
   puts "ffffff wrapnum-kc-participant_id = "+sql
               results = connection.execute(sql) 
         elsif v_key_type == "adrcnum-kc-participant_id"
             v_key_col = v_key_col_array[0]
              sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct p.id from participants p where p.adrcnum = t."+v_key_col+")
-             where  t.participant_id  is null"
+             where  t.participant_id  is null and t."+v_key_col+" is not null and t."+v_key_col+" > '' "
               results = connection.execute(sql) 
         end
 
@@ -2925,17 +2925,17 @@ def cg_up_load
         elsif v_key_type == "subjectid-kc-participant_id"
           v_key_col = v_key_col_array[0]
              sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct e.participant_id from enrollments e where e.enumber = replace(replace(replace(replace(t."+v_key_col+",'_v2',''),'_v3',''),'_v4',''),'_v5',''))
-             where t.participant_id is null "
+             where t.participant_id is null  and t."+v_key_col+" is not null and t."+v_key_col+" > '' "
               results = connection.execute(sql)
         elsif v_key_type == "reggieid-kc-participant_id"
             v_key_col = v_key_col_array[0]
              sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct p.id from participants p where p.reggieid = t."+v_key_col+")
-             where t.participant_id is null "
+             where t.participant_id is null  and t."+v_key_col+" is not null and t."+v_key_col+" > '' "
               results = connection.execute(sql) 
         elsif v_key_type == "wrapnum-kc-participant_id"
           v_key_col = v_key_col_array[0]
              sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct p.id from participants p where p.wrapnum = t."+v_key_col+")
-             where t.participant_id is null "
+             where t.participant_id is null  and t."+v_key_col+" is not null and t."+v_key_col+" > '' "
 
   puts "ggggggggg wrapnum-kc-participant_id = "+sql
 
@@ -2943,7 +2943,7 @@ def cg_up_load
         elsif v_key_type == "adrcnum-kc-participant_id"
             v_key_col = v_key_col_array[0]
              sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct p.id from participants p where p.adrcnum = t."+v_key_col+")
-                   where t.participant_id is null "
+                   where t.participant_id is null  and t."+v_key_col+" is not null and t."+v_key_col+" > '' "
               results = connection.execute(sql) 
         end 
         v_date_source_col_array.each do |key|
