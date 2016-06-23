@@ -2661,6 +2661,19 @@ def cg_up_load
                results = connection.execute(v_delete_sql)
                v_msg = v_msg+"; Deleted shared data  for append from table "+v_tn
          end
+         if ( !params[:append_full_replace].empty? and params[:append_full_replace] == "append_by_participant" )
+# NEED TO DO !!! delete exisiting rows based on key column/subjectid/secondary_key_protocol, secondary_key
+
+               # issues when using wrapnum from one source files, adrcnum from another source
+               v_delete_sql = " DELETE FROM "+v_schema+"."+v_tn+" WHERE coalesce('',"+ v_col_multi_key_array.join(",'=|',") +")  IN 
+                        (SELECT coalesce('',"+ v_col_multi_key_array.join(",'=|',") +") FROM "+v_source_schema+"."+v_source_up_table_name+")
+                        "
+               v_col_multi_key_array.each do |key_col|
+                    v_delete_sql = "and "+key_col+" > '' "  
+               end
+               results = connection.execute(v_delete_sql)
+               v_msg = v_msg+"; Deleted shared data  for append from table "+v_tn
+         end
        v_insert_sql = "INSERT INTO "+v_schema+"."+v_tn+"("
         v_insert_end_sql = ") "
         v_select_sql =" SELECT "
