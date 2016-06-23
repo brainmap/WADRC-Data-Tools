@@ -2669,7 +2669,7 @@ def cg_up_load
                         (SELECT coalesce('',"+ v_col_multi_key_array.join(",'=|',") +") FROM "+v_source_schema+"."+v_source_up_table_name+")
                         "
                v_col_multi_key_array.each do |key_col|
-                    v_delete_sql = "and "+key_col+" > '' "  
+                    v_delete_sql = v_delete_sql+" and "+key_col+" > '' "  
                end
                results = connection.execute(v_delete_sql)
                v_msg = v_msg+"; Deleted shared data  for append from table "+v_tn
