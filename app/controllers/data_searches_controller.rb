@@ -2713,6 +2713,7 @@ def cg_up_load
              sql = "update "+v_schema+"."+v_tn+"  t 
              set t.participant_id = ( select distinct p.id from participants p where p.wrapnum = t."+v_key_col+")
              where t.participant_id  is null"
+  puts "ffffff wrapnum-kc-participant_id = "+sql
               results = connection.execute(sql) 
         elsif v_key_type == "adrcnum-kc-participant_id"
             v_key_col = v_key_col_array[0]
@@ -2935,6 +2936,9 @@ def cg_up_load
           v_key_col = v_key_col_array[0]
              sql = "update "+v_schema+"."+v_tn+"  t set t.participant_id = ( select distinct p.id from participants p where p.wrapnum = t."+v_key_col+")
              where t.participant_id is null "
+
+  puts "ggggggggg wrapnum-kc-participant_id = "+sql
+
               results = connection.execute(sql) 
         elsif v_key_type == "adrcnum-kc-participant_id"
             v_key_col = v_key_col_array[0]
