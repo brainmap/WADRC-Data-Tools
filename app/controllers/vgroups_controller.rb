@@ -565,8 +565,11 @@ class VgroupsController < ApplicationController
         end
         # check if placeholder appt exisits on another vg 
         if !(@vgroup.participant_id).blank?
-          appointments_placeholder = Appointment.where("appointments.appointment_type = 'placeholder' and appointments.vgroup_id in (select vgroups.id from vgroups where vgroups.participant_id in (?))",@vgroup.participant_id)
-          appointments_placeholder.each do |apl|
+                    appointments_placeholder = Appointment.where("appointments.appointment_type = 'placeholder' and appointments.vgroup_id in (select vgroups.id from vgroups where vgroups.participant_id in (?)) 
+              and  appointments.vgroup_id in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where scan_procedures_vgroups.scan_procedure_id in 
+                   (select scan_procedures_vgroups.scan_procedure_id from scan_procedures_vgroups where scan_procedures_vgroups.vgroup_id in (?)))
+                   and appointments.vgroup_id  NOT IN (?) ",@vgroup.participant_id,@vgroup.id,@vgroup.id)
+            appointments_placeholder.each do |apl|
               appointments_other = Appointment.where("appointments.appointment_type IS NOT NULL and appointments.appointment_type != 'placeholder' and appointments.vgroup_id in (?)",apl.vgroup_id)
               if !appointments_other.blank?
                     apl.destroy
@@ -906,7 +909,11 @@ AND p.id in ("+@vgroup.participant_id.to_s+")"
         connection = ActiveRecord::Base.connection();
         results = connection.execute(sql) 
         # look for other vg - appt placeholder 
-          appointments_placeholder = Appointment.where("appointments.appointment_type = 'placeholder' and appointments.vgroup_id in (select vgroups.id from vgroups where vgroups.participant_id in (?))",@vgroup.participant_id)
+          #appointments_placeholder = Appointment.where("appointments.appointment_type = 'placeholder' and appointments.vgroup_id in (select vgroups.id from vgroups where vgroups.participant_id in (?))",@vgroup.participant_id)
+          appointments_placeholder = Appointment.where("appointments.appointment_type = 'placeholder' and appointments.vgroup_id in (select vgroups.id from vgroups where vgroups.participant_id in (?)) 
+              and  appointments.vgroup_id in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where scan_procedures_vgroups.scan_procedure_id in 
+                   (select scan_procedures_vgroups.scan_procedure_id from scan_procedures_vgroups where scan_procedures_vgroups.vgroup_id in (?)))
+                   and appointments.vgroup_id  NOT IN (?) ",@vgroup.participant_id,@vgroup.id,@vgroup.id)
           appointments_placeholder.each do |apl|
               appointments_other = Appointment.where("appointments.appointment_type IS NOT NULL and appointments.appointment_type != 'placeholder' and appointments.vgroup_id in (?)",apl.vgroup_id)
               if !appointments_other.blank?
