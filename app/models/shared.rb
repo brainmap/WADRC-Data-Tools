@@ -1139,6 +1139,7 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
       results_vgroup = connection.execute(sql_vgroup)
       # mkdir /tmp/adrc_upload/[subjectid]_YYYYMMDD_wisc
       v_subject_dir = r[0]+"_"+(results_vgroup.first)[0].to_s+"_wisc"
+      v_subjectid_chop = (r[0]).gsub('_v2','').gsub('_v3','').gsub('_v4','').gsub('_v5','')
       v_parent_dir_target =v_target_dir+"/"+v_subject_dir
       v_call = "mkdir "+v_parent_dir_target
       stdin, stdout, stderr = Open3.popen3(v_call)
@@ -1157,7 +1158,7 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
                   and series_description_maps.series_description_type_id = series_description_types.id
                   and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','T2','T2 Flair','T2_Flair','T2+Flair','DTI') 
                   and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
-                  and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')
+                  and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+v_subjectid_chop+"')
                    order by appointments.appointment_date "
       results_dataset = connection.execute(sql_dataset)
       v_folder_array = [] # how to empty
@@ -2423,7 +2424,7 @@ puts " "+r[0]+"  ="+r[1]
   end
 
   # for the scan share consortium - upload to padi
-  def run_padi_upload   # CHNAGE _STATUS_FLAG = Y !!!!!!!
+  def run_padi_upload   # CHNAGE _STATUS_FLAG = Y !!!!!!!  ## add mri_visit_number????
     v_base_path = Shared.get_base_path()
      @schedule = Schedule.where("name in ('padi_upload')").first
       @schedulerun = Schedulerun.new
@@ -2453,13 +2454,15 @@ puts " "+r[0]+"  ="+r[1]
     #  t_adrc_impact_control_20150216 where participant_id is not null and lp_completed_flag ='Y')
      #(participants.wrapnum is not null and participants.wrapnum > '')
      # only want the tau  - petid=7 
+     # 'pdt00150','pdt00151','pdt00152','pdt00153','pdt00154','pdt00155','pdt00156','pdt00157','pdt00158','pdt00159'
+
     sql = "select distinct vgroups.id, vgroups.participant_id,
               vgroups.transfer_mri, vgroups.transfer_pet
               from enrollments,enrollment_vgroup_memberships, vgroups, scan_procedures_vgroups,participants    
             where participants.id = vgroups.participant_id and
              ( 
                 (vgroups.participant_id) in ( select enrollments.participant_id from enrollments where do_not_share_scans_flag ='N' and
-                                               enrollments.enumber in ('pdt00150','pdt00151','pdt00152','pdt00153','pdt00154','pdt00155','pdt00156','pdt00157','pdt00158','pdt00159'))
+                                               enrollments.enumber in ('pdt00178','pdt00176','pdt00175','pdt00173','pdt00172','pdt00171','pdt00169','pdt00166','pdt00168','pdt00165','pdt00167','pdt00164','pdt00162'))
               )
               and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
               and vgroups.id = scan_procedures_vgroups.vgroup_id
