@@ -1106,7 +1106,7 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
     
     
     # get adrc subjectid to upload
-    sql = "select distinct subjectid from cg_adrc_upload where sent_flag ='N' and status_flag in ('Y','R') "
+    sql = "select distinct subjectid,scan_procedure_id from cg_adrc_upload where sent_flag ='N' and status_flag in ('Y','R') "
     results = connection.execute(sql)
     # changed to series_description_maps table
     v_folder_array = Array.new
@@ -1135,11 +1135,12 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
       @schedulerun.comment =v_comment[0..1990]
       @schedulerun.save
       # update schedulerun comment - prepend 
-      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+r[0]+"')"
+      v_subjectid_chop = (r[0]).gsub('_v2','').gsub('_v3','').gsub('_v4','').gsub('_v5','')
+      sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+v_subjectid_chop+"')
+    and v.id in (select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id = "+r[1]+")"
       results_vgroup = connection.execute(sql_vgroup)
       # mkdir /tmp/adrc_upload/[subjectid]_YYYYMMDD_wisc
       v_subject_dir = r[0]+"_"+(results_vgroup.first)[0].to_s+"_wisc"
-      v_subjectid_chop = (r[0]).gsub('_v2','').gsub('_v3','').gsub('_v4','').gsub('_v5','')
       v_parent_dir_target =v_target_dir+"/"+v_subject_dir
       v_call = "mkdir "+v_parent_dir_target
       stdin, stdout, stderr = Open3.popen3(v_call)
@@ -1159,6 +1160,7 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
                   and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','T2','T2 Flair','T2_Flair','T2+Flair','DTI') 
                   and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
                   and vgroups.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+v_subjectid_chop+"')
+              and v.id in (select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id = "+r[1]+")
                    order by appointments.appointment_date "
       results_dataset = connection.execute(sql_dataset)
       v_folder_array = [] # how to empty
