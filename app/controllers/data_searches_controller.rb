@@ -2,6 +2,8 @@
 class DataSearchesController < ApplicationController
    # this isn't used - was a test bed for making sql
    require 'cgi'
+   require 'csv'
+
   def index
       # get the tables to join
       # columns and values to add to where
@@ -126,6 +128,8 @@ class DataSearchesController < ApplicationController
       @cg_tn_key_unique_y = []
       @cg_tns = CgTn.where("table_type='column_group' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order) 
+      @cg_fs_tns = CgTn.where("table_type='free_surfer' and status_flag='Y' and table_type in 
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order)  
       @cg_tracker_tns = CgTn.where("table_type='tracker' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order)  
       @cg_combio_tns = CgTn.where("table_type='combio' and status_flag='Y' and table_type in 
@@ -2476,6 +2480,8 @@ puts "bbbbb "+sql
     @results_total = @results # pageination makes result count wrong
     t = Time.now 
     @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
+    # making csv - html xls file not working with excel2016
+
   end   
   
       respond_to do |format|
@@ -2488,7 +2494,7 @@ puts "bbbbb "+sql
         else
           format.html 
         end
-        format.xml  { render :xml => @lumbarpunctures }
+        format.xml  { render :xml => @results }
       end
      
     end
