@@ -66,7 +66,7 @@ v_tn_cn_searchable_hash = []
 </td></tr>
 <% if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?%>
 <tr><td align="center" colspan=2>
-	<%= form_tag '/cg_search.xls' do%>
+	<%= form_tag '/cg_search.csv' do%><!--- switching to csv - leaving this xls unchanged -->
 	    <% v_link_to_elements = (link_to '/cg_search.xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
 	    <%  v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
 	        v_link_to_elements = v_link_to_elements.gsub(/&amp;method=post">download xls<\/a>/,'')
@@ -99,7 +99,7 @@ v_tn_cn_searchable_hash = []
 	              <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>
 	            <% end %>
 	       <% end %>
-	      <%= submit_tag 'export file'%>
+	      <%= submit_tag 'export CSV file'%>
 	<% end %>
 	</td></tr>
 	<% end %>
@@ -461,7 +461,7 @@ v_tn_cn_searchable_hash = []
 %>
 </table>
 <% if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?%>
-<%= form_tag '/cg_search.xls' do%>
+<%= form_tag '/cg_search.csv' do%><!--- switching to csv - leaving rest xls unchanged -->
     <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
     <%   v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
              v_link_to_elements = v_link_to_elements.gsub(/&amp;method=post">download xls<\/a>/,'')
@@ -492,11 +492,11 @@ v_tn_cn_searchable_hash = []
             <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
            <% end %>
        <% end %>
-      <%= submit_tag 'export file'%> 
+      <%= submit_tag 'export CSV file'%> 
 
 <% end %>
 
-<%= form_tag '/cg_search.xls' do%>
+<%= form_tag '/cg_search.csv' do%><!--- switching to csv - leaving this xls unchanged -->
     <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
     <%= hidden_field_tag 'longitudinal','Y' %>
     <%   v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
@@ -529,14 +529,14 @@ v_tn_cn_searchable_hash = []
            <% end %>
        <% end %>
        
-      <%= submit_tag 'export longitudinal file'%>  
+      <%= submit_tag 'export longitudinal CSV file'%>  
         
 
 <% end %>
 
 
 <% if !params[:cg_search].blank? and !params[:cg_search][:series_description_type_id].blank? %>
- <%= form_tag '/cg_search.xls' do%>
+ <%= form_tag '/cg_search.csv' do%><!--- switching to csv - leaving this xls unchanged -->
     <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
     <%  v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
         v_link_to_elements = v_link_to_elements.gsub(/&amp;method=post">download xls<\/a>/,'')

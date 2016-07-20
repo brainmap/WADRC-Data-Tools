@@ -2481,6 +2481,19 @@ puts "bbbbb "+sql
     t = Time.now 
     @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
     # making csv - html xls file not working with excel2016
+        @csv_array = []
+    @results_tmp_csv = []
+    @results_tmp_csv.push(@export_file_title)
+    @csv_array.push(@results_tmp_csv )
+    @csv_array.push( @local_column_headers)
+    @results.each do |result| 
+       @results_tmp_csv = []
+       for i in 0..@column_number-1  # results is an array of arrays%>
+          @results_tmp_csv.push(result[i])
+       end 
+       @csv_array.push(@results_tmp_csv)
+    end 
+    @csv_str = @csv_array.inject([]) { |csv, row|  csv << CSV.generate_line(row) }.join("")  
 
   end   
   
@@ -2495,6 +2508,7 @@ puts "bbbbb "+sql
           format.html 
         end
         format.xml  { render :xml => @results }
+        format.csv { send_data @csv_str }
       end
      
     end
