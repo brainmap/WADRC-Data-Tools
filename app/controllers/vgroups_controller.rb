@@ -2,6 +2,7 @@
 class VgroupsController < ApplicationController
   # GET /vgroups
   # GET /vgroups.xml
+  require 'csv'
   def index
     scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
           hide_date_flag_array = []

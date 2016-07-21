@@ -95,6 +95,15 @@ puts "aaa run_search="+sql
                 AND enrollment_vgroup_memberships.vgroup_id = "+var[0].to_s
           @results_enum = connection.execute(sql_enum)
           @temp[2] =@results_enum.to_a.join(", ")
+
+         t_appt_comment = var.last
+         var.pop
+         t_appt_id = var.last
+         var.pop
+         var.push(t_appt_comment)
+         var.push(t_appt_id)
+       # seems to want comment , id, and some other field 
+         var.push(t_appt_comment)
           
       else  # need to only get the sp and enums which are displayed - and need object to make link
         @temp[1] = var[0].to_s
@@ -102,9 +111,9 @@ puts "aaa run_search="+sql
       end 
       var.delete_at(0) # get rid of vgroup_id
       var.delete_at(0) # get rid of extra copy of appt date
-      
+ 
+       
       @temp_row = @temp + var
-
       @results[i] = @temp_row
       i = i+1
     end   
@@ -186,6 +195,9 @@ puts sql
       v_petscan_id = var[v_length-2]
       @temp.unshift(v_petscan_id)
       var.delete_at(v_length-2)
+      if @html_request =="N"
+          var.delete_at(0) # seems to need to delete another blank field?
+      end
       v_petfiles = Petfile.where("petscan_id in (?)", v_petscan_id)
       v_petfiles.each do |pf|
          var.push(pf.file_name)

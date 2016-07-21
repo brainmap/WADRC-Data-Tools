@@ -2,6 +2,7 @@
 class LumbarpuncturesController < ApplicationController
   # GET /lumbarpunctures
   # GET /lumbarpunctures.xml
+  require 'csv'
   def index
     @lumbarpunctures = Lumbarpuncture.all
 
@@ -595,12 +596,25 @@ class LumbarpuncturesController < ApplicationController
      @results_total = @results  # pageination makes result count wrong
      t = Time.now 
      @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
-    
+    @csv_array = []
+    @results_tmp_csv = []
+    @results_tmp_csv.push(@export_file_title)
+    @csv_array.push(@results_tmp_csv )
+    @csv_array.push( @column_headers)
+    @results.each do |result| 
+       @results_tmp_csv = []
+       for i in 0..@column_number-1  # results is an array of arrays%>
+          @results_tmp_csv.push(result[i])
+       end 
+       @csv_array.push(@results_tmp_csv)
+    end 
+    @csv_str = @csv_array.inject([]) { |csv, row|  csv << CSV.generate_line(row) }.join("")  
      ### LOOK WHERE TITLE IS SHOWING UP
      @collection_title = 'All Lumbarpuncture appts'
 
      respond_to do |format|
        format.xls # lp_search.xls.erb
+       format.csv { send_data @csv_str }
        format.xml  { render :xml => @lumbarpunctures }       
        format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(50)} # lp_search.html.erb
      end
