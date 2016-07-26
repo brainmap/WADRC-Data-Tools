@@ -1085,7 +1085,7 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
               and scan_procedures_vgroups.vgroup_id = vgroups.id
               and scan_procedures_vgroups.scan_procedure_id = 65
               and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL "+v_weeks_back+" WEEK)             
-              and enrollments.enumber NOT IN ( select concat(subjectid,'_v2') from cg_adrc_upload_new)
+              and concat(enrollments.enumber,'_v2') NOT IN ( select subjectid from cg_adrc_upload_new)
               and vgroups.transfer_mri ='yes'"
     results = connection.execute(sql)
     results.each do |r|
