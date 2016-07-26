@@ -120,9 +120,9 @@ edit_count = edit_count -1
   
 <% end %>
 
-<%= link_to 'download xls', { :controller=>"neuropsyches", :action=>"np_search", :np_search =>  params[:np_search] , :format => :xls} %> 
+<%= link_to 'download csv', { :controller=>"neuropsyches", :action=>"np_search", :np_search =>  params[:np_search] , :format => :csv} %> 
 <br>
-<%= link_to 'raw data download xls', { :controller=>"neuropsyches", :action=>"np_search", :np_search =>  params[:np_search] ,:p_raw_data =>"Y", :format => :xls} %> 
+<%= link_to 'raw data download csv', { :controller=>"neuropsyches", :action=>"np_search", :np_search =>  params[:np_search] ,:p_raw_data =>"Y", :format => :csv} %> 
  </p>
 
 

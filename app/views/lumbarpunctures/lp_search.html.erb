@@ -75,7 +75,7 @@ edit_count =   edit_count -1
   <%= f.submit "Search" %>
 <% end %>
 
-<%= link_to 'download xls', { :controller=>"lumbarpunctures", :action=>"lp_search", :lp_search =>  params[:lp_search] , :format => :xls} %>  </p>
+<%= link_to 'download csv', { :controller=>"lumbarpunctures", :action=>"lp_search", :lp_search =>  params[:lp_search] , :format => :csv} %>  </p>
 
 <table class="tabular">  
   <caption><%= pluralize(@results_total.size, 'Lumbarpuncture appt') %></caption>

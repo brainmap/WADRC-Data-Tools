@@ -119,7 +119,7 @@ edit_count = edit_count -1
 <% end %>
 
 
-<%= link_to 'download xls',{ :controller=>"visits", :action=>"mri_search", :mri_search =>  params[:mri_search] , :format => :xls} %>  </p>
+<%= link_to 'download csv',{ :controller=>"visits", :action=>"mri_search", :mri_search =>  params[:mri_search] , :format => :csv} %>  </p>
 
 <table class="tabular">  
   <caption><%= pluralize(@results_total.size, 'MRI appt') %></caption>
