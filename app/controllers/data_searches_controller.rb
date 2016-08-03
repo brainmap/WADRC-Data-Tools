@@ -2824,7 +2824,7 @@ def cg_up_load
                 end
                 if ( v_age_at_activity_col_hash[col[0]] > ''  )
                     v_age_existing_cg_tn_cn = v_cg_tn_cns.where("cn in (?)",v_age_at_activity_col_hash[col[0]])
-                    if(v_age_existing_cg_tn_cn?blank)
+                    if(v_age_existing_cg_tn_cn.blank?)
                       v_cg_tn_cn_age = CgTnCn.new
                       v_cnt = v_cnt + 1
                       v_cg_tn_cn_age.display_order = v_cnt
