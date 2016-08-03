@@ -2642,6 +2642,12 @@ def cg_up_load
               end 
               if col[3] == "subjectid"
                  v_key_col_array.push(col[0])
+              elsif col[3] == "wrapnum"
+                 v_key_col_array.push(col[0])
+                 v_col_multi_key_array.push(col[0])
+              elsif col[3] == "reggieid"
+                 v_key_col_array.push(col[0])
+                 v_col_multi_key_array.push(col[0])
               end
               if col[1] == "VARCHAR"
                   v_create_sql = v_create_sql+", "+col[0]+"   VARCHAR("+col[2]+") "
