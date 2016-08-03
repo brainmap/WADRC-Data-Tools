@@ -2822,17 +2822,20 @@ def cg_up_load
                     v_cg_tn_cn.data_type ="date"
                     v_cg_tn_cn.status_flag ="N" # hiding up date field ?????
                 end
-                if ( v_age_at_activity_col_hash[col[0]] > '')
-                    v_cg_tn_cn_age = CgTnCn.new
-                    v_cnt = v_cnt + 1
-                    v_cg_tn_cn_age.display_order = v_cnt
-                    v_cg_tn_cn_age.cn = v_age_at_activity_col_hash[col[0]]
-                    v_cg_tn_cn_age.order_by_flag = "Y"
-                    v_cg_tn_cn_age.common_name = col[3]+" age at activity"
-                    v_cg_tn_cn_age.export_name = col[3]+" age at activity"
-                    v_cg_tn_cn_age.cg_tn_id = v_cg_tns_archive[0].id
-                    v_cg_tn_cn_age.data_type ="float"
-                    v_cg_tn_cn_age.save
+                if ( v_age_at_activity_col_hash[col[0]] > ''  )
+                    v_age_existing_cg_tn_cn = v_cg_tn_cns.where("cn in (?)",v_age_at_activity_col_hash[col[0]])
+                    if(v_age_existing_cg_tn_cn?blank)
+                      v_cg_tn_cn_age = CgTnCn.new
+                      v_cnt = v_cnt + 1
+                      v_cg_tn_cn_age.display_order = v_cnt
+                      v_cg_tn_cn_age.cn = v_age_at_activity_col_hash[col[0]]
+                      v_cg_tn_cn_age.order_by_flag = "Y"
+                      v_cg_tn_cn_age.common_name = col[3]+" age at activity"
+                      v_cg_tn_cn_age.export_name = col[3]+" age at activity"
+                      v_cg_tn_cn_age.cg_tn_id = v_cg_tns_archive[0].id
+                      v_cg_tn_cn_age.data_type ="float"
+                      v_cg_tn_cn_age.save
+                    end
                 end
 
             end
