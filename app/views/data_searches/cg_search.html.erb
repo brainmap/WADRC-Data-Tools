@@ -256,8 +256,7 @@ v_tn_cn_searchable_hash = []
 	<% end %>
 	</td></tr>
 <% elsif tn.common_name == "Participants"%>
-<tr><td colspan="5"><b><big>Participant Centric output:&nbsp;&nbsp;&nbsp;</big></b>
-           <% 
+          <% 
               v_participant_centric = "FALSE"
               if @cg_query.participant_centric == "1" # should have been setting up above
                   v_participant_centric = "TRUE"
@@ -267,7 +266,9 @@ v_tn_cn_searchable_hash = []
                         v_participant_centric = "TRUE"
               end
            %>
-<%= check_box_tag "participant_centric", "1", v_participant_centric == "FALSE" ? FALSE : TRUE , :name => "cg_search[participant_centric]" %>
+<tr><td colspan="5"><%= check_box_tag "participant_centric", "1", v_participant_centric == "FALSE" ? FALSE : TRUE , :name => "cg_search[participant_centric]" %>
+	<b><big>Participant Centric output:&nbsp;&nbsp;&nbsp;</big></b><small>links data to the participant instead of to mri, pet, etc. visits
+<!-- <%= check_box_tag "participant_centric", "1", v_participant_centric == "FALSE" ? FALSE : TRUE , :name => "cg_search[participant_centric]" %> -->
 	</td></tr>
 <% end %>
              <tr><td><%= hidden_field(:cg_search, "tn_id][", :value=>tn.id.to_s) %>
