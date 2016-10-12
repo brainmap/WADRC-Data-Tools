@@ -726,7 +726,6 @@ class VgroupsController < ApplicationController
     end
     
     params[:vgroup].delete('enrollments_attributes') 
-
     
     respond_to do |format|
       if @vgroup.update_attributes(params[:vgroup])  #@vgroup.save #update_attributes(params[:vgroup])
@@ -785,6 +784,9 @@ class VgroupsController < ApplicationController
           # link participant_id to vgroup
         end
         @vgroup.do_not_share_scans = ""
+        if  !params[:vgroup][:pilot_flag].blank? and params[:vgroup][:pilot_flag] == 'Y'
+             @vgroup.do_not_share_scans ='DO NOT SHARE'
+        end 
         @vgroup.save
         v_do_not_share_scans_flag ="N"
         @enrollments = Enrollment.where("enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships 
