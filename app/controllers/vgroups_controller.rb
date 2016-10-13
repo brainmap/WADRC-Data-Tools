@@ -334,7 +334,7 @@ class VgroupsController < ApplicationController
       v_enrollment_id_array = []
       v_enrollment_array = []
       enumber_array = []
-      @vgroup.do_not_share_scans = ""
+      @vgroup.do_not_share_scans = "OK_TO_SHARE"
       if @vgroup.save  # save being blocked if enumber already exists
         params[:id] = @vgroup.id.to_s
         #problems with new enumber
@@ -783,7 +783,7 @@ class VgroupsController < ApplicationController
           # link participant_id to enrollments
           # link participant_id to vgroup
         end
-        @vgroup.do_not_share_scans = ""
+        @vgroup.do_not_share_scans = "OK_TO_SHARE"
         if  !params[:vgroup][:pilot_flag].blank? and params[:vgroup][:pilot_flag] == 'Y'
              @vgroup.do_not_share_scans ='DO NOT SHARE'
         end 
