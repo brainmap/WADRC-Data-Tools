@@ -1987,15 +1987,29 @@ class DataSearchesController < ApplicationController
     end
 
     if v_includes_hide_date_tns  == "Y"
-        # need to exclude hide columns   # format tn.cn
-        @local_fields.each do |lf|
+        # need to exclude hide columns   # format tn.cn # up tables hide other date columns
+       #Problem with vgroup date 
+        @local_fields_chop = @local_fields.dup  
+         # copy array with .dup but as new array, else deleteing from array messes with loop
+        @local_fields_chop.each do |lf|
             v_temp_split = lf.split(".")
             v_temp_tn = CgTn.where("tn in (?)",v_temp_split[0])
             if !v_temp_tn.nil? and !v_temp_tn.first.blank?
                v_temp_cn = CgTnCn.where("cg_tn_id in (?) and  cn in (?) and hide_column_flag = 'Y' and status_flag ='Y'", v_temp_tn.first.id,v_temp_split[1])
                if !v_temp_cn.nil? and !v_temp_cn.first.blank?
-                    @local_column_headers.delete_at((@local_fields.index(lf)+1))
-                    @local_fields.delete(lf)
+                  v_name_hide =v_temp_cn.first.export_name
+                  v_index_hide =@local_column_headers.index(v_name_hide)
+                  if v_name_hide == "Date (vgroup)" and v_index_hide == 0
+                      # Date (vgroup) is still showing in the out put
+                      # this delete skip doesn't seem to do anything
+                      # more problem if vgroups date checked 
+                  else
+                     if(!v_index_hide.nil? ) 
+                        @local_column_headers.delete_at(v_index_hide)
+                        v_index_local_field =@local_fields.index(lf)
+                        @local_fields.delete_at(v_index_local_field)
+                     end
+                  end
                end
             end
         end
@@ -2120,7 +2134,7 @@ class DataSearchesController < ApplicationController
  #    'image_dataset_quality_checks.omnibus_f','image_dataset_quality_checks.omnibus_f_comment','image_dataset_quality_checks.spm_mask','image_dataset_quality_checks.spm_mask_comment','image_dataset_quality_checks.other_issues',
  #    'image_dataset_quality_checks.user_id','image_dataset_quality_checks.created_at','image_dataset_quality_checks.updated_at','image_dataset_quality_checks.image_dataset_id','image_comments.updated_at','image_comments.created_at','image_comments.user_id','image_comments.image_dataset_id','Appt Note'] # need to look up values
  # 
-       @local_column_headers = @column_headers_ids   
+       @local_column_headers = @column_headers_ids  
     end
     # more image_dataset column things below
 
@@ -2476,7 +2490,7 @@ puts "bbbbb "+sql
       @column_number = @local_column_headers.size
 
     end
-
+    
     @results_total = @results # pageination makes result count wrong
     t = Time.now 
     @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
@@ -2496,7 +2510,7 @@ puts "bbbbb "+sql
     @csv_str = @csv_array.inject([]) { |csv, row|  csv << CSV.generate_line(row) }.join("")  
 
   end   
-  
+  puts "end ="+@local_column_headers.join(',')
       respond_to do |format|
         format.xls # cg_search.xls.erb
         if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?
