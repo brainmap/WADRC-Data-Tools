@@ -450,6 +450,10 @@ class ParticipantsController < ApplicationController
   end
 
   def merge_participants
+        v_schema ='panda_production'
+    if Rails.env=="development" 
+      v_schema ='panda_development'
+    end
      connection = ActiveRecord::Base.connection();
      # hoping only used participant_id as column name
     @tns = CgTn.where(" id in (select cg_tn_id from cg_tn_cns where cn ='participant_id')")
@@ -530,7 +534,7 @@ class ParticipantsController < ApplicationController
               v_sql = "select count(*) cnt from "+t.tn+" where participant_id ="+@v_participant_two.to_s
               v_value_cnt = connection.execute(v_sql)
               if(v_value_cnt.first[0].to_i > 0)
-                 v_sql_view = "SELECT count(*) cnt FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA in ('panda_production','panda_development')
+                 v_sql_view = "SELECT count(*) cnt FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA in ('"+v_schema+"')
                   AND TABLE_NAME = '"+t.tn+"'  and table_type = 'BASE TABLE'"
                  v_value_cnt_view = connection.execute(v_sql_view)
                  if(v_value_cnt_view.first[0].to_i > 0) # only update table
@@ -595,7 +599,7 @@ class ParticipantsController < ApplicationController
               v_value_cnt = connection.execute(v_sql)
               if(v_value_cnt.first[0].to_i > 0)
                  v_sql_view = "SELECT count(*) cnt FROM INFORMATION_SCHEMA.TABLES WHERE 
-                 TABLE_SCHEMA in ('panda_production','panda_development') AND TABLE_NAME = '"+t.tn+"' and table_type = 'BASE TABLE'"
+                 TABLE_SCHEMA in ('"+v_schema+"') AND TABLE_NAME = '"+t.tn+"' and table_type = 'BASE TABLE'"
                  v_value_cnt_view = connection.execute(v_sql_view)
                 if(v_value_cnt_view.first[0].to_i > 0)  # only update tables
                    v_sql = "UPDATE "+t.tn+" set participant_id ="+@v_participant_two.to_s+", updated_at = now() WHERE participant_id ="+@v_participant_one.to_s
@@ -636,7 +640,7 @@ class ParticipantsController < ApplicationController
             v_sql = "select count(*) cnt from "+t.tn+" where participant_id ="+@v_participant_two.to_s
             v_value_cnt = connection.execute(v_sql)
             if(v_value_cnt.first[0].to_i > 0)
-              v_sql_view = "SELECT  table_type FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA in ('panda_production','panda_development') AND TABLE_NAME = '"+t.tn+"' "
+              v_sql_view = "SELECT  table_type FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA in ('"+v_schema+"') AND TABLE_NAME = '"+t.tn+"' "
               v_value_cnt_view = connection.execute(v_sql_view)
               if(v_value_cnt_view.first[0] == "BASE TABLE")
                  @tables_two.push(t.tn)

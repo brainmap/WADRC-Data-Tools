@@ -2536,6 +2536,8 @@ def cg_up_load
      v_up_display_table_name = params[:up_display_table_name]
      v_up_table_yyyymmdd = params[:up_table_yyyymmdd]
      v_up_table_name_key_column = params[:up_table_name_key_column]
+
+     v_up_table_name_secondary_key_column = params[:up_table_name_secondary_key_column]
      v_key_type = params[:key_type]
      v_source_up_table_name = params[:source_up_table_name]
      v_source_schema = params[:source_schema]
@@ -2698,6 +2700,7 @@ def cg_up_load
 # NEED TO DO !!! delete exisiting rows based on key column/subjectid/secondary_key_protocol, secondary_key
                v_delete_sql = " DELETE FROM "+v_schema+"."+v_tn+" WHERE coalesce('',"+ v_col_multi_key_array.join(",'=|',") +")  IN 
                         (SELECT coalesce('',"+ v_col_multi_key_array.join(",'=|',") +") FROM "+v_source_schema+"."+v_source_up_table_name+")"
+puts "BBBBBBB="+v_delete_sql
                results = connection.execute(v_delete_sql)
                v_msg = v_msg+"; Deleted shared data  for append from table "+v_tn
          end
@@ -2711,6 +2714,7 @@ def cg_up_load
                v_col_multi_key_array.each do |key_col|
                     v_delete_sql = v_delete_sql+" and "+key_col+" > '' "  
                end
+    puts "AAAAAAA="+v_delete_sql
                results = connection.execute(v_delete_sql)
                v_msg = v_msg+"; Deleted shared data  for append from table "+v_tn
          end
@@ -2953,6 +2957,7 @@ def cg_up_load
         
         # load from source schema, source table
         v_insert_sql = v_insert_sql+v_col_array.join(",")+v_insert_end_sql+v_select_sql+v_col_array.join(",")+v_select_end_sql
+puts "CCCCCCC="+v_insert_sql        
         results = connection.execute(v_insert_sql)
         v_msg = v_msg+"; Insert data into table "+v_tn
          # update key columns -- expect one key column
