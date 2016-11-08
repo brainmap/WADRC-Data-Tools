@@ -237,10 +237,13 @@ class ParticipantsController < ApplicationController
       end  
 
         if !params[:participant_search][:scan_procedure_id].blank?
-              condition =" participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups
+              condition ="( participants.id in (select enrollments.participant_id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups
                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                           and scan_procedures_vgroups.scan_procedure_id in ("+params[:participant_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+                           and scan_procedures_vgroups.scan_procedure_id in ("+params[:participant_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))
+                         or participants.id in (select vgroups.participant_id from vgroups,scan_procedures_vgroups where
+                          vgroups.id = scan_procedures_vgroups.vgroup_id 
+                          and scan_procedures_vgroups.scan_procedure_id in ("+params[:participant_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+")))"
               @conditions.push(condition)
               @scan_procedures = ScanProcedure.where("id in (?)",params[:participant_search][:scan_procedure_id])
               params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe            
@@ -277,20 +280,19 @@ class ParticipantsController < ApplicationController
 
  
 
-            if !params[:participant_search][:wrapnum].blank?
+            if !params[:participant_search][:wrapnum].blank?  # unlinked from enrollemnts
    
-              condition ="  participants.id in (select enrollments.participant_id from participants,  enrollments
-                where enrollments.participant_id = participants.id 
-                       and participants.wrapnum is not NULL and participants.wrapnum in (lower('"+params[:participant_search][:wrapnum].gsub(/[;:'"()=<>]/, '')+"')   ))"
+              condition ="  participants.id in (select participants.id from participants
+                where  participants.wrapnum is not NULL and participants.wrapnum in (lower('"+params[:participant_search][:wrapnum].gsub(/[;:'"()=<>]/, '')+"')   ))
+                        "
               @conditions.push(condition)           
               params["search_criteria"] = params["search_criteria"] +",  Wrapnum "+params[:participant_search][:wrapnum]
             end
             
             if !params[:participant_search][:reggieid].blank?
    
-             condition ="  participants.id in (select enrollments.participant_id from participants,   enrollments
-                where  enrollments.participant_id = participants.id 
-                       and participants.reggieid is not NULL and participants.reggieid in (lower('"+params[:participant_search][:reggieid].gsub(/[;:'"()=<>]/, '')+"')   ))"
+             condition ="  participants.id in (select participants.id from participants
+                where  participants.reggieid is not NULL and participants.reggieid in (lower('"+params[:participant_search][:reggieid].gsub(/[;:'"()=<>]/, '')+"')   ))"
               @conditions.push(condition)           
               params["search_criteria"] = params["search_criteria"] +",  reggieid "+params[:participant_search][:reggieid]
             end
