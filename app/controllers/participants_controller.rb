@@ -482,27 +482,27 @@ class ParticipantsController < ApplicationController
       @vgroups_two = Vgroup.where("participant_id in (?)", @participant_two)
       if @v_merge_into_participant_one.to_s == "1"
           puts " merge into one"
-
-          v_sql = "insert into participant_merges(participant_id_keep,participant_id_eliminate,status)
-               values("+@v_participant_one.to_s+","+@v_participant_two.to_s+",'in process')"
+   # EVERYTHING DONE TWICE - ALSO MAKE CHANGES in two below
+          v_sql = "insert into participant_merges(participant_id_keep,participant_id_eliminate,status,created_at, updated_at,user_id)
+               values("+@v_participant_one.to_s+","+@v_participant_two.to_s+",'in process',now(),now(),"+current_user.id.to_s+")"
           v_result = connection.execute(v_sql)
           # need to blank out
           if @participant_one.reggieid.blank? and !@participant_two.reggieid.blank?
                @participant_one.reggieid = @participant_two.reggieid
-               @participant_two.reggieid = ''
+               @participant_two.reggieid = nil
           end 
           if @participant_one.wrapnum.blank? and !@participant_two.wrapnum.blank?
                @participant_one.wrapnum = @participant_two.wrapnum
-               @participant_two.wrapnum = ''
+               @participant_two.wrapnum = nil
           end 
           if @participant_one.adrcnum.blank? and !@participant_two.adrcnum.blank?
                @participant_one.adrcnum = @participant_two.adrcnum
-               @participant_two.adrcnum = ''
+               @participant_two.adrcnum = nil
           end 
-          if @participant_one.note.blank? and !@participant_two.note.blank?
-               @participant_one.note = @participant_two.note
-               @participant_two.note = "merged with "+@v_participant_one.to_s
+          if  !@participant_two.note.blank?
+               @participant_one.note = @participant_one.note+"  ;"+@participant_two.note
           end 
+          @participant_two.note = "merged with "+@v_participant_one.to_s
           @participant_two.save
           @participant_one.save
           if @participant_one.gender.blank? and !@participant_two.gender.blank?
@@ -539,7 +539,7 @@ class ParticipantsController < ApplicationController
                  end
                end
            end
-              v_sql = "update  participant_merges set status ='completed'
+              v_sql = "update  participant_merges set status ='completed', updated_at = now() 
               Where participant_id_keep ="+@v_participant_one.to_s+" and participant_id_eliminate = "+@v_participant_two.to_s
               v_result = connection.execute(v_sql)
           
@@ -547,26 +547,26 @@ class ParticipantsController < ApplicationController
           puts " merge into two"
 
 
-          v_sql = "insert into participant_merges(participant_id_keep,participant_id_eliminate,status)
-               values("+@v_participant_two.to_s+","+@v_participant_one.to_s+",'in process')"
+          v_sql = "insert into participant_merges(participant_id_keep,participant_id_eliminate,status,created_at,updated_at,user_id)
+               values("+@v_participant_two.to_s+","+@v_participant_one.to_s+",'in process',now(),now(),"+current_user.id.to_s+")"
           v_result = connection.execute(v_sql)
           # need to blank out
           if @participant_two.reggieid.blank? and !@participant_one.reggieid.blank?
                @participant_two.reggieid = @participant_one.reggieid
-               @participant_one.reggieid = ''
+               @participant_one.reggieid = nil
           end 
           if @participant_two.wrapnum.blank? and !@participant_one.wrapnum.blank?
                @participant_two.wrapnum = @participant_one.wrapnum
-               @participant_one.wrapnum = ''
+               @participant_one.wrapnum = nil
           end 
           if @participant_two.adrcnum.blank? and !@participant_one.adrcnum.blank?
                @participant_two.adrcnum = @participant_one.adrcnum
-               @participant_one.adrcnum = ''
+               @participant_one.adrcnum = nil
           end 
-          if @participant_two.note.blank? and !@participant_one.note.blank?
-               @participant_two.note = @participant_one.note
-               @participant_one.note = "merged with "+@v_participant_two.to_s
+          if !@participant_one.note.blank?
+               @participant_two.note = @participant_two.note+"  ;"+@participant_one.note
           end 
+          @participant_one.note = "merged with "+@v_participant_two.to_s
           @participant_one.save
           @participant_two.save
           if @participant_two.gender.blank? and !@participant_one.gender.blank?
@@ -598,7 +598,7 @@ class ParticipantsController < ApplicationController
                  TABLE_SCHEMA in ('panda_production','panda_development') AND TABLE_NAME = '"+t.tn+"' and table_type = 'BASE TABLE'"
                  v_value_cnt_view = connection.execute(v_sql_view)
                 if(v_value_cnt_view.first[0].to_i > 0)  # only update tables
-                   v_sql = "UPDATE "+t.tn+" set participant_id ="+@v_participant_two.to_s+" WHERE participant_id ="+@v_participant_one.to_s
+                   v_sql = "UPDATE "+t.tn+" set participant_id ="+@v_participant_two.to_s+", updated_at = now() WHERE participant_id ="+@v_participant_one.to_s
                    v_result = connection.execute(v_sql)
                 end
               end
