@@ -234,6 +234,8 @@ WADRCDataTools::Application.routes.draw do
   
   match '/run_schedule/:id' ,:controller =>'schedules', :action => 'run_schedule', :as => :run_schedule
   match '/stop_schedule/:id' ,:controller =>'schedules', :action => 'stop_schedule', :as => :stop_schedule
+
+  match '/participant_merge', :controller => 'participants', :action => 'merge_participants', :as => :merge_participants
   
   match '/users/update_role', :controller => 'users', :action => 'update_role', :as => :update_role
   match '/users/user_protocol_role_summary', :controller => 'users', :action => 'user_protocol_role_summary', :as => :user_protocol_role_summary

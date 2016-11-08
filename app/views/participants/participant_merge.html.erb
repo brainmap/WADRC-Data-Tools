@@ -1,0 +1,109 @@
+
+<% if current_user.role == 'Admin_High' %>
+  <b>Merging participants</b><br>
+  <%  v_table_intersection =[]
+    v_table_intersection = (@tables_one & @tables_two)
+  if  @tables_one.nil? and @tables_two.nil? and !v_table_intersection.blank? and v_table_intersection.length > 0 %>
+  <B>Warning - the participant_id's are both in the following cg table(s) </b>
+    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <%=v_table_intersection.join(", ") %><br><br>
+      <%end%>
+      <% if !@participant_one.blank? and !@participant_two.blank? %>
+  <% if !@participant_one.reggieid.blank? and !@participant_two.reggieid.blank? %>
+<br><B>WARNING BOTH PARTICIPANTS HAVE A REGGIE ID!!!!!!<br><br>
+  <%end%>
+    <% if !@participant_one.wrapnum.blank? and !@participant_two.wrapnum.blank? %>
+<br><B>WARNING BOTH PARTICIPANTS HAVE A WRAPNUM!!!!!!<br><br>
+  <%end%>
+    <% if !@participant_one.adrcnum.blank? and !@participant_two.adrcnum.blank? %>
+<br><B>WARNING BOTH PARTICIPANTS HAVE AN ADRC NUMBER!!!!!!<br><br>
+  <%end%>
+  <%end%>
+  <%= form_for :participant_merge ,:url=>'/participant_merge' do |f| %>
+
+
+  <B>Participant One:</B>     
+	<select name="participant_one">
+		<option value="">select participant ONE</option>
+		<% @participant_list.each do |s| %>
+	<option value="<%=s[0] %>" <% if s[0].to_s == @v_participant_one %> selected<%end%>><%= s[1] %></option>
+	   <% end %>
+	</select>
+
+
+       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Check if merge to this participant one:
+       <%= check_box_tag "merge_into_participant_one", "1", @v_merge_into_participant_one == "0" ? FALSE : TRUE , :name => "participant_merge[merge_into_participant_one]" %>
+       <% if !@participant_one.nil? %>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><small>
+         <%= link_to('go to participant one', @participant_one ,target: "_blank"   )%></small></small>
+         <br>Reggie_id_one:<%=@participant_one.reggieid%>
+         <br>Wrapnum_one:<%=@participant_one.wrapnum%>
+         <br>Gender_one:<%=@participant_one.gender%>
+         <br>DOB_one:<%=@participant_one.dob%>
+         <br>ADRCNum_one:<%=@participant_one.adrcnum%>
+         <br>Apoe_e1_one:<%=@participant_one.apoe_e1%>
+         <br>Apoe_e2_one:<%=@participant_one.apoe_e2%>
+         <br>Note_one:<%=@participant_one.note%>
+         <% if !@enrollments_one.nil? %><br>
+             <%  for e in @enrollments_one %>
+                   <%=e.enumber %>&nbsp;;
+            <% end %>
+              <br>
+          <%end%>
+            <% if !@vgroups_one.nil? %><br>
+             <%  for vg in @vgroups_one 
+                 @scan_procedures_vgroups = ScanProcedure.where("scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  vgroup_id in (?))",vg.id)%>
+                   <%=vg.vgroup_date %> &nbsp;&nbsp;&nbsp;
+              <%= @scan_procedures_vgroups.blank? ? "None" : @scan_procedures_vgroups.sort_by(&:codename).collect {|sp| sp.codename}.join(", ") %> <br>
+            <% end %>
+              <br>
+          <%end%>
+          <% if !@tables_one.nil? and @tables_one.count > 0 %>
+             Also in tables: <%= @tables_one.join(", ") %>
+          <%end%>
+       <%end%>
+  <br><br>
+  <B>Participant Two:</B>  	
+    <select name="participant_two">
+		<option value="">select participant TWO</option>
+		<% @participant_list.each do |s| %>
+	<option value="<%=s[0] %>" <% if s[0].to_s == @v_participant_two %> selected<%end%>><%= s[1] %></option>
+	   <% end %>
+	</select>
+	        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Check if merge to this participant two:
+
+	        <%= check_box_tag "merge_into_participant_two", "1", @v_merge_into_participant_two == "0" ? FALSE : TRUE , :name => "participant_merge[merge_into_participant_two]" %>
+	      <% if !@participant_two.nil? %>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><small> <%= link_to('go to participant two', @participant_two ,target: "_blank"   )%></small></small>
+         <br>Reggie_id_two:<%=@participant_two.reggieid%>
+         <br>Wrapnum_two:<%=@participant_two.wrapnum%>
+         <br>Gender_two:<%=@participant_two.gender%>
+         <br>DOB_two:<%=@participant_two.dob%>
+         <br>ADRCNum_two:<%=@participant_two.adrcnum%>
+         <br>Apoe_e1_two:<%=@participant_two.apoe_e1%>
+         <br>Apoe_e2_two:<%=@participant_two.apoe_e2%>
+         <br>Note_two:<%=@participant_two.note%>
+         <% if !@enrollments_two.nil? %><br>
+             <%  for e in @enrollments_two %>
+                   <%=e.enumber %>&nbsp;;
+            <% end %>
+              <br>
+          <%end%>
+            <% if !@vgroups_two.nil? %><br>
+             <%  for vg in @vgroups_two 
+                 @scan_procedures_vgroups = ScanProcedure.where("scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  vgroup_id in (?))",vg.id)%>
+                   <%=vg.vgroup_date %> &nbsp;&nbsp;&nbsp;
+              <%= @scan_procedures_vgroups.blank? ? "None" : @scan_procedures_vgroups.sort_by(&:codename).collect {|sp| sp.codename}.join(", ") %> <br>
+            <% end %>
+              <br>
+          <%end%>
+          <% if !@tables_two.nil? and @tables_two.count > 0 %>
+             Also in tables: <%= @tables_two.join(", ") %>
+          <%end%>
+       <%end%>    
+  <br><br>
+
+
+
+   <%= submit_tag("submit")%>
+  <%end%>
+<%end%>

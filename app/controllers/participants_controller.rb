@@ -89,9 +89,18 @@ class ParticipantsController < ApplicationController
       end  
 #    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
+     if current_user.role == 'Admin_High' 
+
+     @participant = Participant.where(" participants.id in ( select vgroups.participant_id from vgroups where vgroups.id in 
+     (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+      where  scan_procedures_vgroups.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
+        # issues with wrap placeholder participants with no enumber
+     else
      @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in 
      (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships,scan_procedures_vgroups
       where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and  scan_procedures_vgroups.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
+     end
+
   end
 
   # POST /participants
@@ -160,9 +169,14 @@ class ParticipantsController < ApplicationController
       end  
 #    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
 #     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
+     if current_user.role == 'Admin_High' 
+        @participant = Participant.where(" participants.id in ( select vgroups.participant_id from vgroups where vgroups.id in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+                 where scan_procedures_vgroups.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
+      
+     else
      @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
                  where enrollment_vgroup_memberships.vgroup_id  =  scan_procedures_vgroups.vgroup_id and  scan_procedures_vgroups.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
-
+      end
     respond_to do |format|
       if @participant.update_attributes(params[:participant])
         sql = "update participants set wrapnum = NULL where trim(wrapnum) = '' "
@@ -431,5 +445,220 @@ class ParticipantsController < ApplicationController
       format.html { redirect_to(participants_url) }
       format.xml  { head :ok }
     end
+  end
+
+  def merge_participants
+     connection = ActiveRecord::Base.connection();
+     # hoping only used participant_id as column name
+    @tns = CgTn.where(" id in (select cg_tn_id from cg_tn_cns where cn ='participant_id')")
+     if !params[:participant_one].nil?
+         @v_participant_one = params[:participant_one]
+     end
+     if !params[:participant_two].nil?
+         @v_participant_two = params[:participant_two]
+     end
+        # get pid_1  from drop down
+        # get pid_2  from drop down
+     @v_merge_into_participant_one = "0"
+     if !params[:participant_merge].nil? and !params[:participant_merge][:merge_into_participant_one].nil?
+          @v_merge_into_participant_one = params[:participant_merge][:merge_into_participant_one]
+    end
+    @v_merge_into_participant_two = "0"
+     if !params[:participant_merge].nil? and  !params[:participant_merge][:merge_into_participant_two].nil?
+          @v_merge_into_participant_two = params[:participant_merge][:merge_into_participant_two]
+    end
+    if @v_merge_into_participant_one.to_s == "1"  and @v_merge_into_participant_two.to_s == "1"
+         @v_message = "Only check one participant to merge into"
+         @v_merge_into_participant_one = "0"
+         @v_merge_into_participant_two = "0"
+    elsif (@v_merge_into_participant_one.to_s == "1"  or @v_merge_into_participant_two.to_s == "1") and !@v_participant_one.blank? and !@v_participant_two.blank?
+      @participant_one = Participant.find(@v_participant_one)
+      @participant_two = Participant.find(@v_participant_two)
+      @enrollments_one = Enrollment.where("participant_id in (?)", @participant_one)
+      @vgroups_one = Vgroup.where("participant_id in (?)", @participant_one)
+      @enrollments_two = Enrollment.where("participant_id in (?)", @participant_two)
+      @vgroups_two = Vgroup.where("participant_id in (?)", @participant_two)
+      if @v_merge_into_participant_one.to_s == "1"
+          puts " merge into one"
+
+          v_sql = "insert into participant_merges(participant_id_keep,participant_id_eliminate,status)
+               values("+@v_participant_one.to_s+","+@v_participant_two.to_s+",'in process')"
+          v_result = connection.execute(v_sql)
+          # need to blank out
+          if @participant_one.reggieid.blank? and !@participant_two.reggieid.blank?
+               @participant_one.reggieid = @participant_two.reggieid
+               @participant_two.reggieid = ''
+          end 
+          if @participant_one.wrapnum.blank? and !@participant_two.wrapnum.blank?
+               @participant_one.wrapnum = @participant_two.wrapnum
+               @participant_two.wrapnum = ''
+          end 
+          if @participant_one.adrcnum.blank? and !@participant_two.adrcnum.blank?
+               @participant_one.adrcnum = @participant_two.adrcnum
+               @participant_two.adrcnum = ''
+          end 
+          if @participant_one.note.blank? and !@participant_two.note.blank?
+               @participant_one.note = @participant_two.note
+               @participant_two.note = "merged with "+@v_participant_one.to_s
+          end 
+          @participant_two.save
+          @participant_one.save
+          if @participant_one.gender.blank? and !@participant_two.gender.blank?
+               @participant_one.gender = @participant_two.gender
+          end 
+          if @participant_one.dob.blank? and !@participant_two.dob.blank?
+               @participant_one.dob = @participant_two.dob
+          end 
+          if @participant_one.apoe_e1.blank? and !@participant_two.apoe_e1.blank?
+               @participant_one.apoe_e1 = @participant_two.apoe_e1
+          end 
+          if @participant_one.apoe_e2.blank? and !@participant_two.apoe_e2.blank?
+               @participant_one.apoe_e2 = @participant_two.apoe_e2
+          end
+          @participant_one.save
+          for e in @enrollments_two
+               e.participant_id = @v_participant_one
+               e.save
+          end
+          for vg in @vgroups_two
+                vg.participant_id = @v_participant_one
+                vg.save
+           end
+           for t in @tns 
+              v_sql = "select count(*) cnt from "+t.tn+" where participant_id ="+@v_participant_two.to_s
+              v_value_cnt = connection.execute(v_sql)
+              if(v_value_cnt.first[0].to_i > 0)
+                 v_sql_view = "SELECT count(*) cnt FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA in ('panda_production','panda_development')
+                  AND TABLE_NAME = '"+t.tn+"'  and table_type = 'BASE TABLE'"
+                 v_value_cnt_view = connection.execute(v_sql_view)
+                 if(v_value_cnt_view.first[0].to_i > 0) # only update table
+                    v_sql = "UPDATE "+t.tn+" set participant_id ="+@v_participant_one.to_s+" WHERE participant_id ="+@v_participant_two.to_s
+                    v_result = connection.execute(v_sql)
+                 end
+               end
+           end
+              v_sql = "update  participant_merges set status ='completed'
+              Where participant_id_keep ="+@v_participant_one.to_s+" and participant_id_eliminate = "+@v_participant_two.to_s
+              v_result = connection.execute(v_sql)
+          
+      elsif @v_merge_into_participant_two.to_s == "1"
+          puts " merge into two"
+
+
+          v_sql = "insert into participant_merges(participant_id_keep,participant_id_eliminate,status)
+               values("+@v_participant_two.to_s+","+@v_participant_one.to_s+",'in process')"
+          v_result = connection.execute(v_sql)
+          # need to blank out
+          if @participant_two.reggieid.blank? and !@participant_one.reggieid.blank?
+               @participant_two.reggieid = @participant_one.reggieid
+               @participant_one.reggieid = ''
+          end 
+          if @participant_two.wrapnum.blank? and !@participant_one.wrapnum.blank?
+               @participant_two.wrapnum = @participant_one.wrapnum
+               @participant_one.wrapnum = ''
+          end 
+          if @participant_two.adrcnum.blank? and !@participant_one.adrcnum.blank?
+               @participant_two.adrcnum = @participant_one.adrcnum
+               @participant_one.adrcnum = ''
+          end 
+          if @participant_two.note.blank? and !@participant_one.note.blank?
+               @participant_two.note = @participant_one.note
+               @participant_one.note = "merged with "+@v_participant_two.to_s
+          end 
+          @participant_one.save
+          @participant_two.save
+          if @participant_two.gender.blank? and !@participant_one.gender.blank?
+               @participant_two.gender = @participant_one.gender
+          end 
+          if @participant_two.dob.blank? and !@participant_one.dob.blank?
+               @participant_two.dob = @participant_one.dob
+          end 
+          if @participant_two.apoe_e1.blank? and !@participant_one.apoe_e1.blank?
+               @participant_two.apoe_e1 = @participant_one.apoe_e1
+          end 
+          if @participant_two.apoe_e2.blank? and !@participant_one.apoe_e2.blank?
+               @participant_two.apoe_e2 = @participant_one.apoe_e2
+          end
+          @participant_two.save
+          for e in @enrollments_one
+               e.participant_id = @v_participant_two
+               e.save
+          end
+          for vg in @vgroups_one
+                vg.participant_id = @v_participant_two
+                vg.save
+           end
+           for t in @tns 
+              v_sql = "select count(*) cnt from "+t.tn+" where participant_id ="+@v_participant_one.to_s
+              v_value_cnt = connection.execute(v_sql)
+              if(v_value_cnt.first[0].to_i > 0)
+                 v_sql_view = "SELECT count(*) cnt FROM INFORMATION_SCHEMA.TABLES WHERE 
+                 TABLE_SCHEMA in ('panda_production','panda_development') AND TABLE_NAME = '"+t.tn+"' and table_type = 'BASE TABLE'"
+                 v_value_cnt_view = connection.execute(v_sql_view)
+                if(v_value_cnt_view.first[0].to_i > 0)  # only update tables
+                   v_sql = "UPDATE "+t.tn+" set participant_id ="+@v_participant_two.to_s+" WHERE participant_id ="+@v_participant_one.to_s
+                   v_result = connection.execute(v_sql)
+                end
+              end
+           end
+              v_sql = "update  participant_merges set status ='completed'
+              Where participant_id_keep ="+@v_participant_two.to_s+" and participant_id_eliminate = "+@v_participant_one.to_s
+              v_result = connection.execute(v_sql)
+
+
+      end
+    end
+    
+    if !@v_participant_one.blank? and !@v_participant_two.blank? 
+        @participant_one = Participant.find(@v_participant_one)
+        @enrollments_one = Enrollment.where("participant_id in (?)", @participant_one)
+        @vgroups_one = Vgroup.where("participant_id in (?)", @participant_one)
+        @participant_two = Participant.find(@v_participant_two)
+        @enrollments_two = Enrollment.where("participant_id in (?)", @participant_two)
+        @vgroups_two = Vgroup.where("participant_id in (?)", @participant_two)
+        @tables_one =[]
+        @tables_two = []
+        for t in @tns 
+            v_sql = "select count(*) cnt from "+t.tn+" where participant_id ="+@v_participant_one.to_s
+            v_value_cnt = connection.execute(v_sql)
+            if(v_value_cnt.first[0].to_i > 0)
+              v_sql_view = "SELECT table_type FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA in ('panda_production','panda_development') AND TABLE_NAME = '"+t.tn+"'"
+              v_value_cnt_view = connection.execute(v_sql_view)
+
+              if(v_value_cnt_view.first[0] == "BASE TABLE")
+                 @tables_one.push(t.tn)
+              elsif(v_value_cnt_view.first[0] == "VIEW")
+                 @tables_one.push(t.tn+" VIEW ")
+              end 
+            end 
+            v_sql = "select count(*) cnt from "+t.tn+" where participant_id ="+@v_participant_two.to_s
+            v_value_cnt = connection.execute(v_sql)
+            if(v_value_cnt.first[0].to_i > 0)
+              v_sql_view = "SELECT  table_type FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA in ('panda_production','panda_development') AND TABLE_NAME = '"+t.tn+"' "
+              v_value_cnt_view = connection.execute(v_sql_view)
+              if(v_value_cnt_view.first[0] == "BASE TABLE")
+                 @tables_two.push(t.tn)
+              elsif(v_value_cnt_view.first[0] == "VIEW")
+                 @tables_two.push(t.tn+" VIEW ")
+              end 
+            end
+        end
+    else
+        v_message = "two participants need to be selected"
+    end
+
+    sql = "select id, concat('Reggieid=',IFNULL(cast(reggieid as CHAR),''),'  Wrapnum=',IFNULL(wrapnum,'')) name from participants where 
+             wrapnum is not null or reggieid is not null order by name"
+     @participant_list = connection.execute(sql)
+        # get dob, etc, alert if different, all activities for each pid
+        # link to edit each pid in new window
+        # get cg tables with participant_id with this pid
+        # check for check_to_merge into
+        # start participant_merges record
+        # update tables vg, visit, enrollments, cg's, update participant fields, blank out non-merge pid wrap/reggie, add note about pid merged to
+        # finish participant_merges record success_flag = Y
+        # participant status?
+       render :template => "participants/participant_merge"
+
   end
 end
