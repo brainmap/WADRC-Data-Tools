@@ -2698,23 +2698,26 @@ def cg_up_load
          end
          if ( !params[:append_full_replace].empty? and params[:append_full_replace] == "append" )
 # NEED TO DO !!! delete exisiting rows based on key column/subjectid/secondary_key_protocol, secondary_key
-               v_delete_sql = " DELETE FROM "+v_schema+"."+v_tn+" WHERE coalesce('',"+ v_col_multi_key_array.join(",'=|',") +")  IN 
-                        (SELECT coalesce('',"+ v_col_multi_key_array.join(",'=|',") +") FROM "+v_source_schema+"."+v_source_up_table_name+")"
-puts "BBBBBBB="+v_delete_sql
+#coalesce (not working -why using?) vs concat and NULLS ???   #concat('',"+ v_col_multi_key_array.join(",'=|',") +")
+               v_delete_sql = " DELETE FROM "+v_schema+"."+v_tn+" WHERE concat('',IFNULL("+ v_col_multi_key_array.join(",'_'),'=|',IFNULL(") +",'_'))  IN 
+                        (SELECT concat('',IFNULL("+ v_col_multi_key_array.join(",'_'),'=|',IFNULL(") +",'_')) FROM "+v_source_schema+"."+v_source_up_table_name+")"
+               #puts "BBBBBBB="+v_delete_sql
                results = connection.execute(v_delete_sql)
                v_msg = v_msg+"; Deleted shared data  for append from table "+v_tn
          end
          if ( !params[:append_full_replace].empty? and params[:append_full_replace] == "append_by_participant" )
-# NEED TO DO !!! delete exisiting rows based on key column/subjectid/secondary_key_protocol, secondary_key
+# ???delete exisiting rows based on key column/subjectid/secondary_key_protocol, secondary_key
+# letting NULL key columns to accumulate
+
 
                # issues when using wrapnum from one source files, adrcnum from another source
-               v_delete_sql = " DELETE FROM "+v_schema+"."+v_tn+" WHERE coalesce('',"+ v_col_multi_key_array.join(",'=|',") +")  IN 
-                        (SELECT coalesce('',"+ v_col_multi_key_array.join(",'=|',") +") FROM "+v_source_schema+"."+v_source_up_table_name+")
+               v_delete_sql = " DELETE FROM "+v_schema+"."+v_tn+" WHErE concat('',IFNULL("+ v_col_multi_key_array.join(",'_'),'=|',IFNULL(") +",'_'))  IN 
+                      (SELECT concat('',IFNULL("+ v_col_multi_key_array.join(",'_'),'=|',IFNULL(") +",'_')) FROM "+v_source_schema+"."+v_source_up_table_name+")
                         "
                v_col_multi_key_array.each do |key_col|
-                    v_delete_sql = v_delete_sql+" and "+key_col+" > '' "  
+                    v_delete_sql = v_delete_sql+" and IFNULL("+key_col+",'') > '' "  
                end
-    puts "AAAAAAA="+v_delete_sql
+            #puts "AAAAAAA="+v_delete_sql
                results = connection.execute(v_delete_sql)
                v_msg = v_msg+"; Deleted shared data  for append from table "+v_tn
          end
