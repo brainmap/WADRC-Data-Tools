@@ -26,9 +26,6 @@ v_key_type = [["enumber and visit# mapped to enrollment/scan_procedure","enrollm
 				<tr><td align="left"><div class="field">
 	    <B>UP Table Key Column Name:</B>&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "up_table_name_key_column" ,nil, :required => true%></div>
 		</td></tr>
-					<tr><td align="left"><div class="field">
-	    <B>UP Table Secondary Key Column Name (optional):</B>&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "up_table_name_secondary_key_column" ,nil%></div>
-		</td></tr>
 			 	<tr><td align="left"><div class="field">
 	    <B>Key Type:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= select_tag "key_type", options_for_select([["enumber and visit# mapped to enrollment/scan_procedure","enrollment/sp"],
 ["reggieid-participant_id","reggieid-kc-participant_id"],["wrapnum-participant_id","wrapnum-kc-participant_id"],["adrcnum-participant_id","adrcnum-kc-participant_id"], ["subjectid-participant_id","subjectid-kc-participant_id"]], "enrollment/sp")%></div>

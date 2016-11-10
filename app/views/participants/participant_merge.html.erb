@@ -5,17 +5,17 @@
     v_table_intersection = (@tables_one & @tables_two)
   if  @tables_one.nil? and @tables_two.nil? and !v_table_intersection.blank? and v_table_intersection.length > 0 %>
   <B>Warning - the participant_id's are both in the following cg table(s) </b>
-    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <%=v_table_intersection.join(", ") %><br><br>
+    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <%=v_table_intersection.join(", ") %></b><br><br>
       <%end%>
       <% if !@participant_one.blank? and !@participant_two.blank? %>
   <% if !@participant_one.reggieid.blank? and !@participant_two.reggieid.blank? %>
-<br><B>WARNING BOTH PARTICIPANTS HAVE A REGGIE ID!!!!!!<br><br>
+<br><B>WARNING BOTH PARTICIPANTS HAVE A REGGIE ID!!!!!!</b><br><br>
   <%end%>
     <% if !@participant_one.wrapnum.blank? and !@participant_two.wrapnum.blank? %>
-<br><B>WARNING BOTH PARTICIPANTS HAVE A WRAPNUM!!!!!!<br><br>
+<br><B>WARNING BOTH PARTICIPANTS HAVE A WRAPNUM!!!!!!</b><br><br>
   <%end%>
     <% if !@participant_one.adrcnum.blank? and !@participant_two.adrcnum.blank? %>
-<br><B>WARNING BOTH PARTICIPANTS HAVE AN ADRC NUMBER!!!!!!<br><br>
+<br><B>WARNING BOTH PARTICIPANTS HAVE AN ADRC NUMBER!!!!!!</b><br><br>
   <%end%>
   <%end%>
   <%= form_for :participant_merge ,:url=>'/participant_merge' do |f| %>
@@ -28,10 +28,11 @@
 	<option value="<%=s[0] %>" <% if s[0].to_s == @v_participant_one %> selected<%end%>><%= s[1] %></option>
 	   <% end %>
 	</select>
-
+<% if !@v_participant_one.blank? and !@v_participant_two.blank?  %>
 
        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Check if merge to this participant one:
        <%= check_box_tag "merge_into_participant_one", "1", @v_merge_into_participant_one == "0" ? FALSE : TRUE , :name => "participant_merge[merge_into_participant_one]" %>
+<%end%>
        <% if !@participant_one.nil? %>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><small>
          <%= link_to('go to participant one', @participant_one ,target: "_blank"   )%></small></small>
@@ -69,9 +70,11 @@
 	<option value="<%=s[0] %>" <% if s[0].to_s == @v_participant_two %> selected<%end%>><%= s[1] %></option>
 	   <% end %>
 	</select>
+  <% if !@v_participant_one.blank? and !@v_participant_two.blank?  %>
 	        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Check if merge to this participant two:
 
 	        <%= check_box_tag "merge_into_participant_two", "1", @v_merge_into_participant_two == "0" ? FALSE : TRUE , :name => "participant_merge[merge_into_participant_two]" %>
+<%end%>
 	      <% if !@participant_two.nil? %>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><small> <%= link_to('go to participant two', @participant_two ,target: "_blank"   )%></small></small>
          <br>Reggie_id_two:<%=@participant_two.reggieid%>

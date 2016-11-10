@@ -2537,7 +2537,6 @@ def cg_up_load
      v_up_table_yyyymmdd = params[:up_table_yyyymmdd]
      v_up_table_name_key_column = params[:up_table_name_key_column]
 
-     v_up_table_name_secondary_key_column = params[:up_table_name_secondary_key_column]
      v_key_type = params[:key_type]
      v_source_up_table_name = params[:source_up_table_name]
      v_source_schema = params[:source_schema]

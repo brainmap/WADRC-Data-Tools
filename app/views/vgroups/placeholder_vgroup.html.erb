@@ -1,0 +1,26 @@
+<% if current_user.role == 'Admin_High' %>
+    <b>Make Placeholder appointype vgroup</b><br><br>
+<%= form_tag '/placeholder_vgroup' do %>
+<b> Indentify the participants with a Reggieid or a Wrapnum</b><br><br>
+ <b>Reggieid</b>&nbsp;&nbsp;&nbsp;<%= text_field_tag :reggieid  %><br>
+ <b>Wrapnum</b>&nbsp;&nbsp;&nbsp;<%= text_field_tag :wrapnum  %><br><br>
+
+<b>Enumber</b> <%= text_field_tag :enumber  %><br><br>
+<b>Gender</b> <%= select :gender, "",{ "M" => 1, "F" => 2 }, :include_blank => true %><br><br>
+<b>DOB</b> <%= date_select( :dob , "",{:include_blank => true ,:start_year => 1910})%><br><br>
+
+  <br><br>
+    <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
+    <%= collection_select(:scan_procedure, :id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'choose scan procedure'}, {multiple: false,required:  true} ) %>
+
+  <br><br>
+  <% if !@v_message.blank? %>
+     <b><%= @v_message.html_safe  %></b><br><br>
+  <%end%>
+
+   <%= submit_tag("submit")%>
+  <%end%>
+
+
+
+<%end%>

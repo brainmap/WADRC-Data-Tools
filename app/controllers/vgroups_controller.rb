@@ -1148,7 +1148,186 @@ end
     render :template => "vgroups/home"
 
   end
-  
+  # used for making placeholders appts so the UP tables data will show in the search
+  # UP ADRC/WRAP MNP linked to participant_id, but no vgroupish link
+  # this provides a vgroup for the WRAP_WAI and adrc with no mri appt to link to
+  def placeholder_vgroup
+     @v_message = ""
+     v_ok_make_flag = "N"
+     @v_reggieid =""
+     @v_wrapnum = ""
+     @v_enumber = ""
+     @v_scan_procedure_id = ""
+     if !params[:reggieid].blank? 
+        @v_reggieid = params[:reggieid].to_s.rjust(6,"0")
+     end
+     if !params[:wrapnum].blank? 
+        @v_wrapnum = params[:wrapnum].to_s.rjust(4,"0")
+     end
+     if @v_reggieid.blank? and @v_wrapnum.blank?
+         @v_message = @v_message+"A Reggieid or a Wrapnum is required."
+         v_ok_make_flag = "N"
+     else
+         @v_message = @v_message+"Reggieid= "+@v_reggieid+"  wrapnum= "+@v_wrapnum 
+        v_ok_make_flag ="Y"
+     end
+
+     if !params[:enumber].blank? 
+        @v_enumber = params[:enumber]
+         @v_message = @v_message+" Enumber ="+@v_enumber
+     end
+     if !params[:scan_procedure].nil? and !params[:scan_procedure][:id].blank?
+          @v_scan_procedure_id = params[:scan_procedure][:id]
+     end
+    if !@v_scan_procedure_id.nil? and @v_scan_procedure_id.length == 0
+         @v_message = @v_message+"<br>A scan procedure is required."
+         v_ok_make_flag = "N"
+    else
+        v_sp = ScanProcedure.find(@v_scan_procedure_id)
+
+        @v_message = @v_message+"<br> scan procedure = "+v_sp.codename
+    end     
+    if v_ok_make_flag == "Y"
+       v_pid_reggieid = ""
+       v_pid_wrapnum = ""
+       v_pid_enumber = ""
+       v_pid =nil
+       v_adrcnum = nil
+       v_eid =""
+       v_vgroupid= ""
+       v_gender = nil
+       v_dob = nil
+       # check for p.id from reggieid
+       v_p_reggieid = Participant.where("reggieid in (?)",@v_reggieid)
+       if !@v_reggieid.blank? and !v_p_reggieid.first.nil?
+           v_pid_reggieid = v_p_reggieid.first.id
+           v_pid = v_pid_reggieid
+           puts " reggieid pid="+v_pid_reggieid.to_s
+       else
+           puts " no reggieid p"
+       end
+       # check for p.if from wrapnum
+       v_p_wrapnum = Participant.where("wrapnum in (?)",@v_wrapnum)
+       if !@v_wrapnum.blank? and !v_p_wrapnum.first.nil?
+           v_pid_wrapnum = v_p_wrapnum.first.id
+           v_pid = v_pid_wrapnum
+           puts " wrapnum pid="+v_pid.to_s
+       else
+           puts " no wrapnum p"
+       end
+       # check for p.id from enumber
+       # check for enumber
+        v_enrollment = Enrollment.where("enumber in (?)",@v_enumber)
+        if @v_enumber.start_with?('adrc')
+            v_adrcnum = @v_enumber;
+        end
+       if !@v_enumber.blank? and !v_enrollment.first.nil?
+           v_pid_enumber = v_enrollment.first.participant_id
+           v_pid = v_pid_enumber
+           puts " enumber pid="+v_pid_enumber.to_s
+       else
+            puts " no enumber enrollments"
+       end
+       # check that they are all the same
+       if (!v_pid_reggieid.blank? and !v_pid_wrapnum.blank? and v_pid_wrapnum != v_pid_reggieid )
+           v_ok_make_flag = "N"
+           @v_message = @v_message+"<br>The wrapnum and reggieid belong to different participants."
+       end
+       if (!v_pid_enumber.blank? and !v_pid_wrapnum.blank? and v_pid_wrapnum != v_pid_enumber )
+           v_ok_make_flag = "N"
+           @v_message = @v_message+"<br>The wrapnum and enumber belong to different participants."
+       end
+       if (!v_pid_reggieid.blank? and !v_pid_enumber.blank? and v_pid_enumber != v_pid_reggieid )
+           v_ok_make_flag = "N"
+           @v_message = @v_message+"<br>The enumber and reggieid belong to different participants."
+       end
+       if v_ok_make_flag == "Y"
+         if v_pid.nil? 
+           v_participant =  Participant.new
+           if !@v_reggieid.blank?
+                v_participant.reggieid =@v_reggieid
+           end
+           if !@v_wrapnum.blank?
+               v_participant.wrapnum = @v_wrapnum
+           end
+           if !v_adrcnum.blank?
+                v_participant.adrcnum = v_adrcnum
+           end
+           v_dob = params['dob']['(1i)'].to_i
+
+           if !v_dob.blank?
+            v_dob_date =Date.new params['dob']['(1i)'].to_i, params['dob']['(2i)'].to_i, params['dob']['(3i)'].to_i
+            if v_dob < 2.years.ago.to_i
+                v_participant.dob =v_dob_date
+             end
+           end
+           v_gender = params[:gender]
+           if !v_gender.first.blank?
+               v_participant.gender =v_gender.first
+           end
+              v_participant.save
+              v_pid = v_participant.id
+         else 
+            v_participant = Participant.find(v_pid)
+           if !@v_reggieid.blank?
+                v_participant.reggieid =@v_reggieid
+           end
+           if !@v_wrapnum.blank?
+               v_participant.wrapnum = @v_wrapnum
+           end
+           if !v_adrcnum.blank?
+                v_participant.adrcnum = v_adrcnum
+           end
+          v_participant.save
+            #puts v_sql
+          end
+          if !@v_enumber.blank? and v_enrollment.first.nil?
+             v_enrollment = Enrollment.new
+             v_enrollment.enumber = @v_enumber
+             v_enrollment.participant_id =v_pid
+             v_enrollment.save
+             v_enrollment_id = v_enrollment.id
+          elsif !@v_enumber.blank?
+             v_enrollment_id = v_enrollment.first.id
+          end
+       #  check for vgroup with sp and pid
+          @vgroups = Vgroup.where("vgroups.participant_id in (?) 
+            and vgroups.id in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))",v_pid,v_sp.id)
+       # make vgroup
+          if @vgroups.first.nil? 
+             @vgroup = Vgroup.new
+             @vgroup.participant_id = v_pid
+             @vgroup.vgroup_date = '1700-01-01'
+             @vgroup.save
+             @appointment = Appointment.new
+             @appointment.vgroup_id = @vgroup.id
+             @appointment.appointment_date = '1700-01-01'
+             @appointment.appointment_type ='placeholder'
+             @appointment.save
+             v_sql = "insert into scan_procedures_vgroups(vgroup_id, scan_procedure_id)
+             values("+@vgroup.id.to_s+","+v_sp.id.to_s+")"
+             connection = ActiveRecord::Base.connection();
+              v_result = connection.execute(v_sql)
+             if !v_enrollment_id.nil? and !v_enrollment_id.blank?
+                @enrollment_vgroup_membership = EnrollmentVgroupMembership.new
+                @enrollment_vgroup_membership.enrollment_id = v_enrollment_id
+                @enrollment_vgroup_membership.vgroup_id = @vgroup.id
+                @enrollment_vgroup_membership.save
+             end
+          end
+       # make appt_type placeholder
+        end
+       # update wrapnum, reggieid, adrcnum
+       # make p.id
+       # make enumber
+       #  check for vgroup with sp
+       # make vgroup
+       # make appt_type placeholder
+    end
+
+       render :template => "vgroups/placeholder_vgroup"
+  end
+
   
   def visit_search
      render :template => "vgroups/home"
