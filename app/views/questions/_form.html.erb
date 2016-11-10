@@ -15,7 +15,12 @@ v_value_link ={"appointment"=>"appointment", "(DO NOT USE) visit"=>"visit", "(DO
 v_global_update = {"Y"=>"Y","N"=>"N"}
 %>
 The question can have up to three parts.<br>
+
 <%= form_for(@question) do |f| %>
+<%if @question.id.blank? %>
+<b><%= f.label :scan_procedure_id %></b>REQUIRED*&nbsp;&nbsp;&nbsp;
+<%= collection_select(:question_scan_procedure,:scan_procedure_id,ScanProcedure.all.sort_by(&:codename),:id,:codename,{:prompt => 'Select a Scan Procedure'},{:required => true})  %>
+<%end%>
  <table width="100%"><tr><td align="right">
   <div class="actions">
     <%= link_to 'Back', questions_path %> |

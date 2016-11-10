@@ -3,7 +3,13 @@ class QuestionsController < ApplicationController
   # GET /questions
   # GET /questions.xml
   def index
-    @questions = Question.order("id DESC" ).all
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+     
+    @questions = Question.where( "questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",scan_procedure_array).order("id DESC" ).all
+    if current_user.role == 'Admin_High'
+        @questions = Question.order("id DESC" ).all
+    end
+
     @v_scan_procedure_id = ""
     @v_questionform_id =  ""
     if !params[:questionform_question].nil? 
@@ -11,14 +17,14 @@ class QuestionsController < ApplicationController
               @v_edit_display_order = "Y"
               @v_scan_procedure_id = params[:questionform_question][:scan_procedure_id][:id]
               @v_questionform_id = params[:questionform_question][:questionform_id]
-             @questions = Question.where("questions.id in ( select question_id from questionform_questions where questionform_id in (?))",params[:questionform_question][:questionform_id]).where("questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id])      
+             @questions = Question.where("questions.id in ( select question_id from questionform_questions where questionform_id in (?)) AND  questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:questionform_id],scan_procedure_array).where("questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id])      
          elsif !params[:questionform_question][:questionform_id].nil? and params[:questionform_question][:questionform_id] > ''
              @v_questionform_id = params[:questionform_question][:questionform_id]
-             @questions = Question.where("questions.id in ( select question_id from questionform_questions where questionform_id in (?))",params[:questionform_question][:questionform_id])
+             @questions = Question.where("questions.id in ( select question_id from questionform_questions where questionform_id in (?)) AND  questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:questionform_id],scan_procedure_array)
            
          elsif !params[:questionform_question][:scan_procedure_id].nil? and !params[:questionform_question][:scan_procedure_id][:id].nil? and params[:questionform_question][:scan_procedure_id][:id] > ''
              @v_scan_procedure_id = params[:questionform_question][:scan_procedure_id][:id]
-             @questions = Question.where("questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id])
+             @questions = Question.where("questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?)) AND questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id],scan_procedure_array)
 
          end         
 
@@ -131,7 +137,11 @@ class QuestionsController < ApplicationController
   # POST /questions.xml
   def create
     @question = Question.new(params[:question])
-
+    @v_sp_id = params[:question_scan_procedure][:scan_procedure_id]
+    v_message =""
+    if @v_sp_id.blank?
+       v_message ="The Questioon was not linked to a Scan Procedure - PLEASE get an ADMINISTRATOR to link the question"
+    end
     respond_to do |format|
       if @question.save
           @question.ref_table_a_1 = (@question.ref_table_a_1).strip
@@ -144,7 +154,13 @@ class QuestionsController < ApplicationController
           @question.js_2 = (@question.js_2).strip
           @question.js_3 = (@question.js_3).strip
           @question.save
-        format.html { redirect_to(@question, :notice => 'Question was successfully created.') }
+          if !@v_sp_id.blank?
+             @question_scan_procedure = QuestionScanProcedure.new 
+             @question_scan_procedure.question_id = @question.id
+             @question_scan_procedure.scan_procedure_id = @v_sp_id
+             @question_scan_procedure.save
+           end
+        format.html { redirect_to(@question, :notice => 'Question was successfully created.'+v_message) }
         format.xml  { render :xml => @question, :status => :created, :location => @question }
       else
         format.html { render :action => "new" }
@@ -156,8 +172,12 @@ class QuestionsController < ApplicationController
   # PUT /questions/1
   # PUT /questions/1.xml
   def update
-    @question = Question.find(params[:id])
-
+    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    @questions = Question.where("id in (?)",params[:id]).where("questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",scan_procedure_array)
+    @question = @questions.first
+    if current_user.role == 'Admin_High'
+        @question = Question.find(params[:id])
+    end
     respond_to do |format|
       if @question.update_attributes(params[:question])
           @question.ref_table_a_1 = (@question.ref_table_a_1).strip
