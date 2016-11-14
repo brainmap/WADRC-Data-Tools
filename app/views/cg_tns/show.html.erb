@@ -41,6 +41,8 @@
 <p>
 	<b>Owners:</b>
 	<%= @cg_tn.users.sort_by(&:username_name).collect {|u|  u.username_name}.join(", ").html_safe %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<b>view_tn_participant_link:</b>  <%= @cg_tn.view_tn_participant_link %>&nbsp;&nbsp;&nbsp;
 </p>
 <b>Data Dictionary:</b><% if !@cg_tn.datadictionary_file_name.blank? %><small><small><%= link_to 'Download DataDictionary', @cg_tn.datadictionary.url %> <%= @cg_tn.datadictionary_file_name%></small></small><%end%><br>
 <b>Data Dictionary/Explanatory File:</b><% if !@cg_tn.datadictionary2_file_name.blank? %><small><small><%= link_to 'Download DataDictionary/Explanatory File', @cg_tn.datadictionary2.url %> <%= @cg_tn.datadictionary2_file_name%></small></small><%end%><br>

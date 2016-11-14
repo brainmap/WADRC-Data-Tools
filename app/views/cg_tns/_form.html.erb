@@ -58,7 +58,12 @@
  </td></tr></table>
  <table><tr><td><%= f.label :tracker_type %>:
  	<%= collection_select('cg_tn', :tracker_id,Trtype.where("status_flag ='Y' ").order(:description), :id, :description,  {:prompt => 'Choose tracker if table type is tracker'}, {:multiple =>  false} ) %>
- </td></tr></table>
+ </td></tr>
+ <tr><td><%= f.label :view_tn_participant_link %>:
+  <%= f.text_field :view_tn_participant_link ,:size=>50 %><br>
+  Enter if the cg_table is actually a View, of a table which has Participant_id - important for changing participant_id when merging participants - ignore enrollments, vgroups, participants - already being merged.
+ </td></tr>
+</table>
 </div>
 <br>
 <br>

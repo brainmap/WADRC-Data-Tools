@@ -457,6 +457,7 @@ class ParticipantsController < ApplicationController
      connection = ActiveRecord::Base.connection();
      # hoping only used participant_id as column name
     @tns = CgTn.where(" id in (select cg_tn_id from cg_tn_cns where cn ='participant_id')")
+    @tns_view_tn = CgTn.where("view_tn_participant_link is not null and view_tn_participant_link >''")
      if !params[:participant_one].nil?
          @v_participant_one = params[:participant_one]
      end
@@ -543,6 +544,21 @@ class ParticipantsController < ApplicationController
                  end
                end
            end
+           #if there are any views with underlying participant_id tables @tns_view_tn
+           for t in @tns_view_tn 
+              v_sql = "select count(*) cnt from "+t.tn+" where participant_id ="+@v_participant_two.to_s
+              v_value_cnt = connection.execute(v_sql)
+              if(v_value_cnt.first[0].to_i > 0)
+                 v_sql_view = "SELECT count(*) cnt FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA in ('"+v_schema+"')
+                  AND TABLE_NAME = '"+t.tn+"'  and table_type = 'BASE TABLE'"
+                 v_value_cnt_view = connection.execute(v_sql_view)
+                 if(v_value_cnt_view.first[0].to_i > 0) # only update table
+                    v_sql = "UPDATE "+t.tn+" set participant_id ="+@v_participant_one.to_s+" WHERE participant_id ="+@v_participant_two.to_s
+                    v_result = connection.execute(v_sql)
+                 end
+               end
+           end
+
               v_sql = "update  participant_merges set status ='completed', updated_at = now() 
               Where participant_id_keep ="+@v_participant_one.to_s+" and participant_id_eliminate = "+@v_participant_two.to_s
               v_result = connection.execute(v_sql)
