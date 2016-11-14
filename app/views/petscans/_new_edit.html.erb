@@ -108,14 +108,15 @@ v_autodetect =  [["AutoDetect File On","On"],["AutoDetect File Off","Off"]]
   <% if !params[:new_appointment_vgroup_id].blank?%>
        <%=  hidden_field_tag( 'new_appointment_vgroup_id',params[:new_appointment_vgroup_id]) %>
   <% end %>
-<%     @vitals = Vital.where("vitals.appointment_id in (?)",@petscan.appointment_id)     
+<%     @vitals = Vital.where("vitals.appointment_id in (?) and vitals.pre_post_flag='pre'",@petscan.appointment_id)   
+@vitals_post = Vital.where("vitals.appointment_id in (?) and vitals.pre_post_flag='post'",@petscan.appointment_id)    
        @vitals.each do |v|  # could have multiples? %>
     <br><br><br> <table>
-	<tr><td><%= f.label :Pulse %> </td>
+	<tr><td><%= f.label :Pre_Pulse %> </td>
 		<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-	<tr><td><%= f.label :BP_Systol %> </td>
+	<tr><td><%= f.label :Pre_BP_Systol %> </td>
 		<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-	<tr><td><%= f.label :BP_Diastol %> </td>
+	<tr><td><%= f.label :Pre_BP_Diastol %> </td>
 		<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 	<tr><td><%= f.label :Blood_Glucose %> </td>
 		<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
@@ -123,19 +124,19 @@ v_autodetect =  [["AutoDetect File On","On"],["AutoDetect File Off","Off"]]
     <td><%=  text_field_tag( 'weight',v.weight==991?"":v.weight, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
     <tr><td><%= f.label :Height_inches %> </td>
     <td><%=  text_field_tag( 'height',v.height==991?"":v.height, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-	 </table>    
+	    
 	<%=  hidden_field_tag( 'vital_id',v.id) %>
          
-<%       end
+<%       end 
       if @vitals.blank?
 	    v = Vital.new
  %>
  <br><br><br> <table>
-	<tr><td><%= f.label :Pulse %> </td>
+	<tr><td><%= f.label :Pre_Pulse %> </td>
 		<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-	<tr><td><%= f.label :BP_Systol %> </td>
+	<tr><td><%= f.label :Pre_BP_Systol %> </td>
 		<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-	<tr><td><%= f.label :BP_Diastol %> </td>
+	<tr><td><%= f.label :Pre_BP_Diastol %> </td>
 		<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
 	<tr><td><%= f.label :Blood_Glucose %> </td>
 		<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
@@ -143,7 +144,30 @@ v_autodetect =  [["AutoDetect File On","On"],["AutoDetect File Off","Off"]]
     <td><%=  text_field_tag( 'weight',v.weight==991?"":v.weight, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
     <tr><td><%= f.label :Height_inches %> </td>
     <td><%=  text_field_tag( 'height',v.height==991?"":v.height, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-	</table>
+<%   end %>
+<%   @vitals_post.each do |v|  # could have multiples? %>
+    
+  <tr><td><%= f.label :Post_Pulse %> </td>
+    <td><%=  text_field_tag( 'pulse_post',v.pulse==991?"":v.pulse, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+  <tr><td><%= f.label :Post_BP_Systol %> </td>
+    <td><%=  text_field_tag( 'bp_systol_post',v.bp_systol==991? "":v.bp_systol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+  <tr><td><%= f.label :Post_BP_Diastol %> </td>
+    <td><%=  text_field_tag( 'bp_diastol_post',v.bp_diastol==991?"":v.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+   </table>    
+  <%=  hidden_field_tag( 'vital_id_post',v.id) %>
+         
+<%       end 
+      if @vitals_post.blank?
+      v_post = Vital.new
+ %>
+ 
+  <tr><td><%= f.label :Post_Pulse %> </td>
+    <td><%=  text_field_tag( 'pulse_post',v_post.pulse==991?"":v_post.pulse, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+  <tr><td><%= f.label :Post_BP_Systol %> </td>
+    <td><%=  text_field_tag( 'bp_systol_post',v_post.bp_systol==991? "":v_post.bp_systol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+  <tr><td><%= f.label :Post_BP_Diastol %> </td>
+    <td><%=  text_field_tag( 'bp_diastol_post',v_post.bp_diastol==991?"":v_post.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+  </table>
 <%   end %>
 
   </div>

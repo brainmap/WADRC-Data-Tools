@@ -321,7 +321,7 @@ class PetscansController < ApplicationController
                     "LEFT JOIN employees on petscans.enteredpetscanwho = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
          else    
            @html_request ="N"          
-            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Dose','Injection Time','Scan Start','Note','Range','Pet status','BP Systol','BP Diastol','Pulse','Blood Glucose','Weight','Height','Age at Appt','Appt Note'] # need to look up values
+            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Dose','Injection Time','Scan Start','Note','Range','Pet status','Pre_BP Systol','Pre_BP Diastol','Pre_Pulse','Blood Glucose','Weight','Height','Post_BP Systol','Post_BP Diastol','Post_Pulse','Age at Appt','Appt Note'] # need to look up values
           if !@v_petfile_cnt.nil?
             i = @v_petfile_cnt
             k = 1
@@ -339,9 +339,10 @@ class PetscansController < ApplicationController
             @fields =["lookup_pettracers.name pettracer","petscans.netinjecteddose",
                     "time_format(timediff( time(petscans.injecttiontime),subtime(utc_time(),time(localtime()))),'%H:%i')",
                     "time_format(timediff( time(scanstarttime),subtime(utc_time(),time(localtime()))),'%H:%i')",
-                    "petscans.petscan_note","petscans.range","vgroups.transfer_pet","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","vitals.weight","vitals.height","appointments.age_at_appointment","petscans.id","appointments.comment"] # vgroups.id vgroup_id always first, include table name 
+                    "petscans.petscan_note","petscans.range","vgroups.transfer_pet","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","vitals.weight","vitals.height","vitals_post.bp_systol as bp_systol_post","vitals_post.bp_diastol as bp_diastol_post","vitals_post.pulse as pulse_post","appointments.age_at_appointment","petscans.id","appointments.comment"] # vgroups.id vgroup_id always first, include table name 
             @left_join = ["LEFT JOIN lookup_pettracers on petscans.lookup_pettracer_id = lookup_pettracers.id",
-                        "LEFT JOIN vitals on petscans.appointment_id = vitals.appointment_id  "] # left join needs to be in sql right after the parent table!!!!!!!   
+                        "LEFT JOIN vitals on petscans.appointment_id = vitals.appointment_id and vitals.pre_post_flag ='pre' ",
+                        "LEFT JOIN vitals as vitals_post on petscans.appointment_id = vitals_post.appointment_id and vitals_post.pre_post_flag ='post'  "] # left join needs to be in sql right after the parent table!!!!!!!   
                         # "LEFT JOIN employees on petscans.enteredpetscanwho = employees.id",             
                  
          end
@@ -626,6 +627,7 @@ class PetscansController < ApplicationController
           @vital.bp_systol = params[:bp_systol]
           @vital.bp_diastol = params[:bp_diastol]
           @vital.bloodglucose = params[:bloodglucose]
+          @vital.pre_post_flag  = 'pre'
           @vital.save
         else
           @vital = Vital.new
@@ -634,8 +636,25 @@ class PetscansController < ApplicationController
           @vital.bp_systol = params[:bp_systol]
           @vital.bp_diastol = params[:bp_diastol]
           @vital.bloodglucose = params[:bloodglucose]
+          @vital.pre_post_flag  = 'pre'
           @vital.save      
-        end        
+        end     
+        if !params[:vital_id_post].blank?
+          @vital = Vital.find(params[:vital_id_post])
+          @vital.pulse = params[:pulse_post]
+          @vital.bp_systol = params[:bp_systol_post]
+          @vital.bp_diastol = params[:bp_diastol_post]
+          @vital.pre_post_flag  = 'post'
+          @vital.save
+        else
+          @vital = Vital.new
+          @vital.appointment_id = @petscan.appointment_id
+          @vital.pulse = params[:pulse_post]
+          @vital.bp_systol = params[:bp_systol_post]
+          @vital.bp_diastol = params[:bp_diastol_post]
+          @vital.pre_post_flag  = 'post'
+          @vital.save      
+        end    
         format.html { redirect_to(@petscan, :notice => 'Petscan was successfully created.') }
         format.xml  { render :xml => @petscan, :status => :created, :location => @petscan }
       else
@@ -693,6 +712,7 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
       @vital.bloodglucose = params[:bloodglucose]
       @vital.weight = params[:weight]
       @vital.height = params[:height]
+      @vital.pre_post_flag = 'pre'
       @vital.save
     else
       @vital = Vital.new
@@ -703,6 +723,23 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
       @vital.bloodglucose = params[:bloodglucose]
       @vital.weight = params[:weight]
       @vital.height = params[:height]
+      @vital.pre_post_flag = 'pre'
+      @vital.save      
+    end
+    if !params[:vital_id_post].blank?
+      @vital = Vital.find(params[:vital_id_post])
+      @vital.pulse = params[:pulse_post]
+      @vital.bp_systol = params[:bp_systol_post]
+      @vital.bp_diastol = params[:bp_diastol_post]
+      @vital.pre_post_flag = 'post'
+      @vital.save
+    else
+      @vital = Vital.new
+      @vital.appointment_id = @petscan.appointment_id
+      @vital.pulse = params[:pulse_post]
+      @vital.bp_systol = params[:bp_systol_post]
+      @vital.bp_diastol = params[:bp_diastol_post]
+      @vital.pre_post_flag = 'post'
       @vital.save      
     end
     
