@@ -17,10 +17,9 @@ This is for linking a new question to a Scan Procedure.
       </ul>
     </div>
   <% end %>
-
   <div class="field">
     <b><%= f.label :scan_procedure_id %></b>REQUIRED*<br />
-<%= collection_select :question_scan_procedure, :scan_procedure_id, ScanProcedure.all.sort_by(&:codename), :id, :codename,{:prompt => 'Select a Scan Procedure'},{:required => true}  %>
+<%= collection_select :question_scan_procedure, :scan_procedure_id, ScanProcedure.where("scan_procedures.id in (?)",@scan_procedure_array).sort_by(&:codename), :id, :codename,{:prompt => 'Select a Scan Procedure'},{:required => true}  %>
   </div><br>
   <div class="field">
     <b>Un-Linked Questions: </b>
@@ -58,11 +57,11 @@ This is for editing the display order of a question already linked to a scan pro
 
   <div class="field">
     <%= f.label :question_id %><br />
-<%= collection_select :question_scan_procedure, :question_id, Question.all.sort_by(&:description), :id, :description,{:prompt => 'Select a Question'},{:required => true}  %>
+<%= collection_select :question_scan_procedure, :question_id, Question.where("questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",@scan_procedure_array).sort_by(&:description), :id, :description,{:prompt => 'Select a Question'},{:required => true}  %>
   </div>
   <div class="field">
     <%= f.label :scan_procedure_id %><br />
-<%= collection_select :question_scan_procedure, :scan_procedure_id, ScanProcedure.all.sort_by(&:codename), :id, :codename,{:prompt => 'Select a Scan Procedure'},{:required => true}  %>
+<%= collection_select :question_scan_procedure, :scan_procedure_id, ScanProcedure.where("scan_procedures.id in (?)",@scan_procedure_array).sort_by(&:codename), :id, :codename,{:prompt => 'Select a Scan Procedure'},{:required => true}  %>
   </div>
   <div class="field">
     <%= f.label :include_exclude %><br />

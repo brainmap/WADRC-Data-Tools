@@ -3,8 +3,7 @@ class QuestionsController < ApplicationController
   # GET /questions
   # GET /questions.xml
   def index
-    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
-     
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
     @questions = Question.where( "questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",scan_procedure_array).order("id DESC" ).all
     if current_user.role == 'Admin_High'
         @questions = Question.order("id DESC" ).all
@@ -39,8 +38,12 @@ class QuestionsController < ApplicationController
   # GET /questions/1
   # GET /questions/1.xml
   def show
-    @question = Question.find(params[:id])
-
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
+    @questions = Question.where( "questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?)) and questions.id in (?)",scan_procedure_array,params[:id])
+    @question = @questions.first
+    if current_user.role == 'Admin_High'
+         @question = Question.find(params[:id])
+    end
         sql = "select distinct sp.codename, qf.description
                  from   questions q
                                 LEFT JOIN    question_scan_procedures qsp
@@ -52,7 +55,7 @@ class QuestionsController < ApplicationController
                               LEFT JOIN questionformnamesps  qfsp on qfsp.questionform_id = qf.id
                         where q.id = qfq.question_id 
                         and qfq.questionform_id = qf.id 
-                        and q.id = "+params[:id]+" order by qf.description,sp.codename"
+                        and q.id = "+@question.id.to_s+" order by qf.description,sp.codename"
     connection = ActiveRecord::Base.connection();
     @sp_qf = []
     @results = connection.execute(sql)
@@ -89,6 +92,12 @@ class QuestionsController < ApplicationController
 
   # GET /questions/1/edit
   def edit
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
+    @questions = Question.where( "questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?)) and questions.id in (?)",scan_procedure_array,params[:id])
+    @question = @questions.first
+    if current_user.role == 'Admin_High'
+         @question = Question.find(params[:id])
+    end
         sql = "select distinct sp.codename, qf.description
                  from   questions q
                                 LEFT JOIN    question_scan_procedures qsp
@@ -111,17 +120,38 @@ class QuestionsController < ApplicationController
               @sp_qf.push(r[1]+"</td><td>")
           end
     end
-    @question = Question.find(params[:id])
+    #@question = Question.find(params[:id])
   end
 
   def clone 
-    @question_original = Question.find(params[:id])
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
+    v_question_id = params[:id]
+    @questions_original = Question.where( "questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?)) and questions.id in (?)",scan_procedure_array,params[:id])
+    @question_original = @questions_original.first
+    if current_user.role == 'Admin_High'
+         @question_original = Question.find(params[:id])
+    end
+    #@question_original = Question.find(params[:id])
     @question =  @question_original.dup # clone doesn't seem to work anymore 
     @question.description =   @question_original.description+"_CLONE"
+
     
  respond_to do |format|
    if @question.save
       params[:id] = @question.id
+      # clone sp
+       @question_scan_procedures = QuestionScanProcedure.where("question_id in (?)",v_question_id)
+       @question_scan_procedures.each do |qsp|
+              v_question_scan_procedure = QuestionScanProcedure.new 
+              v_question_scan_procedure.question_id = @question.id
+              v_question_scan_procedure.scan_procedure_id = qsp.scan_procedure_id
+              # defaulting to include
+              v_question_scan_procedure.include_exclude = "include"
+              v_question_scan_procedure.save
+       end
+      #clone form
+
+
      format.html { redirect_to(edit_question_path(@question), :notice => 'Question was successfully created.') }
      format.xml  { render :xml => @question, :status => :created, :location => @question }
     else
@@ -136,6 +166,7 @@ class QuestionsController < ApplicationController
   # POST /questions
   # POST /questions.xml
   def create
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
     @question = Question.new(params[:question])
     @v_sp_id = params[:question_scan_procedure][:scan_procedure_id]
     v_message =""
@@ -172,7 +203,7 @@ class QuestionsController < ApplicationController
   # PUT /questions/1
   # PUT /questions/1.xml
   def update
-    scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
     @questions = Question.where("id in (?)",params[:id]).where("questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",scan_procedure_array)
     @question = @questions.first
     if current_user.role == 'Admin_High'
@@ -202,7 +233,13 @@ class QuestionsController < ApplicationController
   # DELETE /questions/1
   # DELETE /questions/1.xml
   def destroy
-    @question = Question.find(params[:id])
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
+    #@question = Question.find(params[:id])
+    @questions = Question.where( "questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?)) and questions.id in (?)",scan_procedure_array,params[:id])
+    @question = @questions.first
+    if current_user.role == 'Admin_High'
+         @question = Question.find(params[:id])
+    end
     @question.destroy
 
     respond_to do |format|

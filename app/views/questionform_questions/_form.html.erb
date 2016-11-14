@@ -57,7 +57,7 @@ This is for editing the display order of a question already linked to a form.
   </div><br>
   <div class="field">
    <b>Full List Questions:</b>
-<%= collection_select :questionform_question, "question_id", Question.all.sort_by(&:description), :id, :description,{:prompt => 'Select a Question- full list'},{:required => true}  %>
+<%= collection_select :questionform_question, "question_id", Question.where("questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",@scan_procedure_array).sort_by(&:description), :id, :description,{:prompt => 'Select a Question- full list'},{:required => true}  %>
   </div><br>
   <div class="field">
     <b><%= f.label :display_order %>:</b><br />

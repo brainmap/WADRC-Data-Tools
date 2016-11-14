@@ -3,6 +3,7 @@ class QuestionformQuestionsController < ApplicationController
   # GET /questionform_questions
   # GET /questionform_questions.xml
   def index_sp_questions 
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
      # copy all the questions from one sp/questionform to another sp,
        # exclude ones already there
      if !params[:questionform_question][:scan_procedure_id].nil? and !params[:questionform_question][:scan_procedure_id][:id].nil? and params[:questionform_question][:scan_procedure_id][:id] > ''
@@ -42,6 +43,7 @@ class QuestionformQuestionsController < ApplicationController
   end
 
   def index
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
     # update display order 
     if !params[:questionform_question].nil?  and !params[:questionform_question][:questionform_id].blank? and !params[:questionform_question][:scan_procedure_id].nil?   and !params[:questionform_question][:scan_procedure_id][:id].nil? and !params[:questionform_question][:scan_procedure_id][:id].blank?  and !params[:question_id].nil?
               params[:question_id].each do |q_id|
@@ -106,6 +108,7 @@ class QuestionformQuestionsController < ApplicationController
   # GET /questionform_questions/new
   # GET /questionform_questions/new.xml
   def new
+    @scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ')
     @questionform_question = QuestionformQuestion.new
 
     respond_to do |format|
@@ -116,12 +119,15 @@ class QuestionformQuestionsController < ApplicationController
 
   # GET /questionform_questions/1/edit
   def edit
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
     @questionform_question = QuestionformQuestion.find(params[:id])
   end
 
   # POST /questionform_questions
   # POST /questionform_questions.xml
   def create
+    @scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ')
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
     sql ="select ifnull(max(display_order),0) display_order from questionform_questions where questionform_id = "+params[:questionform_question][:questionform_id]
     connection = ActiveRecord::Base.connection();
     results = connection.execute(sql)
@@ -150,6 +156,7 @@ class QuestionformQuestionsController < ApplicationController
   # PUT /questionform_questions/1
   # PUT /questionform_questions/1.xml
   def update
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
     @questionform_question = QuestionformQuestion.find(params[:id])
 
     respond_to do |format|
@@ -166,6 +173,7 @@ class QuestionformQuestionsController < ApplicationController
   # DELETE /questionform_questions/1
   # DELETE /questionform_questions/1.xml
   def destroy
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
     @questionform_question = QuestionformQuestion.find(params[:id])
     @questionform_question.destroy
 
