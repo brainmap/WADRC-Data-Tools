@@ -211,12 +211,80 @@ puts "AAAAA "+v_content_array[v_cnt]
              v_sql = "insert into "+@schedule.target_table+"_new("+@schedule.target_table_columns+",participant_id)  select "+@schedule.target_table_columns+",participant_id from "+@schedule.target_table+" where "+@schedule.target_table+"."+v_table_key_source+" not in (select "+v_table_key_source+" from "+@schedule.target_table+"_new)"
              results = connection.execute(v_sql)
            end
+                     # export_id 
+           if @schedule.make_unique_export_id == "Y"
+              @schedule.target_table_columns = @schedule.target_table_columns+",export_id"
+              v_schema ='panda_production'
+              if Rails.env=="development" 
+                  v_schema ='panda_development'
+              end
+              # check @schedule.target_table+"_new, @schedule.target_table+"_edit, @schedule.target_table+"_past,@schedule.target_table+"
+              # have export_id column
+              # add export_id column if not there
+              # check for unique index
+              # add unique index if not there
+              # copy export_id from @schedule.target_table if there
+              # generate any new export_id
+              v_table_list = [@schedule.target_table+"_new", @schedule.target_table+"_edit",@schedule.target_table+"_old",@schedule.target_table]
+              v_table_list.each do |tn|
+                  v_sql = "SELECT count(COLUMN_NAME) cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE 
+                     TABLE_SCHEMA = '"+v_schema+"' AND TABLE_NAME = '"+tn+"' and COLUMN_NAME ='export_id'";
+                  v_export_results = connection.execute(v_sql)
+                  if(v_export_results.first[0] < 1)
+                      v_sql = "alter table "+tn+" add(export_id   int)"
+                      v_altertable_results = connection.execute(v_sql)
+                  end
+                  v_sql = "SELECT count(index_name) cnt FROM information_schema.statistics 
+                      WHERE column_name = 'export_id' and table_name = '"+tn+"'
+                     AND index_schema  IN ( '"+v_schema+"') and non_unique = 0 "
+                  v_uniqueind_results = connection.execute(v_sql)
+                  if(v_uniqueind_results.first[0] < 1)
+                     v_sql = "ALTER TABLE "+tn+"  ADD UNIQUE (export_id)"
+                     v_uniqueindex_results = connection.execute(v_sql)
+                  end
+               end
+               v_sql = "update "+@schedule.target_table+"_new t1 
+               set t1.export_id = (select t2.export_id from "+@schedule.target_table+"  t2 where t1.participant_id = t2.participant_id)"
+               v_update_results = connection.execute(v_sql)
+
+               v_sql = "select export_id from "+@schedule.target_table+"_new where export_id is NOT NULL"
+               v_exportid_results = connection.execute(v_sql)
+               v_exportid_array = []
+               v_exportid_results.each { |r| v_exportid_array << r }
+
+               v_sql = "select participant_id from "+@schedule.target_table+"_new where export_id is NULL and participant_id is not NULL"
+               v_null_results = connection.execute(v_sql)
+               v_null_array = []
+               v_null_results.each { |r| v_null_array << r[0] }
+               v_null_count = v_null_array.count 
+               v_null_array.each do |val|
+              end
+               if v_null_count > 0
+                   v_now = Time.new 
+                   v_date_seed = v_now.to_i
+                   v_array_cnt = 0
+                   v_rand_array = Array.new(5*v_null_results.count) {rand(v_null_count .. v_date_seed)}
+                   v_rand_array.each do |val|
+                      if(v_exportid_array.include?(val)) 
+                            # not do anything
+                      elsif v_array_cnt < v_null_array.count
+                         v_sql = "update "+@schedule.target_table+"_new t1 
+                          set t1.export_id = "+val.to_s+" where t1.participant_id ="+v_null_array[v_array_cnt].to_s
+                          v_exportid_array.push(val)
+            
+                          v_update_results = connection.execute(v_sql)
+                         v_array_cnt = v_array_cnt + 1
+                      end
+                   end
+               end
+           end
            # -- do the new-old-present-edit pivot
            v_comment = v_shared.move_present_to_old_new_to_present(@schedule.target_table,
            @schedule.target_table_columns+",participant_id",
                           "participant_id is not null ",v_comment)
            # apply edits  -- made into a function  in shared model
            v_shared.apply_cg_edits(@schedule.target_table)
+ 
          elsif  @schedule.key_type == "adrcnum-kc-participant_id"
            v_file_col_array = (@schedule.file_columns_included).split(',')
            v_table_col_array = (@schedule.target_table_columns).split(',')
