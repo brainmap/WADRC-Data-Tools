@@ -283,6 +283,7 @@ WADRCDataTools::Application.routes.draw do
    match '/vgroups/change_completedneuropsych_vgroup', :controller => 'vgroups', :action => 'change_completedneuropsych_vgroup', :as =>:change_completedneuropsych_vgroup
    match '/vgroups/change_completedquestionnaire_vgroup', :controller => 'vgroups', :action => 'change_completedquestionnaire_vgroup', :as =>:change_completedquestionnaire_vgroup
    match 'vgroups/change_consent_form_vgroup',:controller => 'vgroups', :action => 'change_consent_form_vgroup', :as =>:change_consent_form_vgroup
+    match '/placeholder_vgroup', :controller => 'vgroups', :action => 'placeholder_vgroup', :as => :placeholder_vgroup
   
    resources :vgroups
   resources :studies
