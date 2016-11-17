@@ -146,7 +146,7 @@ class QuestionsController < ApplicationController
               v_question_scan_procedure.question_id = @question.id
               v_question_scan_procedure.scan_procedure_id = qsp.scan_procedure_id
               # defaulting to include
-              v_question_scan_procedure.include_exclude = "include"
+              v_question_scan_procedure.include_exclude = qsp.include_exclude
               v_question_scan_procedure.save
        end
       #clone form
