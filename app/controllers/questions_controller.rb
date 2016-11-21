@@ -189,6 +189,7 @@ class QuestionsController < ApplicationController
              @question_scan_procedure = QuestionScanProcedure.new 
              @question_scan_procedure.question_id = @question.id
              @question_scan_procedure.scan_procedure_id = @v_sp_id
+             @question_scan_procedure.include_exclude = "include"
              @question_scan_procedure.save
            end
         format.html { redirect_to(@question, :notice => 'Question was successfully created.'+v_message) }
