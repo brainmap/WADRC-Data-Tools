@@ -46,7 +46,11 @@
 	 %>
 	<b>Key Type:</b> <%= f.select :key_type, v_key, :selected => @schedule.key_type %></td></tr>
 <tr><td align="left" colspan=2><b>Target_Table_columns/order:</b> <%= f.text_field :target_table_columns, :size=>120 %>	</td></tr>
-<tr><td align="left" colspan=2><b>Process Stop File option:</b> <%= f.select :process_stop_file_flag, v_y_n, :selected => @schedule.process_stop_file_flag.blank? ? 'N' :  @schedule.process_stop_file_flag   %><br>( /mounts/data/preprocessed/logs ) 	</td></tr>
+<tr><td align="left" ><b>Process Stop File option:</b> <%= f.select :process_stop_file_flag, v_y_n, :selected => @schedule.process_stop_file_flag.blank? ? 'N' :  @schedule.process_stop_file_flag   %><br>( /mounts/data/preprocessed/logs ) 	</td>
+<td align="left"><b>Make Export_id column:</br>
+	<%= f.select :make_unique_export_id, v_y_n, :selected => @schedule.make_unique_export_id.blank? ? 'N' :  @schedule.make_unique_export_id   %><br>
+	(only works with participant linked data - one row per particiapant)
+</td></tr>
 <tr><td align="left" colspan=2>
 <br>
 <B>Owner:</b></td></tr>

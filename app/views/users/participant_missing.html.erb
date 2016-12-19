@@ -1,0 +1,20 @@
+<table>
+
+<% if current_user.role == 'Admin_High'
+   # loop thru each participant, get scans, get dob, gender from scan
+    @participants.each do |p| 
+        @visits = Visit.where("visits.appointment_id in ( select appointments.id from appointments, vgroups where vgroups.id = appointments.vgroup_id and vgroups.participant_id in (?))",p[0])
+
+        v_dob_found = ""
+        v_gender_found = ""
+        @visits.each do |v|
+            
+
+        end
+
+	%>
+<tr><td><%= p[0] %></td><td><%= p[1] %></td><td><% if p[2] == 1%>M<%elsif p[2] == 2%>F<%end%></td><td><%= v_dob_found %></td><td><%= v_gender_found %></td>
+
+<%   end
+end %>
+</table>
