@@ -627,6 +627,8 @@ class PetscansController < ApplicationController
           @vital.bp_systol = params[:bp_systol]
           @vital.bp_diastol = params[:bp_diastol]
           @vital.bloodglucose = params[:bloodglucose]
+          @vital.weight = params[:weight]
+          @vital.height = params[:height]
           @vital.pre_post_flag  = 'pre'
           @vital.save
         else
@@ -636,6 +638,8 @@ class PetscansController < ApplicationController
           @vital.bp_systol = params[:bp_systol]
           @vital.bp_diastol = params[:bp_diastol]
           @vital.bloodglucose = params[:bloodglucose]
+          @vital.weight = params[:weight]
+          @vital.height = params[:height]
           @vital.pre_post_flag  = 'pre'
           @vital.save      
         end     
