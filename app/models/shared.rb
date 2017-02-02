@@ -8481,7 +8481,173 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     
     
   end
-  
+ 
+   def run_lst_v3_process
+      v_process_name = "lst_v3_process"
+      v_log_base ="/mounts/data/preprocessed/logs/"
+      process_logs_delete_old( v_process_name, v_log_base)            
+      v_base_path = Shared.get_base_path()
+      @schedule = Schedule.where("name in ('lst_v3_process')").first
+      v_runner_email = self.get_user_email()  #  want to send errors to the user running the process
+      v_schedule_owner_email_array = []
+      if !v_runner_email.blank?
+        v_schedule_owner_email_array.push(v_runner_email)
+      else
+        v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+      end
+      
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="lst_v3_process"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_error_comment = ""
+      t = Time.now
+      v_date_YM = t.strftime("%Y%m") # just making monthly logs, prepend
+      v_log_name =v_process_name+"_"+v_date_YM
+      v_log_path =v_log_base+v_log_name 
+      v_stop_file_name = v_process_name+"_stop"
+      v_stop_file_path = v_log_base+v_stop_file_name  # use to stop the results loop  
+      v_subjectid_v_num = ""              
+      v_script_dev = v_base_path+"/data1/lab_scripts/LstProc/v3/lstproc.sh" #"/data1/lab_scripts/lstproc.sh"   #LST/LST.sh"
+      v_script = v_base_path+"/data1/lab_scripts/LstProc/v3/lstproc.sh" # v_base_path+"/SysAdmin/production/LST/LST.sh"
+      v_script  = v_script_dev   # using the dev script
+      v_machine ="merida"  # change to merida once set up
+      #   v_script_only_tlv = v_script+" --only_tlv"  # running whole thing -- just use v_script in call
+      (v_error_comment,v_comment) =get_file_diff(v_script,v_script_dev,v_error_comment,v_comment)
+      v_comment_base = @schedulerun.comment
+      connection = ActiveRecord::Base.connection();  
+
+      # THIS IS THE MAIN RUN
+      # do_not_run_process_wlesion_030 == Y means do not run
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_v3_status where if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) ) and (  lst_subjectid not like 'shp%') " #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
+      results = connection.execute(sql)
+      results.each do |r|
+          v_break = 0  # need a kill swith
+           v_log = ""
+          if File.file?(v_stop_file_path)
+            File.delete(v_stop_file_path)
+            v_break = 1
+            v_log = v_log + " STOPPING the results loop"
+            v_comment = " STOPPING the results loop  "+v_comment
+          end
+          break if v_break > 0
+            
+          t_now = Time.now
+          v_log = v_log + "starting "+r[2]+"   "+ t_now.strftime("%Y%m%d:%H:%M")+"\n"
+          v_subjectid_v_num = r[2]
+          v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
+          # get location
+          sql_loc = "select distinct v.path from visits v where v.appointment_id in (select a.id from appointments a, enrollment_vgroup_memberships evg, scan_procedures_vgroups spv where a.vgroup_id = evg.vgroup_id  and evg.enrollment_id = "+r[0].to_s+"  and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id = "+r[1].to_s+")"
+          results_loc = connection.execute(sql_loc)
+          v_o_star_nii_sp_loc = ""
+          v_tlv_lesion_txt = "blank"
+          results_loc.each do |loc|
+            # could have 2 locations dual enrollment with 2 appointments - look for where o*.nii loc
+            v_loc_path = loc[0]
+            v_loc_path = v_loc_path.gsub(v_base_path+"/raw/","")
+            v_loc_parts_array = v_loc_path.split("/")
+            v_subjectid_unknown =v_base_path+"/preprocessed/visits/"+v_loc_parts_array[0]+"/"+v_subjectid+"/unknown"
+            if File.directory?(v_subjectid_unknown)
+                  v_dir_array = Dir.entries(v_subjectid_unknown)
+                  v_dir_array.each do |f|
+                    if f.start_with?("o") and f.end_with?(".nii")
+                        v_o_star_nii_sp_loc = v_loc_parts_array[0]
+                        v_log = v_log + "acpc file found \n"
+                    end
+                  end 
+            end
+            v_expected_tlv_file = v_base_path+"/preprocessed/visits/"+v_loc_parts_array[0]+"/"+v_subjectid+"/LST/pproc_v3"
+            if File.directory?(v_expected_tlv_file)
+                  v_dir_array = Dir.entries(v_expected_tlv_file)
+                  v_dir_array.each do |f|
+                    if  f.start_with?("LST_tlv_0.5")  and f.end_with?(".txt")
+                        v_tlv_lesion_txt = "not blank"
+                        v_log = v_log + "tlv_lesion file found \n"
+                    end
+                  end 
+            end
+          end
+
+          
+          if v_o_star_nii_sp_loc > "" and v_tlv_lesion_txt != "not blank"
+              # call processing script- need to have LST toolbox on gru, merida or edna
+              # v_call =  v_script+" -p "+v_o_star_nii_sp_loc+"  -b "+v_subjectid
+              @schedulerun.comment ="str "+r[2]+"; "+v_comment[0..1990]
+              @schedulerun.save
+              v_multiple_o_star_nii_flag = r[3]
+              v_o_star_nii_file_to_use = r[4]
+              v_multiple_sag_cube_flair_flag = r[5]
+              v_sag_cube_flair_to_use = r[6]
+              # need to change script to accept v_o_star_nii_file_to_use and v_sag_cube_flair_to_use
+              v_call =  'ssh panda_user@'+v_machine+'.dom.wisc.edu "'  +v_script+' -a -p '+v_o_star_nii_sp_loc+'  -b '+v_subjectid+' "  ' 
+              puts "rrrrrrr "+v_call
+              v_log = v_log + v_call+"\n"
+              begin
+                 stdin, stdout, stderr = Open3.popen3(v_call)
+               rescue => msg  
+                  v_log = v_log + msg+"\n"  
+               end
+              v_success ="N"
+              while !stdout.eof?
+                v_output = stdout.read 1024 
+                v_log = v_log + v_output  
+                if (v_log.tr("\n","")).include? "Done    'Thresholding of lesion probabilities'"  # line wrapping? Done ==> Do\nne
+                  v_success ="Y"
+                  v_log = v_log + "SUCCESS !!!!!!!!! \n"
+                end
+                puts v_output  
+               end
+               v_err =""
+               v_log = v_log +"IN ERROR \n"
+               while !stderr.eof?
+                  v_err = stderr.read 1024
+                  v_log = v_log +v_err
+                end
+               puts "err="+v_err
+               if v_success =="Y"
+                 sql_update = "update cg_lst_v3_status set wlesion_030_flag = 'Y' where lst_subjectid = '"+r[2]+"'"
+                 # results_update = connection.execute(sql_update)   # rerun wlesion... file detect
+                 v_comment = " finished=>"+r[2]+ "; " +v_comment
+               else
+                puts " in err"
+                v_log = v_log +"IN ERROR \n" 
+                while !stderr.eof?
+                  v_err = stderr.read 1024
+                  v_log = v_log +v_err
+                  v_comment = v_err +" =>"+r[2]+ " ; " +v_comment  
+                 end 
+                 v_error_comment = "error in "+r[2]+" ;"+v_error_comment
+                 # send email to owner
+                 v_schedule_owner_email_array.each do |e|
+                   v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see ==> "+v_log_path+" <== ALl the output from process is in the file."
+                   PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
+                 end
+               end
+              @schedulerun.comment =v_comment[0..1990]
+              @schedulerun.save
+              stdin.close
+              stdout.close
+              stderr.close
+           else
+             v_log = v_log + "no acpc \n"
+
+           end
+           process_log_append(v_log_path, v_log)
+      end       
+    v_comment = v_error_comment+v_comment
+    puts "successful finish lst_v3_process "+v_comment[0..459]
+     @schedulerun.comment =("successful finish lst_v3_process "+v_comment[0..1959])
+     if !v_comment.include?("ERROR")
+        @schedulerun.status_flag ="Y"
+      end
+      @schedulerun.save
+      @schedulerun.end_time = @schedulerun.updated_at      
+      @schedulerun.save
+  end
+ 
     
   def run_lst_122_process
       v_process_name = "lst_122_process"

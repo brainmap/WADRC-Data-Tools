@@ -342,7 +342,7 @@ class VgroupsController < ApplicationController
           enumber_array << params[:vgroup][:enrollments_attributes]["0"][:enumber]
           # getting enrollments if enumber already in enrollments
           connection = ActiveRecord::Base.connection();
-          enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+          enrollment = Enrollment.where("enumber in (?)",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
         v_do_not_share_scans_flag ="N"
         if !enrollment.blank?
             v_do_not_share_scans_flag ="Y"
@@ -354,7 +354,7 @@ class VgroupsController < ApplicationController
              v_enrollment_array.push(e)
              v_enrollment_id_array.push(e.id)
              v_evg_check = EnrollmentVgroupMembership.where("vgroup_id in (?) and enrollment_id in (?)",@vgroup.id,e.id)
-             if v_evg_check.nil?
+             if v_evg_check.nil? and v_evg_check[0].nil?
                sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(e.id).to_s+")"      
                results = connection.execute(sql)
              end
@@ -399,30 +399,30 @@ class VgroupsController < ApplicationController
                 end
             end
             if !(@vgroup.participant_id).blank? 
-                @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+                @enrollment = Enrollment.where("enumber in (?)",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
                 if @enrollment[0].nil?
                    sql = " insert into enrollments(enumber,participant_id)values('"+params[:vgroup][:enrollments_attributes]["0"][:enumber].gsub(/[;:'"()=<>]/, '')+"',"+@vgroup.participant_id.to_s+")"
                    results = connection.execute(sql) 
-                   @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+                   @enrollment = Enrollment.where("enumber in (?)",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
                 end
                 v_enrollment_array.push(@enrollment[0])
                 v_evg_check = EnrollmentVgroupMembership.where("vgroup_id in (?) and enrollment_id in (?)",@vgroup.id,@enrollment[0].id)
-                if v_evg_check.nil?
+                if v_evg_check.nil? and v_evg_check[0].nil?
                   sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment[0].id).to_s+")"      
                   results = connection.execute(sql)
                 end
             else
                 # need to add
-                @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+                @enrollment = Enrollment.where("enumber in (?)",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
                 if @enrollment[0].nil?
                   sql = " insert into enrollments(enumber)values('"+params[:vgroup][:enrollments_attributes]["0"][:enumber].gsub(/[;:'"()=<>]/, '')+"' )"
                   results = connection.execute(sql)
-                  @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+                  @enrollment = Enrollment.where("enumber in (?)",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
                 end
                 v_enrollment_id_array.push(@enrollment[0].id)
                 v_enrollment_array.push(@enrollment[0])
                 v_evg_check = EnrollmentVgroupMembership.where("vgroup_id in (?) and enrollment_id in (?)",@vgroup.id,@enrollment[0].id)
-                if v_evg_check.nil?
+                if v_evg_check.nil? and v_evg_check[0].nil?
                   sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment[0].id).to_s+")"      
                   results = connection.execute(sql)
                 end
@@ -460,7 +460,7 @@ class VgroupsController < ApplicationController
               if cnt < 1
                 if v_enrollment_id_array.include?(r[0])
                   v_evg_check = EnrollmentVgroupMembership.where("vgroup_id in (?) and enrollment_id in (?)",@vgroup.id,r[0])
-                  if v_evg_check.nil?
+                  if v_evg_check.nil? and v_evg_check[0].nil?
                     sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(r[0]).to_s+")"  
                     results = connection.execute(sql)
                   end
@@ -554,7 +554,7 @@ class VgroupsController < ApplicationController
                  v_new_participant.save
                  @vgroup.participant_id = v_new_participant.id
                  @vgroup.save
-                 @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+                 @enrollment = Enrollment.where("enumber in (?)",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
                  @enrollment.each do |ee|
                    if (ee.participant_id).blank?
                       ee.participant_id = v_new_participant.id
@@ -680,7 +680,7 @@ class VgroupsController < ApplicationController
        else
          if !params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].blank?
            connection = ActiveRecord::Base.connection();
-           @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
+           @enrollment = Enrollment.where("enumber in (?)",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
            enumber_array << params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] 
            if !@enrollment.blank?
              @enrollment_vgroup_membership = EnrollmentVgroupMembership.where("enrollment_id in (?) and vgroup_id in (?)",@enrollment[0].id, @vgroup.id)
@@ -693,7 +693,7 @@ class VgroupsController < ApplicationController
                   end
               end
            else  # make a new enrollment with this participant-- only works for participant selected
-            @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
+            @enrollment = Enrollment.where("enumber in (?)",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
              if !(@vgroup.participant_id).blank? and @enrollment[0].nil?
                  sql = " insert into enrollments(enumber,participant_id)values('"+params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].gsub(/[;:'"()=<>]/, '')+"',"+@vgroup.participant_id.to_s+")"
                  results = connection.execute(sql) 
@@ -702,7 +702,7 @@ class VgroupsController < ApplicationController
                  results = connection.execute(sql)
               end
                  # need to add
-                 @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
+                 @enrollment = Enrollment.where("enumber in (?)",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
                  if !@enrollment.nil? and !@enrollment[0].blank?
                     @enrollment_vgroup_membership = EnrollmentVgroupMembership.where("enrollment_id in (?)",@enrollment[0].id)
                     if @enrollment_vgroup_membership.blank?

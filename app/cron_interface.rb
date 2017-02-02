@@ -163,6 +163,10 @@ v_user = v_user.gsub("\n","")
       v_shared = Shared.new
       v_shared.run_lst_122_process()
 
+  elsif v_value_1 == "lst_v3_process" 
+      v_shared = Shared.new
+      v_shared.run_lst_v3_process()
+
   elsif v_value_1 == "mcd_harvest" 
       v_shared = Shared.new
       v_shared.run_mcd_harvest()
