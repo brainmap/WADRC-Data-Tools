@@ -9,7 +9,8 @@ class Enrollment < ActiveRecord::Base
   belongs_to :participant
   
   validates_uniqueness_of :enumber, :allow_nil => true
-  validates_format_of :enumber, :with => /.*\d{3,}\Z/, :message => "must end with at least 3 digits to be valid."
+  # external studies having different enumber format - 
+  #validates_format_of :enumber, :with => /.*\d{3,}\Z/, :message => "must end with at least 3 digits to be valid."
   
   acts_as_reportable
   paginates_per 50 
