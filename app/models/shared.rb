@@ -8378,7 +8378,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                     if ( f.start_with?("wlesion_lbm3_030_rm"+dir_name_array[0]+"_Sag-CUBE-FLAIR_") or f.start_with?("wlesion_lbm3_030_rm"+dir_name_array[0]+"_Sag-CUBE-flair_") ) and f.end_with?(".nii")
                                       v_wlesion_030_flag = "Y"
                                     end
-                                     if f.start_with?("tlv_lesion") and f.end_with?(".txt")
+                                    if f.start_with?("tlv_lesion") and f.end_with?(".txt")
                                        v_tmp_data = "" 
                                        v_tmp_data_array = []  
                                        ftxt = File.open(v_subjectid_lst_122+"/"+f, "r") 
@@ -8397,7 +8397,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                        end
                                        ftxt.close
                                        v_lst_lesion_value = v_tmp_data.strip
-                                     end
+                                    end
                                   end
                                   v_comment = 'LST 122 dir ;'+v_comment
                              end
@@ -8481,6 +8481,202 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     
     
   end
+
+ # to add columns --
+  # change sql_base insert statement
+  # change  sql = sql_base+  insert statement with values
+  # change  self.move_present_to_old_new_to_present
+  def run_lst_v3_status   # actually the new  lst_122 in column, and lst_116 in separate column
+        v_base_path = Shared.get_base_path()
+         @schedule = Schedule.where("name in ('lst_v3_status')").first
+          @schedulerun = Schedulerun.new
+          @schedulerun.schedule_id = @schedule.id
+          @schedulerun.comment ="starting lst_v3_status"
+          @schedulerun.save
+          @schedulerun.start_time = @schedulerun.created_at
+          @schedulerun.save
+          v_comment = ""
+          v_secondary_key_array =["","b","c","d","e",".R"]
+    ####    begin   # catch all exception and put error in comment    
+            sql = "truncate table cg_lst_v3_status_new"
+            connection = ActiveRecord::Base.connection();        
+            results = connection.execute(sql)
+
+            sql_base = "insert into cg_lst_v3_status_new(lst_subjectid, lst_general_comment,wlesion_030_flag,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,multiple_sag_cube_flair_flag,wlesion_030_flag_lst_v3,enrollment_id, scan_procedure_id,path,filename,lga,lst_lesion,n,secondary_key)values("  
+            v_raw_path = v_base_path+"/raw"
+            v_mri = "/mri"
+            no_mri_path_sp_list =['asthana.adrc-clinical-core.visit1',
+            'bendlin.mets.visit1','bendlin.tami.visit1','bendlin.wmad.visit1','carlson.sharp.visit1','carlson.sharp.visit2',
+            'carlson.sharp.visit3','carlson.sharp.visit4','dempsey.plaque.visit1','dempsey.plaque.visit2','gleason.falls.visit1',
+            'johnson.merit220.visit1','johnson.merit220.visit2','johnson.tbi.aware.visit3','johnson.tbi-va.visit1','ries.aware.visit1','wrap140']
+
+            v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+            # get list of scan_procedure codename -- exclude 4, 10, 15, 19, 32, 
+                # ??? johnson.pc vs johnsonpc4000.visit1 vs pc_4000
+                # ??? johnson.tbi10000 vs johnson.tbiaware vs tbi_1000
+                # ??? johnson.wrap140.visit1 vs wrap140.visit1 vs wrap140
+                # NOT exists /Volumes/team-1/raw/carlson.esprit/mri
+                # NOT exists /Volumes/team-1/raw/johnson.wrap140.visit1/mri
+                # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit1/mri
+                # NOT exists /Volumes/team-1/raw/johnson.tbiaware.visit3/mri
+                # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
+                # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
+                # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
+           @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
+            @scan_procedures. each do |sp|
+              v_visit_number =""
+              if sp.codename.include?("visit2")
+                v_visit_number ="_v2"
+              elsif sp.codename.include?("visit3")
+                v_visit_number ="_v3"
+              elsif sp.codename.include?("visit4")
+                v_visit_number ="_v4"
+              elsif sp.codename.include?("visit5")
+                v_visit_number ="_v5"
+              end
+               if no_mri_path_sp_list.include?(sp.codename)
+                 v_mri = ""
+                else
+                  v_mri = "/mri"
+                end
+                v_raw_full_path = v_raw_path+"/"+sp.codename+v_mri
+                v_preprocessed_full_path = v_preprocessed_path+sp.codename
+                if File.directory?(v_raw_full_path)
+                    if !File.directory?(v_preprocessed_full_path)
+                        #puts "preprocessed path NOT exists "+v_preprocessed_full_path
+                     end
+                    Dir.entries(v_raw_full_path).select { |file| File.directory? File.join(v_raw_full_path, file)}.each do |dir|
+                      dir_name_array = dir.split('_')
+                      if dir_name_array.size == 3
+                        v_secondary_key_array.each do |k|
+                         v_secondary_key = k
+                         #puts "dir="+dir_name_array[0]+" key="+k
+                         enrollment = Enrollment.where("concat(enumber,'"+v_secondary_key+"') in (?)",dir_name_array[0])
+                         if !enrollment.blank?
+                             #puts "enrollment found"
+                             v_comment =""
+                             v_wlesion_030_flag ="N"
+                             v_wlesion_030_flag_lst_v3 ="N"
+                             v_o_star_nii_flag ="N"
+                             v_multiple_o_star_nii_flag ="N"
+                             v_sag_cube_flair_flag ="N"
+                             v_multiple_sag_cube_flair_flag ="N"
+                             v_lst_lesion_value = ""
+                             v_lst_lesion_value_array = ['','','','','']
+                             v_subjectid_unknown = v_preprocessed_full_path+"/"+dir_name_array[0]+"/unknown"
+                             v_subjectid_lst_v3 = v_preprocessed_full_path+"/"+dir_name_array[0]+"/LST/pproc_v3"
+                             #####v_subjectid_lst_122 = v_preprocessed_full_path+"/"+dir_name_array[0]+"/LST/LST_122"
+       
+                               if File.directory?(v_subjectid_lst_v3)
+                                  v_dir_array = Dir.entries(v_subjectid_lst_v3)   # need to get date for specific files
+                                  v_wlesion_030_flag ="N"
+                                  v_dir_array.each do |f|
+                                    if ( f.start_with?("wlesion_lbm3_030_rm"+dir_name_array[0]+"_Sag-CUBE-FLAIR_") or f.start_with?("wlesion_lbm3_030_rm"+dir_name_array[0]+"_Sag-CUBE-flair_") ) and f.end_with?(".nii")
+                                      v_wlesion_030_flag = "Y"
+                                    end
+                                    if f.start_with?("LST_tlv_0.5") and f.end_with?(".csv")
+                                       v_tmp_data = "" 
+                                       v_tmp_data_array = []  
+                                       ftxt = File.open(v_subjectid_lst_v3+"/"+f, "r") 
+                                        v_cnt_tmp = 0
+                                       ftxt.each_line do |line|
+                                          if v_cnt_tmp == 1  # want 2nd line
+                                            v_tmp_data = line   #
+                                          end 
+                                          v_cnt_tmp = v_cnt_tmp + 1
+                                       end
+                                       ftxt.close
+                                       #Path,FileName,LGA,TLV,N
+                                       v_lst_lesion_value = v_tmp_data.strip
+                                       v_lst_lesion_value_array = v_lst_lesion_value.split(",")
+                                     
+                                    end
+                                  end
+                                  v_comment = 'LST v3 dir ;'+v_comment
+                             end
+                             
+                            #puts "check for unknown "+v_subjectid_unknown
+                             if File.directory?(v_subjectid_unknown)
+                                  #puts "unknown found"
+                                  v_dir_array = Dir.entries(v_subjectid_unknown)   # need to get date for specific files
+                                  v_o_star_nii_flag ="N"
+                                  v_multiple_o_star_nii_flag ="N"
+                                  v_sag_cube_flair_flag ="N"
+                                  v_sag_cube_flair_cnt = 0
+                                  v_dir_array.each do |f|
+                                    
+                                    if (f.include? "Sag-CUBE-FLAIR" or f.include? "Sag-CUBE-flair"  or f.include?"Sag-CUBE-T2-FLAIR") and !f.include?"PU" and f.end_with?(".nii")
+                                      v_sag_cube_flair_flag = "Y"
+                                      v_sag_cube_flair_cnt = v_sag_cube_flair_cnt + 1
+                                      if v_sag_cube_flair_cnt > 1
+                                        v_multiple_sag_cube_flair_flag ="Y"
+                                      end
+                                    end
+                                  end
+                                  v_o_star_cnt = 0
+                                  v_dir_array.each do |f|
+                                    
+                                    if f.start_with?("o") and f.end_with?(".nii")
+                                      v_o_star_nii_flag = "Y"
+                                      v_o_star_cnt = v_o_star_cnt+ 1
+                                      if v_o_star_cnt > 1
+                                        v_multiple_o_star_nii_flag ="Y"
+                                      end
+                                    end
+                                  end
+                             end
+                                 
+                                 
+                             if v_wlesion_030_flag == "N" and v_wlesion_030_flag_lst_v3 == "N"
+                                   v_comment ="no LST_v3 product ;" +v_comment                               
+                             end # check for subjectid asl dir
+                             sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','"+v_comment+"','"+v_wlesion_030_flag+"','"+v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"','"+v_sag_cube_flair_flag+"','"+v_multiple_sag_cube_flair_flag+"','"+v_wlesion_030_flag_lst_v3+"',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_lst_lesion_value_array[0]+"','"+v_lst_lesion_value_array[1]+"','"+v_lst_lesion_value_array[2]+"','"+v_lst_lesion_value_array[3]+"','"+v_lst_lesion_value_array[4]+"','"+v_secondary_key+"')"
+                         #puts "insert="+dir_name_array[0]+v_visit_number     
+                               results = connection.execute(sql)
+                             
+                         else
+                           #puts "no enrollment "+dir_name_array[0]
+                         end # check for enrollment
+                       end # loop thru possible secondary key
+                      end # check that dir name is in expected format [subjectid]_exam#_MMDDYY - just test size of array
+                    end # loop thru the subjectids
+                 else
+                        #puts "               # NOT exists "+v_raw_full_path
+                 end # check if raw dir exisits
+            end            
+            # check move cg_ to cg_old
+            # v_shared = Shared.new 
+             # move from new to present table -- made into a function  in shared model
+            # puts "before mv from new to present"
+             v_comment = self.move_present_to_old_new_to_present("cg_lst_v3_status",
+             "lst_subjectid, lst_general_comment,wlesion_030_flag, wlesion_030_comment, wlesion_030_global_quality,o_star_nii_flag,multiple_o_star_nii_flag,sag_cube_flair_flag,multiple_sag_cube_flair_flag,wlesion_030_flag_lst_v3, wlesion_030_comment_lst_v3, wlesion_030_global_quality_lst_v3, enrollment_id,scan_procedure_id,path,filename,lga,lst_lesion,n,secondary_key",
+                            "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
+            # puts "after mv from new to present"
+
+             # apply edits  -- made into a function  in shared model
+             self.apply_cg_edits('cg_lst_v3_status')
+
+             puts "successful finish lst_v3_status "+v_comment[0..459]
+              @schedulerun.comment =("successful finish lst_v3_status "+v_comment[0..459])
+              if !v_comment.include?("ERROR")
+                 @schedulerun.status_flag ="Y"
+               end
+               @schedulerun.save
+               @schedulerun.end_time = @schedulerun.updated_at      
+               @schedulerun.save
+    ####    rescue Exception => msg
+    ####         v_error = msg.to_s
+    ####         puts "ERROR !!!!!!!"
+    ####         puts v_error
+    ####         v_error = v_error+"\n"+v_comment
+    ####          @schedulerun.comment =v_error[0..499]
+    ####          @schedulerun.status_flag="E"
+    ####    end
+    
+    
+  end
+
  
    def run_lst_v3_process
       v_process_name = "lst_v3_process"
@@ -8563,7 +8759,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
             if File.directory?(v_expected_tlv_file)
                   v_dir_array = Dir.entries(v_expected_tlv_file)
                   v_dir_array.each do |f|
-                    if  f.start_with?("LST_tlv_0.5")  and f.end_with?(".txt")
+                    if  f.start_with?("LST_tlv_0.5")  and f.end_with?(".csv")
                         v_tlv_lesion_txt = "not blank"
                         v_log = v_log + "tlv_lesion file found \n"
                     end

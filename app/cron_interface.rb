@@ -157,7 +157,11 @@ v_user = v_user.gsub("\n","")
       
   elsif v_value_1 == "lst_116_status"  # getting lst_122 and lst_116 
       v_shared = Shared.new
-      v_shared.run_lst_116_status()    
+      v_shared.run_lst_116_status()  
+
+  elsif v_value_1 == "lst_v3_status"  # getting lst_122 and lst_116 
+      v_shared = Shared.new
+      v_shared.run_lst_v3_status()   
   
   elsif v_value_1 == "lst_122_process" 
       v_shared = Shared.new
