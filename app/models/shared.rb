@@ -2425,6 +2425,124 @@ puts " "+r[0]+"  ="+r[1]
 #MRI end
   end
 
+  def run_padi_dvr_acpc_ids
+    v_base_path = Shared.get_base_path()
+     @schedule = Schedule.where("name in ('padi_dvr_acpc_ids')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting padi_dvr_acpc_ids"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+      v_acpc_filename = ""
+ 
+       connection = ActiveRecord::Base.connection();
+       v_sql = "select vgroup_id_mri,scan_procedure_id_mri, enum_mri, protocol_mri, t_id from t_padi_dvr_20170215 where acpc_file_name is null or acpc_file_name = ''"
+       # where image_dataset_id is null or image_dataset_id = '' "
+      results = connection.execute(v_sql)
+    results.each do |r|
+        v_t_id = r[4]
+        v_subjectid_unknown = v_base_path+"/preprocessed/visits/"+r[3]+"/"+r[2]+"/unknown/"
+        if File.directory?(v_subjectid_unknown)
+                                  #puts "unknown found"
+            v_dir_array = Dir.entries(v_subjectid_unknown)   # need to get date for specific files
+            v_o_star_nii_flag ="N"
+            v_multiple_o_star_nii_flag ="N"
+            v_o_star_cnt = 0
+            v_acpc_filename = ""
+            v_dir_array.each do |f|
+                 if f.start_with?("o") and f.end_with?(".nii")
+                       v_o_star_nii_flag = "Y"
+                       v_acpc_filename = f
+                       v_o_star_cnt = v_o_star_cnt+ 1
+                        if v_o_star_cnt > 1
+                            v_multiple_o_star_nii_flag ="Y"
+                            v_acpc_filename = ""
+                        end
+                  end
+                end
+                  if(v_acpc_filename > "")
+                     v_sql_update = "UPDATE t_padi_dvr_20170215 set acpc_file_name = '"+v_acpc_filename+"' where t_id ="+v_t_id.to_s
+                    results_update = connection.execute(v_sql_update)
+                  end
+           end
+        end
+
+         v_sql = "select vgroup_id_mri,scan_procedure_id_mri, enum_mri, protocol_mri, t_id,acpc_file_name
+                 from t_padi_dvr_20170215 where acpc_file_name is not null or acpc_file_name > '' "
+              results = connection.execute(v_sql)
+         results.each do |r|
+            v_t_id = r[4]
+             v_acpc_file_name = r[5]
+             v_o_enum = "o"+r[2]+"_"
+             v_acpc_file_name = v_acpc_file_name.gsub(v_o_enum,"")
+             v_bravo_nifty_file = r[2]+"_"+v_acpc_file_name
+             if v_acpc_file_name >""
+                    v_sql_update = "UPDATE t_padi_dvr_20170215 set bravo_nifty_file = '"+v_bravo_nifty_file+"' where t_id ="+v_t_id.to_s
+                    results_update = connection.execute(v_sql_update)
+              end
+          end   
+          # try to get missing ids.id from bravo --- different formats -- paths
+          v_sql = "select vgroup_id_mri,scan_procedure_id_mri, enum_mri, protocol_mri, t_id,acpc_file_name,bravo_nifty_file
+                 from t_padi_dvr_20170215 where (bravo_nifty_file is not null or bravo_nifty_file > '') 
+                 and (image_dataset_id is null or image_dataset_id = '')"
+          results = connection.execute(v_sql)
+         results.each do |r|
+              v_vgroup_id = r[0]
+              v_enum = r[2]
+              v_protocol = r[3]
+              v_t_id = r[4]
+              v_bravo_nifty = r[6]
+    puts v_bravo_nifty
+               if  !v_bravo_nifty.blank? 
+              v_bravo_nifty = v_bravo_nifty.gsub(".nii","")
+    puts v_bravo_nifty
+              v_bravo_nifty_array = v_bravo_nifty.split("_") 
+            end
+            if  !v_bravo_nifty.blank? and !v_bravo_nifty_array[0].nil?
+              v_sql_like = "select ids.id from image_datasets ids, visits v, appointments a  
+                          where  ids.visit_id = v.id and v.appointment_id = a.id
+                          and a.vgroup_id ="+v_vgroup_id.to_s+" 
+                          and ids.path like '%"+v_protocol+"%'
+                          and ids.path like '%"+v_enum+"%' "
+                if !v_bravo_nifty_array[1].nil?
+                          v_sql_like = v_sql_like +" and ids.path like '%"+v_bravo_nifty_array[1].gsub("-","_")+"%' "
+                    if !v_bravo_nifty_array[2].nil?
+                          v_sql_like = v_sql_like +" and ids.path like '%"+v_bravo_nifty_array[2].gsub("-","_")+"%' "
+                      if !v_bravo_nifty_array[3].nil?
+                          v_sql_like = v_sql_like +" and ids.path like '%"+v_bravo_nifty_array[3].gsub("-","_")+"%' "
+                      end
+                    end
+                end
+               results_like = connection.execute(v_sql_like)
+               v_ids_id = nil
+               v_cnt_ids = 0
+               results_like.each do |r2|
+                    v_cnt_ids = v_cnt_ids + 1
+                     v_ids_id = r2[0]
+                end
+                if !v_ids_id.nil? and v_cnt_ids < 2
+                    v_sql_update = "UPDATE t_padi_dvr_20170215 set image_dataset_id = '"+v_ids_id.to_s+"' where t_id ="+v_t_id.to_s
+                    results_update = connection.execute(v_sql_update)
+                end
+           end
+
+         end
+
+       
+       
+
+          @schedulerun.comment =("successful finish padi_dvr_acpc_ids "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+       @schedulerun.status_flag ="Y"
+     end
+     @schedulerun.save
+     @schedulerun.end_time = @schedulerun.updated_at      
+     @schedulerun.save  
+  end
+
   # for the scan share consortium - upload to padi
   def run_padi_upload   # CHNAGE _STATUS_FLAG = Y !!!!!!!  ## add mri_visit_number????
     v_base_path = Shared.get_base_path()

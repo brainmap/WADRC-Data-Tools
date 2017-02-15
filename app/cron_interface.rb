@@ -178,6 +178,10 @@ v_user = v_user.gsub("\n","")
    elsif v_value_1 == "padi_upload"
       v_shared = Shared.new
       v_shared.run_padi_upload()
+
+  elsif v_value_1 == "padi_dvr_acpc_ids"
+      v_shared = Shared.new
+      v_shared.run_padi_dvr_acpc_ids()
         
   elsif v_value_1 == "pet_path"  
       v_shared = Shared.new
