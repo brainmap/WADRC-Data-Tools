@@ -8319,7 +8319,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                         where appointments.id = visits.appointment_id  
                         and visits.id in ( select image_datasets.visit_id from image_datasets,series_description_maps where 
                                   LOWER(image_datasets.series_description) = LOWER(series_description_maps.series_description)
-                                  and  series_description_maps.series_description_type_id = 19)"  
+                                  and  series_description_maps.series_description_type_id in (19,25))"  
   
       results = connection.execute(sql)
       results.each do |r|
@@ -8340,7 +8340,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                               and (image_datasets.lock_default_scan_flag != 'Y' or image_datasets.lock_default_scan_flag  is NULL)
                              AND image_datasets.series_description IN (SELECT series_description_maps.series_description 
                                                FROM series_description_maps WHERE 
-                                               series_description_maps.series_description_type_id = 19)"
+                                               series_description_maps.series_description_type_id in (19,25))"
           results_ids = connection.execute(sql_image_datasets)
           v_cnt = 0
           v_ids_id_array.clear
@@ -8913,6 +8913,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                   v_log = v_log + "SUCCESS !!!!!!!!! \n"
                 end
                 puts v_output  
+                puts "zzzzzzz test write"
                end
                v_err =""
                v_log = v_log +"IN ERROR \n"
@@ -8992,8 +8993,8 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
       v_stop_file_name = v_process_name+"_stop"
       v_stop_file_path = v_log_base+v_stop_file_name  # use to stop the results loop  
       v_subjectid_v_num = ""              
-      v_script_dev = v_base_path+"/data1/lab_scripts/lstproc.sh"   #LST/LST.sh"
-      v_script = v_base_path+"/SysAdmin/production/LST/LST.sh"
+      v_script_dev = v_base_path+"/data1/lab_scripts/LstProc/v2/lstproc.sh"   #LST/LST.sh"
+      #v_script = v_base_path+"/SysAdmin/production/LST/LST.sh"
       v_script  = v_script_dev   # using the dev script
       v_script_only_tlv = v_script+" --only_tlv"  # running whole thing -- just use v_script in call
       (v_error_comment,v_comment) =get_file_diff(v_script,v_script_dev,v_error_comment,v_comment)
