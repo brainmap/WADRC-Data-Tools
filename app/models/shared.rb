@@ -2542,6 +2542,678 @@ puts " "+r[0]+"  ="+r[1]
      @schedulerun.end_time = @schedulerun.updated_at      
      @schedulerun.save  
   end
+ 
+ # uses t_padi_dvr_20170215  as driver table  ==> populated by run_padi_dvr_acpc_ids
+ # wash U wants dicom, penn wants nifties
+ # curated set by Jen pib/flair and bravo/mpnrage
+ #The naming convention is site (P0#), subject number (####), modality (MR/PIB), and visit (v01).
+ #wisc = 4
+ def run_padi_upload_20170227_dicom()
+      run_padi_upload_20170227("dicom")
+ end 
+ def run_padi_upload_20170227_nifty()
+      run_padi_upload_20170227("nifty")
+ end 
+  def run_padi_upload_20170227(p_dicom_nifty) # CHNAGE _STATUS_FLAG = Y !!!!!!!  ## add mri_visit_number????
+    v_base_path = Shared.get_base_path()
+      v_schedulerun_name = "padi_upload_20170227_"+p_dicom_nifty
+     @schedule = Schedule.where("name in (?)",v_schedulerun_name).first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting padi_upload_20170227"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+      v_wisc_siteid ="P04"
+      # all _v01
+      v_visit_number = "v01"  # THE$Y ARE ALL V1!!!!! 
+    connection = ActiveRecord::Base.connection();
+    # shp, alz, pc, adni, dodadni, lmpd
+    v_scan_procedure_exclude =   [21,28,31,34,15,19,23,35,44,51,50,49,20,24,36] # [21,28,31,34,15,19,23,35,44,51,50,49]
+    # just get the predicttau
+     v_scan_procedures = [66,39,26,24,41,4,77]  #   pdt1 and pdt, tau, lead   [20,24,26,36,41,58]  # how to only get adrc impact? 
+     #not limiting by protocol #scan_procedures_vgroups.scan_procedure_id in ("+v_scan_procedures.join(",")+")
+     # getting adrc impact from t_adrc_impact_20150105  --- change to get from refreshing table?
+     v_pet_tracer_array = [1] # just pib 1,2,7] # pib and fdg and thk5117  
+
+     v_scan_type_limit = 1 
+     v_series_desc_array =['T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','T2_Flair'] # just t1,'T2','T2 Flair','T2_Flair','T2+Flair','DTI','ASL','resting_fMRI']
+     if p_dicom_nifty == "dicom"
+       v_series_desc_nii_hash = {'nothing'=>"Y"}
+     elsif p_dicom_nifty == "nifty"
+         v_series_desc_nii_hash =   { 'T1 Volumetic'=>"Y",'T1 Volumetric'=>"Y",'T1+Volumetric'=>"Y",'T1_Volumetric'=>"Y",'T1'=>"Y",'T2_Flair'=>"Y" ,'MPNRAGE'=>"Y"}
+     else
+         v_series_desc_nii_hash =   { 'T1 Volumetic'=>"Y",'T1 Volumetric'=>"Y",'T1+Volumetric'=>"Y",'T1_Volumetric'=>"Y",'T1'=>"Y",'T2_Flair'=>"Y",'MPNRAGE'=>"Y"}
+     end #{ 'T1 Volumetic'=>"Y",'T1 Volumetric'=>"Y",'T1+Volumetric'=>"Y",'T1_Volumetric'=>"Y",'T1'=>"Y"}
+    # recruit new  scans ---   change 
+    v_weeks_back = "2"  # cwant to give time for quality checks etc. 
+    # NEED TO LIMIT ADRC BY LP --- NEED TO REFRESH ADRC IMPACT 
+    #  t_adrc_impact_control_20150216 where participant_id is not null and lp_completed_flag ='Y')
+     #(participants.wrapnum is not null and participants.wrapnum > '')
+     # only want the tau  - petid=7 
+     # 'pdt00150','pdt00151','pdt00152','pdt00153','pdt00154','pdt00155','pdt00156','pdt00157','pdt00158','pdt00159'
+     # getting directly from t_padi_dvr_20170215 -- populated by run_padi_dvr_acpc_ids
+    sql = "select distinct vgroups.id, vgroups.participant_id,
+              vgroups.transfer_mri, vgroups.transfer_pet
+              from enrollments,enrollment_vgroup_memberships, vgroups, scan_procedures_vgroups,participants    
+            where participants.id = vgroups.participant_id and
+             ( 
+                (vgroups.participant_id) in ( select enrollments.participant_id from enrollments where do_not_share_scans_flag ='N' and
+                                               enrollments.enumber in ('pdt00178','pdt00176','pdt00175','pdt00173','pdt00172','pdt00171','pdt00169','pdt00166','pdt00168','pdt00165','pdt00167','pdt00164','pdt00162'))
+              )
+              and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
+              and vgroups.id = scan_procedures_vgroups.vgroup_id
+              and scan_procedures_vgroups.scan_procedure_id in ("+v_scan_procedures.join(",")+")
+              and enrollment_vgroup_memberships.enrollment_id = enrollments.id
+              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL "+v_weeks_back+" WEEK)  
+              and enrollments.do_not_share_scans_flag ='N'           
+              and vgroups.id NOT IN ( select cg_padi_upload.vgroup_id from cg_padi_upload 
+                                         where scan_procedure_id = scan_procedures_vgroups.scan_procedure_id )
+              and ( vgroups.transfer_mri ='yes'  and vgroups.transfer_pet ='yes' and vgroups.id 
+                  in ( select appointments.vgroup_id from appointments, petscans where petscans.appointment_id = appointments.id
+                           and petscans.lookup_pettracer_id in (1) )
+                    )"
+    sql = "select t_id,bravo_nifty_file,acpc_file_name,image_dataset_id,vgroup_id_mri,vgroup_id_pib,participant_id,
+    scan_procedure_id_mri,scan_procedure_id_pib,enum_mri,enum_pib,protocol_mri,protocol_pib,pib_dvr,export_id,visno
+        from t_padi_dvr_20170215 where mri_status_flag ='G' or pib_status_flag = 'G' " #t_id in ( 1, 22,158)"
+    results = connection.execute(sql)
+    results.each do |r|
+          enrollments = Enrollment.where("id in (select enrollment_id from enrollment_vgroup_memberships where vgroup_id in(?) or vgroup_id in(?))",r[4],r[5])
+          enrollment_enumbers_array = []
+          enrollments.each do |e|
+                    enrollment_enumbers_array.push(e.enumber)
+          end
+          enrollment_enumbers = enrollment_enumbers_array.join(",")
+          scan_procedures = ScanProcedure.where("id in (select scan_procedure_id from scan_procedures_vgroups where vgroup_id in(?) or vgroup_id in(?))",r[4], r[5])
+          scan_procedure_codename_array = []
+          scan_procedures.each do |e|
+                    scan_procedure_codename_array.push(e.codename)
+          end
+          scan_procedure_codenames = scan_procedure_codename_array.join(",")
+          v_mri_status_flag = "Y"
+          v_pet_status_flag ="Y"
+         # if (r[2].to_s == "yes")
+         #      v_mri_status_flag = "Y" 
+         # end
+         # if (r[3].to_s == "yes")
+         #      v_pet_status_flag = "Y" 
+         # end
+          sql2 = "insert into cg_padi_upload (vgroup_id,mri_sent_flag,mri_status_flag, pet_sent_flag,pet_status_flag,participant_id,enumbers,codenames,vgroup_id_pib) 
+          values('"+r[4].to_s+"','N','"+v_mri_status_flag+"', 'N','"+v_pet_status_flag+"',"+r[6].to_s+",'"+enrollment_enumbers+"','"+scan_procedure_codenames+"',"+r[5].to_s+")"
+          results2 = connection.execute(sql2)
+    end
+    # already made export_id
+    sql = "insert into cg_padi_participants (participant_id)
+              select distinct cg_padi_upload.participant_id from cg_padi_upload 
+              where participant_id NOT IN ( select participant_id from cg_padi_participants)
+              and participant_id is not null"
+
+     results = connection.execute(sql)
+
+     sql = "update cg_padi_upload 
+            set cg_padi_upload.export_id = ( select cg_padi_participants.export_id from cg_padi_participants 
+                                 where cg_padi_participants.participant_id = cg_padi_upload.participant_id)"
+     results = connection.execute(sql)
+         sql = "update t_padi_dvr_20170215 
+            set t_padi_dvr_20170215.export_id = ( select cg_padi_participants.export_id from cg_padi_participants 
+                                 where cg_padi_participants.participant_id = t_padi_dvr_20170215.participant_id)"
+     results = connection.execute(sql)
+
+     # add mri_visit_number  and pet_visit_number   update !!!!!!!!!!!!!!!
+
+    v_folder_array = Array.new
+    v_scan_desc_type_array = Array.new
+    # check for dir in /tmp
+    v_target_dir ="/tmp/padi_upload"
+    # v_target_dir ="/Volumes/Macintosh_HD2/padi_upload"
+    if !File.directory?(v_target_dir)
+      v_call = "mkdir "+v_target_dir
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close
+    end
+    #PET
+    sql = "select distinct vgroup_id,export_id,enumbers,cg_padi_upload.pet_visit_number from cg_padi_upload where pet_sent_flag ='N' and pet_status_flag in ('G') and pet_visit_number is not null" # ('Y','R') "
+    sql = "select distinct t_id,bravo_nifty_file,acpc_file_name,image_dataset_id,
+vgroup_id_mri,vgroup_id_pib,participant_id,scan_procedure_id_mri,scan_procedure_id_pib,enum_mri,enum_pib,protocol_mri,protocol_pib,pib_dvr,
+export_id, visno  
+     from t_padi_dvr_20170215 where pib_status_flag ='G' and pib_sent_flag ='N' "
+    results = connection.execute(sql)
+
+    v_comment = " :list of vgroupids"+v_comment
+    results.each do |r|
+
+      v_comment = r[5].to_s+","+v_comment
+    end
+    @schedulerun.comment =v_comment[0..1990]
+    @schedulerun.save
+    results.each do |r|
+      v_vgroup_id = r[5].to_s
+      v_export_id = v_wisc_siteid+r[14].to_s.rjust(4,padstr='0')
+      v_visit_number =  "v"+r[15].to_s.rjust(2,padstr='0')
+      v_comment = "strt "+v_vgroup_id+","+v_comment
+      @schedulerun.comment =v_comment[0..1990]
+      @schedulerun.save
+      # update schedulerun comment - prepend 
+    
+      sql_vgroup = "select round((DATEDIFF(max(v.vgroup_date),p.dob)/365.25),2) from vgroups v, participants p where 
+                 v.participant_id = p.id
+                and v.id = "+v_vgroup_id+" and v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
+                                                            evm.enrollment_id = e.id and  e.do_not_share_scans_flag ='N')"
+      results_vgroup = connection.execute(sql_vgroup)
+      # mkdir /tmp/padi_upload/[subjectid]_YYYYMMDD_wisc
+      # switching from age_at_appt , to v#, and somehow also passing age_at_appt linked to file name
+      ####v_age = (results_vgroup.first)[0].to_s
+      ####v_subject_dir = v_export_id+"_"+v_age.gsub(/\./,"")+"_pet"
+      v_subject_dir = v_export_id+"_PIB_"+v_visit_number
+      v_parent_dir_target =v_target_dir+"/"+v_subject_dir
+      v_call = "mkdir "+v_parent_dir_target   # in tmp
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close 
+      v_petfile_path = r[13]
+      v_petfile_target_name = v_subject_dir+".nii"  # all nii
+
+      v_call = "rsync -av "+v_petfile_path+" "+v_parent_dir_target+"/"+v_petfile_target_name             
+            stdin, stdout, stderr = Open3.popen3(v_call)
+            stderr.each {|line|
+               puts line
+            }
+            while !stdout.eof?
+                 puts stdout.read 1024    
+            end
+            stdin.close
+            stdout.close
+            stderr.close
+
+
+        v_call = "rsync -av "+v_parent_dir_target+" panda_user@merida.dom.wisc.edu:/home/panda_user/upload_padi/"    #+v_subject_dir
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+                                                                           
+        #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
+        #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
+        #v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
+        ## switch to zop for xnat 
+        ## v_call =  'ssh panda_user@merida.dom.wisc.edu "  tar  -C /home/panda_user/upload_padi  -zcf /home/panda_user/upload_padi/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
+
+v_call =  'ssh panda_user@merida.dom.wisc.edu " cd /home/panda_user/upload_padi/; zip -r '+v_subject_dir+'.zip '+v_subject_dir+'  "  '      
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+        puts "bbbbbbb "+v_call
+
+        v_call = ' rm -rf '+v_target_dir+'/'+v_subject_dir
+           stdin, stdout, stderr = Open3.popen3(v_call)
+           while !stdout.eof?
+             puts stdout.read 1024    
+            end
+           stdin.close
+           stdout.close
+           stderr.close
+        # 
+        v_call = 'ssh panda_user@merida.dom.wisc.edu " rm -rf /home/panda_user/upload_padi/'+v_subject_dir+' "'
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+       
+        
+         # did the tar.gz on merida to avoid mac acl PaxHeader extra directories
+         # not need this? 
+         # could change sftp to come from ~/upload_padi
+         v_call = "rsync -av panda_user@merida.dom.wisc.edu:/home/panda_user/upload_padi/"+v_subject_dir+".zip "+v_target_dir+'/'+v_subject_dir+".zip"
+         stdin, stdout, stderr = Open3.popen3(v_call)
+         while !stdout.eof?
+           puts stdout.read 1024    
+          end
+         stdin.close
+         stdout.close
+         stderr.close
+
+####        # sftp -- shared helper hasthe username /password and address
+####        v_username = Shared.padi_sftp_username # get from shared helper
+####        v_passwrd = Shared.padi_sftp_password   # get from shared helperwhich is not on github
+####        v_ip = Shared.padi_sftp_host_address # get from shared helper
+        v_source = v_target_dir+'/'+v_subject_dir+".zip"
+        v_target = v_subject_dir+".zip"
+
+ 
+
+####        Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
+####            sftp.upload!(v_source, v_target)
+####        end
+# WANT TO CHECK TRANSFERS
+        v_call = " rm -rf "+v_target_dir+'/'+v_subject_dir+".zip"
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close        
+        
+        sql_sent = "update cg_padi_upload set pet_sent_flag ='Y' where vgroup_id_pib ='"+r[5].to_s+"'  "
+        results_sent = connection.execute(sql_sent) 
+          sql_sent = "update t_padi_dvr_20170215 set pib_sent_flag ='Y' where vgroup_id_pib ='"+r[5].to_s+"'  "
+        results_sent = connection.execute(sql_sent)   
+
+    end
+
+    # get  subjectid to upload    # USING G AS LIMIT FOR TESTING
+    #MRI  switching to appointment
+    sql = "select distinct cg_padi_upload.vgroup_id,export_id,appointments.id,cg_padi_upload.mri_visit_number from cg_padi_upload,appointments 
+     where appointments.vgroup_id = cg_padi_upload.vgroup_id and
+            appointments.appointment_type = 'mri'
+            and    mri_sent_flag ='N' and mri_status_flag in ('G') and mri_visit_number is not null " # ('Y','R') "
+    
+sql = "select distinct t_id,bravo_nifty_file,acpc_file_name,image_dataset_id,
+vgroup_id_mri,vgroup_id_pib,participant_id,scan_procedure_id_mri,scan_procedure_id_pib,enum_mri,enum_pib,protocol_mri,protocol_pib,pib_dvr,
+export_id,visno  
+     from t_padi_dvr_20170215 where mri_status_flag ='G' and mri_sent_flag ='N' "
+    
+    results = connection.execute(sql)
+
+    v_comment = " :list of vgroupid "+v_comment
+    results.each do |r|
+      v_comment = r[4].to_s+","+v_comment
+    end
+    @schedulerun.comment =v_comment[0..1990]
+    @schedulerun.save
+    v_past_vgroup_id = "0"
+    v_cnt = 1
+    results.each do |r|
+      v_dirlist =""
+      v_vgroup_id = r[4].to_s
+      v_ids_id = r[3] # use to get path
+      v_bravo_nifty_file = r[1]
+      if v_vgroup_id  != v_past_vgroup_id
+            v_past_vgroup_id = v_vgroup_id
+            v_cnt = 1
+      else
+            v_cnt = v_cnt + 1
+      end
+      v_export_id = v_wisc_siteid+r[14].to_s.rjust(4,padstr='0')
+      v_visit_number =  "v"+r[15].to_s.rjust(2,padstr='0')
+      
+      v_comment = "strt "+v_vgroup_id+","+v_comment
+      @schedulerun.comment =v_comment[0..1990]
+      @schedulerun.save
+      # update schedulerun comment - prepend 
+      # just using appt date
+      #sql_vgroup = "select round((DATEDIFF(a.appointment_date,p.dob)/365.25),2),
+      #round((DATEDIFF(v.vgroup_date,p.dob)/365.25),2),
+      #a.id from appointments a,vgroups v,participants p where v.id = "+v_vgroup_id+" 
+      #                    and v.id = a.vgroup_id and a.id = "+v_appointment_id+"
+      #                    and v.participant_id = p.id
+      #                     and v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e,scan_procedures_vgroups spvg where spvg.vgroup_id = evm.vgroup_id and 
+      #                                                      evm.enrollment_id = e.id  and e.do_not_share_scans_flag ='N')"
+#puts "PPPPP = apptid="+v_appointment_id+"  sql="+sql_vgroup      
+    #     results_vgroup = connection.execute(sql_vgroup)
+      # mkdir /tmp/padi_upload/[subjectid]_YYYYMMDD_wisc
+       # just using appt age "_"+(results_vgroup.first)[1].to_s+
+       # switching from age_at_appt to v#, and somehow also send the age_appt to link up with file name
+      #####v_age = ((results_vgroup.first)[0].to_s).gsub(/\./,"")
+      ####v_subject_dir = v_export_id+"_"+((results_vgroup.first)[0].to_s).gsub(/\./,"")+"_"+v_cnt.to_s+"_mri"
+      v_subject_dir = v_export_id+"_MR_"+v_visit_number
+      v_parent_dir_target =v_target_dir+"/"+v_subject_dir
+      v_call = "mkdir "+v_parent_dir_target
+      stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+        puts stdout.read 1024    
+       end
+      stdin.close
+      stdout.close
+      stderr.close   
+      # p_dicom_nifty == "dicom"  == "nifty"
+# UP TO HERE   -- use the   bravo_nifty_file r[1] and  image_dataset_id  r[3] for T1 
+            # use this for the T2 FLAIR
+     v_series_desc_array = ['T2_Flair']
+      sql_dataset = "select distinct appointments.appointment_date, visits.id visit_id, image_datasets.id image_dataset_id, image_datasets.series_description, image_datasets.path, series_description_types.series_description_type 
+                  from vgroups , appointments, visits, image_datasets, series_description_maps, series_description_types  
+                  where vgroups.transfer_mri = 'yes' and vgroups.id = appointments.vgroup_id 
+                  and appointments.id = visits.appointment_id and visits.id = image_datasets.visit_id
+                  and vgroups.id = "+v_vgroup_id+"
+                  and (image_datasets.do_not_share_scans_flag is NULL or image_datasets.do_not_share_scans_flag ='N')
+                  and ( (image_datasets.id ="+r[3].to_s+" and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
+                  and series_description_maps.series_description_type_id = series_description_types.id
+                  and series_description_types.series_description_type in ('T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','MPnRAGE')  )
+                        or ((image_datasets.lock_default_scan_flag != 'Y' or image_datasets.lock_default_scan_flag  is NULL)
+                  and LOWER(image_datasets.series_description) =   LOWER(series_description_maps.series_description)
+                  and series_description_maps.series_description_type_id = series_description_types.id
+                  and series_description_types.series_description_type in ('T2_Flair') 
+                  and image_datasets.series_description != 'DTI whole brain  2mm FATSAT ASSET'
+                     ) )
+                   order by appointments.appointment_date "
+      results_dataset = connection.execute(sql_dataset)
+      v_folder_array = [] # how to empty
+      v_scan_desc_type_array = []
+      v_cnt = 1
+      results_dataset.each do |r_dataset|
+         v_ids_ok_flag = "Y"
+         v_ids_id = r_dataset[2]
+         puts " series desc ="+r_dataset[3]
+         v_ids_ok_flag = self.check_ids_for_severe_or_incomplete(v_ids_id) # ADD THE DO NOT SHARE
+         if v_ids_ok_flag == "Y" # no quality check severe or incomplete
+            v_series_description_type = r_dataset[5].gsub(" ","_")
+            v_path = r_dataset[4]
+            v_dir_array = v_path.split("/")
+            v_dir = v_dir_array[(v_dir_array.size - 1)]
+            v_dir_target = v_dir+"_"+v_series_description_type
+            v_path = v_path.gsub("/Volumes/team/","").gsub("/Volumes/team-1/","").gsub("/Data/vtrak1/","")  #v_base_path+"/"+
+            if v_folder_array.include?(v_dir_target)
+              v_dir_target = v_dir_target+"_"+v_cnt.to_s
+              v_cnt = v_cnt +1
+              # might get weird if multiple types have dups - only expect T1/Bravo
+            end
+            v_folder_array.push(v_dir_target)
+            v_nii_flag = "N"
+  ####          v_nii_file_name =  [subjectid]_[series_description /replace " " with -] , _[] , path- split / , last value]
+            v_path_dir_array = r_dataset[4].split("/")
+            #v_path_dir_array[5]= sp
+            
+            v_subject_id_vgroup_array = v_path_dir_array[5].split("_")
+            v_subject_id = v_subject_id_vgroup_array[0] 
+            if v_subject_id == "mri"
+                   v_subject_id_vgroup_array = v_path_dir_array[6].split("_")
+            v_subject_id = v_subject_id_vgroup_array[0]
+            end 
+
+            v_last_dir_array = (v_path_dir_array.last).split(".")
+            v_nii_file_name = v_subject_id+"_"+r_dataset[3].gsub(/ /,"-").gsub(":","-")+"_"+v_last_dir_array[0]+".nii"
+            if r[3] == v_ids_id
+              v_nii_file_name = r[1]
+            end
+            v_dirlist = v_dirlist +", "+v_nii_file_name
+            v_nii_file_path = v_base_path+"/preprocessed/visits/"+v_path_dir_array[4].to_s+"/"+v_subject_id+"/unknown/"+v_nii_file_name
+             puts "eeeeee v_nii_file_path="+v_nii_file_path
+            if(v_series_desc_nii_hash[r_dataset[5]] == "Y")
+                v_nii_flag = "Y"
+                v_call = "rsync -av "+v_nii_file_path+" "+v_parent_dir_target+"/"+v_export_id+"_"+r_dataset[3].gsub(/ /,"-").gsub(":","-")+"_"+v_last_dir_array[0]+".nii"                
+                stdin, stdout, stderr = Open3.popen3(v_call)
+                 stderr.each {|line|
+                     puts line
+                  }
+                 while !stdout.eof?
+                    puts stdout.read 1024    
+                 end
+                 stdin.close
+                 stdout.close
+                 stderr.close
+            end
+            if !v_scan_desc_type_array.include?(v_series_description_type)
+                 v_scan_desc_type_array.push(v_series_description_type)
+            end
+             # v_call = "/usr/bin/bunzip2 "+v_parent_dir_target+"/"+v_dir_target+"/*.bz2"
+             if p_dicom_nifty == "dicom"
+              v_dirlist = v_dirlist+", "+v_path
+              v_call = "mise "+v_path+" "+v_parent_dir_target+"/"+v_dir_target   # works where bunzip2 cmd after rsync not work
+#puts "v_path = "+v_path
+#puts "v_parent_dir_target = "+ v_parent_dir_target
+#puts "v_dir_target="+v_dir_target
+puts "AAAAAA "+v_call
+             stdin, stdout, stderr = Open3.popen3(v_call)
+              stderr.each {|line|
+                  puts line
+                }
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                 end
+             stdin.close
+             stdout.close
+             stderr.close
+             v_delete_file_array = ["yaml","pickle","json"]
+             v_delete_file_array.each do |file_end|
+             v_call = "rm "+v_parent_dir_target+"/"+v_dir_target+"/*."+file_end
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              stderr.each {|line|
+                  puts line
+                }
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                 end
+             stdin.close
+             stdout.close
+             stderr.close
+              v_call = "rm "+v_parent_dir_target+"/"+v_dir_target+"/*/*."+file_end
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              stderr.each {|line|
+                  puts line
+                }
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                 end
+             stdin.close
+             stdout.close
+             stderr.close
+              v_call = "rm "+v_parent_dir_target+"/"+v_dir_target+"/*/*/*."+file_end
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              stderr.each {|line|
+                  puts line
+                }
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                 end
+             stdin.close
+             stdout.close
+             stderr.close
+              v_call = "rm "+v_parent_dir_target+"/"+v_dir_target+"/*/*/*/*."+file_end
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              stderr.each {|line|
+                  puts line
+                }
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                 end
+             stdin.close
+             stdout.close
+             stderr.close
+              end
+            end
+             # temp - replace /Volumes/team/ and /Data/vtrak1/ with /Volumes/team-1 in dev
+            # split on / --- get the last dir
+            # make new dir name dir_series_description_type 
+            # check if in v_folder_array , if in v_folder_array , dir_series_description_type => dir_series_description_type_2
+            # add  dir, dir_series_description_type to v_folder_array
+            # cp path ==> /tmp/padi_upload/[subjectid]_yyymmdd_wisc/dir_series_description_type(_2)
+         end # skipping if qc severe or incomplete    
+      end
+
+      if p_dicom_nifty == "nifty" or p_dicom_nifty == "dicom" #skipping dcm
+          puts "the partial set scan types notification"
+
+      # run it always
+         puts "AAAAAAAAA DCM PATH TMP ="+v_parent_dir_target+"/*/*/*.dcm"
+#         /tmp/padi_upload/adrc00045_20130920_wisc/008_DTI/008
+
+        sql_dirlist = "update cg_padi_upload set mri_dir_list =concat('"+v_dirlist+"',mri_dir_list) where vgroup_id ='"+r[0].to_s+"' "
+        results_dirlist = connection.execute(sql_dirlist)
+# TURN INTO A LOOP -- need to get rid of dates 
+        v_dicom_field_array =['0010,0030','0010,0010','0008,0050','0008,1030','0010,0020','0040,0254','0008,0080','0008,1010','0009,1002','0009,1030','0018,1000',
+                        '0025,101A','0040,0242','0040,0243','0008,0020','0008,0021','0008,0022','0008,0023','0040,0244']
+        v_dicom_field_value_hash ={'0010,0030'=>'DOB','0010,0010'=>v_export_id,'0008,0050'=>'Accession Number',
+                           '0008,1030'=>'Study Description', '0010,0020'=>v_visit_number,'0040,0254'=>'Performed Proc Step Desc',
+                            '0008,0080'=>'Institution Name','0008,1010'=>'Station Name','0009,1002'=>'Private',
+                            '0009,1030'=>'Private','0018,1000'=>'Device Serial Number','0025,101A'=>'Private',
+                            '0040,0242'=>'Performed Station Name','0040,0243'=>'Performed Location',
+                            '0008,0020'=>'19720101','0008,0021'=>'19720101','0008,0022'=>'19720101',   
+                            '0008,0023'=>'19720101','0040,0244'=>'19720101'}
+     ####  v_dicom_field_array.each do |dicom_key|
+               Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                     v_dicom_field_array.each do |dicom_key|
+                                                                                           if !d[dicom_key].nil? 
+                                                                                                 d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                            end 
+                                                                                      end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.0*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.1*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.2*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.3*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.4*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.5*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+              Dir.glob(v_parent_dir_target+'/*/*/*.6*').each {|dcm| puts d = DICOM::DObject.read(dcm); 
+                                                                                        v_dicom_field_array.each do |dicom_key|
+                                                                                            if !d[dicom_key].nil? 
+                                                                                              d[dicom_key].value = v_dicom_field_value_hash[dicom_key]; d.write(dcm) 
+                                                                                           end 
+                                                                                        end }
+                                                                                                
+       ####  end                            
+                                    
+#                             
+# # #puts "bbbbb dicom clean "+v_parent_dir_target+"/*/"
+# Dir.glob(v_parent_dir_target+'/*/*/*.dcm').each {|dcm| puts d = DICOM::DObject.read(dcm); if !d["0010,0030"].nil? 
+#                                                                                           d["0010,0030"].value = "DOB"; d.write(dcm) 
+#                                                                                               end } 
+        v_call = "rsync -av "+v_parent_dir_target+" panda_user@merida.dom.wisc.edu:/home/panda_user/upload_padi/"    #+v_subject_dir
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+                                                                           
+        #v_call = "zip -r "+v_target_dir+"/"+v_subject_dir+".zip  "+v_parent_dir_target
+        #v_call = "cd "+v_target_dir+"; zip -r "+v_subject_dir+"  "+v_subject_dir   #  ???????    PROBLEM HERE????
+        #v_call = "cd "+v_target_dir+";  /bin/tar -zcf "+v_subject_dir+".tar.gz "+v_subject_dir+"/"
+        # switching to zip for xnat
+        #v_call =  'ssh panda_user@merida.dom.wisc.edu "  tar  -C /home/panda_user/upload_padi  -zcf /home/panda_user/upload_padi/'+v_subject_dir+'.tar.gz '+v_subject_dir+'/ "  '
+        v_call =  'ssh panda_user@merida.dom.wisc.edu " cd /home/panda_user/upload_padi/; zip -r '+v_subject_dir+'.zip '+v_subject_dir+' "  '
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+        puts "bbbbbbb "+v_call
+
+        v_call = ' rm -rf '+v_target_dir+'/'+v_subject_dir
+           stdin, stdout, stderr = Open3.popen3(v_call)
+           while !stdout.eof?
+             puts stdout.read 1024    
+            end
+           stdin.close
+           stdout.close
+           stderr.close
+        # 
+        v_call = 'ssh panda_user@merida.dom.wisc.edu " rm -rf /home/panda_user/upload_padi/'+v_subject_dir+' "'
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close
+       
+        
+         # did the tar.gz on merida to avoid mac acl PaxHeader extra directories
+         # not need this? 
+         # could change sftp to come from ~/upload_padi
+         v_call = "rsync -av panda_user@merida.dom.wisc.edu:/home/panda_user/upload_padi/"+v_subject_dir+".zip "+v_target_dir+'/'+v_subject_dir+".zip"
+         stdin, stdout, stderr = Open3.popen3(v_call)
+         while !stdout.eof?
+           puts stdout.read 1024    
+          end
+         stdin.close
+         stdout.close
+         stderr.close
+
+####        # sftp -- shared helper hasthe username /password and address
+####        v_username = Shared.padi_sftp_username # get from shared helper
+####        v_passwrd = Shared.padi_sftp_password   # get from shared helperwhich is not on github
+####        v_ip = Shared.padi_sftp_host_address # get from shared helper
+        v_source = v_target_dir+'/'+v_subject_dir+".zip"
+        v_target = v_subject_dir+".tar.gz"
+
+ 
+
+####        Net::SFTP.start(v_ip, v_username, :password => v_passwrd) do |sftp|
+####            sftp.upload!(v_source, v_target)
+####        end
+# WANT TO CHECK TRANSFERS
+        v_call = " rm -rf "+v_target_dir+'/'+v_subject_dir+".zip"
+        stdin, stdout, stderr = Open3.popen3(v_call)
+        while !stdout.eof?
+          puts stdout.read 1024    
+         end
+        stdin.close
+        stdout.close
+        stderr.close        
+        
+        sql_sent = "update t_padi_dvr_20170215 set mri_sent_flag ='Y',dirlist ='"+v_dirlist+"',
+        target_dir ='"+v_parent_dir_target+"' where VGROUP_id_mri ='"+r[4].to_s+"'  "
+        results_sent = connection.execute(sql_sent)
+      end
+      v_comment = "end "+r[0].to_s+","+v_comment
+      @schedulerun.comment =v_comment[0..1990]
+      @schedulerun.save 
+    end
+              
+    @schedulerun.comment =("successful finish padi_upload "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+       @schedulerun.status_flag ="Y"
+     end
+     @schedulerun.save
+     @schedulerun.end_time = @schedulerun.updated_at      
+     @schedulerun.save          
+      
+    
+  end
+
 
   # for the scan share consortium - upload to padi
   def run_padi_upload   # CHNAGE _STATUS_FLAG = Y !!!!!!!  ## add mri_visit_number????
