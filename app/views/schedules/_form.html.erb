@@ -32,6 +32,7 @@
 	<%= f.text_area :description,:size => "100x6" %>
   <br><br></td></tr>
 <tr><td align="left"><b>Target Table:</b> <%= f.text_field :target_table %> </td><td align="left"><b>Target Column(s):</b> <%= f.text_field :target_column %> </td></tr>
+<tr><td colspan="2"><big><b>FOR FILE UPLOAD -MAKE A CG table IN SEARCH!!!!!!! REQUIRED FOR FILE UPLOAD !!!!!!</b></big></td></tr>
 
 <tr><td align="left" ><br><b>File Upload Fields:</b>  </td><td align="left">&nbsp; </td></tr>
 <tr><td align="left" colspan=2><b>File_Upload_Flag:</b><%= f.select :file_upload_flag, v_y_n, :selected => @schedule.file_upload_flag.blank? ? 'N' :  @schedule.file_upload_flag   %>&nbsp;&nbsp;&nbsp;<small><small> shared function name will be "file_upload" if Y. </small>Also enter the cg_* Target Table above.</small></td></tr>
