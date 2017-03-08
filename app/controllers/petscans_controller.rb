@@ -787,6 +787,7 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
         results_sp = connection.execute(sql_sp)  
         results_sp.each do |r_sp|
                if !params[:petfile].blank? and !params[:petfile][:petfile_autodetect].blank? and params[:petfile][:petfile_autodetect] == "On"
+                    puts "DDDDDDDD BEFORE get_pet_files"    
                         @petfiles_found = @petscan.get_pet_files(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
                         @petfiles_found.each do |pf_name|  # make sure not already in database with this petscan.id
                             v_petfile_check = Petfile.where("file_name in (?) and petscan_id in (?)", pf_name,@petscan.id)

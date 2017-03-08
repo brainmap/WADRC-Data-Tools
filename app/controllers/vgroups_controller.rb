@@ -697,7 +697,7 @@ class VgroupsController < ApplicationController
              if !(@vgroup.participant_id).blank? and @enrollment[0].nil?
                  sql = " insert into enrollments(enumber,participant_id)values('"+params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].gsub(/[;:'"()=<>]/, '')+"',"+@vgroup.participant_id.to_s+")"
                  results = connection.execute(sql) 
-             elsif v_enrollments[0].nil?
+             elsif @enrollment[0].nil?
                  sql = " insert into enrollments(enumber)values('"+params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].gsub(/[;:'"()=<>]/, '')+"' )"  
                  results = connection.execute(sql)
               end
