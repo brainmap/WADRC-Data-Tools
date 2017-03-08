@@ -27,6 +27,7 @@ class Petscan < ActiveRecord::Base
     #      '2_ADNI-2'=>'ADNI-2/pet/FDG', 
     #       '6_ADNI-2'=>'ADNI-2/pet/AV45'}
     v_sp = ScanProcedure.find(p_sp_id)
+    v_subjectid_base = v_sp.subjectid_base
     v_pet_target_path = ""
     if !v_sp.petscan_tracer_path.blank?
       v_tracer_path_array = v_sp.petscan_tracer_path.split("|")
@@ -38,12 +39,16 @@ class Petscan < ActiveRecord::Base
       end
     end
     #v_key = p_tracer_id.to_s+"_"+v_sp.codename
+  puts "aaaaaaa"
     v_file_name = ""
     if !v_pet_target_path.blank?
+      puts "bbbbbbbb"
         v_path = v_base_path+"/raw/"+v_pet_target_path+"/"
         # check for file with enum 
         vgroup = Vgroup.find(p_vgroup_id)
         (vgroup.enrollments).each do |e|
+          v_enumber_plus_underscore = (e.enumber).gsub(v_subjectid_base,v_subjectid_base+"_")
+      puts "hhhhhhh "+v_enumber_plus_underscore
           if !Dir.glob(v_path+e.enumber+"*").empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img").empty?
             v_cnt = 0
             Dir.glob(v_path+e.enumber+"*").each do |f|
@@ -74,6 +79,38 @@ class Petscan < ActiveRecord::Base
             if v_cnt > 1
               v_file_name = ""
             end 
+          elsif !Dir.glob(v_path+v_enumber_plus_underscore+"*").empty?   or !Dir.glob(v_path+"*"+v_enumber_plus_underscore[1..-1]+"*.img").empty?
+            #adcp is adding underscore in subjectid 
+            v_cnt = 0
+            Dir.glob(v_path+v_enumber_plus_underscore+"*").each do |f|
+               v_file_name = f.gsub(v_path,"")
+               v_cnt = v_cnt + 1
+            end   
+            if v_cnt < 1
+              Dir.glob(v_path+"*"+v_enumber_plus_underscore[1..-1]+"*.img").each do |f|
+                 v_file_name = f.gsub(v_path,"")
+                 v_cnt = v_cnt + 1
+              end
+            end
+            if v_cnt > 1
+              v_file_name = ""
+            end 
+          elsif !Dir.glob(v_path+v_enumber_plus_underscore.upcase+"*").empty?   or !Dir.glob(v_path+"*"+v_enumber_plus_underscore[1..-1].upcase+"*.img").empty?
+            v_cnt = 0
+            Dir.glob(v_path+v_enumber_plus_underscore.upcase+"*").each do |f|
+               v_file_name = f.gsub(v_path,"")
+               v_cnt = v_cnt + 1
+            end   
+            if v_cnt < 1
+              Dir.glob(v_path+"*"+v_enumber_plus_underscore[1..-1].upcase+"*.img").each do |f|
+                 v_file_name = f.gsub(v_path,"")
+                 v_cnt = v_cnt + 1
+              end
+            end
+            if v_cnt > 1
+              v_file_name = ""
+            end
+
            else    
           end
         end
@@ -89,6 +126,7 @@ class Petscan < ActiveRecord::Base
     # tracer 1=pib, 2=fdg, 3=way, 4=015
     v_base_path = Shared.get_base_path()
     v_sp = ScanProcedure.find(p_sp_id)
+    v_subjectid_base = v_sp.subjectid_base
     v_pet_target_path = ""
     if !v_sp.petscan_tracer_path.blank?
       v_tracer_path_array = v_sp.petscan_tracer_path.split("|")
@@ -99,13 +137,18 @@ class Petscan < ActiveRecord::Base
         end
       end
     end
+  puts "AAAAAAAA"
     #v_key = p_tracer_id.to_s+"_"+v_sp.codename
     v_file_names = []
     if !v_pet_target_path.blank? #v_pet_target_hash[v_key].blank?
+
+  puts "BBBBBBB"
         v_path = v_base_path+"/raw/"+v_pet_target_path+"/" #v_pet_target_hash[v_key]+"/"
         # check for file with enum 
         vgroup = Vgroup.find(p_vgroup_id)
         (vgroup.enrollments).each do |e|   # need case insensitive match 
+          v_enumber_plus_underscore = (e.enumber).gsub(v_subjectid_base,v_subjectid_base+"_")
+      puts "hhhhhhh "+v_enumber_plus_underscore
           if !Dir.glob(v_path+e.enumber+"*", File::FNM_CASEFOLD).empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).empty?
             v_cnt = 0
             Dir.glob(v_path+e.enumber+"*", File::FNM_CASEFOLD).each do |f|
@@ -117,7 +160,20 @@ class Petscan < ActiveRecord::Base
                  v_file_names.push(f.gsub(v_path,""))
                  v_cnt = v_cnt + 1
               end
+             end 
+            elsif !Dir.glob(v_path+v_enumber_plus_underscore+"*", File::FNM_CASEFOLD).empty?   or !Dir.glob(v_path+"*"+v_enumber_plus_underscore[1..-1]+"*.img", File::FNM_CASEFOLD).empty?
+            v_cnt = 0
+            Dir.glob(v_path+v_enumber_plus_underscore+"*", File::FNM_CASEFOLD).each do |f|
+               v_file_names.push(f.gsub(v_path,""))
+               v_cnt = v_cnt + 1
+            end   
+            if v_cnt < 1
+              Dir.glob(v_path+"*"+v_enumber_plus_underscore[1..-1]+"*.img", File::FNM_CASEFOLD).each do |f|
+                 v_file_names.push(f.gsub(v_path,""))
+                 v_cnt = v_cnt + 1
+              end
             end
+
           #elsif (!Dir.glob(v_path+e.enumber.upcase+"*").empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1].upcase+"*.img").empty?) and 1==2
           #  v_cnt = 0
           #  Dir.glob(v_path+e.enumber.upcase+"*").each do |f|
