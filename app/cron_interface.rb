@@ -184,7 +184,7 @@ v_user = v_user.gsub("\n","")
       v_shared.run_padi_upload_20170227_dicom()
     elsif v_value_1 == "padi_upload_20170227_nifty"
       v_shared = Shared.new
-      v_shared.run_padi_upload_20170227_nifty())
+      v_shared.run_padi_upload_20170227_nifty()
 
   elsif v_value_1 == "padi_dvr_acpc_ids"
       v_shared = Shared.new
