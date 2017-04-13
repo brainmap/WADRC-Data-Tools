@@ -1,3 +1,0 @@
-page[:comments].replace_html :partial => 'image_datasets/comments_table', 
-                             :locals => { :image_dataset => @image_dataset, :image_comments => @image_dataset.image_comments }
-page[:new_image_comment].reset
