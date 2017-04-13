@@ -1,0 +1,21 @@
+<%= form_for(@lookup_consentcohort) do |f| %>
+  <% if @lookup_consentcohort.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@lookup_consentcohort.errors.count, "error") %> prohibited this lookup_consentcohort from being saved:</h2>
+
+      <ul>
+      <% @lookup_consentcohort.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :description %><br />
+    <%= f.text_field :description %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

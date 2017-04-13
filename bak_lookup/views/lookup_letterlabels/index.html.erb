@@ -1,0 +1,32 @@
+<% if current_user.role == 'Admin_High'%>
+
+<h1>Listing lookup_letterlabels</h1>
+
+<table>
+  <tr>
+    <th>Description</th>
+    <th>Protocol</th>
+    <th>Doccategory</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @lookup_letterlabels.each do |lookup_letterlabel| %>
+  <tr>
+    <td><%= lookup_letterlabel.description %></td>
+    <td><%= lookup_letterlabel.protocol_id %></td>
+    <td><%= lookup_letterlabel.doccategory %></td>
+    <td><%= link_to 'Show', lookup_letterlabel %></td>
+    <td><%= link_to 'Edit', edit_lookup_letterlabel_path(lookup_letterlabel) %></td>
+    <td><%= link_to 'Destroy', lookup_letterlabel, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Lookup letterlabel', new_lookup_letterlabel_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

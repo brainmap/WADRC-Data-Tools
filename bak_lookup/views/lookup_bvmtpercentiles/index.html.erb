@@ -1,0 +1,27 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Listing lookup_bvmtpercentiles</h1>
+
+<table>
+  <tr>
+    <th>Description</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @lookup_bvmtpercentiles.each do |lookup_bvmtpercentile| %>
+  <tr>
+    <td><%= lookup_bvmtpercentile.description %></td>
+    <td><%= link_to 'Show', lookup_bvmtpercentile %></td>
+    <td><%= link_to 'Edit', edit_lookup_bvmtpercentile_path(lookup_bvmtpercentile) %></td>
+    <td><%= link_to 'Destroy', lookup_bvmtpercentile, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+<br> hostname=<%= Socket.gethostname %>=<br>
+<%= link_to 'New Lookup bvmtpercentile', new_lookup_bvmtpercentile_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

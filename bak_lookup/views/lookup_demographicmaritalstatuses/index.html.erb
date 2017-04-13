@@ -1,0 +1,27 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Listing lookup_demographicmaritalstatuses</h1>
+
+<table>
+  <tr>
+    <th>Description</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @lookup_demographicmaritalstatuses.each do |lookup_demographicmaritalstatus| %>
+  <tr>
+    <td><%= lookup_demographicmaritalstatus.description %></td>
+    <td><%= link_to 'Show', lookup_demographicmaritalstatus %></td>
+    <td><%= link_to 'Edit', edit_lookup_demographicmaritalstatus_path(lookup_demographicmaritalstatus) %></td>
+    <td><%= link_to 'Destroy', lookup_demographicmaritalstatus, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Lookup demographicmaritalstatus', new_lookup_demographicmaritalstatus_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>

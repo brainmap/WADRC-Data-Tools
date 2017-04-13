@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Description:</b>
+  <%= @lookup_switchboard.description %>
+</p>
+
+<p>
+  <b>Item number:</b>
+  <%= @lookup_switchboard.item_number %>
+</p>
+
+<p>
+  <b>Command:</b>
+  <%= @lookup_switchboard.command %>
+</p>
+
+<p>
+  <b>Argument:</b>
+  <%= @lookup_switchboard.argument %>
+</p>
+
+
+<%= link_to 'Edit', edit_lookup_switchboard_path(@lookup_switchboard) %> |
+<%= link_to 'Back', lookup_switchboards_path %>

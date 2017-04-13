@@ -1,0 +1,25 @@
+<% if current_user.role == 'Admin_High'%>
+
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Description:</b>
+  <%= @lookup_letterlabel.description %>
+</p>
+
+<p>
+  <b>Protocol:</b>
+  <%= @lookup_letterlabel.protocol_id %>
+</p>
+
+<p>
+  <b>Doccategory:</b>
+  <%= @lookup_letterlabel.doccategory %>
+</p>
+
+
+<%= link_to 'Edit', edit_lookup_letterlabel_path(@lookup_letterlabel) %> |
+<%= link_to 'Back', lookup_letterlabels_path %>
+<% else %>
+  Your <%= current_user.role %> role does not allow access. 
+<% end %>
