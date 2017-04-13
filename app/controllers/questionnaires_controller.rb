@@ -1,7 +1,8 @@
 # encoding: utf-8
 class QuestionnairesController < ApplicationController
   require 'csv'
-  
+ 	before_action :set_questionnaire, only: [:show, :edit, :update, :destroy]   
+	respond_to :html 
   
     def questionnaire_search
        @current_tab = "questionnaires"
@@ -130,7 +131,10 @@ class QuestionnairesController < ApplicationController
     end
     
   
-    def q_search
+    def q_search 
+      if !params[:q_search].blank?
+         @q_search_params = q_search_params()
+      end
       @conditions = []
        @current_tab = "questionnaires"
        params["search_criteria"] =""
@@ -308,7 +312,9 @@ class QuestionnairesController < ApplicationController
       #@questionnaires =  @search.page(params[:page])
 
       # adjust columns and fields for html vs xls
-      request_format = request.formats.to_s
+      #request_format = request.formats.to_s  
+      v_request_format_array = request.formats
+       request_format = v_request_format_array[0]
       @html_request ="Y"
       case  request_format
         when "[text/html]","text/html" then  # application/html ?
@@ -455,7 +461,7 @@ class QuestionnairesController < ApplicationController
      @questionnaires = Questionnaire.where("questionnaires.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                  appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                 and appointments.appointment_date between ? and ?
-                                and scan_procedure_id in (?))", @appointment.appointment_date-2.month,@appointment.appointment_date+2,scan_procedure_array).all
+                                and scan_procedure_id in (?))", @appointment.appointment_date-2.month,@appointment.appointment_date+2,scan_procedure_array).to_a
 
      idx = @questionnaires.index(@questionnaire)
      @older_questionnaire = idx + 1 >= @questionnaires.size ? nil : @questionnaires[idx + 1]
@@ -623,7 +629,7 @@ class QuestionnairesController < ApplicationController
       if hide_date_flag_array.count > 0
         @hide_page_flag = 'Y'
       end
-    @questionnaire = Questionnaire.new(params[:questionnaire])
+    @questionnaire = Questionnaire.new# (questionnaire_params)#params[:questionnaire])
 
 
     appointment_date = nil
@@ -733,7 +739,7 @@ class QuestionnairesController < ApplicationController
     end
 =end
     respond_to do |format|
-      if @questionnaire.update_attributes(params[:questionnaire])
+     # not  if @questionnaire.update(params[:questionnaire]) #, :without_protection => true)
         @appointment = Appointment.find(@questionnaire.appointment_id)
         @vgroup = Vgroup.find(@appointment.vgroup_id)
         @appointment.comment = params[:appointment][:comment]
@@ -749,7 +755,7 @@ class QuestionnairesController < ApplicationController
         end
         @appointment.save
         @vgroup.completedquestionnaire = params[:vgroup][:completedquestionnaire]
-        @vgroup.save
+      if  @vgroup.save
         format.html { redirect_to(@questionnaire, :notice => 'Questionnaire was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -785,5 +791,16 @@ class QuestionnairesController < ApplicationController
       format.html { redirect_to(q_search_path) }
       format.xml  { head :ok }
     end
-  end
+  end 
+  private
+    def set_questionnaire
+       @questionnaire = Questionnaire.find(params[:id])
+    end   
+    # not really using
+   def questionnaire_params
+          params.require(:questionnaire).permit(:id,:enteredquestionnairewho,:enteredquestionnairedate,:enteredquestionnaire,:completedquestionnaire_moved_to_vgroups,:appointment_id)
+   end 
+   def q_search_params
+          params.require(:q_search).permit!
+   end
 end

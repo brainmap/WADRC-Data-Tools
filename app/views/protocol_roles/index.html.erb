@@ -2,8 +2,8 @@
 <h1>Listing protocol_roles</h1>
 <!-- add user search -->
 <%= form_tag '/protocol_roles/index' do %>
-  <%= collection_select :protocol_role, :user_id, User.where(" users.username not like '%left%' ").all.sort_by(&:username_name), :id, :username_name, :prompt => 'choose user' %>
-<%= collection_select :protocol_role, :protocol_id, Protocol.all.sort_by(&:name), :id, :name, :prompt => 'choose a protocol' %>
+  <%= collection_select :protocol_role, :user_id, User.where(" users.username not like '%left%' ").sort_by(&:username_name).to_a, :id, :username_name, :prompt => 'choose user' %>
+<%= collection_select :protocol_role, :protocol_id, Protocol.where("1=1").sort_by(&:name).to_a, :id, :name, :prompt => 'choose a protocol' %>
   <%= submit_tag("Search") %>
 <% end %>
 
@@ -26,7 +26,7 @@
       <td><%= protocol_role.role %></td>
       <td><%= link_to 'Show', protocol_role %></td>
       <td><%= link_to 'Edit', edit_protocol_role_path(protocol_role) %></td>
-      <td><%= link_to 'Destroy', protocol_role, :confirm => 'Are you sure?', :method => :delete %></td>
+      <td><%= link_to 'Destroy', protocol_role, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
 <td><% @scan_procedures = ScanProcedure.where("protocol_id in (?)",protocol_role.protocol_id)
       v_sp_list = []
       @scan_procedures.each do |sp| 
@@ -45,7 +45,7 @@
     <td><%= protocol_role.role %></td>
     <td><%= link_to 'Show', protocol_role %></td>
     <td><%= link_to 'Edit', edit_protocol_role_path(protocol_role) %></td>
-    <td><%= link_to 'Destroy', protocol_role, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', protocol_role, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
 	<td><% @scan_procedures = ScanProcedure.where("protocol_id in (?)",protocol_role.protocol_id)
 	      v_sp_list = []
 	      @scan_procedures.each do |sp| 

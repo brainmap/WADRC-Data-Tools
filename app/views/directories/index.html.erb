@@ -5,7 +5,7 @@
 <%= javascript_include_tag "controls.js" %>
 <%= javascript_include_tag "rails.js" %>
 <%= raw chartr_includes %>
-
+<H1> THIS IS NOT WORKING!!!! </H1>
 <a href="http://braindata.dom.wisc.edu/mrtg/" target="top">top level directories -Image Server space usage</a><br><br>
 <ul id="directories" class="graph-list">
 	<% @directories.each_with_index do |d,i| %>
@@ -36,7 +36,7 @@
 		
 	<% end %>
 </ul>
-<%= sortable_element("directories", :url => sort_directories_path, :handle => "handle", :constraint => false, :overlap => :horizontal) %>
+<!-- <= sortable_element("directories", :url => sort_directories_path, :handle => "handle", :constraint => false, :overlap => :horizontal) > -->
 
 <br />
 

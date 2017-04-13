@@ -16,7 +16,7 @@
     <td><%= lookup_pettracer.description %></td>
     <td><%= link_to 'Show', lookup_pettracer %></td>
     <td><%= link_to 'Edit', edit_lookup_pettracer_path(lookup_pettracer) %></td>
-    <td><%= link_to 'Destroy', lookup_pettracer, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', lookup_pettracer, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

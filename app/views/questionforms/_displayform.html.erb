@@ -12,14 +12,18 @@
 %>
 <%
  params[:id] = @questionform.id.to_s
-
- @questionform_questions = QuestionformQuestion.where(" question_id not in (select question_id from question_scan_procedures)
+      # was passing in @scanprocedures   but need @scanprocedures_ids 
+@scanprocedure_ids = []
+@scanprocedures.each do |sp|
+	@scanprocedure_ids.push(sp.id)
+end
+ @questionform_questions = QuestionformQuestion.where("( question_id not in (select question_id from question_scan_procedures)
                                                            or (question_id in 
                                                                    (select question_id from question_scan_procedures where  include_exclude ='include' and scan_procedure_id in (?))
                                                                 and
                                                              question_id not in 
-                                        (select question_id from question_scan_procedures where include_exclude ='exclude' and scan_procedure_id in (?)))",
-                                                   @scanprocedures,@scanprocedures).where(" questionform_id = ?",params[:id]).sort_by(&:display_order)
+                                        (select question_id from question_scan_procedures where include_exclude ='exclude' and scan_procedure_id in (?)))) and (questionform_id = ?)",
+                                                   @scanprocedure_ids,@scanprocedure_ids,params[:id]).sort_by(&:display_order)
 
    puts "id= "+params[:id] 
   if !@q_data_form.blank?

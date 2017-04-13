@@ -86,7 +86,7 @@
     <td><%= @visits.blank? ?  "None" :	@visits.collect{|sp| link_to("mri "+sp.date.strftime('%m-%y'),visit_path(sp))}.join(", ").html_safe %></td>
     <%= show_bool(vgroup.transfer_mri) %>
 <% if edit_count > 0 %>
-    <td><%= link_to  'add-MRI', new_visit_path+"/"+vgroup.id.to_s , :confirm => "Are you sure there is not an existing MRI appointment for the same date, scan procedure and enumber? MRI appointments are usually created when the scans are imported." %></td>
+    <td><%= link_to  'add-MRI', new_visit_path+"/"+vgroup.id.to_s , data: {confirm: "Are you sure there is not an existing MRI appointment for the same date, scan procedure and enumber? MRI appointments are usually created when the scans are imported."} %></td>
 <% end %>
     <td><%= @petscans.blank? ?  "None" :	@petscans.collect{|sp| link_to("pet",petscan_path(sp))}.join(", ").html_safe %></td>
     <%= show_bool(vgroup.transfer_pet )%>
@@ -131,7 +131,7 @@
 <% if edit_count > 0 %>
           <%= link_to 'edit', edit_vgroup_path(vgroup) %>
 <% end %>
-          <%#= link_to 'X', vgroup, :confirm => "Are you sure you want to delete this Visits?", :method => :delete %>
+          <!-- #= link_to 'X', vgroup, :confirm => "Are you sure you want to delete this Visits?", :method => :delete -->
         </td>
       </tr>
     <% end %>

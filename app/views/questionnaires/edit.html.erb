@@ -24,7 +24,7 @@ Save the bottom entries before making/saving any top entiries, and vice versa.
 
 <%= render :partial => 'questionforms/editform', :locals => { :form_action => 'Edit Questionnaire values'} %>
 
-<br /><%= link_to 'Back to this Questionnaire appt', @questionnaire %> | <%= link_to 'Delete this Questionnaire appt', @questionnaire, :confirm => "Are you sure you want to delete this Questionnaire appt?", :method => :delete %>
+<br /><%= link_to 'Back to this Questionnaire appt', @questionnaire %> | <%= link_to 'Delete this Questionnaire appt', @questionnaire, :method => :delete , data: {confirm: "Are you sure you want to delete this Questionnaire appt?"}%>
  | <%= link_to 'Vgroup', Vgroup.find(@appointment.vgroup_id) %>
 
 <% end %>

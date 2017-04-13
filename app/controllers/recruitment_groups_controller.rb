@@ -41,7 +41,7 @@ class RecruitmentGroupsController < ApplicationController
   # POST /recruitment_groups
   # POST /recruitment_groups.xml
   def create
-    @recruitment_group = RecruitmentGroup.new(params[:recruitment_group])
+    @recruitment_group = RecruitmentGroup.new(recruitment_group_params)#params[:recruitment_group])
 
     respond_to do |format|
       if @recruitment_group.save
@@ -61,7 +61,7 @@ class RecruitmentGroupsController < ApplicationController
     @recruitment_group = RecruitmentGroup.find(params[:id])
 
     respond_to do |format|
-      if @recruitment_group.update_attributes(params[:recruitment_group])
+      if @recruitment_group.update(recruitment_group_params)#params[:recruitment_group], :without_protection => true)
         flash[:notice] = 'RecruitmentGroup was successfully updated.'
         format.html { redirect_to(@recruitment_group) }
         format.xml  { head :ok }
@@ -82,5 +82,12 @@ class RecruitmentGroupsController < ApplicationController
       format.html { redirect_to(recruitment_groups_url) }
       format.xml  { head :ok }
     end
-  end
+  end 
+  private
+    def set_recruitment_group
+       @recruitment_group = RecruitmentGroup.find(params[:id])
+    end
+   def recruitment_group_params
+          params.require(:recruitment_group).permit(:study_id,:description,:name,:id)
+   end
 end

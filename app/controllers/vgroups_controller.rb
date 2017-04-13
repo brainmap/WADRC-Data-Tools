@@ -2,7 +2,9 @@
 class VgroupsController < ApplicationController
   # GET /vgroups
   # GET /vgroups.xml
-  require 'csv'
+  require 'csv' 
+  before_action :set_vgroup, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   def index
     scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
           hide_date_flag_array = []
@@ -173,7 +175,11 @@ class VgroupsController < ApplicationController
     # if the vgroup is not linked to a scan protocol, the access control breaks down
     # to get at vgroups without sp's need to be admin - also check that not linked to any sp
     @scan_procedures_vgroups = ScanProcedure.where("scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  vgroup_id in (?))",params[:id]) 
-    @consent_forms = ConsentForm.where("consent_forms.id in (select consent_form_id from consent_form_scan_procedures where scan_procedure_id in (?)) OR consent_forms.id not in (select consent_form_id from consent_form_scan_procedures) ",@scan_procedures_vgroups)
+    @t_scan_procedures_vgroups_id_array = [] 
+    @scan_procedures_vgroups.each do |spvg|    # actually just sp
+         @t_scan_procedures_vgroups_id_array.push(spvg.id)
+    end
+    @consent_forms = ConsentForm.where("consent_forms.id in (select consent_form_id from consent_form_scan_procedures where scan_procedure_id in (?)) OR consent_forms.id not in (select consent_form_id from consent_form_scan_procedures) ",@t_scan_procedures_vgroups_id_array)
     @consent_form_vgroups = ConsentFormVgroup.where("consent_form_vgroups.vgroup_id in  (?) and status_flag ='Y' ",params[:id]) 
 
 
@@ -217,8 +223,9 @@ class VgroupsController < ApplicationController
   # GET /vgroups/new.xml
   def new
     @vgroup = Vgroup.new
-
-    @vgroup.enrollments << Enrollment.new
+     #undefined method `<<' for #<ActiveRecord::Relation []> 
+     # also seems to have gotten rid of the exisiting enumber error
+    ####@vgroup.enrollments << Enrollment.new
 
     respond_to do |format|
       format.html # new.html.erb
@@ -267,8 +274,8 @@ class VgroupsController < ApplicationController
   # POST /vgroups
   # POST /vgroups.xml
   def create
-    # PROBLEM WITH SAVE vgroup IF ENUMBER ALREADY EXISTS !!!!
-    @vgroup = Vgroup.new(params[:vgroup]) 
+    # PROBLEM WITH SAVE vgroup IF ENUMBER ALREADY EXISTS !!!!-- might be fixed
+    @vgroup = Vgroup.new(vgroup_params) #params[:vgroup]) 
     connection = ActiveRecord::Base.connection();
     v_param_vgroup_participant_id = ''
     if !params[:vgroup][:participant_id].blank?
@@ -277,16 +284,16 @@ class VgroupsController < ApplicationController
     # want to check for participant_id mis-match - reggieid rmraic, enumber and vgroup
     v_reggieid_participant_id = ''
     if !params[:participant].nil? and !params[:participant][:reggieid].blank?
-       v_reggieid_participants = Participant.where("reggieid in (?)",params[:participant][:reggieid].rjust(6,"0"))
-       if !v_reggieid_participants.nil? and !v_reggieid_participants[0].nil?
-          v_reggieid_participant_id = v_reggieid_participants[0].id
+       v_reggieid_participants = Participant.where("reggieid in (?)",params[:participant][:reggieid].rjust(6,"0")).first
+       if !v_reggieid_participants.nil?
+          v_reggieid_participant_id = v_reggieid_participants.id
        end
     end
     v_rmraic_participant_id = ''
     if !params[:vgroup][:rmr].blank?  && params[:vgroup][:rmr] [0..5] == "RMRaic" && ((params[:vgroup][:rmr] )[6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && params[:vgroup][:rmr] .length == 12
          v_reggieid = params[:vgroup][:rmr][6..11]
-         v_rmraic_participants = Participant.where(" reggieid in (?)",v_reggieid)
-         v_rmraic_participant_id = v_rmraic_participants[0].try(:id).to_s
+         v_rmraic_participants = Participant.where(" reggieid in (?)",v_reggieid).first
+         v_rmraic_participant_id = v_rmraic_participants.try(:id).to_s
     end   
     v_enumber_participant_ids = [] 
     # removed attr_accessible in model and now ok --not sure why vgroup params not getting saved -- same in update  -- something with the mess of enrollments?
@@ -297,31 +304,31 @@ class VgroupsController < ApplicationController
     #  @vgroup.vgroup_date = params[:vgroup]["#{'vgroup_date'}(1i)"] +"-"+params[:vgroup]["#{'vgroup_date'}(2i)"].rjust(2,"0")+"-"+params[:vgroup]["#{'vgroup_date'}(3i)"].rjust(2,"0")
     # this gets messy - probably multiple inserts
     if  !params[:participant].nil? and !params[:participant][:reggieid].blank?
-         v_participant = Participant.where("reggieid in (?)",params[:participant][:reggieid].rjust(6,"0"))
-         if !v_participant[0].nil? and params[:vgroup][:participant_id].blank?
+         v_participant = Participant.where("reggieid in (?)",params[:participant][:reggieid].rjust(6,"0")).first
+         if !v_participant.nil? and params[:vgroup][:participant_id].blank?
             if !params[:vgroup][:rmr].blank?
               if (params[:vgroup][:rmr])[0..5] == "RMRaic" && (params[:vgroup][:rmr][6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && (params[:vgroup][:rmr]).length == 12
                     reggieid_rmr = (params[:vgroup][:rmr])[6..11]
-                    v_participant_rmr = Participant.where(" reggieid in (?)",reggieid_rmr)
-                    if !v_participant_rmr[0].nil? and v_participant_rmr[0].id != v_participant[0].id
+                    v_participant_rmr = Participant.where(" reggieid in (?)",reggieid_rmr).first
+                    if !v_participant_rmr.nil? and v_participant_rmr[0].id != v_participant.id
                        # flash[:warning] = "The participants from the reggieid and RMRaic######  do not match !!!!!!  SOMETHING IS AMISS! "
                     else
-                       params[:vgroup][:participant_id] = v_participant[0].id.to_s
+                       params[:vgroup][:participant_id] = v_participant.id.to_s
                     end
               end
             else
-              params[:vgroup][:participant_id] = v_participant[0].id.to_s
+              params[:vgroup][:participant_id] = v_participant.id.to_s
               # not sure why setting params not carrying thru
-              @vgroup.participant_id = v_participant[0].id
+              @vgroup.participant_id = v_participant.id
             end
          elsif !params[:vgroup][:participant_id].blank? 
               if (params[:vgroup][:rmr])[0..5] == "RMRaic" && (params[:vgroup][:rmr][6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && (params[:vgroup][:rmr]).length == 12
                     reggieid_rmr = (params[:vgroup][:rmr])[6..11]
-                    v_participant_rmr = Participant.where(" reggieid in (?)",reggieid_rmr)
+                    v_participant_rmr = Participant.where(" reggieid in (?)",reggieid_rmr).first
               end
           elsif (params[:vgroup][:rmr])[0..5] == "RMRaic" && (params[:vgroup][:rmr][6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && (params[:vgroup][:rmr]).length == 12
                # pick up later - let RMRaic take precident
-          elsif v_participant[0].nil? and (params[:participant][:reggieid]=~ /\A[-+]?[0-9]*\.?[0-9]+\Z/)  # make a new participant
+          elsif v_participant.nil? and (params[:participant][:reggieid]=~ /\A[-+]?[0-9]*\.?[0-9]+\Z/)  # make a new participant
             v_new_participant = Participant.new
             v_new_participant.reggieid = params[:participant][:reggieid].rjust(6,"0")
             v_new_participant.save
@@ -342,36 +349,36 @@ class VgroupsController < ApplicationController
           enumber_array << params[:vgroup][:enrollments_attributes]["0"][:enumber]
           # getting enrollments if enumber already in enrollments
           connection = ActiveRecord::Base.connection();
-          enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
-        v_do_not_share_scans_flag ="N"
-        if !enrollment.blank?
+          enrollment = Enrollment.where("enumber in (?)	",params[:vgroup][:enrollments_attributes]["0"][:enumber] ).first
+          v_do_not_share_scans_flag ="N"
+          if !enrollment.blank?
             v_do_not_share_scans_flag ="Y"
-        end
-          enrollment.each do |e|
-             if e.do_not_share_scans_flag.blank? or e.do_not_share_scans_flag != "Y"
+         # enrollment.each do |e|
+            if enrollment.do_not_share_scans_flag.blank? or enrollment.do_not_share_scans_flag != "Y"
                 v_do_not_share_scans_flag ="N" 
-             end
-             v_enrollment_array.push(e)
-             v_enrollment_id_array.push(e.id)
-             v_evg_check = EnrollmentVgroupMembership.where("vgroup_id in (?) and enrollment_id in (?)",@vgroup.id,e.id)
-             if v_evg_check.nil?
-               sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(e.id).to_s+")"      
+            end
+            v_enrollment_array.push(enrollment)
+            v_enrollment_id_array.push(enrollment.id)
+            v_evg_check = EnrollmentVgroupMembership.where("vgroup_id in (?) and enrollment_id in (?)",@vgroup.id,enrollment.id).first
+            if v_evg_check.nil?
+               sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(enrollment.id).to_s+")"      
                results = connection.execute(sql)
-             end
+            end
+        #  end
           end
           if !enrollment.blank?
             if v_do_not_share_scans_flag == "Y"
                  @vgroup.do_not_share_scans = "DO NOT SHARE"
                  @vgroup.save
             end
-            if !(enrollment[0].participant_id).nil? and (@vgroup.participant_id).blank? 
-                @vgroup.participant_id = enrollment[0].participant_id
+            if !(enrollment.participant_id).nil? and (@vgroup.participant_id).blank? 
+                @vgroup.participant_id = enrollment.participant_id
                 @vgroup.save
             elsif  (@vgroup.participant_id).blank? and !(@vgroup.rmr).blank?
                 if (@vgroup.rmr)[0..5] == "RMRaic" &&    ((@vgroup.rmr)[6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && (@vgroup.rmr).length == 12
                     reggieid = (@vgroup.rmr)[6..11]
-                    v_participant = Participant.where(" reggieid in (?)",reggieid)
-                    v_participant_id = v_participant[0].try(:id).to_s
+                    v_participant = Participant.where(" reggieid in (?)",reggieid).first
+                    v_participant_id = v_participant.try(:id).to_s
                     if !v_participant_id.blank?
                        @vgroup.participant_id = v_participant_id
                        @vgroup.save
@@ -380,16 +387,16 @@ class VgroupsController < ApplicationController
                     end
                 end
             end
-            if (enrollment[0].participant_id).nil? and !(@vgroup.participant_id).blank? 
-                 enrollment[0].participant_id = @vgroup.participant_id
-                 enrollment[0].save
+            if (enrollment.participant_id).nil? and !(@vgroup.participant_id).blank? 
+                 enrollment.participant_id = @vgroup.participant_id
+                 enrollment.save
              end
           else  # make a new enrollment with this participant-- only works for participant selected
             if  (@vgroup.participant_id).blank? and !(@vgroup.rmr).blank?
                 if (@vgroup.rmr)[0..5] == "RMRaic" && ((@vgroup.rmr)[6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ )&& (@vgroup.rmr).length == 12
                     reggieid = (@vgroup.rmr)[6..11]
-                    v_participant = Participant.where(" reggieid in (?)",reggieid)
-                    v_participant_id = v_participant[0].try(:id).to_s
+                    v_participant = Participant.where(" reggieid in (?)",reggieid).first
+                    v_participant_id = v_participant.try(:id).to_s
                     if !v_participant_id.blank?
                        @vgroup.participant_id = v_participant_id
                        @vgroup.save
@@ -398,32 +405,41 @@ class VgroupsController < ApplicationController
                     end
                 end
             end
-            if !(@vgroup.participant_id).blank? 
-                @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
-                if @enrollment[0].nil?
-                   sql = " insert into enrollments(enumber,participant_id)values('"+params[:vgroup][:enrollments_attributes]["0"][:enumber].gsub(/[;:'"()=<>]/, '')+"',"+@vgroup.participant_id.to_s+")"
-                   results = connection.execute(sql) 
-                   @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+            if !(@vgroup.participant_id).blank?   
+                v_enumber_tmp = params[:vgroup][:enrollments_attributes]["0"][:enumber].gsub(/[;:'"()=<>]/, '')
+                @enrollment = Enrollment.where("enumber in (?)",v_enumber_tmp).first #params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+                if @enrollment.nil?  
+                  @enrollment = Enrollment.new
+                  @enrollment.enumber = params[:vgroup][:enrollments_attributes]["0"][:enumber].gsub(/[;:'"()=<>]/, '')
+                  @enrollment.participant_id = @vgroup.participant_id
+                  @enrollment.save
+                  #sql = " insert into enrollments(enumber,participant_id)values('"+params[:vgroup][:enrollments_attributes]["0"][:enumber].gsub(/[;:'"()=<>]/, '')+"',"+@vgroup.participant_id.to_s+")"
+                  #results = connection.execute(sql)  
+                  #results = connection.execute("commit") 
+                  #@enrollment = Enrollment.where("enumber in (?)",v_enumber_tmp).first # params[:vgroup][:enrollments_attributes]["0"][:enumber] ) 
                 end
-                v_enrollment_array.push(@enrollment[0])
-                v_evg_check = EnrollmentVgroupMembership.where("vgroup_id in (?) and enrollment_id in (?)",@vgroup.id,@enrollment[0].id)
+                v_enrollment_array.push(@enrollment)
+                v_evg_check = EnrollmentVgroupMembership.where("vgroup_id in (?) and enrollment_id in (?)",@vgroup.id,@enrollment.id).first
                 if v_evg_check.nil?
-                  sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment[0].id).to_s+")"      
+                  sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment.id).to_s+")"      
                   results = connection.execute(sql)
                 end
             else
                 # need to add
-                @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
-                if @enrollment[0].nil?
-                  sql = " insert into enrollments(enumber)values('"+params[:vgroup][:enrollments_attributes]["0"][:enumber].gsub(/[;:'"()=<>]/, '')+"' )"
-                  results = connection.execute(sql)
-                  @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+                @enrollment = Enrollment.where("enumber in (?)	",params[:vgroup][:enrollments_attributes]["0"][:enumber] ).first
+                if @enrollment.nil?  
+                    @enrollment = Enrollment.new
+                    @enrollment.enumber = params[:vgroup][:enrollments_attributes]["0"][:enumber].gsub(/[;:'"()=<>]/, '')
+                    @enrollment.save
+                  #sql = " insert into enrollments(enumber)values('"+params[:vgroup][:enrollments_attributes]["0"][:enumber].gsub(/[;:'"()=<>]/, '')+"' )"
+                  #results = connection.execute(sql)
+                  #@enrollment = Enrollment.where("enumber in (?)	",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
                 end
-                v_enrollment_id_array.push(@enrollment[0].id)
-                v_enrollment_array.push(@enrollment[0])
-                v_evg_check = EnrollmentVgroupMembership.where("vgroup_id in (?) and enrollment_id in (?)",@vgroup.id,@enrollment[0].id)
+                v_enrollment_id_array.push(@enrollment.id)
+                v_enrollment_array.push(@enrollment)
+                v_evg_check = EnrollmentVgroupMembership.where("vgroup_id in (?) and enrollment_id in (?)",@vgroup.id,@enrollment.id).first
                 if v_evg_check.nil?
-                  sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment[0].id).to_s+")"      
+                  sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment.id).to_s+")"      
                   results = connection.execute(sql)
                 end
                 enumber_array = []
@@ -460,7 +476,7 @@ class VgroupsController < ApplicationController
               if cnt < 1
                 if v_enrollment_id_array.include?(r[0])
                   v_evg_check = EnrollmentVgroupMembership.where("vgroup_id in (?) and enrollment_id in (?)",@vgroup.id,r[0])
-                  if v_evg_check.nil?
+                  if v_evg_check[0].nil?
                     sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(r[0]).to_s+")"  
                     results = connection.execute(sql)
                   end
@@ -469,14 +485,16 @@ class VgroupsController < ApplicationController
           end
         end
 
-      # removed attr_accessible in model and now ok  
-      #  if !params[:vgroup][:scan_procedure_ids].blank?
-      #     connection = ActiveRecord::Base.connection();
-      #    params[:vgroup][:scan_procedure_ids].each do |sp|           
-      #      sql = "Insert into scan_procedures_vgroups(vgroup_id,scan_procedure_id) values("+@vgroup.id.to_s+","+sp+")"        
-      #      results = connection.execute(sql)        
-      #    end
-      #  end
+      # removed attr_accessible in model and now ok  # not sure why this was hashed out or why 
+      # hashed out because getting double inserts - must be getting inserted elsewhere
+      #scan_procedures_vgroups not have any model distinct/uniq 
+        #if !params[:vgroup][:scan_procedure_ids].blank?
+        #   connection = ActiveRecord::Base.connection();
+        #  params[:vgroup][:scan_procedure_ids].each do |sp|           
+         #   sql = "Insert into scan_procedures_vgroups(vgroup_id,scan_procedure_id) values("+@vgroup.id.to_s+","+sp+")"        
+          #  results = connection.execute(sql)        
+        #  end
+       # end
                         # check for other vgroups with same sp and enumber within 1 month
           v_near_vgroups = Vgroup.where("vgroups.id != "+@vgroup.id.to_s+" 
             and STR_TO_DATE('"+@vgroup.vgroup_date.strftime('%m/%d/%Y')+"','%m/%d/%Y')  between (vgroups.vgroup_date - interval 1 month ) and (vgroups.vgroup_date + interval 1 month ) 
@@ -554,7 +572,7 @@ class VgroupsController < ApplicationController
                  v_new_participant.save
                  @vgroup.participant_id = v_new_participant.id
                  @vgroup.save
-                 @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
+                 @enrollment = Enrollment.where("enumber in (?)	",params[:vgroup][:enrollments_attributes]["0"][:enumber] )
                  @enrollment.each do |ee|
                    if (ee.participant_id).blank?
                       ee.participant_id = v_new_participant.id
@@ -678,11 +696,11 @@ class VgroupsController < ApplicationController
            end 
          end
        else
-         if !params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].blank?
+         if !params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].blank?  
            connection = ActiveRecord::Base.connection();
-           @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
+           @enrollment = Enrollment.where("enumber in (?)	",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
            enumber_array << params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] 
-           if !@enrollment.blank?
+           if !@enrollment.blank?  
              @enrollment_vgroup_membership = EnrollmentVgroupMembership.where("enrollment_id in (?) and vgroup_id in (?)",@enrollment[0].id, @vgroup.id)
               if @enrollment_vgroup_membership.blank?
                   sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment[0].id).to_s+")"      
@@ -692,24 +710,28 @@ class VgroupsController < ApplicationController
                     results = connection.execute(sql)
                   end
               end
-           else  # make a new enrollment with this participant-- only works for participant selected
-            @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
-             if !(@vgroup.participant_id).blank? and @enrollment[0].nil?
-                 sql = " insert into enrollments(enumber,participant_id)values('"+params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].gsub(/[;:'"()=<>]/, '')+"',"+@vgroup.participant_id.to_s+")"
-                 results = connection.execute(sql) 
-             elsif v_enrollments[0].nil?
-                 sql = " insert into enrollments(enumber)values('"+params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].gsub(/[;:'"()=<>]/, '')+"' )"  
-                 results = connection.execute(sql)
+           else  # make a new enrollment with this participant-- only works for participant selected   
+             @enrollments = Enrollment.where("enumber in (?)	",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
+             if !(@vgroup.participant_id).blank? and @enrollments[0].nil? 
+                 @enrollment = Enrollment.new
+                  @enrollment.enumber = params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].gsub(/[;:'"()=<>]/, '')
+                  @enrollment.participant_id = @vgroup.participant_id
+                  @enrollment.save
+             elsif @enrollments[0].nil?
+                  @enrollment = Enrollment.new 
+                  @enrollment.enumber = params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber].gsub(/[;:'"()=<>]/, '') 
+                  @enrollment.save
+              else
+                  @enrollment = @enrollments[0]
               end
                  # need to add
-                 @enrollment = Enrollment.where("enumber = ?",params[:vgroup][:enrollments_attributes][cnt.to_s][:enumber] )
-                 if !@enrollment.nil? and !@enrollment[0].blank?
-                    @enrollment_vgroup_membership = EnrollmentVgroupMembership.where("enrollment_id in (?)",@enrollment[0].id)
-                    if @enrollment_vgroup_membership.blank?
-                        sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment[0].id).to_s+")"      
-                        results = connection.execute(sql)
-                    end 
-                  end                  
+              if !@enrollment.nil?
+                  @enrollment_vgroup_membership = EnrollmentVgroupMembership.where("enrollment_id in (?) and vgroup_id in (?)",@enrollment.id, @vgroup.id)
+                  if @enrollment_vgroup_membership.blank?
+                     sql = "insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id) values("+@vgroup.id.to_s+","+(@enrollment.id).to_s+")"    
+                     results = connection.execute(sql)
+                  end 
+              end                  
             end    
          end
        end
@@ -728,7 +750,7 @@ class VgroupsController < ApplicationController
     params[:vgroup].delete('enrollments_attributes') 
     
     respond_to do |format|
-      if @vgroup.update_attributes(params[:vgroup])  #@vgroup.save #update_attributes(params[:vgroup])
+      if @vgroup.update(vgroup_params) #params[:vgroup], :without_protection => true)  #@vgroup.save #update(params[:vgroup])
         connection = ActiveRecord::Base.connection();
         # problem with not deleting enum vgr
         sql = "delete from scan_procedures_vgroups where vgroup_id ="+@vgroup.id.to_s
@@ -1333,7 +1355,10 @@ end
      render :template => "vgroups/home"
   end
   
-  def vgroups_search
+  def vgroups_search   
+    if(!params["vgroups_search"].blank?) 
+       @vgroups_search_params  = vgroups_search_params() 
+    end
       # slightly different -- no joins in appointment, so can't use common search
       scan_procedure_array =current_user.view_low_scan_procedure_array.split(' ') #[:view_low_scan_procedure_array]
       scan_procedure_list = scan_procedure_array.map(&:to_i).join(',')
@@ -1397,9 +1422,19 @@ end
 
 
          
-       # adjust columns and fields for html vs xls
-       request_format = request.formats.to_s
-       @html_request ="Y"
+       # adjust columns and fields for html vs xls  --- request.formats changed? in 4.0 
+        #flailing about
+       #request_format_string  = request.formats.to_s
+       #v_request_format_array = request_format_string.split(',')  
+       #v_request_format_string_array = v_request_format_array[2].split('=')
+       #request_format = v_request_format_string_array[1].gsub(/\"/,'')
+       #request_format = request.formats.to_s
+       @html_request ="Y"                  
+            
+
+       v_request_format_array = request.formats
+       request_format = v_request_format_array[0]
+     # puts "AAAAAAA html_request="+@html_request+"   request_format="+request_format.to_s+"    request_format_string="+request_format_string      
        case  request_format
          when "[text/html]", "text/html" then # ? application/html
            @column_headers = ['Date','Protocol','Enumber','RMR','MRI status','PET status','LP status','LH status','NP status','Questionnaire status'] # need to look up values
@@ -1441,7 +1476,6 @@ end
            connection = ActiveRecord::Base.connection();
            @results2 = connection.execute(sql)
            @temp_results = @results2
-
 
            @results = []   
            i =0
@@ -1600,5 +1634,15 @@ end
       format.html { redirect_to('/vgroups/home') }
       format.xml  { head :ok }
     end
-  end
+  end 
+  private
+    def set_vgroup
+       @vgroup = Vgroup.find(params[:id])
+    end
+   def vgroup_params
+          params.require(:vgroup).permit(:entered_by,:qc_by,:qc_completed,:dicom_dvd,:fs_flag,:nii_file_count,:fs_good2go_flag,:fs_manual_edits_flag,:fs_donebutbad_flag,:do_not_share_scans,:pilot_flag,:completedquestionnaire,:compile_folder,:id,:vgroup_date,:participant_id,:note,:transfer_mri,:transfer_pet,:completedblooddraw,:completedneuropsych,:completedlumbarpuncture,:user_id,:rmr, scan_procedure_ids: [])
+   end 
+   def vgroups_search_params
+          params.require(:vgroups_search).permit!
+   end 
 end

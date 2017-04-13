@@ -25,7 +25,7 @@
     <td><%= employee.user.try(:username_name)%></td>
     <td><%= link_to 'Show', employee %></td>
     <td><%= link_to 'Edit', edit_employee_path(employee) %></td>
-    <td><%= link_to 'Destroy', employee, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', employee, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

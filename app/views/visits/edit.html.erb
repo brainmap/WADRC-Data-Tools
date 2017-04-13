@@ -39,8 +39,8 @@ The base path for the Data Panda server is <%=@visit.get_base_path() %>
 	<% end %>	
 
 <% end %>
-
-<br /><%= link_to 'Back to this MRI appt', @visit %> | <%= link_to 'Delete this MRI appt', @visit, :confirm => "Are you sure you want to delete this MRI appt?", :method => :delete %>
- | <%= link_to 'Vgroup', Vgroup.find(@appointment.vgroup_id) %>
+   <!-- deprecated :confirm ?? link_to 'Delete this MRI appt', @visit, :confirm => "Are you sure you want to delete this MRI appt?", :method => :delete-->
+<br /><%= link_to 'Back to this MRI appt', @visit %> | <%= link_to 'Delete this MRI appt', @visit,  method: :delete, data: { confirm: "Are you sure you want to delete this MRI appt?" }%> 
+ | <%= link_to 'Vgroup', Vgroup.find(@appointment.vgroup_id) %> 
 <% end %>
 <%end%>

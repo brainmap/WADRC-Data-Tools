@@ -1,4 +1,5 @@
-<%= form_for [image_dataset, image_comment], :remote => true, :id => :new_comment_form do  |f| -%>
+<% # removed :remote => true, and got single insert and page reload !!!  %>
+<%= form_for [image_dataset, image_comment],  :format => "html" ,:id => :new_comment_form do  |f| -%>   
   <p><%= f.text_area :comment, :rows => 5, :columns => 40 %></p>
   <p><%= f.submit 'Add Comment' %></p>
 <% end -%>

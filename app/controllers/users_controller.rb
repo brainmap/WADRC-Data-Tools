@@ -2,8 +2,9 @@
 class UsersController < ApplicationController
 
   #skip_before_filter :username_required
-    before_filter :authenticate_user!
-     
+    before_action :authenticate_user!
+    before_action :set_user, only: [:show, :edit, :update, :destroy]  
+  	respond_to :html    
 
   def participant_missing
       sql ="select p.id, p.dob,p.gender from participants p where dob is null or dob ='' or gender is null or gender = '' and p.id in ( select participant_id from vgroups)"
@@ -111,7 +112,14 @@ class UsersController < ApplicationController
      respond_to do |format|
        format.xls # ids_search.xls.erb
      end
-  end
+  end   
+  private
+    def set_user 
+       @user = User.find(params[:id]) 
+    end
+   def user_params
+          params.require(:user).permit(:view_low_scan_procedure_array,:edit_low_scan_procedure_array,:description,:role,:last_sign_in_ip,:current_sign_in_ip,:edit_low_protocol_array,:view_low_protocol_array,:admin_low_scan_procedure_array,:admin_high_scan_procedure_array,:edit_high_protocol_array,:admin_low_protocol_array,:admin_high_protocol_array,:hide_date_flag_array,:last_sign_in_at,:current_sign_in_at,:id,:username,:crypted_password,:salt,:remember_token,:remember_token_expires_at,:first_name,:last_name,:sign_in_count,:remember_created_at,:reset_password_sent_at,:reset_password_token,:encrypted_password,:email)
+   end
   
 =begin
   def create
@@ -143,7 +151,7 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
     
     respond_to do |format|
-       if @user.update_attributes(params[:user])
+       if @user.update(params[:user], :without_protection => true)
          flash[:notice] = 'User was successfully updated.'
          format.html { redirect_to(@user) }
          format.xml  { head :ok }

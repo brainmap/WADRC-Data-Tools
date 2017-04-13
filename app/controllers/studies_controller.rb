@@ -1,5 +1,7 @@
 # encoding: utf-8
-class StudiesController < ApplicationController
+class StudiesController < ApplicationController  
+  before_action :set_study, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /studies
   # GET /studies.xml
   def index
@@ -41,7 +43,7 @@ class StudiesController < ApplicationController
   # POST /studies
   # POST /studies.xml
   def create
-    @study = Study.new(params[:study])
+    @study = Study.new(study_params)#params[:study])
 
     respond_to do |format|
       if @study.save
@@ -61,7 +63,7 @@ class StudiesController < ApplicationController
     @study = Study.find(params[:id])
 
     respond_to do |format|
-      if @study.update_attributes(params[:study])
+      if @study.update(study_params)#params[:study], :without_protection => true)
         flash[:notice] = 'Study was successfully updated.'
         format.html { redirect_to(@study) }
         format.xml  { head :ok }
@@ -82,5 +84,6 @@ class StudiesController < ApplicationController
       format.html { redirect_to(studies_url) }
       format.xml  { head :ok }
     end
-  end
+  end 
+  
 end

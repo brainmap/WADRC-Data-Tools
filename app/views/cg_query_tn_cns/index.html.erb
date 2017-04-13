@@ -21,7 +21,7 @@
     <td><%= cg_query_tn_cn.condition %></td>
     <td><%= link_to 'Show', cg_query_tn_cn %></td>
     <td><%= link_to 'Edit', edit_cg_query_tn_cn_path(cg_query_tn_cn) %></td>
-    <td><%= link_to 'Destroy', cg_query_tn_cn, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', cg_query_tn_cn, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

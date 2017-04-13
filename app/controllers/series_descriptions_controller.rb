@@ -1,5 +1,7 @@
 # encoding: utf-8
-class SeriesDescriptionsController < ApplicationController
+class SeriesDescriptionsController < ApplicationController  
+  before_action :set_series_description, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /series_descriptions
   # GET /series_descriptions.xml
   def index
@@ -41,7 +43,7 @@ class SeriesDescriptionsController < ApplicationController
   # POST /series_descriptions
   # POST /series_descriptions.xml
   def create
-    @series_description = SeriesDescription.new(params[:series_description])
+    @series_description = SeriesDescription.new(series_description_params)#params[:series_description])
 
     respond_to do |format|
       if @series_description.save
@@ -61,7 +63,7 @@ class SeriesDescriptionsController < ApplicationController
     @series_description = SeriesDescription.find(params[:id])
 
     respond_to do |format|
-      if @series_description.update_attributes(params[:series_description])
+      if @series_description.update(series_description_params)#params[:series_description], :without_protection => true)
         flash[:notice] = 'SeriesDescription was successfully updated.'
         format.html { redirect_to(@series_description) }
         format.xml  { head :ok }
@@ -82,5 +84,12 @@ class SeriesDescriptionsController < ApplicationController
       format.html { redirect_to(series_descriptions_url) }
       format.xml  { head :ok }
     end
-  end
+  end    
+  private
+    def set_series_description
+       @series_description = SeriesDescription.find(params[:id])
+    end
+   def series_description_params
+          params.require(:series_description).permit(:long_description,:short_description,:acq_plane,:anat_type,:ignore,:id)
+   end
 end

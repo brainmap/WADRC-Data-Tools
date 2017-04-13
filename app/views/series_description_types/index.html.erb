@@ -16,7 +16,7 @@
     <td><%= series_description_type.series_description_type %></td>
     <td><%= link_to 'Show', series_description_type %></td>
     <td><%= link_to 'Edit', edit_series_description_type_path(series_description_type) %></td>
-    <td><%= link_to 'Destroy', series_description_type, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', series_description_type, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

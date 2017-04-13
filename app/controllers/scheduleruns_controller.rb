@@ -41,7 +41,7 @@ class SchedulerunsController < ApplicationController
   # POST /scheduleruns
   # POST /scheduleruns.xml
   def create
-    @schedulerun = Schedulerun.new(params[:schedulerun])
+    @schedulerun = Schedulerun.new(schedulerun_params)#params[:schedulerun])
 
     respond_to do |format|
       if @schedulerun.save
@@ -60,7 +60,7 @@ class SchedulerunsController < ApplicationController
     @schedulerun = Schedulerun.find(params[:id])
 
     respond_to do |format|
-      if @schedulerun.update_attributes(params[:schedulerun])
+      if @schedulerun.update(schedulerun_params)#params[:schedulerun], :without_protection => true)
         format.html { redirect_to(@schedulerun, :notice => 'Schedulerun was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -164,5 +164,12 @@ class SchedulerunsController < ApplicationController
       format.xml  { render :xml => @scheduleruns }
     end
     
-  end
+  end   
+  private
+    def set_schedulerun
+       @schedulerun = Schedulerun.find(params[:id])
+    end
+   def schedulerun_params
+          params.require(:schedulerun).permit(:row_count_end,:row_count_start,:comment,:log_file,:status_flag,:end_time,:start_time,:schedule_id,:id)
+   end
 end

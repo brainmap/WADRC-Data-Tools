@@ -1,5 +1,8 @@
 # encoding: utf-8
-class LookupGendersController < ApplicationController
+class LookupGendersController < ApplicationController   
+  
+  before_action :set_lookup_gender, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /lookup_genders
   # GET /lookup_genders.xml
   def index
@@ -41,7 +44,7 @@ class LookupGendersController < ApplicationController
   # POST /lookup_genders
   # POST /lookup_genders.xml
   def create
-    @lookup_gender = LookupGender.new(params[:lookup_gender])
+    @lookup_gender = LookupGender.new(lookup_gender_params)#params[:lookup_gender])
 
     respond_to do |format|
       if @lookup_gender.save
@@ -60,7 +63,7 @@ class LookupGendersController < ApplicationController
     @lookup_gender = LookupGender.find(params[:id])
 
     respond_to do |format|
-      if @lookup_gender.update_attributes(params[:lookup_gender])
+      if @lookup_gender.update(lookup_gender_params)#params[:lookup_gender], :without_protection => true)
         format.html { redirect_to(@lookup_gender, :notice => 'Lookup gender was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -80,5 +83,12 @@ class LookupGendersController < ApplicationController
       format.html { redirect_to(lookup_genders_url) }
       format.xml  { head :ok }
     end
-  end
+  end 
+  private
+    def set_lookup_gender
+       @lookup_gender = LookupGender.find(params[:id])
+    end
+   def lookup_gender_params
+          params.require(:lookup_gender).permit(:updated_at,:created_at,:description,:id)
+   end
 end

@@ -24,7 +24,7 @@
     <td><%= lookup_scantask.set_id %></td>
     <td><%= link_to 'Show', lookup_scantask %></td>
     <td><%= link_to 'Edit', edit_lookup_scantask_path(lookup_scantask) %></td>
-    <td><%= link_to 'Destroy', lookup_scantask, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', lookup_scantask, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

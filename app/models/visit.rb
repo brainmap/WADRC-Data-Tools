@@ -8,16 +8,19 @@ class Visit < ActiveRecord::Base
 
     
   # default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
-  default_scope :order => 'date DESC' 
+  #default_scope :order => 'date DESC'   
+  default_scope { order(date: :desc) }
   
   validates_presence_of :date
   # Allow the DICOM UID to be blank for visits without Scans
   validates_uniqueness_of :dicom_study_uid, :case_sensitive => false, :unless => Proc.new {|visit| visit.dicom_study_uid.blank?}
   
   has_and_belongs_to_many :scan_procedures
-  has_many :image_datasets, :dependent => :destroy
+  has_many :image_datasets, :dependent => :destroy  
+  #### test added changed Image datasets is invalid error to Image datasets thumbnail Paperclip::Errors::NotIdentifiedByImageMagickError  
+  accepts_nested_attributes_for :image_datasets
   has_many :radiology_comments, :dependent => :destroy
-  
+  # rails 5 ?accepts_nested_attriubtes_for :image_datasets
  # belongs_to :appointment
  has_many :mriscantasks,:dependent => :destroy
   has_many :log_files
@@ -32,8 +35,11 @@ class Visit < ActiveRecord::Base
    validates_inclusion_of :conference, :in => PROGRESS_CHOICES
   
   has_many :enrollment_visit_memberships
-  has_many :enrollments, :through => :enrollment_visit_memberships, :uniq => true
+  # has_many :enrollments, :through => :enrollment_visit_memberships, :uniq => true  
+  # has_many :enrollments, -> { uniq }, :through => :enrollment_visit_memberships   
+   has_many :enrollments, -> { distinct }, :through => :enrollment_visit_memberships 
   accepts_nested_attributes_for :enrollments, :reject_if => :all_blank, :allow_destroy => true
+  ##  think preventing duplicate records 
   before_validation :lookup_enrollments
   
   # moved to vgroups
@@ -48,7 +54,8 @@ class Visit < ActiveRecord::Base
     { :conditions => { :scan_procedure_id => protocol_id } }
   }
   
-  scope :without_enrollments, where("id NOT IN (SELECT visit_id FROM enrollment_visit_memberships)")
+  #scope :without_enrollments, where("id NOT IN (SELECT visit_id FROM enrollment_visit_memberships)")   
+  scope :without_enrollments, lambda{where("id NOT IN (SELECT visit_id FROM enrollment_visit_memberships)") }
   
   paginates_per 50
   
@@ -106,7 +113,7 @@ class Visit < ActiveRecord::Base
   def self.create_or_update_from_metamri(v, created_by = nil)
     created_by ||= User.first
 puts "WWWWWWWWWWWW in create_or_update_from_metamri"    
-    sp = ScanProcedure.find_or_create_by_codename(v.scan_procedure_name)
+    sp = ScanProcedure.find_or_create_by(codename: v.scan_procedure_name)
     
     # Build an ActiveRecord Visit object using available attributes from metamri.
     # We need to handle Old Studies involving GE I-Files, which don't have any true UID
@@ -141,15 +148,23 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
          end
       end
     end
-
-    if visit_attrs[:dicom_study_uid]
-      visit = Visit.find_or_initialize_by_dicom_study_uid(visit_attrs)
+    if visit_attrs[:dicom_study_uid]        #==> in visit table/ from ids.dicom_hashtag
+      # deprteciated nope visit = Visit.find_or_initialize_by_dicom_study_uid(visit_attrs)
+        # nope visit = Visit.find_or_initialize_by(dicom_study_uid: visit_attrs)
+      visit = Visit.where(dicom_study_uid: visit_attrs[:dicom_study_uid]).first_or_initialize  
     else
-      visit = Visit.find_or_initialize_by_rmr(visit_attrs)
+      #visit = Visit.find_or_initialize_by_rmr(visit_attrs) 
+      visit = Visit.find_or_initialize_by(rmr: visit_attrs)   # not tested   - think is working 
     end
-    visit.attributes.merge!(visit_attrs)
-    visit.scan_procedures = [sp]
-
+    # CHECK IN DEV IF THIS IS WORKING - IS THIS WHERE visit.date comes from 
+    # what is visit_attrs
+    visit.date = visit_attrs[:date]  
+    visit.rmr = visit_attrs[:rmr]
+    visit.path = visit_attrs[:path]
+    visit.scan_number = visit_attrs[:scan_number]
+    visit.dicom_study_uid = visit_attrs[:dicom_study_uid]
+    #visit.attributes.merge!(visit_attrs) #### VISIT NOT GETTING values from visit_attrs==>no values   
+    visit.scan_procedures = [sp]  
     
     # We have to zip up the metamri datasets and the activerecord visit datasets
     # For each dataset in the VisitRawDataDirectory...
@@ -161,16 +176,19 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
         # Initialize Thumbnail (or nil)
         # Note: Using Metamri#RawImageDatasetThumbnail Directly
        metamri_attr_options = {}
-        begin
+        begin 
   puts "XXXXXXXX before RawImageDatasetThumbnail.new(dataset).thumbnail"
        v_path_tmp = RawImageDatasetThumbnail.new(dataset).thumbnail
-       puts "hhhh v_path_tmp ="+v_path_tmp
-#       v_image_tmp = File.open(v_path_tmp)
-          metamri_attr_options[:thumb] = File.open(v_path_tmp) #RawImageDatasetThumbnail.new(dataset).thumbnail)
+        puts "hhhh v_path_tmp ="+v_path_tmp
+#       v_image_tmp = File.open(v_path_tmp) 
+#      stopped error when removed ids has_attachment styles <Paperclip::Errors::NotIdentifiedByImageMagickError: Paperclip::Errors::NotIdentifiedByImageMagickError>
+  #### stopping to test -- if block ids ok, no thumbs    
+  metamri_attr_options[:thumb] = File.open(v_path_tmp) #RawImageDatasetThumbnail.new(dataset).thumbnail) 
   puts "ZZZZZZZZZZ after RawImageDatasetThumbnail.new(dataset).thumbnail"   # not sure where it fails after this
         rescue StandardError, ScriptError => e
           puts "WWWWWWWWW in rescue RawImageDatasetThumbnail.new(dataset).thumbnail"
           logger.debug e
+          puts "hhhhh"
         end
         # Test to see if this dataset already exists and grab it if so,
         # otherwise build it fresh. This fails if the image dataset exists but
@@ -185,22 +203,22 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
           data = ImageDataset.where(:dicom_series_uid => dataset.dicom_series_uid).first
         elsif dataset.pfile? or dataset.geifile?
           #data = ImageDataset.where(:path => dataset.directory, :scanned_file.matches => dataset.scanned_file).first
-
           data = ImageDataset.where("path in (?) and scanned_file in (?)", dataset.directory,  dataset.scanned_file).first
         else raise StandardError, "Could not identify type of dataset #{File.join(dataset.directory, datset.scanned_file)}"
         end
       
-        meta_attrs = dataset.attributes_for_active_record(metamri_attr_options)
-#puts "zzzzzzzz metamri_attr_options="+metamri_attr_options.to_s
-
+        meta_attrs = dataset.attributes_for_active_record(metamri_attr_options) 
         # If the ActiveRecord Visit (visit) has a dataset that already matches the metamri dataset (dataset) on dicom_series_uid, then use it and update its params.  Otherwise, build a new one.
         unless data.blank? # AKA data.kind_of? ImageDataset
-#puts "cccccccc meta_attrs="+meta_attrs.to_s
           logger.debug "updating dataset #{data.id} with new metamri attributes"
-          data.attributes.merge!(meta_attrs)
+          data.attributes.merge!(meta_attrs)  # DOES THIS WORK
           if data.valid?
-            visit.image_datasets << data
-          else
+            puts "ggggg data valid"
+            visit.image_datasets << data  
+            puts " after data into v.ids"
+            
+          else     
+            puts " ffff data not valid"
              data.errors.messages.values.each do |msg|
                 msg.each do |m|
                   puts m
@@ -211,7 +229,10 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
           end
         else
           logger.debug "building fresh visit. image_datasets.build(#{meta_attrs})"
-          visit.image_datasets.build(meta_attrs)
+          visit.image_datasets.build(meta_attrs)  
+          #visit.save
+          #visit.image_datasets.create(meta_attrs) # parent needs to be saved -- not saving visit unless ids work out
+          
           logger.debug(visit.image_datasets.last.errors.inspect) unless visit.image_datasets.last.valid?
         end
 
@@ -219,20 +240,23 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
         puts "Error building image_dataset. #{e}"
         raise e
       ensure
-        metamri_attr_options[:thumb].close if metamri_attr_options[:thumb].kind_of? File
+        #### not sure if needed metamri_attr_options[:thumb].close if metamri_attr_options[:thumb].kind_of? File
       end
     end
  
     visit.created_by = created_by
     # added 20120502 to make mri appointment and the vgroup
-    logger.debug "aaaaaaaaa before visit.appointment_id.blank?"
+    logger.debug "aaaaaaaaa before visit.appointment_id.blank?"  
     if visit.appointment_id.blank?
        appointment = Appointment.create
        appointment.appointment_type ='mri'
        appointment.appointment_date = visit.date
        vgroup = Vgroup.create
        vgroup.vgroup_date = visit.date
-       vgroup.rmr = visit.rmr
+       vgroup.rmr = visit.rmr 
+       if visit.path > ""
+          vgroup.transfer_mri = 'yes' 
+       end
        vgroup.save
        appointment.vgroup_id = vgroup.id
        appointment.save
@@ -245,11 +269,11 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
        appointment = Appointment.find(visit.appointment_id)
        vgroup = Vgroup.find(appointment.vgroup_id)
     end    
-    
     if visit.save
       puts "aaaaaaa saved visit"
     else
-      puts "bbbbbbb not saved visit"
+      puts "bbbbbbb not saved visit" 
+      puts visit.errors.full_messages
     end
     sql = "Delete from scan_procedures_vgroups where vgroup_id ="+vgroup.id.to_s
     connection = ActiveRecord::Base.connection();        
@@ -366,12 +390,14 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
     image_datasets.each do |dataset|
       if  dataset.dicom_taghash  
         tags = dataset.dicom_taghash      
-        if @age_info[:age].blank? and !tags['0010,1010'].blank? and tags['0010,1010'] != '0010,1010' and tags['0010,1010'][:value] != 'XX'
+        if @age_info[:age].blank? and !tags['0010,1010'].blank? and tags['0010,1010'] != '0010,1010' and tags['0010,1010'][:value] != 'XX' and tags['0010,1010'][:value] != '00/00/0000'
               @age_info[:age] = tags['0010,1010'][:value].blank? ? nil : tags['0010,1010'][:value].to_i  # age
          end
-         if @age_info[:dob].blank? and !tags['0010,0030'].blank? and tags['0010,0030'] != '0010,0030' and tags['0010,0030'][:value] != 'XX'
-             # getting XX
-             @age_info[:dob] = tags['0010,0030'][:value].blank? ? nil :  Date.strptime(tags['0010,0030'][:value],'%Y%m%d') 
+         if @age_info[:dob].blank? and !tags['0010,0030'].blank? and tags['0010,0030'] != '0010,0030' and tags['0010,0030'][:value] != 'XX' and tags['0010,1010'][:value] != '00/00/0000' 
+             # getting XX   
+            if tags['0010,0030'][:value] != "00/00/0000" and tags['0010,0030'][:value] != "XX"
+              @age_info[:dob] = tags['0010,0030'][:value].blank? ? nil :  Date.strptime(tags['0010,0030'][:value],'%Y%m%d')
+            end 
              # @age_info[:dob] = tags['0010,0030'][:value].blank? ? nil : begin DateTime.parse(tags['0010,0030'][:value]) rescue ArgumentError; nil end   
           end
       end
@@ -583,11 +609,13 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
   # for nested attributes, it will try to find the old record, but it will
   # only do so within the old scope. What we want is to replace the old
   # records with new ones.
-  def lookup_enrollments
+  def lookup_enrollments  
     enrollments_from_params = enrollments.dup
-    enrollments.clear
+    #enrollments.clear   
+    enrollments = []  #????
     enrollments_from_params.each do |enrollment_from_params|
-      enrollment = Enrollment.find_or_initialize_by_enumber(enrollment_from_params.enumber)
+      #enrollment = Enrollment.find_or_initialize_by_enumber(enrollment_from_params.enumber)    
+      enrollment = Enrollment.find_or_initialize_by(enumber: enrollment_from_params.enumber)
       unless enrollment.valid?
         errors.add(:enrollments, "Enrollment invalid for #{enrollment.enumber}")
         raise ActiveRecord::Rollback
@@ -604,7 +632,7 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
       else
         enrollments << enrollment        
       end
-      
+     
 
         
       # If there's not already an existing membership between these two, create one.

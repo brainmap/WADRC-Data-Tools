@@ -1,4 +1,6 @@
-class ConsentFormsController < ApplicationController
+class ConsentFormsController < ApplicationController     
+  before_action :set_consent_form, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /consent_forms
   # GET /consent_forms.json
   def index
@@ -41,7 +43,7 @@ class ConsentFormsController < ApplicationController
   # POST /consent_forms
   # POST /consent_forms.json
   def create
-    @consent_form = ConsentForm.new(params[:consent_form])
+    @consent_form = ConsentForm.new(consent_form_params)#params[:consent_form])
 
     respond_to do |format|
       if @consent_form.save
@@ -70,7 +72,7 @@ class ConsentFormsController < ApplicationController
     @consent_form = ConsentForm.find(params[:id])
 
     respond_to do |format|
-      if @consent_form.update_attributes(params[:consent_form])
+      if @consent_form.update(consent_form_params)#params[:consent_form], :without_protection => true)
        connection = ActiveRecord::Base.connection();
         # problem with not deleting enum vgr
         sql = "delete from consent_form_scan_procedures where consent_form_id ="+@consent_form.id.to_s
@@ -100,5 +102,12 @@ class ConsentFormsController < ApplicationController
       format.html { redirect_to consent_forms_url }
       format.json { head :no_content }
     end
-  end
+  end 
+  private
+    def set_consent_form
+       @consent_form = ConsentForm.find(params[:id])
+    end
+   def consent_form_params
+          params.require(:consent_form).permit(:status_flag,:description,:id)
+   end
 end

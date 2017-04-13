@@ -10,7 +10,7 @@
       <tr>
         <td><%=h cmnt.user.username %></td>
         <td><%= RedCloth.new(cmnt.comment.blank? ? "" : cmnt.comment).to_html.html_safe %></td>
-        <td><%= link_to('X', image_comment_path(cmnt), :method => :delete) if current_user == cmnt.user %></td>
+        <td><%= link_to 'X', cmnt, :method => :delete,data: {confirm: 'Are you sure?' } if current_user == cmnt.user %></td>
       </tr>
     <% end %>
   </tbody>

@@ -17,7 +17,7 @@
     <td><%= lookup_drugclass.description %></td>
     <td><%= link_to 'Show', lookup_drugclass %></td>
     <td><%= link_to 'Edit', edit_lookup_drugclass_path(lookup_drugclass) %></td>
-    <td><%= link_to 'Destroy', lookup_drugclass, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', lookup_drugclass, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

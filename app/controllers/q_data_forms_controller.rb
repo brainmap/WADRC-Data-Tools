@@ -41,7 +41,7 @@ class QDataFormsController < ApplicationController
   # POST /q_data_forms
   # POST /q_data_forms.xml
   def create
-    @q_data_form = QDataForm.new(params[:q_data_form])
+    @q_data_form = QDataForm.new(q_data_form_params)#params[:q_data_form])
 
     respond_to do |format|
       if @q_data_form.save
@@ -60,7 +60,7 @@ class QDataFormsController < ApplicationController
     @q_data_form = QDataForm.find(params[:id])
 
     respond_to do |format|
-      if @q_data_form.update_attributes(params[:q_data_form])
+      if @q_data_form.update(q_data_form_params)#params[:q_data_form], :without_protection => true)
         format.html { redirect_to(@q_data_form, :notice => 'Q data form was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -80,5 +80,12 @@ class QDataFormsController < ApplicationController
       format.html { redirect_to(q_data_forms_url) }
       format.xml  { head :ok }
     end
-  end
+  end   
+  private
+    def set_q_data_form
+       @q_data_form = QDataForm.find(params[:id])
+    end
+   def q_data_form_params
+          params.require(:q_data_form).permit(:id,:participant_id,:visit_id,:appointment_id,:scan_procedure_id,:enrollment_id,:user_id,:questionform_id)
+   end
 end

@@ -7,7 +7,17 @@ v_autodetect =  [["AutoDetect File On","On"],["AutoDetect File Off","Off"]]
 
 <!-- Directory path? -->
 <%= form_for(@petscan) do |f| %>
-  <%= f.error_messages %>
+<% if @petscan.errors.any? %>
+  <div id="error_explanation">
+    <h2><%= pluralize(@petscan.errors.count, "error") %> prohibited this petscan from being saved:</h2>
+
+    <ul>
+    <% @petscan.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
   <div class="three_col_left">
     <p>
       <%= f.label :date %><br />

@@ -1,6 +1,12 @@
 <% if @hide_page_flag == "Y" 
   else %>
-<%   @current_tab = "lumbarpunctures" %>
+<%   @current_tab = "lumbarpunctures" %> 
+<%   
+puts "AAAAAAAAA"
+puts current_user[:edit_low_scan_procedure_array].to_s  
+puts current_user[:view_low_scan_procedure_array].to_s 
+puts "CCCCCCCC"
+%>
 <%
 # assumming if user has edit on one protocol, can have button , exclude the -1 scan_procedures 
 # apply limit protocol  on create , edit in create form  
@@ -23,7 +29,8 @@ edit_count =   edit_count -1
 	<tr><td><%= f.label :scan_procedures %><br>
 	<div id="scan_procedure_list">
 	<ul>
-	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).load.sort_by(&:codename).each do |scan_procedure| %> 
+	
 		<li>
 			<%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'lp_search[scan_procedure_id][]' %>
 			<%= label_tag '', scan_procedure.codename %>
@@ -75,7 +82,7 @@ edit_count =   edit_count -1
   <%= f.submit "Search" %>
 <% end %>
 
-<%= link_to 'download csv', { :controller=>"lumbarpunctures", :action=>"lp_search", :lp_search =>  params[:lp_search] , :format => :csv} %>  </p>
+<%= link_to 'download csv', { :controller=>"lumbarpunctures", :action=>"lp_search", :lp_search =>  @lp_search_params.to_h , :format => :csv} %>  </p>
 
 <table class="tabular">  
   <caption><%= pluralize(@results_total.size, 'Lumbarpuncture appt') %></caption>

@@ -1,3 +1,3 @@
 <%= link_to '@', object %>
 <%= link_to '&', edit_polymorphic_path(object) %>
-<%= link_to 'X', object, :confirm => 'Are you sure?', :method => :delete %>
+<%= link_to 'X', object, :method => :delete , data: {confirm: 'Are you sure?'} %>

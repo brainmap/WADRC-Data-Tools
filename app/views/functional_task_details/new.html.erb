@@ -1,7 +1,17 @@
 <h1>New functional_task_detail</h1>
 
 <%= form_for(@functional_task_detail) do |f| %>
-  <%= f.error_messages %>
+ <% if @functional_task_detail.errors.any? %>
+   <div id="error_explanation">
+     <h2><%= pluralize(@functional_task_detail.errors.count, "error") %> prohibited this functional_task_detail from being saved:</h2>
+
+     <ul>
+     <% @functional_task_detail.errors.full_messages.each do |msg| %>
+       <li><%= msg %></li>
+     <% end %>
+     </ul>
+   </div>
+ <% end %>
 
   <p>
     <%= f.submit 'Create' %>

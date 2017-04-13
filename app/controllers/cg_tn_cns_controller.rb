@@ -3,7 +3,7 @@ class CgTnCnsController < ApplicationController
   # GET /cg_tn_cns
   # GET /cg_tn_cns.xml
   def index
-    @cg_tn_cns = CgTnCn.find(:all, :order =>"cg_tn_id,display_order")
+    @cg_tn_cns = CgTnCn.all.order("cg_tn_id DESC,display_order ASC")
     @cg_tns = CgTn.order("common_name")
 
     respond_to do |format|
@@ -58,7 +58,7 @@ class CgTnCnsController < ApplicationController
          @cg_tn_cn.save
       end
     end
-        @cg_tn_cns = CgTnCn.where("cg_tn_id = "+params[:id]).find(:all,:order=>"display_order")
+        @cg_tn_cns = CgTnCn.where("cg_tn_id = "+params[:id]).all.order("display_order ASC") #  find(:all,:order=>"display_order")
     respond_to do |format|
       format.html 
       format.xml  { head :ok }
@@ -71,7 +71,7 @@ class CgTnCnsController < ApplicationController
     if params[:cg_tn_cn][:display_order].blank?
       params[:cg_tn_cn][:display_order] = "0"
     end
-    @cg_tn_cn = CgTnCn.new(params[:cg_tn_cn])
+    @cg_tn_cn = CgTnCn.new(cg_tn_cn_params)#params[:cg_tn_cn])
     @load_next_column = ""
     if !params[:load_next_column].blank?
       @load_next_column = params[:load_next_column]
@@ -143,7 +143,7 @@ class CgTnCnsController < ApplicationController
       params[:cg_tn_cn][:display_order] = 0
     end
     respond_to do |format|
-      if @cg_tn_cn.update_attributes(params[:cg_tn_cn])
+      if @cg_tn_cn.update(cg_tn_cn_params)#params[:cg_tn_cn], :without_protection => true)
         if !@load_next_column.blank? and @load_next_column == "Y"
           # get the next column_name
           cg_tn = CgTn.find(params[:cg_tn_cn][:cg_tn_id]) 
@@ -203,5 +203,12 @@ class CgTnCnsController < ApplicationController
       format.html { redirect_to(cg_tn_cns_url) }
       format.xml  { head :ok }
     end
-  end
+  end    
+  private
+    def set_cg_tn_cn
+       @cg_tn_cn = CgTnCn.find(params[:id])
+    end
+   def cg_tn_cn_params
+          params.require(:cg_tn_cn).permit(:secondary_key_visitno_flag,:display_order,:created_at,:data_type,:ref_table_b,:ref_table_a,:key_column_flag,:export_name,:common_name,:cn,:cg_tn_id,:searchable_flag,:value_limits,:secondary_key_protocol_flag,:match_mri_path_flag,:hide_column_flag,:order_by_flag,:description,:q_data_form_id,:value_list,:condition_between_flag,:status_flag,:updated_at,:id)
+   end
 end

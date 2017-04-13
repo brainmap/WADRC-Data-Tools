@@ -67,7 +67,7 @@ v_tn_cn_searchable_hash = []
 <% if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?%>
 <tr><td align="center" colspan=2>
 	<%= form_tag '/cg_search.csv' do%><!--- switching to csv - leaving this xls unchanged -->
-	    <% v_link_to_elements = (link_to '/cg_search.xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
+	    <% v_link_to_elements = (link_to '/cg_search.xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  @cg_search_params.to_h , :format => :xls, :method => :post}) %>
 	    <%  v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
 	        v_link_to_elements = v_link_to_elements.gsub(/&amp;method=post">download xls<\/a>/,'')
 	            # trying to trim the empty &'s
@@ -111,7 +111,7 @@ v_tn_cn_searchable_hash = []
 	<tr><td><%= f.label :scan_procedures %><br>
 	<div id="scan_procedure_list">
 	<ul>
-	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).sort_by(&:codename).each do |scan_procedure| %>
 		<li>
 			<%#= f.fields_for scan_procedure do |scan_fields| %>
 				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
@@ -463,7 +463,7 @@ v_tn_cn_searchable_hash = []
 </table>
 <% if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?%>
 <%= form_tag '/cg_search.csv' do%><!--- switching to csv - leaving rest xls unchanged -->
-    <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
+    <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  @cg_search_params.to_h , :format => :xls, :method => :post}) %>
     <%   v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
              v_link_to_elements = v_link_to_elements.gsub(/&amp;method=post">download xls<\/a>/,'')
             # trying to trim the empty &'s
@@ -498,7 +498,7 @@ v_tn_cn_searchable_hash = []
 <% end %>
 
 <%= form_tag '/cg_search.csv' do%><!--- switching to csv - leaving this xls unchanged -->
-    <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
+    <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  @cg_search_params.to_h , :format => :xls, :method => :post}) %>
     <%= hidden_field_tag 'longitudinal','Y' %>
     <%   v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
              v_link_to_elements = v_link_to_elements.gsub(/&amp;method=post">download xls<\/a>/,'')
@@ -538,7 +538,7 @@ v_tn_cn_searchable_hash = []
 
 <% if !params[:cg_search].blank? and !params[:cg_search][:series_description_type_id].blank? %>
  <%= form_tag '/cg_search.csv' do%><!--- switching to csv - leaving this xls unchanged -->
-    <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  params[:cg_search] , :format => :xls, :method => :post}) %>
+    <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  @cg_search_params.to_h , :format => :xls, :method => :post}) %>
     <%  v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
         v_link_to_elements = v_link_to_elements.gsub(/&amp;method=post">download xls<\/a>/,'')
         v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'') 

@@ -1,4 +1,6 @@
-class TractiontypesController < ApplicationController
+class TractiontypesController < ApplicationController  
+  before_action :set_tractiontype, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /tractiontypes
   # GET /tractiontypes.json
   def index
@@ -40,7 +42,7 @@ class TractiontypesController < ApplicationController
   # POST /tractiontypes
   # POST /tractiontypes.json
   def create
-    @tractiontype = Tractiontype.new(params[:tractiontype])
+    @tractiontype = Tractiontype.new(tractiontype_params)#params[:tractiontype])
 
     respond_to do |format|
       if @tractiontype.save
@@ -59,7 +61,7 @@ class TractiontypesController < ApplicationController
     @tractiontype = Tractiontype.find(params[:id])
 
     respond_to do |format|
-      if @tractiontype.update_attributes(params[:tractiontype])
+      if @tractiontype.update(tractiontype_params)#params[:tractiontype], :without_protection => true)
         format.html { redirect_to @tractiontype, notice: 'Tractiontype was successfully updated.' }
         format.json { head :no_content }
       else
@@ -79,5 +81,12 @@ class TractiontypesController < ApplicationController
       format.html { redirect_to tractiontypes_url }
       format.json { head :no_content }
     end
-  end
+  end  
+  private
+    def set_tractiontype
+       @tractiontype = Tractiontype.find(params[:id])
+    end
+   def tractiontype_params
+          params.require(:tractiontype).permit(:form_default_value,:form_required_y_n_1,:form_js,:values_1,:ref_table_a_1,:ref_table_b_1,:triggers_1,:created_at,:updated_at,:display_search_flag,:prompt,:form_col_span,:form_display_field_type,:form_display_label,:id,:trtype_id,:description,:status_flag,:display_order,:display_in_summary,:display_column_header_1,:display_summary_column_header_1,:summary_peek_flag,:export_column_header_1,:form_display_order)
+   end
 end

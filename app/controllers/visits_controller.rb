@@ -1,23 +1,26 @@
 # encoding: utf-8
 require "base64"
-require 'csv'
+require 'csv'   
+
+
 class VisitsController <  AuthorizedController #  ApplicationController
 
     load_resource
     load_and_authorize_resource  :only => [ :show, :edit, :update]  #-- causes problems with the searches, but seems to be needed for the edit, show
-
+    before_action :set_visit, only: [:show, :edit, :update, :destroy]   
+    respond_to :html
     
     # to get the ussr scan_procedure array in
     # added in below by find
   
-    before_filter :set_current_tab
+    before_action :set_current_tab
     
 
   # GET /visits
   # GET /visits.xml  
   def index
 
-     scan_procedure_array =current_user[:view_low_scan_procedure_array]
+     scan_procedure_array =current_user[:view_low_scan_procedure_array].gsub("[","").gsub("]","").split(",")
            hide_date_flag_array = []
       hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
       @hide_page_flag = 'N'
@@ -76,7 +79,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # GET /visits/:scope
   def index_by_scope   # probably not being used
 
-    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    scan_procedure_array =current_user[:view_low_scan_procedure_array].gsub("[","").gsub("]","").split(",")
     @search = Visit.send(params[:scope]).search(params[:search])      # should this be instance_eval 
     @visits = @search.relation.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
     @collection_title = "All #{params[:scope].to_s.gsub('_',' ')} MRI appts"
@@ -90,7 +93,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # GET /visits/assigned_to/:user_login
   def index_by_user_id
 
-    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    scan_procedure_array =current_user[:view_low_scan_procedure_array].gsub("[","").gsub("]","").split(",")
     
     @user = User.find(params[:user_login])
     @search = Visit.assigned_to(@user.id).search
@@ -109,7 +112,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
   def index_by_scan_procedure  
 
 
-    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    scan_procedure_array =current_user[:view_low_scan_procedure_array].gsub("[","").gsub("]","").split(",")
     # sp = ScanProcedure.find_by_id(params[:scan_procedure_id])
     if !params[:search].blank? && !params[:search][:meta_sort].blank?
       @search = Visit.unscoped.includes(:scan_procedures).where(:scan_procedures => {:id => params[:scan_procedure_id]}).search(params[:search])
@@ -128,7 +131,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # GET /visits/by_month
   def by_month
 
-    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    scan_procedure_array =current_user[:view_low_scan_procedure_array].gsub("[","").gsub("]","").split(",")
     @visits = Visit.relation.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).all
     @title = "Visits by month"
     @collection_title = "MRI appts by month"
@@ -140,7 +143,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
   # GET /visits/found
   def found
 
-    scan_procedure_array =current_user[:view_low_scan_procedure_array]   
+    scan_procedure_array =current_user[:view_low_scan_procedure_array].gsub("[","").gsub("]","").split(",")   
     @visits = Visit.find_by_search_params(params['visit_search']).where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).page(params[:page])
     @collection_title = "Found MRI appts"
     @visit_search = params['visit_search']
@@ -163,7 +166,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
   
   # GET /visits/find
   def find
-    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+    scan_procedure_array =current_user[:view_low_scan_procedure_array].gsub("[","").gsub("]","").split(",") 
           hide_date_flag_array = []
       hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
       @hide_page_flag = 'N'
@@ -175,8 +178,8 @@ class VisitsController <  AuthorizedController #  ApplicationController
 
   # GET /visits/1
   # GET /visits/1.xml
-  def show
-    scan_procedure_array =current_user[:view_low_scan_procedure_array]
+  def show   
+    scan_procedure_array =current_user[:view_low_scan_procedure_array].gsub("[","").gsub("]","").split(",")
           hide_date_flag_array = []
       hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
       @hide_page_flag = 'N'
@@ -186,7 +189,7 @@ class VisitsController <  AuthorizedController #  ApplicationController
   
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find_by_id(params[:id])
     # Grab the visits within 1 month +- visit date for "previous" and "back" hack.
-    @visits = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).where(:date => @visit.date-1.month..@visit.date+1.month).all
+    @visits = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).where(:date => @visit.date-1.month..@visit.date+1.month).to_a
     # might be giving errors if user not have perms on some of visits????
     idx = @visits.index(@visit)
     @older_visit = idx + 1 >= @visits.size ? nil : @visits[idx + 1]
@@ -272,8 +275,9 @@ def series_desc_cnt(p_start_id="",p_end_id="")  ### ??? duplicate in visit model
 end
 
   # GET /visits/1/edit
-  def edit
-    scan_procedure_array =current_user[:edit_low_scan_procedure_array ]
+  def edit       
+    # its coming thru as [#, #, #]  
+    scan_procedure_array =current_user[:edit_low_scan_procedure_array ].gsub("[","").gsub("]","").split(", ")
           hide_date_flag_array = []
       hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
       @hide_page_flag = 'N'
@@ -292,16 +296,20 @@ end
 
   # POST /visits
   # POST /visits.xml
-  def create
+  def create    
+    scan_procedure_array =current_user[:edit_low_scan_procedure_array].gsub("[","").gsub("]","").split(",")
+        v_offset = Time.zone_offset('CST') 
+        v_offset = (v_offset*(-1))/(60*60) # mess with storing date as local in db - but shifting to utc
             params[:date][:mristartt][0]="1899"
              params[:date][:mristartt][1]="12"
              params[:date][:mristartt][2]="30"       
              mristarttime = nil
             if !params[:date][:mristartt][0].blank? && !params[:date][:mristartt][1].blank? && !params[:date][:mristartt][2].blank? && !params[:date][:mristartt][3].blank? && !params[:date][:mristartt][4].blank?
-        mristarttime =  params[:date][:mristartt][0]+"-"+params[:date][:mristartt][1]+"-"+params[:date][:mristartt][2]+" "+params[:date][:mristartt][3]+":"+params[:date][:mristartt][4]
-             params[:visit][:mristarttime] = mristarttime
              params[:visit][:mristarttime_hour] = params[:date][:mristartt][3]
-             params[:visit][:mristarttime_minute] =params[:date][:mristartt][4]
+             params[:visit][:mristarttime_minute] =params[:date][:mristartt][4]   
+             params[:date][:mristartt][3] = ((params[:date][:mristartt][3].to_i)+v_offset).to_s 
+             mristarttime =  params[:date][:mristartt][0]+"-"+params[:date][:mristartt][1]+"-"+params[:date][:mristartt][2]+" "+params[:date][:mristartt][3]+":"+params[:date][:mristartt][4]
+             params[:visit][:mristarttime] =  DateTime.strptime(mristarttime, "%Y-%m-%d %H:%M") #mristarttime
             end
 
          params[:date][:mriendt][0]="1899"
@@ -309,12 +317,13 @@ end
          params[:date][:mriendt][2]="30"       
           mriendtime = nil
         if !params[:date][:mriendt][0].blank? && !params[:date][:mriendt][1].blank? && !params[:date][:mriendt][2].blank? && !params[:date][:mriendt][3].blank? && !params[:date][:mriendt][4].blank?
-    mriendtime =  params[:date][:mriendt][0]+"-"+params[:date][:mriendt][1]+"-"+params[:date][:mriendt][2]+" "+params[:date][:mriendt][3]+":"+params[:date][:mriendt][4]
-         params[:visit][:mriendtime] = mriendtime
-         params[:visit][:mriendtime_hour] = params[:date][:mriendt][3]
-        params[:visit][:mriendtime_minute] =params[:date][:mriendt][4]
+        params[:visit][:mriendtime_hour] = params[:date][:mriendt][3]
+        params[:visit][:mriendtime_minute] =params[:date][:mriendt][4]    
+        params[:date][:mriendt][3] = ((params[:date][:mriendt][3].to_i)+v_offset).to_s 
+        mriendtime =  params[:date][:mriendt][0]+"-"+params[:date][:mriendt][1]+"-"+params[:date][:mriendt][2]+" "+params[:date][:mriendt][3]+":"+params[:date][:mriendt][4]
+        params[:visit][:mriendtime] =  DateTime.strptime(mriendtime, "%Y-%m-%d %H:%M") #mriendtime
         end
-    @visit = Visit.new(params[:visit])
+    @visit = Visit.new( visit_params)#params[:visit])
     @visit.user = current_user
     if @visit.appointment_id.blank?
        @appointment = Appointment.create
@@ -344,7 +353,8 @@ end
        @vital.appointment_id = @appointment.id
        @vital.save
        @visit.appointment_id = @appointment.id
-    end
+    end   
+     
     
     
     respond_to do |format|
@@ -366,7 +376,68 @@ end
             connection = ActiveRecord::Base.connection();        
             results = connection.execute(sql)        
           end
-=end          
+=end         
+        connection = ActiveRecord::Base.connection();         
+     # 3.2 to 4.0 enrollment_attributes not working - doing it by hand -- arrg!!
+        v_cnt_enumber = 0
+        enumber_array = []
+        v_vgroup_id =  @vgroup.id 
+        params[:visit][:enrollments_attributes].each do|cnt, value| 
+          if !params[:visit][:enrollments_attributes][cnt][:id].blank? 
+             #enumberpipr00042id2203_destroy1   ????
+             enrollment_id = params[:visit][:enrollments_attributes][cnt][:id] #  (value.to_s)[(value.to_s).index("id")+2,(value.to_s).index("_destroy")]
+             v_destroy = params[:visit][:enrollments_attributes][cnt][:_destroy] #(value.to_s)[(value.to_s).index("_destroy")+8,(value.to_s).length]
+             if v_destroy.to_s == "1"
+                enrollment_id = enrollment_id.sub("_destroy1","")  #???
+                sql = "Delete from enrollment_vgroup_memberships where vgroup_id ="+v_vgroup_id.to_s+" and enrollment_id ="+params[:visit][:enrollments_attributes][cnt][:id]
+                results = connection.execute(sql)  
+                sql = "Delete from enrollment_visit_memberships where visit_id ="+@visit.id.to_s+" and enrollment_id ="+params[:visit][:enrollments_attributes][cnt][:id]
+                results = connection.execute(sql)
+                params[:visit][:enrollments_attributes][cnt] = nil
+                #v_destroy = 0
+             else
+                    #enumber_array << params[:visit][:enrollments_attributes][cnt.to_s][:enumber]
+                v_enrollments = Enrollment.where("enumber in (?)",params[:visit][:enrollments_attributes][cnt][:enumber] )
+                if !v_enrollments.nil? and !v_enrollments[0].nil? 
+                   if !@vgroup.participant_id.blank? and v_enrollments[0].participant_id.blank?
+                       v_enrollments[0].participant_id =  @vgroup.participant_id
+                       v_enrollments[0].save
+                    end
+                   enumber_array.push(v_enrollments[0])
+                end
+             end 
+          else 
+             if(!params[:visit][:enrollments_attributes][cnt].blank? and  !params[:visit][:enrollments_attributes][cnt][:enumber].blank?) 
+                v_enrollments = Enrollment.where("enumber in (?)",params[:visit][:enrollments_attributes][cnt][:enumber] ) 
+                v_enrollment_id = nil
+                if !v_enrollments.nil? and !v_enrollments[0].nil?
+                   v_enrollment_id = v_enrollments[0].id 
+                   if !@vgroup.participant_id.blank? and v_enrollments[0].participant_id.blank?
+                       v_enrollments[0].participant_id =  @vgroup.participant_id
+                       v_enrollments[0].save
+                    end
+                   enumber_array.push(v_enrollments[0])
+                else
+                   v_enrollment = Enrollment.new
+                   v_enrollment.enumber =  params[:visit][:enrollments_attributes][cnt][:enumber]
+                   if !@vgroup.participant_id.blank?
+                      v_enrollment.participant_id =  @vgroup.participant_id
+                   end 
+                   v_enrollment.save 
+                   v_enrollment_id = v_enrollment.id 
+                   enumber_array.push(v_enrollment)
+                end  
+                #@visit.enrollments <<  v_enrollment 
+                sql = "Insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id)values("+v_vgroup_id.to_s+","+v_enrollment_id.to_s+")"   
+                results = connection.execute(sql)  
+                sql = "Insert into enrollment_visit_memberships(visit_id,enrollment_id)values("+@visit.id.to_s+","+v_enrollment_id.to_s+")"
+                results = connection.execute(sql) 
+             end
+          end
+          v_cnt_enumber = v_cnt_enumber + 1 
+        end # enrollments_attributes loop
+        @enumbers =  enumber_array# @visit.enrollments
+       # also want to set participant in vgroup
         flash[:notice] = 'MRI appt was successfully created.'
         format.html { redirect_to(@visit) }
         format.xml  { render :xml => @visit, :status => :created, :location => @visit }
@@ -381,9 +452,11 @@ end
 
   # PUT /visits/1
   # PUT /visits/1.xml
-  def update
-     scan_procedure_array =current_user[:edit_low_scan_procedure_array] 
-           hide_date_flag_array = []
+  def update   
+    v_offset = Time.zone_offset('CST') 
+    v_offset = (v_offset*(-1))/(60*60) # mess with storing date as local in db - but shifting to utc
+     scan_procedure_array =current_user[:edit_low_scan_procedure_array].gsub("[","").gsub("]","").split(",") 
+      hide_date_flag_array = []
       hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
       @hide_page_flag = 'N'
       if hide_date_flag_array.count > 0
@@ -397,10 +470,11 @@ end
              params[:date][:mristartt][2]="30"       
              mristarttime = nil
             if !params[:date][:mristartt][0].blank? && !params[:date][:mristartt][1].blank? && !params[:date][:mristartt][2].blank? && !params[:date][:mristartt][3].blank? && !params[:date][:mristartt][4].blank?
-        mristarttime =  params[:date][:mristartt][0]+"-"+params[:date][:mristartt][1]+"-"+params[:date][:mristartt][2]+" "+params[:date][:mristartt][3]+":"+params[:date][:mristartt][4]
-             params[:visit][:mristarttime] = mristarttime
              params[:visit][:mristarttime_hour] = params[:date][:mristartt][3]
-             params[:visit][:mristarttime_minute] =params[:date][:mristartt][4]
+             params[:visit][:mristarttime_minute] =params[:date][:mristartt][4]  
+             params[:date][:mristartt][3] = ((params[:date][:mristartt][3].to_i)+v_offset).to_s
+             mristarttime =  params[:date][:mristartt][0]+"-"+params[:date][:mristartt][1]+"-"+params[:date][:mristartt][2]+" "+params[:date][:mristartt][3]+":"+params[:date][:mristartt][4]
+             params[:visit][:mristarttime] = DateTime.strptime(mristarttime, "%Y-%m-%d %H:%M")  #mristarttime  
             end
 
          params[:date][:mriendt][0]="1899"
@@ -408,14 +482,17 @@ end
          params[:date][:mriendt][2]="30"       
           mriendtime = nil
         if !params[:date][:mriendt][0].blank? && !params[:date][:mriendt][1].blank? && !params[:date][:mriendt][2].blank? && !params[:date][:mriendt][3].blank? && !params[:date][:mriendt][4].blank?
-    mriendtime =  params[:date][:mriendt][0]+"-"+params[:date][:mriendt][1]+"-"+params[:date][:mriendt][2]+" "+params[:date][:mriendt][3]+":"+params[:date][:mriendt][4]
-         params[:visit][:mriendtime] = mriendtime
+
          params[:visit][:mriendtime_hour] = params[:date][:mriendt][3]
-        params[:visit][:mriendtime_minute] =params[:date][:mriendt][4]
+        params[:visit][:mriendtime_minute] =params[:date][:mriendt][4]   
+        params[:date][:mriendt][3] = ((params[:date][:mriendt][3].to_i)+v_offset).to_s
+        mriendtime =  params[:date][:mriendt][0]+"-"+params[:date][:mriendt][1]+"-"+params[:date][:mriendt][2]+" "+params[:date][:mriendt][3]+":"+params[:date][:mriendt][4]
+        params[:visit][:mriendtime] = DateTime.strptime(mriendtime , "%Y-%m-%d %H:%M") #mriendtime  
+        
         end
 
     # hiding the protocols in checkbox which user not have access to, if any add in to attributes before update
-    @scan_procedures = ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_visits where visit_id = "+params[:id]+" and scan_procedure_id not in (?))",  scan_procedure_array ).all
+    @scan_procedures = ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_visits where visit_id = "+params[:id]+" and scan_procedure_id not in (?))",  scan_procedure_array ).to_a
     if @scan_procedures.count > 0
        scan_procedure_array = []
        @scan_procedures.each do |p2|
@@ -423,10 +500,67 @@ end
        end    
        params[:visit][:scan_procedure_ids] = params[:visit][:scan_procedure_ids] | scan_procedure_array   
     end
-     # HTML Checkbox Hack to remove all if none were checked.
-    attributes = {'scan_procedure_ids' => []}.merge(params[:visit] || {} )
+     # HTML Checkbox Hack to remove all if none were checked. 
+     # this is doing a to_hash??? DEPRECATED in rails 5.1
+    attributes = {'scan_procedure_ids' => []}.merge(params[:visit] || {} )  
+    connection = ActiveRecord::Base.connection();         
+    # 3.2 to 4.0 enrollment_attributes not working - doing it by hand -- arrg!!
+    v_cnt_enumber = 0
+    enumber_array = []
     
-    @enumbers = @visit.enrollments
+    @appointment = Appointment.find(@visit.appointment_id)
+    v_vgroup_id =  @appointment.vgroup_id 
+    params[:visit][:enrollments_attributes].each do|cnt, value| 
+      puts "gggg enrollment_attributes="+cnt.to_s
+
+      if !params[:visit][:enrollments_attributes][cnt][:id].blank? 
+        puts " id= "+params[:visit][:enrollments_attributes][cnt][:id]
+        puts " enumber = "+params[:visit][:enrollments_attributes][cnt][:enumber]
+        puts " _destroy ="+params[:visit][:enrollments_attributes][cnt][:_destroy]
+         #enumberpipr00042id2203_destroy1
+         enrollment_id = params[:visit][:enrollments_attributes][cnt][:id] #  (value.to_s)[(value.to_s).index("id")+2,(value.to_s).index("_destroy")]
+         v_destroy = params[:visit][:enrollments_attributes][cnt][:_destroy] #(value.to_s)[(value.to_s).index("_destroy")+8,(value.to_s).length]
+         if v_destroy.to_s == "1"
+             enrollment_id = enrollment_id.sub("_destroy1","")
+             sql = "Delete from enrollment_vgroup_memberships where vgroup_id ="+v_vgroup_id.to_s+" and enrollment_id ="+params[:visit][:enrollments_attributes][cnt][:id]
+             results = connection.execute(sql)  
+             sql = "Delete from enrollment_visit_memberships where visit_id ="+@visit.id.to_s+" and enrollment_id ="+params[:visit][:enrollments_attributes][cnt][:id]
+             results = connection.execute(sql)
+             params[:visit][:enrollments_attributes][cnt] = nil
+             #v_destroy = 0
+         else
+           #enumber_array << params[:visit][:enrollments_attributes][cnt.to_s][:enumber]
+           v_enrollments = Enrollment.where("enumber in (?)",params[:visit][:enrollments_attributes][cnt][:enumber] )
+           if !v_enrollments.nil? and !v_enrollments[0].nil?
+              enumber_array.push(v_enrollments[0])
+           end
+         end 
+      else 
+          if(!params[:visit][:enrollments_attributes][cnt].blank? and  !params[:visit][:enrollments_attributes][cnt][:enumber].blank?) 
+             v_enrollments = Enrollment.where("enumber in (?)",params[:visit][:enrollments_attributes][cnt][:enumber] ) 
+             v_enrollment_id = nil
+             if !v_enrollments.nil? and !v_enrollments[0].nil?
+                v_enrollment_id = v_enrollments[0].id 
+                enumber_array.push(v_enrollments[0])
+             else
+                v_enrollment = Enrollment.new
+                v_enrollment.enumber =  params[:visit][:enrollments_attributes][cnt][:enumber] 
+                v_enrollment.save 
+                v_enrollment_id = v_enrollment.id 
+                enumber_array.push(v_enrollment)
+             end  
+             #@visit.enrollments <<  v_enrollment 
+             sql = "Insert into enrollment_vgroup_memberships(vgroup_id,enrollment_id)values("+v_vgroup_id.to_s+","+v_enrollment_id.to_s+")"   
+             results = connection.execute(sql)  
+             sql = "Insert into enrollment_visit_memberships(visit_id,enrollment_id)values("+@visit.id.to_s+","+v_enrollment_id.to_s+")"
+             results = connection.execute(sql) 
+          end
+      end
+      v_cnt_enumber = v_cnt_enumber + 1 
+     end # enrollments_attributes loop  
+
+    
+    @enumbers =  enumber_array# @visit.enrollments
     # also want to set participant in vgroup
     set_participant_in_enrollment(@visit.rmr, @enumbers)
    if params[:pulse].blank?  
@@ -475,7 +609,7 @@ end
                  !params[:mriscantask][:imagedataset][:destroy][params[:mriscantask][:image_dataset_id][mri_id]].blank?
            params[:mriscantask][:imagedataset][:destroy][params[:mriscantask][:image_dataset_id][mri_id]].each do |ids_comment|
 puts "DELETE COMMENT "+ids_comment.to_s
-              @image_comment = ImageComment.where("image_comments.image_dataset_id in (?) ",params[:mriscantask][:image_dataset_id][mri_id]).find(ids_comment[0])
+              @image_comment = ImageComment.where("image_comments.image_dataset_id in (?) ",params[:mriscantask][:image_dataset_id][mri_id]).find(ids_comment)
               @image_comment.destroy
            end
       end 
@@ -634,7 +768,7 @@ puts "DELETE COMMENT "+ids_comment.to_s
     end
             
     respond_to do |format|
-      if @visit.update_attributes(attributes)
+      if @visit.update(visit_params) # params[:visit_attributes]) #, :without_protection => true)  #visit_params) #   
         if !delete_scantask_array.blank?
           delete_scantask_array.each do |mri_id|
              @mriscantask = Mriscantask.find(mri_id.to_i)
@@ -901,7 +1035,7 @@ AND p.id in ("+@vgroup.participant_id.to_s+")"
   
   
   
-  def visit_search
+  def visit_search   # OLD, replaced by mri_search
     # possible params -- visits fields just get added as AND statements
     #   other table fields should be grouped into one lower level IN select 
     # scan_procedures_visits.scan_procedures_id
@@ -1099,7 +1233,9 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
 
   def mri_search
       # make @conditions from search form input, access control in application controller run_search
-
+      if(!params["mri_search"].blank?) 
+        @mri_search_params  = mri_search_params() 
+      end
           hide_date_flag_array = []
       hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
       @hide_page_flag = 'N'
@@ -1112,10 +1248,10 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
 
       if params[:mri_search].nil?
            params[:mri_search] =Hash.new
-           params[:mri_search][:mri_status] = "yes"  
+           params[:mri_search][:mri_status] = "yes"
       end
 
-      if !params[:mri_search][:scan_procedure_id].blank?
+      if !params[:mri_search].blank? and !params[:mri_search][:scan_procedure_id].blank?
          condition =" visits.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                                 appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                                 and scan_procedure_id in ("+params[:mri_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
@@ -1124,7 +1260,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
          params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
       end
       
-      if !params[:mri_search][:series_description].blank?
+      if !params[:mri_search].blank? and !params[:mri_search][:series_description].blank?
          var = "%"+params[:mri_search][:series_description].downcase+"%"
          condition ="  visits.id in (select image_datasets.visit_id from image_datasets
           where lower(image_datasets.series_description) like '"+var.gsub(/[;:'"()=<>]/, '')+"' )"
@@ -1132,7 +1268,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
           params["search_criteria"] = params["search_criteria"] +", Series description "+params[:mri_search][:series_description]
       end      
 
-      if !params[:mri_search][:enumber].blank?
+      if !params[:mri_search].blank? and !params[:mri_search][:enumber].blank?
         if params[:mri_search][:enumber].include?(',') # string of enumbers
          v_enumber =  params[:mri_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
          v_enumber = v_enumber.gsub(/,/,"','")
@@ -1148,14 +1284,14 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
           params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:mri_search][:enumber]
       end      
 
-      if !params[:mri_search][:rmr].blank? 
+      if !params[:mri_search].blank? and !params[:mri_search][:rmr].blank? 
           condition =" visits.appointment_id in (select appointments.id from appointments,vgroups
                     where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:mri_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
           @conditions.push(condition)           
           params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:mri_search][:rmr]
       end   
 
-      if !params[:mri_search][:mri_status].blank? 
+      if !params[:mri_search].blank? and !params[:mri_search][:mri_status].blank? 
           condition =" visits.appointment_id in (select appointments.id from appointments,vgroups
                               where appointments.vgroup_id = vgroups.id and  lower(vgroups.transfer_mri) in (lower('"+params[:mri_search][:mri_status].gsub(/[;:'"()=<>]/, '')+"')   ))"
           @conditions.push(condition)
@@ -1164,12 +1300,12 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
       #  build expected date format --- between, >, < 
       v_date_latest =""
       #want all three date parts
-      if !params[:mri_search]["#{'latest_timestamp'}(1i)"].blank? && !params[:mri_search]["#{'latest_timestamp'}(2i)"].blank? && !params[:mri_search]["#{'latest_timestamp'}(3i)"].blank?
+      if !params[:mri_search].blank? and !params[:mri_search]["#{'latest_timestamp'}(1i)"].blank? && !params[:mri_search]["#{'latest_timestamp'}(2i)"].blank? && !params[:mri_search]["#{'latest_timestamp'}(3i)"].blank?
            v_date_latest = params[:mri_search]["#{'latest_timestamp'}(1i)"] +"-"+params[:mri_search]["#{'latest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:mri_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
       end
       v_date_earliest =""
       #want all three date parts
-      if !params[:mri_search]["#{'earliest_timestamp'}(1i)"].blank? && !params[:mri_search]["#{'earliest_timestamp'}(2i)"].blank? && !params[:mri_search]["#{'earliest_timestamp'}(3i)"].blank?
+      if !params[:mri_search].blank? and !params[:mri_search]["#{'earliest_timestamp'}(1i)"].blank? && !params[:mri_search]["#{'earliest_timestamp'}(2i)"].blank? && !params[:mri_search]["#{'earliest_timestamp'}(3i)"].blank?
             v_date_earliest = params[:mri_search]["#{'earliest_timestamp'}(1i)"] +"-"+params[:mri_search]["#{'earliest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:mri_search]["#{'earliest_timestamp'}(3i)"].rjust(2,"0")
        end
       v_date_latest = v_date_latest.gsub(/[;:'"()=<>]/, '')
@@ -1188,7 +1324,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
          params["search_criteria"] = params["search_criteria"] +",  visit date after "+v_date_earliest
        end
 
-       if !params[:mri_search][:gender].blank?
+       if !params[:mri_search].blank? and !params[:mri_search][:gender].blank?
           condition ="  visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
            where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
            and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
@@ -1201,7 +1337,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
            end
        end   
 
-       if !params[:mri_search][:min_age].blank? && params[:mri_search][:max_age].blank?
+       if !params[:mri_search].blank? and !params[:mri_search][:min_age].blank? && params[:mri_search][:max_age].blank?
            condition ="   visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
@@ -1209,7 +1345,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
                            and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:mri_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
             @conditions.push(condition)
            params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:mri_search][:min_age]
-       elsif params[:mri_search][:min_age].blank? && !params[:mri_search][:max_age].blank?
+       elsif !params[:mri_search].blank? and params[:mri_search][:min_age].blank? && !params[:mri_search][:max_age].blank?
             condition ="   visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
                                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                             and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
@@ -1217,7 +1353,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
                         and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:mri_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
            @conditions.push(condition)
            params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:mri_search][:max_age]
-       elsif !params[:mri_search][:min_age].blank? && !params[:mri_search][:max_age].blank?
+       elsif !params[:mri_search].blank? and !params[:mri_search][:min_age].blank? && !params[:mri_search][:max_age].blank?
           condition ="    visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
                              where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                           and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
@@ -1234,7 +1370,9 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
        end
        @html_request ="Y"
        # adjust columns and fields for html vs xls, adjust for radiology comments
-      request_format = request.formats.to_s
+      #request_format = request.formats.to_s 
+      v_request_format_array = request.formats
+       request_format = v_request_format_array[0]
       if v_include_radiology_comments == "1"
           case  request_format
             when "[text/html]","text/html" then
@@ -1310,6 +1448,16 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
   
   def set_current_tab
     @current_tab = "visits"
-  end
+  end  
+  
+    def set_visit
+       @visit = Visit.find(params[:id])
+    end
+   def visit_params
+          params.require(:visit).permit(:buttonbox,:goggles,:mriendtime,:mristarttime,:mritech,:appointment_id,:temp_fkMRIscanid,:vgroup_id,:completedmrifast,:archivedvd,:mriendtime_minute,:mriendtime_hour,:mristarttime_minute,:mristarttime_hour,:mri_coil_name,:use_as_default_mri_flag,:mrifasttotaltime_min,:mrifasttotaltime,:compiled_at,:dicom_study_uid,:created_by_id,:transfer_mri_moved_to_vgroups,:notes,:radiology_outcome,:rmr,:initials,:scan_number,:date,:id,:transfer_pet_moved_to_vgroups,:conference,:scanner_source,:consent_form_type,:research_diagnosis,:radiology_note,:path,:user_id,:dicom_dvd,:compile_folder_moved_to_vgroups, :enrollments_attributes, scan_procedure_ids: []) # [:_destroy,:enumber,:id])
+   end   
+   def mri_search_params
+          params.require(:mri_search).permit!
+   end
   
 end

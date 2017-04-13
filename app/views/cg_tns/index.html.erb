@@ -40,7 +40,7 @@
         <td><%= link_to 'Show', cg_tn %></td>
 <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
     <td><%= link_to 'Edit', edit_cg_tn_path(cg_tn) %></td>
-    <td><%= link_to 'Destroy', cg_tn, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', cg_tn, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
 <% end %>
     <td><%= cg_tn.tn %></td>
     <td><%= cg_tn.common_name %></td>

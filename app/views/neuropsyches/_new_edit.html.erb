@@ -6,7 +6,18 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
 
 <!-- Directory path? -->
 <%= form_for(@neuropsych) do |f| %>
-  <%= f.error_messages %>
+ 
+  <% if @neuropsych.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@neuropsych.errors.count, "error") %> prohibited this neuropsych from being saved:</h2>
+
+      <ul>
+      <% @neuropsych.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
   <div class="three_col_left">
     <p>
       <%= f.label :date %><br />
@@ -44,7 +55,7 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
   <% end %>
 
 <% if params[:new_appointment_vgroup_id].blank?%>
-  <%= f.submit  'Save Neuropsych appt', :confirm => 'Do not continue if changes to bottom form have not been saved!!!'  %>
+  <%= f.submit  'Save Neuropsych appt', data: {confirm: 'Do not continue if changes to bottom form have not been saved!!!' } %>
 <% else %>
       <%= f.submit  'Save Neuropsych Health appt' %>
 <% end %>

@@ -1,7 +1,8 @@
 # encoding: utf-8
 class LogFilesController < ApplicationController
-  before_filter :set_current_tab
-  
+  before_action :set_current_tab
+  before_action :set_log_file, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   def set_current_tab
     @current_tab = "log_files"
   end
@@ -55,7 +56,7 @@ class LogFilesController < ApplicationController
   # POST /log_files
   # POST /log_files.xml
   def create
-    @log_file = LogFile.new(params[:log_file])
+    @log_file = LogFile.new(log_file_params)#params[:log_file])
 
     respond_to do |format|
       if @log_file.save
@@ -72,10 +73,10 @@ class LogFilesController < ApplicationController
   # PUT /log_files/1
   # PUT /log_files/1.xml
   def update
-    @log_file = LogFile.find(params[:id])
+    @log_file = LogFile.find(log_file_params)#params[:id])
 
     respond_to do |format|
-      if @log_file.update_attributes(params[:log_file])
+      if @log_file.update(params[:log_file], :without_protection => true)
         flash[:notice] = 'LogFile was successfully updated.'
         format.html { redirect_to(@log_file) }
         format.xml  { head :ok }

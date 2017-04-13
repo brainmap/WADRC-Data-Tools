@@ -23,7 +23,7 @@
     <td><%= q_data_form.enrollment_id %></td>
     <td><%= link_to 'Show', q_data_form %></td>
     <td><%= link_to 'Edit', edit_q_data_form_path(q_data_form) %></td>
-    <td><%= link_to 'Destroy', q_data_form, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', q_data_form, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

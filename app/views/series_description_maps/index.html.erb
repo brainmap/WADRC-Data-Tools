@@ -32,15 +32,39 @@
     <% if current_user.role == 'Admin_High'%>
     <td><%= link_to 'Show', series_description_map %></td>
     <td><%= link_to 'Edit', edit_series_description_map_path(series_description_map) %></td>
-    <td><%= link_to 'Destroy', series_description_map, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', series_description_map, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
     <%end%>
   </tr>
 <% end %>
 </table>
 
-<br />
+<br />    
+<%= link_to 'New Series description map', new_series_description_map_path %>  
 
-<%= link_to 'New Series description map', new_series_description_map_path %>
+       <br>  <br><br>
+<%= form_for :series_description_map_search,:url=>'/series_description_map_search' do |f| %>
+<table class="search_form">
+	<tr><td><%= f.label :series_description_types %><br>
+	<div id="scan_procedure_list">
+	<ul>
+	<% SeriesDescriptionType.all.sort_by(&:series_description_type).each do |series_description_type| %>
+		<li>
+			<%#= f.fields_for scan_procedure do |scan_fields| %>
+				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
+				<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
+			<%# end %>
+		</li>
+		<li>
+			<%= check_box_tag "series_description_type_ids", series_description_type.id,FALSE , :name => 'series_description_map_search[series_description_type_id][]' %>
+			<%= label_tag '', series_description_type.series_description_type %>
+		</li>
+	<% end %>
+	</ul>
+	</div>  
+	</td><td>  <%= f.submit "Search" %> </td></tr>
+	</table>
+     <%end%>
+      <br>  <br><br> 
 <% else %>
   Your <%= current_user.role %> role does not allow access. 
-<% end %>
+<% end %>  

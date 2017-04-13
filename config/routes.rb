@@ -2,8 +2,6 @@ WADRCDataTools::Application.routes.draw do
 
 
   resources :consent_form_vgroups
-
-
   resources :consent_form_scan_procedures
 
 
@@ -174,7 +172,7 @@ WADRCDataTools::Application.routes.draw do
 
   resources :protocol_roles
   resources :protocols
-   match '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user
+  ###?? match '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user ,via: [:get, :post]
    # want to use adminrole limited add user form instead of devise
   devise_for :users
 
@@ -186,104 +184,106 @@ WADRCDataTools::Application.routes.draw do
   	collection do
   		post :sort
   	end
-	end
+	end 
+     
+  match '/visits/found(.:format)', :to => 'visits#found', :as => :found_visits, via: [:get, :post]
+  match '/visits/find', :to => 'visits#find', :as => :find_visits ,via: [:get, :post]
+  match '/visits/complete', :to => 'visits#index_by_scope', :scope => 'complete', :as => :complete_visits ,via: [:get, :post]
+  match '/visits/incomplete', :to => 'visits#index_by_scope', :scope => 'incomplete', :as => :incomplete_visits ,via: [:get, :post]
+  match '/visits/recently_imported', :to => 'visits#index_by_scope', :scope => 'recently_imported', :as => :recently_imported_visits  ,via: [:get, :post]
+  match '/visits/assigned_to/:user_login', :controller => 'visits', :action => 'index_by_user_id', :as => :assigned_to ,via: [:get, :post]
+  match '/visits/in_scan_procedure/:scan_procedure_id', :controller => 'visits', :action => 'index_by_scan_procedure', :as => :in_scan_procedure  ,via: [:get, :post]
+  match '/visits/visit_search' , :controller => 'visits', :action => 'visit_search', :as =>:visit_search ,via: [:get, :post]
+##???  match '/visit_search' , :controller => 'visits', :action => 'visit_search', :as =>:visit_search ,via: [:get, :post]
+  match '/mri_search' , :controller => 'visits', :action => 'mri_search', :as =>:mri_search   ,via: [:get, :post] 
+ ##??? match '/visits/mri_search' , :controller => 'visits', :action => 'mri_search', :as =>:mri_search  ,via: [:get, :post] 
+  match '/visits/change_directory_path', :controller => 'visits', :action => 'change_directory_path', :as =>:change_directory_path ,via: [:get, :post] 
+  match '/visits/series_desc_cnt', :controller => 'visits', :action => 'series_desc_cnt', :as =>:series_desc_cnt   ,via: [:get, :post] 
   
-  match '/visits/found(.:format)', :to => 'visits#found', :as => :found_visits
-  match '/visits/find', :to => 'visits#find', :as => :find_visits
-  match '/visits/complete', :to => 'visits#index_by_scope', :scope => 'complete', :as => :complete_visits
-  match '/visits/incomplete', :to => 'visits#index_by_scope', :scope => 'incomplete', :as => :incomplete_visits
-  match '/visits/recently_imported', :to => 'visits#index_by_scope', :scope => 'recently_imported', :as => :recently_imported_visits
-  match '/visits/assigned_to/:user_login', :controller => 'visits', :action => 'index_by_user_id', :as => :assigned_to
-  match '/visits/in_scan_procedure/:scan_procedure_id', :controller => 'visits', :action => 'index_by_scan_procedure', :as => :in_scan_procedure
-  match '/visits/visit_search' , :controller => 'visits', :action => 'visit_search', :as =>:visit_search
-  match '/visit_search' , :controller => 'visits', :action => 'visit_search', :as =>:visit_search
-  match '/mri_search' , :controller => 'visits', :action => 'mri_search', :as =>:mri_search
-  match '/visits/mri_search' , :controller => 'visits', :action => 'mri_search', :as =>:mri_search
-  match '/visits/change_directory_path', :controller => 'visits', :action => 'change_directory_path', :as =>:change_directory_path
-  match '/visits/series_desc_cnt', :controller => 'visits', :action => 'series_desc_cnt', :as =>:series_desc_cnt
-  
-    match '/petscan_search' , :controller => 'petscans', :action => 'petscan_search', :as =>:petscan_search
-    match '/pet_search' , :controller => 'petscans', :action => 'pet_search', :as =>:pet_search
-    # match '/petscans/pet_search' , :controller => 'petscans', :action => 'pet_search', :as =>:pet_search
-    match '/lumbarpuncture_search' , :controller => 'lumbarpunctures', :action => 'lumbarpuncture_search', :as =>:lumbarpuncture_search
-    match '/lp_search' , :controller => 'lumbarpunctures', :action => 'lp_search', :as =>:lp_search
+    match '/petscan_search' , :controller => 'petscans', :action => 'petscan_search', :as =>:petscan_search  ,via: [:get, :post] 
+    match '/pet_search' , :controller => 'petscans', :action => 'pet_search', :as =>:pet_search   ,via: [:get, :post]  
+    match '/lumbarpuncture_search' , :controller => 'lumbarpunctures', :action => 'lumbarpuncture_search', :as =>:lumbarpuncture_search ,via: [:get, :post] 
+    match '/lp_search' , :controller => 'lumbarpunctures', :action => 'lp_search', :as =>:lp_search  ,via: [:get, :post] 
     # match '/lumbarpunctures/lp_search' , :controller => 'lumbarpunctures', :action => 'lp_search', :as =>:lp_search
-    match '/blooddraw_search' , :controller => 'blooddraws', :action => 'blooddraw_search', :as =>:blooddraw_search
-    match '/lh_search' , :controller => 'blooddraws', :action => 'lh_search', :as =>:lh_search
-    match '/neuropsych_search' , :controller => 'neuropsyches', :action => 'neuropsych_search', :as =>:neuropsych_search
-    match '/np_search' , :controller => 'neuropsyches', :action => 'np_search', :as =>:np_search
-    match '/questionnaire_search' , :controller => 'questionnaires', :action => 'questionnaire_search', :as =>:questionnaire_search
-    match '/q_search' , :controller => 'questionnaires', :action => 'q_search', :as =>:q_search
-    match '/ids_search' , :controller => 'image_datasets', :action => 'ids_search', :as =>:ids_search
-  
-    match '/enrollment_search' , :controller => 'enrollments', :action => 'enrollment_search', :as =>:enrollment_search
-    match '/participant_search' , :controller => 'participants', :action => 'participant_search', :as =>:participant_search
-  match '/cg_search' , :controller => 'data_searches', :action => 'cg_search', :as =>:cg_search
-  match '/cg_tables' , :controller => 'data_searches', :action => 'cg_tables', :as =>:cg_tables
-  match '/cg_edit_table/:id' , :controller => 'data_searches', :action => 'cg_edit_table', :as =>:cg_edit_table
-    match '/cg_table_create_db' , :controller => 'data_searches', :action => 'cg_create_table_db', :as =>:cg_create_table_db
-     match '/cg_up_load' , :controller => 'data_searches', :action => 'cg_up_load', :as =>:cg_up_load
-      match '/cg_table_edit_db' , :controller => 'data_searches', :action => 'cg_edit_table_db', :as =>:cg_edit_table_db
-  match '/schedulerun_search' , :controller => 'scheduleruns', :action => 'schedulerun_search', :as =>:schedulerun_search
-  match '/shared_file_upload' , :controller => 'shared', :action => 'file_upload', :as =>:file_upload
+    match '/blooddraw_search' , :controller => 'blooddraws', :action => 'blooddraw_search', :as =>:blooddraw_search    ,via: [:get, :post] 
+    match '/lh_search' , :controller => 'blooddraws', :action => 'lh_search', :as =>:lh_search      ,via: [:get, :post] 
+    match '/neuropsych_search' , :controller => 'neuropsyches', :action => 'neuropsych_search', :as =>:neuropsych_search     ,via: [:get, :post] 
+    match '/np_search' , :controller => 'neuropsyches', :action => 'np_search', :as =>:np_search   ,via: [:get, :post] 
+    match '/questionnaire_search' , :controller => 'questionnaires', :action => 'questionnaire_search', :as =>:questionnaire_search ,via: [:get, :post] 
+    match '/q_search' , :controller => 'questionnaires', :action => 'q_search', :as =>:q_search  ,via: [:get, :post] 
+    match '/ids_search' , :controller => 'image_datasets', :action => 'ids_search', :as =>:ids_search ,via: [:get, :post] 
+     
+   
+  match '/series_description_map_search' , :controller => 'series_description_maps', :action => 'series_description_map_search', :as =>:series_description_map_search  ,via: [:get, :post]
+    match '/enrollment_search' , :controller => 'enrollments', :action => 'enrollment_search', :as =>:enrollment_search    ,via: [:get, :post] 
+    match '/participant_search' , :controller => 'participants', :action => 'participant_search', :as =>:participant_search  ,via: [:get, :post] 
+  match '/cg_search' , :controller => 'data_searches', :action => 'cg_search', :as =>:cg_search  ,via: [:get, :post] 
+  match '/cg_tables' , :controller => 'data_searches', :action => 'cg_tables', :as =>:cg_tables ,via: [:get, :post] 
+  match '/cg_edit_table/:id' , :controller => 'data_searches', :action => 'cg_edit_table', :as =>:cg_edit_table   ,via: [:get, :post] 
+    match '/cg_table_create_db' , :controller => 'data_searches', :action => 'cg_create_table_db', :as =>:cg_create_table_db ,via: [:get, :post] 
+     match '/cg_up_load' , :controller => 'data_searches', :action => 'cg_up_load', :as =>:cg_up_load   ,via: [:get, :post] 
+      match '/cg_table_edit_db' , :controller => 'data_searches', :action => 'cg_edit_table_db', :as =>:cg_edit_table_db   ,via: [:get, :post] 
+  match '/schedulerun_search' , :controller => 'scheduleruns', :action => 'schedulerun_search', :as =>:schedulerun_search   ,via: [:get, :post] 
+  match '/shared_file_upload' , :controller => 'shared', :action => 'file_upload', :as =>:file_upload   ,via: [:get, :post] 
 
-  match '/cg_tns_index' , :controller => 'cg_tns', :action => 'index', :as =>:index
+  match '/cg_tns_index' , :controller => 'cg_tns', :action => 'index', :as =>:index   ,via: [:get, :post] 
+    match '/cg_tn_cns_index' , :controller => 'cg_tn_cns', :action => 'index', :as =>:cg_tn_cns_index   ,via: [:get, :post] 
+    match '/cg_tn_cns/tn_cols/:id' , :controller => 'cg_tn_cns', :action => 'tn_cols', :as =>:tn_cols   ,via: [:get, :post] 
+    match '/cg_tns/create_from_cg_tn_db' , :controller => 'cg_tns', :action => 'create_from_cg_tn_db', :as =>:create_from_cg_tn_db  ,via: [:get, :post] 
   
-    match '/cg_tn_cns/tn_cols/:id' , :controller => 'cg_tn_cns', :action => 'tn_cols', :as =>:tn_cols
-    match '/cg_tns/create_from_cg_tn_db' , :controller => 'cg_tns', :action => 'create_from_cg_tn_db', :as =>:create_from_cg_tn_db
-  
-  match '/run_schedule/:id' ,:controller =>'schedules', :action => 'run_schedule', :as => :run_schedule
-  match '/stop_schedule/:id' ,:controller =>'schedules', :action => 'stop_schedule', :as => :stop_schedule
+  match '/run_schedule/:id' ,:controller =>'schedules', :action => 'run_schedule', :as => :run_schedule  ,via: [:get, :post] 
+  match '/stop_schedule/:id' ,:controller =>'schedules', :action => 'stop_schedule', :as => :stop_schedule  ,via: [:get, :post] 
 
-  match '/participant_merge', :controller => 'participants', :action => 'merge_participants', :as => :merge_participants
+  match '/participant_merge', :controller => 'participants', :action => 'merge_participants', :as => :merge_participants  ,via: [:get, :post] 
   
-  match '/users/update_role', :controller => 'users', :action => 'update_role', :as => :update_role
-  match '/users/user_protocol_role_summary', :controller => 'users', :action => 'user_protocol_role_summary', :as => :user_protocol_role_summary
-  match '/users/control', :controller => 'users', :action => 'control', :as => :control
-  match '/users/participant_missing', :controller => 'users', :action => 'participant_missing', :as => :participant_missing
-  match '/users/questionformbase', :controller => 'users', :action => 'questionformbase', :as => :questionformbase
-  match '/users/cgbase', :controller => 'users', :action => 'cgbase', :as => :cgbase
-  match '/users/add_user', :controller => 'users', :action => 'add_user', :as => :add_user
-  match '/users/edit_user', :controller => 'users', :action => 'edit_user', :as => :edit_user
-  match '/questionform/displayform/:id', :controller=>'questionforms',:action=>'displayform', :as => :displayform
-  match '/questionform/editform/:id', :controller=>'questionforms',:action=>'editform', :as => :editform
-    match '/questionform/question_enter', :controller=>'questionforms',:action=>'question_enter', :as => :question_enter
+  match '/users/update_role', :controller => 'users', :action => 'update_role', :as => :update_role  ,via: [:get, :post] 
+  match '/users/user_protocol_role_summary', :controller => 'users', :action => 'user_protocol_role_summary', :as => :user_protocol_role_summary ,via: [:get, :post] 
+  match '/users/control', :controller => 'users', :action => 'control', :as => :control  ,via: [:get, :post] 
+  match '/users/participant_missing', :controller => 'users', :action => 'participant_missing', :as => :participant_missing  ,via: [:get, :post] 
+  match '/users/questionformbase', :controller => 'users', :action => 'questionformbase', :as => :questionformbase,via: [:get, :post] 
+  match '/users/cgbase', :controller => 'users', :action => 'cgbase', :as => :cgbase  ,via: [:get, :post] 
+  match '/users/add_user', :controller => 'users', :action => 'add_user', :as => :add_user  ,via: [:get, :post] 
+  match '/users/edit_user', :controller => 'users', :action => 'edit_user', :as => :edit_user   ,via: [:get, :post] 
+  match '/questionform/displayform/:id', :controller=>'questionforms',:action=>'displayform', :as => :displayform  ,via: [:get, :post] 
+  match '/questionform/editform/:id', :controller=>'questionforms',:action=>'editform', :as => :editform ,via: [:get, :post] 
+    match '/questionform/question_enter', :controller=>'questionforms',:action=>'question_enter', :as => :question_enter   ,via: [:get, :post] 
   # moved up to get precidance over devise sign_upmatch '/users/sign_up', :controller => 'users', :action => 'add_user', :as => :add_user
   
-   match '/question/clone/:id', :controller=>'questions',:action=>'clone', :as => :clone
-   match '/questionform_questions/index_sp_questions', :controller=>'questionform_questions',:action=>'index_sp_questions', :as => :index_sp_questions
+   match '/question/clone/:id', :controller=>'questions',:action=>'clone', :as => :clone   ,via: [:get, :post] 
+   match '/questionform_questions/index_sp_questions', :controller=>'questionform_questions',:action=>'index_sp_questions', :as => :index_sp_questions  ,via: [:get, :post] 
 
-    match '/tredits/tredit_home/:trtype_id', :controller => 'tredits', :action => 'tredit_home', :as => :tredit_home
-    match '/tredit_home/:trtype_id', :controller => 'tredits', :action => 'tredit_home', :as => :tredit_home
-    match 'trfiles/trfile_edit_action', :controller => 'trfiles', :action => 'trfile_edit_action', :as => :trfile_edit_action
-    match '/trfile_home/:id', :controller => 'trfiles', :action => 'trfile_home', :as => :trfile_home
-    match '/trtype_home/:id', :controller => 'trtypes', :action => 'trtype_home', :as => :trtype_home
-    match '/trtype_home/', :controller => 'trtypes', :action => 'trtype_home', :as => :trtype_home
+    ##??? match '/tredits/tredit_home/:trtype_id', :controller => 'tredits', :action => 'tredit_home', :as => :tredit_home  ,via: [:get, :post] 
+    match '/tredit_home/:trtype_id', :controller => 'tredits', :action => 'tredit_home', :as => :tredit_home  ,via: [:get, :post] 
+    match 'trfiles/trfile_edit_action', :controller => 'trfiles', :action => 'trfile_edit_action', :as => :trfile_edit_action  ,via: [:get, :post] 
+    match '/trfile_home/:id', :controller => 'trfiles', :action => 'trfile_home', :as => :trfile_home,via: [:get, :post] 
+    match '/trtype_home/:id', :controller => 'trtypes', :action => 'trtype_home', :as => :trtype_home_id  ,via: [:get, :post]
+    match '/trtypes/trtype_home/:id', :controller => 'trtypes', :action => 'trtype_home', :as => :trtypes_trtype_home_id  ,via: [:get, :post] 
+    match '/trtype_home/', :controller => 'trtypes', :action => 'trtype_home', :as => :trtype_home  ,via: [:get, :post] 
    
    #match '/vgroups/home', :controller => 'vgroups', :action => 'home', :as => :home
-    match '/vgroups/home', :controller => 'vgroups', :action => 'vgroups_search', :as => :home
-   match '/vgroups/vgroups_search', :controller => 'vgroups', :action => 'vgroups_search', :as => :vgroups_search
-   match '/vgroups/complete', :to => 'vgroups#index_by_scope', :scope => 'complete', :as => :complete_vgroups
-   match '/vgroups/incomplete', :to => 'vgroups#index_by_scope', :scope => 'incomplete', :as => :incomplete_vgroups
-   match '/vgroups/recently_imported', :to => 'vgroups#index_by_scope', :scope => 'recently_imported', :as => :recently_imported_vgroups
-   match '/vgroups/assigned_to/:user_login', :controller => 'vgroups', :action => 'index_by_user_id', :as => :assigned_to_vgroup
-   match '/vgroups/in_scan_procedure/:scan_procedure_id', :controller => 'vgroups', :action => 'index_by_scan_procedure', :as => :in_scan_procedure_vgroup
-   match '/vgroups/in_enumber/:enumber', :controller => 'vgroups', :action => 'index_by_enumber', :as => :in_enumber_vgroup
+    match '/vgroups/home', :controller => 'vgroups', :action => 'vgroups_search', :as => :home  ,via: [:get, :post] 
+   match '/vgroups/vgroups_search', :controller => 'vgroups', :action => 'vgroups_search', :as => :vgroups_search ,via: [:get, :post] 
+   match '/vgroups/complete', :to => 'vgroups#index_by_scope', :scope => 'complete', :as => :complete_vgroups  ,via: [:get, :post] 
+   match '/vgroups/incomplete', :to => 'vgroups#index_by_scope', :scope => 'incomplete', :as => :incomplete_vgroups    ,via: [:get, :post] 
+   match '/vgroups/recently_imported', :to => 'vgroups#index_by_scope', :scope => 'recently_imported', :as => :recently_imported_vgroups  ,via: [:get, :post] 
+   match '/vgroups/assigned_to/:user_login', :controller => 'vgroups', :action => 'index_by_user_id', :as => :assigned_to_vgroup ,via: [:get, :post] 
+   match '/vgroups/in_scan_procedure/:scan_procedure_id', :controller => 'vgroups', :action => 'index_by_scan_procedure', :as => :in_scan_procedure_vgroup   ,via: [:get, :post] 
+   match '/vgroups/in_enumber/:enumber', :controller => 'vgroups', :action => 'index_by_enumber', :as => :in_enumber_vgroup  ,via: [:get, :post] 
    #match '/vgroups/in_scan_procedure', :controller => 'vgroups', :action => 'home', :as => :home
    #match '/vgroups/in_enumber', :controller => 'vgroups', :action => 'home', :as => :home
-   match '/vgroups/nii_file_cnt', :controller => 'vgroups', :action => 'nii_file_cnt', :as =>:nii_file_cnt
+   match '/vgroups/nii_file_cnt', :controller => 'vgroups', :action => 'nii_file_cnt', :as =>:nii_file_cnt   ,via: [:get, :post] 
       
-   match '/vgroups/vgroup_search' , :controller => 'vgroups', :action => 'vgroup_search', :as =>:vgroup_search
-    match '/vgroups/change_qc_vgroup', :controller => 'vgroups', :action => 'change_qc_vgroup', :as =>:change_qc_vgroup
-   match '/vgroups/change_appointment_vgroup', :controller => 'vgroups', :action => 'change_appointment_vgroup', :as =>:change_appointment_vgroup
-   match '/vgroups/change_transfer_mri_vgroup', :controller => 'vgroups', :action => 'change_transfer_mri_vgroup', :as =>:change_transfer_mri_vgroup
-   match '/vgroups/change_transfer_pet_vgroup', :controller => 'vgroups', :action => 'change_transfer_pet_vgroup', :as =>:change_transfer_pet_vgroup
-   match '/vgroups/change_completedlumbarpuncture_vgroup', :controller => 'vgroups', :action => 'change_completedlumbarpuncture_vgroup', :as =>:change_completedlumbarpuncture_vgroup
-   match '/vgroups/change_completedblooddraw_vgroup', :controller => 'vgroups', :action => 'change_completedblooddraw_vgroup', :as =>:change_completedblooddraw_vgroup
-   match '/vgroups/change_completedneuropsych_vgroup', :controller => 'vgroups', :action => 'change_completedneuropsych_vgroup', :as =>:change_completedneuropsych_vgroup
-   match '/vgroups/change_completedquestionnaire_vgroup', :controller => 'vgroups', :action => 'change_completedquestionnaire_vgroup', :as =>:change_completedquestionnaire_vgroup
-   match 'vgroups/change_consent_form_vgroup',:controller => 'vgroups', :action => 'change_consent_form_vgroup', :as =>:change_consent_form_vgroup
-    match '/placeholder_vgroup', :controller => 'vgroups', :action => 'placeholder_vgroup', :as => :placeholder_vgroup
+    match '/vgroups/vgroup_search' , :controller => 'vgroups', :action => 'vgroup_search', :as =>:vgroup_search ,via: [:get, :post] 
+    match '/vgroups/change_qc_vgroup', :controller => 'vgroups', :action => 'change_qc_vgroup', :as =>:change_qc_vgroup ,via: [:get, :post] 
+   match '/vgroups/change_appointment_vgroup', :controller => 'vgroups', :action => 'change_appointment_vgroup', :as =>:change_appointment_vgroup   ,via: [:get, :post] 
+   match '/vgroups/change_transfer_mri_vgroup', :controller => 'vgroups', :action => 'change_transfer_mri_vgroup', :as =>:change_transfer_mri_vgroup  ,via: [:get, :post] 
+   match '/vgroups/change_transfer_pet_vgroup', :controller => 'vgroups', :action => 'change_transfer_pet_vgroup', :as =>:change_transfer_pet_vgroup   ,via: [:get, :post] 
+   match '/vgroups/change_completedlumbarpuncture_vgroup', :controller => 'vgroups', :action => 'change_completedlumbarpuncture_vgroup', :as =>:change_completedlumbarpuncture_vgroup ,via: [:get, :post] 
+   match '/vgroups/change_completedblooddraw_vgroup', :controller => 'vgroups', :action => 'change_completedblooddraw_vgroup', :as =>:change_completedblooddraw_vgroup ,via: [:get, :post] 
+   match '/vgroups/change_completedneuropsych_vgroup', :controller => 'vgroups', :action => 'change_completedneuropsych_vgroup', :as =>:change_completedneuropsych_vgroup   ,via: [:get, :post] 
+   match '/vgroups/change_completedquestionnaire_vgroup', :controller => 'vgroups', :action => 'change_completedquestionnaire_vgroup', :as =>:change_completedquestionnaire_vgroup   ,via: [:get, :post] 
+   match 'vgroups/change_consent_form_vgroup',:controller => 'vgroups', :action => 'change_consent_form_vgroup', :as =>:change_consent_form_vgroup   ,via: [:get, :post] 
+    match '/placeholder_vgroup', :controller => 'vgroups', :action => 'placeholder_vgroup', :as => :placeholder_vgroup  ,via: [:get, :post] 
   
    resources :vgroups
   resources :studies
@@ -339,8 +339,8 @@ WADRCDataTools::Application.routes.draw do
 ####  match '/logout', :controller => 'sessions', :action => 'destroy', :as => :logout
 
   root :to => "vgroups#vgroups_search" #"vgroups#home" #"visits#index"
-
-  match ':controller(/:action(/:id(.:format)))'
+    ## deprecated rails 5.3-- MAY NEED TO ADD route for each controller
+match ':controller(/:action(/:id(.:format)))'  ,via: [:get, :post] 
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

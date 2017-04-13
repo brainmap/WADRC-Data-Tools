@@ -1,9 +1,11 @@
 # encoding: utf-8
-class ImageSearchesController < ApplicationController
+class ImageSearchesController < ApplicationController  
+  before_action :set_image_search, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   
   PER_PAGE = 50
   
-  before_filter :set_current_tab
+  before_action :set_current_tab
   
   def set_current_tab
     @current_tab = "image_searches"
@@ -45,7 +47,7 @@ class ImageSearchesController < ApplicationController
   end
   
   def create
-    @image_search = ImageSearch.new(params[:image_search])
+    @image_search = ImageSearch.new(image_search_params)#)#params[:image_search])
     @image_search.user = current_user
     @image_search.scan_procedures = Array.new
     
@@ -117,6 +119,19 @@ class ImageSearchesController < ApplicationController
         format.html { redirect_to @image_search }
       end
     end
-  end
+  end  
+  private
+    def set_image_search
+       @image_search = ImageSearch.find(params[:id])
+    end
+   def image_search_params
+          params.require(:image_search).permit(:min_age,:max_age,:min_ed_years,:max_ed_years,:apoe_status,:scanner_source,:gender,:enumber,:user_id,:id,:rmr,:series_description,:path,:earliest_timestamp,:latest_timestamp)
+   end 
+#     def set_image_search_scan_procedure
+#        @image_search_scan_procedure = ImageSearchScanProcedure.find(params[:id])
+#     end
+#    def image_search_scan_procedure_params
+#           params.require(:image_search_scan_procedure).permit(:image_search_id,:scan_procedure_id)
+#    end
 
 end

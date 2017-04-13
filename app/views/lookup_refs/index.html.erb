@@ -23,7 +23,7 @@ Used to make dropdown lists, checkboxes, radio button desc in forms.<br>
     <td><%= lookup_ref.label %></td>
     <td><%= link_to 'Show', lookup_ref %></td>
     <td><% if current_user.role == 'Admin_High'%><%= link_to 'Edit', edit_lookup_ref_path(lookup_ref) %><%end%></td>
-    <td><% if current_user.role == 'Admin_High'%><%= link_to 'Destroy', lookup_ref, :confirm => 'Are you sure? ', :method => :delete %><%end%></td>
+    <td><% if current_user.role == 'Admin_High'%><%= link_to 'Destroy', lookup_ref, :method => :delete,data: {confirm: 'Are you sure?' } %><%end%></td>
   </tr>
 <% end %>
 </table>

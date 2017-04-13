@@ -1,7 +1,9 @@
 # encoding: utf-8
 class ImageCommentsController < ApplicationController
   
-  before_filter :set_current_tab
+  before_action :set_current_tab      
+  before_action :set_image_comment, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   
   def set_current_tab
     @current_tab = "image_comments"
@@ -52,39 +54,22 @@ class ImageCommentsController < ApplicationController
   end
 
   def create
-
+          #  # removed :remote => true, and got single insert and page reload !!! 
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:image_dataset_id])
-    @image_comment = @image_dataset.image_comments.build(params[:image_comment])
+    @image_comment = @image_dataset.image_comments.build(image_comment_params)#params[:image_comment])  
     @image_comment.user = current_user
     
 
-# got rid of the rjs error, but doing a double render/redirect and still not reloading the page
-#  problems were in  image_comments controller but need image_datasets show
-# copied the 4 lines below from destroy
-
-    respond_to do |format|
-      if @image_comment.save
+     @image_comment.save  
+      respond_to do |format|
+        format.html { redirect_to(@image_dataset) and return }
         format.js
-       format.html { redirect_to  @image_dataset } 
-      else
-       format.html { redirect_to @image_dataset }
-        format.js do
-          render :update do |page|
-            format.redirect_to @image_dataset
-          end
-        end
-        # #flash[:error] = @image_comment.errors.full_messages.to_sentence
-        # #format.html { redirect_to @image }
+        format.xml  { head :ok }
       end
-    end
-
-
-    respond_to do |format|
-      format.html { redirect_to(@image_dataset) }
-     format.js
-     format.xml  { head :ok }
-   end
+ 
+# got rid of the rjs error, but doing a double render/redirect and still not reloading the page
+# removed :remote => true, from form definition and worked
 
   end
   # POST /image_comments POST /image_comments.xml
@@ -112,7 +97,7 @@ class ImageCommentsController < ApplicationController
              where image_datasets.visit_id = scan_procedures_visits.visit_id and  scan_procedures_visits.scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
                         
     respond_to do |format|
-      if @image_comment.update_attributes(params[:image_comment])
+      if @image_comment.update(image_comment_params)#params[:image_comment], :without_protection => true)
         flash[:notice] = 'Image Comment was successfully updated.'
         format.html { redirect_to(@image_comment) }
         format.xml  { head :ok }
@@ -136,10 +121,19 @@ class ImageCommentsController < ApplicationController
     @image_dataset = @image_comment.image_dataset
     @image_comment.destroy
 
-    respond_to do |format|
-      format.html { redirect_to(@image_dataset) }
-      format.js
-      format.xml  { head :ok }
+    respond_to do |format|  
+      if @image_comment.destroy
+        format.html { return(redirect_to(@image_dataset)) }
+         format.js
+        format.xml  { head :ok }  
+      end
     end
-  end
+  end  
+  private
+    def set_image_comment
+       @image_comment = ImageComment.find(params[:id])
+    end
+   def image_comment_params
+          params.require(:image_comment).permit(:user_id,:comment,:image_dataset_id,:id)
+   end
 end

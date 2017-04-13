@@ -1,4 +1,6 @@
-class ConsentFormScanProceduresController < ApplicationController
+class ConsentFormScanProceduresController < ApplicationController   
+  before_action :set_consent_form_scan_procedure, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /consent_form_scan_procedures
   # GET /consent_form_scan_procedures.json
   def index
@@ -40,7 +42,7 @@ class ConsentFormScanProceduresController < ApplicationController
   # POST /consent_form_scan_procedures
   # POST /consent_form_scan_procedures.json
   def create
-    @consent_form_scan_procedure = ConsentFormScanProcedure.new(params[:consent_form_scan_procedure])
+    @consent_form_scan_procedure = ConsentFormScanProcedure.new(consent_form_scan_procedure_params)#params[:consent_form_scan_procedure])
 
     respond_to do |format|
       if @consent_form_scan_procedure.save
@@ -59,7 +61,7 @@ class ConsentFormScanProceduresController < ApplicationController
     @consent_form_scan_procedure = ConsentFormScanProcedure.find(params[:id])
 
     respond_to do |format|
-      if @consent_form_scan_procedure.update_attributes(params[:consent_form_scan_procedure])
+      if @consent_form_scan_procedure.update(consent_form_scan_procedure_params)#params[:consent_form_scan_procedure], :without_protection => true)
         format.html { redirect_to @consent_form_scan_procedure, notice: 'Consent form scan procedure was successfully updated.' }
         format.json { head :no_content }
       else
@@ -80,5 +82,12 @@ class ConsentFormScanProceduresController < ApplicationController
       format.html { redirect_to consent_form_scan_procedures_url }
       format.json { head :no_content }
     end
-  end
+  end 
+  private
+    def set_consent_form_scan_procedure
+       @consent_form_scan_procedure = ConsentFormScanProcedure.find(params[:id])
+    end
+   def consent_form_scan_procedure_params
+          params.require(:consent_form_scan_procedure).permit(:id,:consent_form_id,:scan_procedure_id)
+   end
 end

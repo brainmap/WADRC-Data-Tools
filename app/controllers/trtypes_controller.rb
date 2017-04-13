@@ -1,6 +1,7 @@
 class TrtypesController < ApplicationController
 
-
+	before_action :set_trtype, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
 
   def trtype_home
     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
@@ -105,7 +106,9 @@ class TrtypesController < ApplicationController
          # add in trtype specific summary columns
          # if export -- do select 
          @html_request ="Y"
-         request_format = request.formats.to_s
+         #request_format = request.formats.to_s  
+         v_request_format_array = request.formats
+          request_format = v_request_format_array[0]
          case  request_format
           when "[text/html]","text/html" then
               @column_headers_display = ['Completed','Last Update','Subjectid', @v_action_name.humanize+' links','Scan Procedure','QC']
@@ -276,7 +279,7 @@ class TrtypesController < ApplicationController
   # POST /trtypes
   # POST /trtypes.json
   def create
-    @trtype = Trtype.new(params[:trtype])
+    @trtype = Trtype.new(trtype_params)#params[:trtype])
 
     respond_to do |format|
       if @trtype.save
@@ -295,7 +298,7 @@ class TrtypesController < ApplicationController
     @trtype = Trtype.find(params[:id])
 
     respond_to do |format|
-      if @trtype.update_attributes(params[:trtype])
+      if @trtype.update(trtype_params)#params[:trtype], :without_protection => true)
         format.html { redirect_to @trtype, notice: 'Trtype was successfully updated.' }
         format.json { head :no_content }
       else
@@ -315,5 +318,12 @@ class TrtypesController < ApplicationController
       format.html { redirect_to trtypes_url }
       format.json { head :no_content }
     end
-  end
+  end    
+  private
+    def set_trtype
+       @trtype = Trtype.find(params[:id])
+    end
+   def trtype_params
+          params.require(:trtype).permit(:series_description_display,:action_name,:series_description_type_id,:status_flag,:parameters,:updated_at,:created_at,:description,:id,:triggers_1)
+   end
 end

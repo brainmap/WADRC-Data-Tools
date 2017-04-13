@@ -33,7 +33,7 @@
     <td><%= cg_query.max_age %></td>
     <td><%= link_to 'Show', cg_query %></td>
     <td><%= link_to 'Edit', edit_cg_query_path(cg_query) %></td>
-    <td><%= link_to 'Destroy', cg_query, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', cg_query, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

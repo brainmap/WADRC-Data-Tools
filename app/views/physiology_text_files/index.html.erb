@@ -10,7 +10,7 @@
     <td><%=h physiology_text_file.filepath %></td>
     <td><%= link_to 'Show', physiology_text_file %></td>
     <td><%= link_to 'Edit', edit_physiology_text_file_path(physiology_text_file) %></td>
-    <td><%= link_to 'Destroy', physiology_text_file, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', physiology_text_file, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

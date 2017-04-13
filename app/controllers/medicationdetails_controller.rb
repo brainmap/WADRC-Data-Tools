@@ -41,7 +41,7 @@ class MedicationdetailsController < ApplicationController
   # POST /medicationdetails
   # POST /medicationdetails.xml
   def create
-    @medicationdetail = Medicationdetail.new(params[:medicationdetail])
+    @medicationdetail = Medicationdetail.new(medicationdetail_params)#params[:medicationdetail])
 
     respond_to do |format|
       if @medicationdetail.save
@@ -60,7 +60,7 @@ class MedicationdetailsController < ApplicationController
     @medicationdetail = Medicationdetail.find(params[:id])
 
     respond_to do |format|
-      if @medicationdetail.update_attributes(params[:medicationdetail])
+      if @medicationdetail.update(medicationdetail_params)#params[:medicationdetail], :without_protection => true)
         format.html { redirect_to(@medicationdetail, :notice => 'Medicationdetail was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -80,5 +80,12 @@ class MedicationdetailsController < ApplicationController
       format.html { redirect_to(medicationdetails_url) }
       format.xml  { head :ok }
     end
-  end
+  end  
+  private
+    def set_medicationdetail
+       @medicationdetail = Medicationdetail.find(params[:id])
+    end
+   def medicationdetail_params
+          params.require(:medicationdetail).permit(:id,:genericname,:brandname,:lookup_drugclass_id,:prescription,:exclusionclass)
+   end
 end

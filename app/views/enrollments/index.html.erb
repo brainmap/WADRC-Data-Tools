@@ -34,7 +34,7 @@ edit_count = edit_count -1
           <%= link_to 'Show', enrollment %>
 <% if edit_count >30 %>
           <%= link_to 'Edit', edit_enrollment_path(enrollment) %>
-          <%= link_to 'Destroy', enrollment, :confirm => 'Are you sure?', :method => :delete %>
+          <%= link_to 'Destroy', enrollment, :method => :delete,data: {confirm: 'Are you sure?' } %>
 <% end %>
         </td>
       </tr>

@@ -44,7 +44,7 @@ Limits a question to only be displayed (include) or not displayed ( exclude) for
     <td><%= question_scan_procedure.include_exclude %></td>
     <td><%= link_to 'Show', question_scan_procedure %></td>
     <td><%= link_to 'Edit', edit_question_scan_procedure_path(question_scan_procedure) %></td>
-    <td><%= link_to 'Destroy', question_scan_procedure, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', question_scan_procedure, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

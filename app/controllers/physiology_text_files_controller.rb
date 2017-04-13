@@ -42,7 +42,7 @@ class PhysiologyTextFilesController < ApplicationController
   # POST /physiology_text_files
   # POST /physiology_text_files.xml
   def create
-    @physiology_text_file = PhysiologyTextFile.new(params[:physiology_text_file])
+    @physiology_text_file = PhysiologyTextFile.new(physiology_text_file_params)# params[:physiology_text_file])
 
     respond_to do |format|
       if @physiology_text_file.save
@@ -63,7 +63,7 @@ class PhysiologyTextFilesController < ApplicationController
     
     if validates_truthiness_of_directory(@visit_directory_to_scan)
       respond_to do |format|
-        if @physiology_text_file.update_attributes(params[:physiology_text_file])
+        if @physiology_text_file.update(physiology_text_file_params)# params[:physiology_text_file], :without_protection => true)
           flash[:notice] = 'PhysiologyTextFile was successfully updated.'
           format.html { redirect_to(@physiology_text_file) }
           format.xml  { head :ok }
@@ -90,5 +90,12 @@ class PhysiologyTextFilesController < ApplicationController
   def validates_truthiness_of_directory(dir)
     # dir =~ /Data\/vtrak1\/raw\//
      dir =~ /mounts\/data\/raw\//
-  end
+  end   
+  private
+    def set_physiology_text_file
+       @physiology_text_file = PhysiologyTextFile.find(params[:id])
+    end
+   def physiology_text_file_params
+          params.require(:physiology_text_file).permit(:image_dataset_id,:filepath,:id)
+   end
 end

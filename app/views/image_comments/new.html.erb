@@ -1,7 +1,17 @@
 <h1>New image_comment</h1>
 
 <%= form_for(@image_comment) do |f| %>
-  <%= f.error_messages %>
+  <% if @image_comment.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@image_comment.errors.count, "error") %> prohibited this image_comment from being saved:</h2>
+
+      <ul>
+      <% @image_comment.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
 
 
   <p>

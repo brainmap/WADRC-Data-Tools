@@ -15,7 +15,17 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 </p>
 
 
-  <%= f.error_messages %>
+<% if @visit.errors.any? %>
+  <div id="error_explanation">
+    <h2><%= pluralize(@visit.errors.count, "error") %> prohibited this visit from being saved:</h2>
+
+    <ul>
+    <% @visit.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
   <div class="three_col_left">
     <p>
       <%= f.label :date %><br />
@@ -28,7 +38,17 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 		<p> -->
 			<div id="scan_procedure_list">
 			<ul>
-			<% ScanProcedure.where(" scan_procedures.id in (?)",  current_user[:edit_low_scan_procedure_array] ).all.sort_by(&:codename).each do |scan_procedure| %>
+				<!-- ??DEPRECATION WARNING: Relation#all is deprecated  ScanProcedure.where(" scan_procedures.id in (?)",  current_user[:edit_low_scan_procedure_array] ).all.sort_by(&:codename)--> 
+			<%
+			# sometimes a string -edit, sometimes and array -new - arrrg
+			   if(current_user[:edit_low_scan_procedure_array].kind_of?(Array))
+				   v_edit_low_sp_string = current_user[:edit_low_scan_procedure_array].join(' ')
+			   else
+				   v_edit_low_sp_string = current_user[:edit_low_scan_procedure_array]
+			   end
+			
+			%>
+			<% ScanProcedure.where(" scan_procedures.id in (?)", v_edit_low_sp_string.split(' ')).sort_by(&:codename).each do |scan_procedure| %>
 				<li>
 					<%#= f.fields_for scan_procedure do |scan_fields| %>
 						<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
@@ -40,7 +60,7 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 					<%= label_tag '', scan_procedure.codename %>
 				</li>
 			<% end %>
-			</ul>
+			</ul>  
 			</div>
 		</p>
     <p>
@@ -62,8 +82,10 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 			<%= e.check_box :_destroy unless e.object.new_record?  %>
 			<%= e.label :_destroy, "Remove?" unless e.object.new_record? %>
 			<% if e.object.new_record? %>
-			<%= e.text_field_with_auto_complete :enumber, {},
-				        { :method => :get, :url => enrollments_path(:format => :js), :param_name => 'search' } %>
+			<%= e.text_field :enumber, 
+				        { :method => :get, :url => enrollments_path(:format => :js), :param_name => 'search' } %> 
+		  <!-- e.text_field_with_auto_complete :enumber, {},
+							        { :method => :get, :url => enrollments_path(:format => :js), :param_name => 'search' } -->
 	        <%else%>
                  <%= e.object.enumber %>
                 <%= e.hidden_field :enumber %>
@@ -103,7 +125,10 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
       </tr>  -->
 	<tr>
       <td><%= f.label(:mritech) %></td><!-- from .all.sort_by(&:name) -->
-      <td><%= select(:visit, :mritech, Employee.find(:all, :order=>"status,first_name,last_name").collect {|p| [ p.name, p.id ] }, { :include_blank => "Select MRI Tech" }) %></td>
+      <%#= select(:visit, :mritech, Employee.all( :order=>"status,first_name,last_name").collect {|p| [ p.name, p.id ] },
+	 { :include_blank => "Select MRI Tech" }) %>  
+	  <td><%= select(:visit, :mritech, Employee.where("1=1").order("status,first_name,last_name").collect {|p|[ p.name, p.id ] },
+	 { :include_blank => "Select MRI Tech" }) %></td>
     </tr>
 	<tr>
       <td><%= f.label(:Scan_Start_Time) %></td>
@@ -127,7 +152,7 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
       </tr>  
       	<tr>
       <td><%= f.label(:appointment_coordinator) %></td>
-      <td><%= select(:appointment, :appointment_coordinator, Employee.find(:all, :order=>"status,first_name,last_name").collect {|p| [ p.name, p.id ] }, { :include_blank => "Select Appt Coordinator" }) %></td>
+      <td><%= select(:appointment, :appointment_coordinator, Employee.where("1=1").order("status,first_name,last_name").collect {|p| [ p.name, p.id ] }, { :include_blank => "Select Appt Coordinator" }) %></td>
     </tr>
      	<tr>
       <td><%= f.label(:secondary_key) %></td>

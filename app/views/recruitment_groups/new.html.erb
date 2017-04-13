@@ -1,7 +1,17 @@
 <h1>New recruitment group</h1>
 
 <%= form_for(@recruitment_group) do |f| %>
-  <%= f.error_messages %>
+ <% if @recruitment_group.errors.any? %>
+   <div id="error_explanation">
+     <h2><%= pluralize(@recruitment_group.errors.count, "error") %> prohibited this recruitment_group from being saved:</h2>
+
+     <ul>
+     <% @recruitment_group.errors.full_messages.each do |msg| %>
+       <li><%= msg %></li>
+     <% end %>
+     </ul>
+   </div>
+ <% end %>
 
   <p>
     <%= f.label :name %><br />

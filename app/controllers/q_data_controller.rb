@@ -41,7 +41,7 @@ class QDataController < ApplicationController
   # POST /q_data
   # POST /q_data.xml
   def create
-    @q_datum = QDatum.new(params[:q_datum])
+    @q_datum = QDatum.new(q_datum_params)#params[:q_datum])
 
     respond_to do |format|
       if @q_datum.save
@@ -60,7 +60,7 @@ class QDataController < ApplicationController
     @q_datum = QDatum.find(params[:id])
 
     respond_to do |format|
-      if @q_datum.update_attributes(params[:q_datum])
+      if @q_datum.update(q_datum_params)#params[:q_datum], :without_protection => true)
         format.html { redirect_to(@q_datum, :notice => 'Q datum was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -80,5 +80,12 @@ class QDataController < ApplicationController
       format.html { redirect_to(q_data_url) }
       format.xml  { head :ok }
     end
-  end
+  end   
+  private
+    def set_q_datum
+       @q_datum = QDatum.find(params[:id])
+    end
+   def q_datum_params
+          params.require(:q_datum).permit(:value_3,:value_2,:value_1,:value_link,:question_id,:q_data_form_id,:id)
+   end
 end

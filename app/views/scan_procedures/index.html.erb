@@ -38,7 +38,7 @@
         <%= link_to '@', scan_procedure %>
         <% if current_user.role == 'Admin_High'%>
         <%= link_to '&', edit_scan_procedure_path(scan_procedure) %>
-        <%= link_to 'x', scan_procedure, :confirm => 'Are you sure?', :method => :delete %>
+        <%= link_to 'x', scan_procedure, :method => :delete,data: {confirm: 'Are you sure?' } %>
         <%end%>
       </td>
     </tr>

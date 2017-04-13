@@ -1,12 +1,13 @@
 class Petscan < ActiveRecord::Base
-  belongs_to :appointment
-  has_many :petfiles,:class_name =>"Petfile", :dependent => :destroy
+  belongs_to :appointment 
+  has_many :petfiles,:class_name =>"Petfile", :dependent => :destroy  
   # not sure if will cause problems -- subjectid -visit1, visit2
   # need to also toss in scan procedure?
   #validates_uniqueness_of :file_name, :case_sensitive => false, :unless => Proc.new {|petscan| petscan.file_name.blank?}
   
   
-  default_scope :order => 'appointment_id DESC'
+  #default_scope :order => 'appointment_id DESC'  
+   default_scope { order(appointment_id: :desc) }  
   
   def appointment
       @appointment =Appointment.find(self.appointment_id)

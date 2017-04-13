@@ -40,7 +40,7 @@ class CgTableTypesController < ApplicationController
   # POST /cg_table_types
   # POST /cg_table_types.json
   def create
-    @cg_table_type = CgTableType.new(params[:cg_table_type])
+    @cg_table_type = CgTableType.new(cg_table_type_params)#params[:cg_table_type])
 
     respond_to do |format|
       if @cg_table_type.save
@@ -59,7 +59,7 @@ class CgTableTypesController < ApplicationController
     @cg_table_type = CgTableType.find(params[:id])
 
     respond_to do |format|
-      if @cg_table_type.update_attributes(params[:cg_table_type])
+      if @cg_table_type.update(cg_table_type_params)#params[:cg_table_type], :without_protection => true)
         format.html { redirect_to @cg_table_type, notice: 'Cg table type was successfully updated.' }
         format.json { head :no_content }
       else
@@ -79,5 +79,12 @@ class CgTableTypesController < ApplicationController
       format.html { redirect_to cg_table_types_url }
       format.json { head :no_content }
     end
-  end
+  end 
+  private
+    def set_cg_table_type
+       @cg_table_type = CgTableType.find(params[:id])
+    end
+   def cg_table_type_params
+          params.require(:cg_table_type).permit(:hide_date_flag,:status_flag,:protocol_id,:table_type,:description,:id)
+   end
 end

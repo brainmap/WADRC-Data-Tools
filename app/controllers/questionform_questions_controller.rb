@@ -138,7 +138,7 @@ class QuestionformQuestionsController < ApplicationController
     if params[:questionform_question][:display_order].blank?
       params[:questionform_question][:display_order] = (temp_display_order + 1).to_s
     end
-    @questionform_question = QuestionformQuestion.new(params[:questionform_question])
+    @questionform_question = QuestionformQuestion.new(questionform_question_params)# params[:questionform_question])
 
     respond_to do |format|
       if @questionform_question.save
@@ -160,7 +160,7 @@ class QuestionformQuestionsController < ApplicationController
     @questionform_question = QuestionformQuestion.find(params[:id])
 
     respond_to do |format|
-      if @questionform_question.update_attributes(params[:questionform_question])
+      if @questionform_question.update(questionform_question_params)# params[:questionform_question], :without_protection => true)
         format.html { redirect_to(@questionform_question, :notice => 'Questionform question was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -181,5 +181,12 @@ class QuestionformQuestionsController < ApplicationController
       format.html { redirect_to(questionform_questions_url) }
       format.xml  { head :ok }
     end
-  end
+  end 
+  private
+    def set_questionform_question
+       @questionform_question = QuestionformQuestion.find(params[:id])
+    end
+   def questionform_question_params
+          params.require(:questionform_question).permit(:questionform_id,:display_order,:question_id,:id)
+   end
 end

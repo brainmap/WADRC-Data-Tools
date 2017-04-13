@@ -8,30 +8,37 @@ class ImageDataset < ActiveRecord::Base
   EXCLUDED_REPORT_ATTRIBUTES = [:dicom_taghash, :created_at, :updated_at, :visit_id, :thumbnail_file_name, :thumbnail_file_size, :thumbnail_content_type, :thumbnail_updated_at]
   
   # default_includes = [:image_dataset_quality_checks, :analysis_memberships, {:visit => {:enrollment => :participant}}]
-  default_scope :order => 'image_datasets.timestamp ASC, image_datasets.path ASC' # :include => default_includes, 
-  
-  scope :excluded, :conditions => ['analysis_memberships.excluded = ?', true]
+  #default_scope :order => 'image_datasets.timestamp ASC, image_datasets.path ASC' # :include => default_includes, 
+   default_scope { order(timestamp: :asc,path: :asc) }   
+
+  ###scope :excluded, :conditions => ['analysis_memberships.excluded = ?', true] 
+  scope :excluded, -> { where('analysis_memberships.excluded = ?', true) }
   
   has_many :image_comments
   belongs_to :visit
-  has_many :analysis_memberships
-  # has_many :analyses, :through => :analysis_memberships
+  has_many :analysis_memberships  , :class_name => 'AnalysisMembership'
+  #has_many :analyses, :through => :analysis_memberships
   has_many :image_dataset_quality_checks, :dependent => :destroy
   has_one :log_file
   # Allow the DICOM UID to be blank for PFile Datasets, otherwise enforce uniqueness
   validates_uniqueness_of :dicom_series_uid, :case_sensitive => false, :unless => Proc.new {|dataset| dataset.dicom_series_uid.blank?}, :message => "Series UID must be unique."
   
-  has_attached_file :thumbnail, 
-    :styles => { :large => "900x900>", :medium => "300x300>", :thumb => "100x100" },
-    :default_url => "/images/missing-sag.gif"
-
-  
+  #has_attached_file :thumbnail, :default_url => "/images/missing-sag.gif"   #, was causing imagemah=gick error :styles => { :large => "900x900>", :medium => "300x300>", :thumb => "100x100" },  :default_url => "/images/missing-sag.gif" 
+  has_attached_file :thumbnail,  default_url: "/images/missing-sag.gif" ,          #styles: { thumb: "100x100" },    STYLES CAUSING imagemagick error - not resizing? - no product and then not identifiaable
+  :url => "/system/thumbnails/:id/original/:filename",:path => ":rails_root/public/system/thumbnails/:id/original/:filename"
+  # problem with styles-paperclip-imagemagick resizing  - maybe its an imagemagick on mac issue?
+  # changed ids page to display image as 100x100 using original   
+  #styles: { large: "900x900>", medium: "300x300>", thumb: "100x100" },
+ # do_not_validate_attachment_file_type :thumbnail  
+  validates_attachment_content_type :thumbnail,  :matches => [/png\Z/, /png\[0\]\Z/,/jpeg\Z/, /jpg\Z/, /gif\Z/],:not =>[]  # :content_type => ["image/jpg", "image/jpeg", "image/png", "image/gif"] 
   validates_presence_of :scanned_file
-  # validates_uniqueness_of :dataset_identifier
+  # validates_uniqueness_of :dataset_identifier  
+  
   
   has_many :physiology_text_files
   accepts_nested_attributes_for :physiology_text_files, :allow_destroy => true
   
+  attr_accessor :lock_default_scan_flag_parse  # virtual atrtribute - don't think this actually does anything except supressing an error
   
   serialize :dicom_taghash #, Hash      # added Hash # 20140324 hashed out Hash - ? 1.9.2 ruby? -- seems to work now
  #     attr_unsearchable :dicom_taghash    #   hashed out cai 20130926 -- used in old search ? meta_search, meta_where
@@ -114,7 +121,6 @@ class ImageDataset < ActiveRecord::Base
   def create_thumbnail
     # Only available for Dicoms - Done through glob.
     raise StandardError, "#{scanned_file} is not a DICOM image." if dicom?
-    
     if File.exist?(File.join(path, scanned_file))
       original_zip_status = false
       file_to_scan = File.join(path, scanned_file)
@@ -124,11 +130,10 @@ class ImageDataset < ActiveRecord::Base
     else
       raise StandardError, "Could not find file #{File.join(path, scanned_file)} on filesystem."
     end
-    
-    ds = RawImageDataset.new(path, RawImageFile.new(file_to_scan))
-    png_path = RawImageDatasetThumbnail.new(ds).create_thumbnail
-    tf = File.open(png_path)
-    self.thumbnail = tf
+    ds = RawImageDataset.new(path, RawImageFile.new(file_to_scan))  
+    png_path = RawImageDatasetThumbnail.new(ds).create_thumbnail 
+    tf = File.open(png_path)  
+    self.thumbnail = tf   
     raise(StandardError, "Could not create thumbnail for #{File.join(path, scanned_file)}") unless File.exists?(png_path)
     return png_path
   end

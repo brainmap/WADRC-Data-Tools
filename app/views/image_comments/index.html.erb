@@ -14,7 +14,7 @@
     <td>
 		<%= link_to '@', image_comment %>
     	<%= link_to '&', edit_image_comment_path(image_comment) %>
-    	<%= link_to 'x', image_comment, :confirm => 'Are you sure?', :method => :delete %>
+    	<%= link_to 'x', image_comment, :method => :delete,data: {confirm: 'Are you sure?' } %>
 	</td>
   </tr>
 <% end %>

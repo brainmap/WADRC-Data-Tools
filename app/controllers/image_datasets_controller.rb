@@ -2,7 +2,9 @@
 class ImageDatasetsController < ApplicationController # AuthorizedController #  ApplicationController
 #   load_and_authorize_resource
   require 'csv'
-  before_filter :set_current_tab
+  before_action :set_current_tab  
+  before_action :set_image_dataset, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   
   def set_current_tab
     @current_tab = "image_datasets"
@@ -115,7 +117,9 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
       
 
       def ids_search
-
+           if(!params["ids_search"].blank?) 
+              @ids_search_params  = ids_search_params() 
+           end
           hide_date_flag_array = []
       hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
       @hide_page_flag = 'N'
@@ -277,7 +281,9 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
            params["search_criteria"] = params["search_criteria"].sub(", ","")
 
            # adjust columns and fields for html vs xls
-           request_format = request.formats.to_s
+           #request_format = request.formats.to_s 
+           v_request_format_array = request.formats
+            request_format = v_request_format_array[0]
            @html_request ="Y"
            case  request_format
              when "[text/html]","text/html" then # ? application/html
@@ -293,7 +299,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
          'image_dataset_quality_checks.incomplete_series','image_dataset_quality_checks.incomplete_series_comment','image_dataset_quality_checks.garbled_series','image_dataset_quality_checks.garbled_series_comment','image_dataset_quality_checks.fov_cutoff','image_dataset_quality_checks.fov_cutoff_comment','image_dataset_quality_checks.field_inhomogeneity','image_dataset_quality_checks.field_inhomogeneity_comment','image_dataset_quality_checks.ghosting_wrapping','image_dataset_quality_checks.ghosting_wrapping_comment',
          'image_dataset_quality_checks.banding','image_dataset_quality_checks.banding_comment','image_dataset_quality_checks.registration_risk','image_dataset_quality_checks.registration_risk_comment','image_dataset_quality_checks.nos_concerns','image_dataset_quality_checks.nos_concerns_comment','image_dataset_quality_checks.motion_warning','image_dataset_quality_checks.motion_warning_comment',
             'image_dataset_quality_checks.omnibus_f','image_dataset_quality_checks.omnibus_f_comment','image_dataset_quality_checks.spm_mask','image_dataset_quality_checks.spm_mask_comment','image_dataset_quality_checks.other_issues',
-            'image_dataset_quality_checks.user_id','image_dataset_quality_checks.created_at','image_dataset_quality_checks.updated_at','image_dataset_quality_checks.image_dataset_id','image_comments.updated_at','image_comments.created_at','image_comments.user_id','image_comments.image_dataset_id','Appt Note'] # need to look up values
+            'image_dataset_quality_checks.user_id','image_dataset_quality_checks.created_at','image_dataset_quality_checks.updated_at','image_dataset_quality_checks.image_dataset_id','image_comments.updated_at','image_comments.created_at','image_comments.user_id','image_comments.image_dataset_id','Appt Note'] # need to look up values # not seem to be getting Appt note ,'Appt Note'
           
           
           
@@ -306,7 +312,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
         "image_dataset_quality_checks.incomplete_series","image_dataset_quality_checks.incomplete_series_comment","image_dataset_quality_checks.garbled_series","image_dataset_quality_checks.garbled_series_comment","image_dataset_quality_checks.fov_cutoff","image_dataset_quality_checks.fov_cutoff_comment","image_dataset_quality_checks.field_inhomogeneity","image_dataset_quality_checks.field_inhomogeneity_comment","image_dataset_quality_checks.ghosting_wrapping","image_dataset_quality_checks.ghosting_wrapping_comment",
      "image_dataset_quality_checks.banding","image_dataset_quality_checks.banding_comment","image_dataset_quality_checks.registration_risk","image_dataset_quality_checks.registration_risk_comment","image_dataset_quality_checks.nos_concerns","image_dataset_quality_checks.nos_concerns_comment","image_dataset_quality_checks.motion_warning","image_dataset_quality_checks.motion_warning_comment",
                   "image_dataset_quality_checks.omnibus_f","image_dataset_quality_checks.omnibus_f_comment","image_dataset_quality_checks.spm_mask","image_dataset_quality_checks.spm_mask_comment","image_dataset_quality_checks.other_issues",
-                 "concat(qc_users.last_name,', ',qc_users.first_name)","concat(date_format(image_dataset_quality_checks.created_at,'%m/%d/%Y'),time_format(timediff( time(image_dataset_quality_checks.created_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(date_format(image_dataset_quality_checks.updated_at,'%m/%d/%Y'),time_format(timediff( time(image_dataset_quality_checks.updated_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_dataset_quality_checks.image_dataset_id","concat(date_format(image_comments.updated_at,'%m/%d/%Y'),time_format(timediff( time(image_comments.updated_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(date_format(image_comments.created_at,'%m/%d/%Y'),time_format(timediff( time(image_comments.created_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(users.last_name,', ',users.first_name)","image_comments.image_dataset_id"]
+                 "concat(qc_users.last_name,', ',qc_users.first_name)","concat(date_format(image_dataset_quality_checks.created_at,'%m/%d/%Y'),time_format(timediff( time(image_dataset_quality_checks.created_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(date_format(image_dataset_quality_checks.updated_at,'%m/%d/%Y'),time_format(timediff( time(image_dataset_quality_checks.updated_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","image_dataset_quality_checks.image_dataset_id","concat(date_format(image_comments.updated_at,'%m/%d/%Y'),time_format(timediff( time(image_comments.updated_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(date_format(image_comments.created_at,'%m/%d/%Y'),time_format(timediff( time(image_comments.created_at),subtime(utc_time(),time(localtime()))),' %H:%i'))","concat(users.last_name,', ',users.first_name)","image_comments.image_dataset_id"] 
                
                 @group_by = " group by vgroups.id,appointments.appointment_date, vgroups.rmr , image_datasets.series_description,image_datasets.dicom_series_uid,image_datasets.dcm_file_count,image_datasets.image_uid,image_datasets.id,image_dataset_quality_checks.id"
 
@@ -332,7 +338,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
     @csv_array.push( @column_headers)
     @results.each do |result| 
        @results_tmp_csv = []
-       for i in 0..@column_number-1  # results is an array of arrays%>
+       for i in 0..@column_number     #-1  # results is an array of arrays%>
           @results_tmp_csv.push(result[i])
        end 
        @csv_array.push(@results_tmp_csv)
@@ -412,7 +418,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
   # POST /image_datasets
   # POST /image_datasets.xml
   def create
-    @image_dataset = ImageDataset.new(params[:image_dataset])
+    @image_dataset = ImageDataset.new(image_dataset_params)#params[:image_dataset])
     @image_dataset.user = current_user
     respond_to do |format|
       if @image_dataset.save
@@ -446,18 +452,18 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
         @hide_page_flag = 'Y'
       end
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
-    if !params[:lock_default_scan_flag_parse].blank?  
-           v_lock_default_scan_array = params[:lock_default_scan_flag_parse].split("|")
+    if !params[:image_dataset][:lock_default_scan_flag_parse].blank?  
+           v_lock_default_scan_array = params[:image_dataset][:lock_default_scan_flag_parse].split("|")
             @image_dataset.lock_default_scan_flag = v_lock_default_scan_array[0]
             if v_lock_default_scan_array[1] == ''
                   @image_dataset.use_as_default_scan_flag =nil
             else
                   @image_dataset.use_as_default_scan_flag = v_lock_default_scan_array[1]
-            end
+            end 
     end
 
     respond_to do |format|
-      if @image_dataset.update_attributes(params[:image_dataset])
+      if @image_dataset.update(image_dataset_params)#params[:image_dataset], :without_protection => true)
         flash[:notice] = 'ImageDataset was successfully updated.'
         format.html { redirect_to(@image_dataset) }
         format.xml  { head :ok }
@@ -485,5 +491,15 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
       format.html { redirect_to(image_datasets_url) }
       format.xml  { head :ok }
     end
-  end
+  end  
+  private
+    def set_image_dataset
+       @image_dataset = ImageDataset.find(params[:id])
+    end
+   def image_dataset_params
+          params.require(:image_dataset).permit(:lock_default_scan_flag_parse,:scanned_file,:slices_per_volume,:bold_reps,:rep_time,:glob,:visit_id,:timestamp,:path,:series_description,:rmr,:thumbnail_file_name,:thumbnail_content_type,:mri_coil_name,:lock_default_scan_flag,:use_as_default_scan_flag,:coil_channel_number,:do_not_share_scans_flag,:image_uid,:dicom_taghash,:dicom_series_uid,:thumbnail_updated_at,:thumbnail_file_size,:id,:dcm_file_count,:thumbnail,:thumb)
+   end  
+   def ids_search_params
+          params.require(:ids_search).permit!
+   end
 end

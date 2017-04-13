@@ -18,7 +18,7 @@
     <% if current_user.role == 'Admin_High' %>
     <td><%= link_to 'Show', questionform_scan_procedure %></td>
     <td><%= link_to 'Edit', edit_questionform_scan_procedure_path(questionform_scan_procedure) %></td>
-    <td><%= link_to 'Destroy', questionform_scan_procedure, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', questionform_scan_procedure, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
     <%end%>
 <% end %>
 </table>

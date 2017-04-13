@@ -17,7 +17,7 @@
     <td><%= lookup_status.status_type %></td>
     <td><%= link_to 'Show', lookup_status %></td>
     <td><%= link_to 'Edit', edit_lookup_status_path(lookup_status) %></td>
-    <td><%= link_to 'Destroy', lookup_status, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', lookup_status,  :method => :delete ,data: {confirm: 'Are you sure?' }%></td>
   </tr>
 <% end %>
 </table>

@@ -1,4 +1,4 @@
-<% @radiology_comments = RadiologyComment.where(" radiology_comments.visit_id in (?)",@visit.id).all %>
+<% @radiology_comments = RadiologyComment.where(" radiology_comments.visit_id in (?)",@visit.id).to_a %>
 <%    v_radiology_id = ""
      @radiology_comments.each do |r| 
      	    v_radiology_id = r.id %>

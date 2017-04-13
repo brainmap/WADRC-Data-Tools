@@ -30,7 +30,7 @@
     <td><%= vgroup.lumbar_punture %></td>
     <td><%= link_to 'Show', vgroup %></td>
     <td><%= link_to 'Edit', edit_vgroup_path(vgroup) %></td>
-    <td><%= link_to 'Destroy', vgroup, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', vgroup, :method => :delete, data: {confirm: 'Are you sure?'} %></td>
   </tr>
 <% end %>
 </table>

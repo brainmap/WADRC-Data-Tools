@@ -1,5 +1,7 @@
 # encoding: utf-8
-class NeuropsychAssessmentsController < ApplicationController
+class NeuropsychAssessmentsController < ApplicationController  
+  before_action :set_neuropsych_assessment, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /neuropsych_assessments
   # GET /neuropsych_assessments.xml
   def index
@@ -41,7 +43,7 @@ class NeuropsychAssessmentsController < ApplicationController
   # POST /neuropsych_assessments
   # POST /neuropsych_assessments.xml
   def create
-    @neuropsych_assessment = NeuropsychAssessment.new(params[:neuropsych_assessment])
+    @neuropsych_assessment = NeuropsychAssessment.new(neuropsych_assessment_params)#params[:neuropsych_assessment])
 
     respond_to do |format|
       if @neuropsych_assessment.save
@@ -61,7 +63,7 @@ class NeuropsychAssessmentsController < ApplicationController
     @neuropsych_assessment = NeuropsychAssessment.find(params[:id])
 
     respond_to do |format|
-      if @neuropsych_assessment.update_attributes(params[:neuropsych_assessment])
+      if @neuropsych_assessment.update(neuropsych_assessment_params)#params[:neuropsych_assessment], :without_protection => true)
         flash[:notice] = 'NeuropsychAssessment was successfully updated.'
         format.html { redirect_to(@neuropsych_assessment) }
         format.xml  { head :ok }
@@ -82,5 +84,12 @@ class NeuropsychAssessmentsController < ApplicationController
       format.html { redirect_to(neuropsych_assessments_url) }
       format.xml  { head :ok }
     end
-  end
+  end 
+  private
+    def set_neuropsych_assessment
+       @neuropsych_assessment = NeuropsychAssessment.find(params[:id])
+    end
+   def neuropsych_assessment_params
+          params.require(:neuropsych_assessment).permit(:test_name,:neuropsych_session_id,:id,:score,:score_type,:note)
+   end
 end

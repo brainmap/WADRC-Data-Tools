@@ -1,5 +1,7 @@
 # encoding: utf-8
-class EmployeesController < ApplicationController
+class EmployeesController < ApplicationController   
+  before_action :set_employee, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /employees
   # GET /employees.xml
   def index
@@ -41,7 +43,7 @@ class EmployeesController < ApplicationController
   # POST /employees
   # POST /employees.xml
   def create
-    @employee = Employee.new(params[:employee])
+    @employee = Employee.new(employee_params)#params[:employee])
     @employee.description = @employee.last_name+", "+@employee.first_name+" "+@employee.mi
     respond_to do |format|
       if @employee.save
@@ -60,7 +62,7 @@ class EmployeesController < ApplicationController
     @employee = Employee.find(params[:id])
 
     respond_to do |format|
-      if @employee.update_attributes(params[:employee])
+      if @employee.update(employee_params)#params[:employee], :without_protection => true)
         @employee.description = @employee.last_name+", "+@employee.first_name+" "+@employee.mi
         @employee.save
         format.html { redirect_to(@employee, :notice => 'Employee was successfully updated.') }
@@ -82,5 +84,12 @@ class EmployeesController < ApplicationController
       format.html { redirect_to(employees_url) }
       format.xml  { head :ok }
     end
-  end
+  end  
+  private
+    def set_employee
+       @employee = Employee.find(params[:id])
+    end
+   def employee_params
+          params.require(:employee).permit(:description,:user_id,:lookup_status_id,:initials,:status,:last_name,:mi,:first_name,:id)
+   end
 end

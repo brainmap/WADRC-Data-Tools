@@ -1,5 +1,7 @@
 # encoding: utf-8
-class LumbarpunctureResultsController < ApplicationController
+class LumbarpunctureResultsController < ApplicationController  
+  before_action :set_lumbarpuncture_result, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /lumbarpuncture_results
   # GET /lumbarpuncture_results.xml
   def index
@@ -41,7 +43,7 @@ class LumbarpunctureResultsController < ApplicationController
   # POST /lumbarpuncture_results
   # POST /lumbarpuncture_results.xml
   def create
-    @lumbarpuncture_result = LumbarpunctureResult.new(params[:lumbarpuncture_result])
+    @lumbarpuncture_result = LumbarpunctureResult.new( lumbarpuncture_result_params)#params[:lumbarpuncture_result])
 
     respond_to do |format|
       if @lumbarpuncture_result.save
@@ -60,7 +62,7 @@ class LumbarpunctureResultsController < ApplicationController
     @lumbarpuncture_result = LumbarpunctureResult.find(params[:id])
 
     respond_to do |format|
-      if @lumbarpuncture_result.update_attributes(params[:lumbarpuncture_result])
+      if @lumbarpuncture_result.update( lumbarpuncture_result_params)#params[:lumbarpuncture_result], :without_protection => true)
         format.html { redirect_to(@lumbarpuncture_result, :notice => 'Lumbarpuncture result was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -80,5 +82,12 @@ class LumbarpunctureResultsController < ApplicationController
       format.html { redirect_to(lumbarpuncture_results_url) }
       format.xml  { head :ok }
     end
-  end
+  end  
+  private
+    def set_lumbarpuncture_result
+       @lumbarpuncture_result = LumbarpunctureResult.find(params[:id])
+    end
+   def lumbarpuncture_result_params
+          params.require(:lumbarpuncture_result).permit(:lumbarpuncture_id,:value_string,:value,:lookup_lumbarpuncture_id,:id)
+   end
 end

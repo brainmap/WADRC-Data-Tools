@@ -1,5 +1,7 @@
 # encoding: utf-8
-class LookupRefsController < ApplicationController
+class LookupRefsController < ApplicationController  
+  before_action :set_lookup_ref, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /lookup_refs
   # GET /lookup_refs.xml
   def index
@@ -213,7 +215,7 @@ class LookupRefsController < ApplicationController
     if !v_lookup_refs.empty?
          flash[:notice]  = flash[:notice]  +"The label ["+params[:lookup_ref][:label] +"] and ref_value ["+params[:lookup_ref][:ref_value]+"] already exist."
     end
-    @lookup_ref = LookupRef.new(params[:lookup_ref])
+    @lookup_ref = LookupRef.new(lookup_ref_params)# params[:lookup_ref])
 
 
     respond_to do |format|
@@ -324,7 +326,7 @@ end
          @q.push(r[0])
     end
     respond_to do |format|
-      if ( (current_user.role == 'Admin_High' or @q.count == 0 ) and !(params[:lookup_ref][:label]).strip.empty?  and !(params[:lookup_ref][:ref_value]).empty?  and !(params[:lookup_ref][:description]).strip.empty?  and (params[:lookup_ref][:label]).strip == @lookup_ref.label   and params[:lookup_ref][:ref_value] == @lookup_ref.ref_value.to_s and @lookup_ref.update_attributes(params[:lookup_ref]) )
+      if ( (current_user.role == 'Admin_High' or @q.count == 0 ) and !(params[:lookup_ref][:label]).strip.empty?  and !(params[:lookup_ref][:ref_value]).empty?  and !(params[:lookup_ref][:description]).strip.empty?  and (params[:lookup_ref][:label]).strip == @lookup_ref.label   and params[:lookup_ref][:ref_value] == @lookup_ref.ref_value.to_s and @lookup_ref.update(lookup_ref_params)  )
         @lookup_ref.label = (@lookup_ref.label).strip
         @lookup_ref.save
         format.html { redirect_to(@lookup_ref, :notice => 'Lookup ref was successfully updated.') }
@@ -407,5 +409,12 @@ end
       format.html { redirect_to(lookup_refs_url) }
       format.xml  { head :ok }
     end
-  end
+  end 
+  private
+    def set_lookup_ref
+       @lookup_ref = LookupRef.find(params[:id])
+    end
+   def lookup_ref_params
+          params.require(:lookup_ref).permit(:updated_at,:created_at,:label,:display_order,:description,:ref_value,:id)
+   end
 end

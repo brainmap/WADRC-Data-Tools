@@ -1,4 +1,6 @@
-class DirectoriesController < ApplicationController
+class DirectoriesController < ApplicationController   
+  before_action :set_directory, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
 	# GET /directories
 	# GET /directories.xml
 	def index
@@ -46,7 +48,7 @@ class DirectoriesController < ApplicationController
 	# POST /directories
 	# POST /directories.xml
 	def create
-		@directory = Directory.new(params[:directory])
+		@directory = Directory.new(directory_params)#params[:directory])
 		respond_to do |format|
 			if @directory.save
 				format.html { redirect_to(@directory, :notice => 'Directory was successfully created.') }
@@ -64,7 +66,7 @@ class DirectoriesController < ApplicationController
 		@directory = Directory.find(params[:id])
 
 		respond_to do |format|
-			if @directory.update_attributes(params[:directory])
+			if @directory.update(directory_params)#params[:directory], :without_protection => true)
 				format.html { redirect_to(@directory, :notice => 'Directory was successfully updated.') }
 				format.xml	{ head :ok }
 			else
@@ -93,5 +95,13 @@ class DirectoriesController < ApplicationController
 	    Directory.update_all(['position=?', index+1], ['id=?', id])
 	  end
 	  render :nothing => true
-	end
+	end 
+	
+	private
+    def set_directory
+       @directory = Directory.find(params[:id])
+    end
+   def directory_params
+          params.require(:directory).permit(:drill_down_flag,:position,:label,:path,:id,:status_flag)
+   end
 end

@@ -1,7 +1,17 @@
 <h1>New neuropsych_session</h1>
 
 <%= form_for(@neuropsych_session) do |f| %>
-  <%= f.error_messages %>
+<% if @neuropsych_session.errors.any? %>
+  <div id="error_explanation">
+    <h2><%= pluralize(@neuropsych_session.errors.count, "error") %> prohibited this neuropsych_session from being saved:</h2>
+
+    <ul>
+    <% @neuropsych_session.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
 
   <p>
     <%= f.label :date %><br />

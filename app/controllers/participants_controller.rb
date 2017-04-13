@@ -2,7 +2,7 @@
 class ParticipantsController < ApplicationController
   PER_PAGE = 50
   
-  before_filter :set_current_tab
+  before_action :set_current_tab
   
   def set_current_tab
     @current_tab = "enroll_parti_sp"
@@ -106,7 +106,7 @@ class ParticipantsController < ApplicationController
   # POST /participants
   # POST /participants.xml
   def create
-    @participant = Participant.new(params[:participant])
+    @participant = Participant.new(participant_params)#params[:participant])
     if @participant.dob > 365.days.ago.to_date # form is setting a default date of today sometimes
        @participant.dob = nil
     end
@@ -178,7 +178,7 @@ class ParticipantsController < ApplicationController
                  where enrollment_vgroup_memberships.vgroup_id  =  scan_procedures_vgroups.vgroup_id and  scan_procedures_vgroups.scan_procedure_id in (?))) ", scan_procedure_array).find(params[:id])
       end
     respond_to do |format|
-      if @participant.update_attributes(params[:participant])
+      if @participant.update(participant_params)#params[:participant], :without_protection => true)
         sql = "update participants set wrapnum = NULL where trim(wrapnum) = '' "
         connection = ActiveRecord::Base.connection();
         results = connection.execute(sql)
@@ -209,7 +209,9 @@ class ParticipantsController < ApplicationController
   end
   
   def participant_search
-
+    if(!params["participant_search"].blank?) 
+       @participant_search_params  = participant_search_params() 
+    end
 
         # possible params -- participants fields just get added as AND statements
         #   other table fields should be grouped into one lower level IN select 
@@ -362,7 +364,9 @@ class ParticipantsController < ApplicationController
          end
 
        # adjust columns and fields for html vs xls
-       request_format = request.formats.to_s
+       #request_format = request.formats.to_s  
+       v_request_format_array = request.formats
+        request_format = v_request_format_array[0]
        @html_request ="Y"
        case  request_format
          when "[text/html]","text/html" then # ? application/html
@@ -515,11 +519,11 @@ class ParticipantsController < ApplicationController
           end 
           if @participant_one.dob.blank? and !@participant_two.dob.blank?
                @participant_one.dob = @participant_two.dob
-          end 
-          if @participant_one.apoe_e1.blank? and !@participant_two.apoe_e1.blank?
+          end  
+          if (@participant_one.apoe_e1.blank? or @participant_one.apoe_e1 <1 ) and !@participant_two.apoe_e1.blank?
                @participant_one.apoe_e1 = @participant_two.apoe_e1
           end 
-          if @participant_one.apoe_e2.blank? and !@participant_two.apoe_e2.blank?
+          if (@participant_one.apoe_e2.blank? or @participant_one.apoe_e2 <1 ) and !@participant_two.apoe_e2.blank?
                @participant_one.apoe_e2 = @participant_two.apoe_e2
           end
           @participant_one.save
@@ -594,11 +598,11 @@ class ParticipantsController < ApplicationController
           end 
           if @participant_two.dob.blank? and !@participant_one.dob.blank?
                @participant_two.dob = @participant_one.dob
-          end 
-          if @participant_two.apoe_e1.blank? and !@participant_one.apoe_e1.blank?
+          end    
+          if (@participant_two.apoe_e1.blank? or @participant_two.apoe_e1 <1 ) and !@participant_one.apoe_e1.blank?
                @participant_two.apoe_e1 = @participant_one.apoe_e1
           end 
-          if @participant_two.apoe_e2.blank? and !@participant_one.apoe_e2.blank?
+          if (@participant_two.apoe_e2.blank? or @participant_two.apoe_e2 <1 ) and !@participant_one.apoe_e2.blank?
                @participant_two.apoe_e2 = @participant_one.apoe_e2
           end
           @participant_two.save
@@ -682,5 +686,15 @@ class ParticipantsController < ApplicationController
         # participant status?
        render :template => "participants/participant_merge"
 
-  end
+  end    
+  private
+    def set_participant
+       @participant = Participant.find(params[:id])
+    end
+   def participant_params
+          params.require(:participant).permit(:note,:apoe_processor,:dob,:access_id,:reggieid,:adrcnum,:gender,:apoe_e2,:apoe_e1,:wrapnum,:id,:ed_years)
+   end   
+   def participant_search_params
+          params.require(:participant_search).permit!
+   end
 end

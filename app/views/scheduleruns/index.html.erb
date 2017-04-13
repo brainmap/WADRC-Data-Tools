@@ -38,7 +38,7 @@ edit_count = edit_count -1
     <td><%= link_to 'Show', schedulerun %></td>
 <% if edit_count >30 %>
     <td><%= link_to 'Edit', edit_schedulerun_path(schedulerun) %></td>
-    <td><%= link_to 'Destroy', schedulerun, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', schedulerun, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
 <% end %>
   </tr>
 <% end %>

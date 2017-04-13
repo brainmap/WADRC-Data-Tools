@@ -4,9 +4,9 @@ class QuestionsController < ApplicationController
   # GET /questions.xml
   def index
     scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
-    @questions = Question.where( "questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",scan_procedure_array).order("id DESC" ).all
+    @questions = Question.where( "questions.id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",scan_procedure_array).order("id DESC" ).to_a
     if current_user.role == 'Admin_High'
-        @questions = Question.order("id DESC" ).all
+        @questions = Question.order("id DESC" ).to_a
     end
 
     @v_scan_procedure_id = ""
@@ -167,7 +167,7 @@ class QuestionsController < ApplicationController
   # POST /questions.xml
   def create
     scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
-    @question = Question.new(params[:question])
+    @question = Question.new(question_params)#params[:question])
     @v_sp_id = params[:question_scan_procedure][:scan_procedure_id]
     v_message =""
     if @v_sp_id.blank?
@@ -211,7 +211,7 @@ class QuestionsController < ApplicationController
         @question = Question.find(params[:id])
     end
     respond_to do |format|
-      if @question.update_attributes(params[:question])
+      if @question.update(question_params)#params[:question], :without_protection => true)
           @question.ref_table_a_1 = (@question.ref_table_a_1).strip
           @question.ref_table_b_1 = (@question.ref_table_b_1).strip
           @question.ref_table_a_2 = (@question.ref_table_a_2).strip
@@ -247,5 +247,12 @@ class QuestionsController < ApplicationController
       format.html { redirect_to(questions_url) }
       format.xml  { head :ok }
     end
-  end
+  end 
+  private
+    def set_question
+       @question = Question.find(params[:id])
+    end
+   def question_params
+          params.require(:question).permit(:parent_question_id,:status,:required_y_n_3,:phrase_c_3,:default_val_3,:ref_table_b_3,:default_val_2,:ref_table_a_3,:description,:js_1,:prompt_3,:prompt_2,:base_table_1,:prompt_1,:value_link,:js_3,:js_2,:phrase_b_3,:default_val_1,:export_column_header_2,:access_table_2,:access_column_2,:access_table_3,:access_column_3,:col_span_1,:col_span_2,:col_span_3,:align_1,:align_2,:align_3,:export_column_header_1,:access_column_1,:access_table_1,:base_column_1,:base_table_2,:base_column_2,:base_table_3,:base_column_3,:global_update_1,:global_update_2,:global_update_3,:global_update_insert_1,:global_update_insert_2,:global_update_insert_3,:export_column_header_3,:value_type_3,:phrase_a_3,:phrase_c_1,:phrase_b_1,:ref_table_b_1,:ref_table_a_1,:value_type_1,:phrase_a_1,:heading_1,:id,:required_y_n_1,:heading_2,:heading_3,:required_y_n_2,:phrase_c_2,:phrase_b_2,:ref_table_b_2,:ref_table_a_2,:value_type_2,:phrase_a_2)
+   end
 end

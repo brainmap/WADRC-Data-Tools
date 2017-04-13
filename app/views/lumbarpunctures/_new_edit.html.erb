@@ -11,7 +11,18 @@ v_yes_no_na_display = [["Yes","yes"], ["No","no"], ["n/a","n/a"]]
 
 <!-- Directory path? -->
 <%= form_for(@lumbarpuncture) do |f| %>
-  <%= f.error_messages %>
+
+  <% if @lumbarpuncture.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@lumbarpuncture.errors.count, "error") %> prohibited this lumbarpuncture from being saved:</h2>
+
+      <ul>
+      <% @lumbarpuncture.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
   <div class="three_col_left">
     <p>
       <%= f.label :date %><br />

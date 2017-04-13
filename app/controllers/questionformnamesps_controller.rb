@@ -40,7 +40,7 @@ class QuestionformnamespsController < ApplicationController
   # POST /questionformnamesps
   # POST /questionformnamesps.json
   def create
-    @questionformnamesp = Questionformnamesp.new(params[:questionformnamesp])
+    @questionformnamesp = Questionformnamesp.new(questionformnamesp_params)#params[:questionformnamesp])
 
     respond_to do |format|
       if @questionformnamesp.save
@@ -59,7 +59,7 @@ class QuestionformnamespsController < ApplicationController
     @questionformnamesp = Questionformnamesp.find(params[:id])
 
     respond_to do |format|
-      if @questionformnamesp.update_attributes(params[:questionformnamesp])
+      if @questionformnamesp.update(questionformnamesp_params)#params[:questionformnamesp], :without_protection => true)
         format.html { redirect_to @questionformnamesp, notice: 'Questionformnamesp was successfully updated.' }
         format.json { head :no_content }
       else
@@ -79,5 +79,12 @@ class QuestionformnamespsController < ApplicationController
       format.html { redirect_to questionformnamesps_url }
       format.json { head :no_content }
     end
-  end
+  end   
+  private
+    def set_questionformnamesp
+       @questionformnamesp = Questionformnamesp.find(params[:id])
+    end
+   def questionformnamesp_params
+          params.require(:questionformnamesp).permit(:form_name,:scan_procedure_id,:questionform_id,:id)
+   end
 end

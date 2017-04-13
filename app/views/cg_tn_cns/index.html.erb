@@ -63,7 +63,7 @@
     <td><%= cg_tn_cn.secondary_key_visitno_flag %></td>
     <td><%= link_to 'Show', cg_tn_cn %></td>
     <td><%= link_to 'Edit', edit_cg_tn_cn_path(cg_tn_cn) %></td>
-    <td><%= link_to 'Destroy', cg_tn_cn, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', cg_tn_cn, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

@@ -24,7 +24,7 @@
   <tr>
     <td><%= link_to 'Show', questionform %></td>
     <td><%= link_to 'Edit', edit_questionform_path(questionform) %></td>
-    <td><%= link_to 'Destroy', questionform, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', questionform, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
 	<td><%= link_to 'Display Form/Questions', '/questionforms/displayform/'+questionform.id.to_s %> </td>
     <td><%= questionform.short_description %></td>
     <td><%= questionform.description %></td>

@@ -1,6 +1,8 @@
 # encoding: utf-8
 class ProtocolRolesController < AuthorizedController #  ApplicationController
-load_and_authorize_resource
+load_and_authorize_resource    
+ before_action :set_protocol_role, only: [:show, :edit, :update, :destroy]   
+respond_to :html
   # GET /protocol_roles
   # GET /protocol_roles.xml
   def index
@@ -30,7 +32,7 @@ load_and_authorize_resource
   # GET /protocol_roles/1.xml
   def show
     @protocol_role = ProtocolRole.find(params[:id])
-
+      puts "CCCCC show "+params[:id] 
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @protocol_role }
@@ -56,7 +58,7 @@ load_and_authorize_resource
   # POST /protocol_roles
   # POST /protocol_roles.xml
   def create
-    @protocol_role = ProtocolRole.new(params[:protocol_role])
+    @protocol_role = ProtocolRole.new(protocol_role_params)#params[:protocol_role])
 
     respond_to do |format|
       if @protocol_role.save
@@ -73,9 +75,9 @@ load_and_authorize_resource
   # PUT /protocol_roles/1.xml
   def update
     @protocol_role = ProtocolRole.find(params[:id])
-
+  puts "BBBB update "+params[:id] 
     respond_to do |format|
-      if @protocol_role.update_attributes(params[:protocol_role])
+      if @protocol_role.update(protocol_role_params)# params[:protocol_role], :without_protection => true)
         format.html { redirect_to(@protocol_role, :notice => 'Protocol role was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -88,9 +90,10 @@ load_and_authorize_resource
   # DELETE /protocol_roles/1
   # DELETE /protocol_roles/1.xml
   # Could not find table 'protocol_roles_protocols'
-  def destroy
-    @protocol_role = ProtocolRole.find(params[:id])
-    @protocol_role.destroy
+  def destroy  
+ puts "AAAAAA destroy "+params[:id]
+    @protocol_role = ProtocolRole.find(params[:id].to_i)
+    @protocol_role.destroy  
 
     respond_to do |format|
       format.html { redirect_to(protocol_roles_url) }
@@ -102,5 +105,11 @@ load_and_authorize_resource
   def authorize_parent
     authorize! :read, (@protocol)
   end
-  
+   private
+    def set_protocol_role
+       @protocol_role = ProtocolRole.find(params[:id])
+    end
+   def protocol_role_params
+          params.require(:protocol_role).permit(:role,:protocol_id,:user_id,:id)
+   end
 end

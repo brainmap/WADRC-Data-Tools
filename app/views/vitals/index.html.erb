@@ -22,7 +22,7 @@
     <td><%= vital.bloodglucose %></td>
     <td><%= link_to 'Show', vital %></td>
     <td><%= link_to 'Edit', edit_vital_path(vital) %></td>
-    <td><%= link_to 'Destroy', vital, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', vital, :method => :delete  , data: {confirm: 'Are you sure?'}%></td>
   </tr>
 <% end %>
 </table>

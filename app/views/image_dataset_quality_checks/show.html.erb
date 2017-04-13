@@ -66,7 +66,7 @@ edit_count = edit_count -1
 <%= link_to 'View image dataset', image_dataset_path(@idqc.image_dataset) %> |
 <%= link_to 'View visit', visit_path(@idqc.image_dataset.visit) %> 
 <% if edit_count > 0 %>|
-<%= link_to 'Delete', @idqc, :confirm => 'Are you sure?', :method => :delete %>
+<%= link_to 'Delete', @idqc, :method => :delete , data: { confirm: 'Are you sure?'}%>
 <% end %>
 
 <br>

@@ -45,7 +45,7 @@
           <td>
             <%= link_to '@', qc %>
             <%= link_to '&', edit_image_dataset_quality_check_path(qc) %>
-            <%= link_to 'x', qc, :confirm => 'Are you sure?', :method => :delete %>
+            <%= link_to 'x', qc, :method => :delete, data: { confirm: 'Are you sure?'} %>
           </td>
         </tr>
       <% end %>

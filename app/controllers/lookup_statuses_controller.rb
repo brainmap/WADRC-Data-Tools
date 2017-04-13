@@ -1,5 +1,7 @@
 # encoding: utf-8
-class LookupStatusesController < ApplicationController
+class LookupStatusesController < ApplicationController    
+  before_action :set_lookup_status, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /lookup_statuses
   # GET /lookup_statuses.xml
   def index
@@ -41,7 +43,7 @@ class LookupStatusesController < ApplicationController
   # POST /lookup_statuses
   # POST /lookup_statuses.xml
   def create
-    @lookup_status = LookupStatus.new(params[:lookup_status])
+    @lookup_status = LookupStatus.new(lookup_status_params)#params[:lookup_status])
 
     respond_to do |format|
       if @lookup_status.save
@@ -60,7 +62,7 @@ class LookupStatusesController < ApplicationController
     @lookup_status = LookupStatus.find(params[:id])
 
     respond_to do |format|
-      if @lookup_status.update_attributes(params[:lookup_status])
+      if @lookup_status.update(lookup_status_params)#params[:lookup_status], :without_protection => true)
         format.html { redirect_to(@lookup_status, :notice => 'Lookup status was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -81,4 +83,11 @@ class LookupStatusesController < ApplicationController
       format.xml  { head :ok }
     end
   end
+  private
+    def set_lookup_status
+       @lookup_status = LookupStatus.find(params[:id])
+    end
+   def lookup_status_params
+          params.require(:lookup_status).permit(:updated_at,:created_at,:status_type,:description,:id)
+   end
 end

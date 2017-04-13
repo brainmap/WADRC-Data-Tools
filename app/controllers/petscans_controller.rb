@@ -135,9 +135,13 @@ class PetscansController < ApplicationController
       format.xml  { render :xml => @petscans }
     end
   end
-
-  def pet_search
-
+  def pet_after_delete
+     self.pet_search()
+  end
+  def pet_search  
+    if(!params["pet_search"].blank?)
+       @pet_search_params  =pet_search_params()
+    end 
      scan_procedure_array = []
      scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)   # applied in application search
            hide_date_flag_array = []
@@ -297,7 +301,9 @@ class PetscansController < ApplicationController
        # REMOVE file,path fields , insert extra petfile(s) columns if 
 
        # adjust columns and fields for html vs xls
-       request_format = request.formats.to_s
+       #request_format = request.formats.to_s 
+       v_request_format_array = request.formats
+        request_format = v_request_format_array[0]
        @html_request ="Y"
        case  request_format
          when "[text/html]","text/html" then # ? application/html
@@ -348,8 +354,11 @@ class PetscansController < ApplicationController
          end
        @tables =['petscans'] # trigger joins --- vgroups and appointments by default
        @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
-
-      @results = self.run_search_pet   # in the application controller
+      if  @html_request =="N" 
+           @results = self.run_search   # in the application controller
+      else 
+           @results = self.run_search_pet   # in the application controller  # need petscan_id in [0]
+      end
       @results_total = @results  # pageination makes result count wrong
       t = Time.now 
       @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
@@ -402,7 +411,7 @@ class PetscansController < ApplicationController
     @petscans = Petscan.where("petscans.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                 appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                and appointments.appointment_date between ? and ?
-                               and scan_procedure_id in (?))", @appointment.appointment_date-2.month,@appointment.appointment_date+2,scan_procedure_array).all
+                               and scan_procedure_id in (?))", @appointment.appointment_date-2.month,@appointment.appointment_date+2,scan_procedure_array).load.to_a
 
     idx = @petscans.index(@petscan)
     @older_petscan = idx + 1 >= @petscans.size ? nil : @petscans[idx + 1]
@@ -488,7 +497,9 @@ class PetscansController < ApplicationController
 
   # POST /petscans
   # POST /petscans.xml
-  def create
+  def create  
+     v_offset = Time.zone_offset('CST') 
+     v_offset = (v_offset*(-1))/(60*60) # mess with storing date as local in db - but shifting to utc
      @current_tab = "petscans"
      scan_procedure_array = []
      scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
@@ -498,15 +509,16 @@ class PetscansController < ApplicationController
       if hide_date_flag_array.count > 0
         @hide_page_flag = 'Y'
       end
-    @petscan = Petscan.new(params[:petscan])
+    @petscan = Petscan.new(petscan_params)#params[:petscan])
     
     params[:date][:injectiont][0]="1899"
     params[:date][:injectiont][1]="12"
     params[:date][:injectiont][2]="30"
     injectiontime = nil
     if !params[:date][:injectiont][0].blank? && !params[:date][:injectiont][1].blank? && !params[:date][:injectiont][2].blank? && !params[:date][:injectiont][3].blank? && !params[:date][:injectiont][4].blank?
+      params[:date][:injectiont][3]  = ((params[:date][:injectiont][3].to_i)+v_offset).to_s  
       injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]+"-"+params[:date][:injectiont][2]+" "+params[:date][:injectiont][3]+":"+params[:date][:injectiont][4]
-     @petscan.injecttiontime = injectiontime
+     @petscan.injecttiontime = DateTime.strptime(injectiontime, "%Y-%m-%d %H:%M") #injectiontime
     end
 
     params[:date][:scanstartt][0]="1899"
@@ -514,8 +526,9 @@ class PetscansController < ApplicationController
     params[:date][:scanstartt][2]="30"       
     scanstarttime = nil
     if !params[:date][:scanstartt][0].blank? && !params[:date][:scanstartt][1].blank? && !params[:date][:scanstartt][2].blank? && !params[:date][:scanstartt][3].blank? && !params[:date][:scanstartt][4].blank?
+      params[:date][:scanstartt][3]  = ((params[:date][:scanstartt][3].to_i)+v_offset).to_s 
       scanstarttime =  params[:date][:scanstartt][0]+"-"+params[:date][:scanstartt][1]+"-"+params[:date][:scanstartt][2]+" "+params[:date][:scanstartt][3]+":"+params[:date][:scanstartt][4]
-      @petscan.scanstarttime = scanstarttime
+      @petscan.scanstarttime = DateTime.strptime(scanstarttime, "%Y-%m-%d %H:%M") #scanstarttime
     end  
     
     appointment_date = nil
@@ -627,6 +640,8 @@ class PetscansController < ApplicationController
           @vital.bp_systol = params[:bp_systol]
           @vital.bp_diastol = params[:bp_diastol]
           @vital.bloodglucose = params[:bloodglucose]
+          @vital.weight = params[:weight]
+          @vital.height = params[:height]
           @vital.pre_post_flag  = 'pre'
           @vital.save
         else
@@ -636,6 +651,8 @@ class PetscansController < ApplicationController
           @vital.bp_systol = params[:bp_systol]
           @vital.bp_diastol = params[:bp_diastol]
           @vital.bloodglucose = params[:bloodglucose]
+          @vital.weight = params[:weight]
+           @vital.height = params[:height]
           @vital.pre_post_flag  = 'pre'
           @vital.save      
         end     
@@ -667,7 +684,9 @@ class PetscansController < ApplicationController
 
   # PUT /petscans/1
   # PUT /petscans/1.xml
-  def update
+  def update    
+    v_offset = Time.zone_offset('CST') 
+    v_offset = (v_offset*(-1))/(60*60) # mess with storing date as local in db - but shifting to utc
     scan_procedure_array = []
     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
           hide_date_flag_array = []
@@ -690,8 +709,9 @@ class PetscansController < ApplicationController
       params[:date][:injectiont][2]="30"
       injectiontime = nil
       if !params[:date][:injectiont][0].blank? && !params[:date][:injectiont][1].blank? && !params[:date][:injectiont][2].blank? && !params[:date][:injectiont][3].blank? && !params[:date][:injectiont][4].blank?
+      params[:date][:injectiont][3]  = ((params[:date][:injectiont][3].to_i)+v_offset).to_s
 injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]+"-"+params[:date][:injectiont][2]+" "+params[:date][:injectiont][3]+":"+params[:date][:injectiont][4]
-      params[:petscan][:injecttiontime] = injectiontime
+      params[:petscan][:injecttiontime] =  DateTime.strptime(injectiontime, "%Y-%m-%d %H:%M") #injectiontime
        end
 
        params[:date][:scanstartt][0]="1899"
@@ -699,8 +719,9 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
        params[:date][:scanstartt][2]="30"       
         scanstarttime = nil
       if !params[:date][:scanstartt][0].blank? && !params[:date][:scanstartt][1].blank? && !params[:date][:scanstartt][2].blank? && !params[:date][:scanstartt][3].blank? && !params[:date][:scanstartt][4].blank?
+      params[:date][:scanstartt][3]  = ((params[:date][:scanstartt][3].to_i)+v_offset).to_s
   scanstarttime =  params[:date][:scanstartt][0]+"-"+params[:date][:scanstartt][1]+"-"+params[:date][:scanstartt][2]+" "+params[:date][:scanstartt][3]+":"+params[:date][:scanstartt][4]
-       params[:petscan][:scanstarttime] = scanstarttime
+       params[:petscan][:scanstarttime] = DateTime.strptime(scanstarttime, "%Y-%m-%d %H:%M") #scanstarttime
       end
 
     # ok to update vitals even if other update fail
@@ -774,7 +795,7 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
      end
 
     respond_to do |format|
-      if @petscan.update_attributes(params[:petscan])
+      if @petscan.update(petscan_params)#params[:petscan], :without_protection => true)
         @appointment = Appointment.find(@petscan.appointment_id)
         @vgroup = Vgroup.find(@appointment.vgroup_id)
         # get sp_id's
@@ -841,7 +862,9 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
 
   # DELETE /petscans/1
   # DELETE /petscans/1.xml
-  def destroy
+  def destroy   
+   
+   puts "aaaaaaa"
     scan_procedure_array = []
     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
           hide_date_flag_array = []
@@ -850,24 +873,47 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
       if hide_date_flag_array.count > 0
         @hide_page_flag = 'Y'
       end
-     
+   puts "bbbbbbb"  
     @petscan = Petscan.where("petscans.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
-                                      and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+                                      and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])  
+    puts "ccccc"
     if @petscan.appointment_id > 3156 # sure appointment_id not used by any other
        @appointment = Appointment.find(@petscan.appointment_id)
        @appointments = Appointment.where("vgroup_id in (?)",@appointment.vgroup_id)
-       if @appointments.length < 2 # sure appointment_id not used by any other
+       if @appointments.length < 2 # sure appointment_id not used by any other    
+         puts "ddddd"
+         @petscan.destroy
+         @appointment.destroy 
           @vgroup = Vgroup.find(@appointment.vgroup_id)
-          @vgroup.destroy
+          @vgroup.destroy 
+       else  
+         puts "eeee"
+         @petscan.destroy 
+         puts "ffff"
+         @appointment.destroy  
+         puts "gggg" 
+         
        end
-       @appointment.destroy
+    else   
+      puts "hhhhh"
+      @petscan.destroy
     end
-    @petscan.destroy
-
+    puts "iiiiiii"
     respond_to do |format|
-      format.html { redirect_to(pet_search_path) }
+      format.html { redirect_to  :controller => "petscans", :action =>"pet_search", "_method" =>:get, status: 303 } 
+
       format.xml  { head :ok }
     end
+  end   
+  private
+    def set_petscan
+       @petscan = Petscan.find(params[:id])
+    end
+   def petscan_params
+          params.require(:petscan).permit(:temp_fkpetscanid,:petscan_note,:completedpetscan_moved_to_vgroups,:enteredpetscan,:enteredpetscandate,:enteredpetscanwho,:path,:scanstarttime,:injecttiontime,:range,:units,:netinjecteddose,:ecatfilename,:lookup_pettracer_id,:appointment_id,:id)
+   end  
+   def pet_search_params
+          params.require(:pet_search).permit! #(:enumber,:rmr,:file_name,:latest_timestamp,:earliest_timestamp, :gender,:min_age, :max_age, :pet_status,:lookup_pettracer_id,scan_procedure_id: []) 
   end
 end

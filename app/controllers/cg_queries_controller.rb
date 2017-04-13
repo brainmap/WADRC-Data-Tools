@@ -1,5 +1,7 @@
 # encoding: utf-8
-class CgQueriesController < ApplicationController
+class CgQueriesController < ApplicationController 
+  before_action :set_cg_query, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /cg_queries
   # GET /cg_queries.xml
   def index
@@ -60,7 +62,7 @@ class CgQueriesController < ApplicationController
     @cg_query = CgQuery.find(params[:id])
 
     respond_to do |format|
-      if @cg_query.update_attributes(params[:cg_query])
+      if @cg_query.update(params[:cg_query], :without_protection => true)
         format.html { redirect_to(@cg_query, :notice => 'Cg query was successfully updated.') }
         format.xml  { head :ok }
       else

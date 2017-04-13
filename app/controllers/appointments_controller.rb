@@ -1,5 +1,7 @@
 # encoding: utf-8
-class AppointmentsController < ApplicationController
+class AppointmentsController < ApplicationController  
+  before_action :set_appointment, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /appointments
   # GET /appointments.xml
   def index
@@ -40,7 +42,7 @@ class AppointmentsController < ApplicationController
   # POST /appointments
   # POST /appointments.xml
   def create
-    @appointment = Appointment.new(params[:appointment])
+    @appointment = Appointment.new(appointment_params)#params[:appointment])
   
     respond_to do |format|
       if @appointment.save
@@ -62,7 +64,7 @@ class AppointmentsController < ApplicationController
     @appointment = Appointment.find(params[:id])
 
     respond_to do |format|
-      if @appointment.update_attributes(params[:appointment])
+      if @appointment.update(appointment_params)#params[:appointment], :without_protection => true)
         format.html { redirect_to(@appointment, :notice => 'Appointment was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -84,5 +86,12 @@ class AppointmentsController < ApplicationController
       format.html { redirect_to(appointments_url) }
       format.xml  { head :ok }
     end
-  end
+  end  
+  private
+    def set_appointment
+       @appointment = Appointment.find(params[:id])
+    end
+   def appointment_params
+          params.require(:appointment).permit(:temp_visit_id,:age_at_appointment,:questionform_id_list,:appointment_coordinator,:secondary_key,:user_id,:employee_id,:id,:appointment_date,:vgroup_id,:comment,:appointment_type)
+   end
 end

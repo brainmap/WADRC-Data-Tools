@@ -1,4 +1,6 @@
-class SeriesDescriptionTypesController < ApplicationController
+class SeriesDescriptionTypesController < ApplicationController  
+  before_action :set_series_description_type, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /series_description_types
   # GET /series_description_types.xml
   def index
@@ -40,7 +42,7 @@ class SeriesDescriptionTypesController < ApplicationController
   # POST /series_description_types
   # POST /series_description_types.xml
   def create
-    @series_description_type = SeriesDescriptionType.new(params[:series_description_type])
+    @series_description_type = SeriesDescriptionType.new(series_description_type_params)#params[:series_description_type])
 
     respond_to do |format|
       if @series_description_type.save
@@ -59,7 +61,7 @@ class SeriesDescriptionTypesController < ApplicationController
     @series_description_type = SeriesDescriptionType.find(params[:id])
 
     respond_to do |format|
-      if @series_description_type.update_attributes(params[:series_description_type])
+      if @series_description_type.update(series_description_type_params)#params[:series_description_type], :without_protection => true)
         format.html { redirect_to(@series_description_type, :notice => 'Series description type was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -79,5 +81,12 @@ class SeriesDescriptionTypesController < ApplicationController
       format.html { redirect_to(series_description_types_url) }
       format.xml  { head :ok }
     end
-  end
+  end 
+  private
+    def set_series_description_type
+       @series_description_type = SeriesDescriptionType.find(params[:id])
+    end
+   def series_description_type_params
+          params.require(:series_description_type).permit(:id,:series_description_type)
+   end
 end

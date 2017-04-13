@@ -7,7 +7,7 @@ class User < ActiveRecord::Base
 
   # prevents a user from submitting a crafted form that bypasses activation
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :password, :password_confirmation, :remember_me, :username, :first_name,:last_name, :initials
+ #### attr_accessible :email, :password, :password_confirmation, :remember_me, :username, :first_name,:last_name, :initials
 
   # Virtual attribute for the unencrypted password
   attr_accessor :login
@@ -133,16 +133,16 @@ class User < ActiveRecord::Base
       # loop thru each role
 
       # error where unioning null arrays 
-      self[:view_low_scan_procedure_array] = [0]
-      self[:edit_low_scan_procedure_array] = [0]
-      self[:admin_low_scan_procedure_array] = [0]
-      self[:admin_high_scan_procedure_array] = [0]
+      self[:view_low_scan_procedure_array] = '0'
+      self[:edit_low_scan_procedure_array] = '0'
+      self[:admin_low_scan_procedure_array] = '0'
+      self[:admin_high_scan_procedure_array] = '0'
 
-      self[:view_low_protocol_array] = [0]
-      self[:edit_low_protocol_array] = [0]
-      self[:edit_high_protocol_array] = [0]
-      self[:admin_low_protocol_array] = [0]
-      self[:admin_high_protocol_array] = [0]
+      self[:view_low_protocol_array] = '0'
+      self[:edit_low_protocol_array] = '0'
+      self[:edit_high_protocol_array] = '0'
+      self[:admin_low_protocol_array] = '0'
+      self[:admin_high_protocol_array] = '0'
 
       self[:hide_date_flag_array]=[] 
       protocol_array = []
@@ -150,7 +150,7 @@ class User < ActiveRecord::Base
       @current_self_protocol.each do |p2|
               protocol_array << p2.protocol_id
       end
-      self[:hide_date_flag_array] = protocol_array
+      self[:hide_date_flag_array] = protocol_array.join(" ")
       
        @roles_in_pr.each do |p| 
           if p.role == "Edit_High"
@@ -160,14 +160,14 @@ class User < ActiveRecord::Base
             @current_self_protocol.each do |p2|
               protocol_array << p2.protocol_id
               end
-            self[:edit_high_protocol_array] = protocol_array
+            self[:edit_high_protocol_array] = protocol_array.join(" ")
             protocol_list = protocol_array*","
             scan_procedure_array = []
             @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
             @current_self_scan_procedure.each do |p2|
               scan_procedure_array << p2.id
               end
-            self[:edit_high_scan_procedure_array] = scan_procedure_array
+            self[:edit_high_scan_procedure_array] = scan_procedure_array.join(" ")
           end
 
           if p.role == "Edit_Medium"
@@ -177,14 +177,14 @@ class User < ActiveRecord::Base
              @current_self_protocol.each do |p2|
                protocol_array << p2.protocol_id
                end
-             self[:edit_medium_protocol_array] = protocol_array
+             self[:edit_medium_protocol_array] = protocol_array.join(" ")
              protocol_list = protocol_array*","
              scan_procedure_array = []
              @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
              @current_self_scan_procedure.each do |p2|
                scan_procedure_array << p2.id
                end
-             self[:edit_me3dium_scan_procedure_array] = scan_procedure_array
+             self[:edit_me3dium_scan_procedure_array] = scan_procedure_array.join(" ")
           end
 
           if p.role == "Edit_Low"
@@ -194,7 +194,7 @@ class User < ActiveRecord::Base
              @current_self_protocol.each do |p2|
                protocol_array << p2.protocol_id
                end
-             self[:edit_low_protocol_array] = protocol_array
+             self[:edit_low_protocol_array] = protocol_array.join(" ")
              protocol_list = protocol_array*","
              scan_procedure_array = []
              @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
@@ -202,7 +202,7 @@ class User < ActiveRecord::Base
              @current_self_scan_procedure.each do |p2|
                scan_procedure_array << p2.id
                end
-             self[:edit_low_scan_procedure_array] = scan_procedure_array
+             self[:edit_low_scan_procedure_array] = scan_procedure_array.join(" ")
           end      
 
           if p.role == "View_High"
@@ -212,14 +212,14 @@ class User < ActiveRecord::Base
              @current_self_protocol.each do |p2|
                protocol_array << p2.protocol_id
                end
-             self[:view_high_protocol_array] = protocol_array
+             self[:view_high_protocol_array] = protocol_array.join(" ")
              protocol_list = protocol_array*","
              scan_procedure_array = []
              @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
              @current_self_scan_procedure.each do |p2|
                scan_procedure_array << p2.id
                end
-             self[:view_high_scan_procedure_array] = scan_procedure_array
+             self[:view_high_scan_procedure_array] = scan_procedure_array.join(" ")
           end  
 
           if p.role == "View_Medium"
@@ -229,14 +229,14 @@ class User < ActiveRecord::Base
              @current_self_protocol.each do |p2|
                protocol_array << p2.protocol_id
                end
-             self[:view_medium_protocol_array] = protocol_array
+             self[:view_medium_protocol_array] = protocol_array.join(" ")
              protocol_list = protocol_array*","
              scan_procedure_array = []
              @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
              @current_self_scan_procedure.each do |p2|
                scan_procedure_array << p2.id
                end
-             self[:view_medium_scan_procedure_array] = scan_procedure_array
+             self[:view_medium_scan_procedure_array] = scan_procedure_array.join(" ")
           end
 
           if p.role == "View_Low"
@@ -251,14 +251,14 @@ class User < ActiveRecord::Base
              @current_self_protocol.each do |p2|
                protocol_array << p2.protocol_id
                end
-             self[:view_low_protocol_array] = protocol_array
+             self[:view_low_protocol_array] = protocol_array.join(" ")
              protocol_list = protocol_array*","
              scan_procedure_array = []
              @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
              @current_self_scan_procedure.each do |p2|
                scan_procedure_array << p2.id
                end
-             self[:view_low_scan_procedure_array] = scan_procedure_array
+             self[:view_low_scan_procedure_array] = scan_procedure_array.join(" ")
           end      
 
           if p.role == "Admin_High"
@@ -268,14 +268,14 @@ class User < ActiveRecord::Base
              @current_self_protocol.each do |p2|
                protocol_array << p2.protocol_id
                end
-             self[:admin_high_protocol_array] = protocol_array
+             self[:admin_high_protocol_array] = protocol_array.join(" ")
              protocol_list = protocol_array*","
              scan_procedure_array = []
              @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
              @current_self_scan_procedure.each do |p2|
                scan_procedure_array << p2.id
                end
-             self[:admin_high_scan_procedure_array] = scan_procedure_array
+             self[:admin_high_scan_procedure_array] = scan_procedure_array.join(" ")
           end   
 
           if p.role == "Admin_Medium"
@@ -285,14 +285,14 @@ class User < ActiveRecord::Base
              @current_self_protocol.each do |p2|
                protocol_array << p2.protocol_id
                end
-             self[:admin_medium_protocol_array] = protocol_array
+             self[:admin_medium_protocol_array] = protocol_array.join(" ")
              protocol_list = protocol_array*","
              scan_procedure_array = []
              @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
              @current_self_scan_procedure.each do |p2|
                scan_procedure_array << p2.id
                end
-             self[:admin_medium_scan_procedure_array] = scan_procedure_array
+             self[:admin_medium_scan_procedure_array] = scan_procedure_array.join(" ")
           end
 
           if p.role == "Admin_Low"
@@ -302,14 +302,14 @@ class User < ActiveRecord::Base
              @current_self_protocol.each do |p2|
                protocol_array << p2.protocol_id
                end
-             self[:admin_low_protocol_array] = protocol_array
+             self[:admin_low_protocol_array] = protocol_array.join(" ")
              protocol_list = protocol_array*","
              scan_procedure_array = []
              @current_self_scan_procedure = self.protocol_roles.find_by_sql("SELECT distinct id from scan_procedures where protocol_id in ("+protocol_list+") ")
              @current_self_scan_procedure.each do |p2|
                scan_procedure_array << p2.id
                end
-             self[:admin_low_scan_procedure_array] = scan_procedure_array     
+             self[:admin_low_scan_procedure_array] = scan_procedure_array.join(" ")     
           end      
       end   
   
@@ -327,33 +327,33 @@ class User < ActiveRecord::Base
            end    
 
        if self.role == "Admin_High"
-         self[:admin_high_scan_procedure_array] = scan_procedure_array
-         self[:admin_high_protocol_array] = protocol_array
+         self[:admin_high_scan_procedure_array] = scan_procedure_array.join(" ")
+         self[:admin_high_protocol_array] = protocol_array.join(" ")
        elsif self.role  == "Admin_Medium"
-         self[:admin_medium_scan_procedure_array] = scan_procedure_array
-         self[:admin_medium_protocol_array] = protocol_array  
+         self[:admin_medium_scan_procedure_array] = scan_procedure_array.join(" ")
+         self[:admin_medium_protocol_array] = protocol_array.join(" ")  
        elsif self.role  == "Admin_Low"
-         self[:admin_low_scan_procedure_array] = scan_procedure_array
-         self[:admin_low_protocol_array] = protocol_array
+         self[:admin_low_scan_procedure_array] = scan_procedure_array.join(" ")
+         self[:admin_low_protocol_array] = protocol_array.join(" ")
        elsif self.role  == "Edit_High"
-         self[edit_high_scan_procedure_array] = scan_procedure_array
-         self[:edit_high_protocol_array] = protocol_array
+         self[edit_high_scan_procedure_array] = scan_procedure_array.join(" ")
+         self[:edit_high_protocol_array] = protocol_array.join(" ")
 
        elsif self.role  == "Edit_Medium"
-         self[:edit_medium_scan_procedure_array] = scan_procedure_array
-         self[:edit_medium_protocol_array] = protocol_array  
+         self[:edit_medium_scan_procedure_array] = scan_procedure_array.join(" ")
+         self[:edit_medium_protocol_array] = protocol_array.join(" ")  
        elsif self.role  == "Edit_Low"
-         self[:edit_low_scan_procedure_array] = scan_procedure_array
-         self[:edit_low_protocol_array] = protocol_array
+         self[:edit_low_scan_procedure_array] = scan_procedure_array.join(" ")
+         self[:edit_low_protocol_array] = protocol_array.join(" ")
        elsif self.role  == "View_High"
-         self[:view_high_scan_procedure_array] = scan_procedure_array
-         self[:view_high_protocol_array] = protocol_array    
+         self[:view_high_scan_procedure_array] = scan_procedure_array.join(" ")
+         self[:view_high_protocol_array] = protocol_array.join(" ")    
        elsif self.role  == "View_Medium"
-         self[:view_medium_scan_procedure_array] = scan_procedure_array
-         self[:view_medium_protocol_array] = protocol_array
+         self[:view_medium_scan_procedure_array] = scan_procedure_array.join(" ")
+         self[:view_medium_protocol_array] = protocol_array.join(" ")
        elsif self.role == "View_Low"
-         self[:view_low_scan_procedure_array] = scan_procedure_array
-         self[:view_low_protocol_array] = protocol_array
+         self[:view_low_scan_procedure_array] = scan_procedure_array.join(" ")
+         self[:view_low_protocol_array] = protocol_array.join(" ")
        end
 
        # populate sum of arrays --- admin-> edit
@@ -361,54 +361,54 @@ class User < ActiveRecord::Base
              # driver is edit_low_,  view_low
            # merging nulls arrays 
            # poplate first self array with 0, pick up new procedures as go along?
-       self[:edit_low_scan_procedure_array] = self[:edit_low_scan_procedure_array] | self[:admin_low_scan_procedure_array] | self[:admin_high_scan_procedure_array]
-       self[:view_low_scan_procedure_array] = self[:edit_low_scan_procedure_array] | self[:view_low_scan_procedure_array] 
+       self[:edit_low_scan_procedure_array] = self[:edit_low_scan_procedure_array] +" "+ self[:admin_low_scan_procedure_array] +" "+ self[:admin_high_scan_procedure_array]
+       self[:view_low_scan_procedure_array] = self[:edit_low_scan_procedure_array] +" "+self[:view_low_scan_procedure_array] 
 
        # also protocol
-       self[:edit_low_protocol_array] = self[:edit_low_protocol_array] | self[:admin_low_protocol_array] | self[:admin_high_protocol_array]
-       self[:view_low_protocol_array] = self[:edit_low_protocol_array] | self[:view_low_protocol_array] 
+       self[:edit_low_protocol_array] = self[:edit_low_protocol_array] +" "+ self[:admin_low_protocol_array] +" "+ self[:admin_high_protocol_array]
+       self[:view_low_protocol_array] = self[:edit_low_protocol_array] +" "+ self[:view_low_protocol_array] 
 
       #  self[:edit_low_scan_procedure_array] = [-1]
       #  self[:edit_low_protocol_array] = [-1]
      #  self[:view_low_scan_procedure_array] =[-1,-2,-3]
       if(field == 'hide_date_flag_array')
-          return self[:hide_date_flag_array] .join(' ')
+          return self[:hide_date_flag_array]
      elsif(field == 'view_low_scan_procedure_array')
-       return self[:view_low_scan_procedure_array].join(' ')
+       return self[:view_low_scan_procedure_array]
       elsif(field == 'edit_low_scan_procedure_array')
-        return self[:edit_low_scan_procedure_array].join(' ')
+        return self[:edit_low_scan_procedure_array]
       elsif(field == 'admin_low_scan_procedure_array')
-        return self[:admin_low_scan_procedure_array].join(' ')
+        return self[:admin_low_scan_procedure_array]
       elsif(field == 'view_medium_scan_procedure_array')
-        return self[:view_medium_scan_procedure_array].join(' ')
+        return self[:view_medium_scan_procedure_array]
        elsif(field == 'edit_medium_scan_procedure_array')
-         return self[:edit_low_scan_procedure_array].join(' ')
+         return self[:edit_low_scan_procedure_array]
        elsif(field == 'admin_medium_scan_procedure_array')
-         return self[:admin_medium_scan_procedure_array].join(' ')        
+         return self[:admin_medium_scan_procedure_array]        
        elsif(field == 'view_high_scan_procedure_array')
-         return self[:view_high_scan_procedure_array].join(' ')
+         return self[:view_high_scan_procedure_array]
         elsif(field == 'edit_high_scan_procedure_array')
-          return self[:edit_high_scan_procedure_array].join(' ')
+          return self[:edit_high_scan_procedure_array]
         elsif(field == 'admin_high_scan_procedure_array')
-          return self[:admin_high_scan_procedure_array].join(' ')
+          return self[:admin_high_scan_procedure_array]
       elsif(field == 'view_low_protocol_array')
-        return self[:view_low_protocol_array].join(' ')
+        return self[:view_low_protocol_array]
       elsif(field == 'edit_low_protocol_array')
-        return self[:edit_low_protocol_array].join(' ')
+        return self[:edit_low_protocol_array]
       elsif(field == 'admin_low_protocol_array')
-        return self[:admin_low_protocol_array].join(' ')
+        return self[:admin_low_protocol_array]
       elsif(field == 'view_medium_protocol_array')
-        return self[:view_medium_protocol_array].join(' ')
+        return self[:view_medium_protocol_array]
       elsif(field == 'edit_medium_protocol_array')
-        return self[:edit_medium_protocol_array].join(' ')
+        return self[:edit_medium_protocol_array]
       elsif(field == 'admin_medium_protocol_array')
-        return self[:admin_medium_protocol_array].join(' ')        
+        return self[:admin_medium_protocol_array]        
       elsif(field == 'view_high_protocol_array')
-        return self[:view_high_protocol_array].join(' ')
+        return self[:view_high_protocol_array]
       elsif(field == 'edit_high_protocol_array')
-        return self[:edit_high_protocol_array].join(' ')
+        return self[:edit_high_protocol_array]
       elsif(field == 'admin_high_protocol_array')
-        return self[:admin_high_protocol_array].join(' ')
+        return self[:admin_high_protocol_array]
       else
         var = [-1]
         return var.join(' ')
@@ -466,16 +466,20 @@ class User < ActiveRecord::Base
     @activated
   end
 =end  
-  protected
-    # before filter 
-    def encrypt_password
-      return if password.blank?
-      self.salt = Digest::SHA1.hexdigest("--#{Time.now.to_s}--#{login}--") if new_record?
-      self.crypted_password = encrypt(password)
-    end
-      
-    def password_required?
-      crypted_password.blank? || !password.blank?
+protected
+  # before filter 
+  def encrypt_password
+    return if password.blank?
+    self.salt = Digest::SHA1.hexdigest("--#{Time.now.to_s}--#{login}--") if new_record?
+    self.crypted_password = encrypt(password)
+  end
+    
+  def password_required?
+    crypted_password.blank? || !password.blank?
+  end
+   private 
+    def user_params
+      params.require(:user).permit(:email, :password, :password_confirmation, :remember_me, :username, :first_name,:last_name, :initials,:view_low_scan_procedure_array,:edit_low_scan_procedure_array,:edit_low_protocol_array,:view_low_protocol_array,:admin_low_scan_procedure_array,:admin_high_scan_procedure_array,:edit_high_protocol_array,:admin_low_protocol_array,:admin_high_protocol_array ,:hide_date_flag_array)
     end
   
     

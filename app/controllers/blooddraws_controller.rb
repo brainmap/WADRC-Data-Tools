@@ -2,7 +2,10 @@
 class BlooddrawsController < ApplicationController
   # GET /blooddraws
   # GET /blooddraws.xml
-require 'csv'
+require 'csv'        
+
+before_action :set_blooddraw, only: [:show, :edit, :update, :destroy]   
+respond_to :html
    def blooddraw_search
       @current_tab = "blooddraws"
       params["search_criteria"] =""
@@ -124,7 +127,10 @@ require 'csv'
      end
    end
 
-  def lh_search
+  def lh_search   
+    if !params[:lh_search].blank?
+           @lh_search_params = lh_search_params()
+    end
     @conditions = []
      @current_tab = "blooddraws"
      params["search_criteria"] =""
@@ -146,7 +152,7 @@ require 'csv'
 
      if params[:lh_search].nil?
           params[:lh_search] =Hash.new  
-          # params[:lh_search][:lh_status] = "yes"
+          # params[:lh_search][:lh_status] = "yes" 
      end
 
      scan_procedure_array = []
@@ -297,7 +303,9 @@ require 'csv'
 
   
    # adjust columns and fields for html vs xls
-   request_format = request.formats.to_s
+   #request_format = request.formats.to_s 
+   v_request_format_array = request.formats
+    request_format = v_request_format_array[0]
    @html_request ="Y"
 
    case  request_format
@@ -446,7 +454,7 @@ require 'csv'
      @blooddraws = Blooddraw.where("blooddraws.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                  appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                 and appointments.appointment_date between ? and ?
-                                and scan_procedure_id in (?))", @appointment.appointment_date-2.month,@appointment.appointment_date+2,scan_procedure_array).all
+                                and scan_procedure_id in (?))", @appointment.appointment_date-2.month,@appointment.appointment_date+2,scan_procedure_array).to_a
 
      idx = @blooddraws.index(@blooddraw)
      @older_blooddraw = idx + 1 >= @blooddraws.size ? nil : @blooddraws[idx + 1]
@@ -612,7 +620,7 @@ require 'csv'
         @hide_page_flag = 'Y'
       end
 
-  @blooddraw = Blooddraw.new(params[:blooddraw])
+  @blooddraw = Blooddraw.new# (blooddraw_params)#params[:blooddraw])
   
   appointment_date = nil
   if !params[:appointment]["#{'appointment_date'}(1i)"].blank? && !params[:appointment]["#{'appointment_date'}(2i)"].blank? && !params[:appointment]["#{'appointment_date'}(3i)"].blank?
@@ -688,7 +696,6 @@ require 'csv'
   # PUT /blooddraws/1
   # PUT /blooddraws/1.xml
   def update
-        puts "BBBBBBB update"
         scan_procedure_array = []
         scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
 
@@ -728,7 +735,7 @@ require 'csv'
         end
 
         respond_to do |format|
-          if @blooddraw.update_attributes(params[:blooddraw])
+          #if @blooddraw.update(blooddraw_params) #params[:blooddraw]) #, :without_protection => true)
             @appointment = Appointment.find(@blooddraw.appointment_id)
             @vgroup = Vgroup.find(@appointment.vgroup_id)
             @appointment.comment = params[:appointment][:comment]
@@ -757,7 +764,7 @@ require 'csv'
 
             @appointment.save
             @vgroup.completedblooddraw = params[:vgroup][:completedblooddraw]
-            @vgroup.save
+       if   @vgroup.save
         format.html { redirect_to(@blooddraw, :notice => 'Lab Health was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -796,7 +803,18 @@ require 'csv'
       format.html { redirect_to(lh_search_path) }
       format.xml  { head :ok }
     end
-  end
+  end 
+  private
+    def set_blooddraw
+       @blooddraw = Blooddraw.find(params[:id])
+    end   
+    # not really used
+   def blooddraw_params
+          params.require(:blooddraw).permit(:appointment_coordinator,:comment) #(:blooddraw).permit(:weight_kg,:height_inches,:temp_fkvisitid,:temp_fklabhealthid,:blooddrawnote,:enteredbloodwho,:enteredblooddate,:enteredblood,:completedblooddraw_moved_to_vgroups,:appointment_id,:id)
+   end  
+   def lh_search_params
+          params.require(:lh_search).permit!
+   end
 
 end
 

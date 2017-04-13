@@ -48,7 +48,7 @@ Links a question to a form.<br>
   <tr>
     <td><%= link_to 'Show', questionform_question %></td>
     <td><%= link_to 'Edit', edit_questionform_question_path(questionform_question) %></td>
-    <td><%= link_to 'Destroy', questionform_question, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', questionform_question, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
     <td><%= Questionform.find(questionform_question.questionform_id).description %></td><td align=center> | </td>
     <td align="left"><%= 	Question.find(questionform_question.question_id).description %></td>
     <td><% if  @v_edit_display_order == "Y" %><%= text_field_tag 'display_order['+questionform_question.question_id.to_s+']' ,questionform_question.display_order,:size=>15 ,:onchange => "if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}"%>

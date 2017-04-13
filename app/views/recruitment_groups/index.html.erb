@@ -18,7 +18,7 @@
         <td>
           <%= link_to 'Show', recruitment_group %>
           <%= link_to 'Edit', edit_recruitment_group_path(recruitment_group) %>
-          <%= link_to 'Destroy', recruitment_group, :confirm => 'Are you sure?', :method => :delete %>
+          <%= link_to 'Destroy', recruitment_group, :method => :delete,data: {confirm: 'Are you sure?' } %>
         </td>
       </tr>
     <% end %>

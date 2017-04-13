@@ -22,7 +22,7 @@
   <tbody>
     <% image_datasets.each do |im_ds| %>
       <tr>
-        <%= "<td>#{begin image_tag(im_ds.thumbnail.url(:thumb)); rescue ArgumentError;end }</td>".html_safe  if include_thumbnails %>
+        <%= "<td>#{begin image_tag(im_ds.thumbnail.url(:thumb), size: "100x100"); rescue ArgumentError;end }</td>".html_safe  if include_thumbnails %>   <%# gave up on paperclip using imagemagick to resize %>
 				<td><%=h im_ds.path_basename %></td>
         <td><%=  link_to im_ds.series_description.encode("UTF-8", :invalid => :replace, :undef => :replace, :replace => "").force_encoding('UTF-8'), im_ds %></td>
         <td>

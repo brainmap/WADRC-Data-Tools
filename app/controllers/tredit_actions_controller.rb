@@ -1,4 +1,6 @@
-class TreditActionsController < ApplicationController
+class TreditActionsController < ApplicationController   
+  before_action :set_tredit_action, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /tredit_actions
   # GET /tredit_actions.json
   def index
@@ -40,7 +42,7 @@ class TreditActionsController < ApplicationController
   # POST /tredit_actions
   # POST /tredit_actions.json
   def create
-    @tredit_action = TreditAction.new(params[:tredit_action])
+    @tredit_action = TreditAction.new(tredit_action_params)#)#params[:tredit_action])
 
     respond_to do |format|
       if @tredit_action.save
@@ -59,7 +61,7 @@ class TreditActionsController < ApplicationController
     @tredit_action = TreditAction.find(params[:id])
 
     respond_to do |format|
-      if @tredit_action.update_attributes(params[:tredit_action])
+      if @tredit_action.update(tredit_action_params)#)#params[:tredit_action], :without_protection => true)
         format.html { redirect_to @tredit_action, notice: 'Tredit action was successfully updated.' }
         format.json { head :no_content }
       else
@@ -79,5 +81,12 @@ class TreditActionsController < ApplicationController
       format.html { redirect_to tredit_actions_url }
       format.json { head :no_content }
     end
-  end
+  end 
+  private
+    def set_tredit_action
+       @tredit_action = TreditAction.find(params[:id])
+    end
+   def tredit_action_params
+          params.require(:tredit_action).permit(:updated_at,:id,:tredit_id,:tractiontype_id,:value,:status_flag,:created_at)
+   end
 end

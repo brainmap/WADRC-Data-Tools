@@ -2,12 +2,12 @@
   else %>
 <div id="search">
 	<table><tr><td>
-	<%= simple_form_for @search do |f| %>
-		<%= f.input :path_contains, :required => false %>
-		<%= f.input :series_description_contains, :required => false %>
-		<%= f.input :rmr_contains, :required => false %>
-		<%= f.input :visit_id_eq, :required => false %>
-		<%= f.button :submit, "Search Image Datasets" %>
+	<%= form_for @search do |f| %>
+		<%= f.text_field :path_contains, :required => false %>
+		<%= f.text_field :series_description_contains, :required => false %>
+		<%= f.text_field :rmr_contains, :required => false %>
+		<%= f.text_field :visit_id_eq, :required => false %>
+		<%= f.submit "Search Image Datasets" %>
 
 
 	</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><%= f.label :scan_procedures %><br>

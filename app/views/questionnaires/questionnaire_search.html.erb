@@ -196,7 +196,7 @@ edit_count = edit_count -1
     <td><= questionnaire.scanstarttime %></td>
     <td><= link_to 'Show', questionnaire %></td>
     <td><= link_to 'Edit', edit_questionnaire_path(questionnaire) %></td>
-    <td><= link_to 'Destroy', questionnaire, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><!-- = link_to 'Destroy', questionnaire, :confirm => 'Are you sure?', :method => :delete %></td>
     <td>New (pass vgroup_id) </td>
   </tr>
 < end %>

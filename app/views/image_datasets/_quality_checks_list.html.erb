@@ -7,7 +7,7 @@
         <small>checked by <%= qc.user.username %> at <%= qc.created_at.to_s(:ymdhms) %></small><br />
         <%= link_to('edit', edit_image_dataset_quality_check_path(qc)) if current_user == qc.user %>
 <% if edit_count > 0 %> |
-				<%= link_to('delete', qc, :confirm => 'Are you sure?', :method => :delete) %>
+				<%= link_to('delete', qc, :method => :delete, data: { confirm: 'Are you sure?'}) %>
 <% end %>
       </div>
       <!-- key_val_table('qc_details', {

@@ -20,7 +20,7 @@
     <td><%= lumbarpuncture_result.value_string %></td>
     <td><%= link_to 'Show', lumbarpuncture_result %></td>
     <td><%= link_to 'Edit', edit_lumbarpuncture_result_path(lumbarpuncture_result) %></td>
-    <td><%= link_to 'Destroy', lumbarpuncture_result, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', lumbarpuncture_result, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

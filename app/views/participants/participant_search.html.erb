@@ -20,7 +20,7 @@
 	<tr><td><%= f.label :scan_procedures %><br>
 	<div id="scan_procedure_list">
 	<ul>
-	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_visits where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_visits where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).sort_by(&:codename).each do |scan_procedure| %>
 		<li>
 			<%#= f.fields_for scan_procedure do |scan_fields| %>
 				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
@@ -104,7 +104,7 @@
   
 <% end %>
 
-<%= link_to 'download csv', { :controller=>"participants", :action=>"participant_search", :participant_search =>  params[:participant_search] , :format => :csv} %>  </p></p>
+<%= link_to 'download csv', { :controller=>"participants", :action=>"participant_search", :participant_search =>  @participant_search_params.to_h , :format => :csv} %>  </p></p>
 
 
 <table class="tabular">  

@@ -41,7 +41,7 @@ class CgQueryTnCnsController < ApplicationController
   # POST /cg_query_tn_cns
   # POST /cg_query_tn_cns.xml
   def create
-    @cg_query_tn_cn = CgQueryTnCn.new(params[:cg_query_tn_cn])
+    @cg_query_tn_cn = CgQueryTnCn.new(cg_query_tn_cn_params)#params[:cg_query_tn_cn])
 
     respond_to do |format|
       if @cg_query_tn_cn.save
@@ -60,7 +60,7 @@ class CgQueryTnCnsController < ApplicationController
     @cg_query_tn_cn = CgQueryTnCn.find(params[:id])
 
     respond_to do |format|
-      if @cg_query_tn_cn.update_attributes(params[:cg_query_tn_cn])
+      if @cg_query_tn_cn.update(cg_query_tn_cn_params)#params[:cg_query_tn_cn], :without_protection => true)
         format.html { redirect_to(@cg_query_tn_cn, :notice => 'Cg query tn cn was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -80,5 +80,12 @@ class CgQueryTnCnsController < ApplicationController
       format.html { redirect_to(cg_query_tn_cns_url) }
       format.xml  { head :ok }
     end
-  end
+  end   
+  private
+    def set_cg_query_tn_cn
+       @cg_query_tn_cn = CgQueryTnCn.find(params[:id])
+    end
+   def cg_query_tn_cn_params
+          params.require(:cg_query_tn_cn).permit(:include_cn,:cg_query_tn_id,:cg_tn_cn_id,:value_1,:value_2,:condition,:created_at,:updated_at,:id)
+   end
 end

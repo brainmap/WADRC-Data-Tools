@@ -2,7 +2,9 @@
 class ScanProceduresController <  AuthorizedController #  ApplicationController
 load_and_authorize_resource
   
-  before_filter :set_current_tab
+  before_action :set_current_tab  
+  before_action :set_scan_procedure, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   
   def set_current_tab
     @current_tab = "enroll_parti_sp"
@@ -50,7 +52,7 @@ load_and_authorize_resource
   # POST /scan_procedures
   # POST /scan_procedures.xml
   def create
-    @scan_procedure = ScanProcedure.new(params[:scan_procedure])
+    @scan_procedure = ScanProcedure.new(scan_procedure_params)#params[:scan_procedure])
 
     respond_to do |format|
       if @scan_procedure.save
@@ -70,7 +72,7 @@ load_and_authorize_resource
     @scan_procedure = ScanProcedure.find(params[:id])
 
     respond_to do |format|
-      if @scan_procedure.update_attributes(params[:scan_procedure])
+      if @scan_procedure.update(scan_procedure_params)#params[:scan_procedure], :without_protection => true)
         flash[:notice] = 'Scan procedure was successfully updated.'
         format.html { redirect_to(@scan_procedure) }
         format.xml  { head :ok }
@@ -91,5 +93,27 @@ load_and_authorize_resource
       format.html { redirect_to(scan_procedures_url) }
       format.xml  { head :ok }
     end
-  end
+  end  
+  private
+    def set_scan_procedure
+       @scan_procedure = ScanProcedure.find(params[:id])
+    end
+   def scan_procedure_params
+          params.require(:scan_procedure).permit(:petscan_tracer_path,:rmraic_reggieid_flag,:make_participant_flag,:rmr_dicom_field,:petscan_tracer_file_size,:subjectid_base,:petscan_flag,:protocol_id,:description,:codename,:id)
+   end     
+    
+  
+  #   def set_scan_procedures_visit
+  #      @scan_procedures_visit = Scan_procedures_visit.find(params[:id])
+  #   end
+  #  def scan_procedures_visit_params
+  #         params.require(:scan_procedures_visit).permit(:scan_procedure_id,:visit_id)
+  #  end
+   
+   #  def set_scan_procedures_vgroup
+   #     @scan_procedures_vgroup = Scan_procedures_vgroup.find(params[:id])
+   #  end
+   # def scan_procedures_vgroup_params
+   #        params.require(:scan_procedures_vgroup).permit(:vgroup_id,:scan_procedure_id)
+   # end
 end

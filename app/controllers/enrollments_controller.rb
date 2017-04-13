@@ -1,7 +1,9 @@
 # encoding: utf-8
 class EnrollmentsController < ApplicationController
   
-  before_filter :set_current_tab
+  before_action :set_current_tab   
+  before_action :set_enrollment, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   
   def set_current_tab
     @current_tab = "enroll_parti_sp"
@@ -160,7 +162,9 @@ class EnrollmentsController < ApplicationController
          end
 
        # adjust columns and fields for html vs xls
-       request_format = request.formats.to_s
+       #request_format = request.formats.to_s  
+       v_request_format_array = request.formats
+        request_format = v_request_format_array[0]
        @html_request ="Y"
        case  request_format
          when "[text/html]","text/html" then # ? application/html
@@ -305,7 +309,7 @@ class EnrollmentsController < ApplicationController
   # POST /enrollments
   # POST /enrollments.xml
   def create
-    @enrollment = Enrollment.new(params[:enrollment])
+    @enrollment = Enrollment.new(enrollment_params)#params[:enrollment])
  
 
     respond_to do |format|
@@ -340,7 +344,7 @@ class EnrollmentsController < ApplicationController
     end 
 
     respond_to do |format|
-      if @enrollment.update_attributes(params[:enrollment])
+      if @enrollment.update(enrollment_params)#params[:enrollment], :without_protection => true)
         if current_user.role == 'Admin_High'
           if !params[:cleanup][:set_participant_id_blank].blank?
              @enrollment.participant_id = nil
@@ -395,5 +399,25 @@ class EnrollmentsController < ApplicationController
       format.html { redirect_to(enrollments_url) }
       format.xml  { head :ok }
     end
-  end
+  end 
+  private
+    def set_enrollment
+       @enrollment = Enrollment.find(params[:id])
+    end
+   def enrollment_params
+          params.require(:enrollment).permit(:recruitment_source,:enumber,:enroll_date,:id,:participant_id,:withdrawl_reason,:do_not_share_scans_flag,:recruitment_group_id)
+   end    
+
+#     def set_enrollment_vgroup_membership
+#        @enrollment_vgroup_membership = EnrollmentVgroupMembership.find(params[:id])
+#     end
+#    def enrollment_vgroup_membership_params
+#           params.require(:enrollment_vgroup_membership).permit(:vgroup_id,:id,:enrollment_id)
+#    end
+#     def set_enrollment_visit_membership
+#        @enrollment_visit_membership = EnrollmentVisitMembership.find(params[:id])
+#     end
+#    def enrollment_visit_membership_params
+#           params.require(:enrollment_visit_membership).permit(:visit_id,:enrollment_id,:id)
+#    end
 end

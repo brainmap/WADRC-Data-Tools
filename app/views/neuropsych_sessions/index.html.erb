@@ -14,7 +14,7 @@
     <td><%=h neuropsych_session.procedure %></td>
     <td><%= link_to 'Show', neuropsych_session %></td>
     <td><%= link_to 'Edit', edit_neuropsych_session_path(neuropsych_session) %></td>
-    <td><%= link_to 'Destroy', neuropsych_session, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', neuropsych_session, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

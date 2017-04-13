@@ -1,5 +1,7 @@
 # encoding: utf-8
-class LookupDrugclassesController < ApplicationController
+class LookupDrugclassesController < ApplicationController  
+  before_action :set_lookup_drugclass, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /lookup_drugclasses
   # GET /lookup_drugclasses.xml
   def index
@@ -41,7 +43,7 @@ class LookupDrugclassesController < ApplicationController
   # POST /lookup_drugclasses
   # POST /lookup_drugclasses.xml
   def create
-    @lookup_drugclass = LookupDrugclass.new(params[:lookup_drugclass])
+    @lookup_drugclass = LookupDrugclass.new( lookup_drugclass_params)#params[:lookup_drugclass])
 
     respond_to do |format|
       if @lookup_drugclass.save
@@ -60,7 +62,7 @@ class LookupDrugclassesController < ApplicationController
     @lookup_drugclass = LookupDrugclass.find(params[:id])
 
     respond_to do |format|
-      if @lookup_drugclass.update_attributes(params[:lookup_drugclass])
+      if @lookup_drugclass.update( lookup_drugclass_params)#params[:lookup_drugclass], :without_protection => true)
         format.html { redirect_to(@lookup_drugclass, :notice => 'Lookup drugclass was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -80,5 +82,12 @@ class LookupDrugclassesController < ApplicationController
       format.html { redirect_to(lookup_drugclasses_url) }
       format.xml  { head :ok }
     end
-  end
+  end  
+  private
+    def set_lookup_drugclass
+       @lookup_drugclass = LookupDrugclass.find(params[:id])
+    end
+   def lookup_drugclass_params
+          params.require(:lookup_drugclass).permit(:id,:epodrugclass,:description,:created_at,:updated_at)
+   end
 end

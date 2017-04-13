@@ -2,7 +2,17 @@
 
 <%= form_for(@analysis_membership) do |f| %>
   <p>
-    <%= f.error_messages %>
+	  <% if @analysis_membership.errors.any? %>
+	    <div id="error_explanation">
+	      <h2><%= pluralize(@analysis_membership.errors.count, "error") %> prohibited this analysis_membership from being saved:</h2>
+
+	      <ul>
+	      <% @analysis_membership.errors.full_messages.each do |msg| %>
+	        <li><%= msg %></li>
+	      <% end %>
+	      </ul>
+	    </div>
+	  <% end %>
   </p>
   <p>
     <%= @analysis_membership.image_dataset.rmr %> <%= @analysis_membership.image_dataset.series_description %>

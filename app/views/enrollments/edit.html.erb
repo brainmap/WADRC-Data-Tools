@@ -9,7 +9,17 @@ v_scan_share_hash = [['Ok to share scan with outside request if IRB approval','N
 <h1>Editing enrollment</h1>
 
 <%= form_for(@enrollment) do |f| %>
-  <%= f.error_messages %>
+ <% if @enrollment.errors.any? %>
+   <div id="error_explanation">
+     <h2><%= pluralize(@enrollment.errors.count, "error") %> prohibited this enrollment from being saved:</h2>
+
+     <ul>
+     <% @enrollment.errors.full_messages.each do |msg| %>
+       <li><%= msg %></li>
+     <% end %>
+     </ul>
+   </div>
+ <% end %>
 
   <p>
     <%= f.label :enroll_date %><br />

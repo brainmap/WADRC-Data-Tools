@@ -48,7 +48,7 @@ RMR: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <td><%= radiology_comment.load_date %></td>
     <td><%= link_to 'Show', radiology_comment %></td>
     <td><%= link_to 'Edit', edit_radiology_comment_path(radiology_comment) %></td>
-    <td><%= link_to 'Destroy', radiology_comment, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', radiology_comment, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

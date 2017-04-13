@@ -25,7 +25,7 @@
     <td><%= lumbarpuncture.lpfollownote %></td>
     <td><%= link_to 'Show', lumbarpuncture %></td>
     <td><%= link_to 'Edit', edit_lumbarpuncture_path(lumbarpuncture) %></td>
-    <td><%= link_to 'Destroy', lumbarpuncture, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', lumbarpuncture, :method => :delete, data: { confirm: 'Are you sure?'} %></td>
   </tr>
 <% end %>
 </table>

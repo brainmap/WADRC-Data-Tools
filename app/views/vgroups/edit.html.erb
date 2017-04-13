@@ -16,7 +16,7 @@ edit_count = edit_count -1
 <%= link_to 'Show', @vgroup %> |
 <%= link_to 'Back', home_path %>
 <% if current_user.role == 'Admin_High' and @v_appointment_array.blank?%>
-| <%= link_to 'Delete this Vgroup', @vgroup, :confirm => "Are you sure you want to delete this Vgroup?", :method => :delete %>
+| <%= link_to 'Delete this Vgroup', @vgroup, :method => :delete, dat: {confirm: "Are you sure you want to delete this Vgroup?"} %>
 
 <% end %>
 <%end%>

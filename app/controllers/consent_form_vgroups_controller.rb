@@ -1,4 +1,6 @@
-class ConsentFormVgroupsController < ApplicationController
+class ConsentFormVgroupsController < ApplicationController  
+  before_action :set_consent_form_vgroup, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /consent_form_vgroups
   # GET /consent_form_vgroups.json
   def index
@@ -40,7 +42,7 @@ class ConsentFormVgroupsController < ApplicationController
   # POST /consent_form_vgroups
   # POST /consent_form_vgroups.json
   def create
-    @consent_form_vgroup = ConsentFormVgroup.new(params[:consent_form_vgroup])
+    @consent_form_vgroup = ConsentFormVgroup.new(consent_form_vgroup_params)#params[:consent_form_vgroup])
 
     respond_to do |format|
       if @consent_form_vgroup.save
@@ -59,7 +61,7 @@ class ConsentFormVgroupsController < ApplicationController
     @consent_form_vgroup = ConsentFormVgroup.find(params[:id])
 
     respond_to do |format|
-      if @consent_form_vgroup.update_attributes(params[:consent_form_vgroup])
+      if @consent_form_vgroup.update(consent_form_vgroup_params)#params[:consent_form_vgroup], :without_protection => true)
         format.html { redirect_to @consent_form_vgroup, notice: 'Consent form vgroup was successfully updated.' }
         format.json { head :no_content }
       else
@@ -79,5 +81,12 @@ class ConsentFormVgroupsController < ApplicationController
       format.html { redirect_to consent_form_vgroups_url }
       format.json { head :no_content }
     end
-  end
+  end 
+  private
+    def set_consent_form_vgroup
+       @consent_form_vgroup = ConsentFormVgroup.find(params[:id])
+    end
+   def consent_form_vgroup_params
+          params.require(:consent_form_vgroup).permit(:status_flag,:user_id,:consent_date,:consent_form_id,:vgroup_id,:id)
+   end
 end

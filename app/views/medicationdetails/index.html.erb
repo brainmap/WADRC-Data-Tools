@@ -21,7 +21,7 @@
     <td><%= medicationdetail.exclusionclass %></td>
     <td><%= link_to 'Show', medicationdetail %></td>
     <td><%= link_to 'Edit', edit_medicationdetail_path(medicationdetail) %></td>
-    <td><%= link_to 'Destroy', medicationdetail, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', medicationdetail, :method => :delete , data: { confirm: 'Are you sure?'}%></td>
   </tr>
 <% end %>
 </table>

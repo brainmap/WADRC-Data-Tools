@@ -835,7 +835,11 @@ class DataSearchesController < ApplicationController
     end
    # can not do a self join-- unless two copies of table - unique tn_id, tn_cn_id
    # this has glimpses of maddness and wonder
-    def cg_search   
+    def cg_search 
+      
+      if(!params["cg_search"].blank?) 
+         @cg_search_params  = cg_search_params() 
+      end  
 
       v_debug = "N" # Y"
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
@@ -901,7 +905,9 @@ class DataSearchesController < ApplicationController
       # "T2_Flair" => "T2_Flair", 
       # "T2*" => "T2*"}
      
-      request_format = request.formats.to_s
+      #request_format = request.formats.to_s 
+      v_request_format_array = request.formats
+       request_format = v_request_format_array[0]
       @html_request ="Y"
       # html and non-html have different column_names as output
       case  request_format
@@ -1296,7 +1302,7 @@ class DataSearchesController < ApplicationController
                   # puts "aaaaaaaaaa"
                  else
                      params[:cg_search][:condition][v_tn_id].each do |temp_tn_cn_id|
-                       v_temp_tn_cn_id = temp_tn_cn_id.to_a.to_s
+                       v_temp_tn_cn_id = temp_tn_cn_id.to_s #to_a.to_s   not sure why .to_a was in there
                        if params[:cg_search][:condition][v_tn_id][v_temp_tn_cn_id].blank?
                          params[:cg_search][:condition][v_tn_id].delete(v_temp_tn_cn_id)
                        end
@@ -3275,7 +3281,8 @@ end
              sql = "alter table "+v_tn+"_new change "+v_cn+" "+v_cn_new +" FLOAT "
              results = connection.execute(sql)
              sql = "alter table "+v_tn+"_edit change "+v_cn+" "+v_cn_new +" VARCHAR(50) "
-             results = connection.execute(sql)
+             results = connection.execute(sql)  
+             v_cn = v_cn_new  # redefine so where below finds a cn
           end
           # change cg_table column
           cg_tn = CgTn.where("tn in (?)",v_tn)
@@ -3403,6 +3410,12 @@ end
     end
     
      render :template => "data_searches/cg_table_edit_db"
- end 
+ end  
+ 
+  private    
+ def cg_search_params
+        params.require(:cg_search).permit!
+ end       
+       
     
 end

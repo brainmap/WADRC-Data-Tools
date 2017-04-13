@@ -1,7 +1,8 @@
 # encoding: utf-8
 class NeuropsychesController < ApplicationController
   require 'csv'
-  
+	before_action :set_neuropsych, only: [:show, :edit, :update, :destroy]   
+	respond_to :html  
     def neuropsych_search
        @current_tab = "neuropsyches"
        params["search_criteria"] =""
@@ -129,7 +130,10 @@ class NeuropsychesController < ApplicationController
     end
 
   
-    def np_search
+    def np_search  
+      if !params[:np_search].blank?
+         @np_search_params = np_search_params()
+      end
       @conditions = []
        @current_tab = "neuropsyches"
        params["search_criteria"] =""
@@ -307,7 +311,9 @@ class NeuropsychesController < ApplicationController
 
     
      # adjust columns and fields for html vs xls
-     request_format = request.formats.to_s
+     #request_format = request.formats.to_s  
+     v_request_format_array = request.formats
+      request_format = v_request_format_array[0]
      @html_request ="Y"
      case  request_format
        when "[text/html]","text/html" then  # application/html ?
@@ -449,7 +455,7 @@ class NeuropsychesController < ApplicationController
      @neuropsyches = Neuropsych.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                  appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
                                 and appointments.appointment_date between ? and ?
-                                and scan_procedure_id in (?))", @appointment.appointment_date-2.month,@appointment.appointment_date+2,scan_procedure_array).all
+                                and scan_procedure_id in (?))", @appointment.appointment_date-2.month,@appointment.appointment_date+2,scan_procedure_array).to_a
 
      idx = @neuropsyches.index(@neuropsych)
      @older_neuropsych = idx + 1 >= @neuropsyches.size ? nil : @neuropsyches[idx + 1]
@@ -615,7 +621,7 @@ class NeuropsychesController < ApplicationController
       if hide_date_flag_array.count > 0
         @hide_page_flag = 'Y'
       end
-    @neuropsych = Neuropsych.new(params[:neuropsych])
+    @neuropsych = Neuropsych.new# (neuropsych_params)#params[:neuropsych])
 
 
     appointment_date = nil
@@ -726,7 +732,7 @@ class NeuropsychesController < ApplicationController
     end
 =end
     respond_to do |format|
-      if @neuropsych.update_attributes(params[:neuropsych])
+      # not being used - its all appointment fields if @neuropsych.update(params[:neuropsych]) #, :without_protection => true)
         @appointment = Appointment.find(@neuropsych.appointment_id)
         @vgroup = Vgroup.find(@appointment.vgroup_id)
         @appointment.comment = params[:appointment][:comment]
@@ -742,7 +748,7 @@ class NeuropsychesController < ApplicationController
         end
         @appointment.save
         @vgroup.completedneuropsych = params[:vgroup][:completedneuropsych]
-        @vgroup.save
+      if  @vgroup.save
         format.html { redirect_to(@neuropsych, :notice => 'Neuropsych was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -778,5 +784,16 @@ class NeuropsychesController < ApplicationController
       format.html { redirect_to(np_search_path) }
       format.xml  { head :ok }
     end
-  end
+  end  
+  private
+    def set_neuropsych
+       @neuropsych = Neuropsych.find(params[:id])
+    end    
+    # not really using this
+   def neuropsych_params
+          params.require(:appointment).permit(:id,:appointment_date,:appointment_coordinator,:comment)# :enteredneuropsych,:enteredneuropsychdate,:enteredneuropsychwho,:completedneuropsych_moved_to_vgroups,:neuropsychnote,:temp_fkneuroid,:temp_fkvisitid,:id)
+   end
+   def np_search_params
+          params.require(:np_search).permit!
+   end
 end

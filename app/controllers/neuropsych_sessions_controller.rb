@@ -1,5 +1,7 @@
 # encoding: utf-8
-class NeuropsychSessionsController < ApplicationController
+class NeuropsychSessionsController < ApplicationController 
+  before_action :set_neuropsych_session, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /neuropsych_sessions
   # GET /neuropsych_sessions.xml
   def index
@@ -41,7 +43,7 @@ class NeuropsychSessionsController < ApplicationController
   # POST /neuropsych_sessions
   # POST /neuropsych_sessions.xml
   def create
-    @neuropsych_session = NeuropsychSession.new(params[:neuropsych_session])
+    @neuropsych_session = NeuropsychSession.new(neuropsych_session_params)#params[:neuropsych_session])
 
     respond_to do |format|
       if @neuropsych_session.save
@@ -61,7 +63,7 @@ class NeuropsychSessionsController < ApplicationController
     @neuropsych_session = NeuropsychSession.find(params[:id])
 
     respond_to do |format|
-      if @neuropsych_session.update_attributes(params[:neuropsych_session])
+      if @neuropsych_session.update(neuropsych_session_params)#params[:neuropsych_session], :without_protection => true)
         flash[:notice] = 'NeuropsychSession was successfully updated.'
         format.html { redirect_to(@neuropsych_session) }
         format.xml  { head :ok }
@@ -82,5 +84,12 @@ class NeuropsychSessionsController < ApplicationController
       format.html { redirect_to(neuropsych_sessions_url) }
       format.xml  { head :ok }
     end
-  end
+  end  
+  private
+    def set_neuropsych_session
+       @neuropsych_session = NeuropsychSession.find(params[:id])
+    end
+   def neuropsych_session_params
+          params.require(:neuropsych_session).permit(:visit_id,:id,:date,:note,:procedure)
+   end
 end

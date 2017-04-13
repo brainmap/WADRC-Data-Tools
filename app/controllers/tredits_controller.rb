@@ -1,5 +1,6 @@
 class TreditsController < ApplicationController
-
+  	before_action :set_tredit, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
 
   def tredit_home
     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
@@ -78,7 +79,9 @@ class TreditsController < ApplicationController
           
     end
         @html_request ="Y"
-         request_format = request.formats.to_s
+         #request_format = request.formats.to_s     
+         v_request_format_array = request.formats
+          request_format = v_request_format_array[0]
          case  request_format
           when "[text/html]","text/html" then
             @html_request ="Y"
@@ -198,7 +201,7 @@ class TreditsController < ApplicationController
   # POST /tredits
   # POST /tredits.json
   def create
-    @tredit = Tredit.new(params[:tredit])
+    @tredit = Tredit.new(tredit_params)#params[:tredit])
 
     respond_to do |format|
       if @tredit.save
@@ -217,7 +220,7 @@ class TreditsController < ApplicationController
     @tredit = Tredit.find(params[:id])
 
     respond_to do |format|
-      if @tredit.update_attributes(params[:tredit])
+      if @tredit.update(tredit_params)#params[:tredit], :without_protection => true)
         format.html { redirect_to @tredit, notice: 'Tredit was successfully updated.' }
         format.json { head :no_content }
       else
@@ -237,5 +240,12 @@ class TreditsController < ApplicationController
       format.html { redirect_to tredits_url }
       format.json { head :no_content }
     end
-  end
+  end   
+  private
+    def set_tredit
+       @tredit = Tredit.find(params[:id])
+    end
+   def tredit_params
+          params.require(:tredit).permit(:trfile_id,:user_id,:status_flag,:created_at,:updated_at,:edit_completed_flag,:id)
+   end
 end

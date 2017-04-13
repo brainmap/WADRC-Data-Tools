@@ -9,7 +9,17 @@ edit_count = edit_count -1
 <h1>New participant</h1>
 
 <%= form_for(@participant) do |f| %>
-  <%= f.error_messages %>
+<% if @participant.errors.any? %>
+  <div id="error_explanation">
+    <h2><%= pluralize(@participant.errors.count, "error") %> prohibited this participant from being saved:</h2>
+
+    <ul>
+    <% @participant.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
   <p>
     <%= f.label :date_of_birth %><br />
     <%= f.date_select :dob, :start_year => Time.now.year - 100,

@@ -121,6 +121,6 @@ edit_count = edit_count -1
 <% if edit_count > 0 %>
 <div style="text-align:right">
 	<%= link_to 'edit', edit_enrollment_path(@enrollment) %> |
-	<%= link_to 'delete', @enrollment, :confirm => "Are you sure you want to delete this enrollment?", :method => :delete %>
+	<%= link_to 'delete', @enrollment, :method => :delete , data: {confirm: "Are you sure you want to delete this enrollment?"}%>
 </div>
 <% end %>

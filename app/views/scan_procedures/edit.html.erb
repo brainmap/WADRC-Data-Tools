@@ -2,7 +2,17 @@
   <% if current_user.role == 'Admin_High'%>
 <h1>Editing Scan Procedure</h1>
 <%= form_for(@scan_procedure) do |f| %>
-  <%= f.error_messages %>
+<% if @scan_procedure.errors.any? %>
+  <div id="error_explanation">
+    <h2><%= pluralize(@scan_procedure.errors.count, "error") %> prohibited this scan_procedure from being saved:</h2>
+
+    <ul>
+    <% @scan_procedure.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
 
   <p>
     <%= f.label :code_name %><br />

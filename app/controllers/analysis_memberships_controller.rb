@@ -1,5 +1,7 @@
 # encoding: utf-8
-class AnalysisMembershipsController < ApplicationController
+class AnalysisMembershipsController < ApplicationController   
+  before_action :set_analysis_membership, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /analysis_memberships
   # GET /analysis_memberships.xml
   def index
@@ -45,7 +47,7 @@ class AnalysisMembershipsController < ApplicationController
   # POST /analysis_memberships
   # POST /analysis_memberships.xml
   def create
-    @analysis_membership = AnalysisMembership.new(params[:analysis_membership])
+    @analysis_membership = AnalysisMembership.new( analysis_membership_params)#params[:analysis_membership])
 
     respond_to do |format|
       if @analysis_membership.save
@@ -65,7 +67,7 @@ class AnalysisMembershipsController < ApplicationController
     @analysis_membership = AnalysisMembership.find(params[:id])
 
     respond_to do |format|
-      if @analysis_membership.update_attributes(params[:analysis_membership])
+      if @analysis_membership.update( analysis_membership_params)#params[:analysis_membership], :without_protection => true)
         flash[:notice] = 'AnalysisMembership was successfully updated.'
         format.html { redirect_to(@analysis_membership.analysis) }
         format.xml  { head :ok }
@@ -86,5 +88,12 @@ class AnalysisMembershipsController < ApplicationController
       format.html { redirect_to(analysis_memberships_url) }
       format.xml  { head :ok }
     end
-  end
+  end  
+  private
+    def set_analysis_membership
+       @analysis_membership = AnalysisMembership.find(params[:id])
+    end
+   def analysis_membership_params
+          params.require(:analysis_membership).permit(:exclusion_comment,:excluded,:image_dataset_id,:analysis_id,:id)
+   end
 end

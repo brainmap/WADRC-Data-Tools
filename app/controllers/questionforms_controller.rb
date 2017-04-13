@@ -3,7 +3,7 @@ class QuestionformsController < ApplicationController
   # GET /questionforms
   # GET /questionforms.xml
   def index
-    @questionforms = Questionform.all(:order =>'status_flag desc, entrance_page_type,tab_type,display_order,description')
+    @questionforms = Questionform.where("1=1").order('status_flag desc, entrance_page_type,tab_type,display_order,description')
 
     respond_to do |format|
       format.html # index.html.erb
@@ -50,7 +50,7 @@ class QuestionformsController < ApplicationController
   # POST /questionforms
   # POST /questionforms.xml
   def create
-    @questionform = Questionform.new(params[:questionform])
+    @questionform = Questionform.new(questionform_params)#params[:questionform])
     
     respond_to do |format|
       if @questionform.save
@@ -69,7 +69,7 @@ class QuestionformsController < ApplicationController
     @questionform = Questionform.find(params[:id])
 
     respond_to do |format|
-      if @questionform.update_attributes(params[:questionform])
+      if @questionform.update(questionform_params)#params[:questionform], :without_protection => true)
         format.html { redirect_to(@questionform, :notice => 'Questionform was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -109,7 +109,7 @@ class QuestionformsController < ApplicationController
 
     @q_data_form.user = current_user
     if params["q_data_form_id"].length > 0
-      @q_data_form.save  #update_attributes(@q_data_form)
+      @q_data_form.save  #update(@q_data_form)
     else
       @q_data_form.save
     end
@@ -202,7 +202,7 @@ class QuestionformsController < ApplicationController
         end
     if v_value_link != "-1"
         if params["q_data_id"][q_id].length  > 0
-          @q_data.save # update_attributes(@q_data)
+          @q_data.save # update(@q_data)
         else
           @q_data.save
         end
@@ -453,6 +453,13 @@ class QuestionformsController < ApplicationController
       format.xml  { render :xml => @questionforms }
     end    
    end
-  end
+  end  
+  private
+    def set_questionform
+       @questionform = Questionform.find(params[:id])
+    end
+   def questionform_params
+          params.require(:questionform).permit(:status_flag,:description,:long_description,:display_order,:parent_questionform_id,:entrance_page_type,:target_page,:tab_type,:current_tab,:view_name,:tab_default_yn,:short_description,:id)
+   end
   
 end

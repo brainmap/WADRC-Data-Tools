@@ -41,7 +41,7 @@ class MriperformancesController < ApplicationController
   # POST /mriperformances
   # POST /mriperformances.xml
   def create
-    @mriperformance = Mriperformance.new(params[:mriperformance])
+    @mriperformance = Mriperformance.new(mriperformance_params)#params[:mriperformance])
 
     respond_to do |format|
       if @mriperformance.save
@@ -60,7 +60,7 @@ class MriperformancesController < ApplicationController
     @mriperformance = Mriperformance.find(params[:id])
 
     respond_to do |format|
-      if @mriperformance.update_attributes(params[:mriperformance])
+      if @mriperformance.update(mriperformance_params)#params[:mriperformance], :without_protection => true)
         format.html { redirect_to(@mriperformance, :notice => 'Mriperformance was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -80,5 +80,12 @@ class MriperformancesController < ApplicationController
       format.html { redirect_to(mriperformances_url) }
       format.xml  { head :ok }
     end
-  end
+  end   
+  private
+    def set_mriperformance
+       @mriperformance = Mriperformance.find(params[:id])
+    end
+   def mriperformance_params
+          params.require(:mriperformance).permit(:temp_fkperfomancesummaryid,:mriscantask_id,:accuracypercentage,:hitpercentage,:id)
+   end
 end

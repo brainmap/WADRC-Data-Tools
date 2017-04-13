@@ -87,7 +87,7 @@ class SchedulesController < ApplicationController
   # POST /schedules
   # POST /schedules.xml
   def create
-    @schedule = Schedule.new(params[:schedule])
+    @schedule = Schedule.new(schedule_params)#params[:schedule])
 
     respond_to do |format|
       if @schedule.save
@@ -109,10 +109,10 @@ class SchedulesController < ApplicationController
 
     respond_to do |format|
       
-      if @schedule.update_attributes(params[:schedule])
+      if @schedule.update(schedule_params)#params[:schedule], :without_protection => true)
         if params[:schedule][:user_ids].blank?
            params[:schedule][:user_ids]=""
-           @schedule.update_attributes(params[:schedule])
+           @schedule.update(schedule_params) #params[:schedule], :without_protection => true)
         end
         @schedule.target_table = (@schedule.target_table).strip
         @schedule.save
@@ -135,5 +135,19 @@ class SchedulesController < ApplicationController
       format.html { redirect_to(schedules_url) }
       format.xml  { head :ok }
     end
-  end
+  end 
+  private
+    def set_schedule
+       @schedule = Schedule.find(params[:id])
+    end
+   def schedule_params
+          params.require(:schedule).permit(:file_columns_included,:file_key_source_column,:file_path,:key_type,:target_table_columns,:process_stop_file_flag,:run_as_user,:run_on_machine,:make_unique_export_id,:file_header,:file_upload_flag,:shared_function_name,:id,:run_command,:parameters,:description,:run_time_length_min,:status_flag,:target_table,:target_column,:name,user_ids: [])
+   end 
+
+#    def set_schedules_user
+#       @schedules_user = SchedulesUser.find(params[:id])
+#    end
+#   def schedules_user_params
+#          params.require(:schedules_user).permit(:schedule_id,:user_id)
+#   end
 end

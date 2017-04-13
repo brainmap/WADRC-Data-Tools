@@ -2,7 +2,8 @@ class Blooddraw < ActiveRecord::Base
   
   belongs_to :appointment
   
-  default_scope :order => 'appointment_id DESC'
+  #default_scope :order => 'appointment_id DESC' 
+   default_scope { order(appointment_id: :desc) }  
   
   def appointment
       @appointment =Appointment.find(self.appointment_id)

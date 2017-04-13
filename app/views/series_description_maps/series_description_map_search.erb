@@ -1,0 +1,71 @@
+<% if current_user.role == 'Admin_High'%>
+<h1>Listing series_description_maps</h1>
+
+<table class="tabular">
+  <tr>
+    <th>Id</th>
+    <th>Series description type</th>
+    <th>Series description</th>
+    <th>Count by Scan Protocol</th>
+    <% if current_user.role == 'Admin_High'%>
+    <th></th>
+    <th></th>
+    <th></th>
+    <%end%>
+  </tr>
+
+<% @series_description_maps.each do |series_description_map| %>
+  <tr>
+    <td><%= series_description_map.id %></td>
+    <td><%= if !series_description_map.series_description_type_id.blank? 
+	        SeriesDescriptionType.find(series_description_map.series_description_type_id).series_description_type 
+	   end%></td>
+    <td><%= series_description_map.series_description %></td>
+    <td><% sdsps = SeriesDescriptionScanProcedure.where("series_description_scan_procedures.series_description_id in ( select series_descriptions.id from series_descriptions where trim(long_description) in (?) )",series_description_map.series_description.strip)
+        v_sp_cnt_array = Array.new
+         sdsps.each do |sdsp|
+               v_sp = ScanProcedure.find(sdsp.scan_procedure_id)
+               v_sp_cnt_array.push(v_sp.codename+"  cnt ="+(sdsp.scan_count).to_s)
+          end %>
+          <%= v_sp_cnt_array.join(", ") %>
+    </td>
+    <% if current_user.role == 'Admin_High'%>
+    <td><%= link_to 'Show', series_description_map %></td>
+    <td><%= link_to 'Edit', edit_series_description_map_path(series_description_map) %></td>
+    <td><%= link_to 'Destroy', series_description_map, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
+    <%end%>
+  </tr>
+<% end %>
+</table>
+
+<br />    
+<%= link_to 'New Series description map', new_series_description_map_path %>
+
+       <br><br><br>
+<%= form_for :series_description_map_search,:url=>'/series_description_map_search' do |f| %>
+<table class="search_form">
+	<tr><td><%= f.label :series_description_types %><br>
+	<div id="scan_procedure_list">
+	<ul>
+	<% SeriesDescriptionType.all.sort_by(&:series_description_type).each do |series_description_type| %>
+		<li>
+			<%#= f.fields_for scan_procedure do |scan_fields| %>
+				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
+				<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
+			<%# end %>
+		</li>
+		<li>
+			<%= check_box_tag "series_description_type_ids", series_description_type.id,FALSE , :name => 'series_description_map_search[series_description_type_id][]' %>
+			<%= label_tag '', series_description_type.series_description_type %>
+		</li>
+	<% end %>
+	</ul>
+	</div>  
+	</td><td>  <%= f.submit "Search" %> </td></tr>
+	</table>
+     <%end%>  
+             <br><br><br>
+
+	<% else %>
+	  Your <%= current_user.role %> role does not allow access. 
+	<% end %>

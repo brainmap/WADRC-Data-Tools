@@ -18,7 +18,7 @@
     <td><%= mriperformance.accuracypercentage %></td>
     <td><%= link_to 'Show', mriperformance %></td>
     <td><%= link_to 'Edit', edit_mriperformance_path(mriperformance) %></td>
-    <td><%= link_to 'Destroy', mriperformance, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', mriperformance, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

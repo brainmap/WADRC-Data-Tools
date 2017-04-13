@@ -100,7 +100,17 @@ edit_count = edit_count -1
 <%end%>
 <div>
 <%= form_for(@image_dataset) do |f| %>
-  <%= f.error_messages %>
+<% if @image_dataset.errors.any? %>
+  <div id="error_explanation">
+    <h2><%= pluralize(@image_dataset.errors.count, "error") %> prohibited this image_dataset from being saved:</h2>
+
+    <ul>
+    <% @image_dataset.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
   <%= f.label :do_not_share_scans_flag %>:&nbsp;
     <%= select :image_dataset, :do_not_share_scans_flag, { 
       "Select to Share/Not Share for quality issues" => "N","Do not share scan via outside request, quality problems" => "Y", "Ok to share scan with outside request if IRB approval" => "N" }, :selected =>@image_dataset.do_not_share_scans_flag %>&nbsp;&nbsp;<%= f.submit "Update" %>
@@ -111,11 +121,21 @@ edit_count = edit_count -1
  <br>
 <%= form_for(@image_dataset) do |f| %>
 <%= f.label :use_as_default_scan_flag %>:&nbsp;<%= @image_dataset.use_as_default_scan_flag %><br>
-  <%= f.error_messages %>
+<% if @image_dataset.errors.any? %>
+  <div id="error_explanation">
+    <h2><%= pluralize(@image_dataset.errors.count, "error") %> prohibited this image_dataset from being saved:</h2>
+
+    <ul>
+    <% @image_dataset.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
   <%= f.label :lock_default_scan_flag %>:&nbsp;
     <% @lock_hash = { "Y|Y"=>"Lock and set to Y", "Y|N"=>"Lock and set to N" , "Y|"=>"Lock and set to NULL", "N|"=>"Un-Lock and set to NULL"  } %>
 
-    <%= select_tag('lock_default_scan_flag_parse', options_from_collection_for_select(@lock_hash, :first, :last, @lock_default_scan_flag_parse)) %>&nbsp;&nbsp;<%= f.submit "Update" %><br>
+    <%= select_tag('image_dataset[lock_default_scan_flag_parse]', options_from_collection_for_select(@lock_hash, :first, :last, @lock_default_scan_flag_parse)) %>&nbsp;&nbsp;<%= f.submit "Update" %><br>
     <small>Some scans types are picks as default scan via scheduled processes. Lock block the process from setting the default for this scan. Un-Lock restores the process to set this image_dataset flag.</small>
 
   <%end%>

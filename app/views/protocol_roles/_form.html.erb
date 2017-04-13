@@ -1,6 +1,7 @@
 
 <% if current_user.role == 'Admin_High'%>
-<%= form_for(@protocol_role) do |f| %>
+<%= form_for(@protocol_role) do |f| %>  
+
   <% if @protocol_role.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(@protocol_role.errors.count, "error") %> prohibited this protocol_role from being saved:</h2>

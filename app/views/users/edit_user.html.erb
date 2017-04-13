@@ -2,7 +2,6 @@
 
 <h2>Edit User</h2>
 <% if current_user.role == 'Admin_High'%>
-<%= error_messages_for :user %>
 <%= form_for :user do |f| -%>
   <!-- = f.error_notification -->
 

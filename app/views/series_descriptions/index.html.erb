@@ -22,7 +22,7 @@
     <td><%=h series_description.acq_plane %></td>
     <td><%=h series_description.ignore %></td>
     <td><%= link_to 'Edit', edit_series_description_path(series_description) %></td>
-    <td><%= link_to 'Delete', series_description, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Delete', series_description, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

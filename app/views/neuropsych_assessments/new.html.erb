@@ -1,7 +1,17 @@
 <h1>New neuropsych_assessment</h1>
 
 <%= form_for(@neuropsych_assessment) do |f| %>
-  <%= f.error_messages %>
+  <% if @neuropsych_assessment.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@neuropsych_assessment.errors.count, "error") %> prohibited this neuropsych_assessment from being saved:</h2>
+
+      <ul>
+      <% @neuropsych_assessment.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
 
   <p>
     <%= f.label :score %><br />

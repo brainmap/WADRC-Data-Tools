@@ -40,7 +40,7 @@
     <td><%= mriscantask.concerns %></td>
     <td><%= link_to 'Show', mriscantask %></td>
     <td><%= link_to 'Edit', edit_mriscantask_path(mriscantask) %></td>
-    <td><%= link_to 'Destroy', mriscantask, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', mriscantask, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

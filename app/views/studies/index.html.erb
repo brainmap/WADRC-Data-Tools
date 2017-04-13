@@ -19,7 +19,7 @@
         <td>
           <%= link_to 'Show', study %>
           <%= link_to 'Edit', edit_study_path(study) %>
-          <%= link_to 'Destroy', study, :confirm => 'Are you sure?', :method => :delete %>
+          <%= link_to 'Destroy', study, :method => :delete,data: {confirm: 'Are you sure?' } %>
         </td>
       </tr>
     <% end %>

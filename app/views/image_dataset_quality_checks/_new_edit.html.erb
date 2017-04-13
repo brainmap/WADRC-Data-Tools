@@ -7,7 +7,17 @@ edit_count = edit_count -1
 %>
 
   <% qualopts = ['Pass','Mild','Moderate','Severe'] %>
-  <%= f.error_messages %>
+<% if @image_dataset_quality_check.errors.any? %>
+  <div id="error_explanation">
+    <h2><%= pluralize(@image_dataset_quality_check.errors.count, "error") %> prohibited this image_dataset quality_check from being saved:</h2>
+
+    <ul>
+    <% @image_dataset_quality_check.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
   <%= f.hidden_field :user_id %>
   <%= f.hidden_field :image_dataset_id %>
 

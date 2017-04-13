@@ -41,7 +41,7 @@ class CgQueryTnsController < ApplicationController
   # POST /cg_query_tns
   # POST /cg_query_tns.xml
   def create
-    @cg_query_tn = CgQueryTn.new(params[:cg_query_tn])
+    @cg_query_tn = CgQueryTn.new(cg_query_tn_params)#params[:cg_query_tn])
 
     respond_to do |format|
       if @cg_query_tn.save
@@ -60,7 +60,7 @@ class CgQueryTnsController < ApplicationController
     @cg_query_tn = CgQueryTn.find(params[:id])
 
     respond_to do |format|
-      if @cg_query_tn.update_attributes(params[:cg_query_tn])
+      if @cg_query_tn.update(cg_query_tn_params)#params[:cg_query_tn], :without_protection => true)
         format.html { redirect_to(@cg_query_tn, :notice => 'Cg query tn was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -81,4 +81,11 @@ class CgQueryTnsController < ApplicationController
       format.xml  { head :ok }
     end
   end
+  private
+    def set_cg_query_tn
+       @cg_query_tn = CgQueryTn.find(params[:id])
+    end
+   def cg_query_tn_params
+          params.require(:cg_query_tn).permit(:id,:display_order,:include_tn,:join_type,:save_flag,:updated_at,:cg_tn_id,:cg_query_id,:created_at)
+   end
 end

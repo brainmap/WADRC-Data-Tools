@@ -71,13 +71,13 @@ table { word-wrap:break-word; }
 .tabular thead .vert {
 	font-size:90%;
 	text-align: left;
-	position:absolute;
+	position:absolute;  
 	/* IE-only DX filter */
-	writing-mode: tb-rl;
+    writing-mode: horizontal-tb ; /*tb-rl;  deprecated     */
 	filter: flipv fliph;
 	/* Safari/Chrome function */
-	-webkit-transform: rotate(320deg) translate(0px,1em);
-	-webkit-transform-origin: 0 0;
+	-webkit-transform: rotate(320deg) translate(0px,1em) ;
+    -webkit-transform-origin:  0 0;     
 	/* works in latest FX builds */
 	-moz-transform: rotate(320deg) translate(0px,1em);
 	-moz-transform-origin: 0 0;
@@ -90,7 +90,7 @@ table { word-wrap:break-word; }
 	color:#333;
 	position:absolute;
 	/* IE-only DX filter */
-	writing-mode: tb-rl;
+	writing-mode: horizontal-tb ; /*tb-rl;  deprecated     */ 
 	filter: flipv fliph;
 	/* Safari/Chrome function */
 	-webkit-transform: translate(0px,5px) rotate(270deg);
@@ -126,7 +126,7 @@ table { word-wrap:break-word; }
 	text-align: left;
 	position:absolute;
 	/* IE-only DX filter */
-	writing-mode: tb-rl;
+	writing-mode: horizontal-tb ; /*tb-rl;  deprecated     */ 
 	filter: flipv fliph;
 	/* Safari/Chrome function */
 	-webkit-transform: rotate(320deg) translate(0px,1em);
@@ -143,7 +143,7 @@ table { word-wrap:break-word; }
 	color:#333;
 	position:absolute;
 	/* IE-only DX filter */
-	writing-mode: tb-rl;
+	writing-mode: horizontal-tb ; /*tb-rl;  deprecated     */ 
 	filter: flipv fliph;
 	/* Safari/Chrome function */
 	-webkit-transform: translate(0px,5px) rotate(270deg);
@@ -180,7 +180,7 @@ table { word-wrap:break-word; }
 	text-align: left;
 	position:absolute;
 	/* IE-only DX filter */
-	writing-mode: tb-rl;
+	writing-mode: horizontal-tb ; /*tb-rl;  deprecated     */ 
 	filter: flipv fliph;
 	/* Safari/Chrome function */
 	-webkit-transform: rotate(320deg) translate(0px,1em);
@@ -197,7 +197,7 @@ table { word-wrap:break-word; }
 	color:#333;
 	position:absolute;
 	/* IE-only DX filter */
-	writing-mode: tb-rl;
+	writing-mode: horizontal-tb ; /*tb-rl;  deprecated     */ 
 	filter: flipv fliph;
 	/* Safari/Chrome function */
 	-webkit-transform: translate(0px,5px) rotate(270deg);

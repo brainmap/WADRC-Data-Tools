@@ -1,17 +1,22 @@
 class Vgroup < ActiveRecord::Base 
   
   acts_as_reportable
-  default_scope :order => 'vgroup_date DESC' 
+  #default_scope :order => 'vgroup_date DESC'  
+  default_scope { order(vgroup_date: :desc) }
   paginates_per 50
   # attr_accessible  :transfer_mri  --- if this is added, add all the fields which should be updated from vgroup edit/create form 
   attr_accessor :move_appointemnt_id, :target_vgroup_id
 
   has_many :enrollment_vgroup_memberships,:dependent => :destroy
-  has_many :enrollments, :through => :enrollment_vgroup_memberships, :uniq => true
+  #has_many :enrollments, :through => :enrollment_vgroup_memberships, :uniq => true    
+  has_many :enrollments, -> { distinct }, :through => :enrollment_vgroup_memberships  
+  # has_many :scan_procedures_vgroups,:dependent => :destroy
+  # has_many :scan_procedures, -> { distinct }, :through => :scan_procedures_vgroups 
   accepts_nested_attributes_for :enrollments, :reject_if => :all_blank, :allow_destroy => true
 
    has_many :consent_form_vgroups,:dependent => :destroy
-  has_many :consent_forms, :through => :consent_form_vgroups, :uniq => true
+  #has_many :consent_forms, :through => :consent_form_vgroups, :uniq => true  
+  has_many :consent_forms, -> { distinct }, :through => :consent_form_vgroups   
   accepts_nested_attributes_for :consent_forms, :reject_if => :all_blank, :allow_destroy => true
 
 #  before_validation :lookup_enrollments
@@ -117,6 +122,10 @@ class Vgroup < ActiveRecord::Base
     @enrollments = Enrollment.where("enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships 
                                    where enrollment_vgroup_memberships.vgroup_id in (?)  )",self.id)
     return @enrollments
-  end
+  end  
+#  private
+#  def vgroup_params
+#    params.require(:vgroup).permit(:field1, :field2)
+#  end
      
 end

@@ -1,9 +1,10 @@
 # encoding: utf-8
 class AnalysesController < ApplicationController
-  
+  before_action :set_analysis, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   PER_PAGE = 50
   
-  before_filter :set_current_tab
+  before_action :set_current_tab
   
   def set_current_tab
     @current_tab = "analyses"
@@ -57,7 +58,7 @@ class AnalysesController < ApplicationController
   # POST /analyses
   # POST /analyses.xml
   def create
-    @analysis = Analysis.new(params[:analysis])
+    @analysis = Analysis.new( analyse_params)#params[:analysis])
     @analysis.user = current_user
     # 
     #   @analysis.datasets_in_analysis.each do |ds|
@@ -82,7 +83,7 @@ class AnalysesController < ApplicationController
     @analysis = Analysis.find_by_id(params[:id], :include => [ :analysis_memberships => :image_dataset ] )
     
     respond_to do |format|
-       if @analysis.update_attributes(params[:analysis])
+       if @analysis.update( analyse_params)#params[:analysis], :without_protection => true)
          flash[:notice] = 'Analysis was successfully updated.'
          format.html { redirect_to(@analysis) }
          format.xml  { head :ok }
@@ -103,5 +104,12 @@ class AnalysesController < ApplicationController
       format.html { redirect_to(analyses_url) }
       format.xml  { head :ok }
     end
-  end
+  end 
+  private
+    def set_analyse
+       @analyse = Analyse.find(params[:id])
+    end
+   def analyse_params
+          params.require(:analyse).permit(:id,:description,:user_id,:image_search_id)
+   end
 end

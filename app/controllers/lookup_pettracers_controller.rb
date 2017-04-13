@@ -1,5 +1,7 @@
 # encoding: utf-8
-class LookupPettracersController < ApplicationController
+class LookupPettracersController < ApplicationController  
+  before_action :set_lookup_pettracer, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /lookup_pettracers
   # GET /lookup_pettracers.xml
   def index
@@ -46,7 +48,7 @@ class LookupPettracersController < ApplicationController
   # POST /lookup_pettracers
   # POST /lookup_pettracers.xml
   def create
-    @lookup_pettracer = LookupPettracer.new(params[:lookup_pettracer])
+    @lookup_pettracer = LookupPettracer.new(lookup_pettracer_params)#params[:lookup_pettracer])
 
     respond_to do |format|
       if @lookup_pettracer.save
@@ -65,7 +67,7 @@ class LookupPettracersController < ApplicationController
     @lookup_pettracer = LookupPettracer.find(params[:id])
 
     respond_to do |format|
-      if @lookup_pettracer.update_attributes(params[:lookup_pettracer])
+      if @lookup_pettracer.update(lookup_pettracer_params)#params[:lookup_pettracer], :without_protection => true)
         format.html { redirect_to(@lookup_pettracer, :notice => 'Lookup pettracer was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -85,5 +87,12 @@ class LookupPettracersController < ApplicationController
       format.html { redirect_to(lookup_pettracers_url) }
       format.xml  { head :ok }
     end
-  end
+  end 
+  private
+    def set_lookup_pettracer
+       @lookup_pettracer = LookupPettracer.find(params[:id])
+    end
+   def lookup_pettracer_params
+          params.require(:lookup_pettracer).permit(:updated_at,:created_at,:description,:name,:id)
+   end
 end

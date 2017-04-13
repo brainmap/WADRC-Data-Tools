@@ -1,5 +1,7 @@
 # encoding: utf-8
-class ImageDatasetQualityChecksController < ApplicationController # AuthorizedController #  ApplicationController
+class ImageDatasetQualityChecksController < ApplicationController # AuthorizedController #  ApplicationController  
+  before_action :set_image_dataset_quality_check, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
  #  load_and_authorize_resource
   # GET /image_dataset_quality_checks
   # GET /image_dataset_quality_checks.xml
@@ -65,7 +67,7 @@ class ImageDatasetQualityChecksController < ApplicationController # AuthorizedCo
   def create
     scan_procedure_array = (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:image_dataset_id])
-    @image_dataset_quality_check = ImageDatasetQualityCheck.new(params[:image_dataset_quality_check])
+    @image_dataset_quality_check = ImageDatasetQualityCheck.new(image_dataset_quality_check_params)#params[:image_dataset_quality_check])
     @image_dataset_quality_check.user = current_user
 
     respond_to do |format|
@@ -95,7 +97,7 @@ class ImageDatasetQualityChecksController < ApplicationController # AuthorizedCo
                 where image_datasets.visit_id = scan_procedures_visits.visit_id  and scan_procedures_visits.scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     v_orig_incomplete_series = @image_dataset_quality_check.incomplete_series
     respond_to do |format|
-      if @image_dataset_quality_check.update_attributes(params[:image_dataset_quality_check])
+      if @image_dataset_quality_check.update(image_dataset_quality_check_params)#params[:image_dataset_quality_check], :without_protection => true)
         if @image_dataset_quality_check.incomplete_series == "Incomplete" and v_orig_incomplete_series != "Incomplete" 
             v_image_dataset = ImageDataset.find(@image_dataset_quality_check.image_dataset_id)
             v_image_dataset.do_not_share_scans_flag = 'Y' # Y means do not share
@@ -126,5 +128,12 @@ class ImageDatasetQualityChecksController < ApplicationController # AuthorizedCo
       format.html { redirect_to(im_ds) }
       format.xml  { head :ok }
     end
-  end
+  end 
+  private
+    def set_image_dataset_quality_check
+       @image_dataset_quality_check = ImageDatasetQualityCheck.find(params[:id])
+    end
+   def image_dataset_quality_check_params
+          params.require(:image_dataset_quality_check).permit(:motion_warning,:registration_risk,:banding,:ghosting_wrapping,:field_inhomogeneity,:fov_cutoff,:omnibus_f_comment,:garbled_series,:incomplete_series,:image_dataset_id,:user_id,:id,:omnibus_f,:spm_mask,:nos_concerns,:nos_concerns_comment,:other_issues,:spm_mask_comment,:field_inhomogeneity_comment,:motion_warning_comment,:registration_risk_comment,:banding_comment,:ghosting_wrapping_comment,:fov_cutoff_comment,:garbled_series_comment,:incomplete_series_comment)
+   end
 end

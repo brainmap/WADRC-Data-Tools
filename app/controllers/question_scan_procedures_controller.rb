@@ -4,7 +4,7 @@ class QuestionScanProceduresController < ApplicationController
   # GET /question_scan_procedures.xml
   def index
     scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
-    @question_scan_procedures = QuestionScanProcedure.where("question_id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",scan_procedure_array).order("id DESC" ).all
+    @question_scan_procedures = QuestionScanProcedure.where("question_id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",scan_procedure_array).order("id DESC" ).to_a
         if !params[:questionform_question].nil? 
          if (!params[:questionform_question][:questionform_id].nil?  and !params[:questionform_question][:questionform_id].blank? and !params[:questionform_question][:scan_procedure_id].nil?   and !params[:questionform_question][:scan_procedure_id][:id].nil? and !params[:questionform_question][:scan_procedure_id][:id].blank?  )
              @question_scan_procedures = QuestionScanProcedure.where("question_id in ( select question_id from questionform_questions where questionform_id in (?)) and question_id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:questionform_id],scan_procedure_array).where("question_id in ( select question_id from question_scan_procedures where scan_procedure_id in (?))",params[:questionform_question][:scan_procedure_id][:id])      
@@ -56,7 +56,7 @@ class QuestionScanProceduresController < ApplicationController
   # POST /question_scan_procedures.xml
   def create
     @scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ') #[:edit_low_scan_procedure_array]
-    @question_scan_procedure = QuestionScanProcedure.new(params[:question_scan_procedure])
+    @question_scan_procedure = QuestionScanProcedure.new(question_scan_procedure_params)#params[:question_scan_procedure])
 
     respond_to do |format|
       if @question_scan_procedure.save
@@ -76,7 +76,7 @@ class QuestionScanProceduresController < ApplicationController
     @question_scan_procedure = QuestionScanProcedure.find(params[:id])
 
     respond_to do |format|
-      if @question_scan_procedure.update_attributes(params[:question_scan_procedure])
+      if @question_scan_procedure.update(question_scan_procedure_params)#params[:question_scan_procedure], :without_protection => true)
         format.html { redirect_to(@question_scan_procedure, :notice => 'Question scan procedure was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -97,5 +97,12 @@ class QuestionScanProceduresController < ApplicationController
       format.html { redirect_to(question_scan_procedures_url) }
       format.xml  { head :ok }
     end
-  end
+  end   
+  private
+    def set_question_scan_procedure
+       @question_scan_procedure = QuestionScanProcedure.find(params[:id])
+    end
+   def question_scan_procedure_params
+          params.require(:question_scan_procedure).permit(:id,:question_id,:scan_procedure_id,:include_exclude)
+   end
 end

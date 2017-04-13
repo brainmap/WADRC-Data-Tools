@@ -1,7 +1,17 @@
 <h1 style="display:inline">New Analysis: </h1>  <%= @analysis.timestamp %>
 
 <%= form_for(@analysis) do |f| %>
-  <%= f.error_messages %>
+<% if @analysis.errors.any? %>
+  <div id="error_explanation">
+    <h2><%= pluralize(@analysis.errors.count, "error") %> prohibited this analysis from being saved:</h2>
+
+    <ul>
+    <% @analysis.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
   
   <div id="analyzer_bio" class="floating_left_column">
     <h3>Analysis information:</h3>

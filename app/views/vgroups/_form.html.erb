@@ -17,7 +17,7 @@
   </div>
   <div class="field">
     <%= f.label :participant_id %><br />
-<%= select(:vgroup, :participant_id, Enrollment.where(" participant_id is not null").all.sort_by(&:enumber).collect {|p| [ p.enumber, p.participant_id ] }, { :include_blank => "Select  a participant" }) %>   
+<%= select(:vgroup, :participant_id, Enrollment.where(" participant_id is not null").sort_by(&:enumber).collect {|p| [ p.enumber, p.participant_id ] }, { :include_blank => "Select  a participant" }) %>   
 <br>Pick any enumber associated with a participant. After the vgroup is created, delete the extra enumbers.<br>
 If the enumber is not already associated with a participant, add the enumber below at the bottom of the form, after selecting another enumber associated with the participant. 
 <br><br> 
@@ -94,7 +94,7 @@ If the enumber is not already associated with a participant, add the enumber bel
 	<div id="scan_procedure_list">
 	<ul>
 	<% scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ')
-	ScanProcedure.where(" scan_procedures.id in (?)",  scan_procedure_array).all.sort_by(&:codename).each do |scan_procedure| %>
+	ScanProcedure.where(" scan_procedures.id in (?)",  scan_procedure_array).load.sort_by(&:codename).each do |scan_procedure| %>
 		<li>
 			<%#= f.fields_for scan_procedure do |scan_fields| %>
 				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
@@ -117,7 +117,7 @@ If the enumber is not already associated with a participant, add the enumber bel
 		<%= e.label :_destroy, "Remove?" unless e.object.new_record? %>
 
     <% if e.object.new_record? %>
-      <%= e.text_field_with_auto_complete :enumber, {},
+      <%= e.text_field :enumber, {},
                 { :method => :get, :url => enrollments_path(:format => :js), :param_name => 'search' } %>
     <%else%>
                  <%= e.object.enumber %>

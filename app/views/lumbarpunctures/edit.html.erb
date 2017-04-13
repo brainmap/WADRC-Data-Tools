@@ -17,7 +17,7 @@ edit_count = edit_count -1
 <% end %>
 <br /><%= link_to 'Back to this Lumbar Puncture appt', @lumbarpuncture %> 
 <% if edit_count > 0 %>
-| <%= link_to 'Delete this Lumbar Puncture appt', @lumbarpuncture, :confirm => "Are you sure you want to delete this Lumbar Puncture appt?", :method => :delete %>
+| <%= link_to 'Delete this Lumbar Puncture appt', @lumbarpuncture, :method => :delete ,data: {confirm: "Are you sure you want to delete this Lumbar Puncture appt?"} %>
  | <%= link_to 'Vgroup', Vgroup.find(@appointment.vgroup_id) %>
 <% end %>
 <%end%>

@@ -26,7 +26,7 @@
   <td><%= protocol.hide_date_flag %></td>
     <td><%= link_to 'Show', protocol %></td>
     <td><%= link_to 'Edit', edit_protocol_path(protocol) %></td>
-    <td><%= link_to 'Destroy', protocol, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', protocol, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

@@ -41,7 +41,7 @@ edit_count = edit_count -1
 <% end %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<b>Scan Procedure:</b>
-    <%= @vgroup.blank? ? "None" : @vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, '/vgroups/vgroups_search?vgroups_search[scan_procedure_id][id]='+ sp.id.to_s)}.join(", ").html_safe %> 
+    <%= @vgroup.blank? ? "None" : @vgroup.scan_procedures.uniq.sort_by(&:codename).collect {|sp| link_to(sp.codename, '/vgroups/vgroups_search?vgroups_search[scan_procedure_id][id]='+ sp.id.to_s)}.join(", ").html_safe %> 
 <br>
 	<br><b>Enroll Number:</b>
 	<%= @vgroup.blank? ? "": @vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %>
@@ -111,7 +111,7 @@ edit_count = edit_count -1
 <td colspan=6 align="left"> 
      <%= form_tag( "/vgroups/change_consent_form_vgroup",:url => { :controller=>"vgroups",:action => "change_consent_form_vgroup" } ,  :html => { :id => params[:id] }) do |f| %>
            <%= hidden_field_tag 'id', @vgroup.id %>
- <%= collection_select :consent_form, 'id', ConsentForm.where("consent_forms.id in (select consent_form_id from consent_form_scan_procedures where scan_procedure_id in (?)) OR consent_forms.id not in (select consent_form_id from consent_form_scan_procedures) ",@scan_procedures_vgroups).sort_by(&:description), :id, :description,{:prompt => 'Select a Consent Form'},{ } %> 
+ <%= collection_select :consent_form, 'id', ConsentForm.where("consent_forms.id in (select consent_form_id from consent_form_scan_procedures where scan_procedure_id in (?)) OR consent_forms.id not in (select consent_form_id from consent_form_scan_procedures) ",@t_scan_procedures_vgroups_id_array).sort_by(&:description), :id, :description,{:prompt => 'Select a Consent Form'},{ } %> 
 &nbsp;&nbsp;&nbsp;
 <%= date_select :consent_form,'date' ,:start_year => 2009, :end_year => Time.now.year %>
 &nbsp;&nbsp;&nbsp;
@@ -145,7 +145,7 @@ edit_count = edit_count -1
            <%= hidden_field_tag 'id', @vgroup.id %>
       <%= label_tag :Completed_MRI %> <%= select :vgroup, :transfer_mri, ["no", "yes", "n/a"] %>
      <%= submit_tag("Update") %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	<%= link_to  'New-MRI', new_visit_path+"/"+@vgroup.id.to_s , :confirm => "Are you sure there is not an existing MRI appointment for the same date, scan procedure and enumber? MRI appointments are usually created when the scans are imported."%>
+	<%= link_to  'New-MRI', new_visit_path+"/"+@vgroup.id.to_s , data: {confirm: "Are you sure there is not an existing MRI appointment for the same date, scan procedure and enumber? MRI appointments are usually created when the scans are imported."}%>
 	<% end %>
 <% else %>
 <%= label_tag :Completed_MRI %> <%= select :vgroup, :transfer_mri, ["no", "yes", "n/a"] %>

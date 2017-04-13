@@ -41,7 +41,7 @@ class QuestionformScanProceduresController < ApplicationController
   # POST /questionform_scan_procedures
   # POST /questionform_scan_procedures.xml
   def create
-    @questionform_scan_procedure = QuestionformScanProcedure.new(params[:questionform_scan_procedure])
+    @questionform_scan_procedure = QuestionformScanProcedure.new(questionform_scan_procedure_params)#params[:questionform_scan_procedure])
 
     respond_to do |format|
       if @questionform_scan_procedure.save
@@ -60,7 +60,7 @@ class QuestionformScanProceduresController < ApplicationController
     @questionform_scan_procedure = QuestionformScanProcedure.find(params[:id])
 
     respond_to do |format|
-      if @questionform_scan_procedure.update_attributes(params[:questionform_scan_procedure])
+      if @questionform_scan_procedure.update(questionform_scan_procedure_params)#params[:questionform_scan_procedure], :without_protection => true)
         format.html { redirect_to(@questionform_scan_procedure, :notice => 'Questionform scan procedure was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -80,5 +80,12 @@ class QuestionformScanProceduresController < ApplicationController
       format.html { redirect_to(questionform_scan_procedures_url) }
       format.xml  { head :ok }
     end
-  end
+  end    
+  private
+    def set_questionform_scan_procedure
+       @questionform_scan_procedure = QuestionformScanProcedure.find(params[:id])
+    end
+   def questionform_scan_procedure_params
+          params.require(:questionform_scan_procedure).permit(:questionform_id,:include_exclude,:scan_procedure_id,:id)
+   end
 end

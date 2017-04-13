@@ -1,4 +1,4 @@
-<%= simple_form_for(resource, :as => resource_name,  :url => session_path(resource_name)) do |f| %>
+<%= form_for(resource, :as => resource_name,  :url => session_path(resource_name)) do |f| %>
 
 <%= image_tag 'wadrc_logo.png' %><br/>
 <h1>Sorry, you must be logged in to continue.</h1>
@@ -8,18 +8,18 @@
     <table>
 	  <tr>
 	    <td><%= f.label :username, :label => 'Login'   %></td>
-	    <td><%= f.input_field :username, :required => true, :autofocus => true,  :size=> 20 %></td>
+	    <td><%= f.text_field :username, :required => true, :autofocus => true,  :size=> 20 %></td>
 	  </tr>
 	  <tr>
 	    <td><%= f.label :password, :label => 'Password'   %>	</td>
- <td><%= f.input_field :password, :required => true ,   :size => 20 %></td>
+ <td><%= f.password_field :password, :required => true ,   :size => 20 %></td>
 	  </tr>
 	  <tr>
-	    <td><%= f.label :password, :label => 'Remember me' if devise_mapping.rememberable?  %>	</td>
-    <td><%= f.input_field :remember_me, :as => :boolean if devise_mapping.rememberable? %></td>
+	    <td><%= f.label :remember_me, :label => 'Remember me' if devise_mapping.rememberable?  %>	</td>
+    <td><%= f.check_box :remember_me, :as => :boolean if devise_mapping.rememberable? %></td>
   </tr>
   <tr>
-    <td><%= f.button :submit, "Log in" %></td>
+    <td><%= f.submit "Log in" %></td>
   </tr>
   </table>
 
@@ -34,7 +34,7 @@
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 This is a test of the https --- secure login
 <br>
-<%= simple_form_for(resource, :as => resource_name, :url => session_url(resource_name, :protocol => "https")) do |f| %>
+<%= form_for(resource, :as => resource_name, :url => session_url(resource_name, :protocol => "https")) do |f| %>
 
 <%= image_tag 'wadrc_logo.png' %><br/>
 <h1>Sorry, you must be logged in to continue.</h1>
@@ -44,18 +44,18 @@ This is a test of the https --- secure login
     <table>
 	  <tr>
 	    <td><%= f.label :username, :label => 'Login'   %></td>
-	    <td><%= f.input_field :username, :required => true, :autofocus => true,  :size=> 20 %></td>
+	    <td><%= f.text_field :username, :required => true, :autofocus => true,  :size=> 20 %></td>
 	  </tr>
 	  <tr>
 	    <td><%= f.label :password, :label => 'Password'   %>	</td>
- <td><%= f.input_field :password, :required => true ,   :size => 20 %></td>
+ <td><%= f.password_field :password, :required => true ,   :size => 20 %></td>
 	  </tr>
 	  <tr>
 	    <td><%= f.label :password, :label => 'Remember me' if devise_mapping.rememberable?  %>	</td>
-    <td><%= f.input_field :remember_me, :as => :boolean if devise_mapping.rememberable? %></td>
+    <td><%= f.check_box :remember_me, :as => :boolean if devise_mapping.rememberable? %></td>
   </tr>
   <tr>
-    <td><%= f.button :submit, "Log in" %></td>
+    <td><%= f.submit "Log in" %></td>
   </tr>
   </table>
 

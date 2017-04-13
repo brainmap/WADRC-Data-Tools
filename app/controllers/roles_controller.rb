@@ -1,5 +1,7 @@
 # encoding: utf-8
-class RolesController < ApplicationController
+class RolesController < ApplicationController  
+  before_action :set_role, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /roles
   # GET /roles.xml
   def index
@@ -41,7 +43,7 @@ class RolesController < ApplicationController
   # POST /roles
   # POST /roles.xml
   def create
-    @role = Role.new(params[:role])
+    @role = Role.new(role_params)#params[:role])
 
     respond_to do |format|
       if @role.save
@@ -60,7 +62,7 @@ class RolesController < ApplicationController
     @role = Role.find(params[:id])
 
     respond_to do |format|
-      if @role.update_attributes(params[:role])
+      if @role.update(role_params)#params[:role], :without_protection => true)
         format.html { redirect_to(@role, :notice => 'Role was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -80,5 +82,12 @@ class RolesController < ApplicationController
       format.html { redirect_to(roles_url) }
       format.xml  { head :ok }
     end
-  end
+  end    
+  private
+    def set_role
+       @role = Role.find(params[:id])
+    end
+   def role_params
+          params.require(:role).permit(:id,:role,:description)
+   end
 end

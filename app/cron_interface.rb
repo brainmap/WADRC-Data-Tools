@@ -157,11 +157,19 @@ v_user = v_user.gsub("\n","")
       
   elsif v_value_1 == "lst_116_status"  # getting lst_122 and lst_116 
       v_shared = Shared.new
-      v_shared.run_lst_116_status()    
+      v_shared.run_lst_116_status()  
+
+  elsif v_value_1 == "lst_v3_status"  # getting lst_122 and lst_116 
+      v_shared = Shared.new
+      v_shared.run_lst_v3_status()   
   
   elsif v_value_1 == "lst_122_process" 
       v_shared = Shared.new
       v_shared.run_lst_122_process()
+
+  elsif v_value_1 == "lst_v3_process" 
+      v_shared = Shared.new
+      v_shared.run_lst_v3_process()
 
   elsif v_value_1 == "mcd_harvest" 
       v_shared = Shared.new
@@ -170,6 +178,17 @@ v_user = v_user.gsub("\n","")
    elsif v_value_1 == "padi_upload"
       v_shared = Shared.new
       v_shared.run_padi_upload()
+
+    elsif v_value_1 == "padi_upload_20170227_dicom"
+      v_shared = Shared.new
+      v_shared.run_padi_upload_20170227_dicom()
+    elsif v_value_1 == "padi_upload_20170227_nifty"
+      v_shared = Shared.new
+      v_shared.run_padi_upload_20170227_nifty()
+
+  elsif v_value_1 == "padi_dvr_acpc_ids"
+      v_shared = Shared.new
+      v_shared.run_padi_dvr_acpc_ids()
         
   elsif v_value_1 == "pet_path"  
       v_shared = Shared.new

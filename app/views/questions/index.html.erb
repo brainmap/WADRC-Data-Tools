@@ -96,7 +96,7 @@
   <tr>
 	<td><%= link_to 'Show', question %></td>
     <td><%= link_to 'Edit', edit_question_path(question) %></td>
-    <td><%= link_to 'Destroy', question, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', question, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
     <td><%= link_to 'Clone', '/questions/clone/'+question.id.to_s %></td>
     <td><% v_questionform_question = QuestionformQuestion.where("question_id in (?)",question.id) 
             v_qq_display_order_array = []

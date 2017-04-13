@@ -1,5 +1,7 @@
 # encoding: utf-8
-class VitalsController < ApplicationController
+class VitalsController < ApplicationController   
+  before_action :set_vital, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /vitals
   # GET /vitals.xml
   def index
@@ -41,7 +43,7 @@ class VitalsController < ApplicationController
   # POST /vitals
   # POST /vitals.xml
   def create
-    @vital = Vital.new(params[:vital])
+    @vital = Vital.new( vital_params)#params[:vital])
 
     respond_to do |format|
       if @vital.save
@@ -60,7 +62,7 @@ class VitalsController < ApplicationController
     @vital = Vital.find(params[:id])
 
     respond_to do |format|
-      if @vital.update_attributes(params[:vital])
+      if @vital.update( vital_params)#params[:vital], :without_protection => true)
         format.html { redirect_to(@vital, :notice => 'Vital was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -80,5 +82,12 @@ class VitalsController < ApplicationController
       format.html { redirect_to(vitals_url) }
       format.xml  { head :ok }
     end
-  end
+  end  
+  private
+    def set_vital
+       @vital = Vital.find(params[:id])
+    end
+   def vital_params
+          params.require(:vital).permit(:height,:weight,:bloodglucose,:pulse,:bp_diastol,:bp_systol,:appointment_id,:id,:pre_post_flag)
+   end
 end

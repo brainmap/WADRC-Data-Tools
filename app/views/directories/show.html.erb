@@ -49,7 +49,7 @@
 	<% if current_user.role == 'Admin_High'%>
 	
 		<%= link_to 'edit', edit_directory_path(@directory) %> | 
-		<%= link_to 'remove', @directory, :confirm => 'Are you sure?', :method => :delete %> |
+		<%= link_to 'remove', @directory, :method => :delete, data: { confirm: 'Are you sure?'} %> |
 	<% end %>
 	<%= link_to 'directories', directories_path %>
 	</p>

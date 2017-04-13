@@ -1,6 +1,8 @@
 # encoding: utf-8
 class ProtocolsController <  AuthorizedController #  ApplicationController
-load_and_authorize_resource
+load_and_authorize_resource  
+before_action :set_protocol, only: [:show, :edit, :update, :destroy]   
+respond_to :html
   # GET /protocols
   # GET /protocols.xml
   def index
@@ -42,7 +44,7 @@ load_and_authorize_resource
   # POST /protocols
   # POST /protocols.xml
   def create
-    @protocol = Protocol.new(params[:protocol])
+    @protocol = Protocol.new(protocol_params ) #params[:protocol])
 
     respond_to do |format|
       if @protocol.save
@@ -61,7 +63,7 @@ load_and_authorize_resource
     @protocol = Protocol.find(params[:id])
 
     respond_to do |format|
-      if @protocol.update_attributes(params[:protocol])
+      if @protocol.update(protocol_params ) #params[:protocol], :without_protection => true)
         format.html { redirect_to(@protocol, :notice => 'Protocol was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -81,5 +83,12 @@ load_and_authorize_resource
       format.html { redirect_to(protocols_url) }
       format.xml  { head :ok }
     end
+  end 
+  private
+    def set_protocol
+      @protocol = Protocol.find(params[:id])
+    end
+  def protocol_params
+    params.require(:protocol).permit(:id, :name, :abbr, :path, :description, :parent_protocol_id, :hide_date_flag)
   end
 end

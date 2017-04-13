@@ -14,7 +14,7 @@
     <td><%= neuropsych.appointment_id %></td>
     <td><%= link_to 'Show', neuropsych %></td>
     <td><%= link_to 'Edit', edit_neuropsych_path(neuropsych) %></td>
-    <td><%= link_to 'Destroy', neuropsych, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Destroy', neuropsych, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

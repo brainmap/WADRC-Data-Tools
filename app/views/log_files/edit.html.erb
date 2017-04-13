@@ -1,7 +1,17 @@
 <h1>Editing log_file</h1>
 
 <%= form_for(@log_file) do |f| %>
-  <%= f.error_messages %>
+<% if @log_file.errors.any? %>
+  <div id="error_explanation">
+    <h2><%= pluralize(@log_file.errors.count, "error") %> prohibited this log_file from being saved:</h2>
+
+    <ul>
+    <% @log_file.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
 
   <p>
     <%= f.submit "Update" %>

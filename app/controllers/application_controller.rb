@@ -7,8 +7,8 @@ class ApplicationController < ActionController::Base
 
 #   include AuthenticatedSystem
    # need to skip if json and search and path_contains -- set a userid
-   before_filter :authenticate_user! 
-
+   # deprecated before_filter :authenticate_user! 
+   before_action :authenticate_user! 
  
 # respond_to do |format|
 #   format.html  before_filter :authenticate_user!
@@ -32,7 +32,11 @@ class ApplicationController < ActionController::Base
   # super has to be callled from in a procedure -- 
 
 # place where lumbarpuncture, blooddraw, visits, and other controllers can get at
-def run_search
+def run_search  
+  puts "DDDDD"
+      puts "FFFFFF"+current_user.view_low_scan_procedure_array
+  puts "EEEEEEE"
+  
   scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
   if @tables.size == 1  or @tables.include?("image_datasets")
        sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr , "+@fields.join(',')+",appointments.comment 
@@ -188,7 +192,8 @@ puts sql
         @temp[2] = var[0].to_s
       end 
       var.delete_at(0) # get rid of vgroup_id
-      var.delete_at(0) # get rid of extra copy of appt date
+      var.delete_at(0) # get rid of extra copy of appt date 
+
       
       #moving petscan_id to front
       v_length = var.length

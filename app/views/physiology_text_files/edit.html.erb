@@ -1,7 +1,17 @@
 <h1>Editing physiology_text_file</h1>
 
 <%= form_for(@physiology_text_file) do |f| %>
-  <%= f.error_messages %>
+ <% if @physiology_text_file.errors.any? %>
+   <div id="error_explanation">
+     <h2><%= pluralize(@physiology_text_file.errors.count, "error") %> prohibited this physiology_text_file from being saved:</h2>
+
+     <ul>
+     <% @physiology_text_file.errors.full_messages.each do |msg| %>
+       <li><%= msg %></li>
+     <% end %>
+     </ul>
+   </div>
+ <% end %>
 
   <p>
     <%= f.label :filepath %><br />

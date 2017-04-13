@@ -1,5 +1,7 @@
 # encoding: utf-8
-class MriscantasksController < ApplicationController
+class MriscantasksController < ApplicationController    
+  before_action :set_mriscantask, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /mriscantasks
   # GET /mriscantasks.xml
   def index
@@ -41,7 +43,7 @@ class MriscantasksController < ApplicationController
   # POST /mriscantasks
   # POST /mriscantasks.xml
   def create
-    @mriscantask = Mriscantask.new(params[:mriscantask])
+    @mriscantask = Mriscantask.new(mriscantask_params)# params[:mriscantask])
 
     respond_to do |format|
       if @mriscantask.save
@@ -60,7 +62,7 @@ class MriscantasksController < ApplicationController
     @mriscantask = Mriscantask.find(params[:id])
 
     respond_to do |format|
-      if @mriscantask.update_attributes(params[:mriscantask])
+      if @mriscantask.update(mriscantask_params)# params[:mriscantask], :without_protection => true)
         format.html { redirect_to(@mriscantask, :notice => 'Mriscantask was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -80,5 +82,12 @@ class MriscantasksController < ApplicationController
       format.html { redirect_to(mriscantasks_url) }
       format.xml  { head :ok }
     end
-  end
+  end   
+  private
+    def set_mriscantask
+       @mriscantask = Mriscantask.find(params[:id])
+    end
+   def mriscantask_params
+          params.require(:mriscantask).permit(:id,:visit_id,:lookup_set_id,:lookup_scantask_id,:preday,:task_order,:eyecontact,:logfilerecorded,:moved,:temp_enum,:image_dataset_id,:temp_fkscandataid,:concerns,:has_concerns,:p_file,:tasknote,:reps,:scandate)
+   end
 end

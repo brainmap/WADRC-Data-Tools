@@ -1,9 +1,12 @@
 # encoding: utf-8
-class RadiologyCommentsController < ApplicationController
+class RadiologyCommentsController < ApplicationController   
+  before_action :set_radiology_comment, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   # GET /radiology_comments
   # GET /radiology_comments.xml
-  def index
-    radiology_comments =RadiologyComment.find(:all)
+  def index  
+    
+    radiology_comments =RadiologyComment.all # find(:all)
     if params[:radiology_comment].try(:length).nil?
          params[:radiology_comment] =""
     end
@@ -33,9 +36,8 @@ class RadiologyCommentsController < ApplicationController
        @radiology_comments = RadiologyComment.where("radiology_comments.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)
                                        and scan_procedures_visits.visit_id in (select visits.id from visits where visits.date > '"+v_past_date+"'))", scan_procedure_array).all
      # get last 3 months or pagation
-    else
+    else          
       if  !(params[:radiology_comment][:rmr]).nil?  && params[:radiology_comment][:protocol_id].blank?
-
         @radiology_comments = RadiologyComment.where("radiology_comments.visit_id in (select scan_procedures_visits.visit_id from scan_procedures_visits where scan_procedure_id in (?)
                             and scan_procedures_visits.visit_id in (select visits.id from visits where visits.rmr in (?)))", scan_procedure_array,params[:radiology_comment][:rmr]).all
            
@@ -108,7 +110,7 @@ class RadiologyCommentsController < ApplicationController
   # POST /radiology_comments
   # POST /radiology_comments.xml
   def create
-    @radiology_comment = RadiologyComment.new(params[:radiology_comment])
+    @radiology_comment = RadiologyComment.new(radiology_comment_params)#params[:radiology_comment])
 
     respond_to do |format|
       if @radiology_comment.save
@@ -128,7 +130,7 @@ class RadiologyCommentsController < ApplicationController
     @radiology_comment = RadiologyComment.where("radiology_comments.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
 
     respond_to do |format|
-      if @radiology_comment.update_attributes(params[:radiology_comment])
+      if @radiology_comment.update(radiology_comment_params)#params[:radiology_comment], :without_protection => true)
          if( !params[:comment_to_null].nil? and !params[:comment_to_null].empty?)
                   @radiology_comment.comment_html_1 = nil
                   @radiology_comment.comment_html_2 = nil
@@ -170,7 +172,14 @@ class RadiologyCommentsController < ApplicationController
       format.html { redirect_to(radiology_comments_url) }
       format.xml  { head :ok }
     end
-  end
+  end    
+  private
+    def set_radiology_comment
+       @radiology_comment = RadiologyComment.find(params[:id])
+    end
+   def radiology_comment_params
+          params.require(:radiology_comment).permit(:comment_html,:comment_html_3,:comment_text_3,:comment_html_4,:comment_html_5,:comment_text_4,:comment_text_5,:comment_header_html_1,:comment_header_html_2,:comment_header_html_3,:comment_header_html_4,:comment_header_html_5,:comment_header_html_6,:load_date,:comment_text_2,:id,:visit_id,:rmr,:scan_number,:rmr_rad,:scan_number_rad,:editable_flag,:rad_path,:q1_flag,:q2_flag,:comment_html_1,:comment_html_2,:comment_text_1)
+   end
   
     # moved to model
 =begin

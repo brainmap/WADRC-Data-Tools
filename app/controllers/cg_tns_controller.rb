@@ -123,7 +123,7 @@ class CgTnsController < ApplicationController
   def create
     params[:cg_tn][:tn] =  params[:cg_tn][:tn].downcase 
     params[:cg_tn][:join_left_parent_tn] =  params[:cg_tn][:join_left_parent_tn].downcase
-    @cg_tn = CgTn.new(params[:cg_tn])
+    @cg_tn = CgTn.new(cg_tn_params)# params[:cg_tn])
     v_schema ='panda_production'
     if Rails.env=="development" 
       v_schema ='panda_development'
@@ -157,7 +157,7 @@ class CgTnsController < ApplicationController
      params[:cg_tn][:tn] =  params[:cg_tn][:tn].downcase 
      params[:cg_tn][:join_left_parent_tn] =  params[:cg_tn][:join_left_parent_tn].downcase
     respond_to do |format|
-      if @cg_tn.update_attributes(params[:cg_tn])
+      if @cg_tn.update(cg_tn_params)#params[:cg_tn], :without_protection => true)
         format.html { redirect_to(@cg_tn, :notice => 'Cg tn was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -177,5 +177,12 @@ class CgTnsController < ApplicationController
       format.html { redirect_to(cg_tns_url) }
       format.xml  { head :ok }
     end
-  end
+  end  
+  private
+    def set_cg_tn
+       @cg_tn = CgTn.find(params[:id])
+    end
+   def cg_tn_params
+          params.require(:cg_tn).permit(:join_left_parent_tn,:status_flag,:updated_at,:created_at,:table_type,:display_order,:join_right,:join_left,:common_name,:tn,:id,:editable_flag,:datadictionary_file_name,:datadictionary2_updates_at,:datadictionary2_file_size,:datadictionary2_content_type,:datadictionary2_file_name,:secondary_key_flag,:tracker_id,:table_group_id,:alias,:datadictionary_file_size,:datadictionary_content_type,:view_tn_participant_link,:datadictionary_updated_at,:datadictionary,:datadictionary2,user_ids: [])
+   end
 end

@@ -1,5 +1,6 @@
 class TrfilesController < ApplicationController
-
+ 	before_action :set_trfile, only: [:show, :edit, :update, :destroy]   
+	respond_to :html
   def trfile_edit_action
     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     v_shared = Shared.new
@@ -446,7 +447,7 @@ v_composite_value = v_composite_value + "
   # POST /trfiles
   # POST /trfiles.json
   def create
-    @trfile = Trfile.new(params[:trfile])
+    @trfile = Trfile.new(trfile_params)# params[:trfile])
 
     respond_to do |format|
       if @trfile.save
@@ -488,7 +489,7 @@ v_composite_value = v_composite_value + "
      end
 
     respond_to do |format|
-      if @trfile.update_attributes(params[:trfile])
+      if @trfile.update(trfile_params)# params[:trfile], :without_protection => true)
         format.html { redirect_to @trfile, notice: 'Trfile was successfully updated.' }
         format.json { head :no_content }
       else
@@ -508,5 +509,12 @@ v_composite_value = v_composite_value + "
       format.html { redirect_to trfiles_url }
       format.json { head :no_content }
     end
-  end
+  end   
+  private
+    def set_trfile
+       @trfile = Trfile.find(params[:id])
+    end
+   def trfile_params
+          params.require(:trfile).permit(:updated_at,:status_flag,:qc_value,:file_completed_flag,:qc_notes,:secondary_key,:created_at,:scan_procedure_id,:id,:trtype_id,:image_dataset_id,:subjectid,:enrollment_id)
+   end
 end
