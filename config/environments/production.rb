@@ -89,7 +89,7 @@ WADRCDataTools::Application.configure do
  #   :exception_recipients => %w{noreply_johnson_lab@medicine.wisc.edu}   
  
  
- Rails.application.config.middleware.use ExceptionNotification::Rack,
+ Rails.application.config.middleware.use ExceptionNotifier,
    :email => {
     # :deliver_with => :deliver, # Rails >= 4.2.1 do not need this option since it defaults to :deliver_now
      :email_prefix => "[Panda Exception] ",
