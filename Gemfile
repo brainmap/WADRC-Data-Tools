@@ -55,7 +55,7 @@ gem 'RedCloth','4.3.2'  #, "4.2.7"
 gem "cocaine"  , "0.5.3"   # need older version to work wityh paperclip
 gem 'paperclip' , '4.2' # was 5.0.1 , '~>2.3.8'
 # maybe move ruport, acts_as_reportatable, simple_form further down? get the version of depnedencies loaded for other gems first?
-gem 'ruport' ###########, '~>1.6.3' 
+gem 'ruport' , '~>1.6.3' 
 #### get error about missing mysql2 gem - but seems to be ok now  
 gem 'acts_as_reportable','1.1.1'
 gem 'kaminari','1.0.1'  
@@ -71,13 +71,16 @@ gem 'hpricot' , "0.8.6"
 #gem 'rvm-capistrano','1.5.6' 
 gem 'open4','1.3.4' 
 gem 'bzip2-ruby', :git => 'https://github.com/chewi/bzip2-ruby.git'  
-gem 'escoffier' , :path => '/Users/caillingworth/code/escoffier' 
 #gem 'capistrano' ,'2.15.9'
 #gem 'capistrano', '3.8.0'
 # gem 'capistrano-rails', '1.2.3'
  #gem 'capistrano-rvm', '0.1.2'
 # gem 'rvm1-capistrano3', :require => false
-# gem 'capistrano-bundler', '1.2.0'
+# gem 'capistrano-bundler', '1.2.0'  
+
+
+gem 'escoffier', :path => '/Users/panda_user/code/escoffier'    # think required by metamri?  
+
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -89,10 +92,7 @@ group :development, :test do
   gem 'sqlite3-ruby', :require => 'sqlite3'
   gem 'hirb','0.7.3' #, '~>0.4.5'
   gem 'json','2.0.3'
-  gem 'rack-mini-profiler' ,'0.10.2'
-end
-
-group :development do
+  gem 'rack-mini-profiler' ,'0.10.2' 
   gem 'capistrano', '~> 3.5'
   gem 'capistrano-rails', '~> 1.1.6'   
   gem 'capistrano-rvm' ,'~>0.1.2',:require => false 
@@ -102,8 +102,10 @@ group :development do
   gem 'listen', '3.0.8' #'~> 3.0.5'
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring' ,'2.0.1'
-  gem 'spring-watcher-listen', '2.0.1' #'~> 2.0.0' 
+  gem 'spring-watcher-listen', '2.0.1' #'~> 2.0.0'
 end
+
+
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
