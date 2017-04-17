@@ -75,7 +75,8 @@ gem 'escoffier' , :path => '/Users/caillingworth/code/escoffier'
 #gem 'capistrano' ,'2.15.9'
 gem 'capistrano', '3.8.0'
  gem 'capistrano-rails', '1.2.3'
- gem 'capistrano-rvm', '0.1.2'
+ #gem 'capistrano-rvm', '0.1.2'
+ gem 'rvm1-capistrano3', :require => false
  gem 'capistrano-bundler', '1.2.0'
 
 group :development, :test do
