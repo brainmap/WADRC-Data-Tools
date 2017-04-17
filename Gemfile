@@ -60,7 +60,7 @@ gem 'ruport' , '~>1.6.3'
 #### get error about missing mysql2 gem - but seems to be ok now  
 gem 'acts_as_reportable','1.1.1'
 gem 'kaminari','1.0.1'  
-gem 'exception_notification', :require => 'exception_notifier'      # "~> 2.4.1" ??
+gem 'exception_notification', '2.4.1', :require => 'exception_notifier'      # "~> 2.4.1" ??
    #### get error about missing mysql2 gem -- but seems to be ok now
 gem "devise","4.2.0" #, '> 3.4' # "3.1.1" #   ">= 1.4.9"   
 #### get error about missing mysql2 gem  -- but seems to be ok now 

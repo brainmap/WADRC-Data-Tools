@@ -129,9 +129,7 @@ GEM
       net-ldap (>= 0.6.0, <= 0.11)
     dicom (0.9.7)
     erubis (2.7.0)
-    exception_notification (4.2.1)
-      actionmailer (>= 4.0, < 6)
-      activesupport (>= 4.0, < 6)
+    exception_notification (2.4.1)
     execjs (2.7.0)
     fastercsv (1.5.5)
     ffi (1.9.18)
@@ -316,7 +314,7 @@ DEPENDENCIES
   devise-encryptable (= 0.2.0)
   devise_ldap_authenticatable (= 0.8.5)
   escoffier!
-  exception_notification
+  exception_notification (= 2.4.1)
   hirb (= 0.7.3)
   hpricot (= 0.8.6)
   jbuilder (= 2.6.3)
