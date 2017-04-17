@@ -1,5 +1,6 @@
+require 'capistrano/rails' 
 require 'bundler/capistrano'  
-require 'capistrano/rails'
+
 
 # Load DSL and set up stages
 require "capistrano/setup"
