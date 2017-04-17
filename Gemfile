@@ -68,12 +68,15 @@ gem "devise_ldap_authenticatable","0.8.5" #, "0.8.1"
    #### get error about missing mysql2 gem   -- a crash and then down styream things not happen 
 gem "cancancan" ,"1.16.0"
 gem 'hpricot' , "0.8.6" 
-gem 'rvm-capistrano','1.5.6' 
+#gem 'rvm-capistrano','1.5.6' 
 gem 'open4','1.3.4' 
 gem 'bzip2-ruby', :git => 'https://github.com/chewi/bzip2-ruby.git'  
 gem 'escoffier' , :path => '/Users/caillingworth/code/escoffier' 
-gem 'capistrano' ,'2.15.9'
-
+#gem 'capistrano' ,'2.15.9'
+gem 'capistrano', '3.8.0'
+ gem 'capistrano-rails', '1.2.3'
+ gem 'capistrano-rvm', '0.1.2'
+ gem 'capistrano-bundler', '1.2.0'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -94,7 +97,7 @@ group :development do
   gem 'listen', '3.0.8' #'~> 3.0.5'
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring' ,'2.0.1'
-  gem 'spring-watcher-listen', '2.0.1' #'~> 2.0.0'
+  gem 'spring-watcher-listen', '2.0.1' #'~> 2.0.0' 
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
