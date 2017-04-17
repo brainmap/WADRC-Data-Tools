@@ -73,11 +73,11 @@ gem 'open4','1.3.4'
 gem 'bzip2-ruby', :git => 'https://github.com/chewi/bzip2-ruby.git'  
 gem 'escoffier' , :path => '/Users/caillingworth/code/escoffier' 
 #gem 'capistrano' ,'2.15.9'
-gem 'capistrano', '3.8.0'
- gem 'capistrano-rails', '1.2.3'
+#gem 'capistrano', '3.8.0'
+# gem 'capistrano-rails', '1.2.3'
  #gem 'capistrano-rvm', '0.1.2'
- gem 'rvm1-capistrano3', :require => false
- gem 'capistrano-bundler', '1.2.0'
+# gem 'rvm1-capistrano3', :require => false
+# gem 'capistrano-bundler', '1.2.0'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -93,6 +93,10 @@ group :development, :test do
 end
 
 group :development do
+  gem 'capistrano', '~> 3.5'
+  gem 'capistrano-rails', '~> 1.1.6'   
+  gem 'capistrano-rvm' ,'~>0.1.2',:require => false 
+  gem 'capistrano-passenger', '~> 0.2.0'
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
   gem 'web-console','3.4.0' # '>= 3.3.0'
   gem 'listen', '3.0.8' #'~> 3.0.5'

@@ -95,9 +95,14 @@ GEM
     capistrano-bundler (1.2.0)
       capistrano (~> 3.1)
       sshkit (~> 1.2)
-    capistrano-rails (1.2.3)
+    capistrano-passenger (0.2.0)
+      capistrano (~> 3.0)
+    capistrano-rails (1.1.8)
       capistrano (~> 3.1)
       capistrano-bundler (~> 1.1)
+    capistrano-rvm (0.1.2)
+      capistrano (~> 3.0)
+      sshkit (~> 1.2)
     chronic (0.10.2)
     climate_control (0.1.0)
     cocaine (0.5.3)
@@ -245,9 +250,6 @@ GEM
     ruport (1.7.0)
       pdf-writer (= 1.1.8)
       prawn (= 0.12.0)
-    rvm1-capistrano3 (1.4.0)
-      capistrano (~> 3.0)
-      sshkit (>= 1.2)
     sass (3.4.23)
     sass-rails (5.0.6)
       railties (>= 4.0.0, < 6)
@@ -315,9 +317,10 @@ DEPENDENCIES
   byebug
   bzip2-ruby!
   cancancan (= 1.16.0)
-  capistrano (= 3.8.0)
-  capistrano-bundler (= 1.2.0)
-  capistrano-rails (= 1.2.3)
+  capistrano (~> 3.5)
+  capistrano-passenger (~> 0.2.0)
+  capistrano-rails (~> 1.1.6)
+  capistrano-rvm (~> 0.1.2)
   chronic (= 0.10.2)
   cocaine (= 0.5.3)
   coffee-rails (= 4.2.1)
@@ -344,7 +347,6 @@ DEPENDENCIES
   rails (~> 5.0.1)
   rails-observers!
   ruport
-  rvm1-capistrano3
   sass-rails (= 5.0.6)
   spring (= 2.0.1)
   spring-watcher-listen (= 2.0.1)
