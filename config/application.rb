@@ -53,7 +53,7 @@ module WADRCDataTools
       
     # added for 3.2 to 4.0
     config.paths['config/routes.rb'] # add .rb
-    config.assets.precompile += %w( index.js )  
+    #config.assets.precompile += %w( index.js )  
     config.assets.initialize_on_precompile = false
 
   end
