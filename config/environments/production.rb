@@ -82,9 +82,19 @@ WADRCDataTools::Application.configure do
 # ? causing error ?  config.middleware.insert_before ActionDispatch::Static, "Rack::SSL"
  #### config.force_ssl = true
   
-  config.middleware.use ExceptionNotifier,
-    :email_prefix => "[Panda Exception] ",
-    :sender_address => %{"Exception Notifier" <noreply_johnson_lab@medicine.wisc.edu>},
-    :exception_recipients => %w{noreply_johnson_lab@medicine.wisc.edu}
+  #configuration syntax change
+ # config.middleware.use ExceptionNotifier,
+ #   :email_prefix => "[Panda Exception] ",
+ #   :sender_address => %{"Exception Notifier" <noreply_johnson_lab@medicine.wisc.edu>},
+ #   :exception_recipients => %w{noreply_johnson_lab@medicine.wisc.edu}   
+ 
+ 
+ Rails.application.config.middleware.use ExceptionNotification::Rack,
+   :email => {
+    # :deliver_with => :deliver, # Rails >= 4.2.1 do not need this option since it defaults to :deliver_now
+     :email_prefix => "[Panda Exception] ",
+     :sender_address => %{"Exception Notifier" <noreply_johnson_lab@medicine.wisc.edu>},
+     :exception_recipients => %w{noreply_johnson_lab@medicine.wisc.edu}
+   }
     
 end
