@@ -97,7 +97,7 @@ group :development, :test do
   gem 'capistrano', '~> 3.5'
   gem 'capistrano-rails', '~> 1.1.6'   
   gem 'capistrano-rvm' ,'~>0.1.2',:require => false 
-  gem 'capistrano-passenger', '~> 0.2.0'
+  gem 'capistrano-passenger','0.1.1' # '~> 0.2.0'
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
   gem 'web-console','3.4.0' # '>= 3.3.0'
   gem 'listen', '3.0.8' #'~> 3.0.5'
