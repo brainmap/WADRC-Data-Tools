@@ -83,6 +83,7 @@ GEM
     arel (7.1.4)
     bcrypt (3.1.11)
     builder (3.2.3)
+    bundler-unload (1.0.2)
     byebug (9.0.6)
     cancancan (1.16.0)
     capistrano (3.8.0)
@@ -299,6 +300,8 @@ DEPENDENCIES
   activeresource!
   acts_as_reportable (= 1.1.1)
   builder (= 3.2.3)
+  bundler (= 1.14.6)
+  bundler-unload (= 1.0.2)
   byebug
   bzip2-ruby!
   cancancan (= 1.16.0)
