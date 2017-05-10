@@ -32,6 +32,7 @@
 # need to save, recover search  -- set default in drop down if no saved search values
 
 v_join_type_hash =[['Inner','0'],['Outer','1'],['NOT IN','2']]  #UP TO HERE
+v_join_type_inner_outer_hash =[['Inner','0'],['Outer','1']]
 v_conditions_hash = [['=','0'],['>=','1'],['<=','2'],['!=','3'],['is blank','5'],['is not blank','6'],['contains','7']]
 v_conditions_between_hash = [['=','0'],['>=','1'],['<=','2'],['!=','3'],['between','4'],['is blank','5'],['is not blank','6'],['contains','7']]
 
@@ -446,7 +447,7 @@ v_tn_cn_searchable_hash = []
 
     <small> The image dataset fields will only show up in the <b>[ export file -image dataset ]. </b> </small>
     <br><br>
-     </td><td colspan="5" align="left">	<%= select  :cg_search,"join_type]["+@image_datasets_tn[0].id.to_s, options_for_select(v_join_type_hash, v_join_type_ids  ),
+     </td><td colspan="5" align="left">	<%= select  :cg_search,"join_type]["+@image_datasets_tn[0].id.to_s, options_for_select(v_join_type_inner_outer_hash, v_join_type_ids  ),
 			              {:prompt => 'Select join type'}  %> <br>&nbsp;&nbsp;&nbsp;<small>The series desc category inner join makes the query slow.</small>
     </td></tr>
 
