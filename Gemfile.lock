@@ -328,6 +328,7 @@ DEPENDENCIES
   listen (= 3.0.8)
   metamri (= 0.2.25)
   mysql2 (>= 0.3.18, < 0.5)
+  net-ssh
   open4 (= 1.3.4)
   paperclip (= 4.2)
   puma (= 3.8.2)
