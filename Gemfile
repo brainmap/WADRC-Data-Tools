@@ -5,7 +5,8 @@ git_source(:github) do |repo_name|
   "https://github.com/#{repo_name}.git"
 end
 
-gem 'net-ssh'
+gem 'net-ssh'   
+gem 'net-sftp' 
 # not finding bundler in cap deploy - rvm issue?
 gem 'bundler', '1.14.6'
 gem 'bundler-unload','1.0.2'
