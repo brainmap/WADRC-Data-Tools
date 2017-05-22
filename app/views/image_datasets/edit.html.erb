@@ -40,11 +40,14 @@
 		<%= f.fields_for(:physiology_text_files) do |physiology_text_file_fields| %>
 			<%= render :partial => 'physiology_text_file_fields', :object => physiology_text_file_fields %>
 	  <% end %>
-  </div>
-  <%#= add_phys_link "Add phys file" %>
-  <%= f.fields_for(:physiology_text_files, @image_dataset.physiology_text_files.build) do |new_physiology_text_file_fields| %>
- 		<%= link_to_function "Add phys file" do |page|
-			page.insert_html :bottom, :phys_files_list, :partial => 'physiology_text_file_fields', :object => new_physiology_text_file_fields 
+  </div>  
+Not sure if this was ever used?? also, page.insert_html nil object causing error
+  <%#= add_phys_link "Add phys file"   link_to_function ==> deprecated ==> link_to %>
+  <%= f.fields_for(:physiology_text_files, @image_dataset.physiology_text_files.build) do |new_physiology_text_file_fields| %> 
+ 		<%= link_to "Add phys file" do |page| 
+	     if !page.nil?
+		     page.insert_html :bottom, :phys_files_list, :partial => 'physiology_text_file_fields', :object => new_physiology_text_file_fields 		     
+         end
   	end %>
 	<% end %>
   
@@ -54,5 +57,5 @@
 <% end %>
 
 <br />
-<%= link_to 'Show', @image_dataset %>
+<%= link_to 'Show', @image_dataset %>   &nbsp;&nbsp;<%= link_to 'Destroy', @image_dataset,  :method => :delete ,data: {confirm: 'Are you sure?' }%>
 <%#= link_to 'Back', image_datasets_path %>

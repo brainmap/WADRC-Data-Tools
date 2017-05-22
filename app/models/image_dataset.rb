@@ -18,7 +18,8 @@ class ImageDataset < ActiveRecord::Base
   belongs_to :visit
   has_many :analysis_memberships  , :class_name => 'AnalysisMembership'
   #has_many :analyses, :through => :analysis_memberships
-  has_many :image_dataset_quality_checks, :dependent => :destroy
+  has_many :image_dataset_quality_checks, :dependent => :destroy  
+  has_many :mriscantasks,:dependent => :destroy
   has_one :log_file
   # Allow the DICOM UID to be blank for PFile Datasets, otherwise enforce uniqueness
   validates_uniqueness_of :dicom_series_uid, :case_sensitive => false, :unless => Proc.new {|dataset| dataset.dicom_series_uid.blank?}, :message => "Series UID must be unique."
