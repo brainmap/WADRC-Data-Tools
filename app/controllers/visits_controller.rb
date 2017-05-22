@@ -283,7 +283,8 @@ end
       @hide_page_flag = 'N'
       if hide_date_flag_array.count > 0
         @hide_page_flag = 'Y'
-      end   
+      end 
+      @v_ids_with_mriscantask_array = []     # using to exclude ids which already have a scan task
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
     @visit.enrollments.build # if @visit.enrollments.blank?
     @mriscantask = Mriscantask.where("visit_id in (?) and (lookup_set_id not in (8) or lookup_set_id is NULL)",@visit.id)

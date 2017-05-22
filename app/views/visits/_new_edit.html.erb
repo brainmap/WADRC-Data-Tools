@@ -232,7 +232,8 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 				 v_header_count = 0 %>
 				<tr><th>Scan Series</th><th>Set</th><th>Order</th><th>LogFile Recorded</th><th>Task Note</th></tr>				
 			<% end%>
-		<% if !mst.image_dataset_id.blank?%>
+		<% if !mst.image_dataset_id.blank?
+			   @v_ids_with_mriscantask_array.push(mst.image_dataset_id)%>
 		<tr><td colsapn="8" align = "left"><b><%= ImageDataset.find(mst.image_dataset_id).series_description %></b></td><tr>
 		    <% if !@image_comments.where("image_dataset_id in (?)",mst.image_dataset_id ).blank? %>
 		  <tr><td colspan="7" align="left">
@@ -302,9 +303,9 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 			<%	 end  
 			   end %>		
 			
-	<%	 end 
-	 else %>
-	<% 	   @image_datasets = ImageDataset.where("visit_id in (?)",@visit.id).sort_by(&:id) 
+	<%	 end   %>
+	 <!--else - was only making new mriscantasks /linked to ids - in first update- now making mriscantasks for ANY ids which don't have an mriscantasks -->
+	<% 	   @image_datasets = ImageDataset.where("visit_id in (?) and image_datasets.id not in (?)",@visit.id,@v_ids_with_mriscantask_array).sort_by(&:id) 
           @image_datasets.each do |img_dt_set| 
 	             v_mriscantask_id = v_mriscantask_id - 1   %>
             <tr><td colsapn="8" align = "left"><b><%= img_dt_set.series_description %></b></td><tr>
