@@ -73,7 +73,7 @@
              
      	  <% end%>
      	<td align="left" colspan="<%= act.form_col_span%>"> <small><b><%=act.form_display_label.try(:html_safe) %> </b></small> <% @tredit_actions = nil
-      @tredit_actions = TreditAction.where("tredit_actions.tredit_id in (?)",@tredit.id).where("tredit_actions.tractiontype_id in (?)",act.id)
+      @tredit_actions = TreditAction.where("tredit_actions.tredit_id in (?)",@tredit.id).where("tredit_actions.tractiontype_id in (?)",act.id).to_a
       if @tredit_actions[0].nil? # added metric?
        # @tredit_actions = []
         v_tredit_action = TreditAction.new
