@@ -191,7 +191,7 @@ v_composite_value = v_composite_value + "
    @trfile = nil
    
       v_display_form = "Y"
-   if !params[:trfile_action].nil? and params[:trfile_action] =="create"
+   if !params[:trfile_action].nil? and params[:trfile_action] =="create" 
      v_subjectid_v = params[:subjectid]
      v_secondary_key = ""
      if !params[:secondary_key].blank?
@@ -211,17 +211,25 @@ v_composite_value = v_composite_value + "
      else
        v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload
        v_sp_id = v_shared.get_sp_id_from_subjectid_v(v_subjectid_v)
-
         if v_sp_id.nil?
             v_comment = v_comment+" The subjectid "+v_subjectid_v+" was not mapped to a scan procedure. "
-            v_display_form = "N"
+            v_display_form = "N" 
         end
         v_enrollment_id = v_shared.get_enrollment_id_from_subjectid_v(v_subjectid_v)
         if v_enrollment_id.nil?
             v_comment = v_comment+" The subjectid "+v_subjectid_v+" was not mapped to an enrollment. " 
-            v_display_form = "N"
-        end
+            v_display_form = "N" 
+        end  
+        # problem with sp but enumber not in all the visits 
         if !v_sp_id.nil? and !v_enrollment_id.nil?
+             v_check_vgroup_id = Vgroup.where("vgroups.id in (select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id in (?)) and vgroups.id in (select evgm.vgroup_id from enrollment_vgroup_memberships evgm where evgm.enrollment_id in (?))",v_sp_id,v_enrollment_id).to_a 
+             if v_check_vgroup_id.nil? or v_check_vgroup_id[0].nil? 
+                  v_display_form = "N" 
+                  v_comment = v_comment+" The subjectid "+v_subjectid_v+" does not have a visit in the scan procedure. " 
+             end
+        end
+        if !v_sp_id.nil? and !v_enrollment_id.nil? and !v_check_vgroup_id[0].nil? 
+          puts "AAAAA making a trfile?"
            @trfile = Trfile.new
            @trfile.subjectid = v_subjectid_v
            @trfile.secondary_key = v_secondary_key
@@ -278,8 +286,8 @@ v_composite_value = v_composite_value + "
                     end
                  end
 
-           end
-           @trfile.save
+           end 
+           @trfile.save 
         else
           v_display_form = "N"
         end 
@@ -287,7 +295,7 @@ v_composite_value = v_composite_value + "
      # output v_comment
    end # end of create
 
-   if !params[:trfile_action].nil? and ( params[:trfile_action] =="create" or ( params[:trfile_action] == "add_edit" and !params[:trfile_id].nil? ) )
+   if !params[:trfile_action].nil? and ( params[:trfile_action] =="create"  or ( params[:trfile_action] == "add_edit" and !params[:trfile_id].nil? ) )
 
          if params[:trfile_action] =="add_edit" 
              @trfiles = Trfile.where("trfiles.id in (?)",params[:trfile_id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_edit_array)
