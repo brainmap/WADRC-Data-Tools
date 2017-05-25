@@ -142,7 +142,7 @@ class DataSearchesController < ApplicationController
       @cg_up_archive_tns = CgTn.where("table_type='up_archive' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order) 
        end
-
+        # issues where adrc or wai data in up table, but user not in up - cg_table_types.protocol_id needs to be changed to multiple values
    
       # no edit/key things with tracker
       @cg_tns.each do |cg_tn|

@@ -25,7 +25,7 @@
   <%= @trtype.status_flag %>
 </p>
 <p>
-  <b>Triogger:</b>
+  <b>Trigger:</b>
   <%= @trtype.triggers_1 %>
 </p>
 <% if current_user.role == 'Admin_High'%>
@@ -34,5 +34,12 @@
 <%= link_to 'Back', trtypes_path %> | 
 <%= link_to('Track type actions','/tractiontypes') %> |
 <%= link_to('Track type files','/trfiles') %>
+<br><br>  
+This tracker select statement is used to build a temporary cg_ search table.  <br>
+Create table (create table cg_<tracker_name> as ,select statement>)       <br>
+Add table as a cg_table - look at the cg_fs_edit, cg_md_qc, or cg_pcvipr joins for examples. These are all tracker derived cg tables, check the tracker type dropdown in the cg_table set up    <br>
+Add all the columns of interest <br>
+Drop the cg_<tracker_name> table   <br>
+The search generates a alias cg_<tracker_name> table from the tracker select statement, and finds all the columns in the cg_tn_cns even though the actual table no longer exists
 <br><br>
 <%= @sql_view  %>
