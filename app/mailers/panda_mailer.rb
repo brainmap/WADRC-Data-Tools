@@ -1,5 +1,6 @@
 class PandaMailer < ActionMailer::Base
   default :from => "noreply_johnson_lab@medicine.wisc.edu"
+  layout "mailer"
   
   def visit_confirmation(visit, email_params)
     email_params.to_options! # to_options! is aliased as symbolize_keys!
