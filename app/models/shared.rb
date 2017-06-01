@@ -2722,7 +2722,7 @@ export_id, visno
       stdout.close
       stderr.close 
       v_petfile_path = r[13]
-      v_petfile_target_name = v_subject_dir+".nii"  # all nii
+      v_petfile_target_name = v_subject_dir+".v" # ecat nii"  # all nii
 
       v_call = "rsync -av "+v_petfile_path+" "+v_parent_dir_target+"/"+v_petfile_target_name             
             stdin, stdout, stderr = Open3.popen3(v_call)
