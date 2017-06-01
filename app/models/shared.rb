@@ -2571,9 +2571,9 @@ puts " "+r[0]+"  ="+r[1]
       v_visit_number = "v01"  # THE$Y ARE ALL V1!!!!! 
     connection = ActiveRecord::Base.connection();
     # shp, alz, pc, adni, dodadni, lmpd
-    v_scan_procedure_exclude =   [21,28,31,34,15,19,23,35,44,51,50,49,20,24,36] # [21,28,31,34,15,19,23,35,44,51,50,49]
+    v_scan_procedure_exclude =   [21] # [21,28,31,34,15,19,23,35,44,51,50,49]
     # just get the predicttau
-     v_scan_procedures = [66,39,26,24,41,4,77]  #   pdt1 and pdt, tau, lead   [20,24,26,36,41,58]  # how to only get adrc impact? 
+     v_scan_procedures = [20,41,58,26,77,66]   #66,39,26,24,41,4,77]  #   pdt1 and pdt, tau, lead   [20,24,26,36,41,58]  # how to only get adrc impact? 
      #not limiting by protocol #scan_procedures_vgroups.scan_procedure_id in ("+v_scan_procedures.join(",")+")
      # getting adrc impact from t_adrc_impact_20150105  --- change to get from refreshing table?
      v_pet_tracer_array = [1] # just pib 1,2,7] # pib and fdg and thk5117  
