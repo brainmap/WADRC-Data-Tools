@@ -14,7 +14,7 @@ class LoadComments < ActiveRecord::Base
    v_comment = ""
    begin   # catch all exception and put error in comment
    puts "=============starting path and comments load================================="
-    radiology_comments  = RadiologyComment.find(:all)
+    radiology_comments  = RadiologyComment.all # deprecated find(:all)
     
    # radiology_comments[0].  seems to only get the first visit????
     # going off of visit, ok if only called once   
