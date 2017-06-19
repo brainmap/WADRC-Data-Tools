@@ -9958,36 +9958,36 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                 if File.directory?(v_subjectid_mcd_path)
 
                   if File.file?(v_subjectid_mcd_path+"/_mcdespot_log.txt")
-                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('Error')}
+                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").each_line.any?{|line| line.include?('Error')}
                        v_error_in_log = "Y"
                        v_error_comment =  v_error_comment +"error in "+v_subjectid_mcd_path
                      end
-                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('Loading Complete')}
+                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").each_line.any?{|line| line.include?('Loading Complete')}
                        v_load_flag = 1 # "Y"
                      end
-                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('Masking/BET Complete')}
+                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").each_line.any?{|line| line.include?('Masking/BET Complete')}
                        v_load_flag = 1
                        v_mask_flag = 1 # "Y"
                      end
-                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('Coreg Complete')}
+                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").each_line.any?{|line| line.include?('Coreg Complete')}
                        v_load_flag = 1
                        v_mask_flag = 1 # "Y"
                        v_coreg_flag = 1 # "Y"
                      end
-                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('DESPOT1-HIFI Complete')}
+                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").each_line.any?{|line| line.include?('DESPOT1-HIFI Complete')}
                        v_load_flag = 1
                        v_mask_flag = 1 # "Y"
                        v_coreg_flag = 1 # "Y"
                        v_despot_1_flag =1 #  "Y"
                      end
-                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('DESPOT2-FM Complete')}
+                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").each_line.any?{|line| line.include?('DESPOT2-FM Complete')}
                        v_load_flag = 1
                        v_mask_flag = 1 # "Y"
                        v_coreg_flag = 1 # "Y"
                        v_despot_1_flag =1 #  "Y"
                        v_despot_2_flag = 1 # "Y"
                      end
-                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").lines.any?{|line| line.include?('Processing Run Complete')}
+                     if File.open(v_subjectid_mcd_path+"/_mcdespot_log.txt").each_line.any?{|line| line.include?('Processing Run Complete')}
                        v_load_flag = 1
                        v_mask_flag = 1 # "Y"
                        v_coreg_flag = 1 # "Y"
