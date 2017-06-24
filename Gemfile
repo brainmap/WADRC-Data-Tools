@@ -85,8 +85,9 @@ gem 'bzip2-ruby', :git => 'https://github.com/chewi/bzip2-ruby.git'
 # gem 'capistrano-bundler', '1.2.0'  
 
 
-gem 'escoffier', :path => '/Users/panda_user/code/escoffier'    # think required by metamri?  
-
+gem 'escoffier', :path => '/Users/panda_user/code/escoffier'    # think required by metamri?    
+# mise not working
+# not available , needs ruby 2.5 =gem 'fileutils'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
