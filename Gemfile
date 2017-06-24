@@ -100,7 +100,7 @@ group :development, :test do
   gem 'hirb','0.7.3' #, '~>0.4.5'
   gem 'json','2.0.3'
   gem 'rack-mini-profiler' ,'0.10.2' 
-  gem 'capistrano', '~> 3.5'
+  gem 'capistrano', '3.8.0'  #'~> 3.5'
   gem 'capistrano-rails', '~> 1.1.6'   
   gem 'capistrano-rvm' ,'~>0.1.2',:require => false 
   gem 'capistrano-passenger','0.1.1' # '~> 0.2.0'

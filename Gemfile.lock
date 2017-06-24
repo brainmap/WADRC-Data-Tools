@@ -86,7 +86,7 @@ GEM
     bundler-unload (1.0.2)
     byebug (9.0.6)
     cancancan (1.16.0)
-    capistrano (3.8.2)
+    capistrano (3.8.0)
       airbrussh (>= 1.0.0)
       i18n
       rake (>= 10.0.0)
@@ -308,7 +308,7 @@ DEPENDENCIES
   byebug
   bzip2-ruby!
   cancancan (= 1.16.0)
-  capistrano (~> 3.5)
+  capistrano (= 3.8.0)
   capistrano-passenger (= 0.1.1)
   capistrano-rails (~> 1.1.6)
   capistrano-rvm (~> 0.1.2)
