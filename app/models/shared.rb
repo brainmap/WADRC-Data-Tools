@@ -4,6 +4,7 @@ require 'net/ssh'
 require 'net/sftp'
 require 'open3'
 require 'metamri'
+require 'fileutils'
 #require 'net/http'
 #require 'net/https'
 #require 'net/http/post/multipart'
@@ -1186,9 +1187,9 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
               # might get weird if multiple types have dups - only expect T1/Bravo
             end
             v_folder_array.push(v_dir_target)
-
-             # v_call = "/usr/bin/bunzip2 "+v_parent_dir_target+"/"+v_dir_target+"/*.bz2"
-              v_call = "mise "+v_path+" "+v_parent_dir_target+"/"+v_dir_target   # works where bunzip2 cmd after rsync not work
+             Fileutils.cp_r(v_path,v_parent_dir_target+"/"+v_dir_target)
+             v_call = "/usr/bin/bunzip2 "+v_parent_dir_target+"/"+v_dir_target+"/*.bz2"
+              #### trying to not use mise/dependencies v_call = "mise "+v_path+" "+v_parent_dir_target+"/"+v_dir_target   # works where bunzip2 cmd after rsync not work
 #puts "v_path = "+v_path
 #puts "v_parent_dir_target = "+ v_parent_dir_target
 #puts "v_dir_target="+v_dir_target
@@ -1717,7 +1718,7 @@ end
     connection = ActiveRecord::Base.connection();
     v_comment_base = @schedulerun.comment
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_exclude_array = [-1,62,53,54,55,56,57]
+    sp_exclude_array = [-1,62,53,54,55,56,57,15,19,17,30,6,13,11,12,32,35,25,23,8,48,16]   # old sp's
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     @scan_procedures.each do |sp|
         @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
