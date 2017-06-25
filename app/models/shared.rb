@@ -4,7 +4,7 @@ require 'net/ssh'
 require 'net/sftp'
 require 'open3'
 require 'metamri'
-# needs ruby 2.5 require 'fileutils'
+require 'fileutils'
 #require 'net/http'
 #require 'net/https'
 #require 'net/http/post/multipart'
@@ -1187,11 +1187,11 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
               # might get weird if multiple types have dups - only expect T1/Bravo
             end
             v_folder_array.push(v_dir_target)
-            # needs ruby 2.5  Fileutils.cp_r(v_path,v_parent_dir_target+"/"+v_dir_target)  
+            FileUtils.cp_r(v_path,v_parent_dir_target+"/"+v_dir_target)  
              # had trouble with rsync failing in big directories
-            # v_call = "/usr/bin/bunzip2 "+v_parent_dir_target+"/"+v_dir_target+"/*.bz2"   
+             v_call = "/usr/bin/bunzip2 "+v_parent_dir_target+"/"+v_dir_target+"/*.bz2"   
              #### trying to not use mise/dependencies   
-             v_call = "mise "+v_path+" "+v_parent_dir_target+"/"+v_dir_target   # works where bunzip2 cmd after rsync not work
+             # v_call = "mise "+v_path+" "+v_parent_dir_target+"/"+v_dir_target   # works where bunzip2 cmd after rsync not work
 #puts "v_path = "+v_path
 #puts "v_parent_dir_target = "+ v_parent_dir_target
 #puts "v_dir_target="+v_dir_target
