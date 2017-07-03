@@ -1094,8 +1094,7 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
           sql2 = "insert into cg_adrc_upload_new (subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,dti_sent_flag,dti_status_flag) values('"+r[0]+"_v2','N','Y', "+enrollment[0].id.to_s+",65,'N','Y')"
           results2 = connection.execute(sql2)
     end   
-     v_weeks_back = "20" 
-     # its going to grab 2 -need to adjust v_weeks_back  to cover 2017-05-05
+
         sql = "select distinct enrollments.enumber from enrollments,enrollment_vgroup_memberships, vgroups, scan_procedures_vgroups  where enrollments.enumber like 'adrc%' 
               and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
               and enrollment_vgroup_memberships.enrollment_id = enrollments.id
@@ -1110,7 +1109,7 @@ and v.id in (select a.vgroup_id from appointments a, visits where a.id = visits.
           sql2 = "insert into cg_adrc_upload_new (subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,dti_sent_flag,dti_status_flag) values('"+r[0]+"_v3','N','Y', "+enrollment[0].id.to_s+",89,'N','Y')"
           results2 = connection.execute(sql2)
     end 
-    v_weeks_back = "2" 
+
 
 
     v_comment = self.move_present_to_old_new_to_present("cg_adrc_upload",
