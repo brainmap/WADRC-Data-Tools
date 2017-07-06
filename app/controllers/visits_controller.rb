@@ -465,7 +465,9 @@ end
       end
      delete_scantask_array = []
     @visit = Visit.where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
-
+    if @visit.scanner_source.blank?
+        @visit.scanner_source =  @visit.scanner_source_from_dicom_info
+    end
              params[:date][:mristartt][0]="1899"
              params[:date][:mristartt][1]="12"
              params[:date][:mristartt][2]="30"       

@@ -171,24 +171,24 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
     # rails 5 not have merge! - not hash but objects -- want to limit to unique dicom_series_uid 
     # merge is probably doing other things
     # merging on visit.image_dataset.....
-    v_dicom_series_uid_unique_check_array = []   # standin for merge? 
-    v_non_unique_datasets = [] 
-    v.datasets.each do |dataset|
-     v_skip_this_dataset ="N"  
-     if  !dataset.dicom_series_uid.nil?  and dataset.dicom_series_uid > ""
-         puts "dataset.dicom_series_uid not nill and >'' "
-        if v_dicom_series_uid_unique_check_array.include?(dataset.dicom_series_uid)
-            v_skip_this_dataset ="Y" 
-           puts "dataset.dicom_series_uid not nill and >'' AND in v_dicom_series_uid_unique_check_array"
-           v_non_unique_datasets.push(dataset)  
-        else
-            v_dicom_series_uid_unique_check_array.push(dataset.dicom_series_uid)
-        end
-     end
-    end  
-    v_non_unique_datasets.each do |dataset_delete| 
-        v.datasets.delete_if {|obj| obj == dataset_delete}
-    end
+###    v_dicom_series_uid_unique_check_array = []   # standin for merge? 
+###        v_non_unique_datasets = [] 
+###        v.datasets.each do |dataset|
+###         v_skip_this_dataset ="N"  
+###         if  !dataset.dicom_series_uid.nil?  and dataset.dicom_series_uid > ""
+###             puts "dataset.dicom_series_uid not nill and >'' "
+###            if v_dicom_series_uid_unique_check_array.include?(dataset.dicom_series_uid)
+###                v_skip_this_dataset ="Y" 
+###               puts "dataset.dicom_series_uid not nill and >'' AND in v_dicom_series_uid_unique_check_array"
+###               v_non_unique_datasets.push(dataset)  
+###            else
+###                v_dicom_series_uid_unique_check_array.push(dataset.dicom_series_uid)
+ ###           end
+ ###        end
+###        end  
+###        v_non_unique_datasets.each do |dataset_delete| 
+###            v.datasets.delete_if {|obj| obj == dataset_delete}
+###        end
 
     v.datasets.each do |dataset|
       begin 
@@ -487,6 +487,22 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
     end
     
     return @initials
+  end  
+  
+  def scanner_source_from_dicom_info 
+    # this used to be coming from metamri, but the metamri scanner_source stopped working with rails 5
+     @scanner_source ||nil
+     return @scanner_source unless @scanner_source.blank?
+     
+     image_datasets.each do |dataset|
+       tags = dataset.dicom_taghash 
+       unless tags.blank?  
+          if !tags['0008,0080'].blank? and tags['0008,0080'] != '0008,0080'  
+               v_scanner_source = tags['0008,0080'][:value].to_s
+             return v_scanner_source unless v_scanner_source.blank?
+          end
+        end
+     end
   end
   
   def assign_enrollments
