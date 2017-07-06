@@ -15,12 +15,15 @@ class RawDataImportsController < ApplicationController
     @visit_directory_to_scan = params[:raw_data_import][:directory].chomp(' ')  
     puts @visit_directory_to_scan
    # if validates_truthiness_of_directory(@visit_directory_to_scan)
-    if File.directory?(@visit_directory_to_scan)
+    if File.directory?(@visit_directory_to_scan)  
+      puts "after check if directory"
       v = VisitRawDataDirectory.new(@visit_directory_to_scan, params[:raw_data_import][:scan_procedure])
       logger.info "Current User: #{Etc.getlogin}"
       logger.info  "+++ Importing #{v.visit_directory} as part of #{v.scan_procedure_name} +++"
-      begin
-        v.scan
+      begin  
+        puts " before v.scan"
+        v.scan     
+        puts "after v.scan"
       rescue Exception => e
         v = nil
         flash[:error] = "Awfully sorry, this raw data directory could not be scanned. #{e}"
