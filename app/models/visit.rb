@@ -167,9 +167,31 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
     visit.scan_procedures = [sp]  
     
     # We have to zip up the metamri datasets and the activerecord visit datasets
-    # For each dataset in the VisitRawDataDirectory...
+    # For each dataset in the VisitRawDataDirectory... 
+    # rails 5 not have merge! - not hash but objects -- want to limit to unique dicom_series_uid 
+    # merge is probably doing other things
+    # merging on visit.image_dataset.....
+    v_dicom_series_uid_unique_check_array = []   # standin for merge? 
+    v_non_unique_datasets = [] 
     v.datasets.each do |dataset|
-      begin
+     v_skip_this_dataset ="N"  
+     if  !dataset.dicom_series_uid.nil?  and dataset.dicom_series_uid > ""
+         puts "dataset.dicom_series_uid not nill and >'' "
+        if v_dicom_series_uid_unique_check_array.include?(dataset.dicom_series_uid)
+            v_skip_this_dataset ="Y" 
+           puts "dataset.dicom_series_uid not nill and >'' AND in v_dicom_series_uid_unique_check_array"
+           v_non_unique_datasets.push(dataset)  
+        else
+            v_dicom_series_uid_unique_check_array.push(dataset.dicom_series_uid)
+        end
+     end
+    end  
+    v_non_unique_datasets.each do |dataset_delete| 
+        v.datasets.delete_if {|obj| obj == dataset_delete}
+    end
+
+    v.datasets.each do |dataset|
+      begin 
         # Skip directories that are links.
         next if File.symlink? dataset.directory
         puts "ggggggggg imagedatasets "
@@ -199,19 +221,22 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
         # This will not reassociate the dataset with the current visit.
         # 
         # data = visit.image_datasets.select {|ds| ds.dicom_series_uid.to_s == dataset.dicom_series_uid.to_s }.first
-        if dataset.dicom?
-          data = ImageDataset.where(:dicom_series_uid => dataset.dicom_series_uid).first
+        if dataset.dicom?  
+          data = ImageDataset.where(:dicom_series_uid => dataset.dicom_series_uid).first  
+ 
         elsif dataset.pfile? or dataset.geifile?
           #data = ImageDataset.where(:path => dataset.directory, :scanned_file.matches => dataset.scanned_file).first
           data = ImageDataset.where("path in (?) and scanned_file in (?)", dataset.directory,  dataset.scanned_file).first
+          #data = data.to_h
         else raise StandardError, "Could not identify type of dataset #{File.join(dataset.directory, datset.scanned_file)}"
         end
       
         meta_attrs = dataset.attributes_for_active_record(metamri_attr_options) 
         # If the ActiveRecord Visit (visit) has a dataset that already matches the metamri dataset (dataset) on dicom_series_uid, then use it and update its params.  Otherwise, build a new one.
         unless data.blank? # AKA data.kind_of? ImageDataset
-          logger.debug "updating dataset #{data.id} with new metamri attributes"
-          data.attributes.merge!(meta_attrs)  # DOES THIS WORK
+           logger.debug "updating dataset #{data.id} with new metamri attributes"
+           data.attributes.merge!(meta_attrs)  # DOES THIS WORK  
+          
           if data.valid?
             puts "ggggg data valid"
             visit.image_datasets << data  
