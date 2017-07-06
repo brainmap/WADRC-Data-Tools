@@ -10,8 +10,10 @@ class RawDataImportsController < ApplicationController
     end
   end
   
-  def create
-    @visit_directory_to_scan = params[:raw_data_import][:directory].chomp(' ')
+  def create   
+    puts "aaaa rawdataimports controller "
+    @visit_directory_to_scan = params[:raw_data_import][:directory].chomp(' ')  
+    puts @visit_directory_to_scan
    # if validates_truthiness_of_directory(@visit_directory_to_scan)
     if File.directory?(@visit_directory_to_scan)
       v = VisitRawDataDirectory.new(@visit_directory_to_scan, params[:raw_data_import][:scan_procedure])
