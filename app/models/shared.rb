@@ -10914,7 +10914,119 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
 
 
 
+   end  
+ 
+   def run_sp_scanner_protocol
+     
+     v_shared = Shared.new
+     v_base_path = Shared.get_base_path()
+     @schedule = Schedule.where("name in ('sp_scanner_protocol')").first
+     @schedulerun = Schedulerun.new
+     @schedulerun.schedule_id = @schedule.id
+     @schedulerun.comment ="starting sp_scanner_protocol"
+     @schedulerun.save
+     @schedulerun.start_time = @schedulerun.created_at
+     @schedulerun.save    
+     v_insert_codename_scanner_protocol_base ="insert into t_sp_scanner_protocol(codename,scanner_protocol)"
+     v_dir_path = v_base_path+"/analyses/panda/sp_scanner_protocol/" 
+     v_comment = ""
+     v_comment_error = ""  
+     connection = ActiveRecord::Base.connection();
+     begin   # catch all exception and put error in comment 
+       # truncate and populate table
+         v_t_sp_scanner_protocol_cnt_old = 1  
+         sql = "select count(*) from t_sp_scanner_protocol" 
+         results = connection.execute(sql)   
+         results.each do |r|
+              v_t_sp_scanner_protocol_cnt_old =  r[0]
+         end
+         sql = "truncate table t_sp_scanner_protocol"        
+         results = connection.execute(sql)  
+        sql = "select distinct sp.codename,  vg2.id vg_id, v.id visit_id
+        from scan_procedures sp, scan_procedures_vgroups spg,  vgroups vg2 , appointments a, visits v
+        where sp.id = spg.scan_procedure_id
+        and  vg2.id = spg.vgroup_id
+        and vg2.transfer_mri ='yes' 
+        and vg2.id = a.vgroup_id
+        and a.id = v.appointment_id  
+        and vg2.vgroup_date >  adddate(curdate(),'-400') 
+        and spg.scan_procedure_id in (select spg2.scan_procedure_id from scan_procedures_vgroups spg2, vgroups vg
+                                          where vg.id=spg2.vgroup_id and vg.vgroup_date >  adddate(curdate(),'-400') )
+        order by sp.codename, visit_id"        
+        results = connection.execute(sql)  
+
+       #0018,1030	Protocol Name
+       v_codename = "" 
+       v_scanner_protocol_array = []
+       # loop thru mri visits
+       # each new codename, insert old v_scanner_protocol_array, start new v_scanner_protocol_array
+       results.each do |r| 
+           #puts " visit codename="+r[0]+"visit_id="+r[2].to_s
+           if v_codename != r[0]
+               if  v_scanner_protocol_array.length > 0  
+                    v_scanner_protocol_array.each do |scanner_protocol|
+                         v_insert_codename_scanner_protocol = v_insert_codename_scanner_protocol_base +"values('"+v_codename+"','"+scanner_protocol+"')"
+                         results_insert = connection.execute(v_insert_codename_scanner_protocol) 
+                    end
+               end 
+               v_codename = r[0] 
+               #puts "NEW v_codename ="+v_codename
+               v_scanner_protocol_array.clear
+            end
+            image_datasets = ImageDataset.where("image_datasets.visit_id in (?)",r[2])   
+            v_scanner_protocol = ""
+            image_datasets.each do |dataset|
+ 	             if tags = dataset.dicom_taghash and v_scanner_protocol =="" and  !tags['0018,1030'].blank? and tags['0018,1030'] != '0018,1030' 
+ 	               begin
+ 	                v_scanner_protocol = tags['0018,1030'][:value] unless tags['0018,1030'][:value].blank? 
+ 	                #puts "scanner_protocol ="+v_scanner_protocol 
+ 	                rescue Exception => msg 
+ 	                   v_error = msg.to_s 
+ 	                   puts "ERROR ids !!!!!!!"+"visit_id="+r[2].to_s
+                     puts v_error
+ 	                end
+ 	             end
+ 	           end  
+ 	           if !v_scanner_protocol_array.include?(v_scanner_protocol) 
+ 	             v_scanner_protocol_array.push(v_scanner_protocol)
+ 	           end
+         end    
+         sql = "select count(*) from t_sp_scanner_protocol" 
+         results = connection.execute(sql) 
+         v_t_sp_scanner_protocol_cnt_new = 0  
+         results.each do |r|
+              v_t_sp_scanner_protocol_cnt_new =  r[0]
+         end  
+         if (v_t_sp_scanner_protocol_cnt_new*2) >v_t_sp_scanner_protocol_cnt_old
+            sql = "select codename, scanner_protocol from t_sp_scanner_protocol order by codename" 
+            results = connection.execute(sql) 
+            v_file = v_dir_path+"sp_scanner_protocol.txt"
+            File.open(v_file, "w+") do |f|   
+                results.each do |rc|
+                  f.write(rc[0]+"|"+rc[1]+"\n")
+               # write a tab separated row
+                end
+              end 
+          else
+              @schedulerun.status_flag ="E"
+              v_comment_error ="New scanner protocol list is too small!!! "
+          end
+         @schedulerun.comment =v_comment_error+" successful finish sp_scanner_protocol"
+         @schedulerun.status_flag ="Y"
+         @schedulerun.save
+         @schedulerun.end_time = @schedulerun.updated_at      
+         @schedulerun.save
+       rescue Exception => msg
+          v_error = msg.to_s
+          puts "ERROR !!!!!!!"
+          puts v_error
+           @schedulerun.comment =v_error[0..499]
+           @schedulerun.status_flag="E"
+           @schedulerun.save
+       end     
+     
    end
+   
     
   # to add columns --
   # change sql_base insert statement
