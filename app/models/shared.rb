@@ -10927,10 +10927,13 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
      @schedulerun.save
      @schedulerun.start_time = @schedulerun.created_at
      @schedulerun.save    
-     v_insert_codename_scanner_protocol_base ="insert into t_sp_scanner_protocol(codename,scanner_protocol)"
+     v_insert_codename_scanner_protocol_base ="insert into t_sp_scanner_protocol(codename,scanner_protocol)" 
      v_dir_path = v_base_path+"/analyses/panda/sp_scanner_protocol/" 
      v_comment = ""
-     v_comment_error = ""  
+     v_comment_error = ""   
+     # tried to use cg_table with cg_edit, but think there are subjectid/key etc issues
+     # would use cg_edit to delete bad sp/scanner_protocol
+     v_bad_sp_scanner_protocol_pair_array = ["asthana.adrc-clinical-core.visit2|ADNI2_GE_3T_22.0_E_DTI"]
      connection = ActiveRecord::Base.connection();
      begin   # catch all exception and put error in comment 
        # truncate and populate table
@@ -10940,7 +10943,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
          results.each do |r|
               v_t_sp_scanner_protocol_cnt_old =  r[0]
          end
-         sql = "truncate table t_sp_scanner_protocol"        
+         sql = "truncate table t_sp_scanner_protocol"       
          results = connection.execute(sql)  
         sql = "select distinct sp.codename,  vg2.id vg_id, v.id visit_id
         from scan_procedures sp, scan_procedures_vgroups spg,  vgroups vg2 , appointments a, visits v
@@ -10987,10 +10990,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
  	                end
  	             end
  	           end  
- 	           if !v_scanner_protocol_array.include?(v_scanner_protocol) 
+ 	           if !v_scanner_protocol_array.include?(v_scanner_protocol) and  !v_bad_sp_scanner_protocol_pair_array.include?(v_codename+"|"+v_scanner_protocol)
  	             v_scanner_protocol_array.push(v_scanner_protocol)
  	           end
-         end    
+         end  
          sql = "select count(*) from t_sp_scanner_protocol" 
          results = connection.execute(sql) 
          v_t_sp_scanner_protocol_cnt_new = 0  
@@ -10998,7 +11001,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
               v_t_sp_scanner_protocol_cnt_new =  r[0]
          end  
          if (v_t_sp_scanner_protocol_cnt_new*2) >v_t_sp_scanner_protocol_cnt_old
-            sql = "select codename, scanner_protocol from t_sp_scanner_protocol order by codename" 
+            sql = "select codename, scanner_protocol from t_sp_scanner_protocol order by codename"   
             results = connection.execute(sql) 
             v_file = v_dir_path+"sp_scanner_protocol.txt"
             File.open(v_file, "w+") do |f|   
