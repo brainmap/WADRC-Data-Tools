@@ -473,9 +473,13 @@ end
              params[:date][:mristartt][2]="30"       
              mristarttime = nil
             if !params[:date][:mristartt][0].blank? && !params[:date][:mristartt][1].blank? && !params[:date][:mristartt][2].blank? && !params[:date][:mristartt][3].blank? && !params[:date][:mristartt][4].blank?
+
              params[:visit][:mristarttime_hour] = params[:date][:mristartt][3]
              params[:visit][:mristarttime_minute] =params[:date][:mristartt][4]  
-             params[:date][:mristartt][3] = ((params[:date][:mristartt][3].to_i)+v_offset).to_s
+             params[:date][:mristartt][3] = ((params[:date][:mristartt][3].to_i)+v_offset).to_s  
+             if (params[:date][:mristartt][3].to_i > 23)
+                params[:date][:mristartt][3] = ((params[:date][:mristartt][3].to_i)-24).to_s
+             end
              mristarttime =  params[:date][:mristartt][0]+"-"+params[:date][:mristartt][1]+"-"+params[:date][:mristartt][2]+" "+params[:date][:mristartt][3]+":"+params[:date][:mristartt][4]
              params[:visit][:mristarttime] = DateTime.strptime(mristarttime, "%Y-%m-%d %H:%M")  #mristarttime  
             end
@@ -486,11 +490,14 @@ end
           mriendtime = nil
         if !params[:date][:mriendt][0].blank? && !params[:date][:mriendt][1].blank? && !params[:date][:mriendt][2].blank? && !params[:date][:mriendt][3].blank? && !params[:date][:mriendt][4].blank?
 
-         params[:visit][:mriendtime_hour] = params[:date][:mriendt][3]
-        params[:visit][:mriendtime_minute] =params[:date][:mriendt][4]   
-        params[:date][:mriendt][3] = ((params[:date][:mriendt][3].to_i)+v_offset).to_s
+           params[:visit][:mriendtime_hour] = params[:date][:mriendt][3]
+           params[:visit][:mriendtime_minute] =params[:date][:mriendt][4]   
+           params[:date][:mriendt][3] = ((params[:date][:mriendt][3].to_i)+v_offset).to_s 
+           if(params[:date][:mriendt][3].to_i >23) 
+                 params[:date][:mriendt][3] = ((params[:date][:mriendt][3].to_i)-24).to_s
+           end
         mriendtime =  params[:date][:mriendt][0]+"-"+params[:date][:mriendt][1]+"-"+params[:date][:mriendt][2]+" "+params[:date][:mriendt][3]+":"+params[:date][:mriendt][4]
-        params[:visit][:mriendtime] = DateTime.strptime(mriendtime , "%Y-%m-%d %H:%M") #mriendtime  
+       params[:visit][:mriendtime] = DateTime.strptime(mriendtime , "%Y-%m-%d %H:%M") #mriendtime  
         
         end
 
