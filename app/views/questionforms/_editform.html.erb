@@ -195,7 +195,13 @@ end
                    <% else %>
                     	<%= date_select "value_1",@question.id.to_s+"][", :prompt => "" %>
                     <% end %>
-			        
+			 <% elsif @question.value_type_1 == "date_dob"  
+	                    if !@q_data.value_1.blank?
+	                          v_tmp_date = Date.strptime(@q_data.value_1,'%Y-%m-%d') %>
+	                          <%= date_select "value_1",@question.id.to_s+"][", :default => v_tmp_date , :start_year => Time.now.year - 100,:end_year => Time.now.year%>
+	                   <% else %>
+	                    	<%= date_select "value_1",@question.id.to_s+"][", :prompt => "" , :start_year => Time.now.year - 100,:end_year => Time.now.year %>
+	                    <% end %>			        
              <% elsif @question.value_type_1 == "date_time"  
                     if !@q_data.value_1.blank?
                           v_tmp_datetime = DateTime.strptime(@q_data.value_1,'%Y-%m-%d-%H-%M') %>
@@ -229,7 +235,9 @@ end
 		<% elsif @question.value_type_1 == "text_90"  %>
 		   <%= draw_text_field(@question.id,"1",90, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>
 		<% elsif @question.value_type_1 == "date"  %>
-		   <%= draw_text_field(@question.id,"1",10, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>								
+		   <%= draw_text_field(@question.id,"1",10, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>	
+		<% elsif @question.value_type_1 == "date_dob"  %>
+		   <%= draw_text_field(@question.id,"1",10, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>							
 		<% elsif @question.value_type_1 == "checkbox_1_col"  %>
 		   <% if @question.ref_table_a_1 == "lookup_refs" 
 			     sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_1+"' order by display_order"
@@ -340,7 +348,14 @@ end
                           <%= date_select "value_2",@question.id.to_s+"][", :default => v_tmp_date %>
                    <% else %>
                     	<%= date_select "value_2",@question.id.to_s+"][", :prompt => "" %>
-                    <% end %>
+                    <% end %>  
+			 <% elsif @question.value_type_2 == "date_dob"  
+	                    if !@q_data.value_2.blank?
+	                          v_tmp_date = Date.strptime(@q_data.value_2,'%Y-%m-%d') %>
+	                          <%= date_select "value_2",@question.id.to_s+"][", :default => v_tmp_date, :start_year => Time.now.year - 100,:end_year => Time.now.year %>
+	                   <% else %>
+	                    	<%= date_select "value_2",@question.id.to_s+"][", :prompt => "", :start_year => Time.now.year - 100,:end_year => Time.now.year %>
+	                    <% end %>
              <% elsif @question.value_type_2 == "date_time"  
                     if !@q_data.value_2.blank?
                           v_tmp_datetime = DateTime.strptime(@q_data.value_2,'%Y-%m-%d-%H-%M') %>
@@ -373,6 +388,8 @@ end
 			<% elsif @question.value_type_2 == "text_90"  %>
 			   <%= draw_text_field(@question.id,"2",90, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>
 			<% elsif @question.value_type_2 == "date"  %>
+			   <%= draw_text_field(@question.id,"2",10, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>  
+			<% elsif @question.value_type_2 == "date_dob"  %>
 			   <%= draw_text_field(@question.id,"2",10, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>
 			<% elsif @question.value_type_2 == "checkbox_1_col"  %>
 		   		<% if @question.ref_table_a_2 == "lookup_refs" 
@@ -485,7 +502,14 @@ end
                           <%= date_select "value_3",@question.id.to_s+"][", :default => v_tmp_date %>
                    <% else %>
                     	<%= date_select "value_3",@question.id.to_s+"][", :prompt => "" %>
-                    <% end %>
+                    <% end %>   
+			 <% elsif @question.value_type_3 == "date_dob"  
+	                    if !@q_data.value_3.blank?
+	                          v_tmp_date = Date.strptime(@q_data.value_3,'%Y-%m-%d') %>
+	                          <%= date_select "value_3",@question.id.to_s+"][", :default => v_tmp_date , :start_year => Time.now.year - 100,:end_year => Time.now.year%>
+	                   <% else %>
+	                    	<%= date_select "value_3",@question.id.to_s+"][", :prompt => "", :start_year => Time.now.year - 100,:end_year => Time.now.year %>
+	                    <% end %>
              <% elsif @question.value_type_3 == "date_time"  
                     if !@q_data.value_3.blank?
                           v_tmp_datetime = DateTime.strptime(@q_data.value_3,'%Y-%m-%d-%H-%M') %>
@@ -517,7 +541,9 @@ end
 			<% elsif @question.value_type_3 == "text_90"  %>
 					<%= draw_text_field(@question.id,"3",90, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>
 			<% elsif @question.value_type_3 == "date"  %>
-					<%= draw_text_field(@question.id,"3",10, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>
+					<%= draw_text_field(@question.id,"3",10, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %> 
+		   <% elsif @question.value_type_3 == "date_dob"  %>
+							<%= draw_text_field(@question.id,"3",10, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>
 			<% elsif @question.value_type_3 == "checkbox_1_col"  %>
 		    	<% if @question.ref_table_a_3 == "lookup_refs" 
 			     	sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_3+"' order by display_order"
