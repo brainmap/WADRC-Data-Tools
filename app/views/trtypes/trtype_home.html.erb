@@ -74,9 +74,12 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
 
  <% if !@trfiles_search.nil? and @trfiles_search.size > 0 %>
 <tr><td colspan="3">  <small><%= link_to 'download xls', { :controller=>"trtypes", :action=>"trtype_home", :tr_search =>  params[:tr_search] , :format => :xls} %></small>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<small><%= link_to 'ALL Edits download xls', { :controller=>"trtypes", :action=>"trtype_home", :tr_search =>  params[:tr_search], :tr_all =>"Y" , :format => :xls} %></small>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><%= link_to 'View File '+@v_action_name.humanize+' List' ,{ :controller=>"tredits", :action=>"tredit_home", :trtype_id =>  params[:id]} %></small>
     </td></tr>
-  <%end%>
+  <%end%>   
+
 
 
 </table><br>

@@ -10915,7 +10915,9 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
 
 
    end  
- 
+          
+   # generates sp|scanner_protocol file for use in transfer_process.py
+   # reads dicom headers from scanns in last 400 days, excludes - hard codes- some erroneous pairs
    def run_sp_scanner_protocol
      
      v_shared = Shared.new
@@ -10933,7 +10935,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
      v_comment_error = ""   
      # tried to use cg_table with cg_edit, but think there are subjectid/key etc issues
      # would use cg_edit to delete bad sp/scanner_protocol
-     v_bad_sp_scanner_protocol_pair_array = ["asthana.adrc-clinical-core.visit2|ADNI2_GE_3T_22.0_E_DTI"]
+     v_bad_sp_scanner_protocol_pair_array = ["asthana.adrc-clinical-core.visit2|ADNI2_GE_3T_22.0_E_DTI","bendlin.dzne.visit1|PREDICT-2"]
      connection = ActiveRecord::Base.connection();
      begin   # catch all exception and put error in comment 
        # truncate and populate table

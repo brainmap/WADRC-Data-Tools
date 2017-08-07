@@ -13,7 +13,12 @@ class TrtypesController < ApplicationController
       end
     @trtypes = Trtype.where("status_flag ='Y' ")
     connection = ActiveRecord::Base.connection();
-    @v_action_name ="action"
+    @v_action_name ="action" 
+    v_order_by ="" 
+    v_tr_all ="N"
+    if !params[:tr_all].nil? and params[:tr_all] =="Y"
+       v_tr_all = "Y"
+    end
     # SEARCH IS RETURNING TOO MANY - e.g. all mets if seach on pdt , because there was some pdt with mets dual enrollment
 
     if !params[:id].nil?
@@ -23,7 +28,8 @@ class TrtypesController < ApplicationController
 
          @trfiles = Trfile.where("trtype_id ="+params[:id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_array)
 
-         @conditions = ["scan_procedures.id = trfiles.scan_procedure_id ","trfiles.scan_procedure_id in ("+scan_procedure_array.join(',')+")"]
+         @conditions = ["scan_procedures.id = trfiles.scan_procedure_id ","trfiles.scan_procedure_id in ("+scan_procedure_array.join(',')+")"] 
+         @conditions_all = ["trfiles.scan_procedure_id in ("+scan_procedure_array.join(',')+")"]
          if !params[:tr_search].nil?
            
             @trfiles_search = Trfile.where("trtype_id ="+params[:id]).where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
@@ -35,7 +41,11 @@ class TrtypesController < ApplicationController
                                                                        and tredit_actions.value in (?) )",act.id, params[:tr_search][:tractiontype_id][(act.id).to_s])
                     @conditions.push(" trfiles.id in (select tredits.trfile_id from tredits, tredit_actions where
                                                                       tredits.id = tredit_actions.tredit_id and tredit_actions.tractiontype_id in ("+(act.id).to_s+")
-                                                                       and tredit_actions.value in ("+params[:tr_search][:tractiontype_id][(act.id).to_s]+"))")
+                                                                       and tredit_actions.value in ("+params[:tr_search][:tractiontype_id][(act.id).to_s]+"))") 
+
+                   @conditions_all.push(" trfiles.id in (select tredits.trfile_id from tredits, tredit_actions where
+                                                  tredits.id = tredit_actions.tredit_id and tredit_actions.tractiontype_id in ("+(act.id).to_s+")
+                                                   and tredit_actions.value in ("+params[:tr_search][:tractiontype_id][(act.id).to_s]+"))")                                         
                    
                   end
                 end
@@ -45,14 +55,17 @@ class TrtypesController < ApplicationController
   
                @trfiles_search = @trfiles_search.where("subjectid in (?)",v_subjectid_array) #params[:tr_search][:subjectid])
                @conditions.push(" trfiles.subjectid in ('"+params[:tr_search][:subjectid].gsub(/ /,"").gsub(/,/,"','")+"') ")
+                @conditions_all.push(" trfiles.subjectid in ('"+params[:tr_search][:subjectid].gsub(/ /,"").gsub(/,/,"','")+"') ")
             end
             if !params[:tr_search][:secondary_key].nil? and params[:tr_search][:secondary_key] > ''
                @trfiles_search = @trfiles_search.where("secondary_key in (?)",params[:tr_search][:secondary_key])
                @conditions.push(" trfiles.secondary_key in ('"+params[:tr_search][:secondary_key]+"') ")
+                @conditions_all.push(" trfiles.secondary_key in ('"+params[:tr_search][:secondary_key]+"') ")
             end
             if !params[:tr_search][:trfile_id].nil? and params[:tr_search][:trfile_id] > ''
                @trfiles_search = @trfiles_search.where("id in (?)",params[:tr_search][:trfile_id])
                @conditions.push(" trfiles.id in ("+params[:tr_search][:trfile_id]+") ")
+                @conditions_all.push(" trfiles.id in ("+params[:tr_search][:trfile_id]+") ")
             end
             if !params[:tr_search][:scan_procedure_id].nil? and params[:tr_search][:scan_procedure_id] > ''
                @trfiles_search = @trfiles_search.where("scan_procedure_id in 
@@ -73,14 +86,17 @@ class TrtypesController < ApplicationController
             if !params[:tr_search][:user_id].nil? and params[:tr_search][:user_id] > ''
                @trfiles_search = @trfiles_search.where("id in (select trfile_id from tredits where user_id in (?))",params[:tr_search][:user_id])
                @conditions.push(" trfiles.id in (select trfile_id from tredits where user_id in ("+params[:tr_search][:user_id]+")) ")
+                @conditions_all.push(" trfiles.id in (select trfile_id from tredits where user_id in ("+params[:tr_search][:user_id]+")) ")
             end
             if !params[:tr_search][:file_completed_flag].nil? and params[:tr_search][:file_completed_flag] > ''
               @trfiles_search = @trfiles_search.where("file_completed_flag in (?)",params[:tr_search][:file_completed_flag])
                @conditions.push(" trfiles.file_completed_flag in('"+params[:tr_search][:file_completed_flag]+"') ")
+                @conditions_all.push(" trfiles.file_completed_flag in('"+params[:tr_search][:file_completed_flag]+"') ")
             end
             if !params[:tr_search][:qc_value].nil? and params[:tr_search][:qc_value] > ''
               @trfiles_search = @trfiles_search.where("qc_value in (?)",params[:tr_search][:qc_value])
                @conditions.push(" trfiles.qc_value in('"+params[:tr_search][:qc_value]+"') ")
+                @conditions_all.push(" trfiles.qc_value in('"+params[:tr_search][:qc_value]+"') ")
             end
          else
         # @trfiles_search = Trfile.where("trtype_id ="+params[:id]).where("updated_at >= DATE_SUB(NOW(), INTERVAL 120 DAY) ").where("trfiles.scan_procedure_id in (?)",scan_procedure_array).order("updated_at desc")
@@ -132,10 +148,20 @@ class TrtypesController < ApplicationController
               @column_headers = ['Subjectid','Secondary Key','Scan Procedure','Last Update','Completed','QC','QC Notes']
               v_column_array = ["trfiles.subjectid","trfiles.secondary_key","trfiles.enrollment_id","trfiles.scan_procedure_id", "trfiles.file_completed_flag","trfiles.qc_value","trfiles.qc_notes"]
               v_column_array = ["trfiles.subjectid","trfiles.secondary_key","scan_procedures.codename","trfiles.updated_at", "trfiles.file_completed_flag","trfiles.qc_value","trfiles.qc_notes"]
-              v_table_array = ["scan_procedures, trfiles"] # weird -- DO NOT JOIN ARRAY with comma 
+              v_table_array = ["scan_procedures, trfiles"] # weird -- DO NOT JOIN ARRAY with comma  
+              v_table_array_all = ["scan_procedures, trfiles, tredits"]
                # need trfiles second for left join -- then joining the sql as a table --> no commas
-              v_table_conditions =[" trfiles.trtype_id = "+params[:id]+" "]
-              v_table_conditions.push(@conditions)
+              v_table_conditions =[" trfiles.trtype_id = "+params[:id]+" "] 
+              v_table_conditions_all  =[" trfiles.trtype_id = "+params[:id]+" "] 
+              v_table_conditions.push(@conditions) 
+              v_table_conditions_all.push(@conditions_all)  
+              v_added_trfiles2_conditions = v_table_conditions_all.join(' and ')
+              v_added_trfiles2_conditions = v_added_trfiles2_conditions.gsub("trfiles","trfile2")
+              if v_tr_all == "Y" # adding some more limits if not limiting by max editid
+                  v_order_by =" order by trfiles.id, tredits.id "
+                  @column_headers = ['Subjectid','Secondary Key','Scan Procedure','Last Update','Completed','QC','QC Notes',"tredit_id"] 
+                  v_column_array = ["trfiles.subjectid","trfiles.secondary_key","scan_procedures.codename","trfiles.updated_at", "trfiles.file_completed_flag","trfiles.qc_value","trfiles.qc_notes","tredits.id"]
+              end 
               @tractiontypes = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.form_display_label is not null and tractiontypes.form_display_label >''" ).order(:display_order)
               @tractiontypes.each do |act|
                  v_value_sql = ""
@@ -143,37 +169,78 @@ class TrtypesController < ApplicationController
                  @column_headers.push(act.form_display_label)
                  v_col = (act.form_display_label).gsub(/ /,"").gsub(/\'/,"_").gsub(/\:/,"_").gsub(/\"/,"_").gsub(/\-/,"_").gsub(/\//,"_").downcase+"_" 
                  v_column_array.push("v_"+act.id.to_s+"."+v_col) 
+                 if v_tr_all == "Y"  
+                   #puts "ddddd v_tr_all === Y"
+                   # need all edits  
 
-                 # need last edit
-                 if !act.ref_table_b_1.blank?
-                     v_value_sql = "LEFT JOIN  (select "+act.ref_table_a_1+".description "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1+" 
-                      where trfile2.id = tredits.trfile_id 
-                      and tredits.id = tredit_actions.tredit_id 
-                      and tredit_actions.tractiontype_id = "+act.id.to_s+" 
-                      and "+act.ref_table_a_1+".label = '"+act.ref_table_b_1+"'
-                      and tredit_actions.value = "+act.ref_table_a_1+".ref_value
-                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
-                     v_table_array.push(v_value_sql)
-                 elsif !act.ref_table_a_1.blank?
-                    v_value_sql = "LEFT JOIN  (select "+act.ref_table_a_1.pluralize.underscore+".description "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1.pluralize.underscore+" 
-                      where trfile2.id = tredits.trfile_id 
-                      and tredits.id = tredit_actions.tredit_id 
-                      and tredit_actions.tractiontype_id = "+act.id.to_s+" 
-                      and "+act.ref_table_a_1+".label = '"+act.ref_table_b_1+"'
-                      and tredit_actions.value = "+act.ref_table_a_1.pluralize.underscore+".id
-                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
-                    v_table_array.push(v_value_sql)
+                   if !act.ref_table_b_1.blank?   #GROUP_CONCAT(       SEPARATOR ', ')   wm, gm - multiples from checkbox - only one returned
+                      v_value_sql = "LEFT JOIN  (select GROUP_CONCAT("+act.ref_table_a_1+".description  SEPARATOR ', ') "+v_col+", trfile2.id  trfile_id, tredits.id tredit_id  from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1+" 
+                       where trfile2.id = tredits.trfile_id 
+                       and tredits.id = tredit_actions.tredit_id 
+                       and tredit_actions.tractiontype_id = "+act.id.to_s+"
+                        and "+v_added_trfiles2_conditions+" 
+                       and "+act.ref_table_a_1+".label = '"+act.ref_table_b_1+"' 
+                       and FIND_IN_SET("+act.ref_table_a_1+".ref_value ,tredit_actions.value) > 0  
+                       group by trfile_id, tredit_id ) v_"+act.id.to_s+" on  tredits.id =  v_"+act.id.to_s+".tredit_id"
+                      v_table_array_all.push(v_value_sql)
+                   elsif !act.ref_table_a_1.blank?    # never tested GROUP_CONCAT 
+                     v_value_sql = "LEFT JOIN  (select GROUP_CONCAT("+act.ref_table_a_1.pluralize.underscore+".description  SEPARATOR ', ') "+v_col+", trfile2.id  trfile_id, tredits.id tredit_id  from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1.pluralize.underscore+" 
+                       where trfile2.id = tredits.trfile_id 
+                       and tredits.id = tredit_actions.tredit_id 
+                       and tredit_actions.tractiontype_id = "+act.id.to_s+"
+                        and "+v_added_trfiles2_conditions+" 
+                       and "+act.ref_table_a_1+".label = '"+act.ref_table_b_1+"'
+                      and FIND_IN_SET("+act.ref_table_a_1.pluralize.underscore+".id  ,tredit_actions.value) > 0  
+                       group by trfile_id, tredit_id ) v_"+act.id.to_s+" on tredits.id =  v_"+act.id.to_s+".tredit_id"
+                     v_table_array_all.push(v_value_sql)
+                   else
+                     v_value_sql = "LEFT JOIN (select tredit_actions.value "+v_col+", trfile2.id  trfile_id, tredits.id tredit_id from  trfiles trfile2, tredits , tredit_actions 
+                       where trfile2.id = tredits.trfile_id 
+                       and tredits.id = tredit_actions.tredit_id 
+                       and tredit_actions.tractiontype_id = "+act.id.to_s+"  
+                       and "+v_added_trfiles2_conditions+"
+                        ) v_"+act.id.to_s+" on  tredits.id =  v_"+act.id.to_s+".tredit_id"
+                     v_table_array_all.push(v_value_sql)
+                     v_table_array = v_table_array_all 
+                     v_table_conditions.push("trfiles.id = tredits.trfile_id") 
+                   end                
                  else
+                  # need last edit
+                  if !act.ref_table_b_1.blank?
+                     v_value_sql = "LEFT JOIN  (select GROUP_CONCAT("+act.ref_table_a_1+".description  SEPARATOR ', ')   "+v_col+", trfile2.id  trfile_id  from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1+" 
+                      where trfile2.id = tredits.trfile_id 
+                      and tredits.id = tredit_actions.tredit_id 
+                      and tredit_actions.tractiontype_id = "+act.id.to_s+" 
+                       and "+v_added_trfiles2_conditions+"
+                      and "+act.ref_table_a_1+".label = '"+act.ref_table_b_1+"'
+                      and FIND_IN_SET("+act.ref_table_a_1+".ref_value, tredit_actions.value)   >0
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id)
+                      group by trfile_id ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
+                     v_table_array.push(v_value_sql)
+                  elsif !act.ref_table_a_1.blank?  # never tested GROUP_CONCAT
+                    v_value_sql = "LEFT JOIN  (select GROUP_CONCAT("+act.ref_table_a_1.pluralize.underscore+".description SEPARATOR ', ')  "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1.pluralize.underscore+" 
+                      where trfile2.id = tredits.trfile_id 
+                      and tredits.id = tredit_actions.tredit_id 
+                      and tredit_actions.tractiontype_id = "+act.id.to_s+"   
+                       and "+v_added_trfiles2_conditions+"
+                      and "+act.ref_table_a_1+".label = '"+act.ref_table_b_1+"' 
+                      and FIND_IN_SET("+act.ref_table_a_1.pluralize.underscore+".id  ,tredit_actions.value) > 0
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id)
+                      group by trfile_id ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
+                    v_table_array.push(v_value_sql)
+                  else
                     v_value_sql = "LEFT JOIN (select tredit_actions.value "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions 
                       where trfile2.id = tredits.trfile_id 
                       and tredits.id = tredit_actions.tredit_id 
                       and tredit_actions.tractiontype_id = "+act.id.to_s+" 
                       and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
                     v_table_array.push(v_value_sql)
-                end
+                  end
+                 end
               end
               # using LEFT JOIN
-              @sql_view = "select * from ( select "+v_column_array.join(',')+" from "+v_table_array.join(' ')+" where "+v_table_conditions.join(' and ') +" ) t1"
+              @sql_view = "select * from ( select "+v_column_array.join(',')+" from "+v_table_array.join(' ')+" where "+v_table_conditions.join(' and ') +" "+v_order_by+") t1"  
+        puts "sql = "+@sql_view
               connection = ActiveRecord::Base.connection();
               @trfiles_search  =  connection.execute(@sql_view)
 
