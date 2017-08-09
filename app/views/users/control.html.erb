@@ -1,5 +1,8 @@
-<% if current_user.role == 'Admin_High'%>
-<table><tr bgcolor="#FFFED9"><td colspan=3>
+<% if current_user.role == 'Admin_High'%>   
+&nbsp;&nbsp;<%= link_to 'create new Visit', new_vgroup_path, data: {confirm: "Are you sure there is not an existing Visit for the same date, scan procedure and enumber? Visits are usually created when the scans are imported."} %> |  <%= link_to 'import MRI appt data', new_raw_data_import_path %> | <%= link_to 'track file edits', trtype_home_path %> |  <%= link_to('Scheduled Runs', '/schedulerun_search') %>   
+<br> <br>
+<table>
+	<tr bgcolor="#FFFED9"><td colspan=3>
 <%= link_to('Add user', '/users/add_user') %>  <br>
 Enter the new users ldap login, Fisrt Name, Last Name, and Email. <br>
 Add protocol roles - default is "edit lower level fields" for all protocols which are needed.	<br><br>
