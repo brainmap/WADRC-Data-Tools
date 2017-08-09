@@ -184,7 +184,7 @@ v_autodetect =  [["AutoDetect File On","On"],["AutoDetect File Off","Off"]]
   <div class="three_col_right">
     <p>
       <%= f.label :Notes %><br/>
-      <%= text_area( :appointment,:comment,:value=>@appointment.comment ) %><br />
+      <%= text_area( :appointment,:comment,:value=>@appointment.comment,:cols => 40, :rows => 10 ) %><br />
     </p>
     <%= @petscan.petscan_note.try(:html_safe)%>
   </div>

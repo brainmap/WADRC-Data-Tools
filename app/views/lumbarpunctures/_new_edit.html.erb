@@ -56,7 +56,7 @@ v_yes_no_na_display = [["Yes","yes"], ["No","no"], ["n/a","n/a"]]
     <p>
 	<p>
 	  <%= f.label :Notes %><br/>
-	  <%= text_area( :appointment,:comment,:value=>@appointment.comment ) %><br />
+	  <%= text_area( :appointment,:comment,:cols => 40, :rows => 10, :value=>@appointment.comment) %><br />
 	 </p>
 	
   </div>
@@ -174,7 +174,7 @@ v_yes_no_na_display = [["Yes","yes"], ["No","no"], ["n/a","n/a"]]
 	<br><br><br><br>
 	<p>
       <%= f.label :Comments_on_follow_up_symptoms %><br/>
-      <%= text_area( :lumbarpuncture,:lpfollownote ) %><br />
+      <%= text_area( :lumbarpuncture,:lpfollownote,:cols => 40, :rows => 10, ) %><br />
     </p>
     <%= @lumbarpuncture.lumbarpuncture_note.try(:html_safe)%>
 
