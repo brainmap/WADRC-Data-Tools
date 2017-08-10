@@ -96,7 +96,11 @@ v_user = v_user.gsub("\n","")
       
  elsif v_value_1 == "test_sftp"
       v_shared = Shared.new
-      v_shared.run_sftp()
+      v_shared.run_sftp()  
+ 
+ elsif v_value_1 == "dicom_header_field_harvest"
+      v_shared = Shared.new
+      v_shared.run_dicom_header_field_harvest()
        
  elsif v_value_1 == "dir_size"
       v_shared = Shared.new

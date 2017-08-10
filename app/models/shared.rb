@@ -6633,6 +6633,95 @@ puts "ppppppp "+dir_name_array[0]
     end
 
 
+# takes dicom header field, harvests a value for each ids , puts in cg_table
+# need to add schedule_pass_in_value table/class ( schedule_pass_in_group, schedule_pass_in_value), panda form/admin
+def run_dicom_header_field_harvest
+  
+  v_shared = Shared.new
+  v_base_path = Shared.get_base_path()
+  @schedule = Schedule.where("name in ('dicom_header_field_harvest')").first
+  @schedulerun = Schedulerun.new
+  @schedulerun.schedule_id = @schedule.id
+  @schedulerun.comment ="starting dicom_header_field_harvest"
+  @schedulerun.save
+  @schedulerun.start_time = @schedulerun.created_at
+  @schedulerun.save  
+  # this would retrieved from schedule_pass_in_group, schedule_pass_in_value
+  v_dicom_tag = "0043,1089"   
+  v_insert_base ="insert into cg_dicom_header_field_harvest(vgroup_id, series_description_type, series_description, image_dataset_id,dicom_header_field,dicom_header_field_value)"  
+  v_comment = ""
+  v_comment_error = ""  
+  v_comment_last_vgroup ="" 
+  # maybe could use cg_table with cg_edit, but think there are subjectid/key etc issues
+  v_exclude_vgroup_id = "-1"   # problems in the dicoms, erros in reading
+  connection = ActiveRecord::Base.connection();
+  begin   # catch all exception and put error in comment 
+    # truncate and populate table
+      sql = "truncate table cg_dicom_header_field_harvest"       
+      results = connection.execute(sql)  
+     sql = "select distinct sp.codename,  vg2.id vg_id, v.id visit_id
+     from scan_procedures sp, scan_procedures_vgroups spg,  vgroups vg2 , appointments a, visits v
+     where sp.id = spg.scan_procedure_id
+     and  vg2.id = spg.vgroup_id
+     and vg2.transfer_mri ='yes' 
+     and vg2.id = a.vgroup_id
+     and a.id = v.appointment_id 
+     and vg2.id not in ("+v_exclude_vgroup_id+")
+     order by sp.codename, visit_id"        
+     results = connection.execute(sql)  
+
+    # loop thru mri visits
+    # each new codename, insert old v_scanner_protocol_array, start new v_scanner_protocol_array
+    results.each do |r| 
+         vgroup_id = r[1]  
+         #puts "starting vgroup_id="+vgroup_id.to_s 
+         v_comment_last_vgroup  ="starting vgroup_id="+vgroup_id.to_s
+         image_datasets = ImageDataset.where("image_datasets.visit_id in (?)",r[2])   
+         v_scanner_protocol = ""
+         image_datasets.each do |dataset| 
+             begin
+	             if tags = dataset.dicom_taghash and  !tags[v_dicom_tag].blank? and tags[v_dicom_tag] != v_dicom_tag 
+	               begin
+	                v_field_value = tags[v_dicom_tag][:value] unless tags[v_dicom_tag][:value].blank?  
+	                v_series_description = dataset.series_description 
+	                v_series_description_type = "no type defined"
+	                v_series_description_type_array = SeriesDescriptionType.where("id in ( select series_description_maps.series_description_type_id from series_description_maps
+	                                                                                     where series_description_maps.series_description in (?) )",v_series_description) 
+	                if !v_series_description_type_array.nil? and !v_series_description_type_array[0].nil?               
+	                     v_series_description_type = v_series_description_type_array[0].series_description_type  
+	                end
+	                sql_insert = v_insert_base+" values("+vgroup_id.to_s+",'"+v_series_description_type+"','"+v_series_description+"',"+dataset.id.to_s+",'"+v_dicom_tag+"','"+v_field_value+"')" 
+	                #puts sql_insert
+	                results_insert = connection.execute(sql_insert) 
+	                rescue Exception => msg 
+	                   v_error = msg.to_s 
+	                   puts "ERROR ids !!!!!!!"+"visit_id="+r[2].to_s
+                  puts v_error
+	                end
+	             end 
+	           rescue Exception => msg 
+                 v_error = msg.to_s   
+                 v_comment_error = v_comment_error+" err visit_id="+r[2].to_s+" ids="+dataset.id.to_s 
+                 puts "ERROR ids !!!!!!!"+"visit_id="+r[2].to_s
+              puts v_error
+              end
+	       end  
+      end  
+      @schedulerun.comment =v_comment_last_vgroup+v_comment_error+" successful finish dicom_header_field_harvest"
+      @schedulerun.status_flag ="Y"
+      @schedulerun.save
+      @schedulerun.end_time = @schedulerun.updated_at      
+      @schedulerun.save
+    rescue Exception => msg
+       v_error = msg.to_s
+       puts "ERROR !!!!!!!"
+       puts v_error
+        @schedulerun.comment =v_comment_last_vgroup+v_error[0..499]
+        @schedulerun.status_flag="E"
+        @schedulerun.save
+    end     
+  
+end
 
   def run_dir_size
         v_base_path = Shared.get_base_path()
