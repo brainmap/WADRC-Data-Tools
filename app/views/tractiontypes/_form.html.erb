@@ -127,8 +127,10 @@ v_value_type =  [["dropdown","dropdown"],["dropdown_multiple","dropdown_multiple
   <td colspan="2" valign="center"><b>
     <%= f.label :triggers %>: </b>
     <%= f.text_area :triggers_1,:cols => 60, :rows => 3 %><br>
-    <small><small>To display a command based on value, and include subjectid_v#
-    display_command|value_1=command_1 <enum>|value_2=command_2 <enum>|.....<br></small></small>
+    <small><small>To display a command based on value, and include subjectid_v#  - shows up in &lt;enum&gt; <br>
+    display_command|value_1=command_1 &lt;enum&gt;|value_2=command_2 &lt;enum&gt;|.....<br></small></small>  <br><br>
+	 	<small><small>To display the FIRST command based on matched value, and include subjectid_v# - shows up in &lt;enum&gt;<br>
+	    display_ifeslif_command|value_1=command_1 &lt;enum&gt;|value_2=command_2 &lt;enum&gt;|.....<br></small></small>  <br>
     The triggers are a work in progress.
   </td>
 

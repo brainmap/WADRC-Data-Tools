@@ -176,7 +176,9 @@
 <%= trfile_draw_text_area(act.id,"60x7", act.form_default_value,@tredit_actions[0].value,act.form_required_y_n_1) %>
 
           <%  end  %>
-        <% if !(act.triggers_1).nil?  and !(@tredit_actions[0]).nil? and !(@tredit_actions[0].value).nil? # expect structure split "|" array[0]= type of trigger, rest array elements split "=", value/command <enum> pairs
+        <% if !(act.triggers_1).nil?  and !(@tredit_actions[0]).nil? and !(@tredit_actions[0].value).nil? 
+	      # expect structure split "|" array[0]= type of trigger, rest array elements split "=", value/command <enum> pairs  
+	      # how to do a conditional is 1,2  or 1 - then 1, if 2,3 or 2 then 2, 
               v_triggers_array = (act.triggers_1).split("|") 
               if v_triggers_array[0] == "display_command"  
                 v_triggers_array.delete_at(0)
@@ -186,6 +188,18 @@
                   if val_array.include?(v_val_cmd_array[0]) %>
                     <br><%= v_val_cmd_array[1].gsub("<enum>",@trfile.subjectid) %>
             <%    end
+                end  
+              end
+              if  v_triggers_array[0] == "display_ifeslif_command"
+                v_triggers_array.delete_at(0)
+                val_array = @tredit_actions[0].value.split(',')
+                v_first_match_cnt = 0
+                v_triggers_array.each do |val_cmd|
+                  v_val_cmd_array = val_cmd.split("=")
+                  if val_array.include?(v_val_cmd_array[0]) and v_first_match_cnt < 1 %>
+                    <br><%= v_val_cmd_array[1].gsub("<enum>",@trfile.subjectid) %>
+            <%    v_first_match_cnt = v_first_match_cnt+1
+                  end
                 end  
               end
            end %>
