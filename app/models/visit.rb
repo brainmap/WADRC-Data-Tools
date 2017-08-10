@@ -480,10 +480,15 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
     @initials ||= nil
     return @initials unless @initials.blank?
     
-    image_datasets.each do |dataset|
+    image_datasets.each do |dataset|  
+     begin 
       if tags = dataset.dicom_taghash and !tags['0010,0010'].blank? and tags['0010,0010'] != '0010,0010'
         @initials = tags['0010,0010'][:value] unless tags['0010,0010'][:value].blank?
-      end
+      end 
+      rescue Exception => msg 
+          v_error = msg.to_s   
+          #messed up dicom header?
+       end
     end
     
     return @initials

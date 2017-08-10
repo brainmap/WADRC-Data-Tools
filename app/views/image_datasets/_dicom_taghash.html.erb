@@ -1,5 +1,5 @@
 
-
+<%begin%>
 <% if dataset.dicom_taghash.blank? %>
 <p><%= "DICOM header not available." %></p>
 <% elsif dataset.dicom_taghash.to_s[0,3] == "---" %>
@@ -23,4 +23,12 @@
 	
 	<% end  %>
 	</table>
-<% end %>
+<% end %>   
+<%rescue Exception => msg 
+    v_error = msg.to_s   
+    #messed up dicom header?  
+%>
+<p><%= "DICOM header not available." %></p>  
+<%
+ end
+%>
