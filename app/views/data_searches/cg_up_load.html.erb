@@ -24,7 +24,7 @@ v_key_type = [["enumber and visit# mapped to enrollment/scan_procedure","enrollm
 	    <B>Date Stamp:</B>&nbsp;&nbsp;&nbsp;<small>YYYYMMDD</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "up_table_yyyymmdd",nil, :required => true %></div>
 		</td></tr>
 				<tr><td align="left"><div class="field">
-	    <B>UP Table Key Column Name:</B>&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "up_table_name_key_column" ,nil, :required => true%></div>
+	    <B>UP Table Key Column Name:</B>&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "up_table_name_key_column" ,nil, :required => true%></div> <small>(enter reggieid or wrapnum - just needs something entered- not think its being used?)</small>
 		</td></tr>
 			 	<tr><td align="left"><div class="field">
 	    <B>Key Type:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= select_tag "key_type", options_for_select([["enumber and visit# mapped to enrollment/scan_procedure","enrollment/sp"],
@@ -45,7 +45,8 @@ v_key_type = [["enumber and visit# mapped to enrollment/scan_procedure","enrollm
 			 	<tr><td align="left"><div class="field">
 	    <B>Append or Full Replace or Update with non-blank:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= select_tag "append_full_replace", options_for_select([["append","append"],
 	    	["append_by_participant","append_by_participant"],
-["full_replace","full_replace"],["update_non_blank","update_non_blank"]], "full_replace")%></div>
+["full_replace","full_replace"],["update_non_blank","update_non_blank"]], "full_replace")%></div>  
+<small>( not totally sure when partyically loaded - adrc or wrap, and adding the other set/wrap/adrc to use append or append_by_participant_id)</small>
 		</td></tr>
 	   <tr><td  align="left">
 						  <div class="actions">

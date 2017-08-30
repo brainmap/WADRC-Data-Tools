@@ -2541,7 +2541,7 @@ def cg_up_load
      v_up_table_name = params[:up_table_name]
      v_up_display_table_name = params[:up_display_table_name]
      v_up_table_yyyymmdd = params[:up_table_yyyymmdd]
-     v_up_table_name_key_column = params[:up_table_name_key_column]
+     v_up_table_name_key_column = params[:up_table_name_key_column]     # not think this is being used - just needs to be populated???
 
      v_key_type = params[:key_type]
      v_source_up_table_name = params[:source_up_table_name]
