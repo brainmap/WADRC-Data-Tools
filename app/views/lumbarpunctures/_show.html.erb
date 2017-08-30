@@ -39,7 +39,7 @@
   <div id="notes" class="sticky">
 	<%=  RedCloth.new(@appointment.comment.blank? ? "No comment entered for this lumbarpuncture" : @appointment.comment).to_html.html_safe 
             %><br>
-    <%=  RedCloth.new(@lumbarpuncture.lumbarpuncture_note.blank? ? "No notes entered for this lumbarpuncture" : @lumbarpuncture.lumbarpuncture_note).to_html.html_safe 
+    <%=  RedCloth.new(@lumbarpuncture.lumbarpuncture_note.blank? ? "" : @lumbarpuncture.lumbarpuncture_note).to_html.html_safe 
             %>
   </div>
   <h3>Comments on follow-up symptoms:</h3>

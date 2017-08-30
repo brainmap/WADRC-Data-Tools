@@ -30,7 +30,7 @@
   <div id="notes" class="sticky">
 	<%=  RedCloth.new(@appointment.comment.blank? ? "No comment entered for this Lab Health" : @appointment.comment).to_html.html_safe 
             %><br>
-    <%=  RedCloth.new(@blooddraw.blooddrawnote.blank? ? "No notes entered for this Lab Health" : @blooddraw.blooddrawnote).to_html.html_safe 
+    <%=  RedCloth.new(@blooddraw.blooddrawnote.blank? ? "" : @blooddraw.blooddrawnote).to_html.html_safe 
             %>
   </div> 
 
