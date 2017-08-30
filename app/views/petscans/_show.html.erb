@@ -72,7 +72,7 @@
   <div id="notes" class="sticky">
 	<%=  RedCloth.new(@appointment.comment.blank? ? "No comment entered for this petscan" : @appointment.comment).to_html.html_safe 
             %><br>
-    <%=  RedCloth.new(@petscan.petscan_note.blank? ? "No notes entered for this petscan" : @petscan.petscan_note).to_html.html_safe 
+    <%=  RedCloth.new(@petscan.petscan_note.blank? ? "" : @petscan.petscan_note).to_html.html_safe 
             %>
   </div>
 <% @vital =  Vital.where("appointment_id in (?) and pre_post_flag ='pre' ",@petscan.appointment_id).first
