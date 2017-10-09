@@ -10,9 +10,14 @@
     </td></tr><tr><td><%= f.label :email %></td><td><%= f.text_field :email, :required => true  %>
 </td></tr><tr><td><%= f.label :first_name %></td><td><%= f.text_field :first_name %>
 </td></tr><tr><td><%= f.label :last_name%></td><td><%= f.text_field :last_name %>
- </td></tr><tr><td><%= f.label :role %> </td><td>  <%= collection_select :user, :role, Role.all.sort_by(&:role), :role, :description, :prompt => 'choose a role' %>
+ </td></tr><tr><td><%= f.label :role %> </td><td> LEAVE Global Role BLANK!!!  &nbsp;&nbsp;<%= collection_select :user, :role, Role.all.sort_by(&:role), :role, :description, :prompt => 'choose a role' %>
 	</td></tr></table>
-  </div>Leave the role BLANK unless the users should have global access.
+  </div>
+  Most users do not have a Global Role. <br>
+  Edit/View permissions for a User are set in the [ Update user PROTOCOL specific role].<br>
+  The only Users with global roles are the Panda Admins - [ full admin rights]<br>
+  and the Question making Users - [lower level admin rights].<br>
+  Leave the role BLANK unless the users should have global access.
 
   <div class="actions">
     <%= f.submit "Add User" %>

@@ -36,6 +36,14 @@ If the enumber is not already associated with a participant, add the enumber bel
     else %>
     <%= text_field :participant,:reggieid , :size=>25 %>
     <%end%><br>
+  <%= f.label :wrapnum %>&nbsp;&nbsp;&nbsp;
+    <% if !@participant.nil? 
+        if @participant.wrapnum.to_s  > ""%>
+             <%= @participant.wrapnum.to_s.rjust(4,"0") %>
+          <% end
+    else %>
+    <%= text_field :participant,:wrapnum , :size=>25 %>
+    <%end%><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
    </td><td>
 	<% if current_user.role == 'Admin_High'   #is_a_number?(@vgroup.rmr[6..11]) %>

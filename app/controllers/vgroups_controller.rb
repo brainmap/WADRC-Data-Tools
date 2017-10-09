@@ -289,6 +289,13 @@ class VgroupsController < ApplicationController
           v_reggieid_participant_id = v_reggieid_participants.id
        end
     end
+    v_wrapnum_participant_id = ''
+    if !params[:participant].nil? and !params[:participant][:wrapnum].blank?
+       v_wrapnum_participants = Participant.where("wrapnum in (?)",params[:participant][:wrapnum].rjust(4,"0")).first
+       if !v_wrapnum_participants.nil?
+          v_wrapnum_participant_id = v_wrapnum_participants.id
+       end
+    end
     v_rmraic_participant_id = ''
     if !params[:vgroup][:rmr].blank?  && params[:vgroup][:rmr] [0..5] == "RMRaic" && ((params[:vgroup][:rmr] )[6..11] =~ /\A[-+]?[0-9]*\.?[0-9]+\Z/ ) && params[:vgroup][:rmr] .length == 12
          v_reggieid = params[:vgroup][:rmr][6..11]
@@ -335,6 +342,14 @@ class VgroupsController < ApplicationController
             params[:vgroup][:participant_id] = v_new_participant.id.to_s
               # not sure why setting params not carrying thru
             @vgroup.participant_id = v_new_participant.id
+         end
+    end
+    # adding wrapnum to participant 
+    if @vgroup.participant_id.nil? and !params[:participant][:wrapnum].blank?
+puts "ddddddd "+params[:participant][:wrapnum].rjust(4,"0")
+         v_wrapnum_participant = Participant.where("wrapnum in (?)",params[:participant][:wrapnum].rjust(4,"0")).first
+         if !v_wrapnum_participant.nil?
+             @vgroup.participant_id = v_wrapnum_participant.id   
          end
     end
     respond_to do |format|
