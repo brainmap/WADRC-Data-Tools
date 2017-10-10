@@ -346,7 +346,6 @@ class VgroupsController < ApplicationController
     end
     # adding wrapnum to participant 
     if @vgroup.participant_id.nil? and !params[:participant][:wrapnum].blank?
-puts "ddddddd "+params[:participant][:wrapnum].rjust(4,"0")
          v_wrapnum_participant = Participant.where("wrapnum in (?)",params[:participant][:wrapnum].rjust(4,"0")).first
          if !v_wrapnum_participant.nil?
              @vgroup.participant_id = v_wrapnum_participant.id   
@@ -683,6 +682,14 @@ puts "ddddddd "+params[:participant][:wrapnum].rjust(4,"0")
          if !v_participant[0].nil? and params[:vgroup][:participant_id].blank?
           @vgroup.participant_id = v_participant[0].id
           params[:vgroup][:participant_id] = v_participant[0].id.to_s
+         end
+    end
+        # adding wrapnum to participant 
+    if @vgroup.participant_id.nil? and  !params[:participant].nil? and !params[:participant][:wrapnum].blank?
+         v_wrapnum_participant = Participant.where("wrapnum in (?)",params[:participant][:wrapnum].rjust(4,"0")).first
+         if !v_wrapnum_participant.nil?
+             @vgroup.participant_id = v_wrapnum_participant.id   
+             params[:vgroup][:participant_id] = v_wrapnum_participant.id.to_s
          end
     end
     
