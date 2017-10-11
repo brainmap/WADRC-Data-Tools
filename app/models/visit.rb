@@ -230,7 +230,17 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
           #data = data.to_h
         else raise StandardError, "Could not identify type of dataset #{File.join(dataset.directory, datset.scanned_file)}"
         end
-      
+
+        # waisman has  desc:Mon dd yyyy hh-mm-ss CDT e.g. FA:Oct 09 2017 08-46-40 CDT
+        # want to detect, and split on :, take first part as series description
+        v_series_desc_tmp = nil
+        if  (dataset.series_description).include? "CDT" 
+           if ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].any? { |word| (dataset.series_description).include?(word) }
+             v_series_desc_tmp = (dataset.series_description).split(":")
+              data.series_description = v_series_desc_tmp[0]
+              #puts "zzzttttt  series_description ="+dataset.series_description+"====="+v_series_desc_tmp[0]
+            end
+        end
         meta_attrs = dataset.attributes_for_active_record(metamri_attr_options) 
         # If the ActiveRecord Visit (visit) has a dataset that already matches the metamri dataset (dataset) on dicom_series_uid, then use it and update its params.  Otherwise, build a new one.
         unless data.blank? # AKA data.kind_of? ImageDataset
