@@ -237,8 +237,10 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
         if  (dataset.series_description).include? "CDT" 
            if ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].any? { |word| (dataset.series_description).include?(word) }
              v_series_desc_tmp = (dataset.series_description).split(":")
-              data.series_description = v_series_desc_tmp[0]
-              #puts "zzzttttt  series_description ="+dataset.series_description+"====="+v_series_desc_tmp[0]
+              if !v_series_desc_tmp.blank? and !v_series_desc_tmp[0].blank?
+                 data.series_description = v_series_desc_tmp[0]
+                   #puts "zzzttttt  series_description ="+dataset.series_description+"====="+v_series_desc_tmp[0]
+              end
             end
         end
         meta_attrs = dataset.attributes_for_active_record(metamri_attr_options) 
