@@ -231,18 +231,6 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
         else raise StandardError, "Could not identify type of dataset #{File.join(dataset.directory, datset.scanned_file)}"
         end
 
-        # waisman has  desc:Mon dd yyyy hh-mm-ss CDT e.g. FA:Oct 09 2017 08-46-40 CDT
-        # want to detect, and split on :, take first part as series description
-        v_series_desc_tmp = nil
-        if  (dataset.series_description).include? "CDT" 
-           if ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].any? { |word| (dataset.series_description).include?(word) }
-             v_series_desc_tmp = (dataset.series_description).split(":")
-              if !v_series_desc_tmp.blank? and !v_series_desc_tmp[0].blank?
-                 data.series_description = v_series_desc_tmp[0]
-                   #puts "zzzttttt  series_description ="+dataset.series_description+"====="+v_series_desc_tmp[0]
-              end
-            end
-        end
         meta_attrs = dataset.attributes_for_active_record(metamri_attr_options) 
         # If the ActiveRecord Visit (visit) has a dataset that already matches the metamri dataset (dataset) on dicom_series_uid, then use it and update its params.  Otherwise, build a new one.
         unless data.blank? # AKA data.kind_of? ImageDataset
@@ -250,6 +238,20 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
            data.attributes.merge!(meta_attrs)  # DOES THIS WORK  
           
           if data.valid?
+            # this just gets the existing ids
+            # waisman has  desc:Mon dd yyyy hh-mm-ss CDT e.g. FA:Oct 09 2017 08-46-40 CDT
+            # want to detect, and split on :, take first part as series description
+            v_series_desc_tmp = nil
+            if  (dataset.series_description).include? "CDT" 
+              if ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].any? { |word| (dataset.series_description).include?(word) }
+                 v_series_desc_tmp = (dataset.series_description).split(":")
+                 if !v_series_desc_tmp.blank? and !v_series_desc_tmp[0].blank? 
+                     data.series_description = v_series_desc_tmp[0]
+                  #puts "zzzttttt  series_description ="+dataset.series_description+"====="+v_series_desc_tmp[0]
+                 end
+               end
+            end
+
             puts "ggggg data valid"
             visit.image_datasets << data  
             puts " after data into v.ids"
@@ -265,6 +267,17 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
             raise StandardError, "Image Dataset #{data.path} not valid: #{e}"
           end
         else
+          #puts "PPPPPPPP meta_attrs ="+meta_attrs[:series_description]
+            v_series_desc_tmp = nil
+            if  (meta_attrs[:series_description]).include? "CDT" 
+              if ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].any? { |word| (meta_attrs[:series_description]).include?(word) }
+                 v_series_desc_tmp = (meta_attrs[:series_description]).split(":")
+                 if !v_series_desc_tmp.blank? and !v_series_desc_tmp[0].blank? 
+                     meta_attrs[:series_description] = v_series_desc_tmp[0]
+                   #puts "zzzttttt  series_description ="+meta_attrs[:series_description]+"====="+v_series_desc_tmp[0]
+                 end
+               end
+            end
           logger.debug "building fresh visit. image_datasets.build(#{meta_attrs})"
           visit.image_datasets.build(meta_attrs)  
           #visit.save
