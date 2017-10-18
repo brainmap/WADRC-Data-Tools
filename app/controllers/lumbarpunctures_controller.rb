@@ -386,7 +386,7 @@ class LumbarpuncturesController < ApplicationController
     end
   end
   
-
+# NOT BEING USED - REPLACED BY lp_search, next function
     def lumbarpuncture_search
        @current_tab = "lumbarpunctures"
        params["search_criteria"] =""
@@ -641,7 +641,7 @@ class LumbarpuncturesController < ApplicationController
       @html_request ="Y"
       case  request_format
         when "[text/html]","text/html" then  # application/html ?
-          @column_headers = ['Date','Protocol','Enumber','RMR','LP status','LP abnormality','LP success','LP followup','Completed Fast','24hr Headache','Needle Size','LP Note', 'Appt Note'] # need to look up values
+          @column_headers = ['Date','Protocol','Enumber','RMR','LP status','LP abnormality','LP success','LP followup','Completed Fast','Post-Lp Headache','Needle Size','LP Note', 'Appt Note'] # need to look up values
           # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
           @column_number =   @column_headers.size
           @fields =["vgroups.completedlumbarpuncture", "CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'yes' ELSE 'no' end" ,"CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'yes' WHEN 2 THEN 'unk' ELSE 'no' end ","lumbarpunctures.lpfollownote",
@@ -650,16 +650,42 @@ class LumbarpuncturesController < ApplicationController
           @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
         else
               @html_request ="N"
-              @column_headers = ['Date','Protocol','Enumber','RMR','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','LP status','24hr Headache','Needle Size','LP start Hour', 'LP start Minute','LP end Hour', 'LP end Minute','LP Note','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt', 'Appt Note'] # need to look up values
+              @column_headers = ['Date','Protocol','Enumber','RMR','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','Fast Completed Unknown','Last Intake hrs','Last Intake min','Last Intake Unknown',
+              'LP status',
+              'Post-LP Headache','Post-LP Headache-Date Resolved','Post-LP Headache-Severity','Post-LP Headache-Note',
+              'Post-LP Low Back Pain','Post-LP Low Back Pain-Date Resolved','Post-LP Low Back Pain-Severity','Post-LP Low Back Pain-Note',
+              'Post-LP Other Side Effects','Post-LP Other Side Effects-Date Resolved','Post-LP Other Side Effects-Severity','Post-LP Other Side Effects-Note',
+              'Needle Size','Needle Type','Needle Type -Other','LP Position','LP Method',
+              'Initial Needle Insertion Hour',
+               'Initial Needle Insertion Minute','Fluid Collection Start Hour','Fluid Collection Start Minute','Final Needle Removal Hour', 'Final Needle Removal Minute',
+                'CSF Amount Collected','CSF Initial Amount Stored','CSF Nucleated Cell Count','CSF Red Cell Count','Cell Count Remarks',
+                'If LP unsuccessful-Unable to access CSF','If LP unsuccessful-Participant pain/discomfort','If LP unsuccessful-Participant vasovagal','If LP unsuccessful-Other',
+               'LP Note','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt', 'Appt Note'] # need to look up values
               # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
               @column_number =   @column_headers.size
               @fields =["CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'Yes' WHEN 2 THEN 'unk' ELSE 'No' end ","CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'Yes' ELSE 'No' end" ,"lumbarpunctures.lpfollownote",
                  "concat(employees.first_name,' ',employees.last_name)",
                 "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'Yes' ELSE 'No' end",
-                "lumbarpunctures.lpfasttotaltime","lumbarpunctures.lpfasttotaltime_min","vgroups.completedlumbarpuncture","lumbarpunctures.followupheadache","lumbarpunctures.needlesize","lumbarpunctures.lpstarttime_hour","lumbarpunctures.lpstarttime_minute","lumbarpunctures.lpendtime_hour","lumbarpunctures.lpendtime_minute","lumbarpunctures.lumbarpuncture_note","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
+                "lumbarpunctures.lpfasttotaltime","lumbarpunctures.lpfasttotaltime_min",  "CASE lumbarpunctures.lpfasttotaltime_unk WHEN 2 THEN 'Unk' ELSE '' end",
+                "lumbarpunctures.lptimelastintake","lumbarpunctures.lptimelastintake_min",  "CASE lumbarpunctures.lptimelastintake_unk WHEN 2 THEN 'Unk' ELSE '' end",
+                "vgroups.completedlumbarpuncture",
+                "lumbarpunctures.followupheadache","DATE_FORMAT(lumbarpunctures.lpheadache_dateresolved,'%Y-%m-%d')","lumbarpunctures.lpheadache_severity","lumbarpunctures.lpheadache_note",
+                "lumbarpunctures.lplowbackpain","DATE_FORMAT(lumbarpunctures.lplowbackpain_dateresolved,'%Y-%m-%d')","lumbarpunctures.lplowbackpain_severity","lumbarpunctures.lplowbackpain_note",
+                "lumbarpunctures.lpothersideeffects","DATE_FORMAT(lumbarpunctures.lpothersideeffects_dateresolved,'%Y-%m-%d')","lumbarpunctures.lpothersideeffects_severity","lumbarpunctures.lpothersideeffects_note",
+                "lumbarpunctures.needlesize",
+                "lumbarpunctures.lpneedletype","lumbarpunctures.lpneedletype_other","lumbarpunctures.lpposition","lumbarpunctures.lpmethod",
+                "lumbarpunctures.lpstarttime_hour","lumbarpunctures.lpstarttime_minute","lumbarpunctures.lpfluidstarttime_hour","lumbarpunctures.lpfluidstarttime_minute",
+                "lumbarpunctures.lpendtime_hour","lumbarpunctures.lpendtime_minute",
+                 "lumbarpunctures.lpamountcollected","lumbarpunctures.lpinitialamountstored","lumbarpunctures.lpcsfnucleatedcellcount","lumbarpunctures.lpcsfredcellcount","lumbarpunctures.lpcsfcellcount_note",
+                 "CASE lumbarpunctures.lpcsfunsuccessful_noaccess WHEN 1 THEN 'yes' ELSE '' end",
+                 "CASE lumbarpunctures.lpcsfunsuccessful_pain WHEN 1 THEN 'yes' ELSE '' end",
+                 "CASE lumbarpunctures.lpcsfunsuccessful_vasovagal WHEN 1 THEN 'yes' ELSE '' end","lumbarpunctures.lpcsfunsuccessful_other_specify",
+                "lumbarpunctures.lumbarpuncture_note","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
               @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id",
                             "LEFT JOIN vitals on lumbarpunctures.appointment_id = vitals.appointment_id"] # left join needs to be in sql right after the parent table!!!!!!!
         end
+
+
       @tables =['lumbarpunctures'] # trigger joins --- vgroups and appointments by default
 
       #@conditions =[] # ["scan_procedures.codename='johnson.pipr.visit1'"] # need look up for like, lt, gt, between  
