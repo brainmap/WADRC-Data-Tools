@@ -10,7 +10,9 @@
       :MD_for_Lumbarpuncture => @lumbarpuncture.lp_exam_md_id.nil? ? nil : Employee.find(@lumbarpuncture.lp_exam_md_id).name,
       :LP_Fast_Completed => @lumbarpuncture.completedlpfast == 1 ? "Yes" : "No",
 	  :LP_Fast_Total_Time => @lumbarpuncture.lpfasttotaltime.nil?  ? @lumbarpuncture.lpfasttotaltime_min.nil? ? nil : @lumbarpuncture.lpfasttotaltime.to_s+" hrs : "+@lumbarpuncture.lpfasttotaltime_min.to_s+" mins" :  @lumbarpuncture.lpfasttotaltime.to_s+" hrs : "+@lumbarpuncture.lpfasttotaltime_min.to_s+" mins" ,
+     :LP_Fast_Total_time_unknown => @lumbarpuncture.lpfasttotaltime_unk  == "2" ? "Unknown" : nil ,
      :LP_time_last_intake => @lumbarpuncture.lptimelastintake.nil?  ? @lumbarpuncture.lptimelastintake_min.nil? ? nil : @lumbarpuncture.lptimelastintake.to_s+" hrs : "+@lumbarpuncture.lptimelastintake_min.to_s+" mins" :  @lumbarpuncture.lptimelastintake.to_s+" hrs : "+@lumbarpuncture.lptimelastintake_min.to_s+" mins" ,
+     :LP_time_last_intake_unknown => @lumbarpuncture.lptimelastintake_unk == "2" ? "Unknown" : nil,
       :LP_Successful => @lumbarpuncture.lpsuccess == 1 ? "Yes" : @lumbarpuncture.lpsuccess == 0 ? "No" : "Unknown",
       :CSF_Amount_collected =>  @lumbarpuncture.lpamountcollected.nil? ? nil : @lumbarpuncture.lpamountcollected.to_s  ,
       :Initial_CSF_Amount_stored => @lumbarpuncture.lpinitialamountstored.nil? ? nil : @lumbarpuncture.lpinitialamountstored.to_s  ,
@@ -87,7 +89,7 @@
             %>
   </div>
 
-  <br><b>Comments on Side Effect:</b>
+  <br><b>Comments on Side Effects:</b>
   <div id="notes" class="sticky">
 	<%=  RedCloth.new(@lumbarpuncture.lpfollownote.blank? ? "No follow up comment entered for this lumbarpuncture" : @lumbarpuncture.lpfollownote).to_html.html_safe 
             %>
