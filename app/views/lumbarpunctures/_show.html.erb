@@ -10,18 +10,42 @@
       :MD_for_Lumbarpuncture => @lumbarpuncture.lp_exam_md_id.nil? ? nil : Employee.find(@lumbarpuncture.lp_exam_md_id).name,
       :LP_Fast_Completed => @lumbarpuncture.completedlpfast == 1 ? "Yes" : "No",
 	  :LP_Fast_Total_Time => @lumbarpuncture.lpfasttotaltime.nil?  ? @lumbarpuncture.lpfasttotaltime_min.nil? ? nil : @lumbarpuncture.lpfasttotaltime.to_s+" hrs : "+@lumbarpuncture.lpfasttotaltime_min.to_s+" mins" :  @lumbarpuncture.lpfasttotaltime.to_s+" hrs : "+@lumbarpuncture.lpfasttotaltime_min.to_s+" mins" ,
+     :LP_time_last_intake => @lumbarpuncture.lptimelastintake.nil?  ? @lumbarpuncture.lptimelastintake_min.nil? ? nil : @lumbarpuncture.lptimelastintake.to_s+" hrs : "+@lumbarpuncture.lptimelastintake_min.to_s+" mins" :  @lumbarpuncture.lptimelastintake.to_s+" hrs : "+@lumbarpuncture.lptimelastintake_min.to_s+" mins" ,
       :LP_Successful => @lumbarpuncture.lpsuccess == 1 ? "Yes" : @lumbarpuncture.lpsuccess == 0 ? "No" : "Unknown",
+      :CSF_Amount_collected =>  @lumbarpuncture.lpamountcollected.nil? ? nil : @lumbarpuncture.lpamountcollected.to_s  ,
+      :Initial_CSF_Amount_stored => @lumbarpuncture.lpinitialamountstored.nil? ? nil : @lumbarpuncture.lpinitialamountstored.to_s  ,
+
       :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
       :RMR_Number => @vgroup.rmr,
       :LP_Abnormality_Found =>  @lumbarpuncture.lpabnormality == 1 ? "Yes" : "No" ,
        :Appt_Coordinator =>@appointment.appointment_coordinator.blank? ? "" : Employee.find(@appointment.appointment_coordinator).name,
       :Participant => @participant.nil? ? nil : link_to('view participant', @participant),
       :Needle_Size => @lumbarpuncture.needlesize,
-  :LP_Start_Time =>@lumbarpuncture.lpstarttime.nil? ? nil : @lumbarpuncture.lpstarttime.hour.to_s.rjust(2,'0')+":"+@lumbarpuncture.lpstarttime.min.to_s.rjust(2,'0'),
-  :LP_End_Time =>@lumbarpuncture.lpendtime.nil? ? nil : @lumbarpuncture.lpendtime.hour.to_s.rjust(2,'0')+":"+@lumbarpuncture.lpendtime.min.to_s.rjust(2,'0'),
-            "24_hr_Followup_Headache" => @lumbarpuncture.followupheadache
-    }) %>
+      :Needle_Type => @lumbarpuncture.lpneedletype.nil? ? nil : @lumbarpuncture.lpneedletype == "Other" ? @lumbarpuncture.lpneedletype_other : @lumbarpuncture.lpneedletype,
+      :LP_Position => @lumbarpuncture.lpposition.nil? ? nil : @lumbarpuncture.lpposition,
+      :LP_Method => @lumbarpuncture.lpmethod.nil? ? nil : @lumbarpuncture.lpmethod,
+  :LP_Initial_needle_insertion_Time => @lumbarpuncture.lpstarttime.nil? ? nil : @lumbarpuncture.lpstarttime.hour.to_s.rjust(2,'0')+":"+@lumbarpuncture.lpstarttime.min.to_s.rjust(2,'0'),
+  :Fluid_Collection_Start_Time => @lumbarpuncture.lpfluidstarttime.nil? ? nil : @lumbarpuncture.lpfluidstarttime.hour.to_s.rjust(2,'0')+":"+@lumbarpuncture.lpfluidstarttime.min.to_s.rjust(2,'0'),
+  :LP_final_needle_removal_Time => @lumbarpuncture.lpendtime.nil? ? nil : @lumbarpuncture.lpendtime.hour.to_s.rjust(2,'0')+":"+@lumbarpuncture.lpendtime.min.to_s.rjust(2,'0'),
+    :Significant_post_LP_Headache => @lumbarpuncture.followupheadache,
+    :Significant_post_LP_Headache_Date_Resolved => @lumbarpuncture.followupheadache.nil? ? nil : @lumbarpuncture.followupheadache =="yes" ? @lumbarpuncture.lpheadache_dateresolved.strftime("%Y-%m-%d") : nil,
+    :Significant_post_LP_Headache_severity => @lumbarpuncture.followupheadache.nil? ? nil : @lumbarpuncture.followupheadache == "yes" ? @lumbarpuncture.lpheadache_severity : nil,
+    :Significant_low_back_pain => @lumbarpuncture.lplowbackpain,
+    :Significant_low_back_pain_Date_Resolved => @lumbarpuncture.lplowbackpain.nil? ? nil : @lumbarpuncture.lplowbackpain =="yes" ? @lumbarpuncture.lplowbackpain_dateresolved.strftime("%Y-%m-%d") : nil,
+    :Significant_low_back_pain_severity => @lumbarpuncture.lplowbackpain.nil? ? nil : @lumbarpuncture.lplowbackpain == "yes" ? @lumbarpuncture.lplowbackpain_severity : nil,
+    :Other_side_effects => @lumbarpuncture.lpothersideeffects,
+    :Other_side_effects_Date_Resolved => @lumbarpuncture.lpothersideeffects.nil? ? nil : @lumbarpuncture.lpothersideeffects =="yes" ? @lumbarpuncture.lpothersideeffects_dateresolved.strftime("%Y-%m-%d") : nil,
+    :Other_side_effects_severity => @lumbarpuncture.lpothersideeffects.nil? ? nil : @lumbarpuncture.lpothersideeffects == "yes" ? @lumbarpuncture.lpothersideeffects_severity : nil,
+    :CSF_Nucleated_Cell_Count => @lumbarpuncture.lpcsfnucleatedcellcount.nil? ? nil : @lumbarpuncture.lpcsfnucleatedcellcount.to_s,
+    :CSF_Red_Cell_Count => @lumbarpuncture.lpcsfredcellcount.nil? ? nil : @lumbarpuncture.lpcsfredcellcount.to_s,
+    :If_unsuccessful_LP_Unable_to_access_CSF => @lumbarpuncture.lpsuccess == 1 ? nil : @lumbarpuncture.lpcsfunsuccessful_noaccess == 1 ? "Yes" : nil,
+    :If_unsuccessful_Participant_Pain_discomfort => @lumbarpuncture.lpsuccess == 1 ? nil : @lumbarpuncture.lpcsfunsuccessful_pain == 1 ? "Yes" : nil,
+    :If_unsuccessful_Participant_vasoval => @lumbarpuncture.lpsuccess == 1 ? nil : @lumbarpuncture.lpcsfunsuccessful_vasovagal == 1 ? "Yes" : nil,
+    :If_unsuccessful_other => @lumbarpuncture.lpsuccess == 0 ? @lumbarpuncture.lpcsfunsuccessful_other == 1  ? @lumbarpuncture.lpcsfunsuccessful_other_specify.nil? ? nil : @lumbarpuncture.lpcsfunsuccessful_other_specify : nil : nil,
+     }) %>
+   
   </div>
+  
 
   <div id="visit_details_note" class="sticky">
     <%= key_val_table("visit_details", {
@@ -35,18 +59,47 @@
 
 <div id="visit_status_report" class="two_col_right">
 
-  <h3>Notes:</h3>
+  <b>Notes:</b>
   <div id="notes" class="sticky">
 	<%=  RedCloth.new(@appointment.comment.blank? ? "No comment entered for this lumbarpuncture" : @appointment.comment).to_html.html_safe 
             %><br>
     <%=  RedCloth.new(@lumbarpuncture.lumbarpuncture_note.blank? ? "" : @lumbarpuncture.lumbarpuncture_note).to_html.html_safe 
             %>
   </div>
-  <h3>Comments on follow-up symptoms:</h3>
+
+  <br><b>Comments on Significant post-LP Headache:</b>
+  <div id="notes" class="sticky">
+  <%=  RedCloth.new(@lumbarpuncture.lpheadache_note.blank? ? "No comment entered for this lumbarpuncture" : @lumbarpuncture.lpheadache_note).to_html.html_safe 
+            %>
+  </div>
+
+
+  <br><b>Comments on Significant low back pain:</b>
+  <div id="notes" class="sticky">
+  <%=  RedCloth.new(@lumbarpuncture.lplowbackpain_note.blank? ? "No comment entered for this lumbarpuncture" : @lumbarpuncture.lplowbackpain_note).to_html.html_safe 
+            %>
+  </div>
+
+
+  <br><b>Comments on Other side effects:</b>
+  <div id="notes" class="sticky">
+  <%=  RedCloth.new(@lumbarpuncture.lpothersideeffects_note.blank? ? "No comment entered for this lumbarpuncture" : @lumbarpuncture.lpothersideeffects_note).to_html.html_safe 
+            %>
+  </div>
+
+  <br><b>Comments on Side Effect:</b>
   <div id="notes" class="sticky">
 	<%=  RedCloth.new(@lumbarpuncture.lpfollownote.blank? ? "No follow up comment entered for this lumbarpuncture" : @lumbarpuncture.lpfollownote).to_html.html_safe 
             %>
   </div>
+
+  <br><b>Comments on Cell Count:</b>
+  <div id="notes" class="sticky">
+  <%=  RedCloth.new(@lumbarpuncture.lpcsfcellcount_note.blank? ? "No comment entered for this lumbarpuncture" : @lumbarpuncture.lpcsfcellcount_note).to_html.html_safe 
+            %>
+  </div>
+
+
 <% @vital =  Vital.where("appointment_id in (?) ",@lumbarpuncture.appointment_id).first
  if !@vital.blank?
 	 vital = Vital.find(@vital.id) 
@@ -55,7 +108,7 @@
 		        ( (vital.bp_diastol.blank?? 911 :vital.bp_diastol) < 911) or 
 		           ((vital.bloodglucose.blank?? 911 :vital.bloodglucose) < 911)  )%>
 	
-<h4>Vitals:</h4>
+<br><b>Vitals:</b>
 <div id="vital" class="sticky">
      <%= vital.pulse==991 ?  "" :("Pulse: "+vital.pulse.to_s+"<br>").html_safe %>
      <%= vital.bp_systol==991 ?  "" :("BP Systol: "+vital.bp_systol.to_s+"<br>").html_safe %>

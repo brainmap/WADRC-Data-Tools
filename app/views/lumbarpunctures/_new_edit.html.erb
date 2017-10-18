@@ -1,10 +1,18 @@
 <%
 v_yes_no_display = [["Yes","1"], ["No","0"]]
 v_yes_no_unk_display = [["Yes","1"], ["No","0"], ["Unk","2"]]
+v_unk_display = [["Unkown","2"]]
 v_0_30_min_display = [["0","0"], ["30","30"]]
-v_needlesize_display = [["25 x 3.5","25 x 3.5"],["25 x 4","25 x 4"],["24 x 3.5","24 x 3.5"],
-["24 x 4","24 x 4"],["24 x 4.75","24 x 4.75"],["24 x 6","24 x 6"], ["n/a","n/a"]]
+#v_needlesize_display = [["25 x 3.5","25 x 3.5"],["25 x 4","25 x 4"],["24 x 3.5","24 x 3.5"],["24 x 4","24 x 4"],["24 x 4.75","24 x 4.75"],["24 x 6","24 x 6"], ["n/a","n/a"]]
+v_needlesize_display = [["22 x 90","22 x 90"],["22 x 103","22 x 103"],["22 x 120","22 x 120"],["22 x 150","22 x 150"], 
+["23 x 90","23 x 90"],["23 x 103","23 x 103"],["23 x 120","23 x 120"],["23 x 150","23 x 150"],
+["24 x 90","24 x 90"],["24 x 103","24 x 103"],["24 x 120","24 x 120"],["24 x 150","24 x 150"],
+["25 x 90","25 x 90"],["25 x 103","25 x 103"],["25 x 120","25 x 120"],["25 x 150","25 x 150"],["n/a","n/a"]]
+v_needletype_display = [["Sprotte","Sprotte"],["Other","Other"]]
+v_position_display = [["Sitting","Sitting"],["Decubitus","Decubitis"]]
+v_method_display = [["Gravity","Gravity"],["Aspiration","Aspiration"]]
 v_yes_no_na_display = [["Yes","yes"], ["No","no"], ["n/a","n/a"]]
+v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moderate(4-6/10)"],["severe(7-10/10)","severe(7-10/10)"] ]
 %>
 <% javascript_tag 'defaults' %>
 <div id="new_edit_form">
@@ -29,34 +37,54 @@ v_yes_no_na_display = [["Yes","yes"], ["No","no"], ["n/a","n/a"]]
       <%= date_select :appointment, :appointment_date, :include_blank => true, :end_year => Time.now.year + 1 %><br />
     </p>
     <p>
-       MD for LP<br />
+       MD/Clinician for LP<br />
        <%= select(:lumbarpuncture, :lp_exam_md_id, Employee.all.sort_by(&:last_name).collect {|p| [ p.name, p.id ] }, { :include_blank => "LP done by MD" }) %>
 	
     </p>
-    <p><table width="10"><tr><td width="80" nowrap>
+    <p><table width="100"><tr><td width="80" nowrap >
       <%= f.label :Fast_Completed %>&nbsp;&nbsp;&nbsp;</td><td width="10">
-		<%= f.select :completedlpfast, options_for_select(v_yes_no_display, @lumbarpuncture.completedlpfast),
+		<%= f.select :completedlpfast, options_for_select(v_yes_no_unk_display, @lumbarpuncture.completedlpfast),
 							              {:prompt => 'Select if the lumbarpuncture fast was completed'} %></td></tr>
-     <tr  ><td><%= f.label :Fast_Total_Time %>&nbsp;&nbsp;&nbsp;</td><td width="10" nowrap> 
-	
+     <tr><td colspan="2"><%= f.label :Fast_Total_Time %></td></tr>
+	<tr><td colspan="2" align="right">
 	<%= f.select :lpfasttotaltime, options_for_select(0..48, @lumbarpuncture.lpfasttotaltime),
-						              {:prompt => 'Select hrs'} %> <small>hrs </small>
-	<br> 
+						              {:prompt => 'Select hrs'} %> <small><small>hrs </small></small></small>
+	&nbsp;&nbsp;&nbsp;
 	<%= f.select :lpfasttotaltime_min, options_for_select(v_0_30_min_display, @lumbarpuncture.lpfasttotaltime_min),
-						              {:prompt => 'Select mins'} %> <small> mins</small></td></tr>
+						              {:prompt => 'Select mins'} %> <small><small> mins</small></small> </td></tr>
+<tr><td colspan="2">Fast Total Unknown <%= f.select :lpfasttotaltime_unk, options_for_select(v_unk_display, @lumbarpuncture.lpfasttotaltime_unk),
+                            {:prompt => 'Select ...'} %>
+                            <br><br></td></tr>
+
+<tr><td colspan="2">Time of last intake <small><small> (except water)</small></small></td></tr>
+ <tr><td colspan="2" align="right"> 
+
+  <%= f.select :lptimelastintake, options_for_select(0..48, @lumbarpuncture.lptimelastintake),
+                          {:prompt => 'Select hrs'} %> <small><small>hrs </small></small></small>
+  &nbsp;&nbsp;&nbsp;
+  <%= f.select :lptimelastintake_min, options_for_select(v_0_30_min_display, @lumbarpuncture.lptimelastintake_min),
+                          {:prompt => 'Select mins'} %><small><small> mins</small></small></td></tr>
+<tr><td colspan="2">Last Intake Unk <%= f.select :lptimelastintake_unk, options_for_select(v_unk_display, @lumbarpuncture.lptimelastintake_unk),
+                            {:prompt => 'Select ...'} %>
+                           <br><br> </td></tr>
+
      <tr><td>
       LP Successful&nbsp;&nbsp;&nbsp;</td><td>
 	<%= f.select :lpsuccess, options_for_select(v_yes_no_unk_display, @lumbarpuncture.lpsuccess),
 						              {:prompt => 'Select if the lumbarpuncture was successful'} %></td></tr>
-    <tr><td nowrap>
-      LP Abnormality Found&nbsp;&nbsp;&nbsp;</td><td>
+
+<tr><td colspan="2">Amount Collected &nbsp;&nbsp;<%= f.select :lpamountcollected, options_for_select(0...23, @lumbarpuncture.lpamountcollected),{:prompt => 'Select ....'} %> <small><small> ml</small></small></td></tr>
+<tr><td colspan="2">Initial Amount Stored <%= f.select :lpinitialamountstored, options_for_select(0...23, @lumbarpuncture.lpinitialamountstored),{:prompt => 'Select ....'} %><small><small> ml</small></small></td></tr>
+
+    <tr><td nowrap colspan="2">
+      CSF Abnormality Found 
 		<%= f.select :lpabnormality, options_for_select(v_yes_no_display, @lumbarpuncture.lpabnormality),
 							              {:prompt => 'Select if the lumbarpuncture was abnormal'} %></td></tr>							              
 </table>
     <p>
 	<p>
 	  <%= f.label :Notes %><br/>
-	  <%= text_area( :appointment,:comment,:cols => 40, :rows => 10, :value=>@appointment.comment) %><br />
+	  <%= text_area( :appointment,:comment,:cols => 39, :rows => 10, :value=>@appointment.comment) %><br />
 	 </p>
 	
   </div>
@@ -84,12 +112,9 @@ v_yes_no_na_display = [["Yes","yes"], ["No","no"], ["n/a","n/a"]]
     <tr><td colspan="2">
 	<small>Select "n/a" if the LP will not be done.</small>
 	</td></tr>
-	    <tr>
-      <td>24 hr Followup Headache</td>
-      <td>
-	<%= f.select :followupheadache, options_for_select(v_yes_no_na_display, @lumbarpuncture.followupheadache),
-						              {:prompt => 'Select ....'} %>  
-	</td>
+  <tr>
+      <td><br><%= f.label(:appointment_coordinator) %></td>
+      <td><br><%= select(:appointment, :appointment_coordinator, Employee.all.sort_by(&:name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Select Appt Coordinator" }) %></td>
     </tr>
         <tr>
       <td>Needle Size</td>
@@ -97,16 +122,28 @@ v_yes_no_na_display = [["Yes","yes"], ["No","no"], ["n/a","n/a"]]
 						              {:prompt => 'Select ....'} %> 
 	</td>
     </tr>
-	      	<tr>
-      <td><br><%= f.label(:appointment_coordinator) %></td>
-      <td><br><%= select(:appointment, :appointment_coordinator, Employee.all.sort_by(&:name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Select Appt Coordinator" }) %></td>
+     <tr><td>Needle Type</td><td><%= f.select :lpneedletype, options_for_select(v_needletype_display, @lumbarpuncture.lpneedletype),
+                          {:prompt => 'Select ....'} %>   </td></tr>
+        <tr>
+      <td colspan="2">If Other, specify<br><%= text_area( :lumbarpuncture,:lpneedletype_other,:cols => 40, :rows => 1, ) %>
+  </td>
     </tr>
+<tr><td>Position</td><td><%= f.select :lpposition, options_for_select(v_position_display, @lumbarpuncture.lpposition),
+                          {:prompt => 'Select ....'} %> </td></tr>
+<tr><td>Method</td><td><%= f.select :lpmethod, options_for_select(v_method_display, @lumbarpuncture.lpmethod),
+                          {:prompt => 'Select ....'} %> </td></tr>
+
     	<tr>
-      <td><%= f.label(:LP_Start_Time) %></td>
+      <td><%= f.label(:Initial_needle_insertion_time,'Initial Needle Insertion Time') %></td>
       <td> <%= select_time( @lumbarpuncture.lpstarttime,:field_name =>'lpstartt][', :include_blank => true) %></td>
     </tr>
 	<tr>
-      <td><%= f.label(:LP_End_Time) %></td>
+      <td><%= f.label(:Fluid_Collection_Start_Time,'Fluid Collection Start Time') %></td>
+      <td> <%= select_time( @lumbarpuncture.lpfluidstarttime,:field_name =>'lpfluidstartt][', :include_blank => true) %></td>
+    </tr>
+
+      <tr>
+      <td><%= f.label(:Final_Needle_Removal_Time,'Final Needle Removal Time') %></td>
       <td> <%= select_time( @lumbarpuncture.lpendtime,:field_name =>'lpendt][', :include_blank => true) %></td>
     </tr>
 <!--
@@ -117,8 +154,18 @@ v_yes_no_na_display = [["Yes","yes"], ["No","no"], ["n/a","n/a"]]
 	                          <% end  %></td>
     </tr>
 -->
+<tr><td colspan="2" ><br><br><br>If LP unsuccessful </td></tr>
+<tr><td>Unable to access CSF</td><td><%= f.select :lpcsfunsuccessful_noaccess, options_for_select(v_yes_no_display, @lumbarpuncture.lpcsfunsuccessful_noaccess),
+                            {:prompt => 'Select ...'} %></td></tr>
+<tr><td>Participant pain/discomfort</td><td><%= f.select :lpcsfunsuccessful_pain, options_for_select(v_yes_no_display, @lumbarpuncture.lpcsfunsuccessful_pain),
+                            {:prompt => 'Select ...'} %></td></tr>
+<tr><td>Participant vasovagal</td><td><%= f.select :lpcsfunsuccessful_vasovagal, options_for_select(v_yes_no_display, @lumbarpuncture.lpcsfunsuccessful_vasovagal),
+                            {:prompt => 'Select ...'} %></td></tr>
+<tr><td>Other</td><td><%= f.select :lpcsfunsuccessful_other, options_for_select(v_yes_no_display, @lumbarpuncture.lpcsfunsuccessful_other),
+                            {:prompt => 'Select ...'} %></td></tr>
+<tr><td colspan="2">if Other, specify<br><%= text_area( :lumbarpuncture,:lpcsfunsuccessful_other_specify,:cols => 40, :rows => 1, ) %></td></tr>
   </table>
- <br><br><br><br>
+ 
   <table><tr><td>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
 <!-- <%= f.label :Markers %><br/> Hiding csf values - not stored here- in cg table-->
 	<%    @lumbarpuncture_results = LumbarpunctureResult.where("lumbarpuncture_results.lumbarpuncture_id in (?)",@lumbarpuncture.id)		    
@@ -136,48 +183,82 @@ v_yes_no_na_display = [["Yes","yes"], ["No","no"], ["n/a","n/a"]]
 		</li>-->
 	<% end %>
 	
-  </td></tr></table>	
+  </td></tr></table>
+  <%     @vitals = Vital.where("vitals.appointment_id in (?)",@lumbarpuncture.appointment_id)     
+         @vitals.each do |v|  # could have multiples? %>
+      <table>
+    <tr><td><%= f.label :Pulse,'Resting Heart Rate' %> </td>
+      <td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+    <tr><td><%= f.label :BP_Systol %> </td>
+      <td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+    <tr><td><%= f.label :BP_Diastol %> </td>
+      <td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+    <tr><td><%= f.label :Blood_Glucose %> </td>
+      <td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+     </tr>
+     <tr><td colspan="2"><small><small>999=unknown, all sitting</small></small></td></tr></table>    
+    <%=  hidden_field_tag( 'vital_id',v.id) %>
+
+  <%       end
+        if @vitals.blank?
+        v = Vital.new
+   %>
+    <table>
+    <tr><td><%= f.label :Pulse,'Resting Heart Rate' %> </td>
+      <td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+    <tr><td><%= f.label :BP_Systol %> </td>
+      <td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+    <tr><td><%= f.label :BP_Diastol %> </td>
+      <td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+    <tr><td><%= f.label :Blood_Glucose %> </td>
+      <td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
+     </tr>
+     <tr><td colspan="2"><small><small>999=unknown, all sitting</small></small></td></tr></table>
+  <%   end %> 
+
+  <br><br><br><br>
+	
   </div>
   <div class="three_col_right">
+<table>
+<tr><td>Significant post-LP Headache</td><td>
+  <%= f.select :followupheadache, options_for_select(v_yes_no_na_display, @lumbarpuncture.followupheadache),{:prompt => 'Select ....'} %>  
+  </td></tr>
+<tr><td colspan="2"><small><small>5.1.1:</small></small> date resolved: <%= date_select :lumbarpuncture, :lpheadache_dateresolved, :include_blank => true, :end_year => Time.now.year + 1 %></td></tr>
+<tr><td><small><small>5.1.2:</small></small> severity: </td><td><%= f.select :lpheadache_severity, options_for_select(v_severity_display, @lumbarpuncture.lpheadache_severity),{:prompt => 'Select ....'} %> </td></tr>
+<tr><td colspan="2"><small><small>5.1.3:</small></small> Notes:<br><%= text_area( :lumbarpuncture,:lpheadache_note,:cols => 40, :rows => 3, ) %>
+<br><br></td></tr>
+
+<tr><td>Significant low<br>back pain</td><td><%= f.select :lplowbackpain, options_for_select(v_yes_no_na_display, @lumbarpuncture.lplowbackpain),{:prompt => 'Select ....'} %>  
+  </td></tr>
+<tr><td colspan="2"><small><small>5.2.1:</small></small> date resolved: <%= date_select :lumbarpuncture, :lplowbackpain_dateresolved, :include_blank => true, :end_year => Time.now.year + 1 %></td></tr>
+<tr><td><small><small>5.2.2:</small></small> severity: </td><td><%= f.select :lplowbackpain_severity, options_for_select(v_severity_display, @lumbarpuncture.lplowbackpain_severity),{:prompt => 'Select ....'} %></td></tr>
+<tr><td colspan="2"><small><small>5.2.3:</small></small> Notes:<br><%= text_area( :lumbarpuncture,:lplowbackpain_note,:cols => 40, :rows => 3, ) %>
+<br><br></td></tr>
+
+<tr><td>Other side effects</td><td><%= f.select :lpothersideeffects, options_for_select(v_yes_no_na_display, @lumbarpuncture.lpothersideeffects),{:prompt => 'Select ....'} %>  
+  </td></tr>
+<tr><td colspan="2"><small><small>5.3.1:</small></small> date resolved: <%= date_select :lumbarpuncture, :lpothersideeffects_dateresolved, :include_blank => true, :end_year => Time.now.year + 1 %></td></tr>
+<tr><td><small><small>5.3.2:</small></small> severity: </td><td><%= f.select :lpothersideeffects_severity, options_for_select(v_severity_display, @lumbarpuncture.lpothersideeffects_severity),{:prompt => 'Select ....'} %></td></tr>
+<tr><td colspan="2"><small><small>5.3.3:</small></small> Notes:<br><%= text_area( :lumbarpuncture,:lpothersideeffects_note,:cols => 40, :rows => 3, ) %>
+<br><br></td></tr>
+ </table>
  
 	  <% if !params[:new_appointment_vgroup_id].blank?%>
 	       <%=  hidden_field_tag( 'new_appointment_vgroup_id',params[:new_appointment_vgroup_id]) %>
 	  <% end %>
-	<%     @vitals = Vital.where("vitals.appointment_id in (?)",@lumbarpuncture.appointment_id)     
-	       @vitals.each do |v|  # could have multiples? %>
-	    <table>
-		<tr><td><%= f.label :Pulse %> </td>
-			<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-		<tr><td><%= f.label :BP_Systol %> </td>
-			<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-		<tr><td><%= f.label :BP_Diastol %> </td>
-			<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-		<tr><td><%= f.label :Blood_Glucose %> </td>
-			<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-		 </tr></table>    
-		<%=  hidden_field_tag( 'vital_id',v.id) %>
-
-	<%       end
-	      if @vitals.blank?
-		    v = Vital.new
-	 %>
-	  <table>
-		<tr><td><%= f.label :Pulse %> </td>
-			<td><%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-		<tr><td><%= f.label :BP_Systol %> </td>
-			<td><%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-		<tr><td><%= f.label :BP_Diastol %> </td>
-			<td><%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-		<tr><td><%= f.label :Blood_Glucose %> </td>
-			<td><%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %></td></tr>
-		 </tr></table>
-	<%   end %>	
-	<br><br><br><br>
-	<p>
-      <%= f.label :Comments_on_follow_up_symptoms %><br/>
+      <%= f.label :Comments_on_follow_up_symptoms,'Side Effect Remarks' %><br/>
       <%= text_area( :lumbarpuncture,:lpfollownote,:cols => 40, :rows => 10, ) %><br />
     </p>
     <%= @lumbarpuncture.lumbarpuncture_note.try(:html_safe)%>
+
+    <table>
+    <tr><td colspan="2">CSF Nucleated Cell Count <%= f.select :lpcsfnucleatedcellcount, options_for_select(0...6, @lumbarpuncture.lpcsfnucleatedcellcount),{:prompt => 'Select ....'} %> <small><small> /uL</small></small></td></tr>
+    <tr><td colspan="2">CSF Red Cell Count  <%= f.select :lpcsfredcellcount, options_for_select(0...21, @lumbarpuncture.lpcsfredcellcount),{:prompt => 'Select ....'} %>  <small><small> /uL</small></small></td></tr>
+
+
+<tr><td colspan="2">Cell Count Remarks<br><%= text_area( :lumbarpuncture,:lpcsfcellcount_note,:cols => 40, :rows => 3, ) %></td></tr>
+    </table>
 
   </div>
 
