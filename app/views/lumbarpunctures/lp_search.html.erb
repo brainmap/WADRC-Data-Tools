@@ -118,7 +118,7 @@ edit_count =   edit_count -1
 	    <% elsif i == 1 %>
 	     <td><%= vgroup.scan_procedures.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, '/lp_search?lp_search[scan_procedure_id][]='+sp.id.to_s)}.join(", ").html_safe %></td>
 	    <% elsif i == 2 %>
-	     <td><%= vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
+	     <td><%= vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %> <%= vgroup.enrollments.count > 0 ? "" : vgroup.participant.nil? ? "" : vgroup.participant.wrapnum.blank? ? "" : vgroup.participant.wrapnum %></td>
 	    <% elsif i == 4  %>
 	     <%= show_bool(result[i].to_s ) %>	
 	    <% elsif i == 5  %>
