@@ -204,6 +204,7 @@ class QuestionnairesController < ApplicationController
         end
 
         if !params[:q_search][:enumber].blank?
+          params[:q_search][:enumber] = params[:q_search][:enumber].gsub(/ /,'').gsub(/\t/,'').gsub(/\n/,'').gsub(/\r/,'')
           if params[:q_search][:enumber].include?(',') # string of enumbers
            v_enumber =  params[:q_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
            v_enumber = v_enumber.gsub(/,/,"','")

@@ -537,6 +537,7 @@ class LumbarpuncturesController < ApplicationController
      end
  
      if !params[:lp_search][:enumber].blank?
+       params[:lp_search][:enumber] = params[:lp_search][:enumber].gsub(/ /,'').gsub(/\t/,'').gsub(/\n/,'').gsub(/\r/,'')
        if params[:lp_search][:enumber].include?(',') # string of enumbers
         v_enumber =  params[:lp_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
         v_enumber = v_enumber.gsub(/,/,"','")

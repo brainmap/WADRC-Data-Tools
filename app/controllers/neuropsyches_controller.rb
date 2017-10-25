@@ -202,6 +202,7 @@ class NeuropsychesController < ApplicationController
         end
 
         if !params[:np_search][:enumber].blank?
+          params[:np_search][:enumber] = params[:np_search][:enumber].gsub(/ /,'').gsub(/\t/,'').gsub(/\n/,'').gsub(/\r/,'')
           if params[:np_search][:enumber].include?(',') # string of enumbers
            v_enumber =  params[:np_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
            v_enumber = v_enumber.gsub(/,/,"','")

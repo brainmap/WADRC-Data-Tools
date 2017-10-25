@@ -200,6 +200,7 @@ respond_to :html
       end
 
       if !params[:lh_search][:enumber].blank?
+        params[:lh_search][:enumber] = params[:lh_search][:enumber].gsub(/ /,'').gsub(/\t/,'').gsub(/\n/,'').gsub(/\r/,'')
         if params[:lh_search][:enumber].include?(',') # string of enumbers
          v_enumber =  params[:lh_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
          v_enumber = v_enumber.gsub(/,/,"','")
