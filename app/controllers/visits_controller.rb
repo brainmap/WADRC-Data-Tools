@@ -357,7 +357,6 @@ end
     end   
      
     
-    
     respond_to do |format|
       if @visit.save
          @vgroup.transfer_mri = params[:vgroup][:transfer_mri]
@@ -1279,6 +1278,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
       end      
 
       if !params[:mri_search].blank? and !params[:mri_search][:enumber].blank?
+        params[:mri_search][:enumber] = params[:mri_search][:enumber].gsub(/ /,'').gsub(/\t/,'').gsub(/\n/,'').gsub(/\r/,'')
         if params[:mri_search][:enumber].include?(',') # string of enumbers
          v_enumber =  params[:mri_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
          v_enumber = v_enumber.gsub(/,/,"','")
