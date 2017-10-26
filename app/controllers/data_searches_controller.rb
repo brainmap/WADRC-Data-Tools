@@ -1779,6 +1779,9 @@ class DataSearchesController < ApplicationController
        end 
 
      # not sure how to use this with base vs column_group or other -- if no table_type, sql is not run below
+     #mysql 5.7 only allows order by on fields which are in the select statement
+     # can get around the by having a select distinct val1 from ( select val1, orderby2 from all stuff order by orderby2)
+     # not sure how the 
       if !@table_types.blank? # and !@table_types.index('base').blank?  # extend to cg_enumber, cg_enumber_sp, cg_rmr, cg_rmr_sp, cg_sp, cg_wrapnum, cg_adrcnum, cg_reggieid  
         @table_types.push('base')    
         @local_tables.push("vgroups")
@@ -1792,10 +1795,13 @@ class DataSearchesController < ApplicationController
         @fields_front =[]
         if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0
            # do not want to add vgroup centric columns
+           @order_by =[]   # newer version of mysql 5.7 in dev? only do order by on columns in select? 
+             # breaks all the longitudinal stuff
         else
             @fields_front.push("vgroups.id vgroup_id")
             @fields_front.push("vgroups.vgroup_date")
             @fields_front.push("vgroups.rmr")
+            @order_by =["vgroups.vgroup_date DESC", "vgroups.rmr"]  # newer version of mysql 5.7 in dev? only do order by on columns in select?
         end
         @local_fields = @fields_front.concat(@local_fields)
         #@local_conditions.push("vgroups.id = appointments.vgroup_id")
@@ -1804,7 +1810,7 @@ class DataSearchesController < ApplicationController
         @local_conditions.push("scan_procedures_vgroups.vgroup_id = vgroups.id")
         @local_conditions.push("appointments.vgroup_id = vgroups.id")
                                             # everything always joined
-        @order_by =["vgroups.vgroup_date DESC", "vgroups.rmr"]
+        # @order_by =["vgroups.vgroup_date DESC", "vgroups.rmr"] # newer version of mysql in dev? only do orderby on columns in select?
      
         #run_search_q_data tn_cn_id/tn_id in (686/676,687/677,688/688) common_name = "question fields" vs run_search if 
       end     
@@ -1867,7 +1873,7 @@ class DataSearchesController < ApplicationController
     # weird part is changing the outer joins from vgroups to view_mri_appts
 
  # add in secondary_key_protocol -- 
-        @tables_secondary_key_protocol = CgTn.where("cg_tns.id  in (?) and cg_tns.id in (select cg_tn_cns.cg_tn_id from cg_tn_cns where cg_tn_cns.secondary_key_protocol_flag = 'Y')",  @all_table_ids_in_query)  
+        @tables_secondary_key_protocol = CgTn.where("cg_tns.id  in (?) and cg_tns.id in (select cg_tn_cns.cg_tn_id from cg_tn_cns where cg_tn_cns.secondary_key_protocol_flag = 'Y')",  @all_table_ids_in_query).order("cg_tns.display_order")  
         if @tables_secondary_key_protocol.count > 1
            v_key_protocol_cnt = 0
            v_key_protocol_base_table = ""
@@ -1892,7 +1898,7 @@ class DataSearchesController < ApplicationController
         end
        
                  # add in secondary_key_visitno
-        @tables_secondary_key_visitno = CgTn.where("cg_tns.id  in (?) and cg_tns.id in (select cg_tn_cns.cg_tn_id from cg_tn_cns where cg_tn_cns.secondary_key_visitno_flag = 'Y')", @all_table_ids_in_query)
+        @tables_secondary_key_visitno = CgTn.where("cg_tns.id  in (?) and cg_tns.id in (select cg_tn_cns.cg_tn_id from cg_tn_cns where cg_tn_cns.secondary_key_visitno_flag = 'Y')", @all_table_ids_in_query).order("cg_tns.display_order") 
         if @tables_secondary_key_visitno.count > 1
            v_key_visitno_cnt = 0
            v_key_visitno_base_table = ""
@@ -2541,7 +2547,7 @@ def cg_up_load
      v_up_table_name = params[:up_table_name]
      v_up_display_table_name = params[:up_display_table_name]
      v_up_table_yyyymmdd = params[:up_table_yyyymmdd]
-     v_up_table_name_key_column = params[:up_table_name_key_column]     # not think this is being used - just needs to be populated???
+     v_up_table_name_key_column = params[:up_table_name_key_column]
 
      v_key_type = params[:key_type]
      v_source_up_table_name = params[:source_up_table_name]
