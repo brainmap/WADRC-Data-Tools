@@ -932,14 +932,15 @@ class DataSearchesController < ApplicationController
          end
 
          @cg_query_tns =  CgQueryTn.where("cg_query_id = "+@cg_query.id.to_s).where("cg_tn_id in ( select cg_tns.id from cg_tns where cg_tns.table_type in 
-        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+")))")
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+")))").order("cg_tns.display_order")
          @cg_query_tns.each do |cg_query_tn|
 
            v_tn_id = cg_query_tn.cg_tn_id 
             @cg_query_tn_id_array.push(v_tn_id) # need to retrieve for display on the page
             # if cg table needd to propagate from search to search
            v_cg_tn = CgTn.find(v_tn_id)
-           if v_cg_tn.table_type != 'base'   
+           if v_cg_tn.table_type != 'base'  
+  puts "zzzzz add_table id = "+v_tn_id.to_s 
              @add_cg_tn_id.push(v_tn_id.to_s) 
            end
            @cg_query_tn_hash[v_tn_id.to_s] = cg_query_tn  
@@ -1795,13 +1796,13 @@ class DataSearchesController < ApplicationController
         @fields_front =[]
         if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0
            # do not want to add vgroup centric columns
-           @order_by =[]   # newer version of mysql 5.7 in dev? only do order by on columns in select? 
+           # not working yet  @order_by =[]   # newer version of mysql 5.7 in dev? only do order by on columns in select? 
              # breaks all the longitudinal stuff
         else
             @fields_front.push("vgroups.id vgroup_id")
             @fields_front.push("vgroups.vgroup_date")
             @fields_front.push("vgroups.rmr")
-            @order_by =["vgroups.vgroup_date DESC", "vgroups.rmr"]  # newer version of mysql 5.7 in dev? only do order by on columns in select?
+           # not working yet, reverting to previous with @order_by defined line 1815 @order_by =["vgroups.vgroup_date DESC", "vgroups.rmr"]  # newer version of mysql 5.7 in dev? only do order by on columns in select?
         end
         @local_fields = @fields_front.concat(@local_fields)
         #@local_conditions.push("vgroups.id = appointments.vgroup_id")
@@ -1810,7 +1811,8 @@ class DataSearchesController < ApplicationController
         @local_conditions.push("scan_procedures_vgroups.vgroup_id = vgroups.id")
         @local_conditions.push("appointments.vgroup_id = vgroups.id")
                                             # everything always joined
-        # @order_by =["vgroups.vgroup_date DESC", "vgroups.rmr"] # newer version of mysql in dev? only do orderby on columns in select?
+        # undoing - need in mysql 5.6
+        @order_by =["vgroups.vgroup_date DESC", "vgroups.rmr"] # newer version of mysql in dev? only do orderby on columns in select?
      
         #run_search_q_data tn_cn_id/tn_id in (686/676,687/677,688/688) common_name = "question fields" vs run_search if 
       end     
