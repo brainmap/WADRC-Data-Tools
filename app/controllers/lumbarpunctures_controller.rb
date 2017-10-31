@@ -661,6 +661,7 @@ class LumbarpuncturesController < ApplicationController
                'Initial Needle Insertion Minute','Fluid Collection Start Hour','Fluid Collection Start Minute','Final Needle Removal Hour', 'Final Needle Removal Minute',
                 'CSF Amount Collected','CSF Initial Amount Stored','CSF Nucleated Cell Count','CSF Red Cell Count','Cell Count Remarks',
                 'If LP unsuccessful-Unable to access CSF','If LP unsuccessful-Participant pain/discomfort','If LP unsuccessful-Participant vasovagal','If LP unsuccessful-Other',
+                'LP Data entered by','LP Data entry date',
                'LP Note','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt', 'Appt Note'] # need to look up values
               # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
               @column_number =   @column_headers.size
@@ -681,8 +682,10 @@ class LumbarpuncturesController < ApplicationController
                  "CASE lumbarpunctures.lpcsfunsuccessful_noaccess WHEN 1 THEN 'yes' ELSE '' end",
                  "CASE lumbarpunctures.lpcsfunsuccessful_pain WHEN 1 THEN 'yes' ELSE '' end",
                  "CASE lumbarpunctures.lpcsfunsuccessful_vasovagal WHEN 1 THEN 'yes' ELSE '' end","lumbarpunctures.lpcsfunsuccessful_other_specify",
+                 "concat(u2.first_name,' ',u2.last_name)", "DATE_FORMAT(lumbarpunctures.lp_data_entered_date,'%Y-%m-%d')",
                 "lumbarpunctures.lumbarpuncture_note","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
               @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id",
+                "LEFT JOIN users u2 on lumbarpunctures.lp_data_entered_by = u2.id  ",
                             "LEFT JOIN vitals on lumbarpunctures.appointment_id = vitals.appointment_id"] # left join needs to be in sql right after the parent table!!!!!!!
         end
 
@@ -754,7 +757,7 @@ class LumbarpuncturesController < ApplicationController
        @lumbarpuncture = Lumbarpuncture.find(params[:id])
     end
    def lumbarpuncture_params
-          params.require(:lumbarpuncture).permit(:lpfasttotaltime_min,:lpfasttotaltime,:lumbarpuncture_note,:enteredlumbarpuncturewho,:enteredlumbarpuncturedate,:needlesize,:followupheadache,:lpstarttime,:lpendtime,:lpstarttime_hour,:lpstarttime_minute,:lpendtime_hour,:lpendtime_minute,:enteredlumbarpuncture,:completedlumbarpuncture_moved_to_vgroups,:lpfollownote,:id,:completedlpfast,:lp_exam_md_id,:lpsuccess,:lpabnormality,:appointment_id, :lptimelastintake, :lptimelastintake_min, :lptimelastintake_unk, :lpfasttotaltime_unk, :lpamountcollected, :lpinitialamountstored, :lpneedletype, :lpneedletype_other, :lpposition, :lpmethod, :lpfluidstarttime, :lpfluidstarttime_hour, :lpfluidstarttime_minute, :lpheadache_dateresolved, :lpheadache_severity, :lpheadache_note, :lplowbackpain, :lplowbackpain_dateresolved, :lplowbackpain_severity, :lplowbackpain_note, :lpothersideeffects, :lpothersideeffects_dateresolved, :lpothersideeffects_severity, :lpothersideeffects_note, :lpcsfnucleatedcellcount, :lpcsfredcellcount, :lpcsfcellcount_note, :lpcsfunsuccessful_noaccess, :lpcsfunsuccessful_pain, :lpcsfunsuccessful_vasovagal, :lpcsfunsuccessful_other, :lpcsfunsuccessful_other_specify) #,:temp_fklumbarpunctureid)
+          params.require(:lumbarpuncture).permit(:lpfasttotaltime_min,:lpfasttotaltime,:lumbarpuncture_note,:enteredlumbarpuncturewho,:enteredlumbarpuncturedate,:needlesize,:followupheadache,:lpstarttime,:lpendtime,:lpstarttime_hour,:lpstarttime_minute,:lpendtime_hour,:lpendtime_minute,:enteredlumbarpuncture,:completedlumbarpuncture_moved_to_vgroups,:lpfollownote,:id,:completedlpfast,:lp_exam_md_id,:lpsuccess,:lpabnormality,:appointment_id, :lptimelastintake, :lptimelastintake_min, :lptimelastintake_unk, :lpfasttotaltime_unk, :lpamountcollected, :lpinitialamountstored, :lpneedletype, :lpneedletype_other, :lpposition, :lpmethod, :lpfluidstarttime, :lpfluidstarttime_hour, :lpfluidstarttime_minute, :lpheadache_dateresolved, :lpheadache_severity, :lpheadache_note, :lplowbackpain, :lplowbackpain_dateresolved, :lplowbackpain_severity, :lplowbackpain_note, :lpothersideeffects, :lpothersideeffects_dateresolved, :lpothersideeffects_severity, :lpothersideeffects_note, :lpcsfnucleatedcellcount, :lpcsfredcellcount, :lpcsfcellcount_note, :lpcsfunsuccessful_noaccess, :lpcsfunsuccessful_pain, :lpcsfunsuccessful_vasovagal, :lpcsfunsuccessful_other, :lpcsfunsuccessful_other_specify,:lp_data_entered_by,:lp_data_entered_date) #,:temp_fklumbarpunctureid)
    end 
    def lp_search_params
           params.require(:lp_search).permit!

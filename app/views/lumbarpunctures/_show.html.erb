@@ -44,6 +44,8 @@
     :If_unsuccessful_Participant_Pain_discomfort => @lumbarpuncture.lpsuccess == 1 ? nil : @lumbarpuncture.lpcsfunsuccessful_pain == 1 ? "Yes" : nil,
     :If_unsuccessful_Participant_vasoval => @lumbarpuncture.lpsuccess == 1 ? nil : @lumbarpuncture.lpcsfunsuccessful_vasovagal == 1 ? "Yes" : nil,
     :If_unsuccessful_other => @lumbarpuncture.lpsuccess == 0 ? @lumbarpuncture.lpcsfunsuccessful_other == 1  ? @lumbarpuncture.lpcsfunsuccessful_other_specify.nil? ? nil : @lumbarpuncture.lpcsfunsuccessful_other_specify : nil : nil,
+    :LP_data_entered_by => @lumbarpuncture.lp_data_entered_by.blank? ? "" : User.find(@lumbarpuncture.lp_data_entered_by).username_name,
+    :LP_Data_entery_date => @lumbarpuncture.lp_data_entered_date.nil? ? nil : @lumbarpuncture.lp_data_entered_date.strftime("%Y-%m-%d")
      }) %>
    
   </div>

@@ -79,7 +79,13 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
     <tr><td nowrap colspan="2">
       CSF Abnormality Found 
 		<%= f.select :lpabnormality, options_for_select(v_yes_no_display, @lumbarpuncture.lpabnormality),
-							              {:prompt => 'Select if the lumbarpuncture was abnormal'} %></td></tr>							              
+							              {:prompt => 'Select if the lumbarpuncture was abnormal'} %></td></tr>		
+
+  <tr><td nowrap colspan="2">
+   <br>Entered by:<br>
+    <%= select(:lumbarpuncture,:lp_data_entered_by , User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select who entered LP data" }) %>&nbsp;&nbsp;&nbsp;&nbsp
+  </td></tr>	
+  <tr><td colspan="2">LP data entry date:<br> <%= date_select :lumbarpuncture, :lp_data_entered_date, :include_blank => true, :end_year => Time.now.year + 1 %></td></tr>				              
 </table>
     <p>
 	<p>
