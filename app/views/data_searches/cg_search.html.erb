@@ -49,7 +49,7 @@ if !params[:cg_search].blank? and !params[:cg_search][:add_cg_tn_id].blank?
 end
 @add_cg_tns = CgTn.where("table_type='column_group' and status_flag='Y'")
 @cg_tn = CgTn.where("(table_type='base' and status_flag='Y') or id in (?) or id in (?)",@add_cg_tn_id, @cg_query_tn_id_array).where("cg_tns.id in ( select cg_tns.id from cg_tns where cg_tns.table_type in 
-        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+@scan_procedure_list+")))").order(:id)
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+@scan_procedure_list+")))").order(:id).order("cg_tns.display_order")
 # how to order
 v_tn_cn_hash =[]
 v_tn_cn_searchable_hash = []
@@ -532,6 +532,7 @@ v_tn_cn_searchable_hash = []
        <% end %>
        
       <%= submit_tag 'export longitudinal CSV file'%>  
+      <%= button_tag  'export reverse longitudinal CSV file', type: 'submit', name: 'direction', value: 'reverse' %>
         
 
 <% end %>

@@ -2319,6 +2319,9 @@ puts "bbbbb "+sql
        @participants = []
        @participant_result = {}
        @participant_size = {}
+       if !params[:direction].nil? and params[:direction] =="reverse"
+         @results.reverse! 
+       end
        @results.each do |r|
           v_participant_id = r[0] 
  # puts "aaaaaa p.id="+v_participant_id.to_s
@@ -2366,7 +2369,7 @@ puts "bbbbb "+sql
       @column_number = @local_column_headers.size
 
     # NEED TO MOVE UP BEFORE DELETE OF VGROUP_ID
-    elsif !params[:longitudinal].nil? and params[:longitudinal] == "Y"
+    elsif (!params[:longitudinal].nil? and params[:longitudinal] == "Y") 
        # need to flip rows so each participant/enrollment has one row with #row* cols
        v_max_length = 0
        @participants = []
@@ -2377,6 +2380,10 @@ puts "bbbbb "+sql
        @enrollment_result = {}
        @enrollment_size = {}
        @enrollment_vgroup = {}
+       # 
+       if !params[:direction].nil? and params[:direction] =="reverse"
+         @results.reverse! 
+       end
        @results.each do |r|
           v_vgroupid = r[0]
           v_vgroup  = Vgroup.find(v_vgroupid)
