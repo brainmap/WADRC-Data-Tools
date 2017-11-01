@@ -63,7 +63,10 @@ class LumbarpuncturesController < ApplicationController
         @hide_page_flag = 'Y'
       end
        @current_tab = "lumbarpunctures"
-    @lumbarpuncture = Lumbarpuncture.new
+       @lumbarpuncture = Lumbarpuncture.new
+       @lumbarpuncture.lp_data_entered_by = current_user.id
+       @lumbarpuncture.lp_data_entered_date = Date.today
+
         vgroup_id = params[:id]
         @vgroup = Vgroup.find(vgroup_id)
         @enumbers = @vgroup.enrollments
@@ -200,6 +203,12 @@ class LumbarpuncturesController < ApplicationController
   #   params[:lumbarpuncture][:appointment_id]  = @appointment.id 
     @lumbarpuncture = Lumbarpuncture.new( lumbarpuncture_params)#params[:lumbarpuncture])  
     @lumbarpuncture.appointment_id = @appointment.id
+    if @lumbarpuncture.lp_data_entered_by.blank?
+       @lumbarpuncture.lp_data_entered_by = current_user.id
+    end
+    if @lumbarpuncture.lp_data_entered_date.blank?
+        @lumbarpuncture.lp_data_entered_date = Date.today
+    end
 
     respond_to do |format|
       if @lumbarpuncture.save
