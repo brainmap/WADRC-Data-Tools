@@ -82,6 +82,8 @@ v_full_partial = {"Full Reload"=>"full","Partial Reload/Append"=>"partial"}
 	
 <%    end
       if  @schedule.file_upload_flag == 'Y' %>
+      <B> Excel 2016 csv might have issues.</B><br> Try running thru dos2unix.<br> Try saving as different type of csv file in excel.<br> Try Excel 2013.
+    <br>
 <%= form_tag('/shared_file_upload', :method=>'post', :multipart => true) do %>
        <table>
 	</td><td valign="top"><b>Browse for file to upload:</b> <%= file_field_tag "file_name" , :accept => 'text/csv' %></td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Full or Partial upload:</b> 

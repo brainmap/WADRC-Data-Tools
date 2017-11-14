@@ -932,7 +932,7 @@ class DataSearchesController < ApplicationController
          end
 
          @cg_query_tns =  CgQueryTn.where("cg_query_id = "+@cg_query.id.to_s).where("cg_tn_id in ( select cg_tns.id from cg_tns where cg_tns.table_type in 
-        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+")))").order("cg_tns.display_order")
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+")))").order("cg_query_tns.display_order")
          @cg_query_tns.each do |cg_query_tn|
 
            v_tn_id = cg_query_tn.cg_tn_id 
