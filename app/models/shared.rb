@@ -10460,6 +10460,175 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
        @schedulerun.save
     
   end
+
+  def run_pcvipr_output_file
+         v_base_path = Shared.get_base_path()
+         @schedule = Schedule.where("name in ('pcvipr_output_file')").first
+          @schedulerun = Schedulerun.new
+          @schedulerun.schedule_id = @schedule.id
+          @schedulerun.comment ="starting pcvipr_output_file"
+          @schedulerun.save
+          @schedulerun.start_time = @schedulerun.created_at
+          @schedulerun.save
+          v_comment = ""
+          v_cnt = 0
+
+          v_machine = "baloo.dom.wisc.edu"  # eventually switch to merida - need packages installed
+          v_script_path = v_base_path+"/data1/lab_scripts/python_dev/collect_pcvipr_data.py"  # CHANGE TO PRODUCTION
+
+          # add check if output.csv was made
+          #connection = ActiveRecord::Base.connection();
+
+          v_analyses_path = v_base_path+"/analyses/PCVIPR/"
+
+          # go to directory, get list of directories. - could check if there is a scan_procedure
+          Dir.glob(v_analyses_path+"/*").each do |v_dir_path_name| 
+            if File.directory?(v_dir_path_name)
+                #puts v_dir_path_name
+               v_scan_procedures = ScanProcedure.where("scan_procedures.codename in (?)",v_dir_path_name.split("/").last)
+               if !v_scan_procedures.nil? and !v_scan_procedures[0].nil?
+                  #puts v_scan_procedures[0].codename
+                  v_dir_path_name_done = v_dir_path_name+"/"+v_dir_path_name.split("/").last+".done"
+                  puts "v_dir_path_name_done= "+v_dir_path_name_done
+                  Dir.glob(v_dir_path_name_done+"/*").each do |v_dir_path_name_subjectid| # get the subjectid folders
+                    # check for Summary.xls and *Summary_Calculator_*.xlsx and output*.csv
+                    #NEED TO DO FIND or something to get real path
+                    # get path to Summary.xls, could be few directories down
+                    if !Dir.glob(v_dir_path_name_subjectid+"/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*Summary_Calculator_*.xlsx").empty? and Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").empty? and Dir.glob(v_dir_path_name_subjectid+"/*_output.csv.log").empty?
+                        #puts "done===="+v_dir_path_name_subjectid
+                        v_just_path = v_dir_path_name_subjectid
+                        # run command
+                        v_call = "ssh panda_user@"+v_machine+" '"+v_script_path+"  "+v_just_path+"' "
+                        stdin, stdout, stderr = Open3.popen3(v_call)
+                        
+                        while !stdout.eof?
+                            puts stdout.read 1024    
+                        end
+                        stdin.close
+                        stdout.close
+                        stderr.close
+                        if Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").empty?
+                                v_comment = v_comment+"; no output file="+v_just_path
+                        else
+                          v_cnt = v_cnt +1
+                        end
+
+                     elsif  !Dir.glob(v_dir_path_name_subjectid+"/*/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*/*Summary_Calculator_*.xlsx").empty? and Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv").empty? and Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv.log").empty?
+                         #puts "done 1 down===="+v_dir_path_name_subjectid+"/*"
+                         # get extra dir path 
+                         Dir.glob(v_dir_path_name_subjectid+"/*/Summary.xls").each do |v_file_path| 
+                             v_just_path = File.dirname(v_file_path)
+                             #puts v_just_path
+                             # run command
+                             v_call = "ssh panda_user@"+v_machine+" '"+v_script_path+"  "+v_just_path+"' "
+                             stdin, stdout, stderr = Open3.popen3(v_call)
+                             while !stdout.eof?
+                                puts stdout.read 1024    
+                             end
+                             stdin.close
+                             stdout.close
+                             stderr.close
+                              if Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv").empty?
+                                v_comment = v_comment+"; no output file "+v_just_path
+                              else
+                                v_cnt = v_cnt +1
+                             end
+                          end
+                         
+                     elsif  !Dir.glob(v_dir_path_name_subjectid+"/*/*/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*/*/*Summary_Calculator_*.xlsx").empty? and Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv").empty? and Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv.log").empty?
+                         puts "done 2 down ===="+v_dir_path_name_subjectid+"/*/*"
+                         # get extra dir path 
+                         Dir.glob(v_dir_path_name_subjectid+"/*/*/Summary.xls").each do |v_file_path| 
+                             v_just_path = File.dirname(v_file_path)
+                             #puts v_just_path
+                             # run command
+                             v_call = "ssh panda_user@"+v_machine+" '"+v_script_path+"  "+v_just_path+"' "
+                             stdin, stdout, stderr = Open3.popen3(v_call)
+                             while !stdout.eof?
+                                puts stdout.read 1024    
+                             end
+                             stdin.close
+                             stdout.close
+                             stderr.close
+                             if Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv").empty?
+                                v_comment = v_comment+"; no output file "+v_just_path
+                              else
+                                v_cnt = v_cnt +1
+                             end
+                          end
+                     elsif  !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*Summary_Calculator_*.xlsx").empty? and Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv").empty? and Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv.log").empty?
+                         #puts "done 3 down ===="+v_dir_path_name_subjectid+"/*/*/*"
+                         # get extra dir path 
+                         Dir.glob(v_dir_path_name_subjectid+"/*/*/*/Summary.xls").each do |v_file_path| 
+                             v_just_path = File.dirname(v_file_path)
+                             #puts v_just_path
+                             # run command
+                             v_call = "ssh panda_user@"+v_machine+" '"+v_script_path+"  "+v_just_path+"' "
+                             stdin, stdout, stderr = Open3.popen3(v_call)
+                             while !stdout.eof?
+                                puts stdout.read 1024    
+                             end
+                             stdin.close
+                             stdout.close
+                             stderr.close
+                             if Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv").empty?
+                                v_comment = v_comment+"; no output file "+v_just_path
+                              else
+                                v_cnt = v_cnt +1
+                             end
+                          end
+                    end
+                  end
+               end
+            end
+          end
+ 
+          # subjectid, subjectid_mmddyyyy , subjectid_v#, subjectid_v#_yyyymmdd, subjectid_v#_yyyymmdd_wisc, subjectid_v#_yyyymmdd_wisc1
+          # check for Summary.xls
+           # *_Summary_Calculator_*.xlsx. - adrc00534_Summary_Calculator_3.27.17.xlsx, Summary_Calculator_3.27.17.xlsx
+          # run output - 
+          # check log - delete if error
+
+
+
+
+
+
+      @schedulerun.comment =("successful finish pcvipr_output_file "+v_cnt.to_s+" output files made  "+v_comment[0..1459])
+      if !v_comment.include?("ERROR")
+         @schedulerun.status_flag ="Y"
+       end
+       @schedulerun.save
+       @schedulerun.end_time = @schedulerun.updated_at      
+       @schedulerun.save
+
+  end
+
+  def run_pcvipr_output_file_harvest
+          v_base_path = Shared.get_base_path()
+         @schedule = Schedule.where("name in ('pcvipr_output_file_harvest')").first
+          @schedulerun = Schedulerun.new
+          @schedulerun.schedule_id = @schedule.id
+          @schedulerun.comment ="starting pcvipr_output_file_harvest"
+          @schedulerun.save
+          @schedulerun.start_time = @schedulerun.created_at
+          @schedulerun.save
+
+          v_analyses_path = v_base_path+"/analyses_path/PCVIPR/"
+          sql = "truncate table cg_pcvipr_value_new"
+          connection = ActiveRecord::Base.connection();        
+          results = connection.execute(sql)
+
+
+        @schedulerun.comment =("successful finish pcvipr_output_file_harvest "+v_comment[0..459])
+      if !v_comment.include?("ERROR")
+         @schedulerun.status_flag ="Y"
+       end
+       @schedulerun.save
+       @schedulerun.end_time = @schedulerun.updated_at      
+       @schedulerun.save
+
+  end
   
   # to add columns --
   # change sql_base insert statement

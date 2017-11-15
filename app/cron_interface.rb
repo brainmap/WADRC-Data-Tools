@@ -197,6 +197,13 @@ v_user = v_user.gsub("\n","")
   elsif v_value_1 == "pet_path"  
       v_shared = Shared.new
       v_shared.run_pet_path()
+      
+  elsif v_value_1 == "pcvipr_output_file"  
+      v_shared = Shared.new
+      v_shared.run_pcvipr_output_file()
+  elsif v_value_1 == "pcvipr_output_file_harvest"  
+      v_shared = Shared.new
+      v_shared.run_pcvipr_output_file_harvest()
   
   elsif v_value_1 == "pib_status"
       v_shared = Shared.new
