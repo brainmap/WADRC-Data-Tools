@@ -1,5 +1,5 @@
 <% if current_user.role == 'Admin_High'%>
-<h1>Listing series_description_maps</h1>
+<h1>Listing series_description_map</h1>
 
 <table class="tabular">
   <tr>
@@ -61,10 +61,31 @@
 	<% end %>
 	</ul>
 	</div>  
-	</td><td>  <%= f.submit "Search" %> </td></tr>
+	</td><td>
+<%= f.label :scan_procedures %><br>
+  <div id="scan_procedure_list">
+  <ul>
+  <% ScanProcedure.all.sort_by(&:codename).each do |scan_procedure| %>
+    <li>
+      <%#= f.fields_for scan_procedure do |scan_fields| %>
+        <%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
+        <%#= f.label :scan_procedure_ids, scan_procedure.codename %>
+      <%# end %>
+    </li>
+    <li>
+         <%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'series_description_map_search[scan_procedure_id][]' %>
+      <%= label_tag '', scan_procedure.codename %>
+    </li>
+  <% end %>
+  </ul>
+  </div>
+</td><td><%= f.label :Series_desc_contains %><br>
+      <%= f.text_field :series_description %>    <br><br><br>
+    Un-Mapped Series Descriptions: <%= f.check_box :unmapped_series_descriptions %></td>
+  <td>  <%= f.submit "Search" %> </td></tr>
 	</table>
      <%end%>  
-             <br><br><br>
+             <br><br><br><br><br><br><br><br>
 
 	<% else %>
 	  Your <%= current_user.role %> role does not allow access. 
