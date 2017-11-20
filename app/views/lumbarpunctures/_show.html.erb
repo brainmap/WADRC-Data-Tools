@@ -11,6 +11,7 @@
       :LP_Fast_Completed => @lumbarpuncture.completedlpfast == 1 ? "Yes" : "No",
 	  :LP_Fast_Total_Time => @lumbarpuncture.lpfasttotaltime.nil?  ? @lumbarpuncture.lpfasttotaltime_min.nil? ? nil : @lumbarpuncture.lpfasttotaltime.to_s+" hrs : "+@lumbarpuncture.lpfasttotaltime_min.to_s+" mins" :  @lumbarpuncture.lpfasttotaltime.to_s+" hrs : "+@lumbarpuncture.lpfasttotaltime_min.to_s+" mins" ,
      :LP_Fast_Total_time_unknown => @lumbarpuncture.lpfasttotaltime_unk  == "2" ? "Unknown" : nil ,
+     :LP_Fast_Total_time_range => @lumbarpuncture.lpfasttotaltime_range.nil?  ? nil : @lumbarpuncture.lpfasttotaltime_range,
      :LP_time_last_intake => @lumbarpuncture.lptimelastintake.nil?  ? @lumbarpuncture.lptimelastintake_min.nil? ? nil : @lumbarpuncture.lptimelastintake.to_s+" hrs : "+@lumbarpuncture.lptimelastintake_min.to_s+" mins" :  @lumbarpuncture.lptimelastintake.to_s+" hrs : "+@lumbarpuncture.lptimelastintake_min.to_s+" mins" ,
      :LP_time_last_intake_unknown => @lumbarpuncture.lptimelastintake_unk == "2" ? "Unknown" : nil,
       :LP_Successful => @lumbarpuncture.lpsuccess == 1 ? "Yes" : @lumbarpuncture.lpsuccess == 0 ? "No" : "Unknown",
@@ -45,7 +46,9 @@
     :If_unsuccessful_Participant_vasoval => @lumbarpuncture.lpsuccess == 1 ? nil : @lumbarpuncture.lpcsfunsuccessful_vasovagal == 1 ? "Yes" : nil,
     :If_unsuccessful_other => @lumbarpuncture.lpsuccess == 0 ? @lumbarpuncture.lpcsfunsuccessful_other == 1  ? @lumbarpuncture.lpcsfunsuccessful_other_specify.nil? ? nil : @lumbarpuncture.lpcsfunsuccessful_other_specify : nil : nil,
     :LP_data_entered_by => @lumbarpuncture.lp_data_entered_by.blank? ? "" : User.find(@lumbarpuncture.lp_data_entered_by).username_name,
-    :LP_Data_entery_date => @lumbarpuncture.lp_data_entered_date.nil? ? nil : @lumbarpuncture.lp_data_entered_date.strftime("%Y-%m-%d")
+    :LP_Data_entry_date => @lumbarpuncture.lp_data_entered_date.nil? ? nil : @lumbarpuncture.lp_data_entered_date.strftime("%Y-%m-%d"),
+      :LP_data_qced_by => @lumbarpuncture.lp_data_qced_by.blank? ? "" : User.find(@lumbarpuncture.lp_data_qced_by).username_name,
+    :LP_Data_qced_date => @lumbarpuncture.lp_data_qced_date.nil? ? nil : @lumbarpuncture.lp_data_qced_date.strftime("%Y-%m-%d")
      }) %>
    
   </div>

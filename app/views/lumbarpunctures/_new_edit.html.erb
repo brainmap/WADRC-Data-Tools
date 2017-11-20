@@ -3,6 +3,7 @@ v_yes_no_display = [["Yes","1"], ["No","0"]]
 v_yes_no_unk_display = [["Yes","1"], ["No","0"], ["Unk","2"]]
 v_unk_display = [["Unkown","2"]]
 v_0_30_min_display = [["0","0"], ["30","30"]]
+v_fast_range_display = [["< 8 hours","< 8 hours"], ["8-12 hours","8-12 hours"],[">= 12 hours",">= 12 hours"],["Unknown","Unknown"]]
 #v_needlesize_display = [["25 x 3.5","25 x 3.5"],["25 x 4","25 x 4"],["24 x 3.5","24 x 3.5"],["24 x 4","24 x 4"],["24 x 4.75","24 x 4.75"],["24 x 6","24 x 6"], ["n/a","n/a"]]
 v_needlesize_display = [["22 x 90","22 x 90"],["22 x 103","22 x 103"],["22 x 120","22 x 120"],["22 x 150","22 x 150"], 
 ["23 x 90","23 x 90"],["23 x 103","23 x 103"],["23 x 120","23 x 120"],["23 x 150","23 x 150"],
@@ -55,6 +56,11 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
 <tr><td colspan="2">Fast Total Unknown <%= f.select :lpfasttotaltime_unk, options_for_select(v_unk_display, @lumbarpuncture.lpfasttotaltime_unk),
                             {:prompt => 'Select ...'} %>
                             <br><br></td></tr>
+    <tr><td colspan="2" align="left">
+ <%= f.label :Or_Fast_Total_Time_range %>
+  &nbsp;&nbsp;&nbsp;
+  <%= f.select :lpfasttotaltime_range, options_for_select(v_fast_range_display, @lumbarpuncture.lpfasttotaltime_range),
+                          {:prompt => 'Select range'} %> <br><br></td></tr>
 
 <tr><td colspan="2">Time of last intake <small><small> (except water)</small></small></td></tr>
  <tr><td colspan="2" align="right"> 
@@ -85,7 +91,12 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
    <br>Entered by:<br>
     <%= select(:lumbarpuncture,:lp_data_entered_by , User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select who entered LP data" }) %>&nbsp;&nbsp;&nbsp;&nbsp
   </td></tr>	
-  <tr><td colspan="2">LP data entry date:<br> <%= date_select :lumbarpuncture, :lp_data_entered_date, :include_blank => true, :end_year => Time.now.year + 1 %></td></tr>				              
+  <tr><td colspan="2">LP data entry date:<br> <%= date_select :lumbarpuncture, :lp_data_entered_date, :include_blank => true, :end_year => Time.now.year + 1 %></td></tr>		
+   <tr><td nowrap colspan="2">
+   <br>QCed by:<br>
+    <%= select(:lumbarpuncture,:lp_data_qced_by , User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select who QCed LP data" }) %>&nbsp;&nbsp;&nbsp;&nbsp
+  </td></tr>  
+  <tr><td colspan="2">LP data QC date:<br> <%= date_select :lumbarpuncture, :lp_data_qced_date, :include_blank => true, :end_year => Time.now.year + 1 %></td></tr> 		              
 </table>
     <p>
 	<p>
