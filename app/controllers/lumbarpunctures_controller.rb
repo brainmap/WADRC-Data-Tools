@@ -660,7 +660,7 @@ class LumbarpuncturesController < ApplicationController
           @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
         else
               @html_request ="N"
-              @column_headers = ['Date','Protocol','Enumber','RMR','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','Fast Completed Unknown','Last Intake hrs','Last Intake min','Last Intake Unknown',
+              @column_headers = ['Date','Protocol','Enumber','RMR','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','Fast Completed Unknown','Fast Time as Range','Last Intake hrs','Last Intake min','Last Intake Unknown',
               'LP status',
               'Post-LP Headache','Post-LP Headache-Date Resolved','Post-LP Headache-Severity','Post-LP Headache-Note',
               'Post-LP Low Back Pain','Post-LP Low Back Pain-Date Resolved','Post-LP Low Back Pain-Severity','Post-LP Low Back Pain-Note',
@@ -670,7 +670,7 @@ class LumbarpuncturesController < ApplicationController
                'Initial Needle Insertion Minute','Fluid Collection Start Hour','Fluid Collection Start Minute','Final Needle Removal Hour', 'Final Needle Removal Minute',
                 'CSF Amount Collected','CSF Initial Amount Stored','CSF Nucleated Cell Count','CSF Red Cell Count','Cell Count Remarks',
                 'If LP unsuccessful-Unable to access CSF','If LP unsuccessful-Participant pain/discomfort','If LP unsuccessful-Participant vasovagal','If LP unsuccessful-Other',
-                'LP Data entered by','LP Data entry date',
+                'LP Data entered by','LP Data entry date','LP Data QCed by','LP Data QCed date',
                'LP Note','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt', 'Appt Note'] # need to look up values
               # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
               @column_number =   @column_headers.size
@@ -678,6 +678,7 @@ class LumbarpuncturesController < ApplicationController
                  "concat(employees.first_name,' ',employees.last_name)",
                 "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'Yes' ELSE 'No' end",
                 "lumbarpunctures.lpfasttotaltime","lumbarpunctures.lpfasttotaltime_min",  "CASE lumbarpunctures.lpfasttotaltime_unk WHEN 2 THEN 'Unk' ELSE '' end",
+                "lumbarpunctures.lpfasttotaltime_range",
                 "lumbarpunctures.lptimelastintake","lumbarpunctures.lptimelastintake_min",  "CASE lumbarpunctures.lptimelastintake_unk WHEN 2 THEN 'Unk' ELSE '' end",
                 "vgroups.completedlumbarpuncture",
                 "lumbarpunctures.followupheadache","DATE_FORMAT(lumbarpunctures.lpheadache_dateresolved,'%Y-%m-%d')","lumbarpunctures.lpheadache_severity","lumbarpunctures.lpheadache_note",
@@ -692,6 +693,7 @@ class LumbarpuncturesController < ApplicationController
                  "CASE lumbarpunctures.lpcsfunsuccessful_pain WHEN 1 THEN 'yes' ELSE '' end",
                  "CASE lumbarpunctures.lpcsfunsuccessful_vasovagal WHEN 1 THEN 'yes' ELSE '' end","lumbarpunctures.lpcsfunsuccessful_other_specify",
                  "concat(u2.first_name,' ',u2.last_name)", "DATE_FORMAT(lumbarpunctures.lp_data_entered_date,'%Y-%m-%d')",
+                 "concat(u3.first_name,' ',u3.last_name)", "DATE_FORMAT(lumbarpunctures.lp_data_qced_date,'%Y-%m-%d')",
                 "lumbarpunctures.lumbarpuncture_note","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
               @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id",
                 "LEFT JOIN users u2 on lumbarpunctures.lp_data_entered_by = u2.id  ",
