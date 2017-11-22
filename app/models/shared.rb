@@ -10921,8 +10921,8 @@ puts "v_analyses_path="+v_analyses_path
                 sql =  "truncate table cg_pcvipr_values"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pcvipr_values("+v_column_list+",enrollment_id,scan_procedure_id,secondary_key) 
-                select distinct "+v_column_list+",t.enrollment_id, scan_procedure_id,secondary_key from cg_pcvipr_values_new t
+                sql = "insert into cg_pcvipr_values("+v_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key) 
+                select distinct "+v_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key from cg_pcvipr_values_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
