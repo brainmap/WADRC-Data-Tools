@@ -142,7 +142,7 @@ or   image_dataset_quality_checks.omnibus_f  = 'Severe'  or  spm_mask  = 'Severe
       v_comment = "ERROR!!! file header  not match expected header \n"+p_standard_header+"\n"+p_file_header 
       v_flag = "N"              
     else
-      v_comment =" header matches expected."
+      #v_comment =" header matches expected."
     end
     return v_flag, v_comment
   end
@@ -10485,6 +10485,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           Dir.glob(v_analyses_path+"/*").each do |v_dir_path_name| 
             if File.directory?(v_dir_path_name)
                 #puts v_dir_path_name
+                v_run_all_outputs = "N" #"Y"
                v_scan_procedures = ScanProcedure.where("scan_procedures.codename in (?)",v_dir_path_name.split("/").last)
                if !v_scan_procedures.nil? and !v_scan_procedures[0].nil?
                   #puts v_scan_procedures[0].codename
@@ -10494,7 +10495,53 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                     # check for Summary.xls and *Summary_Calculator_*.xlsx and output*.csv
                     #NEED TO DO FIND or something to get real path
                     # get path to Summary.xls, could be few directories down
-                    if !Dir.glob(v_dir_path_name_subjectid+"/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*Summary_Calculator_*.xlsx").empty? and Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").empty? and Dir.glob(v_dir_path_name_subjectid+"/*_output.csv.log").empty?
+                    if v_run_all_outputs == "Y"
+                        if !Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").empty?
+                         v_call = "rm "+v_dir_path_name_subjectid+"/*_output.csv"
+                         stdin, stdout, stderr = Open3.popen3(v_call)
+                        
+                        while !stdout.eof?
+                            puts stdout.read 1024    
+                        end
+                        stdin.close
+                        stdout.close
+                        stderr.close
+                       end
+                       if !Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv").empty?
+                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*_output.csv"
+                         stdin, stdout, stderr = Open3.popen3(v_call)
+                        
+                        while !stdout.eof?
+                            puts stdout.read 1024    
+                        end
+                        stdin.close
+                        stdout.close
+                        stderr.close
+                       end
+                       if !Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv").empty?
+                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*/*_output.csv"
+                         stdin, stdout, stderr = Open3.popen3(v_call)
+                        
+                        while !stdout.eof?
+                            puts stdout.read 1024    
+                        end
+                        stdin.close
+                        stdout.close
+                        stderr.close
+                        end
+                        if !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv").empty?
+                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*/*/*_output.csv"
+                         stdin, stdout, stderr = Open3.popen3(v_call)
+                        
+                        while !stdout.eof?
+                            puts stdout.read 1024    
+                        end
+                        stdin.close
+                        stdout.close
+                        stderr.close
+                       end
+                    end
+                    if  !Dir.glob(v_dir_path_name_subjectid+"/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*Summary_Calculator_*.xlsx").empty? and Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").empty? and Dir.glob(v_dir_path_name_subjectid+"/*_output.csv.log").empty?
                         #puts "done===="+v_dir_path_name_subjectid
                         v_just_path = v_dir_path_name_subjectid
                         # run command
@@ -10602,16 +10649,23 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           @schedulerun.save
           @schedulerun.start_time = @schedulerun.created_at
           @schedulerun.save
+          v_comment =""
+          v_shared = Shared.new
 
-          v_analyses_path = v_base_path+"/analyses_path/PCVIPR/"
+          v_file_header_expected ="Left ICA - Cervical (Inferior),Left ICA - Petrous (Superior),Right ICA - Cervical (Inferior),Right ICA - Petrous (Superior),Basilar Artery,Left MCA,Right MCA,Left PCA,Right PCA,SS Sinus,Straight Sinus,Left ICA - Cervical (Inferior):Mean Flow,Left ICA - Petrous (Superior):Mean Flow,Right ICA - Cervical (Inferior):Mean Flow,Right ICA - Petrous (Superior):Mean Flow,Basilar Artery:Mean Flow,Left MCA:Mean Flow,Right MCA:Mean Flow,Left PCA:Mean Flow,Right PCA:Mean Flow,SS Sinus:Mean Flow,Straight Sinus:Mean Flow,LeftTS:Mean Flow,RightTS:Mean Flow,Left ICA - Cervical (Inferior):Pulsatility Index,Left ICA - Petrous (Superior):Pulsatility Index,Right ICA - Cervical (Inferior):Pulsatility Index,Right ICA - Petrous (Superior):Pulsatility Index,Basilar Artery:Pulsatility Index,Left MCA:Pulsatility Index,Right MCA:Pulsatility Index,Left PCA:Pulsatility Index,Right PCA:Pulsatility Index,SS Sinus:Pulsatility Index,Straight Sinus:Pulsatility Index,LeftTS:Pulsatility Index,RightTS:Pulsatility Index,Left ICA - Cervical (Inferior):Boolean,Left ICA - Petrous (Superior):Boolean,Right ICA - Cervical (Inferior):Boolean,Right ICA - Petrous (Superior):Boolean,Basilar Artery:Boolean,Left MCA:Boolean,Right MCA:Boolean,Left PCA:Boolean,Right PCA:Boolean,SS Sinus:Boolean,Straight Sinus:Boolean"
+          v_column_list = "left_ica_cervical_inferior,left_ica_petrous_superior,right_ica_cervical_inferior,right_ica_petrous_superior,basilar_artery,left_mca,right_mca,left_pca,right_pca,ss_sinus,straight_sinus,left_ica_cervical_inferior_mean_flow,left_ica_petrous_superior_mean_flow,right_ica_cervical_inferior_mean_flow,right_ica_petrous_superior_mean_flow,basilar_artery_mean_flow,left_mca_mean_flow,right_mca_mean_flow,left_pca_mean_flow,right_pca_mean_flow,ss_sinus_mean_flow,straight_sinus_mean_flow,leftts_mean_flow,rightts_mean_flow,left_ica_cervical_inferior_pulsatility_index,left_ica_petrous_superior_pulsatility_index,right_ica_cervical_inferior_pulsatility_index,right_ica_petrous_superior_pulsatility_index,basilar_artery_pulsatility_index,left_mca_pulsatility_index,right_mca_pulsatility_index,left_pca_pulsatility_index,right_pca_pulsatility_index,ss_sinus_pulsatility_index,straight_sinus_pulsatility_index,leftts_pulsatility_index,rightts_pulsatility_index,left_ica_cervical_inferior_boolean,left_ica_petrous_superior_boolean,right_ica_cervical_inferior_boolean,right_ica_petrous_superior_boolean,basilar_artery_boolean,left_mca_boolean,right_mca_boolean,left_pca_boolean,right_pca_boolean,ss_sinus_boolean,straight_sinus_boolean"
+         # Directory Name,secondary_key, == dir name
+          v_analyses_path = v_base_path+"/analyses/PCVIPR/"
+puts "v_analyses_path="+v_analyses_path
           sql = "truncate table cg_pcvipr_values_new"
           connection = ActiveRecord::Base.connection();        
           results = connection.execute(sql)
+          v_visit_number_array = ['v2','v3','v4','v5','v6','v7','v8','v9','v10','v11','v12','v13','v14','v15','v16']
 
           # go to directory, get list of directories. - could check if there is a scan_procedure
           Dir.glob(v_analyses_path+"/*").each do |v_dir_path_name| 
             if File.directory?(v_dir_path_name)
-                #puts v_dir_path_name
+                puts v_dir_path_name
                v_scan_procedures = ScanProcedure.where("scan_procedures.codename in (?)",v_dir_path_name.split("/").last)
                if !v_scan_procedures.nil? and !v_scan_procedures[0].nil?
                   #puts v_scan_procedures[0].codename
@@ -10621,46 +10675,261 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                     # check for Summary.xls and *Summary_Calculator_*.xlsx and output*.csv
                     #NEED TO DO FIND or something to get real path
                     # get path to Summary.xls, could be few directories down
+                    v_subjectid_dir = v_dir_path_name_subjectid.split("/").last
+                    v_subjectid_array = v_subjectid_dir.split("_")
+                    if(!v_subjectid_array[1].nil? and (v_visit_number_array.include? v_subjectid_array[1])) # 
+                       v_subjectid = v_subjectid_array[0]+"_"+v_subjectid_array[1]
+                    else
+                       v_subjectid = v_subjectid_array[0]
+                    end
                     if !Dir.glob(v_dir_path_name_subjectid+"/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*Summary_Calculator_*.xlsx").empty? and !Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").empty? 
                         #puts "done===="+v_dir_path_name_subjectid
-                        v_just_path = v_dir_path_name_subjectid
-                        # harvest ouput - check column header
-      
-
+                         Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").each do |v_file_path_exact| 
+                             v_file_path = v_file_path_exact # File.dirname(v_file_path_exact)
+                             v_cnt = 0
+                             v_header = ""
+                             File.open(v_file_path,'r') do |file_a|
+                               while line = file_a.gets and v_cnt < 1
+                                 if v_cnt < 1
+                                   v_header = line
+                                 end
+                                 v_cnt = v_cnt +1
+                               end
+                             end
+                             v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_file_header_expected)
+                             if v_return_flag == "N" 
+                               v_comment = v_return_comment+" \n"+v_comment
+                               puts v_return_comment               
+                             else
+                               puts v_return_comment
+                               v_comment = v_return_comment+v_comment
+                               v_comment = v_comment[0..1499]
+                               v_cnt = 0
+                               v_line_array = []
+                               File.open(v_file_path,'r') do |file_a|
+                               while line = file_a.gets
+                                 if v_cnt > 0
+                                   sql = "insert into cg_pcvipr_values_new ( secondary_key,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
+                                   v_line_array = []
+                                   line.gsub(/\n/,"").split(",").each do |v|
+                                     v_line_array.push("'"+v+"'")
+                                   end 
+                                   sql = sql+v_line_array.join(",")
+                                   sql = sql+")"
+                                   results = connection.execute(sql)                    
+                                 end
+                                 v_cnt = v_cnt + 1
+                               end
+                             end
+                          end
+                        end
+                        #
                      elsif  !Dir.glob(v_dir_path_name_subjectid+"/*/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*/*Summary_Calculator_*.xlsx").empty? and !Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv").empty? 
-                         #puts "done 1 down===="+v_dir_path_name_subjectid+"/*"
-                         # get extra dir path 
-                         Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv").each do |v_file_path| 
-                             v_just_path = File.dirname(v_file_path)
-                             #puts v_just_path
-                             # harvest ouput - check column header
-
+                         #puts "done===="+v_dir_path_name_subjectid
+                         Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv").each do |v_file_path_exact| 
+                             v_file_path = v_file_path_exact #  File.dirname(v_file_path_exact)
+                             v_cnt = 0
+                             v_header = ""
+                             File.open(v_file_path,'r') do |file_a|
+                               while line = file_a.gets and v_cnt < 1
+                                 if v_cnt < 1
+                                   v_header = line
+                                 end
+                                 v_cnt = v_cnt +1
+                               end
+                             end
+                             v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_file_header_expected)
+                             if v_return_flag == "N" 
+                               v_comment = v_return_comment+" \n"+v_comment
+                               puts v_return_comment               
+                             else
+                               puts v_return_comment
+                               v_comment = v_return_comment+v_comment
+                               v_comment = v_comment[0..1499]
+                               v_cnt = 0
+                               v_line_array = []
+                               File.open(v_file_path,'r') do |file_a|
+                               while line = file_a.gets
+                                 if v_cnt > 0
+                                   sql = "insert into cg_pcvipr_values_new ( secondary_key,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
+                                   v_line_array = []
+                                   line.gsub(/\n/,"").split(",").each do |v|
+                                     v_line_array.push("'"+v+"'")
+                                   end 
+                                   sql = sql+v_line_array.join(",")
+                                   sql = sql+")"
+                                   results = connection.execute(sql)                    
+                                 end
+                                 v_cnt = v_cnt + 1
+                               end
+                             end
                           end
-                         
+                        end
                      elsif  !Dir.glob(v_dir_path_name_subjectid+"/*/*/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*/*/*Summary_Calculator_*.xlsx").empty? and !Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv").empty? 
-                         puts "done 2 down ===="+v_dir_path_name_subjectid+"/*/*"
-                         # get extra dir path 
-                         Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv").each do |v_file_path| 
-                             v_just_path = File.dirname(v_file_path)
-                             #puts v_just_path
-                             # harvest ouput - check column header
+                         #puts "done 2 down ===="+v_dir_path_name_subjectid+"/*/*"
+                         #puts "done===="+v_dir_path_name_subjectid
+                         Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv").each do |v_file_path_exact| 
+                             v_file_path = v_file_path_exact #File.dirname(v_file_path_exact)
+                             v_cnt = 0
+                             v_header = ""
+                             File.open(v_file_path,'r') do |file_a|
+                               while line = file_a.gets and v_cnt < 1
+                                 if v_cnt < 1
+                                   v_header = line
+                                 end
+                                 v_cnt = v_cnt +1
+                               end
+                             end
+                             v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_file_header_expected)
+                             if v_return_flag == "N" 
+                               v_comment = v_return_comment+" \n"+v_comment
+                               puts v_return_comment               
+                             else
+                               puts v_return_comment
+                               v_comment = v_return_comment+v_comment
+                               v_comment = v_comment[0..1499]
+                               v_cnt = 0
+                               v_line_array = []
+                               File.open(v_file_path,'r') do |file_a|
+                               while line = file_a.gets
+                                 if v_cnt > 0
+                                   sql = "insert into cg_pcvipr_values_new ( secondary_key,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
+                                   v_line_array = []
+                                   line.gsub(/\n/,"").split(",").each do |v|
+                                     v_line_array.push("'"+v+"'")
+                                   end 
+                                   sql = sql+v_line_array.join(",")
+                                   sql = sql+")"
+                                   results = connection.execute(sql)                    
+                                 end
+                                 v_cnt = v_cnt + 1
+                               end
+                             end
                           end
+                        end
                      elsif  !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*Summary_Calculator_*.xlsx").empty? and !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv").empty? 
                          #puts "done 3 down ===="+v_dir_path_name_subjectid+"/*/*/*"
-                         # get extra dir path 
-                         Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv").each do |v_file_path| 
-                             v_just_path = File.dirname(v_file_path)
-                             #puts v_just_path
-                             # harvest ouput - check column header
+                         #puts "done===="+v_dir_path_name_subjectid
+                         Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv").each do |v_file_path_exact| 
+                             v_file_path = v_file_path_exact #File.dirname(v_file_path_exact)
+                             v_cnt = 0
+                             v_header = ""
+                             File.open(v_file_path,'r') do |file_a|
+                               while line = file_a.gets and v_cnt < 1
+                                 if v_cnt < 1
+                                   v_header = line
+                                 end
+                                 v_cnt = v_cnt +1
+                               end
+                             end
+                             v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_file_header_expected)
+                             if v_return_flag == "N" 
+                               v_comment = v_return_comment+" \n"+v_comment
+                               puts v_return_comment               
+                             else
+                               puts v_return_comment
+                               v_comment = v_return_comment+v_comment
+                               v_comment = v_comment[0..1499]
+                               v_cnt = 0
+                               v_line_array = []
+                               File.open(v_file_path,'r') do |file_a|
+                               while line = file_a.gets
+                                 if v_cnt > 0
+                                   sql = "insert into cg_pcvipr_values_new ( secondary_key,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
+                                   v_line_array = []
+                                   line.gsub(/\n/,"").split(",").each do |v|
+                                     v_line_array.push("'"+v+"'")
+                                   end 
+                                   sql = sql+v_line_array.join(",")
+                                   sql = sql+")"
+                                   results = connection.execute(sql)                    
+                                 end
+                                 v_cnt = v_cnt + 1
+                               end
+                             end
                           end
+                        end
                     end
                   end
                end
             end
           end
+          # update all the 
+                # update enrollment -- make into a function?
+                sql = "update cg_pcvipr_values_new  t set t.enrollment_id = ( select e.id from enrollments e where e.enumber = replace(replace(replace(replace(t.subjectid,'_v2',''),'_v3',''),'_v4',''),'_v5',''))"
+                results = connection.execute(sql)
+                # secondary key
+                # select all where enrollment_id is null
+                # match enumber plus .R, b, c, d , 
+                # set secondary key
+                sql = "select subjectid from cg_pcvipr_values_new where enrollment_id is null order by subjectid"
+                results = connection.execute(sql)
+                results.each do |re|
+                    enrollment = Enrollment.where("concat(enumber,'.R') in (?) or concat(enumber,'a') in (?) or concat(enumber,'b') in (?) or concat(enumber,'c') in (?) or concat(enumber,'d') in (?) or concat(enumber,'e') in (?)",re[0],re[0],re[0],re[0],re[0],re[0])
+                    if !enrollment.blank?
+                             v_secondary_key = re[0]
+                             v_secondary_key = v_secondary_key.tr(enrollment[0].enumber, "") 
+                             sql = "update cg_pcvipr_values_new  t set t.enrollment_id = "+enrollment[0].id.to_s+", secondary_key='"+v_secondary_key+"', subjectid='"+enrollment[0].enumber+"' where subjectid='"+re[0]+"'"
+                             results = connection.execute(sql)
+                    end
+                end
+
+                
+
+                sql = "select subjectid from cg_pcvipr_values_new"
+                results = connection.execute(sql)
+                results.each do |r|
+                  v_sp_id = v_shared.get_sp_id_from_subjectid_v(r[0])
+                  if !v_sp_id.blank?
+                    sql = "update cg_pcvipr_values_new  t set t.scan_procedure_id = "+v_sp_id.to_s+" where subjectid ='"+r[0]+"'"
+                    results = connection.execute(sql)
+                  end
+                end
 
 
-        @schedulerun.comment =("successful finish pcvipr_output_file_harvest "+v_comment[0..459])
+
+                # report on unmapped rows, not insert unmapped rows 
+
+                sql = "select subjectid, enrollment_id from cg_pcvipr_values_new where scan_procedure_id is null order by subjectid"
+                results = connection.execute(sql)
+                results.each do |re|
+                  v_comment = re.join(' | ')+" ,"+v_comment
+                end
+                if !results.blank?
+                   v_comment = "cg_pcvipr_values_new unmapped subjectid,enrollment_id ="+v_comment
+                end
+
+                # check move cg_ to cg_old
+                sql = "select count(*) from cg_pcvipr_values_old"
+                results_old = connection.execute(sql)
+                
+                sql = "select count(*) from cg_pcvipr_values"
+                results = connection.execute(sql)
+                v_old_cnt = results_old.first.to_s.to_i
+                v_present_cnt = results.first.to_s.to_i
+                v_old_minus_present =v_old_cnt-v_present_cnt
+                v_present_minus_old = v_present_cnt-v_old_cnt
+                if ( v_old_minus_present <= 0 or ( v_old_cnt > 0 and  (v_present_minus_old/v_old_cnt)>0.7     ) )
+                  sql =  "truncate table cg_pcvipr_values_old"
+                  results = connection.execute(sql)
+                  sql = "insert into cg_pcvipr_values_old select * from cg_pcvipr_values"
+                  results = connection.execute(sql)
+                else
+                  v_comment = " The cg_pcvipr_values_old table has 30% more rows than the present cg_pcvipr_values\n Not truncating cg_pcvipr_values_old "+v_comment 
+                end
+                #  truncate cg_ and insert cg_new
+                sql =  "truncate table cg_pcvipr_values"
+                results = connection.execute(sql)
+
+                sql = "insert into cg_pcvipr_values("+v_column_list+",enrollment_id,scan_procedure_id,secondary_key) 
+                select distinct "+v_column_list+",t.enrollment_id, scan_procedure_id,secondary_key from cg_pcvipr_values_new t
+                                               where t.scan_procedure_id is not null  and t.enrollment_id is not null "
+                results = connection.execute(sql)
+
+                # apply edits  -- made into a function  in shared model
+              
+                v_shared.apply_cg_edits("pcvipr_values")
+        @schedulerun.comment =("successful finish pcvipr_output_file_harvest "+v_comment[0..1459])
       if !v_comment.include?("ERROR")
          @schedulerun.status_flag ="Y"
        end
