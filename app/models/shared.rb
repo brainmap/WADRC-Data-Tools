@@ -10461,7 +10461,17 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     
   end
 
-  def run_pcvipr_output_file
+  def run_pcvipr_output_file()
+         run_pcvipr_output_file_base("leave_output_and_log")
+  end
+  def run_pcvipr_output_file_rm_output()
+         run_pcvipr_output_file_base("rm_output")
+  end
+  def run_pcvipr_output_file_rm_output_and_log()
+         run_pcvipr_output_file_base("rm_output_and_log")
+  end
+
+  def run_pcvipr_output_file_base(p_output_log_rm)
          v_base_path = Shared.get_base_path()
          @schedule = Schedule.where("name in ('pcvipr_output_file')").first
           @schedulerun = Schedulerun.new
@@ -10472,6 +10482,14 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           @schedulerun.save
           v_comment = ""
           v_cnt = 0
+          v_rerun_outputs = "N" #"Y"# rm output and log if output present
+          v_rerun_full_outputs_log = "N"  # "Y"  # rm all output and log  
+          if p_output_log_rm == "rm_output"
+            v_rerun_outputs = "Y"
+          end  
+          if p_output_log_rm == "rm_output_and_log"
+            v_rerun_full_outputs_log = "Y"
+          end
 
           v_machine = "baloo.dom.wisc.edu"  # eventually switch to merida - need packages installed
           v_script_path = v_base_path+"/data1/lab_scripts/python_dev/collect_pcvipr_data.py"  # CHANGE TO PRODUCTION
@@ -10485,7 +10503,6 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           Dir.glob(v_analyses_path+"/*").each do |v_dir_path_name| 
             if File.directory?(v_dir_path_name)
                 #puts v_dir_path_name
-                v_run_all_outputs = "N" #"Y"
                v_scan_procedures = ScanProcedure.where("scan_procedures.codename in (?)",v_dir_path_name.split("/").last)
                if !v_scan_procedures.nil? and !v_scan_procedures[0].nil?
                   #puts v_scan_procedures[0].codename
@@ -10495,9 +10512,29 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                     # check for Summary.xls and *Summary_Calculator_*.xlsx and output*.csv
                     #NEED TO DO FIND or something to get real path
                     # get path to Summary.xls, could be few directories down
-                    if v_run_all_outputs == "Y"
-                        if !Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").empty?
+                    if v_rerun_outputs == "Y" or v_rerun_full_outputs_log == "Y"
+                       if !Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").empty?
                          v_call = "rm "+v_dir_path_name_subjectid+"/*_output.csv"
+                         stdin, stdout, stderr = Open3.popen3(v_call)
+                        
+                        while !stdout.eof?
+                            puts stdout.read 1024    
+                        end
+                        stdin.close
+                        stdout.close
+                        stderr.close
+                         v_call = "rm "+v_dir_path_name_subjectid+"/*_output.csv.log"
+                         stdin, stdout, stderr = Open3.popen3(v_call)
+                        
+                        while !stdout.eof?
+                            puts stdout.read 1024    
+                        end
+                        stdin.close
+                        stdout.close
+                        stderr.close
+                       end
+                       if !Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").empty? and v_rerun_full_outputs_log == "Y"
+                         v_call = "rm "+v_dir_path_name_subjectid+"/*_output.csv.log"
                          stdin, stdout, stderr = Open3.popen3(v_call)
                         
                         while !stdout.eof?
@@ -10517,9 +10554,49 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                         stdin.close
                         stdout.close
                         stderr.close
+                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*_output.csv.log"
+                         stdin, stdout, stderr = Open3.popen3(v_call)
+                        
+                        while !stdout.eof?
+                            puts stdout.read 1024    
+                        end
+                        stdin.close
+                        stdout.close
+                        stderr.close
+                       end
+                       if !Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv.log").empty? and v_rerun_full_outputs_log == "Y"
+                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*_output.csv.log"
+                         stdin, stdout, stderr = Open3.popen3(v_call)
+                        
+                        while !stdout.eof?
+                            puts stdout.read 1024    
+                        end
+                        stdin.close
+                        stdout.close
+                        stderr.close
                        end
                        if !Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv").empty?
                          v_call = "rm "+v_dir_path_name_subjectid+"/*/*/*_output.csv"
+                         stdin, stdout, stderr = Open3.popen3(v_call)
+                        
+                        while !stdout.eof?
+                            puts stdout.read 1024    
+                        end
+                        stdin.close
+                        stdout.close
+                        stderr.close
+                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*/*_output.csv.log"
+                         stdin, stdout, stderr = Open3.popen3(v_call)
+                        
+                        while !stdout.eof?
+                            puts stdout.read 1024    
+                        end
+                        stdin.close
+                        stdout.close
+                        stderr.close
+                        end
+                       if !Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv.log").empty? and v_rerun_full_outputs_log == "Y"
+                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*/*_output.csv.log"
                          stdin, stdout, stderr = Open3.popen3(v_call)
                         
                         while !stdout.eof?
@@ -10539,7 +10616,27 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                         stdin.close
                         stdout.close
                         stderr.close
-                       end
+                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*/*/*_output.csv.log"
+                         stdin, stdout, stderr = Open3.popen3(v_call)
+                        
+                        while !stdout.eof?
+                            puts stdout.read 1024    
+                        end
+                        stdin.close
+                        stdout.close
+                        stderr.close
+                        end
+                        if !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv.log").empty? and v_rerun_full_outputs_log == "Y"
+                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*/*/*_output.csv.log"
+                         stdin, stdout, stderr = Open3.popen3(v_call)
+                        
+                        while !stdout.eof?
+                            puts stdout.read 1024    
+                        end
+                        stdin.close
+                        stdout.close
+                        stderr.close
+                        end
                     end
                     if  !Dir.glob(v_dir_path_name_subjectid+"/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*Summary_Calculator_*.xlsx").empty? and Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").empty? and Dir.glob(v_dir_path_name_subjectid+"/*_output.csv.log").empty?
                         #puts "done===="+v_dir_path_name_subjectid
@@ -10654,7 +10751,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
 
           v_file_header_expected ="Left ICA - Cervical (Inferior),Left ICA - Petrous (Superior),Right ICA - Cervical (Inferior),Right ICA - Petrous (Superior),Basilar Artery,Left MCA,Right MCA,Left PCA,Right PCA,SS Sinus,Straight Sinus,Left ICA - Cervical (Inferior):Mean Flow,Left ICA - Petrous (Superior):Mean Flow,Right ICA - Cervical (Inferior):Mean Flow,Right ICA - Petrous (Superior):Mean Flow,Basilar Artery:Mean Flow,Left MCA:Mean Flow,Right MCA:Mean Flow,Left PCA:Mean Flow,Right PCA:Mean Flow,SS Sinus:Mean Flow,Straight Sinus:Mean Flow,LeftTS:Mean Flow,RightTS:Mean Flow,Left ICA - Cervical (Inferior):Pulsatility Index,Left ICA - Petrous (Superior):Pulsatility Index,Right ICA - Cervical (Inferior):Pulsatility Index,Right ICA - Petrous (Superior):Pulsatility Index,Basilar Artery:Pulsatility Index,Left MCA:Pulsatility Index,Right MCA:Pulsatility Index,Left PCA:Pulsatility Index,Right PCA:Pulsatility Index,SS Sinus:Pulsatility Index,Straight Sinus:Pulsatility Index,LeftTS:Pulsatility Index,RightTS:Pulsatility Index,Left ICA - Cervical (Inferior):Boolean,Left ICA - Petrous (Superior):Boolean,Right ICA - Cervical (Inferior):Boolean,Right ICA - Petrous (Superior):Boolean,Basilar Artery:Boolean,Left MCA:Boolean,Right MCA:Boolean,Left PCA:Boolean,Right PCA:Boolean,SS Sinus:Boolean,Straight Sinus:Boolean"
           v_column_list = "left_ica_cervical_inferior,left_ica_petrous_superior,right_ica_cervical_inferior,right_ica_petrous_superior,basilar_artery,left_mca,right_mca,left_pca,right_pca,ss_sinus,straight_sinus,left_ica_cervical_inferior_mean_flow,left_ica_petrous_superior_mean_flow,right_ica_cervical_inferior_mean_flow,right_ica_petrous_superior_mean_flow,basilar_artery_mean_flow,left_mca_mean_flow,right_mca_mean_flow,left_pca_mean_flow,right_pca_mean_flow,ss_sinus_mean_flow,straight_sinus_mean_flow,leftts_mean_flow,rightts_mean_flow,left_ica_cervical_inferior_pulsatility_index,left_ica_petrous_superior_pulsatility_index,right_ica_cervical_inferior_pulsatility_index,right_ica_petrous_superior_pulsatility_index,basilar_artery_pulsatility_index,left_mca_pulsatility_index,right_mca_pulsatility_index,left_pca_pulsatility_index,right_pca_pulsatility_index,ss_sinus_pulsatility_index,straight_sinus_pulsatility_index,leftts_pulsatility_index,rightts_pulsatility_index,left_ica_cervical_inferior_boolean,left_ica_petrous_superior_boolean,right_ica_cervical_inferior_boolean,right_ica_petrous_superior_boolean,basilar_artery_boolean,left_mca_boolean,right_mca_boolean,left_pca_boolean,right_pca_boolean,ss_sinus_boolean,straight_sinus_boolean"
-         # Directory Name,secondary_key, == dir name
+         # Directory Name,file_name, == dir name
           v_analyses_path = v_base_path+"/analyses/PCVIPR/"
 puts "v_analyses_path="+v_analyses_path
           sql = "truncate table cg_pcvipr_values_new"
@@ -10709,7 +10806,7 @@ puts "v_analyses_path="+v_analyses_path
                                File.open(v_file_path,'r') do |file_a|
                                while line = file_a.gets
                                  if v_cnt > 0
-                                   sql = "insert into cg_pcvipr_values_new ( secondary_key,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
+                                   sql = "insert into cg_pcvipr_values_new ( file_name,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
                                    v_line_array = []
                                    line.gsub(/\n/,"").split(",").each do |v|
                                      v_line_array.push("'"+v+"'")
@@ -10751,7 +10848,7 @@ puts "v_analyses_path="+v_analyses_path
                                File.open(v_file_path,'r') do |file_a|
                                while line = file_a.gets
                                  if v_cnt > 0
-                                   sql = "insert into cg_pcvipr_values_new ( secondary_key,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
+                                   sql = "insert into cg_pcvipr_values_new ( file_name,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
                                    v_line_array = []
                                    line.gsub(/\n/,"").split(",").each do |v|
                                      v_line_array.push("'"+v+"'")
@@ -10793,7 +10890,7 @@ puts "v_analyses_path="+v_analyses_path
                                File.open(v_file_path,'r') do |file_a|
                                while line = file_a.gets
                                  if v_cnt > 0
-                                   sql = "insert into cg_pcvipr_values_new ( secondary_key,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
+                                   sql = "insert into cg_pcvipr_values_new ( file_name,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
                                    v_line_array = []
                                    line.gsub(/\n/,"").split(",").each do |v|
                                      v_line_array.push("'"+v+"'")
@@ -10835,7 +10932,7 @@ puts "v_analyses_path="+v_analyses_path
                                File.open(v_file_path,'r') do |file_a|
                                while line = file_a.gets
                                  if v_cnt > 0
-                                   sql = "insert into cg_pcvipr_values_new ( secondary_key,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
+                                   sql = "insert into cg_pcvipr_values_new ( file_name,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
                                    v_line_array = []
                                    line.gsub(/\n/,"").split(",").each do |v|
                                      v_line_array.push("'"+v+"'")
@@ -10921,8 +11018,8 @@ puts "v_analyses_path="+v_analyses_path
                 sql =  "truncate table cg_pcvipr_values"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pcvipr_values("+v_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key) 
-                select distinct "+v_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key from cg_pcvipr_values_new t
+                sql = "insert into cg_pcvipr_values("+v_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name) 
+                select distinct "+v_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name from cg_pcvipr_values_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
