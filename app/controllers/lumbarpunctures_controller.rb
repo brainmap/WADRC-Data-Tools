@@ -668,7 +668,7 @@ class LumbarpuncturesController < ApplicationController
               'Needle Size','Needle Type','Needle Type -Other','LP Position','LP Method',
               'Initial Needle Insertion Hour',
                'Initial Needle Insertion Minute','Fluid Collection Start Hour','Fluid Collection Start Minute','Final Needle Removal Hour', 'Final Needle Removal Minute',
-                'CSF Amount Collected','CSF Initial Amount Stored','CSF Nucleated Cell Count','CSF Red Cell Count','Cell Count Remarks',
+                'CSF Amount Collected (ml)','CSF Initial Amount Stored (ml)','CSF Nucleated Cell Count','CSF Red Cell Count','Cell Count Remarks',
                 'If LP unsuccessful-Unable to access CSF','If LP unsuccessful-Participant pain/discomfort','If LP unsuccessful-Participant vasovagal','If LP unsuccessful-Other',
                 'LP Data entered by','LP Data entry date','LP Data QCed by','LP Data QCed date',
                'LP Note','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt', 'Appt Note'] # need to look up values

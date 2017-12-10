@@ -79,8 +79,8 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
 	<%= f.select :lpsuccess, options_for_select(v_yes_no_unk_display, @lumbarpuncture.lpsuccess),
 						              {:prompt => 'Select if the lumbarpuncture was successful'} %></td></tr>
 
-<tr><td colspan="2">Amount Collected &nbsp;&nbsp;<%= f.select :lpamountcollected, options_for_select(0...23, @lumbarpuncture.lpamountcollected),{:prompt => 'Select ....'} %> <small><small> ml</small></small></td></tr>
-<tr><td colspan="2">Initial Amount Stored <%= f.select :lpinitialamountstored, options_for_select(0...23, @lumbarpuncture.lpinitialamountstored),{:prompt => 'Select ....'} %><small><small> ml</small></small></td></tr>
+<tr><td colspan="2">Amount Collected &nbsp;&nbsp;<%= f.select :lpamountcollected, options_for_select(0...26, @lumbarpuncture.lpamountcollected),{:prompt => 'Select ....'} %> <small><small> ml</small></small></td></tr>
+<tr><td colspan="2">Initial Amount Stored <%= f.select :lpinitialamountstored, options_for_select(0...26, @lumbarpuncture.lpinitialamountstored),{:prompt => 'Select ....'} %><small><small> ml</small></small></td></tr>
 
     <tr><td nowrap colspan="2">
       CSF Abnormality Found 

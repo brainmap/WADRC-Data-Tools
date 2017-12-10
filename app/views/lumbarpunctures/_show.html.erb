@@ -15,8 +15,8 @@
      :LP_time_last_intake => @lumbarpuncture.lptimelastintake.nil?  ? @lumbarpuncture.lptimelastintake_min.nil? ? nil : @lumbarpuncture.lptimelastintake.to_s+" hrs : "+@lumbarpuncture.lptimelastintake_min.to_s+" mins" :  @lumbarpuncture.lptimelastintake.to_s+" hrs : "+@lumbarpuncture.lptimelastintake_min.to_s+" mins" ,
      :LP_time_last_intake_unknown => @lumbarpuncture.lptimelastintake_unk == "2" ? "Unknown" : nil,
       :LP_Successful => @lumbarpuncture.lpsuccess == 1 ? "Yes" : @lumbarpuncture.lpsuccess == 0 ? "No" : "Unknown",
-      :CSF_Amount_collected =>  @lumbarpuncture.lpamountcollected.nil? ? nil : @lumbarpuncture.lpamountcollected.to_s  ,
-      :Initial_CSF_Amount_stored => @lumbarpuncture.lpinitialamountstored.nil? ? nil : @lumbarpuncture.lpinitialamountstored.to_s  ,
+      :CSF_Amount_collected =>  @lumbarpuncture.lpamountcollected.nil? ? nil : @lumbarpuncture.lpamountcollected.to_s+" ml"  ,
+      :Initial_CSF_Amount_stored => @lumbarpuncture.lpinitialamountstored.nil? ? nil : @lumbarpuncture.lpinitialamountstored.to_s+" ml"  ,
 
       :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
       :RMR_Number => @vgroup.rmr,
