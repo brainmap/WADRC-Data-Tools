@@ -10461,6 +10461,44 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
     
   end
 
+  def run_pcvipr_recon_and_gating_check
+         v_base_path = Shared.get_base_path()
+         @schedule = Schedule.where("name in ('pcvipr_recon_and gating_check')").first
+          @schedulerun = Schedulerun.new
+          @schedulerun.schedule_id = @schedule.id
+          @schedulerun.comment ="starting pcvipr_recon_and gating_check"
+          @schedulerun.save
+          @schedulerun.start_time = @schedulerun.created_at
+          @schedulerun.save
+          v_comment = ""
+          v_month_back = "1"
+          v_pcvipr_values_tn = "cg_pcvipr_values"
+      #check for pvvipr in month back which are not in v_pcvipr_values_tn
+      # get spS ( could be multiples) and enumberS ( could be multiples)
+      # use raw path to pick sp and enum to use
+      # check in sp/sp.done sp/sp.orig -if any match found - stop
+      # if no match found and no sp found
+      # make sp, sp.orig, sp.done
+      # if no match found, sp found, but no sp.orig - make sp.orig, make dir _v#
+      # if no match found but sp found - make dir /_v# in .orig
+      # copy over pcvipr, pcvipr_summary and gating files
+      # unbzip pfile
+      # run pcvipr recon
+      # check log/outoput files
+      # email if problem
+      # run gating_check
+      # check log/output files
+      # email if problem
+      # rm pfile
+
+          v_ids_array = ImageDataset.where("image_datasets.visit_id in 
+            (select visits.id from visits, appointments  where visit.appointment_id = appointments.id and appointments.appointment_date > (DATE_SUB(NOW(), INTERVAL "+v_month_back+" MONTH)) )
+            and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15))
+            and image_datasets.visit_id not in (  GET visit_id/via vgroup via sp_id, enrollment_id from cg_pcvipr_values )")
+
+
+
+  end
   def run_pcvipr_output_file()
          run_pcvipr_output_file_base("leave_output_and_log")
   end
@@ -10492,7 +10530,8 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           end
 
           v_machine = "baloo.dom.wisc.edu"  # eventually switch to merida - need packages installed
-          v_script_path = v_base_path+"/data1/lab_scripts/python_dev/collect_pcvipr_data.py"  # CHANGE TO PRODUCTION
+         #  v_script_path = v_base_path+"/data1/lab_scripts/python_dev/collect_pcvipr_data.py" 
+          v_script_path = v_base_path+"/SysAdmin/production/python/collect_pcvipr_data.py"  # CHANGE TO PRODUCTION
 
           # add check if output.csv was made
           #connection = ActiveRecord::Base.connection();
@@ -10749,7 +10788,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           v_comment =""
           v_shared = Shared.new
 
-          v_file_header_expected ="Left ICA - Cervical (Inferior),Left ICA - Petrous (Superior),Right ICA - Cervical (Inferior),Right ICA - Petrous (Superior),Basilar Artery,Left MCA,Right MCA,Left PCA,Right PCA,SS Sinus,Straight Sinus,Left ICA - Cervical (Inferior):Mean Flow,Left ICA - Petrous (Superior):Mean Flow,Right ICA - Cervical (Inferior):Mean Flow,Right ICA - Petrous (Superior):Mean Flow,Basilar Artery:Mean Flow,Left MCA:Mean Flow,Right MCA:Mean Flow,Left PCA:Mean Flow,Right PCA:Mean Flow,SS Sinus:Mean Flow,Straight Sinus:Mean Flow,LeftTS:Mean Flow,RightTS:Mean Flow,Left ICA - Cervical (Inferior):Pulsatility Index,Left ICA - Petrous (Superior):Pulsatility Index,Right ICA - Cervical (Inferior):Pulsatility Index,Right ICA - Petrous (Superior):Pulsatility Index,Basilar Artery:Pulsatility Index,Left MCA:Pulsatility Index,Right MCA:Pulsatility Index,Left PCA:Pulsatility Index,Right PCA:Pulsatility Index,SS Sinus:Pulsatility Index,Straight Sinus:Pulsatility Index,LeftTS:Pulsatility Index,RightTS:Pulsatility Index,Left ICA - Cervical (Inferior):Boolean,Left ICA - Petrous (Superior):Boolean,Right ICA - Cervical (Inferior):Boolean,Right ICA - Petrous (Superior):Boolean,Basilar Artery:Boolean,Left MCA:Boolean,Right MCA:Boolean,Left PCA:Boolean,Right PCA:Boolean,SS Sinus:Boolean,Straight Sinus:Boolean"
+          v_file_header_expected ="Left ICA - Cervical (Inferior):maxV,Left ICA - Petrous (Superior):maxV,Right ICA - Cervical (Inferior):maxV,Right ICA - Petrous (Superior):maxV,Basilar Artery:maxV,Left MCA:maxV,Right MCA:maxV,Left PCA:maxV,Right PCA:maxV,SS Sinus:maxV,Straight Sinus:maxV,Left ICA - Cervical (Inferior):Mean Flow,Left ICA - Petrous (Superior):Mean Flow,Right ICA - Cervical (Inferior):Mean Flow,Right ICA - Petrous (Superior):Mean Flow,Basilar Artery:Mean Flow,Left MCA:Mean Flow,Right MCA:Mean Flow,Left PCA:Mean Flow,Right PCA:Mean Flow,SS Sinus:Mean Flow,Straight Sinus:Mean Flow,LeftTS:Mean Flow,RightTS:Mean Flow,Left ICA - Cervical (Inferior):Pulsatility Index,Left ICA - Petrous (Superior):Pulsatility Index,Right ICA - Cervical (Inferior):Pulsatility Index,Right ICA - Petrous (Superior):Pulsatility Index,Basilar Artery:Pulsatility Index,Left MCA:Pulsatility Index,Right MCA:Pulsatility Index,Left PCA:Pulsatility Index,Right PCA:Pulsatility Index,SS Sinus:Pulsatility Index,Straight Sinus:Pulsatility Index,LeftTS:Pulsatility Index,RightTS:Pulsatility Index,Left ICA - Cervical (Inferior):Boolean,Left ICA - Petrous (Superior):Boolean,Right ICA - Cervical (Inferior):Boolean,Right ICA - Petrous (Superior):Boolean,Basilar Artery:Boolean,Left MCA:Boolean,Right MCA:Boolean,Left PCA:Boolean,Right PCA:Boolean,SS Sinus:Boolean,Straight Sinus:Boolean"
           v_column_list = "left_ica_cervical_inferior,left_ica_petrous_superior,right_ica_cervical_inferior,right_ica_petrous_superior,basilar_artery,left_mca,right_mca,left_pca,right_pca,ss_sinus,straight_sinus,left_ica_cervical_inferior_mean_flow,left_ica_petrous_superior_mean_flow,right_ica_cervical_inferior_mean_flow,right_ica_petrous_superior_mean_flow,basilar_artery_mean_flow,left_mca_mean_flow,right_mca_mean_flow,left_pca_mean_flow,right_pca_mean_flow,ss_sinus_mean_flow,straight_sinus_mean_flow,leftts_mean_flow,rightts_mean_flow,left_ica_cervical_inferior_pulsatility_index,left_ica_petrous_superior_pulsatility_index,right_ica_cervical_inferior_pulsatility_index,right_ica_petrous_superior_pulsatility_index,basilar_artery_pulsatility_index,left_mca_pulsatility_index,right_mca_pulsatility_index,left_pca_pulsatility_index,right_pca_pulsatility_index,ss_sinus_pulsatility_index,straight_sinus_pulsatility_index,leftts_pulsatility_index,rightts_pulsatility_index,left_ica_cervical_inferior_boolean,left_ica_petrous_superior_boolean,right_ica_cervical_inferior_boolean,right_ica_petrous_superior_boolean,basilar_artery_boolean,left_mca_boolean,right_mca_boolean,left_pca_boolean,right_pca_boolean,ss_sinus_boolean,straight_sinus_boolean"
          # Directory Name,file_name, == dir name
           v_analyses_path = v_base_path+"/analyses/PCVIPR/"
