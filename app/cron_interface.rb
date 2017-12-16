@@ -206,7 +206,9 @@ v_user = v_user.gsub("\n","")
   elsif v_value_1 == "pcvipr_output_file_rm_output_and_log"  
       v_shared = Shared.new
       v_shared.run_pcvipr_output_file_rm_output_and_log()
-
+  elsif v_value_1 == "pcvipr_output_file_rerun_if_no_output"  
+      v_shared = Shared.new
+      v_shared.run_pcvipr_output_file_rerun_if_no_output()
   elsif v_value_1 == "pcvipr_output_file_harvest"  
       v_shared = Shared.new
       v_shared.run_pcvipr_output_file_harvest()
