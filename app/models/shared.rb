@@ -10473,6 +10473,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           v_comment = ""
           v_month_back = "1"
           v_pcvipr_values_tn = "cg_pcvipr_values"
+      # exclude list of sp's - e.g. barnes.bbf
       #check for pvvipr in month back which are not in v_pcvipr_values_tn
       # get spS ( could be multiples) and enumberS ( could be multiples)
       # use raw path to pick sp and enum to use
@@ -10528,9 +10529,11 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           v_rerun_if_no_output = "N"
           if p_output_log_rm == "rm_output"
             v_rerun_outputs = "Y"
+            v_rerun_if_no_output = "Y"
           end  
           if p_output_log_rm == "rm_output_and_log"
-            v_rerun_full_outputs_log = "Y"
+            v_rerun_if_no_output = "Y"
+            v_rerun_outputs = "Y"
           end
           if p_output_log_rm == "rerun_if_no_output"
             v_rerun_if_no_output = "Y"
@@ -10560,133 +10563,8 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                     # check for Summary.xls and *Summary_Calculator_*.xlsx and output*.csv
                     #NEED TO DO FIND or something to get real path
                     # get path to Summary.xls, could be few directories down
-                    if v_rerun_outputs == "Y" or v_rerun_full_outputs_log == "Y"
-                       if !Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").empty?
-                         v_call = "rm "+v_dir_path_name_subjectid+"/*_output.csv"
-                         stdin, stdout, stderr = Open3.popen3(v_call)
-                        
-                        while !stdout.eof?
-                            puts stdout.read 1024    
-                        end
-                        stdin.close
-                        stdout.close
-                        stderr.close
-                         v_call = "rm "+v_dir_path_name_subjectid+"/*_output.csv.log"
-                         stdin, stdout, stderr = Open3.popen3(v_call)
-                        
-                        while !stdout.eof?
-                            puts stdout.read 1024    
-                        end
-                        stdin.close
-                        stdout.close
-                        stderr.close
-                       end
-                       if !Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").empty? and v_rerun_full_outputs_log == "Y"
-                         v_call = "rm "+v_dir_path_name_subjectid+"/*_output.csv.log"
-                         stdin, stdout, stderr = Open3.popen3(v_call)
-                        
-                        while !stdout.eof?
-                            puts stdout.read 1024    
-                        end
-                        stdin.close
-                        stdout.close
-                        stderr.close
-                       end
-                       if !Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv").empty?
-                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*_output.csv"
-                         stdin, stdout, stderr = Open3.popen3(v_call)
-                        
-                        while !stdout.eof?
-                            puts stdout.read 1024    
-                        end
-                        stdin.close
-                        stdout.close
-                        stderr.close
-                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*_output.csv.log"
-                         stdin, stdout, stderr = Open3.popen3(v_call)
-                        
-                        while !stdout.eof?
-                            puts stdout.read 1024    
-                        end
-                        stdin.close
-                        stdout.close
-                        stderr.close
-                       end
-                       if !Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv.log").empty? and v_rerun_full_outputs_log == "Y"
-                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*_output.csv.log"
-                         stdin, stdout, stderr = Open3.popen3(v_call)
-                        
-                        while !stdout.eof?
-                            puts stdout.read 1024    
-                        end
-                        stdin.close
-                        stdout.close
-                        stderr.close
-                       end
-                       if !Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv").empty?
-                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*/*_output.csv"
-                         stdin, stdout, stderr = Open3.popen3(v_call)
-                        
-                        while !stdout.eof?
-                            puts stdout.read 1024    
-                        end
-                        stdin.close
-                        stdout.close
-                        stderr.close
-                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*/*_output.csv.log"
-                         stdin, stdout, stderr = Open3.popen3(v_call)
-                        
-                        while !stdout.eof?
-                            puts stdout.read 1024    
-                        end
-                        stdin.close
-                        stdout.close
-                        stderr.close
-                        end
-                       if !Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv.log").empty? and v_rerun_full_outputs_log == "Y"
-                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*/*_output.csv.log"
-                         stdin, stdout, stderr = Open3.popen3(v_call)
-                        
-                        while !stdout.eof?
-                            puts stdout.read 1024    
-                        end
-                        stdin.close
-                        stdout.close
-                        stderr.close
-                        end
-                        if !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv").empty?
-                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*/*/*_output.csv"
-                         stdin, stdout, stderr = Open3.popen3(v_call)
-                        
-                        while !stdout.eof?
-                            puts stdout.read 1024    
-                        end
-                        stdin.close
-                        stdout.close
-                        stderr.close
-                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*/*/*_output.csv.log"
-                         stdin, stdout, stderr = Open3.popen3(v_call)
-                        
-                        while !stdout.eof?
-                            puts stdout.read 1024    
-                        end
-                        stdin.close
-                        stdout.close
-                        stderr.close
-                        end
-                        if !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv.log").empty? and v_rerun_full_outputs_log == "Y"
-                         v_call = "rm "+v_dir_path_name_subjectid+"/*/*/*/*_output.csv.log"
-                         stdin, stdout, stderr = Open3.popen3(v_call)
-                        
-                        while !stdout.eof?
-                            puts stdout.read 1024    
-                        end
-                        stdin.close
-                        stdout.close
-                        stderr.close
-                        end
-                    end
-                    if  !Dir.glob(v_dir_path_name_subjectid+"/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*Summary_Calculator_*.xlsx").empty? and Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").empty? and (Dir.glob(v_dir_path_name_subjectid+"/*_output.csv.log").empty? or v_rerun_if_no_output =="Y")
+                    
+                    if  !Dir.glob(v_dir_path_name_subjectid+"/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*Summary_Calculator_*.xlsx").empty? and (Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").empty? or v_rerun_outputs == "Y") and (Dir.glob(v_dir_path_name_subjectid+"/*_output.csv.log").empty? or v_rerun_if_no_output =="Y")
                         #puts "done===="+v_dir_path_name_subjectid
                         v_just_path = v_dir_path_name_subjectid
                         # run command
@@ -10705,7 +10583,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                           v_cnt = v_cnt +1
                         end
 
-                     elsif  !Dir.glob(v_dir_path_name_subjectid+"/*/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*/*Summary_Calculator_*.xlsx").empty? and Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv").empty? and (Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv.log").empty? or v_rerun_if_no_output =="Y")
+                     elsif  !Dir.glob(v_dir_path_name_subjectid+"/*/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*/*Summary_Calculator_*.xlsx").empty? and (Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv").empty? or v_rerun_outputs == "Y")  and (Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv.log").empty? or v_rerun_if_no_output =="Y")
                          #puts "done 1 down===="+v_dir_path_name_subjectid+"/*"
                          # get extra dir path 
                          Dir.glob(v_dir_path_name_subjectid+"/*/Summary.xls").each do |v_file_path| 
@@ -10727,7 +10605,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                              end
                           end
                          
-                     elsif  !Dir.glob(v_dir_path_name_subjectid+"/*/*/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*/*/*Summary_Calculator_*.xlsx").empty? and Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv").empty? and (Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv.log").empty? or v_rerun_if_no_output =="Y")
+                     elsif  !Dir.glob(v_dir_path_name_subjectid+"/*/*/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*/*/*Summary_Calculator_*.xlsx").empty? and (Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv").empty? or v_rerun_outputs == "Y")  and (Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv.log").empty? or v_rerun_if_no_output =="Y")
                          puts "done 2 down ===="+v_dir_path_name_subjectid+"/*/*"
                          # get extra dir path 
                          Dir.glob(v_dir_path_name_subjectid+"/*/*/Summary.xls").each do |v_file_path| 
@@ -10748,7 +10626,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
                                 v_cnt = v_cnt +1
                              end
                           end
-                     elsif  !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*Summary_Calculator_*.xlsx").empty? and Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv").empty? and (Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv.log").empty? or v_rerun_if_no_output =="Y")
+                     elsif  !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*Summary_Calculator_*.xlsx").empty? and (Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv").empty? or v_rerun_outputs == "Y")  and (Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv.log").empty? or v_rerun_if_no_output =="Y")
                          #puts "done 3 down ===="+v_dir_path_name_subjectid+"/*/*/*"
                          # get extra dir path 
                          Dir.glob(v_dir_path_name_subjectid+"/*/*/*/Summary.xls").each do |v_file_path| 
