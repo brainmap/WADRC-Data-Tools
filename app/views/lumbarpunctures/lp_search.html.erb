@@ -83,6 +83,7 @@ edit_count =   edit_count -1
 <% end %>
 
 <%= link_to 'download csv', { :controller=>"lumbarpunctures", :action=>"lp_search", :lp_search =>  @lp_search_params.to_h , :format => :csv} %>  </p>
+<%= link_to 'download json', { :controller=>"lumbarpunctures", :action=>"lp_search", :lp_search =>  @lp_search_params.to_h , :format => :json} %>  </p>
 
 <table class="tabular">  
   <caption><%= pluralize(@results_total.size, 'Lumbarpuncture appt') %></caption>

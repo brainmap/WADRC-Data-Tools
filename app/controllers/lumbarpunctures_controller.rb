@@ -3,6 +3,7 @@ class LumbarpuncturesController < ApplicationController
   # GET /lumbarpunctures
   # GET /lumbarpunctures.xml
   require 'csv'   
+  require 'json/ext'
   before_action :set_lumbarpuncture, only: [:show, :edit, :update, :destroy]   
 	respond_to :html
   def index
@@ -39,6 +40,8 @@ class LumbarpuncturesController < ApplicationController
                                and appointments.appointment_date between ? and ?
                                and scan_procedure_id in (?))", @appointment.appointment_date-2.month,@appointment.appointment_date+2,scan_procedure_array).to_a
 
+  
+
     idx = @lumbarpunctures.index(@lumbarpuncture)
     @older_lumbarpuncture = idx + 1 >= @lumbarpunctures.size ? nil : @lumbarpunctures[idx + 1]
     @newer_lumbarpuncture = idx - 1 < 0 ? nil : @lumbarpunctures[idx - 1]
@@ -50,6 +53,31 @@ class LumbarpuncturesController < ApplicationController
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @lumbarpuncture }
+      format.json { render :json => @lumbarpuncture.to_json }
+    end
+  end
+
+  def json_lp
+
+    scan_procedure_array = []
+    scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+    hide_date_flag_array = []
+    hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+    @hide_page_flag = 'N'
+    if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+    end
+     
+    @lumbarpuncture = Lumbarpuncture.where("lumbarpunctures.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
+                                      appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
+                                      and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+
+    @appointment = Appointment.find(@lumbarpuncture.appointment_id)                            
+    @lumbarpuncture_json = @lumbarpuncture.to_json
+    respond_to do |format|
+      format.html # show.html.erb
+      format.xml  { render :xml => @lumbarpuncture }
+      format.json { render :json => @lumbarpuncture_json }
     end
   end
 
@@ -716,22 +744,66 @@ class LumbarpuncturesController < ApplicationController
     @results_tmp_csv.push(@export_file_title)
     @csv_array.push(@results_tmp_csv )
     @csv_array.push( @column_headers)
-    @results.each do |result| 
-       @results_tmp_csv = []
-       for i in 0..@column_number-1  # results is an array of arrays%>
-          @results_tmp_csv.push(result[i])
-       end 
-       @csv_array.push(@results_tmp_csv)
-    end 
+    if v_request_format_array[0] == "application/json"
+      @test_to_json_lumbarpunctures = Lumbarpuncture.where("id > 1800")
+      # want a unique id for lumbarpuncture - not dropping last column
+      @results.each do |result| 
+         @results_tmp_csv = []
+         for i in 0..@column_number  # results is an array of arrays%>
+            @results_tmp_csv.push(result[i])
+         end 
+         @csv_array.push(@results_tmp_csv)
+      end
+
+    else
+      @results.each do |result| 
+         @results_tmp_csv = []
+         for i in 0..@column_number-1  # results is an array of arrays%>
+            @results_tmp_csv.push(result[i])
+         end 
+         @csv_array.push(@results_tmp_csv)
+      end 
+    end
     @csv_str = @csv_array.inject([]) { |csv, row|  csv << CSV.generate_line(row) }.join("")  
      ### LOOK WHERE TITLE IS SHOWING UP
      @collection_title = 'All Lumbarpuncture appts'
+
+     # for json
+     # delete 1st row
+     # use 2nd row as key for all rest of rows
+     # make a hash of items in each row, 
+     # make a hash of the hash
+     # push this hash into an array
+     # makes the same json format as the @lumbarpunctures object
+     if v_request_format_array[0] == "application/json"
+        @csv_array_json = @csv_array
+        @csv_array_json.shift
+        @csv_array_json_header = @csv_array_json[0]
+        @csv_array_json_header.push("lumbarpuncture_id")
+        @csv_array_json.shift  # deleted the first row
+        @json_hash_of_hash = Hash[]
+        @json_array_of_hash = Array[]
+        @csv_array_json.each do |item|
+          @h = Hash[]
+          @h2 = Hash[]
+          v_cnt = 0
+          @csv_array_json_header.each do |header_col|
+            @h[header_col] = item[v_cnt]
+            v_cnt = v_cnt + 1
+          end
+         #@json_hash_of_hash[item[v_cnt-1]]= @h
+         @h2["lumbarpuncture"]= @h
+         @json_array_of_hash.push(@h2)
+        end
+
+    end
 
      respond_to do |format|
        format.xls # lp_search.xls.erb
        format.csv { send_data @csv_str }
        format.xml  { render :xml => @lumbarpunctures }       
        format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(50)} # lp_search.html.erb
+       format.json { render :json =>  @json_array_of_hash.to_json} # @test_to_json_lumbarpunctures}
      end
    end
   
