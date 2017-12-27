@@ -2565,7 +2565,7 @@ puts "bbbbb "+sql
           @h2 = Hash[]
           v_cnt = 0
           @csv_array_json_header.each do |header_col|
-            @h[header_col] = item[v_cnt]
+            @h[v_cnt.to_s+"_"+header_col] = item[v_cnt]
             v_cnt = v_cnt + 1
           end
          #@json_hash_of_hash[item[v_cnt-1]]= @h
