@@ -745,7 +745,6 @@ class LumbarpuncturesController < ApplicationController
     @csv_array.push(@results_tmp_csv )
     @csv_array.push( @column_headers)
     if v_request_format_array[0] == "application/json"
-      @test_to_json_lumbarpunctures = Lumbarpuncture.where("id > 1800")
       # want a unique id for lumbarpuncture - not dropping last column
       @results.each do |result| 
          @results_tmp_csv = []

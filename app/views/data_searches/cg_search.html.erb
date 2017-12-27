@@ -497,6 +497,40 @@ v_tn_cn_searchable_hash = []
       <%= submit_tag 'export CSV file'%> 
 
 <% end %>
+<%= form_tag '/cg_search.json' do%><!--- switching to csv - leaving rest xls unchanged -->
+    <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  @cg_search_params.to_h , :format => :xls, :method => :post}) %>
+    <%   v_link_to_elements = v_link_to_elements.gsub(/<a href="\/cg_search.xls\?/,'') 
+             v_link_to_elements = v_link_to_elements.gsub(/&amp;method=post">download xls<\/a>/,'')
+            # trying to trim the empty &'s
+             v_link_to_elements = v_link_to_elements.gsub(/^&amp;/,'') 
+             v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;')
+             v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;')
+             v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;')
+             v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'&amp;').gsub(/%5B/,'[').gsub(/%5D/,']').gsub(/%5D/,']').gsub(/%29/,')').gsub(/%28/,'(')
+     #        v_link_to_elements = v_link_to_elements.gsub(/&amp;&amp;/,'') 
+     #        v_link_to_elements = v_link_to_elements.gsub(/^&amp;/,'')   
+        v_link_array =[]
+        v_link_array = v_link_to_elements.split("\&amp\;") 
+        v_link_array.each do |v| 
+            v_name = ""
+            v_val =""
+	        (v_name,v_val) = v.split('=') 
+	        if !v_val.nil?
+     	        v_val = CGI::unescape(v_val)
+     	    end %>
+	     <%   if v_name == "cg_search[enumber]"   %>
+	      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
+	       <% else 
+                 if !v_val.nil?
+                     v_val = CGI.unescape(v_val) # gets rid of gsub(/\%2F/,"/").gsub(/\+/," ")
+                  end
+	       %>	
+            <%= hidden_field_tag v_name, v_val && v_val.gsub(/\%2F/,"/") %>	
+           <% end %>
+       <% end %>
+      <%= submit_tag 'export JSON file (experimental/in process)'%> 
+
+<% end %>
 
 <%= form_tag '/cg_search.csv' do%><!--- switching to csv - leaving this xls unchanged -->
     <% v_link_to_elements = (link_to 'download xls', { :controller=>"data_searches", :action=>"cg_search", :cg_search =>  @cg_search_params.to_h , :format => :xls, :method => :post}) %>

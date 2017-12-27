@@ -2201,8 +2201,16 @@ puts "bbbbb "+sql
       if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1" and  @local_fields.length() > 0
         @temp = []
       else
-        var.delete_at(0) # get rid of vgroup_id
-        var.delete_at(0) # get rid of extra copy of appt date
+        if v_request_format_array[0] == "application/json"
+          # not so simple - the 4 leading columns vs vgroup_id
+          v_tmp_array = var[0]
+          var.push(v_tmp_array)
+          var.delete_at(0) # get rid of vgroup_id
+          var.delete_at(0) # get rid of extra copy of appt date
+        else
+           var.delete_at(0) # get rid of vgroup_id
+           var.delete_at(0) # get rid of extra copy of appt date
+        end
       end
       if !params[:longitudinal].nil?  and params[:longitudinal] == "Y"
         # need vgroup_id in logintudinal to get participant_id or enrollment_id 
@@ -2521,17 +2529,51 @@ puts "bbbbb "+sql
     @results_tmp_csv.push(@export_file_title)
     @csv_array.push(@results_tmp_csv )
     @csv_array.push( @local_column_headers)
-    @results.each do |result| 
-       @results_tmp_csv = []
-       for i in 0..@column_number-1  # results is an array of arrays%>
-          @results_tmp_csv.push(result[i])
-       end 
-       @csv_array.push(@results_tmp_csv)
-    end 
+    if v_request_format_array[0] == "application/json"
+      # want a unique id for lumbarpuncture - not dropping last column
+      @results.each do |result| 
+         @results_tmp_csv = []
+         for i in 0..@column_number  # results is an array of arrays%>
+            @results_tmp_csv.push(result[i])
+         end 
+         @csv_array.push(@results_tmp_csv)
+      end 
+
+    else
+      @results.each do |result| 
+         @results_tmp_csv = []
+         for i in 0..@column_number-1  # results is an array of arrays%>
+            @results_tmp_csv.push(result[i])
+         end 
+         @csv_array.push(@results_tmp_csv)
+      end 
+     end
     @csv_str = @csv_array.inject([]) { |csv, row|  csv << CSV.generate_line(row) }.join("")  
 
   end   
   puts "end ="+@local_column_headers.join(',')
+       if v_request_format_array[0] == "application/json"
+        @csv_array_json = @csv_array
+        @csv_array_json.shift
+        @csv_array_json_header = @csv_array_json[0]
+        @csv_array_json_header.push("vgroup_id")
+        @csv_array_json.shift  # deleted the first row
+        @json_hash_of_hash = Hash[]
+        @json_array_of_hash = Array[]
+        @csv_array_json.each do |item|
+          @h = Hash[]
+          @h2 = Hash[]
+          v_cnt = 0
+          @csv_array_json_header.each do |header_col|
+            @h[header_col] = item[v_cnt]
+            v_cnt = v_cnt + 1
+          end
+         #@json_hash_of_hash[item[v_cnt-1]]= @h
+         @h2["vgroup_participant"]= @h
+         @json_array_of_hash.push(@h2)
+        end
+
+    end
       respond_to do |format|
         format.xls # cg_search.xls.erb
         if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?
@@ -2544,6 +2586,7 @@ puts "bbbbb "+sql
         end
         format.xml  { render :xml => @results }
         format.csv { send_data @csv_str }
+        format.json { render :json =>  @json_array_of_hash.to_json}
       end
      
     end
