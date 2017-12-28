@@ -1728,6 +1728,7 @@ end
       end
       @schedulerun.comment = v_comment
       if v_comment > "Missing dirs:" # send email set status = ""
+          @schedulerun.status_flag ="E"
           v_comment = "ERROR "+v_comment
           v_subject = "New missing dirs in "+v_process_name+": "+v_comment
           v_email = "noreply_johnson_lab@medicine.wisc.edu"
