@@ -1707,6 +1707,7 @@ end
       @schedulerun.comment ="starting check_if_raw_dirs_exist"
       @schedulerun.save
       @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.status_flag ="N"
       @schedulerun.save
       v_comment = "Missing dirs:"
       v_comment_warning ="" 
@@ -1726,19 +1727,11 @@ end
 
       end
       @schedulerun.comment = v_comment
-      if v_comment > "Missing dirs:" # send email
-          #v_runner_email = self.get_user_email()  #  want to send errors to the user running the process
-          v_schedule_owner_email_array = ['noreply_johnson_lab@medicine.wisc.edu']
-          #if !v_runner_email.blank?
-          #    v_schedule_owner_email_array.push(v_runner_email)
-          #else
-          #    v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
-          #end
-          v_schedule_owner_email_array.each do |e|
-                  v_subject = "New missing dirs in "+v_process_name+": "+v_comment
-                   PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
-           end
-
+      if v_comment > "Missing dirs:" # send email set status = ""
+          v_comment = "ERROR "+v_comment
+          v_subject = "New missing dirs in "+v_process_name+": "+v_comment
+          v_email = "noreply_johnson_lab@medicine.wisc.edu"
+          PandaMailer.schedule_notice(v_subject,{:send_to => v_email}).deliver
       end
     
 
