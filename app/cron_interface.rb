@@ -93,6 +93,9 @@ v_user = v_user.gsub("\n","")
  elsif v_value_1 == "change_log"  
       v_shared = Shared.new
       v_shared.run_change_log() 
+ elsif v_value_1 == "check_if_raw_dirs_exist"  
+      v_shared = Shared.new
+      v_shared.run_check_if_raw_dirs_exist()
       
  elsif v_value_1 == "test_sftp"
       v_shared = Shared.new

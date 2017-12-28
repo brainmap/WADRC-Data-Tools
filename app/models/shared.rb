@@ -1699,6 +1699,58 @@ end
     @schedulerun.save
   end
 
+  def run_check_if_raw_dirs_exist
+    v_base_path = Shared.get_base_path()
+     @schedule = Schedule.where("name in ('check_if_raw_dirs_exist')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting check_if_raw_dirs_exist"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = "Missing dirs:"
+      v_comment_warning ="" 
+      v_process_name = 'check_if_raw_dirs_exist'
+      v_missing_dir_array = ['/mounts/data/raw/bendlin.bfit.visit1/mri/bfit10011_1572_06052017','/mounts/data/raw/bendlin.adcp.visit1/mri/adcp2042_8626_09292017','/mounts/data/raw/adcs.a4.v27/mri/A41270257B_3235_09062017','/mounts/data/raw/ADNI-2/mri/ADNI3_PHANTOM_1565_11012016','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015','/mounts/data/raw/peppard.sleepcohort.visit1/mri/wscsPT1001_8120_10152014','/mounts/data/raw/peppard.sleepcohort.visit1/mri/wscsPT1002_8121_10152014','/mounts/data/raw/gleason.falls.visit1/fal00028_9602_01282010','/mounts/data/raw/johnson.merit220.visit1/mrtP00002','/mounts/data/raw/johnson.merit220.visit1/mrtP00001','/mounts/data/raw/bendlin_WMAD/ge3T_750_scanner/wmadP003','/mounts/data/raw/bendlin_WMAD/ge3T_750_scanner/wmadP002','/mounts/data/raw/bendlin_WMAD/ge3T_750_scanner/wmadpilot1'] # the known bad ones
+      @mri_visits = Visit.all
+      @mri_visits.each do |v_mri_visit|
+        v_path = v_mri_visit.path
+        if  !v_path.nil? and v_path > '' and !v_missing_dir_array.include?(v_path)
+          if File.directory?(v_path)
+           # all good
+          else
+              v_comment = v_comment+"; "+v_path
+          end
+ 
+        end
+
+      end
+      @schedulerun.comment = v_comment
+      if v_comment > "Missing dirs:" # send email
+          #v_runner_email = self.get_user_email()  #  want to send errors to the user running the process
+          v_schedule_owner_email_array = ['noreply_johnson_lab@medicine.wisc.edu']
+          #if !v_runner_email.blank?
+          #    v_schedule_owner_email_array.push(v_runner_email)
+          #else
+          #    v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+          #end
+          v_schedule_owner_email_array.each do |e|
+                  v_subject = "New missing dirs in "+v_process_name+": "+v_comment
+                   PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
+           end
+
+      end
+    
+
+    @schedulerun.comment =("successful finish check_if_raw_dirs_exist "+v_comment_warning+" "+@schedulerun.comment[0..1990])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
+  end
+
   def run_fsl_first_volumes
 
     v_base_path = Shared.get_base_path()
