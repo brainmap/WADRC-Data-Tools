@@ -107,6 +107,13 @@ class Petscan < ActiveRecord::Base
         # check for file with enum 
         vgroup = Vgroup.find(p_vgroup_id)
         (vgroup.enrollments).each do |e|   # need case insensitive match 
+          # adcp#### needs to be adcp_##### for pattern match
+          if (e.enumber).start_with? "adcp"
+               v_last_four_chars = (e.enumber)[-4..-1]
+               if !v_last_four_chars.include? "_" and  v_last_four_chars =~ /^[0-9]+$/ 
+                      e.enumber = "adcp_"+v_last_four_chars
+              end
+          end
           if !Dir.glob(v_path+e.enumber+"*", File::FNM_CASEFOLD).empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).empty?
             v_cnt = 0
             Dir.glob(v_path+e.enumber+"*", File::FNM_CASEFOLD).each do |f|
