@@ -2351,6 +2351,9 @@ puts "bbbbb "+sql
     if !params[:longitudinal].nil? and params[:longitudinal] == "Y" and !@cg_query.participant_centric.nil? and ( @cg_query.participant_centric == "1" or  @cg_query.participant_centric == "2"  ) and @local_fields.length() > 0  
 # UP TO HERE 
        # first colum IS participant id -- no sp or enrollment cols in summary
+       if @cg_query.participant_centric == "2"
+            @local_column_headers.delete_at(0)
+       end
        v_max_length = 0
        @participants = []
        @participant_result = {}
@@ -2365,6 +2368,11 @@ puts "bbbbb "+sql
           r.delete_at(0)
           # ??? getting 2 
           r.delete_at(0)
+          if @cg_query.participant_centric == "2"  # extra p_id?
+               r.delete_at(0)
+          end
+
+
           if @participant_result[v_participant_id].nil? and !v_participant_id.nil? and v_participant_id > ''
              puts "bbbbp.id="+v_participant_id.to_s+"===" +r[0].to_s+"==="+r[1].to_s
 
