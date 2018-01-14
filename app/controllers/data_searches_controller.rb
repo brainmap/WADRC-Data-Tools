@@ -1832,7 +1832,7 @@ class DataSearchesController < ApplicationController
           @local_column_headers.delete_at(@local_column_headers.index("RMR"))
       end
       if !@cg_query.participant_centric.nil? and ( @cg_query.participant_centric == "1" or @cg_query.participant_centric == "2" )   and @local_fields.length() > 0 and !params[:longitudinal].nil? and params[:longitudinal] == "Y"
-                @local_fields = ["vgroups.participant_id"].concat(@local_fields)   # for @cg_query.participant_centric == "2" adding leading view_participants.id - could trailing  vgroups.participant_id be used instead
+                @local_fields = ["vgroups.participant_id"].concat(@local_fields)   # for @cg_query.participant_centric == "2" adding leading vgroups.participant_id - could trailing  vgroups.participant_id be used instead
       end
       @column_number =   @local_column_headers.size
       if v_debug == "Y"
@@ -2010,7 +2010,7 @@ class DataSearchesController < ApplicationController
     end
              # putting participant_id out front to get enumber 
   if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "2"
-        @local_fields.unshift("view_participants.id")  # might have been able to use vgroups.participant_id ==> the last column in participant_centric's ???/
+        @local_fields.unshift("vgroups.participant_id as p_id")  # might have been able to use vgroups.participant_id ==> the last column in participant_centric's ???/
   end
 
     if v_includes_hide_date_tns  == "Y"
@@ -2203,10 +2203,14 @@ puts "bbbbb "+sql
         if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1" and  @local_fields.length() > 0 
            # not do anything
         elsif !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "2" and  @local_fields.length() > 0 
+          if var[0].to_s > ''
                     sql_enum = "SELECT distinct enrollments.enumber 
                 FROM enrollments where enrollments.participant_id  in ("+var[0].to_s+")"
-          @results_enum = connection.execute(sql_enum)
-          @temp[0] =@results_enum.to_a.join(", ")
+                @results_enum = connection.execute(sql_enum)
+                @temp[0] =@results_enum.to_a.join(", ")
+          else
+               @temp[0] =""
+          end
           #@temp[1] = var[0].to_s
 
         else
@@ -2384,6 +2388,14 @@ puts "bbbbb "+sql
                  v_participant = Participant.find(p)
                  longitudinal_base_array.push(v_participant.reggieid)
                  longitudinal_base_array.push(v_participant.wrapnum)
+                 if @cg_query.participant_centric == "2" #enumber
+                      enrollment_array = []
+                      v_enrollments = Enrollment.where("participant_id in (?)",p)
+                      v_enrollments.each do |e|
+                           enrollment_array.push( e.enumber  )
+                      end
+                      longitudinal_base_array.push((enrollment_array.uniq).join(', '))
+                 end
                  @participant_result[p] = longitudinal_base_array + @participant_result[p]
                  @results.push(@participant_result[p])
                  # add new lead columns
@@ -2396,6 +2408,9 @@ puts "bbbbb "+sql
              end
        end
        v_longitudinal_base_col = ['Reggieid','Wrapno']
+       if @cg_query.participant_centric == "2"  # enumbers
+            v_longitudinal_base_col = ['Reggieid','Wrapno','Enumber']
+       end
       @local_column_headers = v_longitudinal_base_col + @longitudinal_column_headers
       # add new lead columns
       @column_number = @local_column_headers.size
