@@ -1028,7 +1028,9 @@ class DataSearchesController < ApplicationController
           
             if params[:cg_search][:enumber].include?(',') # string of enumbers
              v_enumber =  params[:cg_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
+             v_enumber = v_enumber.gsub(/,$/,"")  # trimming trailing comma 
              v_enumber = v_enumber.gsub(/,/,"','")
+             
              v_condition ="   appointments.id in (select a2.id from enrollment_vgroup_memberships,enrollments, appointments a2
                   where enrollment_vgroup_memberships.vgroup_id= a2.vgroup_id 
                    and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) "+v_in_not_in+" ('"+v_enumber.gsub(/[\\;:"()=<>]/, '')+"'))"
@@ -1459,6 +1461,7 @@ class DataSearchesController < ApplicationController
                            # letting wrapno, reggieid, adrcnum be IN () condition
                            if @cg_query_tn_cn.value_1.include?(',') and ((@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.wrapnum" or (@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.adrcnum" or (@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.reggieid" )
                               @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/ /,'').gsub(/'/,'').gsub(/ /,'').gsub(/\t/,'').gsub(/\n/,'').gsub(/\r/,'')
+                              @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/,$/,"") # trailing comma
                               @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/,/,"','")
                               v_condition =  " "+@local_tables_alias_hash[@cg_tn.tn]+"."+@cg_tn_cn.cn+" in ( '"+@cg_query_tn_cn.value_1.gsub(/[;:"()=<>]/, '')+"')"
                            else
@@ -1794,7 +1797,7 @@ class DataSearchesController < ApplicationController
         @local_tables.push("scan_procedures_vgroups")
         @local_tables_alias_hash["scan_procedures_vgroups"]
         @fields_front =[]
-        if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0
+        if !@cg_query.participant_centric.nil? and ( @cg_query.participant_centric == "1" or @cg_query.participant_centric == "2" ) and @local_fields.length() > 0
            # do not want to add vgroup centric columns
            # not working yet  @order_by =[]   # newer version of mysql 5.7 in dev? only do order by on columns in select? 
              # breaks all the longitudinal stuff
@@ -1822,8 +1825,14 @@ class DataSearchesController < ApplicationController
           @local_column_headers.delete_at(@local_column_headers.index("Enumber"))
           @local_column_headers.delete_at(@local_column_headers.index("RMR"))
       end
-      if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0 and !params[:longitudinal].nil? and params[:longitudinal] == "Y"
-                @local_fields = ["vgroups.participant_id"].concat(@local_fields)
+      if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "2"  and @local_fields.length() > 0
+          @local_column_headers.delete_at(@local_column_headers.index("Date (vgroup)"))
+          @local_column_headers.delete_at(@local_column_headers.index("Protocol"))
+         # @local_column_headers.delete_at(@local_column_headers.index("Enumber"))
+          @local_column_headers.delete_at(@local_column_headers.index("RMR"))
+      end
+      if !@cg_query.participant_centric.nil? and ( @cg_query.participant_centric == "1" or @cg_query.participant_centric == "2" )   and @local_fields.length() > 0 and !params[:longitudinal].nil? and params[:longitudinal] == "Y"
+                @local_fields = ["vgroups.participant_id"].concat(@local_fields)   # for @cg_query.participant_centric == "2" adding leading view_participants.id - could trailing  vgroups.participant_id be used instead
       end
       @column_number =   @local_column_headers.size
       if v_debug == "Y"
@@ -1840,14 +1849,14 @@ class DataSearchesController < ApplicationController
       end
   if !params[:cg_search].blank? and !@table_types.blank? and !@table_types.index('base').blank?
     if v_debug == "Y"
-        puts "jjjjjjjj line 1821"
+        puts "jjjjjjjj line 1849"
     end
 
     @local_conditions.delete_if {|x| x == "" }   # a blank getting inserted 
    # moved further down - hide cols sql = " select distinct "+@local_fields.join(',')+" from "
     @all_tables = []
     # participant_centic order by 
-    if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0
+    if !@cg_query.participant_centric.nil? and ( @cg_query.participant_centric == "1" or @cg_query.participant_centric == "2" )   and @local_fields.length() > 0
        @all_table_ids_in_query.uniq.each do |r|
              v_cg_tn_cns = CgTnCn.where("cg_tn_id in (?) and order_by_flag in (?)",r,'Y')
              v_cg_tn_cns.each do |n|   # need to only include tables which are in tn_id in select  #ERROR!!!
@@ -1999,6 +2008,10 @@ class DataSearchesController < ApplicationController
          end
          # need same thing for path and secondary key
     end
+             # putting participant_id out front to get enumber 
+  if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "2"
+        @local_fields.unshift("view_participants.id")  # might have been able to use vgroups.participant_id ==> the last column in participant_centric's ???/
+  end
 
     if v_includes_hide_date_tns  == "Y"
         # need to exclude hide columns   # format tn.cn # up tables hide other date columns
@@ -2170,7 +2183,7 @@ puts "bbbbb "+sql
              @temp[0] = ""
               end
         end
-      if @html_request =="N"  and @local_fields.length() > 0 and (@cg_query.participant_centric.nil? or (!@cg_query.participant_centric.nil? and @cg_query.participant_centric != "1" ) )
+      if @html_request =="N"  and @local_fields.length() > 0 and (@cg_query.participant_centric.nil? or (!@cg_query.participant_centric.nil? and @cg_query.participant_centric != "1" and @cg_query.participant_centric != "2" ) )
           sql_sp = "SELECT distinct scan_procedures.codename 
                 FROM scan_procedures, scan_procedures_vgroups
                 WHERE scan_procedures.id = scan_procedures_vgroups.scan_procedure_id
@@ -2184,10 +2197,18 @@ puts "bbbbb "+sql
                 AND enrollment_vgroup_memberships.vgroup_id = "+var[0].to_s
           @results_enum = connection.execute(sql_enum)
           @temp[2] =@results_enum.to_a.join(", ")
+
           
       else  # need to only get the sp and enums which are displayed - and need object to make link
         if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1" and  @local_fields.length() > 0 
            # not do anything
+        elsif !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "2" and  @local_fields.length() > 0 
+                    sql_enum = "SELECT distinct enrollments.enumber 
+                FROM enrollments where enrollments.participant_id  in ("+var[0].to_s+")"
+          @results_enum = connection.execute(sql_enum)
+          @temp[0] =@results_enum.to_a.join(", ")
+          #@temp[1] = var[0].to_s
+
         else
            @temp[1] = var[0].to_s
            @temp[2] = var[0].to_s
@@ -2200,6 +2221,9 @@ puts "bbbbb "+sql
       end
       if !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1" and  @local_fields.length() > 0
         @temp = []
+      elsif !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "2" and  @local_fields.length() > 0
+        # @temp = [] #not doing anything???
+        var.delete_at(0) # get rid of view_particpant.id
       else
         if v_request_format_array[0] == "application/json"
           # not so simple - the 4 leading columns vs vgroup_id
@@ -2320,7 +2344,7 @@ puts "bbbbb "+sql
      end
     end
 
-    if !params[:longitudinal].nil? and params[:longitudinal] == "Y" and !@cg_query.participant_centric.nil? and @cg_query.participant_centric == "1"  and @local_fields.length() > 0  
+    if !params[:longitudinal].nil? and params[:longitudinal] == "Y" and !@cg_query.participant_centric.nil? and ( @cg_query.participant_centric == "1" or  @cg_query.participant_centric == "2"  ) and @local_fields.length() > 0  
 # UP TO HERE 
        # first colum IS participant id -- no sp or enrollment cols in summary
        v_max_length = 0

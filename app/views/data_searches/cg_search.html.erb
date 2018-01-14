@@ -35,6 +35,7 @@ v_join_type_hash =[['Inner','0'],['Outer','1'],['NOT IN','2']]  #UP TO HERE
 v_join_type_inner_outer_hash =[['Inner','0'],['Outer','1']]
 v_conditions_hash = [['=','0'],['>=','1'],['<=','2'],['!=','3'],['is blank','5'],['is not blank','6'],['contains','7']]
 v_conditions_between_hash = [['=','0'],['>=','1'],['<=','2'],['!=','3'],['between','4'],['is blank','5'],['is not blank','6'],['contains','7']]
+v_participant_centric_type_hash = [['Not Participant Centric','0'],['Participant Centric','1'],['Participant Centric plus enumber/subjectid','2']]
 
 # make array of tn_id from cg add table
 # @add_cg_tn_id = [] initalized in controller, populated from stored query also
@@ -258,18 +259,26 @@ v_tn_cn_searchable_hash = []
 	</td></tr>
 <% elsif tn.common_name == "Participants"%>
           <% 
-              v_participant_centric = "FALSE"
+              v_participant_centric = "0"
               if @cg_query.participant_centric == "1" # should have been setting up above
-                  v_participant_centric = "TRUE"
+                  v_participant_centric = "1"
                   params[:cg_search][:participant_centric] = "1"
               end
-              if !params[:cg_search].blank? and !params[:cg_search][:participant_centric].blank? and params[:cg_search][:participant_centric] == "1"
-                        v_participant_centric = "TRUE"
+              if @cg_query.participant_centric == "2" # should have been setting up above
+                  v_participant_centric = "2"
+                  params[:cg_search][:participant_centric] = "2"
+              end
+              if !params[:cg_search].blank? and !params[:cg_search][:participant_centric].blank? and (params[:cg_search][:participant_centric] == "1" or params[:cg_search][:participant_centric] == "2")
+                        v_participant_centric = params[:cg_search][:participant_centric]
               end
            %>
-<tr><td colspan="5"><%= check_box_tag "participant_centric", "1", v_participant_centric == "FALSE" ? FALSE : TRUE , :name => "cg_search[participant_centric]" %>
+<tr><td colspan="5"><!-- <%= check_box_tag "participant_centric", "1", v_participant_centric == "FALSE" ? FALSE : TRUE , :name => "cg_search[participant_centric]" %> changing to multi  options-->
+<%= select  :cg_search,"participant_centric]", options_for_select(v_participant_centric_type_hash, v_participant_centric  ),
+							              {:prompt => 'Select Participant Centric level'}  %>
+
 	<b><big>Participant Centric output:&nbsp;&nbsp;&nbsp;</big></b><small>links data to the participant instead of to mri, pet, etc. visits
 <!-- <%= check_box_tag "participant_centric", "1", v_participant_centric == "FALSE" ? FALSE : TRUE , :name => "cg_search[participant_centric]" %> -->
+
 	</td></tr>
 <% end %>
              <tr><td><%= hidden_field(:cg_search, "tn_id][", :value=>tn.id.to_s) %>
@@ -621,7 +630,7 @@ v_tn_cn_searchable_hash = []
 	</td></tr></tfoot>
 		 <% @results.each do |result| %>
 		    <%  
-         if @cg_query.participant_centric == "1" %>
+         if @cg_query.participant_centric == "1" or @cg_query.participant_centric == "2"%>
            <tr>
            	<% for i in 0..@column_number-1  # results is an array of arrays%>
 			      <td><%= result[i] %></td>
