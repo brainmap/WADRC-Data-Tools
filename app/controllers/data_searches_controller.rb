@@ -1025,7 +1025,7 @@ class DataSearchesController < ApplicationController
             if !params[:cg_search][:enumber_not_in].blank? and params[:cg_search][:enumber_not_in] == "1"
                 v_in_not_in = " not in "
              end
-          
+            params[:cg_search][:enumber] = params[:cg_search][:enumber].gsub(/\xef\xbc\x8c/,',').gsub(/\\xef\\xbc\\x8c/,',') # utf-8 full length comma - ? fron IE out of excel?
             if params[:cg_search][:enumber].include?(',') # string of enumbers
              v_enumber =  params[:cg_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
              v_enumber = v_enumber.gsub(/,$/,"")  # trimming trailing comma 
@@ -1459,6 +1459,9 @@ class DataSearchesController < ApplicationController
                          # [['=','0'],['>=','1'],['<=','2'],['!=','3'],['between','4'],['is blank','5']]
                          if @cg_query_tn_cn.condition == 0 
                            # letting wrapno, reggieid, adrcnum be IN () condition
+                           if !@cg_query_tn_cn.value_1.blank?
+                               @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/\xef\xbc\x8c/,',').gsub(/\\xef\\xbc\\x8c/,',') # utf-8 full width comma - ? coming from IE from excel?
+                           end
                            if @cg_query_tn_cn.value_1.include?(',') and ((@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.wrapnum" or (@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.adrcnum" or (@cg_tn.tn+"."+@cg_tn_cn.cn) == "view_participants.reggieid" )
                               @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/ /,'').gsub(/'/,'').gsub(/ /,'').gsub(/\t/,'').gsub(/\n/,'').gsub(/\r/,'')
                               @cg_query_tn_cn.value_1 = @cg_query_tn_cn.value_1.gsub(/,$/,"") # trailing comma
