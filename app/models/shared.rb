@@ -10594,7 +10594,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           # add check if output.csv was made
           #connection = ActiveRecord::Base.connection();
 
-          v_analyses_path = v_base_path+"/analyses/PCVIPR/"
+          v_analyses_path = v_base_path+"/analyses/PCVIPR/4DFLOW_DATA/"
 
           # go to directory, get list of directories. - could check if there is a scan_procedure
           Dir.glob(v_analyses_path+"/*").each do |v_dir_path_name| 
@@ -10724,7 +10724,7 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           v_file_header_expected ="Left ICA - Cervical (Inferior):maxV,Left ICA - Petrous (Superior):maxV,Right ICA - Cervical (Inferior):maxV,Right ICA - Petrous (Superior):maxV,Basilar Artery:maxV,Left MCA:maxV,Right MCA:maxV,Left PCA:maxV,Right PCA:maxV,SS Sinus:maxV,Straight Sinus:maxV,Left ICA - Cervical (Inferior):Mean Flow,Left ICA - Petrous (Superior):Mean Flow,Right ICA - Cervical (Inferior):Mean Flow,Right ICA - Petrous (Superior):Mean Flow,Basilar Artery:Mean Flow,Left MCA:Mean Flow,Right MCA:Mean Flow,Left PCA:Mean Flow,Right PCA:Mean Flow,SS Sinus:Mean Flow,Straight Sinus:Mean Flow,LeftTS:Mean Flow,RightTS:Mean Flow,Left ICA - Cervical (Inferior):Pulsatility Index,Left ICA - Petrous (Superior):Pulsatility Index,Right ICA - Cervical (Inferior):Pulsatility Index,Right ICA - Petrous (Superior):Pulsatility Index,Basilar Artery:Pulsatility Index,Left MCA:Pulsatility Index,Right MCA:Pulsatility Index,Left PCA:Pulsatility Index,Right PCA:Pulsatility Index,SS Sinus:Pulsatility Index,Straight Sinus:Pulsatility Index,LeftTS:Pulsatility Index,RightTS:Pulsatility Index,Left ICA - Cervical (Inferior):Boolean,Left ICA - Petrous (Superior):Boolean,Right ICA - Cervical (Inferior):Boolean,Right ICA - Petrous (Superior):Boolean,Basilar Artery:Boolean,Left MCA:Boolean,Right MCA:Boolean,Left PCA:Boolean,Right PCA:Boolean,SS Sinus:Boolean,Straight Sinus:Boolean"
           v_column_list = "left_ica_cervical_inferior,left_ica_petrous_superior,right_ica_cervical_inferior,right_ica_petrous_superior,basilar_artery,left_mca,right_mca,left_pca,right_pca,ss_sinus,straight_sinus,left_ica_cervical_inferior_mean_flow,left_ica_petrous_superior_mean_flow,right_ica_cervical_inferior_mean_flow,right_ica_petrous_superior_mean_flow,basilar_artery_mean_flow,left_mca_mean_flow,right_mca_mean_flow,left_pca_mean_flow,right_pca_mean_flow,ss_sinus_mean_flow,straight_sinus_mean_flow,leftts_mean_flow,rightts_mean_flow,left_ica_cervical_inferior_pulsatility_index,left_ica_petrous_superior_pulsatility_index,right_ica_cervical_inferior_pulsatility_index,right_ica_petrous_superior_pulsatility_index,basilar_artery_pulsatility_index,left_mca_pulsatility_index,right_mca_pulsatility_index,left_pca_pulsatility_index,right_pca_pulsatility_index,ss_sinus_pulsatility_index,straight_sinus_pulsatility_index,leftts_pulsatility_index,rightts_pulsatility_index,left_ica_cervical_inferior_boolean,left_ica_petrous_superior_boolean,right_ica_cervical_inferior_boolean,right_ica_petrous_superior_boolean,basilar_artery_boolean,left_mca_boolean,right_mca_boolean,left_pca_boolean,right_pca_boolean,ss_sinus_boolean,straight_sinus_boolean"
          # Directory Name,file_name, == dir name
-          v_analyses_path = v_base_path+"/analyses/PCVIPR/"
+          v_analyses_path = v_base_path+"/analyses/PCVIPR/4DFLOW_DATA/"
 puts "v_analyses_path="+v_analyses_path
           sql = "truncate table cg_pcvipr_values_new"
           connection = ActiveRecord::Base.connection();        
