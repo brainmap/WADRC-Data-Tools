@@ -10719,7 +10719,10 @@ puts " /tmp dir = "+"/tmp/"+v_dir_target+"/*/*.*  0. 1. 2. *.dcm"
           @schedulerun.start_time = @schedulerun.created_at
           @schedulerun.save
           v_comment =""
+          v_comment_warning = ""
           v_shared = Shared.new
+          v_trtype_id = 2 # pcvipr tracker typeid
+          v_second_viewer_flag = "N" # populate from tracker record
 
           v_file_header_expected ="Left ICA - Cervical (Inferior):maxV,Left ICA - Petrous (Superior):maxV,Right ICA - Cervical (Inferior):maxV,Right ICA - Petrous (Superior):maxV,Basilar Artery:maxV,Left MCA:maxV,Right MCA:maxV,Left PCA:maxV,Right PCA:maxV,SS Sinus:maxV,Straight Sinus:maxV,Left ICA - Cervical (Inferior):Mean Flow,Left ICA - Petrous (Superior):Mean Flow,Right ICA - Cervical (Inferior):Mean Flow,Right ICA - Petrous (Superior):Mean Flow,Basilar Artery:Mean Flow,Left MCA:Mean Flow,Right MCA:Mean Flow,Left PCA:Mean Flow,Right PCA:Mean Flow,SS Sinus:Mean Flow,Straight Sinus:Mean Flow,LeftTS:Mean Flow,RightTS:Mean Flow,Left ICA - Cervical (Inferior):Pulsatility Index,Left ICA - Petrous (Superior):Pulsatility Index,Right ICA - Cervical (Inferior):Pulsatility Index,Right ICA - Petrous (Superior):Pulsatility Index,Basilar Artery:Pulsatility Index,Left MCA:Pulsatility Index,Right MCA:Pulsatility Index,Left PCA:Pulsatility Index,Right PCA:Pulsatility Index,SS Sinus:Pulsatility Index,Straight Sinus:Pulsatility Index,LeftTS:Pulsatility Index,RightTS:Pulsatility Index,Left ICA - Cervical (Inferior):Boolean,Left ICA - Petrous (Superior):Boolean,Right ICA - Cervical (Inferior):Boolean,Right ICA - Petrous (Superior):Boolean,Basilar Artery:Boolean,Left MCA:Boolean,Right MCA:Boolean,Left PCA:Boolean,Right PCA:Boolean,SS Sinus:Boolean,Straight Sinus:Boolean"
           v_column_list = "left_ica_cervical_inferior,left_ica_petrous_superior,right_ica_cervical_inferior,right_ica_petrous_superior,basilar_artery,left_mca,right_mca,left_pca,right_pca,ss_sinus,straight_sinus,left_ica_cervical_inferior_mean_flow,left_ica_petrous_superior_mean_flow,right_ica_cervical_inferior_mean_flow,right_ica_petrous_superior_mean_flow,basilar_artery_mean_flow,left_mca_mean_flow,right_mca_mean_flow,left_pca_mean_flow,right_pca_mean_flow,ss_sinus_mean_flow,straight_sinus_mean_flow,leftts_mean_flow,rightts_mean_flow,left_ica_cervical_inferior_pulsatility_index,left_ica_petrous_superior_pulsatility_index,right_ica_cervical_inferior_pulsatility_index,right_ica_petrous_superior_pulsatility_index,basilar_artery_pulsatility_index,left_mca_pulsatility_index,right_mca_pulsatility_index,left_pca_pulsatility_index,right_pca_pulsatility_index,ss_sinus_pulsatility_index,straight_sinus_pulsatility_index,leftts_pulsatility_index,rightts_pulsatility_index,left_ica_cervical_inferior_boolean,left_ica_petrous_superior_boolean,right_ica_cervical_inferior_boolean,right_ica_petrous_superior_boolean,basilar_artery_boolean,left_mca_boolean,right_mca_boolean,left_pca_boolean,right_pca_boolean,ss_sinus_boolean,straight_sinus_boolean"
@@ -10737,6 +10740,9 @@ puts "v_analyses_path="+v_analyses_path
                 puts "-bbbbb "+v_dir_path_name
                 puts "sp ="+v_dir_path_name.split("/").last+"="
                v_scan_procedures = ScanProcedure.where("scan_procedures.codename in (?)",v_dir_path_name.split("/").last)
+               # add check that internal subject_id sp matches top dir sp
+               # add check that pcvipr has second view flag=Y
+
                if !v_scan_procedures.nil? and !v_scan_procedures[0].nil?
                   puts v_scan_procedures[0].codename
                   v_dir_path_name_done = v_dir_path_name+"/"+v_dir_path_name.split("/").last+".done"
@@ -10774,25 +10780,51 @@ puts "v_analyses_path="+v_analyses_path
                                v_comment = v_return_comment+" \n"+v_comment
                                puts v_return_comment               
                              else
-                               puts v_return_comment
-                               v_comment = v_return_comment+v_comment
-                               v_comment = v_comment[0..1499]
-                               v_cnt = 0
-                               v_line_array = []
-                               File.open(v_file_path,'r') do |file_a|
-                               while line = file_a.gets
-                                 if v_cnt > 0
-                                   sql = "insert into cg_pcvipr_values_new ( file_name,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
-                                   v_line_array = []
-                                   line.gsub(/\n/,"").split(",").each do |v|
-                                     v_line_array.push("'"+v+"'")
-                                   end 
-                                   sql = sql+v_line_array.join(",")
-                                   sql = sql+")"
-                                   results = connection.execute(sql)                    
-                                 end
-                                 v_cnt = v_cnt + 1
+                               v_subject_id_sp_id = v_shared.get_sp_id_from_subjectid_v(v_subjectid)
+                               v_second_viewer_flag = "N"
+                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid)
+                               if !@trfiles.nil? and !@trfiles[0].nil?
+                                   # get last edit
+                                   @tredits = Tredit.where("trfile_id in (?)",@trfiles[0].id).order("tredits.id desc")
+                                   v_tredit_id = @tredits[0].id
+                                   # the individual fields
+                                   v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                                   if !v_tractiontypes.nil?
+                                       v_tractiontypes.each do |tat|
+                                           v_tredit_action = TreditAction.where("tredit_id in (?)",v_tredit_id).where("tractiontype_id in (?)", tat.id)
+                                           if tat.id == 79 # load
+                                               if  !v_tredit_action[0].nil? and !v_tredit_action[0].value.nil? and v_tredit_action[0].value == "1"
+                                                   v_second_viewer_flag = "Y"
+                                               end
+                                            end
+                                       end
+                                   end
                                end
+                               if v_subject_id_sp_id != v_scan_procedures[0].id   # difference between directory and subject sp - ussually a missing _v#
+                                      v_comment_warning = v_comment_warning+"; sp mismatch "+v_subjectid+" sp="+v_scan_procedures[0].id .to_s
+                               elsif v_second_viewer_flag == "N"
+                                     v_comment = v_comment+"; "+v_subjectid+" not done"
+                               else
+                                   puts v_return_comment
+                                   v_comment = v_return_comment+v_comment
+                                   v_comment = v_comment[0..1499]
+                                   v_cnt = 0
+                                   v_line_array = []
+                                   File.open(v_file_path,'r') do |file_a|
+                                   while line = file_a.gets
+                                     if v_cnt > 0
+                                       sql = "insert into cg_pcvipr_values_new ( file_name,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
+                                       v_line_array = []
+                                       line.gsub(/\n/,"").split(",").each do |v|
+                                         v_line_array.push("'"+v+"'")
+                                       end 
+                                       sql = sql+v_line_array.join(",")
+                                       sql = sql+")"
+                                       results = connection.execute(sql)                    
+                                     end
+                                     v_cnt = v_cnt + 1
+                                   end
+                               end # end mismatch sp's
                              end
                           end
                         end
@@ -10816,25 +10848,51 @@ puts "v_analyses_path="+v_analyses_path
                                v_comment = v_return_comment+" \n"+v_comment
                                puts v_return_comment               
                              else
-                               puts v_return_comment
-                               v_comment = v_return_comment+v_comment
-                               v_comment = v_comment[0..1499]
-                               v_cnt = 0
-                               v_line_array = []
-                               File.open(v_file_path,'r') do |file_a|
-                               while line = file_a.gets
-                                 if v_cnt > 0
-                                   sql = "insert into cg_pcvipr_values_new ( file_name,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
-                                   v_line_array = []
-                                   line.gsub(/\n/,"").split(",").each do |v|
-                                     v_line_array.push("'"+v+"'")
-                                   end 
-                                   sql = sql+v_line_array.join(",")
-                                   sql = sql+")"
-                                   results = connection.execute(sql)                    
-                                 end
-                                 v_cnt = v_cnt + 1
+                               v_subject_id_sp_id = v_shared.get_sp_id_from_subjectid_v(v_subjectid)
+                               v_second_viewer_flag = "N"
+                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid)
+                               if !@trfiles.nil? and !@trfiles[0].nil?
+                                   # get last edit
+                                   @tredits = Tredit.where("trfile_id in (?)",@trfiles[0].id).order("tredits.id desc")
+                                   v_tredit_id = @tredits[0].id
+                                   # the individual fields
+                                   v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                                   if !v_tractiontypes.nil?
+                                       v_tractiontypes.each do |tat|
+                                           v_tredit_action = TreditAction.where("tredit_id in (?)",v_tredit_id).where("tractiontype_id in (?)", tat.id)
+                                           if tat.id == 79 # load
+                                               if  !v_tredit_action[0].nil? and !v_tredit_action[0].value.nil? and v_tredit_action[0].value == "1"
+                                                   v_second_viewer_flag = "Y"
+                                               end
+                                            end
+                                       end
+                                   end
                                end
+                               if v_subject_id_sp_id != v_scan_procedures[0].id   # difference between directory and subject sp - ussually a missing _v#
+                                      v_comment_warning = v_comment_warning+"; sp mismatch "+v_subjectid+" sp="+v_scan_procedures[0].id .to_s
+                               elsif v_second_viewer_flag == "N"
+                                     v_comment = v_comment+"; "+v_subjectid+" not done"
+                               else
+                                   puts v_return_comment
+                                   v_comment = v_return_comment+v_comment
+                                   v_comment = v_comment[0..1499]
+                                   v_cnt = 0
+                                   v_line_array = []
+                                   File.open(v_file_path,'r') do |file_a|
+                                   while line = file_a.gets
+                                     if v_cnt > 0
+                                        sql = "insert into cg_pcvipr_values_new ( file_name,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
+                                        v_line_array = []
+                                        line.gsub(/\n/,"").split(",").each do |v|
+                                          v_line_array.push("'"+v+"'")
+                                        end 
+                                        sql = sql+v_line_array.join(",")
+                                        sql = sql+")"
+                                        results = connection.execute(sql)                    
+                                     end
+                                     v_cnt = v_cnt + 1
+                                   end
+                                end # sp mismatch
                              end
                           end
                         end
@@ -10858,25 +10916,51 @@ puts "v_analyses_path="+v_analyses_path
                                v_comment = v_return_comment+" \n"+v_comment
                                puts v_return_comment               
                              else
-                               puts v_return_comment
-                               v_comment = v_return_comment+v_comment
-                               v_comment = v_comment[0..1499]
-                               v_cnt = 0
-                               v_line_array = []
-                               File.open(v_file_path,'r') do |file_a|
-                               while line = file_a.gets
-                                 if v_cnt > 0
-                                   sql = "insert into cg_pcvipr_values_new ( file_name,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
-                                   v_line_array = []
-                                   line.gsub(/\n/,"").split(",").each do |v|
-                                     v_line_array.push("'"+v+"'")
-                                   end 
-                                   sql = sql+v_line_array.join(",")
-                                   sql = sql+")"
-                                   results = connection.execute(sql)                    
-                                 end
-                                 v_cnt = v_cnt + 1
+                               v_subject_id_sp_id = v_shared.get_sp_id_from_subjectid_v(v_subjectid)
+                               v_second_viewer_flag = "N"
+                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid)
+                               if !@trfiles.nil? and !@trfiles[0].nil?
+                                   # get last edit
+                                   @tredits = Tredit.where("trfile_id in (?)",@trfiles[0].id).order("tredits.id desc")
+                                   v_tredit_id = @tredits[0].id
+                                   # the individual fields
+                                   v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                                   if !v_tractiontypes.nil?
+                                       v_tractiontypes.each do |tat|
+                                           v_tredit_action = TreditAction.where("tredit_id in (?)",v_tredit_id).where("tractiontype_id in (?)", tat.id)
+                                           if tat.id == 79 # load
+                                               if  !v_tredit_action[0].nil? and !v_tredit_action[0].value.nil? and v_tredit_action[0].value == "1"
+                                                   v_second_viewer_flag = "Y"
+                                               end
+                                            end
+                                       end
+                                   end
                                end
+                               if v_subject_id_sp_id != v_scan_procedures[0].id   # difference between directory and subject sp - ussually a missing _v#
+                                      v_comment_warning = v_comment_warning+"; sp mismatch "+v_subjectid+" sp="+v_scan_procedures[0].id .to_s
+                               elsif v_second_viewer_flag == "N"
+                                     v_comment = v_comment+"; "+v_subjectid+" not done"
+                               else
+                                   puts v_return_comment
+                                   v_comment = v_return_comment+v_comment
+                                   v_comment = v_comment[0..1499]
+                                   v_cnt = 0
+                                   v_line_array = []
+                                   File.open(v_file_path,'r') do |file_a|
+                                   while line = file_a.gets
+                                      if v_cnt > 0
+                                        sql = "insert into cg_pcvipr_values_new ( file_name,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
+                                        v_line_array = []
+                                        line.gsub(/\n/,"").split(",").each do |v|
+                                           v_line_array.push("'"+v+"'")
+                                        end 
+                                        sql = sql+v_line_array.join(",")
+                                        sql = sql+")"
+                                        results = connection.execute(sql)                    
+                                      end
+                                      v_cnt = v_cnt + 1
+                                   end
+                                end # sp mismatch
                              end
                           end
                         end
@@ -10900,25 +10984,51 @@ puts "v_analyses_path="+v_analyses_path
                                v_comment = v_return_comment+" \n"+v_comment
                                puts v_return_comment               
                              else
-                               puts v_return_comment
-                               v_comment = v_return_comment+v_comment
-                               v_comment = v_comment[0..1499]
-                               v_cnt = 0
-                               v_line_array = []
-                               File.open(v_file_path,'r') do |file_a|
-                               while line = file_a.gets
-                                 if v_cnt > 0
-                                   sql = "insert into cg_pcvipr_values_new ( file_name,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
-                                   v_line_array = []
-                                   line.gsub(/\n/,"").split(",").each do |v|
-                                     v_line_array.push("'"+v+"'")
-                                   end 
-                                   sql = sql+v_line_array.join(",")
-                                   sql = sql+")"
-                                   results = connection.execute(sql)                    
-                                 end
-                                 v_cnt = v_cnt + 1
+                               v_subject_id_sp_id = v_shared.get_sp_id_from_subjectid_v(v_subjectid)
+                               v_second_viewer_flag = "N"
+                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid)
+                               if !@trfiles.nil? and !@trfiles[0].nil?
+                                   # get last edit
+                                   @tredits = Tredit.where("trfile_id in (?)",@trfiles[0].id).order("tredits.id desc")
+                                   v_tredit_id = @tredits[0].id
+                                   # the individual fields
+                                   v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                                   if !v_tractiontypes.nil?
+                                       v_tractiontypes.each do |tat|
+                                           v_tredit_action = TreditAction.where("tredit_id in (?)",v_tredit_id).where("tractiontype_id in (?)", tat.id)
+                                           if tat.id == 79 # load
+                                               if  !v_tredit_action[0].nil? and !v_tredit_action[0].value.nil? and v_tredit_action[0].value == "1"
+                                                   v_second_viewer_flag = "Y"
+                                               end
+                                            end
+                                       end
+                                   end
                                end
+                               if v_subject_id_sp_id != v_scan_procedures[0].id   # difference between directory and subject sp - ussually a missing _v#
+                                      v_comment_warning = v_comment_warning+"; sp mismatch "+v_subjectid+" sp="+v_scan_procedures[0].id .to_s
+                               elsif v_second_viewer_flag == "N"
+                                     v_comment = v_comment+"; "+v_subjectid+" not done"
+                               else
+                                   puts v_return_comment
+                                   v_comment = v_return_comment+v_comment
+                                   v_comment = v_comment[0..1499]
+                                   v_cnt = 0
+                                   v_line_array = []
+                                   File.open(v_file_path,'r') do |file_a|
+                                    while line = file_a.gets
+                                     if v_cnt > 0
+                                        sql = "insert into cg_pcvipr_values_new ( file_name,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
+                                        v_line_array = []
+                                        line.gsub(/\n/,"").split(",").each do |v|
+                                          v_line_array.push("'"+v+"'")
+                                        end 
+                                        sql = sql+v_line_array.join(",")
+                                        sql = sql+")"
+                                        results = connection.execute(sql)                    
+                                     end
+                                     v_cnt = v_cnt + 1
+                                   end
+                                end # sp mismatch
                              end
                           end
                         end
@@ -11003,6 +11113,7 @@ puts "v_analyses_path="+v_analyses_path
                 # apply edits  -- made into a function  in shared model
               
                 v_shared.apply_cg_edits("pcvipr_values")
+        v_comment = v_comment_warning+v_comment
         @schedulerun.comment =("successful finish pcvipr_output_file_harvest "+v_comment[0..1459])
       if !v_comment.include?("ERROR")
          @schedulerun.status_flag ="Y"
