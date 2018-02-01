@@ -2841,6 +2841,7 @@ def cg_up_load
         
         # load from source schema, source table
         v_insert_sql = v_insert_sql+v_col_array.join(",")+v_insert_end_sql+v_select_sql+v_col_array.join(",")+v_select_end_sql
+        puts v_insert_sql
         results = connection.execute(v_insert_sql)
         v_msg = v_msg+"; Inserted data into table "+v_tn
          # update key columns -- expect one key column
@@ -2915,7 +2916,7 @@ def cg_up_load
           # update cg_serach columns  -- want to keep as many cn.id's for stored query
           v_cg_tns_archive[0].common_name = v_up_display_table_name
           v_cg_tn_cns = CgTnCn.where("cg_tn_id in (?)", v_cg_tns_archive[0].id)
-        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_display,col_function, col_format from "+v_definition_table+" where target_table ='"+v_up_table_name+"' order by display_order"   
+        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_display,col_function, col_format,column_active,search_list,column_searchable from "+v_definition_table+" where target_table ='"+v_up_table_name+"' order by display_order"   
         result_cols = connection.execute(v_sql_cols)
         v_cnt =1
         result_cols.each do |col|
@@ -2976,6 +2977,9 @@ def cg_up_load
                 end
 
             end
+            v_cg_tn_cn.status_flag = col[6]  # column_active
+            v_cg_tn_cn.value_list = col[7]  # search_list
+            v_cg_tn_cn.searchable_flag = col[8] # column searchable
             v_cg_tn_cn.cg_tn_id = v_cg_tns_archive[0].id
               v_cg_tn_cn.save
         end
