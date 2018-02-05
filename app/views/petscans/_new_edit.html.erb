@@ -36,7 +36,7 @@ v_autodetect =  [["AutoDetect File On","On"],["AutoDetect File Off","Off"]]
     </p>
     <p>
       <%= f.label "Acquisition Duration " %><br />
-      <%= f.text_field :range,:size => 15 %>&nbsp;&nbsp; <small> (min after injection)</small>
+      <%= f.text_field :range,:size => 15 %><small><small>(min after injection)</small></small>
     </p>
        <!-- switched to petfiles.path, but leaving old petscans.path autodetect running -->
       <%= f.hidden_field :path , :size=> 80 %>
