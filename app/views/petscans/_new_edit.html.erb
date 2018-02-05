@@ -35,8 +35,8 @@ v_autodetect =  [["AutoDetect File On","On"],["AutoDetect File Off","Off"]]
       <%= f.text_field :netinjecteddose ,:size => 10,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}" %>
     </p>
     <p>
-      <%= f.label :range %><br />
-      <%= f.text_field :range,:size => 6 %>
+      <%= f.label "Acquisition Duration " %><br />
+      <%= f.text_field :range,:size => 15 %>&nbsp;&nbsp; <small> (min after injection)</small>
     </p>
        <!-- switched to petfiles.path, but leaving old petscans.path autodetect running -->
       <%= f.hidden_field :path , :size=> 80 %>
