@@ -10781,7 +10781,7 @@ puts "v_analyses_path="+v_analyses_path
                              end
                              v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_file_header_expected)
                              if v_return_flag == "N" 
-                               v_comment = v_subjectid+"=>"+v_return_comment+" \n"+v_comment
+                               v_comment = v_file_path+"=>"+v_return_comment+" \n"+v_comment
                                puts v_return_comment               
                              else
                                v_subject_id_sp_id = v_shared.get_sp_id_from_subjectid_v(v_subjectid)
@@ -10853,7 +10853,7 @@ puts "v_analyses_path="+v_analyses_path
                              end
                              v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_file_header_expected)
                              if v_return_flag == "N" 
-                               v_comment = +v_subjectid+"=>"+v_return_comment+" \n"+v_comment
+                               v_comment = v_file_path+"=>"+v_return_comment+" \n"+v_comment
                                puts v_return_comment               
                              else
                                v_subject_id_sp_id = v_shared.get_sp_id_from_subjectid_v(v_subjectid)
@@ -10925,7 +10925,7 @@ puts "v_analyses_path="+v_analyses_path
                              end
                              v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_file_header_expected)
                              if v_return_flag == "N" 
-                               v_comment = +v_subjectid+"=>"+v_return_comment+" \n"+v_comment
+                               v_comment = v_file_path+"=>"+v_return_comment+" \n"+v_comment
                                puts v_return_comment               
                              else
                                v_subject_id_sp_id = v_shared.get_sp_id_from_subjectid_v(v_subjectid)
@@ -10994,7 +10994,7 @@ puts "v_analyses_path="+v_analyses_path
                              end
                              v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_file_header_expected)
                              if v_return_flag == "N" 
-                               v_comment = +v_subjectid+"=>"+v_return_comment+" \n"+v_comment
+                               v_comment = v_file_path+"=>"+v_return_comment+" \n"+v_comment
                                puts v_return_comment               
                              else
                                v_subject_id_sp_id = v_shared.get_sp_id_from_subjectid_v(v_subjectid)
