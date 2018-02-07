@@ -356,7 +356,7 @@ class PetscansController < ApplicationController
        @tables =['petscans'] # trigger joins --- vgroups and appointments by default
        @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
       if  @html_request =="N" 
-           @results = self.run_search   # in the application controller
+           @results = self.run_search_pet  # in the application controller - was self.run_search - messing the petfiles
       else 
            @results = self.run_search_pet   # in the application controller  # need petscan_id in [0]
       end
