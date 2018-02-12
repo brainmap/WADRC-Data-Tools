@@ -11096,6 +11096,54 @@ puts "v_analyses_path="+v_analyses_path
                    v_comment = "cg_pcvipr_values_new unmapped subjectid,enrollment_id ="+v_comment
                 end
 
+                # make copy of full _new harvest
+                # wipe out bad pulsavity values based on tracker
+                v_full_value_tn = "cg_pcvipr_values_full"
+                begin
+                  sql = "drop table "+v_full_value_tn
+                  results = connection.execute(sql)
+                  sql = "create table "+v_full_value_tn+" as select * from cg_pcvipr_values_new"
+                  results = connection.execute(sql)
+                 rescue
+                     puts "error in drop/populate "+v_full_value_tn
+                 end
+                 # other columns ? not just pulsativity?
+                #v_tredit_columns_hash = {"65"=>"basilar_artery_pulsatility_index","66"=>"right_ica_petrous_superior_pulsatility_index","67"=>"right_ica_cervical_inferior_pulsatility_index","68"=>"left_ica_petrous_superior_pulsatility_index","69"=>"left_ica_cervical_inferior_pulsatility_index","70"=>"right_mca_pulsatility_index","71"=>"left_mca_pulsatility_index","72"=>"left_pca_pulsatility_index","73"=>"right_pca_pulsatility_index","74"=>"ss_sinus_pulsatility_index","75"=>"straight_sinus_pulsatility_index","76"=>"rightts_pulsatility_index","77"=>"leftts_pulsatility_index"} #####  
+                v_tredit_columns_hash = {"66"=>"right_ica_petrous_superior_pulsatility_index","67"=>"right_ica_cervical_inferior_pulsatility_index","68"=>"left_ica_petrous_superior_pulsatility_index","69"=>"left_ica_cervical_inferior_pulsatility_index","70"=>"right_mca_pulsatility_index","71"=>"left_mca_pulsatility_index","72"=>"left_pca_pulsatility_index","73"=>"right_pca_pulsatility_index","74"=>"ss_sinus_pulsatility_index","75"=>"straight_sinus_pulsatility_index","76"=>"rightts_pulsatility_index","77"=>"leftts_pulsatility_index"} #####  
+               
+               v_tredit_columns_hash.each do |name, values|
+                   sql = "update cg_pcvipr_values_new t1
+                      set t1."+values+" = 'Bad Pulstility'
+                         where t1.subjectid in 
+                        ( select trfile2.subjectid  from  trfiles trfile2, tredits , tredit_actions, lookup_refs 
+                      where trfile2.id = tredits.trfile_id 
+                      and tredits.id = tredit_actions.tredit_id 
+                      and tredit_actions.tractiontype_id = "+name+"
+                      and lookup_refs.label = 'pcvipr_quality'
+                      and tredit_actions.value = lookup_refs.ref_value
+                      and lookup_refs.ref_value = 2
+                      and trfile2.trtype_id = 2 
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id ) )"
+                      results = connection.execute(sql)
+                   sql = "update cg_pcvipr_values_new t1
+                      set t1."+values+" = 'Do Not Use'
+                         where t1.subjectid in 
+                        ( select trfile2.subjectid  from  trfiles trfile2, tredits , tredit_actions, lookup_refs 
+                      where trfile2.id = tredits.trfile_id 
+                      and tredits.id = tredit_actions.tredit_id 
+                      and tredit_actions.tractiontype_id = "+name+"
+                      and lookup_refs.label = 'pcvipr_quality'
+                      and tredit_actions.value = lookup_refs.ref_value
+                      and lookup_refs.ref_value = 4
+                      and trfile2.trtype_id = 2 
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id ) )"
+                      results = connection.execute(sql)
+
+
+
+                end
+                
+
                 # check move cg_ to cg_old
                 sql = "select count(*) from cg_pcvipr_values_old"
                 results_old = connection.execute(sql)
