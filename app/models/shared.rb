@@ -11129,7 +11129,7 @@ puts "v_analyses_path="+v_analyses_path
                       and tredit_actions.value = lookup_refs.ref_value
                       and lookup_refs.ref_value = 2
                       and trfile2.trtype_id = 2 
-                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id ) )"
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id and tredit2.status_flag = 'Y') )"
                       results = connection.execute(sql)
                    # bad gating = 62, fail = 3
                    sql = "update cg_pcvipr_values_new t1
@@ -11143,7 +11143,7 @@ puts "v_analyses_path="+v_analyses_path
                       and tredit_actions.value = lookup_refs.ref_value
                       and lookup_refs.ref_value = 3
                       and trfile2.trtype_id = 2 
-                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id ) )"
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id and tredit2.status_flag = 'Y' ) )"
                       results = connection.execute(sql)
                       v_do_not_use_column_set = ""
                       v_col_cnt = 0
@@ -11165,7 +11165,7 @@ puts "v_analyses_path="+v_analyses_path
                       and tredit_actions.value = lookup_refs.ref_value
                       and lookup_refs.ref_value = 4
                       and trfile2.trtype_id = 2 
-                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id ) )"
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id and tredit2.status_flag = 'Y' ) )"
                       results = connection.execute(sql)
 
 
