@@ -356,7 +356,7 @@ class PetscansController < ApplicationController
        @tables =['petscans'] # trigger joins --- vgroups and appointments by default
        @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
       if  @html_request =="N" 
-           @results = self.run_search_pet  # in the application controller - was self.run_search - messing the petfiles
+           @results = self.run_search_pet  # in the application controller - was self.run_search WHY?- messing the petfiles
       else 
            @results = self.run_search_pet   # in the application controller  # need petscan_id in [0]
       end
@@ -713,6 +713,8 @@ class PetscansController < ApplicationController
       params[:date][:injectiont][3]  = ((params[:date][:injectiont][3].to_i)+v_offset).to_s
 injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]+"-"+params[:date][:injectiont][2]+" "+params[:date][:injectiont][3]+":"+params[:date][:injectiont][4]
       params[:petscan][:injecttiontime] =  DateTime.strptime(injectiontime, "%Y-%m-%d %H:%M") #injectiontime
+      else
+      params[:petscan][:injecttiontime] =  ""
        end
 
        params[:date][:scanstartt][0]="1899"
@@ -723,6 +725,8 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
       params[:date][:scanstartt][3]  = ((params[:date][:scanstartt][3].to_i)+v_offset).to_s
   scanstarttime =  params[:date][:scanstartt][0]+"-"+params[:date][:scanstartt][1]+"-"+params[:date][:scanstartt][2]+" "+params[:date][:scanstartt][3]+":"+params[:date][:scanstartt][4]
        params[:petscan][:scanstarttime] = DateTime.strptime(scanstarttime, "%Y-%m-%d %H:%M") #scanstarttime
+     else
+        params[:petscan][:scanstarttime] = ""
       end
 
     # ok to update vitals even if other update fail
