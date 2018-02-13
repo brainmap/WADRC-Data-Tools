@@ -11102,18 +11102,24 @@ puts "v_analyses_path="+v_analyses_path
                 begin
                   sql = "drop table "+v_full_value_tn
                   results = connection.execute(sql)
+                 rescue
+                     puts "error in drop/populate "+v_full_value_tn
+                 end
+                 begin
                   sql = "create table "+v_full_value_tn+" as select * from cg_pcvipr_values_new"
                   results = connection.execute(sql)
                  rescue
                      puts "error in drop/populate "+v_full_value_tn
                  end
                  # other columns ? not just pulsativity?
-                #v_tredit_columns_hash = {"65"=>"basilar_artery_pulsatility_index","66"=>"right_ica_petrous_superior_pulsatility_index","67"=>"right_ica_cervical_inferior_pulsatility_index","68"=>"left_ica_petrous_superior_pulsatility_index","69"=>"left_ica_cervical_inferior_pulsatility_index","70"=>"right_mca_pulsatility_index","71"=>"left_mca_pulsatility_index","72"=>"left_pca_pulsatility_index","73"=>"right_pca_pulsatility_index","74"=>"ss_sinus_pulsatility_index","75"=>"straight_sinus_pulsatility_index","76"=>"rightts_pulsatility_index","77"=>"leftts_pulsatility_index"} #####  
-                v_tredit_columns_hash = {"66"=>"right_ica_petrous_superior_pulsatility_index","67"=>"right_ica_cervical_inferior_pulsatility_index","68"=>"left_ica_petrous_superior_pulsatility_index","69"=>"left_ica_cervical_inferior_pulsatility_index","70"=>"right_mca_pulsatility_index","71"=>"left_mca_pulsatility_index","72"=>"left_pca_pulsatility_index","73"=>"right_pca_pulsatility_index","74"=>"ss_sinus_pulsatility_index","75"=>"straight_sinus_pulsatility_index","76"=>"rightts_pulsatility_index","77"=>"leftts_pulsatility_index"} #####  
-               
+                #v_tredit_columns_hash = {"65"=>"basilar_artery_pulsatility_index","66"=>"right_ica_petrous_superior_pulsatility_index","67"=>"right_ica_cervical_inferior_pulsatility_index","68"=>"left_ica_petrous_superior_pulsatility_index","69"=>"left_ica_cervical_inferior_pulsatility_index","70"=>"right_mca_pulsatility_index","71"=>"left_mca_pulsatility_index","72"=>"left_pca_pulsatility_index","73"=>"right_pca_pulsatility_index","74"=>"ss_sinus_pulsatility_index","75"=>"straight_sinus_pulsatility_index","76"=>"rightts_pulsatility_index","77"=>"leftts_pulsatility_index"} #####  #####  
+              v_tredit_columns_hash = {"65"=>"basilar_artery_pulsatility_index|basilar_artery|basilar_artery_mean_flow","69"=>"left_ica_cervical_inferior_pulsatility_index|left_ica_cervical_inferior|left_ica_cervical_inferior_mean_flow","68"=>"left_ica_petrous_superior_pulsatility_index|left_ica_petrous_superior|left_ica_petrous_superior_mean_flow","71"=>"left_mca_pulsatility_index|left_mca|left_mca_mean_flow","72"=>"left_pca_pulsatility_index|left_pca|left_pca_mean_flow","77"=>"leftts_pulsatility_index|leftts_mean_flow","67"=>"right_ica_cervical_inferior_pulsatility_index|right_ica_cervical_inferior|right_ica_cervical_inferior_mean_flow","66"=>"right_ica_petrous_superior_pulsatility_index|right_ica_petrous_superior|right_ica_petrous_superior_mean_flow","70"=>"right_mca_pulsatility_index|right_mca|right_mca_mean_flow","73"=>"right_pca_pulsatility_index|right_pca|right_pca_mean_flow","76"=>"rightts_pulsatility_index|rightts_mean_flow","74"=>"ss_sinus_pulsatility_index|ss_sinus|ss_sinus_mean_flow","75"=>"straight_sinus_pulsatility_index|straight_sinus|straight_sinus_mean_flow"}#  "65"=>"basilar_artery_pulsatility_index|basilar_artery|basilar_artery_mean_flow","69"=>"left_ica_cervical_inferior_pulsatility_index|left_ica_cervical_inferior|left_ica_cervical_inferior_mean_flow","68"=>"left_ica_petrous_superior_pulsatility_index|left_ica_petrous_superior|left_ica_petrous_superior_mean_flow","71"=>"left_mca_pulsatility_index|left_mca|left_mca_mean_flow","72"=>"left_pca_pulsatility_index|left_pca|left_pca_mean_flow","77"=>"leftts_pulsatility_index|leftts_mean_flow","67"=>"right_ica_cervical_inferior_pulsatility_index|right_ica_cervical_inferior|right_ica_cervical_inferior_mean_flow","66"=>"right_ica_petrous_superior_pulsatility_index|right_ica_petrous_superior|right_ica_petrous_superior_mean_flow","70"=>"right_mca_pulsatility_index|right_mca|right_mca_mean_flow","73"=>"right_pca_pulsatility_index|right_pca|right_pca_mean_flow","76"=>"rightts_pulsatility_index|rightts_mean_flow","74"=>"ss_sinus_pulsatility_index|ss_sinus|ss_sinus_mean_flow","75"=>"straight_sinus_pulsatility_index|straight_sinus|straight_sinus_mean_flow"}
                v_tredit_columns_hash.each do |name, values|
+                puts values
+                   v_col_array = values.split("|")
+                puts v_col_array.first
                    sql = "update cg_pcvipr_values_new t1
-                      set t1."+values+" = 'Bad Pulstility'
+                      set t1."+v_col_array.first+" = 'Bad Pulstility'
                          where t1.subjectid in 
                         ( select trfile2.subjectid  from  trfiles trfile2, tredits , tredit_actions, lookup_refs 
                       where trfile2.id = tredits.trfile_id 
@@ -11125,8 +11131,31 @@ puts "v_analyses_path="+v_analyses_path
                       and trfile2.trtype_id = 2 
                       and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id ) )"
                       results = connection.execute(sql)
+                   # bad gating = 62, fail = 3
                    sql = "update cg_pcvipr_values_new t1
-                      set t1."+values+" = 'Do Not Use'
+                      set t1."+v_col_array.first+" = 'Bad Pulstility'
+                         where t1.subjectid in 
+                        ( select trfile2.subjectid  from  trfiles trfile2, tredits , tredit_actions, lookup_refs 
+                      where trfile2.id = tredits.trfile_id 
+                      and tredits.id = tredit_actions.tredit_id 
+                      and tredit_actions.tractiontype_id = 62
+                      and lookup_refs.label = 'pcvipr_quality'
+                      and tredit_actions.value = lookup_refs.ref_value
+                      and lookup_refs.ref_value = 3
+                      and trfile2.trtype_id = 2 
+                      and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id ) )"
+                      results = connection.execute(sql)
+                      v_do_not_use_column_set = ""
+                      v_col_cnt = 0
+                      for v_col in v_col_array
+                          if v_col_cnt > 0
+                             v_do_not_use_column_set = v_do_not_use_column_set+" , "
+                          end 
+                          v_do_not_use_column_set = v_do_not_use_column_set+"t1."+v_col+" = 'Do Not Use' "
+                          v_col_cnt = v_col_cnt + 1
+                    end
+                   sql = "update cg_pcvipr_values_new t1
+                      set "+v_do_not_use_column_set+"
                          where t1.subjectid in 
                         ( select trfile2.subjectid  from  trfiles trfile2, tredits , tredit_actions, lookup_refs 
                       where trfile2.id = tredits.trfile_id 
