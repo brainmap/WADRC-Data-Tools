@@ -11119,11 +11119,13 @@ puts "v_analyses_path="+v_analyses_path
                    v_col_array = values.split("|")
                 puts v_col_array.first
                    sql = "update cg_pcvipr_values_new t1
-                      set t1."+v_col_array.first+" = 'Bad Pulstility'
+                      set t1."+v_col_array.first+" = 'Bad Pulstatility'
                          where t1.subjectid in 
                         ( select trfile2.subjectid  from  trfiles trfile2, tredits , tredit_actions, lookup_refs 
                       where trfile2.id = tredits.trfile_id 
                       and tredits.id = tredit_actions.tredit_id 
+                      and tredits.id in ( select tredit3.id from tredits tredit3, tredit_actions tredit_action3 where  tredit3.id = tredit_action3.tredit_id 
+                                           and tredit_action3.tractiontype_id = 79 and tredit_action3.value = 1  and tredit3.status_flag = 'Y')
                       and tredit_actions.tractiontype_id = "+name+"
                       and lookup_refs.label = 'pcvipr_quality'
                       and tredit_actions.value = lookup_refs.ref_value
@@ -11133,11 +11135,13 @@ puts "v_analyses_path="+v_analyses_path
                       results = connection.execute(sql)
                    # bad gating = 62, fail = 3
                    sql = "update cg_pcvipr_values_new t1
-                      set t1."+v_col_array.first+" = 'Bad Pulstility'
+                      set t1."+v_col_array.first+" = 'Bad Pulsatility'
                          where t1.subjectid in 
                         ( select trfile2.subjectid  from  trfiles trfile2, tredits , tredit_actions, lookup_refs 
                       where trfile2.id = tredits.trfile_id 
                       and tredits.id = tredit_actions.tredit_id 
+                                            and tredits.id in ( select tredit3.id from tredits tredit3, tredit_actions tredit_action3 where  tredit3.id = tredit_action3.tredit_id 
+                                           and tredit_action3.tractiontype_id = 79 and tredit_action3.value = 1  and tredit3.status_flag = 'Y')
                       and tredit_actions.tractiontype_id = 62
                       and lookup_refs.label = 'pcvipr_quality'
                       and tredit_actions.value = lookup_refs.ref_value
@@ -11160,6 +11164,8 @@ puts "v_analyses_path="+v_analyses_path
                         ( select trfile2.subjectid  from  trfiles trfile2, tredits , tredit_actions, lookup_refs 
                       where trfile2.id = tredits.trfile_id 
                       and tredits.id = tredit_actions.tredit_id 
+                                            and tredits.id in ( select tredit3.id from tredits tredit3, tredit_actions tredit_action3 where  tredit3.id = tredit_action3.tredit_id 
+                                           and tredit_action3.tractiontype_id = 79 and tredit_action3.value = 1 and tredit3.status_flag = 'Y')
                       and tredit_actions.tractiontype_id = "+name+"
                       and lookup_refs.label = 'pcvipr_quality'
                       and tredit_actions.value = lookup_refs.ref_value
