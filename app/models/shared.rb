@@ -11121,15 +11121,13 @@ puts "v_analyses_path="+v_analyses_path
                    sql = "update cg_pcvipr_values_new t1
                       set t1."+v_col_array.first+" = 'Bad Pulstatility'
                          where t1.subjectid in 
-                        ( select trfile2.subjectid  from  trfiles trfile2, tredits , tredit_actions, lookup_refs 
+                        ( select trfile2.subjectid  from  trfiles trfile2, tredits , tredit_actions
                       where trfile2.id = tredits.trfile_id 
                       and tredits.id = tredit_actions.tredit_id 
                       and tredits.id in ( select tredit3.id from tredits tredit3, tredit_actions tredit_action3 where  tredit3.id = tredit_action3.tredit_id 
                                            and tredit_action3.tractiontype_id = 79 and tredit_action3.value = 1  and tredit3.status_flag = 'Y')
                       and tredit_actions.tractiontype_id = "+name+"
-                      and lookup_refs.label = 'pcvipr_quality'
-                      and tredit_actions.value = lookup_refs.ref_value
-                      and lookup_refs.ref_value = 2
+                      and tredit_actions.value =  2
                       and trfile2.trtype_id = 2 
                       and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id and tredit2.status_flag = 'Y') )"
                       results = connection.execute(sql)
@@ -11137,15 +11135,13 @@ puts "v_analyses_path="+v_analyses_path
                    sql = "update cg_pcvipr_values_new t1
                       set t1."+v_col_array.first+" = 'Bad Pulsatility'
                          where t1.subjectid in 
-                        ( select trfile2.subjectid  from  trfiles trfile2, tredits , tredit_actions, lookup_refs 
+                        ( select trfile2.subjectid  from  trfiles trfile2, tredits , tredit_actions 
                       where trfile2.id = tredits.trfile_id 
                       and tredits.id = tredit_actions.tredit_id 
                                             and tredits.id in ( select tredit3.id from tredits tredit3, tredit_actions tredit_action3 where  tredit3.id = tredit_action3.tredit_id 
                                            and tredit_action3.tractiontype_id = 79 and tredit_action3.value = 1  and tredit3.status_flag = 'Y')
                       and tredit_actions.tractiontype_id = 62
-                      and lookup_refs.label = 'pcvipr_quality'
-                      and tredit_actions.value = lookup_refs.ref_value
-                      and lookup_refs.ref_value = 3
+                      and tredit_actions.value = 3
                       and trfile2.trtype_id = 2 
                       and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id and tredit2.status_flag = 'Y' ) )"
                       results = connection.execute(sql)
@@ -11161,15 +11157,13 @@ puts "v_analyses_path="+v_analyses_path
                    sql = "update cg_pcvipr_values_new t1
                       set "+v_do_not_use_column_set+"
                          where t1.subjectid in 
-                        ( select trfile2.subjectid  from  trfiles trfile2, tredits , tredit_actions, lookup_refs 
+                        ( select trfile2.subjectid  from  trfiles trfile2, tredits , tredit_actions
                       where trfile2.id = tredits.trfile_id 
                       and tredits.id = tredit_actions.tredit_id 
                                             and tredits.id in ( select tredit3.id from tredits tredit3, tredit_actions tredit_action3 where  tredit3.id = tredit_action3.tredit_id 
                                            and tredit_action3.tractiontype_id = 79 and tredit_action3.value = 1 and tredit3.status_flag = 'Y')
                       and tredit_actions.tractiontype_id = "+name+"
-                      and lookup_refs.label = 'pcvipr_quality'
-                      and tredit_actions.value = lookup_refs.ref_value
-                      and lookup_refs.ref_value = 4
+                      and tredit_actions.value =  4
                       and trfile2.trtype_id = 2 
                       and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id and tredit2.status_flag = 'Y' ) )"
                       results = connection.execute(sql)
