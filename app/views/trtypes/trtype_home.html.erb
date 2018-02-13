@@ -107,7 +107,13 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
         <br>
         <% if !@tredit.nil? %>
         <%= link_to "Last "+@v_action_name,"/trfile_home/"+params[:id]+"?trfile_action=get_edit&trfile_id="+(trf.id).to_s ,{:style=>'color:#000000;'}%></small></small>
-       <%end%></td>
+       <%end%>
+<% if current_user.role == 'Admin_High' and trf.file_completed_flag  == 'N' %>
+<small><small><small><small><small><small><small><small>
+  <%= link_to 'del', trf, method: :delete, data: { confirm: 'Are you sure?' } %>
+</small></small></small></small></small></small></small></small>
+<%end%>
+     </td>
         <td><%= ScanProcedure.find(trf.scan_procedure_id).codename %> </td> 
         <td><%= trf.qc_value %> <small><small><%= popup_note('peek', key_val_table('path_popup', { :qc_notes => v_peek })) unless v_peek.blank? %></small></small> </td> 
         <%   v_cnt = 0
