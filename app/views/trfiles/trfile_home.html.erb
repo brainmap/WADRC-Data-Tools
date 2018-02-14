@@ -42,7 +42,8 @@
      <%  end
       else %>
        <% if !(@trfile.trtype_id).nil? and !Trtype.find(@trfile.trtype_id).series_description_type_id.nil? and   !@trfile.enrollment_id.nil? and  !@trfile.scan_procedure_id.nil? %>
-     <%= f.select(:image_dataset_id, @ids.collect {|p| [ p.series_description+" - "+p.path, p.id ] },  { :include_blank => "Select a scan series",:selected => @trfile.image_dataset_id }) %>
+     <%= f.select(:image_dataset_id, @ids.collect {|p| [ p.series_description+" - "+p.path, p.id ] },  { :include_blank => "Select a scan series",:selected => @trfile.image_dataset_id } )%>
+<!-- NOT TOTALLY WORKING YET?,{ :multiple => true} -->
      <%end%>
     <%end%>
   </td></tr>
@@ -55,6 +56,9 @@
 <% if current_user.role == 'Admin_High' or (current_user.id).to_s == (@tredit.user_id).to_s %>
       <br>
     <small><small>Active?: <%= select( :tredit, :status_flag, v_y_n, {:prompt => 'Active?',:selected => @tredit.status_flag} ) %> set to N to delete <%= @v_action_name %> </small></small>
+      <% if current_user.role == 'Admin_High' %>
+   <small><small>  or <%= link_to 'full delete', @tredit, method: :delete, data: { confirm: 'Are you sure?' } %></small></small>
+    <%end%>
   <%end%> </td>
 	</tr>
 <%  v_tractiontypes = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.status_flag ='Y' and tractiontypes.form_display_order is not null").order(:form_display_order) 
