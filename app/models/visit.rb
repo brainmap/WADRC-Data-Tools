@@ -6,16 +6,18 @@ class Visit < ActiveRecord::Base
     # Use the Class Constant ImageDataset::EXCLUDED_REPORT_ATTRIBUTES instead.
     acts_as_reportable
 
-    
+   
   # default_scope :order => 'date DESC', :include => [:scan_procedure, {:enrollment => :participant} ]
   #default_scope :order => 'date DESC'   
   default_scope { order(date: :desc) }
   
   validates_presence_of :date
+
   # Allow the DICOM UID to be blank for visits without Scans
   validates_uniqueness_of :dicom_study_uid, :case_sensitive => false, :unless => Proc.new {|visit| visit.dicom_study_uid.blank?}
   
   has_and_belongs_to_many :scan_procedures
+ 
   has_many :image_datasets, :dependent => :destroy  
   #### test added changed Image datasets is invalid error to Image datasets thumbnail Paperclip::Errors::NotIdentifiedByImageMagickError  
   accepts_nested_attributes_for :image_datasets
@@ -114,6 +116,7 @@ class Visit < ActiveRecord::Base
     created_by ||= User.first
 puts "WWWWWWWWWWWW in create_or_update_from_metamri"    
     sp = ScanProcedure.find_or_create_by(codename: v.scan_procedure_name)
+    v_series_desc_time_stamp_cleanup_array = ["CDT","CBF","ADC","FA","Trace"]
     
     # Build an ActiveRecord Visit object using available attributes from metamri.
     # We need to handle Old Studies involving GE I-Files, which don't have any true UID
@@ -241,8 +244,16 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
             # this just gets the existing ids
             # waisman has  desc:Mon dd yyyy hh-mm-ss CDT e.g. FA:Oct 09 2017 08-46-40 CDT
             # want to detect, and split on :, take first part as series description
+            # CDT 
+            #CBF
+            #eADC
+            #ADC
+            #FA
+            #Trace
             v_series_desc_tmp = nil
-            if  (dataset.series_description).include? "CDT" 
+             # also LINE 282
+            v_series_desc_time_stamp_cleanup_array.each do |v_desc|
+             if  (dataset.series_description).include? v_desc 
               if ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].any? { |word| (dataset.series_description).include?(word) }
                  v_series_desc_tmp = (dataset.series_description).split(":")
                  if !v_series_desc_tmp.blank? and !v_series_desc_tmp[0].blank? 
@@ -250,6 +261,7 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
                   #puts "zzzttttt  series_description ="+dataset.series_description+"====="+v_series_desc_tmp[0]
                  end
                end
+              end
             end
 
             puts "ggggg data valid"
@@ -269,7 +281,8 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
         else
           #puts "PPPPPPPP meta_attrs ="+meta_attrs[:series_description]
             v_series_desc_tmp = nil
-            if  (meta_attrs[:series_description]).include? "CDT" 
+            v_series_desc_time_stamp_cleanup_array.each do |v_desc|
+            if  (meta_attrs[:series_description]).include? v_desc 
               if ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].any? { |word| (meta_attrs[:series_description]).include?(word) }
                  v_series_desc_tmp = (meta_attrs[:series_description]).split(":")
                  if !v_series_desc_tmp.blank? and !v_series_desc_tmp[0].blank? 
@@ -277,6 +290,7 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
                    #puts "zzzttttt  series_description ="+meta_attrs[:series_description]+"====="+v_series_desc_tmp[0]
                  end
                end
+              end
             end
           logger.debug "building fresh visit. image_datasets.build(#{meta_attrs})"
           visit.image_datasets.build(meta_attrs)  
