@@ -116,7 +116,7 @@ class Visit < ActiveRecord::Base
     created_by ||= User.first
 puts "WWWWWWWWWWWW in create_or_update_from_metamri"    
     sp = ScanProcedure.find_or_create_by(codename: v.scan_procedure_name)
-    v_series_desc_time_stamp_cleanup_array = ["CDT","CBF","ADC","FA","Trace"]
+    v_series_desc_time_stamp_cleanup_array = ["CDT","CBF","ADC","FA","Trace","AvDC"]
     
     # Build an ActiveRecord Visit object using available attributes from metamri.
     # We need to handle Old Studies involving GE I-Files, which don't have any true UID
