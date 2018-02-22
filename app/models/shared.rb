@@ -10516,16 +10516,20 @@ puts "AAAAAAA="+v_log
 
   def run_pcvipr_recon_and_gating_check
          v_base_path = Shared.get_base_path()
-         @schedule = Schedule.where("name in ('pcvipr_recon_and gating_check')").first
+         @schedule = Schedule.where("name in ('pcvipr_recon_and_gating_check')").first
           @schedulerun = Schedulerun.new
           @schedulerun.schedule_id = @schedule.id
-          @schedulerun.comment ="starting pcvipr_recon_and gating_check"
+          @schedulerun.comment ="starting pcvipr_recon_and_gating_check"
           @schedulerun.save
           @schedulerun.start_time = @schedulerun.created_at
           @schedulerun.save
           v_comment = ""
+          v_cnt = 0
           v_month_back = "1"
+          v_pcvipr_recon_base =  v_base_path+"/analyses/PCVIPR/4DFLOW_DATA/"
+
           v_pcvipr_values_tn = "cg_pcvipr_values"
+          v_scan_procedure_id_exclude_array = [75,81] # barnes bbf and mbe
       # exclude list of sp's - e.g. barnes.bbf
       #check for pvvipr in month back which are not in v_pcvipr_values_tn
       # get spS ( could be multiples) and enumberS ( could be multiples)
@@ -10546,13 +10550,104 @@ puts "AAAAAAA="+v_log
       # rm pfile
 
           v_ids_array = ImageDataset.where("image_datasets.visit_id in 
-            (select visits.id from visits, appointments  where visit.appointment_id = appointments.id and appointments.appointment_date > (DATE_SUB(NOW(), INTERVAL "+v_month_back+" MONTH)) )
+            (select visits.id from visits, appointments,image_datasets  where visits.appointment_id = appointments.id and appointments.appointment_date > (DATE_SUB(NOW(), INTERVAL "+v_month_back+" MONTH)) 
+            and visits.id = image_datasets.visit_id
+            and appointments.appointment_type = 'mri'
+            and appointments.vgroup_id not in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where 
+                       scan_procedures_vgroups.scan_procedure_id in (?)    )
             and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15))
-            and image_datasets.visit_id not in (  GET visit_id/via vgroup via sp_id, enrollment_id from cg_pcvipr_values )")
+            and image_datasets.visit_id not in ( select v.id from cg_pcvipr_values, visits v, appointments a, scan_procedures_vgroups spvg, 
+                            enrollment_vgroup_memberships evgm  where cg_pcvipr_values.enrollment_id = evgm.enrollment_id
+                            and a.vgroup_id = evgm.vgroup_id and spvg.scan_procedure_id = cg_pcvipr_values.scan_procedure_id
+                            and v.appointment_id = a.id and a.vgroup_id = evgm.vgroup_id and a.vgroup_id = spvg.vgroup_id))", v_scan_procedure_id_exclude_array)
+          v_ids_array.each do |ids|
+                 v_ids_path = (ids.path)
+                 if (ids.path).include? "\/mri\/"
+                  v_ids_path = (ids.path).gsub!("\/mri\/","\/") # replace /mri/ , split on / ==> sp , split on _ ==> subjectid
+                 end
+                  v_path_array = v_ids_path.split("/")
+                  v_scan_procedure_name = v_path_array[4]
+                  v_visit_number = ""   # might have to add more some day
+                  if v_scan_procedure_name.include? "visit2"
+                     v_visit_number = "_v2"
+                  elsif v_scan_procedure_name.include? "visit3"
+                     v_visit_number = "_v3"
+                  elsif v_scan_procedure_name.include? "visit4"
+                     v_visit_number = "_v4"
+                  elsif v_scan_procedure_name.include? "visit5"
+                     v_visit_number = "_v5"
+                  elsif v_scan_procedure_name.include? "visit6"
+                     v_visit_number = "_v6"
+                  elsif v_scan_procedure_name.include? "visit7"
+                     v_visit_number = "_v7"
+                  end
+                  v_subjectid_exam_date_array = v_path_array[5].split("_")
+                  v_subjectid = v_subjectid_exam_date_array[0]
+
+                  v_check_path_done = v_pcvipr_recon_base+v_scan_procedure_name+"/"+v_scan_procedure_name+".done/"+v_subjectid+v_visit_number
+                  v_check_path_orig = v_pcvipr_recon_base+v_scan_procedure_name+"/"+v_scan_procedure_name+".orig/"+v_subjectid+v_visit_number
+                  v_exisits = "N"
+                   #check that not in sp.visit#.orig. and not in sp.visit#.done
+                  if File.directory? v_check_path_done or File.directory? v_check_path_orig 
+                       v_exisits = "Y"
+                  else
+                    v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_check_path_orig +"' "
+                    stdin, stdout, stderr = Open3.popen3(v_call)
+                    while !stdout.eof?
+                            puts stdout.read 1024    
+                    end
+                    stdin.close
+                    stdout.close
+                    stderr.close
+                    v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+ids.path+"   "+v_check_path_orig+"/' "
+                    stdin, stdout, stderr = Open3.popen3(v_call)
+                    while !stdout.eof?
+                            puts stdout.read 1024    
+                    end
+                    stdin.close
+                    stdout.close
+                    stderr.close
+                    v_call = "ssh panda_user@merida.dom.wisc.edu 'cd "+v_check_path_orig+"; find . -name 'P*.7.bz2' -exec bunzip2 {} \;' "
+                    stdin, stdout, stderr = Open3.popen3(v_call)
+                    while !stdout.eof?
+                            puts stdout.read 1024    
+                    end
+                    stdin.close
+                    stdout.close
+                    stderr.close
+       #make subjectid_v# directory
+       #copy over pfile/gating files
+       #bunzip2 pfile
+
+                  end 
+             
+               
+          end
 
 
+       # get list of pcvipr scans from X months back. not already in cg_pcvipr_value
+       # get sp and subjectid
+       #check that not in sp.visit#.orig. and not in sp.visit#.done
+       #make subjectid_v# directory
+       #copy over pfile/gating files
+       #bunzip2 pfile
+       #check load on machine
+       #run gating check
+       #run pcvipr recon
+       # make tracker record - 
+       # check logs
+
+
+      @schedulerun.comment =("successful finish pcvipr_recon_and_gating_check "+v_cnt.to_s+" recon run  "+v_comment[0..1459])
+      if !v_comment.include?("ERROR")
+         @schedulerun.status_flag ="Y"
+       end
+       @schedulerun.save
+       @schedulerun.end_time = @schedulerun.updated_at      
+       @schedulerun.save
 
   end
+
   def run_pcvipr_output_file()
          run_pcvipr_output_file_base("leave_output_and_log")
   end
