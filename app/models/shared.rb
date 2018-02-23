@@ -10553,18 +10553,29 @@ puts "AAAAAAA="+v_log
             (select visits.id from visits, appointments,image_datasets  where visits.appointment_id = appointments.id and appointments.appointment_date > (DATE_SUB(NOW(), INTERVAL "+v_month_back+" MONTH)) 
             and visits.id = image_datasets.visit_id
             and appointments.appointment_type = 'mri'
+            and appointments.vgroup_id in (8172,8170)
             and appointments.vgroup_id not in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where 
                        scan_procedures_vgroups.scan_procedure_id in (?)    )
             and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15))
             and image_datasets.visit_id not in ( select v.id from cg_pcvipr_values, visits v, appointments a, scan_procedures_vgroups spvg, 
                             enrollment_vgroup_memberships evgm  where cg_pcvipr_values.enrollment_id = evgm.enrollment_id
                             and a.vgroup_id = evgm.vgroup_id and spvg.scan_procedure_id = cg_pcvipr_values.scan_procedure_id
-                            and v.appointment_id = a.id and a.vgroup_id = evgm.vgroup_id and a.vgroup_id = spvg.vgroup_id))", v_scan_procedure_id_exclude_array)
+                            and v.appointment_id = a.id and a.vgroup_id = evgm.vgroup_id and a.vgroup_id = spvg.vgroup_id)
+            and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15)) 
+            and image_datasets.series_description is not null)", v_scan_procedure_id_exclude_array)
+          # not getting juist PCVIPR ??
+          v_ids_array = v_ids_array.where("image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15))")
           v_ids_array.each do |ids|
+                 v_ids_path_full = ids.path
+                 v_subjectid = ""
+  puts "full_path="+v_ids_path_full
+  puts "series_description="+ids.series_description
                  v_ids_path = (ids.path)
-                 if (ids.path).include? "\/mri\/"
-                  v_ids_path = (ids.path).gsub!("\/mri\/","\/") # replace /mri/ , split on / ==> sp , split on _ ==> subjectid
-                 end
+                 # gsub replacing everything - variables seem to be linked
+                 #if (v_ids_path).include? "\/mri\/"
+                 # v_ids_path = (v_ids_path).gsub!("\/mri\/","\/") # replace /mri/ , split on / ==> sp , split on _ ==> subjectid
+                 #end
+ 
                   v_path_array = v_ids_path.split("/")
                   v_scan_procedure_name = v_path_array[4]
                   v_visit_number = ""   # might have to add more some day
@@ -10581,13 +10592,22 @@ puts "AAAAAAA="+v_log
                   elsif v_scan_procedure_name.include? "visit7"
                      v_visit_number = "_v7"
                   end
-                  v_subjectid_exam_date_array = v_path_array[5].split("_")
-                  v_subjectid = v_subjectid_exam_date_array[0]
+                  if v_path_array[5] == "mri"
+                     v_subjectid_exam_date_array = v_path_array[6].split("_")
+                     v_subjectid = v_subjectid_exam_date_array[0]
+
+                  else
+                     v_subjectid_exam_date_array = v_path_array[5].split("_")
+                     v_subjectid = v_subjectid_exam_date_array[0]
+                  end
 
                   v_check_path_done = v_pcvipr_recon_base+v_scan_procedure_name+"/"+v_scan_procedure_name+".done/"+v_subjectid+v_visit_number
                   v_check_path_orig = v_pcvipr_recon_base+v_scan_procedure_name+"/"+v_scan_procedure_name+".orig/"+v_subjectid+v_visit_number
                   v_exisits = "N"
                    #check that not in sp.visit#.orig. and not in sp.visit#.done
+                  #make subjectid_v# directory
+                  #copy over pfile/gating files
+                  #bunzip2 pfile
                   if File.directory? v_check_path_done or File.directory? v_check_path_orig 
                        v_exisits = "Y"
                   else
@@ -10599,7 +10619,8 @@ puts "AAAAAAA="+v_log
                     stdin.close
                     stdout.close
                     stderr.close
-                    v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+ids.path+"   "+v_check_path_orig+"/' "
+                    v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_ids_path_full+"   "+v_check_path_orig+"/' "
+        puts v_call
                     stdin, stdout, stderr = Open3.popen3(v_call)
                     while !stdout.eof?
                             puts stdout.read 1024    
@@ -10607,7 +10628,9 @@ puts "AAAAAAA="+v_log
                     stdin.close
                     stdout.close
                     stderr.close
-                    v_call = "ssh panda_user@merida.dom.wisc.edu 'cd "+v_check_path_orig+"; find . -name 'P*.7.bz2' -exec bunzip2 {} \;' "
+        
+                    v_call = "ssh panda_user@merida.dom.wisc.edu 'cd "+v_check_path_orig+";find . -name 'P*.7.bz2' -exec bunzip2 {} \\\;' "
+             puts v_call        
                     stdin, stdout, stderr = Open3.popen3(v_call)
                     while !stdout.eof?
                             puts stdout.read 1024    
@@ -10618,6 +10641,7 @@ puts "AAAAAAA="+v_log
        #make subjectid_v# directory
        #copy over pfile/gating files
        #bunzip2 pfile
+                #run gating check ==> output to gating_check_file.txt
 
                   end 
              
