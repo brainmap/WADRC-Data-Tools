@@ -10529,6 +10529,7 @@ puts "AAAAAAA="+v_log
           v_pcvipr_recon_base =  v_base_path+"/analyses/PCVIPR/4DFLOW_DATA/"
 
           v_pcvipr_values_tn = "cg_pcvipr_values"
+          v_trtype_id = 2  # pcvipr
           v_scan_procedure_id_exclude_array = [75,81] # barnes bbf and mbe
       # exclude list of sp's - e.g. barnes.bbf
       #check for pvvipr in month back which are not in v_pcvipr_values_tn
@@ -10548,7 +10549,7 @@ puts "AAAAAAA="+v_log
       # check log/output files
       # email if problem
       # rm pfile
-
+            # LIMIT FOR TESTING and appointments.vgroup_id in (8172,8170)
           v_ids_array = ImageDataset.where("image_datasets.visit_id in 
             (select visits.id from visits, appointments,image_datasets  where visits.appointment_id = appointments.id and appointments.appointment_date > (DATE_SUB(NOW(), INTERVAL "+v_month_back+" MONTH)) 
             and visits.id = image_datasets.visit_id
@@ -10566,86 +10567,216 @@ puts "AAAAAAA="+v_log
           # not getting juist PCVIPR ??
           v_ids_array = v_ids_array.where("image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15))")
           v_ids_array.each do |ids|
-                 v_ids_path_full = ids.path
-                 v_subjectid = ""
+
+            v_ids_path_full = ids.path
+            v_subjectid = ""
   puts "full_path="+v_ids_path_full
   puts "series_description="+ids.series_description
-                 v_ids_path = (ids.path)
+            v_ids_path = (ids.path)
                  # gsub replacing everything - variables seem to be linked
                  #if (v_ids_path).include? "\/mri\/"
                  # v_ids_path = (v_ids_path).gsub!("\/mri\/","\/") # replace /mri/ , split on / ==> sp , split on _ ==> subjectid
                  #end
  
-                  v_path_array = v_ids_path.split("/")
-                  v_scan_procedure_name = v_path_array[4]
-                  v_visit_number = ""   # might have to add more some day
-                  if v_scan_procedure_name.include? "visit2"
-                     v_visit_number = "_v2"
-                  elsif v_scan_procedure_name.include? "visit3"
-                     v_visit_number = "_v3"
-                  elsif v_scan_procedure_name.include? "visit4"
-                     v_visit_number = "_v4"
-                  elsif v_scan_procedure_name.include? "visit5"
-                     v_visit_number = "_v5"
-                  elsif v_scan_procedure_name.include? "visit6"
-                     v_visit_number = "_v6"
-                  elsif v_scan_procedure_name.include? "visit7"
-                     v_visit_number = "_v7"
-                  end
-                  if v_path_array[5] == "mri"
-                     v_subjectid_exam_date_array = v_path_array[6].split("_")
-                     v_subjectid = v_subjectid_exam_date_array[0]
+            v_path_array = v_ids_path.split("/")
+            v_scan_procedure_name = v_path_array[4]
 
-                  else
-                     v_subjectid_exam_date_array = v_path_array[5].split("_")
-                     v_subjectid = v_subjectid_exam_date_array[0]
-                  end
+            v_visit_number = ""   # might have to add more some day
+            if v_scan_procedure_name.include? "visit2"
+              v_visit_number = "_v2"
+            elsif v_scan_procedure_name.include? "visit3"
+              v_visit_number = "_v3"
+            elsif v_scan_procedure_name.include? "visit4"
+              v_visit_number = "_v4"
+            elsif v_scan_procedure_name.include? "visit5"
+              v_visit_number = "_v5"
+            elsif v_scan_procedure_name.include? "visit6"
+              v_visit_number = "_v6"
+            elsif v_scan_procedure_name.include? "visit7"
+              v_visit_number = "_v7"
+            end
+            if v_path_array[5] == "mri"
+              v_subjectid_exam_date_array = v_path_array[6].split("_")
+              v_subjectid = v_subjectid_exam_date_array[0]
+            else
+              v_subjectid_exam_date_array = v_path_array[5].split("_")
+              v_subjectid = v_subjectid_exam_date_array[0]
+            end
+                  # check for v_pcvipr_recon_base+v_scan_procedure_name --- make dir
+            v_sp_pcvipr = v_pcvipr_recon_base+v_scan_procedure_name
+            if File.directory? v_sp_pcvipr
+              v_sp_pcvipr = ""
+            else
+              v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_sp_pcvipr +"' "
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+            end
+                  # check for v_pcvipr_recon_base+v_scan_procedure_name+"/"+v_scan_procedure_name+".orig/" --- make dir
+            v_sp_pcvipr_orig = v_pcvipr_recon_base+v_scan_procedure_name+"/"+v_scan_procedure_name+".orig"
+            if File.directory? v_sp_pcvipr_orig
+              v_sp_pcvipr_orig = ""
+            else
+              v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_sp_pcvipr_orig +"' "
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+            end
+                  # used in tracker
+            v_ids_id = ids.id
+            v_sp = (ScanProcedure.where("codename in (?)",v_scan_procedure_name).first).id
+            v_enrollment_id = (Enrollment.where("enumber in (?)",v_subjectid).first).id
+            v_subjectid_v_num = v_subjectid+v_visit_number
 
-                  v_check_path_done = v_pcvipr_recon_base+v_scan_procedure_name+"/"+v_scan_procedure_name+".done/"+v_subjectid+v_visit_number
-                  v_check_path_orig = v_pcvipr_recon_base+v_scan_procedure_name+"/"+v_scan_procedure_name+".orig/"+v_subjectid+v_visit_number
-                  v_exisits = "N"
+            v_check_path_done = v_pcvipr_recon_base+v_scan_procedure_name+"/"+v_scan_procedure_name+".done/"+v_subjectid+v_visit_number
+            v_check_path_orig = v_pcvipr_recon_base+v_scan_procedure_name+"/"+v_scan_procedure_name+".orig/"+v_subjectid+v_visit_number
+            v_exisits = "N"
                    #check that not in sp.visit#.orig. and not in sp.visit#.done
                   #make subjectid_v# directory
                   #copy over pfile/gating files
                   #bunzip2 pfile
-                  if File.directory? v_check_path_done or File.directory? v_check_path_orig 
-                       v_exisits = "Y"
-                  else
-                    v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_check_path_orig +"' "
-                    stdin, stdout, stderr = Open3.popen3(v_call)
-                    while !stdout.eof?
-                            puts stdout.read 1024    
-                    end
-                    stdin.close
-                    stdout.close
-                    stderr.close
-                    v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_ids_path_full+"   "+v_check_path_orig+"/' "
+            if File.directory? v_check_path_done or File.directory? v_check_path_orig 
+              v_exisits = "Y"
+              puts 
+            else
+              v_comment = "str "+v_subjectid+";"+v_comment
+              @schedulerun.comment = "str "+v_subjectid_v_num+";"+@schedulerun.comment
+              @schedulerun.save
+              v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_check_path_orig +"' "
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+              v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_ids_path_full+"   "+v_check_path_orig+"/' "
         puts v_call
-                    stdin, stdout, stderr = Open3.popen3(v_call)
-                    while !stdout.eof?
-                            puts stdout.read 1024    
-                    end
-                    stdin.close
-                    stdout.close
-                    stderr.close
-        
-                    v_call = "ssh panda_user@merida.dom.wisc.edu 'cd "+v_check_path_orig+";find . -name 'P*.7.bz2' -exec bunzip2 {} \\\;' "
-             puts v_call        
-                    stdin, stdout, stderr = Open3.popen3(v_call)
-                    while !stdout.eof?
-                            puts stdout.read 1024    
-                    end
-                    stdin.close
-                    stdout.close
-                    stderr.close
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+              v_call = "ssh panda_user@merida.dom.wisc.edu 'cd "+v_check_path_orig+";find . -name 'P*.7.bz2' -exec bunzip2 {} \\\;' "
+        puts v_call        
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
        #make subjectid_v# directory
        #copy over pfile/gating files
        #bunzip2 pfile
                 #run gating check ==> output to gating_check_file.txt
+              v_check_gating_base ="check_gating -f "
+              v_pcvipr_recon_base = "pcvipr_recon_binary -f "
+              v_pcvipr_recon_options =" -dat_plus_dicom -override_autorecon -pils -walsh -lp_frac 0.75 -vs_wdth_high 5 -weighted_echos 0 -viewshare_type tornado -frame_by_frame -echo_stop 0 -viewshare_type tornado -cardiac -tr 6800 -gate_delay 9 -rcframes 20 -gating_type retro_ecg"
+                # get path pfile
+              v_pfile_path = ""
+              v_pfile_dir_path = ""
+              v_pfile  = ""
+              v_call = "ssh panda_user@kanga.dom.wisc.edu 'cd "+v_check_path_orig+";find . -name 'P*.7' -exec readlink -f {} \\\;'"
+          puts v_call        
+              stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                v_pfile_path = stdout.read 1024    
+              end
+          puts "v_pfile_path="+v_pfile_path  
+              v_pfile_dir_path = File.dirname(v_pfile_path)
+              v_pfile = File.basename(v_pfile_path)
+              stdin.close
+              stdout.close
+              stderr.close
 
-                  end 
-             
+              if v_pfile.include? "P" and v_pfile.include? ".7"
+                v_call = "ssh panda_user@kanga.dom.wisc.edu 'cd "+v_pfile_dir_path+";"+v_check_gating_base+v_pfile+">"+v_pfile_dir_path+"/gating_check_output_"+v_pfile.strip+".txt'"
+                puts v_call        
+                stdin, stdout, stderr = Open3.popen3(v_call)
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                end
+                stdin.close
+                stdout.close
+                stderr.close
                
+               # run recon-- output to file
+
+                v_call = "ssh panda_user@kanga.dom.wisc.edu 'cd "+v_pfile_dir_path+";"+v_pcvipr_recon_base+v_pfile+v_pcvipr_recon_options+">"+v_pfile_dir_path+"/recon_output_"+v_pfile.strip+".txt'"
+                puts v_call        
+                stdin, stdout, stderr = Open3.popen3(v_call)
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                end
+                stdin.close
+                stdout.close
+                stderr.close
+               # delete pfile
+                v_call = "ssh panda_user@kanga.dom.wisc.edu 'cd "+v_pfile_dir_path+";rm "+v_pfile+"'"
+                puts v_call        
+                stdin, stdout, stderr = Open3.popen3(v_call)
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                end
+                stdin.close
+                stdout.close
+                stderr.close
+                      #make tracker record
+                @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
+                if @trfiles.nil?
+                  @trfile = Trfile.new
+                  @trfile.subjectid = v_subjectid_v_num
+                      # @trfile.secondary_key = v_secondary_key
+                  @trfile.enrollment_id = v_enrollment_id
+                  @trfile.scan_procedure_id = v_sp_id
+                  @trfile.trtype_id = v_trtype_id
+                  @trfile.image_dataset_id = v_ids_id
+                  @trfile.qc_notes = "autorun recon by panda "
+                  @trfile.save
+                  @tredit = Tredit.new
+                  @tredit.trfile_id = @trfile.id
+                      #@tredit.user_id = current_user.id
+                  @tredit.save
+                  v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                  if !v_tractiontypes.nil?
+                    v_tractiontypes.each do |tat|
+                      v_tredit_action = TreditAction.new
+                      v_tredit_action.tredit_id = @tredit.id
+                      v_tredit_action.tractiontype_id = tat.id
+                      if !(tat.form_default_value).blank?
+                        v_tredit_action.value = tat.form_default_value
+                      end
+                                 # set each field if needed-- just an example from mcd
+                                 #if tat.id == 14 # despot 2
+                                 #   v_tredit_action.value = v_despot_2_flag
+                                 #elsif tat.id == 15 # mcdespot
+                                 #   v_tredit_action.value = v_mcdespot_flag
+                                 #end
+                      v_tredit_action.save
+                    end
+                  end
+                end
+               
+                v_cnt = v_cnt + 1
+                v_comment = "done "+v_subjectid_v_num+";"+v_comment
+                @schedulerun.comment = "done "+v_subjectid_v_num+";"+@schedulerun.comment
+              else
+                v_comment = "no pfile found "+v_subjectid_v_num+";"+v_comment
+                @schedulerun.comment = "no pfile found "+v_subjectid_v_num+";"+@schedulerun.comment
+              end
+puts "end of ids loop"
+            end                 
           end
 
 
