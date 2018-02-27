@@ -10605,7 +10605,7 @@ puts "AAAAAAA="+v_log
                   # check for v_pcvipr_recon_base+v_scan_procedure_name --- make dir
             v_sp_pcvipr = v_pcvipr_recon_base+v_scan_procedure_name
             if File.directory? v_sp_pcvipr
-              v_sp_pcvipr = ""
+              puts v_sp_pcvipr 
             else
               v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_sp_pcvipr +"' "
               stdin, stdout, stderr = Open3.popen3(v_call)
@@ -10619,7 +10619,7 @@ puts "AAAAAAA="+v_log
                   # check for v_pcvipr_recon_base+v_scan_procedure_name+"/"+v_scan_procedure_name+".orig/" --- make dir
             v_sp_pcvipr_orig = v_pcvipr_recon_base+v_scan_procedure_name+"/"+v_scan_procedure_name+".orig"
             if File.directory? v_sp_pcvipr_orig
-              v_sp_pcvipr_orig = ""
+              puts v_sp_pcvipr_orig 
             else
               v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_sp_pcvipr_orig +"' "
               stdin, stdout, stderr = Open3.popen3(v_call)
@@ -10645,12 +10645,13 @@ puts "AAAAAAA="+v_log
                   #bunzip2 pfile
             if File.directory? v_check_path_done or File.directory? v_check_path_orig 
               v_exisits = "Y"
-              puts 
+              puts "exisits = "+v_check_path_done+" or "+v_check_path_orig
             else
               v_comment = "str "+v_subjectid+";"+v_comment
               @schedulerun.comment = "str "+v_subjectid_v_num+";"+@schedulerun.comment
               @schedulerun.save
               v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_check_path_orig +"' "
+        puts v_call
               stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
                 puts stdout.read 1024    
@@ -10681,7 +10682,7 @@ puts "AAAAAAA="+v_log
        #bunzip2 pfile
                 #run gating check ==> output to gating_check_file.txt
               v_check_gating_base ="check_gating -f "
-              v_pcvipr_recon_base = "pcvipr_recon_binary -f "
+              v_pcvipr_recon_binary_base = "pcvipr_recon_binary -f "
               v_pcvipr_recon_options =" -dat_plus_dicom -override_autorecon -pils -walsh -lp_frac 0.75 -vs_wdth_high 5 -weighted_echos 0 -viewshare_type tornado -frame_by_frame -echo_stop 0 -viewshare_type tornado -cardiac -tr 6800 -gate_delay 9 -rcframes 20 -gating_type retro_ecg"
                 # get path pfile
               v_pfile_path = ""
@@ -10699,26 +10700,40 @@ puts "AAAAAAA="+v_log
               stdin.close
               stdout.close
               stderr.close
+              v_pfile = v_pfile.strip
+
+#f = File.open('foo.txt', 'a')
+#f.write('foo')
+#f.close
 
               if v_pfile.include? "P" and v_pfile.include? ".7"
-                v_call = "ssh panda_user@kanga.dom.wisc.edu 'cd "+v_pfile_dir_path+";"+v_check_gating_base+v_pfile+">"+v_pfile_dir_path+"/gating_check_output_"+v_pfile.strip+".txt'"
+                v_call = "ssh panda_user@kanga.dom.wisc.edu 'cd "+v_pfile_dir_path+";"+v_check_gating_base+v_pfile+"'"   #' >> "+v_pfile_dir_path+"/gating_check_output_"+v_pfile.strip+".txt'"
                 puts v_call        
                 stdin, stdout, stderr = Open3.popen3(v_call)
+      #IS THERE A SIZE LIMIT IN TEXT OUT BUFFER
+                f = File.open(v_pfile_dir_path+"/gating_check_output_"+v_pfile.strip+".txt", 'a')
                 while !stdout.eof?
-                  puts stdout.read 1024    
+                  #puts stdout.read 1024
+                  f.write((stdout.read 1024))  
+     
                 end
+                f.close
                 stdin.close
                 stdout.close
                 stderr.close
                
                # run recon-- output to file
 
-                v_call = "ssh panda_user@kanga.dom.wisc.edu 'cd "+v_pfile_dir_path+";"+v_pcvipr_recon_base+v_pfile+v_pcvipr_recon_options+">"+v_pfile_dir_path+"/recon_output_"+v_pfile.strip+".txt'"
+                v_call = "ssh panda_user@kanga.dom.wisc.edu 'cd "+v_pfile_dir_path+";"+v_pcvipr_recon_binary_base+v_pfile+v_pcvipr_recon_options+"'" #' >> "+v_pfile_dir_path+"/recon_output_"+v_pfile.strip+".txt'"
                 puts v_call        
                 stdin, stdout, stderr = Open3.popen3(v_call)
+                f = File.open(v_pfile_dir_path+"/recon_output_"+v_pfile.strip+".txt", 'a')
                 while !stdout.eof?
-                  puts stdout.read 1024    
+                  #puts stdout.read 1024 
+                  f.write((stdout.read 1024)) 
+                
                 end
+                f.close
                 stdin.close
                 stdout.close
                 stderr.close
@@ -10734,7 +10749,9 @@ puts "AAAAAAA="+v_log
                 stderr.close
                       #make tracker record
                 @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
+                puts "before trfiles"
                 if @trfiles.nil?
+                  puts "making trfile"
                   @trfile = Trfile.new
                   @trfile.subjectid = v_subjectid_v_num
                       # @trfile.secondary_key = v_secondary_key
