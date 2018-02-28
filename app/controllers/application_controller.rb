@@ -33,9 +33,9 @@ class ApplicationController < ActionController::Base
 
 # place where lumbarpuncture, blooddraw, visits, and other controllers can get at
 def run_search  
-  puts "DDDDD"
-      puts "FFFFFF"+current_user.view_low_scan_procedure_array
-  puts "EEEEEEE"
+  #puts "DDDDD"
+  #    puts "FFFFFF"+current_user.view_low_scan_procedure_array
+  # puts "EEEEEEE"
   
   scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
   if @tables.size == 1  or @tables.include?("image_datasets")
@@ -198,11 +198,13 @@ puts sql
       #moving petscan_id to front
       v_length = var.length
       v_petscan_id = var[v_length-2]
-      @temp.unshift(v_petscan_id)
-      var.delete_at(v_length-2)
-      if @html_request =="N"
-          var.delete_at(0) # seems to need to delete another blank field?
+      if @html_request =="Y"
+          @temp.unshift(v_petscan_id)
       end
+      var.delete_at(v_length-2)
+      #if @html_request =="N"
+         #var.delete_at(0) # seems to need to delete another blank field?
+      #end
       v_petfiles = Petfile.where("petscan_id in (?)", v_petscan_id)
       v_petfiles.each do |pf|
          var.push(pf.file_name)
