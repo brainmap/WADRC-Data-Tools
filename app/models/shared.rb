@@ -10551,12 +10551,12 @@ puts "AAAAAAA="+v_log
       # check log/output files
       # email if problem
       # rm pfile
+      #            and appointments.vgroup_id in (8284)
             # LIMIT FOR TESTING and appointments.vgroup_id in (8172,8170)
           v_ids_array = ImageDataset.where("image_datasets.visit_id in 
             (select visits.id from visits, appointments,image_datasets  where visits.appointment_id = appointments.id and appointments.appointment_date > (DATE_SUB(NOW(), INTERVAL "+v_month_back+" MONTH)) 
             and visits.id = image_datasets.visit_id
             and appointments.appointment_type = 'mri'
-            and appointments.vgroup_id in (8172,8170)
             and appointments.vgroup_id not in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where 
                        scan_procedures_vgroups.scan_procedure_id in (?)    )
             and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15))
