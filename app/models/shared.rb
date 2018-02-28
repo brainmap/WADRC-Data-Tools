@@ -10528,6 +10528,8 @@ puts "AAAAAAA="+v_log
           v_month_back = "1"
           v_pcvipr_recon_base =  v_base_path+"/analyses/PCVIPR/4DFLOW_DATA/"
 
+          
+
           v_pcvipr_values_tn = "cg_pcvipr_values"
           v_trtype_id = 2  # pcvipr
           v_scan_procedure_id_exclude_array = [75,81] # barnes bbf and mbe
@@ -10632,7 +10634,7 @@ puts "AAAAAAA="+v_log
             end
                   # used in tracker
             v_ids_id = ids.id
-            v_sp = (ScanProcedure.where("codename in (?)",v_scan_procedure_name).first).id
+            v_sp_id = (ScanProcedure.where("codename in (?)",v_scan_procedure_name).first).id
             v_enrollment_id = (Enrollment.where("enumber in (?)",v_subjectid).first).id
             v_subjectid_v_num = v_subjectid+v_visit_number
 
@@ -10643,13 +10645,14 @@ puts "AAAAAAA="+v_log
                   #make subjectid_v# directory
                   #copy over pfile/gating files
                   #bunzip2 pfile
-            if File.directory? v_check_path_done or File.directory? v_check_path_orig 
+            if (File.directory? v_check_path_done or File.directory? v_check_path_orig ) 
               v_exisits = "Y"
               puts "exisits = "+v_check_path_done+" or "+v_check_path_orig
             else
               v_comment = "str "+v_subjectid+";"+v_comment
               @schedulerun.comment = "str "+v_subjectid_v_num+";"+@schedulerun.comment
               @schedulerun.save
+
               v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_check_path_orig +"' "
         puts v_call
               stdin, stdout, stderr = Open3.popen3(v_call)
@@ -10681,6 +10684,7 @@ puts "AAAAAAA="+v_log
        #copy over pfile/gating files
        #bunzip2 pfile
                 #run gating check ==> output to gating_check_file.txt
+
               v_check_gating_base ="check_gating -f "
               v_pcvipr_recon_binary_base = "pcvipr_recon_binary -f "
               v_pcvipr_recon_options =" -dat_plus_dicom -override_autorecon -pils -walsh -lp_frac 0.75 -vs_wdth_high 5 -weighted_echos 0 -viewshare_type tornado -frame_by_frame -echo_stop 0 -viewshare_type tornado -cardiac -tr 6800 -gate_delay 9 -rcframes 20 -gating_type retro_ecg"
@@ -10707,6 +10711,7 @@ puts "AAAAAAA="+v_log
 #f.close
 
               if v_pfile.include? "P" and v_pfile.include? ".7"
+
                 v_call = "ssh panda_user@kanga.dom.wisc.edu 'cd "+v_pfile_dir_path+";"+v_check_gating_base+v_pfile+"'"   #' >> "+v_pfile_dir_path+"/gating_check_output_"+v_pfile.strip+".txt'"
                 puts v_call        
                 stdin, stdout, stderr = Open3.popen3(v_call)
@@ -10747,10 +10752,11 @@ puts "AAAAAAA="+v_log
                 stdin.close
                 stdout.close
                 stderr.close
+   
                       #make tracker record
                 @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
-                puts "before trfiles"
-                if @trfiles.nil?
+
+                if @trfiles.count == 0
                   puts "making trfile"
                   @trfile = Trfile.new
                   @trfile.subjectid = v_subjectid_v_num
