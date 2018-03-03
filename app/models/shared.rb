@@ -10525,7 +10525,7 @@ puts "AAAAAAA="+v_log
           @schedulerun.save
           v_comment = ""
           v_cnt = 0
-          v_month_back = "1"
+          v_month_back = "2"
           v_pcvipr_recon_base =  v_base_path+"/analyses/PCVIPR/4DFLOW_DATA/"
 
           
@@ -10635,7 +10635,7 @@ puts "AAAAAAA="+v_log
                   # used in tracker
             v_ids_id = ids.id
             v_sp_id = (ScanProcedure.where("codename in (?)",v_scan_procedure_name).first).id
-            v_enrollment_id = (Enrollment.where("enumber in (?)",v_subjectid).first).id
+            v_enrollment_id = (Enrollment.where("enumber in (?) or concat(enumber,'b') in (?)" ,v_subjectid,v_subjectid).first).id
             v_subjectid_v_num = v_subjectid+v_visit_number
 
             v_check_path_done = v_pcvipr_recon_base+v_scan_procedure_name+"/"+v_scan_procedure_name+".done/"+v_subjectid+v_visit_number
