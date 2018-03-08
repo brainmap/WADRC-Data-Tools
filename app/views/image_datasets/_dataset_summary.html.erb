@@ -8,5 +8,7 @@
   :Slices_per_volume => image_dataset.slices_per_volume,
   :Acquisition_date => image_dataset.timestamp.blank? ? "" : image_dataset.timestamp.strftime('%Y-%m-%d %H:%M:%S') ,
   :scanned_file => image_dataset.scanned_file,
-  :Mri_Coil_name => image_dataset.mri_coil_name
+  :Mri_Coil_name => image_dataset.mri_coil_name,
+  :Mri_Station_name => image_dataset.mri_station_name,
+  :Mri_Manufacturer_Model_name => image_dataset.mri_manufacturer_model_name
 })%>

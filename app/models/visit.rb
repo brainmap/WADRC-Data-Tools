@@ -445,7 +445,55 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
       end 
     end 
     return @mri_coil_info 
+  end 
+  def mri_station_name_from_dicom_info  # 32 vs 8
+      @mri_station_info ||= {}
+    return @mri_station_info unless @mri_station_info.blank?
+    # tags[#] sometimes its just returning # -- a string? 
+    image_datasets.each do |dataset|
+      if  dataset.dicom_taghash  
+        tags = dataset.dicom_taghash      
+        if @mri_station_info[:name].blank? and !tags['0008,1010'].blank? and tags['0008,1010'] != '0008,1010' and tags['0008,1010'][:value] != '' #and tags['0008,1010'][:value] !=  'HDNV Array'  
+              @mri_station_info[:name] = tags['0008,1010'][:value].blank? ? nil : tags['0008,1010'][:value].to_s  # age
+         end
+      end 
+    end
+     # retry with no restriction
+        image_datasets.each do |dataset|
+      if  dataset.dicom_taghash  
+        tags = dataset.dicom_taghash      
+        if @mri_station_info[:name].blank? and !tags['0008,1010'].blank? and tags['0008,1010'] != '0008,1010' and tags['0008,1010'][:value] != ''
+              @mri_station_info[:name] = tags['0008,1010'][:value].blank? ? nil : tags['0008,1010'][:value].to_s  # age
+         end
+      end 
+    end 
+    return @mri_station_info 
+  end 
+  def mri_manufacturer_model_name_from_dicom_info  # 32 vs 8
+      @mri_manufacturer_model_info ||= {}
+    return @mri_manufacturer_model_info unless @mri_manufacturer_model_info.blank?
+    # tags[#] sometimes its just returning # -- a string? 
+    image_datasets.each do |dataset|
+      if  dataset.dicom_taghash  
+        tags = dataset.dicom_taghash      
+        if @mri_manufacturer_model_info[:name].blank? and !tags['0008,1090'].blank? and tags['0008,1090'] != '0008,1090' and tags['0008,1090'][:value] != '' # and tags['0008,1090'][:value] !=  'HDNV Array' 
+              @mri_manufacturer_model_info[:name] = tags['0008,1090'][:value].blank? ? nil : tags['0008,1090'][:value].to_s  # age
+         end
+      end 
+    end
+     # retry with no restriction
+        image_datasets.each do |dataset|
+      if  dataset.dicom_taghash  
+        tags = dataset.dicom_taghash      
+        if @mri_manufacturer_model_info[:name].blank? and !tags['0008,1090'].blank? and tags['0008,1090'] != '0008,1090' and tags['0008,1090'][:value] != ''
+              @mri_manufacturer_model_info[:name] = tags['0008,1090'][:value].blank? ? nil : tags['0008,1090'][:value].to_s  # age
+         end
+      end 
+    end 
+    return @mri_manufacturer_model_info 
   end
+
+
   
   def age_from_dicom_info
     @age_info ||= {}

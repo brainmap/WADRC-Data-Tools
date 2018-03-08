@@ -79,7 +79,9 @@ class ImageDataset < ActiveRecord::Base
       :Bold_reps => bold_reps,
       :Rep_time => (rep_time_hundredths rescue nil),
       :Slices_per_volume => slices_per_volume,
-      :Mri_Coil_Name => mri_coil_name 
+      :Mri_Coil_Name => mri_coil_name, 
+      :Mri_Station_Name => mri_station_name,
+      :Mri_Manufacturer_Model_Name => mri_manufacturer_model_name
     }
   end
   
@@ -165,7 +167,7 @@ class ImageDataset < ActiveRecord::Base
   def self.report
     File.open('dump.csv', 'w') do |f|
       f.puts report_table(:all,
-        :except => [:timestamp, :created_at, :updated_at, :id, :rep_time, :glob, :thumbnail_file_name, :bold_reps, :thumbnail_file_size, :thumbnail_content_type, :thumbnail_updated_at, :slices_per_volume, :mri_coil_name,"scanned_file", "visit_id"], 
+        :except => [:timestamp, :created_at, :updated_at, :id, :rep_time, :glob, :thumbnail_file_name, :bold_reps, :thumbnail_file_size, :thumbnail_content_type, :thumbnail_updated_at, :slices_per_volume,:mri_station_name, :mri_manufacturer_model_name, :mri_coil_name,"scanned_file", "visit_id"], 
         :conditions => "series_description LIKE '%DTI%' AND series_description NOT LIKE '%GW3D%'", 
         # :limit => 500,
         :include => { 

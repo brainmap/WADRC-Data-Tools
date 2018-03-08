@@ -26,6 +26,8 @@
       :Entered_by => @vgroup.entered_by.nil? ? nil : User.find(@vgroup.entered_by).username,
       :Scanner_source => @visit.scanner_source,
       :Mri_Coil_name => @visit.mri_coil_name,
+      :Mri_Station_name => @visit.mri_station_name,
+      :Mri_Manufacturer_Model_name => @visit.mri_manufacturer_model_name,
       :Created_by => @visit.created_by ? @visit.created_by.login : '',
       :Participant => @participant.nil? ? nil : link_to('view participant', @participant),
 	  :Age_at_Visit => @visit.age_at_visit,

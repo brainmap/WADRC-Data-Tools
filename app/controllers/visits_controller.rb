@@ -773,7 +773,34 @@ puts "DELETE COMMENT "+ids_comment.to_s
           end
         end 
        end
-
+    end
+    if (@visit.mri_station_name).blank?
+       @mri_station_name = @visit.mri_station_name_from_dicom_info 
+       @visit.mri_station_name = @mri_station_name[:name]  unless @mri_station_name[:name].blank?
+       # doing update if ids mri_coil_name instead of changing metamri
+       @visit.image_datasets.each do |dataset|
+        if  dataset.dicom_taghash  
+          tags = dataset.dicom_taghash      
+          if !tags['0008,1010'].blank? and tags['0008,1010'] != '0008,1010' and tags['0008,1010'][:value] != ''
+              dataset.mri_station_name  = tags['0008,1010'][:value].blank? ? nil : tags['0008,1010'][:value].to_s  
+              dataset.save
+          end
+        end 
+       end
+    end
+    if (@visit.mri_manufacturer_model_name).blank?
+       @mri_manufacturer_model_name = @visit.mri_manufacturer_model_name_from_dicom_info 
+       @visit.mri_manufacturer_model_name = @mri_manufacturer_model_name[:name]  unless @mri_manufacturer_model_name[:name].blank?
+       # doing update if ids mri_manufacturer_model_name instead of changing metamri
+       @visit.image_datasets.each do |dataset|
+        if  dataset.dicom_taghash  
+          tags = dataset.dicom_taghash      
+          if !tags['0008,1090'].blank? and tags['0008,1090'] != '0008,1090' and tags['0008,1090'][:value] != ''
+              dataset.mri_manufacturer_model_name  = tags['0008,1090'][:value].blank? ? nil : tags['0008,1090'][:value].to_s  
+              dataset.save
+          end
+        end 
+       end
     end
             
     respond_to do |format|
