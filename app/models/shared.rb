@@ -10525,7 +10525,7 @@ puts "AAAAAAA="+v_log
           @schedulerun.save
           v_comment = ""
           v_cnt = 0
-          v_month_back = "2"
+          v_month_back = "48" # going all the way back - later change back to 1 month 
           v_pcvipr_recon_base =  v_base_path+"/analyses/PCVIPR/4DFLOW_DATA/"
 
           
@@ -10632,6 +10632,7 @@ puts "AAAAAAA="+v_log
               stdout.close
               stderr.close
             end
+               # SEWCONDARY_KEY IN PATH CAUSING nil in .first enrollment etc.
                   # used in tracker
             v_ids_id = ids.id
             v_sp_id = (ScanProcedure.where("codename in (?)",v_scan_procedure_name).first).id
