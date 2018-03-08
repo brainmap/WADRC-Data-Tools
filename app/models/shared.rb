@@ -10552,7 +10552,7 @@ puts "AAAAAAA="+v_log
       # email if problem
       # rm pfile
       #            and appointments.vgroup_id in (8284)
-            # LIMIT FOR TESTING and appointments.vgroup_id in (8172,8170)
+            # LIMIT FOR TESTING and appointments.vgroup_id in (2875,8174)
           v_ids_array = ImageDataset.where("image_datasets.visit_id in 
             (select visits.id from visits, appointments,image_datasets  where visits.appointment_id = appointments.id and appointments.appointment_date > (DATE_SUB(NOW(), INTERVAL "+v_month_back+" MONTH)) 
             and visits.id = image_datasets.visit_id
@@ -10646,7 +10646,19 @@ puts "AAAAAAA="+v_log
                   #make subjectid_v# directory
                   #copy over pfile/gating files
                   #bunzip2 pfile
-            if (File.directory? v_check_path_done or File.directory? v_check_path_orig ) 
+                  # not detecting or not detecting <subjectid>_v#_otherstuff
+            #if (File.directory? v_check_path_done or File.directory? v_check_path_orig )
+            v_check_path_done_wildcard = v_check_path_done+"*"
+            v_check_path_orig_wildcard = v_check_path_orig+"*"
+            Dir.glob(v_check_path_done_wildcard).each do|f|
+                v_exisits = "Y"
+                puts "exisits = "+v_check_path_done
+            end
+            Dir.glob(v_check_path_orig_wildcard).each do|f|
+                v_exisits = "Y"
+                puts "exisits = "+v_check_path_orig
+            end
+            if v_exisits == "Y"
               v_exisits = "Y"
               puts "exisits = "+v_check_path_done+" or "+v_check_path_orig
             else
