@@ -37,7 +37,7 @@ The users are ordered by "PRESENT ROLE"- Name . <br>
 
 </td></tr>
 <% end %>
-<% if current_user.role == 'Admin_High'  or current_user.role == 'Admin_Low'%>
+<% if current_user.role == 'Admin_High'  or current_user.role == 'Admin_Low'  or current_user.role == 'Admin_Medium'%>
 <tr bgcolor="#ECFFE0"><td colspan=3>
 <%= link_to('Question Forms', '/users/questionformbase') %>   --- presently used by Lab Health, NeuroPsyche, and Questionaires<br>
 includes links to making questions, linking a question to a form and setting the display order, limiting a question to a scan procedure, and limiting a question form to a scan procedure.
@@ -45,7 +45,8 @@ includes links to making questions, linking a question to a form and setting the
 <%= link_to('Combined Reference Table', '/lookup_refs') %> --- add reference lookups used by questions.
 <br><br>
 </td></tr>
-
+<%end%>
+<% if current_user.role == 'Admin_High'  or current_user.role == 'Admin_Medium'%>
 <tr bgcolor="#E8FFF6"><td colspan=3>
 <%= link_to('Column Group tables set up search/load - Scheduled jobs', '/users/cgbase') %> --- make a cg_table available in the Search tab, define cg_table_columns (join to vgroup,  column display order, show/hide column in search/export, whether the column is searchable). A cg_table needs to have first been created in the database (below).<br>
 -- Define scheduled jobs, which may populate a cg_table. The actually scheduling of a job is defined in the crontab, but the job outcome is logged in scheduleruns.
