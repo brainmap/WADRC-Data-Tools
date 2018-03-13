@@ -4,7 +4,7 @@
 <%= form_tag  '/cg_search'  do %>
 <table  width="90%" class="tabular"><tr><th width="50"><small><small>Add to Search</small></small></th><th  nowrap align="left">Table Name
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= submit_tag("add tables checked to search")%> </th><th>Data Dictionary</th>
-    <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low' %><th  align="right">Edit Table Values</th><% end %>
+    <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium' %><th  align="right">Edit Table Values</th><% end %>
  </tr>
 	<%    @cg_tns.each do |tn| %>
 	 <tr><td><%= hidden_field(:cg_search, "add_cg_tn_id][", :value=>tn.id.to_s) %>
@@ -17,7 +17,7 @@
 		<small><small><%= link_to ' Download2', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
 		<% end %></td>
 		
-	<% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low' or tn.users.include?( current_user) ) and tn.editable_flag == "Y" and @cg_tn_key_y[tn.id] == "Y"  and @cg_tn_key_unique_y[tn.id] == "Y"%>
+	<% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium' or tn.users.include?( current_user) ) and tn.editable_flag == "Y" and @cg_tn_key_y[tn.id] == "Y"  and @cg_tn_key_unique_y[tn.id] == "Y"%>
 		<td> <%= link_to  'Edit values', '/cg_edit_table/'+tn.id.to_s %></td>
     <%else%>
     <td> &nbsp;</td>

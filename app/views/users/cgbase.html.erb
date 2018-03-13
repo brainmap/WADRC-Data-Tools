@@ -1,4 +1,4 @@
-<% if current_user.role == 'Admin_High'  or current_user.role == 'Admin_Low'%>
+<% if current_user.role == 'Admin_High'  or current_user.role == 'Admin_Medium'%>
 <table class="tabular">
 <tr><td align="left"><%= link_to('Column Group - Tables', '/cg_tns') %> </td><td align="left">--- define parent join table, left and right joins, common name, active status, if table is editable via cg_edit, upload of data dictionary, and owner of table for editing. A cg_table will be available in the Search tab. Before any of this, the cg_table needs to have been made in the database. New Cg tn link is at bottom of page. <br></td></tr>
 <tr><td nowrap align="left"><%= link_to('Column Group - Columns', '/cg_tn_cns_index') %></td><td align="left"> New Cg tn cn link at bottom of page.<br> After selecting cg table name, enter the first column name, set "load next column?"== Y to autopopulate the column name, display order and datatype.<br> To skip a column set the status active=N. <br>The display order can be decimal. Large text fields are generally not searchable.<br>

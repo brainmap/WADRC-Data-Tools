@@ -46,7 +46,7 @@
 </p>
 <b>Data Dictionary:</b><% if !@cg_tn.datadictionary_file_name.blank? %><small><small><%= link_to 'Download DataDictionary', @cg_tn.datadictionary.url %> <%= @cg_tn.datadictionary_file_name%></small></small><%end%><br>
 <b>Data Dictionary/Explanatory File:</b><% if !@cg_tn.datadictionary2_file_name.blank? %><small><small><%= link_to 'Download DataDictionary/Explanatory File', @cg_tn.datadictionary2.url %> <%= @cg_tn.datadictionary2_file_name%></small></small><%end%><br>
-<% if @cg_tn.users.include?( current_user) or (current_user.role == 'Admin_High' or current_user.role == 'Admin_Low')%>
+<% if @cg_tn.users.include?( current_user) or (current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium')%>
    <%= link_to 'Edit', edit_cg_tn_path(@cg_tn) %> |
 <% end %>
 <%= link_to 'Back', cg_tns_path %> |

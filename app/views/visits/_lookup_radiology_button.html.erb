@@ -6,7 +6,7 @@
 <%	 end   %>
 <br>
 <br>
-<%= form_tag "https://www.radiology.wisc.edu/protected/neuroResearchScans/scanList.php", :target => "_blank" do -%>
+<%= form_tag "https://www.radiology.wisc.edu/a/overreads/scanList.php", :target => "_blank" do -%>
 	<%= hidden_field_tag("origin", "searchForm") %>
 	<%= hidden_field_tag("subjID",rmr) %>
 	<%= submit_tag("Check Radiology Site [in a new tab]") %>

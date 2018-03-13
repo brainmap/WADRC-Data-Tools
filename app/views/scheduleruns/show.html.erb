@@ -28,7 +28,7 @@
   <b>Comment:</b>
   <%= @schedulerun.comment %>
 </p>
-<% if  current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'  %>
+<% if  current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium'  %>
    <%= link_to 'Edit', edit_schedulerun_path(@schedulerun) %> |
 <% end %>
 <%= link_to 'Back', schedulerun_search_path %> |

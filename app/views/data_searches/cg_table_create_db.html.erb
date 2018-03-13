@@ -2,7 +2,7 @@
 
 v_key_type = [["enumber and visit# mapped to enrollment/scan_procedure","enrollment/sp"],["reggieid-participant_id","reggieid-kc-participant_id"],["wrapnum-participant_id","wrapnum-kc-participant_id"],["adrcnum-participant_id","adrcnum-kc-participant_id"]]
 %>
-<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium'%>
                        
 <br>
 <%= form_tag  '/cg_table_create_db'  do %>

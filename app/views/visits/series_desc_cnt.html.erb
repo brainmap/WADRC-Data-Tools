@@ -1,4 +1,4 @@
-<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium'%>
 <%= form_for 'series_desc_cnt' do |f|%>
 <table><tr><td>image_dataset ids between  
 <%= f.text_field 'start_id',:value=>@v_start_id %>	and <%= f.text_field 'end_id',:value=>@v_end_id %>

@@ -38,7 +38,7 @@
 <% @cg_tns.each do |cg_tn| %>
   <tr>
         <td><%= link_to 'Show', cg_tn %></td>
-<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium'%>
     <td><%= link_to 'Edit', edit_cg_tn_path(cg_tn) %></td>
     <td><%= link_to 'Destroy', cg_tn, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
 <% end %>

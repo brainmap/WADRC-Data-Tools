@@ -21,7 +21,7 @@
       <% end %></td>
       <td><%= cg_table_type.status_flag %></td>
       <td><%= cg_table_type.hide_date_flag %></td>
-      <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'%>
+      <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium'%>
     <td><%= link_to 'Show', cg_table_type %></td>
     <td><%= link_to 'Edit', edit_cg_table_type_path(cg_table_type) %></td>
     <td><%= link_to 'Destroy', cg_table_type, method: :delete, data: { confirm: 'Are you sure?' } %></td>
