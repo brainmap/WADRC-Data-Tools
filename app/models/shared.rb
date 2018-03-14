@@ -6693,7 +6693,7 @@ def run_dicom_header_field_harvest
   @schedulerun.start_time = @schedulerun.created_at
   @schedulerun.save  
   # this would retrieved from schedule_pass_in_group, schedule_pass_in_value
-  v_dicom_tag = "0043,1089"   
+  v_dicom_tag = "0008,1010"    #"0043,1089"   
   v_insert_base ="insert into cg_dicom_header_field_harvest(vgroup_id, series_description_type, series_description, image_dataset_id,dicom_header_field,dicom_header_field_value)"  
   v_comment = ""
   v_comment_error = ""  
