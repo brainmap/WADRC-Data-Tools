@@ -10525,7 +10525,7 @@ puts "AAAAAAA="+v_log
           @schedulerun.save
           v_comment = ""
           v_cnt = 0
-          v_month_back = "48" # going all the way back - later change back to 1 month 
+          v_month_back = "100" # going all the way back - later change back to 1 month 
           v_pcvipr_recon_base =  v_base_path+"/analyses/PCVIPR/4DFLOW_DATA/"
 
           
