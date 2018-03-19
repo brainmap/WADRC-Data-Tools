@@ -10532,7 +10532,7 @@ puts "AAAAAAA="+v_log
 
           v_pcvipr_values_tn = "cg_pcvipr_values"
           v_trtype_id = 2  # pcvipr
-          v_scan_procedure_id_exclude_array = [75,81,33,40] # barnes bbf and mbe and dempsey plaque
+          v_scan_procedure_id_exclude_array = [75,81,33,40,49] # barnes bbf and mbe and dempsey plaque 
       # exclude list of sp's - e.g. barnes.bbf
       #check for pvvipr in month back which are not in v_pcvipr_values_tn
       # get spS ( could be multiples) and enumberS ( could be multiples)
