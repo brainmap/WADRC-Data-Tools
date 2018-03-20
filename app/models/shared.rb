@@ -10609,7 +10609,7 @@ puts "AAAAAAA="+v_log
             if File.directory? v_sp_pcvipr
               puts v_sp_pcvipr 
             else
-              v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_sp_pcvipr +"' "
+              v_call = "ssh panda_user@kanga.dom.wisc.edu 'mkdir "+v_sp_pcvipr +"' "
               stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
                 puts stdout.read 1024    
@@ -10623,7 +10623,7 @@ puts "AAAAAAA="+v_log
             if File.directory? v_sp_pcvipr_orig
               puts v_sp_pcvipr_orig 
             else
-              v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_sp_pcvipr_orig +"' "
+              v_call = "ssh panda_user@kanga.dom.wisc.edu 'mkdir "+v_sp_pcvipr_orig +"' "
               stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
                 puts stdout.read 1024    
@@ -10666,7 +10666,7 @@ puts "AAAAAAA="+v_log
               @schedulerun.comment = "str "+v_subjectid_v_num+";"+@schedulerun.comment
               @schedulerun.save
 
-              v_call = "ssh panda_user@merida.dom.wisc.edu 'mkdir "+v_check_path_orig +"' "
+              v_call = "ssh panda_user@kanga.dom.wisc.edu 'mkdir "+v_check_path_orig +"' "
         puts v_call
               stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
@@ -10675,7 +10675,7 @@ puts "AAAAAAA="+v_log
               stdin.close
               stdout.close
               stderr.close
-              v_call = "ssh panda_user@merida.dom.wisc.edu 'rsync -av  "+v_ids_path_full+"   "+v_check_path_orig+"/' "
+              v_call = "ssh panda_user@kanga.dom.wisc.edu 'rsync -av  "+v_ids_path_full+"   "+v_check_path_orig+"/' "
         puts v_call
               stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
@@ -10684,7 +10684,7 @@ puts "AAAAAAA="+v_log
               stdin.close
               stdout.close
               stderr.close
-              v_call = "ssh panda_user@merida.dom.wisc.edu 'cd "+v_check_path_orig+";find . -name 'P*.7.bz2' -exec bunzip2 {} \\\;' "
+              v_call = "ssh panda_user@kanga.dom.wisc.edu 'cd "+v_check_path_orig+";find . -name 'P*.7.bz2' -exec bunzip2 {} \\\;' "
         puts v_call        
               stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
