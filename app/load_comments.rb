@@ -15,7 +15,6 @@ class LoadComments < ActiveRecord::Base
    begin   # catch all exception and put error in comment
    puts "=============starting path and comments load================================="
     radiology_comments  = RadiologyComment.all # deprecated find(:all)
-    
    # radiology_comments[0].  seems to only get the first visit????
     # going off of visit, ok if only called once   
     radiology_comments[0].load_paths(1)
@@ -26,7 +25,7 @@ class LoadComments < ActiveRecord::Base
 #    radiology_comments.each do |rc|
         # IF THINGS ARE NOT LOADING, LOOK AT THE HTML OF RADIOLOGY SITE - START INDEX - END INDEX 
           v_return_comment = ""
-          v_return_comment = radiology_comments[0].load_comments(1)
+          v_return_comment = radiology_comments[0].load_comments(2)  # (1) #CHANGING FOR TESTING TO 0 months back!!!!!!
 #         rc.load_comments(1)
 #     end
      
