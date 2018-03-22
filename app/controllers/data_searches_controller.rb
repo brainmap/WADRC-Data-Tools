@@ -2636,7 +2636,7 @@ puts "bbbbb "+sql
         end
         format.xml  { render :xml => @results }
         format.csv { send_data @csv_str }
-        format.json { render :json =>  @json_array_of_hash.to_json}
+        format.json { send_data @json_array_of_hash.to_json}#render :json =>  @json_array_of_hash.to_json}
       end
      
     end

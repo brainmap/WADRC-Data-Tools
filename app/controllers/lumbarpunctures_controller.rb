@@ -802,7 +802,7 @@ class LumbarpuncturesController < ApplicationController
        format.csv { send_data @csv_str }
        format.xml  { render :xml => @lumbarpunctures }       
        format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(50)} # lp_search.html.erb
-       format.json { render :json =>  @json_array_of_hash.to_json} # @test_to_json_lumbarpunctures}
+       format.json { send_data @json_array_of_hash.to_json } #render :json =>  @json_array_of_hash.to_json} # @test_to_json_lumbarpunctures}
      end
    end
   
