@@ -25,7 +25,7 @@ class LoadComments < ActiveRecord::Base
 #    radiology_comments.each do |rc|
         # IF THINGS ARE NOT LOADING, LOOK AT THE HTML OF RADIOLOGY SITE - START INDEX - END INDEX 
           v_return_comment = ""
-          v_return_comment = radiology_comments[0].load_comments(2)  # (1) #CHANGING FOR TESTING TO 0 months back!!!!!!
+          v_return_comment = radiology_comments[0].load_comments(1)  # (1) #CHANGING FOR TESTING TO 0 months back!!!!!!
 #         rc.load_comments(1)
 #     end
      
