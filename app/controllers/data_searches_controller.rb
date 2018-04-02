@@ -3288,21 +3288,27 @@ end
              v_key_col_sql ="reggieid_kc varchar(50) "
              v_key_col_join_sql = "participant_id integer"
              v_key_col_edit_join_sql = "participant_id varchar(50) DEFAULT '|'"
+             v_key_col_index = "participant_id"
           elsif params[:key_type] == "wrapnum-kc-participant_id"
             v_key_col_sql ="wrapnum_kc varchar(50) "
              v_key_col_join_sql = "participant_id integer"             
              v_key_col_edit_join_sql = "participant_id varchar(50) DEFAULT '|'"
+             v_key_col_index = "participant_id"
           elsif params[:key_type] == "adrcnum-kc-participant_id"
              v_key_col_sql ="adrcnum_kc varchar(50) "
               v_key_col_join_sql = "participant_id integer"             
               v_key_col_edit_join_sql = "participant_id varchar(50) DEFAULT '|'"
+              v_key_col_index = "participant_id"
          elsif  params[:key_type] == "enrollment/sp"
               v_key_col_sql ="subjectid varchar(50) "
               v_key_col_join_sql = "enrollment_id integer, scan_procedure_id integer"
               v_key_col_edit_join_sql = "enrollment_id varchar(50) DEFAULT '|', scan_procedure_id varchar(50) DEFAULT '|'"
+              v_key_col_index = "enrollment_id,scan_procedure_id"
          end
          sql ="create table "+v_table_name+" ("+v_key_col_sql+", general_comment varchar(2000),done_flag varchar(1),status_flag varchar(1),status_comment varchar(500),"+v_key_col_join_sql+")"
          results = connection.execute(sql)
+         sql_index = "create index ind_"+v_table_name+" on "+v_table_name+"("+v_key_col_index+")"
+         results_index = connection.execute(sql_index)
          sql ="create table "+v_table_name+"_old ("+v_key_col_sql+", general_comment varchar(2000),done_flag varchar(1),status_flag varchar(1),status_comment varchar(500),"+v_key_col_join_sql+")"
          results = connection.execute(sql)
          sql ="create table "+v_table_name+"_new ("+v_key_col_sql+", general_comment varchar(2000),done_flag varchar(1),status_flag varchar(1),status_comment varchar(500),"+v_key_col_join_sql+")"
