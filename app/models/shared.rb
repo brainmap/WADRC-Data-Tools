@@ -1113,9 +1113,7 @@ end
           else
               v_comment = v_comment+"; "+v_path
           end
- 
         end
-
       end
       @schedulerun.comment = v_comment
       if v_comment > "Missing dirs:" # send email set status = ""
@@ -1125,7 +1123,30 @@ end
           v_email = "noreply_johnson_lab@medicine.wisc.edu"
           PandaMailer.schedule_notice(v_subject,{:send_to => v_email}).deliver
       end
-    
+    # check all the ids
+    v_check_ids_flag = "Y"
+    if v_check_ids_flag == "Y"
+      v_comment_ids= ""
+      @ids = ImageDataset.all
+      @ids.each do |idset|
+          v_path = idset.path
+          if  !v_path.nil? and v_path > '' and !v_missing_dir_array.include?(v_path)
+            if File.directory?(v_path)
+             # all good
+            else
+              v_comment_ids = v_comment_ids+"; "+v_path
+            end
+          end
+      end
+      @schedulerun.comment = v_comment_ids
+      if v_comment_ids > "Missing ImageDataset dirs:" # send email set status = ""
+          @schedulerun.status_flag ="E"
+          v_comment = "ERROR "+v_comment_ids
+          v_subject = "New missing IMAGE DATASET dirs in "+v_process_name+": "+v_comment_ids
+          v_email = "noreply_johnson_lab@medicine.wisc.edu"
+          PandaMailer.schedule_notice(v_subject,{:send_to => v_email}).deliver
+      end  
+    end
 
     @schedulerun.comment =("successful finish check_if_raw_dirs_exist "+v_comment_warning+" "+@schedulerun.comment[0..1990])
     if !v_comment.include?("ERROR")
