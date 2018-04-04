@@ -1153,7 +1153,7 @@ end
              # all good
             else
               v_comment_ids = v_comment_ids+"; ids="+v_path
-              #puts "ids not found="+v_path
+              puts "ids not found="+v_path
             end
           end
       end
