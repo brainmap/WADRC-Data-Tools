@@ -1130,11 +1130,13 @@ end
       @ids = ImageDataset.all
       @ids.each do |idset|
           v_path = idset.path
+          #puts "checking="+v_path
           if  !v_path.nil? and v_path > '' and !v_missing_dir_array.include?(v_path)
             if File.directory?(v_path)
              # all good
             else
-              v_comment_ids = v_comment_ids+"; "+v_path
+              v_comment_ids = v_comment_ids+"; ids="+v_path
+              puts "ids not found="+v_path
             end
           end
       end
