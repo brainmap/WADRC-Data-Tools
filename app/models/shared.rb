@@ -1120,7 +1120,7 @@ end
 '/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/020','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/1000',
 '/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/1001','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/1600',
 '/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/700','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/vipr/012',
-'/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/vipr/013','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/vipr/014'] # the known bad ones
+'/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/vipr/013','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/vipr/014','/mounts/data/raw/bendlin.adcp.visit1/mri/adcp2024_8474_08142017/8474/5','/mounts/data/raw/bendlin.adcp.visit1/mri/adcp2024_8474_08142017/8474/6','/mounts/data/raw/bendlin.adcp.visit1/mri/adcp2024_8474_08142017/8474/7','/mounts/data/raw/bendlin.adcp.visit1/mri/adcp2024_8474_08142017/8474/8'] # the known bad ones
       @mri_visits = Visit.all
       @mri_visits.each do |v_mri_visit|
         v_path = v_mri_visit.path
