@@ -1103,7 +1103,24 @@ end
       v_comment = "Missing dirs:"
       v_comment_warning ="" 
       v_process_name = 'check_if_raw_dirs_exist'
-      v_missing_dir_array = ['/mounts/data/raw/bendlin.bfit.visit1/mri/bfit10011_1572_06052017','/mounts/data/raw/bendlin.adcp.visit1/mri/adcp2042_8626_09292017','/mounts/data/raw/adcs.a4.v27/mri/A41270257B_3235_09062017','/mounts/data/raw/ADNI-2/mri/ADNI3_PHANTOM_1565_11012016','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015','/mounts/data/raw/peppard.sleepcohort.visit1/mri/wscsPT1001_8120_10152014','/mounts/data/raw/peppard.sleepcohort.visit1/mri/wscsPT1002_8121_10152014','/mounts/data/raw/gleason.falls.visit1/fal00028_9602_01282010','/mounts/data/raw/johnson.merit220.visit1/mrtP00002','/mounts/data/raw/johnson.merit220.visit1/mrtP00001','/mounts/data/raw/bendlin_WMAD/ge3T_750_scanner/wmadP003','/mounts/data/raw/bendlin_WMAD/ge3T_750_scanner/wmadP002','/mounts/data/raw/bendlin_WMAD/ge3T_750_scanner/wmadpilot1'] # the known bad ones
+      v_missing_dir_array = ['/mounts/data/raw/bendlin.bfit.visit1/mri/bfit10011_1572_06052017','/mounts/data/raw/bendlin.adcp.visit1/mri/adcp2042_8626_09292017',
+        '/mounts/data/raw/adcs.a4.v27/mri/A41270257B_3235_09062017','/mounts/data/raw/ADNI-2/mri/ADNI3_PHANTOM_1565_11012016',
+        '/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015','/mounts/data/raw/peppard.sleepcohort.visit1/mri/wscsPT1001_8120_10152014',
+        '/mounts/data/raw/peppard.sleepcohort.visit1/mri/wscsPT1002_8121_10152014','/mounts/data/raw/gleason.falls.visit1/fal00028_9602_01282010',
+        '/mounts/data/raw/johnson.merit220.visit1/mrtP00002','/mounts/data/raw/johnson.merit220.visit1/mrtP00001','/mounts/data/raw/bendlin_WMAD/ge3T_750_scanner/wmadP003',
+        '/mounts/data/raw/bendlin_WMAD/ge3T_750_scanner/wmadP002','/mounts/data/raw/bendlin_WMAD/ge3T_750_scanner/wmadpilot1',
+        '/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/001','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/002',
+'/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/003','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/004',
+'/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/006','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/007',
+'/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/009','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/010',
+'/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/011','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/012',
+'/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/013','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/014',
+'/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/015','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/016',
+'/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/017','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/019',
+'/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/020','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/1000',
+'/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/1001','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/1600',
+'/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/700','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/vipr/012',
+'/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/vipr/013','/mounts/data/raw/gallagher.lmpd.visit2/mri/TESTLMPDP00001_9261_07152015/vipr/014'] # the known bad ones
       @mri_visits = Visit.all
       @mri_visits.each do |v_mri_visit|
         v_path = v_mri_visit.path
@@ -1136,7 +1153,7 @@ end
              # all good
             else
               v_comment_ids = v_comment_ids+"; ids="+v_path
-              puts "ids not found="+v_path
+              #puts "ids not found="+v_path
             end
           end
       end
