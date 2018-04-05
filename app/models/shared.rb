@@ -6046,7 +6046,7 @@ puts "AAAAAAA="+v_log
             and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
             and enrollment_vgroup_memberships.enrollment_id = enrollments.id
             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
-            and ( (scan_procedures_vgroups.scan_procedure_id = 22 and enrollments.enumber in ('adrc00191','adrc00192','adrc00210','adrc00303',adrc00333','adrc00383','adrc00404','adrc00423',
+            and ( (scan_procedures_vgroups.scan_procedure_id = 22 and enrollments.enumber in ('adrc00191','adrc00192','adrc00210','adrc00303','adrc00333','adrc00383','adrc00404','adrc00423',
 'adrc00435','adrc00530','adrc00531','adrc00555','adrc00558','adrc00579','adrc00580','adrc00592',
 'adrc00599','adrc00601','adrc00605','adrc00622','adrc00623','adrc00670','adrc00700','adrc00703',
 'adrc00709','adrc00711','adrc00712','adrc00713','adrc00716','adrc00717','adrc00718','adrc00721',
