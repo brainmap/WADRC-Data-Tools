@@ -2262,7 +2262,9 @@ def run_sleep_t1
                   if f.start_with?("o") and f.end_with?(".nii")
                     # check for tissue_seg
                     v_subjectid_tissue_seg =v_subjectid_path+"/tissue_seg"
-                      if !File.directory?(v_subjectid_tissue_seg)  # or !File.directory?(v_subjectid_tissue_seg) # makes file
+                     ##### if !File.directory?(v_subjectid_tissue_seg)  # or !File.directory?(v_subjectid_tissue_seg) # makes file
+                      # want to run everywhere with out csv
+                     if Dir.glob(v_subjectid_tissue_seg+"/*.csv").empty?
                         v_comment = "str "+v_subjectid_v_num+";"+v_comment
 #puts " RUN t1segproc.sh for "+f+"    "+v_subjectid_v_num+"  "+v_subjectid_tissue_seg
                         v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'  +v_script+' -p '+sp.codename+'  -b '+v_subjectid+' " ' 
