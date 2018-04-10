@@ -6040,23 +6040,35 @@ puts "AAAAAAA="+v_log
             and image_datasets.series_description is not null)", v_scan_procedure_id_exclude_array)
 
           #same as above but with limited list
-                    v_ids_array = ImageDataset.where("image_datasets.visit_id in 
-            (select visits.id from visits, appointments,image_datasets, scan_procedures_vgroups, enrollments, enrollment_vgroup_memberships
+ #          v_ids_array = ImageDataset.where("image_datasets.visit_id in 
+ #           (select visits.id from visits, appointments,image_datasets, scan_procedures_vgroups, enrollments, enrollment_vgroup_memberships
+ #                   where visits.appointment_id = appointments.id and appointments.appointment_date > (DATE_SUB(NOW(), INTERVAL "+v_month_back+" MONTH)) 
+ #           and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
+ #           and enrollment_vgroup_memberships.enrollment_id = enrollments.id
+ #           and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+ #           and ( (scan_procedures_vgroups.scan_procedure_id = 22 and enrollments.enumber in (enumlist))
+ #     or
+ #      (scan_procedures_vgroups.scan_procedure_id = 65 and enrollments.enumber in (enumlist))
+#)
+#            and visits.id = image_datasets.visit_id
+#            and appointments.appointment_type = 'mri'
+#            and appointments.vgroup_id not in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where 
+#                       scan_procedures_vgroups.scan_procedure_id in (?)    )
+#            and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15))
+#            and image_datasets.visit_id not in ( select v.id from cg_pcvipr_values, visits v, appointments a, scan_procedures_vgroups spvg, 
+#                            enrollment_vgroup_memberships evgm  where cg_pcvipr_values.enrollment_id = evgm.enrollment_id
+#                            and a.vgroup_id = evgm.vgroup_id and spvg.scan_procedure_id = cg_pcvipr_values.scan_procedure_id
+#                            and v.appointment_id = a.id and a.vgroup_id = evgm.vgroup_id and a.vgroup_id = spvg.vgroup_id)
+#            and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15)) 
+#            and image_datasets.series_description is not null)", v_scan_procedure_id_exclude_array)
+
+          #same as above but with limited to 2 sp's
+          v_ids_array = ImageDataset.where("image_datasets.visit_id in 
+            (select visits.id from visits, appointments,image_datasets, scan_procedures_vgroups
                     where visits.appointment_id = appointments.id and appointments.appointment_date > (DATE_SUB(NOW(), INTERVAL "+v_month_back+" MONTH)) 
             and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
-            and enrollment_vgroup_memberships.enrollment_id = enrollments.id
-            and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
-            and ( (scan_procedures_vgroups.scan_procedure_id = 22 and enrollments.enumber in ('adrc00191','adrc00192','adrc00210','adrc00303','adrc00333','adrc00383','adrc00404','adrc00423',
-'adrc00435','adrc00530','adrc00531','adrc00555','adrc00558','adrc00579','adrc00580','adrc00592',
-'adrc00599','adrc00601','adrc00605','adrc00622','adrc00623','adrc00670','adrc00700','adrc00703',
-'adrc00709','adrc00711','adrc00712','adrc00713','adrc00716','adrc00717','adrc00718','adrc00721',
-'adrc00725','adrc00728','adrc00731','adrc00735','adrc00741','adrc00761','adrc00839','adrc00858',
-'adrc00871','adrc00880','adrc00883','adrc00915','adrc00938','adrc00942','adrc00949','adrc00950',
-'adrc00951','adrc00961','adrc00963','adrc00986'))
-      or
-       (scan_procedures_vgroups.scan_procedure_id = 65 and enrollments.enumber in ('adrc00019','adrc00023','adrc00039','adrc00074','adrc00299','adrc00320','adrc00379','adrc00589',
-'adrc00602','adrc00603','adrc00606','adrc00607','adrc00608','adrc00648','adrc00694'))
-)
+            and 
+       (scan_procedures_vgroups.scan_procedure_id in (46,60))
             and visits.id = image_datasets.visit_id
             and appointments.appointment_type = 'mri'
             and appointments.vgroup_id not in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where 
