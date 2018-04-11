@@ -6065,23 +6065,22 @@ puts "AAAAAAA="+v_log
 #            and image_datasets.series_description is not null)", v_scan_procedure_id_exclude_array)
 
           #same as above but with limited to 2 sp's
-          v_ids_array = ImageDataset.where("image_datasets.visit_id in 
-            (select visits.id from visits, appointments,image_datasets, scan_procedures_vgroups
-                    where visits.appointment_id = appointments.id and appointments.appointment_date > (DATE_SUB(NOW(), INTERVAL "+v_month_back+" MONTH)) 
-            and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
-            and 
-       (scan_procedures_vgroups.scan_procedure_id in (46,60))
-            and visits.id = image_datasets.visit_id
-            and appointments.appointment_type = 'mri'
-            and appointments.vgroup_id not in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where 
-                       scan_procedures_vgroups.scan_procedure_id in (?)    )
-            and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15))
-            and image_datasets.visit_id not in ( select v.id from cg_pcvipr_values, visits v, appointments a, scan_procedures_vgroups spvg, 
-                            enrollment_vgroup_memberships evgm  where cg_pcvipr_values.enrollment_id = evgm.enrollment_id
-                            and a.vgroup_id = evgm.vgroup_id and spvg.scan_procedure_id = cg_pcvipr_values.scan_procedure_id
-                            and v.appointment_id = a.id and a.vgroup_id = evgm.vgroup_id and a.vgroup_id = spvg.vgroup_id)
-            and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15)) 
-            and image_datasets.series_description is not null)", v_scan_procedure_id_exclude_array)
+   #       v_ids_array = ImageDataset.where("image_datasets.visit_id in 
+   #         (select visits.id from visits, appointments,image_datasets, scan_procedures_vgroups
+   #                 where visits.appointment_id = appointments.id and appointments.appointment_date > (DATE_SUB(NOW(), INTERVAL "+v_month_back+" MONTH)) 
+   #         and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
+   #         and  (scan_procedures_vgroups.scan_procedure_id in (46,60))
+   #         and visits.id = image_datasets.visit_id
+   #         and appointments.appointment_type = 'mri'
+   #         and appointments.vgroup_id not in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where 
+   #                    scan_procedures_vgroups.scan_procedure_id in (?)    )
+   #         and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15))
+   #         and image_datasets.visit_id not in ( select v.id from cg_pcvipr_values, visits v, appointments a, scan_procedures_vgroups spvg, 
+   #                         enrollment_vgroup_memberships evgm  where cg_pcvipr_values.enrollment_id = evgm.enrollment_id
+   #                         and a.vgroup_id = evgm.vgroup_id and spvg.scan_procedure_id = cg_pcvipr_values.scan_procedure_id
+   #                         and v.appointment_id = a.id and a.vgroup_id = evgm.vgroup_id and a.vgroup_id = spvg.vgroup_id)
+   #         and image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15)) 
+   #         and image_datasets.series_description is not null)", v_scan_procedure_id_exclude_array)
           # not getting juist PCVIPR ??
           v_ids_array = v_ids_array.where("image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15))")
           v_ids_array.each do |ids|
