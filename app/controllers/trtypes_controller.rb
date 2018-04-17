@@ -51,6 +51,8 @@ class TrtypesController < ApplicationController
                 end
             end
             if !params[:tr_search][:subjectid].nil? and params[:tr_search][:subjectid] > ''
+
+               params[:tr_search][:subjectid] = params[:tr_search][:subjectid].gsub(/ /,'').gsub(/\t/,'').gsub(/\n/,'').gsub(/\r/,'').gsub(/ /,'').gsub(/'/,'').downcase
                v_subjectid_array = (params[:tr_search][:subjectid].gsub(/ /,"")).split(",")
   
                @trfiles_search = @trfiles_search.where("subjectid in (?)",v_subjectid_array) #params[:tr_search][:subjectid])
@@ -391,6 +393,8 @@ class TrtypesController < ApplicationController
        @trtype = Trtype.find(params[:id])
     end
    def trtype_params
-          params.require(:trtype).permit(:series_description_display,:action_name,:series_description_type_id,:status_flag,:parameters,:updated_at,:created_at,:description,:id,:triggers_1)
+    params.require(:trtype).permit(:series_description_display,:action_name,:series_description_type_id,:status_flag,:parameters,:updated_at,:created_at,:description,:id,:triggers_1)
+   
+   #new       params.require(:trtype).permit(:series_description_display,:action_name,:status_flag,:parameters,:updated_at,:created_at,:description,:id,:triggers_1,:series_description_type_id =>[])
    end
 end
