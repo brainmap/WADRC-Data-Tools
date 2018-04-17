@@ -1,5 +1,4 @@
 <h1>Editing Image Dataset</h1>
-
 <p>
 	<%=h @image_dataset.path %> <br />
 	<%=h @image_dataset.rmr %> <br />
@@ -50,7 +49,15 @@ Not sure if this was ever used?? also, page.insert_html nil object causing error
          end
   	end %>
 	<% end %>
-  
+    <p>
+    <%= f.submit "Update things above" %>
+  </p>
+<% end %>
+
+  <%= form_for(@image_dataset, :multipart => true) do |f| %>
+  <p>
+ <%= f.label "Edit Image Dataset Path: " %> <%= text_field_tag 'image_dataset[path', @image_dataset.path,:size =>100 %>
+</p>
   <p>
     <%= f.submit "Update" %>
   </p>

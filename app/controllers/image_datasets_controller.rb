@@ -453,7 +453,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
         @hide_page_flag = 'Y'
       end
     @image_dataset = ImageDataset.where("image_datasets.visit_id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
-    if !params[:image_dataset][:lock_default_scan_flag_parse].blank?  
+    if !params[:image_dataset].nil? and !params[:image_dataset][:lock_default_scan_flag_parse].blank?  
            v_lock_default_scan_array = params[:image_dataset][:lock_default_scan_flag_parse].split("|")
             @image_dataset.lock_default_scan_flag = v_lock_default_scan_array[0]
             if v_lock_default_scan_array[1] == ''
