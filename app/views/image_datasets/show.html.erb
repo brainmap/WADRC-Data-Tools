@@ -19,6 +19,11 @@ edit_count = edit_count -1
     <% else %>
       <%= link_to('view participant', @image_dataset.participant) %>
     <% end %>
+    <% if current_user.role == 'Admin_High' %>
+    <small><small>
+<%= link_to 'Edit path/delete', edit_image_dataset_path(@image_dataset) %>
+     </small></small> 
+     <% end %>
 	</p>
 	<div class="next-previous-links">
 		<%=	link_to "&larr; Previous".html_safe, @previous_image_dataset unless @image_dataset == @image_datasets.first %>

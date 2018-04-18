@@ -5,7 +5,7 @@
 	<%=h @image_dataset.series_description %> <br />
 	<%=h @image_dataset.timestamp %>
 </p>
-
+<% if current_user.role == 'Admin_High' %>
 <%= form_for(@image_dataset, :multipart => true) do |f| %>
 <% if @image_dataset.errors.any? %>
   <div id="error_explanation">
@@ -66,3 +66,4 @@ Not sure if this was ever used?? also, page.insert_html nil object causing error
 <br />
 <%= link_to 'Show', @image_dataset %>   &nbsp;&nbsp;<%= link_to 'Destroy', @image_dataset,  :method => :delete ,data: {confirm: 'Are you sure?' }%>
 <%#= link_to 'Back', image_datasets_path %>
+<% end %>
