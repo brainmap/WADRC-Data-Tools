@@ -15,7 +15,13 @@
 		<% end %> 
 	<% if !tn.datadictionary2_file_name.blank?%>
 		<small><small><%= link_to ' Download2', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
-		<% end %></td>
+		<% end %>
+	<% if !tn.contact_owner_table.blank?%>
+		<small><small><input type="button" id="contact" value="Contact" onClick="alert('<%= tn.contact_owner_table %>');" />
+		</small></small>
+		<% end %> 
+
+	</td>
 		
 	<% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium' or tn.users.include?( current_user) ) and tn.editable_flag == "Y" and @cg_tn_key_y[tn.id] == "Y"  and @cg_tn_key_unique_y[tn.id] == "Y"%>
 		<td> <%= link_to  'Edit values', '/cg_edit_table/'+tn.id.to_s %></td>
@@ -40,7 +46,12 @@
 		<% end %>
 			<% if !tn.datadictionary2_file_name.blank?%>
 		<small><small><%= link_to 'Download2', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
-		<% end %></td> <td> &nbsp;</td></tr>
+		<% end %>
+	<% if !tn.contact_owner_table.blank?%>
+		<small><small><input type="button" id="contact" value="Contact" onClick="alert('<%= tn.contact_owner_table %>');" />
+		</small></small>
+		<% end %> 
+	</td> <td> &nbsp;</td></tr>
 
 	     <% end %>
 	  <% end %>
@@ -56,7 +67,11 @@
 		<% end %>
 		<% if !tn.datadictionary2_file_name.blank?%>
 		<small><small><%= link_to 'Download2', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
-		<% end %></td> <td> &nbsp;</td></tr>
+		<% end %>
+		<% if !tn.contact_owner_table.blank?%>
+		<small><small><input type="button" id="contact" value="Contact" onClick="alert('<%= tn.contact_owner_table %>');" />
+		</small></small>
+		<% end %> </td> <td> &nbsp;</td></tr>
 
 	     <% end %>
 	  <% end %>
@@ -71,7 +86,11 @@
 		<% end %>
 		<% if !tn.datadictionary2_file_name.blank?%>
 		<small><small><%= link_to 'Download2', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
-		<% end %></td> <td> &nbsp;</td></tr>
+		<% end %>
+		<% if !tn.contact_owner_table.blank?%>
+		<small><small><input type="button" id="contact" value="Contact" onClick="alert('<%= tn.contact_owner_table %>');" />
+		</small></small>
+		<% end %> </td> <td> &nbsp;</td></tr>
 
 	     <% end %>
 	  <% end %>
@@ -87,6 +106,10 @@
 		<% if !tn.datadictionary2_file_name.blank?%>
 		<small><small><%= link_to 'Download2', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
 		<% end %>
+			<% if !tn.contact_owner_table.blank?%>
+		<small><small><input type="button" id="contact" value="Contact" onClick="alert('<%= tn.contact_owner_table %>');" />
+		</small></small>
+		<% end %> 
 	</td> <td> &nbsp;</td></tr>
 
 	     <% end %>
@@ -103,7 +126,11 @@
 		<% end %>
 		<% if !tn.datadictionary2_file_name.blank?%>
 		<small><small><%= link_to 'Download2', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
-		<% end %></td> <td> &nbsp;</td></tr>
+		<% end %>
+		<% if !tn.contact_owner_table.blank?%>
+		<small><small><input type="button" id="contact" value="Contact" onClick="alert('<%= tn.contact_owner_table %>');" />
+		</small></small>
+		<% end %> </td> <td> &nbsp;</td></tr>
 
 	     <% end %>
 	  <% end %>
@@ -118,7 +145,11 @@
 		<% end %>
 		<% if !tn.datadictionary2_file_name.blank?%>
 		<small><small><%= link_to 'Download', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
-		<% end %></td> <td> &nbsp;</td></tr>
+		<% end %>
+		<% if !tn.contact_owner_table.blank?%>
+		<small><small><input type="button" id="contact" value="Contact" onClick="alert('<%= tn.contact_owner_table %>');" />
+		</small></small>
+		<% end %> </td> <td> &nbsp;</td></tr>
 
 	     <% end %>
 	  <% end %>

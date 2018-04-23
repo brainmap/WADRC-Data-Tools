@@ -296,7 +296,12 @@ v_tn_cn_searchable_hash = []
 							<% end %>
 							<% if !tn.datadictionary2_file_name.blank?%>
 							<small><small><%= link_to 'DataDictionary2/Expanatory', tn.datadictionary2.url %></small></small>
-							<% end %></td><td>&nbsp;
+							<% end %>
+							<% if !tn.contact_owner_table.blank?%>
+		                    <small><small><input type="button" id="contact" value="Contact" onClick="alert('<%= tn.contact_owner_table %>');" />
+		                    </small></small>
+		                     <% end %> 
+	                       </td><td>&nbsp;
 								
 											<a id="myHeader1" href="javascript:toggle2_closed('tn_<%=tn.id.to_s%>','myHeader2');" ><small><small>expand/collapse</small></small></a>
 											   </td></tr>

@@ -183,6 +183,6 @@ class CgTnsController < ApplicationController
        @cg_tn = CgTn.find(params[:id])
     end
    def cg_tn_params
-          params.require(:cg_tn).permit(:join_left_parent_tn,:status_flag,:updated_at,:created_at,:table_type,:display_order,:join_right,:join_left,:common_name,:tn,:id,:editable_flag,:datadictionary_file_name,:datadictionary2_updates_at,:datadictionary2_file_size,:datadictionary2_content_type,:datadictionary2_file_name,:secondary_key_flag,:tracker_id,:table_group_id,:alias,:datadictionary_file_size,:datadictionary_content_type,:view_tn_participant_link,:datadictionary_updated_at,:datadictionary,:datadictionary2,user_ids: [])
+          params.require(:cg_tn).permit(:join_left_parent_tn,:status_flag,:updated_at,:created_at,:table_type,:display_order,:join_right,:join_left,:common_name,:tn,:id,:editable_flag,:datadictionary_file_name,:datadictionary2_updates_at,:datadictionary2_file_size,:datadictionary2_content_type,:datadictionary2_file_name,:secondary_key_flag,:tracker_id,:table_group_id,:alias,:datadictionary_file_size,:datadictionary_content_type,:view_tn_participant_link,:datadictionary_updated_at,:datadictionary,:datadictionary2,:contact_owner_table,:secondary_edit_flag,user_ids: [])
    end
 end
