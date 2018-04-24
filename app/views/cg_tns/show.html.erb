@@ -39,6 +39,8 @@
   <b>Table has secondary key column:</b>
   <%= @cg_tn.secondary_key_flag %>
 </p>
+<p>Nicer table edit form/dashboard: <%= @cg_tn.secondary_edit_flag %>
+  </p>
 <p>
 	<b>Owners:</b>
 	<%= @cg_tn.users.sort_by(&:username_name).collect {|u|  u.username_name}.join(", ").html_safe %>

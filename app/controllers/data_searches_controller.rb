@@ -174,6 +174,156 @@ class DataSearchesController < ApplicationController
       end
       
     end
+    def cg_edit_dashboard_table
+      v_schema ='panda_production'
+      if Rails.env=="development" 
+        v_schema ='panda_development'
+      end
+      scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
+      # really want to stop edit_table from being used on core tables
+      v_exclude_tables_array =['appointments','blooddraws','cg_queries','cg_query_tn_cns','cg_query_tns','cg_tn_cns','cg_tns',
+        'cg_tns_users','employees','enrollment_vgroup_memberships','enrollment_visit_memberships','enrollments',
+        'image_comments','image_dataset_quality_checks','image_datasets','lumbarpuncture_results','lumbarpunctures','mriperformances','mriscantasks',
+        'neuropsyches','participants','petscans','q_data','q_data_forms','question_scan_procedures','questionform_questions','questionform_scan_procedures',
+        'questionforms','questionnaires','questions','radiology_comments','roles','scan_procedures','scan_procedures_vgroups','scan_procedures_visits',
+        'scheduleruns','schedules','schedules_users','series_descriptions','users','vgroups','visits','vitals'] 
+      @cg_tn = CgTn.find(params[:id])
+      v_new_key_value =""
+      @enumber_search =""
+      v_sp =""
+      @sp_array =[]
+      v_condition =""
+      @conditions = []
+      params["search_criteria"] =""
+      v_key_columns =""
+
+      
+      # build up condition and join from @cg_tn
+      if !params[:cg_edit_dashboard_table].blank? and  !params[:cg_edit_dashboard_table][:enumber].blank?
+          if params[:cg_edit_dashboard_table][:enumber].include?(',') # string of enumbers
+            v_enumber =  params[:cg_edit_dashboard_table][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
+             @enumber_search = v_enumber
+             v_enumber = v_enumber.gsub(/,/,"','")
+            v_condition ="   appointments.id in (select a2.id from enrollment_vgroup_memberships,enrollments, appointments a2
+                              where enrollment_vgroup_memberships.vgroup_id= a2.vgroup_id 
+                               and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"')) "
+          else
+             v_enumber = params[:cg_edit_dashboard_table][:enumber].gsub(/[;:'"()=<>]/, '')
+             v_condition ="   appointments.id in (select a2.id from enrollment_vgroup_memberships,enrollments, appointments a2
+                            where enrollment_vgroup_memberships.vgroup_id= a2.vgroup_id 
+                             and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:cg_edit_dashboard_table][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+          end
+          @conditions.push(v_condition)
+          params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:cg_edit_dashboard_table][:enumber]
+      end
+
+      if !params[:cg_edit_dashboard_table].blank? and !params[:cg_edit_dashboard_table][:scan_procedure_id].blank?
+           @sp_array = params[:cg_edit_dashboard_table][:scan_procedure_id]
+           v_sp = params[:cg_edit_dashboard_table][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')
+
+           v_condition ="   appointments.id in (select a2.id from appointments a2,scan_procedures_vgroups where 
+                                                              a2.vgroup_id = scan_procedures_vgroups.vgroup_id 
+                                                              and scan_procedure_id in ("+params[:cg_edit_dashboard_table][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+           @conditions.push(v_condition)
+           @scan_procedures = ScanProcedure.where("id in (?)",params[:cg_edit_dashboard_table][:scan_procedure_id])
+           params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
+      end
+
+      if @cg_tn.table_type == 'column_group' and @cg_tn.secondary_edit_flag == "Y"  and !v_exclude_tables_array.include?(@cg_tn.tn.downcase) # want to limit to cg tables
+        @cns = []
+        @key_cns = []
+        @v_key = []
+        @v_dashboard_edit_columns = []
+        @cns_type_dict ={}
+        @cns_common_name_dict = {}
+        @cg_data_dict = {}
+        @cg_edit_data_dict = {}
+        @ref_table_a_dict ={}
+        @ref_table_b_dict ={}
+        @value_list_dict ={}
+        
+        @cg_tn_cns =CgTnCn.where("cg_tn_id in (?) and status_flag='Y'",@cg_tn.id)
+        @cg_tn_cns.each do |cg_tn_cn|
+  # puts "AAAAAAA cg_tn_cn.cn="+cg_tn_cn.cn
+            if !cg_tn_cn.ref_table_a.blank?
+              @ref_table_a_dict[cg_tn_cn.cn] = cg_tn_cn.ref_table_a
+            end
+            if !cg_tn_cn.ref_table_b.blank?
+              @ref_table_b_dict[cg_tn_cn.cn] = cg_tn_cn.ref_table_b
+            end
+            if !cg_tn_cn.value_list.blank?
+               @value_list_dict[cg_tn_cn.cn] = cg_tn_cn.value_list
+            end             
+            @cns.push(cg_tn_cn.cn)
+            @cns_common_name_dict[cg_tn_cn.cn] = cg_tn_cn.common_name
+            # make so its the first column in display
+            if cg_tn_cn.key_column_flag == "Y"
+              @key_cns.push(cg_tn_cn.cn)
+            end 
+            # make so its the first columns after the keys
+            if cg_tn_cn.dashboard_edit_flag == "Y"
+              @v_dashboard_edit_columns.push(cg_tn_cn.cn)
+            end 
+            if !cg_tn_cn.data_type.blank?
+              @cns_type_dict[cg_tn_cn.cn] = cg_tn_cn.data_type
+            end
+        end  
+        @v_key_columns = @key_cns.join(',') 
+        if   @key_cns.size == 0
+          # NEED TO ADD FLASH
+        end
+        #adjusting column order so key first, then editable columns, then the rest
+        @cns = @cns - @key_cns
+        @cns = @cns - @v_dashboard_edit_columns
+        @cns = @key_cns + @v_dashboard_edit_columns + @cns
+        #NOT NEED ACL here - only getting cg_edit to compare with returned form values
+        sql = "SELECT "+@cns.join(',')+" FROM "+@cg_tn.tn+" order by "+@key_cns.join(',') 
+              #apply acl limits
+      @conditions.push(" scan_procedures_vgroups.scan_procedure_id in ("+scan_procedure_list+") " )
+      @conditions.push(" scan_procedures.id = scan_procedures_vgroups.scan_procedure_id " )
+      @conditions.push(" scan_procedures_vgroups.vgroup_id = vgroups.id ")
+      @conditions.push(" appointments.vgroup_id = vgroups.id ")
+      @conditions.push(@cg_tn.join_right)
+      @key_cns.each do |k|
+          @conditions.push(@cg_tn.tn+"."+k+" is not null ")
+      end  
+      @cns_plus_tn = []
+      @cns.each do |cn|
+          @cns_plus_tn.push(@cg_tn.tn+"."+cn)
+      end
+      sql = "SELECT distinct "+@cns_plus_tn.join(',')+" FROM appointments,scan_procedures,scan_procedures_vgroups,vgroups, "+ @cg_tn.tn+" where "+@conditions.uniq.join(' and ')+" order by "+@key_cns.join(',')  # add in conditions from search # NEED TO ADD ACL   WHERE keys in ( select keys where vgroup_id in ( normal acl ))    
+           
+puts sql
+        connection = ActiveRecord::Base.connection();
+        @results = connection.execute(sql)
+        @results.each do |r|   # populate keys and data
+          v_cnt  = 0
+          v_key =""
+          r.each do |rc| # make and save cn-value| key
+            if @key_cns.include?(@cns[v_cnt]) # key column
+              v_key = v_key+@cns[v_cnt] +"^"+rc.to_s+"|"   # params seem to not like "=" in a key
+            end
+            v_cnt = v_cnt + 1
+          end
+          if !v_key.blank? and !@v_key.include?(v_key) 
+              @v_key.push(v_key)
+          end          
+          # load data dict
+          v_cnt = 0
+          r.each do |rc|
+             v_temp = v_key+@cns[v_cnt]
+    #puts "v_temp="+v_temp+"   rc.to_s="+rc.to_s
+             @cg_data_dict[v_temp] = rc.to_s
+             v_cnt = v_cnt + 1
+          end         
+        end
+      end
+
+     respond_to do |format|
+          format.html {@v_key = Kaminari.paginate_array(@v_key).page(params[:page]).per(100)}
+      end
+    end
+
     def cg_edit_table
       v_schema ='panda_production'
       if Rails.env=="development" 

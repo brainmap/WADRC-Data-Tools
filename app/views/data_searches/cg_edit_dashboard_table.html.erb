@@ -1,0 +1,154 @@
+cg_edit_dashboard_table
+<% @cg_tn = CgTn.find(params[:id])
+
+if @cg_tn.table_type == 'column_group' and @cg_tn.secondary_edit_flag == "Y" %>
+   cg_edit_dashboard_table = <%= @cg_tn.common_name%>
+   <% @cg_tn_cn = CgTnCn.where("key_column_flag ='Y' and cg_tn_id in (?)",@cg_tn.id) %>
+
+   <%= form_for '/cg_edit_dashboard_table'+params[:id] do |f| %>
+   <table class="search_form">
+   <tr><td><%= f.label :scan_procedures %><br>
+   <div id="scan_procedure_list">
+   <ul>
+   <% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
+    <li>
+    <% if @sp_array.include?(scan_procedure.id.to_s)%>
+       <%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,TRUE , :name => 'cg_edit_dashboard_table[scan_procedure_id][]' %>
+    <% else %>
+       <%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'cg_edit_dashboard_table[scan_procedure_id][]' %>
+    <% end %>
+      <%= label_tag '', scan_procedure.codename %>
+    </li>
+   <% end %>
+   </ul>
+   </div>
+   </td></tr></table>
+   <br><br><br><br>
+    <%end%>
+       <%= form_for 'cg_edit_dashboard_table' do |f| %>
+      <table class="search_form">
+         <tr>
+            <th valign="top"><%= f.label :enumber %></th>
+            <td><%= text_field :cg_edit_dashboard_table, :enumber , :value =>@enumber_search%> <br><br>
+            <%= f.submit "Search" %></td>
+         </tr>
+       </table><%= hidden_field(:cg_edit_dashboard_table, :id, :value=>params[:id])%>
+       <% end %>
+       <br><br><br><br><br><br>
+ <% if !@key_cns.blank?%>
+       <%= form_for 'cg_edit_table' do |f| %> 
+       <% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium' or @cg_tn.users.include?( current_user) ) and @cg_tn.secondary_edit_flag == "Y" %>
+                      <br><%= submit_tag("save edits")%> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <%= link_to "Back", '/cg_tables'%>
+            <% end %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br><br>
+          <% @sp_array.each do |sp| %>
+  <!-- <%= hidden_field 'cg_edit_dashboard_table','scan_procedure_id][' ,  :value=>sp%> -->
+           <%end %>
+       <% if !@enumber_search.blank? %>
+             <%= hidden_field 'cg_edit_dashboard_table','enumber' ,  :value=>@enumber_search%>
+      <% end %>
+      <%= hidden_field 'cg_edit_dashboard_table','id' ,  :value=>params[:id]%>
+       <table  class="tabular"><tr>
+       <% @cns.each do |cn|    %>
+          <th><%= @cns_common_name_dict[cn]%>
+             <% if @key_cns.include?(cn)  %><br> key column <% end %></th>
+       <% end %>
+       </tr>
+       <tfoot><tr><td colspan=<%= @cns.size+2 %> align="left">
+       <%= paginate @v_key %>
+      </td></tr></tfoot>
+      <% v_cnt = 0
+      @v_key.each do |k| 
+          v_edit_in_row_flag ="N"
+        @cns.each do |cn|
+           if  !@cg_edit_data_dict[k+cn].blank? and @cg_edit_data_dict[k+cn] != "|" 
+               v_edit_in_row_flag ="Y"
+           end
+        end
+        %> <tr>
+        <%= hidden_field 'cg_edit_dashboard_table','key][' ,  :value=>k %>
+        <% v_cnt_cn = 0
+        v_cg_data_row = "N"
+        @cns.each do |cn|
+           if !@cg_data_dict[k+cn].blank?
+              v_cg_data_row = "Y"
+           end %>
+           <td  wrap ><small>(<%= @cg_data_dict[k+cn] %>)</small>
+           <% if !@key_cns.include?(cn) %>
+             <% if !@value_list_dict[cn].blank?
+                   v_value_list_array =  @value_list_dict[cn].split("|")
+                   v_value_list = {}
+
+                   v_value_list_array.each do |v|
+                        v_value_list[v]=v
+                   end 
+                   v_value_list['Select a value'] = '|'
+                   v_val ="|"
+                   if @cg_data_dict[k+cn].blank?
+                          v_val ="|"
+                   else
+                           v_val = @cg_data_dict[k+cn]
+                   end%>
+                   <% if @v_dashboard_edit_columns.include? cn %>
+                       <%=  select  :cg_edit_dashboard_table, 'edit_col]['+k+']['+cn, options_for_select(v_value_list, v_val)   %>  
+                   <%end%>      
+             <%  elsif @cns_type_dict[cn] == "date"   # format YYYY-MM-DD %>
+                   <% if @v_dashboard_edit_columns.include? cn %>
+                         <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if (this.value != '|' && isValidDate_yyyy_mm_dd(this.value) ){alert('The field needs to be a date - YYYY-MM-DD.');this.value =''}",
+                           :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>  
+                  <%end%>
+             <% elsif @cns_type_dict[cn] == "integer"%>
+                   <% if @v_dashboard_edit_columns.include? cn %>
+                          <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if ( this.value != '|' &&  isNaN(this.value)){alert('The field needs to be all  numeric.');this.value =''}",
+                            :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>
+                   <%end%>
+             <% elsif @cns_type_dict[cn] == "float"%>
+                   <% if @v_dashboard_edit_columns.include? cn %>
+                         <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,:onchange => "if ( this.value != '|' && isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}",
+                          :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>
+                   <%end%>
+             <% else 
+                   v_val = !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]
+                   if !v_val.blank? and v_val.size > 20%>         
+                      <% if @v_dashboard_edit_columns.include? cn %>
+                            <%= text_area  :cg_edit_dashboard_table, '[edit_col]['+k+']['+cn+']', :value => v_val, :cols => 10, :rows => 4 %>
+                       <%end%>
+                   <% else %>
+                      <%= f.text_field 'edit_col]['+k+']['+cn ,:size=>10 ,
+                       :value=>( !@cg_edit_data_dict[k+cn].blank? ?  ( @cg_edit_data_dict[k+cn] == "|" ?  @cg_data_dict[k+cn] :  @cg_edit_data_dict[k+cn] ):  @cg_data_dict[k+cn]) %>
+                 <% end %>
+             <% end %>
+           <% else %>
+              <%=  @cg_edit_data_dict[k+cn]%>
+           <% end %>
+       <%
+         v_cnt_cn = v_cnt_cn + 1
+      end %>
+     <%  if v_cg_data_row == "Y"  %>
+       <%= hidden_field 'cg_edit_table','key_data][' ,  :value=>k %>         
+       <%    end %>
+     </tr>
+   
+
+   <% v_cnt = v_cnt +1 
+      if v_cnt%25 == 0 %>
+      <tr>
+       <% @cns.each do |cn| %>
+            <th><small><%= @cns_common_name_dict[cn]%></small></th>
+        <% end %>
+      </tr>
+    <% end %>
+        <%end%>
+        <% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium' or @cg_tn.users.include?( current_user) ) and @cg_tn.secondary_edit_flag == "Y" %>
+  <tr><td align="left" colspan="<%= @cns.size+2 %>"><%= submit_tag("save edits")%> | <%= link_to "Back", '/cg_tables'%></td></tr>
+<% end %>
+</table>
+
+     <%end%>
+ <% else %>
+ <B>There is no key column. Please add key column(s) to the cg table.</B>
+<% end %>
+
+<% end %>
+
+
+

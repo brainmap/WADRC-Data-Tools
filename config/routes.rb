@@ -220,6 +220,8 @@ WADRCDataTools::Application.routes.draw do
   match '/cg_search' , :controller => 'data_searches', :action => 'cg_search', :as =>:cg_search  ,via: [:get, :post] 
   match '/cg_tables' , :controller => 'data_searches', :action => 'cg_tables', :as =>:cg_tables ,via: [:get, :post] 
   match '/cg_edit_table/:id' , :controller => 'data_searches', :action => 'cg_edit_table', :as =>:cg_edit_table   ,via: [:get, :post] 
+  match '/cg_edit_dashboard_table/:id' , :controller => 'data_searches', :action => 'cg_edit_dashboard_table', :as =>:cg_edit_dashboard_table   ,via: [:get, :post] 
+
     match '/cg_table_create_db' , :controller => 'data_searches', :action => 'cg_create_table_db', :as =>:cg_create_table_db ,via: [:get, :post] 
      match '/cg_up_load' , :controller => 'data_searches', :action => 'cg_up_load', :as =>:cg_up_load   ,via: [:get, :post] 
       match '/cg_table_edit_db' , :controller => 'data_searches', :action => 'cg_edit_table_db', :as =>:cg_edit_table_db   ,via: [:get, :post] 

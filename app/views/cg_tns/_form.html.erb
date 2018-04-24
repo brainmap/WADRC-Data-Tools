@@ -58,12 +58,22 @@
                             <B>The secondary key flag expects the table to have a column called [secondary_key]. The tables are joined on secondary_key, which might make an inner join behave outer joinish.</b> 
                             <br> Related issues are columns which are flaged as match_mri_path_flag ( trys to eliminate duplicates from dual enrollments), secondary_key_protocol_flag and secondary_key_visitno_flag ( for joining the UP protocol tables ). Getting rid of the multiple rows in the search joins without lossing rows to an inner join is a PROBLEM.
  </td></tr></table>
+ <hr width="90%">
  <table><tr><td><%= f.label :tracker_type %>:
  	<%= collection_select('cg_tn', :tracker_id,Trtype.where("status_flag ='Y' ").order(:description), :id, :description,  {:prompt => 'Choose tracker if table type is tracker'}, {:multiple =>  false} ) %>
+   <hr width="90%">
  </td></tr>
  <tr><td><%= f.label :view_tn_participant_link %>:
   <%= f.text_field :view_tn_participant_link ,:size=>50 %><br>
   Enter if the cg_table is actually a View, of a table which has Participant_id - important for changing participant_id when merging participants - ignore enrollments, vgroups, participants - already being merged.
+   <hr width="90%">
+ </td></tr>
+  <tr><td>Nicer table edit form/dashboard:  <%= f.label :secondary_edit_flag %>: 
+              <%= f.select :secondary_edit_flag, options_for_select(v_y_n, @cg_tn.secondary_edit_flag),
+                              {:prompt => 'Select secondary table edit'}  %>  
+                              &nbsp;&nbsp;&nbsp; <br>
+                              Need view if other tables included in dashboard.
+   <hr width="90%">
  </td></tr>
 </table>
 </div>

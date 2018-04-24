@@ -34,6 +34,7 @@
     <th>Table has secondary key</th>
     <th>Owners</th>
     <th>view_tn_participant_link</th>
+    <th>secondary_edit_flag - dashboard</th>
   </tr>
 
 <% @cg_tns.each do |cg_tn| %>
@@ -57,6 +58,7 @@
     <td><%= cg_tn.secondary_key_flag %></td>
     <td><%= cg_tn.users.sort_by(&:username_name).collect {|u|  u.username_name}.join(", ").html_safe %></td>
     <td><%= cg_tn.view_tn_participant_link %></td>
+    <td><%= cg_tn.secondary_edit_flag %></td>
 
   </tr>
 <% end %>
