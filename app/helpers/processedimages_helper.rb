@@ -1,0 +1,2 @@
+module ProcessedimagesHelper
+end

@@ -2605,7 +2605,68 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
     
   end
 
- 
+ def run_xnat_upload
+     v_base_path = Shared.get_base_path()
+    v_log_base ="/mounts/data/preprocessed/logs/"
+    v_process_name = "xnat_file"
+    process_logs_delete_old( v_process_name, v_log_base)
+     @schedule = Schedule.where("name in ('xnat_upload')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting xnat_file"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+      v_stop_file_name = v_process_name+"_stop"
+      v_stop_file_path = v_log_base+v_stop_file_name
+      v_computer = "merida"
+
+     v_scan_procedure_array = [22]
+     v_series_description_category_array = ['T1_Volumetric','T2','ASL']
+     v_series_description_category_id_array = [19, 20,1 ]
+
+      #cg_xnat_participants
+      #participant_id, participant_export_id
+      #cg_xnat_image_datasets
+      #participant_export_id, image_dataset_id, xnat_project, session_id, scan_id
+
+      # insert participants from scan_procedure list who are not in cg_xnat_participants
+      # insert into cg_xnat_image_datasets scans of series description types which are not in 
+
+      # clean bunzip2, dicom header, zip
+
+      response = RestClient::Request.execute(
+method: :get,
+url: 'https://xnatdev.medicine.wisc.edu/data/JSESSION',
+user: '',
+password: ''
+)
+# --cookie JSESSIONID=3940FAAC4CB8DD368A9A1575372ECBBA
+# NOT SURE HOW TO USE JSESSIONID
+v_cookie_value = response.gsub(/\s+/, '')
+v_jsession = "JSESSIONID="+v_cookie_value
+puts v_jsession
+
+v_subject_exportid = "green73"
+
+
+   # v_json =  JSON.parse(response)
+   # puts v_json
+
+### can pass in values with url - how to do with params or xml?
+response = RestClient::Request.execute(
+method: :put,
+url: 'https://xnatdev.medicine.wisc.edu/data/projects/lead-v1/subjects/'+v_subject_exportid,
+user: '',
+password: '',
+gender: 'M',
+handedness: 'Left'
+)
+
+
+ end
 
 
 # ADD EXCLUDE SCAN SHARE
@@ -7141,6 +7202,98 @@ puts "v_analyses_path="+v_analyses_path
     ####          @schedulerun.comment =v_error[0..499]
     ####          @schedulerun.status_flag="E"
     ####    end  
+  end
+
+   # walk the preprocessed/visits/sp/subject/asl etc. 
+   # get the ASL file name
+   # try to link to ids asl
+  def run_processedimage_asl_harvest
+    #/mounts/data/preprocessed/visits/asthana.adrc-clinical-core.visit1/adrc00540/asl/pproc_v5
+    #ASL_fmap_adrc00540_2025_005.nii. ==> source ==> ids
+    #ASL_fmap_adrc00540_1525_004.nii 
+    #adrc00540_004_ASL_ROIs_invXgm.csv  ==>adrc00540_004_ASL_ROIs_invXgm.csv   asl_csv
+    #swrASL_fmap_adrc00540_1525_004.nii. asl_swr
+    # read log fro tissue seg dir ==> oT1 --> ids
+    #full path
+
+      v_base_path = Shared.get_base_path()
+      v_log_base ="/mounts/data/preprocessed/logs/"
+      v_process_name = "processedimage_asl_harvest"
+      process_logs_delete_old( v_process_name, v_log_base)
+      @schedule = Schedule.where("name in ('processedimage_asl_harvest')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting processedimage_asl_harvest"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_computer = "kanga"
+      v_raw_path = v_base_path+"/raw"
+      v_mri = "/mri"
+      no_mri_path_sp_list =['asthana.adrc-clinical-core.visit1',
+      'bendlin.mets.visit1','bendlin.tami.visit1','bendlin.wmad.visit1','carlson.sharp.visit1','carlson.sharp.visit2',
+       'carlson.sharp.visit3','carlson.sharp.visit4','dempsey.plaque.visit1','dempsey.plaque.visit2','gleason.falls.visit1',
+      'johnson.merit220.visit1','johnson.merit220.visit2','johnson.tbi.aware.visit3','johnson.tbi-va.visit1','ries.aware.visit1','wrap140']
+
+      v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+      v_asl_subpath = "/asl/images/"
+      v_asl_series_description_type_id = "1"
+      v_asl_processedimage_type = 'asl version#'
+      v_source_image_type = 'image_dataset'
+
+      v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
+      @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
+      @scan_procedures.each do |sp|
+          v_visit_number =""
+          if sp.codename.include?("visit2")
+              v_visit_number ="_v2"
+          elsif sp.codename.include?("visit3")
+              v_visit_number ="_v3"
+          elsif sp.codename.include?("visit4")
+              v_visit_number ="_v4"
+          elsif sp.codename.include?("visit5")
+              v_visit_number ="_v5"
+          end
+          if no_mri_path_sp_list.include?(sp.codename)
+              v_mri = ""
+          else
+              v_mri = "/mri"
+          end
+          v_raw_full_path = v_raw_path+"/"+sp.codename+v_mri
+          v_preprocessed_full_path = v_preprocessed_path+sp.codename
+          if File.directory?(v_raw_full_path)
+              if !File.directory?(v_preprocessed_full_path)
+                  @schedulerun.comment = "preprocessed path NOT exists "+v_preprocessed_full_path+";"+@schedulerun.comment
+              else
+                # look for asl files
+                # get list of subjectid's 
+                # in asl/images look for ASL_fmap_<subjectid>_<inversion>_<scan_series>.nii
+                # check if file already in processedimages
+                # look in sp/subjectid/visit/ids for one match on series_desc_type_id
+                Dir.entries(v_raw_full_path).select { |file| File.directory? File.join(v_raw_full_path, file)}.each do |dir|
+                      puts "aaaa dir="+dir
+                      dir_name_array = dir.split('_')
+
+
+                end
+              end
+          end
+      end                
+
+
+
+
+
+
+      if !v_comment.include?("ERROR")
+            @schedulerun.status_flag ="Y"
+      else
+          @schedulerun.comment ="Suceess ;"+@schedulerun.comment
+      end
+      @schedulerun.save
+      @schedulerun.end_time = @schedulerun.updated_at      
+      @schedulerun.save
   end
  
   # data request from seller, wrap , resting bold/fmri and t1 volumetric,pib, fdg johnson.prodict.visit1

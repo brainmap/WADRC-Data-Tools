@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>File name:</strong>
+  <%= @processedimage.file_name %>
+</p>
+
+<p>
+  <strong>File path:</strong>
+  <%= @processedimage.file_path %>
+</p>
+
+<p>
+  <strong>File type:</strong>
+  <%= @processedimage.file_type %>
+</p>
+
+<p>
+  <strong>Comment:</strong>
+  <%= @processedimage.comment %>
+</p>
+
+<%= link_to 'Edit', edit_processedimage_path(@processedimage) %> |
+<%= link_to 'Back', processedimages_path %>

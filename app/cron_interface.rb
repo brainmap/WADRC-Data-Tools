@@ -226,6 +226,9 @@ v_user = v_user.gsub("\n","")
   elsif v_value_1 == "pib_cereb_tac"
       v_shared = Shared.new
       v_shared.run_pib_cereb_tac()
+  elsif v_value_1 == "processedimage_asl_harvest"
+      v_shared = Shared.new
+      v_shared.run_processedimage_asl_harvest()
 
   elsif v_value_1 == "selley_20130906_upload"
       v_shared = Shared.new
@@ -262,6 +265,10 @@ v_user = v_user.gsub("\n","")
   elsif v_value_1 == "xnat_file"
       v_shared = Shared.new
       v_shared.run_xnat_file()  
+  elsif v_value_1 == "xnat_upload"
+      v_shared = Shared.new
+      v_shared.run_xnat_upload() 
+
             
   elsif v_value_1 == "test_shell"
     puts "bbbbbbbbb in test shell"

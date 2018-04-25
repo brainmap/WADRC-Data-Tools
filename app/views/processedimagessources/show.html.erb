@@ -1,0 +1,34 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>File name:</strong>
+  <%= @processedimagessource.file_name %>
+</p>
+
+<p>
+  <strong>File path:</strong>
+  <%= @processedimagessource.file_path %>
+</p>
+
+<p>
+  <strong>Source image:</strong>
+  <%= @processedimagessource.source_image_id %>
+</p>
+
+<p>
+  <strong>Source image type:</strong>
+  <%= @processedimagessource.source_image_type %>
+</p>
+
+<p>
+  <strong>Processedimage:</strong>
+  <%= @processedimagessource.processedimage_id %>
+</p>
+
+<p>
+  <strong>Comment:</strong>
+  <%= @processedimagessource.comment %>
+</p>
+
+<%= link_to 'Edit', edit_processedimagessource_path(@processedimagessource) %> |
+<%= link_to 'Back', processedimagessources_path %>

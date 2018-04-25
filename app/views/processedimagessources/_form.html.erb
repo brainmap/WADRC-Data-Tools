@@ -1,0 +1,47 @@
+<%= form_for(processedimagessource) do |f| %>
+  <% if processedimagessource.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(processedimagessource.errors.count, "error") %> prohibited this processedimagessource from being saved:</h2>
+
+      <ul>
+      <% processedimagessource.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :file_name %>
+    <%= f.text_field :file_name %>
+  </div>
+
+  <div class="field">
+    <%= f.label :file_path %>
+    <%= f.text_field :file_path %>
+  </div>
+
+  <div class="field">
+    <%= f.label :source_image_id %>
+    <%= f.number_field :source_image_id %>
+  </div>
+
+  <div class="field">
+    <%= f.label :source_image_type %>
+    <%= f.text_field :source_image_type %>
+  </div>
+
+  <div class="field">
+    <%= f.label :processedimage_id %>
+    <%= f.number_field :processedimage_id %>
+  </div>
+
+  <div class="field">
+    <%= f.label :comment %>
+    <%= f.text_field :comment %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,37 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Processedimagessources</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>File name</th>
+      <th>File path</th>
+      <th>Source image</th>
+      <th>Source image type</th>
+      <th>Processedimage</th>
+      <th>Comment</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @processedimagessources.each do |processedimagessource| %>
+      <tr>
+        <td><%= processedimagessource.file_name %></td>
+        <td><%= processedimagessource.file_path %></td>
+        <td><%= processedimagessource.source_image_id %></td>
+        <td><%= processedimagessource.source_image_type %></td>
+        <td><%= processedimagessource.processedimage_id %></td>
+        <td><%= processedimagessource.comment %></td>
+        <td><%= link_to 'Show', processedimagessource %></td>
+        <td><%= link_to 'Edit', edit_processedimagessource_path(processedimagessource) %></td>
+        <td><%= link_to 'Destroy', processedimagessource, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Processedimagessource', new_processedimagessource_path %>
