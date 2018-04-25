@@ -196,6 +196,7 @@ class DataSearchesController < ApplicationController
       @conditions = []
       params["search_criteria"] =""
       v_key_columns =""
+      v_delete_data_row="N"
 
       
       # build up condition and join from @cg_tn
@@ -276,6 +277,48 @@ class DataSearchesController < ApplicationController
         @cns = @cns - @key_cns
         @cns = @cns - @v_dashboard_edit_columns
         @cns = @key_cns + @v_dashboard_edit_columns + @cns
+
+      if !params[:cg_edit_dashboard_table].blank? and  !params[:cg_edit_dashboard_table][:key].blank?
+         connection = ActiveRecord::Base.connection();
+          params[:cg_edit_dashboard_table][:key].each do |r_val|
+            v_key_array = []
+            v_cnt  = 0
+            v_key =""
+            r = r_val.split("|")
+            r.each do |rc| # make and save cn-value| key
+              rc_array = rc.split("^")
+              if @key_cns.include?(@cns[v_cnt]) # key column
+                v_key = v_key+"^"+rc.to_s+"|"
+               #v_key = v_key+@cns[v_cnt] +"^"+rc.to_s+"|"
+                v_key_array.push( @cns[v_cnt]+"='"+rc_array[1].to_s+"'")
+              end
+              v_cnt = v_cnt + 1
+            end  
+            if !v_key.blank? and !@v_key.include?(v_key) 
+                @v_key.push(v_key)
+            end
+            # update cg_data
+            v_cnt = 0
+            v_col_value_dict = {}
+            v_col_value_array = []
+            if !params[:cg_edit_dashboard_table][:edit_col].blank? 
+                if !params[:cg_edit_dashboard_table][:edit_col][r_val].blank?
+                    v_col_value_dict =params[:cg_edit_dashboard_table][:edit_col][r_val]
+                    v_col_value_array.push(v_col_value_dict.keys.first.to_s+"='"+v_col_value_dict[v_col_value_dict.keys.first.to_s].to_s.gsub(/[;:"()=<>]/, '').gsub(/'/, "''")+"' ")
+                end
+            end
+
+            if v_delete_data_row=="N"
+                if v_col_value_array.size > 0
+                  sql = "update "+@cg_tn.tn+" set "+v_col_value_array.join(',')+" where "+v_key_array.join(" and ")
+                  @results = connection.execute(sql)
+                 end
+            else
+                sql = "delete from "+@cg_tn.tn+" where "+v_key_array.join(" and ")
+                #### @results = connection.execute(sql)
+            end
+          end
+      end
         #NOT NEED ACL here - only getting cg_edit to compare with returned form values
         sql = "SELECT "+@cns.join(',')+" FROM "+@cg_tn.tn+" order by "+@key_cns.join(',') 
               #apply acl limits
@@ -292,10 +335,9 @@ class DataSearchesController < ApplicationController
           @cns_plus_tn.push(@cg_tn.tn+"."+cn)
       end
       sql = "SELECT distinct "+@cns_plus_tn.join(',')+" FROM appointments,scan_procedures,scan_procedures_vgroups,vgroups, "+ @cg_tn.tn+" where "+@conditions.uniq.join(' and ')+" order by "+@key_cns.join(',')  # add in conditions from search # NEED TO ADD ACL   WHERE keys in ( select keys where vgroup_id in ( normal acl ))    
-           
-puts sql
         connection = ActiveRecord::Base.connection();
         @results = connection.execute(sql)
+        @v_key = [] # start fresh
         @results.each do |r|   # populate keys and data
           v_cnt  = 0
           v_key =""
@@ -320,7 +362,7 @@ puts sql
       end
 
      respond_to do |format|
-          format.html {@v_key = Kaminari.paginate_array(@v_key).page(params[:page]).per(100)}
+          format.html {@v_key = Kaminari.paginate_array(@v_key).page(params[:page]).per(50)}
       end
     end
 

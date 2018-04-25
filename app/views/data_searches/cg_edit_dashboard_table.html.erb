@@ -22,15 +22,16 @@ if @cg_tn.table_type == 'column_group' and @cg_tn.secondary_edit_flag == "Y" %>
    <% end %>
    </ul>
    </div>
-   </td></tr></table>
+   </td></tr><tr><td><%= f.submit "Search Scan Procedures" %></td></tr>
+ </table>
    <br><br><br><br>
     <%end%>
        <%= form_for 'cg_edit_dashboard_table' do |f| %>
       <table class="search_form">
          <tr>
             <th valign="top"><%= f.label :enumber %></th>
-            <td><%= text_field :cg_edit_dashboard_table, :enumber , :value =>@enumber_search%> <br><br>
-            <%= f.submit "Search" %></td>
+            <td><%= text_field :cg_edit_dashboard_table, :enumber , :value =>@enumber_search%> <br>
+            <%= f.submit "Search Enumber" %></td>
          </tr>
        </table><%= hidden_field(:cg_edit_dashboard_table, :id, :value=>params[:id])%>
        <% end %>
@@ -41,7 +42,7 @@ if @cg_tn.table_type == 'column_group' and @cg_tn.secondary_edit_flag == "Y" %>
                       <br><%= submit_tag("save edits")%> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <%= link_to "Back", '/cg_tables'%>
             <% end %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br><br>
           <% @sp_array.each do |sp| %>
-  <!-- <%= hidden_field 'cg_edit_dashboard_table','scan_procedure_id][' ,  :value=>sp%> -->
+   <%= hidden_field 'cg_edit_dashboard_table','scan_procedure_id][' ,  :value=>sp%>
            <%end %>
        <% if !@enumber_search.blank? %>
              <%= hidden_field 'cg_edit_dashboard_table','enumber' ,  :value=>@enumber_search%>
