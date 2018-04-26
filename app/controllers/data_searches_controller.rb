@@ -229,6 +229,7 @@ class DataSearchesController < ApplicationController
            @scan_procedures = ScanProcedure.where("id in (?)",params[:cg_edit_dashboard_table][:scan_procedure_id])
            params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
       end
+       # non-blank search down by the @v_dashboard_edit_columns
 
       if @cg_tn.table_type == 'column_group' and @cg_tn.secondary_edit_flag == "Y"  and !v_exclude_tables_array.include?(@cg_tn.tn.downcase) # want to limit to cg tables
         @cns = []
@@ -277,6 +278,17 @@ class DataSearchesController < ApplicationController
         @cns = @cns - @key_cns
         @cns = @cns - @v_dashboard_edit_columns
         @cns = @key_cns + @v_dashboard_edit_columns + @cns
+
+      if !params[:cg_edit_dashboard_table].blank? and !params[:cg_edit_dashboard_table][:blank_values].blank? and params[:cg_edit_dashboard_table][:blank_values] == "Y"
+                 
+           @cg_tn.tn
+           @v_dashboard_edit_columns.each do |cn|
+               v_condition =""
+               v_condition = v_condition+" ("+@cg_tn.tn+"."+cn+" is NULL or "+@cg_tn.tn+"."+cn+"= '' or "+@cg_tn.tn+"."+cn+"= '|' ) "
+               @conditions.push(v_condition)
+           end
+           @conditions.push(v_condition)
+      end
 
       if !params[:cg_edit_dashboard_table].blank? and  !params[:cg_edit_dashboard_table][:key].blank?
          connection = ActiveRecord::Base.connection();

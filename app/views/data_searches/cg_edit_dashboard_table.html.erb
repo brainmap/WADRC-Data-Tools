@@ -35,6 +35,16 @@ if @cg_tn.table_type == 'column_group' and @cg_tn.secondary_edit_flag == "Y" %>
          </tr>
        </table><%= hidden_field(:cg_edit_dashboard_table, :id, :value=>params[:id])%>
        <% end %>
+       <br>
+       <%= form_for 'cg_edit_dashboard_table' do |f| %>
+      <table class="search_form">
+         <tr> 
+            
+            <td><%= hidden_field(:cg_edit_dashboard_table, :blank_values, :value=>"Y")%>
+            <%= f.submit "Search Blank Values" %></td>
+         </tr>
+       </table><%= hidden_field(:cg_edit_dashboard_table, :id, :value=>params[:id])%>
+       <% end %>
        <br><br><br><br><br><br>
  <% if !@key_cns.blank?%>
        <%= form_for 'cg_edit_table' do |f| %> 
