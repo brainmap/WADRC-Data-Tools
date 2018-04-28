@@ -1,3 +1,3 @@
 class Processedimagessource < ApplicationRecord
-	  belongs_to :processedimage    
+	  ####belongs_to :processedimage    
 end
