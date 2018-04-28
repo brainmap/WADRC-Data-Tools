@@ -2637,12 +2637,13 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
 
       # clean bunzip2, dicom header, zip
 
-      response = RestClient::Request.execute(
-method: :get,
-url: 'https://xnatdev.medicine.wisc.edu/data/JSESSION',
-user: '',
-password: ''
-)
+#gem not on prod
+####response = RestClient::Request.execute(
+####method: :get,
+####url: 'https://xnatdev.medicine.wisc.edu/data/JSESSION',
+####user: '',
+####password: ''
+####)
 # --cookie JSESSIONID=3940FAAC4CB8DD368A9A1575372ECBBA
 # NOT SURE HOW TO USE JSESSIONID
 v_cookie_value = response.gsub(/\s+/, '')
@@ -2656,14 +2657,14 @@ v_subject_exportid = "green73"
    # puts v_json
 
 ### can pass in values with url - how to do with params or xml?
-response = RestClient::Request.execute(
-method: :put,
-url: 'https://xnatdev.medicine.wisc.edu/data/projects/lead-v1/subjects/'+v_subject_exportid,
-user: '',
-password: '',
-gender: 'M',
-handedness: 'Left'
-)
+####response = RestClient::Request.execute(
+####method: :put,
+####url: 'https://xnatdev.medicine.wisc.edu/data/projects/lead-v1/subjects/'+v_subject_exportid,
+####user: '',
+####password: '',
+####gender: 'M',
+####handedness: 'Left'
+####)
 
 
  end

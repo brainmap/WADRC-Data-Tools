@@ -68,7 +68,7 @@ edit_count = edit_count -1
 	 schedulerun = Schedulerun.find(r[0]) %>
   <tr>
 	<%= show_bool( @v_status_dict[schedulerun.status_flag] ) %>
-	<% if  current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'  %>
+	<% if  current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium'  %>
         <td><%= link_to( (Schedule.find(schedulerun.schedule_id)).name, edit_schedule_path(Schedule.find(schedulerun.schedule_id)) ) %></td>
     <% else %>
         <td><%= link_to( (Schedule.find(schedulerun.schedule_id)).name, schedule_path(Schedule.find(schedulerun.schedule_id)) ) %></td>
@@ -78,7 +78,7 @@ edit_count = edit_count -1
     <td width="40%"><%= schedulerun.comment %></td>
     <td><%= schedulerun.log_file %></td>
     <td><%= link_to 'Show', schedulerun %></td>
-<% if  current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'  %>
+<% if  current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium'  %>
     <td><%= link_to 'Edit', edit_schedulerun_path(schedulerun) %></td>
     <td><%= link_to 'Destroy', schedulerun, :method => :delete, data: { confirm: 'Are you sure?'} %></td>
 <% end %>
@@ -89,6 +89,6 @@ edit_count = edit_count -1
 
 <br />
 
-	<% if  current_user.role == 'Admin_High' or current_user.role == 'Admin_Low'  %>
+	<% if  current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium'  %>
 <%= link_to('Column Group search/load', '/users/cgbase') %>
    <% end %>
