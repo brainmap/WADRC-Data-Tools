@@ -200,9 +200,12 @@ v_user = v_user.gsub("\n","")
   elsif v_value_1 == "pet_path"  
       v_shared = Shared.new
       v_shared.run_pet_path()
-    elsif v_value_1 == "pcvipr_recon_and_gating_check"  
+  elsif v_value_1 == "pcvipr_recon_and_gating_check"  
       v_shared = Shared.new
       v_shared.run_pcvipr_recon_and_gating_check()
+  elsif v_value_1 == "pcvipr_recon_and_fail_list"  
+      v_shared = Shared.new
+      v_shared.pcvipr_recon_and_fail_list()
   elsif v_value_1 == "pcvipr_output_file"  
       v_shared = Shared.new
       v_shared.run_pcvipr_output_file()

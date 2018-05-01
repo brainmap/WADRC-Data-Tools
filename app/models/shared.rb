@@ -6416,6 +6416,57 @@ puts "end of ids loop"
 
   end
 
+  # look for pcvipr recon in orig which don't have a .dat
+  def run_pcvipr_recon_and_fail_list()
+         v_base_path = Shared.get_base_path()
+         @schedule = Schedule.where("name in ('pcvipr_recon_and_fail_list')").first
+          @schedulerun = Schedulerun.new
+          @schedulerun.schedule_id = @schedule.id
+          @schedulerun.comment ="starting pcvipr_recon_and_fail_list"
+          @schedulerun.save
+          @schedulerun.start_time = @schedulerun.created_at
+          @schedulerun.save
+          v_comment = "no dat file;"
+          v_computer = "kanga"
+
+       # go into each scan procedure, go into .orig
+       # get list of subjectid paths
+       # do a find for *.dat
+       # log if not found
+
+          v_analyses_path = v_base_path+"/analyses/PCVIPR/4DFLOW_DATA/"
+
+          # go to directory, get list of directories. - could check if there is a scan_procedure
+          Dir.glob(v_analyses_path+"/*").each do |v_dir_path_name| 
+            if File.directory?(v_dir_path_name)
+                #puts v_dir_path_name
+               v_scan_procedures = ScanProcedure.where("scan_procedures.codename in (?)",v_dir_path_name.split("/").last)
+               if !v_scan_procedures.nil? and !v_scan_procedures[0].nil?
+                  #puts v_scan_procedures[0].codename
+                  v_dir_path_name_orig = v_dir_path_name+"/"+v_dir_path_name.split("/").last+".orig"
+                   Dir.glob(v_dir_path_name_orig+"/*").each do |v_subject_path_name| 
+
+                      if !v_subject_path_name.include? "harvignore" and  Dir.glob(v_subject_path_name+"/*.dat").empty? and  Dir.glob(v_subject_path_name+"/*/*.dat").empty? and  Dir.glob(v_subject_path_name+"/*/*/*.dat").empty?
+                            v_comment = v_comment +"; "+v_subject_path_name
+                      end
+                   end
+                end
+             end
+           end
+
+      @schedulerun.comment =("successful finish pcvipr_recon_and_fail_list  "+v_comment[0..2459])
+      if !v_comment.include?("ERROR")
+         @schedulerun.status_flag ="Y"
+       end
+       @schedulerun.save
+       @schedulerun.end_time = @schedulerun.updated_at      
+       @schedulerun.save
+
+    
+  end
+
+
+
   def run_pcvipr_output_file()
          run_pcvipr_output_file_base("leave_output_and_log")
   end
