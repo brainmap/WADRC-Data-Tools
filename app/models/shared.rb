@@ -6447,7 +6447,7 @@ puts "end of ids loop"
                    Dir.glob(v_dir_path_name_orig+"/*").each do |v_subject_path_name| 
 
                       if !v_subject_path_name.include? "harvignore" and  Dir.glob(v_subject_path_name+"/*.dat").empty? and  Dir.glob(v_subject_path_name+"/*/*.dat").empty? and  Dir.glob(v_subject_path_name+"/*/*/*.dat").empty?
-                            v_comment = v_comment +"; "+v_subject_path_name
+                            v_comment = v_comment +"; "+v_subject_path_name.gsub(v_analyses_path,"")
                       end
                    end
                 end
