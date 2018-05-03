@@ -138,6 +138,8 @@ class DataSearchesController < ApplicationController
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order)  
       @cg_up_tns = CgTn.where("table_type='up' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order) 
+      @cg_inprocess_tns = CgTn.where("table_type='InProcess' and status_flag='Y' and table_type in 
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order) 
        if !params[:archive_up_tables].nil? and params[:archive_up_tables] == "Y"
       @cg_up_archive_tns = CgTn.where("table_type='up_archive' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order) 
