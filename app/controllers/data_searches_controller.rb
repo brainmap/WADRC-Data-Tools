@@ -267,7 +267,7 @@ class DataSearchesController < ApplicationController
       end
        # non-blank search down by the @v_dashboard_edit_columns
 
-      if @cg_tn.table_type == 'column_group' and @cg_tn.secondary_edit_flag == "Y"  and !v_exclude_tables_array.include?(@cg_tn.tn.downcase) # want to limit to cg tables
+      if (@cg_tn.table_type == 'column_group' or @cg_tn.table_type == 'InProcess'  ) and @cg_tn.secondary_edit_flag == "Y"  and !v_exclude_tables_array.include?(@cg_tn.tn.downcase) # want to limit to cg tables
         @cns = []
         @key_cns = []
         @v_key = []
@@ -659,7 +659,7 @@ class DataSearchesController < ApplicationController
       end
 
       v_key_columns =""
-      if @cg_tn.table_type == 'column_group' and @cg_tn.editable_flag == "Y"  and !v_exclude_tables_array.include?(@cg_tn.tn.downcase) # want to limit to cg tables
+      if (@cg_tn.table_type == 'column_group' or @cg_tn.table_type == 'InProcess') and @cg_tn.editable_flag == "Y"  and !v_exclude_tables_array.include?(@cg_tn.tn.downcase) # want to limit to cg tables
         
 
         
