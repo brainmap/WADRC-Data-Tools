@@ -180,6 +180,31 @@ class DataSearchesController < ApplicationController
               end
          end
       end
+      #need inprocess
+      @cg_inprocess_tns.each do |cg_tn|
+          cg_tn_key_array = []
+          cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",cg_tn.id)
+          cg_tn_cns.each do |cg_tn_cn|
+               if cg_tn_cn.key_column_flag == "Y"
+                   @cg_tn_key_y[cg_tn.id] = "Y"
+                   cg_tn_key_array.push(cg_tn_cn.cn)
+               end
+          end
+          @cg_tn_key_unique_y[cg_tn.id] = "Y"
+          if @cg_tn_key_y[cg_tn.id] == "Y"
+              sql = "select "+cg_tn_key_array.join(',')+" from "+cg_tn.tn+" group by "+cg_tn_key_array.join(',')+" having count(*) > 1"
+              connection = ActiveRecord::Base.connection();
+              @results = connection.execute(sql)
+              @cg_tn_key_unique_y[cg_tn.id] = "Y"
+              @results.each do |r|
+                if @cg_tn_key_unique_y[cg_tn.id] == "Y"
+                  @cg_tn_key_unique_y[cg_tn.id] = r[0].to_s
+                else
+                  @cg_tn_key_unique_y[cg_tn.id] = @cg_tn_key_unique_y[cg_tn.id]+", "+r[0].to_s
+                end
+              end
+         end
+      end
       respond_to do |format|
           format.html
       end
