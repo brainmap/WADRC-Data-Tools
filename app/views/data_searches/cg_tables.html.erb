@@ -93,7 +93,17 @@
 		<% if !tn.contact_owner_table.blank?%>
 		<small><small><input type="button" id="contact" value="Contact" onClick="alert('<%= tn.contact_owner_table %>');" />
 		</small></small>
-		<% end %> </td> <td> &nbsp;</td></tr>
+		<% end %> </td> 
+
+	<% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium' or tn.users.include?( current_user) ) and (tn.editable_flag == "Y" or tn.secondary_edit_flag == "Y" ) and @cg_tn_key_y[tn.id] == "Y"  and @cg_tn_key_unique_y[tn.id] == "Y"%>
+		<td> <% if tn.editable_flag == "Y" %> <%= link_to  'Edit values', '/cg_edit_table/'+tn.id.to_s %> <%end%>
+			<% if tn.secondary_edit_flag == "Y" %> <%= link_to  'Dashboard/edit', '/cg_edit_dashboard_table/'+tn.id.to_s %> <%end%>
+		</td>
+    <%else%>
+    <td> &nbsp;</td>
+	<%end%>
+
+	</tr>
 
 	     <% end %>
 
