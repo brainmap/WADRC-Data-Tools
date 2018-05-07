@@ -127,17 +127,23 @@ class DataSearchesController < ApplicationController
       @cg_tn_key_y = []
       @cg_tn_key_unique_y = []
       @cg_tns = CgTn.where("table_type='column_group' and status_flag='Y' and table_type in 
-        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order) 
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null 
+        or cg_table_types.protocol_id in (select scan_procedures.protocol_id from scan_procedures where id in ("+scan_procedure_list+")))").order(:display_order)  
       @cg_fs_tns = CgTn.where("table_type='free_surfer' and status_flag='Y' and table_type in 
-        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order)  
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null 
+        or cg_table_types.protocol_id in (select scan_procedures.protocol_id from scan_procedures where id in ("+scan_procedure_list+")))").order(:display_order)   
       @cg_tracker_tns = CgTn.where("table_type='tracker' and status_flag='Y' and table_type in 
-        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order)  
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null 
+        or cg_table_types.protocol_id in (select scan_procedures.protocol_id from scan_procedures where id in ("+scan_procedure_list+")))").order(:display_order)   
       @cg_combio_tns = CgTn.where("table_type='combio' and status_flag='Y' and table_type in 
-        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order)  
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null 
+        or cg_table_types.protocol_id in (select scan_procedures.protocol_id from scan_procedures where id in ("+scan_procedure_list+")))").order(:display_order)   
       @cg_scan_export_tns = CgTn.where("table_type='scan_export' and status_flag='Y' and table_type in 
-        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order)  
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null 
+        or cg_table_types.protocol_id in (select scan_procedures.protocol_id from scan_procedures where id in ("+scan_procedure_list+")))").order(:display_order)   
       @cg_up_tns = CgTn.where("table_type='up' and status_flag='Y' and table_type in 
-        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order) 
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null 
+        or cg_table_types.protocol_id in (select scan_procedures.protocol_id from scan_procedures where id in ("+scan_procedure_list+")))").order(:display_order) 
       @cg_inprocess_tns = CgTn.where("table_type='InProcess' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null 
         or cg_table_types.protocol_id in (select scan_procedures.protocol_id from scan_procedures where id in ("+scan_procedure_list+")))").order(:display_order) 

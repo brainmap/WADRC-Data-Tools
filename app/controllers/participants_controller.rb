@@ -137,6 +137,10 @@ class ParticipantsController < ApplicationController
         format.html { render :action => "new" }
         format.xml  { render :xml => @participant.errors, :status => :unprocessable_entity }
       elsif @participant.save 
+        sql = "update participants set apoe_e1 = NULL where apoe_e1 = '0' "
+        results = connection.execute(sql)
+        sql = "update participants set apoe_e2 = NULL where apoe_e2 = '0' "
+        results = connection.execute(sql)
         sql = "update participants set wrapnum = NULL where trim(wrapnum) = '' "
         results = connection.execute(sql)
         sql = "update participants set reggieid = NULL where trim(reggieid) = '' "
@@ -179,8 +183,12 @@ class ParticipantsController < ApplicationController
       end
     respond_to do |format|
       if @participant.update(participant_params)#params[:participant], :without_protection => true)
-        sql = "update participants set wrapnum = NULL where trim(wrapnum) = '' "
         connection = ActiveRecord::Base.connection();
+        sql = "update participants set apoe_e1 = NULL where apoe_e1 = '0' "
+        results = connection.execute(sql)
+        sql = "update participants set apoe_e2 = NULL where apoe_e2 = '0' "
+        results = connection.execute(sql)
+        sql = "update participants set wrapnum = NULL where trim(wrapnum) = '' "
         results = connection.execute(sql)
         sql = "update participants set reggieid = NULL where trim(reggieid) = '' "
         results = connection.execute(sql)
