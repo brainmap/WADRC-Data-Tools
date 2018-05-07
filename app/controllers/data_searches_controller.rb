@@ -124,7 +124,7 @@ class DataSearchesController < ApplicationController
     
     def cg_tables
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
-puts "scan_procedure_list="+scan_procedure_list
+
       @cg_tn_key_y = []
       @cg_tn_key_unique_y = []
       @cg_tns = CgTn.where("table_type='column_group' and status_flag='Y' and table_type in 
