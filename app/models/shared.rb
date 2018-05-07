@@ -2456,7 +2456,7 @@ def run_sleep_t1
                   if File.directory?(v_subjectid_unknown)
                     v_dir_array = Dir.entries(v_subjectid_unknown)
                     v_dir_array.each do |f|
-                    if (f.start_with?("o") and f.end_with?(".nii") ) # or v_subjectid_actual.include?("shp")
+                    if (f.start_with?("o") and f.end_with?(".nii") )  or v_subjectid_actual.include?("shp")
                         # check for tissue_seg
                         v_subjectid_tissue_seg =v_subjectid_path+"/tissue_seg"
                         v_subjectid_rbm_icv =v_subjectid_path+"/rbm_icv"
