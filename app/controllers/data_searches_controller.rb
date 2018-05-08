@@ -349,12 +349,17 @@ class DataSearchesController < ApplicationController
             v_cnt = 0
             v_col_value_dict = {}
             v_col_value_array = []
-            if !params[:cg_edit_dashboard_table][:edit_col].blank? 
+           # @cns.each do |cn|
+              if !params[:cg_edit_dashboard_table][:edit_col].blank? 
                 if !params[:cg_edit_dashboard_table][:edit_col][r_val].blank?
-                    v_col_value_dict =params[:cg_edit_dashboard_table][:edit_col][r_val]
-                    v_col_value_array.push(v_col_value_dict.keys.first.to_s+"='"+v_col_value_dict[v_col_value_dict.keys.first.to_s].to_s.gsub(/[;:"()=<>]/, '').gsub(/'/, "''")+"' ")
+                    v_col_value_dict =params[:cg_edit_dashboard_table][:edit_col][r_val] 
+                   v_col_value_dict.keys.each do |cn_key|
+                        v_col_value_array.push(cn_key.to_s+"='"+v_col_value_dict[cn_key.to_s].to_s.gsub(/[;:"()=<>]/, '').gsub(/'/, "''")+"' ")
+                    end
+                    #v_col_value_array.push(v_col_value_dict.keys.first.to_s+"='"+v_col_value_dict[v_col_value_dict.keys.first.to_s].to_s.gsub(/[;:"()=<>]/, '').gsub(/'/, "''")+"' ")
                 end
-            end
+              end
+           #end
 
             if v_delete_data_row=="N"
                 if v_col_value_array.size > 0
