@@ -7258,15 +7258,9 @@ puts "v_analyses_path="+v_analyses_path
 
    # walk the preprocessed/visits/sp/subject/asl etc. 
    # get the ASL file name
-   # try to link to ids asl
+   # try to link to ids asl, ids t1/flair
   def run_processedimage_asl_harvest
-    #/mounts/data/preprocessed/visits/asthana.adrc-clinical-core.visit1/adrc00540/asl/pproc_v5
-    #ASL_fmap_adrc00540_2025_005.nii. ==> source ==> ids
-    #ASL_fmap_adrc00540_1525_004.nii 
-    #adrc00540_004_ASL_ROIs_invXgm.csv  ==>adrc00540_004_ASL_ROIs_invXgm.csv   asl_csv
-    #swrASL_fmap_adrc00540_1525_004.nii. asl_swr
-    # read log fro tissue seg dir ==> oT1 --> ids
-    #full path
+
 
       v_base_path = Shared.get_base_path()
       v_log_base ="/mounts/data/preprocessed/logs/"
@@ -7289,13 +7283,15 @@ puts "v_analyses_path="+v_analyses_path
       'johnson.merit220.visit1','johnson.merit220.visit2','johnson.tbi.aware.visit3','johnson.tbi-va.visit1','ries.aware.visit1','wrap140']
 
       v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-      v_asl_subpath = "/asl/images/"
+      v_asl_subpath = "/asl/pproc_v5/"
+      v_tissue_seg_subpath = "/tissue_seg/"
+      v_unknown_subpath = "/unknown/"
       v_asl_series_description_type_id = "1"
-      v_asl_processedimage_type = 'asl version#'
+      v_asl_processedimage_type = 'asl version#5'
       v_source_image_type = 'image_dataset'
 
       v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
-      @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
+      @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp).where("scan_procedures.codename in ('asthana.adrc-clinical-core.visit1')")
       @scan_procedures.each do |sp|
           v_visit_number =""
           if sp.codename.include?("visit2")
@@ -7313,20 +7309,106 @@ puts "v_analyses_path="+v_analyses_path
               v_mri = "/mri"
           end
           v_raw_full_path = v_raw_path+"/"+sp.codename+v_mri
-          v_preprocessed_full_path = v_preprocessed_path+sp.codename
+          v_preprocessed_full_path = v_preprocessed_path+sp.codename+"/"
           if File.directory?(v_raw_full_path)
               if !File.directory?(v_preprocessed_full_path)
                   @schedulerun.comment = "preprocessed path NOT exists "+v_preprocessed_full_path+";"+@schedulerun.comment
               else
-                # look for asl files
+                # look for asl files -- multipl inversion times
+                # get product => source => source_of_source => source_of_source_of_source etc. until back to ids
+                # check that anything in processedimages
+                # then starting with the source_of_source_... before the ids, check for source_of_source_... in processedimages
+                #.  if not in processedimages, make record, else use processedimage_id,
+                #  continue until back to final product
                 # get list of subjectid's 
-                # in asl/images look for ASL_fmap_<subjectid>_<inversion>_<scan_series>.nii
                 # check if file already in processedimages
                 # look in sp/subjectid/visit/ids for one match on series_desc_type_id
-                Dir.entries(v_raw_full_path).select { |file| File.directory? File.join(v_raw_full_path, file)}.each do |dir|
-                      puts "aaaa dir="+dir
-                      dir_name_array = dir.split('_')
+                #a) look for swrASL_fmap_adrc00540_1525_004.nii.     swrASL_fmap_<subjectid>_<inversion_time>_<dirname>.nii  --- Waisman vs WIMR for dir names
+                #b) get scan series from dir name
+                #c) look for ASL_fmap_<subjectid>_<inversion_time>_<dirname>.nii 
+                #d) get image_dataset_id from <dirname>
 
+                #e) look for y_o<subjectid>_<scan desc>_<dir>.nii
+                #f) from tissue_seg/mo<subjectid>_<scan desc>_<dir>.nii
+                #g) from unknown o<subjectid>_<scan desc>_<dir>.nii
+                #h) get image_dataset_id from <dir>
+
+                #grep tissue_seg log. gives directory source -- flair vs t1?
+                #grep asl log. gives directory source 
+                Dir.entries(v_raw_full_path).select { |file| File.directory? File.join(v_raw_full_path, file)}.each do |dir|
+                  if dir.include? "adrc00540"
+                      dir_name_array = dir.split('_')
+                      v_subjectid = dir_name_array[0]
+                      v_enrollments = Enrollment.where("enumber in (?)", v_subjectid)
+                      if File.directory?(v_preprocessed_full_path+v_subjectid+v_asl_subpath) and v_enrollments.count > 0
+                          v_enrollment = v_enrollments.first
+                          # get all the matches
+                          #swrASL_fmap_<subjectid>_<inversion_time>_<dirname>.nii
+                          Dir.glob(v_preprocessed_full_path+v_subjectid+v_asl_subpath+'swrASL_fmap_'+v_subjectid+'_*_*.nii').each do|f|
+                             v_final_file_full_path = f 
+                             v_final_file = File.basename(f) 
+                             v_final_file_array = v_final_file.split('_')
+                             v_scan_series_dir = (v_final_file_array.last).gsub(".nii","")
+                             v_asl_inversion_time = v_final_file_array[-2]
+                             v_final_processesimages = Processedimage.where("file_path in (?)",v_final_file_full_path)
+                             v_final_file_id = nil
+                             if v_final_processesimages.count <1
+                                # need to collect source files, then make processedimage record
+                                v_final_processedimage = Processedimage.new
+                                v_final_processedimage.file_type ="ASL pproc_v5 final"
+                                v_final_processedimage.file_name = v_final_file
+                                v_final_processedimage.file_path = v_final_file_full_path
+                                v_final_processedimage.save  
+                                v_final_file_id = v_final_processedimage.id
+                              else
+                                v_final_processedimage = v_final_processesimages.first
+                                v_final_file_id = v_final_processedimage.id   
+                             end
+                             # check for ASL_fmap_<subjectid>_<inversion_time>_<dirname>.nii
+                             # check if already in processedimages
+                             # check if already a child processedimagessources for the parent v_asl_final_processedimage
+                             Dir.glob(v_preprocessed_full_path+v_subjectid+v_asl_subpath+'ASL_fmap_'+v_subjectid+'_'+v_asl_inversion_time+'_'+v_scan_series_dir+'.nii').each do|source1_f|
+                                v_source1_file_full_path = source1_f 
+                                v_source1_file = File.basename(source1_f)
+                                v_source1_processesimages = Processedimage.where("file_path in (?)",v_source1_file_full_path)
+                                v_source1_file_id = nil
+                                if v_source1_processesimages.count <1
+                                # need to collect source files, then make processedimage record
+                                    v_source1_processedimage = Processedimage.new
+                                    v_source1_processedimage.file_type ="ASL pproc_v5 -ASL fmap"
+                                    v_source1_processedimage.file_name = v_source1_file
+                                    v_source1_processedimage.file_path = v_source1_file_full_path
+                                    v_source1_processedimage.save  
+                                    v_source1_file_id = v_source1_processedimage.id
+                                else
+                                    v_source1_processesimage = v_source1_processesimages.first
+                                    v_source1_file_id = v_source1_processesimage.id   
+                                end
+            ###NOT RIGHT !!!!!!
+                                v_final_processedimagesources = Processedimagessource.where("source_image_id in (?) and source_image_type = 'processedimage'",v_final_file_id)
+                                if v_final_processedimagesources.count < 1
+                                    v_final_processedimagesource = Processedimagessource.new
+                                    v_final_processedimagesource.file_name = v_source1_file
+                                    v_final_processedimagesource.file_path = v_source1_file_full_path
+                                    v_final_processedimagesource.source_image_id = v_source1_file_id
+                                    v_final_processedimagesource.source_image_type = 'processedimage'
+                                    v_final_processedimagesource.save
+
+                                 else
+                                    v_final_processedimagesource = v_final_processedimagesources.first
+                                end
+                                # check for image dataset for ASL scan
+                                # sp and enrollment - only one - add to processedimages status_flag - no_processedimagessource - or select all parents with no children
+                                # sp.id v_enrollment.id v_asl_series_description_type_id
+                                # check if v_source1_file_id in processedimagesources with image_dataset as source image
+                                   
+                             end
+
+
+                          end
+
+                      end
+                  end
 
                 end
               end
