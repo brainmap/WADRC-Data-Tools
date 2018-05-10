@@ -7256,6 +7256,317 @@ puts "v_analyses_path="+v_analyses_path
     ####    end  
   end
 
+   # walk the preprocessed/visits/sp/subject/unknown etc. 
+   # try to link to ids
+   def run_processedimage_unknown_harvest
+
+
+      v_base_path = Shared.get_base_path()
+      v_log_base ="/mounts/data/preprocessed/logs/"
+      v_process_name = "processedimage_unknown_harvest"
+      process_logs_delete_old( v_process_name, v_log_base)
+      @schedule = Schedule.where("name in ('processedimage_unknown_harvest')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting processedimage_unknown_harvest"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_computer = "kanga"
+      v_raw_path = v_base_path+"/raw"
+      v_mri = "/mri"
+      no_mri_path_sp_list =['asthana.adrc-clinical-core.visit1',
+      'bendlin.mets.visit1','bendlin.tami.visit1','bendlin.wmad.visit1','carlson.sharp.visit1','carlson.sharp.visit2',
+       'carlson.sharp.visit3','carlson.sharp.visit4','dempsey.plaque.visit1','dempsey.plaque.visit2','gleason.falls.visit1',
+      'johnson.merit220.visit1','johnson.merit220.visit2','johnson.tbi.aware.visit3','johnson.tbi-va.visit1','ries.aware.visit1','wrap140']
+
+      v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+      v_unknown_subpath = "/unknown/"
+      v_t1_series_description_type_id = "19"
+      v_t2_series_description_type_id = "20"
+
+      v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
+      @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)   #.where("scan_procedures.codename in ('asthana.adrc-clinical-core.visit1')")
+      @scan_procedures.each do |sp|
+          v_visit_number =""
+          if sp.codename.include?("visit2")
+              v_visit_number ="_v2"
+          elsif sp.codename.include?("visit3")
+              v_visit_number ="_v3"
+          elsif sp.codename.include?("visit4")
+              v_visit_number ="_v4"
+          elsif sp.codename.include?("visit5")
+              v_visit_number ="_v5"
+          end
+          if no_mri_path_sp_list.include?(sp.codename)
+              v_mri = ""
+          else
+              v_mri = "/mri"
+          end
+          v_raw_full_path = v_raw_path+"/"+sp.codename+v_mri
+          v_preprocessed_full_path = v_preprocessed_path+sp.codename+"/"
+          if File.directory?(v_raw_full_path)
+              if !File.directory?(v_preprocessed_full_path)
+                @schedulerun.comment = "preprocessed path NOT exists "+v_preprocessed_full_path+";"+@schedulerun.comment
+              else
+                Dir.entries(v_raw_full_path).select { |file| File.directory? File.join(v_raw_full_path, file)}.each do |dir|
+                  #if dir.include? "adrc00540"
+                      dir_name_array = dir.split('_')
+                      v_subjectid = dir_name_array[0]
+                      v_enrollments = Enrollment.where("enumber in (?)", v_subjectid)
+                      if File.directory?(v_preprocessed_full_path+v_subjectid+v_unknown_subpath) and v_enrollments.count > 0
+                          v_enrollment = v_enrollments.first
+                                   # get the o<subjectid> from unknown
+                                   Dir.glob(v_preprocessed_full_path+v_subjectid+v_unknown_subpath+'o'+v_subjectid+'_*.nii').each do|source3_f|
+                                      v_source3_file_full_path = source3_f 
+                                      v_source3_file = File.basename(source3_f)
+                                      v_source3_file_array = v_source3_file.split('_')
+                                      v_t1_scan_series_dir = (v_source3_file_array.last).gsub(".nii","")
+                                      v_source3_processesimages = Processedimage.where("file_path in (?)",v_source3_file_full_path)
+                                      v_source3_file_id = nil
+                                      if v_source3_processesimages.count <1
+                                      # need to collect source files, then make processedimage record
+                                          v_source3_processedimage = Processedimage.new
+                                          v_source3_processedimage.file_type ="o_acpc T1"
+                                          v_source3_processedimage.file_name = v_source3_file
+                                          v_source3_processedimage.file_path = v_source3_file_full_path
+                                          v_source3_processedimage.save  
+                                          v_source3_file_id = v_source3_processedimage.id
+                                      else
+                                          v_source3_processesimage = v_source3_processesimages.first
+                                          v_source3_file_id = v_source3_processesimage.id   
+                                      end
+          
+                                      # get the image_dataset of the T1 CHANGE THE IMAGE TYPE / look in LOG   T1 vs T2??? 
+                                      v_image_datasets = ImageDataset.where("image_datasets.visit_id in (select visits.id from visits, appointments, enrollment_vgroup_memberships, scan_procedures_vgroups 
+                                                             where visits.appointment_id = appointments.id 
+                                                             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.scan_procedure_id in (?) 
+                                                             and enrollment_vgroup_memberships.enrollment_id in (?) )
+                                                             and image_datasets.series_description in 
+                                                              (select series_description_maps.series_description from series_description_maps where 
+                                                                   series_description_maps.series_description_type_id in (?))
+                                                              and image_datasets.path like '%"+v_t1_scan_series_dir+"'",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+
+                                      if v_image_datasets.count > 0 and v_image_datasets.count < 2
+                                         v_image_dataset = v_image_datasets.first
+                                         v_source4_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'image_dataset'",v_source3_file_id,v_image_dataset.id)
+                                         if v_source4_processedimagesources.count < 1
+                                             v_source4_processedimagesource = Processedimagessource.new
+                                             v_source4_processedimagesource.file_name = v_image_dataset.scanned_file
+                                             v_source4_processedimagesource.file_path = v_image_dataset.path
+                                             v_source4_processedimagesource.source_image_id = v_image_dataset.id
+                                             v_source4_processedimagesource.source_image_type = 'image_dataset'
+                                             v_source4_processedimagesource.processedimage_id= v_source3_file_id
+                                             v_source4_processedimagesource.save
+
+                                        else
+                                            v_source4_processedimagesource = v_source4_processedimagesources.first
+                                        end
+                                      elsif v_image_datasets.count > 1
+                                        #puts "multiples ids found"
+                                        v_image_datasets.each do |ids|
+                                           puts "t1 ids multiple="+ids.id.to_s
+                                        end
+                                      else
+                                        puts " ids not found"
+                                      end 
+                                   end # unknown o loop
+                      end # check if this subjectid proprocessed exists and that subjectid is an enumber
+                  #end # TEMPORARY LIMIT TO one subjectid
+                end # loop thru all subjectid in raw -- used to look at preporcessed
+              end #check if preprocessed exists
+          end #check if raw exists                      
+      end # sp loop                          
+
+
+
+
+      if !v_comment.include?("ERROR")
+            @schedulerun.status_flag ="Y"
+      else
+          @schedulerun.comment ="Suceess ;"+@schedulerun.comment
+      end
+      @schedulerun.save
+      @schedulerun.end_time = @schedulerun.updated_at      
+      @schedulerun.save
+   end
+
+ # walk the preprocessed/visits/sp/subject/tissue_seg etc. 
+   # link to unknown o_acpc 
+   # try to link to ids
+   def run_processedimage_tissue_seg_harvest
+
+
+      v_base_path = Shared.get_base_path()
+      v_log_base ="/mounts/data/preprocessed/logs/"
+      v_process_name = "processedimage_tissue_seg_harvest"
+      process_logs_delete_old( v_process_name, v_log_base)
+      @schedule = Schedule.where("name in ('processedimage_tissue_seg_harvest')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting processedimage_tissue_seg_harvest"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_computer = "kanga"
+      v_raw_path = v_base_path+"/raw"
+      v_mri = "/mri"
+      no_mri_path_sp_list =['asthana.adrc-clinical-core.visit1',
+      'bendlin.mets.visit1','bendlin.tami.visit1','bendlin.wmad.visit1','carlson.sharp.visit1','carlson.sharp.visit2',
+       'carlson.sharp.visit3','carlson.sharp.visit4','dempsey.plaque.visit1','dempsey.plaque.visit2','gleason.falls.visit1',
+      'johnson.merit220.visit1','johnson.merit220.visit2','johnson.tbi.aware.visit3','johnson.tbi-va.visit1','ries.aware.visit1','wrap140']
+
+      v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+      v_tissue_seg_subpath = "/tissue_seg/"
+      v_unknown_subpath = "/unknown/"
+      v_t1_series_description_type_id = "19"
+      v_t2_series_description_type_id = "20"
+
+      v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
+      @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)  #.where("scan_procedures.codename in ('asthana.adrc-clinical-core.visit1')")
+      @scan_procedures.each do |sp|
+          v_visit_number =""
+          if sp.codename.include?("visit2")
+              v_visit_number ="_v2"
+          elsif sp.codename.include?("visit3")
+              v_visit_number ="_v3"
+          elsif sp.codename.include?("visit4")
+              v_visit_number ="_v4"
+          elsif sp.codename.include?("visit5")
+              v_visit_number ="_v5"
+          end
+          if no_mri_path_sp_list.include?(sp.codename)
+              v_mri = ""
+          else
+              v_mri = "/mri"
+          end
+          v_raw_full_path = v_raw_path+"/"+sp.codename+v_mri
+          v_preprocessed_full_path = v_preprocessed_path+sp.codename+"/"
+          if File.directory?(v_raw_full_path)
+              if !File.directory?(v_preprocessed_full_path)
+                @schedulerun.comment = "preprocessed path NOT exists "+v_preprocessed_full_path+";"+@schedulerun.comment
+              else
+                Dir.entries(v_raw_full_path).select { |file| File.directory? File.join(v_raw_full_path, file)}.each do |dir|
+                  #if dir.include? "adrc00540"
+                      dir_name_array = dir.split('_')
+                      v_subjectid = dir_name_array[0]
+                      v_enrollments = Enrollment.where("enumber in (?)", v_subjectid)
+                      if File.directory?(v_preprocessed_full_path+v_subjectid+v_tissue_seg_subpath) and v_enrollments.count > 0
+                          v_enrollment = v_enrollments.first
+                                # get the mo<subjectid> from tissue_seg
+                                Dir.glob(v_preprocessed_full_path+v_subjectid+v_tissue_seg_subpath+'mo'+v_subjectid+'_*.nii').each do|source2_f|
+                                   v_source2_file_full_path = source2_f 
+                                   v_source2_file = File.basename(source2_f)
+                                   v_source2_file_array = v_source2_file.split('_')
+                                   v_t1_scan_series_dir = (v_source2_file_array.last).gsub(".nii","")
+                                   v_source2_processesimages = Processedimage.where("file_path in (?)",v_source2_file_full_path)
+                                   v_source2_file_id = nil
+                                   if v_source2_processesimages.count <1
+                                # need to collect source files, then make processedimage record
+                                       v_source2_processedimage = Processedimage.new
+                                       v_source2_processedimage.file_type ="m_acpc T1"
+                                       v_source2_processedimage.file_name = v_source2_file
+                                       v_source2_processedimage.file_path = v_source2_file_full_path
+                                       v_source2_processedimage.save  
+                                       v_source2_file_id = v_source2_processedimage.id
+                                   else
+                                       v_source2_processesimage = v_source2_processesimages.first
+                                       v_source2_file_id = v_source2_processesimage.id   
+                                   end
+
+                                   # get the o<subjectid> from unknown
+                                   Dir.glob(v_preprocessed_full_path+v_subjectid+v_unknown_subpath+'o'+v_subjectid+'_*_'+v_t1_scan_series_dir+'.nii').each do|source3_f|
+                                      v_source3_file_full_path = source3_f 
+                                      v_source3_file = File.basename(source3_f)
+                                      #v_source3_file_array = v_source3_file.split('_')
+                                      #v_t1_scan_series_dir = (v_source3_file_array.last).gsub(".nii","")
+                                      v_source3_processesimages = Processedimage.where("file_path in (?)",v_source3_file_full_path)
+                                      v_source3_file_id = nil
+                                      if v_source3_processesimages.count <1
+                                      # need to collect source files, then make processedimage record
+                                          v_source3_processedimage = Processedimage.new
+                                          v_source3_processedimage.file_type ="o_acpc T1"
+                                          v_source3_processedimage.file_name = v_source3_file
+                                          v_source3_processedimage.file_path = v_source3_file_full_path
+                                          v_source3_processedimage.save  
+                                          v_source3_file_id = v_source3_processedimage.id
+                                      else
+                                          v_source3_processesimage = v_source3_processesimages.first
+                                          v_source3_file_id = v_source3_processesimage.id   
+                                      end
+          
+                                      v_source3_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'processedimage'",v_source2_file_id,v_source3_file_id)
+                                      if v_source3_processedimagesources.count < 1
+                                          v_source3_processedimagesource = Processedimagessource.new
+                                          v_source3_processedimagesource.file_name = v_source3_file
+                                          v_source3_processedimagesource.file_path = v_source3_file_full_path
+                                          v_source3_processedimagesource.source_image_id = v_source3_file_id
+                                          v_source3_processedimagesource.source_image_type = 'processedimage'
+                                          v_source3_processedimagesource.processedimage_id= v_source2_file_id
+                                          v_source3_processedimagesource.save
+
+                                      else
+                                          v_source3_processedimagesource = v_source3_processedimagesources.first
+                                      end
+                                      # get the image_dataset of the T1 CHANGE THE IMAGE TYPE / look in LOG   T1 vs T2??? 
+                                      v_image_datasets = ImageDataset.where("image_datasets.visit_id in (select visits.id from visits, appointments, enrollment_vgroup_memberships, scan_procedures_vgroups 
+                                                             where visits.appointment_id = appointments.id 
+                                                             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.scan_procedure_id in (?) 
+                                                             and enrollment_vgroup_memberships.enrollment_id in (?) )
+                                                             and image_datasets.series_description in 
+                                                              (select series_description_maps.series_description from series_description_maps where 
+                                                                   series_description_maps.series_description_type_id in (?))
+                                                              and image_datasets.path like '%"+v_t1_scan_series_dir+"'",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+
+                                      if v_image_datasets.count > 0 and v_image_datasets.count < 2
+                                         v_image_dataset = v_image_datasets.first
+                                         v_source4_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'image_dataset'",v_source3_file_id,v_image_dataset.id)
+                                         if v_source4_processedimagesources.count < 1
+                                             v_source4_processedimagesource = Processedimagessource.new
+                                             v_source4_processedimagesource.file_name = v_image_dataset.scanned_file
+                                             v_source4_processedimagesource.file_path = v_image_dataset.path
+                                             v_source4_processedimagesource.source_image_id = v_image_dataset.id
+                                             v_source4_processedimagesource.source_image_type = 'image_dataset'
+                                             v_source4_processedimagesource.processedimage_id= v_source3_file_id
+                                             v_source4_processedimagesource.save
+
+                                        else
+                                            v_source4_processedimagesource = v_source4_processedimagesources.first
+                                        end
+                                      elsif v_image_datasets.count > 1
+                                        #puts "multiples ids found"
+                                        v_image_datasets.each do |ids|
+                                           puts "t1 ids multiple="+ids.id.to_s
+                                        end
+                                      else
+                                        puts " ids not found"
+                                      end 
+                                   end # unknown o loop
+                                end # tissue seg mo loop
+                      end # check if this subjectid proprocessed exists and that subjectid is an enumber
+                  #end # TEMPORARY LIMIT TO one subjectid
+                end # loop thru all subjectid in raw -- used to look at preporcessed
+              end #check if preprocessed exists
+          end #check if raw exists                      
+      end # sp loop 
+
+
+
+      if !v_comment.include?("ERROR")
+            @schedulerun.status_flag ="Y"
+      else
+          @schedulerun.comment ="Suceess ;"+@schedulerun.comment
+      end
+      @schedulerun.save
+      @schedulerun.end_time = @schedulerun.updated_at      
+      @schedulerun.save
+   end
    # walk the preprocessed/visits/sp/subject/asl etc. 
    # get the ASL file name
    # try to link to ids asl, ids t1/flair
@@ -7443,10 +7754,11 @@ puts "v_analyses_path="+v_analyses_path
                              end # end of ASL_fmap loop
                              # get the T1 y_o<subjectid>_<series descriptionish>_<dirname>.nii
                              Dir.glob(v_preprocessed_full_path+v_subjectid+v_asl_subpath+'y_o'+v_subjectid+'_*.nii').each do|source1_f|
+                                v_t1_scan_series_dir = ""
                                 v_source1_file_full_path = source1_f 
                                 v_source1_file = File.basename(source1_f)
                                 v_source1_file_array = v_source1_file.split('_')
-                                v_scan_series_dir = (v_source1_file_array.last).gsub(".nii","")
+                                v_t1_scan_series_dir = (v_source1_file_array.last).gsub(".nii","")
                                 v_source1_processesimages = Processedimage.where("file_path in (?)",v_source1_file_full_path)
                                 v_source1_file_id = nil
                                 if v_source1_processesimages.count <1
@@ -7476,11 +7788,11 @@ puts "v_analyses_path="+v_analyses_path
                                     v_source1_processedimagesource = v_source1_processedimagesources.first
                                 end
                                 # get the mo<subjectid> from tissue_seg
-                                Dir.glob(v_preprocessed_full_path+v_subjectid+v_tissue_seg_subpath+'mo'+v_subjectid+'_*.nii').each do|source2_f|
+                                Dir.glob(v_preprocessed_full_path+v_subjectid+v_tissue_seg_subpath+'mo'+v_subjectid+'_*_'+v_t1_scan_series_dir+'.nii').each do|source2_f|
                                    v_source2_file_full_path = source2_f 
                                    v_source2_file = File.basename(source2_f)
                                    #v_source2_file_array = v_source2_file.split('_')
-                                   #v_scan_series_dir = (v_source2_file_array.last).gsub(".nii","")
+                                   #v_t1_scan_series_dir = (v_source2_file_array.last).gsub(".nii","")
                                    v_source2_processesimages = Processedimage.where("file_path in (?)",v_source2_file_full_path)
                                    v_source2_file_id = nil
                                    if v_source2_processesimages.count <1
@@ -7510,11 +7822,11 @@ puts "v_analyses_path="+v_analyses_path
                                        v_source2_processedimagesource = v_source2_processedimagesources.first
                                    end
                                    # get the o<subjectid> from unknown
-                                   Dir.glob(v_preprocessed_full_path+v_subjectid+v_unknown_subpath+'o'+v_subjectid+'_*.nii').each do|source3_f|
+                                   Dir.glob(v_preprocessed_full_path+v_subjectid+v_unknown_subpath+'o'+v_subjectid+'_*_'+v_t1_scan_series_dir+'.nii').each do|source3_f|
                                       v_source3_file_full_path = source3_f 
                                       v_source3_file = File.basename(source3_f)
-                                      v_source3_file_array = v_source3_file.split('_')
-                                      v_t1_scan_series_dir = (v_source3_file_array.last).gsub(".nii","")
+                                      #v_source3_file_array = v_source3_file.split('_')
+                                      #v_t1_scan_series_dir = (v_source3_file_array.last).gsub(".nii","")
                                       v_source3_processesimages = Processedimage.where("file_path in (?)",v_source3_file_full_path)
                                       v_source3_file_id = nil
                                       if v_source3_processesimages.count <1

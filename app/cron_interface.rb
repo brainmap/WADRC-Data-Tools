@@ -232,6 +232,12 @@ v_user = v_user.gsub("\n","")
   elsif v_value_1 == "processedimage_asl_harvest"
       v_shared = Shared.new
       v_shared.run_processedimage_asl_harvest()
+  elsif v_value_1 == "processedimage_tissue_seg_harvest"
+      v_shared = Shared.new
+      v_shared.run_processedimage_tissue_seg_harvest()
+  elsif v_value_1 == "processedimage_unknown_harvest"
+      v_shared = Shared.new
+      v_shared.run_processedimage_unknown_harvest()
 
   elsif v_value_1 == "selley_20130906_upload"
       v_shared = Shared.new
