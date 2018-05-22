@@ -6091,8 +6091,8 @@ puts "AAAAAAA="+v_log
            # v_petfile_conditions.push(condition)
             condition = "appointments.appointment_type = 'pet_scan' "
             @conditions.push(condition)
-            #condition = "appointments.vgroup_id = 4230 "
-            #@conditions.push(condition)
+           # condition = "appointments.vgroup_id = 8360 "
+           # @conditions.push(condition)
 
             v_petfile_conditions.push("petscans.id = petfiles.petscan_id")
             sql_petfile_cnt = "select max(cnt) from 
@@ -6100,7 +6100,7 @@ puts "AAAAAAA="+v_log
             results_petfile_cnt= connection.execute(sql_petfile_cnt) 
             @v_petfile_cnt = 0
             @v_petfile_cnt = results_petfile_cnt.first[0]   # ,'Injection_scan_start_diff'
-            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Dose','Injection Time','Scan Start','Note','Acquisition Duration','Pet status','Pre_BP Systol','Pre_BP Diastol','Pre_Pulse','Blood Glucose','Weight','Height','Post_BP Systol','Post_BP Diastol','Post_Pulse','Age at Appt','Appt Note'] # need to look up values
+            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Dose','Injection Time','Scan Start','Inj-Scan Strt Diff','Note','Acquisition Duration','Pet status','Pre_BP Systol','Pre_BP Diastol','Pre_Pulse','Blood Glucose','Weight','Height','Post_BP Systol','Post_BP Diastol','Post_Pulse','Age at Appt','Appt Note'] # need to look up values
           
             if !@v_petfile_cnt.nil?
               i = @v_petfile_cnt
@@ -6117,6 +6117,7 @@ puts "AAAAAAA="+v_log
             @fields =["lookup_pettracers.name pettracer","petscans.netinjecteddose",
                     "time_format(timediff( time(petscans.injecttiontime),subtime(utc_time(),time(localtime()))),'%H:%i')",
                     "time_format(timediff( time(scanstarttime),subtime(utc_time(),time(localtime()))),'%H:%i')",
+                      "ROUND(TIME_TO_SEC(TIMEDIFF(petscans.scanstarttime,petscans.injecttiontime)))/60",
                     "petscans.petscan_note","petscans.range","vgroups.transfer_pet","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","vitals.weight","vitals.height","vitals_post.bp_systol as bp_systol_post","vitals_post.bp_diastol as bp_diastol_post","vitals_post.pulse as pulse_post","appointments.age_at_appointment","petscans.id","appointments.comment"] # vgroups.id vgroup_id always first, include table name 
             @left_join = ["LEFT JOIN lookup_pettracers on petscans.lookup_pettracer_id = lookup_pettracers.id",
                         "LEFT JOIN vitals on petscans.appointment_id = vitals.appointment_id and vitals.pre_post_flag ='pre' ",
@@ -6218,7 +6219,9 @@ puts "AAAAAAA="+v_log
                       end 
                       if v_exists_tracer == "Y"
                         # make file
-                        v_pet_data_csv = v_pet_enumber_path+"/pet/"+v_tracer_name+"/pet_data.csv"
+        puts v_pet_data_csv 
+
+                        v_pet_data_csv = v_pet_enumber_path+"/pet/"+v_tracer_name+"/"+v_enumber+"_"+v_tracer_name+"_"+v_sp_codename.gsub(".","_")+"_pet_data.csv"
                         File.open(v_pet_data_csv, "w+") do |fcsv| 
                              fcsv.write("variable_name,value\n") 
                              v_cnt = 0
