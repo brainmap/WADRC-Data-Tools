@@ -6049,6 +6049,302 @@ puts "AAAAAAA="+v_log
        @schedulerun.save
     
   end
+ #makes preprocessed/visits/<sp>/<subjectid>/pet/<tracer>/ csv and json or petscan data
+  def run_pet_preprocessed_data
+         v_base_path = Shared.get_base_path()
+         @schedule = Schedule.where("name in ('pet_preprocessed_data')").first
+          @schedulerun = Schedulerun.new
+          @schedulerun.schedule_id = @schedule.id
+          @schedulerun.comment ="starting pet_preprocessed_data"
+          @schedulerun.save
+          @schedulerun.start_time = @schedulerun.created_at
+          @schedulerun.save
+
+          v_comment = ""
+          v_cnt = 0
+          v_month_back = "100" # going all the way back - later change back to 1 month 
+          # add option for full and partial re-write
+          v_preprocessed_visits_base =  v_base_path+"/preprocessed/visits/"
+          v_raw_base = v_base_path+"/raw/"
+          v_computer = "kanga"
+          # tracer_id - dir name
+          v_tracer_id_exclude_array = [1,2,3,5,6,7,8,9,10] #[5] # excluding pbr 
+
+         connection = ActiveRecord::Base.connection();
+          @lookup_pettracers = LookupPettracer.where("lookup_pettracers.id not in (?)",v_tracer_id_exclude_array)
+          @lookup_pettracers.each do |tracer|
+              v_tracer_name = (tracer.name).downcase
+              # loop thru each tracer  === lower case
+              # get all the pet appts with that tracer -- mimic the pet_search query
+              # get raw path, infer sp, infer subjectid
+              # check for pet dir/mk pet dir
+              # check for tracer dir/mk tracer dir
+              # make csv
+              # make json
+            @conditions = []
+            v_petfile_conditions = [] # need to find max number of petfiles - some have 1, some 2 , etc, for this mix of scan procedures
+            condition ="  petscans.lookup_pettracer_id in ("+(tracer.id).to_s+" )"
+            @conditions.push(condition)
+            v_petfile_conditions.push(condition)
+            condition = "appointments.appointment_date > (DATE_SUB(NOW(), INTERVAL "+v_month_back+" MONTH))"
+            @conditions.push(condition)
+           # v_petfile_conditions.push(condition)
+            condition = "appointments.appointment_type = 'pet_scan' "
+            @conditions.push(condition)
+            #condition = "appointments.vgroup_id = 4230 "
+            #@conditions.push(condition)
+
+            v_petfile_conditions.push("petscans.id = petfiles.petscan_id")
+            sql_petfile_cnt = "select max(cnt) from 
+                  (select    count(petfiles.id) cnt, petscans.id from petfiles, petscans where "+v_petfile_conditions.join(" and ")+ " group by petscans.id) t2"
+            results_petfile_cnt= connection.execute(sql_petfile_cnt) 
+            @v_petfile_cnt = 0
+            @v_petfile_cnt = results_petfile_cnt.first[0]   # ,'Injection_scan_start_diff'
+            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Dose','Injection Time','Scan Start','Note','Acquisition Duration','Pet status','Pre_BP Systol','Pre_BP Diastol','Pre_Pulse','Blood Glucose','Weight','Height','Post_BP Systol','Post_BP Diastol','Post_Pulse','Age at Appt','Appt Note'] # need to look up values
+          
+            if !@v_petfile_cnt.nil?
+              i = @v_petfile_cnt
+              k = 1
+              while i > 0
+                @column_headers.push("Pet_file_"+k.to_s)
+                @column_headers.push("Pet_path_"+k.to_s)
+                @column_headers.push("Pet_note_"+k.to_s)
+                k = k + 1
+                i = i -1
+              end
+            end
+            @column_number =   @column_headers.size
+            @fields =["lookup_pettracers.name pettracer","petscans.netinjecteddose",
+                    "time_format(timediff( time(petscans.injecttiontime),subtime(utc_time(),time(localtime()))),'%H:%i')",
+                    "time_format(timediff( time(scanstarttime),subtime(utc_time(),time(localtime()))),'%H:%i')",
+                    "petscans.petscan_note","petscans.range","vgroups.transfer_pet","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","vitals.weight","vitals.height","vitals_post.bp_systol as bp_systol_post","vitals_post.bp_diastol as bp_diastol_post","vitals_post.pulse as pulse_post","appointments.age_at_appointment","petscans.id","appointments.comment"] # vgroups.id vgroup_id always first, include table name 
+            @left_join = ["LEFT JOIN lookup_pettracers on petscans.lookup_pettracer_id = lookup_pettracers.id",
+                        "LEFT JOIN vitals on petscans.appointment_id = vitals.appointment_id and vitals.pre_post_flag ='pre' ",
+                        "LEFT JOIN vitals as vitals_post on petscans.appointment_id = vitals_post.appointment_id and vitals_post.pre_post_flag ='post'  "]
+            
+            @tables =['petscans'] # trigger joins --- vgroups and appointments by default
+            @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
+
+            # how to call controller function from in another model?
+            @results = self.run_search_pet
+
+           @csv_array = []
+           @results_tmp_csv = []
+           @results.each do |result| 
+              v_sp_codename = ""
+              v_enumber = ""
+              @results_tmp_csv = []
+              for i in 0..@column_number-1  # results is an array of arrays%>
+    #puts "colum = "+@column_headers[i]
+                 if @column_headers[i] == "Pet_path_1"
+                      # get scan procedure
+                      v_file_path =result[i]
+                      if !v_file_path.nil?
+                         v_file = v_file_path.gsub(v_raw_base,"")
+                         v_file_path_array = v_file.split("/")
+                         v_sp_codename = v_file_path_array[0]
+                      end
+                 end
+                 if @column_headers[i] == "Pet_file_1"
+                      # get scan procedure
+                      v_file_name =result[i]
+                      if !v_file_name.nil?
+                         
+                         v_file_name_array = v_file_name.split("_")
+                         v_enumber = v_file_name_array[0]
+                      end
+                 end
+                 @results_tmp_csv.push(result[i])
+              end 
+              if v_sp_codename > "" and v_enumber > ""
+                   # check if is a sp 
+                   @scan_procedures = ScanProcedure.where("codename in (?)",v_sp_codename)
+                   @enumbers = Enrollment.where("enumber in (?)",v_enumber)
+                   if !@scan_procedures.nil? and !@enumbers.nil? and @scan_procedures.count > 0 and @enumbers.count > 0
+                       v_pet_enumber_path = v_preprocessed_visits_base+v_sp_codename+"/"+v_enumber
+                       v_exists = "N"
+                       v_exists_pet = "N"
+                       v_exists_tracer = "N"
+                       Dir.glob(v_pet_enumber_path).each do|f|
+                          v_exists = "Y"
+                       end
+                       if v_exists == "N" 
+                          v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'mkdir "+v_pet_enumber_path+" ' "
+                          puts v_call
+                          stdin, stdout, stderr = Open3.popen3(v_call)
+                          while !stdout.eof?
+                              puts stdout.read 1024    
+                          end
+                          stdin.close
+                          stdout.close
+                          stderr.close
+            
+                          v_exists = "Y"
+                       end
+                       if v_exists == "Y"
+                          Dir.glob(v_pet_enumber_path+"/pet").each do|fp|
+                              v_exists_pet = "Y"
+                          end
+                          if v_exists_pet == "N" 
+                               v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'mkdir "+v_pet_enumber_path+"/pet' "
+                               puts v_call
+                               stdin, stdout, stderr = Open3.popen3(v_call)
+                               while !stdout.eof?
+                                   puts stdout.read 1024    
+                               end
+                               stdin.close
+                               stdout.close
+                               stderr.close
+                               v_exists_pet = "Y"
+                          end
+                          if v_exists_pet == "Y"
+                              Dir.glob(v_pet_enumber_path+"/pet"+v_tracer_name).each do|fp|
+                              v_exists_tracer = "Y"
+                          end
+                          if v_exists_tracer == "N" 
+                               v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'mkdir "+v_pet_enumber_path+"/pet/"+v_tracer_name+"' "
+                               puts v_call
+                               stdin, stdout, stderr = Open3.popen3(v_call)
+                               while !stdout.eof?
+                                   puts stdout.read 1024    
+                               end
+                               stdin.close
+                               stdout.close
+                               stderr.close
+                               v_exists_tracer = "Y"
+                          end
+                       end
+
+                      end 
+                      if v_exists_tracer == "Y"
+                        # make file
+                        v_pet_data_csv = v_pet_enumber_path+"/pet/"+v_tracer_name+"/pet_data.csv"
+                        File.open(v_pet_data_csv, "w+") do |fcsv| 
+                             fcsv.write("variable_name,value\n") 
+                             v_cnt = 0
+                             @results_tmp_csv.each do |rc| 
+                                  fcsv.write(@column_headers[v_cnt]+","+rc.to_s+"\n")
+                               v_cnt = v_cnt + 1
+                             end
+                        end
+                        v_pet_data_json = v_pet_enumber_path+"/pet/"+v_tracer_name+"/pet_data.json"
+
+                      end
+                     
+                   end # has sp and enumber
+
+              end
+              @csv_array.push(@results_tmp_csv)
+            end 
+
+
+          end
+
+      @schedulerun.comment =("successful finish pet_preprocessed_data "+v_comment[0..459])
+      if !v_comment.include?("ERROR")
+         @schedulerun.status_flag ="Y"
+       end
+       @schedulerun.save
+       @schedulerun.end_time = @schedulerun.updated_at      
+       @schedulerun.save
+  end
+  def run_search_pet  # need to add the petfiles - file_name, path and note
+    # taken from application controller -- not sure how to call from shared model
+    @html_request ="N"
+
+  if @tables.size == 1  or @tables.include?("image_datasets")
+    # moved ,appointments.comment  to be in field list
+       sql ="SELECT distinct vgroups.id vgroup_id,appointments.appointment_date,  vgroups.rmr , "+@fields.join(',')+" 
+        FROM vgroups, appointments,scan_procedures, scan_procedures_vgroups, "+@tables.join(',')+" "+@left_join.join(' ')+"
+        WHERE vgroups.id = appointments.vgroup_id "
+        @tables.each do |tab|
+          if tab == "image_datasets"
+            sql = sql +" AND "+tab+".visit_id = visits.id  "
+          else
+            sql = sql +" AND "+tab+".appointment_id = appointments.id  "
+          end
+        end
+        sql = sql +" AND scan_procedures.id = scan_procedures_vgroups.scan_procedure_id
+        AND scan_procedures_vgroups.vgroup_id = vgroups.id "
+
+        if @conditions.size > 0
+            sql = sql +" AND "+@conditions.join(' and ')
+        end
+       #conditions - feed thru ActiveRecord? stop sql injection -- replace : ; " ' ( ) = < > - others?
+        if @order_by.size > 0
+          sql = sql +" ORDER BY "+@order_by.join(',')
+        end 
+   end
+
+puts sql    
+    connection = ActiveRecord::Base.connection();
+    @results2 = connection.execute(sql)
+    @temp_results = @results2
+
+    @results = []   
+    i =0
+    @temp_results.each do |var|
+      @temp = []
+      # TRY TUNING BY GETTING ALL RELEVANT sp , enum , put in hash, with vgroup_id as key
+      # take each var --- get vgroup_id => find vgroup
+      # get scan procedure(s) -- make string, put in @results[0]
+      # vgroup.rmr --- put in @results[1]
+      # get enumber(s) -- make string, put in @results[2]
+      # put the rest of var - minus vgroup_id, into @results
+      # SLOWER THAN sql  -- 9915 msec vs 3193 msec
+      #vgroup = Vgroup.find(var[0])
+      #@temp[0]=vgroup.scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ")
+      #@temp[1]=vgroup.enrollments.collect {|e| e.enumber }.join(", ")
+      # change to scan_procedures.id and enrollments.id  or vgroup_id to make links-- maybe keep vgroup_id for display
+      @temp[0] = var[1] # want appt date first
+      if @html_request =="N"
+          sql_sp = "SELECT distinct scan_procedures.codename 
+                FROM scan_procedures, scan_procedures_vgroups
+                WHERE scan_procedures.id = scan_procedures_vgroups.scan_procedure_id
+                AND scan_procedures_vgroups.vgroup_id = "+var[0].to_s
+          @results_sp = connection.execute(sql_sp)
+          @temp[1] =@results_sp.to_a.join(", ")
+
+          sql_enum = "SELECT distinct enrollments.enumber 
+                FROM enrollments, enrollment_vgroup_memberships
+                WHERE enrollments.id = enrollment_vgroup_memberships.enrollment_id
+                AND enrollment_vgroup_memberships.vgroup_id = "+var[0].to_s
+          @results_enum = connection.execute(sql_enum)
+          @temp[2] =@results_enum.to_a.join(", ")
+          
+      else  # need to only get the sp and enums which are displayed - and need object to make link
+        @temp[1] = var[0].to_s
+        @temp[2] = var[0].to_s
+      end 
+      var.delete_at(0) # get rid of vgroup_id
+      var.delete_at(0) # get rid of extra copy of appt date 
+
+      
+      #moving petscan_id to front
+      v_length = var.length
+      v_petscan_id = var[v_length-2]
+      if @html_request =="Y"
+          @temp.unshift(v_petscan_id)
+      end
+      var.delete_at(v_length-2)
+      #if @html_request =="N"
+         #var.delete_at(0) # seems to need to delete another blank field?
+      #end
+      v_petfiles = Petfile.where("petscan_id in (?)", v_petscan_id)
+      v_petfiles.each do |pf|
+         var.push(pf.file_name)
+         var.push(pf.path)
+         var.push(pf.note)
+      end 
+      
+      @temp_row = @temp + var  
+
+      @results[i] = @temp_row
+      i = i+1
+    end   
+  @v_petfile_cnt.to_s
+    return @results
+ end
 
   def run_pcvipr_recon_and_gating_check
          v_base_path = Shared.get_base_path()

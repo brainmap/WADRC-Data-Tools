@@ -355,6 +355,8 @@ class PetscansController < ApplicationController
          end
        @tables =['petscans'] # trigger joins --- vgroups and appointments by default
        @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
+
+       # ALSO USING in shared.run_pet_preprocessed_data
       if  @html_request =="N" 
            @results = self.run_search_pet  # in the application controller - was self.run_search WHY?- messing the petfiles
       else 
