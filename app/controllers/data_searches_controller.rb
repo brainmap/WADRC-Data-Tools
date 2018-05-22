@@ -2845,7 +2845,7 @@ puts "bbbbb "+sql
      end
     @csv_str = @csv_array.inject([]) { |csv, row|  csv << CSV.generate_line(row) }.join("")  
 
-  end   
+  end 
   puts "end ="+@local_column_headers.join(',')
        if v_request_format_array[0] == "application/json"
         @csv_array_json = @csv_array

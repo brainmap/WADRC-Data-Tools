@@ -378,11 +378,33 @@ class PetscansController < ApplicationController
     @csv_str = @csv_array.inject([]) { |csv, row|  csv << CSV.generate_line(row) }.join("")  
       ### LOOK WHERE TITLE IS SHOWING UP
       @collection_title = 'All Petscan appts'
-
+       if v_request_format_array[0] == "application/json"
+        @csv_array_json = @csv_array
+        @csv_array_json.shift
+        @csv_array_json_header = @csv_array_json[0]
+        ###@csv_array_json_header.push("vgroup_id")
+        @csv_array_json.shift  # deleted the first row
+        @json_hash_of_hash = Hash[]
+        @json_array_of_hash = Array[]
+        @csv_array_json.each do |item|
+          @h = Hash[]
+          @h2 = Hash[]
+          v_cnt = 0
+          @csv_array_json_header.each do |header_col|
+            ###@h[v_cnt.to_s+"_"+header_col] = item[v_cnt]
+            @h[header_col] = item[v_cnt]
+            v_cnt = v_cnt + 1
+         end
+         #@json_hash_of_hash[item[v_cnt-1]]= @h
+         @h2["petscan"]= @h
+         @json_array_of_hash.push(@h2)
+        end
+     end
       respond_to do |format|
         format.xls # pet_search.xls.erb
         format.csv { send_data @csv_str }
         format.xml  { render :xml => @results }    # actually redefined in the xls page    
+        format.json { send_data @json_array_of_hash.to_json}
         format.html {@results = Kaminari.paginate_array(@results).page(params[:page]).per(50)} # pet_search.html.erb
       end
     end
@@ -511,10 +533,25 @@ class PetscansController < ApplicationController
         @hide_page_flag = 'Y'
       end
     @petscan = Petscan.new(petscan_params)#params[:petscan])
-    
+    appointment_date = nil
     params[:date][:injectiont][0]="1899"
     params[:date][:injectiont][1]="12"
     params[:date][:injectiont][2]="30"
+
+    params[:date][:scanstartt][0]="1899"
+    params[:date][:scanstartt][1]="12"
+    params[:date][:scanstartt][2]="30"  
+    if !params[:appointment]["#{'appointment_date'}(1i)"].blank? && !params[:appointment]["#{'appointment_date'}(2i)"].blank? && !params[:appointment]["#{'appointment_date'}(3i)"].blank?
+         appointment_date = params[:appointment]["#{'appointment_date'}(1i)"] +"-"+params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")+"-"+params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
+        #params[:date][:injectiont][0]=params[:appointment]["#{'appointment_date'}(1i)"]
+        #params[:date][:injectiont][1]=params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")
+        #params[:date][:injectiont][2]=params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
+        #params[:date][:scanstartt][0]=params[:appointment]["#{'appointment_date'}(1i)"]
+        #params[:date][:scanstartt][1]=params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")
+        #params[:date][:scanstartt][2]=params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
+
+    end
+    
     injectiontime = nil
     if !params[:date][:injectiont][0].blank? && !params[:date][:injectiont][1].blank? && !params[:date][:injectiont][2].blank? && !params[:date][:injectiont][3].blank? && !params[:date][:injectiont][4].blank?
       params[:date][:injectiont][3]  = ((params[:date][:injectiont][3].to_i)+v_offset).to_s  
@@ -522,9 +559,7 @@ class PetscansController < ApplicationController
      @petscan.injecttiontime = DateTime.strptime(injectiontime, "%Y-%m-%d %H:%M") #injectiontime
     end
 
-    params[:date][:scanstartt][0]="1899"
-    params[:date][:scanstartt][1]="12"
-    params[:date][:scanstartt][2]="30"       
+     
     scanstarttime = nil
     if !params[:date][:scanstartt][0].blank? && !params[:date][:scanstartt][1].blank? && !params[:date][:scanstartt][2].blank? && !params[:date][:scanstartt][3].blank? && !params[:date][:scanstartt][4].blank?
       params[:date][:scanstartt][3]  = ((params[:date][:scanstartt][3].to_i)+v_offset).to_s 
@@ -532,10 +567,7 @@ class PetscansController < ApplicationController
       @petscan.scanstarttime = DateTime.strptime(scanstarttime, "%Y-%m-%d %H:%M") #scanstarttime
     end  
     
-    appointment_date = nil
-    if !params[:appointment]["#{'appointment_date'}(1i)"].blank? && !params[:appointment]["#{'appointment_date'}(2i)"].blank? && !params[:appointment]["#{'appointment_date'}(3i)"].blank?
-         appointment_date = params[:appointment]["#{'appointment_date'}(1i)"] +"-"+params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")+"-"+params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
-    end
+
     
     vgroup_id =params[:new_appointment_vgroup_id]
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(vgroup_id)
@@ -702,12 +734,23 @@ class PetscansController < ApplicationController
                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
                                       
     appointment_date = nil
-    if !params[:appointment]["#{'appointment_date'}(1i)"].blank? && !params[:appointment]["#{'appointment_date'}(2i)"].blank? && !params[:appointment]["#{'appointment_date'}(3i)"].blank?
-         appointment_date = params[:appointment]["#{'appointment_date'}(1i)"] +"-"+params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")+"-"+params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
-    end
       params[:date][:injectiont][0]="1899"
       params[:date][:injectiont][1]="12"
       params[:date][:injectiont][2]="30"
+      params[:date][:scanstartt][0]="1899"
+      params[:date][:scanstartt][1]="12"
+      params[:date][:scanstartt][2]="30" 
+
+    if !params[:appointment]["#{'appointment_date'}(1i)"].blank? && !params[:appointment]["#{'appointment_date'}(2i)"].blank? && !params[:appointment]["#{'appointment_date'}(3i)"].blank?
+         appointment_date = params[:appointment]["#{'appointment_date'}(1i)"] +"-"+params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")+"-"+params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
+         # params[:date][:injectiont][0]=params[:appointment]["#{'appointment_date'}(1i)"]
+         # params[:date][:injectiont][1]=params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")
+         # params[:date][:injectiont][2]=params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
+         # params[:date][:scanstartt][0]=params[:appointment]["#{'appointment_date'}(1i)"]
+         # params[:date][:scanstartt][1]=params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")
+         #  params[:date][:scanstartt][2]=params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
+    end
+
       injectiontime = nil
       if !params[:date][:injectiont][0].blank? && !params[:date][:injectiont][1].blank? && !params[:date][:injectiont][2].blank? && !params[:date][:injectiont][3].blank? && !params[:date][:injectiont][4].blank?
       params[:date][:injectiont][3]  = ((params[:date][:injectiont][3].to_i)+v_offset).to_s
@@ -716,10 +759,7 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
       else
       params[:petscan][:injecttiontime] =  ""
        end
-
-       params[:date][:scanstartt][0]="1899"
-       params[:date][:scanstartt][1]="12"
-       params[:date][:scanstartt][2]="30"       
+     
         scanstarttime = nil
       if !params[:date][:scanstartt][0].blank? && !params[:date][:scanstartt][1].blank? && !params[:date][:scanstartt][2].blank? && !params[:date][:scanstartt][3].blank? && !params[:date][:scanstartt][4].blank?
       params[:date][:scanstartt][3]  = ((params[:date][:scanstartt][3].to_i)+v_offset).to_s

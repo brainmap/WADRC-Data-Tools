@@ -124,6 +124,8 @@ edit_count = edit_count -1
   
 <% end %>
 <%= link_to 'download csv', { :controller=>"petscans", :action=>"pet_search", :pet_search => @pet_search_params.to_h, :format => :csv} %>  </p>  
+<%= link_to 'download json', { :controller=>"petscans", :action=>"pet_search", :pet_search =>  @pet_search_params.to_h , :format => :json} %>  </p>
+
 
 <table class="tabular">  
   <caption><%= pluralize(@results_total.size, 'Petscan appt') %></caption>
