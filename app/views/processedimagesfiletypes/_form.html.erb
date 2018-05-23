@@ -1,0 +1,22 @@
+<%= form_for(processedimagesfiletype) do |f| %>
+  <% if processedimagesfiletype.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(processedimagesfiletype.errors.count, "error") %> prohibited this processedimagesfiletype from being saved:</h2>
+
+      <ul>
+      <% processedimagesfiletype.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :file_type %>
+    <%= f.text_field :file_type %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
