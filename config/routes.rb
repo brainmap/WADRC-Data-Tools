@@ -1,6 +1,7 @@
 WADRCDataTools::Application.routes.draw do
 
 
+  resources :processedimagesfiletypes
   resources :processedimagessources
   resources :processedimages
   resources :consent_form_vgroups
