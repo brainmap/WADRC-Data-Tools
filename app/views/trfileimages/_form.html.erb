@@ -1,0 +1,32 @@
+<%= form_for(trfileimage) do |f| %>
+  <% if trfileimage.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(trfileimage.errors.count, "error") %> prohibited this trfileimage from being saved:</h2>
+
+      <ul>
+      <% trfileimage.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :trfile_id %>
+    <%= f.text_field :trfile_id %>
+  </div>
+
+  <div class="field">
+    <%= f.label :image_id %>
+    <%= f.text_field :image_id %>
+  </div>
+
+  <div class="field">
+    <%= f.label :image_category %>
+    <%= f.text_field :image_category %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

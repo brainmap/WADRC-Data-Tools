@@ -1,0 +1,19 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Trfile:</strong>
+  <%= @trfileimage.trfile_id %>
+</p>
+
+<p>
+  <strong>Image:</strong>
+  <%= @trfileimage.image_id %>
+</p>
+
+<p>
+  <strong>Image category:</strong>
+  <%= @trfileimage.image_category %>
+</p>
+
+<%= link_to 'Edit', edit_trfileimage_path(@trfileimage) %> |
+<%= link_to 'Back', trfileimages_path %>
