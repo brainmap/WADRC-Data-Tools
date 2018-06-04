@@ -8,6 +8,7 @@
     <th>Status flag</th>
     <th>Series Desc Type</th>
     <th>Trigger</th>
+    <th>Processed Images File Type</th>
     <th></th>
     <th></th>
     <th></th>
@@ -18,10 +19,25 @@
     <td><%= trtype.description %></td>
     <td><%= trtype.action_name %></td>
     <td><%= trtype.status_flag %></td>
-    <td>  <%=   if !trtype.series_description_type_id.blank? 
-          SeriesDescriptionType.find(trtype.series_description_type_id).series_description_type 
+    <td>  <%   if !trtype.series_description_type_id.blank? 
+          #SeriesDescriptionType.where("id in (?)",trtype.series_description_type_id).series_description_type 
+          v_seriesdesctypes = SeriesDescriptionType.where("id in (?)",trtype.series_description_type_id.split(","))
+          v_seriesdesctypes.each do |sdt|
+	             %>
+	           <%= sdt.series_description_type%><br>
+	    
+	     <% end
      end%> &nbsp;</td>
-    <td><%= trtype.triggers_1 %></td>
+    <td><%= trtype.triggers_1 %>&nbsp;</td>
+    <td>
+    <%   if !trtype.processedimagesfiletype_id.blank? 
+          v_processedimagesfiletypes = Processedimagesfiletype.where("id in (?)",trtype.processedimagesfiletype_id)
+          v_processedimagesfiletypes.each do |pift|
+               %>
+             <%= pift.file_type%><br>
+      
+       <% end
+     end%> &nbsp;</td>
     <td><%= link_to 'Show', trtype %></td>
     <% if current_user.role == 'Admin_High'%>
     <td><%= link_to 'Edit', edit_trtype_path(trtype) %></td>

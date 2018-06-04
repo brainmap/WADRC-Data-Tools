@@ -19,6 +19,14 @@
   <strong>Comment:</strong>
   <%= @processedimage.comment %>
 </p>
+<p>
+  <strong>status_flag:</strong>
+  <%= @processedimage.status_flag %>
+</p>
+<p>
+  <strong>exists_flag:</strong>
+  <%= @processedimage.exists_flag %>
+</p>
 
 <%= link_to 'Edit', edit_processedimage_path(@processedimage) %> |
 <%= link_to 'Back', processedimages_path %>

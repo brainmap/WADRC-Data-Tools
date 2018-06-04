@@ -69,6 +69,6 @@ class ProcessedimagesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def processedimage_params
-      params.require(:processedimage).permit(:file_name, :file_path, :comment, :file_type)
+      params.require(:processedimage).permit(:file_name, :file_path, :comment, :file_type, :status_flag, :exists_flag)
     end
 end

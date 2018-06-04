@@ -415,7 +415,7 @@ class DataSearchesController < ApplicationController
       end
 
      respond_to do |format|
-          format.html {@v_key = Kaminari.paginate_array(@v_key).page(params[:page]).per(50)}
+       format.html {@v_key = Kaminari.paginate_array(@v_key).page(params[:page]).per(50)}
       end
     end
 

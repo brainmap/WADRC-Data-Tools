@@ -365,6 +365,18 @@ class TrtypesController < ApplicationController
   # PUT /trtypes/1.json
   def update
     @trtype = Trtype.find(params[:id])
+    v_series_desc_type_array = []
+   if !params[:trtype][:series_description_type_id].blank?
+           v_series_desc_types = params[:trtype][:series_description_type_id].reject { |c| c.empty? }
+           v_series_desc_types.each do |ty|
+              v_series_desc_type_array.push(ty)
+           end
+        end
+        if v_series_desc_type_array.count > 0
+            @trtype.series_description_type_id = v_series_desc_type_array.join(",")
+        else
+            @trtype.series_description_type_id = ''
+        end
 
     respond_to do |format|
       if @trtype.update(trtype_params)#params[:trtype], :without_protection => true)
@@ -393,7 +405,7 @@ class TrtypesController < ApplicationController
        @trtype = Trtype.find(params[:id])
     end
    def trtype_params
-    params.require(:trtype).permit(:series_description_display,:action_name,:series_description_type_id,:status_flag,:parameters,:updated_at,:created_at,:description,:id,:triggers_1)
+    params.require(:trtype).permit(:series_description_display,:action_name,:series_description_type_id,:status_flag,:parameters,:updated_at,:created_at,:description,:id,:triggers_1,:processedimagesfiletype_id)
    
    #new       params.require(:trtype).permit(:series_description_display,:action_name,:status_flag,:parameters,:updated_at,:created_at,:description,:id,:triggers_1,:series_description_type_id =>[])
    end

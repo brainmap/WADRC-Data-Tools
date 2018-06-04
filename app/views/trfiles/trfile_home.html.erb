@@ -33,8 +33,18 @@
  <small><b>QC notes:</b></small>  <br>
  <%= f.text_area :qc_notes ,:size => '80X4',:value => @trfile.qc_notes%>
   </td></tr>
-  <% if !@trtype.series_description_type_id.blank? %>
-  <tr><td align="left" colspan="3"><small><b>Image Dataset:</b></small>
+  <% if !@trtype.series_description_type_id.blank? or !@trtype.processedimagesfiletype_id.blank?%>
+  <tr><td align="left" colspan="3">
+  <% if !(@trtype.processedimagesfiletype_id).nil? %>
+<small><b>Processed Image:</b></small>
+    <% if !@trfileimage_imgs.nil? %>
+      <%= f.select(:image_id, @processedimages.collect {|p| [ p.file_type+" - "+p.file_path, p.id ] },  { :include_blank => "Select a processed image", :selected => @trfileimage_imgs},{ :multiple => true, :size => 5 } )%>
+     <%else%>
+       <%= f.select(:image_id, @processedimages.collect {|p| [ p.file_type+" - "+p.file_path, p.id ] },  { :include_blank => "Select a processed image"},{ :multiple => true, :size => 5 } )%>
+
+     <%end%>
+  <%elsif !@trtype.series_description_type_id.blank? %>
+    <small><b>Image Dataset:</b></small>
      <% if @trtype.series_description_display == 'text' %>
          <br>
       <%   @ids.each do |image| %>
@@ -42,9 +52,14 @@
      <%  end
       else %>
        <% if !(@trfile.trtype_id).nil? and !Trtype.find(@trfile.trtype_id).series_description_type_id.nil? and   !@trfile.enrollment_id.nil? and  !@trfile.scan_procedure_id.nil? %>
-     <%= f.select(:image_dataset_id, @ids.collect {|p| [ p.series_description+" - "+p.path, p.id ] },  { :include_blank => "Select a scan series",:selected => @trfile.image_dataset_id } )%>
-<!-- NOT TOTALLY WORKING YET?,{ :multiple => true} -->
+     <br>    
+     <% if !@trfileimage_imgs.nil? %>
+      <%= f.select(:image_id, @ids.collect {|p| [ p.series_description+" - "+p.path, p.id ] },  { :include_blank => "Select a scan series", :selected => @trfileimage_imgs },{ :multiple => true, :size => 5 } )%>
+     <%else%>
+      <%= f.select(:image_id, @ids.collect {|p| [ p.series_description+" - "+p.path, p.id ] },  { :include_blank => "Select a scan series"},  { :multiple => true, :size => 5 } )%>
      <%end%>
+     <%end%>
+    <%end%>
     <%end%>
   </td></tr>
   <% end %>

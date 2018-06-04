@@ -1,6 +1,7 @@
 WADRCDataTools::Application.routes.draw do
 
 
+  resources :trfileimages
   resources :processedimagesfiletypes
   resources :processedimagessources
   resources :processedimages

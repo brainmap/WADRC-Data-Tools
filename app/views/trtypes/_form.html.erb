@@ -26,12 +26,17 @@ v_display = {"dropdown"=>"dropdown","text"=>"text"}  %>
 
   <div class="field">
     <%= f.label :series_description_type %><br />
-    <%= f.select(:series_description_type_id, SeriesDescriptionType.where("series_description_type not like '%?%'").sort_by(&:series_description_type).collect {|p| [ p.series_description_type, p.id ] },  { :include_blank => "Select a scan category",:selected => @trtype.series_description_type_id } ,{ :multiple => true} ) %>
+    <%= f.select(:series_description_type_id, SeriesDescriptionType.where("series_description_type not like '%?%'").sort_by(&:series_description_type).collect {|p| [ p.series_description_type, p.id ] },  { :include_blank => "Select a scan category",:selected => (@trtype.series_description_type_id).split(",") } ,{ :multiple => true} ) %>
   </div>
 
   <div class="field">
     <%= f.label :series_description_display %><br />
     <%= f.select(:series_description_display,  v_display, {:prompt => 'Display?'} ) %>
+  </div>
+  <br>
+    <div class="field">
+    <%= f.label :processed_images_file_type %><br />
+    <%= f.select(:processedimagesfiletype_id, Processedimagesfiletype.where("file_type not like '%?%'").sort_by(&:file_type).collect {|p| [ p.file_type, p.id ] },  { :include_blank => "Select a processed image category",:selected => @trtype.processedimagesfiletype_id } ) %><!--  ,{ :multiple => true} -->
   </div>
 
   <div class="field">

@@ -18,13 +18,82 @@ class TrfilesController < ApplicationController
         @tredit.save
         @trfiles = Trfile.where("trfiles.scan_procedure_id in (?)",scan_procedure_array).where("trfiles.id in (?)",@tredit.trfile_id)
        @trfile = @trfiles[0]
-        @trfile.image_dataset_id  = params[:trfile_edit_action][:image_dataset_id]
+       ##### @trfile.image_dataset_id  = params[:trfile_edit_action][:image_dataset_id]
+        @trfileimage_ids = []
+        if !params[:trfile_edit_action][:image_dataset_id].blank?
+           @trfileimage_ids = params[:trfile_edit_action][:image_dataset_id].reject { |c| c.empty? }
+        end
+        @trfileimage_processedimages = []
+        if !params[:trfile_edit_action][:image_id].blank?
+            @trfileimage_processedimages = params[:trfile_edit_action][:image_id].reject { |c| c.empty? }
+        end
+
         @trfile.file_completed_flag  = params[:trfile_edit_action][:file_completed_flag]
         @trfile.qc_value  = params[:trfile_edit_action][:qc_value]
         @trfile.qc_notes  = params[:trfile_edit_action][:qc_notes]
         @trfile.status_flag  = params[:trfile_edit_action][:status_flag]
         @trfile.updated_at = v_datetime.strftime('%Y-%m-%d %H:%M:%S')
         @trfile.save
+        v_trfileimages_existing = Trfileimage.where("trfile_id in (?)",@trfile.id)
+        v_existing_images = []
+        v_trfileimages_existing.each do |existing_img|
+           if existing_img.image_category == "image_dataset"
+                if !@trfileimage_ids.nil? and (@trfileimage_ids.include?(existing_img.image_id.to_s) )
+                    #@trfileimage_ids = @trfileimage_ids.delete(existing_img.image_id.to_s)
+                    #@trfileimage_ids = @trfileimage_ids.delete(existing_img.image_id)
+                    v_existing_images.push(existing_img.image_id.to_s)
+                else
+                   existing_img.delete
+                end
+           else existing_img.image_category == "processedimage"
+               if !@trfileimage_processedimages.nil? and (@trfileimage_processedimages.include?(existing_img.image_id.to_s) )
+                #   @trfileimage_processedimages = @trfileimage_processedimages.delete(existing_img.image_id.to_s)
+                   #@trfileimage_processedimage = @trfileimage_processedimage.delete(existing_img.image_id)
+                   v_existing_images.push(existing_img.image_id.to_s)
+                else
+                   existing_img.delete
+
+                end 
+           end
+        end
+        #  deleting existing id which not in new id list, create new img from new id list which is not in existing list
+
+        if @trfileimage_processedimages.kind_of?(Array)
+          @trfileimage_processedimages.each do |img|
+            if !v_existing_images.include?(img)
+              v_img = Trfileimage.new
+              v_img.trfile_id = @trfile.id
+              v_img.image_category = "processedimage"
+              v_img.image_id = img
+              v_img.save
+            end
+           end
+         elsif !@trfileimage_processedimages.blank? and !v_existing_images.include?(@trfileimage_processedimages)
+           v_img = Trfileimage.new
+            v_img.trfile_id = @trfile.id
+            v_img.image_category = "processedimage"
+            v_img.image_id = @trfileimage_processedimages
+            v_img.save
+
+         end
+         if @trfileimage_ids.kind_of?(Array)
+           @trfileimage_ids.each do |ids|
+             if !v_existing_images.include?(ids)
+              v_img = Trfileimage.new
+              v_img.trfile_id = @trfile.id
+              v_img.image_category = "image_dataset"
+              v_img.image_id = ids
+              v_img.save
+             end 
+           end
+         elsif !@trfileimage_ids.blank? and !v_existing_images.include?(@trfileimage_ids)
+           v_img = Trfileimage.new
+            v_img.trfile_id = @trfile.id
+            v_img.image_category = "processedimage"
+            v_img.image_id = "image_dataset"
+            v_img.save
+
+         end
         @tredit.user_id = params[:tredit][:user_id]
         @trtype = Trtype.find(@trfile.trtype_id)
         if !params[:value].nil?
@@ -374,19 +443,76 @@ v_composite_value = v_composite_value + "
     @trfiles = Trfile.where("trfiles.scan_procedure_id in (?)",scan_procedure_array).where("trfiles.id in (?)",@trfile.id)
     @trfile = @trfiles[0]
     @trtype = Trtype.find(@trfile.trtype_id)
+    @trfileimages = Trfileimage.where("trfile_id in (?)",@trfile.id)
+    @trfileimage_imgs = []
+    @trfileimages.each do |tri|
+          @trfileimage_imgs.push(tri.image_id)
+    end 
+
+    @trfileimage = @trfileimages.first
     @v_action_name = @trtype.action_name
     @vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships where enrollment_id in (?) )",@trfile.enrollment_id).where("vgroups.id in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))",@trfile.scan_procedure_id)
        if !(@trfile.scan_procedure_id).nil? and !(@trfile.enrollment_id).nil? 
+         if !@trtype.series_description_type_id.blank?
           @ids = ImageDataset.where(" image_datasets.visit_id in (select v1.id from visits v1, appointments a1, scan_procedures_vgroups spvg1, enrollment_vgroup_memberships evg1
                                                       where v1.appointment_id = a1.id and a1.vgroup_id =spvg1.vgroup_id and a1.vgroup_id = evg1.vgroup_id 
                                                       and spvg1.scan_procedure_id in (?) 
                                                       and evg1.enrollment_id in (?)) 
                                       and image_datasets.series_description in 
                                        ( select sdm1.series_description from series_description_maps sdm1 where series_description_type_id in (?))",
-                    @trfile.scan_procedure_id ,@trfile.enrollment_id, @trtype.series_description_type_id)
+                    @trfile.scan_procedure_id ,@trfile.enrollment_id, @trtype.series_description_type_id.split(","))
 
-      end
-    end
+          elsif !(@trtype.processedimagesfiletype_id).nil?
+            #NEED TO LIMIT TO THIS VISIT
+            @ids_source = ImageDataset.where(" image_datasets.visit_id in (select v1.id from visits v1, appointments a1, scan_procedures_vgroups spvg1, enrollment_vgroup_memberships evg1
+                                                      where v1.appointment_id = a1.id and a1.vgroup_id =spvg1.vgroup_id and a1.vgroup_id = evg1.vgroup_id 
+                                                      and spvg1.scan_procedure_id in (?) 
+                                                      and evg1.enrollment_id in (?)) ",
+                    @trfile.scan_procedure_id ,@trfile.enrollment_id)
+            v_ids_id_array = []
+            @ids_source.each do |ids|
+               v_ids_id_array.push(ids.id)
+            end 
+            @processedimages = {}
+            @processedimages = Processedimage.where("(
+              processedimages.id in 
+                                (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'image_dataset'
+                                                            and pis2.source_image_id in (?))
+              or 
+              processedimages.id in 
+                   (select pis3.processedimage_id from processedimagessources pis3 where pis3.source_image_type = 'processedimage'
+                          and pis3.source_image_id in
+                                (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'image_dataset'
+                                                            and pis2.source_image_id in (?))) 
+              or 
+              processedimages.id in 
+                   (select pis4.processedimage_id from processedimagessources pis4 where pis4.source_image_type = 'processedimage'
+                          and pis4.source_image_id in
+                   (select pis3.processedimage_id from processedimagessources pis3 where pis3.source_image_type = 'processedimage'
+                          and pis3.source_image_id in
+                                (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'image_dataset'
+                                                            and pis2.source_image_id in (?))) )
+              or 
+              processedimages.id in 
+                   (select pis5.processedimage_id from processedimagessources pis5 where pis5.source_image_type = 'processedimage'
+                          and pis5.source_image_id in
+                   (select pis4.processedimage_id from processedimagessources pis4 where pis4.source_image_type = 'processedimage'
+                          and pis4.source_image_id in
+                   (select pis3.processedimage_id from processedimagessources pis3 where pis3.source_image_type = 'processedimage'
+                          and pis3.source_image_id in
+                                (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'image_dataset'
+                                                            and pis2.source_image_id in (?))) ) )                                             
+              )
+              and processedimages.file_type in 
+              (select processedimagesfiletypes.file_type from processedimagesfiletypes where  processedimagesfiletypes.id in (?))",v_ids_id_array,v_ids_id_array,v_ids_id_array,v_ids_id_array,@trtype.processedimagesfiletype_id)
+  
+             ####@processedimages = Processedimage.all
+
+            # and processedimages.file_type in 
+            #  (select processedimagesfiletypes.file_type from processedimagesfiletypes where  processedimagesfiletypes.id in (?))",v_ids_id_array,v_ids_id_array,v_ids_id_array,v_ids_id_array,v_ids_id_array,@trtype.processedimagesfiletype_id)
+         end
+       end
+     end
   # get specified edit , edit_action in the form
     if !v_comment.blank?
      flash[:error] = v_comment

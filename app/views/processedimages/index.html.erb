@@ -9,6 +9,8 @@
       <th>File path</th>
       <th>File type</th>
       <th>Comment</th>
+      <th>status_flag</th>
+      <th>exists_flag</th>
       <th colspan="3"></th>
     </tr>
   </thead>
@@ -20,6 +22,8 @@
         <td><%= processedimage.file_path %></td>
         <td><%= processedimage.file_type %></td>
         <td><%= processedimage.comment %></td>
+        <td><%= processedimage.status_flag %></td>
+        <td><%= processedimage.exists_flag %></td>
         <td><%= link_to 'Show', processedimage %></td>
         <td><%= link_to 'Edit', edit_processedimage_path(processedimage) %></td>
         <td><%= link_to 'Destroy', processedimage, method: :delete, data: { confirm: 'Are you sure?' } %></td>
