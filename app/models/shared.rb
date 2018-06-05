@@ -7950,7 +7950,7 @@ puts "v_analyses_path="+v_analyses_path
                 #grep asl log. gives directory source 
                 # add logging / comment/status for issues with finding children - e.g. 2 matches
                 Dir.entries(v_raw_full_path).select { |file| File.directory? File.join(v_raw_full_path, file)}.each do |dir|
-                  if dir.include? "adrc00540"
+                  #if dir.include? "adrc00540".  ### NEED to GET log parse/T2
                       dir_name_array = dir.split('_')
                       v_subjectid = dir_name_array[0]
                       v_enrollments = Enrollment.where("enumber in (?)", v_subjectid)
@@ -8194,7 +8194,7 @@ puts "v_analyses_path="+v_analyses_path
                              end # loop thru y_o in asl dir
                           end # loop thru swrASL_fmap files - this is the final ASL processing product
                       end # check if this subjectid proprocessed exists and that subjectid is an enumber
-                  end # TEMPORARY LIMIT TO one subjectid
+                  ####end # TEMPORARY LIMIT TO one subjectid
                 end # loop thru all subjectid in raw -- used to look at preporcessed
               end #check if preprocessed exists
           end #check if raw exists                      
