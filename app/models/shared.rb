@@ -1166,8 +1166,31 @@ end
           PandaMailer.schedule_notice(v_subject,{:send_to => v_email}).deliver
       end  
     end
+    # check all the processedimages
+    v_check_processedimages_flag = "Y"
+    if v_check_processedimages_flag == "Y"
+      v_comment_processedimages= ""
+      @processedimages = Processedimage.all
+      @processedimages.each do |pi|
+          v_path = pi.file_path
+          #puts "checking="+v_path
+          if  !v_path.nil? and v_path > '' and !v_missing_dir_array.include?(v_path)
+            if File.file?(v_path) or File.directory?(v_path)
+             # all good
+              pi.exists_flag = 'Y'
+              pi.save
+            else
+              v_comment_processedimages = v_comment_processedimages+"; pi="+v_path
+              pi.exists_flag = 'N'
+              pi.save
+              puts "processedimage not found="+v_path
+            end
+          end
+      end
+      @schedulerun.comment = v_comment_processedimages+"; "+@schedulerun.comment 
+    end
 
-    @schedulerun.comment =("successful finish check_if_raw_dirs_exist "+v_comment_warning+" "+@schedulerun.comment[0..1990])
+    @schedulerun.comment =("successful finish check_if_raw_dirs_exist "+v_comment_warning+" "+@schedulerun.comment[0..2990])
     if !v_comment.include?("ERROR")
           @schedulerun.status_flag ="Y"
     end
