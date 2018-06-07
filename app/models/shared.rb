@@ -7645,6 +7645,14 @@ puts "v_analyses_path="+v_analyses_path
                                       v_source3_file = File.basename(source3_f)
                                       v_source3_file_array = v_source3_file.split('_')
                                       v_t1_scan_series_dir = (v_source3_file_array.last).gsub(".nii","")
+                                      v_t1_scan_series_dir_2words = (v_source3_file_array.last(2).join("_")).gsub(".nii","")
+
+                                      #olead00123_Ax-FSPGR-BRAVO-T1_00002.nii ==> 00002.Ax_FSPGR_BRAVO_T1
+                                      v_source3_file_array.drop(1)
+                                      v_last_item = (v_source3_file_array.last).gsub(".nii","")
+                                      v_source3_file_array.pop
+                                      v_t1_scan_series_dir_waisman_flip = v_last_item+"."+(v_source3_file_array.join("_")).gsub("-","_")
+
                                       v_source3_processesimages = Processedimage.where("file_path in (?)",v_source3_file_full_path)
                                       v_source3_file_id = nil
                                       if v_source3_processesimages.count <1
@@ -7653,6 +7661,8 @@ puts "v_analyses_path="+v_analyses_path
                                           v_source3_processedimage.file_type ="o_acpc T1"
                                           v_source3_processedimage.file_name = v_source3_file
                                           v_source3_processedimage.file_path = v_source3_file_full_path
+                                          v_source3_processedimage.scan_procedure_id = sp.id
+                                          v_source3_processedimage.enrollment_id = v_enrollment.id
                                           v_source3_processedimage.save  
                                           v_source3_file_id = v_source3_processedimage.id
                                       else
@@ -7671,6 +7681,36 @@ puts "v_analyses_path="+v_analyses_path
                                                               (select series_description_maps.series_description from series_description_maps where 
                                                                    series_description_maps.series_description_type_id in (?))
                                                               and image_datasets.path like '%"+v_t1_scan_series_dir+"'",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+                                      if v_image_datasets.count > 1  or v_image_datasets.count < 1 # try last 2 parts of array
+                                             v_image_datasets_last2 = ImageDataset.where("image_datasets.visit_id in (select visits.id from visits, appointments, enrollment_vgroup_memberships, scan_procedures_vgroups 
+                                                             where visits.appointment_id = appointments.id 
+                                                             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.scan_procedure_id in (?) 
+                                                             and enrollment_vgroup_memberships.enrollment_id in (?) )
+                                                             and image_datasets.series_description in 
+                                                              (select series_description_maps.series_description from series_description_maps where 
+                                                                   series_description_maps.series_description_type_id in (?))
+                                                              and image_datasets.path like '%"+v_t1_scan_series_dir_2words+"'",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+                                             if v_image_datasets_last2.count > 0 and v_image_datasets_last2.count < 2
+                                                v_image_datasets = v_image_datasets_last2
+                                             end
+                                       end
+                                      if v_image_datasets.count > 1  or v_image_datasets.count < 1 # try last 2 parts of array
+                                             v_image_datasets_waisman_flip = ImageDataset.where("image_datasets.visit_id in (select visits.id from visits, appointments, enrollment_vgroup_memberships, scan_procedures_vgroups 
+                                                             where visits.appointment_id = appointments.id 
+                                                             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.scan_procedure_id in (?) 
+                                                             and enrollment_vgroup_memberships.enrollment_id in (?) )
+                                                             and image_datasets.series_description in 
+                                                              (select series_description_maps.series_description from series_description_maps where 
+                                                                   series_description_maps.series_description_type_id in (?))
+                                                              and image_datasets.path like '%"+v_t1_scan_series_dir_waisman_flip+"'",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+                                             if v_image_datasets_waisman_flip.count > 0 and v_image_datasets_waisman_flip.count < 2
+                                                v_image_datasets = v_image_datasets_waisman_flip
+                                             end
+                                       end
 
                                       if v_image_datasets.count > 0 and v_image_datasets.count < 2
                                          v_image_dataset = v_image_datasets.first
@@ -7793,6 +7833,8 @@ puts "v_analyses_path="+v_analyses_path
                                        v_source2_processedimage.file_type ="m_acpc T1"
                                        v_source2_processedimage.file_name = v_source2_file
                                        v_source2_processedimage.file_path = v_source2_file_full_path
+                                       v_source2_processedimage.scan_procedure_id = sp.id
+                                       v_source2_processedimage.enrollment_id = v_enrollment.id
                                        v_source2_processedimage.save  
                                        v_source2_file_id = v_source2_processedimage.id
                                    else
@@ -7814,6 +7856,8 @@ puts "v_analyses_path="+v_analyses_path
                                           v_source3_processedimage.file_type ="o_acpc T1"
                                           v_source3_processedimage.file_name = v_source3_file
                                           v_source3_processedimage.file_path = v_source3_file_full_path
+                                          v_source3_processedimage.scan_procedure_id = sp.id
+                                          v_source3_processedimage.enrollment_id = v_enrollment.id
                                           v_source3_processedimage.save  
                                           v_source3_file_id = v_source3_processedimage.id
                                       else
@@ -7995,6 +8039,9 @@ puts "v_analyses_path="+v_analyses_path
                                 v_final_processedimage.file_type ="ASL pproc_v5 final"
                                 v_final_processedimage.file_name = v_final_file
                                 v_final_processedimage.file_path = v_final_file_full_path
+                                v_final_processedimage.scan_procedure_id = sp.id
+                                v_final_processedimage.enrollment_id = v_enrollment.id
+
                                 v_final_processedimage.save  
                                 v_final_file_id = v_final_processedimage.id
                               else
@@ -8015,6 +8062,8 @@ puts "v_analyses_path="+v_analyses_path
                                     v_source1_processedimage.file_type ="ASL pproc_v5 -ASL fmap"
                                     v_source1_processedimage.file_name = v_source1_file
                                     v_source1_processedimage.file_path = v_source1_file_full_path
+                                    v_source1_processedimage.scan_procedure_id = sp.id
+                                    v_source1_processedimage.enrollment_id = v_enrollment.id
                                     v_source1_processedimage.save  
                                     v_source1_file_id = v_source1_processedimage.id
                                 else
@@ -8089,6 +8138,8 @@ puts "v_analyses_path="+v_analyses_path
                                     v_source1_processedimage.file_type ="y_acpc T1"
                                     v_source1_processedimage.file_name = v_source1_file
                                     v_source1_processedimage.file_path = v_source1_file_full_path
+                                    v_source1_processedimage.scan_procedure_id = sp.id
+                                    v_source1_processedimage.enrollment_id = v_enrollment.id
                                     v_source1_processedimage.save  
                                     v_source1_file_id = v_source1_processedimage.id
                                 else
@@ -8123,6 +8174,8 @@ puts "v_analyses_path="+v_analyses_path
                                        v_source2_processedimage.file_type ="m_acpc T1"
                                        v_source2_processedimage.file_name = v_source2_file
                                        v_source2_processedimage.file_path = v_source2_file_full_path
+                                       v_source2_processedimage.scan_procedure_id = sp.id
+                                       v_source2_processedimage.enrollment_id = v_enrollment.id
                                        v_source2_processedimage.save  
                                        v_source2_file_id = v_source2_processedimage.id
                                    else
@@ -8157,6 +8210,8 @@ puts "v_analyses_path="+v_analyses_path
                                           v_source3_processedimage.file_type ="o_acpc T1"
                                           v_source3_processedimage.file_name = v_source3_file
                                           v_source3_processedimage.file_path = v_source3_file_full_path
+                                          v_source3_processedimage.scan_procedure_id = sp.id
+                                          v_source3_processedimage.enrollment_id = v_enrollment.id
                                           v_source3_processedimage.save  
                                           v_source3_file_id = v_source3_processedimage.id
                                       else

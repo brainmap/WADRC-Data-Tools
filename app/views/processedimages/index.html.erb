@@ -11,6 +11,8 @@
       <th>Comment</th>
       <th>status_flag</th>
       <th>exists_flag</th>
+      <th>scan_procedure_id</th>
+      <th>enrollment_id</th>
       <th colspan="3"></th>
     </tr>
   </thead>
@@ -24,6 +26,8 @@
         <td><%= processedimage.comment %></td>
         <td><%= processedimage.status_flag %></td>
         <td><%= processedimage.exists_flag %></td>
+        <td><%= processedimage.scan_procedure_id %></td>
+        <td><%= processedimage.enrollment_id %></td>
         <td><%= link_to 'Show', processedimage %></td>
         <td><%= link_to 'Edit', edit_processedimage_path(processedimage) %></td>
         <td><%= link_to 'Destroy', processedimage, method: :delete, data: { confirm: 'Are you sure?' } %></td>
