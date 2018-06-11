@@ -6382,10 +6382,19 @@ puts sql
           @schedulerun.start_time = @schedulerun.created_at
           @schedulerun.save
           v_comment = ""
+          v_comment_error = ""
+          v_process_name = 'pcvipr_recon_and_gating_check'
           v_cnt = 0
-          v_month_back = "100" # going all the way back - later change back to 1 month 
+          v_month_back = "2" #"100" # going all the way back - later change back to 1 month 
           v_pcvipr_recon_base =  v_base_path+"/analyses/PCVIPR/4DFLOW_DATA/"
           v_computer = "kanga"
+          v_runner_email = "" #####self.get_user_email()  #  want to send errors to the user running the process
+          v_schedule_owner_email_array = []
+          if !v_runner_email.blank?
+            v_schedule_owner_email_array.push(v_runner_email)
+          else
+            v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+          end
           
 
           v_pcvipr_values_tn = "cg_pcvipr_values"
@@ -6468,7 +6477,8 @@ puts sql
           # not getting juist PCVIPR ??
           v_ids_array = v_ids_array.where("image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15))")
           v_ids_array.each do |ids|
-
+           begin
+            v_err = ""
             v_ids_path_full = ids.path
             v_subjectid = ""
   puts "full_path="+v_ids_path_full
@@ -6711,6 +6721,22 @@ puts sql
                 @schedulerun.comment = "no pfile found "+v_subjectid_v_num+";"+@schedulerun.comment
               end
 puts "end of ids loop"
+             end
+             rescue => msg
+                v_err = msg.inspect
+                if !v_err.nil? and v_err > ""
+                  v_comment_error = v_subjectid_v_num.to_s+" "+v_err+"; "+v_comment_error
+                  v_comment = "ERROR "+v_subjectid_v_num.to_s+" "+v_comment
+                  @schedulerun.comment = "ERROR "+v_subjectid_v_num.to_s+" "+v_err+";"+@schedulerun.comment
+                  @schedulerun.save
+                   v_schedule_owner_email_array.each do |e|
+                       v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num.to_s+" check enum -extra 0, permission P file, wrong Pfile, no gating file?"
+                       PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
+
+                   end
+                 end
+
+          
             end                 
           end
 
@@ -6728,7 +6754,7 @@ puts "end of ids loop"
        # check logs
 
 
-      @schedulerun.comment =("successful finish pcvipr_recon_and_gating_check "+v_cnt.to_s+" recon run  "+v_comment[0..1459])
+      @schedulerun.comment =(v_comment_error+"successful finish pcvipr_recon_and_gating_check "+v_cnt.to_s+" recon run  "+v_comment[0..1459])
       if !v_comment.include?("ERROR")
          @schedulerun.status_flag ="Y"
        end
