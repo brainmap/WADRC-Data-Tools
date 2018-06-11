@@ -519,6 +519,9 @@ end
     
     @appointment = Appointment.find(@visit.appointment_id)
     v_vgroup_id =  @appointment.vgroup_id 
+    # much higher id than in enrollment are showing up --- not sure where from- something with the enrollment_visit vs enrollment_vgroup - attributes mashup
+    sql = "Delete from enrollment_visit_memberships where visit_id ="+@visit.id.to_s+" and enrollment_id not in (select enrollments.id from enrollments)"
+    results = connection.execute(sql)
     params[:visit][:enrollments_attributes].each do|cnt, value| 
       puts "gggg enrollment_attributes="+cnt.to_s
 
@@ -537,6 +540,7 @@ end
              results = connection.execute(sql)
              params[:visit][:enrollments_attributes][cnt] = nil
              #v_destroy = 0
+             # not all of them are getting deleted?
          else
            #enumber_array << params[:visit][:enrollments_attributes][cnt.to_s][:enumber]
            v_enrollments = Enrollment.where("enumber in (?)",params[:visit][:enrollments_attributes][cnt][:enumber] )
@@ -567,7 +571,7 @@ end
       end
       v_cnt_enumber = v_cnt_enumber + 1 
      end # enrollments_attributes loop  
-
+ 
     
     @enumbers =  enumber_array# @visit.enrollments
     # also want to set participant in vgroup
@@ -836,7 +840,8 @@ puts "DELETE COMMENT "+ids_comment.to_s
         sql = "Delete from enrollment_vgroup_memberships where vgroup_id ="+@vgroup.id.to_s
         connection = ActiveRecord::Base.connection();        
         results_del = connection.execute(sql)
-        sql = "select distinct enrollment_id from enrollment_visit_memberships where visit_id in (select visits.id from visits, appointments where appointments.id = visits.appointment_id and appointments.vgroup_id ="+@vgroup.id.to_s+")"
+        sql = "select distinct enrollment_id from enrollment_visit_memberships where visit_id in (select visits.id from visits, appointments where appointments.id = visits.appointment_id and appointments.vgroup_id ="+@vgroup.id.to_s+")
+                    and enrollment_id in ( select e.id from enrollments e)"
         connection = ActiveRecord::Base.connection();        
         results = connection.execute(sql)
         v_do_not_share_scans_flag ="N"
