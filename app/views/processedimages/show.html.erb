@@ -29,11 +29,11 @@
 </p>
 <p>
   <strong>scan_procedure_id:</strong>
-  <%= @processedimage.scan_procedure_id %>
+  <%= ScanProcedure.find(@processedimage.scan_procedure_id).codename %>
 </p>
 <p>
   <strong>enrollment_id:</strong>
-  <%= @processedimage.enrollment_id %>
+  <%= Enrollment.find(@processedimage.enrollment_id).enumber %>
 </p>
 
 <%= link_to 'Edit', edit_processedimage_path(@processedimage) %> |

@@ -1,3 +1,7 @@
+<%
+v_image_types = {"image_dataset"=>"image_dataset","processedimage"=>"processedimage","pet_pib"=>"pet_pib","pet_mk6240"=>"pet_mk6240","pet_fdg"=>"pet_fdg"}
+%>
+
 <%= form_for(processedimagessource) do |f| %>
   <% if processedimagessource.errors.any? %>
     <div id="error_explanation">
@@ -13,32 +17,33 @@
 
   <div class="field">
     <%= f.label :file_name %>
-    <%= f.text_field :file_name %>
+    <%= f.text_field :file_name, :size =>"75" %>
   </div>
 
   <div class="field">
     <%= f.label :file_path %>
-    <%= f.text_field :file_path %>
+    <%= f.text_field :file_path, :size =>"100" %>
   </div>
 
   <div class="field">
     <%= f.label :source_image_id %>
-    <%= f.number_field :source_image_id %>
+    <%= f.number_field :source_image_id %> - need to adjust by source_image_type
   </div>
 
   <div class="field">
     <%= f.label :source_image_type %>
-    <%= f.text_field :source_image_type %>
+    <%= f.select :source_image_type, options_for_select(v_image_types, @processedimagessource.source_image_type),
+                {:prompt => 'Select source image type'}  %>
   </div>
 
   <div class="field">
     <%= f.label :processedimage_id %>
-    <%= f.number_field :processedimage_id %>
+        <%= collection_select :processedimagessource, :processedimage_id, Processedimage.all.sort_by(&:file_path), :id, :file_path,{:prompt => 'Select a Product Processed Image'},{:required => true}  %>
   </div>
 
   <div class="field">
     <%= f.label :comment %>
-    <%= f.text_field :comment %>
+    <%= f.text_field :comment, :size =>"100" %>
   </div>
 
   <div class="actions">

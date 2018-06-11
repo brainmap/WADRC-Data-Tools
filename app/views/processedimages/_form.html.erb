@@ -1,3 +1,6 @@
+<%
+v_yn = {"Y"=>"Y","N"=>"N"}
+%>
 <%= form_for(processedimage) do |f| %>
   <% if processedimage.errors.any? %>
     <div id="error_explanation">
@@ -13,35 +16,37 @@
 
   <div class="field">
     <%= f.label :file_name %>
-    <%= f.text_field :file_name %>
+    <%= f.text_field :file_name ,:size =>"75"%>
   </div>
 
   <div class="field">
     <%= f.label :file_path %>
-    <%= f.text_field :file_path %>
+    <%= f.text_field :file_path ,:size =>"100"%>
   </div>
     <div class="field">
     <%= f.label :file_type %>
-    <%= f.text_field :file_type %>
+     <%= collection_select :processedimage, :file_type, Processedimagesfiletype.all.sort_by(&:file_type), :file_type, :file_type,{:prompt => 'Select a File Type'},{:required => true}  %>
   </div>
 
   <div class="field">
     <%= f.label :comment %>
-    <%= f.text_field :comment %>
+    <%= f.text_field :comment,:size =>"100" %>
   </div>
   <div class="field">
     <%= f.label :status_flag %>
-    <%= f.text_field :status_flag %>
+    <%= f.select :status_flag, options_for_select(v_yn, @processedimage.status_flag),
+                {:prompt => 'Select status'}  %>
   </div>  <div class="field">
     <%= f.label :exists_flag %>
-    <%= f.text_field :exists_flag %>
+    <%= f.select :exists_flag, options_for_select(v_yn, @processedimage.exists_flag),
+                {:prompt => 'Select if exists'}  %>
   </div> <div class="field">
     <%= f.label :scan_procedure_id %>
-    <%= f.text_field :scan_procedure_id %>-- drop down would be nice
+    <%= collection_select :processedimage, :scan_procedure_id, ScanProcedure.all.sort_by(&:codename), :id, :codename,{:prompt => 'Select a Scan Procedure'},{:required => true}  %>
   </div>
    <div class="field">
     <%= f.label :enrollment_id %>
-    <%= f.text_field :enrollment_id %>-- drop down would be nice
+    <%= collection_select :processedimage, :enrollment_id, Enrollment.all.sort_by(&:enumber), :id, :enumber,{:prompt => 'Select a Enumber'},{:required => true}  %>
   </div>
   <div class="actions">
     <%= f.submit %>

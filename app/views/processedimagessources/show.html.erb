@@ -12,7 +12,7 @@
 
 <p>
   <strong>Source image:</strong>
-  <%= @processedimagessource.source_image_id %>
+  <%= @processedimagessource.source_image_id %>. -- need to adjust for source iamge type
 </p>
 
 <p>
@@ -22,7 +22,7 @@
 
 <p>
   <strong>Processedimage:</strong>
-  <%= @processedimagessource.processedimage_id %>
+  <%= Processedimage.find(@processedimagessource.processedimage_id).file_path %>
 </p>
 
 <p>

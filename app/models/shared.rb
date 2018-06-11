@@ -6838,7 +6838,8 @@ puts "end of ids loop"
           @schedulerun.start_time = @schedulerun.created_at
           @schedulerun.save
           v_comment = ""
-          v_computer = "kanga"
+          v_computer = "kanga" # actually baloo == v_machine
+           v_machine = "baloo.dom.wisc.edu"  # eventually switch to "+v_computer+" - need packages installed
           v_cnt = 0
           v_rerun_outputs = "N" #"Y"# rm output and log if output present
           v_rerun_full_outputs_log = "N"  # "Y"  # rm all output and log  
@@ -6854,10 +6855,7 @@ puts "end of ids loop"
           if p_output_log_rm == "rerun_if_no_output"
             v_rerun_if_no_output = "Y"
           end
-          
 
-
-          v_machine = "baloo.dom.wisc.edu"  # eventually switch to "+v_computer+" - need packages installed
          #  v_script_path = v_base_path+"/data1/lab_scripts/python_dev/collect_pcvipr_data.py" 
           v_script_path = v_base_path+"/SysAdmin/production/python/collect_pcvipr_data.py"  # CHANGE TO PRODUCTION
 
