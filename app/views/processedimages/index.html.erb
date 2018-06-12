@@ -1,7 +1,9 @@
 <p id="notice"><%= notice %></p>
 
 <h1>Processedimages</h1>
+<% if current_user.role == 'Admin_High'%>
 <%= link_to 'New Processedimage', new_processedimage_path %>
+<%end%>
 <table>
   <thead>
     <tr>
@@ -29,13 +31,16 @@
         <td><%= processedimage.scan_procedure_id %></td>
         <td><%= processedimage.enrollment_id %></td>
         <td><%= link_to 'Show', processedimage %></td>
+        <% if current_user.role == 'Admin_High'%>
         <td><%= link_to 'Edit', edit_processedimage_path(processedimage) %></td>
         <td><%= link_to 'Destroy', processedimage, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <%end%>
       </tr>
     <% end %>
   </tbody>
 </table>
 
 <br>
-
+<% if current_user.role == 'Admin_High'%>
 <%= link_to 'New Processedimage', new_processedimage_path %>
+<%end%>

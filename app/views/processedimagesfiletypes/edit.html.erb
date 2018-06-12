@@ -1,6 +1,8 @@
+<% if current_user.role == 'Admin_High'%>
 <h1>Editing Processedimagesfiletype</h1>
 
 <%= render 'form', processedimagesfiletype: @processedimagesfiletype %>
 
 <%= link_to 'Show', @processedimagesfiletype %> |
 <%= link_to 'Back', processedimagesfiletypes_path %>
+<%end%>

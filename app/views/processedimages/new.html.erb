@@ -1,5 +1,8 @@
+
+<% if current_user.role == 'Admin_High'%>
 <h1>New Processedimage</h1>
 
 <%= render 'form', processedimage: @processedimage %>
 
 <%= link_to 'Back', processedimages_path %>
+<%end%>

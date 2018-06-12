@@ -15,8 +15,10 @@
       <tr>
         <td><%= processedimagesfiletype.file_type %></td>
         <td><%= link_to 'Show', processedimagesfiletype %></td>
+        <% if current_user.role == 'Admin_High'%>
         <td><%= link_to 'Edit', edit_processedimagesfiletype_path(processedimagesfiletype) %></td>
         <td><%= link_to 'Destroy', processedimagesfiletype, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <%end%>
       </tr>
     <% end %>
   </tbody>
