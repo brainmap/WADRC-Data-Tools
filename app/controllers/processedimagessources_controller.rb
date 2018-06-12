@@ -5,6 +5,9 @@ class ProcessedimagessourcesController < ApplicationController
   # GET /processedimagessources.json
   def index
     @processedimagessources = Processedimagessource.all
+        respond_to do |format|
+   format.html {@processedimagessources = Kaminari.paginate_array(@processedimagessources).page(params[:page]).per(50)} 
+    end
   end
 
   # GET /processedimagessources/1

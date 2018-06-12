@@ -39,7 +39,7 @@
     <% end %>
   </tbody>
 </table>
-
+<%=    paginate @processedimages %> 
 <br>
 <% if current_user.role == 'Admin_High'%>
 <%= link_to 'New Processedimage', new_processedimage_path %>
