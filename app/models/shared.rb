@@ -7742,6 +7742,20 @@ puts "v_analyses_path="+v_analyses_path
                                                 v_image_datasets = v_image_datasets_waisman_flip
                                              end
                                        end
+                                      if v_image_datasets.count > 1  or v_image_datasets.count < 1 # try last 2 parts of array
+                                             v_image_datasets_type_limit = ImageDataset.where("image_datasets.visit_id in (select visits.id from visits, appointments, enrollment_vgroup_memberships, scan_procedures_vgroups 
+                                                             where visits.appointment_id = appointments.id 
+                                                             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.scan_procedure_id in (?) 
+                                                             and enrollment_vgroup_memberships.enrollment_id in (?) )
+                                                             and image_datasets.series_description in 
+                                                              (select series_description_maps.series_description from series_description_maps where 
+                                                                   series_description_maps.series_description_type_id in (?))",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+                                             if v_image_datasets_type_limit.count > 0 and v_image_datasets_type_limit.count < 2
+                                                v_image_datasets = v_image_datasets_type_limit
+                                             end
+                                       end
 
                                       if v_image_datasets.count > 0 and v_image_datasets.count < 2
                                          v_image_dataset = v_image_datasets.first
@@ -7955,6 +7969,20 @@ puts "v_analyses_path="+v_analyses_path
                                                               and image_datasets.path like '%"+v_t1_scan_series_dir_waisman_flip+"'",sp.id, v_enrollment.id, v_t1_series_description_type_id)
                                              if v_image_datasets_waisman_flip.count > 0 and v_image_datasets_waisman_flip.count < 2
                                                 v_image_datasets = v_image_datasets_waisman_flip
+                                             end
+                                       end
+                                      if v_image_datasets.count > 1  or v_image_datasets.count < 1 # try last 2 parts of array
+                                             v_image_datasets_type_limit = ImageDataset.where("image_datasets.visit_id in (select visits.id from visits, appointments, enrollment_vgroup_memberships, scan_procedures_vgroups 
+                                                             where visits.appointment_id = appointments.id 
+                                                             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.scan_procedure_id in (?) 
+                                                             and enrollment_vgroup_memberships.enrollment_id in (?) )
+                                                             and image_datasets.series_description in 
+                                                              (select series_description_maps.series_description from series_description_maps where 
+                                                                   series_description_maps.series_description_type_id in (?))",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+                                             if v_image_datasets_type_limit.count > 0 and v_image_datasets_type_limit.count < 2
+                                                v_image_datasets = v_image_datasets_type_limit
                                              end
                                        end
 
@@ -8203,6 +8231,20 @@ puts "v_analyses_path="+v_analyses_path
                                                 v_image_datasets = v_image_datasets_waisman_flip
                                              end
                                        end
+                                      if v_image_datasets.count > 1  or v_image_datasets.count < 1 # try last 2 parts of array
+                                             v_image_datasets_type_limit = ImageDataset.where("image_datasets.visit_id in (select visits.id from visits, appointments, enrollment_vgroup_memberships, scan_procedures_vgroups 
+                                                             where visits.appointment_id = appointments.id 
+                                                             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.scan_procedure_id in (?) 
+                                                             and enrollment_vgroup_memberships.enrollment_id in (?) )
+                                                             and image_datasets.series_description in 
+                                                              (select series_description_maps.series_description from series_description_maps where 
+                                                                   series_description_maps.series_description_type_id in (?))",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+                                             if v_image_datasets_type_limit.count > 0 and v_image_datasets_type_limit.count < 2
+                                                v_image_datasets = v_image_datasets_type_limit
+                                             end
+                                       end
 
                                 if v_image_datasets.count > 0 and v_image_datasets.count < 2
                                    v_image_dataset = v_image_datasets.first
@@ -8383,6 +8425,20 @@ puts "v_analyses_path="+v_analyses_path
                                                               and image_datasets.path like '%"+v_t1_scan_series_dir_waisman_flip+"'",sp.id, v_enrollment.id, v_t1_series_description_type_id)
                                              if v_image_datasets_waisman_flip.count > 0 and v_image_datasets_waisman_flip.count < 2
                                                 v_image_datasets = v_image_datasets_waisman_flip
+                                             end
+                                       end
+                                      if v_image_datasets.count > 1  or v_image_datasets.count < 1 # try last 2 parts of array
+                                             v_image_datasets_type_limit = ImageDataset.where("image_datasets.visit_id in (select visits.id from visits, appointments, enrollment_vgroup_memberships, scan_procedures_vgroups 
+                                                             where visits.appointment_id = appointments.id 
+                                                             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.scan_procedure_id in (?) 
+                                                             and enrollment_vgroup_memberships.enrollment_id in (?) )
+                                                             and image_datasets.series_description in 
+                                                              (select series_description_maps.series_description from series_description_maps where 
+                                                                   series_description_maps.series_description_type_id in (?))",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+                                             if v_image_datasets_type_limit.count > 0 and v_image_datasets_type_limit.count < 2
+                                                v_image_datasets = v_image_datasets_type_limit
                                              end
                                        end
 
