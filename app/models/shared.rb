@@ -7657,7 +7657,7 @@ puts "v_analyses_path="+v_analyses_path
                 @schedulerun.comment = "preprocessed path NOT exists "+v_preprocessed_full_path+";"+@schedulerun.comment
               else
                 Dir.entries(v_raw_full_path).select { |file| File.directory? File.join(v_raw_full_path, file)}.each do |dir|
-                  #if dir.include? "adrc00540"
+                 # if dir.include? "shp00027"
                       dir_name_array = dir.split('_')
                       v_subjectid = dir_name_array[0]
                       v_enrollments = Enrollment.where("enumber in (?)", v_subjectid)
@@ -7667,15 +7667,21 @@ puts "v_analyses_path="+v_analyses_path
                                    Dir.glob(v_preprocessed_full_path+v_subjectid+v_unknown_subpath+'o'+v_subjectid+'_*.nii').each do|source3_f|
                                       v_source3_file_full_path = source3_f 
                                       v_source3_file = File.basename(source3_f)
+        #puts "aaaa v_source3_file="+v_source3_file
                                       v_source3_file_array = v_source3_file.split('_')
                                       v_t1_scan_series_dir = (v_source3_file_array.last).gsub(".nii","")
+        #puts "bbbbb v_t1_scan_series_dir="+v_t1_scan_series_dir
                                       v_t1_scan_series_dir_2words = (v_source3_file_array.last(2).join("_")).gsub(".nii","")
+         #puts "ccccc v_t1_scan_series_dir="+v_t1_scan_series_dir
+         #puts "ddddd v_t1_scan_series_dir_2words="+v_t1_scan_series_dir_2words
 
                                       #olead00123_Ax-FSPGR-BRAVO-T1_00002.nii ==> 00002.Ax_FSPGR_BRAVO_T1
                                       v_source3_file_array.drop(1)
                                       v_last_item = (v_source3_file_array.last).gsub(".nii","")
                                       v_source3_file_array.pop
                                       v_t1_scan_series_dir_waisman_flip = v_last_item+"."+(v_source3_file_array.join("_")).gsub("-","_")
+
+          #puts "eeee v_t1_scan_series_dir_waisman_flip="+v_t1_scan_series_dir_waisman_flip
 
                                       v_source3_processesimages = Processedimage.where("file_path in (?)",v_source3_file_full_path)
                                       v_source3_file_id = nil
@@ -7704,7 +7710,8 @@ puts "v_analyses_path="+v_analyses_path
                                                              and image_datasets.series_description in 
                                                               (select series_description_maps.series_description from series_description_maps where 
                                                                    series_description_maps.series_description_type_id in (?))
-                                                              and image_datasets.path like '%"+v_t1_scan_series_dir+"'",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+                                                              and image_datasets.path like '%/"+v_t1_scan_series_dir+"'",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+                                            # looking for ...%/003 == 003 vs ...%003 ==> 003 and 40003 - processed t1 - same type   
                                       if v_image_datasets.count > 1  or v_image_datasets.count < 1 # try last 2 parts of array
                                              v_image_datasets_last2 = ImageDataset.where("image_datasets.visit_id in (select visits.id from visits, appointments, enrollment_vgroup_memberships, scan_procedures_vgroups 
                                                              where visits.appointment_id = appointments.id 
@@ -7849,6 +7856,12 @@ puts "v_analyses_path="+v_analyses_path
                                    v_source2_file = File.basename(source2_f)
                                    v_source2_file_array = v_source2_file.split('_')
                                    v_t1_scan_series_dir = (v_source2_file_array.last).gsub(".nii","")
+                                   v_t1_scan_series_dir_2words = (v_source2_file_array.last(2).join("_")).gsub(".nii","")
+                                   v_source2_file_array.drop(1)
+                                   v_last_item = (v_source2_file_array.last).gsub(".nii","")
+                                   v_source2_file_array.pop
+                                   v_t1_scan_series_dir_waisman_flip = v_last_item+"."+(v_source2_file_array.join("_")).gsub("-","_")
+
                                    v_source2_processesimages = Processedimage.where("file_path in (?)",v_source2_file_full_path)
                                    v_source2_file_id = nil
                                    if v_source2_processesimages.count <1
@@ -7912,7 +7925,38 @@ puts "v_analyses_path="+v_analyses_path
                                                              and image_datasets.series_description in 
                                                               (select series_description_maps.series_description from series_description_maps where 
                                                                    series_description_maps.series_description_type_id in (?))
-                                                              and image_datasets.path like '%"+v_t1_scan_series_dir+"'",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+                                                              and image_datasets.path like '%/"+v_t1_scan_series_dir+"'",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+                                            # looking for ...%/003 == 003 vs ...%003 ==> 003 and 40003 - processed t1 - same type   
+                                      if v_image_datasets.count > 1  or v_image_datasets.count < 1 # try last 2 parts of array
+                                             v_image_datasets_last2 = ImageDataset.where("image_datasets.visit_id in (select visits.id from visits, appointments, enrollment_vgroup_memberships, scan_procedures_vgroups 
+                                                             where visits.appointment_id = appointments.id 
+                                                             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.scan_procedure_id in (?) 
+                                                             and enrollment_vgroup_memberships.enrollment_id in (?) )
+                                                             and image_datasets.series_description in 
+                                                              (select series_description_maps.series_description from series_description_maps where 
+                                                                   series_description_maps.series_description_type_id in (?))
+                                                              and image_datasets.path like '%"+v_t1_scan_series_dir_2words+"'",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+                                             if v_image_datasets_last2.count > 0 and v_image_datasets_last2.count < 2
+                                                v_image_datasets = v_image_datasets_last2
+                                             end
+                                       end
+                                      if v_image_datasets.count > 1  or v_image_datasets.count < 1 # try last 2 parts of array
+                                             v_image_datasets_waisman_flip = ImageDataset.where("image_datasets.visit_id in (select visits.id from visits, appointments, enrollment_vgroup_memberships, scan_procedures_vgroups 
+                                                             where visits.appointment_id = appointments.id 
+                                                             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.scan_procedure_id in (?) 
+                                                             and enrollment_vgroup_memberships.enrollment_id in (?) )
+                                                             and image_datasets.series_description in 
+                                                              (select series_description_maps.series_description from series_description_maps where 
+                                                                   series_description_maps.series_description_type_id in (?))
+                                                              and image_datasets.path like '%"+v_t1_scan_series_dir_waisman_flip+"'",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+                                             if v_image_datasets_waisman_flip.count > 0 and v_image_datasets_waisman_flip.count < 2
+                                                v_image_datasets = v_image_datasets_waisman_flip
+                                             end
+                                       end
 
                                       if v_image_datasets.count > 0 and v_image_datasets.count < 2
                                          v_image_dataset = v_image_datasets.first
@@ -8055,6 +8099,12 @@ puts "v_analyses_path="+v_analyses_path
                              v_final_file_array = v_final_file.split('_')
                              v_scan_series_dir = (v_final_file_array.last).gsub(".nii","")
                              v_asl_inversion_time = v_final_file_array[-2]
+                             v_t1_scan_series_dir_2words = (v_final_file_array.last(2).join("_")).gsub(".nii","")
+                             v_final_file_array.drop(1)
+                             v_last_item = (v_final_file_array.last).gsub(".nii","")
+                             v_final_file_array.pop
+                             v_t1_scan_series_dir_waisman_flip = v_last_item+"."+(v_final_file_array.join("_")).gsub("-","_")
+
                              v_final_processesimages = Processedimage.where("file_path in (?)",v_final_file_full_path)
                              v_final_file_id = nil
                              if v_final_processesimages.count <1
@@ -8121,7 +8171,38 @@ puts "v_analyses_path="+v_analyses_path
                                                              and image_datasets.series_description in 
                                                               (select series_description_maps.series_description from series_description_maps where 
                                                                    series_description_maps.series_description_type_id in (?))
-                                                              and image_datasets.path like '%"+v_scan_series_dir+"'",sp.id, v_enrollment.id, v_asl_series_description_type_id)
+                                                              and image_datasets.path like '%/"+v_scan_series_dir+"'",sp.id, v_enrollment.id, v_asl_series_description_type_id)
+                                            # looking for ...%/003 == 003 vs ...%003 ==> 003 and 40003 - processed t1 - same type   
+                                      if v_image_datasets.count > 1  or v_image_datasets.count < 1 # try last 2 parts of array
+                                             v_image_datasets_last2 = ImageDataset.where("image_datasets.visit_id in (select visits.id from visits, appointments, enrollment_vgroup_memberships, scan_procedures_vgroups 
+                                                             where visits.appointment_id = appointments.id 
+                                                             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.scan_procedure_id in (?) 
+                                                             and enrollment_vgroup_memberships.enrollment_id in (?) )
+                                                             and image_datasets.series_description in 
+                                                              (select series_description_maps.series_description from series_description_maps where 
+                                                                   series_description_maps.series_description_type_id in (?))
+                                                              and image_datasets.path like '%"+v_t1_scan_series_dir_2words+"'",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+                                             if v_image_datasets_last2.count > 0 and v_image_datasets_last2.count < 2
+                                                v_image_datasets = v_image_datasets_last2
+                                             end
+                                       end
+                                      if v_image_datasets.count > 1  or v_image_datasets.count < 1 # try last 2 parts of array
+                                             v_image_datasets_waisman_flip = ImageDataset.where("image_datasets.visit_id in (select visits.id from visits, appointments, enrollment_vgroup_memberships, scan_procedures_vgroups 
+                                                             where visits.appointment_id = appointments.id 
+                                                             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.vgroup_id = appointments.vgroup_id
+                                                             and scan_procedures_vgroups.scan_procedure_id in (?) 
+                                                             and enrollment_vgroup_memberships.enrollment_id in (?) )
+                                                             and image_datasets.series_description in 
+                                                              (select series_description_maps.series_description from series_description_maps where 
+                                                                   series_description_maps.series_description_type_id in (?))
+                                                              and image_datasets.path like '%"+v_t1_scan_series_dir_waisman_flip+"'",sp.id, v_enrollment.id, v_t1_series_description_type_id)
+                                             if v_image_datasets_waisman_flip.count > 0 and v_image_datasets_waisman_flip.count < 2
+                                                v_image_datasets = v_image_datasets_waisman_flip
+                                             end
+                                       end
 
                                 if v_image_datasets.count > 0 and v_image_datasets.count < 2
                                    v_image_dataset = v_image_datasets.first
