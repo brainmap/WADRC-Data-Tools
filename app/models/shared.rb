@@ -2067,12 +2067,17 @@ def run_sleep_t1
        @results = connection.execute(sql_base)
        # using 2 key columns - need to make generic
        # using 2 edit tables - need to make generic
+         v_diff_type = v_edit1_tn+" vs "+v_edit2_tn
+          sql_delete = "delete from "+v_diff_tn+" where diff_type = '"+v_diff_type+"'"
+          @results_delete = connection.execute(sql_delete)
+          v_diff_type = v_raw_tn+" vs "+v_edit1_tn+" or "+v_edit2_tn
+          sql_delete = "delete from "+v_diff_tn+" where diff_type = '"+v_diff_type+"'"
+          @results_delete = connection.execute(sql_delete)
+
        @results.each do |user|
           v_key1 = user[0]
           v_key2 = user[1]
           v_diff_type = v_edit1_tn+" vs "+v_edit2_tn
-          sql_delete = "delete from "+v_diff_tn+" where diff_type = '"+v_diff_type+"'"
-          @results_delete = connection.execute(sql_delete)
           v_cnt = 0
           v_raw_tn_cn_array.each do |raw_cn|
             # exclude key column?
@@ -2112,8 +2117,6 @@ def run_sleep_t1
 
           v_diff_type = v_raw_tn+" vs "+v_edit1_tn+" or "+v_edit2_tn
           #puts v_diff_type
-          sql_delete = "delete from "+v_diff_tn+" where diff_type = '"+v_diff_type+"'"
-          @results_delete = connection.execute(sql_delete)
           v_cnt = 0
           v_raw_tn_cn_array.each do |raw_cn|
              sql_compare = " select "
