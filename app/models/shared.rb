@@ -2102,7 +2102,7 @@ def run_sleep_t1
              @results_compare = connection.execute(sql_compare)
              @results_compare.each do |r_compare|
                #puts v_diff_type
-               sql_diff_insert = v_sql_diff_insert+" VALUES( '"+v_key1+"','"+v_key2+"','"+v_diff_type+"','"+v_raw_tn+"','"+raw_cn+"','"+r_compare[6]+"','N','"+v_edit1_tn+"','"+v_edit1_tn_cn_array[v_cnt]+"','"+r_compare[7]+"','N','"+v_edit2_tn+"','"+v_edit2_tn_cn_array[v_cnt]+"','"+r_compare[8]+"','N','"+v_raw_tn_cn_order_dict[raw_cn]+"')"
+               sql_diff_insert = v_sql_diff_insert+" VALUES( '"+v_key1+"','"+v_key2+"','"+v_diff_type+"','"+v_raw_tn+"','"+raw_cn+"','"+r_compare[6].to_s+"','N','"+v_edit1_tn+"','"+v_edit1_tn_cn_array[v_cnt].to_s+"','"+r_compare[7].to_s+"','N','"+v_edit2_tn+"','"+v_edit2_tn_cn_array[v_cnt].to_s+"','"+r_compare[8].to_s+"','N','"+v_raw_tn_cn_order_dict[raw_cn].to_s+"')"
                #puts sql_diff_insert          
                @results_insert = connection.execute(sql_diff_insert)
              end
