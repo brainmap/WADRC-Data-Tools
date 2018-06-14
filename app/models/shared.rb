@@ -2014,6 +2014,155 @@ def run_sleep_t1
    
   end
 
+#compares raw data table with edited versions - logs all cells which have change
+#compared 2 edits tables for differences - logs all cells which are different
+#uses col name and col order array for each table to make comparisons
+#key columns  - 
+  def run_table_cell_comparison
+    v_base_path = Shared.get_base_path()
+     @schedule = Schedule.where("name in ('table_cell_comparison')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting table_cell_comparison"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning ="" 
+    connection = ActiveRecord::Base.connection();
+
+       v_raw_tn ="t_champs_adrc_raw_20180511"
+       v_raw_tn_cn_array =["ptid","champs_visit_number","champs_frndfam","champs_frndfam_fq","champs_frndfam_hw","champs_snrctr","champs_snrctr_fq","champs_snrctr_hw","champs_volun","champs_volun_fq","champs_volun_hw","champs_church","champs_church_fq","champs_church_hw","champs_clubmtg","champs_clubmtg_fq","champs_clubmtg_hw","champs_usecomp","champs_usecomp_fq","champs_usecomp_hw","champs_dance","champs_dance_fq","champs_dance_hw","champs_artcraft","champs_artcraft_fq","champs_artcraft_hw","champs_golfcrryeqp","champs_golfcrryeqp_fq","champs_golfcrryeqp_hw","champs_golfrde","champs_golfrde_fq","champs_golfrde_hw","champs_concert","champs_concert_fq","champs_concert_hw","champs_games","champs_games_fq","champs_games_hw","champs_pool","champs_pool_fq","champs_pool_hw","champs_tennissng","champs_tennissng_fq","champs_tennissng_hw","champs_tennisdbl","champs_tennisdbl_fq","champs_tennisdbl_hw","champs_skate","champs_skate_fq","champs_skate_hw","champs_plymuscins","champs_plymuscins_fq","champs_plymuscins_hw","champs_read","champs_read_fq","champs_read_hw","champs_hsehvywrk","champs_hsehvywrk_fq","champs_hsehvywrk_hw","champs_hseltwrk","champs_hseltwrk_fq","champs_hseltwrk_hw","champs_grdnhvywrk","champs_grdnhvywrk_fq","champs_grdnhvywrk_hw","champs_grdnltwrk","champs_grdnltwrk_fq","champs_grdnltwrk_hw","champs_wrkonmchn","champs_wrkonmchn_fq","champs_wrkonmchn_hw","champs_run","champs_run_fq","champs_run_hw","champs_walkuphll","champs_walkuphll_fq","champs_walkuphll_hw","champs_walkfast","champs_walkfast_fq","champs_walkfast_hw","champs_walkerrnd","champs_walkerrnd_fq","champs_walkerrnd_hw","champs_walkleisure","champs_walkleisure_fq","champs_walkleisure_hw","champs_ridebike","champs_ridebike_fq","champs_ridebike_hw","champs_othaerobic","champs_othaerobic_fq","champs_othaerobic_hw","champs_waterex","champs_waterex_fq","champs_waterex_hw","champs_swimmodfast","champs_swimmodfast_fq","champs_swimmodfast_hw","champs_swimgent","champs_swimgent_fq","champs_swimgent_hw","champs_stretch","champs_stretch_fq","champs_stretch_hw","champs_yoga","champs_yoga_fq","champs_yoga_hw","champs_aerobics","champs_aerobics_fq","champs_aerobics_hw","champs_strngtrnmodhv","champs_strngtrnmodhv_fq","champs_strngtrnmodhv_hw","champs_strngtrnlt","champs_strngtrnlt_fq","champs_strngtrnlt_hw","champs_genconditn","champs_genconditn_fq","champs_genconditn_hw","champs_plybbscrb","champs_plybbscrb_fq","champs_plybbscrb_hw","champs_othphysact","champs_othphysact_fq","champs_othphysact_hw","champs_complete"]
+       v_raw_tn_cn_order_dict ={'ptid' => '1', 'redcap_event_name' => '2', 'champs_visit_number' => '3', 'champs_frndfam' => '4', 'champs_frndfam_fq' => '5', 'champs_frndfam_hw' => '6', 'champs_snrctr' => '7', 'champs_snrctr_fq' => '8', 'champs_snrctr_hw' => '9', 'champs_volun' => '10', 'champs_volun_fq' => '11', 'champs_volun_hw' => '12', 'champs_church' => '13', 'champs_church_fq' => '14', 'champs_church_hw' => '15', 'champs_clubmtg' => '16', 'champs_clubmtg_fq' => '17', 'champs_clubmtg_hw' => '18', 'champs_usecomp' => '19', 'champs_usecomp_fq' => '20', 'champs_usecomp_hw' => '21', 'champs_dance' => '22', 'champs_dance_fq' => '23', 'champs_dance_hw' => '24', 'champs_artcraft' => '25', 'champs_artcraft_fq' => '26', 'champs_artcraft_hw' => '27', 'champs_golfcrryeqp' => '28', 'champs_golfcrryeqp_fq' => '29', 'champs_golfcrryeqp_hw' => '30', 'champs_golfrde' => '31', 'champs_golfrde_fq' => '32', 'champs_golfrde_hw' => '33', 'champs_concert' => '34', 'champs_concert_fq' => '35', 'champs_concert_hw' => '36', 'champs_games' => '37', 'champs_games_fq' => '38', 'champs_games_hw' => '39', 'champs_pool' => '40', 'champs_pool_fq' => '41', 'champs_pool_hw' => '42', 'champs_tennissng' => '43', 'champs_tennissng_fq' => '44', 'champs_tennissng_hw' => '45', 'champs_tennisdbl' => '46', 'champs_tennisdbl_fq' => '47', 'champs_tennisdbl_hw' => '48', 'champs_skate' => '49', 'champs_skate_fq' => '50', 'champs_skate_hw' => '51', 'champs_plymuscins' => '52', 'champs_plymuscins_fq' => '53', 'champs_plymuscins_hw' => '54', 'champs_read' => '55', 'champs_read_fq' => '56', 'champs_read_hw' => '57', 'champs_hsehvywrk' => '58', 'champs_hsehvywrk_fq' => '59', 'champs_hsehvywrk_hw' => '60', 'champs_hseltwrk' => '61', 'champs_hseltwrk_fq' => '62', 'champs_hseltwrk_hw' => '63', 'champs_grdnhvywrk' => '64', 'champs_grdnhvywrk_fq' => '65', 'champs_grdnhvywrk_hw' => '66', 'champs_grdnltwrk' => '67', 'champs_grdnltwrk_fq' => '68', 'champs_grdnltwrk_hw' => '69', 'champs_wrkonmchn' => '70', 'champs_wrkonmchn_fq' => '71', 'champs_wrkonmchn_hw' => '72', 'champs_run' => '73', 'champs_run_fq' => '74', 'champs_run_hw' => '75', 'champs_walkuphll' => '76', 'champs_walkuphll_fq' => '77', 'champs_walkuphll_hw' => '78', 'champs_walkfast' => '79', 'champs_walkfast_fq' => '80', 'champs_walkfast_hw' => '81', 'champs_walkerrnd' => '82', 'champs_walkerrnd_fq' => '83', 'champs_walkerrnd_hw' => '84', 'champs_walkleisure' => '85', 'champs_walkleisure_fq' => '86', 'champs_walkleisure_hw' => '87', 'champs_ridebike' => '88', 'champs_ridebike_fq' => '89', 'champs_ridebike_hw' => '90', 'champs_othaerobic' => '91', 'champs_othaerobic_fq' => '92', 'champs_othaerobic_hw' => '93', 'champs_waterex' => '94', 'champs_waterex_fq' => '95', 'champs_waterex_hw' => '96', 'champs_swimmodfast' => '97', 'champs_swimmodfast_fq' => '98', 'champs_swimmodfast_hw' => '99', 'champs_swimgent' => '100', 'champs_swimgent_fq' => '101', 'champs_swimgent_hw' => '102', 'champs_stretch' => '103', 'champs_stretch_fq' => '104', 'champs_stretch_hw' => '105', 'champs_yoga' => '106', 'champs_yoga_fq' => '107', 'champs_yoga_hw' => '108', 'champs_aerobics' => '109', 'champs_aerobics_fq' => '110', 'champs_aerobics_hw' => '111', 'champs_strngtrnmodhv' => '112', 'champs_strngtrnmodhv_fq' => '113', 'champs_strngtrnmodhv_hw' => '114', 'champs_strngtrnlt' => '115', 'champs_strngtrnlt_fq' => '116', 'champs_strngtrnlt_hw' => '117', 'champs_genconditn' => '118', 'champs_genconditn_fq' => '119', 'champs_genconditn_hw' => '120', 'champs_plybbscrb' => '121', 'champs_plybbscrb_fq' => '122', 'champs_plybbscrb_hw' => '123', 'champs_othphysact' => '124', 'champs_othphysact_fq' => '125', 'champs_othphysact_hw' => '126', 'champs_complete' => '127'}
+      v_raw_key_cn_array =["ptid","champs_visit_number"]
+
+       v_edit1_tn ="t_champs_adrc_alex_20180511"
+       v_edit1_tn_cn_array = ["ptid","champs_visit_number","champs_frndfam","champs_frndfam_fq","champs_frndfam_hw","champs_snrctr","champs_snrctr_fq","champs_snrctr_hw","champs_volun","champs_volun_fq","champs_volun_hw","champs_church","champs_church_fq","champs_church_hw","champs_clubmtg","champs_clubmtg_fq","champs_clubmtg_hw","champs_usecomp","champs_usecomp_fq","champs_usecomp_hw","champs_dance","champs_dance_fq","champs_dance_hw","champs_artcraft","champs_artcraft_fq","champs_artcraft_hw","champs_golfcrryeqp","champs_golfcrryeqp_fq","champs_golfcrryeqp_hw","champs_golfrde","champs_golfrde_fq","champs_golfrde_hw","champs_concert","champs_concert_fq","champs_concert_hw","champs_games","champs_games_fq","champs_games_hw","champs_pool","champs_pool_fq","champs_pool_hw","champs_tennissng","champs_tennissng_fq","champs_tennissng_hw","champs_tennisdbl","champs_tennisdbl_fq","champs_tennisdbl_hw","champs_skate","champs_skate_fq","champs_skate_hw","champs_plymuscins","champs_plymuscins_fq","champs_plymuscins_hw","champs_read","champs_read_fq","champs_read_hw","champs_hsehvywrk","champs_hsehvywrk_fq","champs_hsehvywrk_hw","champs_hseltwrk","champs_hseltwrk_fq","champs_hseltwrk_hw","champs_grdnhvywrk","champs_grdnhvywrk_fq","champs_grdnhvywrk_hw","champs_grdnltwrk","champs_grdnltwrk_fq","champs_grdnltwrk_hw","champs_wrkonmchn","champs_wrkonmchn_fq","champs_wrkonmchn_hw","champs_run","champs_run_fq","champs_run_hw","champs_walkuphll","champs_walkuphll_fq","champs_walkuphll_hw","champs_walkfast","champs_walkfast_fq","champs_walkfast_hw","champs_walkerrnd","champs_walkerrnd_fq","champs_walkerrnd_hw","champs_walkleisure","champs_walkleisure_fq","champs_walkleisure_hw","champs_ridebike","champs_ridebike_fq","champs_ridebike_hw","champs_othaerobic","champs_othaerobic_fq","champs_othaerobic_hw","champs_waterex","champs_waterex_fq","champs_waterex_hw","champs_swimmodfast","champs_swimmodfast_fq","champs_swimmodfast_hw","champs_swimgent","champs_swimgent_fq","champs_swimgent_hw","champs_stretch","champs_stretch_fq","champs_stretch_hw","champs_yoga","champs_yoga_fq","champs_yoga_hw","champs_aerobics","champs_aerobics_fq","champs_aerobics_hw","champs_strngtrnmodhv","champs_strngtrnmodhv_fq","champs_strngtrnmodhv_hw","champs_strngtrnlt","champs_strngtrnlt_fq","champs_strngtrnlt_hw","champs_genconditn","champs_genconditn_fq","champs_genconditn_hw","champs_plybbscrb","champs_plybbscrb_fq","champs_plybbscrb_hw","champs_othphysact","champs_othphysact_fq","champs_othphysact_hw","champs_complete"]
+       v_edit1_tn_cn_order_dict ={'ptid' => '1', 'redcap_event_name' => '2', 'champs_visit_number' => '3', 'champs_frndfam' => '4', 'champs_frndfam_fq' => '5', 'champs_frndfam_hw' => '6', 'champs_snrctr' => '7', 'champs_snrctr_fq' => '8', 'champs_snrctr_hw' => '9', 'champs_volun' => '10', 'champs_volun_fq' => '11', 'champs_volun_hw' => '12', 'champs_church' => '13', 'champs_church_fq' => '14', 'champs_church_hw' => '15', 'champs_clubmtg' => '16', 'champs_clubmtg_fq' => '17', 'champs_clubmtg_hw' => '18', 'champs_usecomp' => '19', 'champs_usecomp_fq' => '20', 'champs_usecomp_hw' => '21', 'champs_dance' => '22', 'champs_dance_fq' => '23', 'champs_dance_hw' => '24', 'champs_artcraft' => '25', 'champs_artcraft_fq' => '26', 'champs_artcraft_hw' => '27', 'champs_golfcrryeqp' => '28', 'champs_golfcrryeqp_fq' => '29', 'champs_golfcrryeqp_hw' => '30', 'champs_golfrde' => '31', 'champs_golfrde_fq' => '32', 'champs_golfrde_hw' => '33', 'champs_concert' => '34', 'champs_concert_fq' => '35', 'champs_concert_hw' => '36', 'champs_games' => '37', 'champs_games_fq' => '38', 'champs_games_hw' => '39', 'champs_pool' => '40', 'champs_pool_fq' => '41', 'champs_pool_hw' => '42', 'champs_tennissng' => '43', 'champs_tennissng_fq' => '44', 'champs_tennissng_hw' => '45', 'champs_tennisdbl' => '46', 'champs_tennisdbl_fq' => '47', 'champs_tennisdbl_hw' => '48', 'champs_skate' => '49', 'champs_skate_fq' => '50', 'champs_skate_hw' => '51', 'champs_plymuscins' => '52', 'champs_plymuscins_fq' => '53', 'champs_plymuscins_hw' => '54', 'champs_read' => '55', 'champs_read_fq' => '56', 'champs_read_hw' => '57', 'champs_hsehvywrk' => '58', 'champs_hsehvywrk_fq' => '59', 'champs_hsehvywrk_hw' => '60', 'champs_hseltwrk' => '61', 'champs_hseltwrk_fq' => '62', 'champs_hseltwrk_hw' => '63', 'champs_grdnhvywrk' => '64', 'champs_grdnhvywrk_fq' => '65', 'champs_grdnhvywrk_hw' => '66', 'champs_grdnltwrk' => '67', 'champs_grdnltwrk_fq' => '68', 'champs_grdnltwrk_hw' => '69', 'champs_wrkonmchn' => '70', 'champs_wrkonmchn_fq' => '71', 'champs_wrkonmchn_hw' => '72', 'champs_run' => '73', 'champs_run_fq' => '74', 'champs_run_hw' => '75', 'champs_walkuphll' => '76', 'champs_walkuphll_fq' => '77', 'champs_walkuphll_hw' => '78', 'champs_walkfast' => '79', 'champs_walkfast_fq' => '80', 'champs_walkfast_hw' => '81', 'champs_walkerrnd' => '82', 'champs_walkerrnd_fq' => '83', 'champs_walkerrnd_hw' => '84', 'champs_walkleisure' => '85', 'champs_walkleisure_fq' => '86', 'champs_walkleisure_hw' => '87', 'champs_ridebike' => '88', 'champs_ridebike_fq' => '89', 'champs_ridebike_hw' => '90', 'champs_othaerobic' => '91', 'champs_othaerobic_fq' => '92', 'champs_othaerobic_hw' => '93', 'champs_waterex' => '94', 'champs_waterex_fq' => '95', 'champs_waterex_hw' => '96', 'champs_swimmodfast' => '97', 'champs_swimmodfast_fq' => '98', 'champs_swimmodfast_hw' => '99', 'champs_swimgent' => '100', 'champs_swimgent_fq' => '101', 'champs_swimgent_hw' => '102', 'champs_stretch' => '103', 'champs_stretch_fq' => '104', 'champs_stretch_hw' => '105', 'champs_yoga' => '106', 'champs_yoga_fq' => '107', 'champs_yoga_hw' => '108', 'champs_aerobics' => '109', 'champs_aerobics_fq' => '110', 'champs_aerobics_hw' => '111', 'champs_strngtrnmodhv' => '112', 'champs_strngtrnmodhv_fq' => '113', 'champs_strngtrnmodhv_hw' => '114', 'champs_strngtrnlt' => '115', 'champs_strngtrnlt_fq' => '116', 'champs_strngtrnlt_hw' => '117', 'champs_genconditn' => '118', 'champs_genconditn_fq' => '119', 'champs_genconditn_hw' => '120', 'champs_plybbscrb' => '121', 'champs_plybbscrb_fq' => '122', 'champs_plybbscrb_hw' => '123', 'champs_othphysact' => '124', 'champs_othphysact_fq' => '125', 'champs_othphysact_hw' => '126', 'champs_complete' => '127'}
+       v_edit1_key_cn_array =["ptid","champs_visit_number"]
+
+       v_edit2_tn ="t_champs_adrc_kaitlin_20180511"
+       v_edit2_tn_cn_array = ["ptid","visitnum","champs_frndfam","champs_frndfam_fq","champs_frndfam_hw","champs_snrctr","champs_snrctr_fq","champs_snrctr_hw","champs_volun","champs_volun_fq","champs_volun_hw","champs_church","champs_church_fq","champs_church_hw","champs_clubmtg","champs_clubmtg_fq","champs_clubmtg_hw","champs_usecomp","champs_usecomp_fq","champs_usecomp_hw","champs_dance","champs_dance_fq","champs_dance_hw","champs_artcraft","champs_artcraft_fq","champs_artcraft_hw","champs_golfcrryeqp","champs_golfcrryeqp_fq","champs_golfcrryeqp_hw","champs_golfrde","champs_golfrde_fq","champs_golfrde_hw","champs_concert","champs_concert_fq","champs_concert_hw","champs_games","champs_games_fq","champs_games_hw","champs_pool","champs_pool_fq","champs_pool_hw","champs_tennissng","champs_tennissng_fq","champs_tennissng_hw","champs_tennisdbl","champs_tennisdbl_fq","champs_tennisdbl_hw","champs_skate","champs_skate_fq","champs_skate_hw","champs_plymuscins","champs_plymuscins_fq","champs_plymuscins_hw","champs_read","champs_read_fq","champs_read_hw","champs_hsehvywrk","champs_hsehvywrk_fq","champs_hsehvywrk_hw","champs_hseltwrk","champs_hseltwrk_fq","champs_hseltwrk_hw","champs_grdnhvywrk","champs_grdnhvywrk_fq","champs_grdnhvywrk_hw","champs_grdnltwrk","champs_grdnltwrk_fq","champs_grdnltwrk_hw","champs_wrkonmchn","champs_wrkonmchn_fq","champs_wrkonmchn_hw","champs_run","champs_run_fq","champs_run_hw","champs_walkuphll","champs_walkuphll_fq","champs_walkuphll_hw","champs_walkfast","champs_walkfast_fq","champs_walkfast_hw","champs_walkerrnd","champs_walkerrnd_fq","champs_walkerrnd_hw","champs_walkleisure","champs_walkleisure_fq","champs_walkleisure_hw","champs_ridebike","champs_ridebike_fq","champs_ridebike_hw","champs_othaerobic","champs_othaerobic_fq","champs_othaerobic_hw","champs_waterex","champs_waterex_fq","champs_waterex_hw","champs_swimmodfast","champs_swimmodfast_fq","champs_swimmodfast_hw","champs_swimgent","champs_swimgent_fq","champs_swimgent_hw","champs_stretch","champs_stretch_fq","champs_stretch_hw","champs_yoga","champs_yoga_fq","champs_yoga_hw","champs_aerobics","champs_aerobics_fq","champs_aerobics_hw","champs_strngtrnmodhv","champs_strngtrnmodhv_fq","champs_strngtrnmodhv_hw","champs_strngtrnlt","champs_strngtrnlt_fq","champs_strngtrnlt_hw","champs_genconditn","champs_genconditn_fq","champs_genconditn_hw","champs_plybbscrb","champs_plybbscrb_fq","champs_plybbscrb_hw","champs_othphysact","champs_othphysact_fq","champs_othphysact_hw","champs_complete"]
+       v_edit2_tn_cn_order_dict ={'ptid' => '1', 'redcap_event_name' => '2', 'champs_visit_number' => '3', 'champs_frndfam' => '4', 'champs_frndfam_fq' => '5', 'champs_frndfam_hw' => '6', 'champs_snrctr' => '7', 'champs_snrctr_fq' => '8', 'champs_snrctr_hw' => '9', 'champs_volun' => '10', 'champs_volun_fq' => '11', 'champs_volun_hw' => '12', 'champs_church' => '13', 'champs_church_fq' => '14', 'champs_church_hw' => '15', 'champs_clubmtg' => '16', 'champs_clubmtg_fq' => '17', 'champs_clubmtg_hw' => '18', 'champs_usecomp' => '19', 'champs_usecomp_fq' => '20', 'champs_usecomp_hw' => '21', 'champs_dance' => '22', 'champs_dance_fq' => '23', 'champs_dance_hw' => '24', 'champs_artcraft' => '25', 'champs_artcraft_fq' => '26', 'champs_artcraft_hw' => '27', 'champs_golfcrryeqp' => '28', 'champs_golfcrryeqp_fq' => '29', 'champs_golfcrryeqp_hw' => '30', 'champs_golfrde' => '31', 'champs_golfrde_fq' => '32', 'champs_golfrde_hw' => '33', 'champs_concert' => '34', 'champs_concert_fq' => '35', 'champs_concert_hw' => '36', 'champs_games' => '37', 'champs_games_fq' => '38', 'champs_games_hw' => '39', 'champs_pool' => '40', 'champs_pool_fq' => '41', 'champs_pool_hw' => '42', 'champs_tennissng' => '43', 'champs_tennissng_fq' => '44', 'champs_tennissng_hw' => '45', 'champs_tennisdbl' => '46', 'champs_tennisdbl_fq' => '47', 'champs_tennisdbl_hw' => '48', 'champs_skate' => '49', 'champs_skate_fq' => '50', 'champs_skate_hw' => '51', 'champs_plymuscins' => '52', 'champs_plymuscins_fq' => '53', 'champs_plymuscins_hw' => '54', 'champs_read' => '55', 'champs_read_fq' => '56', 'champs_read_hw' => '57', 'champs_hsehvywrk' => '58', 'champs_hsehvywrk_fq' => '59', 'champs_hsehvywrk_hw' => '60', 'champs_hseltwrk' => '61', 'champs_hseltwrk_fq' => '62', 'champs_hseltwrk_hw' => '63', 'champs_grdnhvywrk' => '64', 'champs_grdnhvywrk_fq' => '65', 'champs_grdnhvywrk_hw' => '66', 'champs_grdnltwrk' => '67', 'champs_grdnltwrk_fq' => '68', 'champs_grdnltwrk_hw' => '69', 'champs_wrkonmchn' => '70', 'champs_wrkonmchn_fq' => '71', 'champs_wrkonmchn_hw' => '72', 'champs_run' => '73', 'champs_run_fq' => '74', 'champs_run_hw' => '75', 'champs_walkuphll' => '76', 'champs_walkuphll_fq' => '77', 'champs_walkuphll_hw' => '78', 'champs_walkfast' => '79', 'champs_walkfast_fq' => '80', 'champs_walkfast_hw' => '81', 'champs_walkerrnd' => '82', 'champs_walkerrnd_fq' => '83', 'champs_walkerrnd_hw' => '84', 'champs_walkleisure' => '85', 'champs_walkleisure_fq' => '86', 'champs_walkleisure_hw' => '87', 'champs_ridebike' => '88', 'champs_ridebike_fq' => '89', 'champs_ridebike_hw' => '90', 'champs_othaerobic' => '91', 'champs_othaerobic_fq' => '92', 'champs_othaerobic_hw' => '93', 'champs_waterex' => '94', 'champs_waterex_fq' => '95', 'champs_waterex_hw' => '96', 'champs_swimmodfast' => '97', 'champs_swimmodfast_fq' => '98', 'champs_swimmodfast_hw' => '99', 'champs_swimgent' => '100', 'champs_swimgent_fq' => '101', 'champs_swimgent_hw' => '102', 'champs_stretch' => '103', 'champs_stretch_fq' => '104', 'champs_stretch_hw' => '105', 'champs_yoga' => '106', 'champs_yoga_fq' => '107', 'champs_yoga_hw' => '108', 'champs_aerobics' => '109', 'champs_aerobics_fq' => '110', 'champs_aerobics_hw' => '111', 'champs_strngtrnmodhv' => '112', 'champs_strngtrnmodhv_fq' => '113', 'champs_strngtrnmodhv_hw' => '114', 'champs_strngtrnlt' => '115', 'champs_strngtrnlt_fq' => '116', 'champs_strngtrnlt_hw' => '117', 'champs_genconditn' => '118', 'champs_genconditn_fq' => '119', 'champs_genconditn_hw' => '120', 'champs_plybbscrb' => '121', 'champs_plybbscrb_fq' => '122', 'champs_plybbscrb_hw' => '123', 'champs_othphysact' => '124', 'champs_othphysact_fq' => '125', 'champs_othphysact_hw' => '126', 'champs_complete' => '127'}
+       v_edit2_key_cn_array =["ptid","visitnum"]
+
+       v_diff_tn = "t_champs_diff_20180511"
+       v_diff_tn_cn_array = ['subjectid','visno','diff_type','raw_tn','raw_tn_cn','raw_value','use_raw_flag','edit1_tn','edit1_tn_cn','edit1_value','use_edit1_flag','edit2_tn','edit2_tn_cn','edit2_value','use_edit2_flag','column_order']
+       v_diff_key_cn_array =["subjectid","visno"]
+       v_value_size = 100
+       v_sql_diff_insert = "insert into "+v_diff_tn+"("+v_diff_tn_cn_array.join(",")+")"
+       # limit of 100 characters
+        
+
+       sql_base = "select "+v_raw_key_cn_array.join(",")+" from "+v_raw_tn+" where "
+       v_cnt = 0
+       v_raw_key_cn_array.each do |key_cn|
+              if v_cnt > 0
+                 sql_base = sql_base+" and "
+              end
+              sql_base = sql_base+" "+key_cn+" is not null and "+key_cn+" > '' "
+              v_cnt = v_cnt +1
+       end
+#puts sql_base
+       @results = connection.execute(sql_base)
+       # using 2 key columns - need to make generic
+       # using 2 edit tables - need to make generic
+       @results.each do |user|
+          v_key1 = user[0]
+          v_key2 = user[1]
+          v_diff_type = v_edit1_tn+" vs "+v_edit2_tn
+          sql_delete = "delete from "+v_diff_tn+" where diff_type = '"+v_diff_type+"'"
+          @results_delete = connection.execute(sql_delete)
+          v_cnt = 0
+          v_raw_tn_cn_array.each do |raw_cn|
+            # exclude key column?
+             sql_compare = " select "
+                 v_raw_key_cn_array.each do |raw_key|
+                        sql_compare = sql_compare +" "+v_raw_tn+"."+raw_key+","
+                 end
+                 v_edit1_key_cn_array.each do |edit1_key|
+                        sql_compare = sql_compare +" "+v_edit1_tn+"."+edit1_key+","
+                 end
+                 v_edit2_key_cn_array.each do |edit2_key|
+                        sql_compare = sql_compare +" "+v_edit2_tn+"."+edit2_key+","
+                 end
+                 sql_compare = sql_compare +" "+v_raw_tn+"."+raw_cn+","
+                 sql_compare = sql_compare +" "+v_edit1_tn+"."+v_edit1_tn_cn_array[v_cnt]+","
+                 sql_compare = sql_compare +" "+v_edit2_tn+"."+v_edit2_tn_cn_array[v_cnt]+" "
+                 sql_compare = sql_compare +" from "+v_raw_tn+","+v_edit1_tn+","+v_edit2_tn+" "
+                 sql_compare = sql_compare +" where "+v_edit1_tn+"."+v_edit1_tn_cn_array[v_cnt]+" != "+v_edit2_tn+"."+v_edit2_tn_cn_array[v_cnt]
+                 v_cnt_key = 0
+                 v_raw_key_cn_array.each do |raw_key|
+                       sql_compare = sql_compare +" and "+v_raw_tn+"."+raw_key+" = '"+user[v_cnt_key]+"' and "+v_raw_tn+"."+raw_key+" = "+v_edit1_tn+"."+v_edit1_key_cn_array[v_cnt_key]+" and "+v_raw_tn+"."+raw_key+" = "+v_edit2_tn+"."+v_edit2_key_cn_array[v_cnt_key]+" "
+                   v_cnt_key = v_cnt_key + 1
+                 end
+#puts sql_compare
+            
+
+             @results_compare = connection.execute(sql_compare)
+             @results_compare.each do |r_compare|
+               #puts v_diff_type
+               sql_diff_insert = v_sql_diff_insert+" VALUES( '"+v_key1+"','"+v_key2+"','"+v_diff_type+"','"+v_raw_tn+"','"+raw_cn+"','"+r_compare[6]+"','N','"+v_edit1_tn+"','"+v_edit1_tn_cn_array[v_cnt]+"','"+r_compare[7]+"','N','"+v_edit2_tn+"','"+v_edit2_tn_cn_array[v_cnt]+"','"+r_compare[8]+"','N','"+v_raw_tn_cn_order_dict[raw_cn]+"')"
+               #puts sql_diff_insert          
+               @results_insert = connection.execute(sql_diff_insert)
+             end
+             v_cnt = v_cnt + 1
+          end
+
+
+          v_diff_type = v_raw_tn+" vs "+v_edit1_tn+" or "+v_edit2_tn
+          #puts v_diff_type
+          sql_delete = "delete from "+v_diff_tn+" where diff_type = '"+v_diff_type+"'"
+          @results_delete = connection.execute(sql_delete)
+          v_cnt = 0
+          v_raw_tn_cn_array.each do |raw_cn|
+             sql_compare = " select "
+                 v_raw_key_cn_array.each do |raw_key|
+                        sql_compare = sql_compare +" "+v_raw_tn+"."+raw_key+","
+                 end
+                 v_edit1_key_cn_array.each do |edit1_key|
+                        sql_compare = sql_compare +" "+v_edit1_tn+"."+edit1_key+","
+                 end
+                 v_edit2_key_cn_array.each do |edit2_key|
+                        sql_compare = sql_compare +" "+v_edit2_tn+"."+edit2_key+","
+                 end
+
+                 sql_compare = sql_compare +" "+v_raw_tn+"."+raw_cn+","
+                 sql_compare = sql_compare +" "+v_edit1_tn+"."+v_edit1_tn_cn_array[v_cnt]+","
+                 sql_compare = sql_compare +" "+v_edit2_tn+"."+v_edit2_tn_cn_array[v_cnt]+" "
+                 sql_compare = sql_compare +" from "+v_raw_tn+","+v_edit1_tn+","+v_edit2_tn+" "
+                 sql_compare = sql_compare +" where "+v_edit1_tn+"."+v_edit1_tn_cn_array[v_cnt]+" = "+v_edit2_tn+"."+v_edit2_tn_cn_array[v_cnt]
+                sql_compare = sql_compare +" and ("+v_raw_tn+"."+v_raw_tn_cn_array[v_cnt]+" != "+v_edit1_tn+"."+v_edit1_tn_cn_array[v_cnt]
+                sql_compare = sql_compare +" or "+v_raw_tn+"."+v_raw_tn_cn_array[v_cnt]+" != "+v_edit2_tn+"."+v_edit2_tn_cn_array[v_cnt]+" )"
+                 v_cnt_key = 0
+                 v_raw_key_cn_array.each do |raw_key|
+                       sql_compare = sql_compare +" and "+v_raw_tn+"."+raw_key+" = '"+user[v_cnt_key]+"' and "+v_raw_tn+"."+raw_key+" = "+v_edit1_tn+"."+v_edit1_key_cn_array[v_cnt_key]+" and "+v_raw_tn+"."+raw_key+" = "+v_edit2_tn+"."+v_edit2_key_cn_array[v_cnt_key]+" "
+                   v_cnt_key = v_cnt_key + 1
+                 end
+             @results_compare = connection.execute(sql_compare)
+             @results_compare.each do |r_compare|
+               #puts  v_diff_type
+               sql_diff_insert = v_sql_diff_insert+" VALUES( '"+v_key1+"','"+v_key2+"','"+v_diff_type+"','"+v_raw_tn+"','"+raw_cn+"','"+r_compare[6]+"','N','"+v_edit1_tn+"','"+v_edit1_tn_cn_array[v_cnt]+"','"+r_compare[7]+"','N','"+v_edit2_tn+"','"+v_edit2_tn_cn_array[v_cnt]+"','"+r_compare[8]+"','N','"+v_raw_tn_cn_order_dict[raw_cn]+"')"
+               #puts sql_diff_insert      
+               @results_insert = connection.execute(sql_diff_insert)
+             end
+             v_cnt = v_cnt + 1
+          end
+        
+
+       end
+
+
+
+
+    @schedulerun.comment =("successful finish table_cell_comparison "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+       @schedulerun.status_flag ="Y"
+     end
+     @schedulerun.save
+     @schedulerun.end_time = @schedulerun.updated_at      
+     @schedulerun.save  
+  end
   def run_t1seg_spm8_gm_wm_csf_volumes
 
     v_base_path = Shared.get_base_path()

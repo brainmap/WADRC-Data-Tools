@@ -256,7 +256,11 @@ v_user = v_user.gsub("\n","")
          
   elsif v_value_1 == "sp_scanner_protocol"
     v_shared = Shared.new
-    v_shared.run_sp_scanner_protocol()       
+    v_shared.run_sp_scanner_protocol()   
+
+  elsif v_value_1 == "table_cell_comparison" 
+    v_shared = Shared.new
+    v_shared.run_table_cell_comparison()   
     
   elsif v_value_1 == "t1seg_spm8_gm_wm_csf_volumes" # volumes being harvested in t1seg_status
       v_shared = Shared.new
