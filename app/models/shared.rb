@@ -1997,6 +1997,170 @@ puts " "+r[0]+"  ="+r[1]
   end
 
 
+def  run_pet_mk6240_harvest
+      v_base_path = Shared.get_base_path()
+     @schedule = Schedule.where("name in ('pet_mk6240_harvest')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting pet_mk6240_harvest"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning ="" 
+      v_comment_base = ""
+      connection = ActiveRecord::Base.connection();
+
+      # truncate cg table new 
+      v_cg_tn_roi = "cg_pet_mk6240_roi"
+      v_cg_tn_tacs = "cg_pet_mk6240_tacs" 
+      # <enum>_analysis-log_mk6240_suvr_<codename-hyphen>_2a.csv. source filenames
+      #<enum>_pet-processing-log_31-May-2018_mk6240_suvr_visit3_2a.csv  
+      #<enum>_roi-summary_mk6240_suvr_<codename-hyphen>_2a.csv --multiple rois, suvr col and volume col
+      #<enum>_tacs_mk6240_suvr_<codename-hyphen>_2a.csv --- for one subject, multiple times, series of roi
+
+    v_mk6240_path = "/pet/mk6240/suvr/code_ver2a/"
+    v_roi_file_name = "_roi-summary_mk6240_suvr_"
+    v_tacs_file_name = "_tacs_mk6240_suvr_"
+    v_log_file_name = "_analysis-log_mk6240_suvr_"
+    v_code_version = "2a"
+    v_secondary_key_array =["b","c","d","e",".R"]
+    v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+    sp_exclude_array = [69,53,54,56,57,95,55,76,78,72,70,71,49,79,99,81,75,80,83,92,93,88,68,97,29,52,87,48,27,14,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,50,42,44,51,96,9,25,23,19,15,24,36,100,35,20,73,32,45,6,12,16,13,11,10,90,59,63,43,4,17,30,74,98]
+    @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
+    @scan_procedures.each do |sp|
+      @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
+      @schedulerun.save
+      v_visit_number =""
+      if sp.codename.include?("visit2")
+            v_visit_number ="_v2"
+      elsif sp.codename.include?("visit3")
+            v_visit_number ="_v3"
+      elsif sp.codename.include?("visit4")
+            v_visit_number ="_v4"
+      elsif sp.codename.include?("visit5")
+            v_visit_number ="_v5"
+      end  
+      v_codename_hyphen =  sp.codename
+      v_codename_hyphen = v_codename_hyphen.gsub(".","-")
+
+      v_preprocessed_full_path = v_preprocessed_path+sp.codename  
+      if File.directory?(v_preprocessed_full_path)
+        sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+"  
+                                    and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id
+                                    and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
+        @results = connection.execute(sql_enum)                                 
+        @results.each do |r|
+          enrollment = Enrollment.where("enumber='"+r[0]+"'")
+          if !enrollment.blank?
+            v_log = ""
+            v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
+            v_subjectid = enrollment[0].enumber
+            v_subjectid_v_num = enrollment[0].enumber + v_visit_number
+            @schedulerun.comment = "start "+v_subjectid_v_num+" "+v_comment_base
+            @schedulerun.save
+            v_subjectid_pet_mk6240 =v_subjectid_path+v_mk6240_path
+            v_subjectid_array = []
+            begin
+              if File.directory?(v_subjectid_pet_mk6240)
+                v_subjectid_array.push(v_subjectid)
+              end
+              v_secondary_key_array.each do |k|
+                if File.directory?(v_subjectid_path+k+v_mk6240_path)
+                  v_subjectid_array.push((v_subjectid+k))
+                end
+              end
+             rescue => msg  
+                v_log = v_log + "IN RESCUE ERROR "+msg+"\n"  
+            end
+            v_subjectid_array = v_subjectid_array.uniq
+            v_subjectid_array.each do |subj|
+              v_subjectid = subj
+              v_subjectid_v_num = subj + v_visit_number
+              v_subjectid_path = v_preprocessed_full_path+"/"+subj
+              v_subjectid_pet_mk6240 =v_subjectid_path+v_mk6240_path
+              if File.directory?(v_subjectid_pet_mk6240)
+                v_dir_array = Dir.entries(v_subjectid_pet_mk6240)
+                v_dir_array.each do |f|
+                  # get roi, tac, log files and final file = wpdt00235_mk6240_suvr70-90_visit3_2a.nii
+                   #<enum>_roi-summary_mk6240_suvr_<codename-hyphen>_2a.csv --multiple rois, suvr col and volume col
+                  v_subjectid_roi_file_name = v_subjectid+v_roi_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
+                  #<enum>_tacs_mk6240_suvr_<codename-hyphen>_2a.csv --- for one subject, multiple times, series of roi
+                  v_subjectid_tacs_file_name = v_subjectid+v_tacs_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
+                  # <enum>_analysis-log_mk6240_suvr_<codename-hyphen>_2a.csv. source filenames
+                  v_subjectid_log_file_name = v_subjectid+v_log_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
+                  # final product file - insert into processed images - get source file names from the log file
+                  v_skip_flag = "N"
+                  if f.start_with?("w"+v_subjectid) and f.end_with?(".nii")
+                     puts "pet product="+f
+                      #check if exists in processedimages
+                     if File.file?(v_subjectid_log_file_name)
+                      # check column header "Description,Value"
+                      # check "study ID" = v_subjectid  "protocol description" = sp.codename, tracer = mk6240, method = suvr, "PET code version" = v_code_version
+                      # email if different - set flag to skip
+                       # parse by rows, get "ecat file", "original t1 MRI file"
+                       # check if 
+                     end
+                  end
+                  if v_skip_flag == "N"
+                    # check for roi file
+                    if File.file?(v_subjectid_roi_file_name)
+                        # check column headers 
+                       v_roi_cn_array = ["Region","Atlas","ROI_Number","SUVR","Volume_cc"]
+                       # insert v_cg_tn_roi -- with _v# ?
+                    end
+                    if File.file?(v_subjectid_tacs_file_name)
+                          # check column headers 
+                        v_tacs_cn_array = ["Time_min","cblm_gm_inf","Precentral_L","Precentral_R","Frontal_Sup_L","Frontal_Sup_R","Frontal_Sup_Orb_L","Frontal_Sup_Orb_R","Frontal_Mid_L","Frontal_Mid_R","Frontal_Mid_Orb_L","Frontal_Mid_Orb_R","Frontal_Inf_Oper_L","Frontal_Inf_Oper_R","Frontal_Inf_Tri_L","Frontal_Inf_Tri_R","Frontal_Inf_Orb_L","Frontal_Inf_Orb_R","Rolandic_Oper_L","Rolandic_Oper_R","Supp_Motor_Area_L","Supp_Motor_Area_R","Olfactory_L","Olfactory_R","Frontal_Sup_Medial_L","Frontal_Sup_Medial_R","Frontal_Med_Orb_L","Frontal_Med_Orb_R","Rectus_L","Rectus_R","Insula_L","Insula_R","Cingulum_Ant_L","Cingulum_Ant_R","Cingulum_Mid_L","Cingulum_Mid_R","Cingulum_Post_L","Cingulum_Post_R","Hippocampus_L","Hippocampus_R","ParaHippocampal_L","ParaHippocampal_R","Amygdala_L","Amygdala_R","Calcarine_L","Calcarine_R","Cuneus_L","Cuneus_R","Lingual_L","Lingual_R","Occipital_Sup_L","Occipital_Sup_R","Occipital_Mid_L","Occipital_Mid_R","Occipital_Inf_L","Occipital_Inf_R","Fusiform_L","Fusiform_R","Postcentral_L","Postcentral_R","Parietal_Sup_L","Parietal_Sup_R","Parietal_Inf_L","Parietal_Inf_R","SupraMarginal_L","SupraMarginal_R","Angular_L","Angular_R","Precuneus_L","Precuneus_R","Paracentral_Lobule_L","Paracentral_Lobule_R","Caudate_L","Caudate_R","Putamen_L","Putamen_R","Pallidum_L","Pallidum_R","Thalamus_L","Thalamus_R","Heschl_L","Heschl_R","Temporal_Sup_L","Temporal_Sup_R","Temporal_Pole_Sup_L","Temporal_Pole_Sup_R","Temporal_Mid_L","Temporal_Mid_R","Temporal_Pole_Mid_L","Temporal_Pole_Mid_R","Temporal_Inf_L","Temporal_Inf_R","Cerebelum_Crus1_L","Cerebelum_Crus1_R","Cerebelum_Crus2_L","Cerebelum_Crus2_R","Cerebelum_3_L","Cerebelum_3_R","Cerebelum_4_5_L","Cerebelum_4_5_R","Cerebelum_6_L","Cerebelum_6_R","Cerebelum_7b_L","Cerebelum_7b_R","Cerebelum_8_L","Cerebelum_8_R","Cerebelum_9_L","Cerebelum_9_R","Cerebelum_10_L","Cerebelum_10_R","Vermis_1_2","Vermis_3","Vermis_4_5","Vermis_6","Vermis_7","Vermis_8","Vermis_9","Vermis_10","Clivus","Ethmoid","Meninges","Pineal","Vermis_Sup_Ant","Cerebellum_Superior","Substantia_Nigra","SphenotemporalButtress","Pons"]
+                        # insert v_cg_tn_tacs -- with _v# ?
+                    end
+                  end # end of skip flag
+                end # file loop  
+              end # if pet_mk6240 exists
+            end # subject array loop
+          end # enrollment not blank
+        end # results loop
+      end # preprocessed sp dir exists
+    end   # scan procedure loop
+
+
+     @schedulerun.comment =("successful finish pet_mk6240_harvest "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+       @schedulerun.status_flag ="Y"
+     end
+     @schedulerun.save
+     @schedulerun.end_time = @schedulerun.updated_at      
+     @schedulerun.save  
+
+
+end
+
+def run_pet_mk6240_process
+      v_base_path = Shared.get_base_path()
+     @schedule = Schedule.where("name in ('pet_mk6240_process')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting pet_mk6240_process"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning ="" 
+    connection = ActiveRecord::Base.connection();
+
+
+
+    @schedulerun.comment =("successful finish pet_mk6240_process "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+       @schedulerun.status_flag ="Y"
+     end
+     @schedulerun.save
+     @schedulerun.end_time = @schedulerun.updated_at      
+     @schedulerun.save  
+end
+
+
 # Kate Sprecher Sleep study needs t1 - clean out dicom
 def run_sleep_t1
 
