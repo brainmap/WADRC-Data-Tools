@@ -115,7 +115,7 @@ edit_count = edit_count -1
         appointment = Appointment.find(lp.appointment_id)
         vgroup = Vgroup.find(appointment.vgroup_id)%>
         <li><%= link_to appointment.appointment_date , lp %>  
-  in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
+  in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %> sucess=<%if lp.lpsuccess == 1%>Yes<%end%><%if lp.lpsuccess == 0%>No<%end%></li>
   <% end %>
 </ul>
 <% end %>
