@@ -2014,6 +2014,10 @@ def  run_pet_mk6240_harvest
 
       # truncate cg table new 
       v_cg_tn_roi = "cg_pet_mk6240_roi"
+      v_cg_tn_roi_atlas_tjb_mni_v1 = "cg_pet_mk6240_roi_atlas_tjb_mni_v1"
+      v_aal_atlas = "aal_MNI_V4"
+      v_tjb_mni_v1 = "tjb_MNI_V1"
+      # ALSO A SECOND TABLE WITH A DIFFERENT ATLAS -- keeping columns same in both tables
       # ADD AS SINMGLE COLUMN ["Region","Atlas"]
       # CHANGE LOOP THRU ALL roi ROWS - make Key of suvr_+lower(region), volume_cc_+lower(region)
       v_roi_file_cn_array = ["Region","Atlas","ROI_Number","SUVR","Volume_cc"]
@@ -2025,6 +2029,8 @@ def  run_pet_mk6240_harvest
       #<enum>_pet-processing-log_31-May-2018_mk6240_suvr_visit3_2a.csv  
       #<enum>_roi-summary_mk6240_suvr_<codename-hyphen>_2a.csv --multiple rois, suvr col and volume col
       #<enum>_tacs_mk6240_suvr_<codename-hyphen>_2a.csv --- for one subject, multiple times, series of roi
+      sql = "truncate table "+v_cg_tn_roi_atlas_tjb_mni_v1+"_new"
+      results = connection.execute(sql)
       sql = "truncate table "+v_cg_tn_roi+"_new"
       results = connection.execute(sql)
       sql = "truncate table "+v_cg_tn_tacs+"_new"
@@ -2044,7 +2050,7 @@ def  run_pet_mk6240_harvest
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
     sp_exclude_array = [69,53,54,56,57,95,55,76,78,72,70,71,49,79,99,81,75,80,83,92,93,88,68,97,29,52,87,48,27,14,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,50,42,44,51,96,9,25,23,19,15,24,36,100,35,20,73,32,45,6,12,16,13,11,10,90,59,63,43,4,17,30,74,98]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
-    # for testing @scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
+    # for testing@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
     @scan_procedures.each do |sp|
       @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
       @schedulerun.save
@@ -2301,17 +2307,25 @@ def  run_pet_mk6240_harvest
                           v_cnt = 0
                           v_line_array = []
                           v_roi_hash = Hash.new
+
+                          v_roi_hash_atlas_tjb_mni_v1 = Hash.new
                           v_atlas = ""
+                          v_atlas_tjb_mni_v1 = ""
                           File.open(v_subjectid_roi_file_name,'r') do |file_a|
 
                             while line = file_a.gets
                               if v_cnt > 0 
                                 v_line_array = []
                                 v_line_array =line.gsub(/\n/,"").split(",")
-                                v_atlas = v_line_array[1]
-                                 
-                                v_roi_hash["suvr_"+v_line_array[0].downcase] = v_line_array[3]
-                                v_roi_hash["volume_cc_"+v_line_array[0].downcase] = v_line_array[4]
+                                if v_line_array[1] == v_aal_atlas
+                                  v_atlas = v_line_array[1]
+                                  v_roi_hash["suvr_"+v_line_array[0].downcase] = v_line_array[3]
+                                  v_roi_hash["volume_cc_"+v_line_array[0].downcase] = v_line_array[4]
+                                elsif v_line_array[1] == v_tjb_mni_v1
+                                  v_atlas_tjb_mni_v1 = v_line_array[1]
+                                  v_roi_hash_atlas_tjb_mni_v1["suvr_"+v_line_array[0].downcase] = v_line_array[3]
+                                  v_roi_hash_atlas_tjb_mni_v1["volume_cc_"+v_line_array[0].downcase] = v_line_array[4]
+                                end
                               end   
                               v_cnt = v_cnt + 1                 
                             end
@@ -2322,9 +2336,21 @@ def  run_pet_mk6240_harvest
                           v_col_array.each do |cn|
                                if v_roi_hash[cn].nil?
 puts "bbbbbbb nil="+cn
-                                 sql = sql+","
+                                 sql = sql+",''"
                                else
                                    sql = sql+",'"+v_roi_hash[cn]+"'"
+                               end
+                          end
+                          sql = sql+")"
+                          results = connection.execute(sql)
+                          sql = "insert into cg_pet_mk6240_roi_atlas_tjb_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,atlas,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_ecat_file.to_s+"','"+v_atlas_tjb_mni_v1+"'"
+                          v_col_array = v_roi_column_list.split(",")
+                          v_col_array.each do |cn|
+                               if v_roi_hash_atlas_tjb_mni_v1[cn].nil?
+puts "bbbbbbb nil="+cn
+                                 sql = sql+",''"
+                               else
+                                   sql = sql+",'"+v_roi_hash_atlas_tjb_mni_v1[cn]+"'"
                                end
                           end
                           sql = sql+")"
@@ -2413,6 +2439,37 @@ puts "bbbbbbb nil="+cn
                 # apply edits  -- made into a function  in shared model
               
                 v_shared.apply_cg_edits("cg_pet_mk6240_roi")
+
+                 # DIFFERENT ATLAS atlas_tjb_mni_v1_
+                sql = "select count(*) from cg_pet_mk6240_roi_atlas_tjb_mni_v1_old"
+                results_old = connection.execute(sql)
+                
+                sql = "select count(*) from cg_pet_mk6240_roi_atlas_tjb_mni_v1"
+                results = connection.execute(sql)
+                v_old_cnt = results_old.first.to_s.to_i
+                v_present_cnt = results.first.to_s.to_i
+                v_old_minus_present =v_old_cnt-v_present_cnt
+                v_present_minus_old = v_present_cnt-v_old_cnt
+                if ( v_old_minus_present <= 0 or ( v_old_cnt > 0 and  (v_present_minus_old/v_old_cnt)>0.7     ) )
+                  sql =  "truncate table cg_pet_mk6240_roi_atlas_tjb_mni_v1_old"
+                  results = connection.execute(sql)
+                  sql = "insert into cg_pet_mk6240_roi_atlas_tjb_mni_v1_old select * from cg_pet_mk6240_roi_atlas_tjb_mni_v1"
+                  results = connection.execute(sql)
+                else
+                  v_comment = " The cg_pet_mk6240_roi_atlas_tjb_mni_v1_old table has 30% more rows than the present cg_pet_mk6240_roi_atlas_tjb_mni_v1\n Not truncating cg_pet_mk6240_roi_atlas_tjb_mni_v1_old "+v_comment 
+                end
+                #  truncate cg_ and insert cg_new
+                sql =  "truncate table cg_pet_mk6240_roi_atlas_tjb_mni_v1"
+                results = connection.execute(sql)
+
+                sql = "insert into cg_pet_mk6240_roi_atlas_tjb_mni_v1("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name) 
+                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name from cg_pet_mk6240_roi_atlas_tjb_mni_v1_new t
+                                               where t.scan_procedure_id is not null  and t.enrollment_id is not null "
+                results = connection.execute(sql)
+
+                # apply edits  -- made into a function  in shared model
+              
+                v_shared.apply_cg_edits("cg_pet_mk6240_roi_atlas_tjb_mni_v1")
                 # tacs
                 sql = "select count(*) from cg_pet_mk6240_tacs_old"
                 results_old = connection.execute(sql)
