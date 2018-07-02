@@ -2014,8 +2014,11 @@ def  run_pet_mk6240_harvest
 
       # truncate cg table new 
       v_cg_tn_roi = "cg_pet_mk6240_roi"
-      v_roi_cn_array = ["Region","Atlas","ROI_Number","SUVR","Volume_cc"]
-      v_cg_tn_tacs = "cg_pet_mk6240_tacs" 
+      # ADD AS SINMGLE COLUMN ["Region","Atlas"]
+      # CHANGE LOOP THRU ALL roi ROWS - make Key of suvr_+lower(region), volume_cc_+lower(region)
+      v_roi_file_cn_array = ["Region","Atlas","ROI_Number","SUVR","Volume_cc"]
+      v_roi_cn_array =  ["suvr_precentral_l","suvr_precentral_r","suvr_frontal_sup_l","suvr_frontal_sup_r","suvr_frontal_sup_orb_l","suvr_frontal_sup_orb_r","suvr_frontal_mid_l","suvr_frontal_mid_r","suvr_frontal_mid_orb_l","suvr_frontal_mid_orb_r","suvr_frontal_inf_oper_l","suvr_frontal_inf_oper_r","suvr_frontal_inf_tri_l","suvr_frontal_inf_tri_r","suvr_frontal_inf_orb_l","suvr_frontal_inf_orb_r","suvr_rolandic_oper_l","suvr_rolandic_oper_r","suvr_supp_motor_area_l","suvr_supp_motor_area_r","suvr_olfactory_l","suvr_olfactory_r","suvr_frontal_sup_medial_l","suvr_frontal_sup_medial_r","suvr_frontal_med_orb_l","suvr_frontal_med_orb_r","suvr_rectus_l","suvr_rectus_r","suvr_insula_l","suvr_insula_r","suvr_cingulum_ant_l","suvr_cingulum_ant_r","suvr_cingulum_mid_l","suvr_cingulum_mid_r","suvr_cingulum_post_l","suvr_cingulum_post_r","suvr_hippocampus_l","suvr_hippocampus_r","suvr_parahippocampal_l","suvr_parahippocampal_r","suvr_amygdala_l","suvr_amygdala_r","suvr_calcarine_l","suvr_calcarine_r","suvr_cuneus_l","suvr_cuneus_r","suvr_lingual_l","suvr_lingual_r","suvr_occipital_sup_l","suvr_occipital_sup_r","suvr_occipital_mid_l","suvr_occipital_mid_r","suvr_occipital_inf_l","suvr_occipital_inf_r","suvr_fusiform_l","suvr_fusiform_r","suvr_postcentral_l","suvr_postcentral_r","suvr_parietal_sup_l","suvr_parietal_sup_r","suvr_parietal_inf_l","suvr_parietal_inf_r","suvr_supramarginal_l","suvr_supramarginal_r","suvr_angular_l","suvr_angular_r","suvr_precuneus_l","suvr_precuneus_r","suvr_paracentral_lobule_l","suvr_paracentral_lobule_r","suvr_caudate_l","suvr_caudate_r","suvr_putamen_l","suvr_putamen_r","suvr_pallidum_l","suvr_pallidum_r","suvr_thalamus_l","suvr_thalamus_r","suvr_heschl_l","suvr_heschl_r","suvr_temporal_sup_l","suvr_temporal_sup_r","suvr_temporal_pole_sup_l","suvr_temporal_pole_sup_r","suvr_temporal_mid_l","suvr_temporal_mid_r","suvr_temporal_pole_mid_l","suvr_temporal_pole_mid_r","suvr_temporal_inf_l","suvr_temporal_inf_r","suvr_cerebelum_crus1_l","suvr_cerebelum_crus1_r","suvr_cerebelum_crus2_l","suvr_cerebelum_crus2_r","suvr_cerebelum_3_l","suvr_cerebelum_3_r","suvr_cerebelum_4_5_l","suvr_cerebelum_4_5_r","suvr_cerebelum_6_l","suvr_cerebelum_6_r","suvr_cerebelum_7b_l","suvr_cerebelum_7b_r","suvr_cerebelum_8_l","suvr_cerebelum_8_r","suvr_cerebelum_9_l","suvr_cerebelum_9_r","suvr_cerebelum_10_l","suvr_cerebelum_10_r","suvr_vermis_1_2","suvr_vermis_3","suvr_vermis_4_5","suvr_vermis_6","suvr_vermis_7","suvr_vermis_8","suvr_vermis_9","suvr_vermis_10","suvr_clivus","suvr_ethmoid","suvr_meninges","suvr_pineal","suvr_vermis_sup_ant","suvr_cerebellum_superior","suvr_substantia_nigra","suvr_sphenotemporalbuttress","suvr_pons","volume_cc_precentral_l","volume_cc_precentral_r","volume_cc_frontal_sup_l","volume_cc_frontal_sup_r","volume_cc_frontal_sup_orb_l","volume_cc_frontal_sup_orb_r","volume_cc_frontal_mid_l","volume_cc_frontal_mid_r","volume_cc_frontal_mid_orb_l","volume_cc_frontal_mid_orb_r","volume_cc_frontal_inf_oper_l","volume_cc_frontal_inf_oper_r","volume_cc_frontal_inf_tri_l","volume_cc_frontal_inf_tri_r","volume_cc_frontal_inf_orb_l","volume_cc_frontal_inf_orb_r","volume_cc_rolandic_oper_l","volume_cc_rolandic_oper_r","volume_cc_supp_motor_area_l","volume_cc_supp_motor_area_r","volume_cc_olfactory_l","volume_cc_olfactory_r","volume_cc_frontal_sup_medial_l","volume_cc_frontal_sup_medial_r","volume_cc_frontal_med_orb_l","volume_cc_frontal_med_orb_r","volume_cc_rectus_l","volume_cc_rectus_r","volume_cc_insula_l","volume_cc_insula_r","volume_cc_cingulum_ant_l","volume_cc_cingulum_ant_r","volume_cc_cingulum_mid_l","volume_cc_cingulum_mid_r","volume_cc_cingulum_post_l","volume_cc_cingulum_post_r","volume_cc_hippocampus_l","volume_cc_hippocampus_r","volume_cc_parahippocampal_l","volume_cc_parahippocampal_r","volume_cc_amygdala_l","volume_cc_amygdala_r","volume_cc_calcarine_l","volume_cc_calcarine_r","volume_cc_cuneus_l","volume_cc_cuneus_r","volume_cc_lingual_l","volume_cc_lingual_r","volume_cc_occipital_sup_l","volume_cc_occipital_sup_r","volume_cc_occipital_mid_l","volume_cc_occipital_mid_r","volume_cc_occipital_inf_l","volume_cc_occipital_inf_r","volume_cc_fusiform_l","volume_cc_fusiform_r","volume_cc_postcentral_l","volume_cc_postcentral_r","volume_cc_parietal_sup_l","volume_cc_parietal_sup_r","volume_cc_parietal_inf_l","volume_cc_parietal_inf_r","volume_cc_supramarginal_l","volume_cc_supramarginal_r","volume_cc_angular_l","volume_cc_angular_r","volume_cc_precuneus_l","volume_cc_precuneus_r","volume_cc_paracentral_lobule_l","volume_cc_paracentral_lobule_r","volume_cc_caudate_l","volume_cc_caudate_r","volume_cc_putamen_l","volume_cc_putamen_r","volume_cc_pallidum_l","volume_cc_pallidum_r","volume_cc_thalamus_l","volume_cc_thalamus_r","volume_cc_heschl_l","volume_cc_heschl_r","volume_cc_temporal_sup_l","volume_cc_temporal_sup_r","volume_cc_temporal_pole_sup_l","volume_cc_temporal_pole_sup_r","volume_cc_temporal_mid_l","volume_cc_temporal_mid_r","volume_cc_temporal_pole_mid_l","volume_cc_temporal_pole_mid_r","volume_cc_temporal_inf_l","volume_cc_temporal_inf_r","volume_cc_cerebelum_crus1_l","volume_cc_cerebelum_crus1_r","volume_cc_cerebelum_crus2_l","volume_cc_cerebelum_crus2_r","volume_cc_cerebelum_3_l","volume_cc_cerebelum_3_r","volume_cc_cerebelum_4_5_l","volume_cc_cerebelum_4_5_r","volume_cc_cerebelum_6_l","volume_cc_cerebelum_6_r","volume_cc_cerebelum_7b_l","volume_cc_cerebelum_7b_r","volume_cc_cerebelum_8_l","volume_cc_cerebelum_8_r","volume_cc_cerebelum_9_l","volume_cc_cerebelum_9_r","volume_cc_cerebelum_10_l","volume_cc_cerebelum_10_r","volume_cc_vermis_1_2","volume_cc_vermis_3","volume_cc_vermis_4_5","volume_cc_vermis_6","volume_cc_vermis_7","volume_cc_vermis_8","volume_cc_vermis_9","volume_cc_vermis_10","volume_cc_clivus","volume_cc_ethmoid","volume_cc_meninges","volume_cc_pineal","volume_cc_vermis_sup_ant","volume_cc_cerebellum_superior","volume_cc_substantia_nigra","volume_cc_sphenotemporalbuttress","volume_cc_pons"]
+      v_cg_tn_tacs = "cg_pet_mk6240_tacs"  
       v_tacs_cn_array = ["Time_min","cblm_gm_inf","Precentral_L","Precentral_R","Frontal_Sup_L","Frontal_Sup_R","Frontal_Sup_Orb_L","Frontal_Sup_Orb_R","Frontal_Mid_L","Frontal_Mid_R","Frontal_Mid_Orb_L","Frontal_Mid_Orb_R","Frontal_Inf_Oper_L","Frontal_Inf_Oper_R","Frontal_Inf_Tri_L","Frontal_Inf_Tri_R","Frontal_Inf_Orb_L","Frontal_Inf_Orb_R","Rolandic_Oper_L","Rolandic_Oper_R","Supp_Motor_Area_L","Supp_Motor_Area_R","Olfactory_L","Olfactory_R","Frontal_Sup_Medial_L","Frontal_Sup_Medial_R","Frontal_Med_Orb_L","Frontal_Med_Orb_R","Rectus_L","Rectus_R","Insula_L","Insula_R","Cingulum_Ant_L","Cingulum_Ant_R","Cingulum_Mid_L","Cingulum_Mid_R","Cingulum_Post_L","Cingulum_Post_R","Hippocampus_L","Hippocampus_R","ParaHippocampal_L","ParaHippocampal_R","Amygdala_L","Amygdala_R","Calcarine_L","Calcarine_R","Cuneus_L","Cuneus_R","Lingual_L","Lingual_R","Occipital_Sup_L","Occipital_Sup_R","Occipital_Mid_L","Occipital_Mid_R","Occipital_Inf_L","Occipital_Inf_R","Fusiform_L","Fusiform_R","Postcentral_L","Postcentral_R","Parietal_Sup_L","Parietal_Sup_R","Parietal_Inf_L","Parietal_Inf_R","SupraMarginal_L","SupraMarginal_R","Angular_L","Angular_R","Precuneus_L","Precuneus_R","Paracentral_Lobule_L","Paracentral_Lobule_R","Caudate_L","Caudate_R","Putamen_L","Putamen_R","Pallidum_L","Pallidum_R","Thalamus_L","Thalamus_R","Heschl_L","Heschl_R","Temporal_Sup_L","Temporal_Sup_R","Temporal_Pole_Sup_L","Temporal_Pole_Sup_R","Temporal_Mid_L","Temporal_Mid_R","Temporal_Pole_Mid_L","Temporal_Pole_Mid_R","Temporal_Inf_L","Temporal_Inf_R","Cerebelum_Crus1_L","Cerebelum_Crus1_R","Cerebelum_Crus2_L","Cerebelum_Crus2_R","Cerebelum_3_L","Cerebelum_3_R","Cerebelum_4_5_L","Cerebelum_4_5_R","Cerebelum_6_L","Cerebelum_6_R","Cerebelum_7b_L","Cerebelum_7b_R","Cerebelum_8_L","Cerebelum_8_R","Cerebelum_9_L","Cerebelum_9_R","Cerebelum_10_L","Cerebelum_10_R","Vermis_1_2","Vermis_3","Vermis_4_5","Vermis_6","Vermis_7","Vermis_8","Vermis_9","Vermis_10","Clivus","Ethmoid","Meninges","Pineal","Vermis_Sup_Ant","Cerebellum_Superior","Substantia_Nigra","SphenotemporalButtress","Pons"]
       v_log_file_cn_array = ["Description","Value"]             
       # <enum>_analysis-log_mk6240_suvr_<codename-hyphen>_2a.csv. source filenames
@@ -2033,14 +2036,15 @@ def  run_pet_mk6240_harvest
     v_code_version = "2a"
     v_product_file = ""
       #subjectid,general_comment,enrollment_id,scan_procedure_id,file_name,secondary_key,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,
-    v_roi_column_list = "region,atlas,roi_number,suvr,volume_cc"
-    #subjectid,general_comment,enrollment_id,scan_procedure_id,file_name,secondary_key,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,
+    v_roi_column_list = "suvr_precentral_l,suvr_precentral_r,suvr_frontal_sup_l,suvr_frontal_sup_r,suvr_frontal_sup_orb_l,suvr_frontal_sup_orb_r,suvr_frontal_mid_l,suvr_frontal_mid_r,suvr_frontal_mid_orb_l,suvr_frontal_mid_orb_r,suvr_frontal_inf_oper_l,suvr_frontal_inf_oper_r,suvr_frontal_inf_tri_l,suvr_frontal_inf_tri_r,suvr_frontal_inf_orb_l,suvr_frontal_inf_orb_r,suvr_rolandic_oper_l,suvr_rolandic_oper_r,suvr_supp_motor_area_l,suvr_supp_motor_area_r,suvr_olfactory_l,suvr_olfactory_r,suvr_frontal_sup_medial_l,suvr_frontal_sup_medial_r,suvr_frontal_med_orb_l,suvr_frontal_med_orb_r,suvr_rectus_l,suvr_rectus_r,suvr_insula_l,suvr_insula_r,suvr_cingulum_ant_l,suvr_cingulum_ant_r,suvr_cingulum_mid_l,suvr_cingulum_mid_r,suvr_cingulum_post_l,suvr_cingulum_post_r,suvr_hippocampus_l,suvr_hippocampus_r,suvr_parahippocampal_l,suvr_parahippocampal_r,suvr_amygdala_l,suvr_amygdala_r,suvr_calcarine_l,suvr_calcarine_r,suvr_cuneus_l,suvr_cuneus_r,suvr_lingual_l,suvr_lingual_r,suvr_occipital_sup_l,suvr_occipital_sup_r,suvr_occipital_mid_l,suvr_occipital_mid_r,suvr_occipital_inf_l,suvr_occipital_inf_r,suvr_fusiform_l,suvr_fusiform_r,suvr_postcentral_l,suvr_postcentral_r,suvr_parietal_sup_l,suvr_parietal_sup_r,suvr_parietal_inf_l,suvr_parietal_inf_r,suvr_supramarginal_l,suvr_supramarginal_r,suvr_angular_l,suvr_angular_r,suvr_precuneus_l,suvr_precuneus_r,suvr_paracentral_lobule_l,suvr_paracentral_lobule_r,suvr_caudate_l,suvr_caudate_r,suvr_putamen_l,suvr_putamen_r,suvr_pallidum_l,suvr_pallidum_r,suvr_thalamus_l,suvr_thalamus_r,suvr_heschl_l,suvr_heschl_r,suvr_temporal_sup_l,suvr_temporal_sup_r,suvr_temporal_pole_sup_l,suvr_temporal_pole_sup_r,suvr_temporal_mid_l,suvr_temporal_mid_r,suvr_temporal_pole_mid_l,suvr_temporal_pole_mid_r,suvr_temporal_inf_l,suvr_temporal_inf_r,suvr_cerebelum_crus1_l,suvr_cerebelum_crus1_r,suvr_cerebelum_crus2_l,suvr_cerebelum_crus2_r,suvr_cerebelum_3_l,suvr_cerebelum_3_r,suvr_cerebelum_4_5_l,suvr_cerebelum_4_5_r,suvr_cerebelum_6_l,suvr_cerebelum_6_r,suvr_cerebelum_7b_l,suvr_cerebelum_7b_r,suvr_cerebelum_8_l,suvr_cerebelum_8_r,suvr_cerebelum_9_l,suvr_cerebelum_9_r,suvr_cerebelum_10_l,suvr_cerebelum_10_r,suvr_vermis_1_2,suvr_vermis_3,suvr_vermis_4_5,suvr_vermis_6,suvr_vermis_7,suvr_vermis_8,suvr_vermis_9,suvr_vermis_10,suvr_clivus,suvr_ethmoid,suvr_meninges,suvr_pineal,suvr_vermis_sup_ant,suvr_cerebellum_superior,suvr_substantia_nigra,suvr_sphenotemporalbuttress,suvr_pons,volume_cc_precentral_l,volume_cc_precentral_r,volume_cc_frontal_sup_l,volume_cc_frontal_sup_r,volume_cc_frontal_sup_orb_l,volume_cc_frontal_sup_orb_r,volume_cc_frontal_mid_l,volume_cc_frontal_mid_r,volume_cc_frontal_mid_orb_l,volume_cc_frontal_mid_orb_r,volume_cc_frontal_inf_oper_l,volume_cc_frontal_inf_oper_r,volume_cc_frontal_inf_tri_l,volume_cc_frontal_inf_tri_r,volume_cc_frontal_inf_orb_l,volume_cc_frontal_inf_orb_r,volume_cc_rolandic_oper_l,volume_cc_rolandic_oper_r,volume_cc_supp_motor_area_l,volume_cc_supp_motor_area_r,volume_cc_olfactory_l,volume_cc_olfactory_r,volume_cc_frontal_sup_medial_l,volume_cc_frontal_sup_medial_r,volume_cc_frontal_med_orb_l,volume_cc_frontal_med_orb_r,volume_cc_rectus_l,volume_cc_rectus_r,volume_cc_insula_l,volume_cc_insula_r,volume_cc_cingulum_ant_l,volume_cc_cingulum_ant_r,volume_cc_cingulum_mid_l,volume_cc_cingulum_mid_r,volume_cc_cingulum_post_l,volume_cc_cingulum_post_r,volume_cc_hippocampus_l,volume_cc_hippocampus_r,volume_cc_parahippocampal_l,volume_cc_parahippocampal_r,volume_cc_amygdala_l,volume_cc_amygdala_r,volume_cc_calcarine_l,volume_cc_calcarine_r,volume_cc_cuneus_l,volume_cc_cuneus_r,volume_cc_lingual_l,volume_cc_lingual_r,volume_cc_occipital_sup_l,volume_cc_occipital_sup_r,volume_cc_occipital_mid_l,volume_cc_occipital_mid_r,volume_cc_occipital_inf_l,volume_cc_occipital_inf_r,volume_cc_fusiform_l,volume_cc_fusiform_r,volume_cc_postcentral_l,volume_cc_postcentral_r,volume_cc_parietal_sup_l,volume_cc_parietal_sup_r,volume_cc_parietal_inf_l,volume_cc_parietal_inf_r,volume_cc_supramarginal_l,volume_cc_supramarginal_r,volume_cc_angular_l,volume_cc_angular_r,volume_cc_precuneus_l,volume_cc_precuneus_r,volume_cc_paracentral_lobule_l,volume_cc_paracentral_lobule_r,volume_cc_caudate_l,volume_cc_caudate_r,volume_cc_putamen_l,volume_cc_putamen_r,volume_cc_pallidum_l,volume_cc_pallidum_r,volume_cc_thalamus_l,volume_cc_thalamus_r,volume_cc_heschl_l,volume_cc_heschl_r,volume_cc_temporal_sup_l,volume_cc_temporal_sup_r,volume_cc_temporal_pole_sup_l,volume_cc_temporal_pole_sup_r,volume_cc_temporal_mid_l,volume_cc_temporal_mid_r,volume_cc_temporal_pole_mid_l,volume_cc_temporal_pole_mid_r,volume_cc_temporal_inf_l,volume_cc_temporal_inf_r,volume_cc_cerebelum_crus1_l,volume_cc_cerebelum_crus1_r,volume_cc_cerebelum_crus2_l,volume_cc_cerebelum_crus2_r,volume_cc_cerebelum_3_l,volume_cc_cerebelum_3_r,volume_cc_cerebelum_4_5_l,volume_cc_cerebelum_4_5_r,volume_cc_cerebelum_6_l,volume_cc_cerebelum_6_r,volume_cc_cerebelum_7b_l,volume_cc_cerebelum_7b_r,volume_cc_cerebelum_8_l,volume_cc_cerebelum_8_r,volume_cc_cerebelum_9_l,volume_cc_cerebelum_9_r,volume_cc_cerebelum_10_l,volume_cc_cerebelum_10_r,volume_cc_vermis_1_2,volume_cc_vermis_3,volume_cc_vermis_4_5,volume_cc_vermis_6,volume_cc_vermis_7,volume_cc_vermis_8,volume_cc_vermis_9,volume_cc_vermis_10,volume_cc_clivus,volume_cc_ethmoid,volume_cc_meninges,volume_cc_pineal,volume_cc_vermis_sup_ant,volume_cc_cerebellum_superior,volume_cc_substantia_nigra,volume_cc_sphenotemporalbuttress,volume_cc_pons"
+
+ #subjectid,general_comment,enrollment_id,scan_procedure_id,file_name,secondary_key,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,
     v_tacs_column_list = "time_min,cblm_gm_inf,precentral_l,precentral_r,frontal_sup_l,frontal_sup_r,frontal_sup_orb_l,frontal_sup_orb_r,frontal_mid_l,frontal_mid_r,frontal_mid_orb_l,frontal_mid_orb_r,frontal_inf_oper_l,frontal_inf_oper_r,frontal_inf_tri_l,frontal_inf_tri_r,frontal_inf_orb_l,frontal_inf_orb_r,rolandic_oper_l,rolandic_oper_r,supp_motor_area_l,supp_motor_area_r,olfactory_l,olfactory_r,frontal_sup_medial_l,frontal_sup_medial_r,frontal_med_orb_l,frontal_med_orb_r,rectus_l,rectus_r,insula_l,insula_r,cingulum_ant_l,cingulum_ant_r,cingulum_mid_l,cingulum_mid_r,cingulum_post_l,cingulum_post_r,hippocampus_l,hippocampus_r,parahippocampal_l,parahippocampal_r,amygdala_l,amygdala_r,calcarine_l,calcarine_r,cuneus_l,cuneus_r,lingual_l,lingual_r,occipital_sup_l,occipital_sup_r,occipital_mid_l,occipital_mid_r,occipital_inf_l,occipital_inf_r,fusiform_l,fusiform_r,postcentral_l,postcentral_r,parietal_sup_l,parietal_sup_r,parietal_inf_l,parietal_inf_r,supramarginal_l,supramarginal_r,angular_l,angular_r,precuneus_l,precuneus_r,paracentral_lobule_l,paracentral_lobule_r,caudate_l,caudate_r,putamen_l,putamen_r,pallidum_l,pallidum_r,thalamus_l,thalamus_r,heschl_l,heschl_r,temporal_sup_l,temporal_sup_r,temporal_pole_sup_l,temporal_pole_sup_r,temporal_mid_l,temporal_mid_r,temporal_pole_mid_l,temporal_pole_mid_r,temporal_inf_l,temporal_inf_r,cerebelum_crus1_l,cerebelum_crus1_r,cerebelum_crus2_l,cerebelum_crus2_r,cerebelum_3_l,cerebelum_3_r,cerebelum_4_5_l,cerebelum_4_5_r,cerebelum_6_l,cerebelum_6_r,cerebelum_7b_l,cerebelum_7b_r,cerebelum_8_l,cerebelum_8_r,cerebelum_9_l,cerebelum_9_r,cerebelum_10_l,cerebelum_10_r,vermis_1_2,vermis_3,vermis_4_5,vermis_6,vermis_7,vermis_8,vermis_9,vermis_10,clivus,ethmoid,meninges,pineal,vermis_sup_ant,cerebellum_superior,substantia_nigra,sphenotemporalbuttress,pons"
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
     sp_exclude_array = [69,53,54,56,57,95,55,76,78,72,70,71,49,79,99,81,75,80,83,92,93,88,68,97,29,52,87,48,27,14,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,50,42,44,51,96,9,25,23,19,15,24,36,100,35,20,73,32,45,6,12,16,13,11,10,90,59,63,43,4,17,30,74,98]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
-     # testing   @scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
+    # for testing @scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
     @scan_procedures.each do |sp|
       @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
       @schedulerun.save
@@ -2275,6 +2279,7 @@ def  run_pet_mk6240_harvest
                     # check for roi file
                     if File.file?(v_subjectid_roi_file_name)
                         # check column headers 
+                        puts "v_subjectid_roi_file_name="+v_subjectid_roi_file_name
                         v_cnt = 0
                         v_header = ""
                         File.open(v_subjectid_roi_file_name,'r') do |file_a|
@@ -2285,9 +2290,9 @@ def  run_pet_mk6240_harvest
                             v_cnt = v_cnt +1
                           end
                         end
-                       v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_roi_cn_array.join(","))
+                       v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_roi_file_cn_array.join(","))
                        if v_return_flag == "N" 
-                               v_comment = v_file_path+"=>"+v_return_comment+" \n"+v_comment
+                               v_comment = v_subjectid_roi_file_name+"=>"+v_return_comment+" \n"+v_comment
                                puts v_return_comment               
                        else
                        # insert v_cg_tn_roi -- with _v#  v_subjectid_v_num  
@@ -2295,24 +2300,36 @@ def  run_pet_mk6240_harvest
                        # CHECK FOR empty ROWS
                           v_cnt = 0
                           v_line_array = []
+                          v_roi_hash = Hash.new
+                          v_atlas = ""
                           File.open(v_subjectid_roi_file_name,'r') do |file_a|
 
                             while line = file_a.gets
-                              if v_cnt > 0 and v_cnt < 2
-                                sql = "insert into cg_pet_mk6240_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_ecat_file.to_s+"',"
+                              if v_cnt > 0 
                                 v_line_array = []
-                                line.gsub(/\n/,"").split(",").each do |v|
-                                  v_line_array.push("'"+v+"'")
-                                end 
-                                sql = sql+v_line_array.join(",")
-                                sql = sql+")"
-                                results = connection.execute(sql)
-  puts "AAAAA insert="+v_subjectid_v_num
+                                v_line_array =line.gsub(/\n/,"").split(",")
+                                v_atlas = v_line_array[1]
+                                 
+                                v_roi_hash["suvr_"+v_line_array[0].downcase] = v_line_array[3]
+                                v_roi_hash["volume_cc_"+v_line_array[0].downcase] = v_line_array[4]
                               end   
                               v_cnt = v_cnt + 1                 
                             end
                             
+                          end # file read
+                          sql = "insert into cg_pet_mk6240_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,atlas,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_ecat_file.to_s+"','"+v_atlas+"'"
+                          v_col_array = v_roi_column_list.split(",")
+                          v_col_array.each do |cn|
+                               if v_roi_hash[cn].nil?
+puts "bbbbbbb nil="+cn
+                                 sql = sql+","
+                               else
+                                   sql = sql+",'"+v_roi_hash[cn]+"'"
+                               end
                           end
+                          sql = sql+")"
+                          results = connection.execute(sql)
+                                
                        end
                     end
                     if File.file?(v_subjectid_tacs_file_name)
@@ -2454,6 +2471,8 @@ end
 # later file exists and log not say "something"
 def run_pet_mk6240_process
       v_base_path = Shared.get_base_path()
+      v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+      v_mk6240_path = "/pet/mk6240/suvr/code_ver2a"
      @schedule = Schedule.where("name in ('pet_mk6240_process')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
@@ -2463,7 +2482,39 @@ def run_pet_mk6240_process
       @schedulerun.save
       v_comment = ""
       v_comment_warning ="" 
+      v_mk6240_tracer_id = "11"
     connection = ActiveRecord::Base.connection();
+      v_mk6240_petscans = Petscan.where("petscans.lookup_pettracer_id in (?)",v_mk6240_tracer_id)
+    # get list of mk6240 Petscans
+    #check if has precprocessed codever 2a dir
+    # if there, stop, else 
+    # check if ecat file exisits, single file, correct size
+    # check for single o acpc corrected file linked to vgroup
+    # run command, make tracker record
+    # using ecat file name to get subjectid, scan_procedure from ecat file path
+      v_mk6240_petscans.each do |pet_appt|
+          # puts "pet_appt.path="+pet_appt.path
+          v_pet_path_array = (pet_appt.path).split("/")
+          v_pet_path_ok = "Y"
+          v_scan_procedure_codename = ""
+          v_subjectid = ""
+          if v_pet_path_array.count < 8 #or !File.file?(pet_appt.path)
+             v_pet_path_ok = "N"
+          else
+             v_scan_procedure_codename = v_pet_path_array[4] # leading slash shifts register
+             v_subjectid_array = v_pet_path_array[7].split("_")
+             v_subjectid = v_subjectid_array[0].downcase
+          end
+          v_subjectid_pet_mk6240 = v_preprocessed_path+v_scan_procedure_codename+"/"+v_subjectid+v_mk6240_path
+          if File.directory?(v_subjectid_pet_mk6240) and v_pet_path_ok == "Y"
+           #  dir exists - not run - extend to look at logs - re-run criteria or flag
+           # puts "dddd v_subjectid_pet_mk6240="+v_subjectid_pet_mk6240
+          elsif File.file?(pet_appt.path)
+            puts " need to run="+v_subjectid_pet_mk6240
+          else
+            puts "no ecat file"
+          end
+      end
 
 
 
