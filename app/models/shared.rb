@@ -2011,7 +2011,7 @@ def  run_pet_mk6240_harvest
       v_comment_base = ""
       v_shared = Shared.new
       connection = ActiveRecord::Base.connection();
-
+      v_mk6240_tracer_id = "11"
       # truncate cg table new 
       v_cg_tn_roi = "cg_pet_mk6240_roi"
       v_cg_tn_roi_atlas_tjb_mni_v1 = "cg_pet_mk6240_roi_atlas_tjb_mni_v1"
@@ -2209,8 +2209,20 @@ def  run_pet_mk6240_harvest
                                      if v_petscans.count > 0
                                         v_appointment = Appointment.find(v_petscans.first.appointment_id)
                                         v_age_at_appointment = v_appointment.age_at_appointment.to_s
-                                     end
+                                     else # sometimes the processing ecat not match the panda ecat 
+                                          # use tracer, enumber and scan_procedure
+                                          v_appointments = Appointment.where("appointments.appointment_type = 'pet_scan' 
+                                             and appointments.id in (select petscans.appointment_id from petscans where petscans.lookup_pettracer_id in (?))
+                                             and appointments.vgroup_id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships 
+                                                                 where enrollment_vgroup_memberships.enrollment_id in (?))
+                                             and appointments.vgroup_id in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+                                                               where scan_procedures_vgroups.scan_procedure_id in (?))",v_mk6240_tracer_id,enrollment.first.id,sp.id)
+                                           if v_appointments.count > 0
+                                               v_age_at_appointment = v_appointments.first.age_at_appointment.to_s
+                                           end
 
+                                     end
+                                       
                                    end
                                
                                 end
@@ -2339,7 +2351,7 @@ def  run_pet_mk6240_harvest
                             end
                             
                           end # file read
-                          sql = "insert into cg_pet_mk6240_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,atlas,age_at_appointment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_mk6240_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,ecat_file_name,atlas,age_at_appointment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"'"
                           v_col_array = v_roi_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash[cn].nil?
@@ -2351,7 +2363,7 @@ def  run_pet_mk6240_harvest
                           end
                           sql = sql+")"
                           results = connection.execute(sql)
-                          sql = "insert into cg_pet_mk6240_roi_atlas_tjb_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,atlas,age_at_appointment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_ecat_file.to_s+"','"+v_atlas_tjb_mni_v1+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_mk6240_roi_atlas_tjb_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,ecat_file_name,atlas,age_at_appointment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_ecat_file.to_s+"','"+v_atlas_tjb_mni_v1+"','"+v_age_at_appointment+"'"
                           v_col_array = v_roi_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_tjb_mni_v1[cn].nil?
