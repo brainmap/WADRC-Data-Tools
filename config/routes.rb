@@ -216,6 +216,7 @@ WADRCDataTools::Application.routes.draw do
     match '/questionnaire_search' , :controller => 'questionnaires', :action => 'questionnaire_search', :as =>:questionnaire_search ,via: [:get, :post] 
     match '/q_search' , :controller => 'questionnaires', :action => 'q_search', :as =>:q_search  ,via: [:get, :post] 
     match '/ids_search' , :controller => 'image_datasets', :action => 'ids_search', :as =>:ids_search ,via: [:get, :post] 
+    match '/processedimage_search' , :controller => 'processedimages', :action => 'processedimage_search', :as =>:processedimage_search  ,via: [:get, :post] 
      
    
   match '/series_description_map_search' , :controller => 'series_description_maps', :action => 'series_description_map_search', :as =>:series_description_map_search  ,via: [:get, :post]
