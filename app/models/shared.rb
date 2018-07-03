@@ -2551,6 +2551,8 @@ def run_pet_mk6240_process
     # using ecat file name to get subjectid, scan_procedure from ecat file path
       v_mk6240_petscans.each do |pet_appt|
           # puts "pet_appt.path="+pet_appt.path
+          v_enumber = ""
+          v_scan_procedure = ""
           v_pet_path_array = (pet_appt.path).split("/")
           v_pet_path_ok = "Y"
           v_scan_procedure_codename = ""
@@ -2561,18 +2563,79 @@ def run_pet_mk6240_process
              v_scan_procedure_codename = v_pet_path_array[4] # leading slash shifts register
              v_subjectid_array = v_pet_path_array[7].split("_")
              v_subjectid = v_subjectid_array[0].downcase
+             #check if enumber and scan_procedure are valid
+             v_enumbers = Enrollment.where("enumber in (?)", v_subjectid)
+             v_scan_procedures =ScanProcedure.where("codename in (?)",v_scan_procedure_codename)
+             if v_enumbers.count > 0
+                v_enumber = v_enumbers.first
+             else
+               v_pet_path_ok = "N"
+             end
+             if v_scan_procedures.count >0
+                v_scan_procedure = v_scan_procedures.first
+             else
+                v_pet_path_ok = "N"
+             end
           end
           v_subjectid_pet_mk6240 = v_preprocessed_path+v_scan_procedure_codename+"/"+v_subjectid+v_mk6240_path
           if File.directory?(v_subjectid_pet_mk6240) and v_pet_path_ok == "Y"
            #  dir exists - not run - extend to look at logs - re-run criteria or flag
            # puts "dddd v_subjectid_pet_mk6240="+v_subjectid_pet_mk6240
           elsif File.file?(pet_appt.path)
-            puts " need to run="+v_subjectid_pet_mk6240
+            # check for expected size
+            @petscan_tracer_file_size = {}
+            @petscan_tracer_file_size_multiple = {}
+            if !v_scan_procedure.petscan_tracer_file_size.nil?
+               v_tmp_tracer_size = v_scan_procedure.petscan_tracer_file_size.split("|")
+               v_tmp_tracer_size.each do |tr|
+                v_tmp_size = tr.split(":")
+                @petscan_tracer_file_size[v_tmp_size[0]] = v_tmp_size[1]
+                if @petscan_tracer_file_size_multiple[v_tmp_size[0]].nil?
+                   @petscan_tracer_file_size_multiple[v_tmp_size[0]] = [v_tmp_size[1]]
+                else
+                  @petscan_tracer_file_size_multiple[v_tmp_size[0]] = @petscan_tracer_file_size_multiple[v_tmp_size[0]].push(v_tmp_size[1])
+                end
+               end
+             #v_mk6240_tracer_id
+               if !@petscan_tracer_file_size_multiple.nil? and !@petscan_tracer_file_size_multiple[v_mk6240_tracer_id.to_s].nil? 
+                    if @petscan_tracer_file_size_multiple[v_mk6240_tracer_id.to_s].include?(File.stat(pet_appt.path).size.to_s)
+                      # petfile not expected size
+                      v_pet_path_ok = "N"
+                      v_comment = v_comment+" :"+v_subjectid+" ecat file wrong size:"
+                    end
+               end
+             end
+
+            end
+            v_o_acpc_file = ""
+            if v_pet_path_ok == "Y"
+               # check for one o-acpc  file -- unknown?
+               v_subjectid_unknown = v_preprocessed_path+v_scan_procedure.codename+"/"+v_subjectid+"/unknown"
+               
+               if File.directory?(v_subjectid_unknown)   # need to also look for [subjectid]b,c,d,.R
+                    v_cnt = 0
+                    v_dir_array = Dir.entries(v_subjectid_unknown)
+                    v_dir_array.each do |f|
+                      if f.start_with?("o") and f.end_with?(".nii")
+                         v_cnt = v_cnt + 1
+                         v_o_acpc_file = f
+                      end
+                    end
+                    if v_cnt > 1
+                      v_pet_path_ok = "N"
+                      v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in unknown:"
+                    end
+
+            end  
+            if v_pet_path_ok == "Y"
+      
+              puts " need to run="+v_subjectid_pet_mk6240
+            end
           else
             puts "no ecat file"
+            v_comment = v_comment+" :"+v_subjectid+" no ecat file:"
           end
       end
-
 
 
     @schedulerun.comment =("successful finish pet_mk6240_process "+v_comment_warning+" "+v_comment[0..1990])
