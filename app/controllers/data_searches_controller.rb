@@ -2663,9 +2663,9 @@ puts "bbbbb "+sql
                  @longitudinal_column_headers.push(v_cnt.to_s+"_"+col)
              end
        end
-       v_longitudinal_base_col = ['Reggieid','Wrapno']
+       v_longitudinal_base_col = ['reggieid','wrapno']
        if @cg_query.participant_centric == "2"  # enumbers
-            v_longitudinal_base_col = ['Reggieid','Wrapno','Enumber']
+            v_longitudinal_base_col = ['reggieid','wrapno','enumber']
        end
       @local_column_headers = v_longitudinal_base_col + @longitudinal_column_headers
       # add new lead columns
@@ -2808,7 +2808,7 @@ puts "bbbbb "+sql
                  @longitudinal_column_headers.push(v_cnt.to_s+"_"+col)
              end
        end
-       v_longitudinal_base_col = ['Protocols','Enumbers','Reggieid','Wrapno']
+       v_longitudinal_base_col = ['protocols','enumbers','reggieid','wrapno']
       @local_column_headers = v_longitudinal_base_col + @longitudinal_column_headers
       # add new lead columns
       @column_number = @local_column_headers.size
