@@ -57,6 +57,10 @@ v_user = v_user.gsub("\n","")
   elsif v_value_1 == "asl_sw_fs_process"
        v_shared = Shared.new
        v_shared.run_asl_sw_fs_process()
+  
+  elsif v_value_1 == "asl_harvest"
+       v_shared = Shared.new
+       v_shared.run_asl_harvest()
 
   elsif v_value_1 == "adrc_dti"
       v_shared = Shared.new

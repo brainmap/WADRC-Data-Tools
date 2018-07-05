@@ -4345,6 +4345,186 @@ puts "ppppppp "+dir_name_array[0]
     end
 
 
+def  run_asl_harvest
+  
+      v_base_path = Shared.get_base_path()
+     @schedule = Schedule.where("name in ('asl_harvest')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting asl_harvest"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning ="" 
+      v_comment_base = ""
+      v_shared = Shared.new
+      connection = ActiveRecord::Base.connection();
+      v_cg_tn_asl = "cg_asl_pproc_v5"  
+      v_asl_cn_array = ["inversion_time","value","file_name","file_path"] 
+
+      # just one value in global_rASL_fmap_<subjectid>_<inversion_time>_<scan_series>_bmasked.txt
+
+      sql = "truncate table "+v_cg_tn_asl+"_new"
+      results = connection.execute(sql)
+    v_asl_pproc_v5_path = "/asl/pproc_v5/"
+    v_asl_file_name_start = "global_rASL_fmap_"
+    v_asl_file_name_end = "_bmasked.txt"
+    v_product_file = ""
+ 
+    v_asl_column_list = "inversion_time,value,file_name,file_path"
+    v_secondary_key_array =["b","c","d","e",".R"]
+    v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+    sp_exclude_array = [-1]
+    @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
+    # for testing@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
+    @scan_procedures.each do |sp|
+      @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
+      @schedulerun.save
+      v_visit_number =""
+      if sp.codename.include?("visit2")
+            v_visit_number ="_v2"
+      elsif sp.codename.include?("visit3")
+            v_visit_number ="_v3"
+      elsif sp.codename.include?("visit4")
+            v_visit_number ="_v4"
+      elsif sp.codename.include?("visit5")
+            v_visit_number ="_v5"
+      end  
+      v_codename_hyphen =  sp.codename
+      v_codename_hyphen = v_codename_hyphen.gsub(".","-")
+
+      v_preprocessed_full_path = v_preprocessed_path+sp.codename  
+      if File.directory?(v_preprocessed_full_path)
+        sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+"  
+                                    and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id 
+                                    and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
+        @results = connection.execute(sql_enum)                                 
+        @results.each do |r|
+          enrollment = Enrollment.where("enumber='"+r[0]+"'")
+          if !enrollment.blank?
+            v_log = ""
+            v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
+            v_subjectid = enrollment[0].enumber
+            v_subjectid_v_num = enrollment[0].enumber + v_visit_number
+            @schedulerun.comment = "start "+v_subjectid_v_num+" "+v_comment_base
+            @schedulerun.save
+            v_subjectid_asl =v_subjectid_path+v_asl_pproc_v5_path
+            v_subjectid_array = []
+            begin
+              if File.directory?(v_subjectid_asl)
+                v_subjectid_array.push(v_subjectid)
+              end
+              v_secondary_key_array.each do |k|
+                if File.directory?(v_subjectid_path+k+v_asl_pproc_v5_path)
+                  v_subjectid_array.push((v_subjectid+k))
+                  v_subjectid_v_num = v_subjectid+k + v_visit_number
+                  v_subjectid_path = v_preprocessed_full_path+"/"+v_subjectid+k
+                  v_subjectid_pet_mk6240 =v_subjectid_path+v_asl_pproc_v5_path
+                end
+              end
+             rescue => msg  
+                v_comment = v_comment + "IN RESCUE ERROR "+msg+"\n"  
+            end
+
+            v_subjectid_array = v_subjectid_array.uniq
+            v_subjectid_array.each do |subj|
+              v_seconbdary_key =""
+              if subj != enrollment.first.enumber
+                 v_secondary_key = subj
+                 v_secondary_key = v_secondary_key.gsub(enrollment.first.enumber,"")
+              end
+              v_subjectid = subj
+              v_subjectid_v_num = subj + v_visit_number
+              v_subjectid_path = v_preprocessed_full_path+"/"+subj
+              v_subjectid_asl =v_subjectid_path+v_asl_pproc_v5_path
+              if File.directory?(v_subjectid_asl)
+                v_dir_array = Dir.entries(v_subjectid_asl)
+                v_dir_array.each do |f|
+                  #global_rASL_fmap_<subjectid>_<inversion_time>_<scan_series>_bmasked.txt
+                  v_product_file = ""
+                  if f.start_with?(v_asl_file_name_start+v_subjectid) and f.end_with?(v_asl_file_name_end)
+                    v_product_file = f
+                      #check if exists in processedimages
+                      v_value =""
+                      v_inversion_time = ""
+                      v_scan_series = ""
+                      v_asl_file_array = f.split("_")
+                      v_inversion_time = v_asl_file_array[4]
+                      v_scan_series = v_asl_file_array[5]
+ # MAKE TRACKER QC
+
+puts "gggg v_subjectid_asl+v_product_file="+v_subjectid_asl+v_product_file
+                    if File.file?(v_subjectid_asl+v_product_file)
+                        v_cnt = 0
+                        File.open(v_subjectid_asl+v_product_file,'r') do |file_a|
+                          while line = file_a.gets and v_cnt < 1
+                            if v_cnt < 1
+                              v_value = line.gsub("\n","")
+                            end
+                            v_cnt = v_cnt +1
+                          end
+                        end
+
+                        sql = "insert into cg_asl_pproc_v5_new(subjectid,enrollment_id,scan_procedure_id,secondary_key,inversion_time,value,file_name,file_path ) 
+                          values('"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_inversion_time.to_s+"','"+v_value.to_s+"','"+v_product_file+"','"+v_subjectid_asl+v_product_file+"'"
+
+                        sql = sql+")"
+                        results = connection.execute(sql)
+                    end
+                  end # if pattern match file name
+                end # file loop
+              end # has asl/pproc_v5 dir  
+            end # subject array loop
+          end # enrollment not blank
+        end # results loop
+      end # preprocessed sp dir exists
+    end   # scan procedure loop
+                  
+                # asl
+                sql = "select count(*) from cg_asl_pproc_v5_old"
+                results_old = connection.execute(sql)
+                
+                sql = "select count(*) from cg_asl_pproc_v5"
+                results = connection.execute(sql)
+                v_old_cnt = results_old.first.to_s.to_i
+                v_present_cnt = results.first.to_s.to_i
+                v_old_minus_present =v_old_cnt-v_present_cnt
+                v_present_minus_old = v_present_cnt-v_old_cnt
+                if ( v_old_minus_present <= 0 or ( v_old_cnt > 0 and  (v_present_minus_old/v_old_cnt)>0.7     ) )
+                  sql =  "truncate table cg_asl_pproc_v5_old"
+                  results = connection.execute(sql)
+                  sql = "insert into cg_asl_pproc_v5 select * from cg_asl_pproc_v5"
+                  results = connection.execute(sql)
+                else
+                  v_comment = " The cg_asl_pproc_v5_old table has 30% more rows than the present cg_asl_pproc_v5\n Not truncating cg_asl_pproc_v5_old "+v_comment 
+                end
+                #  truncate cg_ and insert cg_new
+                sql =  "truncate table cg_asl_pproc_v5"
+                results = connection.execute(sql)
+
+                sql = "insert into cg_asl_pproc_v5(subjectid,enrollment_id,scan_procedure_id,secondary_key,inversion_time,value,file_name,file_path) 
+                select distinct subjectid,enrollment_id,scan_procedure_id,secondary_key,inversion_time,value,file_name,file_path from cg_asl_pproc_v5_new t
+                                               where t.scan_procedure_id is not null  and t.enrollment_id is not null "
+                results = connection.execute(sql)
+
+                # apply edits  -- made into a function  in shared model
+                v_shared.apply_cg_edits("cg_asl_pproc_v5")
+
+     @schedulerun.comment =("successful finish asl_harvest "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+       @schedulerun.status_flag ="Y"
+     end
+     @schedulerun.save
+     @schedulerun.end_time = @schedulerun.updated_at      
+     @schedulerun.save  
+
+end
+
+
+
+
 # takes dicom header field, harvests a value for each ids , puts in cg_table
 # need to add schedule_pass_in_value table/class ( schedule_pass_in_group, schedule_pass_in_value), panda form/admin
 def run_dicom_header_field_harvest
