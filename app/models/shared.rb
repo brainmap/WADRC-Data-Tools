@@ -3455,6 +3455,9 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
     
   end
 
+# exclude pilots
+# exclude do not shares
+# exclude bad ids
  def run_xnat_upload
      v_base_path = Shared.get_base_path()
     v_log_base ="/mounts/data/preprocessed/logs/"
@@ -3463,7 +3466,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      @schedule = Schedule.where("name in ('xnat_upload')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
-      @schedulerun.comment ="starting xnat_file"
+      @schedulerun.comment ="starting xnat_upload"
       @schedulerun.save
       @schedulerun.start_time = @schedulerun.created_at
       @schedulerun.save
@@ -3473,49 +3476,103 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
       v_stop_file_path = v_log_base+v_stop_file_name
       v_computer = "merida"
 
-     v_scan_procedure_array = [22]
-     v_series_description_category_array = ['T1_Volumetric','T2','ASL']
-     v_series_description_category_id_array = [19, 20,1 ]
+     v_scan_procedure_array = [26,41,77,91] #pdt's and mk
+     v_series_description_category_array = ['T1_Volumetric','T2'] # mpnrage?
+     v_series_description_category_id_array = [19, 20] #,1 ]
 
-      #cg_xnat_participants
-      #participant_id, participant_export_id
-      #cg_xnat_image_datasets
-      #participant_export_id, image_dataset_id, xnat_project, session_id, scan_id
+     v_xnat_participant_tn = "xnat_participants"
+     v_xnat_appointment_mri_tn ="xnat_mri_appointment"
+     v_xnat_ids_tn = "xnat_image_datasets"
 
-      # insert participants from scan_procedure list who are not in cg_xnat_participants
-      # insert into cg_xnat_image_datasets scans of series description types which are not in 
+     connection = ActiveRecord::Base.connection();
+     # get all participants in sp/id not in v_xnat_participant_tn
+     #insert and make export_id
+     sql = "insert into "+v_xnat_participant_tn+"(participant_id,xnat_exists_flag) 
+               select distinct vgroups.participant_id,'N' from vgroups 
+               where vgroups.participant_id not in ( select "+v_xnat_participant_tn+".participant_id from "+v_xnat_participant_tn+")
+               and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups 
+                                    where scan_procedures_vgroups.scan_procedure_id in ("+v_scan_procedure_array.join(",")+")) 
+               and vgroups.id in (select appointments.vgroup_id from appointments, visits, image_datasets, series_description_maps
+                  where appointments.id = visits.appointment_id 
+                    and visits.id = image_datasets.visit_id
+                    and image_datasets.series_description = series_description_maps.series_description
+                    and series_description_maps.series_description_type_id in ("+v_series_description_category_id_array.join(",")+") )" 
+      results = connection.execute(sql)
+      # add export_id
+      sql = "select export_id from "+v_xnat_participant_tn+" where export_id is NOT NULL"
+      v_exportid_results = connection.execute(sql)
+      v_exportid_array = []
+      v_exportid_results.each { |r| v_exportid_array << r }
 
-      # clean bunzip2, dicom header, zip
+     v_null_check_sql = "select participant_id from "+v_xnat_participant_tn+" where export_id is NULL and participant_id is not NULL"
+     v_null_check_cnt = 0
+     v_null_cnt_threshold = 10  # repeat 10 times increasing upper range
+     while v_null_check_cnt < v_null_cnt_threshold
+        v_null_check_cnt = v_null_check_cnt + 1
+        v_null_results = connection.execute(v_null_check_sql)
+        v_null_array = []
+        v_null_results.each { |r| v_null_array << r[0] }
+        v_null_count = v_null_array.count 
+        if v_null_count > 0
+          v_now = Time.new 
+          v_date_seed = (v_now.to_i)*v_null_check_cnt
+          v_array_cnt = 0
+          v_rand_array = Array.new(2*v_null_check_cnt*v_null_results.count) {rand(v_null_count .. v_date_seed)}
+          v_rand_array.each do |val|
+            if(!v_exportid_array.include?(val))  and  (v_array_cnt < v_null_array.count)
+              v_sql = "update "+v_xnat_participant_tn+" t1 
+                      set t1.export_id = "+val.to_s+" where t1.participant_id ="+v_null_array[v_array_cnt].to_s
+              v_exportid_array.push(val)
+              v_update_results = connection.execute(v_sql)
+              v_array_cnt = v_array_cnt + 1
+            end
+          end
+        end
+     end
+# set xnat_do_not_share_flag
+#set xnat_exists_flag = 'Y' after upload to xnat
+     # get [vgroups]/appointmnent/visit - 
+     sql = "insert into "+v_xnat_appointment_mri_tn+"(appointment_id, visit_id,xnat_exists_flag)
+     select distinct appointments.id , visits.id, 'N' from appointments, visits
+     where appointments.id = visits.appointment_id
+     and appointments.vgroup_id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups 
+                                    where scan_procedures_vgroups.scan_procedure_id in ("+v_scan_procedure_array.join(",")+")) 
+               and visits.id in (select image_datasets.visit_id from image_datasets, series_description_maps
+                  where image_datasets.series_description = series_description_maps.series_description
+                    and series_description_maps.series_description_type_id in ("+v_series_description_category_id_array.join(",")+") )
+      and (visits.appointment_id,visits.id) NOT IN (select "+v_xnat_appointment_mri_tn+".appointment_id,"+v_xnat_appointment_mri_tn+".visit_id 
+                                                         from "+v_xnat_appointment_mri_tn+" )"
 
-#gem not on prod
-####response = RestClient::Request.execute(
-####method: :get,
-####url: 'https://xnatdev.medicine.wisc.edu/data/JSESSION',
-####user: '',
-####password: ''
-####)
-# --cookie JSESSIONID=3940FAAC4CB8DD368A9A1575372ECBBA
-# NOT SURE HOW TO USE JSESSIONID
-v_cookie_value = response.gsub(/\s+/, '')
-v_jsession = "JSESSIONID="+v_cookie_value
-puts v_jsession
+     results = connection.execute(sql)
+  # doing full participant update - in case p.id changed - a mess either way - fixed or unfixed
+     sql = "update "+v_xnat_appointment_mri_tn+" set participant_id = ( select vgroups.participant_id from vgroups, appointments  
+                               where vgroups.id = appointments.vgroup_id and appointments.id = "+v_xnat_appointment_mri_tn+".appointment_id)"
+     results = connection.execute(sql)
+# set xnat_do_not_share_flag
+#set xnat_exists_flag = 'Y' after upload to xnat
+     sql = "insert into "+v_xnat_ids_tn+"(visit_id,image_dataset_id,xnat_exists_flag)
+     select distinct image_datasets.visit_id, image_datasets.id, 'N' from image_datasets, visits, appointments, series_description_maps,scan_procedures_vgroups
+     where image_datasets.visit_id = visits.id 
+     and appointments.id = visits.appointment_id
+     and image_datasets.series_description = series_description_maps.series_description
+                    and series_description_maps.series_description_type_id in ("+v_series_description_category_id_array.join(",")+") 
+     and appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
+      and  scan_procedures_vgroups.scan_procedure_id in ("+v_scan_procedure_array.join(",")+") 
+      and (image_datasets.visit_id, image_datasets.id ) NOT IN (select "+v_xnat_ids_tn+".visit_id,"+v_xnat_ids_tn+".image_dataset_id 
+                                                         from "+v_xnat_ids_tn+" )"
 
-v_subject_exportid = "green73"
+     results = connection.execute(sql)
 
+# set xnat_do_not_share_flag
+#set xnat_exists_flag = 'Y' after upload to xnat
 
-   # v_json =  JSON.parse(response)
-   # puts v_json
-
-### can pass in values with url - how to do with params or xml?
-####response = RestClient::Request.execute(
-####method: :put,
-####url: 'https://xnatdev.medicine.wisc.edu/data/projects/lead-v1/subjects/'+v_subject_exportid,
-####user: '',
-####password: '',
-####gender: 'M',
-####handedness: 'Left'
-####)
-
+    @schedulerun.comment =("successful finish xnat_upload "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
 
  end
 
