@@ -4539,6 +4539,10 @@ puts "gggg v_subjectid_asl+v_product_file="+v_subjectid_asl+v_product_file
                             v_cnt = v_cnt +1
                           end
                         end
+                        if v_column_header_ok == "Y" and v_asl_cn_array.count != v_values.gsub(/\n/,"").split(",").count
+                            v_column_header_ok = "N"
+                            v_comment = v_subjectid_asl+v_product_file+" roi file wrong columns \n"+v_comment
+                        end
                         if v_column_header_ok == "Y"
                           sql = "insert into cg_asl_pproc_v5_new(subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,file_path,"+v_asl_cn_array.join(",")+") 
                             values('"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_product_file+"','"+v_subjectid_asl+v_product_file+"',"
@@ -4583,8 +4587,8 @@ puts "gggg v_subjectid_asl+v_product_file="+v_subjectid_asl+v_product_file
                 sql =  "truncate table cg_asl_pproc_v5"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_asl_pproc_v5(subjectid,enrollment_id,scan_procedure_id,secondary_key,inversion_time,value,file_name,file_path) 
-                select distinct subjectid,enrollment_id,scan_procedure_id,secondary_key,inversion_time,value,file_name,file_path from cg_asl_pproc_v5_new t
+                sql = "insert into cg_asl_pproc_v5(subjectid,general_comment,status_flag,enrollment_id,scan_procedure_id,inversion_time,global,file_name,file_path,secondary_key,gm_sroi_mask,gm_angular_l,gm_angular_r,gm_cingulum_ant_l,gm_cingulum_ant_r,gm_cingulum_post_l,gm_cingulum_post_r,gm_frontal_med_orb_l,gm_frontal_med_orb_r,gm_frontal_mid_l,gm_frontal_mid_r,gm_frontal_mid_orb_l,gm_frontal_mid_orb_r,gm_frontal_sup_l,gm_frontal_sup_r,gm_frontal_sup_medial_l,gm_frontal_sup_medial_r,gm_frontal_sup_orb_l,gm_frontal_sup_orb_r,gm_hippocampus_l,gm_hippocampus_r,gm_precuneus_l,gm_precuneus_r,gm_supramarginal_l,gm_supramarginal_r,gm_temporal_mid_l,gm_temporal_mid_r,gm_temporal_sup_l,gm_temporal_sup_r,enum,series,asl_image) 
+                select distinct subjectid,general_comment,status_flag,enrollment_id,scan_procedure_id,inversion_time,global,file_name,file_path,secondary_key,gm_sroi_mask,gm_angular_l,gm_angular_r,gm_cingulum_ant_l,gm_cingulum_ant_r,gm_cingulum_post_l,gm_cingulum_post_r,gm_frontal_med_orb_l,gm_frontal_med_orb_r,gm_frontal_mid_l,gm_frontal_mid_r,gm_frontal_mid_orb_l,gm_frontal_mid_orb_r,gm_frontal_sup_l,gm_frontal_sup_r,gm_frontal_sup_medial_l,gm_frontal_sup_medial_r,gm_frontal_sup_orb_l,gm_frontal_sup_orb_r,gm_hippocampus_l,gm_hippocampus_r,gm_precuneus_l,gm_precuneus_r,gm_supramarginal_l,gm_supramarginal_r,gm_temporal_mid_l,gm_temporal_mid_r,gm_temporal_sup_l,gm_temporal_sup_r,enum,series,asl_image from cg_asl_pproc_v5_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
