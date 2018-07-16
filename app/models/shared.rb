@@ -3562,7 +3562,9 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                                                          from "+v_xnat_ids_tn+" )"
 
      results = connection.execute(sql)
-
+# add file_path --
+# make session id from file_path sp --> enum start| export_id|-v#
+# add sessionid column in database
 # set xnat_do_not_share_flag
 #set xnat_exists_flag = 'Y' after upload to xnat
 
@@ -4418,15 +4420,20 @@ def  run_asl_harvest
       v_shared = Shared.new
       connection = ActiveRecord::Base.connection();
       v_cg_tn_asl = "cg_asl_pproc_v5"  
-      v_asl_cn_array = ["inversion_time","value","file_name","file_path"] 
+      v_asl_cn_array = ["inversion_time","global","file_name","file_path"] 
+      v_asl_roi_cn = "enum,series,asl_image,global,GM_sROI_mask,GM_Angular_L,GM_Angular_R,GM_Cingulum_Ant_L,GM_Cingulum_Ant_R,GM_Cingulum_Post_L,GM_Cingulum_Post_R,GM_Frontal_Med_Orb_L,GM_Frontal_Med_Orb_R,GM_Frontal_Mid_L,GM_Frontal_Mid_R,GM_Frontal_Mid_Orb_L,GM_Frontal_Mid_Orb_R,GM_Frontal_Sup_L,GM_Frontal_Sup_R,GM_Frontal_Sup_Medial_L,GM_Frontal_Sup_Medial_R,GM_Frontal_Sup_Orb_L,GM_Frontal_Sup_Orb_R,GM_Hippocampus_L,GM_Hippocampus_R,GM_Precuneus_L,GM_Precuneus_R,GM_SupraMarginal_L,GM_SupraMarginal_R,GM_Temporal_Mid_L,GM_Temporal_Mid_R,GM_Temporal_Sup_L,GM_Temporal_Sup_R"
+      v_asl_cn_array = ["enum","series","asl_image","global","GM_sROI_mask","GM_Angular_L","GM_Angular_R","GM_Cingulum_Ant_L","GM_Cingulum_Ant_R","GM_Cingulum_Post_L","GM_Cingulum_Post_R","GM_Frontal_Med_Orb_L","GM_Frontal_Med_Orb_R","GM_Frontal_Mid_L","GM_Frontal_Mid_R","GM_Frontal_Mid_Orb_L","GM_Frontal_Mid_Orb_R","GM_Frontal_Sup_L","GM_Frontal_Sup_R","GM_Frontal_Sup_Medial_L","GM_Frontal_Sup_Medial_R","GM_Frontal_Sup_Orb_L","GM_Frontal_Sup_Orb_R","GM_Hippocampus_L","GM_Hippocampus_R","GM_Precuneus_L","GM_Precuneus_R","GM_SupraMarginal_L","GM_SupraMarginal_R","GM_Temporal_Mid_L","GM_Temporal_Mid_R","GM_Temporal_Sup_L","GM_Temporal_Sup_R"]
 
-      # just one value in global_rASL_fmap_<subjectid>_<inversion_time>_<scan_series>_bmasked.txt
+
+      # just one value in global_rASL_fmap_<subjectid>_<inversion_time>_<scan_series>_bmasked.txt  # check for 2 files - could be alternative
 
       sql = "truncate table "+v_cg_tn_asl+"_new"
       results = connection.execute(sql)
-    v_asl_pproc_v5_path = "/asl/pproc_v5/"
-    v_asl_file_name_start = "global_rASL_fmap_"
-    v_asl_file_name_end = "_bmasked.txt"
+    v_asl_pproc_v5_path = "/asl/pproc_v5/masks/roi_summary/"
+
+    # mask/roi_summary/
+    # <subjectid>_<scan_series>_ASL_ROIs_invXgm.cs
+    v_asl_file_name_end = "_ASL_ROIs_invXgm.csv"
     v_product_file = ""
  
     v_asl_column_list = "inversion_time,value,file_name,file_path"
@@ -4501,34 +4508,49 @@ def  run_asl_harvest
                 v_dir_array.each do |f|
                   #global_rASL_fmap_<subjectid>_<inversion_time>_<scan_series>_bmasked.txt
                   v_product_file = ""
-                  if f.start_with?(v_asl_file_name_start+v_subjectid) and f.end_with?(v_asl_file_name_end)
+                  if f.start_with?(v_subjectid) and f.end_with?(v_asl_file_name_end)
                     v_product_file = f
                       #check if exists in processedimages
-                      v_value =""
-                      v_inversion_time = ""
+
+                      v_column_header_ok = "N"
                       v_scan_series = ""
                       v_asl_file_array = f.split("_")
-                      v_inversion_time = v_asl_file_array[4]
-                      v_scan_series = v_asl_file_array[5]
+                      v_scan_series = v_asl_file_array[1]
+                      v_values = ""
  # MAKE TRACKER QC
 
 puts "gggg v_subjectid_asl+v_product_file="+v_subjectid_asl+v_product_file
                     if File.file?(v_subjectid_asl+v_product_file)
                         v_cnt = 0
                         File.open(v_subjectid_asl+v_product_file,'r') do |file_a|
-                          while line = file_a.gets and v_cnt < 1
+                          while line = file_a.gets
                             if v_cnt < 1
-                              v_value = line.gsub("\n","")
+                                v_header = line
+                                v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_asl_roi_cn)
+                                if v_return_flag == "N" 
+                                   v_comment = v_subjectid_asl+v_product_file+"=>"+v_return_comment+" \n"+v_comment
+                                    puts v_return_comment               
+                                else
+                                    v_column_header_ok = "Y"
+                                 end
+                            else
+                              v_values = line.gsub("\n","")
                             end
                             v_cnt = v_cnt +1
                           end
                         end
+                        if v_column_header_ok == "Y"
+                          sql = "insert into cg_asl_pproc_v5_new(subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,file_path,"+v_asl_cn_array.join(",")+") 
+                            values('"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_product_file+"','"+v_subjectid_asl+v_product_file+"',"
+                                        v_line_array = []
+                                        v_values.gsub(/\n/,"").split(",").each do |v|
+                                           v_line_array.push("'"+v+"'")
+                                        end 
+                                        sql = sql+v_line_array.join(",")
 
-                        sql = "insert into cg_asl_pproc_v5_new(subjectid,enrollment_id,scan_procedure_id,secondary_key,inversion_time,value,file_name,file_path ) 
-                          values('"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_inversion_time.to_s+"','"+v_value.to_s+"','"+v_product_file+"','"+v_subjectid_asl+v_product_file+"'"
-
-                        sql = sql+")"
-                        results = connection.execute(sql)
+                           sql = sql+")"
+                           results = connection.execute(sql)
+                        end
                     end
                   end # if pattern match file name
                 end # file loop
@@ -7789,12 +7811,12 @@ puts "end of ids loop"
              rescue => msg
                 v_err = msg.inspect
                 if !v_err.nil? and v_err > ""
-                  v_comment_error = v_subjectid_v_num.to_s+" "+v_err+"; "+v_comment_error
-                  v_comment = "ERROR "+v_subjectid_v_num.to_s+" "+v_comment
-                  @schedulerun.comment = "ERROR "+v_subjectid_v_num.to_s+" "+v_err+";"+@schedulerun.comment
+                  v_comment_error = v_err+"; "+v_comment_error
+                  v_comment = "ERROR  "+v_comment    # took out v_subjectid_v_num  - not defined?
+                  @schedulerun.comment = "ERROR  "+v_err+";"+@schedulerun.comment
                   @schedulerun.save
                    v_schedule_owner_email_array.each do |e|
-                       v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num.to_s+" check enum -extra 0, permission P file, wrong Pfile, no gating file?"
+                       v_subject = "Error in "+v_process_name+":  check enum -extra 0, permission P file, wrong Pfile, no gating file?"
                        PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
 
                    end
