@@ -4544,8 +4544,12 @@ puts "gggg v_subjectid_asl+v_product_file="+v_subjectid_asl+v_product_file
                             v_comment = v_subjectid_asl+v_product_file+" roi file wrong columns \n"+v_comment
                         end
                         if v_column_header_ok == "Y"
-                          sql = "insert into cg_asl_pproc_v5_new(subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,file_path,"+v_asl_cn_array.join(",")+") 
-                            values('"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_product_file+"','"+v_subjectid_asl+v_product_file+"',"
+                          v_line_array = []
+                          v_line_array = v_values.gsub(/\n/,"").split(",")
+                          v_source_file = v_line_array[2]
+                          v_inversion_time = (v_source_file.split("/").last).split("_")[3] # rASL_fmap_<subjectid>_<inversion_time>_<scan_series>.nii
+                          sql = "insert into cg_asl_pproc_v5_new(subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,file_path,inversion_time,"+v_asl_cn_array.join(",")+") 
+                            values('"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_product_file+"','"+v_subjectid_asl+v_product_file+"','"+v_inversion_time+"',"
                                         v_line_array = []
                                         v_values.gsub(/\n/,"").split(",").each do |v|
                                            v_line_array.push("'"+v+"'")
