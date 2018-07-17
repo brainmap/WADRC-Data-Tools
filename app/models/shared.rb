@@ -8588,6 +8588,7 @@ puts "v_analyses_path="+v_analyses_path
  # base on pcvipr_outyput_file_harvest
  # check if html file exisits, else make html file
  # option for full replace of all html
+ # some existiing html with weird <subjectid>_<exam#>_<date> names- just making an extra file
   def run_pcvipr_html_base(p_full_replace)
           v_base_path = Shared.get_base_path()
          @schedule = Schedule.where("name in ('pcvipr_html')").first
@@ -8680,16 +8681,15 @@ puts "v_analyses_path="+v_analyses_path
                                   if File.exist?(v_dir_path_name_subjectid+"/"+v_subjectid+".html") and v_full_replace == "N"
                                     # html exists
                                   else
-                                     # COPY to REST of levels
-                                     v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu '"+v_script_path+" "+v_dir_path_name_subjectid+"/"+v_subjectid+".html'"
+                                     v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu '"+v_script_path+" "+v_dir_path_name_subjectid+"/"+" "+v_dir_path_name_subjectid+"/"+v_subjectid+".html'"
                                      puts v_call        
-                                     #stdin, stdout, stderr = Open3.popen3(v_call)
-                                     #while !stdout.eof?
-                                     #    puts stdout.read 1024    
-                                     #end
-                                     #stdin.close
-                                     #stdout.close
-                                     #stderr.close
+                                     stdin, stdout, stderr = Open3.popen3(v_call)
+                                     while !stdout.eof?
+                                         puts stdout.read 1024    
+                                     end
+                                     stdin.close
+                                     stdout.close
+                                     stderr.close
 
                                   end
                                 end # sp mismatch
@@ -8729,7 +8729,15 @@ puts "v_analyses_path="+v_analyses_path
                                   if File.exist?(v_dir_path_name_subjectid+"/"+v_subjectid+".html") and v_full_replace == "N"
                                     # html exists
                                   else
-                                     v_call = v_script_path+" "+v_dir_path_name_subjectid+"/"+v_subjectid+".html"
+                                     v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu '"+v_script_path+" "+v_dir_path_name_subjectid+"/"+" "+v_dir_path_name_subjectid+"/"+v_subjectid+".html'"
+                                     puts v_call        
+                                     stdin, stdout, stderr = Open3.popen3(v_call)
+                                     while !stdout.eof?
+                                         puts stdout.read 1024    
+                                     end
+                                     stdin.close
+                                     stdout.close
+                                     stderr.close
 
                                   end
                                 end # sp mismatch
@@ -8770,7 +8778,15 @@ puts "v_analyses_path="+v_analyses_path
                                   if File.exist?(v_dir_path_name_subjectid+"/"+v_subjectid+".html") and v_full_replace == "N"
                                     # html exists
                                   else
-                                     v_call = v_script_path+" "+v_dir_path_name_subjectid+"/"+v_subjectid+".html"
+                                     v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu '"+v_script_path+" "+v_dir_path_name_subjectid+"/"+" "+v_dir_path_name_subjectid+"/"+v_subjectid+".html'"
+                                     puts v_call        
+                                     stdin, stdout, stderr = Open3.popen3(v_call)
+                                     while !stdout.eof?
+                                         puts stdout.read 1024    
+                                     end
+                                     stdin.close
+                                     stdout.close
+                                     stderr.close
 
                                   end
                                 end # sp mismatch
@@ -8807,7 +8823,15 @@ puts "v_analyses_path="+v_analyses_path
                                   if File.exist?(v_dir_path_name_subjectid+"/"+v_subjectid+".html") and v_full_replace == "N"
                                         # html exists
                                   else
-                                     v_call = v_script_path+" "+v_dir_path_name_subjectid+"/"+v_subjectid+".html"
+                                     v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu '"+v_script_path+" "+v_dir_path_name_subjectid+"/"+" "+v_dir_path_name_subjectid+"/"+v_subjectid+".html'"
+                                     puts v_call        
+                                     stdin, stdout, stderr = Open3.popen3(v_call)
+                                     while !stdout.eof?
+                                         puts stdout.read 1024    
+                                     end
+                                     stdin.close
+                                     stdout.close
+                                     stderr.close
 
                                   end
                                 end # sp mismatch
