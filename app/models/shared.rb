@@ -8577,6 +8577,258 @@ puts "v_analyses_path="+v_analyses_path
        @schedulerun.save
 
   end
+  # not tested
+  def run_pcvipr_html_full_replace()
+         run_pcvipr_html_base("full_replace")
+  end
+  def run_pcvipr_html()
+         run_pcvipr_html_base("ignore existing")
+  end
+
+ # base on pcvipr_outyput_file_harvest
+ # check if html file exisits, else make html file
+ # option for full replace of all html
+  def run_pcvipr_html_base(p_full_replace)
+          v_base_path = Shared.get_base_path()
+         @schedule = Schedule.where("name in ('pcvipr_html')").first
+          @schedulerun = Schedulerun.new
+          @schedulerun.schedule_id = @schedule.id
+          @schedulerun.comment ="starting pcvipr_html"
+          @schedulerun.save
+          @schedulerun.start_time = @schedulerun.created_at
+          @schedulerun.save
+          v_comment =""
+          v_comment_warning = ""
+          v_shared = Shared.new
+          v_second_viewer_flag = "N" # populate from tracker record
+          v_harvester_ignore_directory = "harvignore"
+          v_computer = "kanga"
+          v_script_path = v_base_path+"/SysAdmin/production/make_webbody_pcvipr.bash"
+          v_full_replace = "N"
+          if p_full_replace == "full_replace"
+              v_full_replace = "Y"
+          end
+
+
+          v_file_header_expected ="Left ICA - Cervical (Inferior):maxV,Left ICA - Petrous (Superior):maxV,Right ICA - Cervical (Inferior):maxV,Right ICA - Petrous (Superior):maxV,Basilar Artery:maxV,Left MCA:maxV,Right MCA:maxV,Left PCA:maxV,Right PCA:maxV,SS Sinus:maxV,Straight Sinus:maxV,Left ICA - Cervical (Inferior):Mean Flow,Left ICA - Petrous (Superior):Mean Flow,Right ICA - Cervical (Inferior):Mean Flow,Right ICA - Petrous (Superior):Mean Flow,Basilar Artery:Mean Flow,Left MCA:Mean Flow,Right MCA:Mean Flow,Left PCA:Mean Flow,Right PCA:Mean Flow,SS Sinus:Mean Flow,Straight Sinus:Mean Flow,LeftTS:Mean Flow,RightTS:Mean Flow,Left ICA - Cervical (Inferior):Pulsatility Index,Left ICA - Petrous (Superior):Pulsatility Index,Right ICA - Cervical (Inferior):Pulsatility Index,Right ICA - Petrous (Superior):Pulsatility Index,Basilar Artery:Pulsatility Index,Left MCA:Pulsatility Index,Right MCA:Pulsatility Index,Left PCA:Pulsatility Index,Right PCA:Pulsatility Index,SS Sinus:Pulsatility Index,Straight Sinus:Pulsatility Index,LeftTS:Pulsatility Index,RightTS:Pulsatility Index,Left ICA - Cervical (Inferior):Boolean,Left ICA - Petrous (Superior):Boolean,Right ICA - Cervical (Inferior):Boolean,Right ICA - Petrous (Superior):Boolean,Basilar Artery:Boolean,Left MCA:Boolean,Right MCA:Boolean,Left PCA:Boolean,Right PCA:Boolean,SS Sinus:Boolean,Straight Sinus:Boolean"
+          v_column_list = "left_ica_cervical_inferior,left_ica_petrous_superior,right_ica_cervical_inferior,right_ica_petrous_superior,basilar_artery,left_mca,right_mca,left_pca,right_pca,ss_sinus,straight_sinus,left_ica_cervical_inferior_mean_flow,left_ica_petrous_superior_mean_flow,right_ica_cervical_inferior_mean_flow,right_ica_petrous_superior_mean_flow,basilar_artery_mean_flow,left_mca_mean_flow,right_mca_mean_flow,left_pca_mean_flow,right_pca_mean_flow,ss_sinus_mean_flow,straight_sinus_mean_flow,leftts_mean_flow,rightts_mean_flow,left_ica_cervical_inferior_pulsatility_index,left_ica_petrous_superior_pulsatility_index,right_ica_cervical_inferior_pulsatility_index,right_ica_petrous_superior_pulsatility_index,basilar_artery_pulsatility_index,left_mca_pulsatility_index,right_mca_pulsatility_index,left_pca_pulsatility_index,right_pca_pulsatility_index,ss_sinus_pulsatility_index,straight_sinus_pulsatility_index,leftts_pulsatility_index,rightts_pulsatility_index,left_ica_cervical_inferior_boolean,left_ica_petrous_superior_boolean,right_ica_cervical_inferior_boolean,right_ica_petrous_superior_boolean,basilar_artery_boolean,left_mca_boolean,right_mca_boolean,left_pca_boolean,right_pca_boolean,ss_sinus_boolean,straight_sinus_boolean"
+         # Directory Name,file_name, == dir name
+          v_analyses_path = v_base_path+"/analyses/PCVIPR/4DFLOW_DATA/"
+puts "v_analyses_path="+v_analyses_path
+          sql = "truncate table cg_pcvipr_values_new"
+          connection = ActiveRecord::Base.connection();        
+          results = connection.execute(sql)
+          v_visit_number_array = ['v2','v3','v4','v5','v6','v7','v8','v9','v10','v11','v12','v13','v14','v15','v16']
+
+          # go to directory, get list of directories. - could check if there is a scan_procedure
+          Dir.glob(v_analyses_path+"/*").each do |v_dir_path_name| 
+            if File.directory?(v_dir_path_name)
+                puts "-bbbbb "+v_dir_path_name
+                puts "sp ="+v_dir_path_name.split("/").last+"="
+               v_scan_procedures = ScanProcedure.where("scan_procedures.codename in (?)",v_dir_path_name.split("/").last)
+               # add check that internal subject_id sp matches top dir sp
+               # add check that pcvipr has second view flag=Y
+
+               if !v_scan_procedures.nil? and !v_scan_procedures[0].nil?
+                  puts v_scan_procedures[0].codename
+                  v_dir_path_name_done = v_dir_path_name+"/"+v_dir_path_name.split("/").last+".done"
+                  puts "-aaaaaa v_dir_path_name_done= "+v_dir_path_name_done
+                  Dir.glob(v_dir_path_name_done+"/*").each do |v_dir_path_name_subjectid| # get the subjectid folders
+                    # check for Summary.xls and *Summary_Calculator_*.xlsx and output*.csv
+                    #NEED TO DO FIND or something to get real path
+                    # get path to Summary.xls, could be few directories down
+                    puts "v_dir_path_name_subjectid.split(/).last="+v_dir_path_name_subjectid.split("/").last
+                    v_subjectid_dir = v_dir_path_name_subjectid.split("/").last
+                    v_subjectid_array = v_subjectid_dir.split("_")
+                    v_subjectid = ""
+                    if(!v_subjectid_array[1].nil? and (v_visit_number_array.include? v_subjectid_array[1])) # 
+                       v_subjectid = v_subjectid_array[0]+"_"+v_subjectid_array[1]
+                    else
+                       v_subjectid = v_subjectid_array[0]
+                    end
+                    puts "v_subjectid="+v_subjectid+"=     v_dir_path_name_subjectid= cd "+v_dir_path_name_subjectid+"; ls *.xls*"
+                    if !Dir.glob(v_dir_path_name_subjectid+"/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*Summary_Calculator_*.xlsx").empty? and !Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").empty? 
+                        puts "AAAA done===="+v_dir_path_name_subjectid
+                         Dir.glob(v_dir_path_name_subjectid+"/*_output.csv").each do |v_file_path_exact| 
+                             v_file_path = v_file_path_exact # File.dirname(v_file_path_exact)
+                          if v_file_path.include? v_harvester_ignore_directory
+                             print "ignore this directory"
+                          else
+                             v_cnt = 0
+                             v_header = ""
+                             File.open(v_file_path,'r') do |file_a|
+                               while line = file_a.gets and v_cnt < 1
+                                 if v_cnt < 1
+                                   v_header = line
+                                 end
+                                 v_cnt = v_cnt +1
+                               end
+                             end
+                             v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_file_header_expected)
+                             if v_return_flag == "N" 
+                               v_comment = v_file_path+"=>"+v_return_comment+" \n"+v_comment
+                               puts v_return_comment               
+                             else
+                               v_subject_id_sp_id = v_shared.get_sp_id_from_subjectid_v(v_subjectid)
+                       
+                               if v_subject_id_sp_id != v_scan_procedures[0].id   # difference between directory and subject sp - ussually a missing _v#
+                                      v_comment_warning = v_comment_warning+"; sp mismatch "+v_subjectid+" sp="+v_scan_procedures[0].id .to_s
+                               else
+                                   # CHECK FOR HTML
+                                  # MAKE HTML
+                                  #puts "PPPP check for v#="+v_dir_path_name_subjectid+"/"+v_subjectid+".html"
+                                  if File.exist?(v_dir_path_name_subjectid+"/"+v_subjectid+".html") and v_full_replace == "N"
+                                    # html exists
+                                  else
+                                     # COPY to REST of levels
+                                     v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu '"+v_script_path+" "+v_dir_path_name_subjectid+"/"+v_subjectid+".html'"
+                                     puts v_call        
+                                     #stdin, stdout, stderr = Open3.popen3(v_call)
+                                     #while !stdout.eof?
+                                     #    puts stdout.read 1024    
+                                     #end
+                                     #stdin.close
+                                     #stdout.close
+                                     #stderr.close
+
+                                  end
+                                end # sp mismatch
+                             ##?end
+                            end # return flag==N
+                          end # harvignore
+                        end # dir glob
+                        #
+                     elsif  !Dir.glob(v_dir_path_name_subjectid+"/*/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*/*Summary_Calculator_*.xlsx").empty? and !Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv").empty? 
+                         puts "BBBBB done===="+v_dir_path_name_subjectid
+                         Dir.glob(v_dir_path_name_subjectid+"/*/*_output.csv").each do |v_file_path_exact| 
+                          v_file_path = v_file_path_exact #  File.dirname(v_file_path_exact)
+                          if v_file_path.include? v_harvester_ignore_directory
+                             print "ignore this directory"
+                          else
+                             v_cnt = 0
+                             v_header = ""
+                             File.open(v_file_path,'r') do |file_a|
+                               while line = file_a.gets and v_cnt < 1
+                                 if v_cnt < 1
+                                   v_header = line
+                                 end
+                                 v_cnt = v_cnt +1
+                               end
+                             end
+                             v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_file_header_expected)
+                             if v_return_flag == "N" 
+                               v_comment = v_file_path+"=>"+v_return_comment+" \n"+v_comment
+                               puts v_return_comment               
+                             else
+                               v_subject_id_sp_id = v_shared.get_sp_id_from_subjectid_v(v_subjectid)
+                       
+                               if v_subject_id_sp_id != v_scan_procedures[0].id   # difference between directory and subject sp - ussually a missing _v#
+                                      v_comment_warning = v_comment_warning+"; sp mismatch "+v_subjectid+" sp="+v_scan_procedures[0].id .to_s
+                               else
+                                  #puts "PPPP check for v#="+v_dir_path_name_subjectid+"/"+v_subjectid+".html"
+                                  if File.exist?(v_dir_path_name_subjectid+"/"+v_subjectid+".html") and v_full_replace == "N"
+                                    # html exists
+                                  else
+                                     v_call = v_script_path+" "+v_dir_path_name_subjectid+"/"+v_subjectid+".html"
+
+                                  end
+                                end # sp mismatch
+                               
+                              ##?end
+                             end
+                          end
+                        end
+                     elsif  !Dir.glob(v_dir_path_name_subjectid+"/*/*/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*/*/*Summary_Calculator_*.xlsx").empty? and !Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv").empty? 
+                         puts "CCCCCC done 2 down ===="+v_dir_path_name_subjectid+"/*/*"
+                         #puts "done===="+v_dir_path_name_subjectid
+                         Dir.glob(v_dir_path_name_subjectid+"/*/*/*_output.csv").each do |v_file_path_exact| 
+                          v_file_path = v_file_path_exact #File.dirname(v_file_path_exact)
+                          if v_file_path.include? v_harvester_ignore_directory
+                             print "ignore this directory"
+                          else
+                             v_cnt = 0
+                             v_header = ""
+                             File.open(v_file_path,'r') do |file_a|
+                               while line = file_a.gets and v_cnt < 1
+                                 if v_cnt < 1
+                                   v_header = line
+                                 end
+                                 v_cnt = v_cnt +1
+                               end
+                             end
+                             v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_file_header_expected)
+                             if v_return_flag == "N" 
+                               v_comment = v_file_path+"=>"+v_return_comment+" \n"+v_comment
+                               puts v_return_comment               
+                             else
+                               v_subject_id_sp_id = v_shared.get_sp_id_from_subjectid_v(v_subjectid)
+                       
+                               if v_subject_id_sp_id != v_scan_procedures[0].id   # difference between directory and subject sp - ussually a missing _v#
+                                      v_comment_warning = v_comment_warning+"; sp mismatch "+v_subjectid+" sp="+v_scan_procedures[0].id .to_s
+                               else
+                                  #puts "PPPP check for v#="+v_dir_path_name_subjectid+"/"+v_subjectid+".html"
+                                  if File.exist?(v_dir_path_name_subjectid+"/"+v_subjectid+".html") and v_full_replace == "N"
+                                    # html exists
+                                  else
+                                     v_call = v_script_path+" "+v_dir_path_name_subjectid+"/"+v_subjectid+".html"
+
+                                  end
+                                end # sp mismatch
+                             ##?end
+                            end
+                          end
+                        end
+                     elsif  !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/Summary.xls").empty?  and !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*Summary_Calculator_*.xlsx").empty? and !Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv").empty? 
+                         puts "DDDDD done 3 down ===="+v_dir_path_name_subjectid+"/*/*/*"
+                         #puts "done===="+v_dir_path_name_subjectid
+                         Dir.glob(v_dir_path_name_subjectid+"/*/*/*/*_output.csv").each do |v_file_path_exact| 
+                             v_file_path = v_file_path_exact #File.dirname(v_file_path_exact)
+                             v_cnt = 0
+                             v_header = ""
+                             File.open(v_file_path,'r') do |file_a|
+                               while line = file_a.gets and v_cnt < 1
+                                 if v_cnt < 1
+                                   v_header = line
+                                 end
+                                 v_cnt = v_cnt +1
+                               end
+                             end
+                             v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_file_header_expected)
+                             if v_return_flag == "N" 
+                               v_comment = v_file_path+"=>"+v_return_comment+" \n"+v_comment
+                               puts v_return_comment               
+                             else
+                               v_subject_id_sp_id = v_shared.get_sp_id_from_subjectid_v(v_subjectid)
+                               
+                               if v_subject_id_sp_id != v_scan_procedures[0].id   # difference between directory and subject sp - ussually a missing _v#
+                                      v_comment_warning = v_comment_warning+"; sp mismatch "+v_subjectid+" sp="+v_scan_procedures[0].id .to_s
+                               else
+                                  #puts "PPPP check for v#="+v_dir_path_name_subjectid+"/"+v_subjectid+".html"
+                                  if File.exist?(v_dir_path_name_subjectid+"/"+v_subjectid+".html") and v_full_replace == "N"
+                                        # html exists
+                                  else
+                                     v_call = v_script_path+" "+v_dir_path_name_subjectid+"/"+v_subjectid+".html"
+
+                                  end
+                                end # sp mismatch
+                             ##?end
+                          end
+                        end
+                    end
+                  end
+               end
+            end
+          end
+        v_comment = v_comment_warning+v_comment
+        puts v_comment
+        @schedulerun.comment =("successful finish pcvipr_html "+v_comment[0..1459])
+      if !v_comment.include?("ERROR")
+         @schedulerun.status_flag ="Y"
+       end
+       @schedulerun.save
+       @schedulerun.end_time = @schedulerun.updated_at      
+       @schedulerun.save
+  end
   
   # to add columns --
   # change sql_base insert statement

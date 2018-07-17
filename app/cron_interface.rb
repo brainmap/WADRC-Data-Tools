@@ -228,6 +228,12 @@ v_user = v_user.gsub("\n","")
   elsif v_value_1 == "pcvipr_output_file_harvest"  
       v_shared = Shared.new
       v_shared.run_pcvipr_output_file_harvest()
+  elsif v_value_1 == "pcvipr_html"  
+      v_shared = Shared.new
+      v_shared.run_pcvipr_html()
+  elsif v_value_1 == "pcvipr_html_full_replace"  
+      v_shared = Shared.new
+      v_shared.run_pcvipr_html_full_replace()
    elsif v_value_1 == "pet_mk6240_harvest"
       v_shared = Shared.new
       v_shared.run_pet_mk6240_harvest()
