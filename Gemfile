@@ -1,14 +1,16 @@
 source 'https://rubygems.org'
-
+#THIS HAS NOT BEEN COMMITED OR THE Gemfile.lock
+# bundler to 1.16.1 - then active* 5.0.6, active model 4.2, and other changes
+# old copy on totoro
 git_source(:github) do |repo_name|
   repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?("/")
   "https://github.com/#{repo_name}.git"
 end
-
+####gem 'httpclient'
 gem 'net-ssh'   
 gem 'net-sftp' 
 # not finding bundler in cap deploy - rvm issue?
-gem 'bundler', '1.14.6'
+gem 'bundler', '1.14.6' #,'1.16.1' # '1.15.4' #  '1.14.6'  # was , '1.14.6'
 gem 'bundler-unload','1.0.2'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
@@ -31,8 +33,7 @@ gem 'uglifier', '3.1.7' #'>= 1.3.0'
 gem 'coffee-rails', '4.2.1' #'~> 4.2'
 # See https://github.com/rails/execjs#readme for more supported runtimes
 # gem 'therubyracer', platforms: :ruby
-
-
+####gem 'rest-client'
 # Use Redis adapter to run Action Cable in production
 # gem 'redis', '~> 3.0'
 # Use ActiveModel has_secure_password
@@ -54,7 +55,7 @@ gem 'rails-observers', github: 'rails/rails-observers'
 gem 'activeresource', github: 'rails/activeresource'
  
 gem 'metamri', '0.2.25'  # new gem version
-#gem 'metamri', :path => '/Users/caillingworth/code/metamri_5_0_1/metamri'
+####gem 'metamri', :path => '/Users/caillingworth/code/metamri_5_0_1/metamri'
 # end
 gem 'builder', '3.2.3'#, '~>2.1.2'
 gem 'RedCloth','4.3.2'  #, "4.2.7"     
@@ -83,8 +84,9 @@ gem 'bzip2-ruby', :git => 'https://github.com/chewi/bzip2-ruby.git'
  #gem 'capistrano-rvm', '0.1.2'
 # gem 'rvm1-capistrano3', :require => false
 # gem 'capistrano-bundler', '1.2.0'  
+gem 'prawn'
 
-
+###gem 'escoffier', :path => '/Users/caillingworth/code/escoffier' # 
 gem 'escoffier', :path => '/Users/panda_user/code/escoffier'    # think required by metamri?    
 # mise not working
 # not available , needs ruby 2.5 =gem 'fileutils'
@@ -100,8 +102,8 @@ group :development, :test do
   gem 'hirb','0.7.3' #, '~>0.4.5'
   gem 'json','2.0.3'
   gem 'rack-mini-profiler' ,'0.10.2' 
-  gem 'capistrano', '3.8.0'  #'~> 3.5'
-  gem 'capistrano-rails', '~> 1.1.6'   
+  gem 'capistrano', '3.10.2'#'3.8.0'  #'~> 3.5'
+  gem 'capistrano-rails','1.3.1' # '~> 1.1.6'   
   gem 'capistrano-rvm' ,'~>0.1.2',:require => false 
   gem 'capistrano-passenger','0.1.1' # '~> 0.2.0'
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
@@ -110,6 +112,7 @@ group :development, :test do
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring' ,'2.0.1'
   gem 'spring-watcher-listen', '2.0.1' #'~> 2.0.0'
+  #gem 'prawn'
 end
 
 

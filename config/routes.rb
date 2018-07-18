@@ -222,6 +222,8 @@ WADRCDataTools::Application.routes.draw do
   match '/series_description_map_search' , :controller => 'series_description_maps', :action => 'series_description_map_search', :as =>:series_description_map_search  ,via: [:get, :post]
     match '/enrollment_search' , :controller => 'enrollments', :action => 'enrollment_search', :as =>:enrollment_search    ,via: [:get, :post] 
     match '/participant_search' , :controller => 'participants', :action => 'participant_search', :as =>:participant_search  ,via: [:get, :post] 
+    match '/participant_show_pdf' , :controller => 'participants', :action => 'participant_show_pdf', :as =>:participant_show_pdf  ,via: [:get, :post] 
+    
   match '/cg_search' , :controller => 'data_searches', :action => 'cg_search', :as =>:cg_search  ,via: [:get, :post] 
   match '/cg_tables' , :controller => 'data_searches', :action => 'cg_tables', :as =>:cg_tables ,via: [:get, :post] 
   match '/cg_edit_table/:id' , :controller => 'data_searches', :action => 'cg_edit_table', :as =>:cg_edit_table   ,via: [:get, :post] 

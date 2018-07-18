@@ -68,6 +68,172 @@ class ParticipantsController < ApplicationController
     end
   end
 
+  def participant_show_pdf
+    scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+    hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end  
+
+#    @participant = Participant.where(" participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_visit_memberships.enrollment_id from enrollment_visit_memberships where enrollment_visit_memberships.visit_id in
+#     (select visit_id from scan_procedures_visits where scan_procedure_id in (?)))) ", scan_procedure_array).find(params[:id])
+
+     @participants = Participant.where("participants.id in ( select vgroups.participant_id from vgroups, scan_procedures_vgroups where vgroups.id = scan_procedures_vgroups.vgroup_id 
+                    and vgroups.participant_id in (?) and scan_procedures_vgroups.scan_procedure_id in (?)) ", params[:id],scan_procedure_array)
+     if(@participants.blank?)
+         @participants = Participant.where("participants.id in ( select participant_id from enrollments where enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
+           where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?)))",scan_procedure_array)
+     end
+     # problems if no vgroup or enumber -- no way to link to scan procedure and access control
+     @participant = @participants.find(params[:id])
+
+     
+      
+     @vgroups = Vgroup.where("participant_id in ( select participant_id from enrollments where participant_id = ? and enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
+                  where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?))) ", params[:id],scan_procedure_array)
+    
+      @a =  Appointment.where("vgroup_id in ( select vgroups.id from vgroups where vgroups.participant_id in (?) )",@participant.id)
+        a_array =@a.to_a
+     
+
+      pdf = Prawn::Document.new
+      pdf.font('Helvetica', size: 8)
+      pdf.text "DOB "+@participant.dob.year.to_s+"      Gender "+@participant.gender_prompt.to_s+"    WrapNum "+@participant.wrapnum.to_s+"     ReggieID "+@participant.reggieid.to_s+"     AdrcNum "+@participant.adrcnum.to_s+"\n"
+      v_enumber_array = []
+      @participant.enrollments.each do |e| 
+         v_enumber_array.push(e.enumber)
+      end
+      if v_enumber_array.count > 0
+       pdf.text "Enrollments: "+v_enumber_array.join(", ")
+      else
+        pdf.text "Enrollments: none"
+      end 
+      pdf.font('Helvetica', size: 8) 
+      pdf.text "Visits"
+      pdf.font('Helvetica', size: 6)
+      v_cnt = 0
+    @vgroups.order("vgroup_date DESC").each do |vgroup|
+      v_value = "-  "+vgroup.vgroup_date.to_s+"   "+vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ")+"\n" 
+      pdf.text v_value
+      v_cnt = v_cnt + 1
+    end 
+      if v_cnt < 1
+        pdf.text "-  no visits"
+      end
+      pdf.font('Helvetica', size: 8)
+      pdf.text "MRI scan appointments"
+      pdf.font('Helvetica', size: 6)
+      v_cnt = 0
+      @visits = Visit.where("appointment_id in (?) ",a_array)
+      @visits.each do |v|
+            v_value = "-  "+v.date.to_s+"     "+v.scan_procedures.collect {|sp| sp.codename }.join(", ")+" with enumber "+ v.enrollments.collect {|e|e.enumber }.join(", ")
+             pdf.text v_value
+             v_cnt = v_cnt + 1
+      end 
+
+      
+      if v_cnt < 1
+        pdf.text "-  no MRI scans"
+      end 
+      # order by 
+      pdf.font('Helvetica', size: 8)
+      pdf.text "PET scan appointments"
+      pdf.font('Helvetica', size: 6)
+      # need to order by tracer
+      @petscans = Petscan.where("appointment_id in (?) ",a_array).order("lookup_pettracer_id")
+      v_cnt = 0
+          v_petscan_text_array = []
+          @a.order("appointment_date DESC").where("appointment_type = 'pet_scan'").each do |appt|
+             vgroup = Vgroup.find(appt.vgroup_id)
+             v_value = "-  "+appt.appointment_date.to_s+"     "+vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ")+"\n"
+             v_petscan = @petscans.where("appointment_id in (?)",appt.id)
+    
+             v_value = "-  "+LookupPettracer.find((v_petscan.first).lookup_pettracer_id).name+" "+v_value
+             v_petscan_text_array.push(v_value) 
+          v_cnt = v_cnt + 1
+         end 
+      if v_cnt < 1
+        pdf.text "-  no PET scans"
+      else
+          v_petscan_text_array.sort.each do |pet|
+                  pdf.text pet
+          end  
+      end 
+      # need to get LP success
+      pdf.font('Helvetica', size: 8)
+      pdf.text "LP appointments"
+      pdf.font('Helvetica', size: 6)
+      v_cnt = 0
+          @a.order("appointment_date DESC").where("appointment_type = 'lumbar_puncture'").each do |appt|
+             vgroup = Vgroup.find(appt.vgroup_id)
+             v_lps = Lumbarpuncture.where("appointment_id in (?)",appt.id)
+             v_lp_success = ""
+             if (v_lps.first).lpsuccess == 1
+                    v_lp_success = "Yes"
+             elsif (v_lps.first).lpsuccess == 0
+                   v_lp_success = "No"
+             end
+             
+             v_value = "-  "+appt.appointment_date.to_s+"     "+vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ")+"  success="+v_lp_success+"\n"
+             pdf.text v_value
+      v_cnt = v_cnt + 1
+    end 
+      if v_cnt < 1
+        pdf.text "-  no LP appointments"
+      end
+      pdf.font('Helvetica', size: 8)
+      pdf.text "Lab Health appointments"
+      pdf.font('Helvetica', size: 6)
+      v_cnt = 0
+          @a.order("appointment_date DESC").where("appointment_type = 'blood_draw'").each do |appt|
+             vgroup = Vgroup.find(appt.vgroup_id)
+             v_value = "-  "+appt.appointment_date.to_s+"     "+vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ")+"\n" 
+             pdf.text v_value
+      v_cnt = v_cnt + 1
+    end 
+      if v_cnt < 1
+        pdf.text "-  none"
+      end
+      pdf.font('Helvetica', size: 8)
+      pdf.text "Neuropsyche appointments"
+      pdf.font('Helvetica', size: 6)
+      v_cnt = 0
+          @a.order("appointment_date DESC").where("appointment_type = 'neuropsych'").each do |appt|
+             vgroup = Vgroup.find(appt.vgroup_id)
+             v_value = "-  "+appt.appointment_date.to_s+"     "+vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ")+"\n" 
+             pdf.text v_value
+      v_cnt = v_cnt + 1
+    end 
+      if v_cnt < 1
+        pdf.text "-  none"
+      end
+      pdf.font('Helvetica', size: 8)
+      pdf.text "Questionnaire appointments"
+      pdf.font('Helvetica', size: 6)
+      v_cnt = 0
+          @a.order("appointment_date DESC").where("appointment_type = 'questionnaire'").each do |appt|
+             vgroup = Vgroup.find(appt.vgroup_id)
+             v_value = "-  "+appt.appointment_date.to_s+"     "+vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ")+"\n" 
+             pdf.text v_value
+      v_cnt = v_cnt + 1
+       end 
+      if v_cnt < 1
+        pdf.text "-  none"
+      end
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.xml  { render :xml => @participant }
+      format.pdf do
+        send_data pdf.render,
+          filename: "export.pdf",
+          type: 'application/pdf',
+          disposition: 'inline'
+      end
+    end
+  end
+
   # GET /participants/new
   # GET /participants/new.xml
   def new
