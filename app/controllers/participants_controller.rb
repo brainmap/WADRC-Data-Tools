@@ -99,7 +99,12 @@ class ParticipantsController < ApplicationController
 
       pdf = Prawn::Document.new
       pdf.font('Helvetica', size: 8)
-      pdf.text "DOB "+@participant.dob.year.to_s+"      Gender "+@participant.gender_prompt.to_s+"    WrapNum "+@participant.wrapnum.to_s+"     ReggieID "+@participant.reggieid.to_s+"     AdrcNum "+@participant.adrcnum.to_s+"\n"
+      if !@participant.dob.nil?
+         v_value = "DOB "+@participant.dob.year.to_s+"      Gender "+@participant.gender_prompt.to_s+"    WrapNum "+@participant.wrapnum.to_s+"     ReggieID "+@participant.reggieid.to_s+"     AdrcNum "+@participant.adrcnum.to_s+"\n"
+       else
+         v_value = "DOB         Gender "+@participant.gender_prompt.to_s+"    WrapNum "+@participant.wrapnum.to_s+"     ReggieID "+@participant.reggieid.to_s+"     AdrcNum "+@participant.adrcnum.to_s+"\n"
+       end
+       pdf.text v_value
       v_enumber_array = []
       @participant.enrollments.each do |e| 
          v_enumber_array.push(e.enumber)
