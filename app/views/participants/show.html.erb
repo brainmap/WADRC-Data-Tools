@@ -158,7 +158,7 @@ edit_count = edit_count -1
 <% end %>
 <%end%>
 <br>
- <%= link_to 'download pdf', { :controller=>"participants", :action=>"participant_show_pdf", :id =>  @participant.id , :format => :pdf} %>  
+ <%= link_to 'download pdf (very slow to load)', { :controller=>"participants", :action=>"participant_show_pdf", :id =>  @participant.id , :format => :pdf}, :target => "green" %>  
 
 
 
