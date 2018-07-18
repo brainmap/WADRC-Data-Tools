@@ -10,7 +10,7 @@ end
 gem 'net-ssh'   
 gem 'net-sftp' 
 # not finding bundler in cap deploy - rvm issue?
-gem 'bundler', '1.14.6' #,'1.16.1' # '1.15.4' #  '1.14.6'  # was , '1.14.6'
+gem 'bundler','1.16.1' # '1.15.4' #  '1.14.6'  # was , '1.14.6'
 gem 'bundler-unload','1.0.2'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
@@ -86,7 +86,7 @@ gem 'bzip2-ruby', :git => 'https://github.com/chewi/bzip2-ruby.git'
 # gem 'capistrano-bundler', '1.2.0'  
 gem 'prawn'
 
-###gem 'escoffier', :path => '/Users/caillingworth/code/escoffier' # 
+#gem 'escoffier', :path => '/Users/caillingworth/code/escoffier' # 
 gem 'escoffier', :path => '/Users/panda_user/code/escoffier'    # think required by metamri?    
 # mise not working
 # not available , needs ruby 2.5 =gem 'fileutils'
