@@ -88,14 +88,18 @@ class ParticipantsController < ApplicationController
      # problems if no vgroup or enumber -- no way to link to scan procedure and access control
      @participant = @participants.find(params[:id])
       
-     @vgroups = Vgroup.where("participant_id in ( select participant_id from enrollments where participant_id = ? and enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
-                  where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?))) ", params[:id],scan_procedure_array)
+   #  @vgroups = Vgroup.where("participant_id in ( select participant_id from enrollments where participant_id = ? and enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from enrollment_vgroup_memberships, scan_procedures_vgroups
+   #               where enrollment_vgroup_memberships.vgroup_id = scan_procedures_vgroups.vgroup_id and scan_procedures_vgroups.scan_procedure_id in (?))) ", params[:id],scan_procedure_array)
+    # LETTING USERS SEE ALL vgroups
+     @vgroups = Vgroup.where("participant_id in (?) ", params[:id])
     connection = ActiveRecord::Base.connection();
-     v_vgroup_array = Hash.new
+     v_vgroup_hash = Hash.new
      v_vgroup_id_array = []
+     v_vgroup_sp_hash = Hash.new
      @vgroups.each do |vg|
           v_vgroup_id_array.push(vg.id)
-          v_vgroup_array[vg.id] = vg
+          v_vgroup_hash[vg.id] = vg
+          v_vgroup_sp_hash[vg.id] = vg.scan_procedures.collect {|sp| sp.codename }.join(", ")
      end
       sql = "select appointments.vgroup_id, appointments.appointment_type, appointments.appointment_date, appointments.id as appointment_id,
                  petscans.lookup_pettracer_id,lookup_pettracers.name,
@@ -133,7 +137,7 @@ class ParticipantsController < ApplicationController
       pdf.font('Helvetica', size: 6)
       v_cnt = 0
     @vgroups.order("vgroup_date DESC").each do |vgroup|
-      v_value = "-  "+vgroup.vgroup_date.to_s+"   "+vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ")+"\n" 
+      v_value = "-  "+vgroup.vgroup_date.to_s+"   "+v_vgroup_sp_hash[vgroup.id]+"\n" 
       pdf.text v_value
       v_cnt = v_cnt + 1
     end 
@@ -150,7 +154,7 @@ class ParticipantsController < ApplicationController
       results.each do |appt|
 
          if appt[1] == "blood_draw"
-            v_value = "-  "+appt[2].to_s+"     "+v_vgroup_array[appt[0]].scan_procedures.collect {|sp| sp.codename }.join(", ")+"\n"
+            v_value = "-  "+appt[2].to_s+"     "+v_vgroup_sp_hash[appt[0]]+"\n"
             v_blood_draw_array.push(v_value)
          elsif appt[1] == "lumbar_puncture"
              v_lp_success = ""
@@ -159,26 +163,26 @@ class ParticipantsController < ApplicationController
              elsif appt[6] == 0
                    v_lp_success = "No"
              end
-             v_value = "-  "+appt[2].to_s+"     "+v_vgroup_array[appt[0]].scan_procedures.collect {|sp| sp.codename }.join(", ")+"  success="+v_lp_success+"\n"
+             v_value = "-  "+appt[2].to_s+"     "+v_vgroup_sp_hash[appt[0]]+"  success="+v_lp_success+"\n"
              v_lumbar_puncture_array.push(v_value)
          elsif appt[1] == "mri"
              v_visit = Visit.find(appt[7])
              v_value = "-  "+v_visit.date.to_s+"     "+v_visit.scan_procedures.collect {|sp| sp.codename }.join(", ")+" with enumber "+ v_visit.enrollments.collect {|e|e.enumber }.join(", ")
              v_mri_array.push(v_value)
          elsif appt[1] == "neuropsych"
-            v_value = "-  "+appt[2].to_s+"     "+v_vgroup_array[appt[0]].scan_procedures.collect {|sp| sp.codename }.join(", ")+"\n"
+            v_value = "-  "+appt[2].to_s+"     "+v_vgroup_sp_hash[appt[0]]+"\n"
             v_neuropsych_array.push(v_value)
 
        
          elsif appt[1] == "pet_scan"
-            v_value = "-  "+appt[5]+"    -"+appt[2].to_s+"     "+v_vgroup_array[appt[0]].scan_procedures.collect {|sp| sp.codename }.join(", ")+"\n"
+            v_value = "-  "+appt[5]+"    -"+appt[2].to_s+"     "+v_vgroup_sp_hash[appt[0]]+"\n"
             v_pet_scan_array.push(v_value)
 
          elsif appt[1] == "placeholder"
              # skip
 
          elsif appt[1] == "questionnaire"
-            v_value = "-  "+appt[2].to_s+"     "+v_vgroup_array[appt[0]].scan_procedures.collect {|sp| sp.codename }.join(", ")+"\n"
+            v_value = "-  "+appt[2].to_s+"     "+v_vgroup_sp_hash[appt[0]]+"\n"
             v_questionnaire_array.push(v_value)
          end
       end
