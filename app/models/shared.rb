@@ -3454,9 +3454,10 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
       @schedulerun.save    
     
   end
-
-# exclude pilots
+#NEED TO ADDD!!!!!
+# exclude pilots vgroups.pilot_flag = 'N'
 # exclude do not shares
+# enrollments.do_nat_share_scans_flag = 'N'  
 # exclude bad ids
  def run_xnat_upload
      v_base_path = Shared.get_base_path()
@@ -3490,6 +3491,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      sql = "insert into "+v_xnat_participant_tn+"(participant_id,xnat_exists_flag) 
                select distinct vgroups.participant_id,'N' from vgroups 
                where vgroups.participant_id not in ( select "+v_xnat_participant_tn+".participant_id from "+v_xnat_participant_tn+")
+               and vgroups.pilot_flag = 'N'
                and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups 
                                     where scan_procedures_vgroups.scan_procedure_id in ("+v_scan_procedure_array.join(",")+")) 
                and vgroups.id in (select appointments.vgroup_id from appointments, visits, image_datasets, series_description_maps
@@ -3535,6 +3537,10 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      sql = "insert into "+v_xnat_appointment_mri_tn+"(appointment_id, visit_id,xnat_exists_flag)
      select distinct appointments.id , visits.id, 'N' from appointments, visits
      where appointments.id = visits.appointment_id
+     and appointments.vgroup_id in ( select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships, enrollments
+                                        where enrollment_vgroup_memberships.enrollment_id = enrollments.id 
+                                         and enrollments.do_not_share_scans_flag = 'N'  )
+     and appointments.vgroup_id in ( select vgroups.id from vgroups where vgroups.pilot_flag = 'N')
      and appointments.vgroup_id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups 
                                     where scan_procedures_vgroups.scan_procedure_id in ("+v_scan_procedure_array.join(",")+")) 
                and visits.id in (select image_datasets.visit_id from image_datasets, series_description_maps
@@ -3548,12 +3554,63 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      sql = "update "+v_xnat_appointment_mri_tn+" set participant_id = ( select vgroups.participant_id from vgroups, appointments  
                                where vgroups.id = appointments.vgroup_id and appointments.id = "+v_xnat_appointment_mri_tn+".appointment_id)"
      results = connection.execute(sql)
+
+
+     # get path from appointment_id , get codename/sp , get start , update xnat_session_id  <sp enum start>_export_id_<v#>
+
+     sql = "select "+v_xnat_appointment_mri_tn+".appointment_id, "+v_xnat_participant_tn+".export_id, visits.path
+       from "+v_xnat_appointment_mri_tn+","+v_xnat_participant_tn+", visits 
+     where ("+v_xnat_appointment_mri_tn+".xnat_session_id is null or "+v_xnat_appointment_mri_tn+".xnat_session_id = '') 
+     and "+v_xnat_participant_tn+".participant_id = "+v_xnat_appointment_mri_tn+".participant_id
+     and visits.appointment_id = "+v_xnat_appointment_mri_tn+".appointment_id
+     and visits.path is not null and visits.path > ''"
+
+     results = connection.execute(sql)
+
+     results.each do |v_val|
+        v_appt_id = v_val[0]
+        v_export_id = v_val[1]
+        v_path = v_val[2]
+        v_path_array = v_path.split("/")
+        if v_path_array.count > 4
+           v_codename = v_path_array[4]
+        end
+        v_xnat_session_id = ""
+        sp_array = ScanProcedure.where("codename in (?)",v_codename)
+        if sp_array.count> 0
+             v_prepend = sp_array.first.subjectid_base+"_"
+             v_number = ""
+             if v_codename.include? "visit2"
+                 v_number = "_v2"
+             elsif v_codename.include? "visit3"
+                 v_number = "_v3"
+             elsif v_codename.include? "visit4"
+                 v_number = "_v4"
+             elsif v_codename.include? "visit5"
+                 v_number = "_v5"
+             elsif v_codename.include? "visit6"
+                 v_number = "_v6"
+             elsif v_codename.include? "visit7"
+                 v_number = "_v7"
+             elsif v_codename.include? "visit8"
+                 v_number = "_v8"
+             end
+             v_xnat_session_id = v_prepend+v_export_id.to_s+v_number
+             sql_update = "update "+v_xnat_appointment_mri_tn+" set xnat_session_id = '"+v_xnat_session_id+"'
+             where "+v_xnat_appointment_mri_tn+".appointment_id = "+v_appt_id.to_s+"
+             and ("+v_xnat_appointment_mri_tn+".xnat_session_id is null or "+v_xnat_appointment_mri_tn+".xnat_session_id = '') "
+             results = connection.execute(sql_update)
+        end
+     end
+
+
 # set xnat_do_not_share_flag
 #set xnat_exists_flag = 'Y' after upload to xnat
-     sql = "insert into "+v_xnat_ids_tn+"(visit_id,image_dataset_id,xnat_exists_flag)
-     select distinct image_datasets.visit_id, image_datasets.id, 'N' from image_datasets, visits, appointments, series_description_maps,scan_procedures_vgroups
+     sql = "insert into "+v_xnat_ids_tn+"(visit_id,image_dataset_id,xnat_exists_flag,file_path)
+     select distinct image_datasets.visit_id, image_datasets.id, 'N',image_datasets.path from image_datasets, visits, appointments, series_description_maps,scan_procedures_vgroups
      where image_datasets.visit_id = visits.id 
      and appointments.id = visits.appointment_id
+     and (image_datasets.do_not_share_scans_flag is null or image_datasets.do_not_share_scans_flag != 'Y')
      and image_datasets.series_description = series_description_maps.series_description
                     and series_description_maps.series_description_type_id in ("+v_series_description_category_id_array.join(",")+") 
      and appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
