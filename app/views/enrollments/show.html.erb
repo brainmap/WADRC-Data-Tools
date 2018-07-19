@@ -117,7 +117,10 @@ edit_count = edit_count -1
 
 
 
-<p><%= link_to 'go to participant', @enrollment.participant if @enrollment.participant %></p>
+<p> <% if  !@enrollment.participant.nil? %>
+  <%= link_to 'Participant summary -download pdf (slowwww)', { :controller=>"participants", :action=>"participant_show_pdf", :id =>  @enrollment.participant.id , :format => :pdf}, :target => "green" %>  
+    <%end%>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <%= link_to 'go to participant', @enrollment.participant if @enrollment.participant %></p>
 <% if edit_count > 0 %>
 <div style="text-align:right">
 	<%= link_to 'edit', edit_enrollment_path(@enrollment) %> |
