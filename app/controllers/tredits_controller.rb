@@ -131,7 +131,7 @@ class TreditsController < ApplicationController
                                  val.push(v[0])
                                end
                               @tredit_row.push(val.join(', '))
-                          elsif  !act.ref_table_a_1.blank?  and !@tredit_actions[0].nil? and !(@tredit_actions[0].value).nil?
+                          elsif  !act.ref_table_a_1.blank?  and !@tredit_actions[0].nil? and !(@tredit_actions[0].value).nil? and @tredit_actions[0].value > ""
                                vals =((act.ref_table_a_1).constantize).where("id in (?)",@tredit_actions[0].value)
                                @tredit_row.push((vals.first).description)
                           elsif !@tredit_actions[0].nil?
