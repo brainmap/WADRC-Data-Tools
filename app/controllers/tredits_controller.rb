@@ -123,7 +123,7 @@ class TreditsController < ApplicationController
                         @tractiontypes.each do |act|
                           @tredit_actions = TreditAction.where("tredit_id in (?)",tredit.id).where("tractiontype_id in (?)",act.id)
                           # translate stored value to display value -- q_data does this by one big join
-                          if  !act.ref_table_a_1.nil? and act.ref_table_a_1 == "lookup_refs" and !(act.ref_table_b_1).nil? and !@tredit_actions[0].nil? and !(@tredit_actions[0].value).nil?
+                          if  !act.ref_table_a_1.nil? and act.ref_table_a_1 == "lookup_refs" and !(act.ref_table_b_1).nil? and !@tredit_actions[0].nil? and !(@tredit_actions[0].value).nil? and @tredit_actions[0].value > ""
                              sql_val = "select lookup_refs.description from lookup_refs where label='"+ act.ref_table_b_1+"' and ref_value in ("+@tredit_actions[0].value+")"
                               vals =  connection.execute(sql_val)
                                val=[]
