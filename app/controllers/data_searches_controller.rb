@@ -2942,8 +2942,7 @@ def cg_snapshot
           v_new_check_if_is_cgs = CgTn.where("tn in (?)",v_new_db_tn) 
           if v_new_check_if_is_cgs.count > 0
               v_set_inactive_tn = (v_new_check_if_is_cgs.first)
-              v_set_inactive_tn.status_flag = "N"
-              v_set_inactive_tn.save
+              v_set_inactive_tn.delete
           end 
           v_new_cg_tns = CgTn.new
           v_new_cg_tns.tn = v_new_db_tn
