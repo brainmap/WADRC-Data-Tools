@@ -2978,7 +2978,7 @@ def cg_snapshot
 end
 
  #def run_search
-#   copy of def index in application_controller  -- so other controllers can get at  -- need for csv export
+#   copy of def index in application_controller  -- so other controllers can get at  -- need for csv export index
 # end
 # make_in_source_schema, load_from_source_schema
 def cg_up_load
@@ -3073,6 +3073,7 @@ def cg_up_load
            v_msg = v_msg+"; Dropped UP Table "+v_tn 
          end
   # NEED TO DO !!!!! collect key_columns/subjectid/reggiied/secondary_key_protocol, secondary_key_visitno
+       v_visno_datasource_participant_index_array = []
         v_create_sql = "CREATE table "+v_schema+"."+v_tn+"("
         v_create_index_key_type = "create index ind_key_"+v_tn+" ON "+v_schema+"."+v_tn+"(participant_id)"
         # add key columns
@@ -3082,17 +3083,22 @@ def cg_up_load
         v_create_index_key_type = "create index ind_key_"+v_tn+" ON "+v_schema+"."+v_tn+"(enrollment_id,scan_procedure_id)"
         elsif v_key_type == "subjectid-kc-participant_id"
              v_create_sql = v_create_sql+" participant_id int "
+             #participant_id is being made somewhere else?
         elsif v_key_type == "reggieid-kc-participant_id"
              v_create_sql = v_create_sql+" participant_id int "
+             #participant_id is being made somewhere else?
         elsif v_key_type == "wrapnum-kc-participant_id"
              v_create_sql = v_create_sql+" participant_id int "
+             #participant_id is being made somewhere else?
         elsif v_key_type == "adrcnum-kc-participant_id"
              v_create_sql = v_create_sql+" participant_id int "
+             #participant_id is being made somewhere else?
         end 
 
         v_col_array = []
         v_key_col_array = []
         v_col_multi_key_array = []
+        
         # need to make _date and _age_at_activity cols, and do upddate based on format
         v_date_source_col_array = []
         v_date_date_col_hash = {}
@@ -3105,6 +3111,9 @@ def cg_up_load
               if col[3] == "subjectid" or col[3] == "secondary_key_protocol" or col[3] == "secondary_key_visitno" or col[0] == "secondary_key"
                   v_col_multi_key_array.push(col[0])
               end 
+              if col[3] == "secondary_key_protocol" or col[3] == "secondary_key_visitno"
+                      v_visno_datasource_participant_index_array.push(col[0])
+              end
               if col[3] == "subjectid"
                  v_key_col_array.push(col[0])
               elsif col[3] == "wrapnum"
@@ -3143,6 +3152,13 @@ def cg_up_load
              # make new table with v_up_table_yyyymmdd, 
             results = connection.execute(v_create_sql)   # new-present-old_edit ?
             results = connection.execute(v_create_index_key_type)
+            if v_visno_datasource_participant_index_array.count > 0
+               v_visno_datasource_participant_index_array.each do |cn|
+                 v_create_index_visno_datasource_participant = "create index ind_key_"+v_tn+cn+" ON "+v_schema+"."+v_tn+"("+cn+")"
+puts "aaaaa = "+v_create_index_visno_datasource_participant
+                 results = connection.execute(v_create_index_visno_datasource_participant)
+              end
+            end
             v_msg = v_msg+"; Created table "+v_tn
          end
          if ( !params[:append_full_replace].empty? and params[:append_full_replace] == "append" )
@@ -3344,6 +3360,7 @@ def cg_up_load
         v_create_sql = "CREATE table "+v_schema+"."+v_tn+"("
 
         # add key columns
+        v_visno_datasource_participant_index_array = []
         v_create_index_key_type = "create index ind_key_"+v_tn+" ON "+v_schema+"."+v_tn+"(participant_id)"
         if v_key_type == "enrollment/sp"
              v_create_sql = v_create_sql+" enrollment_id int,
@@ -3351,12 +3368,16 @@ def cg_up_load
           v_create_index_key_type = "create index ind_key_"+v_tn+" ON "+v_schema+"."+v_tn+"(enrollment_id,scan_procedure_id)"
         elsif v_key_type == "subjectid-kc-participant_id"
              v_create_sql = v_create_sql+" participant_id int "
+             #participant_id is being made somewhere else?
         elsif v_key_type == "reggieid-kc-participant_id"
              v_create_sql = v_create_sql+" participant_id int "
+             #participant_id is being made somewhere else?
         elsif v_key_type == "wrapnum-kc-participant_id"
              v_create_sql = v_create_sql+" participant_id int "
+             #participant_id is being made somewhere else?
         elsif v_key_type == "adrcnum-kc-participant_id"
              v_create_sql = v_create_sql+" participant_id int "
+             #participant_id is being made somewhere else?
         end 
 
         v_col_array = []
@@ -3370,6 +3391,9 @@ def cg_up_load
         v_age_at_activity_col_hash = {}
         result_cols.each do |col|
               v_col_array.push(col[0])
+              if col[3] == "secondary_key_protocol" or col[3] == "secondary_key_visitno"
+                      v_visno_datasource_participant_index_array.push(col[0])
+              end
               if col[3] == "subjectid"
                  v_key_col_array.push(col[0])
               elsif col[3] == "wrapnum"
@@ -3405,6 +3429,12 @@ def cg_up_load
           # make new table with v_up_table_yyyymmdd, 
          results = connection.execute(v_create_sql)   # new-present-old_edit ?
          results = connection.execute(v_create_index_key_type)
+         if  v_visno_datasource_participant_index_array.count > 0
+               v_visno_datasource_participant_index_array.each do |cn|
+                   v_visno_datasource_participant_index = "create index ind_key_"+v_tn+cn+" ON "+v_schema+"."+v_tn+"("+cn+")"
+                   results = connection.execute(v_visno_datasource_participant_index)
+               end
+         end
 
        v_insert_sql = "INSERT INTO "+v_schema+"."+v_tn+"("
         v_insert_end_sql = ") "
