@@ -11,6 +11,9 @@
 
 <tr><td nowrap align="left"><%= link_to('Runs -Scheduled Jobs', '/schedulerun_search') %></td><td align="left"> logging of recent scheduled jobs runs.<br></td></tr>
 <tr><td nowrap align="left"><%= link_to('Up Protocol data load', '/cg_up_load') %></td><td align="left"> - archive existing UP Protocol table, load new UP Protocol table, Re-load exisiting UP Protocol table from data dictionary. Expects data dictionary to be loaded in up_table_definitions table/file upload.<br></td></tr>
+
+<tr><td nowrap align="left"><%= link_to('CG table snapshot', '/cg_snapshot') %></td><td align="left"> - archive existing cg_* table<br></td></tr>
+
 <tr><td nowrap align="left"><b>Admin check logged querries</b> ( for UP protocol)</td><td align="left"> <%= form_tag  '/cg_search' ,{:target =>'_blank'} do %>
 <%= collection_select :admin_query_check, :user_id, User.where(" users.username not like '%left%' ").all.sort_by(&:username_name), :id, :username_name, :prompt => 'choose user' %>
 	  <%= submit_tag("checked logged searches")%><%end%><br></td></tr>

@@ -2886,6 +2886,98 @@ puts "bbbbb "+sql
      
     end
 
+
+def cg_snapshot
+  if !params[:cg_snapshot].nil?
+     v_cg_tn_id = params[:cg_snapshot][:cg_tn_id]
+     v_new_cg_display_table_name = params[:new_cg_display_table_name]
+     v_cg_table_yyyymmdd = params[:cg_table_yyyymmdd]
+     v_new_cg_table_type = params[:cg_snapshot][:new_cg_table_type]
+     v_make_or_full_replace = params[:make_or_full_replace]
+
+     v_msg = " new table ="+v_new_cg_display_table_name
+     v_msg = " new table ="+v_cg_table_yyyymmdd
+     v_msg = " new table ="+v_new_cg_table_type
+     v_msg = " new table ="+v_make_or_full_replace
+
+     v_msg = " new table ="+v_new_cg_display_table_name+" "+v_cg_table_yyyymmdd+" "+v_new_cg_table_type+" "+v_make_or_full_replace
+
+     # get cg_tns
+     # check if db has cg_tns.tn+_yyyymmdd
+     # check if cg_tns and cg_tn_cns has cg_tns.tn+_yyyymmdd/new_cg_display_table_name
+     # check if make_or_full_replace 
+
+     # make new db table_yyyymmdd
+     # make new cg_tns. - replace all joins with new table name, use new_cg_table_type
+     # make new cg_tn_cns with new cg_tns_yyyymmdd
+     # echo out changes
+     v_old_cg_tns = CgTn.find(v_cg_tn_id)
+     v_new_db_tn = v_old_cg_tns.tn+"_"+v_cg_table_yyyymmdd
+     v_make_db_table = "N"
+     v_table_exists = "N"
+     # table_schema = '"+v_source_schema+"' AND
+     connection = ActiveRecord::Base.connection();
+     v_sql = "SELECT COUNT(*) FROM information_schema.tables WHERE  table_name = '"+v_new_db_tn+"' "     
+        results = connection.execute(v_sql)
+        v_cnt = results.first
+        if v_cnt[0].to_i > 0
+              v_table_exists = "Y"          
+        else
+           v_make_db_table = "Y"
+        end
+
+
+     if v_make_or_full_replace == "full_replace" and v_table_exists == "Y"
+         v_make_db_table = "Y"
+         v_sql = "DROP table "+v_new_db_tn
+         results = connection.execute(v_sql)
+         v_msg =" dropping existing db table; "+v_msg
+     end
+     if v_make_db_table == "Y"
+      # copies table structure an dindexes
+          v_sql = "create table "+v_new_db_tn+" like "+v_old_cg_tns.tn
+          results = connection.execute(v_sql)
+          v_sql = "insert into "+v_new_db_tn+" select * from "+v_old_cg_tns.tn
+          results = connection.execute(v_sql)
+          v_new_check_if_is_cgs = CgTn.where("tn in (?)",v_new_db_tn) 
+          if v_new_check_if_is_cgs.count > 0
+              v_set_inactive_tn = (v_new_check_if_is_cgs.first)
+              v_set_inactive_tn.status_flag = "N"
+              v_set_inactive_tn.save
+          end 
+          v_new_cg_tns = CgTn.new
+          v_new_cg_tns.tn = v_new_db_tn
+          v_new_cg_tns.common_name = v_new_cg_display_table_name
+          v_new_cg_tns.join_left  = (v_old_cg_tns.join_left).gsub(v_old_cg_tns.tn,v_new_db_tn)
+          v_new_cg_tns.join_right = (v_old_cg_tns.join_right).gsub(v_old_cg_tns.tn,v_new_db_tn)
+          v_new_cg_tns.join_left_parent_tn = v_old_cg_tns.join_left_parent_tn
+          v_new_cg_tns.display_order = v_old_cg_tns.display_order
+          v_new_cg_tns.table_type = v_new_cg_table_type
+          v_new_cg_tns.status_flag = 'Y'
+          v_new_cg_tns.editable_flag = "N"
+          v_new_cg_tns.secondary_key_flag = v_old_cg_tns.secondary_key_flag
+          v_new_cg_tns.contact_owner_table = v_old_cg_tns.contact_owner_table
+          v_new_cg_tns.save
+
+          @v_cg_tn_cns = CgTnCn.where("cg_tn_id = "+v_old_cg_tns.id.to_s)
+          @v_cg_tn_cns.each do |cg_tn_cn|
+              v_new_cg_tn_cn = CgTnCn.new
+              v_new_cg_tn_cn = cg_tn_cn     
+              v_new_cg_tn_cn.cg_tn_id =  v_new_cg_tns.id
+              v_new_cg_tn_cn.save
+          end
+          v_msg =" Made table; "+v_msg
+     else
+         v_msg = "Not make table "+v_msg     
+     end
+    
+
+
+
+  end
+  flash[:notice] = v_msg
+end
+
  #def run_search
 #   copy of def index in application_controller  -- so other controllers can get at  -- need for csv export
 # end

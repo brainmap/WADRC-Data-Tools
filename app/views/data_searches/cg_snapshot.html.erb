@@ -1,0 +1,45 @@
+<% @current_tab = "searches" 
+v_schema = [["up_load_development","up_load_development"],["up_load_production","up_load_production"]]
+v_make_load_table_schema = [["Make Table in Source Schema","make_in_source_schema"],["Load from Source Schema","load_from_source_schema"]]
+
+v_key_type = [["enumber and visit# mapped to enrollment/scan_procedure","enrollment/sp"],["reggieid-participant_id","reggieid-kc-participant_id"],["wrapnum-participant_id","wrapnum-kc-participant_id"],["adrcnum-participant_id","adrcnum-kc-participant_id"]]
+%>
+
+<% if current_user.role == 'Admin_High' %>
+
+
+
+<br>
+<%= form_tag  '/cg_snapshot'  do %>
+    <H2>Archive CG table in the database and cg_search</H2> -useful for continually updated tables<br>
+	 <table width="100%">
+	 	<tr><td align="left"><div class="field">
+	    <B>CG Table Name:</B>: 
+	 <%= collection_select :cg_snapshot, :cg_tn_id, CgTn.all.sort_by(&:common_name), :id, :common_name,{:prompt => 'Select a Table'},{:required => true}  %>
+	</div>
+		</td></tr>
+		<tr><td align="left"><div class="field">
+	    <B>New CG Table Name:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	    <%= text_field_tag "new_cg_display_table_name", nil,:size =>90 %>  <small>Include the date stamp YYYYMMDD in the display name</small></div>
+		</td></tr>
+		<tr><td align="left"><div class="field">
+	    <B>Date Stamp:</B>&nbsp;&nbsp;&nbsp;<small>YYYYMMDD</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "cg_table_yyyymmdd",nil, :required => true %> - append to existing cg_table_name</div>
+		</td></tr>
+				<tr><td align="left"><div class="field">
+	    <B>new CG table type:</B>&nbsp;&nbsp;&nbsp;&nbsp;<%= collection_select 'cg_snapshot', :new_cg_table_type, CgTableType.where(" status_flag ='Y' ").all.sort_by(&:table_type), :table_type, :table_type, :prompt => 'Select table types'%>
+		</td></tr>
+			 	
+			 	<tr><td align="left"><div class="field">
+	    <B>Append or Full Replace or Update with non-blank:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= select_tag "make_or_full_replace", options_for_select([
+["full_replace","full_replace"],["make_if_not_exist","make_if_not_exist"]], "make_if_not_exist")%></div>  
+		</td></tr>
+	   <tr><td  align="left">
+						  <div class="actions">
+						    <%= submit_tag("make Archive for CG table") %>
+						  </div>
+		</td></tr>
+		</table>
+		<br>
+<% end %>
+
+<% end %>
