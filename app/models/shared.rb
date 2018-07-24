@@ -3480,10 +3480,14 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      v_scan_procedure_array = [26,41,77,91] #pdt's and mk
      v_series_description_category_array = ['T1_Volumetric','T2'] # mpnrage?
      v_series_description_category_id_array = [19, 20] #,1 ]
+     v_project = "up-test"
 
      v_xnat_participant_tn = "xnat_participants"
      v_xnat_appointment_mri_tn ="xnat_mri_appointment"
      v_xnat_ids_tn = "xnat_image_datasets"
+     v_working_directory = "/tmp/"   # v_base_path+"/xnat_dev"
+     v_xnat_script_dir = v_base_path+"/analyses/rpcary/xnat/scripts/"
+     v_script_dicom_clean = v_xnat_script_dir+"xnat_dicom_upload_cleaner.rb"
 
      connection = ActiveRecord::Base.connection();
      # get all participants in sp/id not in v_xnat_participant_tn
@@ -3624,6 +3628,141 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
 # add sessionid column in database
 # set xnat_do_not_share_flag
 #set xnat_exists_flag = 'Y' after upload to xnat
+
+    # R means run, D means done
+    # make participants in xnat
+    sql = "select export_id, participant_id from "+v_xnat_participant_tn+" where xnat_do_not_share_flag = 'N' and xnat_run_upload_flag = 'R' and xnat_exists_flag = 'N' "
+    results = connection.execute(sql)
+    results.each do |participant|
+       # make user on xnat
+       v_sql_update = "update "+v_xnat_participant_tn+" set xnat_run_upload_flag ='D', xnat_exists_flag = 'Y' where export_id = '"+participant[0].to_s+"' "
+       ####results_update = connection.execute(v_sql_update)
+    end
+
+    # make session and scans in xnat      v_xnat_ids_tn = "xnat_image_datasets"
+    sql = "select "+v_xnat_ids_tn+".file_path, "+v_xnat_ids_tn+".visit_id, "+v_xnat_appointment_mri_tn+".xnat_session_id, "+v_xnat_appointment_mri_tn+".xnat_exists_flag,
+    "+v_xnat_participant_tn+".export_id, "+v_xnat_participant_tn+".xnat_exists_flag 
+                  from "+v_xnat_participant_tn+","+v_xnat_ids_tn+","+v_xnat_appointment_mri_tn+" where "+v_xnat_ids_tn+".xnat_do_not_share_flag = 'N' 
+                                  and "+v_xnat_ids_tn+".xnat_exists_flag = 'N' 
+                                  and "+v_xnat_participant_tn+".participant_id = "+v_xnat_appointment_mri_tn+".participant_id
+                                  and "+v_xnat_appointment_mri_tn+".visit_id = "+v_xnat_ids_tn+".visit_id
+                                  and "+v_xnat_participant_tn+".xnat_run_upload_flag = 'R'
+                      order by "+v_xnat_appointment_mri_tn+".xnat_session_id "
+    #puts "xnat_driver="+sql
+    results = connection.execute(sql)
+    v_xnat_session ="zzzzz"
+    v_target_dir = ""
+    v_cnt_ids = 0
+    results.each do |scan|
+       if v_xnat_session != scan[2]
+           # new xnat session
+        puts " new session="+v_xnat_session
+        if v_cnt_ids  > 0 
+          # before new xnat_session, zip v_target_dir  and xnat_seesion != zzzzzz
+          # do xnat upload - curl command
+          # update database table
+          
+             v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+"'"
+          begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+              rescue => msg    
+          end
+        end
+        v_cnt_ids = v_cnt_ids + 1
+        v_xnat_session = scan[2]
+        v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; mkdir "+v_xnat_session+"'"
+  #puts " gggg ="+v_call
+        begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+            rescue => msg    
+        end
+        v_target_dir = v_working_directory+v_xnat_session
+      end # new sxnat_session
+      # rsync -av scan[0] v_target_dir
+      v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'rsync -av  "+scan[0]+"  "+v_working_directory+"/"+v_xnat_session+"/'"
+      begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+            rescue => msg    
+      end
+      v_path = scan[0]
+      v_path_array = v_path.split("/")
+      v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/"+v_xnat_session+"/"+v_path_array.last+";find . -name '*.dcm.bz2' -exec bunzip2 {} \\\;\" "
+      begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+            rescue => msg    
+      end
+      # delete json, yaml, pickle
+      v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/"+v_xnat_session+"/"+v_path_array.last+"/;rm -rf *.json \""
+  puts "nnnnn ="+v_call
+      begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+            rescue => msg    
+      end
+      v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/"+v_xnat_session+"/"+v_path_array.last+"/;rm -rf *.pickle \""
+      begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+            rescue => msg    
+      end
+      v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/"+v_xnat_session+"/"+v_path_array.last+"/;rm -rf *.yaml \""
+      begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+            rescue => msg    
+      end
+      # find /bunzip bz2
+      # v_script_dicom_clean command = "./xnat_dicom_upload_cleaner.rb %s %s %s %s" % (target_dir, meta_info['exportID'], project, session_label)
+         # target_dir = v_target_dir + dicom dir
+         # meta_info['exportID'] = scan[4]
+         # project = v_project
+         # session_label = v_xnat_session
+
+    end
+     # bfor last xnat_session, zip v_target_dir  and xnat_seesion != zzzzzz
+          # do xnat upload - curl command
+          # update database table
+          #v_call = "ssh panda_user@"+v_computer+" 'cd "+v_working_directory+"; rm -rf "+v_xnat_session+"'"
+
 
     @schedulerun.comment =("successful finish xnat_upload "+v_comment_warning+" "+v_comment[0..1990])
     if !v_comment.include?("ERROR")
