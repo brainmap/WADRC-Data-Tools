@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @networkgroup.name %>
+</p>
+
+<p>
+  <strong>Networkgroup type:</strong>
+  <%= @networkgroup.networkgroup_type %>
+</p>
+
+<p>
+  <strong>Status flag:</strong>
+  <%= @networkgroup.status_flag %>
+</p>
+
+<p>
+  <strong>Comment:</strong>
+  <%= @networkgroup.comment %>
+</p>
+
+<%= link_to 'Edit', edit_networkgroup_path(@networkgroup) %> |
+<%= link_to 'Back', networkgroups_path %>

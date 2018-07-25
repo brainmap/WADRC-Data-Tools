@@ -1,0 +1,37 @@
+<%= form_for(usernetworkgroup) do |f| %>
+  <% if usernetworkgroup.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(usernetworkgroup.errors.count, "error") %> prohibited this usernetworkgroup from being saved:</h2>
+
+      <ul>
+      <% usernetworkgroup.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :user_id %>
+    <%= f.text_field :user_id %>
+  </div>
+
+  <div class="field">
+    <%= f.label :networkgroup_id %>
+    <%= f.text_field :networkgroup_id %>
+  </div>
+
+  <div class="field">
+    <%= f.label :status_flag %>
+    <%= f.text_field :status_flag %>
+  </div>
+
+  <div class="field">
+    <%= f.label :comment %>
+    <%= f.text_field :comment %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

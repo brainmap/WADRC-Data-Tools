@@ -1,6 +1,8 @@
 WADRCDataTools::Application.routes.draw do
 
 
+  resources :usernetworkgroups
+  resources :networkgroups
   resources :trfileimages
   resources :processedimagesfiletypes
   resources :processedimagessources

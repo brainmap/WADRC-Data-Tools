@@ -1,0 +1,40 @@
+<% if current_user.role == 'Admin_High'%>
+<%= form_for(networkgroup) do |f| %>
+  <% if networkgroup.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(networkgroup.errors.count, "error") %> prohibited this networkgroup from being saved:</h2>
+
+      <ul>
+      <% networkgroup.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :name %>
+    <%= f.text_field :name %>
+  </div>
+
+  <div class="field">
+    <%= f.label :networkgroup_type %>
+    <%= f.text_field :networkgroup_type %>
+  </div>
+
+  <div class="field">
+    <%= f.label :status_flag %>
+    <%= f.text_field :status_flag %>
+  </div>
+
+  <div class="field">
+    <%= f.label :comment %>
+    <%= f.text_field :comment %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<%end%>

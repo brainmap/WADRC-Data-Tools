@@ -1,0 +1,33 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Usernetworkgroups</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Networkgroup</th>
+      <th>Status flag</th>
+      <th>Comment</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @usernetworkgroups.each do |usernetworkgroup| %>
+      <tr>
+        <td><%= usernetworkgroup.user_id %></td>
+        <td><%= usernetworkgroup.networkgroup_id %></td>
+        <td><%= usernetworkgroup.status_flag %></td>
+        <td><%= usernetworkgroup.comment %></td>
+        <td><%= link_to 'Show', usernetworkgroup %></td>
+        <td><%= link_to 'Edit', edit_usernetworkgroup_path(usernetworkgroup) %></td>
+        <td><%= link_to 'Destroy', usernetworkgroup, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Usernetworkgroup', new_usernetworkgroup_path %>

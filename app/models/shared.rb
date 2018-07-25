@@ -2994,7 +2994,7 @@ def run_sleep_t1
     @schedulerun.save
     
   end
-
+ # ilinux id command - gets user groups
   def run_user_networkgroup_harvest
 
      @schedule = Schedule.where("name in ('user_networkgroup_harvest')").first
@@ -3007,6 +3007,75 @@ def run_sleep_t1
       v_comment = ""
       v_comment_warning =""
       v_error_comment = ""
+      v_computer = "merida"
+      v_users = User.all.where("users.id not in (select protocol_roles.user_id from protocol_roles)")
+      v_users.each do |user|
+         v_usernetworkgroups = Usernetworkgroup.where("user_id in (?)",user.id)
+         v_usernetworkgroups.each do |usernetworkgroup|
+             usernetworkgroup.delete
+         end
+      end
+      # limiting to users with 
+      v_users = User.all.where("users.id in (select protocol_roles.user_id from protocol_roles)")
+      v_networkgroup_array = []
+      v_networkgroup_id_array = []
+      v_allready_found_array = []
+      v_networkgroup_id_hash = Hash.new
+      v_users.each do |user|
+         v_username = user.username
+         v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'id "+v_username+" '"
+         v_grouplist = ""
+         begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                v_output = stdout.read 1024 
+                v_grouplist = v_grouplist + v_output   
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+            rescue => msg    
+           end
+         puts v_username
+         puts v_grouplist
+         v_networkgroup_array = v_grouplist.split(",")
+         v_networkgroup_id_array = []
+         v_networkgroup_array.shift # get rid of uid-gid-domain_users group
+         puts v_networkgroup_array.join(",")
+         v_networkgroup_array.each do |netgrp|
+             if !v_allready_found_array.include? netgrp
+                 v_allready_found_array.push(netgrp)
+                 v_networkgroups = Networkgroup.where("name in (?)", netgrp)
+                 if v_networkgroups.count < 1
+                    v_networkgroup = Networkgroup.new
+                    v_networkgroup.name = netgrp
+                    v_networkgroup.status_flag = 'Y'
+                    v_networkgroup.save
+                    v_networkgroup_id_hash[netgrp] = v_networkgroup.id
+                    v_networkgroup_id_array.push(v_networkgroup.id)
+                 else
+                     v_networkgroup_id_hash[netgrp] = v_networkgroups.first.id
+                     v_networkgroup_id_array.push(v_networkgroups.first.id)
+                 end
+              end   
+         end
+         v_usernetworkgroups = Usernetworkgroup.where("user_id in (?)",user.id)
+         v_usernetworkgroups.each do |usernetworkgroup|
+            if v_networkgroup_id_array.include? usernetworkgroup.networkgroup_id
+              v_networkgroup_id_array.delete(usernetworkgroup.networkgroup_id)
+             else
+               usernetworkgroup.delete
+             end
+         end
+         v_networkgroup_id_array.each do |networkgroup_id|
+             v_usernetworkgroup = Usernetworkgroup.new
+             v_usernetworkgroup.user_id = user.id
+             v_usernetworkgroup.networkgroup_id = networkgroup_id
+             v_usernetworkgroup.save
+         end
+
+         # parse list, check if in networkgroups/insert, check if in usernetworkgroups, delete ones that aren't any more, insert new ones
+      end
 
     @schedulerun.comment =("successful finish user_networkgroup_harvest "+v_comment_warning+" "+v_comment[0..3900])
     if !v_comment.include?("ERROR")

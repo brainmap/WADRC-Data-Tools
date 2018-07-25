@@ -1,0 +1,35 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Networkgroups</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Networkgroup type</th>
+      <th>Status flag</th>
+      <th>Comment</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @networkgroups.each do |networkgroup| %>
+      <tr>
+        <td><%= networkgroup.name %></td>
+        <td><%= networkgroup.networkgroup_type %></td>
+        <td><%= networkgroup.status_flag %></td>
+        <td><%= networkgroup.comment %></td>
+        <td><%= link_to 'Show', networkgroup %></td>
+        <% if current_user.role == 'Admin_High'%>
+        <td><%= link_to 'Edit', edit_networkgroup_path(networkgroup) %></td>
+        <td><%= link_to 'Destroy', networkgroup, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <%end%>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Networkgroup', new_networkgroup_path %>
