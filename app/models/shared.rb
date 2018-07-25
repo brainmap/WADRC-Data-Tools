@@ -3582,7 +3582,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      
      # DEV vs PROD
      v_xnat_site = "xnatdev.medicine.wisc.edu"
-     v_pass = # "zzzz"
+     v_pass = ""# "zzzz"
 
      connection = ActiveRecord::Base.connection();
      # get all participants in sp/id not in v_xnat_participant_tn
