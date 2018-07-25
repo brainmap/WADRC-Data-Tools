@@ -287,7 +287,11 @@ v_user = v_user.gsub("\n","")
 
   elsif v_value_1 == "tissueseg_spm12_gm_wm_csf_volumes" # harvests
       v_shared = Shared.new
-      v_shared.run_tissueseg_spm12_gm_wm_csf_volumes()  
+      v_shared.run_tissueseg_spm12_gm_wm_csf_volumes() 
+
+  elsif v_value_1 == "user_networkgroup_harvest"
+      v_shared = Shared.new
+      v_shared.run_user_networkgroup_harvest() 
 
    elsif v_value_1 == "washu_upload"
       v_shared = Shared.new

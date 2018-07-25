@@ -2995,6 +2995,28 @@ def run_sleep_t1
     
   end
 
+  def run_user_networkgroup_harvest
+
+     @schedule = Schedule.where("name in ('user_networkgroup_harvest')").first
+    @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting user_networkgroup_harvest"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+      v_error_comment = ""
+
+    @schedulerun.comment =("successful finish user_networkgroup_harvest "+v_comment_warning+" "+v_comment[0..3900])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
+  end
+
    # data request from anders wahlin for adrc - t1/resting bold => /unknown, asl => /asl
   # from cg_adrc_upload 
   # wahlin_t1_asl_resting_sent_flag = Y means the files has been uploaded
@@ -3488,6 +3510,10 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      v_working_directory = "/tmp/"   # v_base_path+"/xnat_dev"
      v_xnat_script_dir = v_base_path+"/analyses/rpcary/xnat/scripts/"   # WILL CHANGE LOCATIOON!!!!!
      v_script_dicom_clean = v_xnat_script_dir+"xnat_dicom_upload_cleaner.rb"
+     
+     # DEV vs PROD
+     v_xnat_site = "xnatdev.medicine.wisc.edu"
+     v_pass = # "zzzz"
 
      connection = ActiveRecord::Base.connection();
      # get all participants in sp/id not in v_xnat_participant_tn
@@ -3682,8 +3708,33 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
 puts "hhhhh ="+sql_update 
           # update database table
           # update database table
+    v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl -u paultestuser:'"+v_pass+"' -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
+      puts v_call 
+      begin
+    stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+          puts stdout.read 1024    
+      end
+      stdin.close
+      stdout.close
+      stderr.close
+      rescue => msg    
+      end
+      #sleep(3.minutes)
           
-             v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+"*'"
+             v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+"'"
+          begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+              rescue => msg    
+          end
+          
+             v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+".zip'"
           begin
             stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
@@ -3731,7 +3782,7 @@ puts "hhhhh ="+sql_update
       end
       v_path = scan[0]
       v_path_array = v_path.split("/")
-      v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/"+v_xnat_session+"/"+v_path_array.last+";find . -name '*.dcm.bz2' -exec bunzip2 {} \\\;\" "
+      v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/"+v_xnat_session+"/"+v_path_array.last+";find . -name '*.bz2' -exec bunzip2 {} \\\;\" "
       begin
             stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
@@ -3812,13 +3863,45 @@ puts "hhhhh ="+sql_update
       rescue => msg    
     end
     # do xnat upload - curl command
+    #$(curl -u ${USER}:${PASS} -o ${FILE}.log -w "%{http_code}" --form project=${PROJECT_ID} --form image_archive=@${FILE} "${SITE}/data/services/import?format=html")
+    #$(curl  -o ${FILE}.log -w "%{http_code}" --form project=${PROJECT_ID} --form image_archive=@${FILE} "${SITE}/data/services/import?format=html")
+    v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl -u paultestuser:'"+v_pass+"' -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
+      puts v_call
+
+      begin
+    stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+          puts stdout.read 1024    
+      end
+      while !stderr.eof?
+         puts stderr.read 1024
+      end
+      stdin.close
+      stdout.close
+      stderr.close
+      rescue => msg    
+      end
+      #sleep(2.minutes)
+    puts "dddd="+v_call
     sql_update = "update "+v_xnat_ids_tn+" set "+v_xnat_ids_tn+".xnat_exists_flag = 'Y' 
     where "+v_xnat_ids_tn+".visit_id = "+v_visit_id.to_s+" and "+v_xnat_ids_tn+".xnat_exists_flag = 'N'
           and "+v_xnat_ids_tn+".file_path in('"+v_path_full_list_array.join("','")+"') "
   ######results_update = connection.execute(sql_update)
 puts "hhhhh ="+sql_update
           
-             v_call = "SSSSSSSSSSSssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+"*'"
+             v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+"'"
+          begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+              rescue => msg    
+          end
+          
+             v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+".zip'"
           begin
             stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
