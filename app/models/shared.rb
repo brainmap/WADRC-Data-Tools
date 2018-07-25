@@ -3486,7 +3486,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      v_xnat_appointment_mri_tn ="xnat_mri_appointment"
      v_xnat_ids_tn = "xnat_image_datasets"
      v_working_directory = "/tmp/"   # v_base_path+"/xnat_dev"
-     v_xnat_script_dir = v_base_path+"/analyses/rpcary/xnat/scripts/"
+     v_xnat_script_dir = v_base_path+"/analyses/rpcary/xnat/scripts/"   # WILL CHANGE LOCATIOON!!!!!
      v_script_dicom_clean = v_xnat_script_dir+"xnat_dicom_upload_cleaner.rb"
 
      connection = ActiveRecord::Base.connection();
@@ -3653,16 +3653,37 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
     v_xnat_session ="zzzzz"
     v_target_dir = ""
     v_cnt_ids = 0
+    v_path_array = []  # the path pusghed into array is getting split on /
+    v_path_full_list_array = []
+    v_visit_id = ""
     results.each do |scan|
+      puts "aaaaa=0"+scan[0]+"   1="+scan[1].to_s+"  2="+scan[2].to_s
        if v_xnat_session != scan[2]
            # new xnat session
         puts " new session="+v_xnat_session
         if v_cnt_ids  > 0 
           # before new xnat_session, zip v_target_dir  and xnat_seesion != zzzzzz
+           v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/;zip -r  "+v_xnat_session+".zip  "+v_xnat_session+"\""
+           begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+            rescue => msg    
+           end
           # do xnat upload - curl command
+          sql_update = "update "+v_xnat_ids_tn+" set "+v_xnat_ids_tn+".xnat_exists_flag = 'Y' 
+          where "+v_xnat_ids_tn+".visit_id = "+v_visit_id.to_s+" and "+v_xnat_ids_tn+".xnat_exists_flag = 'N'
+          and "+v_xnat_ids_tn+".file_path in('"+v_path_full_list_array.join("','")+"') "
+          ######results_update = connection.execute(sql_update)
+puts "hhhhh ="+sql_update 
+          # update database table
           # update database table
           
-             v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+"'"
+             v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+"*'"
           begin
             stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
@@ -3673,8 +3694,10 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
               stderr.close
               rescue => msg    
           end
+          
         end
         v_cnt_ids = v_cnt_ids + 1
+        v_visit_id = scan[1]
         v_xnat_session = scan[2]
         v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; mkdir "+v_xnat_session+"'"
   #puts " gggg ="+v_call
@@ -3688,8 +3711,12 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
               stderr.close
             rescue => msg    
         end
-        v_target_dir = v_working_directory+v_xnat_session
+        v_path_full_list_array = []
+
       end # new sxnat_session
+        v_file_path = scan[0]
+        v_path_full_list_array.push(v_file_path)
+        v_target_dir = v_working_directory+v_xnat_session
       # rsync -av scan[0] v_target_dir
       v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'rsync -av  "+scan[0]+"  "+v_working_directory+"/"+v_xnat_session+"/'"
       begin
@@ -3717,10 +3744,10 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
       end
       # delete json, yaml, pickle
       v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/"+v_xnat_session+"/"+v_path_array.last+"/;rm -rf *.json \""
-  puts "nnnnn ="+v_call
+
       begin
             stdin, stdout, stderr = Open3.popen3(v_call)
-              while !stdout.eof?
+             while !stdout.eof?
                 puts stdout.read 1024    
               end
               stdin.close
@@ -3756,12 +3783,52 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
          # meta_info['exportID'] = scan[4]
          # project = v_project
          # session_label = v_xnat_session
-
+      v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \""+v_script_dicom_clean+" '"+v_working_directory+"/"+v_xnat_session+"/"+v_path_array.last+"' '"+scan[4].to_s+"' '"+v_project+"' '"+v_xnat_session+"' \" "
+      #puts "ddddd ="+v_call
+      begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+            rescue => msg    
+      end
     end
-     # bfor last xnat_session, zip v_target_dir  and xnat_seesion != zzzzzz
+     # after last xnat_session, zip v_target_dir  and xnat_seesion != zzzzzz
           # do xnat upload - curl command
           # update database table
           #v_call = "ssh panda_user@"+v_computer+" 'cd "+v_working_directory+"; rm -rf "+v_xnat_session+"'"
+    v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/;zip -r  "+v_xnat_session+".zip  "+v_xnat_session+"\""
+    begin
+    stdin, stdout, stderr = Open3.popen3(v_call)
+      while !stdout.eof?
+          puts stdout.read 1024    
+      end
+      stdin.close
+      stdout.close
+      stderr.close
+      rescue => msg    
+    end
+    # do xnat upload - curl command
+    sql_update = "update "+v_xnat_ids_tn+" set "+v_xnat_ids_tn+".xnat_exists_flag = 'Y' 
+    where "+v_xnat_ids_tn+".visit_id = "+v_visit_id.to_s+" and "+v_xnat_ids_tn+".xnat_exists_flag = 'N'
+          and "+v_xnat_ids_tn+".file_path in('"+v_path_full_list_array.join("','")+"') "
+  ######results_update = connection.execute(sql_update)
+puts "hhhhh ="+sql_update
+          
+             v_call = "SSSSSSSSSSSssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+"*'"
+          begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+              rescue => msg    
+          end
 
 
     @schedulerun.comment =("successful finish xnat_upload "+v_comment_warning+" "+v_comment[0..1990])
@@ -4510,6 +4577,9 @@ puts "ppppppp "+dir_name_array[0]
                 # end
                     begin
                         stdin, stdout, stderr = Open3.popen3(v_call)
+                        # closing below stdin.close
+                        #stdout.close
+                        #stderr.close
                         rescue => msg  
                            v_log = v_log + msg+"\n"  
                     end
