@@ -2888,6 +2888,11 @@ puts "bbbbb "+sql
 
 
 def cg_snapshot
+
+  v_schema ='panda_production'
+  if Rails.env=="development" 
+    v_schema ='panda_development'
+  end
   if !params[:cg_snapshot].nil?
      v_cg_tn_id = params[:cg_snapshot][:cg_tn_id]
      v_new_cg_display_table_name = params[:new_cg_display_table_name]
@@ -2917,7 +2922,7 @@ def cg_snapshot
      v_table_exists = "N"
      # table_schema = '"+v_source_schema+"' AND
      connection = ActiveRecord::Base.connection();
-     v_sql = "SELECT COUNT(*) FROM information_schema.tables WHERE  table_name = '"+v_new_db_tn+"' "     
+     v_sql = "SELECT COUNT(*) FROM information_schema.tables WHERE  table_name = '"+v_new_db_tn+"' and table_schema = '"+v_schema+"' "     
         results = connection.execute(v_sql)
         v_cnt = results.first
         if v_cnt[0].to_i > 0
