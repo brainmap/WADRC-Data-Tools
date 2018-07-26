@@ -31,6 +31,7 @@ class User < ActiveRecord::Base
   
   has_many :image_dataset_quality_checks
   has_many :protocol_roles, :dependent => :destroy
+  has_many :usernetworkgroups,:dependent => :destroy
   
   
   def username_name

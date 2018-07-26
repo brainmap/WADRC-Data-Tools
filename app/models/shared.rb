@@ -3008,12 +3008,11 @@ def run_sleep_t1
       v_comment_warning =""
       v_error_comment = ""
       v_computer = "merida"
+      connection = ActiveRecord::Base.connection();
       v_users = User.all.where("users.id not in (select protocol_roles.user_id from protocol_roles)")
       v_users.each do |user|
-         v_usernetworkgroups = Usernetworkgroup.where("user_id in (?)",user.id)
-         v_usernetworkgroups.each do |usernetworkgroup|
-             usernetworkgroup.delete
-         end
+         sql = "delete from usernetworkgroups where user_id in ("+user.id.to_s+")"
+         @results = connection.execute(sql)
       end
       # limiting to users with 
       v_users = User.all.where("users.id in (select protocol_roles.user_id from protocol_roles)")
@@ -3062,9 +3061,10 @@ def run_sleep_t1
          v_usernetworkgroups = Usernetworkgroup.where("user_id in (?)",user.id)
          v_usernetworkgroups.each do |usernetworkgroup|
             if v_networkgroup_id_array.include? usernetworkgroup.networkgroup_id
-              v_networkgroup_id_array.delete(usernetworkgroup.networkgroup_id)
+                v_networkgroup_id_array.delete(usernetworkgroup.networkgroup_id)
              else
-               usernetworkgroup.delete
+                sql = "delete from usernetworkgroups where user_id in ("+user.id.to_s+") and networkgroup_id in ("+usernetworkgroup.networkgroup_id.to_s+")"
+                @results = connection.execute(sql)
              end
          end
          v_networkgroup_id_array.each do |networkgroup_id|

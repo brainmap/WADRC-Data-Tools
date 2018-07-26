@@ -81,8 +81,10 @@ class UsersController < ApplicationController
   def edit_user
     if !params[:user].nil?   && params[:user][:last_name].blank?
       @user = User.find(params[:user][:id])
+  
          render :template => "/users/edit_user"  
     elsif !params[:user].nil?  && !params[:user][:last_name].nil? 
+     
      var = "update users set email='"+params[:user][:email]+"',last_name='"+params[:user][:last_name].gsub("'","''")+"',first_name='"+params[:user][:first_name].gsub("'","''")+"' where id = "+params[:user][:id]+" "
     connection = ActiveRecord::Base.connection();
      results = connection.execute(var)

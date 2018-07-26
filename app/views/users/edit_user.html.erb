@@ -7,7 +7,9 @@
 
   <div class="inputs">
 	<% if !params[:user].nil?   &&  !params[:user][:id].nil? %>
-	<% @user	 = User.find(params[:user][:id])%>
+	<% @user	 = User.find(params[:user][:id])
+   @networkgroups = Networkgroup.where("id in (select networkgroup_id from usernetworkgroups where user_id in (?))",params[:user][:id] ).order('networkgroup_type desc,name')
+	%>
 	  <div class="actions">
 	    <%= f.submit "Edit User" %><br>
 	<!-- = link_to "Delete user", registration_path(user), :confirm => "Are you sure?", :method => :delete -->.
@@ -34,4 +36,30 @@
 <% end %>
 
 <br> No delete users yet -- much better to just remove all the user rights -- user.role and protocol roles.
+
+<% if !@networkgroups.nil? %>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Networkgroup type</th>
+      <th>Status flag</th>
+      <th>Comment</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @networkgroups.each do |networkgroup| %>
+      <tr>
+        <td><%= networkgroup.name %></td>
+        <td><%= networkgroup.networkgroup_type %></td>
+        <td><%= networkgroup.status_flag %></td>
+        <td><%= networkgroup.comment %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%end %>
+
 <% end %>
