@@ -3035,12 +3035,9 @@ def run_sleep_t1
               stderr.close
             rescue => msg    
            end
-         puts v_username
-         puts v_grouplist
          v_networkgroup_array = v_grouplist.split(",")
          v_networkgroup_id_array = []
          v_networkgroup_array.shift # get rid of uid-gid-domain_users group
-         puts v_networkgroup_array.join(",")
          v_networkgroup_array.each do |netgrp|
              if !v_allready_found_array.include? netgrp
                  v_allready_found_array.push(netgrp)
@@ -3056,6 +3053,9 @@ def run_sleep_t1
                      v_networkgroup_id_hash[netgrp] = v_networkgroups.first.id
                      v_networkgroup_id_array.push(v_networkgroups.first.id)
                  end
+              else
+                v_networkgroups = Networkgroup.where("name in (?)", netgrp)
+                v_networkgroup_id_array.push(v_networkgroups.first.id)
               end   
          end
          v_usernetworkgroups = Usernetworkgroup.where("user_id in (?)",user.id)
@@ -3064,7 +3064,7 @@ def run_sleep_t1
                 v_networkgroup_id_array.delete(usernetworkgroup.networkgroup_id)
              else
                 sql = "delete from usernetworkgroups where user_id in ("+user.id.to_s+") and networkgroup_id in ("+usernetworkgroup.networkgroup_id.to_s+")"
-                @results = connection.execute(sql)
+               @results = connection.execute(sql)
              end
          end
          v_networkgroup_id_array.each do |networkgroup_id|
