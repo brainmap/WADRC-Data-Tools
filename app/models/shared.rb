@@ -3582,7 +3582,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      
      # DEV vs PROD
      v_xnat_site = "xnatdev.medicine.wisc.edu"
-     v_pass = ""# "zzzz"
+     v_pass =  "zzzz"
 
      connection = ActiveRecord::Base.connection();
      # get all participants in sp/id not in v_xnat_participant_tn
@@ -3757,8 +3757,10 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
            # new xnat session
         puts " new session="+v_xnat_session
         if v_cnt_ids  > 0 
+      puts " cnt>0"
           # before new xnat_session, zip v_target_dir  and xnat_seesion != zzzzzz
            v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/;zip -r  "+v_xnat_session+".zip  "+v_xnat_session+"\""
+           puts v_call
            begin
             stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
@@ -3770,14 +3772,10 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
             rescue => msg    
            end
           # do xnat upload - curl command
-          sql_update = "update "+v_xnat_ids_tn+" set "+v_xnat_ids_tn+".xnat_exists_flag = 'Y' 
-          where "+v_xnat_ids_tn+".visit_id = "+v_visit_id.to_s+" and "+v_xnat_ids_tn+".xnat_exists_flag = 'N'
-          and "+v_xnat_ids_tn+".file_path in('"+v_path_full_list_array.join("','")+"') "
-          ######results_update = connection.execute(sql_update)
-puts "hhhhh ="+sql_update 
-          # update database table
-          # update database table
     v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl -u paultestuser:'"+v_pass+"' -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
+    v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl --netrc -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
+    v_log_file_path = "/tmp/"+v_xnat_session+".log"
+
       puts v_call 
       begin
     stdin, stdout, stderr = Open3.popen3(v_call)
@@ -3789,7 +3787,39 @@ puts "hhhhh ="+sql_update
       stderr.close
       rescue => msg    
       end
-      #sleep(3.minutes)
+      v_status =""
+      v_status_comment = ""
+      File.foreach(v_log_file_path).detect { |line| 
+             if line.include?("Session processing may already be in progress")
+                    v_status ='F'
+                    v_status_comment = "record already loaded:="+line
+             elsif  line.include?("following sessions have been uploaded")
+                    v_status ='D'
+                    v_status_comment = "recordloaded:="+line
+             elsif  line.include?("HTTP Status 401")
+                    v_status ='F'
+                    v_status_comment = "failed login:="+line
+             elsif  line.include?("RMR")
+                    v_status ='F'
+                    v_status_comment = "failed dicom cleaning:="+line
+             else  
+                    v_status ='F'
+                    v_status_comment = "something unexpected:="+line
+             end
+                 }
+
+    puts "aaaaa v_status ="+v_status
+    puts "bbb v_status_comment ="+v_status_comment
+          sql_update = "update "+v_xnat_ids_tn+" set "+v_xnat_ids_tn+".xnat_exists_flag = 'Y' 
+          where "+v_xnat_ids_tn+".visit_id = "+v_visit_id.to_s+" and "+v_xnat_ids_tn+".xnat_exists_flag = 'N'
+          and "+v_xnat_ids_tn+".file_path in('"+v_path_full_list_array.join("','")+"') "
+       if v_status == "D"
+          results_update = connection.execute(sql_update)
+       end
+#puts "hhhhh ="+sql_update 
+          # update database table
+          # update database table
+    
           
              v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+"'"
           begin
@@ -3820,7 +3850,6 @@ puts "hhhhh ="+sql_update
         v_visit_id = scan[1]
         v_xnat_session = scan[2]
         v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; mkdir "+v_xnat_session+"'"
-  #puts " gggg ="+v_call
         begin
             stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
@@ -3864,7 +3893,6 @@ puts "hhhhh ="+sql_update
       end
       # delete json, yaml, pickle
       v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/"+v_xnat_session+"/"+v_path_array.last+"/;rm -rf *.json \""
-
       begin
             stdin, stdout, stderr = Open3.popen3(v_call)
              while !stdout.eof?
@@ -3905,6 +3933,7 @@ puts "hhhhh ="+sql_update
          # session_label = v_xnat_session
       v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \""+v_script_dicom_clean+" '"+v_working_directory+"/"+v_xnat_session+"/"+v_path_array.last+"' '"+scan[4].to_s+"' '"+v_project+"' '"+v_xnat_session+"' \" "
       #puts "ddddd ="+v_call
+
       begin
             stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
@@ -3936,6 +3965,8 @@ puts "hhhhh ="+sql_update
     #$(curl  -o ${FILE}.log -w "%{http_code}" --form project=${PROJECT_ID} --form image_archive=@${FILE} "${SITE}/data/services/import?format=html")
     v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl -u paultestuser:'"+v_pass+"' -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
       puts v_call
+    v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl --netrc -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
+    v_log_file_path = "/tmp/"+v_xnat_session+".log"      
 
       begin
     stdin, stdout, stderr = Open3.popen3(v_call)
@@ -3950,12 +3981,36 @@ puts "hhhhh ="+sql_update
       stderr.close
       rescue => msg    
       end
-      #sleep(2.minutes)
-    puts "dddd="+v_call
+      v_status =""
+      v_status_comment = ""
+      File.foreach(v_log_file_path).detect { |line| 
+             if line.include?("Session processing may already be in progress")
+                    v_status ='F'
+                    v_status_comment = "record already loaded:="+line
+             elsif  line.include?("following sessions have been uploaded")
+                    v_status ='D'
+                    v_status_comment = "recordloaded:="+line
+             elsif  line.include?("HTTP Status 401")
+                    v_status ='F'
+                    v_status_comment = "failed login:="+line
+             elsif  line.include?("RMR")
+                    v_status ='F'
+                    v_status_comment = "failed dicom cleaning:="+line
+             else  
+                    v_status ='F'
+                    v_status_comment = "something unexpected:="+line
+             end
+                 }
+
+    puts "aaaaa v_status ="+v_status
+    puts "bbb v_status_comment ="+v_status_comment         
     sql_update = "update "+v_xnat_ids_tn+" set "+v_xnat_ids_tn+".xnat_exists_flag = 'Y' 
     where "+v_xnat_ids_tn+".visit_id = "+v_visit_id.to_s+" and "+v_xnat_ids_tn+".xnat_exists_flag = 'N'
           and "+v_xnat_ids_tn+".file_path in('"+v_path_full_list_array.join("','")+"') "
-  ######results_update = connection.execute(sql_update)
+       
+       if v_status == "D"
+          results_update = connection.execute(sql_update)
+       end
 puts "hhhhh ="+sql_update
           
              v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+"'"
@@ -3971,7 +4026,7 @@ puts "hhhhh ="+sql_update
           end
           
              v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+".zip'"
-          begin
+        begin
             stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
                 puts stdout.read 1024    
