@@ -3579,7 +3579,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      v_working_directory = "/tmp/"   # v_base_path+"/xnat_dev"
      v_xnat_script_dir = v_base_path+"/analyses/rpcary/xnat/scripts/"   # WILL CHANGE LOCATIOON!!!!!
      v_script_dicom_clean = v_xnat_script_dir+"xnat_dicom_upload_cleaner.rb"
-     
+     v_rm_endings = ["json","pickle","yaml","txt","xml","doc","xls","xlsx"]
      # DEV vs PROD
      v_xnat_site = "xnatdev.medicine.wisc.edu"
      v_pass =  "zzzz"
@@ -3891,8 +3891,9 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
               stderr.close
             rescue => msg    
       end
+    v_rm_endings.each do |file_ending|
       # delete json, yaml, pickle
-      v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/"+v_xnat_session+"/"+v_path_array.last+"/;rm -rf *.json \""
+      v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/"+v_xnat_session+"/"+v_path_array.last+"/;rm -rf *."+file_ending+" \""
       begin
             stdin, stdout, stderr = Open3.popen3(v_call)
              while !stdout.eof?
@@ -3903,28 +3904,8 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
               stderr.close
             rescue => msg    
       end
-      v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/"+v_xnat_session+"/"+v_path_array.last+"/;rm -rf *.pickle \""
-      begin
-            stdin, stdout, stderr = Open3.popen3(v_call)
-              while !stdout.eof?
-                puts stdout.read 1024    
-              end
-              stdin.close
-              stdout.close
-              stderr.close
-            rescue => msg    
-      end
-      v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/"+v_xnat_session+"/"+v_path_array.last+"/;rm -rf *.yaml \""
-      begin
-            stdin, stdout, stderr = Open3.popen3(v_call)
-              while !stdout.eof?
-                puts stdout.read 1024    
-              end
-              stdin.close
-              stdout.close
-              stderr.close
-            rescue => msg    
-      end
+    end # loop thru file endings
+      
       # find /bunzip bz2
       # v_script_dicom_clean command = "./xnat_dicom_upload_cleaner.rb %s %s %s %s" % (target_dir, meta_info['exportID'], project, session_label)
          # target_dir = v_target_dir + dicom dir

@@ -91,6 +91,27 @@ class QuestionformsController < ApplicationController
     end
   end
 
+ 
+  def displayform_pdf   #(p_q_data_form_id, p_q_form_id)
+
+    pdf = Prawn::Document.new
+    pdf.font('Helvetica', size: 8)
+    v_value = "hello world"
+    pdf.text v_value
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.xml  { render :xml => @participant }
+      format.pdf do
+        send_data pdf.render,
+          filename: "export.pdf",
+          type: 'application/pdf',
+          disposition: 'inline'
+      end
+    end
+  
+  end
+
   
   def question_enter
    # params["q_data_form_id"] = "9"
