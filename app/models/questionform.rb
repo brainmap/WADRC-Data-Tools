@@ -73,21 +73,23 @@ class Questionform < ActiveRecord::Base
       end
 
       if !@question.heading_1.blank?
-         v_value = @question.heading_1.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+        pdf.text " "
+         v_value = @question.heading_1.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
          v_value_array = v_value.split("<br>")
          v_value_array.each do |v_value_| 
             pdf.text v_value_
          end
       end 
       if !@question.phrase_a_1.blank?
-         v_value = @question.phrase_a_1.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+        pdf.text " "
+         v_value = @question.phrase_a_1.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
          v_value_array = v_value.split("<br>")
          v_value_array.each do |v_value_| 
             pdf.text v_value_
          end 
       end 
       if !@question.phrase_b_1.blank? 
-         v_value = @question.phrase_b_1.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+         v_value = @question.phrase_b_1.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
          v_value_array = v_value.split("<br>")
          v_value_array.each do |v_value_| 
             pdf.text v_value_
@@ -100,7 +102,7 @@ class Questionform < ActiveRecord::Base
               val_array = @q_data.value_1.split(',')
            end
            if @question.value_type_1 == "textarea" or @question.value_type_1 == "textarea_3x60"  # walk thru each value_type --- get each disoplay value  %>
-               v_value = @q_data.value_1.html_safe.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+               v_value = @q_data.value_1.html_safe.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
                v_value_array = v_value.split("<br>")
                v_value_array.each do |v_value_| 
                   pdf.text v_value_
@@ -109,47 +111,110 @@ class Questionform < ActiveRecord::Base
                if @question.ref_table_a_1 == "lookup_refs" 
                   if !@q_data.value_1.blank?
                       v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_1,@q_data.value_1)
-                      v_value = @q_data.value_1+"  "+v_lookup_refs.first.description
+                      v_value = "selected= "+@q_data.value_1+"  "+v_lookup_refs.first.description
                       pdf.text v_value
                   end
+                  v_lookup_refs =  LookupRef.where("label in (?)",@question.ref_table_b_1).sort_by(&:display_order)
+                  v_description_array = []
+                  v_lookup_refs.each do |val|
+                        v_description_array.push(val.description+" ["+val.ref_value.to_s+"]")
+                  end
+                  v_value = v_description_array.join("    ")
+                  pdf.text v_value
                end 
            elsif @question.value_type_1 == "date" or @question.value_type_1 == "date_dob"  
                     if !@q_data.value_1.blank?
                           v_tmp_date = Date.strptime(@q_data.value_1,'%Y-%m-%d')
-                          v_value = v_tmp_date.html_safe.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+                          v_value = v_tmp_date.to_s
                           pdf.text v_value
                     end 
            elsif @question.value_type_1 == "date_time"  
                     if !@q_data.value_1.blank?
                           v_tmp_datetime = DateTime.strptime(@q_data.value_1,'%Y-%m-%d-%H-%M')
-                          v_value = v_tmp_date.html_safe.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+                          v_value = v_tmp_date.to_s
                           pdf.text v_value
                      end
                   
            elsif @question.value_type_1 == "time"                      
                     if !@q_data.value_1.blank?
                           v_tmp_time = Time.strptime(@q_data.value_1,'%H-%M')
-                          v_value = v_tmp_date.html_safe.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+                          v_value = v_tmp_date.to_s
                           pdf.text v_value
                     end
                   
            elsif @question.value_type_1 == "text_5" or @question.value_type_1 == "text_10" or @question.value_type_1 == "text_20" or @question.value_type_1 == "text_30" or  @question.value_type_1 == "text_50" or  @question.value_type_1 == "text_70" or  @question.value_type_1 == "text_90" or  @question.value_type_1 == "date" or  @question.value_type_1 == "date_dob"
-               v_value =  @q_data.value_1.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+               v_value =  @q_data.value_1.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
                v_value_array = v_value.split("<br>")
                v_value_array.each do |v_value_| 
                      pdf.text v_value_ 
               end                 
-           elsif @question.value_type_1 == "checkbox_1_col"  or  @question.value_type_1 == "checkbox_in_line" or  @question.value_type_1 == "radio_1_col"  or @question.value_type_1 == "radio_in_line" 
+           elsif @question.value_type_1 == "checkbox_1_col"  
                 if @question.ref_table_a_1 == "lookup_refs" 
+                  if !@q_data.value_1.blank? 
+                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_1,val_array)
+                    v_lookup_refs.each do |val|
+                        v_value = "selected= "+val.ref_value.to_s+"  "+val.description
+                        pdf.text v_value
+                    end
+                  end
+                end
+                  v_lookup_refs =  LookupRef.where("label in (?)",@question.ref_table_b_1).sort_by(&:display_order)
+                  v_description_array = []
+                  v_lookup_refs.each do |val|
+                        pdf.text val.description+" ["+val.ref_value.to_s+"]" 
+                  end                 
+           elsif @question.value_type_1 == "radio_1_col"  
+                if @question.ref_table_a_1 == "lookup_refs"  
+                  if !@q_data.value_1.blank? 
                     v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_1,@q_data.value_1)
-                    v_value = @q_data.value_1+"  "+v_lookup_refs.first.description
+                    v_value = "selected= "+@q_data.value_1+"  "+v_lookup_refs.first.description
                     pdf.text v_value
-                end   
+                  end
+                end
+                  v_lookup_refs =  LookupRef.where("label in (?)",@question.ref_table_b_1).sort_by(&:display_order)
+                  v_description_array = []
+                  v_lookup_refs.each do |val|
+                        pdf.text val.description+" ["+val.ref_value.to_s+"]" 
+                  end
+
+           elsif  @question.value_type_1 == "radio_in_line" 
+                if @question.ref_table_a_1 == "lookup_refs" 
+                  if !@q_data.value_1.blank?  
+                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_1,@q_data.value_1)
+                    v_value = "selected= "+@q_data.value_1+"  "+v_lookup_refs.first.description
+                    pdf.text v_value
+                  end
+                end
+                  v_lookup_refs =  LookupRef.where("label in (?)",@question.ref_table_b_1).sort_by(&:display_order)
+                  v_description_array = []
+                  v_lookup_refs.each do |val|
+                        v_description_array.push(val.description+" ["+val.ref_value.to_s+"]")
+                  end
+                  v_value = v_description_array.join("    ")
+                  pdf.text v_value
+
+           elsif  @question.value_type_1 == "checkbox_in_line" 
+                if @question.ref_table_a_1 == "lookup_refs" 
+                  if !@q_data.value_1.blank?  
+                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_1,val_array)
+                    v_lookup_refs.each do |val|
+                        v_value = "selected= "+val.ref_value.to_s+"  "+val.description
+                        pdf.text v_value
+                    end
+                  end
+                end
+                  v_lookup_refs =  LookupRef.where("label in (?)",@question.ref_table_b_1).sort_by(&:display_order)
+                  v_description_array = []
+                  v_lookup_refs.each do |val|
+                        v_description_array.push(val.description+" ["+val.ref_value.to_s+"]")
+                  end
+                  v_value = v_description_array.join("    ")
+                  pdf.text v_value      
           end  # question type    
         end # !@question.value_type_1.blank?
 
         if !@question.phrase_c_1.blank?
-            v_value = @question.phrase_c_1.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+            v_value = @question.phrase_c_1.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
             v_value_array = v_value.split("<br>")
             v_value_array.each do |v_value_| 
                 pdf.text v_value_ 
@@ -157,21 +222,23 @@ class Questionform < ActiveRecord::Base
         end 
 
         if !@question.heading_2.blank?
-            v_value = @question.heading_2.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+        pdf.text " "
+            v_value = @question.heading_2.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
             v_value_array = v_value.split("<br>")
             v_value_array.each do |v_value_| 
                 pdf.text v_value_ 
             end
         end
-        if !@question.phrase_a_2.blank? 
-            v_value = @question.phrase_a_2.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+        if !@question.phrase_a_2.blank?
+        pdf.text " " 
+            v_value = @question.phrase_a_2.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
             v_value_array = v_value.split("<br>")
             v_value_array.each do |v_value_| 
                 pdf.text v_value_ 
             end  
         end  
         if !@question.phrase_b_2.blank?
-            v_value = @question.phrase_b_2.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+            v_value = @question.phrase_b_2.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
             v_value_array = v_value.split("<br>")
             v_value_array.each do |v_value_| 
                 pdf.text v_value_ 
@@ -183,7 +250,7 @@ class Questionform < ActiveRecord::Base
                val_array = @q_data.value_2.split(',')
             end
             if @question.value_type_2 == "textarea"  or @question.value_type_2 == "textarea_3x60"      
-               v_value = @q_data.value_2.html_safe.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+               v_value = @q_data.value_2.html_safe.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
                v_value_array = v_value.split("<br>")
                v_value_array.each do |v_value_| 
                   pdf.text v_value_ 
@@ -191,51 +258,117 @@ class Questionform < ActiveRecord::Base
         
 
             elsif @question.value_type_2 == "dropdown"
-                if @question.ref_table_a_2 == "lookup_refs"  
-                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_2,@q_data.value_2),
-                    v_value = @q_data.value_1+"  "+v_lookup_refs.first.description
+                if @question.ref_table_a_2 == "lookup_refs" 
+                  if !@q_data.value_2.blank?
+                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_2,@q_data.value_2)
+                    v_value = "selected= "+@q_data.value_2+"  "+v_lookup_refs.first.description
                     pdf.text v_value
+                  end
                end  ## use ref_table_b_2 %>
+                  v_lookup_refs =  LookupRef.where("label in (?)",@question.ref_table_b_2).sort_by(&:display_order)
+                  v_description_array = []
+                  v_lookup_refs.each do |val|
+                        v_description_array.push(val.description+" ["+val.ref_value.to_s+"]")
+                  end
+                  v_value = v_description_array.join("    ")
+                  pdf.text v_value
 
 
             elsif @question.value_type_2 == "date" or  @question.value_type_2 == "date_dob"
                     if !@q_data.value_2.blank?
                           v_tmp_date = Date.strptime(@q_data.value_2,'%Y-%m-%d') 
-                          v_value = v_tmp_date.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+                          v_value = v_tmp_date.to_s
                           pdf.text v_value 
                      end             
             elsif @question.value_type_2 == "date_time"  
                     if !@q_data.value_2.blank?
                           v_tmp_datetime = DateTime.strptime(@q_data.value_2,'%Y-%m-%d-%H-%M') 
-                          v_value = v_tmp_date.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+                          v_value = v_tmp_date.to_s
                           pdf.text v_value 
                     end
                     
              elsif @question.value_type_2 == "time"                      
                     if !@q_data.value_2.blank?
                           v_tmp_time = Time.strptime(@q_data.value_2,'%H-%M') 
-                          v_value = v_tmp_date.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+                          v_value = v_tmp_date.to_s
                           pdf.text v_value 
                    end
                  
              elsif @question.value_type_2 == "text_5" or @question.value_type_2 == "text_10" or @question.value_type_2 == "text_20" or @question.value_type_2 == "text_30" or @question.value_type_2 == "text_50" or @question.value_type_2 == "text_70" or @question.value_type_2 == "text_90" or @question.value_type_2 == "date" or @question.value_type_2 == "date_dob" 
-                v_value = @q_data.value_2.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+                v_value = @q_data.value_2.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
                 v_value_array = v_value.split("<br>")
                 v_value_array.each do |v_value_| 
                     pdf.text v_value_
                 end
   
-             elsif @question.value_type_2 == "checkbox_1_col" or @question.value_type_2 == "checkbox_in_line" or @question.value_type_2 == "radio_1_col" or @question.value_type_2 == "radio_in_line" 
+             elsif  @question.value_type_2 == "radio_1_col"  
                 if @question.ref_table_a_2 == "lookup_refs" 
-                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_2,@q_data.value_2),
-                    v_value = @q_data.value_1+"  "+v_lookup_refs.first.description
+                  if !@q_data.value_2.blank?
+                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_2,@q_data.value_2)
+                    v_value = "selected= "+@q_data.value_2+"  "+v_lookup_refs.first.description
                     pdf.text v_value
+                  end
                 end
+                  v_lookup_refs =  LookupRef.where("label in (?)",@question.ref_table_b_2).sort_by(&:display_order)
+                  v_description_array = []
+                  v_lookup_refs.each do |val|
+                        pdf.text val.description+" ["+val.ref_value.to_s+"]" 
+                  end
+  
+             elsif @question.value_type_2 == "checkbox_1_col" 
+                if @question.ref_table_a_2 == "lookup_refs" 
+                  if !@q_data.value_2.blank?
+                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_2,val_array)
+                    v_lookup_refs.each do |val|
+                        v_value = "selected= "+val.ref_value.to_s+"  "+val.description
+                        pdf.text v_value
+                    end
+                  end
+                end
+                  v_lookup_refs =  LookupRef.where("label in (?)",@question.ref_table_b_2).sort_by(&:display_order)
+                  v_description_array = []
+                  v_lookup_refs.each do |val|
+                        pdf.text val.description+" ["+val.ref_value.to_s+"]" 
+                  end
+  
+             elsif @question.value_type_2 == "radio_in_line" 
+                if @question.ref_table_a_2 == "lookup_refs" 
+                  if !@q_data.value_2.blank?
+                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_2,@q_data.value_2)
+                    v_value = "selected= "+@q_data.value_2+"  "+v_lookup_refs.first.description
+                    pdf.text v_value
+                  end
+                end
+                  v_lookup_refs =  LookupRef.where("label in (?)",@question.ref_table_b_2).sort_by(&:display_order)
+                  v_description_array = []
+                  v_lookup_refs.each do |val|
+                        v_description_array.push(val.description+" ["+val.ref_value.to_s+"]")
+                  end
+                  v_value = v_description_array.join("    ")
+                  pdf.text v_value
+  
+             elsif @question.value_type_2 == "checkbox_in_line" 
+                if @question.ref_table_a_2 == "lookup_refs" 
+                  if !@q_data.value_2.blank?
+                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_2,val_array)
+                    v_lookup_refs.each do |val|
+                        v_value = "selected= "+val.ref_value.to_s+"  "+val.description
+                        pdf.text v_value
+                    end
+                  end
+                end
+                  v_lookup_refs =  LookupRef.where("label in (?)",@question.ref_table_b_2).sort_by(&:display_order)
+                  v_description_array = []
+                  v_lookup_refs.each do |val|
+                        v_description_array.push(val.description+" ["+val.ref_value.to_s+"]")
+                  end
+                  v_value = v_description_array.join("    ")
+                  pdf.text v_value
 
              end # question type
         end # !@question.value_type_2.blank?
     if !@question.phrase_c_2.blank? 
-       v_value = @question.phrase_c_2.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+       v_value = @question.phrase_c_2.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
          v_value_array = v_value.split("<br>")
          v_value_array.each do |v_value_| 
             pdf.text v_value_ 
@@ -244,21 +377,23 @@ class Questionform < ActiveRecord::Base
 
 
     if !@question.heading_3.blank? 
-         v_value = @question.heading_3.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+        pdf.text " "
+         v_value = @question.heading_3.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
          v_value_array = v_value.split("<br>")
          v_value_array.each do |v_value_| 
             pdf.text v_value_
           end
      end
     if !@question.phrase_a_3.blank? 
-       v_value = @question.phrase_a_3.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+        pdf.text " "
+       v_value = @question.phrase_a_3.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
          v_value_array = v_value.split("<br>")
          v_value_array.each do |v_value_| 
             pdf.text v_value_ 
         end
      end 
     if !@question.phrase_b_3.blank? 
-       v_value = @question.phrase_b_3.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+       v_value = @question.phrase_b_3.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
          v_value_array = v_value.split("<br>")
          v_value_array.each do |v_value_| 
             pdf.text v_value_  
@@ -271,63 +406,124 @@ class Questionform < ActiveRecord::Base
         val_array = @q_data.value_3.split(',')
       end
       if @question.value_type_3 == "textarea" or  @question.value_type_3 == "textarea_3x60" 
-             v_value = @q_data.value_3.html_safe.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+             v_value = @q_data.value_3.html_safe.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
              v_value_array = v_value.split("<br>")
              v_value_array.each do |v_value_| 
                  pdf.text v_value_
              end
        elsif @question.value_type_3 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>      
-             v_value =  @q_data.value_3.html_safe.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+             v_value =  @q_data.value_3.html_safe.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
              v_value_array = v_value.split("<br>")
              v_value_array.each do |v_value_| 
                 pdf.text v_value_
              end
        elsif @question.value_type_3 == "dropdown"
-          if @question.ref_table_a_3 == "lookup_refs"  
-                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_3,@q_data.value_3),
-                    v_value = @q_data.value_1+"  "+v_lookup_refs.first.description
+          if @question.ref_table_a_3 == "lookup_refs" 
+                  if !@q_data.value_3.blank? 
+                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_3,@q_data.value_3)
+                    v_value = "selected= "+@q_data.value_3+"  "+v_lookup_refs.first.description
                     pdf.text v_value
+                  end
           end
+                  v_lookup_refs =  LookupRef.where("label in (?)",@question.ref_table_b_3).sort_by(&:display_order)
+                  v_description_array = []
+                  v_lookup_refs.each do |val|
+                        v_description_array.push(val.description+" ["+val.ref_value.to_s+"]")
+                  end
+                  v_value = v_description_array.join("    ")
+                  pdf.text v_value
 
        elsif @question.value_type_3 == "date" or  @question.value_type_3 == "date_dob" 
                     if !@q_data.value_3.blank?
                           v_tmp_date = Date.strptime(@q_data.value_3,'%Y-%m-%d') 
-                          v_value = v_tmp_date.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+                          v_value = v_tmp_date.to_s
                           pdf.text v_value
                      end    
               
         elsif @question.value_type_3 == "date_time"  
                     if !@q_data.value_3.blank?
                           v_tmp_datetime = DateTime.strptime(@q_data.value_3,'%Y-%m-%d-%H-%M') 
-                          v_value = v_tmp_date.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+                          v_value = v_tmp_date.to_s
                           pdf.text v_value
                      end
                    
          elsif @question.value_type_3 == "time"                      
                     if !@q_data.value_3.blank?
                           v_tmp_time = Time.strptime(@q_data.value_3,'%H-%M') 
-                          v_value = v_tmp_date.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+                          v_value = v_tmp_date.to_s
                           pdf.text v_value
                    end
                   
 
         elsif @question.value_type_3 == "text_5" or @question.value_type_3 == "text_10" or  @question.value_type_3 == "text_20" or @question.value_type_3 == "text_30" or @question.value_type_3 == "text_50"  or @question.value_type_3 == "text_70"  or @question.value_type_3 == "text_90" or @question.value_type_3 == "date" or  @question.value_type_3 == "date_dob" 
-            v_value = @q_data.value_3.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+            v_value = @q_data.value_3.gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
             v_value_array = v_value.split("<br>")
             v_value_array.each do |v_value_| 
                 pdf.text v_value_
             end 
-        elsif @question.value_type_3 == "checkbox_1_col" or  @question.value_type_3 == "checkbox_in_line" or @question.value_type_3 == "radio_1_col" or  @question.value_type_3 == "radio_in_line"
-           if @question.ref_table_a_3 == "lookup_refs" 
-                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_3,@q_data.value_3),
-                    v_value = @q_data.value_1+"  "+v_lookup_refs.first.description
+        elsif @question.value_type_3 == "radio_1_col" 
+           if @question.ref_table_a_3 == "lookup_refs"  
+                  if !@q_data.value_3.blank?
+                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_3,@q_data.value_3)
+                    v_value = "selected= "+@q_data.value_3+"  "+v_lookup_refs.first.description
                     pdf.text v_value
+                  end
             end
+                  v_lookup_refs =  LookupRef.where("label in (?)",@question.ref_table_b_3).sort_by(&:display_order)
+                  v_lookup_refs.each do |val|
+                        pdf.text val.description+" ["+val.ref_value.to_s+"]" 
+                  end 
+        elsif @question.value_type_3 == "checkbox_1_col" 
+           if @question.ref_table_a_3 == "lookup_refs"  
+                  if !@q_data.value_3.blank?
+                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_3,val_array)
+                    v_lookup_refs.each do |val|
+                        v_value = "selected= "+val.ref_value.to_s+"  "+val.description
+                        pdf.text v_value
+                    end
+                  end
+            end
+                  v_lookup_refs =  LookupRef.where("label in (?)",@question.ref_table_b_3).sort_by(&:display_order)
+                  v_lookup_refs.each do |val|
+                        pdf.text val.description+" ["+val.ref_value.to_s+"]" 
+                  end
+        elsif   @question.value_type_3 == "radio_in_line"
+           if @question.ref_table_a_3 == "lookup_refs"  
+                  if !@q_data.value_3.blank?
+                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_3,@q_data.value_3)
+                    v_value = "selected= "+@q_data.value_3+"  "+v_lookup_refs.first.description
+                    pdf.text v_value
+                  end
+            end
+                  v_lookup_refs =  LookupRef.where("label in (?)",@question.ref_table_b_3).sort_by(&:display_order)
+                  v_description_array = []
+                  v_lookup_refs.each do |val|
+                        v_description_array.push(val.description+" ["+val.ref_value.to_s+"]")
+                  end
+                  v_value = v_description_array.join("    ")
+                  pdf.text v_value
+        elsif  @question.value_type_3 == "checkbox_in_line" 
+           if @question.ref_table_a_3 == "lookup_refs"  
+                  if !@q_data.value_3.blank?
+                    v_lookup_refs =  LookupRef.where("label in (?) and ref_value in (?)",@question.ref_table_b_3,val_array)
+                    v_lookup_refs.each do |val|
+                        v_value = "selected= "+val.ref_value.to_s+"  "+val.description
+                        pdf.text v_value
+                    end
+                  end
+            end
+                  v_lookup_refs =  LookupRef.where("label in (?)",@question.ref_table_b_3).sort_by(&:display_order)
+                  v_description_array = []
+                  v_lookup_refs.each do |val|
+                        v_description_array.push(val.description+" ["+val.ref_value.to_s+"]")
+                  end
+                  v_value = v_description_array.join("    ")
+                  pdf.text v_value
 
          end # question type
        end  # !@question.value_type_3.blank?
        if !@question.phrase_c_3.blank? 
-            v_value = @question.phrase_c_3.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","")
+            v_value = @question.phrase_c_3.try(:html_safe).gsub("&nbsp;"," ").gsub("</b>","").gsub("<b>","").gsub("<b/>","").gsub("<u>","").gsub("</u>","").gsub("<big>","").gsub("</big>","").gsub("<hr>","").gsub('<font color="#990000">',"").gsub("</font>","").gsub("<B>","").gsub("</B>","").gsub("<small>","").gsub("</small>","").gsub("<BR>","")
          v_value_array = v_value.split("<br>")
          v_value_array.each do |v_value_| 
             pdf.text v_value_

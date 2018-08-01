@@ -36,6 +36,11 @@
 
 
 </div>
+<% if !@q_form_id.blank? and !@q_data_form.nil? and @q_form_id.to_s > "" %>
+  <% if !@questionform.nil? %>
+<%= link_to 'Neuropsyche -download pdf', { :controller=>"neuropsyches", :action=>"neuropsych_pdf", :id => @neuropsych.id.to_s, :q_form_id =>  @q_form_id.to_s ,:q_data_form_id => @q_data_form.id.to_s ,:format => :pdf}, :target => "green" %>
+  <%end%>
+<% end %>
 
 
 <br style="clear: both" /><br />

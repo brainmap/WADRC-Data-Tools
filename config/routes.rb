@@ -221,7 +221,9 @@ WADRCDataTools::Application.routes.draw do
     match '/processedimage_search' , :controller => 'processedimages', :action => 'processedimage_search', :as =>:processedimage_search  ,via: [:get, :post] 
      
 
-      match '/questionnaire_pdf' , :controller => 'questionnaires', :action => 'questionnaire_pdf', :as =>:questionnaire_pdf  ,via: [:get, :post] 
+      match '/questionnaire_pdf' , :controller => 'questionnaires', :action => 'questionnaire_pdf', :as =>:questionnaire_pdf  ,via: [:get, :post]
+      match '/neuropsych_pdf' , :controller => 'neuropsyches', :action => 'neuropsych_pdf', :as =>:neuropsych_pdf  ,via: [:get, :post] 
+      match '/blooddraw_pdf' , :controller => 'blooddrawes', :action => 'blooddraw_pdf', :as =>:blooddraw_pdf  ,via: [:get, :post]  
     
    
   match '/series_description_map_search' , :controller => 'series_description_maps', :action => 'series_description_map_search', :as =>:series_description_map_search  ,via: [:get, :post]

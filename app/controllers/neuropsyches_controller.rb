@@ -400,6 +400,43 @@ class NeuropsychesController < ApplicationController
     end
   end
 
+    def neuropsych_pdf
+      v_q_data_form_id = ""
+      v_q_form_id = ""
+      if !params[:q_form_id].nil? and !params[:q_data_form_id].blank? and !params[:id].blank?
+         v_q_data_form_id = params[:q_data_form_id]
+         v_q_form_id = params[:q_form_id]
+         # need to evaluate that user has perms on q_data_form_id
+
+           # mimicing show
+         scan_procedure_array = []
+         scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+         @neuropsych = Neuropsych.where("neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
+                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
+                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
+
+     @appointment = Appointment.find(@neuropsych.appointment_id)
+     @vgroup = Vgroup.find(@appointment.vgroup_id)
+     @questionform =Questionform.find(v_q_form_id)
+
+      puts "zzzzz v_q_data_form_id="+v_q_data_form_id.to_s+"  v_q_form_id="+v_q_form_id.to_s
+
+      # HOW much of to do here vs in questionform model
+      pdf = @questionform.displayform_pdf(v_q_data_form_id,v_q_form_id,@appointment,@vgroup)
+      respond_to do |format|
+         format.html # show.html.erb
+         format.xml  { render :xml => @participant }
+         format.pdf do
+           send_data pdf.render,
+           filename: "export.pdf",
+           type: 'application/pdf',
+           disposition: 'inline'
+         end
+      end
+
+     end # params ok
+    end
+
   # GET /neuropsyches/1
   # GET /neuropsyches/1.xml
   def show

@@ -53,6 +53,11 @@
 <%    end 
   end %>
 </div>
+<% if !@q_form_id.blank? and !@q_data_form.nil? and @q_form_id.to_s > "" %>
+  <% if !@questionform.nil? %>
+<%= link_to 'Lab Health -download pdf', { :controller=>"blooddraws", :action=>"blooddraw_pdf", :id => @blooddraw.id.to_s, :q_form_id =>  @q_form_id.to_s ,:q_data_form_id => @q_data_form.id.to_s ,:format => :pdf}, :target => "green" %>
+  <%end%>
+<% end %>
 
 
 <br style="clear: both" /><br />

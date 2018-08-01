@@ -35,7 +35,11 @@
 
 
 </div>
-
+<% if !@q_form_id.blank? and !@q_data_form.nil? and @q_form_id.to_s > "" %>
+  <% if !@questionform.nil? %>
+<%= link_to 'Questionnaire -download pdf', { :controller=>"questionnaires", :action=>"questionnaire_pdf", :id => @questionnaire.id.to_s, :q_form_id =>  @q_form_id.to_s ,:q_data_form_id => @q_data_form.id.to_s ,:format => :pdf}, :target => "green" %>
+  <%end%>
+<% end %>
 
 <br style="clear: both" /><br />
 <%= form_for("/questionnaires/"+@questionnaire.id.to_s) do |f| %>
@@ -47,6 +51,9 @@
   <%end %>
 
 <%end%>
+ 
+
+
 <% if !@q_data_form.blank? %>
   <% if !@questionform.nil? %>
        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><small><b>Form:</b></small></small><%= @questionform.description %>
