@@ -26,7 +26,13 @@ v_display = {"dropdown"=>"dropdown","text"=>"text"}  %>
 
   <div class="field">
     <%= f.label :series_description_type %><br />
+    <% if !@trtype.series_description_type_id.nil? %>
     <%= f.select(:series_description_type_id, SeriesDescriptionType.where("series_description_type not like '%?%'").sort_by(&:series_description_type).collect {|p| [ p.series_description_type, p.id ] },  { :include_blank => "Select a scan category",:selected => (@trtype.series_description_type_id).split(",") } ,{ :multiple => true} ) %>
+    <%else%>
+    <%= f.select(:series_description_type_id, SeriesDescriptionType.where("series_description_type not like '%?%'").sort_by(&:series_description_type).collect {|p| [ p.series_description_type, p.id ] },  { :include_blank => "Select a scan category",:selected => (@trtype.series_description_type_id) } ,{ :multiple => true} ) %>
+
+
+    <%end%>
   </div>
 
   <div class="field">
