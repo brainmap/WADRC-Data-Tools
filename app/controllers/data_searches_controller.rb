@@ -140,7 +140,9 @@ class DataSearchesController < ApplicationController
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)   
       @cg_up_tns = CgTn.where("table_type='up' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
-      @cg_inprocess_tns = CgTn.where("table_type='InProcess' and status_flag='Y' and table_type in 
+      @cg_johnsoninprocess_tns = CgTn.where("table_type='InProcess' and status_flag='Y' and table_type in 
+        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
+      @cg_bendlininprocess_tns = CgTn.where("table_type='BendlinInProcess' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
 
         # not rights - protocol_id - but up not have scan_procedure_id - hide scan_procedure_id from most drop downs or get protocol_id ist vs sp_id list 
@@ -181,7 +183,31 @@ class DataSearchesController < ApplicationController
          end
       end
       #need inprocess
-      @cg_inprocess_tns.each do |cg_tn|
+      @cg_johnsoninprocess_tns.each do |cg_tn|
+          cg_tn_key_array = []
+          cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",cg_tn.id)
+          cg_tn_cns.each do |cg_tn_cn|
+               if cg_tn_cn.key_column_flag == "Y"
+                   @cg_tn_key_y[cg_tn.id] = "Y"
+                   cg_tn_key_array.push(cg_tn_cn.cn)
+               end
+          end
+          @cg_tn_key_unique_y[cg_tn.id] = "Y"
+          if @cg_tn_key_y[cg_tn.id] == "Y"
+              sql = "select "+cg_tn_key_array.join(',')+" from "+cg_tn.tn+" group by "+cg_tn_key_array.join(',')+" having count(*) > 1"
+              connection = ActiveRecord::Base.connection();
+              @results = connection.execute(sql)
+              @cg_tn_key_unique_y[cg_tn.id] = "Y"
+              @results.each do |r|
+                if @cg_tn_key_unique_y[cg_tn.id] == "Y"
+                  @cg_tn_key_unique_y[cg_tn.id] = r[0].to_s
+                else
+                  @cg_tn_key_unique_y[cg_tn.id] = @cg_tn_key_unique_y[cg_tn.id]+", "+r[0].to_s
+                end
+              end
+         end
+      end
+      @cg_bendlininprocess_tns.each do |cg_tn|
           cg_tn_key_array = []
           cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",cg_tn.id)
           cg_tn_cns.each do |cg_tn_cn|

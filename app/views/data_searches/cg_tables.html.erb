@@ -78,37 +78,58 @@
 	     <% end %>
 	  <% end %>
 
-       <% if !@cg_inprocess_tns.nil?  %>
-        <tr><td align="left" colspan="2"><b>In Process Tables</b> </td></tr>
-		<%    @cg_inprocess_tns.each do |tn| %>
-	 <tr><td><%= hidden_field(:cg_search, "add_cg_tn_id][", :value=>tn.id.to_s) %>
-		<%= check_box_tag "include_add_cg_tns", "1",  FALSE , :name => "cg_search[include_add_cg_tn]["+tn.id.to_s+"]", :onclick =>"checkbox_cascade(this,'"+tn.id.to_s+"')"%></td>
-		     <td><%= tn.common_name %> </td><td>
-		<% if !tn.datadictionary_file_name.blank?%>
-		<small><small><%= link_to 'Download', tn.datadictionary.url %> <%= tn.datadictionary_file_name%></small></small>
-		<% end %>
-		<% if !tn.datadictionary2_file_name.blank?%>
-		<small><small><%= link_to 'Download2', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
-		<% end %>
-		<% if !tn.contact_owner_table.blank?%>
-		<small><small><input type="button" id="contact" value="Contact" onClick="alert('<%= tn.contact_owner_table %>');" />
-		</small></small>
-		<% end %> </td> 
-	<% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium' or tn.users.include?( current_user)) and (tn.editable_flag == "Y" or tn.secondary_edit_flag == "Y" ) and @cg_tn_key_y[tn.id] == "Y"  and @cg_tn_key_unique_y[tn.id] == "Y"%>
-		<td> <% if tn.editable_flag == "Y" %> <%= link_to  'Edit values', '/cg_edit_table/'+tn.id.to_s %> <%end%>
-			<% if tn.secondary_edit_flag == "Y" %> <%= link_to  'Dashboard/edit', '/cg_edit_dashboard_table/'+tn.id.to_s %> <%end%>
-		</td>
-    <%else%>
-    <td> &nbsp;</td>
-	<%end%>
-
-	</tr>
-
+       <% if !@cg_johnsoninprocess_tns.nil?  %>
+          <tr><td align="left" colspan="2"><b>Johnson In Process Tables</b> </td></tr>
+		     <%    @cg_johnsoninprocess_tns.each do |tn| %>
+	            <tr><td><%= hidden_field(:cg_search, "add_cg_tn_id][", :value=>tn.id.to_s) %>
+		           <%= check_box_tag "include_add_cg_tns", "1",  FALSE , :name => "cg_search[include_add_cg_tn]["+tn.id.to_s+"]", :onclick =>"checkbox_cascade(this,'"+tn.id.to_s+"')"%></td>
+		          <td><%= tn.common_name %> </td><td>
+		         <% if !tn.datadictionary_file_name.blank?%>
+		                <small><small><%= link_to 'Download', tn.datadictionary.url %> <%= tn.datadictionary_file_name%></small></small>
+		        <% end %>
+		        <% if !tn.datadictionary2_file_name.blank?%>
+		            <small><small><%= link_to 'Download2', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
+		       <% end %>
+		       <% if !tn.contact_owner_table.blank?%>
+		           <small><small><input type="button" id="contact" value="Contact" onClick="alert('<%= tn.contact_owner_table %>');" />
+		            </small></small>
+		      <% end %> </td> 
+	          <% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium' or tn.users.include?( current_user)) and (tn.editable_flag == "Y" or tn.secondary_edit_flag == "Y" ) and @cg_tn_key_y[tn.id] == "Y"  and @cg_tn_key_unique_y[tn.id] == "Y"%>
+		          <td> <% if tn.editable_flag == "Y" %> <%= link_to  'Edit values', '/cg_edit_table/'+tn.id.to_s %> <%end%>
+			            <% if tn.secondary_edit_flag == "Y" %> <%= link_to  'Dashboard/edit', '/cg_edit_dashboard_table/'+tn.id.to_s %> <%end%>
+		            </td>
+              <%else%>
+                   <td> &nbsp;</td>
+	         <%end%>
+             </tr>
 	     <% end %>
+       <%end%>
 
-
-
-
+       <% if !@cg_bendlininprocess_tns.nil?  %>
+          <tr><td align="left" colspan="2"><b>Bendlin In Process Tables</b> </td></tr>
+		     <%    @cg_bendlininprocess_tns.each do |tn| %>
+	            <tr><td><%= hidden_field(:cg_search, "add_cg_tn_id][", :value=>tn.id.to_s) %>
+		           <%= check_box_tag "include_add_cg_tns", "1",  FALSE , :name => "cg_search[include_add_cg_tn]["+tn.id.to_s+"]", :onclick =>"checkbox_cascade(this,'"+tn.id.to_s+"')"%></td>
+		          <td><%= tn.common_name %> </td><td>
+		         <% if !tn.datadictionary_file_name.blank?%>
+		                <small><small><%= link_to 'Download', tn.datadictionary.url %> <%= tn.datadictionary_file_name%></small></small>
+		        <% end %>
+		        <% if !tn.datadictionary2_file_name.blank?%>
+		            <small><small><%= link_to 'Download2', tn.datadictionary2.url %> <%= tn.datadictionary2_file_name%></small></small>
+		       <% end %>
+		       <% if !tn.contact_owner_table.blank?%>
+		           <small><small><input type="button" id="contact" value="Contact" onClick="alert('<%= tn.contact_owner_table %>');" />
+		            </small></small>
+		      <% end %> </td> 
+	          <% if (current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium' or tn.users.include?( current_user)) and (tn.editable_flag == "Y" or tn.secondary_edit_flag == "Y" ) and @cg_tn_key_y[tn.id] == "Y"  and @cg_tn_key_unique_y[tn.id] == "Y"%>
+		          <td> <% if tn.editable_flag == "Y" %> <%= link_to  'Edit values', '/cg_edit_table/'+tn.id.to_s %> <%end%>
+			            <% if tn.secondary_edit_flag == "Y" %> <%= link_to  'Dashboard/edit', '/cg_edit_dashboard_table/'+tn.id.to_s %> <%end%>
+		            </td>
+              <%else%>
+                   <td> &nbsp;</td>
+	         <%end%>
+             </tr>
+	     <% end %>
        <%end%>
 
 
