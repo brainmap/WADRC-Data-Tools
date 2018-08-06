@@ -140,7 +140,7 @@ class DataSearchesController < ApplicationController
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)   
       @cg_up_tns = CgTn.where("table_type='up' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
-      @cg_johnsoninprocess_tns = CgTn.where("table_type='InProcess' and status_flag='Y' and table_type in 
+      @cg_johnsoninprocess_tns = CgTn.where("table_type='JohnsonInProcess' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
       @cg_bendlininprocess_tns = CgTn.where("table_type='BendlinInProcess' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
