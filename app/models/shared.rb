@@ -27,6 +27,12 @@ class Shared  < ActionController::Base
   def self.booked_disconnect_pwd; booked_disconnect_pwd end
   def self.booked_address_page; booked_address_page end
   def self.booked_address_base; booked_address_base end
+
+
+  def self.xnat_user; xnat_user end
+  def self.xnat_pwd; xnat_pwd end
+  def self.xnat_path; xnat_path end
+
   
   def test_return( p_var)
     return "BBBBBBAAAAAAAAAAAAA"+p_var
@@ -1996,6 +2002,731 @@ puts " "+r[0]+"  ="+r[1]
     
   end
 
+def  run_pet_av1451_harvest
+      v_base_path = Shared.get_base_path()
+     @schedule = Schedule.where("name in ('pet_av1451_harvest')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting pet_av1451_harvest"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning ="" 
+      v_comment_base = ""
+      v_shared = Shared.new
+      connection = ActiveRecord::Base.connection();
+      v_av1451_tracer_id = "9"
+      v_trtype_id = 9 #PET av1451 quality
+      # truncate cg table new 
+      v_cg_tn_roi = "cg_pet_av1451_roi"
+      v_cg_tn_roi_atlas_tjb_mni_v1 = "cg_pet_av1451_roi_atlas_tjb_mni_v1"
+      v_aal_atlas = "aal_MNI_V4"
+      v_tjb_mni_v1 = "tjb_MNI_V1"
+      # ALSO A SECOND TABLE WITH A DIFFERENT ATLAS -- keeping columns same in both tables
+      # ADD AS SINMGLE COLUMN ["Region","Atlas"]
+      # CHANGE LOOP THRU ALL roi ROWS - make Key of suvr_+lower(region), volume_cc_+lower(region)
+      v_roi_file_cn_array = ["Region","Atlas","ROI_Number","SUVR","Volume_cc"]
+      v_roi_cn_array =  ["suvr_precentral_l","suvr_precentral_r","suvr_frontal_sup_l","suvr_frontal_sup_r","suvr_frontal_sup_orb_l","suvr_frontal_sup_orb_r","suvr_frontal_mid_l","suvr_frontal_mid_r","suvr_frontal_mid_orb_l","suvr_frontal_mid_orb_r","suvr_frontal_inf_oper_l","suvr_frontal_inf_oper_r","suvr_frontal_inf_tri_l","suvr_frontal_inf_tri_r","suvr_frontal_inf_orb_l","suvr_frontal_inf_orb_r","suvr_rolandic_oper_l","suvr_rolandic_oper_r","suvr_supp_motor_area_l","suvr_supp_motor_area_r","suvr_olfactory_l","suvr_olfactory_r","suvr_frontal_sup_medial_l","suvr_frontal_sup_medial_r","suvr_frontal_med_orb_l","suvr_frontal_med_orb_r","suvr_rectus_l","suvr_rectus_r","suvr_insula_l","suvr_insula_r","suvr_cingulum_ant_l","suvr_cingulum_ant_r","suvr_cingulum_mid_l","suvr_cingulum_mid_r","suvr_cingulum_post_l","suvr_cingulum_post_r","suvr_hippocampus_l","suvr_hippocampus_r","suvr_parahippocampal_l","suvr_parahippocampal_r","suvr_amygdala_l","suvr_amygdala_r","suvr_calcarine_l","suvr_calcarine_r","suvr_cuneus_l","suvr_cuneus_r","suvr_lingual_l","suvr_lingual_r","suvr_occipital_sup_l","suvr_occipital_sup_r","suvr_occipital_mid_l","suvr_occipital_mid_r","suvr_occipital_inf_l","suvr_occipital_inf_r","suvr_fusiform_l","suvr_fusiform_r","suvr_postcentral_l","suvr_postcentral_r","suvr_parietal_sup_l","suvr_parietal_sup_r","suvr_parietal_inf_l","suvr_parietal_inf_r","suvr_supramarginal_l","suvr_supramarginal_r","suvr_angular_l","suvr_angular_r","suvr_precuneus_l","suvr_precuneus_r","suvr_paracentral_lobule_l","suvr_paracentral_lobule_r","suvr_caudate_l","suvr_caudate_r","suvr_putamen_l","suvr_putamen_r","suvr_pallidum_l","suvr_pallidum_r","suvr_thalamus_l","suvr_thalamus_r","suvr_heschl_l","suvr_heschl_r","suvr_temporal_sup_l","suvr_temporal_sup_r","suvr_temporal_pole_sup_l","suvr_temporal_pole_sup_r","suvr_temporal_mid_l","suvr_temporal_mid_r","suvr_temporal_pole_mid_l","suvr_temporal_pole_mid_r","suvr_temporal_inf_l","suvr_temporal_inf_r","suvr_cerebelum_crus1_l","suvr_cerebelum_crus1_r","suvr_cerebelum_crus2_l","suvr_cerebelum_crus2_r","suvr_cerebelum_3_l","suvr_cerebelum_3_r","suvr_cerebelum_4_5_l","suvr_cerebelum_4_5_r","suvr_cerebelum_6_l","suvr_cerebelum_6_r","suvr_cerebelum_7b_l","suvr_cerebelum_7b_r","suvr_cerebelum_8_l","suvr_cerebelum_8_r","suvr_cerebelum_9_l","suvr_cerebelum_9_r","suvr_cerebelum_10_l","suvr_cerebelum_10_r","suvr_vermis_1_2","suvr_vermis_3","suvr_vermis_4_5","suvr_vermis_6","suvr_vermis_7","suvr_vermis_8","suvr_vermis_9","suvr_vermis_10","suvr_clivus","suvr_ethmoid","suvr_meninges","suvr_pineal","suvr_vermis_sup_ant","suvr_cerebellum_superior","suvr_substantia_nigra","suvr_sphenotemporalbuttress","suvr_pons","volume_cc_precentral_l","volume_cc_precentral_r","volume_cc_frontal_sup_l","volume_cc_frontal_sup_r","volume_cc_frontal_sup_orb_l","volume_cc_frontal_sup_orb_r","volume_cc_frontal_mid_l","volume_cc_frontal_mid_r","volume_cc_frontal_mid_orb_l","volume_cc_frontal_mid_orb_r","volume_cc_frontal_inf_oper_l","volume_cc_frontal_inf_oper_r","volume_cc_frontal_inf_tri_l","volume_cc_frontal_inf_tri_r","volume_cc_frontal_inf_orb_l","volume_cc_frontal_inf_orb_r","volume_cc_rolandic_oper_l","volume_cc_rolandic_oper_r","volume_cc_supp_motor_area_l","volume_cc_supp_motor_area_r","volume_cc_olfactory_l","volume_cc_olfactory_r","volume_cc_frontal_sup_medial_l","volume_cc_frontal_sup_medial_r","volume_cc_frontal_med_orb_l","volume_cc_frontal_med_orb_r","volume_cc_rectus_l","volume_cc_rectus_r","volume_cc_insula_l","volume_cc_insula_r","volume_cc_cingulum_ant_l","volume_cc_cingulum_ant_r","volume_cc_cingulum_mid_l","volume_cc_cingulum_mid_r","volume_cc_cingulum_post_l","volume_cc_cingulum_post_r","volume_cc_hippocampus_l","volume_cc_hippocampus_r","volume_cc_parahippocampal_l","volume_cc_parahippocampal_r","volume_cc_amygdala_l","volume_cc_amygdala_r","volume_cc_calcarine_l","volume_cc_calcarine_r","volume_cc_cuneus_l","volume_cc_cuneus_r","volume_cc_lingual_l","volume_cc_lingual_r","volume_cc_occipital_sup_l","volume_cc_occipital_sup_r","volume_cc_occipital_mid_l","volume_cc_occipital_mid_r","volume_cc_occipital_inf_l","volume_cc_occipital_inf_r","volume_cc_fusiform_l","volume_cc_fusiform_r","volume_cc_postcentral_l","volume_cc_postcentral_r","volume_cc_parietal_sup_l","volume_cc_parietal_sup_r","volume_cc_parietal_inf_l","volume_cc_parietal_inf_r","volume_cc_supramarginal_l","volume_cc_supramarginal_r","volume_cc_angular_l","volume_cc_angular_r","volume_cc_precuneus_l","volume_cc_precuneus_r","volume_cc_paracentral_lobule_l","volume_cc_paracentral_lobule_r","volume_cc_caudate_l","volume_cc_caudate_r","volume_cc_putamen_l","volume_cc_putamen_r","volume_cc_pallidum_l","volume_cc_pallidum_r","volume_cc_thalamus_l","volume_cc_thalamus_r","volume_cc_heschl_l","volume_cc_heschl_r","volume_cc_temporal_sup_l","volume_cc_temporal_sup_r","volume_cc_temporal_pole_sup_l","volume_cc_temporal_pole_sup_r","volume_cc_temporal_mid_l","volume_cc_temporal_mid_r","volume_cc_temporal_pole_mid_l","volume_cc_temporal_pole_mid_r","volume_cc_temporal_inf_l","volume_cc_temporal_inf_r","volume_cc_cerebelum_crus1_l","volume_cc_cerebelum_crus1_r","volume_cc_cerebelum_crus2_l","volume_cc_cerebelum_crus2_r","volume_cc_cerebelum_3_l","volume_cc_cerebelum_3_r","volume_cc_cerebelum_4_5_l","volume_cc_cerebelum_4_5_r","volume_cc_cerebelum_6_l","volume_cc_cerebelum_6_r","volume_cc_cerebelum_7b_l","volume_cc_cerebelum_7b_r","volume_cc_cerebelum_8_l","volume_cc_cerebelum_8_r","volume_cc_cerebelum_9_l","volume_cc_cerebelum_9_r","volume_cc_cerebelum_10_l","volume_cc_cerebelum_10_r","volume_cc_vermis_1_2","volume_cc_vermis_3","volume_cc_vermis_4_5","volume_cc_vermis_6","volume_cc_vermis_7","volume_cc_vermis_8","volume_cc_vermis_9","volume_cc_vermis_10","volume_cc_clivus","volume_cc_ethmoid","volume_cc_meninges","volume_cc_pineal","volume_cc_vermis_sup_ant","volume_cc_cerebellum_superior","volume_cc_substantia_nigra","volume_cc_sphenotemporalbuttress","volume_cc_pons"]
+      v_cg_tn_tacs = "cg_pet_av1451_tacs"  
+      v_tacs_cn_array = ["Time_min","cblm_gm_inf","Precentral_L","Precentral_R","Frontal_Sup_L","Frontal_Sup_R","Frontal_Sup_Orb_L","Frontal_Sup_Orb_R","Frontal_Mid_L","Frontal_Mid_R","Frontal_Mid_Orb_L","Frontal_Mid_Orb_R","Frontal_Inf_Oper_L","Frontal_Inf_Oper_R","Frontal_Inf_Tri_L","Frontal_Inf_Tri_R","Frontal_Inf_Orb_L","Frontal_Inf_Orb_R","Rolandic_Oper_L","Rolandic_Oper_R","Supp_Motor_Area_L","Supp_Motor_Area_R","Olfactory_L","Olfactory_R","Frontal_Sup_Medial_L","Frontal_Sup_Medial_R","Frontal_Med_Orb_L","Frontal_Med_Orb_R","Rectus_L","Rectus_R","Insula_L","Insula_R","Cingulum_Ant_L","Cingulum_Ant_R","Cingulum_Mid_L","Cingulum_Mid_R","Cingulum_Post_L","Cingulum_Post_R","Hippocampus_L","Hippocampus_R","ParaHippocampal_L","ParaHippocampal_R","Amygdala_L","Amygdala_R","Calcarine_L","Calcarine_R","Cuneus_L","Cuneus_R","Lingual_L","Lingual_R","Occipital_Sup_L","Occipital_Sup_R","Occipital_Mid_L","Occipital_Mid_R","Occipital_Inf_L","Occipital_Inf_R","Fusiform_L","Fusiform_R","Postcentral_L","Postcentral_R","Parietal_Sup_L","Parietal_Sup_R","Parietal_Inf_L","Parietal_Inf_R","SupraMarginal_L","SupraMarginal_R","Angular_L","Angular_R","Precuneus_L","Precuneus_R","Paracentral_Lobule_L","Paracentral_Lobule_R","Caudate_L","Caudate_R","Putamen_L","Putamen_R","Pallidum_L","Pallidum_R","Thalamus_L","Thalamus_R","Heschl_L","Heschl_R","Temporal_Sup_L","Temporal_Sup_R","Temporal_Pole_Sup_L","Temporal_Pole_Sup_R","Temporal_Mid_L","Temporal_Mid_R","Temporal_Pole_Mid_L","Temporal_Pole_Mid_R","Temporal_Inf_L","Temporal_Inf_R","Cerebelum_Crus1_L","Cerebelum_Crus1_R","Cerebelum_Crus2_L","Cerebelum_Crus2_R","Cerebelum_3_L","Cerebelum_3_R","Cerebelum_4_5_L","Cerebelum_4_5_R","Cerebelum_6_L","Cerebelum_6_R","Cerebelum_7b_L","Cerebelum_7b_R","Cerebelum_8_L","Cerebelum_8_R","Cerebelum_9_L","Cerebelum_9_R","Cerebelum_10_L","Cerebelum_10_R","Vermis_1_2","Vermis_3","Vermis_4_5","Vermis_6","Vermis_7","Vermis_8","Vermis_9","Vermis_10","Clivus","Ethmoid","Meninges","Pineal","Vermis_Sup_Ant","Cerebellum_Superior","Substantia_Nigra","SphenotemporalButtress","Pons"]
+      v_log_file_cn_array = ["Description","Value"]             
+      # <enum>_analysis-log_av1451_suvr_<codename-hyphen>_2a.csv. source filenames
+      #<enum>_pet-processing-log_31-May-2018_av1451_suvr_visit3_2a.csv  
+      #<enum>_roi-summary_av1451_suvr_<codename-hyphen>_2a.csv --multiple rois, suvr col and volume col
+      #<enum>_tacs_av1451_suvr_<codename-hyphen>_2a.csv --- for one subject, multiple times, series of roi
+      sql = "truncate table "+v_cg_tn_roi_atlas_tjb_mni_v1+"_new"
+      results = connection.execute(sql)
+      sql = "truncate table "+v_cg_tn_roi+"_new"
+      results = connection.execute(sql)
+      sql = "truncate table "+v_cg_tn_tacs+"_new"
+      results = connection.execute(sql)
+    v_av1451_path = "/pet/av1451/suvr/code_ver2a/"
+    v_roi_file_name = "_roi-summary_av1451_suvr_"
+    v_tacs_file_name = "_tacs_av1451_suvr_"
+    v_log_file_name = "_panda-log_av1451_suvr_"   #"_analysis-log_av1451_suvr_"
+    v_code_version = "2a"
+    v_product_file = ""
+      #subjectid,general_comment,enrollment_id,scan_procedure_id,file_name,secondary_key,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,
+    v_roi_column_list = "suvr_precentral_l,suvr_precentral_r,suvr_frontal_sup_l,suvr_frontal_sup_r,suvr_frontal_sup_orb_l,suvr_frontal_sup_orb_r,suvr_frontal_mid_l,suvr_frontal_mid_r,suvr_frontal_mid_orb_l,suvr_frontal_mid_orb_r,suvr_frontal_inf_oper_l,suvr_frontal_inf_oper_r,suvr_frontal_inf_tri_l,suvr_frontal_inf_tri_r,suvr_frontal_inf_orb_l,suvr_frontal_inf_orb_r,suvr_rolandic_oper_l,suvr_rolandic_oper_r,suvr_supp_motor_area_l,suvr_supp_motor_area_r,suvr_olfactory_l,suvr_olfactory_r,suvr_frontal_sup_medial_l,suvr_frontal_sup_medial_r,suvr_frontal_med_orb_l,suvr_frontal_med_orb_r,suvr_rectus_l,suvr_rectus_r,suvr_insula_l,suvr_insula_r,suvr_cingulum_ant_l,suvr_cingulum_ant_r,suvr_cingulum_mid_l,suvr_cingulum_mid_r,suvr_cingulum_post_l,suvr_cingulum_post_r,suvr_hippocampus_l,suvr_hippocampus_r,suvr_parahippocampal_l,suvr_parahippocampal_r,suvr_amygdala_l,suvr_amygdala_r,suvr_calcarine_l,suvr_calcarine_r,suvr_cuneus_l,suvr_cuneus_r,suvr_lingual_l,suvr_lingual_r,suvr_occipital_sup_l,suvr_occipital_sup_r,suvr_occipital_mid_l,suvr_occipital_mid_r,suvr_occipital_inf_l,suvr_occipital_inf_r,suvr_fusiform_l,suvr_fusiform_r,suvr_postcentral_l,suvr_postcentral_r,suvr_parietal_sup_l,suvr_parietal_sup_r,suvr_parietal_inf_l,suvr_parietal_inf_r,suvr_supramarginal_l,suvr_supramarginal_r,suvr_angular_l,suvr_angular_r,suvr_precuneus_l,suvr_precuneus_r,suvr_paracentral_lobule_l,suvr_paracentral_lobule_r,suvr_caudate_l,suvr_caudate_r,suvr_putamen_l,suvr_putamen_r,suvr_pallidum_l,suvr_pallidum_r,suvr_thalamus_l,suvr_thalamus_r,suvr_heschl_l,suvr_heschl_r,suvr_temporal_sup_l,suvr_temporal_sup_r,suvr_temporal_pole_sup_l,suvr_temporal_pole_sup_r,suvr_temporal_mid_l,suvr_temporal_mid_r,suvr_temporal_pole_mid_l,suvr_temporal_pole_mid_r,suvr_temporal_inf_l,suvr_temporal_inf_r,suvr_cerebelum_crus1_l,suvr_cerebelum_crus1_r,suvr_cerebelum_crus2_l,suvr_cerebelum_crus2_r,suvr_cerebelum_3_l,suvr_cerebelum_3_r,suvr_cerebelum_4_5_l,suvr_cerebelum_4_5_r,suvr_cerebelum_6_l,suvr_cerebelum_6_r,suvr_cerebelum_7b_l,suvr_cerebelum_7b_r,suvr_cerebelum_8_l,suvr_cerebelum_8_r,suvr_cerebelum_9_l,suvr_cerebelum_9_r,suvr_cerebelum_10_l,suvr_cerebelum_10_r,suvr_vermis_1_2,suvr_vermis_3,suvr_vermis_4_5,suvr_vermis_6,suvr_vermis_7,suvr_vermis_8,suvr_vermis_9,suvr_vermis_10,suvr_clivus,suvr_ethmoid,suvr_meninges,suvr_pineal,suvr_vermis_sup_ant,suvr_cerebellum_superior,suvr_substantia_nigra,suvr_sphenotemporalbuttress,suvr_pons,volume_cc_precentral_l,volume_cc_precentral_r,volume_cc_frontal_sup_l,volume_cc_frontal_sup_r,volume_cc_frontal_sup_orb_l,volume_cc_frontal_sup_orb_r,volume_cc_frontal_mid_l,volume_cc_frontal_mid_r,volume_cc_frontal_mid_orb_l,volume_cc_frontal_mid_orb_r,volume_cc_frontal_inf_oper_l,volume_cc_frontal_inf_oper_r,volume_cc_frontal_inf_tri_l,volume_cc_frontal_inf_tri_r,volume_cc_frontal_inf_orb_l,volume_cc_frontal_inf_orb_r,volume_cc_rolandic_oper_l,volume_cc_rolandic_oper_r,volume_cc_supp_motor_area_l,volume_cc_supp_motor_area_r,volume_cc_olfactory_l,volume_cc_olfactory_r,volume_cc_frontal_sup_medial_l,volume_cc_frontal_sup_medial_r,volume_cc_frontal_med_orb_l,volume_cc_frontal_med_orb_r,volume_cc_rectus_l,volume_cc_rectus_r,volume_cc_insula_l,volume_cc_insula_r,volume_cc_cingulum_ant_l,volume_cc_cingulum_ant_r,volume_cc_cingulum_mid_l,volume_cc_cingulum_mid_r,volume_cc_cingulum_post_l,volume_cc_cingulum_post_r,volume_cc_hippocampus_l,volume_cc_hippocampus_r,volume_cc_parahippocampal_l,volume_cc_parahippocampal_r,volume_cc_amygdala_l,volume_cc_amygdala_r,volume_cc_calcarine_l,volume_cc_calcarine_r,volume_cc_cuneus_l,volume_cc_cuneus_r,volume_cc_lingual_l,volume_cc_lingual_r,volume_cc_occipital_sup_l,volume_cc_occipital_sup_r,volume_cc_occipital_mid_l,volume_cc_occipital_mid_r,volume_cc_occipital_inf_l,volume_cc_occipital_inf_r,volume_cc_fusiform_l,volume_cc_fusiform_r,volume_cc_postcentral_l,volume_cc_postcentral_r,volume_cc_parietal_sup_l,volume_cc_parietal_sup_r,volume_cc_parietal_inf_l,volume_cc_parietal_inf_r,volume_cc_supramarginal_l,volume_cc_supramarginal_r,volume_cc_angular_l,volume_cc_angular_r,volume_cc_precuneus_l,volume_cc_precuneus_r,volume_cc_paracentral_lobule_l,volume_cc_paracentral_lobule_r,volume_cc_caudate_l,volume_cc_caudate_r,volume_cc_putamen_l,volume_cc_putamen_r,volume_cc_pallidum_l,volume_cc_pallidum_r,volume_cc_thalamus_l,volume_cc_thalamus_r,volume_cc_heschl_l,volume_cc_heschl_r,volume_cc_temporal_sup_l,volume_cc_temporal_sup_r,volume_cc_temporal_pole_sup_l,volume_cc_temporal_pole_sup_r,volume_cc_temporal_mid_l,volume_cc_temporal_mid_r,volume_cc_temporal_pole_mid_l,volume_cc_temporal_pole_mid_r,volume_cc_temporal_inf_l,volume_cc_temporal_inf_r,volume_cc_cerebelum_crus1_l,volume_cc_cerebelum_crus1_r,volume_cc_cerebelum_crus2_l,volume_cc_cerebelum_crus2_r,volume_cc_cerebelum_3_l,volume_cc_cerebelum_3_r,volume_cc_cerebelum_4_5_l,volume_cc_cerebelum_4_5_r,volume_cc_cerebelum_6_l,volume_cc_cerebelum_6_r,volume_cc_cerebelum_7b_l,volume_cc_cerebelum_7b_r,volume_cc_cerebelum_8_l,volume_cc_cerebelum_8_r,volume_cc_cerebelum_9_l,volume_cc_cerebelum_9_r,volume_cc_cerebelum_10_l,volume_cc_cerebelum_10_r,volume_cc_vermis_1_2,volume_cc_vermis_3,volume_cc_vermis_4_5,volume_cc_vermis_6,volume_cc_vermis_7,volume_cc_vermis_8,volume_cc_vermis_9,volume_cc_vermis_10,volume_cc_clivus,volume_cc_ethmoid,volume_cc_meninges,volume_cc_pineal,volume_cc_vermis_sup_ant,volume_cc_cerebellum_superior,volume_cc_substantia_nigra,volume_cc_sphenotemporalbuttress,volume_cc_pons"
+
+ #subjectid,general_comment,enrollment_id,scan_procedure_id,file_name,secondary_key,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,
+    v_tacs_column_list = "time_min,cblm_gm_inf,precentral_l,precentral_r,frontal_sup_l,frontal_sup_r,frontal_sup_orb_l,frontal_sup_orb_r,frontal_mid_l,frontal_mid_r,frontal_mid_orb_l,frontal_mid_orb_r,frontal_inf_oper_l,frontal_inf_oper_r,frontal_inf_tri_l,frontal_inf_tri_r,frontal_inf_orb_l,frontal_inf_orb_r,rolandic_oper_l,rolandic_oper_r,supp_motor_area_l,supp_motor_area_r,olfactory_l,olfactory_r,frontal_sup_medial_l,frontal_sup_medial_r,frontal_med_orb_l,frontal_med_orb_r,rectus_l,rectus_r,insula_l,insula_r,cingulum_ant_l,cingulum_ant_r,cingulum_mid_l,cingulum_mid_r,cingulum_post_l,cingulum_post_r,hippocampus_l,hippocampus_r,parahippocampal_l,parahippocampal_r,amygdala_l,amygdala_r,calcarine_l,calcarine_r,cuneus_l,cuneus_r,lingual_l,lingual_r,occipital_sup_l,occipital_sup_r,occipital_mid_l,occipital_mid_r,occipital_inf_l,occipital_inf_r,fusiform_l,fusiform_r,postcentral_l,postcentral_r,parietal_sup_l,parietal_sup_r,parietal_inf_l,parietal_inf_r,supramarginal_l,supramarginal_r,angular_l,angular_r,precuneus_l,precuneus_r,paracentral_lobule_l,paracentral_lobule_r,caudate_l,caudate_r,putamen_l,putamen_r,pallidum_l,pallidum_r,thalamus_l,thalamus_r,heschl_l,heschl_r,temporal_sup_l,temporal_sup_r,temporal_pole_sup_l,temporal_pole_sup_r,temporal_mid_l,temporal_mid_r,temporal_pole_mid_l,temporal_pole_mid_r,temporal_inf_l,temporal_inf_r,cerebelum_crus1_l,cerebelum_crus1_r,cerebelum_crus2_l,cerebelum_crus2_r,cerebelum_3_l,cerebelum_3_r,cerebelum_4_5_l,cerebelum_4_5_r,cerebelum_6_l,cerebelum_6_r,cerebelum_7b_l,cerebelum_7b_r,cerebelum_8_l,cerebelum_8_r,cerebelum_9_l,cerebelum_9_r,cerebelum_10_l,cerebelum_10_r,vermis_1_2,vermis_3,vermis_4_5,vermis_6,vermis_7,vermis_8,vermis_9,vermis_10,clivus,ethmoid,meninges,pineal,vermis_sup_ant,cerebellum_superior,substantia_nigra,sphenotemporalbuttress,pons"
+    v_secondary_key_array =["b","c","d","e",".R"]
+    v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+    sp_exclude_array = [69,53,54,56,57,95,55,76,78,72,70,71,49,79,99,81,75,83,92,93,88,68,97,29,52,87,48,27,14,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,50,42,44,51,96,9,25,23,19,15,24,36,100,35,20,73,32,45,6,12,16,13,11,10,90,59,63,43,4,17,30,74,98]
+    @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
+    # for testing
+    ###@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
+    @scan_procedures.each do |sp|
+      @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
+      v_sp_id = sp.id
+      @schedulerun.save
+      v_visit_number =""
+      if sp.codename.include?("visit2")
+            v_visit_number ="_v2"
+      elsif sp.codename.include?("visit3")
+            v_visit_number ="_v3"
+      elsif sp.codename.include?("visit4")
+            v_visit_number ="_v4"
+      elsif sp.codename.include?("visit5")
+            v_visit_number ="_v5"
+      end  
+      v_codename_hyphen =  sp.codename
+      v_codename_hyphen = v_codename_hyphen.gsub(".","-")
+
+      v_preprocessed_full_path = v_preprocessed_path+sp.codename  
+      if File.directory?(v_preprocessed_full_path)
+        sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+"  
+                                    and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id 
+                                    and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
+        @results = connection.execute(sql_enum)                                 
+        @results.each do |r|
+          enrollment = Enrollment.where("enumber='"+r[0]+"'")
+          if !enrollment.blank?
+            v_log = ""
+            v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
+            v_subjectid = enrollment[0].enumber
+            v_subjectid_v_num = enrollment[0].enumber + v_visit_number
+            v_enrollment_id = enrollment[0].id
+            @schedulerun.comment = "start "+v_subjectid_v_num+" "+v_comment_base
+            @schedulerun.save
+            v_subjectid_pet_av1451 =v_subjectid_path+v_av1451_path
+            v_subjectid_array = []
+            begin
+              if File.directory?(v_subjectid_pet_av1451)
+                v_subjectid_array.push(v_subjectid)
+              end
+              v_secondary_key_array.each do |k|
+                if File.directory?(v_subjectid_path+k+v_av1451_path)
+                  v_subjectid_array.push((v_subjectid+k))
+                  v_subjectid_v_num = v_subjectid+k + v_visit_number
+                  v_subjectid_path = v_preprocessed_full_path+"/"+v_subjectid+k
+                  v_subjectid_pet_av1451 =v_subjectid_path+v_av1451_path
+                end
+              end
+             rescue => msg  
+                v_comment = v_comment + "IN RESCUE ERROR "+msg+"\n"  
+            end
+
+            v_subjectid_array = v_subjectid_array.uniq
+            v_subjectid_array.each do |subj|
+              v_seconbdary_key =""
+              if subj != enrollment.first.enumber
+                 v_secondary_key = subj
+                 v_secondary_key = v_secondary_key.gsub(enrollment.first.enumber,"")
+              end
+              v_subjectid = subj
+              v_subjectid_v_num = subj + v_visit_number
+              v_subjectid_path = v_preprocessed_full_path+"/"+subj
+              v_subjectid_pet_av1451 =v_subjectid_path+v_av1451_path
+              if File.directory?(v_subjectid_pet_av1451)
+                v_dir_array = Dir.entries(v_subjectid_pet_av1451)
+                v_dir_array.each do |f|
+                  # get roi, tac, log files and final file = wpdt00235_av1451_suvr70-90_visit3_2a.nii
+                   #<enum>_roi-summary_av1451_suvr_<codename-hyphen>_2a.csv --multiple rois, suvr col and volume col
+                  v_subjectid_roi_file_name = v_subjectid_pet_av1451+v_subjectid+v_roi_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
+                  #<enum>_tacs_av1451_suvr_<codename-hyphen>_2a.csv --- for one subject, multiple times, series of roi
+                  v_subjectid_tacs_file_name = v_subjectid_pet_av1451+v_subjectid+v_tacs_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
+                  # <enum>_analysis-log_av1451_suvr_<codename-hyphen>_2a.csv. source filenames
+                  #<enum>_panda-log_av1451_suvr_<codename-hyphen>_2a.csv
+                  v_subjectid_log_file_name = v_subjectid_pet_av1451+v_subjectid+v_log_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
+                  # final product file - insert into processed images - get source file names from the log file
+                  v_skip_flag = "Y"
+                  v_product_file = ""
+                  if f.start_with?("w"+v_subjectid) and f.end_with?(".nii")
+                    v_product_file = f
+                      #check if exists in processedimages
+                      v_age_at_appointment =""
+                      v_ecat_file = ""
+                      v_original_t1_mri_file = ""
+                      v_tracer = ""
+                      v_method = ""
+                      v_pet_code_version = ""
+                      v_protocol_description = ""
+                      v_pet_processing_date = ""
+                     if File.file?(v_subjectid_log_file_name)
+                      # check column header "Description,Value". #v_log_file_cn_array
+                      # check "study ID" = v_subjectid  "protocol description" = sp.codename, tracer = av1451, method = suvr, "PET code version" = v_code_version
+                      # email if different - set flag to skip
+                       # parse by rows, get "ecat file", "original t1 MRI file"
+                       # check if
+                        # check column headers
+                        v_cnt = 0
+                        v_header = ""
+                        File.open(v_subjectid_log_file_name,'r') do |file_a|
+                          while line = file_a.gets and v_cnt < 1
+                            if v_cnt < 1
+                              v_header = line
+                            end
+                            v_cnt = v_cnt +1
+                          end
+                        end
+                       v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_log_file_cn_array.join(","))
+                       if v_return_flag == "N" 
+                               v_comment = v_subjectid_log_file_name+"=>"+v_return_comment+" \n"+v_comment
+                               puts v_return_comment
+                               v_skip_flag = "Y"               
+                       else 
+                         v_skip_flag = "N"
+                         v_cnt = 0
+                          File.open(v_subjectid_log_file_name,'r') do |file_a|
+                            while line = file_a.gets
+                              if v_cnt > 0
+                               # line.gsub(/\n/,"") #.each do |v_line|
+                                  v = line.gsub(/\n/,"").split(",")
+                                   if v[0] == "tracer" 
+                                     if v[1] == "av1451"
+                                         v_tracer = v[1]
+                                     else
+                                         v_skip_flag = "Y"
+                                     end
+                                   elsif v[0] == "study ID" 
+                                     if v[1] == v_subjectid
+                                         # ok
+                                     else
+                                         v_skip_flag = "Y"
+                                     end
+                                   elsif v[0] == "protocol description" 
+                                     if v[1] == sp.codename
+                                         v_protocol_description = v[1]
+
+                                     else
+                                         v_skip_flag = "Y"
+                                     end
+                                   elsif v[0] == "method" 
+                                     if v[1] == "suvr"
+                                         v_method = v[1]
+                                     else
+                                         v_skip_flag = "Y"
+                                     end
+                                   elsif v[0] == "PET code version" 
+                                     if v[1] == v_code_version
+                                         v_pet_code_version = v[1]
+                                     else
+                                         v_skip_flag = "Y"
+                                     end
+                                   elsif v[0] == "PET image processing date" 
+                                     v_pet_processing_date = v[1].to_s
+                                   elsif v[0] == "original t1 MRI file" 
+                                     v_original_t1_mri_file = v[1].to_s
+                                   elsif v[0] == "ecat file" 
+                                     v_ecat_file = v[1].to_s
+                                     # get v_age_at_appointment
+                                     v_petscans = Petscan.where("petscans.path in (?)",v_ecat_file)
+                                     if v_petscans.count > 0
+                                        v_appointment = Appointment.find(v_petscans.first.appointment_id)
+                                        v_age_at_appointment = v_appointment.age_at_appointment.to_s
+                                     else # sometimes the processing ecat not match the panda ecat 
+                                          # use tracer, enumber and scan_procedure
+                                          v_appointments = Appointment.where("appointments.appointment_type = 'pet_scan' 
+                                             and appointments.id in (select petscans.appointment_id from petscans where petscans.lookup_pettracer_id in (?))
+                                             and appointments.vgroup_id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships 
+                                                                 where enrollment_vgroup_memberships.enrollment_id in (?))
+                                             and appointments.vgroup_id in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+                                                               where scan_procedures_vgroups.scan_procedure_id in (?))",v_av1451_tracer_id,enrollment.first.id,sp.id)
+                                           if v_appointments.count > 0
+                                               v_age_at_appointment = v_appointments.first.age_at_appointment.to_s
+                                           end
+
+                                     end
+                                       
+                                   end
+                               
+                                end
+                              #end
+                              v_cnt = v_cnt + 1
+                            end
+                          end  
+                       end 
+                     end
+                  end
+                  if v_pet_processing_date.nil?
+                       v_pet_processing_date =""
+                  end
+                  if v_original_t1_mri_file.nil?
+                      v_original_t1_mri_file =""
+                  end
+                  if v_ecat_file.nil?
+                     v_ecat_file= ""
+                  end
+                  if v_skip_flag == "N"
+                     # CHECK IN PROCESSEDIMAGES for v_subjectid_pet_av1451+v_product_file - , insert with sources v_original_t1_mri_file, v_ecat_file 
+                     v_processesimages = Processedimage.where("file_path in (?)",v_subjectid_pet_av1451+v_product_file)
+                     @trfileimage_processedimages = []
+                     if v_processesimages.count <1
+                                      # need to collect source files, then make processedimage record
+                         v_processedimage = Processedimage.new
+                         v_processedimage.file_type ="suvr av1451"
+                         v_processedimage.file_name = v_product_file
+                         v_processedimage.file_path = v_subjectid_pet_av1451+v_product_file
+                         v_processedimage.scan_procedure_id = sp.id
+                         v_processedimage.enrollment_id = enrollment.first.id
+                         v_processedimage.save  
+                         v_processedimage_file_id = v_processedimage.id
+                         @trfileimage_processedimages.push(v_processedimage.id)
+                         # sources - ecat pet file -- petfile_id?
+                         # petfile_id from ecat file
+                         v_petfiles = Petfile.where("petfiles.path in (?)",v_ecat_file)
+                         if v_petfiles.count > 0
+                           v_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'petfile'",v_processedimage_file_id,v_petfiles.first.id)
+                           if v_processedimagesources.count < 1 and v_petfiles.count > 0
+                             v_processedimagesource = Processedimagessource.new
+                             v_processedimagesource.file_name = v_ecat_file.split("/").last
+                             v_processedimagesource.file_path = v_ecat_file
+                             v_processedimagesource.source_image_id = v_petfiles.first.id
+                             v_processedimagesource.source_image_type = 'petfile'
+                             v_processedimagesource.processedimage_id= v_processedimage_file_id
+                             v_processedimagesource.save
+                           end
+                         end
+                         v_mri_processedimage_id = ""
+                         v_original_t1_mri_file_unknown = v_original_t1_mri_file
+                         v_original_t1_mri_file_unknown = v_original_t1_mri_file_unknown.gsub("tissue_seg","unknown") # think the oACPC in tissue seg are from unknown
+                         v_mri_processesimages = Processedimage.where("file_path in (?) or file_path in (?)",v_original_t1_mri_file,v_original_t1_mri_file_unknown)
+                         if v_mri_processesimages.count < 1
+                             v_mri_processedimage = Processedimage.new
+                             v_mri_processedimage.file_type ="o_acpc T1"
+                             v_mri_processedimage.file_name = v_original_t1_mri_file.split("/").last
+                             v_mri_processedimage.file_path = v_original_t1_mri_file
+                             v_mri_processedimage.scan_procedure_id = sp.id
+                             v_mri_processedimage.enrollment_id = enrollment.first.id
+                             v_mri_processedimage.save  
+                             v_mri_processedimage_id = v_mri_processedimage.id
+
+                         else
+                           v_mri_processedimage_id = v_mri_processesimages.first.id
+                         end
+                         v_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'processedimage'",v_processedimage_file_id,v_mri_processedimage_id)
+                         if v_processedimagesources.count < 1 
+                             v_processedimagesource = Processedimagessource.new
+                             v_processedimagesource.file_name = v_original_t1_mri_file.split("/").last
+                             v_processedimagesource.file_path = v_original_t1_mri_file
+                             v_processedimagesource.source_image_id = v_mri_processedimage_id
+                             v_processedimagesource.source_image_type = 'processedimage'
+                             v_processedimagesource.processedimage_id= v_processedimage_file_id
+                             v_processedimagesource.save
+                         end
+                      else
+                        @trfileimage_processedimages.push(v_processesimages.first.id)
+                     end
+
+ # MAKE TRACKER QC
+                     @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
+
+                     if @trfiles.count == 0
+                       puts "making trfile"
+                       @trfile = Trfile.new
+                       @trfile.subjectid = v_subjectid_v_num
+                       # @trfile.secondary_key = v_secondary_key
+                       @trfile.enrollment_id = v_enrollment_id
+                       @trfile.scan_procedure_id = v_sp_id
+                       @trfile.trtype_id = v_trtype_id
+        
+                       @trfile.qc_notes = "autoinsert by panda "
+                       @trfile.save
+                       # NEED processedimage @trfile.image_dataset_id = v_ids_id
+                       if @trfileimage_processedimages.kind_of?(Array)
+                          @trfileimage_processedimages.each do |img|
+                            v_img = Trfileimage.new
+                            v_img.trfile_id = @trfile.id
+                            v_img.image_category = "processedimage"
+                            v_img.image_id = img
+                            v_img.save
+                          end
+                       end
+                       @tredit = Tredit.new
+                       @tredit.trfile_id = @trfile.id
+                       #@tredit.user_id = current_user.id
+                       @tredit.save
+                       v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                       if !v_tractiontypes.nil?
+                          v_tractiontypes.each do |tat|
+                            v_tredit_action = TreditAction.new
+                            v_tredit_action.tredit_id = @tredit.id
+                            v_tredit_action.tractiontype_id = tat.id
+                            if !(tat.form_default_value).blank?
+                               v_tredit_action.value = tat.form_default_value
+                            end
+                                 # set each field if needed-- just an example from mcd
+                                 #if tat.id == 14 # despot 2
+                                 #   v_tredit_action.value = v_despot_2_flag
+                                 #elsif tat.id == 15 # mcdespot
+                                 #   v_tredit_action.value = v_mcdespot_flag
+                                 #end
+                            v_tredit_action.save
+                          end
+                       end
+                     end
+
+
+                    # check for roi file
+                    if File.file?(v_subjectid_roi_file_name)
+                        # check column headers 
+                        puts "v_subjectid_roi_file_name="+v_subjectid_roi_file_name
+                        v_cnt = 0
+                        v_header = ""
+                        File.open(v_subjectid_roi_file_name,'r') do |file_a|
+                          while line = file_a.gets and v_cnt < 1
+                            if v_cnt < 1
+                              v_header = line.gsub("\n","")
+                            end
+                            v_cnt = v_cnt +1
+                          end
+                        end
+                       v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_roi_file_cn_array.join(","))
+                       if v_return_flag == "N" 
+                               v_comment = v_subjectid_roi_file_name+"=>"+v_return_comment+" \n"+v_comment
+                               puts v_return_comment               
+                       else
+                       # insert v_cg_tn_roi -- with _v#  v_subjectid_v_num  
+                       # CHECK FOR subjectid_v# to SP/ENUMBER/ have sp.id have enrollment.id
+                       # CHECK FOR empty ROWS
+                          v_cnt = 0
+                          v_line_array = []
+                          v_roi_hash = Hash.new
+
+                          v_roi_hash_atlas_tjb_mni_v1 = Hash.new
+                          v_atlas = ""
+                          v_atlas_tjb_mni_v1 = ""
+                          File.open(v_subjectid_roi_file_name,'r') do |file_a|
+
+                            while line = file_a.gets
+                              if v_cnt > 0 
+                                v_line_array = []
+                                v_line_array =line.gsub(/\n/,"").split(",")
+                                if v_line_array[1] == v_aal_atlas
+                                  v_atlas = v_line_array[1]
+                                  v_roi_hash["suvr_"+v_line_array[0].downcase] = v_line_array[3]
+                                  v_roi_hash["volume_cc_"+v_line_array[0].downcase] = v_line_array[4]
+                                elsif v_line_array[1] == v_tjb_mni_v1
+                                  v_atlas_tjb_mni_v1 = v_line_array[1]
+                                  v_roi_hash_atlas_tjb_mni_v1["suvr_"+v_line_array[0].downcase] = v_line_array[3]
+                                  v_roi_hash_atlas_tjb_mni_v1["volume_cc_"+v_line_array[0].downcase] = v_line_array[4]
+                                end
+                              end   
+                              v_cnt = v_cnt + 1                 
+                            end
+                            
+                          end # file read
+                          sql = "insert into cg_pet_av1451_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,ecat_file_name,atlas,age_at_appointment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"'"
+                          v_col_array = v_roi_column_list.split(",")
+                          v_col_array.each do |cn|
+                               if v_roi_hash[cn].nil?
+#puts "bbbbbbb nil="+cn
+                                 sql = sql+",''"
+                               else
+                                   sql = sql+",'"+v_roi_hash[cn]+"'"
+                               end
+                          end
+                          sql = sql+")"
+                          results = connection.execute(sql)
+                          sql = "insert into cg_pet_av1451_roi_atlas_tjb_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,ecat_file_name,atlas,age_at_appointment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_ecat_file.to_s+"','"+v_atlas_tjb_mni_v1+"','"+v_age_at_appointment+"'"
+                          v_col_array = v_roi_column_list.split(",")
+                          v_col_array.each do |cn|
+                               if v_roi_hash_atlas_tjb_mni_v1[cn].nil?
+#puts "bbbbbbb nil="+cn
+                                 sql = sql+",''"
+                               else
+                                   sql = sql+",'"+v_roi_hash_atlas_tjb_mni_v1[cn]+"'"
+                               end
+                          end
+                          sql = sql+")"
+                          results = connection.execute(sql)
+                                
+                       end
+                    end
+                    if File.file?(v_subjectid_tacs_file_name)
+                          # check column headers  
+                        v_cnt = 0
+                        v_header = ""
+                        File.open(v_subjectid_tacs_file_name,'r') do |file_a|
+                          while line = file_a.gets and v_cnt < 1
+                            if v_cnt < 1
+                              v_header = line.gsub("\n","")
+                            end
+                            v_cnt = v_cnt +1
+                          end
+                        end
+                       v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_tacs_cn_array.join(","))
+                       if v_return_flag == "N" 
+                               v_comment = v_file_path+"=>"+v_return_comment+" \n"+v_comment
+                               puts v_return_comment               
+                       else
+                        # insert v_cg_tn_tacs -- with _v# ?
+                           v_cnt = 0
+                          v_line_array = []
+                          File.open(v_subjectid_tacs_file_name,'r') do |file_a|
+
+                            while line = file_a.gets
+                              if v_cnt > 0 and v_cnt < 2
+                                sql = "insert into cg_pet_av1451_tacs_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,"+v_tacs_column_list+" ) values('"+v_subjectid_tacs_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_ecat_file.to_s+"',"
+                                v_line_array = []
+                                line.gsub(/\n/,"").split(",").each do |v|
+                                  v_line_array.push("'"+v+"'")
+                                end 
+                                sql = sql+v_line_array.join(",")
+                                sql = sql+")"
+                                results = connection.execute(sql)
+                              end   
+                              v_cnt = v_cnt + 1                 
+                            end
+                            
+                          end
+                       end
+                        
+                    end
+                  end # end of skip flag
+                end # file loop  
+              end # if pet_av1451 exists
+            end # subject array loop
+          end # enrollment not blank
+        end # results loop
+      end # preprocessed sp dir exists
+    end   # scan procedure loop
+    
+                
+
+                # check move cg_ to cg_old
+                sql = "select count(*) from cg_pet_av1451_roi_old"
+                results_old = connection.execute(sql)
+                
+                sql = "select count(*) from cg_pet_av1451_roi"
+                results = connection.execute(sql)
+                v_old_cnt = results_old.first.to_s.to_i
+                v_present_cnt = results.first.to_s.to_i
+                v_old_minus_present =v_old_cnt-v_present_cnt
+                v_present_minus_old = v_present_cnt-v_old_cnt
+                if ( v_old_minus_present <= 0 or ( v_old_cnt > 0 and  (v_present_minus_old/v_old_cnt)>0.7     ) )
+                  sql =  "truncate table cg_pet_av1451_roi_old"
+                  results = connection.execute(sql)
+                  sql = "insert into cg_pet_av1451_roi_old select * from cg_pet_av1451_roi"
+                  results = connection.execute(sql)
+                else
+                  v_comment = " The cg_pet_av1451_roi_old table has 30% more rows than the present cg_pet_av1451_roi\n Not truncating cg_pet_av1451_roi_old "+v_comment 
+                end
+                #  truncate cg_ and insert cg_new
+                sql =  "truncate table cg_pet_av1451_roi"
+                results = connection.execute(sql)
+
+                sql = "insert into cg_pet_av1451_roi("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,atlas,age_at_appointment) 
+                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,atlas,age_at_appointment from cg_pet_av1451_roi_new t
+                                               where t.scan_procedure_id is not null  and t.enrollment_id is not null "
+                results = connection.execute(sql)
+
+                # apply edits  -- made into a function  in shared model
+              
+                v_shared.apply_cg_edits("cg_pet_av1451_roi")
+
+                 # DIFFERENT ATLAS atlas_tjb_mni_v1_
+                sql = "select count(*) from cg_pet_av1451_roi_atlas_tjb_mni_v1_old"
+                results_old = connection.execute(sql)
+                
+                sql = "select count(*) from cg_pet_av1451_roi_atlas_tjb_mni_v1"
+                results = connection.execute(sql)
+                v_old_cnt = results_old.first.to_s.to_i
+                v_present_cnt = results.first.to_s.to_i
+                v_old_minus_present =v_old_cnt-v_present_cnt
+                v_present_minus_old = v_present_cnt-v_old_cnt
+                if ( v_old_minus_present <= 0 or ( v_old_cnt > 0 and  (v_present_minus_old/v_old_cnt)>0.7     ) )
+                  sql =  "truncate table cg_pet_av1451_roi_atlas_tjb_mni_v1_old"
+                  results = connection.execute(sql)
+                  sql = "insert into cg_pet_av1451_roi_atlas_tjb_mni_v1_old select * from cg_pet_av1451_roi_atlas_tjb_mni_v1"
+                  results = connection.execute(sql)
+                else
+                  v_comment = " The cg_pet_av1451_roi_atlas_tjb_mni_v1_old table has 30% more rows than the present cg_pet_av1451_roi_atlas_tjb_mni_v1\n Not truncating cg_pet_av1451_roi_atlas_tjb_mni_v1_old "+v_comment 
+                end
+                #  truncate cg_ and insert cg_new
+                sql =  "truncate table cg_pet_av1451_roi_atlas_tjb_mni_v1"
+                results = connection.execute(sql)
+
+                sql = "insert into cg_pet_av1451_roi_atlas_tjb_mni_v1("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,atlas,age_at_appointment) 
+                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,atlas,age_at_appointment from cg_pet_av1451_roi_atlas_tjb_mni_v1_new t
+                                               where t.scan_procedure_id is not null  and t.enrollment_id is not null "
+                results = connection.execute(sql)
+
+                # apply edits  -- made into a function  in shared model
+              
+                v_shared.apply_cg_edits("cg_pet_av1451_roi_atlas_tjb_mni_v1")
+                # tacs
+                sql = "select count(*) from cg_pet_av1451_tacs_old"
+                results_old = connection.execute(sql)
+                
+                sql = "select count(*) from cg_pet_av1451_tacs"
+                results = connection.execute(sql)
+                v_old_cnt = results_old.first.to_s.to_i
+                v_present_cnt = results.first.to_s.to_i
+                v_old_minus_present =v_old_cnt-v_present_cnt
+                v_present_minus_old = v_present_cnt-v_old_cnt
+                if ( v_old_minus_present <= 0 or ( v_old_cnt > 0 and  (v_present_minus_old/v_old_cnt)>0.7     ) )
+                  sql =  "truncate table cg_pet_av1451_tacs_old"
+                  results = connection.execute(sql)
+                  sql = "insert into cg_pet_av1451_tacs select * from cg_pet_av1451_tacs"
+                  results = connection.execute(sql)
+                else
+                  v_comment = " The cg_pet_av1451_tacs_old table has 30% more rows than the present cg_pet_av1451_tacs\n Not truncating cg_pet_av1451_tacs_old "+v_comment 
+                end
+                #  truncate cg_ and insert cg_new
+                sql =  "truncate table cg_pet_av1451_tacs"
+                results = connection.execute(sql)
+
+                sql = "insert into cg_pet_av1451_tacs("+v_tacs_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name) 
+                select distinct "+v_tacs_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name from cg_pet_av1451_tacs_new t
+                                               where t.scan_procedure_id is not null  and t.enrollment_id is not null "
+                results = connection.execute(sql)
+
+                # apply edits  -- made into a function  in shared model
+              
+                v_shared.apply_cg_edits("cg_pet_av1451_tacs")
+
+        #BRAAK INSERT NEW ROWS
+                sql = "insert into cg_av1451_braak(subjectid,participant_id, scan_procedure_id,file_name,enrollment_id)
+                      select cg_pet_av1451_roi.subjectid,enrollments.participant_id,cg_pet_av1451_roi.scan_procedure_id,cg_pet_av1451_roi.ecat_file_name,cg_pet_av1451_roi.enrollment_id
+                      from cg_pet_av1451_roi, enrollments where cg_pet_av1451_roi.enrollment_id = enrollments.id
+                      and cg_pet_av1451_roi.subjectid not in ( select cg_av1451_braak.subjectid from cg_av1451_braak)"
+              results = connection.execute(sql)
+
+     @schedulerun.comment =("successful finish pet_av1451_harvest "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+       @schedulerun.status_flag ="Y"
+     end
+     @schedulerun.save
+     @schedulerun.end_time = @schedulerun.updated_at      
+     @schedulerun.save  
+
+
+end
+
+
+#WHAT SHOULD TRIGGER PROCCESSING 
+# panda record=> file path
+# file path ==> panda record
+# WHAT should stop processing
+# for now just that dir exisits
+# later file exists and log not say "something"
+def run_pet_av1451_process
+      v_base_path = Shared.get_base_path()
+      v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+      v_av1451_path = "/pet/av1451/suvr/code_ver2a"
+     @schedule = Schedule.where("name in ('pet_av1451_process')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting pet_av1451_process"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning ="" 
+      v_av1451_tracer_id = "9"
+    connection = ActiveRecord::Base.connection();
+      v_av1451_petscans = Petscan.where("petscans.lookup_pettracer_id in (?)",v_av1451_tracer_id)
+    # get list of av1451 Petscans
+    #check if has precprocessed codever 2a dir
+    # if there, stop, else 
+    # check if ecat file exisits, single file, correct size
+    # check for single o acpc corrected file linked to vgroup
+    # run command, make tracker record
+    # using ecat file name to get subjectid, scan_procedure from ecat file path
+      v_av1451_petscans.each do |pet_appt|
+          # puts "pet_appt.path="+pet_appt.path
+          v_enumber = ""
+          v_scan_procedure = ""
+          v_pet_path_array = (pet_appt.path).split("/")
+          v_pet_path_ok = "Y"
+          v_scan_procedure_codename = ""
+          v_subjectid = ""
+          if v_pet_path_array.count < 8 #or !File.file?(pet_appt.path)
+             v_pet_path_ok = "N"
+          else
+             v_scan_procedure_codename = v_pet_path_array[4] # leading slash shifts register
+             v_subjectid_array = v_pet_path_array[7].split("_")
+             v_subjectid = v_subjectid_array[0].downcase
+             #check if enumber and scan_procedure are valid
+             v_enumbers = Enrollment.where("enumber in (?)", v_subjectid)
+             v_scan_procedures =ScanProcedure.where("codename in (?)",v_scan_procedure_codename)
+             if v_enumbers.count > 0
+                v_enumber = v_enumbers.first
+             else
+               v_pet_path_ok = "N"
+             end
+             if v_scan_procedures.count >0
+                v_scan_procedure = v_scan_procedures.first
+             else
+                v_pet_path_ok = "N"
+             end
+          end
+          v_subjectid_pet_av1451 = v_preprocessed_path+v_scan_procedure_codename+"/"+v_subjectid+v_av1451_path
+          if File.directory?(v_subjectid_pet_av1451) and v_pet_path_ok == "Y"
+           #  dir exists - not run - extend to look at logs - re-run criteria or flag
+           # puts "dddd v_subjectid_pet_av1451="+v_subjectid_pet_av1451
+          elsif File.file?(pet_appt.path)
+            # check for expected size
+            @petscan_tracer_file_size = {}
+            @petscan_tracer_file_size_multiple = {}
+            if !v_scan_procedure.petscan_tracer_file_size.nil?
+               v_tmp_tracer_size = v_scan_procedure.petscan_tracer_file_size.split("|")
+               v_tmp_tracer_size.each do |tr|
+                v_tmp_size = tr.split(":")
+                @petscan_tracer_file_size[v_tmp_size[0]] = v_tmp_size[1]
+                if @petscan_tracer_file_size_multiple[v_tmp_size[0]].nil?
+                   @petscan_tracer_file_size_multiple[v_tmp_size[0]] = [v_tmp_size[1]]
+                else
+                  @petscan_tracer_file_size_multiple[v_tmp_size[0]] = @petscan_tracer_file_size_multiple[v_tmp_size[0]].push(v_tmp_size[1])
+                end
+               end
+             #v_av1451_tracer_id
+               if !@petscan_tracer_file_size_multiple.nil? and !@petscan_tracer_file_size_multiple[v_av1451_tracer_id.to_s].nil? 
+                    if @petscan_tracer_file_size_multiple[v_av1451_tracer_id.to_s].include?(File.stat(pet_appt.path).size.to_s)
+                      # petfile not expected size
+                      v_pet_path_ok = "N"
+                      v_comment = v_comment+" :"+v_subjectid+" ecat file wrong size:"
+                    end
+               end
+             end
+
+            end
+            v_o_acpc_file = ""
+            if v_pet_path_ok == "Y"
+               # check for one o-acpc  file -- using tissue_seg - a winnowing of the unknown dir files
+               v_subjectid_tissue_seg = v_preprocessed_path+v_scan_procedure.codename+"/"+v_subjectid+"/tissue_seg"
+               
+               if File.directory?(v_subjectid_tissue_seg)   # need to also look for [subjectid]b,c,d,.R
+                    v_cnt = 0
+                    v_dir_array = Dir.entries(v_subjectid_tissue_seg)
+                    v_dir_array.each do |f|
+                      if f.start_with?("o") and f.end_with?(".nii")
+                         v_cnt = v_cnt + 1
+                         v_o_acpc_file = f
+                      end
+                    end
+                    if v_cnt > 1
+                      v_pet_path_ok = "N"
+                      v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in tissue_seg:"
+                    end
+
+            end  
+            if v_pet_path_ok == "Y"
+              # netinjecteddose
+              puts " need to run="+v_subjectid_pet_av1451
+            end
+          else
+            puts "no ecat file"
+            v_comment = v_comment+" :"+v_subjectid+" no ecat file:"
+          end
+      end
+
+
+    @schedulerun.comment =("successful finish pet_av1451_process "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+       @schedulerun.status_flag ="Y"
+     end
+     @schedulerun.save
+     @schedulerun.end_time = @schedulerun.updated_at      
+     @schedulerun.save  
+end
+
+
 
 def  run_pet_mk6240_harvest
       v_base_path = Shared.get_base_path()
@@ -3635,6 +4366,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      v_script_dicom_clean = v_xnat_script_dir+"xnat_dicom_upload_cleaner.rb"
      v_rm_endings = ["json","pickle","yaml","txt","xml","doc","xls","xlsx"]
      # DEV vs PROD
+     v_xnat_site = Shared.xnat_site
      v_xnat_site = "xnatdev.medicine.wisc.edu"
      v_pass =  "zzzz"
 
