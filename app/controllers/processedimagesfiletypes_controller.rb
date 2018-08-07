@@ -69,6 +69,6 @@ class ProcessedimagesfiletypesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def processedimagesfiletype_params
-      params.require(:processedimagesfiletype).permit(:file_type)
+      params.require(:processedimagesfiletype).permit(:file_type,:image_linkage_type)
     end
 end
