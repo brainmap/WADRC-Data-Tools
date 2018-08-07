@@ -2012,6 +2012,7 @@ def  run_pet_mk6240_harvest
       v_shared = Shared.new
       connection = ActiveRecord::Base.connection();
       v_mk6240_tracer_id = "11"
+      v_trtype_id = 8 #PET MK6240 quality
       # truncate cg table new 
       v_cg_tn_roi = "cg_pet_mk6240_roi"
       v_cg_tn_roi_atlas_tjb_mni_v1 = "cg_pet_mk6240_roi_atlas_tjb_mni_v1"
@@ -2050,9 +2051,11 @@ def  run_pet_mk6240_harvest
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
     sp_exclude_array = [69,53,54,56,57,95,55,76,78,72,70,71,49,79,99,81,75,80,83,92,93,88,68,97,29,52,87,48,27,14,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,50,42,44,51,96,9,25,23,19,15,24,36,100,35,20,73,32,45,6,12,16,13,11,10,90,59,63,43,4,17,30,74,98]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
-    # for testing@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
+    # for testing
+    @scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
     @scan_procedures.each do |sp|
       @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
+      v_sp_id = sp.id
       @schedulerun.save
       v_visit_number =""
       if sp.codename.include?("visit2")
@@ -2081,6 +2084,7 @@ def  run_pet_mk6240_harvest
             v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
             v_subjectid = enrollment[0].enumber
             v_subjectid_v_num = enrollment[0].enumber + v_visit_number
+            v_enrollment_id = enrollment[0].id
             @schedulerun.comment = "start "+v_subjectid_v_num+" "+v_comment_base
             @schedulerun.save
             v_subjectid_pet_mk6240 =v_subjectid_path+v_mk6240_path
@@ -2245,6 +2249,7 @@ def  run_pet_mk6240_harvest
                   if v_skip_flag == "N"
                      # CHECK IN PROCESSEDIMAGES for v_subjectid_pet_mk6240+v_product_file - , insert with sources v_original_t1_mri_file, v_ecat_file 
                      v_processesimages = Processedimage.where("file_path in (?)",v_subjectid_pet_mk6240+v_product_file)
+                     @trfileimage_processedimages = []
                      if v_processesimages.count <1
                                       # need to collect source files, then make processedimage record
                          v_processedimage = Processedimage.new
@@ -2255,11 +2260,11 @@ def  run_pet_mk6240_harvest
                          v_processedimage.enrollment_id = enrollment.first.id
                          v_processedimage.save  
                          v_processedimage_file_id = v_processedimage.id
-    
+                         @trfileimage_processedimages.push(v_processedimage.id)
                          # sources - ecat pet file -- petfile_id?
                          # petfile_id from ecat file
                          v_petfiles = Petfile.where("petfiles.path in (?)",v_ecat_file)
-                         if v_petfiles.count > 1
+                         if v_petfiles.count > 0
                            v_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'petfile'",v_processedimage_file_id,v_petfiles.first.id)
                            if v_processedimagesources.count < 1 and v_petfiles.count > 0
                              v_processedimagesource = Processedimagessource.new
@@ -2298,9 +2303,58 @@ def  run_pet_mk6240_harvest
                              v_processedimagesource.processedimage_id= v_processedimage_file_id
                              v_processedimagesource.save
                          end
+                      else
+                        @trfileimage_processedimages.push(v_processesimages.first.id)
                      end
 
  # MAKE TRACKER QC
+                     @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
+
+                     if @trfiles.count == 0
+                       puts "making trfile"
+                       @trfile = Trfile.new
+                       @trfile.subjectid = v_subjectid_v_num
+                       # @trfile.secondary_key = v_secondary_key
+                       @trfile.enrollment_id = v_enrollment_id
+                       @trfile.scan_procedure_id = v_sp_id
+                       @trfile.trtype_id = v_trtype_id
+        
+                       @trfile.qc_notes = "autoinsert by panda "
+                       @trfile.save
+                       # NEED processedimage @trfile.image_dataset_id = v_ids_id
+                       if @trfileimage_processedimages.kind_of?(Array)
+                          @trfileimage_processedimages.each do |img|
+                            v_img = Trfileimage.new
+                            v_img.trfile_id = @trfile.id
+                            v_img.image_category = "processedimage"
+                            v_img.image_id = img
+                            v_img.save
+                          end
+                       end
+                       @tredit = Tredit.new
+                       @tredit.trfile_id = @trfile.id
+                       #@tredit.user_id = current_user.id
+                       @tredit.save
+                       v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                       if !v_tractiontypes.nil?
+                          v_tractiontypes.each do |tat|
+                            v_tredit_action = TreditAction.new
+                            v_tredit_action.tredit_id = @tredit.id
+                            v_tredit_action.tractiontype_id = tat.id
+                            if !(tat.form_default_value).blank?
+                               v_tredit_action.value = tat.form_default_value
+                            end
+                                 # set each field if needed-- just an example from mcd
+                                 #if tat.id == 14 # despot 2
+                                 #   v_tredit_action.value = v_despot_2_flag
+                                 #elsif tat.id == 15 # mcdespot
+                                 #   v_tredit_action.value = v_mcdespot_flag
+                                 #end
+                            v_tredit_action.save
+                          end
+                       end
+                     end
+
 
                     # check for roi file
                     if File.file?(v_subjectid_roi_file_name)

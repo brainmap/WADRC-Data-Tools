@@ -463,37 +463,41 @@ v_composite_value = v_composite_value + "
                     @trfile.scan_procedure_id ,@trfile.enrollment_id, @trtype.series_description_type_id.split(","))
 
           elsif !(@trtype.processedimagesfiletype_id).nil?
+            @processedimagefiletype = Processedimagesfiletype.find(@trtype.processedimagesfiletype_id)
+
             #NEED TO LIMIT TO THIS VISIT
-            @ids_source = ImageDataset.where(" image_datasets.visit_id in (select v1.id from visits v1, appointments a1, scan_procedures_vgroups spvg1, enrollment_vgroup_memberships evg1
+             #  image_dataset vs petfile -- but if using a oT1 should still link up - need all oT1 harvested
+            if @processedimagefiletype.image_linkage_type == 'image_datasets'
+                 @ids_source = ImageDataset.where(" image_datasets.visit_id in (select v1.id from visits v1, appointments a1, scan_procedures_vgroups spvg1, enrollment_vgroup_memberships evg1
                                                       where v1.appointment_id = a1.id and a1.vgroup_id =spvg1.vgroup_id and a1.vgroup_id = evg1.vgroup_id 
                                                       and spvg1.scan_procedure_id in (?) 
                                                       and evg1.enrollment_id in (?)) ",
                     @trfile.scan_procedure_id ,@trfile.enrollment_id)
-            v_ids_id_array = []
-            @ids_source.each do |ids|
-               v_ids_id_array.push(ids.id)
-            end 
-            @processedimages = {}
-            @processedimages = Processedimage.where("(
-              processedimages.id in 
+                 v_ids_id_array = []
+                 @ids_source.each do |ids|
+                   v_ids_id_array.push(ids.id)
+                 end 
+                 @processedimages = {}
+                 @processedimages = Processedimage.where("(
+                   processedimages.id in 
                                 (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'image_dataset'
                                                             and pis2.source_image_id in (?))
-              or 
-              processedimages.id in 
+                   or 
+                   processedimages.id in 
                    (select pis3.processedimage_id from processedimagessources pis3 where pis3.source_image_type = 'processedimage'
                           and pis3.source_image_id in
                                 (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'image_dataset'
                                                             and pis2.source_image_id in (?))) 
-              or 
-              processedimages.id in 
+                  or 
+                  processedimages.id in 
                    (select pis4.processedimage_id from processedimagessources pis4 where pis4.source_image_type = 'processedimage'
                           and pis4.source_image_id in
                    (select pis3.processedimage_id from processedimagessources pis3 where pis3.source_image_type = 'processedimage'
                           and pis3.source_image_id in
                                 (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'image_dataset'
                                                             and pis2.source_image_id in (?))) )
-              or 
-              processedimages.id in 
+                 or 
+                 processedimages.id in 
                    (select pis5.processedimage_id from processedimagessources pis5 where pis5.source_image_type = 'processedimage'
                           and pis5.source_image_id in
                    (select pis4.processedimage_id from processedimagessources pis4 where pis4.source_image_type = 'processedimage'
@@ -502,10 +506,56 @@ v_composite_value = v_composite_value + "
                           and pis3.source_image_id in
                                 (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'image_dataset'
                                                             and pis2.source_image_id in (?))) ) )                                             
-              )
-              and processedimages.file_type in 
-              (select processedimagesfiletypes.file_type from processedimagesfiletypes where  processedimagesfiletypes.id in (?))",v_ids_id_array,v_ids_id_array,v_ids_id_array,v_ids_id_array,@trtype.processedimagesfiletype_id)
-  
+                 )
+                 and processedimages.file_type in 
+                 (select processedimagesfiletypes.file_type from processedimagesfiletypes where  processedimagesfiletypes.id in (?))",v_ids_id_array,v_ids_id_array,v_ids_id_array,v_ids_id_array,@trtype.processedimagesfiletype_id)
+              elsif @processedimagefiletype.image_linkage_type == 'petfile'
+                  @petfiles_source = Petfile.where("petfiles.petscan_id in  (select pet1.id from petscans pet1, appointments a1, scan_procedures_vgroups spvg1, enrollment_vgroup_memberships evg1
+                                                      where pet1.appointment_id = a1.id and a1.vgroup_id =spvg1.vgroup_id and a1.vgroup_id = evg1.vgroup_id 
+                                                      and spvg1.scan_procedure_id in (?) 
+                                                      and evg1.enrollment_id in (?)) ",
+                        @trfile.scan_procedure_id ,@trfile.enrollment_id)
+                v_petfiles_id_array = []
+                 @petfiles_source.each do |petfile|
+                   v_petfiles_id_array.push(petfile.id)
+                 end 
+                 @processedimages = {}
+                 @processedimages = Processedimage.where("(
+                   processedimages.id in 
+                                (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'petfile'
+                                                            and pis2.source_image_id in (?))
+                   or 
+                   processedimages.id in 
+                   (select pis3.processedimage_id from processedimagessources pis3 where pis3.source_image_type = 'processedimage'
+                          and pis3.source_image_id in
+                                (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'petfile'
+                                                            and pis2.source_image_id in (?))) 
+                  or 
+                  processedimages.id in 
+                   (select pis4.processedimage_id from processedimagessources pis4 where pis4.source_image_type = 'processedimage'
+                          and pis4.source_image_id in
+                   (select pis3.processedimage_id from processedimagessources pis3 where pis3.source_image_type = 'processedimage'
+                          and pis3.source_image_id in
+                                (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'petfile'
+                                                            and pis2.source_image_id in (?))) )
+                 or  
+                 processedimages.id in 
+                   (select pis5.processedimage_id from processedimagessources pis5 where pis5.source_image_type = 'processedimage'
+                          and pis5.source_image_id in
+                   (select pis4.processedimage_id from processedimagessources pis4 where pis4.source_image_type = 'processedimage'
+                          and pis4.source_image_id in
+                   (select pis3.processedimage_id from processedimagessources pis3 where pis3.source_image_type = 'processedimage'
+                          and pis3.source_image_id in
+                                (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'petfile'
+                                                            and pis2.source_image_id in (?))) ) )                                             
+                 )
+                 and processedimages.file_type in 
+                 (select processedimagesfiletypes.file_type from processedimagesfiletypes where  processedimagesfiletypes.id in (?))",v_petfiles_id_array,v_petfiles_id_array,v_petfiles_id_array,v_petfiles_id_array,@trtype.processedimagesfiletype_id)
+
+
+
+
+              end
              ####@processedimages = Processedimage.all
 
             # and processedimages.file_type in 
