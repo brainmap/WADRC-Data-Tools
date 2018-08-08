@@ -4356,7 +4356,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      v_scan_procedure_array = [26,41,77,91] #pdt's and mk
      v_series_description_category_array = ['T1_Volumetric','T2'] # mpnrage?
      v_series_description_category_id_array = [19, 20] #,1 ]
-     v_project = "up-test"
+     v_project = "wadrc_sp" #"up-test"
 
      v_xnat_participant_tn = "xnat_participants"
      v_xnat_appointment_mri_tn ="xnat_mri_appointment"
@@ -4367,6 +4367,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      v_rm_endings = ["json","pickle","yaml","txt","xml","doc","xls","xlsx"]
      # DEV vs PROD
      v_xnat_site = Shared.xnat_site
+     v_xnat_user = Shared.xnat_user
      v_xnat_site = "xnatdev.medicine.wisc.edu"
      v_pass =  "zzzz"
 
@@ -4558,7 +4559,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
             rescue => msg    
            end
           # do xnat upload - curl command
-    v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl -u paultestuser:'"+v_pass+"' -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
+    v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl -u "+v_xnat_user+":'"+v_pass+"' -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
     v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl --netrc -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
     v_log_file_path = "/tmp/"+v_xnat_session+".log"
 
@@ -4730,8 +4731,8 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
     # do xnat upload - curl command
     #$(curl -u ${USER}:${PASS} -o ${FILE}.log -w "%{http_code}" --form project=${PROJECT_ID} --form image_archive=@${FILE} "${SITE}/data/services/import?format=html")
     #$(curl  -o ${FILE}.log -w "%{http_code}" --form project=${PROJECT_ID} --form image_archive=@${FILE} "${SITE}/data/services/import?format=html")
-    v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl -u paultestuser:'"+v_pass+"' -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
-      puts v_call
+   # v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl -u "+v_xnat_user+":'"+v_pass+"' -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
+   #   puts v_call
     v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl --netrc -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
     v_log_file_path = "/tmp/"+v_xnat_session+".log"      
 
