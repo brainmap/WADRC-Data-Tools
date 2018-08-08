@@ -237,6 +237,7 @@ class DataSearchesController < ApplicationController
       
     end
     def cg_edit_dashboard_table
+
       v_schema ='panda_production'
       if Rails.env=="development" 
         v_schema ='panda_development'
@@ -293,7 +294,7 @@ class DataSearchesController < ApplicationController
       end
        # non-blank search down by the @v_dashboard_edit_columns
 
-      if (@cg_tn.table_type == 'column_group' or @cg_tn.table_type == 'InProcess'  ) and @cg_tn.secondary_edit_flag == "Y"  and !v_exclude_tables_array.include?(@cg_tn.tn.downcase) # want to limit to cg tables
+      if (@cg_tn.table_type == 'column_group' or @cg_tn.table_type == 'JohnsonInProcess'  or @cg_tn.table_type == 'BendlinInProcess'  ) and @cg_tn.secondary_edit_flag == "Y"  and !v_exclude_tables_array.include?(@cg_tn.tn.downcase) # want to limit to cg tables
         @cns = []
         @key_cns = []
         @v_key = []
