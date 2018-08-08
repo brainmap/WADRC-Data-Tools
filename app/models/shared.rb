@@ -32,6 +32,8 @@ class Shared  < ActionController::Base
   def self.xnat_user; xnat_user end
   def self.xnat_pwd; xnat_pwd end
   def self.xnat_path; xnat_path end
+  def self.xnat_site; xnat_site end
+
 
   
   def test_return( p_var)
