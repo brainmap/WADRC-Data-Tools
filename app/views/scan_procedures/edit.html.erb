@@ -1,4 +1,5 @@
-<% v_y_n = {"Yes"=>"Y","No"=>"N"} %>
+<% v_y_n = {"Yes"=>"Y","No"=>"N"}
+v_permission_type ={"study_permission"=>"study_permission","search_tables_permission"=>"search_tables_permission"} %>
   <% if current_user.role == 'Admin_High'%>
 <h1>Editing Scan Procedure</h1>
 <%= form_for(@scan_procedure) do |f| %>
@@ -54,6 +55,10 @@
         <p>
     <b>Alternative RMR dicom field</b><br />
     <%= f.text_field :rmr_dicom_field %> Enter [####,####]|[description] e.g. 0008,0050|Accession Number.
+  </p>
+    <p>
+    <%= f.label :permission_type %><br />
+      <%= f.select :permission_type, v_permission_type, :selected => @scan_procedure.permission_type , :include_blank => 'Select if being used for search table permissions'  %> 
   </p>
 
   <p>

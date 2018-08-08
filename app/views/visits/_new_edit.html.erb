@@ -48,7 +48,7 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 			   end
 			
 			%>
-			<% ScanProcedure.where(" scan_procedures.id in (?)", v_edit_low_sp_string.split(' ')).sort_by(&:codename).each do |scan_procedure| %>
+			<% ScanProcedure.where(" scan_procedures.id in (?) and scan_procedures.permission_type in (?)", v_edit_low_sp_string.split(' '),"study_permission").sort_by(&:codename).each do |scan_procedure| %>
 				<li>
 					<%#= f.fields_for scan_procedure do |scan_fields| %>
 						<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
@@ -207,7 +207,7 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
       <%= f.label :notes %><br/>
       <%= f.text_area :notes , :cols => 60, :rows => 10 %><br />
     </p>
-<br><br><br><%= f.submit 'Save MRI appt' %>
+<br><br><br><%= f.submit 'Save MRI appt'  %><!-- , onclick: "validateCheckbox();" -->
   </div>
 <br>&nbsp;____________<br>
 <% if !@appointment.blank? %>
@@ -381,7 +381,7 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 </div>
   <br style="clear:both" />
   
-  <%= f.submit form_action %>
+  <%= f.submit form_action  %>
 
 <% end %>
 

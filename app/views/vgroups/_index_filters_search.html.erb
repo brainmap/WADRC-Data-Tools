@@ -16,7 +16,7 @@
 <%= f.submit "Search" %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
-<%= collection_select('vgroups_search[scan_procedure_id]', :id,ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'Choose scan procedure'}, {:multiple =>  false} ) %>
+<%= collection_select('vgroups_search[scan_procedure_id]', :id,ScanProcedure.where(" scan_procedures.id in (?) and scan_procedures.permission_type in (?)",scan_procedure_array,"study_permission").order(:codename), :id, :codename,  {:prompt => 'Choose scan procedure'}, {:multiple =>  false} ) %>
      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <%= f.label :enumber %>
 <%= f.text_field :enumber %>
