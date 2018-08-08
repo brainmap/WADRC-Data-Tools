@@ -29,10 +29,8 @@ class Shared  < ActionController::Base
   def self.booked_address_base; booked_address_base end
 
 
-  def self.xnat_user; xnat_user end
-  def self.xnat_pwd; xnat_pwd end
-  def self.xnat_path; xnat_path end
-  def self.xnat_site; xnat_site end
+
+
 
 
   
@@ -4368,9 +4366,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      v_script_dicom_clean = v_xnat_script_dir+"xnat_dicom_upload_cleaner.rb"
      v_rm_endings = ["json","pickle","yaml","txt","xml","doc","xls","xlsx"]
      # DEV vs PROD
-     v_xnat_site = Shared.xnat_site
-     v_xnat_user = Shared.xnat_user
-     v_xnat_site = "xnatdev.medicine.wisc.edu"
+     v_xnat_site = "xnat.medicine.wisc.edu"
      v_pass =  "zzzz"
 
      connection = ActiveRecord::Base.connection();
@@ -4561,7 +4557,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
             rescue => msg    
            end
           # do xnat upload - curl command
-    v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl -u "+v_xnat_user+":'"+v_pass+"' -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
+ #   v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl -u "+v_xnat_user+":'"+v_pass+"' -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
     v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl --netrc -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
     v_log_file_path = "/tmp/"+v_xnat_session+".log"
 
