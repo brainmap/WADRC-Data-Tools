@@ -4545,7 +4545,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
        if v_xnat_session != scan[2]
            # new xnat session
         puts " new session="+v_xnat_session
-        if v_cnt_ids  > 0 and v_xnat_session != "zzzzz"
+        if v_cnt_ids  > 0    #and v_xnat_session != "zzzzz"
       puts " cnt>0"
           # before new xnat_session, zip v_target_dir  and xnat_seesion != zzzzzz
            v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/;zip -r  "+v_xnat_session+".zip  "+v_xnat_session+"\""
@@ -4578,6 +4578,18 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
           end
           v_status =""
           v_status_comment = ""
+          v_call = "rsync -av panda_user@"+v_computer+".dom.wisc.edu:/"+v_log_file_path+" "+v_log_file_path
+          begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+          while !stdout.eof?
+             puts stdout.read 1024    
+          end
+          stdin.close
+          stdout.close
+          stderr.close
+          rescue => msg    
+          end
+          
           File.foreach(v_log_file_path).detect { |line| 
              if line.include?("Session processing may already be in progress")
                     v_status ='F'
@@ -4753,6 +4765,17 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
       end
       v_status =""
       v_status_comment = ""
+          v_call = "rsync -av panda_user@"+v_computer+".dom.wisc.edu:/"+v_log_file_path+" "+v_log_file_path
+          begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+          while !stdout.eof?
+             puts stdout.read 1024    
+          end
+          stdin.close
+          stdout.close
+          stderr.close
+          rescue => msg    
+          end
       File.foreach(v_log_file_path).detect { |line| 
              if line.include?("Session processing may already be in progress")
                     v_status ='F'
