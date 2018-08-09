@@ -28,6 +28,8 @@ class Shared  < ActionController::Base
   def self.booked_address_page; booked_address_page end
   def self.booked_address_base; booked_address_base end
 
+  def self.xnat_site_address; xnat_site end
+
 
 
 
@@ -4366,7 +4368,9 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      v_script_dicom_clean = v_xnat_script_dir+"xnat_dicom_upload_cleaner.rb"
      v_rm_endings = ["json","pickle","yaml","txt","xml","doc","xls","xlsx"]
      # DEV vs PROD
-     v_xnat_site = "xnat.medicine.wisc.edu"
+   
+     v_xnat_site = Shared.xnat_site_address
+
      v_pass =  "zzzz"
 
      connection = ActiveRecord::Base.connection();
@@ -4537,11 +4541,11 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
     v_path_full_list_array = []
     v_visit_id = ""
     results.each do |scan|
-      puts "aaaaa=0"+scan[0]+"   1="+scan[1].to_s+"  2="+scan[2].to_s
+      puts "BBBBBB=0"+scan[0]+"   1="+scan[1].to_s+"  2="+scan[2].to_s
        if v_xnat_session != scan[2]
            # new xnat session
         puts " new session="+v_xnat_session
-        if v_cnt_ids  > 0 
+        if v_cnt_ids  > 0 and v_xnat_session != "zzzzz"
       puts " cnt>0"
           # before new xnat_session, zip v_target_dir  and xnat_seesion != zzzzzz
            v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/;zip -r  "+v_xnat_session+".zip  "+v_xnat_session+"\""
@@ -4558,23 +4562,23 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
            end
           # do xnat upload - curl command
  #   v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl -u "+v_xnat_user+":'"+v_pass+"' -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
-    v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl --netrc -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
-    v_log_file_path = "/tmp/"+v_xnat_session+".log"
+            v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd /tmp; curl --netrc -o "+v_xnat_session+".log -w \\\"%{http_code}\\\" --form project="+v_project+" --form image_archive=@"+v_xnat_session+".zip https://"+v_xnat_site+"/data/services/import?format=html\" "
+            v_log_file_path = "/tmp/"+v_xnat_session+".log"
 
-      puts v_call 
-      begin
-    stdin, stdout, stderr = Open3.popen3(v_call)
-      while !stdout.eof?
-          puts stdout.read 1024    
-      end
-      stdin.close
-      stdout.close
-      stderr.close
-      rescue => msg    
-      end
-      v_status =""
-      v_status_comment = ""
-      File.foreach(v_log_file_path).detect { |line| 
+            puts v_call
+          begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+          while !stdout.eof?
+             puts stdout.read 1024    
+          end
+          stdin.close
+          stdout.close
+          stderr.close
+          rescue => msg    
+          end
+          v_status =""
+          v_status_comment = ""
+          File.foreach(v_log_file_path).detect { |line| 
              if line.include?("Session processing may already be in progress")
                     v_status ='F'
                     v_status_comment = "record already loaded:="+line
@@ -4592,15 +4596,14 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                     v_status_comment = "something unexpected:="+line
              end
                  }
-
-    puts "aaaaa v_status ="+v_status
-    puts "bbb v_status_comment ="+v_status_comment
+         #puts "aaaaa v_status ="+v_status
+         #puts "bbb v_status_comment ="+v_status_comment
           sql_update = "update "+v_xnat_ids_tn+" set "+v_xnat_ids_tn+".xnat_exists_flag = 'Y' 
           where "+v_xnat_ids_tn+".visit_id = "+v_visit_id.to_s+" and "+v_xnat_ids_tn+".xnat_exists_flag = 'N'
           and "+v_xnat_ids_tn+".file_path in('"+v_path_full_list_array.join("','")+"') "
-       if v_status == "D"
-          results_update = connection.execute(sql_update)
-       end
+          if v_status == "D"
+              results_update = connection.execute(sql_update)
+          end
 #puts "hhhhh ="+sql_update 
           # update database table
           # update database table
@@ -4689,8 +4692,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
               stderr.close
             rescue => msg    
       end
-    end # loop thru file endings
-      
+    end # loop thru file endings 
       # find /bunzip bz2
       # v_script_dicom_clean command = "./xnat_dicom_upload_cleaner.rb %s %s %s %s" % (target_dir, meta_info['exportID'], project, session_label)
          # target_dir = v_target_dir + dicom dir
@@ -4711,11 +4713,13 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
             rescue => msg    
       end
     end
+    if v_cnt_ids  > 0 # no results
      # after last xnat_session, zip v_target_dir  and xnat_seesion != zzzzzz
           # do xnat upload - curl command
           # update database table
           #v_call = "ssh panda_user@"+v_computer+" 'cd "+v_working_directory+"; rm -rf "+v_xnat_session+"'"
     v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu \"cd "+v_working_directory+"/;zip -r  "+v_xnat_session+".zip  "+v_xnat_session+"\""
+
     begin
     stdin, stdout, stderr = Open3.popen3(v_call)
       while !stdout.eof?
@@ -4802,8 +4806,11 @@ puts "hhhhh ="+sql_update
               stderr.close
               rescue => msg    
           end
+       else
+          v_comment = "No scans selected to load "+v_comment
+          puts "NOTHING..."
 
-
+       end
     @schedulerun.comment =("successful finish xnat_upload "+v_comment_warning+" "+v_comment[0..1990])
     if !v_comment.include?("ERROR")
           @schedulerun.status_flag ="Y"
