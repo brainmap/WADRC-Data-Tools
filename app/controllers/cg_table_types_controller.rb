@@ -85,6 +85,6 @@ class CgTableTypesController < ApplicationController
        @cg_table_type = CgTableType.find(params[:id])
     end
    def cg_table_type_params
-          params.require(:cg_table_type).permit(:hide_date_flag,:status_flag,:protocol_id,:table_type,:description,:id)
+          params.require(:cg_table_type).permit(:hide_date_flag,:status_flag,:protocol_id,:table_type,:description,:id,:default_open_flag,:display_order,:display_name,:editable_dashboard_table_type_flag)
    end
 end

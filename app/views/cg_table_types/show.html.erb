@@ -23,6 +23,18 @@
   <b>Hide dates in all queries:</b>
   <%= @cg_table_type.hide_date_flag %>
 </p>
+  <b>default_open_flag:</b>
+  <%= @cg_table_type.default_open_flag %>
+</p>
+  <b>display_order:</b>
+  <%= @cg_table_type.display_order %>
+</p>
+  <b>Hdisplay_name:</b>
+  <%= @cg_table_type.display_name %>
+</p>
+  <b>editable_dashboard_table_type_flag:</b>
+  <%= @cg_table_type.editable_dashboard_table_type_flag %>
+</p>
 <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium'%>
 <%= link_to 'Edit', edit_cg_table_type_path(@cg_table_type) %> |
 <% end %>

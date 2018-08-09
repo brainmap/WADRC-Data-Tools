@@ -7,6 +7,10 @@
     <th>Protocol</th>
    <th>Active Status</th>
    <th>Hide dates in all queries</th>
+   <th>default_open_flag</th>
+   <th>display_order</th>
+   <th>display_name</th>
+   <th>editable_dashboard_table_type_flag</th>
     <th></th>
     <th></th>
     <th></th>
@@ -21,6 +25,10 @@
       <% end %></td>
       <td><%= cg_table_type.status_flag %></td>
       <td><%= cg_table_type.hide_date_flag %></td>
+      <td><%= cg_table_type.default_open_flag %></td>
+      <td><%= cg_table_type.display_order %></td>
+      <td><%= cg_table_type.display_name %></td>
+      <td><%= cg_table_type.editable_dashboard_table_type_flag %></td>
       <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium'%>
     <td><%= link_to 'Show', cg_table_type %></td>
     <td><%= link_to 'Edit', edit_cg_table_type_path(cg_table_type) %></td>

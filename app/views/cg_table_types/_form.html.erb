@@ -16,9 +16,17 @@
     <%= f.label :description %><br />
     <%= f.text_field :description %>
   </div>
+    <div class="field">
+    <%= f.label :display_name %><br />
+    <%= f.text_field :display_name %>
+  </div>
   <div class="field">
     <%= f.label :table_type %><br />
     <%= f.text_field :table_type %>
+  </div>
+    <div class="field">
+    <%= f.label :display_order %><br />
+    <%= f.text_field :display_order %>
   </div>
   <div class="field">
     <%= f.label :protocol_id %><br />
@@ -34,6 +42,16 @@
    <%= f.label :hide_date_flag %><br>
             <%= f.select :hide_date_flag, options_for_select(v_y_n, @cg_table_type.hide_date_flag),
                             {:prompt => 'Select if should hide dates in all queries'}  %>
+  </div>
+    <div class="field">
+   <%= f.label :default_open_flag %><br>
+            <%= f.select :default_open_flag, options_for_select(v_y_n, @cg_table_type.default_open_flag),
+                            {:prompt => 'Select to open(Y) or collapse (N) list'}  %>
+  </div>
+    <div class="field">
+   <%= f.label :editable_dashboard_table_type_flag %><br>
+            <%= f.select :editable_dashboard_table_type_flag, options_for_select(v_y_n, @cg_table_type.editable_dashboard_table_type_flag),
+                            {:prompt => 'Select to allow edit dashboard'}  %>
   </div>
   <div class="actions">
     <%= f.submit %>
