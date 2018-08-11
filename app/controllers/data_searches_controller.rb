@@ -123,28 +123,38 @@ class DataSearchesController < ApplicationController
     end
     
     def cg_tables
+      @cg_table_types = CgTableType.where("display_order > 0")
+
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       v_user_id = current_user.id.to_s
-
+      @cg_tn_dict = Hash.new
       @cg_tn_key_y = []
       @cg_tn_key_unique_y = []
+      # CHANGE TO A LOOP OF TABLE TYPE
       @cg_tns = CgTn.where("table_type='column_group' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
+        @cg_tn_dict["column_group"] = @cg_tns
       @cg_fs_tns = CgTn.where("table_type='free_surfer' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order) 
+        @cg_tn_dict["free_surfer"] = @cg_fs_tns
       @cg_tracker_tns = CgTn.where("table_type='tracker' and status_flag='Y' and table_type in 
        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order) 
+        @cg_tn_dict["tracker"] = @cg_tracker_tns
       @cg_combio_tns = CgTn.where("table_type='combio' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)    
+         @cg_tn_dict["combio"] = @cg_combio_tns
       @cg_scan_export_tns = CgTn.where("table_type='scan_export' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)   
+        @cg_tn_dict["scan_export"] = @cg_scan_export_tns
       @cg_up_tns = CgTn.where("table_type='up' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
+        @cg_tn_dict["up"] = @cg_up_tns
       @cg_johnsoninprocess_tns = CgTn.where("table_type='JohnsonInProcess' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
+        @cg_tn_dict["JohnsonInProcess"] = @cg_johnsoninprocess_tns
       @cg_bendlininprocess_tns = CgTn.where("table_type='BendlinInProcess' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
-
+        @cg_tn_dict["BendlinInProcess"] = @cg_bendlininprocess_tns
         # not rights - protocol_id - but up not have scan_procedure_id - hide scan_procedure_id from most drop downs or get protocol_id ist vs sp_id list 
         #table_type='column_group' and status_flag='Y' and table_type in 
         #(select table_type from cg_table_types where cg_table_types.protocol_id is null 
@@ -154,9 +164,13 @@ class DataSearchesController < ApplicationController
       @cg_up_archive_tns = CgTn.where("table_type='up_archive' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order) 
        # (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in ("+scan_procedure_list+"))").order(:display_order) 
+         @cg_tn_dict["up_archive"] = @cg_up_archive_tns
        end
         # issues where adrc or wai data in up table, but user not in up - cg_table_types.protocol_id needs to be changed to multiple values
-   
+
+
+
+      # CHANGE TO A LOOP OF TABLE TYPE
       # no edit/key things with tracker
       @cg_tns.each do |cg_tn|
           cg_tn_key_array = []
