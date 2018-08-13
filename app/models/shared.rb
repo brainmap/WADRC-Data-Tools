@@ -4507,6 +4507,22 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                                                          from "+v_xnat_ids_tn+" )"
 
      results = connection.execute(sql)
+
+# set the xnat_do_not_share based on pilot and enumber/study consent forms
+sql ="update xnat_mri_appointment xma set xnat_do_not_share_flag = 'Y'
+where xma.visit_id in (select v.id from visits v, enrollments e, enrollment_visit_memberships evm
+    where xma.visit_id = v.id  and v.id = evm.visit_id and evm.enrollment_id = e.id  and e.do_not_share_scans_flag = 'Y')"
+results = connection.execute(sql)
+sql ="update xnat_image_datasets xid set  xnat_do_not_share_flag = 'Y'
+where xid.visit_id in (select v.id from visits v, enrollments e, enrollment_visit_memberships evm
+      where xid.visit_id = v.id   and v.id = evm.visit_id and evm.enrollment_id = e.id  and e.do_not_share_scans_flag = 'Y')"
+results = connection.execute(sql)
+sql ="update xnat_mri_appointment set xnat_do_not_share_flag = 'Y' where visit_id in 
+(select v.id from visits v, appointments a, vgroups vg where v.appointment_id = a.id and a.vgroup_id = vg.id  and vg.pilot_flag = 'Y')"
+results = connection.execute(sql)
+sql ="update  xnat_image_datasets set xnat_do_not_share_flag = 'Y' where visit_id in 
+(select v.id from visits v, appointments a, vgroups vg where v.appointment_id = a.id and a.vgroup_id = vg.id  and vg.pilot_flag = 'Y')"
+results = connection.execute(sql)
 # add file_path --
 # make session id from file_path sp --> enum start| export_id|-v#
 # add sessionid column in database
