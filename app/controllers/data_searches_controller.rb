@@ -168,7 +168,7 @@ puts tt.table_type+"  tt.default_open_flag="+tt.default_open_flag
         end
       end
 
-
+=begin
       # CHANGE TO A LOOP OF TABLE TYPE
       @cg_tns = CgTn.where("table_type='column_group' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
@@ -284,7 +284,7 @@ puts tt.table_type+"  tt.default_open_flag="+tt.default_open_flag
               end
          end
       end
-
+=end
 
       respond_to do |format|
           format.html
