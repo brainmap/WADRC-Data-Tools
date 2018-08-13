@@ -123,38 +123,77 @@ class DataSearchesController < ApplicationController
     end
     
     def cg_tables
-      @cg_table_types = CgTableType.where("display_order > 0")
+      @cg_table_types = CgTableType.where("display_order > 0 and status_flag = 'Y'").sort_by(&:display_order)
 
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       v_user_id = current_user.id.to_s
       @cg_tn_dict = Hash.new
       @cg_tn_key_y = []
       @cg_tn_key_unique_y = []
+      connection = ActiveRecord::Base.connection();
+
+      @cg_table_types.each do |tt|
+puts tt.table_type+"  tt.default_open_flag="+tt.default_open_flag
+        if tt.default_open_flag == 'Y' or (tt.default_open_flag == 'N' and !params[tt.table_type].nil? and params[tt.table_type] == "Y" )
+           @cg_tn_dict[tt.table_type] = CgTn.where("table_type in (?) and status_flag='Y' and table_type in 
+           (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in 
+                 (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in (?)))",tt.table_type,v_user_id).order(:display_order)  
+        #@cg_tn_dict[tt.table_type] = @cg_tns_common
+  puts tt.table_type+" ffff @cg_tn_dict[tt.table_type].count="+@cg_tn_dict[tt.table_type].count.to_s
+           if tt.editable_dashboard_table_type_flag == 'Y'
+             @cg_tn_dict[tt.table_type].each do |cg_tn|
+                cg_tn_key_array = []
+                cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",cg_tn.id)
+                cg_tn_cns.each do |cg_tn_cn|
+                  if cg_tn_cn.key_column_flag == "Y"
+                     @cg_tn_key_y[cg_tn.id] = "Y"
+                     cg_tn_key_array.push(cg_tn_cn.cn)
+                  end
+                end
+                @cg_tn_key_unique_y[cg_tn.id] = "Y"
+                if @cg_tn_key_y[cg_tn.id] == "Y"
+                   sql = "select "+cg_tn_key_array.join(',')+" from "+cg_tn.tn+" group by "+cg_tn_key_array.join(',')+" having count(*) > 1"
+                   @results = connection.execute(sql)
+                   @cg_tn_key_unique_y[cg_tn.id] = "Y"
+                   @results.each do |r|
+                      if @cg_tn_key_unique_y[cg_tn.id] == "Y"
+                         @cg_tn_key_unique_y[cg_tn.id] = r[0].to_s
+                      else
+                         @cg_tn_key_unique_y[cg_tn.id] = @cg_tn_key_unique_y[cg_tn.id]+", "+r[0].to_s
+                      end
+                   end
+                end
+             end
+           end
+        end
+      end
+
+
       # CHANGE TO A LOOP OF TABLE TYPE
       @cg_tns = CgTn.where("table_type='column_group' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
-        @cg_tn_dict["column_group"] = @cg_tns
+
       @cg_fs_tns = CgTn.where("table_type='free_surfer' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order) 
-        @cg_tn_dict["free_surfer"] = @cg_fs_tns
+
       @cg_tracker_tns = CgTn.where("table_type='tracker' and status_flag='Y' and table_type in 
        (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order) 
-        @cg_tn_dict["tracker"] = @cg_tracker_tns
+
       @cg_combio_tns = CgTn.where("table_type='combio' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)    
-         @cg_tn_dict["combio"] = @cg_combio_tns
+
       @cg_scan_export_tns = CgTn.where("table_type='scan_export' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)   
-        @cg_tn_dict["scan_export"] = @cg_scan_export_tns
+
       @cg_up_tns = CgTn.where("table_type='up' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
-        @cg_tn_dict["up"] = @cg_up_tns
+  
       @cg_johnsoninprocess_tns = CgTn.where("table_type='JohnsonInProcess' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
-        @cg_tn_dict["JohnsonInProcess"] = @cg_johnsoninprocess_tns
+
       @cg_bendlininprocess_tns = CgTn.where("table_type='BendlinInProcess' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
-        @cg_tn_dict["BendlinInProcess"] = @cg_bendlininprocess_tns
+
         # not rights - protocol_id - but up not have scan_procedure_id - hide scan_procedure_id from most drop downs or get protocol_id ist vs sp_id list 
         #table_type='column_group' and status_flag='Y' and table_type in 
         #(select table_type from cg_table_types where cg_table_types.protocol_id is null 
@@ -245,6 +284,8 @@ class DataSearchesController < ApplicationController
               end
          end
       end
+
+
       respond_to do |format|
           format.html
       end
