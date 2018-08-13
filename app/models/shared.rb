@@ -4794,6 +4794,18 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                     v_status_comment = "something unexpected:="+line
              end
                  }
+          
+        v_call = "rm -rf "+v_log_file_path
+        begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+              rescue => msg    
+          end
 
     puts "aaaaa v_status ="+v_status
     puts "bbb v_status_comment ="+v_status_comment         
@@ -4806,7 +4818,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
        end
 puts "hhhhh ="+sql_update
           
-             v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+"'"
+          v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+"'"
           begin
             stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
@@ -4818,7 +4830,7 @@ puts "hhhhh ="+sql_update
               rescue => msg    
           end
           
-             v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+".zip'"
+        v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'cd "+v_working_directory+"; rm -rf "+v_working_directory+"/"+v_xnat_session+".zip'"
         begin
             stdin, stdout, stderr = Open3.popen3(v_call)
               while !stdout.eof?
