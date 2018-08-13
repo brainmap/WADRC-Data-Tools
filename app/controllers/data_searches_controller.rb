@@ -133,13 +133,11 @@ class DataSearchesController < ApplicationController
       connection = ActiveRecord::Base.connection();
 
       @cg_table_types.each do |tt|
-puts tt.table_type+"  tt.default_open_flag="+tt.default_open_flag
         if tt.default_open_flag == 'Y' or (tt.default_open_flag == 'N' and !params[tt.table_type].nil? and params[tt.table_type] == "Y" )
            @cg_tn_dict[tt.table_type] = CgTn.where("table_type in (?) and status_flag='Y' and table_type in 
            (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in 
                  (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in (?)))",tt.table_type,v_user_id).order(:display_order)  
         #@cg_tn_dict[tt.table_type] = @cg_tns_common
-  puts tt.table_type+" ffff @cg_tn_dict[tt.table_type].count="+@cg_tn_dict[tt.table_type].count.to_s
            if tt.editable_dashboard_table_type_flag == 'Y'
              @cg_tn_dict[tt.table_type].each do |cg_tn|
                 cg_tn_key_array = []
@@ -168,11 +166,11 @@ puts tt.table_type+"  tt.default_open_flag="+tt.default_open_flag
         end
       end
 
-
+=begin
       # CHANGE TO A LOOP OF TABLE TYPE
       @cg_tns = CgTn.where("table_type='column_group' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
-=begin
+
       @cg_fs_tns = CgTn.where("table_type='free_surfer' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order) 
 
@@ -187,7 +185,7 @@ puts tt.table_type+"  tt.default_open_flag="+tt.default_open_flag
 
       @cg_up_tns = CgTn.where("table_type='up' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
-=end
+
       @cg_johnsoninprocess_tns = CgTn.where("table_type='JohnsonInProcess' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order)  
 
@@ -198,7 +196,7 @@ puts tt.table_type+"  tt.default_open_flag="+tt.default_open_flag
         #table_type='column_group' and status_flag='Y' and table_type in 
         #(select table_type from cg_table_types where cg_table_types.protocol_id is null 
         #or cg_table_types.protocol_id in (select scan_procedures.protocol_id from scan_procedures where id in ("+scan_procedure_list+")))").order(:display_order) 
-=begin
+
        if !params[:archive_up_tables].nil? and params[:archive_up_tables] == "Y"
       @cg_up_archive_tns = CgTn.where("table_type='up_archive' and status_flag='Y' and table_type in 
         (select table_type from cg_table_types where cg_table_types.protocol_id is null or cg_table_types.protocol_id in (select protocol_roles.protocol_id from protocol_roles where protocol_roles.user_id in ("+v_user_id+")))").order(:display_order) 
@@ -207,11 +205,12 @@ puts tt.table_type+"  tt.default_open_flag="+tt.default_open_flag
        end
         # issues where adrc or wai data in up table, but user not in up - cg_table_types.protocol_id needs to be changed to multiple values
 
-=end
+
 
       # CHANGE TO A LOOP OF TABLE TYPE
       # no edit/key things with tracker
       @cg_tns.each do |cg_tn|
+  puts "bottom id="+cg_tn.id.to_s
           cg_tn_key_array = []
           cg_tn_cns =CgTnCn.where("cg_tn_id in (?)",cg_tn.id)
           cg_tn_cns.each do |cg_tn_cn|
@@ -235,6 +234,7 @@ puts tt.table_type+"  tt.default_open_flag="+tt.default_open_flag
               end
          end
       end
+
       #need inprocess
       @cg_johnsoninprocess_tns.each do |cg_tn|
           cg_tn_key_array = []
@@ -284,8 +284,7 @@ puts tt.table_type+"  tt.default_open_flag="+tt.default_open_flag
               end
          end
       end
-
-
+=end
       respond_to do |format|
           format.html
       end
