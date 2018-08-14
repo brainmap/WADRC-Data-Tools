@@ -4459,10 +4459,13 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
         v_appt_id = v_val[0]
         v_export_id = v_val[1]
         v_path = v_val[2]
-        v_secondary_key = v_val[3].gsub(".","") 
         v_path_array = v_path.split("/")
         if v_path_array.count > 4
            v_codename = v_path_array[4]
+        end
+        v_secondary_key = v_val[3] 
+        if !v_secondary_key.blank?
+             v_secondary_key = v_secondary_key.gsub(".","")
         end
         v_xnat_session_id = ""
         sp_array = ScanProcedure.where("codename in (?)",v_codename)
@@ -4485,7 +4488,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                  v_number = "_v8"
              end
              # issue with secondary scans into one session
-             if v_secondary_key > ""
+             if !v_secondary_key.blank?
                  v_xnat_session_id = v_prepend+v_secondary_key+"_"+v_export_id.to_s+v_number
              else
                  v_xnat_session_id = v_prepend+v_export_id.to_s+v_number
