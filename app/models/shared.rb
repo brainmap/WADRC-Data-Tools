@@ -4470,8 +4470,8 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
         v_xnat_session_id = ""
         sp_array = ScanProcedure.where("codename in (?)",v_codename)
         if sp_array.count> 0
-             v_prepend = sp_array.first.subjectid_base+"_"
-             v_number = ""
+             v_prepend = "_"+sp_array.first.subjectid_base
+             v_number = "_v1"
              if v_codename.include? "visit2"
                  v_number = "_v2"
              elsif v_codename.include? "visit3"
@@ -4489,9 +4489,9 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
              end
              # issue with secondary scans into one session
              if !v_secondary_key.blank?
-                 v_xnat_session_id = v_prepend+v_secondary_key+"_"+v_export_id.to_s+v_number
+                 v_xnat_session_id = v_export_id.to_s+v_prepend+v_number+"_sk"+v_secondary_key
              else
-                 v_xnat_session_id = v_prepend+v_export_id.to_s+v_number
+                 v_xnat_session_id = v_export_id.to_s+v_prepend+v_number
 
              end
              sql_update = "update "+v_xnat_appointment_mri_tn+" set xnat_session_id = '"+v_xnat_session_id+"'
