@@ -4358,7 +4358,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      v_scan_procedure_array = [26,41,77,91] #pdt's and mk
      v_series_description_category_array = ['T1_Volumetric','T2'] # mpnrage?
      v_series_description_category_id_array = [19, 20] #,1 ]
-     v_project = "wadrc_sp" #"up-test"
+     v_project = "wbbsp"  #"wadrc_sp" #"up-test"
 
      v_xnat_participant_tn = "xnat_participants"
      v_xnat_appointment_mri_tn ="xnat_mri_appointment"
@@ -4422,8 +4422,8 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
 # set xnat_do_not_share_flag
 #set xnat_exists_flag = 'Y' after upload to xnat
      # get [vgroups]/appointmnent/visit - 
-     sql = "insert into "+v_xnat_appointment_mri_tn+"(appointment_id, visit_id,xnat_exists_flag)
-     select distinct appointments.id , visits.id, 'N' from appointments, visits
+     sql = "insert into "+v_xnat_appointment_mri_tn+"(appointment_id, visit_id,xnat_exists_flag,secondary_key)
+     select distinct appointments.id , visits.id, 'N', appointments.secondary_key from appointments, visits
      where appointments.id = visits.appointment_id
      and appointments.vgroup_id in ( select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships, enrollments
                                         where enrollment_vgroup_memberships.enrollment_id = enrollments.id 
@@ -4446,7 +4446,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
 
      # get path from appointment_id , get codename/sp , get start , update xnat_session_id  <sp enum start>_export_id_<v#>
 
-     sql = "select "+v_xnat_appointment_mri_tn+".appointment_id, "+v_xnat_participant_tn+".export_id, visits.path
+     sql = "select "+v_xnat_appointment_mri_tn+".appointment_id, "+v_xnat_participant_tn+".export_id, visits.path, "+v_xnat_appointment_mri_tn+".secondary_key
        from "+v_xnat_appointment_mri_tn+","+v_xnat_participant_tn+", visits 
      where ("+v_xnat_appointment_mri_tn+".xnat_session_id is null or "+v_xnat_appointment_mri_tn+".xnat_session_id = '') 
      and "+v_xnat_participant_tn+".participant_id = "+v_xnat_appointment_mri_tn+".participant_id
@@ -4459,6 +4459,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
         v_appt_id = v_val[0]
         v_export_id = v_val[1]
         v_path = v_val[2]
+        v_secondary_key = v_val[3].gsub(".","") 
         v_path_array = v_path.split("/")
         if v_path_array.count > 4
            v_codename = v_path_array[4]
@@ -4483,7 +4484,13 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
              elsif v_codename.include? "visit8"
                  v_number = "_v8"
              end
-             v_xnat_session_id = v_prepend+v_export_id.to_s+v_number
+             # issue with secondary scans into one session
+             if v_secondary_key > ""
+                 v_xnat_session_id = v_prepend+v_secondary_key+"_"+v_export_id.to_s+v_number
+             else
+                 v_xnat_session_id = v_prepend+v_export_id.to_s+v_number
+
+             end
              sql_update = "update "+v_xnat_appointment_mri_tn+" set xnat_session_id = '"+v_xnat_session_id+"'
              where "+v_xnat_appointment_mri_tn+".appointment_id = "+v_appt_id.to_s+"
              and ("+v_xnat_appointment_mri_tn+".xnat_session_id is null or "+v_xnat_appointment_mri_tn+".xnat_session_id = '') "
