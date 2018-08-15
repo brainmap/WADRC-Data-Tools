@@ -30,11 +30,6 @@ class Shared  < ActionController::Base
 
   def self.xnat_site_address; xnat_site end
 
-
-
-
-
-
   
   def test_return( p_var)
     return "BBBBBBAAAAAAAAAAAAA"+p_var
@@ -4372,6 +4367,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
      v_xnat_site = Shared.xnat_site_address
 
      v_pass =  "zzzz"
+     v_days_back = "15"
 
      connection = ActiveRecord::Base.connection();
      # get all participants in sp/id not in v_xnat_participant_tn
@@ -4435,7 +4431,8 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                   where image_datasets.series_description = series_description_maps.series_description
                     and series_description_maps.series_description_type_id in ("+v_series_description_category_id_array.join(",")+") )
       and (visits.appointment_id,visits.id) NOT IN (select "+v_xnat_appointment_mri_tn+".appointment_id,"+v_xnat_appointment_mri_tn+".visit_id 
-                                                         from "+v_xnat_appointment_mri_tn+" )"
+                                                         from "+v_xnat_appointment_mri_tn+" )
+      and appointments.appointment_date < ( NOW() - INTERVAL "+v_days_back+" DAY)"
 
      results = connection.execute(sql)
   # doing full participant update - in case p.id changed - a mess either way - fixed or unfixed
@@ -4840,6 +4837,11 @@ results = connection.execute(sql)
           and "+v_xnat_ids_tn+".file_path in('"+v_path_full_list_array.join("','")+"') "
        
        if v_status == "D"
+          results_update = connection.execute(sql_update)
+       elsif v_status == "F"        
+         sql_update = "update "+v_xnat_ids_tn+" set "+v_xnat_ids_tn+".xnat_exists_flag = 'Q' 
+          where "+v_xnat_ids_tn+".visit_id = "+v_visit_id.to_s+" and "+v_xnat_ids_tn+".xnat_exists_flag in ('N','Q')
+          and "+v_xnat_ids_tn+".file_path in('"+v_path_full_list_array.join("','")+"') "
           results_update = connection.execute(sql_update)
        end
 puts "hhhhh ="+sql_update
