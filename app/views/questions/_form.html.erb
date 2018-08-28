@@ -1,3 +1,69 @@
+<script type="text/javascript">
+  function validateform()
+  {
+    var v_ok = "yes"
+    var v_value_type_1 = document.getElementById("question_value_type_1")
+    if(v_value_type_1.value.includes("radio") || v_value_type_1.value.includes("checkbox") || v_value_type_1.value.includes("dropdown") )
+    {
+      var v_ref_table_a_1 = document.getElementById("question_ref_table_a_1")
+      var v_ref_table_b_1 = document.getElementById("question_ref_table_b_1")
+      if(v_ref_table_a_1.value == ""){
+        v_ok = "no"
+        alert("Ref_table_a_1 needs to be populated for dropdowns, checkboxes or radio buttons, usually with [lookup_refs]. Change the Value_type_1 selected value to [text] to get rid of the selection requirement.")
+      } else if (v_ref_table_a_1.value == "lookup_refs" && v_ref_table_b_1.value == ""){
+        v_ok = "no"
+        alert("Ref_table_b_1 needs to be populated with a lookup_refs LABEL field.")
+
+      }
+    }
+    var v_value_type_2 = document.getElementById("question_value_type_2")
+    if(v_value_type_2.value.includes("radio") || v_value_type_2.value.includes("checkbox") || v_value_type_2.value.includes("dropdown") )
+    {
+      var v_ref_table_a_2 = document.getElementById("question_ref_table_a_2")
+      var v_ref_table_b_2 = document.getElementById("question_ref_table_b_2")
+      if(v_ref_table_a_2.value == ""){
+        v_ok = "no"
+        alert("Ref_table_a_2 needs to be populated for dropdowns, checkboxes or radio buttons, usually with [lookup_refs]. Change the Value_type_2 selected value to [text] to get rid of the selection requirement.")
+      } else if (v_ref_table_a_2.value == "lookup_refs" && v_ref_table_b_2.value == ""){
+        v_ok = "no"
+        alert("Ref_table_b_2 needs to be populated with a lookup_refs LABEL field.")
+
+      }
+    }
+    var v_value_type_3 = document.getElementById("question_value_type_3")
+    if(v_value_type_3.value.includes("radio") || v_value_type_3.value.includes("checkbox") || v_value_type_3.value.includes("dropdown") )
+    {
+      var v_ref_table_a_3 = document.getElementById("question_ref_table_a_3")
+      var v_ref_table_b_3 = document.getElementById("question_ref_table_b_3")
+      if(v_ref_table_a_3.value == ""){
+        v_ok = "no"
+        alert("Ref_table_a_3 needs to be populated for dropdowns, checkboxes or radio buttons, usually with [lookup_refs]. Change the Value_type_3 selected value to [text] to get rid of the selection requirement.")
+      } else if (v_ref_table_a_3.value == "lookup_refs" && v_ref_table_b_3.value == ""){
+        v_ok = "no"
+        alert("Ref_table_b_3 needs to be populated with a lookup_refs LABEL field.")
+
+      }
+    }
+    var v_value_link = document.getElementById("question_value_link")
+    var v_question_scan_procedure_id = document.getElementById("question_scan_procedure_scan_procedure_id")
+    if(v_value_link.value == ""){
+      v_ok = "no"
+      alert("Select the Value_link ==> appointment")
+    }
+    if(v_question_scan_procedure_id.value == ""){
+      v_ok = "no"
+      alert("Seelect a Scan Procedure to link the question to.")
+    }
+
+    if(v_ok == "yes")
+    {
+      alert("ok")
+      document.forms[0].submit();
+    }
+  }
+  
+</script>
+
 <%
 #v_value_type = {"dropdown"=>"dropdown", "dropdown_multiple"=>"dropdown_multiple", "radio"=>"radio", 
 #	 "checkbox"=>"checkbox", "text"=>"text","text_10"=>"text_10",	"text_20"=>"text_20","text_30"=>"text_30",
@@ -24,7 +90,10 @@ The question can have up to three parts.<br>
   <div class="actions">
     <%= link_to 'Back', questions_path %> |
 	<%= link_to('Question Forms Base', questionformbase_path) %> |
-	<%= f.submit %> 
+	<%= f.submit %>
+  <a href="#" onclick="return validateform()">Validate</a>
+ 
+
   </div>
 	</td></tr></table>
   <% if @question.errors.any? %>
@@ -46,7 +115,7 @@ The question can have up to three parts.<br>
   <div class="field">
     <%= f.label :value_link %>&nbsp;<small><small>Normally = Appointment. What the question results are linked with.</small></small><br />
  <%= f.select :value_link, options_for_select(v_value_link, @question.value_link),
-	              {:prompt => 'Select a value link'}  %><br>
+	              {:prompt => 'Select a value link'} ,{:required => true} %><br>
                 <B>USE APPOINTMENT!!! as value link, unless just text </B>
   </div>  -participant linkage is causing problems
 </td><td>
