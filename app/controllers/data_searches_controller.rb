@@ -1211,6 +1211,10 @@ class DataSearchesController < ApplicationController
       @add_cg_tn_id = []
       
       @image_datasets_tn =  CgTn.where("tn = 'image_datasets' ")
+      @v_hidden_form_element_exclude_from_char_replace_array = ["cg_search[value_1][862][11209]", "cg_search[value_1][885][13697]" ]
+      # how to populate from a tn_cn property?
+      # normally getting rid of + in hidden form elements used in the export files, for the NIH Toolbox have search values with + = replacing with %2B instead
+      # there were some problems with the + being in the hiddeen elements
       # ALSO IN IDS_SEARCH !!!!!!  need to update if added new categories
       #       @series_desc_categories = {"ASL" => "ASL", 
       # "DSC_Perfusion" => "DSC_Perfusion", 

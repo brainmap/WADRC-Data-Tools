@@ -95,7 +95,7 @@ v_tn_cn_searchable_hash = []
 			      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"%2B") %>
 			    <% else 
                        if !v_val.nil?
-                       	  if v_name == "cg_search[value_1][862][11209]"  or v_name == "cg_search[value_1][885][13697]"  # toolbox instruments - need + to come thru
+                       	  if @v_hidden_form_element_exclude_from_char_replace_array.include? v_name #== "cg_search[value_1][862][11209]"  or v_name == "cg_search[value_1][885][13697]"  # toolbox instruments - need + to come thru
                               v_val = CGI.unescape(v_val.gsub(/\+/,"%2B")) # gets rid of gsub(/\%2F/,"/").gsub(/\+/," ") 
                           else
                              v_val = CGI.unescape(v_val) # gets rid of gsub(/\%2F/,"/").gsub(/\+/," ") - not sure why getting rid of + - probably url next issues?
@@ -506,7 +506,7 @@ v_tn_cn_searchable_hash = []
 	      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
 	       <% else 
                  if !v_val.nil?
-                 	  if v_name == "cg_search[value_1][862][11209]" or v_name == "cg_search[value_1][885][13697]"   # toolbox instruments - need + to come thru
+                 	  if @v_hidden_form_element_exclude_from_char_replace_array.include? v_name #== "cg_search[value_1][862][11209]" or v_name == "cg_search[value_1][885][13697]"   # toolbox instruments - need + to come thru
                            v_val = CGI.unescape(v_val.gsub(/\+/,"%2B")) # gets rid of gsub(/\%2F/,"/").gsub(/\+/," ")
                       else
                            v_val = CGI.unescape(v_val) # gets rid of gsub(/\%2F/,"/").gsub(/\+/," ")# not sure why getting rid of + - maybe url issues?
@@ -544,7 +544,7 @@ v_tn_cn_searchable_hash = []
 	      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
 	       <% else 
                  if !v_val.nil?
-                 	     if v_name == "cg_search[value_1][862][11209]" or v_name == "cg_search[value_1][885][13697]"    # toolbox instruments - need + to come thru
+                 	     if @v_hidden_form_element_exclude_from_char_replace_array.include? v_name #== "cg_search[value_1][862][11209]" or v_name == "cg_search[value_1][885][13697]"    # toolbox instruments - need + to come thru
                               v_val = CGI.unescape(v_val.gsub(/\+/,"%2B")) # gets rid of gsub(/\%2F/,"/").gsub(/\+/," ")
                           else
                                v_val = CGI.unescape(v_val) # gets rid of gsub(/\%2F/,"/").gsub(/\+/," ") # not sure why gettiing rid of + - maybe url issues
@@ -584,7 +584,7 @@ v_tn_cn_searchable_hash = []
 	      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
 	       <% else 
                        if !v_val.nil?
-                       	   if v_name == "cg_search[value_1][862][11209]" or v_name == "cg_search[value_1][885][13697]"    # toolbox instruments - need + to come thru
+                       	   if @v_hidden_form_element_exclude_from_char_replace_array.include? v_name #== "cg_search[value_1][862][11209]" or v_name == "cg_search[value_1][885][13697]"    # toolbox instruments - need + to come thru
                               v_val = CGI.unescape(v_val.gsub(/\+/,"%2B")) # gets rid of gsub(/\%2F/,"/").gsub(/\+/," ")
                           else
                                v_val = CGI.unescape(v_val) # gets rid of gsub(/\%2F/,"/").gsub(/\+/," ") # not sure why getting rid of + - maybe url issues
@@ -622,7 +622,7 @@ v_tn_cn_searchable_hash = []
 	      <%= hidden_field_tag v_name, v_val.gsub(/\%2C/,",").gsub(/\%27/,"").gsub(/\+/,"") %>
 	       <% else 
                        if !v_val.nil?
-                       	  if v_name == "cg_search[value_1][862][11209]" or v_name == "cg_search[value_1][885][13697]"    # toolbox instruments - need + to come thru
+                       	  if @v_hidden_form_element_exclude_from_char_replace_array.include? v_name #== "cg_search[value_1][862][11209]" or v_name == "cg_search[value_1][885][13697]"    # toolbox instruments - need + to come thru
                               v_val = CGI.unescape(v_val.gsub(/\+/,"%2B")) # gets rid of gsub(/\%2F/,"/").gsub(/\+/," ")
                           else
                               v_val = CGI.unescape(v_val) # gets rid of gsub(/\%2F/,"/").gsub(/\+/," ") # not sure why getting rid of + - maybe url issues
