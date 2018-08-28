@@ -4636,9 +4636,9 @@ results = connection.execute(sql)
           sql_update = "update "+v_xnat_ids_tn+" set "+v_xnat_ids_tn+".xnat_exists_flag = 'Y' 
           where "+v_xnat_ids_tn+".visit_id = "+v_visit_id.to_s+" and "+v_xnat_ids_tn+".xnat_exists_flag = 'N'
           and "+v_xnat_ids_tn+".file_path in('"+v_path_full_list_array.join("','")+"') "
-          if v_status == "D"
+          if v_status == "D"   # DONE
               results_update = connection.execute(sql_update)
-          elsif v_status == "F"        
+          elsif v_status == "F"      #FAIL  => QUIT  
              sql_update = "update "+v_xnat_ids_tn+" set "+v_xnat_ids_tn+".xnat_exists_flag = 'Q' 
                where "+v_xnat_ids_tn+".visit_id = "+v_visit_id.to_s+" and "+v_xnat_ids_tn+".xnat_exists_flag in ('N','Q')
                and "+v_xnat_ids_tn+".file_path in('"+v_path_full_list_array.join("','")+"') "
@@ -4892,7 +4892,55 @@ puts "hhhhh ="+sql_update
  end
 
  def run_xnat_session
+    v_base_path = Shared.get_base_path()
+    v_process_name = "xnat_session"
+    @schedule = Schedule.where("name in ('xnat_session')").first
+    @schedulerun = Schedulerun.new
+    @schedulerun.schedule_id = @schedule.id
+    @schedulerun.comment ="starting xnat_session"
+    @schedulerun.save
+    @schedulerun.start_time = @schedulerun.created_at
+    @schedulerun.save
+    v_comment = ""
+    v_comment_warning =""
+    v_computer = "merida"
 
+    v_address = "ccccc"
+    v_form = "/app/template/Login.vm"
+    v_user = "aaaaa"
+    v_pswd = "bbbbb"
+
+    begin
+        http = Net::HTTP.new(v_address, 443)
+        http.use_ssl = true
+        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        req = Net::HTTP::Post.new(v_form) #/includes/loginProcess.php')
+        req.set_form_data( {"username" => v_user , "password"=> v_pswd }) 
+        req.add_field 'Content-Type', 'text/html' 
+        result = http.request(req)
+        @response = result.body
+        doc = Hpricot(@response)
+        #puts "web page fetch_cookie ="+doc.to_s
+
+        cookie = result.fetch('set-cookie')
+        cookie = cookie.gsub("; path=/; secure; HttpOnly","")
+        puts "fetch==== cookie = "+cookie
+    rescue StandardError => e
+      puts "fetch cookie HTTP Request failed (#{e.message})"
+    end
+    if !cookie.nil?
+       v_cookie_array = cookie.split(";")
+       puts "JSESSIONID ===="+v_cookie_array[0]
+    end
+
+
+    @schedulerun.comment =("successful finish xnat_session "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
  end
 
 
