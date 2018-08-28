@@ -4368,12 +4368,12 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
 
      v_pass =  "zzzz"
      v_days_back = "15"
-
+     v_default_xnat_run_upload_flag = 'Y'
      connection = ActiveRecord::Base.connection();
      # get all participants in sp/id not in v_xnat_participant_tn
      #insert and make export_id
-     sql = "insert into "+v_xnat_participant_tn+"(participant_id,xnat_exists_flag) 
-               select distinct vgroups.participant_id,'N' from vgroups 
+     sql = "insert into "+v_xnat_participant_tn+"(participant_id,xnat_exists_flag,xnat_run_upload_flag) 
+               select distinct vgroups.participant_id,'N','"+v_default_xnat_run_upload_flag+"' from vgroups 
                where vgroups.participant_id not in ( select "+v_xnat_participant_tn+".participant_id from "+v_xnat_participant_tn+")
                and vgroups.pilot_flag = 'N'
                and vgroups.id in ( select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups 
