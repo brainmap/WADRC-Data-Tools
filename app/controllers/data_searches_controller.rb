@@ -1211,7 +1211,15 @@ class DataSearchesController < ApplicationController
       @add_cg_tn_id = []
       
       @image_datasets_tn =  CgTn.where("tn = 'image_datasets' ")
-      @v_hidden_form_element_exclude_from_char_replace_array = ["cg_search[value_1][862][11209]", "cg_search[value_1][885][13697]" ]
+      @v_tn_cns_exclude_char_replacements = CgTnCn.where("exclude_from_char_replacement_flag = 'Y'")
+      v_temp_base = "cg_search[value_1]["
+
+      @v_hidden_form_element_exclude_from_char_replace_array = [] #["cg_search[value_1][862][11209]", "cg_search[value_1][885][13697]" ]
+        
+      @v_tn_cns_exclude_char_replacements.each do |tn_cn|
+        v_temp_base_plus_value = v_temp_base+tn_cn.cg_tn_id.to_s+"]["+tn_cn.id.to_s+"]"
+        @v_hidden_form_element_exclude_from_char_replace_array.push(v_temp_base_plus_value)
+      end
       # how to populate from a tn_cn property?
       # normally getting rid of + in hidden form elements used in the export files, for the NIH Toolbox have search values with + = replacing with %2B instead
       # there were some problems with the + being in the hiddeen elements
