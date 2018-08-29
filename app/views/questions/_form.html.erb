@@ -50,14 +50,20 @@
       v_ok = "no"
       alert("Select the Value_link ==> appointment")
     }
-    if(v_question_scan_procedure_id.value == ""){
-      v_ok = "no"
-      alert("Seelect a Scan Procedure to link the question to.")
+    if(v_question_scan_procedure_id == null)
+    { //alert("in edit"). // scan_procedure_id only defined in create questions
+    }
+    else
+    {
+      if(v_question_scan_procedure_id.value == ""){
+        v_ok = "no"
+        alert("Seelect a Scan Procedure to link the question to.")
+      }
     }
 
     if(v_ok == "yes")
     {
-      alert("ok")
+      //alert("ok")
       document.forms[0].submit();
     }
   }
@@ -90,9 +96,9 @@ The question can have up to three parts.<br>
   <div class="actions">
     <%= link_to 'Back', questions_path %> |
 	<%= link_to('Question Forms Base', questionformbase_path) %> |
-	<%= f.submit %>
-  <a href="#" onclick="return validateform()">Validate</a>
- 
+	<!-- <%= f.submit %> -->
+
+<input type="button" onclick="return validateform()" value="Create/Update Question" /> 
 
   </div>
 	</td></tr></table>
@@ -477,6 +483,7 @@ The question can have up to three parts.<br>
   </div>
 <br>
   <div class="actions">
-    <%= f.submit %>
+   <!-- <%= f.submit %> -->
+      <input type="button" onclick="return validateform()" value="Create/Update Question" /> 
   </div>
 <% end %>
