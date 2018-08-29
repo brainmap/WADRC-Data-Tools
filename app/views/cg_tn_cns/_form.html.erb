@@ -94,6 +94,10 @@ load next column? : <%= select_tag 'load_next_column', options_for_select(v_y_n,
     &nbsp;&nbsp;&nbsp;<br>
     <%= f.label :dashboard_edit_flag %>:  <%= f.select :dashboard_edit_flag, options_for_select(v_y_n, @cg_tn_cn.dashboard_edit_flag),
                   {:prompt => 'Select y/n make column editable in Dashboard edit'}  %> 
+                  &nbsp;&nbsp;&nbsp;<br><br>
+    <%= f.label :exclude_from_char_replacement_flag %>:  <%= f.select :exclude_from_char_replacement_flag,  options_for_select(v_y_n, @cg_tn_cn.exclude_from_char_replacement_flag),
+                  {:prompt => 'Select y to make column not have a character + replacement in hidden form element'}  %> 
+                  &nbsp;&nbsp;&nbsp;<br>The NIH Toolbox has a drop down search on the Inst column - with +'s in the description. The +'s are normally replaced in export file/hidden form elements in the search. Y will let the +'s not be replaced.
   </div>
 <br>
 match_mri_path_flag ( trys to eliminate duplicates from dual enrollments), secondary_key_protocol_flag and secondary_key_visitno_flag ( for joining the UP protocol tables ). Getting rid of the multiple rows in the search joins without lossing rows to an inner join is a PROBLEM.
