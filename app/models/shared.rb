@@ -2592,6 +2592,8 @@ def  run_pet_av1451_harvest
      @schedulerun.end_time = @schedulerun.updated_at      
      @schedulerun.save  
 
+     # CHECK THAT TREDITS.STATUS_FLAG = 'Y' if used in harvest
+
 
 end
 
@@ -3082,7 +3084,7 @@ def  run_pet_mk6240_harvest
                           end
                        end
                      end
-
+# CHECK THAT TREDITS.STATUS_FLAG = 'Y'
 
                     # check for roi file
                     if File.file?(v_subjectid_roi_file_name)
@@ -9520,7 +9522,7 @@ puts "v_analyses_path="+v_analyses_path
                                @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid)
                                if !@trfiles.nil? and !@trfiles[0].nil?
                                    # get last edit
-                                   @tredits = Tredit.where("trfile_id in (?)",@trfiles[0].id).order("tredits.id desc")
+                                   @tredits = Tredit.where("trfile_id in (?) and tredits.status_flag in (?)",@trfiles[0].id, 'Y').order("tredits.id desc")
                                    v_tredit_id = @tredits[0].id
                                    # the individual fields
                                    v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
@@ -9592,7 +9594,7 @@ puts "v_analyses_path="+v_analyses_path
                                @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid)
                                if !@trfiles.nil? and !@trfiles[0].nil?
                                    # get last edit
-                                   @tredits = Tredit.where("trfile_id in (?)",@trfiles[0].id).order("tredits.id desc")
+                                   @tredits = Tredit.where("trfile_id in (?) and tredits.status_flag in (?)",@trfiles[0].id,'Y').order("tredits.id desc")
                                    v_tredit_id = @tredits[0].id
                                    # the individual fields
                                    v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
@@ -9664,7 +9666,7 @@ puts "v_analyses_path="+v_analyses_path
                                @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid)
                                if !@trfiles.nil? and !@trfiles[0].nil?
                                    # get last edit
-                                   @tredits = Tredit.where("trfile_id in (?)",@trfiles[0].id).order("tredits.id desc")
+                                   @tredits = Tredit.where("trfile_id in (?) and tredits.status_flag in (?)",@trfiles[0].id,'Y').order("tredits.id desc")
                                    v_tredit_id = @tredits[0].id
                                    # the individual fields
                                    v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
@@ -9739,7 +9741,7 @@ puts "v_analyses_path="+v_analyses_path
                                    v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
                                    if !v_tractiontypes.nil?
                                        v_tractiontypes.each do |tat|
-                                           v_tredit_action = TreditAction.where("tredit_id in (?)",v_tredit_id).where("tractiontype_id in (?)", tat.id)
+                                           v_tredit_action = TreditAction.where("tredit_id in (?) and tredits.status_flag in (?)",v_tredit_id,'Y').where("tractiontype_id in (?)", tat.id)
                                            if tat.id == 79 # load
                                                if  !v_tredit_action[0].nil? and !v_tredit_action[0].value.nil? and v_tredit_action[0].value == "1"
                                                    v_second_viewer_flag = "Y"
