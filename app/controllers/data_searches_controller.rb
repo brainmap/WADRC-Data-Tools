@@ -132,6 +132,13 @@ class DataSearchesController < ApplicationController
       @cg_tn_key_unique_y = []
       connection = ActiveRecord::Base.connection();
 
+      if !params["cg_tables"].nil? and !params["cg_tables"]["multi_table_type"].nil?
+          params["cg_tables"]["multi_table_type"].each do |tt|
+                  params[tt] = "Y"
+          end
+
+      end
+
       @cg_table_types.each do |tt|
         if tt.default_open_flag == 'Y' or (tt.default_open_flag == 'N' and !params[tt.table_type].nil? and params[tt.table_type] == "Y" )
            @cg_tn_dict[tt.table_type] = CgTn.where("table_type in (?) and status_flag='Y' and table_type in 

@@ -1,8 +1,9 @@
 <% @current_tab = "searches" 
 
 %>
+<table  width="90%" class="tabular">
 <%= form_tag  '/cg_search'  do %>
-<table  width="90%" class="tabular"><tr><th width="50"><small><small>Add to Search</small></small></th><th  nowrap align="left">Table Name
+<tr><th width="50"><small><small>Add to Search</small></small></th><th  nowrap align="left">Table Name
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= submit_tag("add tables checked to search")%> </th><th>Data Dictionary</th>
     <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium' %><th  align="right">Edit Table Values</th><% end %>
  </tr>
@@ -39,8 +40,15 @@
       <tr><td align="left" colspan="4"> &nbsp;&nbsp;&nbsp;<%= link_to tt.display_name+'- click to open table listing', '/cg_tables?'+tt.table_type+'=Y'%></td></tr>
      <% end %>
 <% end %>
-</table>
+<tr><td align="left" colspan="2"><%= submit_tag("add tables checked to search")%> </td></tr>
 <% end %>
+<tr><td align="left" colspan="4">
+<%= form_tag  '/cg_tables'  do %>
+
+<%= select(:cg_tables, :multi_table_type,@cg_table_types.collect {|p| [ p.table_type, p.table_type ] }, {},{:multiple=>true,:size=>1}) %> <%= submit_tag("open multiple table type categories")%>
+<%end%>
+</td></tr>
+</table>
 <!--
 %%= form_tag  '/cg_search'  do %>
 <table  width="90%" class="tabular"><tr><th width="50"><small><small>Add to Search</small></small></th><th  nowrap align="left">Table Name
