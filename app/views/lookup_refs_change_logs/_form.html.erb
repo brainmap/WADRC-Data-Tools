@@ -1,0 +1,68 @@
+<%= form_for(lookup_refs_change_log) do |f| %>
+  <% if lookup_refs_change_log.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(lookup_refs_change_log.errors.count, "error") %> prohibited this lookup_refs_change_log from being saved:</h2>
+
+      <ul>
+      <% lookup_refs_change_log.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  original_id
+    <div class="field">
+    <%= f.label :original_id %>
+    <%= f.text_field :original_id %>
+  </div>
+
+  <div class="field">
+    <%= f.label :modified_by_user_id %>
+    <%= f.text_field :modified_by_user_id %>
+  </div>
+
+  <div class="field">
+    <%= f.label :original_ref_value %>
+    <%= f.text_field :original_ref_value %>
+  </div>
+
+  <div class="field">
+    <%= f.label :ref_value %>
+    <%= f.text_field :ref_value %>
+  </div>
+
+  <div class="field">
+    <%= f.label :original_display_order %>
+    <%= f.text_field :original_display_order %>
+  </div>
+
+  <div class="field">
+    <%= f.label :display_order %>
+    <%= f.text_field :display_order %>
+  </div>
+
+  <div class="field">
+    <%= f.label :original_description %>
+    <%= f.text_field :original_description %>
+  </div>
+
+  <div class="field">
+    <%= f.label :description %>
+    <%= f.text_field :description %>
+  </div>
+
+  <div class="field">
+    <%= f.label :original_label %>
+    <%= f.text_field :original_label %>
+  </div>
+
+  <div class="field">
+    <%= f.label :label %>
+    <%= f.text_field :label %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

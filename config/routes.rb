@@ -1,6 +1,7 @@
 WADRCDataTools::Application.routes.draw do
 
 
+  resources :lookup_refs_change_logs
   resources :usernetworkgroups
   resources :networkgroups
   resources :trfileimages

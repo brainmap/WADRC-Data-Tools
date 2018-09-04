@@ -1,0 +1,55 @@
+<p id="notice"><%= notice %></p>
+
+original_id
+<p>
+  <strong>original_id:</strong>
+  <%= @lookup_refs_change_log.original_id %>
+</p>
+
+<p>
+  <strong>Modified by user:</strong>
+  <%= @lookup_refs_change_log.modified_by_user_id %>
+</p>
+
+<p>
+  <strong>Original ref value:</strong>
+  <%= @lookup_refs_change_log.original_ref_value %>
+</p>
+
+<p>
+  <strong>Ref value:</strong>
+  <%= @lookup_refs_change_log.ref_value %>
+</p>
+
+<p>
+  <strong>Original display order:</strong>
+  <%= @lookup_refs_change_log.original_display_order %>
+</p>
+
+<p>
+  <strong>Display order:</strong>
+  <%= @lookup_refs_change_log.display_order %>
+</p>
+
+<p>
+  <strong>Original description:</strong>
+  <%= @lookup_refs_change_log.original_description %>
+</p>
+
+<p>
+  <strong>Description:</strong>
+  <%= @lookup_refs_change_log.description %>
+</p>
+
+<p>
+  <strong>Original label:</strong>
+  <%= @lookup_refs_change_log.original_label %>
+</p>
+
+<p>
+  <strong>Label:</strong>
+  <%= @lookup_refs_change_log.label %>
+</p>
+
+<%= link_to 'Edit', edit_lookup_refs_change_log_path(@lookup_refs_change_log) %> |
+<%= link_to 'Back', lookup_refs_change_logs_path %>

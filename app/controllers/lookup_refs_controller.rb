@@ -234,7 +234,9 @@ class LookupRefsController < ApplicationController
   # PUT /lookup_refs/1
   # PUT /lookup_refs/1.xml
   def update
+    @original_lookup_ref = LookupRef.find(params[:id])
     @lookup_ref = LookupRef.find(params[:id])
+
 # NOT LETTING CHANGE OF LABEL OR REF_VALUE
 sql = "select distinct sp.codename, qf.description
                  from lookup_refs lr, scan_procedures sp, questions q, question_scan_procedures qsp, 
@@ -329,6 +331,21 @@ end
       if ( (current_user.role == 'Admin_High' or @q.count == 0 ) and !(params[:lookup_ref][:label]).strip.empty?  and !(params[:lookup_ref][:ref_value]).empty?  and !(params[:lookup_ref][:description]).strip.empty?  and (params[:lookup_ref][:label]).strip == @lookup_ref.label   and params[:lookup_ref][:ref_value] == @lookup_ref.ref_value.to_s and @lookup_ref.update(lookup_ref_params)  )
         @lookup_ref.label = (@lookup_ref.label).strip
         @lookup_ref.save
+        @lookup_refs_change_log = LookupRefsChangeLog.new
+        @lookup_refs_change_log.original_id = @lookup_ref.id
+        @lookup_refs_change_log.modified_by_user_id = current_user.id
+        @lookup_refs_change_log.ref_value = @lookup_ref.ref_value
+        @lookup_refs_change_log.original_ref_value = @original_lookup_ref.ref_value
+        @lookup_refs_change_log.description = @lookup_ref.description
+        @lookup_refs_change_log.original_description = @original_lookup_ref.description
+        @lookup_refs_change_log.display_order = @lookup_ref.display_order
+        @lookup_refs_change_log.original_display_order = @original_lookup_ref.display_order
+        @lookup_refs_change_log.label = @lookup_ref.label
+        @lookup_refs_change_log.original_label = @original_lookup_ref.label
+        @lookup_refs_change_log.save
+
+        
+
         format.html { redirect_to(@lookup_ref, :notice => 'Lookup ref was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -403,6 +420,16 @@ end
         flash[:notice] = flash[:notice] + " The value could not be deleted. There are records in the database referencing the value."
     end
     if current_user.role == 'Admin_High' and @sp_qf_enum.count == 0
+
+        @lookup_refs_change_log = LookupRefsChangeLog.new
+        @lookup_refs_change_log.original_id = @lookup_ref.id
+        @lookup_refs_change_log.modified_by_user_id = current_user.id
+        @lookup_refs_change_log.original_ref_value = @lookup_ref.ref_value
+        @lookup_refs_change_log.original_description = @lookup_ref.description
+        @lookup_refs_change_log.original_display_order = @lookup_ref.display_order
+        @lookup_refs_change_log.original_label = @lookup_ref.label
+        @lookup_refs_change_log.save
+
       @lookup_ref.destroy
     end
     respond_to do |format|

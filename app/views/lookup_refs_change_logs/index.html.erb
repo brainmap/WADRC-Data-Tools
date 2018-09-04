@@ -1,0 +1,45 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Lookup Refs Change Logs</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>original_id</th>
+      <th>Modified by user</th>
+      <th>Original ref value</th>
+      <th>Ref value</th>
+      <th>Original display order</th>
+      <th>Display order</th>
+      <th>Original description</th>
+      <th>Description</th>
+      <th>Original label</th>
+      <th>Label</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @lookup_refs_change_logs.each do |lookup_refs_change_log| %>
+      <tr>
+        <td><%= lookup_refs_change_log.original_id %></td>
+        <td><%= lookup_refs_change_log.modified_by_user_id %></td>
+        <td><%= lookup_refs_change_log.original_ref_value %></td>
+        <td><%= lookup_refs_change_log.ref_value %></td>
+        <td><%= lookup_refs_change_log.original_display_order %></td>
+        <td><%= lookup_refs_change_log.display_order %></td>
+        <td><%= lookup_refs_change_log.original_description %></td>
+        <td><%= lookup_refs_change_log.description %></td>
+        <td><%= lookup_refs_change_log.original_label %></td>
+        <td><%= lookup_refs_change_log.label %></td>
+        <td><%= link_to 'Show', lookup_refs_change_log %></td>
+        <td><%= link_to 'Edit', edit_lookup_refs_change_log_path(lookup_refs_change_log) %></td>
+        <td><%= link_to 'Destroy', lookup_refs_change_log, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Lookup Refs Change Log', new_lookup_refs_change_log_path %>
