@@ -124,6 +124,7 @@ class DataSearchesController < ApplicationController
     
     def cg_tables
       @cg_table_types = CgTableType.where("display_order > 0 and status_flag = 'Y'").sort_by(&:display_order)
+      @cg_table_types_default_close = CgTableType.where("display_order > 0 and status_flag = 'Y' and default_open_flag = 'N'").sort_by(&:display_order)
 
       scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
       v_user_id = current_user.id.to_s

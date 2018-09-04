@@ -45,7 +45,7 @@
 <tr><td align="left" colspan="4">
 <%= form_tag  '/cg_tables'  do %>
 
-<%= select(:cg_tables, :multi_table_type,@cg_table_types.collect {|p| [ p.table_type, p.table_type ] }, {},{:multiple=>true,:size=>1}) %> <%= submit_tag("open multiple table type categories")%>
+<%= select(:cg_tables, :multi_table_type,@cg_table_types_default_close.collect {|p| [ p.table_type, p.table_type ] }, {},{:multiple=>true,:size=>1}) %> <%= submit_tag("open multiple table type categories")%>
 <%end%>
 </td></tr>
 </table>
