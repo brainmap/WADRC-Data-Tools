@@ -3176,7 +3176,7 @@ def  run_pet_mk6240_harvest
                         end
                        v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_tacs_cn_array.join(","))
                        if v_return_flag == "N" 
-                               v_comment = v_file_path+"=>"+v_return_comment+" \n"+v_comment
+                               v_comment = v_subjectid_tacs_file_name+"=>"+v_return_comment+" \n"+v_comment
                                puts v_return_comment               
                        else
                         # insert v_cg_tn_tacs -- with _v# ?
