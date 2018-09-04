@@ -23,11 +23,9 @@ class ProcessedimagesController < ApplicationController
        end
 
        if !params[:processedimage_search][:scan_procedure_id].blank?
-           condition ="   HOW TO GO FROM PROCCESSEDIMAGES- thru multiple SOURSE LEVELS???questionnaires.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
-                                                  appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
-                                                  and scan_procedure_id in ("+params[:processedimage_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+           condition ="  processedimages.scan_procedure_id in ("+params[:processedimage_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+")"
            @scan_procedures = ScanProcedure.where("id in (?)",params[:processedimage_search][:scan_procedure_id])
-          #### @conditions.push(condition)
+           @conditions.push(condition)
            params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
         end
 
@@ -36,24 +34,66 @@ class ProcessedimagesController < ApplicationController
           if params[:processedimage_search][:enumber].include?(',') # string of enumbers
            v_enumber =  params[:processedimage_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
            v_enumber = v_enumber.gsub(/,/,"','")
-             condition ="    questionnaires.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
-              where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-              and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in  ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"
+             condition ="    processedimages.enrollment_id in (select enrollments.id from enrollments where lower(enrollments.enumber) in  ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"
           else
-           condition ="    questionnaires.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
-            where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-            and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in  (lower('"+params[:processedimage_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
-          end
-          ##  @conditions.push(condition)
-            params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:processedimage_search][:enumber]
-        end      
+           condition ="    processedimages.enrollment_id in (select enrollments.id from enrollments
+            where  lower(enrollments.enumber) in  (lower('"+params[:processedimage_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
 
-        if !params[:processedimage_search][:rmr].blank? 
-            condition ="    questionnaires.appointment_id in (select appointments.id from appointments,vgroups
-                      where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:processedimage_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
-               ###       @conditions.push(condition)
-            params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:processedimage_search][:rmr]
-        end
+          end
+            @conditions.push(condition)
+            params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:processedimage_search][:enumber]
+        end   
+
+         #  build expected date format --- between, >, < 
+         v_date_latest =""
+         #want all three date parts
+
+         if !params[:processedimage_search]["#{'latest_timestamp'}(1i)"].blank? && !params[:processedimage_search]["#{'latest_timestamp'}(2i)"].blank? && !params[:processedimage_search]["#{'latest_timestamp'}(3i)"].blank?
+              v_date_latest = params[:processedimage_search]["#{'latest_timestamp'}(1i)"] +"-"+params[:processedimage_search]["#{'latest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:processedimage_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
+         end
+         v_date_earliest =""
+         #want all three date parts
+
+         if !params[:processedimage_search]["#{'earliest_timestamp'}(1i)"].blank? && !params[:processedimage_search]["#{'earliest_timestamp'}(2i)"].blank? && !params[:processedimage_search]["#{'earliest_timestamp'}(3i)"].blank?
+               v_date_earliest = params[:processedimage_search]["#{'earliest_timestamp'}(1i)"] +"-"+params[:processedimage_search]["#{'earliest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:processedimage_search]["#{'earliest_timestamp'}(3i)"].rjust(2,"0")
+          end
+          #
+         if v_date_latest.length>0 && v_date_earliest.length >0
+           condition ="processedimages.scan_procedure_id  in (select scan_procedures_vgroups.scan_procedure_id from appointments,scan_procedures_vgroups  where appointments.vgroup_id =scan_procedures_vgroups.vgroup_id and appointments.appointment_date between '"+v_date_earliest+"' and '"+v_date_latest+"' ) and
+                         processedimages.enrollment_id  in (select enrollment_vgroup_memberships.enrollment_id from appointments,enrollment_vgroup_memberships  where appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id and appointments.appointment_date between '"+v_date_earliest+"' and '"+v_date_latest+"' )" #,v_date_earliest,v_date_latest)
+
+
+           condition ="processedimages.id  in (select pi2.id from processedimages pi2, appointments,scan_procedures_vgroups,enrollment_vgroup_memberships  
+                                            where appointments.vgroup_id =scan_procedures_vgroups.vgroup_id 
+                                            and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                                            and pi2.scan_procedure_id = scan_procedures_vgroups.scan_procedure_id 
+                                            and pi2.enrollment_id = enrollment_vgroup_memberships.enrollment_id
+                                            and appointments.appointment_date  between '"+v_date_earliest+"' and '"+v_date_latest+"') "       
+           params["search_criteria"] = params["search_criteria"] +",  visit date between "+v_date_earliest+" and "+v_date_latest
+           @conditions.push(condition)
+         elsif v_date_latest.length>0
+           condition ="processedimages.scan_procedure_id  in (select scan_procedures_vgroups.scan_procedure_id from appointments,scan_procedures_vgroups  where appointments.vgroup_id =scan_procedures_vgroups.vgroup_id and appointments.appointment_date < '"+v_date_latest+"' ) and
+                         processedimages.enrollment_id  in (select enrollment_vgroup_memberships.enrollment_id from appointments,enrollment_vgroup_memberships  where appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id and appointments.appointment_date < '"+v_date_latest+"' )"
+            condition ="processedimages.id  in (select pi2.id from processedimages pi2, appointments,scan_procedures_vgroups,enrollment_vgroup_memberships  
+                                            where appointments.vgroup_id =scan_procedures_vgroups.vgroup_id 
+                                            and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                                            and pi2.scan_procedure_id = scan_procedures_vgroups.scan_procedure_id 
+                                            and pi2.enrollment_id = enrollment_vgroup_memberships.enrollment_id
+                                            and appointments.appointment_date '"+v_date_latest+"' ) "
+
+            params["search_criteria"] = params["search_criteria"] +",  visit date before "+v_date_latest 
+            @conditions.push(condition)
+         elsif  v_date_earliest.length >0
+           condition ="processedimages.id  in (select pi2.id from processedimages pi2, appointments,scan_procedures_vgroups,enrollment_vgroup_memberships  
+                                            where appointments.vgroup_id =scan_procedures_vgroups.vgroup_id 
+                                            and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
+                                            and pi2.scan_procedure_id = scan_procedures_vgroups.scan_procedure_id 
+                                            and pi2.enrollment_id = enrollment_vgroup_memberships.enrollment_id
+                                            and appointments.appointment_date  > '"+v_date_earliest+"' ) "
+            params["search_criteria"] = params["search_criteria"] +",  visit date after "+v_date_earliest
+            @conditions.push(condition)
+          end   
+
         
         if !params[:processedimage_search][:status_flag].blank? 
             condition =" processedimages.status_flag in ('"+params[:processedimage_search][:status_flag].gsub(/[;:'"()=<>]/, '')+"')   "
