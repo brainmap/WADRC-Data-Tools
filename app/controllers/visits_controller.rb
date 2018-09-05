@@ -815,11 +815,14 @@ puts "DELETE COMMENT "+ids_comment.to_s
              @mriscantask.destroy
          end
         end
+        v_participant_id_vgroup = ""
+        v_participant_id_enumber_array = []
         @appointment = Appointment.find(@visit.appointment_id)
         @vgroup = Vgroup.find(@appointment.vgroup_id)
         @appointment.appointment_date = @visit.date
         if !@vgroup.participant_id.blank?
           @participant = Participant.find(@vgroup.participant_id)
+          v_participant_id_vgroup = @vgroup.participant_id
           if !@participant.dob.blank?
              @appointment.age_at_appointment = ((@appointment.appointment_date - @participant.dob)/365.25).round(2)
           end
@@ -850,6 +853,9 @@ puts "DELETE COMMENT "+ids_comment.to_s
         end
         results.each do |e|
           enrollment = Enrollment.find(e[0])
+          if !enrollment.participant_id.blank?
+              v_participant_id_enumber_array.push(enrollment.participant_id)
+          end
           if enrollment.do_not_share_scans_flag.empty? or enrollment.do_not_share_scans_flag != "Y"
             v_do_not_share_scans_flag ="N" 
           end
@@ -918,7 +924,21 @@ AND p.id in ("+@vgroup.participant_id.to_s+")"
           end
         end  
    #     4
-        flash[:notice] = 'visit was successfully updated.'
+        v_participant_id_missmatch = "N"
+        if v_participant_id_enumber_array.count > 0
+           v_participant_id_enumber_array.each do |enumber_p_id|
+               if !enumber_p_id.blank? and !v_participant_id_vgroup.blank? and enumber_p_id != v_participant_id_vgroup
+                   v_participant_id_missmatch = "Y"
+               end
+
+           end
+        end
+        if v_participant_id_missmatch == "N"
+           flash[:notice] = 'visit was successfully updated.'
+        else
+             flash[:notice] = 'ERROR- REALLY IMPORTANT to FIX THIS RIGHT AWAY. 
+             There is a missmatch betwen the participant linked to the vgroup (- via RMR) and the subjectid/enumber.'
+        end
         format.html { redirect_to(@visit) }
         format.xml  { head :ok }
       else
