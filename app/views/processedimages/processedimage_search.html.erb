@@ -76,7 +76,7 @@
   
 <% end %>
 
-<%= link_to 'download csv', { :controller=>"processedimage", :action=>"processedimage_search", :processedimage_search =>  @processedimage_search_params.to_h , :format => :csv} %>  <br>
+<%= link_to 'download csv', {   :processedimage_search =>  @processedimage_search_params.to_h , :format => :csv} %>  <br>
 
 
 

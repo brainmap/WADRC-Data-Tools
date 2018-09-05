@@ -13,7 +13,7 @@ class ProcessedimagesController < ApplicationController
 # LOTS NOT WORKING
  def processedimage_search
       if !params[:processedimage_search].blank?
-      ### causing error   @processedimage_search_params = processedimage_params()
+          @processedimage_search_params = processedimage_search_params()
       end
       @conditions = []
        @current_tab = "admin"
@@ -156,9 +156,49 @@ class ProcessedimagesController < ApplicationController
 
        params["search_criteria"] = params["search_criteria"].sub(", ","")
     puts @conditions.join(" and ")
-    @processedimages = Processedimage.where(@conditions.join(" and "))
+    @processedimages_full = Processedimage.where(@conditions.join(" and ")).to_ary
+    # modifying from questionnaire- probably simplier way 
+    v_request_format_array = request.formats
+    request_format = v_request_format_array[0]
+    @html_request ="Y"
+    case  request_format
+        when "[text/html]","text/html" then  # application/html ?
+          @column_headers = ['File name','File path','File type','Comment','status_flag','exists_flag','scan_procedure_id','enrollment_id'] # need to look up values
+          # not doing anything
+        else
+              @html_request ="N"
+             @column_headers = ['File name','File path','File type','Comment','status_flag','exists_flag','scan_procedure_id','enrollment_id']
+        end
+   @column_number =   @column_headers.size
+   if @html_request == "N"
+     @csv_array = []
+     @results_tmp_csv = []
+     @results_tmp_csv.push(@export_file_title)
+     @csv_array.push(@results_tmp_csv )
+     @csv_array.push( @column_headers)
+     @processedimages_full.each do |result| 
+      # must be a ror way to do this 
+       @results_tmp_csv = []
+      @results_tmp_csv.push(result.file_name)
+      @results_tmp_csv.push(result.file_path)
+      @results_tmp_csv.push(result.file_type)
+      @results_tmp_csv.push(result.comment)
+      @results_tmp_csv.push(result.status_flag)
+      @results_tmp_csv.push(result.exists_flag)
+      @results_tmp_csv.push(result.scan_procedure_id)
+      @results_tmp_csv.push(result.enrollment_id)
+       @csv_array.push(@results_tmp_csv)
+    end 
+
+
+    @csv_str = @csv_array.inject([]) { |csv, row|  csv << CSV.generate_line(row) }.join("") 
+
+   end
+
+
     respond_to do |format|
-   format.html {@processedimages = Kaminari.paginate_array(@processedimages).page(params[:page]).per(50)} 
+       format.html {@processedimages = Kaminari.paginate_array(@processedimages_full).page(params[:page]).per(50)} 
+       format.csv { send_data @csv_str  }
     end
   end
 
@@ -224,7 +264,10 @@ class ProcessedimagesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def processedimage_params
-      params.require(:processedimage).permit(:file_name, :file_path, :comment, :file_type, :status_flag, :exists_flag,:scan_procedure_id, :enrollment_id)
+      params.require(:processedimage).permit(:file_type,:id,:file_name,:file_path,:comment,:status_flag,:exists_flag,:scan_procedure_id,:enrollment_id)
     end
+    def processedimage_search_params
+          params.require(:processedimage_search).permit!
+   end
 
 end
