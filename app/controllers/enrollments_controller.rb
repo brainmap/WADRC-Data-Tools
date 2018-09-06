@@ -346,7 +346,7 @@ class EnrollmentsController < ApplicationController
     respond_to do |format|
       if @enrollment.update(enrollment_params)#params[:enrollment], :without_protection => true)
         if current_user.role == 'Admin_High'
-          if !params[:cleanup][:set_participant_id_blank].blank?
+          if !params[:cleanup][:set_participant_id_blank].blank? and params[:cleanup][:set_participant_id_blank] == "1"
              @enrollment.participant_id = nil
              @enrollment.save
           end
@@ -358,7 +358,7 @@ class EnrollmentsController < ApplicationController
                                                 where enrollment_vgroup_memberships.enrollment_id = "+params[:id]+") "
               @results = connection.execute(sql)
           else
-              sql = "update vgroups set vgroups.do_not_share_scans = NULL
+              sql = "update vgroups set vgroups.do_not_share_scans = 'OK_TO_SHARE'
                         where vgroups.id in ( select enrollment_vgroup_memberships.vgroup_id 
                                                from enrollment_vgroup_memberships 
                                                 where enrollment_vgroup_memberships.enrollment_id = "+params[:id]+") "
