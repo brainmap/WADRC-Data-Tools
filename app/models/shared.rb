@@ -3413,11 +3413,11 @@ def  run_pet_mk6240_harvest
                 sql = "insert into cg_pet_mk6240_tacs("+v_tacs_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name) 
                 select distinct "+v_tacs_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name from cg_pet_mk6240_tacs_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
-                results = connection.execute(sql)
+                ## NEED TO CHANGE TABLE AFTER NEXT ATLAS results = connection.execute(sql)
 
                 # apply edits  -- made into a function  in shared model
               
-                v_shared.apply_cg_edits("cg_pet_mk6240_tacs")
+                ## NEED TO CHANGE TABLE AFTER NEXT ATLAS v_shared.apply_cg_edits("cg_pet_mk6240_tacs")
 
         #BRAAK INSERT NEW ROWS
                 sql = "insert into cg_mk6240_braak(subjectid,participant_id, scan_procedure_id,file_name,enrollment_id)
