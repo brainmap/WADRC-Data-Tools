@@ -2022,6 +2022,7 @@ def  run_pet_av1451_harvest
       v_aal_atlas = "aal_MNI_V4"
       v_tjb_mni_v1 = "tjb_MNI_V1"
       v_homic_mni_v1 = "homic_MNI_V1"
+      v_atlas_array = [v_aal_atlas,v_tjb_mni_v1,v_homic_mni_v1 ]
       # ALSO A SECOND TABLE WITH A DIFFERENT ATLAS -- keeping columns same in both tables
       # ADD AS SINMGLE COLUMN ["Region","Atlas"]
       # CHANGE LOOP THRU ALL roi ROWS - make Key of suvr_+lower(region), volume_cc_+lower(region)
@@ -2401,6 +2402,9 @@ def  run_pet_av1451_harvest
                               if v_cnt > 0 
                                 v_line_array = []
                                 v_line_array =line.gsub(/\n/,"").split(",")
+                                if !v_atlas_array.include?(v_line_array[1])
+                                   v_comment = "UNEXPECTED ATLAS "+v_line_array[1]+";"+v_comment
+                                end
                                 if v_line_array[1] == v_aal_atlas
                                   v_atlas = v_line_array[1]
                                   v_roi_hash["suvr_"+v_line_array[0].downcase] = v_line_array[3]
@@ -2807,6 +2811,8 @@ def  run_pet_mk6240_harvest
       v_aal_atlas = "aal_MNI_V4"
       v_tjb_mni_v1 = "tjb_MNI_V1"
       v_homic_mni_v1 = "homic_MNI_V1"
+      v_atlas_array = [v_aal_atlas,v_tjb_mni_v1,v_homic_mni_v1 ]
+
       # ALSO A SECOND TABLE WITH A DIFFERENT ATLAS -- keeping columns same in both tables
       # ADD AS SINMGLE COLUMN ["Region","Atlas"]
       # CHANGE LOOP THRU ALL roi ROWS - make Key of suvr_+lower(region), volume_cc_+lower(region)
@@ -3186,6 +3192,9 @@ def  run_pet_mk6240_harvest
                               if v_cnt > 0 
                                 v_line_array = []
                                 v_line_array =line.gsub(/\n/,"").split(",")
+                                if !v_atlas_array.include?(v_line_array[1])
+                                   v_comment = "UNEXPECTED ATLAS "+v_line_array[1]+";"+v_comment
+                                end
                                 if v_line_array[1] == v_aal_atlas
                                   v_atlas = v_line_array[1]
                                   v_roi_hash["suvr_"+v_line_array[0].downcase] = v_line_array[3]
@@ -3259,7 +3268,9 @@ def  run_pet_mk6240_harvest
                         end
                        v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_tacs_cn_array.join(","))
                        if v_return_flag == "N" 
-                               v_comment = v_subjectid_tacs_file_name+"=>"+v_return_comment+" \n"+v_comment
+                            #### HIDING - some tacs columns have different name not being used except by toby
+                            #   v_comment = v_subjectid_tacs_file_name+"=>"+v_return_comment+" \n"+v_comment
+                            v_return_flag = "Y"
                                puts v_return_comment               
                        else
                         # insert v_cg_tn_tacs -- with _v# ?
