@@ -3068,8 +3068,32 @@ def cg_snapshot
           @v_cg_tn_cns = CgTnCn.where("cg_tn_id = "+v_old_cg_tns.id.to_s)
           @v_cg_tn_cns.each do |cg_tn_cn|
               v_new_cg_tn_cn = CgTnCn.new
-              v_new_cg_tn_cn = cg_tn_cn     
+              # how will this work with stored queries? 
               v_new_cg_tn_cn.cg_tn_id =  v_new_cg_tns.id
+              v_new_cg_tn_cn.secondary_key_visitno_flag = cg_tn_cn.secondary_key_visitno_flag
+              v_new_cg_tn_cn.display_order = cg_tn_cn.display_order
+              v_new_cg_tn_cn.created_at = cg_tn_cn.created_at
+              v_new_cg_tn_cn.data_type = cg_tn_cn.data_type
+              v_new_cg_tn_cn.ref_table_b = cg_tn_cn.ref_table_b
+              v_new_cg_tn_cn.ref_table_a = cg_tn_cn.ref_table_a
+              v_new_cg_tn_cn.key_column_flag = cg_tn_cn.key_column_flag
+              v_new_cg_tn_cn.export_name = cg_tn_cn.export_name
+              v_new_cg_tn_cn.common_name = cg_tn_cn.common_name
+              v_new_cg_tn_cn.cn = cg_tn_cn.cn
+              v_new_cg_tn_cn.searchable_flag = cg_tn_cn.searchable_flag
+              v_new_cg_tn_cn.value_limits = cg_tn_cn.value_limits
+              v_new_cg_tn_cn.secondary_key_protocol_flag = cg_tn_cn.secondary_key_protocol_flag
+              v_new_cg_tn_cn.match_mri_path_flag = cg_tn_cn.match_mri_path_flag
+              v_new_cg_tn_cn.hide_column_flag = cg_tn_cn.hide_column_flag
+              v_new_cg_tn_cn.order_by_flag = cg_tn_cn.order_by_flag
+              v_new_cg_tn_cn.description = cg_tn_cn.description
+              v_new_cg_tn_cn.q_data_form_id = cg_tn_cn.q_data_form_id
+              v_new_cg_tn_cn.value_list = cg_tn_cn.value_list
+              v_new_cg_tn_cn.condition_between_flag = cg_tn_cn.condition_between_flag
+              v_new_cg_tn_cn.status_flag = cg_tn_cn.status_flag
+              v_new_cg_tn_cn.updated_at = cg_tn_cn.updated_at
+              v_new_cg_tn_cn.dashboard_edit_flag = cg_tn_cn.dashboard_edit_flag
+              v_new_cg_tn_cn.exclude_from_char_replacement_flag = cg_tn_cn.exclude_from_char_replacement_flag
               v_new_cg_tn_cn.save
           end
           v_msg =" Made table; "+v_msg
