@@ -51,6 +51,8 @@
       :enumber => @enumber.nil? ? nil : link_to(@vgroup.enrollment.enumber, @vgroup.enrollment),
       :Appt_Coordinator =>@appointment.appointment_coordinator.blank? ? "" : Employee.find(@appointment.appointment_coordinator).name,
       :RMR_Number => @vgroup.rmr,
+      :Scanner_Location =>  @petscan.scanner_location,
+      :Scanner_Name =>  @petscan.scanner_name,
       :Acquisition_Duration =>  @petscan.range,
       :Injection_time => @petscan.injecttiontime.nil? ? nil : @petscan.injecttiontime.hour.to_s.rjust(2,'0')+":"+@petscan.injecttiontime.min.to_s.rjust(2,'0'),
       :Scanner_Start_time => @petscan.scanstarttime.nil? ? nil : @petscan.scanstarttime.hour.to_s.rjust(2,'0')+":"+@petscan.scanstarttime.min.to_s.rjust(2,'0'),

@@ -328,7 +328,7 @@ class PetscansController < ApplicationController
                     "LEFT JOIN employees on petscans.enteredpetscanwho = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
          else    
            @html_request ="N"          
-            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Dose','Injection Time','Scan Start','Note','Acquisition Duration','Pet status','Pre_BP Systol','Pre_BP Diastol','Pre_Pulse','Blood Glucose','Weight','Height','Post_BP Systol','Post_BP Diastol','Post_Pulse','Age at Appt','Appt Note'] # need to look up values
+            @column_headers = ['Date','Protocol','Enumber','RMR','Tracer','Dose','Injection Time','Scan Start','Scanner Location','Scanner Name','Note','Acquisition Duration','Pet status','Pre_BP Systol','Pre_BP Diastol','Pre_Pulse','Blood Glucose','Weight','Height','Post_BP Systol','Post_BP Diastol','Post_Pulse','Age at Appt','Appt Note'] # need to look up values
           if !@v_petfile_cnt.nil?
             i = @v_petfile_cnt
             k = 1
@@ -346,6 +346,7 @@ class PetscansController < ApplicationController
             @fields =["lookup_pettracers.name pettracer","petscans.netinjecteddose",
                     "time_format(timediff( time(petscans.injecttiontime),subtime(utc_time(),time(localtime()))),'%H:%i')",
                     "time_format(timediff( time(scanstarttime),subtime(utc_time(),time(localtime()))),'%H:%i')",
+                    "petscans.scanner_location","petscans.scanner_name",
                     "petscans.petscan_note","petscans.range","vgroups.transfer_pet","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","vitals.weight","vitals.height","vitals_post.bp_systol as bp_systol_post","vitals_post.bp_diastol as bp_diastol_post","vitals_post.pulse as pulse_post","appointments.age_at_appointment","petscans.id","appointments.comment"] # vgroups.id vgroup_id always first, include table name 
             @left_join = ["LEFT JOIN lookup_pettracers on petscans.lookup_pettracer_id = lookup_pettracers.id",
                         "LEFT JOIN vitals on petscans.appointment_id = vitals.appointment_id and vitals.pre_post_flag ='pre' ",
@@ -958,7 +959,7 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
        @petscan = Petscan.find(params[:id])
     end
    def petscan_params
-          params.require(:petscan).permit(:temp_fkpetscanid,:petscan_note,:completedpetscan_moved_to_vgroups,:enteredpetscan,:enteredpetscandate,:enteredpetscanwho,:path,:scanstarttime,:injecttiontime,:range,:units,:netinjecteddose,:ecatfilename,:lookup_pettracer_id,:appointment_id,:id)
+          params.require(:petscan).permit(:temp_fkpetscanid,:petscan_note,:completedpetscan_moved_to_vgroups,:enteredpetscan,:enteredpetscandate,:enteredpetscanwho,:path,:scanstarttime,:injecttiontime,:range,:units,:netinjecteddose,:ecatfilename,:lookup_pettracer_id,:appointment_id,:id,:scanner_location,:scanner_name)
    end  
    def pet_search_params
           params.require(:pet_search).permit! #(:enumber,:rmr,:file_name,:latest_timestamp,:earliest_timestamp, :gender,:min_age, :max_age, :pet_status,:lookup_pettracer_id,scan_procedure_id: []) 

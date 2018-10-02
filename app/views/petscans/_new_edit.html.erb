@@ -186,6 +186,14 @@ v_autodetect =  [["AutoDetect File On","On"],["AutoDetect File Off","Off"]]
       <%= f.label :Notes %><br/>
       <%= text_area( :appointment,:comment,:value=>@appointment.comment,:cols => 40, :rows => 10 ) %><br />
     </p>
+  <p>
+<%= f.label :Petscanner_Location %> : <%= select :v, :scanner_location, ["Waisman","WIMR","select a scanner location"] %>
+  </p>
+
+  <p>
+<%= f.label :Petscanner_Name %> : <%= select :v, :scanner_name, ["HR+","select a scanner name"] %>
+  </p>
+
     <%= @petscan.petscan_note.try(:html_safe)%>
   </div>
 
