@@ -27,7 +27,7 @@
   <b>Processed images file type:</b>
   <%=   if !@trtype.processedimagesfiletype_id.blank? 
           #SeriesDescriptionType.find(@trtype.series_description_type_id).series_description_type 
-          v_processedimagesfiletypes = Processedimagesfiletype.where("id in (?)",@trtype.processedimagesfiletype_id)
+          v_processedimagesfiletypes = Processedimagesfiletype.where("id in (?)",@trtype.processedimagesfiletype_id.split(","))
               v_processedimagesfiletypes.each do |pift|
                    %>
                  <%= pift.file_type%><br>

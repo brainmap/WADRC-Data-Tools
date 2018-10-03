@@ -371,12 +371,24 @@ class TrtypesController < ApplicationController
            v_series_desc_types.each do |ty|
               v_series_desc_type_array.push(ty)
            end
-        end
-        if v_series_desc_type_array.count > 0
-            @trtype.series_description_type_id = v_series_desc_type_array.join(",")
-        else
-            @trtype.series_description_type_id = ''
-        end
+    end
+    if v_series_desc_type_array.count > 0
+        @trtype.series_description_type_id = v_series_desc_type_array.join(",")
+    else
+        @trtype.series_description_type_id = ''
+    end
+    v_processedimagesfiletype_array = []
+   if !params[:trtype][:processedimagesfiletype_id].blank?
+           v_processedimagesfiletypes = params[:trtype][:processedimagesfiletype_id].reject { |c| c.empty? }
+           v_processedimagesfiletypes.each do |ty|
+              v_processedimagesfiletype_array.push(ty)
+           end
+    end
+    if v_processedimagesfiletype_array.count > 0
+        @trtype.processedimagesfiletype_id = v_processedimagesfiletype_array.join(",")
+    else
+        @trtype.processedimagesfiletype_id = ''
+    end
 
     respond_to do |format|
       if @trtype.update(trtype_params)#params[:trtype], :without_protection => true)

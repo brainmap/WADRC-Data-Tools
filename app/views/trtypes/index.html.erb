@@ -31,7 +31,7 @@
     <td><%= trtype.triggers_1 %>&nbsp;</td>
     <td>
     <%   if !trtype.processedimagesfiletype_id.blank? 
-          v_processedimagesfiletypes = Processedimagesfiletype.where("id in (?)",trtype.processedimagesfiletype_id)
+          v_processedimagesfiletypes = Processedimagesfiletype.where("id in (?)",trtype.processedimagesfiletype_id.split(","))
           v_processedimagesfiletypes.each do |pift|
                %>
              <%= pift.file_type%><br>
