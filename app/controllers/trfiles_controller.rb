@@ -467,8 +467,9 @@ v_composite_value = v_composite_value + "
 
             #NEED TO LIMIT TO THIS VISIT
              #  image_dataset vs petfile -- but if using a oT1 should still link up - need all oT1 harvested
-             @processedimages = {}
-             @processedimages_img = {}
+             @processedimages = []
+             #@processedimages_pet = {}
+             #@processedimages_img = {}
            @processedimagefiletypes.each do |processedimagefiletype|  
             if processedimagefiletype.image_linkage_type == 'image_datasets'
                  @ids_source = ImageDataset.where(" image_datasets.visit_id in (select v1.id from visits v1, appointments a1, scan_procedures_vgroups spvg1, enrollment_vgroup_memberships evg1
@@ -511,6 +512,13 @@ v_composite_value = v_composite_value + "
                  )
                  and processedimages.file_type in 
                  (select processedimagesfiletypes.file_type from processedimagesfiletypes where  processedimagesfiletypes.id in (?))",v_ids_id_array,v_ids_id_array,v_ids_id_array,v_ids_id_array,@trtype.processedimagesfiletype_id.split(","))
+
+                 # add to collection @processedimages
+                 @processedimages_img.each do |pi_ids|
+          puts "hhh ids"
+                    @processedimages.push(pi_ids)
+                 end
+
               end
               if processedimagefiletype.image_linkage_type == 'petfile'
                   @petfiles_source = Petfile.where("petfiles.petscan_id in  (select pet1.id from petscans pet1, appointments a1, scan_procedures_vgroups spvg1, enrollment_vgroup_memberships evg1
@@ -523,7 +531,7 @@ v_composite_value = v_composite_value + "
                    v_petfiles_id_array.push(petfile.id)
                  end 
                  
-                 @processedimages = Processedimage.where("(
+                 @processedimages_pet = Processedimage.where("(
                    processedimages.id in 
                                 (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'petfile'
                                                             and pis2.source_image_id in (?))
@@ -554,7 +562,13 @@ v_composite_value = v_composite_value + "
                  )
                  and processedimages.file_type in 
                  (select processedimagesfiletypes.file_type from processedimagesfiletypes where  processedimagesfiletypes.id in (?))",v_petfiles_id_array,v_petfiles_id_array,v_petfiles_id_array,v_petfiles_id_array,@trtype.processedimagesfiletype_id.split(","))
+              # add to collection @processedimages
+                 @processedimages_pet.each do |pi_pet|
+                    @processedimages.push(pi_pet)
+                 end
               end
+              
+
             end
              ####@processedimages = Processedimage.all
 
