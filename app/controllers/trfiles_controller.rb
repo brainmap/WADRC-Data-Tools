@@ -514,9 +514,11 @@ v_composite_value = v_composite_value + "
                  (select processedimagesfiletypes.file_type from processedimagesfiletypes where  processedimagesfiletypes.id in (?))",v_ids_id_array,v_ids_id_array,v_ids_id_array,v_ids_id_array,@trtype.processedimagesfiletype_id.split(","))
 
                  # add to collection @processedimages
-                 @processedimages_img.each do |pi_ids|
+                 if @processedimages_img.count > 0
+                   @processedimages_img.each do |pi_ids|
           puts "hhh ids"
                     @processedimages.push(pi_ids)
+                  end
                  end
 
               end
@@ -563,14 +565,19 @@ v_composite_value = v_composite_value + "
                  and processedimages.file_type in 
                  (select processedimagesfiletypes.file_type from processedimagesfiletypes where  processedimagesfiletypes.id in (?))",v_petfiles_id_array,v_petfiles_id_array,v_petfiles_id_array,v_petfiles_id_array,@trtype.processedimagesfiletype_id.split(","))
               # add to collection @processedimages
+                if @processedimages_pet.count > 0
                  @processedimages_pet.each do |pi_pet|
                     @processedimages.push(pi_pet)
                  end
+                end
               end
               
 
             end
              ####@processedimages = Processedimage.all
+             if @processedimages.count > 0
+                  @processedimages = @processedimages.uniq
+             end
 
             # and processedimages.file_type in 
             #  (select processedimagesfiletypes.file_type from processedimagesfiletypes where  processedimagesfiletypes.id in (?))",v_ids_id_array,v_ids_id_array,v_ids_id_array,v_ids_id_array,v_ids_id_array,@trtype.processedimagesfiletype_id)
