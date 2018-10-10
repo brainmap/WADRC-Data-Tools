@@ -44,8 +44,40 @@ class Petscan < ActiveRecord::Base
         v_path = v_base_path+"/raw/"+v_pet_target_path+"/"
         # check for file with enum 
         vgroup = Vgroup.find(p_vgroup_id)
-        (vgroup.enrollments).each do |e|
-          if !Dir.glob(v_path+e.enumber+"*").empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img").empty?
+        # first checking for path including enumber dir
+        (vgroup.enrollments).each do |e|    
+          if !Dir.glob(v_path+e.enumber+"/"+e.enumber+"*").empty?   or !Dir.glob(v_path+e.enumber+"/"+"*"+e.enumber[1..-1]+"*.img").empty?
+            v_cnt = 0
+            Dir.glob(v_path+e.enumber+"/"+e.enumber+"*").each do |f|
+               v_file_name = f.gsub(v_path+e.enumber+"/","")
+               v_cnt = v_cnt + 1
+            end   
+            if v_cnt < 1
+              Dir.glob(v_path+e.enumber+"/"+"*"+e.enumber[1..-1]+"*.img").each do |f|
+                 v_file_name = f.gsub(v_path+e.enumber+"/","")
+                 v_cnt = v_cnt + 1
+              end
+            end
+            if v_cnt > 1
+              v_file_name = ""
+            end 
+          elsif !Dir.glob(v_path+e.enumber+"/"+e.enumber.upcase+"*").empty?   or !Dir.glob(v_path+e.enumber+"/"+"*"+e.enumber[1..-1].upcase+"*.img").empty?
+            v_cnt = 0
+            Dir.glob(v_path+e.enumber+"/"+e.enumber.upcase+"*").each do |f|
+               v_file_name = f.gsub(v_path+e.enumber+"/","")
+               v_cnt = v_cnt + 1
+            end   
+            if v_cnt < 1
+              Dir.glob(v_path+e.enumber+"/"+"*"+e.enumber[1..-1].upcase+"*.img").each do |f|
+                 v_file_name = f.gsub(v_path+e.enumber+"/","")
+                 v_cnt = v_cnt + 1
+              end
+            end
+            if v_cnt > 1
+              v_file_name = ""
+            end 
+            # old check without enumber dir in path
+          elsif !Dir.glob(v_path+e.enumber+"*").empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img").empty?
             v_cnt = 0
             Dir.glob(v_path+e.enumber+"*").each do |f|
                v_file_name = f.gsub(v_path,"")
@@ -75,6 +107,8 @@ class Petscan < ActiveRecord::Base
             if v_cnt > 1
               v_file_name = ""
             end 
+
+
            else    
           end
         end
@@ -114,7 +148,20 @@ class Petscan < ActiveRecord::Base
                       e.enumber = "adcp_"+v_last_four_chars
               end
           end
-          if !Dir.glob(v_path+e.enumber+"*", File::FNM_CASEFOLD).empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).empty?
+          # checking first for the enum dir in path, then the puddle of files
+          if !Dir.glob(v_path+e.enumber+"/"+e.enumber+"*", File::FNM_CASEFOLD).empty?   or !Dir.glob(v_path+e.enumber+"/"+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).empty?
+            v_cnt = 0
+            Dir.glob(v_path+e.enumber+"/"+e.enumber+"*", File::FNM_CASEFOLD).each do |f|
+               v_file_names.push(f.gsub(v_path+e.enumber+"/",""))
+               v_cnt = v_cnt + 1
+            end   
+            if v_cnt < 1
+              Dir.glob(v_path+e.enumber+"/"+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).each do |f|
+                 v_file_names.push(f.gsub(v_path+e.enumber+"/",""))
+                 v_cnt = v_cnt + 1
+              end
+            end
+          elsif !Dir.glob(v_path+e.enumber+"*", File::FNM_CASEFOLD).empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).empty?
             v_cnt = 0
             Dir.glob(v_path+e.enumber+"*", File::FNM_CASEFOLD).each do |f|
                v_file_names.push(f.gsub(v_path,""))
@@ -125,20 +172,7 @@ class Petscan < ActiveRecord::Base
                  v_file_names.push(f.gsub(v_path,""))
                  v_cnt = v_cnt + 1
               end
-            end
-          #elsif (!Dir.glob(v_path+e.enumber.upcase+"*").empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1].upcase+"*.img").empty?) and 1==2
-          #  v_cnt = 0
-          #  Dir.glob(v_path+e.enumber.upcase+"*").each do |f|
-          #     v_file_names.push(f.gsub(v_path,""))
-          #     v_cnt = v_cnt + 1
-          #  end   
-          #  if v_cnt < 1
-          #    Dir.glob(v_path+"*"+e.enumber[1..-1].upcase+"*.img").each do |f|
-          #       v_file_names.push(f.gsub(v_path,""))
-          #       v_cnt = v_cnt + 1
-          #    end
-          #  end
-          # else    
+            end  
           end
         end
     else
@@ -147,7 +181,7 @@ class Petscan < ActiveRecord::Base
     return v_file_names
   end
   
-  def get_pet_path(p_sp_id, p_file_name, p_tracer_id)
+  def get_pet_path(p_sp_id, p_file_name, p_tracer_id,p_vgroup_id)
     # ???? '1_asthana.adrc-clinical-core.visit1'=>'', '2_bendlin.tami.visit1'=>'', '1_bendlin.wmad.visit1'=>'','1_bendlin.mets.visit1'=> '',    '2_bendlin.mets.visit1'=> ''
     # 2_ries.mosaic.visit1    3_ries.mosaic.visit1
     # tracer 1=pib, 2=fdg, 3=way, 4=015
@@ -180,7 +214,15 @@ class Petscan < ActiveRecord::Base
     end
     if File.exists?(v_path)
       return v_path
-    else
+    else # need to check for enum directory - new structure - should be doing before the puddle check
+      vgroup = Vgroup.find(p_vgroup_id)
+      (vgroup.enrollments).each do |e| 
+          v_path = v_base_path+"/raw/"+v_pet_target_path+"/"+e.enumber+"/"+p_file_name
+          if File.exists?(v_path)
+             return v_path
+          end
+      end
+
       return ""
     end
   end

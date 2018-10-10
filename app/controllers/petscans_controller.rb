@@ -600,7 +600,7 @@ class PetscansController < ApplicationController
          @petscan.ecatfilename = @petscan.get_pet_file(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
       end
       if (@petscan.path).blank? and !(@petscan.ecatfilename).blank?
-        v_path = @petscan.get_pet_path(r_sp[0], @petscan.ecatfilename, @petscan.lookup_pettracer_id)
+        v_path = @petscan.get_pet_path(r_sp[0], @petscan.ecatfilename, @petscan.lookup_pettracer_id,@vgroup.id)
         if !v_path.blank?
               @petscan.path = v_path
 
@@ -628,7 +628,7 @@ class PetscansController < ApplicationController
                       if (@petfile.path).blank?
                          results_sp.each do |r_sp|
                             v_petfile_check = Petfile.where("file_name in (?) and petscan_id in (?)", @petfile.file_name,@petscan.id)
-                            v_path = @petscan.get_pet_path(r_sp[0], @petfile.file_name, @petscan.lookup_pettracer_id)
+                            v_path = @petscan.get_pet_path(r_sp[0], @petfile.file_name, @petscan.lookup_pettracer_id,@appointment.vgroup_id)
                             if !v_petfile_check.nil? and v_petfile_check.length > 0
                                  v_petfile_check.each do |pf_check|
                                     if pf_check.path.blank? and !v_path.blank?
@@ -645,12 +645,10 @@ class PetscansController < ApplicationController
      end 
           results_sp.each do |r_sp|
                if !params[:petfile].blank? and !params[:petfile][:petfile_autodetect].blank? and params[:petfile][:petfile_autodetect] == "On"
-  puts "aaaaaa"
                         @petfiles_found = @petscan.get_pet_files(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
                         @petfiles_found.each do |pf_name|  # make sure not already in database with this petscan.id
-  puts "bbbbbbb"
                             v_petfile_check = Petfile.where("file_name in (?) and petscan_id in (?)", pf_name,@petscan.id)
-                            v_path = @petscan.get_pet_path(r_sp[0], pf_name, @petscan.lookup_pettracer_id)
+                            v_path = @petscan.get_pet_path(r_sp[0], pf_name, @petscan.lookup_pettracer_id,@appointment.vgroup_id)
                             if !v_petfile_check.nil? and v_petfile_check.length > 0
                                  v_petfile_check.each do |pf_check|
                                     if pf_check.path.blank? and !v_path.blank?
@@ -855,7 +853,7 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
                         @petfiles_found = @petscan.get_pet_files(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
                         @petfiles_found.each do |pf_name|  # make sure not already in database with this petscan.id
                             v_petfile_check = Petfile.where("file_name in (?) and petscan_id in (?)", pf_name,@petscan.id)
-                            v_path = @petscan.get_pet_path(r_sp[0], pf_name, @petscan.lookup_pettracer_id)
+                            v_path = @petscan.get_pet_path(r_sp[0], pf_name, @petscan.lookup_pettracer_id,@appointment.vgroup_id)
                             if !v_petfile_check.nil? and v_petfile_check.length > 0
                                  v_petfile_check.each do |pf_check|
                                     if pf_check.path.blank? and !v_path.blank?
@@ -878,7 +876,7 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
             end
             v_path = ""
             if !@petscan.ecatfilename.blank?
-               v_path = @petscan.get_pet_path(r_sp[0], @petscan.ecatfilename, @petscan.lookup_pettracer_id)
+               v_path = @petscan.get_pet_path(r_sp[0], @petscan.ecatfilename, @petscan.lookup_pettracer_id,@vgroup.id)
                if !v_path.blank?
                  @petscan.path = v_path
                  @petscan.save 
