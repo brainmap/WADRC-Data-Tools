@@ -42,7 +42,12 @@ v_display = {"dropdown"=>"dropdown","text"=>"text"}  %>
   <br>
     <div class="field">
     <%= f.label :processed_images_file_type %><br />
-    <%= f.select(:processedimagesfiletype_id, Processedimagesfiletype.where("file_type not like '%?%'").sort_by(&:file_type).collect {|p| [ p.file_type, p.id ] },  { :include_blank => "Select a processed image category",:selected => (@trtype.processedimagesfiletype_id).split(",") },{ :multiple => true} ) %><!--  ,{ :multiple => true} -->
+    <% if !(@trtype.processedimagesfiletype_id).nil? %>
+    <%= f.select(:processedimagesfiletype_id, Processedimagesfiletype.where("file_type not like '%?%'").sort_by(&:file_type).collect {|p| [ p.file_type, p.id ] },  { :include_blank => "Select a processed image category",:selected => (@trtype.processedimagesfiletype_id).split(",")  },{ :multiple => true} ) %><!--  ,{ :multiple => true} -->
+    <%else%>
+    <%= f.select(:processedimagesfiletype_id, Processedimagesfiletype.where("file_type not like '%?%'").sort_by(&:file_type).collect {|p| [ p.file_type, p.id ] },  { :include_blank => "Select a processed image category"},{ :multiple => true} ) %><!--  ,{ :multiple => true} -->
+
+    <%end%>
   </div>
 
   <div class="field">
