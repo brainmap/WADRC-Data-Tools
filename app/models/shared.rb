@@ -1192,6 +1192,26 @@ end
       end
       @schedulerun.comment = v_comment_processedimages+"; "+@schedulerun.comment 
     end
+    # check all the petfiles
+    v_check_petfiles_flag = "Y"
+    if v_check_petfiles_flag == "Y"
+      v_comment_petfiles= ""
+      @petfiles = Petfile.all
+      @petfiles.each do |pf|
+          v_path = pf.path
+          #puts "checking="+v_path
+          if  !v_path.nil? and v_path > '' and !v_missing_dir_array.include?(v_path)
+            if File.file?(v_path) or File.directory?(v_path)
+             # all good
+          
+            else
+              v_comment_petfiles = v_comment_petfiles+"; pf="+v_path
+              puts "petfile not found="+v_path
+            end
+          end
+      end
+      @schedulerun.comment = v_comment_petfiles+"; "+@schedulerun.comment 
+    end
 
     @schedulerun.comment =("successful finish check_if_raw_dirs_exist "+v_comment_warning+" "+@schedulerun.comment[0..2990])
     if !v_comment.include?("ERROR")
@@ -3075,7 +3095,7 @@ def  run_pet_mk6240_harvest
                   # final product file - insert into processed images - get source file names from the log file
                   v_skip_flag = "Y"
                   v_product_file = ""
-                  if f.start_with?("w"+v_subjectid) and f.end_with?(".nii")
+                  if f.start_with?("w"+v_subjectid) and f.end_with?(".nii") # maybe use "MNI space SUVR PET file" field
                     v_product_file = f
                       #check if exists in processedimages
                       v_age_at_appointment =""
@@ -3309,6 +3329,55 @@ def  run_pet_mk6240_harvest
                              v_processedimagesource.source_image_type = 'processedimage'
                              v_processedimagesource.processedimage_id= v_processedimage_file_id
                              v_processedimagesource.save
+                         end
+                      else
+                        @trfileimage_processedimages.push(v_processesimages.first.id)
+                     end
+                    end
+    # NOT SURE WHAT THE SOURCE IS
+    #NEED TO ADD TO av1451  
+                    if v_multispectral_file  > ""
+                     v_processesimages = Processedimage.where("file_path in (?)",v_multispectral_file )
+                     if v_processesimages.count <1
+                                      # need to collect source files, then make processedimage record
+                         vv_multispectral_file_name = v_multispectral_file.split("/").last
+                         v_processedimage = Processedimage.new
+                         v_processedimage.file_type ="multispectral mri"
+                         v_processedimage.file_name = v_multispectral_file_name
+                         v_processedimage.file_path = v_multispectral_file
+                         v_processedimage.scan_procedure_id = sp.id
+                         v_processedimage.enrollment_id = enrollment.first.id
+                         v_processedimage.save  
+                         v_processedimage_file_id = v_processedimage.id
+                         @trfileimage_processedimages.push(v_processedimage.id)
+     # NOT SURE WHAT THE SOURCE IS
+
+                         v_mri_processedimage_id = ""
+                         v_original_t1_mri_file_unknown = v_original_t1_mri_file
+                         v_original_t1_mri_file_unknown = v_original_t1_mri_file_unknown.gsub("tissue_seg","unknown") # think the oACPC in tissue seg are from unknown
+                         v_mri_processesimages = Processedimage.where("file_path in (?) or file_path in (?)",v_original_t1_mri_file,v_original_t1_mri_file_unknown)
+                         if v_mri_processesimages.count < 1
+                             v_mri_processedimage = Processedimage.new
+                             v_mri_processedimage.file_type ="o_acpc T1"
+                             v_mri_processedimage.file_name = v_original_t1_mri_file.split("/").last
+                             v_mri_processedimage.file_path = v_original_t1_mri_file
+                             v_mri_processedimage.scan_procedure_id = sp.id
+                             v_mri_processedimage.enrollment_id = enrollment.first.id
+                      ###       v_mri_processedimage.save  
+                             v_mri_processedimage_id = v_mri_processedimage.id
+
+                         else
+                           v_mri_processedimage_id = v_mri_processesimages.first.id
+                         end
+                         v_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'processedimage'",v_processedimage_file_id,v_mri_processedimage_id)
+                         if v_processedimagesources.count < 1 
+                             v_processedimagesource = Processedimagessource.new
+                             v_processedimagesource.file_name = v_original_t1_mri_file.split("/").last
+                             v_processedimagesource.file_path = v_original_t1_mri_file
+                             v_processedimagesource.source_image_id = v_mri_processedimage_id
+                             v_processedimagesource.source_image_type = 'processedimage'
+                             v_processedimagesource.processedimage_id= v_processedimage_file_id
+                      #####       v_processedimagesource.save
                          end
                       else
                         @trfileimage_processedimages.push(v_processesimages.first.id)
@@ -10809,7 +10878,7 @@ puts "v_analyses_path="+v_analyses_path
       v_t2_series_description_type_id = "20"
 
       v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
-      @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)   #.where("scan_procedures.codename in ('asthana.adrc-clinical-core.visit1')")
+      @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)   #.where("scan_procedures.codename in ('asthana.adrc-clinical-core.visit1')") where("id in (?)",95) #
       @scan_procedures.each do |sp|
           v_visit_number =""
           if sp.codename.include?("visit2")
