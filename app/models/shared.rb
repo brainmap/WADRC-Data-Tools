@@ -8989,10 +8989,11 @@ puts "AAAAAAA="+v_log
         results_sp.each do |r_sp|
             # pass to function so can use in petscan edit
             v_petscan = Petscan.find(r[0])
+            v_appointment = Appointment.find(v_petscan.appointment_id)
   puts "aaaaaa petscan_id = "+r[0].to_s
             v_return_path = ""     
             # GET SINGLE petscan file -- old version , still running
-            v_return_path = v_petscan.get_pet_path(r_sp[0], r[2], r[4])  # pass in sp, file name, tracerid
+            v_return_path = v_petscan.get_pet_path(r_sp[0], r[2], r[4],v_appointment.vgroup_id)  # pass in sp, file name, tracerid, vgroup
             if v_return_path > ""
               v_petscan.path = v_return_path
               v_petscan.save
@@ -9016,11 +9017,12 @@ puts "AAAAAAA="+v_log
         results_sp.each do |r_sp|
             # pass to function so can use in petscan edit
             v_petscan = Petscan.find(r[0])
+            v_appointment = Appointment.find(v_petscan.appointment_id)
   puts "bbb petscan_id = "+r[0].to_s
             ## petfiles - multiples , new version
             v_petfiles = Petfile.where("petfiles.petscan_id in (?) ",v_petscan.id)
             v_petfiles.each do |pf|  # make sure not already in database with this petscan.id
-                            v_path = v_petscan.get_pet_path(r_sp[0], pf.file_name, v_petscan.lookup_pettracer_id)
+                            v_path = v_petscan.get_pet_path(r_sp[0], pf.file_name, v_petscan.lookup_pettracer_id,v_appointment.vgroup_id)
                             if pf.path.blank? and !v_path.blank?
                                        pf.path = v_path
                                        pf.save
