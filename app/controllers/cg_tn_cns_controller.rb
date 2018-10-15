@@ -209,6 +209,7 @@ class CgTnCnsController < ApplicationController
        @cg_tn_cn = CgTnCn.find(params[:id])
     end
    def cg_tn_cn_params
+          # ALSO ADD ANY NEW FIELDS TO THE data_searches_controller   cg_snapshot -- 
           params.require(:cg_tn_cn).permit(:secondary_key_visitno_flag,:display_order,:created_at,:data_type,:ref_table_b,:ref_table_a,:key_column_flag,:export_name,:common_name,:cn,:cg_tn_id,:searchable_flag,:value_limits,:secondary_key_protocol_flag,:match_mri_path_flag,:hide_column_flag,:order_by_flag,:description,:q_data_form_id,:value_list,:condition_between_flag,:status_flag,:updated_at,:id,:dashboard_edit_flag,:exclude_from_char_replacement_flag)
    end
 end

@@ -464,13 +464,15 @@ v_composite_value = v_composite_value + "
 
           elsif !(@trtype.processedimagesfiletype_id).nil?
             @processedimagefiletypes = Processedimagesfiletype.where("id in (?)",@trtype.processedimagesfiletype_id.split(","))
-
+# NEED 2 types!!!
             #NEED TO LIMIT TO THIS VISIT
              #  image_dataset vs petfile -- but if using a oT1 should still link up - need all oT1 harvested
              @processedimages = []
              #@processedimages_pet = {}
              #@processedimages_img = {}
            @processedimagefiletypes.each do |processedimagefiletype|  
+
+
             if processedimagefiletype.image_linkage_type == 'image_datasets'
                  @ids_source = ImageDataset.where(" image_datasets.visit_id in (select v1.id from visits v1, appointments a1, scan_procedures_vgroups spvg1, enrollment_vgroup_memberships evg1
                                                       where v1.appointment_id = a1.id and a1.vgroup_id =spvg1.vgroup_id and a1.vgroup_id = evg1.vgroup_id 
@@ -481,6 +483,7 @@ v_composite_value = v_composite_value + "
                  @ids_source.each do |ids|
                    v_ids_id_array.push(ids.id)
                  end 
+        #puts "IMMMAGGEDDDSSS"
                  @processedimages_img = Processedimage.where("(
                    processedimages.id in 
                                 (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'image_dataset'
@@ -516,7 +519,6 @@ v_composite_value = v_composite_value + "
                  # add to collection @processedimages
                  if @processedimages_img.count > 0
                    @processedimages_img.each do |pi_ids|
-          puts "hhh ids"
                     @processedimages.push(pi_ids)
                   end
                  end
@@ -532,7 +534,7 @@ v_composite_value = v_composite_value + "
                  @petfiles_source.each do |petfile|
                    v_petfiles_id_array.push(petfile.id)
                  end 
-                 
+       # puts "PPPPEEEETTTT"
                  @processedimages_pet = Processedimage.where("(
                    processedimages.id in 
                                 (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'petfile'
