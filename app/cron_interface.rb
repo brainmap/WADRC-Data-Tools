@@ -246,6 +246,12 @@ v_user = v_user.gsub("\n","")
    elsif v_value_1 == "pet_mk6240_process"
       v_shared = Shared.new
       v_shared.run_pet_mk6240_process()
+   elsif v_value_1 == "pet_pib_suvr_harvest"
+      v_shared = Shared.new
+      v_shared.run_pet_pib_suvr_harvest()
+   elsif v_value_1 == "pet_pib_dvr_harvest"
+      v_shared = Shared.new
+      v_shared.run_pet_pib_dvr_harvest()
   elsif v_value_1 == "pib_status"
       v_shared = Shared.new
       v_shared.run_pib_status()
@@ -308,7 +314,10 @@ v_user = v_user.gsub("\n","")
       v_shared.run_xnat_file()  
   elsif v_value_1 == "xnat_upload"
       v_shared = Shared.new
-      v_shared.run_xnat_upload() 
+      v_shared.run_xnat_upload()   
+  elsif v_value_1 == "xnat_session"
+      v_shared = Shared.new
+      v_shared.run_xnat_session()
 
             
   elsif v_value_1 == "test_shell"

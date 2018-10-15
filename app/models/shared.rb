@@ -3957,6 +3957,907 @@ def run_pet_mk6240_process
 end
 
 
+
+def  run_pet_pib_suvr_harvest
+      v_base_path = Shared.get_base_path()
+     @schedule = Schedule.where("name in ('pet_pib_suvr_harvest')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting pet_pib_suvr_harvest"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning ="" 
+      v_comment_base = ""
+      v_shared = Shared.new
+      connection = ActiveRecord::Base.connection();
+      v_pib_tracer_id = "1"
+      v_trtype_id = 10 #PET pib suvr quality
+      # truncate cg table new 
+      v_cg_tn_roi = "cg_pet_pib_suvr_roi"
+      v_cg_tn_roi_atlas_tjb_mni_v1 = "cg_pet_pib_suvr_roi_atlas_tjb_mni_v1"
+      v_cg_tn_roi_atlas_homic_mni_v1 = "cg_pet_pib_suvr_roi_atlas_homic_mni_v1"
+      v_cg_tn_roi_atlas_morimod_mni_v1 = "cg_pet_pib_suvr_roi_atlas_morimod_mni_v1"
+      v_cg_tn_roi_atlas_na = "cg_pet_pib_suvr_roi_atlas_na"
+      v_aal_atlas = "aal_MNI_V4"
+      v_tjb_mni_v1 = "tjb_MNI_V1"
+      v_homic_mni_v1 = "homic_MNI_V1"
+      v_morimod_mni_v1 = "morimod_MNI_V1"
+      v_na = "NA"
+      v_atlas_array = [v_aal_atlas,v_tjb_mni_v1,v_homic_mni_v1,v_morimod_mni_v1,v_na ]
+
+      # ALSO A SECOND TABLE WITH A DIFFERENT ATLAS -- keeping columns same in both tables
+      # ADD AS SINMGLE COLUMN ["Region","Atlas"]
+      # CHANGE LOOP THRU ALL roi ROWS - make Key of suvr_+lower(region), volume_cc_+lower(region)
+      v_roi_file_cn_array = ["Region","Atlas","ROI_Number","SUVR","Volume_cc"]
+      v_roi_cn_array =  ["suvr_precentral_l","suvr_precentral_r","suvr_frontal_sup_l","suvr_frontal_sup_r","suvr_frontal_sup_orb_l","suvr_frontal_sup_orb_r","suvr_frontal_mid_l","suvr_frontal_mid_r","suvr_frontal_mid_orb_l","suvr_frontal_mid_orb_r","suvr_frontal_inf_oper_l","suvr_frontal_inf_oper_r","suvr_frontal_inf_tri_l","suvr_frontal_inf_tri_r","suvr_frontal_inf_orb_l","suvr_frontal_inf_orb_r","suvr_rolandic_oper_l","suvr_rolandic_oper_r","suvr_supp_motor_area_l","suvr_supp_motor_area_r","suvr_olfactory_l","suvr_olfactory_r","suvr_frontal_sup_medial_l","suvr_frontal_sup_medial_r","suvr_frontal_med_orb_l","suvr_frontal_med_orb_r","suvr_rectus_l","suvr_rectus_r","suvr_insula_l","suvr_insula_r","suvr_cingulum_ant_l","suvr_cingulum_ant_r","suvr_cingulum_mid_l","suvr_cingulum_mid_r","suvr_cingulum_post_l","suvr_cingulum_post_r","suvr_hippocampus_l","suvr_hippocampus_r","suvr_parahippocampal_l","suvr_parahippocampal_r","suvr_amygdala_l","suvr_amygdala_r","suvr_calcarine_l","suvr_calcarine_r","suvr_cuneus_l","suvr_cuneus_r","suvr_lingual_l","suvr_lingual_r","suvr_occipital_sup_l","suvr_occipital_sup_r","suvr_occipital_mid_l","suvr_occipital_mid_r","suvr_occipital_inf_l","suvr_occipital_inf_r","suvr_fusiform_l","suvr_fusiform_r","suvr_postcentral_l","suvr_postcentral_r","suvr_parietal_sup_l","suvr_parietal_sup_r","suvr_parietal_inf_l","suvr_parietal_inf_r","suvr_supramarginal_l","suvr_supramarginal_r","suvr_angular_l","suvr_angular_r","suvr_precuneus_l","suvr_precuneus_r","suvr_paracentral_lobule_l","suvr_paracentral_lobule_r","suvr_caudate_l","suvr_caudate_r","suvr_putamen_l","suvr_putamen_r","suvr_pallidum_l","suvr_pallidum_r","suvr_thalamus_l","suvr_thalamus_r","suvr_heschl_l","suvr_heschl_r","suvr_temporal_sup_l","suvr_temporal_sup_r","suvr_temporal_pole_sup_l","suvr_temporal_pole_sup_r","suvr_temporal_mid_l","suvr_temporal_mid_r","suvr_temporal_pole_mid_l","suvr_temporal_pole_mid_r","suvr_temporal_inf_l","suvr_temporal_inf_r","suvr_cerebelum_crus1_l","suvr_cerebelum_crus1_r","suvr_cerebelum_crus2_l","suvr_cerebelum_crus2_r","suvr_cerebelum_3_l","suvr_cerebelum_3_r","suvr_cerebelum_4_5_l","suvr_cerebelum_4_5_r","suvr_cerebelum_6_l","suvr_cerebelum_6_r","suvr_cerebelum_7b_l","suvr_cerebelum_7b_r","suvr_cerebelum_8_l","suvr_cerebelum_8_r","suvr_cerebelum_9_l","suvr_cerebelum_9_r","suvr_cerebelum_10_l","suvr_cerebelum_10_r","suvr_vermis_1_2","suvr_vermis_3","suvr_vermis_4_5","suvr_vermis_6","suvr_vermis_7","suvr_vermis_8","suvr_vermis_9","suvr_vermis_10","volume_cc_precentral_l","volume_cc_precentral_r","volume_cc_frontal_sup_l","volume_cc_frontal_sup_r","volume_cc_frontal_sup_orb_l","volume_cc_frontal_sup_orb_r","volume_cc_frontal_mid_l","volume_cc_frontal_mid_r","volume_cc_frontal_mid_orb_l","volume_cc_frontal_mid_orb_r","volume_cc_frontal_inf_oper_l","volume_cc_frontal_inf_oper_r","volume_cc_frontal_inf_tri_l","volume_cc_frontal_inf_tri_r","volume_cc_frontal_inf_orb_l","volume_cc_frontal_inf_orb_r","volume_cc_rolandic_oper_l","volume_cc_rolandic_oper_r","volume_cc_supp_motor_area_l","volume_cc_supp_motor_area_r","volume_cc_olfactory_l","volume_cc_olfactory_r","volume_cc_frontal_sup_medial_l","volume_cc_frontal_sup_medial_r","volume_cc_frontal_med_orb_l","volume_cc_frontal_med_orb_r","volume_cc_rectus_l","volume_cc_rectus_r","volume_cc_insula_l","volume_cc_insula_r","volume_cc_cingulum_ant_l","volume_cc_cingulum_ant_r","volume_cc_cingulum_mid_l","volume_cc_cingulum_mid_r","volume_cc_cingulum_post_l","volume_cc_cingulum_post_r","volume_cc_hippocampus_l","volume_cc_hippocampus_r","volume_cc_parahippocampal_l","volume_cc_parahippocampal_r","volume_cc_amygdala_l","volume_cc_amygdala_r","volume_cc_calcarine_l","volume_cc_calcarine_r","volume_cc_cuneus_l","volume_cc_cuneus_r","volume_cc_lingual_l","volume_cc_lingual_r","volume_cc_occipital_sup_l","volume_cc_occipital_sup_r","volume_cc_occipital_mid_l","volume_cc_occipital_mid_r","volume_cc_occipital_inf_l","volume_cc_occipital_inf_r","volume_cc_fusiform_l","volume_cc_fusiform_r","volume_cc_postcentral_l","volume_cc_postcentral_r","volume_cc_parietal_sup_l","volume_cc_parietal_sup_r","volume_cc_parietal_inf_l","volume_cc_parietal_inf_r","volume_cc_supramarginal_l","volume_cc_supramarginal_r","volume_cc_angular_l","volume_cc_angular_r","volume_cc_precuneus_l","volume_cc_precuneus_r","volume_cc_paracentral_lobule_l","volume_cc_paracentral_lobule_r","volume_cc_caudate_l","volume_cc_caudate_r","volume_cc_putamen_l","volume_cc_putamen_r","volume_cc_pallidum_l","volume_cc_pallidum_r","volume_cc_thalamus_l","volume_cc_thalamus_r","volume_cc_heschl_l","volume_cc_heschl_r","volume_cc_temporal_sup_l","volume_cc_temporal_sup_r","volume_cc_temporal_pole_sup_l","volume_cc_temporal_pole_sup_r","volume_cc_temporal_mid_l","volume_cc_temporal_mid_r","volume_cc_temporal_pole_mid_l","volume_cc_temporal_pole_mid_r","volume_cc_temporal_inf_l","volume_cc_temporal_inf_r","volume_cc_cerebelum_crus1_l","volume_cc_cerebelum_crus1_r","volume_cc_cerebelum_crus2_l","volume_cc_cerebelum_crus2_r","volume_cc_cerebelum_3_l","volume_cc_cerebelum_3_r","volume_cc_cerebelum_4_5_l","volume_cc_cerebelum_4_5_r","volume_cc_cerebelum_6_l","volume_cc_cerebelum_6_r","volume_cc_cerebelum_7b_l","volume_cc_cerebelum_7b_r","volume_cc_cerebelum_8_l","volume_cc_cerebelum_8_r","volume_cc_cerebelum_9_l","volume_cc_cerebelum_9_r","volume_cc_cerebelum_10_l","volume_cc_cerebelum_10_r","volume_cc_vermis_1_2","volume_cc_vermis_3","volume_cc_vermis_4_5","volume_cc_vermis_6","volume_cc_vermis_7","volume_cc_vermis_8","volume_cc_vermis_9","volume_cc_vermis_10"]
+      v_roi_cn_tjb_array =  ["suvr_clivus","suvr_ethmoid","suvr_meninges","suvr_pineal","suvr_vermis_sup_ant","suvr_cerebellum_superior","suvr_substantia_nigra","suvr_sphenotemporalbuttress","suvr_pons","volume_cc_clivus","volume_cc_ethmoid","volume_cc_meninges","volume_cc_pineal","volume_cc_vermis_sup_ant","volume_cc_cerebellum_superior","volume_cc_substantia_nigra","volume_cc_sphenotemporalbuttress","volume_cc_pons"]
+      v_roi_cn_homic_array = ["suvr_front_pole_l","suvr_front_pole_r","suvr_insular_ctx_l","suvr_insular_ctx_r","suvr_sup_front_gy_l","suvr_sup_front_gy_r","suvr_mid_front_gy_l","suvr_mid_front_gy_r","suvr_inf_front_gy_pars_triangularis_l","suvr_inf_front_gy_pars_triangularis_r","suvr_inf_front_gy_pars_opercularis_l","suvr_inf_front_gy_pars_opercularis_r","suvr_precentral_gy_l","suvr_precentral_gy_r","suvr_temp_pole_l","suvr_temp_pole_r","suvr_sup_temp_gy_ant_l","suvr_sup_temp_gy_ant_r","suvr_sup_temp_gy_post_l","suvr_sup_temp_gy_post_r","suvr_mid_temp_gy_ant_l","suvr_mid_temp_gy_ant_r","suvr_mid_temp_gy_post_l","suvr_mid_temp_gy_post_r","suvr_mid_temp_gy_temporooccipital_l","suvr_mid_temp_gy_temporooccipital_r","suvr_inf_temp_gy_ant_l","suvr_inf_temp_gy_ant_r","suvr_inf_temp_gy_post_l","suvr_inf_temp_gy_post_r","suvr_inf_temp_gy_temporooccipital_l","suvr_inf_temp_gy_temporooccipital_r","suvr_postcentral_gy_l","suvr_postcentral_gy_r","suvr_sup_parietal_lobule_l","suvr_sup_parietal_lobule_r","suvr_supramarginal_gy_ant_l","suvr_supramarginal_gy_ant_r","suvr_supramarginal_gy_post_l","suvr_supramarginal_gy_post_r","suvr_angular_gy_l","suvr_angular_gy_r","suvr_lat_occ_ctx_sup_l","suvr_lat_occ_ctx_sup_r","suvr_lat_occ_ctx_inf_l","suvr_lat_occ_ctx_inf_r","suvr_intracalcarine_ctx_l","suvr_intracalcarine_ctx_r","suvr_front_medial_ctx_l","suvr_front_medial_ctx_r","suvr_juxtapositional_lobule_ctx_l","suvr_juxtapositional_lobule_ctx_r","suvr_subcallosal_ctx_l","suvr_subcallosal_ctx_r","suvr_paracingulate_gy_l","suvr_paracingulate_gy_r","suvr_cingulate_gy_ant_l","suvr_cingulate_gy_ant_r","suvr_cingulate_gy_post_l","suvr_cingulate_gy_post_r","suvr_precuneous_ctx_l","suvr_precuneous_ctx_r","suvr_cuneal_ctx_l","suvr_cuneal_ctx_r","suvr_front_orbital_ctx_l","suvr_front_orbital_ctx_r","suvr_parahippocampal_gy_ant_l","suvr_parahippocampal_gy_ant_r","suvr_parahippocampal_gy_post_l","suvr_parahippocampal_gy_post_r","suvr_lingual_gy_l","suvr_lingual_gy_r","suvr_temp_fusiform_ctx_ant_l","suvr_temp_fusiform_ctx_ant_r","suvr_temp_fusiform_ctx_post_l","suvr_temp_fusiform_ctx_post_r","suvr_temp_occ_fusiform_ctx_l","suvr_temp_occ_fusiform_ctx_r","suvr_occ_fusiform_gy_l","suvr_occ_fusiform_gy_r","suvr_front_operculum_ctx_l","suvr_front_operculum_ctx_r","suvr_central_opercular_ctx_l","suvr_central_opercular_ctx_r","suvr_parietal_operculum_ctx_l","suvr_parietal_operculum_ctx_r","suvr_planum_polare_l","suvr_planum_polare_r","suvr_heschls_gy_l","suvr_heschls_gy_r","suvr_planum_temporale_l","suvr_planum_temporale_r","suvr_supracalcarine_ctx_l","suvr_supracalcarine_ctx_r","suvr_occ_pole_l","suvr_occ_pole_r","suvr_thalamus_l","suvr_thalamus_r","suvr_caudate_l","suvr_caudate_r","suvr_putamen_l","suvr_putamen_r","suvr_pallidum_l","suvr_pallidum_r","suvr_hippocampus_l","suvr_hippocampus_r","suvr_amygdala_l","suvr_amygdala_r","suvr_accumbens_l","suvr_accumbens_r","suvr_cerebellum_gm_l","suvr_cerebellum_gm_r","suvr_cerebellum_wm_l","suvr_cerebellum_wm_r","suvr_brainstem","volume_cc_front_pole_l","volume_cc_front_pole_r","volume_cc_insular_ctx_l","volume_cc_insular_ctx_r","volume_cc_sup_front_gy_l","volume_cc_sup_front_gy_r","volume_cc_mid_front_gy_l","volume_cc_mid_front_gy_r","volume_cc_inf_front_gy_pars_triangularis_l","volume_cc_inf_front_gy_pars_triangularis_r","volume_cc_inf_front_gy_pars_opercularis_l","volume_cc_inf_front_gy_pars_opercularis_r","volume_cc_precentral_gy_l","volume_cc_precentral_gy_r","volume_cc_temp_pole_l","volume_cc_temp_pole_r","volume_cc_sup_temp_gy_ant_l","volume_cc_sup_temp_gy_ant_r","volume_cc_sup_temp_gy_post_l","volume_cc_sup_temp_gy_post_r","volume_cc_mid_temp_gy_ant_l","volume_cc_mid_temp_gy_ant_r","volume_cc_mid_temp_gy_post_l","volume_cc_mid_temp_gy_post_r","volume_cc_mid_temp_gy_temporooccipital_l","volume_cc_mid_temp_gy_temporooccipital_r","volume_cc_inf_temp_gy_ant_l","volume_cc_inf_temp_gy_ant_r","volume_cc_inf_temp_gy_post_l","volume_cc_inf_temp_gy_post_r","volume_cc_inf_temp_gy_temporooccipital_l","volume_cc_inf_temp_gy_temporooccipital_r","volume_cc_postcentral_gy_l","volume_cc_postcentral_gy_r","volume_cc_sup_parietal_lobule_l","volume_cc_sup_parietal_lobule_r","volume_cc_supramarginal_gy_ant_l","volume_cc_supramarginal_gy_ant_r","volume_cc_supramarginal_gy_post_l","volume_cc_supramarginal_gy_post_r","volume_cc_angular_gy_l","volume_cc_angular_gy_r","volume_cc_lat_occ_ctx_sup_l","volume_cc_lat_occ_ctx_sup_r","volume_cc_lat_occ_ctx_inf_l","volume_cc_lat_occ_ctx_inf_r","volume_cc_intracalcarine_ctx_l","volume_cc_intracalcarine_ctx_r","volume_cc_front_medial_ctx_l","volume_cc_front_medial_ctx_r","volume_cc_juxtapositional_lobule_ctx_l","volume_cc_juxtapositional_lobule_ctx_r","volume_cc_subcallosal_ctx_l","volume_cc_subcallosal_ctx_r","volume_cc_paracingulate_gy_l","volume_cc_paracingulate_gy_r","volume_cc_cingulate_gy_ant_l","volume_cc_cingulate_gy_ant_r","volume_cc_cingulate_gy_post_l","volume_cc_cingulate_gy_post_r","volume_cc_precuneous_ctx_l","volume_cc_precuneous_ctx_r","volume_cc_cuneal_ctx_l","volume_cc_cuneal_ctx_r","volume_cc_front_orbital_ctx_l","volume_cc_front_orbital_ctx_r","volume_cc_parahippocampal_gy_ant_l","volume_cc_parahippocampal_gy_ant_r","volume_cc_parahippocampal_gy_post_l","volume_cc_parahippocampal_gy_post_r","volume_cc_lingual_gy_l","volume_cc_lingual_gy_r","volume_cc_temp_fusiform_ctx_ant_l","volume_cc_temp_fusiform_ctx_ant_r","volume_cc_temp_fusiform_ctx_post_l","volume_cc_temp_fusiform_ctx_post_r","volume_cc_temp_occ_fusiform_ctx_l","volume_cc_temp_occ_fusiform_ctx_r","volume_cc_occ_fusiform_gy_l","volume_cc_occ_fusiform_gy_r","volume_cc_front_operculum_ctx_l","volume_cc_front_operculum_ctx_r","volume_cc_central_opercular_ctx_l","volume_cc_central_opercular_ctx_r","volume_cc_parietal_operculum_ctx_l","volume_cc_parietal_operculum_ctx_r","volume_cc_planum_polare_l","volume_cc_planum_polare_r","volume_cc_heschls_gy_l","volume_cc_heschls_gy_r","volume_cc_planum_temporale_l","volume_cc_planum_temporale_r","volume_cc_supracalcarine_ctx_l","volume_cc_supracalcarine_ctx_r","volume_cc_occ_pole_l","volume_cc_occ_pole_r","volume_cc_thalamus_l","volume_cc_thalamus_r","volume_cc_caudate_l","volume_cc_caudate_r","volume_cc_putamen_l","volume_cc_putamen_r","volume_cc_pallidum_l","volume_cc_pallidum_r","volume_cc_hippocampus_l","volume_cc_hippocampus_r","volume_cc_amygdala_l","volume_cc_amygdala_r","volume_cc_accumbens_l","volume_cc_accumbens_r","volume_cc_cerebellum_gm_l","volume_cc_cerebellum_gm_r","volume_cc_cerebellum_wm_l","volume_cc_cerebellum_wm_r","volume_cc_brainstem"]
+      v_roi_cn_morimod_array = ["suvr_left_anterior_capsule_limb_of_internal","suvr_right_anterior_capsule_limb_of_internal","suvr_left_posterior_capsule_limb_of_internal","suvr_right_posterior_capsule_limb_of_internal","suvr_left_posterior_thalamic_radiation","suvr_right_posterior_thalamic_radiation","suvr_left_anterior_corona_radiata","suvr_right_anterior_corona_radiata","suvr_left_superior_corona_radiata","suvr_right_superior_corona_radiata","suvr_left_posterior_corona_radiata","suvr_right_posterior_corona_radiata","suvr_left_superior_longitudinal_longitudinal","suvr_right_superior_longitudinal_longitudinal","suvr_left_sagital_stratum","suvr_right_sagital_stratum","suvr_left_capsule_external","suvr_right_capsule_external","suvr_left_corpus_callosum_genu","suvr_right_corpus_callosum_genu","suvr_left_corpus_callosum_body","suvr_right_corpus_callosum_body","suvr_left_corpus_callosum","suvr_right_corpus_callosum","suvr_left_capsule_retrolenticular_part_of_ic","suvr_right_capsule_retrolenticular_part_of_ic","volume_cc_left_anterior_capsule_limb_of_internal","volume_cc_right_anterior_capsule_limb_of_internal","volume_cc_left_posterior_capsule_limb_of_internal","volume_cc_right_posterior_capsule_limb_of_internal","volume_cc_left_posterior_thalamic_radiation","volume_cc_right_posterior_thalamic_radiation","volume_cc_left_anterior_corona_radiata","volume_cc_right_anterior_corona_radiata","volume_cc_left_superior_corona_radiata","volume_cc_right_superior_corona_radiata","volume_cc_left_posterior_corona_radiata","volume_cc_right_posterior_corona_radiata","volume_cc_left_superior_longitudinal_longitudinal","volume_cc_right_superior_longitudinal_longitudinal","volume_cc_left_sagital_stratum","volume_cc_right_sagital_stratum","volume_cc_left_capsule_external","volume_cc_right_capsule_external","volume_cc_left_corpus_callosum_genu","volume_cc_right_corpus_callosum_genu","volume_cc_left_corpus_callosum_body","volume_cc_right_corpus_callosum_body","volume_cc_left_corpus_callosum","volume_cc_right_corpus_callosum","volume_cc_left_capsule_retrolenticular_part_of_ic","volume_cc_right_capsule_retrolenticular_part_of_ic"]
+    v_roi_cn_na_array = ["suvr_altref_cblm_gm","suvr_altref_cblm_whole","suvr_altref_cblm_wm","suvr_altref_centsm_wm","volume_cc_altref_cblm_gm","volume_cc_altref_cblm_whole","volume_cc_altref_cblm_wm","volume_cc_altref_centsm_wm"]
+
+      # not getting tacs
+      #v_cg_tn_tacs = "cg_pet_pib_suvr_tacs"  
+      v_tacs_cn_array = ["Time_min","cblm_gm_inf","aal_MNI_V4_Precentral_L","aal_MNI_V4_Precentral_R","aal_MNI_V4_Frontal_Sup_L","aal_MNI_V4_Frontal_Sup_R","aal_MNI_V4_Frontal_Sup_Orb_L","aal_MNI_V4_Frontal_Sup_Orb_R","aal_MNI_V4_Frontal_Mid_L","aal_MNI_V4_Frontal_Mid_R","aal_MNI_V4_Frontal_Mid_Orb_L","aal_MNI_V4_Frontal_Mid_Orb_R","aal_MNI_V4_Frontal_Inf_Oper_L","aal_MNI_V4_Frontal_Inf_Oper_R","aal_MNI_V4_Frontal_Inf_Tri_L","aal_MNI_V4_Frontal_Inf_Tri_R","aal_MNI_V4_Frontal_Inf_Orb_L","aal_MNI_V4_Frontal_Inf_Orb_R","aal_MNI_V4_Rolandic_Oper_L","aal_MNI_V4_Rolandic_Oper_R","aal_MNI_V4_Supp_Motor_Area_L","aal_MNI_V4_Supp_Motor_Area_R","aal_MNI_V4_Olfactory_L","aal_MNI_V4_Olfactory_R","aal_MNI_V4_Frontal_Sup_Medial_L","aal_MNI_V4_Frontal_Sup_Medial_R","aal_MNI_V4_Frontal_Med_Orb_L","aal_MNI_V4_Frontal_Med_Orb_R","aal_MNI_V4_Rectus_L","aal_MNI_V4_Rectus_R","aal_MNI_V4_Insula_L","aal_MNI_V4_Insula_R","aal_MNI_V4_Cingulum_Ant_L","aal_MNI_V4_Cingulum_Ant_R","aal_MNI_V4_Cingulum_Mid_L","aal_MNI_V4_Cingulum_Mid_R","aal_MNI_V4_Cingulum_Post_L","aal_MNI_V4_Cingulum_Post_R","aal_MNI_V4_Hippocampus_L","aal_MNI_V4_Hippocampus_R","aal_MNI_V4_ParaHippocampal_L","aal_MNI_V4_ParaHippocampal_R","aal_MNI_V4_Amygdala_L","aal_MNI_V4_Amygdala_R","aal_MNI_V4_Calcarine_L","aal_MNI_V4_Calcarine_R","aal_MNI_V4_Cuneus_L","aal_MNI_V4_Cuneus_R","aal_MNI_V4_Lingual_L","aal_MNI_V4_Lingual_R","aal_MNI_V4_Occipital_Sup_L","aal_MNI_V4_Occipital_Sup_R","aal_MNI_V4_Occipital_Mid_L","aal_MNI_V4_Occipital_Mid_R","aal_MNI_V4_Occipital_Inf_L","aal_MNI_V4_Occipital_Inf_R","aal_MNI_V4_Fusiform_L","aal_MNI_V4_Fusiform_R","aal_MNI_V4_Postcentral_L","aal_MNI_V4_Postcentral_R","aal_MNI_V4_Parietal_Sup_L","aal_MNI_V4_Parietal_Sup_R","aal_MNI_V4_Parietal_Inf_L","aal_MNI_V4_Parietal_Inf_R","aal_MNI_V4_SupraMarginal_L","aal_MNI_V4_SupraMarginal_R","aal_MNI_V4_Angular_L","aal_MNI_V4_Angular_R","aal_MNI_V4_Precuneus_L","aal_MNI_V4_Precuneus_R","aal_MNI_V4_Paracentral_Lobule_L","aal_MNI_V4_Paracentral_Lobule_R","aal_MNI_V4_Caudate_L","aal_MNI_V4_Caudate_R","aal_MNI_V4_Putamen_L","aal_MNI_V4_Putamen_R","aal_MNI_V4_Pallidum_L","aal_MNI_V4_Pallidum_R","aal_MNI_V4_Thalamus_L","aal_MNI_V4_Thalamus_R","aal_MNI_V4_Heschl_L","aal_MNI_V4_Heschl_R","aal_MNI_V4_Temporal_Sup_L","aal_MNI_V4_Temporal_Sup_R","aal_MNI_V4_Temporal_Pole_Sup_L","aal_MNI_V4_Temporal_Pole_Sup_R","aal_MNI_V4_Temporal_Mid_L","aal_MNI_V4_Temporal_Mid_R","aal_MNI_V4_Temporal_Pole_Mid_L","aal_MNI_V4_Temporal_Pole_Mid_R","aal_MNI_V4_Temporal_Inf_L","aal_MNI_V4_Temporal_Inf_R","aal_MNI_V4_Cerebelum_Crus1_L","aal_MNI_V4_Cerebelum_Crus1_R","aal_MNI_V4_Cerebelum_Crus2_L","aal_MNI_V4_Cerebelum_Crus2_R","aal_MNI_V4_Cerebelum_3_L","aal_MNI_V4_Cerebelum_3_R","aal_MNI_V4_Cerebelum_4_5_L","aal_MNI_V4_Cerebelum_4_5_R","aal_MNI_V4_Cerebelum_6_L","aal_MNI_V4_Cerebelum_6_R","aal_MNI_V4_Cerebelum_7b_L","aal_MNI_V4_Cerebelum_7b_R","aal_MNI_V4_Cerebelum_8_L","aal_MNI_V4_Cerebelum_8_R","aal_MNI_V4_Cerebelum_9_L","aal_MNI_V4_Cerebelum_9_R","aal_MNI_V4_Cerebelum_10_L","aal_MNI_V4_Cerebelum_10_R","aal_MNI_V4_Vermis_1_2","aal_MNI_V4_Vermis_3","aal_MNI_V4_Vermis_4_5","aal_MNI_V4_Vermis_6","aal_MNI_V4_Vermis_7","aal_MNI_V4_Vermis_8","aal_MNI_V4_Vermis_9","aal_MNI_V4_Vermis_10","tjb_MNI_V1_Clivus","tjb_MNI_V1_Ethmoid","tjb_MNI_V1_Meninges","tjb_MNI_V1_Pineal","tjb_MNI_V1_Vermis_Sup_Ant","tjb_MNI_V1_Cerebellum_Superior","tjb_MNI_V1_Substantia_Nigra","tjb_MNI_V1_SphenotemporalButtress","tjb_MNI_V1_Pons","homic_MNI_V1_Front_Pole_L","homic_MNI_V1_Front_Pole_R","homic_MNI_V1_Insular_Ctx_L","homic_MNI_V1_Insular_Ctx_R","homic_MNI_V1_Sup_Front_Gy_L","homic_MNI_V1_Sup_Front_Gy_R","homic_MNI_V1_Mid_Front_Gy_L","homic_MNI_V1_Mid_Front_Gy_R","homic_MNI_V1_Inf_Front_Gy_pars_triangularis_L","homic_MNI_V1_Inf_Front_Gy_pars_triangularis_R","homic_MNI_V1_Inf_Front_Gy_pars_opercularis_L","homic_MNI_V1_Inf_Front_Gy_pars_opercularis_R","homic_MNI_V1_Precentral_Gy_L","homic_MNI_V1_Precentral_Gy_R","homic_MNI_V1_Temp_Pole_L","homic_MNI_V1_Temp_Pole_R","homic_MNI_V1_Sup_Temp_Gy_Ant_L","homic_MNI_V1_Sup_Temp_Gy_Ant_R","homic_MNI_V1_Sup_Temp_Gy_Post_L","homic_MNI_V1_Sup_Temp_Gy_Post_R","homic_MNI_V1_Mid_Temp_Gy_Ant_L","homic_MNI_V1_Mid_Temp_Gy_Ant_R","homic_MNI_V1_Mid_Temp_Gy_Post_L","homic_MNI_V1_Mid_Temp_Gy_Post_R","homic_MNI_V1_Mid_Temp_Gy_temporooccipital_L","homic_MNI_V1_Mid_Temp_Gy_temporooccipital_R","homic_MNI_V1_Inf_Temp_Gy_Ant_L","homic_MNI_V1_Inf_Temp_Gy_Ant_R","homic_MNI_V1_Inf_Temp_Gy_Post_L","homic_MNI_V1_Inf_Temp_Gy_Post_R","homic_MNI_V1_Inf_Temp_Gy_temporooccipital_L","homic_MNI_V1_Inf_Temp_Gy_temporooccipital_R","homic_MNI_V1_Postcentral_Gy_L","homic_MNI_V1_Postcentral_Gy_R","homic_MNI_V1_Sup_Parietal_Lobule_L","homic_MNI_V1_Sup_Parietal_Lobule_R","homic_MNI_V1_Supramarginal_Gy_Ant_L","homic_MNI_V1_Supramarginal_Gy_Ant_R","homic_MNI_V1_Supramarginal_Gy_Post_L","homic_MNI_V1_Supramarginal_Gy_Post_R","homic_MNI_V1_Angular_Gy_L","homic_MNI_V1_Angular_Gy_R","homic_MNI_V1_Lat_Occ_Ctx_Sup_L","homic_MNI_V1_Lat_Occ_Ctx_Sup_R","homic_MNI_V1_Lat_Occ_Ctx_Inf_L","homic_MNI_V1_Lat_Occ_Ctx_Inf_R","homic_MNI_V1_Intracalcarine_Ctx_L","homic_MNI_V1_Intracalcarine_Ctx_R","homic_MNI_V1_Front_Medial_Ctx_L","homic_MNI_V1_Front_Medial_Ctx_R","homic_MNI_V1_Juxtapositional_Lobule_Ctx_L","homic_MNI_V1_Juxtapositional_Lobule_Ctx_R","homic_MNI_V1_Subcallosal_Ctx_L","homic_MNI_V1_Subcallosal_Ctx_R","homic_MNI_V1_Paracingulate_Gy_L","homic_MNI_V1_Paracingulate_Gy_R","homic_MNI_V1_Cingulate_Gy_Ant_L","homic_MNI_V1_Cingulate_Gy_Ant_R","homic_MNI_V1_Cingulate_Gy_Post_L","homic_MNI_V1_Cingulate_Gy_Post_R","homic_MNI_V1_Precuneous_Ctx_L","homic_MNI_V1_Precuneous_Ctx_R","homic_MNI_V1_Cuneal_Ctx_L","homic_MNI_V1_Cuneal_Ctx_R","homic_MNI_V1_Front_Orbital_Ctx_L","homic_MNI_V1_Front_Orbital_Ctx_R","homic_MNI_V1_Parahippocampal_Gy_Ant_L","homic_MNI_V1_Parahippocampal_Gy_Ant_R","homic_MNI_V1_Parahippocampal_Gy_Post_L","homic_MNI_V1_Parahippocampal_Gy_Post_R","homic_MNI_V1_Lingual_Gy_L","homic_MNI_V1_Lingual_Gy_R","homic_MNI_V1_Temp_Fusiform_Ctx_Ant_L","homic_MNI_V1_Temp_Fusiform_Ctx_Ant_R","homic_MNI_V1_Temp_Fusiform_Ctx_Post_L","homic_MNI_V1_Temp_Fusiform_Ctx_Post_R","homic_MNI_V1_Temp_Occ_Fusiform_Ctx_L","homic_MNI_V1_Temp_Occ_Fusiform_Ctx_R","homic_MNI_V1_Occ_Fusiform_Gy_L","homic_MNI_V1_Occ_Fusiform_Gy_R","homic_MNI_V1_Front_Operculum_Ctx_L","homic_MNI_V1_Front_Operculum_Ctx_R","homic_MNI_V1_Central_Opercular_Ctx_L","homic_MNI_V1_Central_Opercular_Ctx_R","homic_MNI_V1_Parietal_Operculum_Ctx_L","homic_MNI_V1_Parietal_Operculum_Ctx_R","homic_MNI_V1_Planum_Polare_L","homic_MNI_V1_Planum_Polare_R","homic_MNI_V1_Heschls_Gy_L","homic_MNI_V1_Heschls_Gy_R","homic_MNI_V1_Planum_Temporale_L","homic_MNI_V1_Planum_Temporale_R","homic_MNI_V1_Supracalcarine_Ctx_L","homic_MNI_V1_Supracalcarine_Ctx_R","homic_MNI_V1_Occ_Pole_L","homic_MNI_V1_Occ_Pole_R","homic_MNI_V1_Thalamus_L","homic_MNI_V1_Thalamus_R","homic_MNI_V1_Caudate_L","homic_MNI_V1_Caudate_R","homic_MNI_V1_Putamen_L","homic_MNI_V1_Putamen_R","homic_MNI_V1_Pallidum_L","homic_MNI_V1_Pallidum_R","homic_MNI_V1_Hippocampus_L","homic_MNI_V1_Hippocampus_R","homic_MNI_V1_Amygdala_L","homic_MNI_V1_Amygdala_R","homic_MNI_V1_Accumbens_L","homic_MNI_V1_Accumbens_R","homic_MNI_V1_Cerebellum_GM_L","homic_MNI_V1_Cerebellum_GM_R","homic_MNI_V1_Cerebellum_WM_L","homic_MNI_V1_Cerebellum_WM_R","homic_MNI_V1_Brainstem"]
+      v_log_file_cn_array = ["Description","Value"]             
+      # <enum>_analysis-log_pib_suvr_<codename-hyphen>_2a.csv. source filenames
+      #<enum>_pet-processing-log_31-May-2018_pib_suvr_visit3_2a.csv  
+      #<enum>_roi-summary_pib_suvr_<codename-hyphen>_2a.csv --multiple rois, suvr col and volume col
+      #<enum>_tacs_pib_suvr_<codename-hyphen>_2a.csv --- for one subject, multiple times, series of roi
+      sql = "truncate table "+v_cg_tn_roi_atlas_tjb_mni_v1+"_new"
+      results = connection.execute(sql)
+      sql = "truncate table "+v_cg_tn_roi+"_new"
+      results = connection.execute(sql)
+      #sql = "truncate table "+v_cg_tn_tacs+"_new"
+      #results = connection.execute(sql)
+      sql = "truncate table "+v_cg_tn_roi_atlas_homic_mni_v1+"_new"
+      results = connection.execute(sql)
+      sql = "truncate table "+v_cg_tn_roi_atlas_morimod_mni_v1+"_new"
+      results = connection.execute(sql)
+      sql = "truncate table "+v_cg_tn_roi_atlas_na+"_new"
+      results = connection.execute(sql)
+    #v_pib_path = "/pet/pib/suvr/code_ver2a/"
+    v_pib_path = "/pet/pib/suvr/code_ver2b/"
+    v_roi_file_name = "_roi-summary_pib_suvr_"
+    #v_tacs_file_name = "_tacs_pib_suvr_"
+    v_log_file_name = "_panda-log_pib_suvr_"   #"_analysis-log_pib_suvr_"
+    #v_code_version = "2a"
+    v_code_version = "2b"
+    v_product_file = ""
+      #subjectid,general_comment,enrollment_id,scan_procedure_id,file_name,secondary_key,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,
+    v_roi_column_list = "suvr_precentral_l,suvr_precentral_r,suvr_frontal_sup_l,suvr_frontal_sup_r,suvr_frontal_sup_orb_l,suvr_frontal_sup_orb_r,suvr_frontal_mid_l,suvr_frontal_mid_r,suvr_frontal_mid_orb_l,suvr_frontal_mid_orb_r,suvr_frontal_inf_oper_l,suvr_frontal_inf_oper_r,suvr_frontal_inf_tri_l,suvr_frontal_inf_tri_r,suvr_frontal_inf_orb_l,suvr_frontal_inf_orb_r,suvr_rolandic_oper_l,suvr_rolandic_oper_r,suvr_supp_motor_area_l,suvr_supp_motor_area_r,suvr_olfactory_l,suvr_olfactory_r,suvr_frontal_sup_medial_l,suvr_frontal_sup_medial_r,suvr_frontal_med_orb_l,suvr_frontal_med_orb_r,suvr_rectus_l,suvr_rectus_r,suvr_insula_l,suvr_insula_r,suvr_cingulum_ant_l,suvr_cingulum_ant_r,suvr_cingulum_mid_l,suvr_cingulum_mid_r,suvr_cingulum_post_l,suvr_cingulum_post_r,suvr_hippocampus_l,suvr_hippocampus_r,suvr_parahippocampal_l,suvr_parahippocampal_r,suvr_amygdala_l,suvr_amygdala_r,suvr_calcarine_l,suvr_calcarine_r,suvr_cuneus_l,suvr_cuneus_r,suvr_lingual_l,suvr_lingual_r,suvr_occipital_sup_l,suvr_occipital_sup_r,suvr_occipital_mid_l,suvr_occipital_mid_r,suvr_occipital_inf_l,suvr_occipital_inf_r,suvr_fusiform_l,suvr_fusiform_r,suvr_postcentral_l,suvr_postcentral_r,suvr_parietal_sup_l,suvr_parietal_sup_r,suvr_parietal_inf_l,suvr_parietal_inf_r,suvr_supramarginal_l,suvr_supramarginal_r,suvr_angular_l,suvr_angular_r,suvr_precuneus_l,suvr_precuneus_r,suvr_paracentral_lobule_l,suvr_paracentral_lobule_r,suvr_caudate_l,suvr_caudate_r,suvr_putamen_l,suvr_putamen_r,suvr_pallidum_l,suvr_pallidum_r,suvr_thalamus_l,suvr_thalamus_r,suvr_heschl_l,suvr_heschl_r,suvr_temporal_sup_l,suvr_temporal_sup_r,suvr_temporal_pole_sup_l,suvr_temporal_pole_sup_r,suvr_temporal_mid_l,suvr_temporal_mid_r,suvr_temporal_pole_mid_l,suvr_temporal_pole_mid_r,suvr_temporal_inf_l,suvr_temporal_inf_r,suvr_cerebelum_crus1_l,suvr_cerebelum_crus1_r,suvr_cerebelum_crus2_l,suvr_cerebelum_crus2_r,suvr_cerebelum_3_l,suvr_cerebelum_3_r,suvr_cerebelum_4_5_l,suvr_cerebelum_4_5_r,suvr_cerebelum_6_l,suvr_cerebelum_6_r,suvr_cerebelum_7b_l,suvr_cerebelum_7b_r,suvr_cerebelum_8_l,suvr_cerebelum_8_r,suvr_cerebelum_9_l,suvr_cerebelum_9_r,suvr_cerebelum_10_l,suvr_cerebelum_10_r,suvr_vermis_1_2,suvr_vermis_3,suvr_vermis_4_5,suvr_vermis_6,suvr_vermis_7,suvr_vermis_8,suvr_vermis_9,suvr_vermis_10,volume_cc_precentral_l,volume_cc_precentral_r,volume_cc_frontal_sup_l,volume_cc_frontal_sup_r,volume_cc_frontal_sup_orb_l,volume_cc_frontal_sup_orb_r,volume_cc_frontal_mid_l,volume_cc_frontal_mid_r,volume_cc_frontal_mid_orb_l,volume_cc_frontal_mid_orb_r,volume_cc_frontal_inf_oper_l,volume_cc_frontal_inf_oper_r,volume_cc_frontal_inf_tri_l,volume_cc_frontal_inf_tri_r,volume_cc_frontal_inf_orb_l,volume_cc_frontal_inf_orb_r,volume_cc_rolandic_oper_l,volume_cc_rolandic_oper_r,volume_cc_supp_motor_area_l,volume_cc_supp_motor_area_r,volume_cc_olfactory_l,volume_cc_olfactory_r,volume_cc_frontal_sup_medial_l,volume_cc_frontal_sup_medial_r,volume_cc_frontal_med_orb_l,volume_cc_frontal_med_orb_r,volume_cc_rectus_l,volume_cc_rectus_r,volume_cc_insula_l,volume_cc_insula_r,volume_cc_cingulum_ant_l,volume_cc_cingulum_ant_r,volume_cc_cingulum_mid_l,volume_cc_cingulum_mid_r,volume_cc_cingulum_post_l,volume_cc_cingulum_post_r,volume_cc_hippocampus_l,volume_cc_hippocampus_r,volume_cc_parahippocampal_l,volume_cc_parahippocampal_r,volume_cc_amygdala_l,volume_cc_amygdala_r,volume_cc_calcarine_l,volume_cc_calcarine_r,volume_cc_cuneus_l,volume_cc_cuneus_r,volume_cc_lingual_l,volume_cc_lingual_r,volume_cc_occipital_sup_l,volume_cc_occipital_sup_r,volume_cc_occipital_mid_l,volume_cc_occipital_mid_r,volume_cc_occipital_inf_l,volume_cc_occipital_inf_r,volume_cc_fusiform_l,volume_cc_fusiform_r,volume_cc_postcentral_l,volume_cc_postcentral_r,volume_cc_parietal_sup_l,volume_cc_parietal_sup_r,volume_cc_parietal_inf_l,volume_cc_parietal_inf_r,volume_cc_supramarginal_l,volume_cc_supramarginal_r,volume_cc_angular_l,volume_cc_angular_r,volume_cc_precuneus_l,volume_cc_precuneus_r,volume_cc_paracentral_lobule_l,volume_cc_paracentral_lobule_r,volume_cc_caudate_l,volume_cc_caudate_r,volume_cc_putamen_l,volume_cc_putamen_r,volume_cc_pallidum_l,volume_cc_pallidum_r,volume_cc_thalamus_l,volume_cc_thalamus_r,volume_cc_heschl_l,volume_cc_heschl_r,volume_cc_temporal_sup_l,volume_cc_temporal_sup_r,volume_cc_temporal_pole_sup_l,volume_cc_temporal_pole_sup_r,volume_cc_temporal_mid_l,volume_cc_temporal_mid_r,volume_cc_temporal_pole_mid_l,volume_cc_temporal_pole_mid_r,volume_cc_temporal_inf_l,volume_cc_temporal_inf_r,volume_cc_cerebelum_crus1_l,volume_cc_cerebelum_crus1_r,volume_cc_cerebelum_crus2_l,volume_cc_cerebelum_crus2_r,volume_cc_cerebelum_3_l,volume_cc_cerebelum_3_r,volume_cc_cerebelum_4_5_l,volume_cc_cerebelum_4_5_r,volume_cc_cerebelum_6_l,volume_cc_cerebelum_6_r,volume_cc_cerebelum_7b_l,volume_cc_cerebelum_7b_r,volume_cc_cerebelum_8_l,volume_cc_cerebelum_8_r,volume_cc_cerebelum_9_l,volume_cc_cerebelum_9_r,volume_cc_cerebelum_10_l,volume_cc_cerebelum_10_r,volume_cc_vermis_1_2,volume_cc_vermis_3,volume_cc_vermis_4_5,volume_cc_vermis_6,volume_cc_vermis_7,volume_cc_vermis_8,volume_cc_vermis_9,volume_cc_vermis_10"
+    v_roi_tjb_column_list = "suvr_clivus,suvr_ethmoid,suvr_meninges,suvr_pineal,suvr_vermis_sup_ant,suvr_cerebellum_superior,suvr_substantia_nigra,suvr_sphenotemporalbuttress,suvr_pons,volume_cc_clivus,volume_cc_ethmoid,volume_cc_meninges,volume_cc_pineal,volume_cc_vermis_sup_ant,volume_cc_cerebellum_superior,volume_cc_substantia_nigra,volume_cc_sphenotemporalbuttress,volume_cc_pons"
+    
+    v_roi_homic_column_list ="suvr_front_pole_l,suvr_front_pole_r,suvr_insular_ctx_l,suvr_insular_ctx_r,suvr_sup_front_gy_l,suvr_sup_front_gy_r,suvr_mid_front_gy_l,suvr_mid_front_gy_r,suvr_inf_front_gy_pars_triangularis_l,suvr_inf_front_gy_pars_triangularis_r,suvr_inf_front_gy_pars_opercularis_l,suvr_inf_front_gy_pars_opercularis_r,suvr_precentral_gy_l,suvr_precentral_gy_r,suvr_temp_pole_l,suvr_temp_pole_r,suvr_sup_temp_gy_ant_l,suvr_sup_temp_gy_ant_r,suvr_sup_temp_gy_post_l,suvr_sup_temp_gy_post_r,suvr_mid_temp_gy_ant_l,suvr_mid_temp_gy_ant_r,suvr_mid_temp_gy_post_l,suvr_mid_temp_gy_post_r,suvr_mid_temp_gy_temporooccipital_l,suvr_mid_temp_gy_temporooccipital_r,suvr_inf_temp_gy_ant_l,suvr_inf_temp_gy_ant_r,suvr_inf_temp_gy_post_l,suvr_inf_temp_gy_post_r,suvr_inf_temp_gy_temporooccipital_l,suvr_inf_temp_gy_temporooccipital_r,suvr_postcentral_gy_l,suvr_postcentral_gy_r,suvr_sup_parietal_lobule_l,suvr_sup_parietal_lobule_r,suvr_supramarginal_gy_ant_l,suvr_supramarginal_gy_ant_r,suvr_supramarginal_gy_post_l,suvr_supramarginal_gy_post_r,suvr_angular_gy_l,suvr_angular_gy_r,suvr_lat_occ_ctx_sup_l,suvr_lat_occ_ctx_sup_r,suvr_lat_occ_ctx_inf_l,suvr_lat_occ_ctx_inf_r,suvr_intracalcarine_ctx_l,suvr_intracalcarine_ctx_r,suvr_front_medial_ctx_l,suvr_front_medial_ctx_r,suvr_juxtapositional_lobule_ctx_l,suvr_juxtapositional_lobule_ctx_r,suvr_subcallosal_ctx_l,suvr_subcallosal_ctx_r,suvr_paracingulate_gy_l,suvr_paracingulate_gy_r,suvr_cingulate_gy_ant_l,suvr_cingulate_gy_ant_r,suvr_cingulate_gy_post_l,suvr_cingulate_gy_post_r,suvr_precuneous_ctx_l,suvr_precuneous_ctx_r,suvr_cuneal_ctx_l,suvr_cuneal_ctx_r,suvr_front_orbital_ctx_l,suvr_front_orbital_ctx_r,suvr_parahippocampal_gy_ant_l,suvr_parahippocampal_gy_ant_r,suvr_parahippocampal_gy_post_l,suvr_parahippocampal_gy_post_r,suvr_lingual_gy_l,suvr_lingual_gy_r,suvr_temp_fusiform_ctx_ant_l,suvr_temp_fusiform_ctx_ant_r,suvr_temp_fusiform_ctx_post_l,suvr_temp_fusiform_ctx_post_r,suvr_temp_occ_fusiform_ctx_l,suvr_temp_occ_fusiform_ctx_r,suvr_occ_fusiform_gy_l,suvr_occ_fusiform_gy_r,suvr_front_operculum_ctx_l,suvr_front_operculum_ctx_r,suvr_central_opercular_ctx_l,suvr_central_opercular_ctx_r,suvr_parietal_operculum_ctx_l,suvr_parietal_operculum_ctx_r,suvr_planum_polare_l,suvr_planum_polare_r,suvr_heschls_gy_l,suvr_heschls_gy_r,suvr_planum_temporale_l,suvr_planum_temporale_r,suvr_supracalcarine_ctx_l,suvr_supracalcarine_ctx_r,suvr_occ_pole_l,suvr_occ_pole_r,suvr_thalamus_l,suvr_thalamus_r,suvr_caudate_l,suvr_caudate_r,suvr_putamen_l,suvr_putamen_r,suvr_pallidum_l,suvr_pallidum_r,suvr_hippocampus_l,suvr_hippocampus_r,suvr_amygdala_l,suvr_amygdala_r,suvr_accumbens_l,suvr_accumbens_r,suvr_cerebellum_gm_l,suvr_cerebellum_gm_r,suvr_cerebellum_wm_l,suvr_cerebellum_wm_r,suvr_brainstem,volume_cc_front_pole_l,volume_cc_front_pole_r,volume_cc_insular_ctx_l,volume_cc_insular_ctx_r,volume_cc_sup_front_gy_l,volume_cc_sup_front_gy_r,volume_cc_mid_front_gy_l,volume_cc_mid_front_gy_r,volume_cc_inf_front_gy_pars_triangularis_l,volume_cc_inf_front_gy_pars_triangularis_r,volume_cc_inf_front_gy_pars_opercularis_l,volume_cc_inf_front_gy_pars_opercularis_r,volume_cc_precentral_gy_l,volume_cc_precentral_gy_r,volume_cc_temp_pole_l,volume_cc_temp_pole_r,volume_cc_sup_temp_gy_ant_l,volume_cc_sup_temp_gy_ant_r,volume_cc_sup_temp_gy_post_l,volume_cc_sup_temp_gy_post_r,volume_cc_mid_temp_gy_ant_l,volume_cc_mid_temp_gy_ant_r,volume_cc_mid_temp_gy_post_l,volume_cc_mid_temp_gy_post_r,volume_cc_mid_temp_gy_temporooccipital_l,volume_cc_mid_temp_gy_temporooccipital_r,volume_cc_inf_temp_gy_ant_l,volume_cc_inf_temp_gy_ant_r,volume_cc_inf_temp_gy_post_l,volume_cc_inf_temp_gy_post_r,volume_cc_inf_temp_gy_temporooccipital_l,volume_cc_inf_temp_gy_temporooccipital_r,volume_cc_postcentral_gy_l,volume_cc_postcentral_gy_r,volume_cc_sup_parietal_lobule_l,volume_cc_sup_parietal_lobule_r,volume_cc_supramarginal_gy_ant_l,volume_cc_supramarginal_gy_ant_r,volume_cc_supramarginal_gy_post_l,volume_cc_supramarginal_gy_post_r,volume_cc_angular_gy_l,volume_cc_angular_gy_r,volume_cc_lat_occ_ctx_sup_l,volume_cc_lat_occ_ctx_sup_r,volume_cc_lat_occ_ctx_inf_l,volume_cc_lat_occ_ctx_inf_r,volume_cc_intracalcarine_ctx_l,volume_cc_intracalcarine_ctx_r,volume_cc_front_medial_ctx_l,volume_cc_front_medial_ctx_r,volume_cc_juxtapositional_lobule_ctx_l,volume_cc_juxtapositional_lobule_ctx_r,volume_cc_subcallosal_ctx_l,volume_cc_subcallosal_ctx_r,volume_cc_paracingulate_gy_l,volume_cc_paracingulate_gy_r,volume_cc_cingulate_gy_ant_l,volume_cc_cingulate_gy_ant_r,volume_cc_cingulate_gy_post_l,volume_cc_cingulate_gy_post_r,volume_cc_precuneous_ctx_l,volume_cc_precuneous_ctx_r,volume_cc_cuneal_ctx_l,volume_cc_cuneal_ctx_r,volume_cc_front_orbital_ctx_l,volume_cc_front_orbital_ctx_r,volume_cc_parahippocampal_gy_ant_l,volume_cc_parahippocampal_gy_ant_r,volume_cc_parahippocampal_gy_post_l,volume_cc_parahippocampal_gy_post_r,volume_cc_lingual_gy_l,volume_cc_lingual_gy_r,volume_cc_temp_fusiform_ctx_ant_l,volume_cc_temp_fusiform_ctx_ant_r,volume_cc_temp_fusiform_ctx_post_l,volume_cc_temp_fusiform_ctx_post_r,volume_cc_temp_occ_fusiform_ctx_l,volume_cc_temp_occ_fusiform_ctx_r,volume_cc_occ_fusiform_gy_l,volume_cc_occ_fusiform_gy_r,volume_cc_front_operculum_ctx_l,volume_cc_front_operculum_ctx_r,volume_cc_central_opercular_ctx_l,volume_cc_central_opercular_ctx_r,volume_cc_parietal_operculum_ctx_l,volume_cc_parietal_operculum_ctx_r,volume_cc_planum_polare_l,volume_cc_planum_polare_r,volume_cc_heschls_gy_l,volume_cc_heschls_gy_r,volume_cc_planum_temporale_l,volume_cc_planum_temporale_r,volume_cc_supracalcarine_ctx_l,volume_cc_supracalcarine_ctx_r,volume_cc_occ_pole_l,volume_cc_occ_pole_r,volume_cc_thalamus_l,volume_cc_thalamus_r,volume_cc_caudate_l,volume_cc_caudate_r,volume_cc_putamen_l,volume_cc_putamen_r,volume_cc_pallidum_l,volume_cc_pallidum_r,volume_cc_hippocampus_l,volume_cc_hippocampus_r,volume_cc_amygdala_l,volume_cc_amygdala_r,volume_cc_accumbens_l,volume_cc_accumbens_r,volume_cc_cerebellum_gm_l,volume_cc_cerebellum_gm_r,volume_cc_cerebellum_wm_l,volume_cc_cerebellum_wm_r,volume_cc_brainstem"
+    v_roi_morimod_column_list ="suvr_left_anterior_capsule_limb_of_internal,suvr_right_anterior_capsule_limb_of_internal,suvr_left_posterior_capsule_limb_of_internal,suvr_right_posterior_capsule_limb_of_internal,suvr_left_posterior_thalamic_radiation,suvr_right_posterior_thalamic_radiation,suvr_left_anterior_corona_radiata,suvr_right_anterior_corona_radiata,suvr_left_superior_corona_radiata,suvr_right_superior_corona_radiata,suvr_left_posterior_corona_radiata,suvr_right_posterior_corona_radiata,suvr_left_superior_longitudinal_longitudinal,suvr_right_superior_longitudinal_longitudinal,suvr_left_sagital_stratum,suvr_right_sagital_stratum,suvr_left_capsule_external,suvr_right_capsule_external,suvr_left_corpus_callosum_genu,suvr_right_corpus_callosum_genu,suvr_left_corpus_callosum_body,suvr_right_corpus_callosum_body,suvr_left_corpus_callosum,suvr_right_corpus_callosum,suvr_left_capsule_retrolenticular_part_of_ic,suvr_right_capsule_retrolenticular_part_of_ic,volume_cc_left_anterior_capsule_limb_of_internal,volume_cc_right_anterior_capsule_limb_of_internal,volume_cc_left_posterior_capsule_limb_of_internal,volume_cc_right_posterior_capsule_limb_of_internal,volume_cc_left_posterior_thalamic_radiation,volume_cc_right_posterior_thalamic_radiation,volume_cc_left_anterior_corona_radiata,volume_cc_right_anterior_corona_radiata,volume_cc_left_superior_corona_radiata,volume_cc_right_superior_corona_radiata,volume_cc_left_posterior_corona_radiata,volume_cc_right_posterior_corona_radiata,volume_cc_left_superior_longitudinal_longitudinal,volume_cc_right_superior_longitudinal_longitudinal,volume_cc_left_sagital_stratum,volume_cc_right_sagital_stratum,volume_cc_left_capsule_external,volume_cc_right_capsule_external,volume_cc_left_corpus_callosum_genu,volume_cc_right_corpus_callosum_genu,volume_cc_left_corpus_callosum_body,volume_cc_right_corpus_callosum_body,volume_cc_left_corpus_callosum,volume_cc_right_corpus_callosum,volume_cc_left_capsule_retrolenticular_part_of_ic,volume_cc_right_capsule_retrolenticular_part_of_ic"
+    v_roi_na_column_list ="suvr_altref_cblm_gm,suvr_altref_cblm_whole,suvr_altref_cblm_wm,suvr_altref_centsm_wm,volume_cc_altref_cblm_gm,volume_cc_altref_cblm_whole,volume_cc_altref_cblm_wm,volume_cc_altref_centsm_wm"
+
+ #subjectid,general_comment,enrollment_id,scan_procedure_id,file_name,secondary_key,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,
+ 
+   # v_tacs_column_list = "time_min,cblm_gm_inf,aal_mni_v4_precentral_l,aal_mni_v4_precentral_r,aal_mni_v4_frontal_sup_l,aal_mni_v4_frontal_sup_r,aal_mni_v4_frontal_sup_orb_l,aal_mni_v4_frontal_sup_orb_r,aal_mni_v4_frontal_mid_l,aal_mni_v4_frontal_mid_r,aal_mni_v4_frontal_mid_orb_l,aal_mni_v4_frontal_mid_orb_r,aal_mni_v4_frontal_inf_oper_l,aal_mni_v4_frontal_inf_oper_r,aal_mni_v4_frontal_inf_tri_l,aal_mni_v4_frontal_inf_tri_r,aal_mni_v4_frontal_inf_orb_l,aal_mni_v4_frontal_inf_orb_r,aal_mni_v4_rolandic_oper_l,aal_mni_v4_rolandic_oper_r,aal_mni_v4_supp_motor_area_l,aal_mni_v4_supp_motor_area_r,aal_mni_v4_olfactory_l,aal_mni_v4_olfactory_r,aal_mni_v4_frontal_sup_medial_l,aal_mni_v4_frontal_sup_medial_r,aal_mni_v4_frontal_med_orb_l,aal_mni_v4_frontal_med_orb_r,aal_mni_v4_rectus_l,aal_mni_v4_rectus_r,aal_mni_v4_insula_l,aal_mni_v4_insula_r,aal_mni_v4_cingulum_ant_l,aal_mni_v4_cingulum_ant_r,aal_mni_v4_cingulum_mid_l,aal_mni_v4_cingulum_mid_r,aal_mni_v4_cingulum_post_l,aal_mni_v4_cingulum_post_r,aal_mni_v4_hippocampus_l,aal_mni_v4_hippocampus_r,aal_mni_v4_parahippocampal_l,aal_mni_v4_parahippocampal_r,aal_mni_v4_amygdala_l,aal_mni_v4_amygdala_r,aal_mni_v4_calcarine_l,aal_mni_v4_calcarine_r,aal_mni_v4_cuneus_l,aal_mni_v4_cuneus_r,aal_mni_v4_lingual_l,aal_mni_v4_lingual_r,aal_mni_v4_occipital_sup_l,aal_mni_v4_occipital_sup_r,aal_mni_v4_occipital_mid_l,aal_mni_v4_occipital_mid_r,aal_mni_v4_occipital_inf_l,aal_mni_v4_occipital_inf_r,aal_mni_v4_fusiform_l,aal_mni_v4_fusiform_r,aal_mni_v4_postcentral_l,aal_mni_v4_postcentral_r,aal_mni_v4_parietal_sup_l,aal_mni_v4_parietal_sup_r,aal_mni_v4_parietal_inf_l,aal_mni_v4_parietal_inf_r,aal_mni_v4_supramarginal_l,aal_mni_v4_supramarginal_r,aal_mni_v4_angular_l,aal_mni_v4_angular_r,aal_mni_v4_precuneus_l,aal_mni_v4_precuneus_r,aal_mni_v4_paracentral_lobule_l,aal_mni_v4_paracentral_lobule_r,aal_mni_v4_caudate_l,aal_mni_v4_caudate_r,aal_mni_v4_putamen_l,aal_mni_v4_putamen_r,aal_mni_v4_pallidum_l,aal_mni_v4_pallidum_r,aal_mni_v4_thalamus_l,aal_mni_v4_thalamus_r,aal_mni_v4_heschl_l,aal_mni_v4_heschl_r,aal_mni_v4_temporal_sup_l,aal_mni_v4_temporal_sup_r,aal_mni_v4_temporal_pole_sup_l,aal_mni_v4_temporal_pole_sup_r,aal_mni_v4_temporal_mid_l,aal_mni_v4_temporal_mid_r,aal_mni_v4_temporal_pole_mid_l,aal_mni_v4_temporal_pole_mid_r,aal_mni_v4_temporal_inf_l,aal_mni_v4_temporal_inf_r,aal_mni_v4_cerebelum_crus1_l,aal_mni_v4_cerebelum_crus1_r,aal_mni_v4_cerebelum_crus2_l,aal_mni_v4_cerebelum_crus2_r,aal_mni_v4_cerebelum_3_l,aal_mni_v4_cerebelum_3_r,aal_mni_v4_cerebelum_4_5_l,aal_mni_v4_cerebelum_4_5_r,aal_mni_v4_cerebelum_6_l,aal_mni_v4_cerebelum_6_r,aal_mni_v4_cerebelum_7b_l,aal_mni_v4_cerebelum_7b_r,aal_mni_v4_cerebelum_8_l,aal_mni_v4_cerebelum_8_r,aal_mni_v4_cerebelum_9_l,aal_mni_v4_cerebelum_9_r,aal_mni_v4_cerebelum_10_l,aal_mni_v4_cerebelum_10_r,aal_mni_v4_vermis_1_2,aal_mni_v4_vermis_3,aal_mni_v4_vermis_4_5,aal_mni_v4_vermis_6,aal_mni_v4_vermis_7,aal_mni_v4_vermis_8,aal_mni_v4_vermis_9,aal_mni_v4_vermis_10,tjb_mni_v1_clivus,tjb_mni_v1_ethmoid,tjb_mni_v1_meninges,tjb_mni_v1_pineal,tjb_mni_v1_vermis_sup_ant,tjb_mni_v1_cerebellum_superior,tjb_mni_v1_substantia_nigra,tjb_mni_v1_sphenotemporalbuttress,tjb_mni_v1_pons,homic_mni_v1_front_pole_l,homic_mni_v1_front_pole_r,homic_mni_v1_insular_ctx_l,homic_mni_v1_insular_ctx_r,homic_mni_v1_sup_front_gy_l,homic_mni_v1_sup_front_gy_r,homic_mni_v1_mid_front_gy_l,homic_mni_v1_mid_front_gy_r,homic_mni_v1_inf_front_gy_pars_triangularis_l,homic_mni_v1_inf_front_gy_pars_triangularis_r,homic_mni_v1_inf_front_gy_pars_opercularis_l,homic_mni_v1_inf_front_gy_pars_opercularis_r,homic_mni_v1_precentral_gy_l,homic_mni_v1_precentral_gy_r,homic_mni_v1_temp_pole_l,homic_mni_v1_temp_pole_r,homic_mni_v1_sup_temp_gy_ant_l,homic_mni_v1_sup_temp_gy_ant_r,homic_mni_v1_sup_temp_gy_post_l,homic_mni_v1_sup_temp_gy_post_r,homic_mni_v1_mid_temp_gy_ant_l,homic_mni_v1_mid_temp_gy_ant_r,homic_mni_v1_mid_temp_gy_post_l,homic_mni_v1_mid_temp_gy_post_r,homic_mni_v1_mid_temp_gy_temporooccipital_l,homic_mni_v1_mid_temp_gy_temporooccipital_r,homic_mni_v1_inf_temp_gy_ant_l,homic_mni_v1_inf_temp_gy_ant_r,homic_mni_v1_inf_temp_gy_post_l,homic_mni_v1_inf_temp_gy_post_r,homic_mni_v1_inf_temp_gy_temporooccipital_l,homic_mni_v1_inf_temp_gy_temporooccipital_r,homic_mni_v1_postcentral_gy_l,homic_mni_v1_postcentral_gy_r,homic_mni_v1_sup_parietal_lobule_l,homic_mni_v1_sup_parietal_lobule_r,homic_mni_v1_supramarginal_gy_ant_l,homic_mni_v1_supramarginal_gy_ant_r,homic_mni_v1_supramarginal_gy_post_l,homic_mni_v1_supramarginal_gy_post_r,homic_mni_v1_angular_gy_l,homic_mni_v1_angular_gy_r,homic_mni_v1_lat_occ_ctx_sup_l,homic_mni_v1_lat_occ_ctx_sup_r,homic_mni_v1_lat_occ_ctx_inf_l,homic_mni_v1_lat_occ_ctx_inf_r,homic_mni_v1_intracalcarine_ctx_l,homic_mni_v1_intracalcarine_ctx_r,homic_mni_v1_front_medial_ctx_l,homic_mni_v1_front_medial_ctx_r,homic_mni_v1_juxtapositional_lobule_ctx_l,homic_mni_v1_juxtapositional_lobule_ctx_r,homic_mni_v1_subcallosal_ctx_l,homic_mni_v1_subcallosal_ctx_r,homic_mni_v1_paracingulate_gy_l,homic_mni_v1_paracingulate_gy_r,homic_mni_v1_cingulate_gy_ant_l,homic_mni_v1_cingulate_gy_ant_r,homic_mni_v1_cingulate_gy_post_l,homic_mni_v1_cingulate_gy_post_r,homic_mni_v1_precuneous_ctx_l,homic_mni_v1_precuneous_ctx_r,homic_mni_v1_cuneal_ctx_l,homic_mni_v1_cuneal_ctx_r,homic_mni_v1_front_orbital_ctx_l,homic_mni_v1_front_orbital_ctx_r,homic_mni_v1_parahippocampal_gy_ant_l,homic_mni_v1_parahippocampal_gy_ant_r,homic_mni_v1_parahippocampal_gy_post_l,homic_mni_v1_parahippocampal_gy_post_r,homic_mni_v1_lingual_gy_l,homic_mni_v1_lingual_gy_r,homic_mni_v1_temp_fusiform_ctx_ant_l,homic_mni_v1_temp_fusiform_ctx_ant_r,homic_mni_v1_temp_fusiform_ctx_post_l,homic_mni_v1_temp_fusiform_ctx_post_r,homic_mni_v1_temp_occ_fusiform_ctx_l,homic_mni_v1_temp_occ_fusiform_ctx_r,homic_mni_v1_occ_fusiform_gy_l,homic_mni_v1_occ_fusiform_gy_r,homic_mni_v1_front_operculum_ctx_l,homic_mni_v1_front_operculum_ctx_r,homic_mni_v1_central_opercular_ctx_l,homic_mni_v1_central_opercular_ctx_r,homic_mni_v1_parietal_operculum_ctx_l,homic_mni_v1_parietal_operculum_ctx_r,homic_mni_v1_planum_polare_l,homic_mni_v1_planum_polare_r,homic_mni_v1_heschls_gy_l,homic_mni_v1_heschls_gy_r,homic_mni_v1_planum_temporale_l,homic_mni_v1_planum_temporale_r,homic_mni_v1_supracalcarine_ctx_l,homic_mni_v1_supracalcarine_ctx_r,homic_mni_v1_occ_pole_l,homic_mni_v1_occ_pole_r,homic_mni_v1_thalamus_l,homic_mni_v1_thalamus_r,homic_mni_v1_caudate_l,homic_mni_v1_caudate_r,homic_mni_v1_putamen_l,homic_mni_v1_putamen_r,homic_mni_v1_pallidum_l,homic_mni_v1_pallidum_r,homic_mni_v1_hippocampus_l,homic_mni_v1_hippocampus_r,homic_mni_v1_amygdala_l,homic_mni_v1_amygdala_r,homic_mni_v1_accumbens_l,homic_mni_v1_accumbens_r,homic_mni_v1_cerebellum_gm_l,homic_mni_v1_cerebellum_gm_r,homic_mni_v1_cerebellum_wm_l,homic_mni_v1_cerebellum_wm_r,homic_mni_v1_brainstem"
+# will change again - need to change tac table
+    v_secondary_key_array =["b","c","d","e",".R"]
+    v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+    sp_exclude_array = [54,56,57,95,55,76,78,72,70,71,99,81,75,83,92,93,88,68,97,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,42,44,51,96,9,25,23,19,15,24,36,100,35,73,32,6,12,16,13,11,90,59,63,43,4,17,74,98]
+    @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
+    # for testing
+    ###@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
+    @scan_procedures.each do |sp|
+      @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
+      v_sp_id = sp.id
+      @schedulerun.save
+      v_visit_number =""
+      if sp.codename.include?("visit2")
+            v_visit_number ="_v2"
+      elsif sp.codename.include?("visit3")
+            v_visit_number ="_v3"
+      elsif sp.codename.include?("visit4")
+            v_visit_number ="_v4"
+      elsif sp.codename.include?("visit5")
+            v_visit_number ="_v5"
+      end  
+      v_codename_hyphen =  sp.codename
+      v_codename_hyphen = v_codename_hyphen.gsub(".","-")
+
+      v_preprocessed_full_path = v_preprocessed_path+sp.codename  
+      if File.directory?(v_preprocessed_full_path)
+        sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+"  
+                                    and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id 
+                                    and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
+        @results = connection.execute(sql_enum)                                 
+        @results.each do |r|
+          enrollment = Enrollment.where("enumber='"+r[0]+"'")
+          if !enrollment.blank?
+            v_log = ""
+            v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
+            v_subjectid = enrollment[0].enumber
+            v_subjectid_v_num = enrollment[0].enumber + v_visit_number
+            v_enrollment_id = enrollment[0].id
+            @schedulerun.comment = "start "+v_subjectid_v_num+" "+v_comment_base
+            @schedulerun.save
+            v_subjectid_pet_pib =v_subjectid_path+v_pib_path
+            v_subjectid_array = []
+            begin
+              if File.directory?(v_subjectid_pet_pib)
+                v_subjectid_array.push(v_subjectid)
+              end
+              v_secondary_key_array.each do |k|
+                if File.directory?(v_subjectid_path+k+v_pib_path)
+                  v_subjectid_array.push((v_subjectid+k))
+                  v_subjectid_v_num = v_subjectid+k + v_visit_number
+                  v_subjectid_path = v_preprocessed_full_path+"/"+v_subjectid+k
+                  v_subjectid_pet_pib =v_subjectid_path+v_pib_path
+                end
+              end
+             rescue => msg  
+                v_comment = v_comment + "IN RESCUE ERROR "+msg+"\n"  
+            end
+
+            v_subjectid_array = v_subjectid_array.uniq
+            v_subjectid_array.each do |subj|
+              v_seconbdary_key =""
+              if subj != enrollment.first.enumber
+                 v_secondary_key = subj
+                 v_secondary_key = v_secondary_key.gsub(enrollment.first.enumber,"")
+              end
+              v_subjectid = subj
+              v_subjectid_v_num = subj + v_visit_number
+              v_subjectid_path = v_preprocessed_full_path+"/"+subj
+              v_subjectid_pet_pib =v_subjectid_path+v_pib_path
+              if File.directory?(v_subjectid_pet_pib)
+                v_dir_array = Dir.entries(v_subjectid_pet_pib)
+                v_dir_array.each do |f|
+                  # get roi, tac, log files and final file = wpdt00235_pib_suvr70-90_visit3_2a.nii
+                   #<enum>_roi-summary_pib_suvr_<codename-hyphen>_2a.csv --multiple rois, suvr col and volume col
+                  v_subjectid_roi_file_name = v_subjectid_pet_pib+v_subjectid+v_roi_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
+                  #<enum>_tacs_pib_suvr_<codename-hyphen>_2a.csv --- for one subject, multiple times, series of roi
+                  #v_subjectid_tacs_file_name = v_subjectid_pet_pib+v_subjectid+v_tacs_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
+                  # <enum>_analysis-log_pib_suvr_<codename-hyphen>_2a.csv. source filenames
+                  #<enum>_panda-log_pib_suvr_<codename-hyphen>_2a.csv
+                  v_subjectid_log_file_name = v_subjectid_pet_pib+v_subjectid+v_log_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
+                  # final product file - insert into processed images - get source file names from the log file
+                  v_skip_flag = "Y"
+                  v_product_file = ""
+                  if f.start_with?("w"+v_subjectid) and f.end_with?(".nii") # maybe use "MNI space SUVR PET file" field
+                    v_product_file = f
+                      #check if exists in processedimages
+                      v_age_at_appointment =""
+                      v_ecat_file = ""
+                      v_original_t1_mri_file = ""
+                      v_tracer = ""
+                      v_method = ""
+                      v_pet_code_version = ""
+                      v_protocol_description = ""
+                      v_pet_processing_date = ""
+                      v_deformation_field_file = ""
+                      v_bias_corrected_t1_mri_file = ""
+                      v_mni_space_t1_mri = ""
+                      v_multispectral_file = ""
+                     if File.file?(v_subjectid_log_file_name)
+                      # check column header "Description,Value". #v_log_file_cn_array
+                      # check "study ID" = v_subjectid  "protocol description" = sp.codename, tracer = pib, method = suvr, "PET code version" = v_code_version
+                      # email if different - set flag to skip
+                       # parse by rows, get "ecat file", "original t1 MRI file"
+                       # check if
+                        # check column headers
+                        v_cnt = 0
+                        v_header = ""
+                        File.open(v_subjectid_log_file_name,'r') do |file_a|
+                          while line = file_a.gets and v_cnt < 1
+                            if v_cnt < 1
+                              v_header = line
+                            end
+                            v_cnt = v_cnt +1
+                          end
+                        end
+                       v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_log_file_cn_array.join(","))
+                       if v_return_flag == "N" 
+                               v_comment = v_subjectid_log_file_name+"=>"+v_return_comment+" \n"+v_comment
+                               puts v_return_comment
+                               v_skip_flag = "Y"               
+                       else 
+                         v_skip_flag = "N"
+                         v_cnt = 0
+                          File.open(v_subjectid_log_file_name,'r') do |file_a|
+                            while line = file_a.gets
+                              if v_cnt > 0
+                               # line.gsub(/\n/,"") #.each do |v_line|
+                                  v = line.gsub(/\n/,"").split(",")
+                                   if v[0] == "tracer" 
+                                     if v[1] == "pib"
+                                         v_tracer = v[1]
+                                     else
+                                         v_skip_flag = "Y"
+                                     end
+                                   elsif v[0] == "study ID" 
+                                     if v[1] == v_subjectid
+                                         # ok
+                                     else
+                                         v_skip_flag = "Y"
+                                     end
+                                   elsif v[0] == "protocol description" 
+                                     if v[1] == sp.codename
+                                         v_protocol_description = v[1]
+
+                                     else
+                                         v_skip_flag = "Y"
+                                     end
+                                   elsif v[0] == "method" 
+                                     if v[1] == "suvr"
+                                         v_method = v[1]
+                                     else
+                                         v_skip_flag = "Y"
+                                     end
+                                   elsif v[0] == "PET code version" 
+                                     if v[1] == v_code_version
+                                         v_pet_code_version = v[1]
+                                     else
+                                         v_skip_flag = "Y"
+                                     end
+                                   elsif v[0] == "PET image processing date" 
+                                     v_pet_processing_date = v[1].to_s
+                                   elsif v[0] == "original t1 MRI file" 
+                                     v_original_t1_mri_file = v[1].to_s
+                                   elsif v[0] == "deformation field file" 
+                                     v_deformation_field_file = v[1].to_s
+                                   elsif v[0] == "Bias Corrected T1 MRI file" 
+                                     v_bias_corrected_t1_mri_file = v[1].to_s
+                                   elsif v[0] == "MNI space T1 MRI" 
+                                     v_mni_space_t1_mri = v[1].to_s
+                                   elsif v[0] == "multispectral file" and  v[1].to_s.strip != "" and v[1].to_s.strip != "n"
+                                      v_multispectral_file = v[1].to_s.strip
+                                   elsif v[0] == "ecat file" or v[0] = "raw PET file"
+                                     v_ecat_file = v[1].to_s
+                                     # get v_age_at_appointment
+
+                                     v_petscans = Petscan.where("petscans.path in (?)",v_ecat_file)
+                                     if v_petscans.count > 0
+                                        v_appointment = Appointment.find(v_petscans.first.appointment_id)
+                                        v_age_at_appointment = v_appointment.age_at_appointment.to_s
+                                     else # sometimes the processing ecat not match the panda ecat 
+                                          # use tracer, enumber and scan_procedure
+                                          v_appointments = Appointment.where("appointments.appointment_type = 'pet_scan' 
+                                             and appointments.id in (select petscans.appointment_id from petscans where petscans.lookup_pettracer_id in (?))
+                                             and appointments.vgroup_id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships 
+                                                                 where enrollment_vgroup_memberships.enrollment_id in (?))
+                                             and appointments.vgroup_id in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups
+                                                               where scan_procedures_vgroups.scan_procedure_id in (?))",v_pib_tracer_id,enrollment.first.id,sp.id)
+                                           if v_appointments.count > 0
+                                               v_age_at_appointment = v_appointments.first.age_at_appointment.to_s
+                                           end
+
+                                     end
+                                       
+                                   end
+                               
+                                end
+                              #end
+                              v_cnt = v_cnt + 1
+                            end
+                          end  
+                       end 
+                     end
+                  end
+                  if v_pet_processing_date.nil?
+                       v_pet_processing_date =""
+                  end
+                  if v_original_t1_mri_file.nil?
+                      v_original_t1_mri_file =""
+                  end
+                  if v_ecat_file.nil?
+                     v_ecat_file= ""
+                  end
+                  if v_skip_flag == "N"
+
+                     # CHECK IN PROCESSEDIMAGES for v_subjectid_pet_pib+v_product_file - , insert with sources v_original_t1_mri_file, v_ecat_file 
+                     v_processesimages = Processedimage.where("file_path in (?)",v_subjectid_pet_pib+v_product_file)
+                     @trfileimage_processedimages = []
+                     if v_processesimages.count <1
+                                      # need to collect source files, then make processedimage record
+                         v_processedimage = Processedimage.new
+                         v_processedimage.file_type ="suvr pib"
+                         v_processedimage.file_name = v_product_file
+                         v_processedimage.file_path = v_subjectid_pet_pib+v_product_file
+                         v_processedimage.scan_procedure_id = sp.id
+                         v_processedimage.enrollment_id = enrollment.first.id
+                         v_processedimage.save  
+                         v_processedimage_file_id = v_processedimage.id
+                         @trfileimage_processedimages.push(v_processedimage.id)
+                         # sources - ecat pet file -- petfile_id?
+                         # petfile_id from ecat file
+                         v_petfiles = Petfile.where("petfiles.path in (?)",v_ecat_file)
+                         if v_petfiles.count > 0
+                           v_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'petfile'",v_processedimage_file_id,v_petfiles.first.id)
+                           if v_processedimagesources.count < 1 and v_petfiles.count > 0
+                             v_processedimagesource = Processedimagessource.new
+                             v_processedimagesource.file_name = v_ecat_file.split("/").last
+                             v_processedimagesource.file_path = v_ecat_file
+                             v_processedimagesource.source_image_id = v_petfiles.first.id
+                             v_processedimagesource.source_image_type = 'petfile'
+                             v_processedimagesource.processedimage_id= v_processedimage_file_id
+                             v_processedimagesource.save
+                           end
+                         end
+                         v_mri_processedimage_id = ""
+                         v_original_t1_mri_file_unknown = v_original_t1_mri_file
+                         v_original_t1_mri_file_unknown = v_original_t1_mri_file_unknown.gsub("tissue_seg","unknown") # think the oACPC in tissue seg are from unknown
+                         v_mri_processesimages = Processedimage.where("file_path in (?) or file_path in (?)",v_original_t1_mri_file,v_original_t1_mri_file_unknown)
+                         if v_mri_processesimages.count < 1
+                             v_mri_processedimage = Processedimage.new
+                             v_mri_processedimage.file_type ="o_acpc T1"
+                             v_mri_processedimage.file_name = v_original_t1_mri_file.split("/").last
+                             v_mri_processedimage.file_path = v_original_t1_mri_file
+                             v_mri_processedimage.scan_procedure_id = sp.id
+                             v_mri_processedimage.enrollment_id = enrollment.first.id
+                             v_mri_processedimage.save  
+                             v_mri_processedimage_id = v_mri_processedimage.id
+
+                         else
+                           v_mri_processedimage_id = v_mri_processesimages.first.id
+                         end
+                         v_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'processedimage'",v_processedimage_file_id,v_mri_processedimage_id)
+                         if v_processedimagesources.count < 1 
+                             v_processedimagesource = Processedimagessource.new
+                             v_processedimagesource.file_name = v_original_t1_mri_file.split("/").last
+                             v_processedimagesource.file_path = v_original_t1_mri_file
+                             v_processedimagesource.source_image_id = v_mri_processedimage_id
+                             v_processedimagesource.source_image_type = 'processedimage'
+                             v_processedimagesource.processedimage_id= v_processedimage_file_id
+                             v_processedimagesource.save
+                         end
+                      else
+                        @trfileimage_processedimages.push(v_processesimages.first.id)
+                     end
+
+                    # NEED TO ADD CHECK IN processedimages for v_bias_corrected_t1_mri_file , link to unknown/tissueseg nii processedimage 
+                    if v_bias_corrected_t1_mri_file  > ""
+                     v_processesimages = Processedimage.where("file_path in (?)",v_bias_corrected_t1_mri_file )
+                     if v_processesimages.count <1
+                                      # need to collect source files, then make processedimage record
+                         v_bias_corrected_file_name = v_bias_corrected_t1_mri_file.split("/").last
+                         v_processedimage = Processedimage.new
+                         v_processedimage.file_type ="bias corrected mri"
+                         v_processedimage.file_name = v_bias_corrected_file_name
+                         v_processedimage.file_path = v_bias_corrected_t1_mri_file
+                         v_processedimage.scan_procedure_id = sp.id
+                         v_processedimage.enrollment_id = enrollment.first.id
+                         v_processedimage.save  
+                         v_processedimage_file_id = v_processedimage.id
+                         @trfileimage_processedimages.push(v_processedimage.id)
+
+
+                         v_mri_processedimage_id = ""
+                         v_original_t1_mri_file_unknown = v_original_t1_mri_file
+                         v_original_t1_mri_file_unknown = v_original_t1_mri_file_unknown.gsub("tissue_seg","unknown") # think the oACPC in tissue seg are from unknown
+                         v_mri_processesimages = Processedimage.where("file_path in (?) or file_path in (?)",v_original_t1_mri_file,v_original_t1_mri_file_unknown)
+                         if v_mri_processesimages.count < 1
+                             v_mri_processedimage = Processedimage.new
+                             v_mri_processedimage.file_type ="o_acpc T1"
+                             v_mri_processedimage.file_name = v_original_t1_mri_file.split("/").last
+                             v_mri_processedimage.file_path = v_original_t1_mri_file
+                             v_mri_processedimage.scan_procedure_id = sp.id
+                             v_mri_processedimage.enrollment_id = enrollment.first.id
+                             v_mri_processedimage.save  
+                             v_mri_processedimage_id = v_mri_processedimage.id
+
+                         else
+                           v_mri_processedimage_id = v_mri_processesimages.first.id
+                         end
+                         v_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'processedimage'",v_processedimage_file_id,v_mri_processedimage_id)
+                         if v_processedimagesources.count < 1 
+                             v_processedimagesource = Processedimagessource.new
+                             v_processedimagesource.file_name = v_original_t1_mri_file.split("/").last
+                             v_processedimagesource.file_path = v_original_t1_mri_file
+                             v_processedimagesource.source_image_id = v_mri_processedimage_id
+                             v_processedimagesource.source_image_type = 'processedimage'
+                             v_processedimagesource.processedimage_id= v_processedimage_file_id
+                             v_processedimagesource.save
+                         end
+                      else
+                        @trfileimage_processedimages.push(v_processesimages.first.id)
+                     end
+                    end
+    # NOT SURE WHAT THE SOURCE IS
+    #NEED TO ADD TO av1451  
+                    if v_multispectral_file  > ""
+                     v_processesimages = Processedimage.where("file_path in (?)",v_multispectral_file )
+                     if v_processesimages.count <1
+                                      # need to collect source files, then make processedimage record
+                         vv_multispectral_file_name = v_multispectral_file.split("/").last
+                         v_processedimage = Processedimage.new
+                         v_processedimage.file_type ="multispectral mri"
+                         v_processedimage.file_name = v_multispectral_file_name
+                         v_processedimage.file_path = v_multispectral_file
+                         v_processedimage.scan_procedure_id = sp.id
+                         v_processedimage.enrollment_id = enrollment.first.id
+                         v_processedimage.save  
+                         v_processedimage_file_id = v_processedimage.id
+                         @trfileimage_processedimages.push(v_processedimage.id)
+     # NOT SURE WHAT THE SOURCE IS
+
+                         v_mri_processedimage_id = ""
+                         v_original_t1_mri_file_unknown = v_original_t1_mri_file
+                         v_original_t1_mri_file_unknown = v_original_t1_mri_file_unknown.gsub("tissue_seg","unknown") # think the oACPC in tissue seg are from unknown
+                         v_mri_processesimages = Processedimage.where("file_path in (?) or file_path in (?)",v_original_t1_mri_file,v_original_t1_mri_file_unknown)
+                         if v_mri_processesimages.count < 1
+                             v_mri_processedimage = Processedimage.new
+                             v_mri_processedimage.file_type ="o_acpc T1"
+                             v_mri_processedimage.file_name = v_original_t1_mri_file.split("/").last
+                             v_mri_processedimage.file_path = v_original_t1_mri_file
+                             v_mri_processedimage.scan_procedure_id = sp.id
+                             v_mri_processedimage.enrollment_id = enrollment.first.id
+                      ###       v_mri_processedimage.save  
+                             v_mri_processedimage_id = v_mri_processedimage.id
+
+                         else
+                           v_mri_processedimage_id = v_mri_processesimages.first.id
+                         end
+                         v_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'processedimage'",v_processedimage_file_id,v_mri_processedimage_id)
+                         if v_processedimagesources.count < 1 
+                             v_processedimagesource = Processedimagessource.new
+                             v_processedimagesource.file_name = v_original_t1_mri_file.split("/").last
+                             v_processedimagesource.file_path = v_original_t1_mri_file
+                             v_processedimagesource.source_image_id = v_mri_processedimage_id
+                             v_processedimagesource.source_image_type = 'processedimage'
+                             v_processedimagesource.processedimage_id= v_processedimage_file_id
+                      #####       v_processedimagesource.save
+                         end
+                      else
+                        @trfileimage_processedimages.push(v_processesimages.first.id)
+                     end
+                    end
+
+ # MAKE TRACKER QC
+                     @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
+
+                     if @trfiles.count == 0
+                       puts "making trfile"
+                       @trfile = Trfile.new
+                       @trfile.subjectid = v_subjectid_v_num
+                       # @trfile.secondary_key = v_secondary_key
+                       @trfile.enrollment_id = v_enrollment_id
+                       @trfile.scan_procedure_id = v_sp_id
+                       @trfile.trtype_id = v_trtype_id
+        
+                       @trfile.qc_notes = "autoinsert by panda "
+                       @trfile.save
+                       # NEED processedimage @trfile.image_dataset_id = v_ids_id
+                       if @trfileimage_processedimages.kind_of?(Array)
+                          @trfileimage_processedimages.each do |img|
+                            v_img = Trfileimage.new
+                            v_img.trfile_id = @trfile.id
+                            v_img.image_category = "processedimage"
+                            v_img.image_id = img
+                            v_img.save
+                          end
+                       end
+                       @tredit = Tredit.new
+                       @tredit.trfile_id = @trfile.id
+                       #@tredit.user_id = current_user.id
+                       @tredit.save
+                       v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                       if !v_tractiontypes.nil?
+                          v_tractiontypes.each do |tat|
+                            v_tredit_action = TreditAction.new
+                            v_tredit_action.tredit_id = @tredit.id
+                            v_tredit_action.tractiontype_id = tat.id
+                            if !(tat.form_default_value).blank?
+                               v_tredit_action.value = tat.form_default_value
+                            end
+                                 # set each field if needed-- just an example from mcd
+                                 #if tat.id == 14 # despot 2
+                                 #   v_tredit_action.value = v_despot_2_flag
+                                 #elsif tat.id == 15 # mcdespot
+                                 #   v_tredit_action.value = v_mcdespot_flag
+                                 #end
+                            v_tredit_action.save
+                          end
+                       end
+                     end
+# CHECK THAT TREDITS.STATUS_FLAG = 'Y'
+
+                    # check for roi file
+                    if File.file?(v_subjectid_roi_file_name)
+                        # check column headers 
+                        puts "v_subjectid_roi_file_name="+v_subjectid_roi_file_name
+                        v_cnt = 0
+                        v_header = ""
+                        File.open(v_subjectid_roi_file_name,'r') do |file_a|
+                          while line = file_a.gets and v_cnt < 1
+                            if v_cnt < 1
+                              v_header = line.gsub("\n","")
+                            end
+                            v_cnt = v_cnt +1
+                          end
+                        end
+                       v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_roi_file_cn_array.join(","))
+                       if v_return_flag == "N" 
+                               v_comment = v_subjectid_roi_file_name+"=>"+v_return_comment+" \n"+v_comment
+                               puts v_return_comment               
+                       else
+                       # insert v_cg_tn_roi -- with _v#  v_subjectid_v_num  
+                       # CHECK FOR subjectid_v# to SP/ENUMBER/ have sp.id have enrollment.id
+                       # CHECK FOR empty ROWS
+                          v_cnt = 0
+                          v_line_array = []
+                          v_roi_hash = Hash.new
+
+                          v_roi_hash_atlas_tjb_mni_v1 = Hash.new
+                          v_roi_hash_atlas_homic_mni_v1 = Hash.new
+                          v_roi_hash_atlas_morimod_mni_v1 = Hash.new
+                          v_roi_hash_atlas_na = Hash.new
+                          v_atlas = ""
+                          v_atlas_tjb_mni_v1 = ""
+                          v_atlas_homic_mni_v1 = ""
+                          v_atlas_morimod_mni_v1 = ""
+                          v_atlas_na = ""
+                          File.open(v_subjectid_roi_file_name,'r') do |file_a|
+
+                            while line = file_a.gets
+                              if v_cnt > 0 
+                                v_line_array = []
+                                v_line_array =line.gsub(/\n/,"").split(",")
+                                if !v_atlas_array.include?(v_line_array[1])
+                                   v_comment = "UNEXPECTED ATLAS "+v_line_array[1]+";"+v_comment
+                                end
+                                if v_line_array[1] == v_aal_atlas
+                                  v_atlas = v_line_array[1]
+                                  v_roi_hash["suvr_"+v_line_array[0].downcase] = v_line_array[3]
+                                  v_roi_hash["volume_cc_"+v_line_array[0].downcase] = v_line_array[4]
+                                elsif v_line_array[1] == v_tjb_mni_v1
+                                  v_atlas_tjb_mni_v1 = v_line_array[1]
+                                  v_roi_hash_atlas_tjb_mni_v1["suvr_"+v_line_array[0].downcase] = v_line_array[3]
+                                  v_roi_hash_atlas_tjb_mni_v1["volume_cc_"+v_line_array[0].downcase] = v_line_array[4]
+                                elsif v_line_array[1] == v_homic_mni_v1
+                                  v_atlas_homic_mni_v1 = v_line_array[1]
+                                  v_roi_hash_atlas_homic_mni_v1["suvr_"+v_line_array[0].downcase] = v_line_array[3]
+                                  v_roi_hash_atlas_homic_mni_v1["volume_cc_"+v_line_array[0].downcase] = v_line_array[4]
+                                elsif v_line_array[1] == v_morimod_mni_v1
+                                  v_atlas_morimod_mni_v1 = v_line_array[1]
+                                  v_roi_hash_atlas_morimod_mni_v1["suvr_"+v_line_array[0].downcase] = v_line_array[3]
+                                  v_roi_hash_atlas_morimod_mni_v1["volume_cc_"+v_line_array[0].downcase] = v_line_array[4]
+                                elsif v_line_array[1] == v_na
+                                  v_atlas_na = v_line_array[1]
+                                  v_roi_hash_atlas_na["suvr_"+v_line_array[0].downcase] = v_line_array[3]
+                                  v_roi_hash_atlas_na["volume_cc_"+v_line_array[0].downcase] = v_line_array[4]
+                                end
+                              end   
+                              v_cnt = v_cnt + 1                 
+                            end
+                            
+                          end # file read
+                          sql = "insert into cg_pet_pib_suvr_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"'"
+                          v_col_array = v_roi_column_list.split(",")
+                          v_col_array.each do |cn|
+                               if v_roi_hash[cn].nil?
+#puts "bbbbbbb nil="+cn
+                                 sql = sql+",''"
+                               else
+                                   sql = sql+",'"+v_roi_hash[cn]+"'"
+                               end
+                          end
+                          sql = sql+")"
+                          results = connection.execute(sql)
+                          sql = "insert into cg_pet_pib_suvr_roi_atlas_tjb_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_tjb_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_tjb_mni_v1+"','"+v_age_at_appointment+"'"
+                          v_col_array = v_roi_tjb_column_list.split(",")
+                          v_col_array.each do |cn|
+                               if v_roi_hash_atlas_tjb_mni_v1[cn].nil?
+#puts "bbbbbbb nil="+cn
+                                 sql = sql+",''"
+                               else
+                                   sql = sql+",'"+v_roi_hash_atlas_tjb_mni_v1[cn]+"'"
+                               end
+                          end
+                          sql = sql+")"
+                          results = connection.execute(sql)
+                          sql = "insert into cg_pet_pib_suvr_roi_atlas_homic_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_homic_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_homic_mni_v1+"','"+v_age_at_appointment+"'"
+                          v_col_array = v_roi_homic_column_list.split(",")
+                          v_col_array.each do |cn|
+                               if v_roi_hash_atlas_homic_mni_v1[cn].nil?
+#puts "bbbbbbb nil="+cn
+                                 sql = sql+",''"
+                               else
+                                   sql = sql+",'"+v_roi_hash_atlas_homic_mni_v1[cn]+"'"
+                               end
+                          end
+                          sql = sql+")"
+                          if  v_roi_hash_atlas_homic_mni_v1.length > 0 
+                              results = connection.execute(sql)
+                          end
+                          sql = "insert into cg_pet_pib_suvr_roi_atlas_morimod_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_morimod_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_morimod_mni_v1+"','"+v_age_at_appointment+"'"
+                          v_col_array = v_roi_morimod_column_list.split(",")
+                          v_col_array.each do |cn|
+                               if v_roi_hash_atlas_morimod_mni_v1[cn].nil?
+#puts "bbbbbbb nil="+cn
+                                 sql = sql+",''"
+                               else
+                                   sql = sql+",'"+v_roi_hash_atlas_morimod_mni_v1[cn]+"'"
+                               end
+                          end
+                          sql = sql+")"
+                          if  v_roi_hash_atlas_morimod_mni_v1.length > 0 
+                              results = connection.execute(sql)
+                          end
+                          sql = "insert into cg_pet_pib_suvr_roi_atlas_na_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_na_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_na+"','"+v_age_at_appointment+"'"
+                          v_col_array = v_roi_na_column_list.split(",")
+                          v_col_array.each do |cn|
+                               if v_roi_hash_atlas_na[cn].nil?
+#puts "bbbbbbb nil="+cn
+                                 sql = sql+",''"
+                               else
+                                   sql = sql+",'"+v_roi_hash_atlas_na[cn]+"'"
+                               end
+                          end
+                          sql = sql+")"
+                          if  v_roi_hash_atlas_na.length > 0 
+                              results = connection.execute(sql)
+                          end
+                                
+                       end
+                    end
+                    ##if File.file?(v_subjectid_tacs_file_name)
+                          # check column headers  
+                        ##v_cnt = 0
+                        ##v_header = ""
+                        ##File.open(v_subjectid_tacs_file_name,'r') do |file_a|
+                          ##while line = file_a.gets and v_cnt < 1
+                            ##if v_cnt < 1
+                              ##v_header = line.gsub("\n","")
+                            ##end
+                            ##v_cnt = v_cnt +1
+                          ##end
+                        ##end
+                       ##v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_tacs_cn_array.join(","))
+                       ##if v_return_flag == "N" 
+                            #### HIDING - some tacs columns have different name not being used except by toby
+                            #   v_comment = v_subjectid_tacs_file_name+"=>"+v_return_comment+" \n"+v_comment
+                            ##v_return_flag = "Y"
+                               ##puts v_return_comment               
+                       ##else
+                        # insert v_cg_tn_tacs -- with _v# ?
+                           ##v_cnt = 0
+                          ##v_line_array = []
+                          ##File.open(v_subjectid_tacs_file_name,'r') do |file_a|
+
+                            ##while line = file_a.gets
+                              ##if v_cnt > 0 and v_cnt < 2
+                                ##sql = "insert into cg_pet_pib_suvr_tacs_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,"+v_tacs_column_list+" ) values('"+v_subjectid_tacs_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_ecat_file.to_s+"',"
+                                ##v_line_array = []
+                                ##line.gsub(/\n/,"").split(",").each do |v|
+                                  ##v_line_array.push("'"+v+"'")
+                                ##end 
+                                ##sql = sql+v_line_array.join(",")
+                                ##sql = sql+")"
+                               #NEED TO CHANGE TABLE AFTER NEXT ATLAS CHANGE results = connection.execute(sql)
+                              ##end   
+                              ##v_cnt = v_cnt + 1                 
+                            ##end
+                            
+                          ##end
+                       ##end
+                        
+                    ##end
+                  end # end of skip flag
+                end # file loop  
+              end # if pet_pib exists
+            end # subject array loop
+          end # enrollment not blank
+        end # results loop
+      end # preprocessed sp dir exists
+    end   # scan procedure loop
+    
+                
+
+                # check move cg_ to cg_old
+                sql = "select count(*) from cg_pet_pib_suvr_roi_old"
+                results_old = connection.execute(sql)
+                
+                sql = "select count(*) from cg_pet_pib_suvr_roi"
+                results = connection.execute(sql)
+                v_old_cnt = results_old.first.to_s.to_i
+                v_present_cnt = results.first.to_s.to_i
+                v_old_minus_present =v_old_cnt-v_present_cnt
+                v_present_minus_old = v_present_cnt-v_old_cnt
+                if ( v_old_minus_present <= 0 or ( v_old_cnt > 0 and  (v_present_minus_old/v_old_cnt)>0.7     ) )
+                  sql =  "truncate table cg_pet_pib_suvr_roi_old"
+                  results = connection.execute(sql)
+                  sql = "insert into cg_pet_pib_suvr_roi_old select * from cg_pet_pib_suvr_roi"
+                  results = connection.execute(sql)
+                else
+                  v_comment = " The cg_pet_pib_suvr_roi_old table has 30% more rows than the present cg_pet_pib_suvr_roi\n Not truncating cg_pet_pib_suvr_roi_old "+v_comment 
+                end
+                #  truncate cg_ and insert cg_new
+                sql =  "truncate table cg_pet_pib_suvr_roi"
+                results = connection.execute(sql)
+
+                sql = "insert into cg_pet_pib_suvr_roi("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
+                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_pib_suvr_roi_new t
+                                               where t.scan_procedure_id is not null  and t.enrollment_id is not null "
+                results = connection.execute(sql)
+
+                # apply edits  -- made into a function  in shared model
+              
+                v_shared.apply_cg_edits("cg_pet_pib_suvr_roi")
+
+                 # DIFFERENT ATLAS atlas_tjb_mni_v1_
+                sql = "select count(*) from cg_pet_pib_suvr_roi_atlas_tjb_mni_v1_old"
+                results_old = connection.execute(sql)
+                
+                sql = "select count(*) from cg_pet_pib_suvr_roi_atlas_tjb_mni_v1"
+                results = connection.execute(sql)
+                v_old_cnt = results_old.first.to_s.to_i
+                v_present_cnt = results.first.to_s.to_i
+                v_old_minus_present =v_old_cnt-v_present_cnt
+                v_present_minus_old = v_present_cnt-v_old_cnt
+                if ( v_old_minus_present <= 0 or ( v_old_cnt > 0 and  (v_present_minus_old/v_old_cnt)>0.7     ) )
+                  sql =  "truncate table cg_pet_pib_suvr_roi_atlas_tjb_mni_v1_old"
+                  results = connection.execute(sql)
+                  sql = "insert into cg_pet_pib_suvr_roi_atlas_tjb_mni_v1_old select * from cg_pet_pib_suvr_roi_atlas_tjb_mni_v1"
+                  results = connection.execute(sql)
+                else
+                  v_comment = " The cg_pet_pib_suvr_roi_atlas_tjb_mni_v1_old table has 30% more rows than the present cg_pet_pib_suvr_roi_atlas_tjb_mni_v1\n Not truncating cg_pet_pib_suvr_roi_atlas_tjb_mni_v1_old "+v_comment 
+                end
+                #  truncate cg_ and insert cg_new
+                sql =  "truncate table cg_pet_pib_suvr_roi_atlas_tjb_mni_v1"
+                results = connection.execute(sql)
+
+                sql = "insert into cg_pet_pib_suvr_roi_atlas_tjb_mni_v1("+v_roi_tjb_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
+                select distinct "+v_roi_tjb_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_pib_suvr_roi_atlas_tjb_mni_v1_new t
+                                               where t.scan_procedure_id is not null  and t.enrollment_id is not null "
+                results = connection.execute(sql)
+
+                # apply edits  -- made into a function  in shared model
+              
+                v_shared.apply_cg_edits("cg_pet_pib_suvr_roi_atlas_tjb_mni_v1")
+
+                 # DIFFERENT ATLAS atlas_homic_mni_v1_
+                sql = "select count(*) from cg_pet_pib_suvr_roi_atlas_homic_mni_v1_old"
+                results_old = connection.execute(sql)
+                
+                sql = "select count(*) from cg_pet_pib_suvr_roi_atlas_homic_mni_v1"
+                results = connection.execute(sql)
+                v_old_cnt = results_old.first.to_s.to_i
+                v_present_cnt = results.first.to_s.to_i
+                v_old_minus_present =v_old_cnt-v_present_cnt
+                v_present_minus_old = v_present_cnt-v_old_cnt
+                if ( v_old_minus_present <= 0 or ( v_old_cnt > 0 and  (v_present_minus_old/v_old_cnt)>0.7     ) )
+                  sql =  "truncate table cg_pet_pib_suvr_roi_atlas_homic_mni_v1_old"
+                  results = connection.execute(sql)
+                  sql = "insert into cg_pet_pib_suvr_roi_atlas_homic_mni_v1_old select * from cg_pet_pib_suvr_roi_atlas_homic_mni_v1"
+                  results = connection.execute(sql)
+                else
+                  v_comment = " The cg_pet_pib_suvr_roi_atlas_homic_mni_v1_old table has 30% more rows than the present cg_pet_pib_suvr_roi_atlas_homic_mni_v1\n Not truncating cg_pet_pib_suvr_roi_atlas_homic_mni_v1_old "+v_comment 
+                end
+                #  truncate cg_ and insert cg_new
+                sql =  "truncate table cg_pet_pib_suvr_roi_atlas_homic_mni_v1"
+                results = connection.execute(sql)
+
+                sql = "insert into cg_pet_pib_suvr_roi_atlas_homic_mni_v1("+v_roi_homic_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
+                select distinct "+v_roi_homic_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_pib_suvr_roi_atlas_homic_mni_v1_new t
+                                               where t.scan_procedure_id is not null  and t.enrollment_id is not null "
+                results = connection.execute(sql)
+
+                # apply edits  -- made into a function  in shared model
+              
+                v_shared.apply_cg_edits("cg_pet_pib_suvr_roi_atlas_homic_mni_v1")
+
+                 # DIFFERENT ATLAS atlas_morimod_mni_v1_
+                sql = "select count(*) from cg_pet_pib_suvr_roi_atlas_morimod_mni_v1_old"
+                results_old = connection.execute(sql)
+                
+                sql = "select count(*) from cg_pet_pib_suvr_roi_atlas_morimod_mni_v1"
+                results = connection.execute(sql)
+                v_old_cnt = results_old.first.to_s.to_i
+                v_present_cnt = results.first.to_s.to_i
+                v_old_minus_present =v_old_cnt-v_present_cnt
+                v_present_minus_old = v_present_cnt-v_old_cnt
+                if ( v_old_minus_present <= 0 or ( v_old_cnt > 0 and  (v_present_minus_old/v_old_cnt)>0.7     ) )
+                  sql =  "truncate table cg_pet_pib_suvr_roi_atlas_morimod_mni_v1_old"
+                  results = connection.execute(sql)
+                  sql = "insert into cg_pet_pib_suvr_roi_atlas_morimod_mni_v1_old select * from cg_pet_pib_suvr_roi_atlas_morimod_mni_v1"
+                  results = connection.execute(sql)
+                else
+                  v_comment = " The cg_pet_pib_suvr_roi_atlas_morimod_mni_v1_old table has 30% more rows than the present cg_pet_pib_suvr_roi_atlas_morimod_mni_v1\n Not truncating cg_pet_pib_suvr_roi_atlas_morimod_mni_v1_old "+v_comment 
+                end
+                #  truncate cg_ and insert cg_new
+                sql =  "truncate table cg_pet_pib_suvr_roi_atlas_morimod_mni_v1"
+                results = connection.execute(sql)
+
+                sql = "insert into cg_pet_pib_suvr_roi_atlas_morimod_mni_v1("+v_roi_morimod_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
+                select distinct "+v_roi_morimod_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_pib_suvr_roi_atlas_morimod_mni_v1_new t
+                                               where t.scan_procedure_id is not null  and t.enrollment_id is not null "
+                results = connection.execute(sql)
+
+                # apply edits  -- made into a function  in shared model
+              
+                v_shared.apply_cg_edits("cg_pet_pib_suvr_roi_atlas_morimod_mni_v1")
+
+                 # DIFFERENT ATLAS atlas_na
+                sql = "select count(*) from cg_pet_pib_suvr_roi_atlas_na_old"
+                results_old = connection.execute(sql)
+                
+                sql = "select count(*) from cg_pet_pib_suvr_roi_atlas_na"
+                results = connection.execute(sql)
+                v_old_cnt = results_old.first.to_s.to_i
+                v_present_cnt = results.first.to_s.to_i
+                v_old_minus_present =v_old_cnt-v_present_cnt
+                v_present_minus_old = v_present_cnt-v_old_cnt
+                if ( v_old_minus_present <= 0 or ( v_old_cnt > 0 and  (v_present_minus_old/v_old_cnt)>0.7     ) )
+                  sql =  "truncate table cg_pet_pib_suvr_roi_atlas_na_old"
+                  results = connection.execute(sql)
+                  sql = "insert into cg_pet_pib_suvr_roi_atlas_na_old select * from cg_pet_pib_suvr_roi_atlas_na"
+                  results = connection.execute(sql)
+                else
+                  v_comment = " The cg_pet_pib_suvr_roi_atlas_na_old table has 30% more rows than the present cg_pet_pib_suvr_roi_atlas_na\n Not truncating cg_pet_pib_suvr_roi_atlas_na_old "+v_comment 
+                end
+                #  truncate cg_ and insert cg_new
+                sql =  "truncate table cg_pet_pib_suvr_roi_atlas_na"
+                results = connection.execute(sql)
+
+                sql = "insert into cg_pet_pib_suvr_roi_atlas_na("+v_roi_na_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
+                select distinct "+v_roi_na_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_pib_suvr_roi_atlas_na_new t
+                                               where t.scan_procedure_id is not null  and t.enrollment_id is not null "
+                results = connection.execute(sql)
+
+                # apply edits  -- made into a function  in shared model
+              
+                v_shared.apply_cg_edits("cg_pet_pib_suvr_roi_atlas_na")
+                # tacs
+               ##sql = "select count(*) from cg_pet_pib_suvr_tacs_old"
+                ##results_old = connection.execute(sql)
+                
+                ##sql = "select count(*) from cg_pet_pib_suvr_tacs"
+                ##results = connection.execute(sql)
+                ##v_old_cnt = results_old.first.to_s.to_i
+                ##v_present_cnt = results.first.to_s.to_i
+                ##v_old_minus_present =v_old_cnt-v_present_cnt
+                ##v_present_minus_old = v_present_cnt-v_old_cnt
+                ##if ( v_old_minus_present <= 0 or ( v_old_cnt > 0 and  (v_present_minus_old/v_old_cnt)>0.7     ) )
+                  ##sql =  "truncate table cg_pet_pib_suvr_tacs_old"
+                  ##results = connection.execute(sql)
+                  ##sql = "insert into cg_pet_pib_suvr_tacs select * from cg_pet_pib_suvr_tacs"
+                  ##results = connection.execute(sql)
+                ##else
+                  ##v_comment = " The cg_pet_pib_suvr_tacs_old table has 30% more rows than the present cg_pet_pib_suvr_tacs\n Not truncating cg_pet_pib_suvr_tacs_old "+v_comment 
+                ##end
+                #  truncate cg_ and insert cg_new
+                ##sql =  "truncate table cg_pet_pib_suvr_tacs"
+                ##results = connection.execute(sql)
+
+                ##sql = "insert into cg_pet_pib_suvr_tacs("+v_tacs_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name) 
+                ##select distinct "+v_tacs_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name from cg_pet_pib_suvr_tacs_new t
+                ##                               where t.scan_procedure_id is not null  and t.enrollment_id is not null "
+                ## NEED TO CHANGE TABLE AFTER NEXT ATLAS results = connection.execute(sql)
+
+                # apply edits  -- made into a function  in shared model
+              
+                ## NEED TO CHANGE TABLE AFTER NEXT ATLAS v_shared.apply_cg_edits("cg_pet_pib_suvr_tacs")
+
+        #BRAAK INSERT NEW ROWS
+                sql = "insert into cg_pib_visual_ratings_20180126(subjectid, scan_procedure_id,source_image,enrollment_id)
+                      select cg_pet_pib_suvr_roi.subjectid,cg_pet_pib_suvr_roi.scan_procedure_id,cg_pet_pib_suvr_roi.ecat_file_name,cg_pet_pib_suvr_roi.enrollment_id
+                      from cg_pet_pib_suvr_roi, enrollments where cg_pet_pib_suvr_roi.enrollment_id = enrollments.id
+                      and cg_pet_pib_suvr_roi.subjectid not in ( select cg_pib_visual_ratings_20180126.subjectid from cg_pib_visual_ratings_20180126)"
+              results = connection.execute(sql)
+
+     @schedulerun.comment =("successful finish pet_pib_suvr_harvest "+v_comment_warning+" "+v_comment[0..1990])
+    if !v_comment.include?("ERROR")
+       @schedulerun.status_flag ="Y"
+     end
+     @schedulerun.save
+     @schedulerun.end_time = @schedulerun.updated_at      
+     @schedulerun.save  
+
+
+end
+
+
+
+
+
+
 # Kate Sprecher Sleep study needs t1 - clean out dicom
 def run_sleep_t1
 
