@@ -538,10 +538,12 @@ v_composite_value = v_composite_value + "
                    v_petfiles_id_array.push(petfile.id)
                  end 
        # puts "PPPPEEEETTTT"
+                  # pet should all link to raw petfile
+                  #processedimages.id in 
+                    # (select image_id from trfileimages where trfileimages.trfile_id in (?) and trfileimages.image_category = 'processedimage'). ===>@trfile.id,
+                    # or
+
                  @processedimages_pet = Processedimage.where("(
-                  processedimages.id in 
-                     (select image_id from trfileimages where trfileimages.trfile_id in (?) and trfileimages.image_category = 'processedimage')
-                     or
                    processedimages.id in 
                                 (select pis2.processedimage_id from processedimagessources pis2 where pis2.source_image_type = 'petfile'
                                                             and pis2.source_image_id in (?))
@@ -571,7 +573,7 @@ v_composite_value = v_composite_value + "
                                                             and pis2.source_image_id in (?))) ) )                                             
                  )
                  and processedimages.file_type in 
-                 (select processedimagesfiletypes.file_type from processedimagesfiletypes where  processedimagesfiletypes.id in (?))",@trfile.id,v_petfiles_id_array,v_petfiles_id_array,v_petfiles_id_array,v_petfiles_id_array,@trtype.processedimagesfiletype_id.split(","))
+                 (select processedimagesfiletypes.file_type from processedimagesfiletypes where  processedimagesfiletypes.id in (?))",v_petfiles_id_array,v_petfiles_id_array,v_petfiles_id_array,v_petfiles_id_array,@trtype.processedimagesfiletype_id.split(","))
               # add to collection @processedimages
                 if @processedimages_pet.count > 0
                  @processedimages_pet.each do |pi_pet|

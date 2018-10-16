@@ -3183,7 +3183,7 @@ def  run_pet_mk6240_harvest
                                      v_mni_space_t1_mri = v[1].to_s
                                    elsif v[0] == "multispectral file" and  v[1].to_s.strip != "" and v[1].to_s.strip != "n"
                                       v_multispectral_file = v[1].to_s.strip
-                                   elsif v[0] == "ecat file" or v[0] = "raw PET file"
+                                   elsif v[0] == "ecat file" or v[0] == "raw PET file"
                                      v_ecat_file = v[1].to_s
                                      # get v_age_at_appointment
 
@@ -4162,9 +4162,11 @@ def  run_pet_pib_suvr_harvest
                          v_cnt = 0
                           File.open(v_subjectid_log_file_name,'r') do |file_a|
                             while line = file_a.gets
+                               line = line.gsub(/\n/,"").gsub(/\r/,"")
                               if v_cnt > 0
                                # line.gsub(/\n/,"") #.each do |v_line|
-                                  v = line.gsub(/\n/,"").split(",")
+                                  v = line.split(",")
+
                                    if v[0] == "tracer" 
                                      if v[1] == "pib"
                                          v_tracer = v[1]
@@ -4208,8 +4210,9 @@ def  run_pet_pib_suvr_harvest
                                      v_mni_space_t1_mri = v[1].to_s
                                    elsif v[0] == "multispectral file" and  v[1].to_s.strip != "" and v[1].to_s.strip != "n"
                                       v_multispectral_file = v[1].to_s.strip
-                                   elsif v[0] == "ecat file" or v[0] = "raw PET file"
+                                   elsif v[0] == "ecat file" or v[0] == "raw PET file"
                                      v_ecat_file = v[1].to_s
+                                     
                                      # get v_age_at_appointment
 
                                      v_petscans = Petscan.where("petscans.path in (?)",v_ecat_file)
@@ -4268,9 +4271,11 @@ def  run_pet_pib_suvr_harvest
                          # sources - ecat pet file -- petfile_id?
                          # petfile_id from ecat file
                          v_petfiles = Petfile.where("petfiles.path in (?)",v_ecat_file)
+                         puts " hhhh before ecat file cnt"
                          if v_petfiles.count > 0
                            v_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'petfile'",v_processedimage_file_id,v_petfiles.first.id)
                            if v_processedimagesources.count < 1 and v_petfiles.count > 0
+                          puts "jjjjjj make new pertfile ecat processedimagesource"
                              v_processedimagesource = Processedimagessource.new
                              v_processedimagesource.file_name = v_ecat_file.split("/").last
                              v_processedimagesource.file_path = v_ecat_file
