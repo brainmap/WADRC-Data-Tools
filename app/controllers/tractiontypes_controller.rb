@@ -4,7 +4,7 @@ class TractiontypesController < ApplicationController
   # GET /tractiontypes
   # GET /tractiontypes.json
   def index
-    @tractiontypes = Tractiontype.all
+    @tractiontypes = Tractiontype.all.order("trtype_id, form_display_order" )
 
     respond_to do |format|
       format.html # index.html.erb
