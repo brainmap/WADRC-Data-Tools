@@ -4539,15 +4539,22 @@ def  run_pet_pib_dvr_harvest
                           v_pib_index = ""  # divide sum by 16
                           v_pib_index_sum = 0
                           v_col_array = v_roi_column_list.split(",")
-
+                          v_pibindex_field_cnt = 0
                           v_col_array.each do |cn|
                               if v_aal_mni_v4_pibindex_cn_array.include? cn
-                                if !v_roi_hash[cn].nil?
+                                if !v_roi_hash[cn].nil? and  !v_roi_hash[cn].blank?
                                  v_pib_index_sum = v_pib_index_sum + v_roi_hash[cn].to_f
+                                  if v_roi_hash[cn].to_f > 0
+                                     v_pibindex_field_cnt = v_pibindex_field_cnt+1
+                                  end
                                 end
                               end
                           end
-                          v_pib_index = (v_pib_index_sum/16).round(9)
+                          if v_pibindex_field_cnt < 16
+                              v_pib_index = "na"
+                          else
+                              v_pib_index = (v_pib_index_sum/16).round(9)
+                          end
                           sql = "insert into cg_pet_pib_dvr_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,pib_index,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"','"+v_pib_index.to_s+"'"
                           v_col_array = v_roi_column_list.split(",")
                           v_col_array.each do |cn|
