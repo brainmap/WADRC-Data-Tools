@@ -4,7 +4,7 @@
 <table  width="90%" class="tabular">
 <%= form_tag  '/cg_search'  do %>
 <tr><th width="50"><small><small>Add to Search</small></small></th><th  nowrap align="left">Table Name
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= submit_tag("add tables checked to search")%> </th><th>Data Dictionary</th>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= submit_tag("add tables checked to search")%> &nbsp;&nbsp;&nbsp;&nbsp;<small><small>open multiple table category option at bottom of page</small></small></th><th>Data Dictionary</th>
     <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium' %><th  align="right">Edit Table Values</th><% end %>
  </tr>
 <% @cg_table_types.each do |tt| 
@@ -13,7 +13,7 @@
 		  <%   @cg_tn_dict[tt.table_type].each do |tn| %>
 	            <tr><td><%= hidden_field(:cg_search, "add_cg_tn_id][", :value=>tn.id.to_s) %>
 		           <%= check_box_tag "include_add_cg_tns", "1",  FALSE , :name => "cg_search[include_add_cg_tn]["+tn.id.to_s+"]", :onclick =>"checkbox_cascade(this,'"+tn.id.to_s+"')"%></td>
-		          <td><%= tn.common_name %> </td><td>
+		          <td align="left"><%= tn.common_name %> </td><td>
 		           <% if !tn.datadictionary_file_name.blank?%>
 		                <small><small><%= link_to 'Download', tn.datadictionary.url %> <%= tn.datadictionary_file_name%></small></small>
 		           <% end %>
