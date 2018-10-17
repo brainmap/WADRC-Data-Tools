@@ -142,22 +142,25 @@ class Petscan < ActiveRecord::Base
         vgroup = Vgroup.find(p_vgroup_id)
         (vgroup.enrollments).each do |e|   # need case insensitive match 
           # adcp#### needs to be adcp_##### for pattern match
+          v_enumber = e.enumber
           if (e.enumber).start_with? "adcp"
+               v_enumber = v_enumber.gsub("_","")
                v_last_four_chars = (e.enumber)[-4..-1]
                if !v_last_four_chars.include? "_" and  v_last_four_chars =~ /^[0-9]+$/ 
-                      e.enumber = "adcp_"+v_last_four_chars
+                      e.enumber = "adcp_"+v_last_four_chars #in the file name but not in the pet/enumber dir
               end
           end
+
           # checking first for the enum dir in path, then the puddle of files
-          if !Dir.glob(v_path+e.enumber+"/"+e.enumber+"*", File::FNM_CASEFOLD).empty?   or !Dir.glob(v_path+e.enumber+"/"+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).empty?
+          if !Dir.glob(v_path+v_enumber+"/"+e.enumber+"*", File::FNM_CASEFOLD).empty?   or !Dir.glob(v_path+v_enumber+"/"+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).empty?
             v_cnt = 0
-            Dir.glob(v_path+e.enumber+"/"+e.enumber+"*", File::FNM_CASEFOLD).each do |f|
-               v_file_names.push(f.gsub(v_path+e.enumber+"/",""))
+            Dir.glob(v_path+v_enumber+"/"+e.enumber+"*", File::FNM_CASEFOLD).each do |f|
+               v_file_names.push(f.gsub(v_path+v_enumber+"/",""))
                v_cnt = v_cnt + 1
             end   
             if v_cnt < 1
-              Dir.glob(v_path+e.enumber+"/"+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).each do |f|
-                 v_file_names.push(f.gsub(v_path+e.enumber+"/",""))
+              Dir.glob(v_path+v_enumber+"/"+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).each do |f|
+                 v_file_names.push(f.gsub(v_path+v_enumber+"/",""))
                  v_cnt = v_cnt + 1
               end
             end
