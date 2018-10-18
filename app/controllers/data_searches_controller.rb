@@ -1488,7 +1488,8 @@ class DataSearchesController < ApplicationController
                 @tractiontypes.each do |act|
                     v_value_sql = ""
                     # ("trfiles.id = v_"+act.id.to_s+".trfile_id")
-                    v_col = (act.form_display_label).gsub(/ /,"").gsub(/\'/,"_").gsub(/\"/,"_").gsub(/\-/,"_").downcase+"_" 
+                    # replacing problem characters so sql works
+                    v_col = (act.form_display_label).gsub(/ /,"").gsub(/\'/,"_").gsub(/\"/,"_").gsub(/\-/,"_").gsub(/<br>/,"_").gsub(/<hr>/,"_").gsub(/\//,"_").gsub(/\:/,"_").downcase+"_" 
                     v_tracker_column_array.push("v_"+act.id.to_s+"."+v_col) 
                     # need last edit
                     if !act.ref_table_b_1.blank?
