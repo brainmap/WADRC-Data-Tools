@@ -1493,12 +1493,14 @@ class DataSearchesController < ApplicationController
                     v_tracker_column_array.push("v_"+act.id.to_s+"."+v_col) 
                     # need last edit
                     if !act.ref_table_b_1.blank?
+                      # blank was being interpreted as 0 and returning 0 value field
                       v_value_sql = "LEFT JOIN  (select "+act.ref_table_a_1+".description "+v_col+", trfile2.id  trfile_id from  trfiles trfile2, tredits , tredit_actions, "+act.ref_table_a_1+" 
                       where trfile2.id = tredits.trfile_id 
                       and tredits.id = tredit_actions.tredit_id 
                       and tredit_actions.tractiontype_id = "+act.id.to_s+" 
                       and "+act.ref_table_a_1+".label = '"+act.ref_table_b_1+"'
                       and tredit_actions.value = "+act.ref_table_a_1+".ref_value
+                      and (tredit_actions.value is not null and tredit_actions.value > '')
                       and tredits.id in ( select max(tredit2.id) from tredits tredit2 where tredit2.trfile_id = trfile2.id) ) v_"+act.id.to_s+" on trfiles.id = v_"+act.id.to_s+".trfile_id "
                       v_tracker_table_array.push(v_value_sql)
 
