@@ -150,6 +150,22 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 											<%= f.select :mrifasttotaltime_min, options_for_select(v_0_30_min_display, @visit.mrifasttotaltime_min),
 																              {:prompt => 'Select mins'} %> <small> mins</small></td>
       </tr>  
+<tr><td> <%= f.label :Total_Last_Nicotine_Time %></td>
+		<td nowrap> 
+      	<%= f.select :mrilast_nicotine_totaltime, options_for_select(0..48, @visit.mrilast_nicotine_totaltime),
+																              {:prompt => 'Select Nicotine hrs'} %> <small>hrs </small>
+											<br> 
+											<%= f.select :mrilast_nicotine_totaltime_min, options_for_select(v_0_30_min_display, @visit.mrilast_nicotine_totaltime_min),
+																              {:prompt => 'Select Nicotine mins'} %> <small> mins</small></td>
+      </tr>  
+<tr><td> <%= f.label :Total_Last_Caffeine_Time %></td>
+		<td nowrap> 
+      	<%= f.select :mrilast_caffeine_totaltime, options_for_select(0..48, @visit.mrilast_caffeine_totaltime),
+																              {:prompt => 'Select Caffeine hrs'} %> <small>hrs </small>
+											<br> 
+											<%= f.select :mrilast_caffeine_totaltime_min, options_for_select(v_0_30_min_display, @visit.mrilast_caffeine_totaltime_min),
+																              {:prompt => 'Select Caffeine mins'} %> <small> mins</small></td>
+      </tr> 
       	<tr>
       <td><%= f.label(:appointment_coordinator) %></td>
       <td><%= select(:appointment, :appointment_coordinator, Employee.where("1=1").order("status,first_name,last_name").collect {|p| [ p.name, p.id ] }, { :include_blank => "Select Appt Coordinator" }) %></td>

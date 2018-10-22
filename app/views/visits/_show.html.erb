@@ -40,6 +40,8 @@
 	:Scan_End_Time =>@visit.mriendtime.nil? ? nil : @visit.mriendtime.hour.to_s.rjust(2,'0')+":"+@visit.mriendtime.min.to_s.rjust(2,'0'),
 	:MRI_Fast_Completed => @visit.completedmrifast.nil? ? "_": @visit.completedmrifast == 1 ? "Yes" : "No",
 	:MRI_Fast_Total_Time => @visit.mrifasttotaltime.nil?  ? @visit.mrifasttotaltime_min.nil? ? nil : @visit.mrifasttotaltime.to_s+" hrs : "+@visit.mrifasttotaltime_min.to_s+" mins" :  @visit.mrifasttotaltime.to_s+" hrs : "+@visit.mrifasttotaltime_min.to_s+" mins" ,
+  :MRI_Last_Nicotine_Total_Time => @visit.mrilast_nicotine_totaltime.nil?  ? @visit.mrilast_nicotine_totaltime_min.nil? ? nil : @visit.mrilast_nicotine_totaltime.to_s+" hrs : "+@visit.mrilast_nicotine_totaltime_min.to_s+" mins" :  @visit.mrilast_nicotine_totaltime.to_s+" hrs : "+@visit.mrilast_nicotine_totaltime_min.to_s+" mins" ,
+  :MRI_Last_Caffreine_Total_Time => @visit.mrilast_caffeine_totaltime.nil?  ? @visit.mrilast_caffeine_totaltime_min.nil? ? nil : @visit.mrilast_caffeine_totaltime.to_s+" hrs : "+@visit.mrilast_caffeine_totaltime_min.to_s+" mins" :  @visit.mrilast_caffeine_totaltime.to_s+" hrs : "+@visit.mrilast_caffeine_totaltime_min.to_s+" mins" ,
 	
     })  #:Archive_Dvd =>@visit.archivedvd,:Dicom_DVD => @vgroup.dicom_dvd == 'no' ? nil : @vgroup.dicom_dvd,
     %>

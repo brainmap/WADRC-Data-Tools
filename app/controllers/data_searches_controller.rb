@@ -39,11 +39,11 @@ class DataSearchesController < ApplicationController
  
 
 # mri 
-      @column_headers = ['Protocol','Enumber','RMR','Appt Date','Scan','Path',  'Completed Fast','Fast hrs','Fast min','Mri status','Radiology Outcome','Notes','Appt Note'] # need to look up values
+      @column_headers = ['Protocol','Enumber','RMR','Appt Date','Scan','Path',  'Completed Fast','Fast hrs','Fast min','Last Nicotine hrs','Last Nicotine min','Last Caffeine hrs','Last Caffeine min','Mri status','Radiology Outcome','Notes','Appt Note'] # need to look up values
       # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
       @column_number =   @column_headers.size
       @fields =["visits.scan_number","visits.path","CASE visits.completedmrifast WHEN 1 THEN 'Yes' ELSE 'No' end",
-        "visits.mrifasttotaltime","visits.mrifasttotaltime_min","vgroups.transfer_mri","CASE visits.radiology_outcome WHEN 1 THEN 'Yes' ELSE 'No' end","visits.notes","visits.id"] # vgroups.id vgroup_id always first, include table name
+        "visits.mrifasttotaltime","visits.mrifasttotaltime_min","visits.mrilast_nicotine_totaltime","visits.mrilast_nicotine_totaltime_min","visits.mrilast_caffeine_totaltime","visits.mrilast_caffeine_totaltime_min","vgroups.transfer_mri","CASE visits.radiology_outcome WHEN 1 THEN 'Yes' ELSE 'No' end","visits.notes","visits.id"] # vgroups.id vgroup_id always first, include table name
       @tables =['visits'] # trigger joins --- vgroups and appointments by default
       @left_join = [ ] # left join needs to be in sql right after the parent table!!!!!!!
       @conditions =["scan_procedures.codename='johnson.predict.visit1'"] # need look up for like, lt, gt, between  

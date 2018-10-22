@@ -59,8 +59,11 @@
 <br><br>  
 This tracker select statement is used to build a temporary cg_ search table.  <br>
 Create table (create table cg_<tracker_name> as ,select statement>)       <br>
+Replace all the weird htmlly characters,&lt;br&gt;,&lt;hr&gt;, /, :, with "_" --- this is what the search does on the field names. If there are any more weird chars to replace, the search needs to also do the replace.<br>
+The create table might fail - to many characteras per row or somethings - the get rid of all the left joins, leave the trfiles columns and turn the rest of the selected columns into "select ....,null as 'column_name', ....."
 Add table as a cg_table - look at the cg_fs_edit, cg_md_qc, or cg_pcvipr joins for examples. These are all tracker derived cg tables, check the tracker type dropdown in the cg_table set up    <br>
-Add all the columns of interest <br>
+Add all the columns of interest as cg_tn_cns<br>
+add any search able fields to the cg_tn_cns<br>
 Drop the cg_<tracker_name> table   <br>
 The search generates a alias cg_<tracker_name> table from the tracker select statement, and finds all the columns in the cg_tn_cns even though the actual table no longer exists
 <br><br>
