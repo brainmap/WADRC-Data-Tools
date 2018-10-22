@@ -28,6 +28,7 @@ class CgTnCnsController < ApplicationController
   def new
     @cg_tn_cn = CgTnCn.new
    @load_next_column = "N"
+   @load_all_rest_columns = "N"
     respond_to do |format|
       format.html # new.html.erb
       format.xml  { render :xml => @cg_tn_cn }
@@ -39,8 +40,10 @@ class CgTnCnsController < ApplicationController
     @cg_tn_cn = CgTnCn.find(params[:id])
     if !params[:load_next_column].blank?
         @load_next_column = params[:load_next_column]
+        @load_all_rest_columns = params[:load_all_rest_columns]
     else
        @load_next_column = "N"
+       @load_all_rest_columns = "N"
     end
   end
   
@@ -75,13 +78,63 @@ class CgTnCnsController < ApplicationController
     end
     @cg_tn_cn = CgTnCn.new(cg_tn_cn_params)#params[:cg_tn_cn])
     @load_next_column = ""
+    @load_all_rest_columns = ""
     if !params[:load_next_column].blank?
       @load_next_column = params[:load_next_column]
+      @load_all_rest_columns = params[:load_all_rest_columns]
     end 
 
     respond_to do |format|
       if @cg_tn_cn.save
-        if !@load_next_column.blank? and @load_next_column == "Y"
+        if !@load_all_rest_columns.blank? and @load_all_rest_columns == "Y"
+          # go until the last cg_tn_cn - save current and then loop
+          # get the next column_name
+          cg_tn = CgTn.find(params[:cg_tn_cn][:cg_tn_id]) 
+          sql = "SHOW COLUMNS FROM "+cg_tn.tn
+          connection = ActiveRecord::Base.connection();
+          @results = connection.execute(sql)
+          v_next_column =""
+          v_next_column_datatype =""
+          v_get_next_column = "N"
+          @results.each do |r|
+            v_next_column =""
+            v_next_column_datatype =""
+            if v_get_next_column == "Y"
+              v_get_next_column = "N"
+              v_next_column = r[0]
+              v_next_column_datatype = r[1]
+              @cg_tn_cn_next = CgTnCn.new
+              @cg_tn_cn_next.cn = v_next_column
+              @cg_tn_cn_next.common_name = v_next_column
+              @cg_tn_cn_next.export_name = v_next_column
+              if v_next_column_datatype == "date"
+                @cg_tn_cn_next.data_type ="date"
+              elsif v_next_column_datatype.include?('int')
+                @cg_tn_cn_next.data_type ="integer"
+              elsif v_next_column_datatype == "float"
+                @cg_tn_cn_next.data_type ="float"
+              elsif v_next_column_datatype.include?('varchar')
+                @cg_tn_cn_next.data_type ="string"
+              elsif v_next_column_datatype.include?('char')
+                @cg_tn_cn_next.data_type ="string"
+              end
+              @cg_tn_cn_next.cg_tn_id = params[:cg_tn_cn][:cg_tn_id]
+              @cg_tn_cn_next.display_order = (params[:cg_tn_cn][:display_order]).to_i + 1
+              params[:cg_tn_cn][:display_order] = @cg_tn_cn_next.display_order
+              params[:cg_tn_cn][:cn] = @cg_tn_cn_next.cn
+              @cg_tn_cn_next.save
+            end
+            if r[0] == params[:cg_tn_cn][:cn]
+              v_get_next_column = "Y"
+              v_next_column = "check_for_next"
+            end 
+          end
+
+
+
+
+
+        elsif !@load_next_column.blank? and @load_next_column == "Y"
           # get the next column_name
           cg_tn = CgTn.find(params[:cg_tn_cn][:cg_tn_id]) 
           sql = "SHOW COLUMNS FROM "+cg_tn.tn
@@ -122,6 +175,9 @@ class CgTnCnsController < ApplicationController
             @cg_tn_cn.display_order = (params[:cg_tn_cn][:display_order]).to_i + 1
             format.html { render :action => "new" }
           end
+        end
+        if !@cg_tn_cn_next.nil? and !(@cg_tn_cn_next.cn).nil?
+          format.html { redirect_to(@cg_tn_cn_next, :notice => 'Cg tn cn was successfully created - ALL rest of columns loaded.') }
         else
           format.html { redirect_to(@cg_tn_cn, :notice => 'Cg tn cn was successfully created.') }
         end
