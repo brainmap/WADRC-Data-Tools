@@ -54,7 +54,9 @@ class CgTnCnsController < ApplicationController
          puts "aaaaaa cn id="+cn
          @cg_tn_cn = CgTnCn.find(cn)
          @cg_tn_cn.display_order = params[:display_order][cn]
-         @cg_tn_cn.status_flag = params[:status_flag][cn] 
+         @cg_tn_cn.status_flag = params[:status_flag][cn]
+         @cg_tn_cn.common_name = params[:common_name][cn]
+         @cg_tn_cn.export_name = params[:export_name][cn]  
          @cg_tn_cn.save
       end
     end
