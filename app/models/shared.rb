@@ -2279,7 +2279,7 @@ def  run_pet_av1451_harvest
                                       if !v_original_t1_mri_file_array.nil? and v_original_t1_mri_file_array.count > 5
                                         v_mri_sps = ScanProcedure.where("codename in (?)",v_original_t1_mri_file_array[5])
                                         v_mri_enums = Enrollment.where("enumber in (?) or concat(enumber,'b') in (?)",v_original_t1_mri_file_array[6],v_original_t1_mri_file_array[6])
-                                        if !v_mri_sps.nil? and !v_mri_enums.nil?
+                                        if !v_mri_sps.nil? and !v_mri_enums.nil?  and v_mri_sps.count > 0 and v_mri_enums.count > 0
                                           v_mri_appointments = Appointment.where("appointments.appointment_type = 'mri' 
                                              and appointments.vgroup_id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships 
                                                                  where enrollment_vgroup_memberships.enrollment_id in (?))
@@ -3246,7 +3246,7 @@ def  run_pet_mk6240_harvest
                                       if !v_original_t1_mri_file_array.nil? and v_original_t1_mri_file_array.count > 5
                                         v_mri_sps = ScanProcedure.where("codename in (?)",v_original_t1_mri_file_array[5])
                                         v_mri_enums = Enrollment.where("enumber in (?) or concat(enumber,'b') in (?)",v_original_t1_mri_file_array[6],v_original_t1_mri_file_array[6])
-                                        if !v_mri_sps.nil? and !v_mri_enums.nil?
+                                        if !v_mri_sps.nil? and !v_mri_enums.nil?  and v_mri_sps.count > 0 and v_mri_enums.count > 0
                                           v_mri_appointments = Appointment.where("appointments.appointment_type = 'mri' 
                                              and appointments.vgroup_id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships 
                                                                  where enrollment_vgroup_memberships.enrollment_id in (?))
@@ -4323,7 +4323,7 @@ def  run_pet_pib_dvr_harvest
                                       if !v_original_t1_mri_file_array.nil? and v_original_t1_mri_file_array.count > 5
                                         v_mri_sps = ScanProcedure.where("codename in (?)",v_original_t1_mri_file_array[5])
                                         v_mri_enums = Enrollment.where("enumber in (?) or concat(enumber,'b') in (?)",v_original_t1_mri_file_array[6],v_original_t1_mri_file_array[6])
-                                        if !v_mri_sps.nil? and !v_mri_enums.nil?
+                                        if !v_mri_sps.nil? and !v_mri_enums.nil? and v_mri_sps.count > 0 and v_mri_enums.count > 0
                                           v_mri_appointments = Appointment.where("appointments.appointment_type = 'mri' 
                                              and appointments.vgroup_id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships 
                                                                  where enrollment_vgroup_memberships.enrollment_id in (?))
@@ -5298,7 +5298,7 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
                                       if !v_original_t1_mri_file_array.nil? and v_original_t1_mri_file_array.count > 5
                                         v_mri_sps = ScanProcedure.where("codename in (?)",v_original_t1_mri_file_array[5])
                                         v_mri_enums = Enrollment.where("enumber in (?) or concat(enumber,'b') in (?)",v_original_t1_mri_file_array[6],v_original_t1_mri_file_array[6])
-                                        if !v_mri_sps.nil? and !v_mri_enums.nil?
+                                        if !v_mri_sps.nil? and !v_mri_enums.nil?  and v_mri_sps.count > 0 and v_mri_enums.count > 0
                                           v_mri_appointments = Appointment.where("appointments.appointment_type = 'mri' 
                                              and appointments.vgroup_id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships 
                                                                  where enrollment_vgroup_memberships.enrollment_id in (?))
