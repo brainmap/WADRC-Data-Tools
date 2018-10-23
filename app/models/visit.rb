@@ -227,7 +227,7 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
         if dataset.dicom?  
           data = ImageDataset.where(:dicom_series_uid => dataset.dicom_series_uid).first  
  
-        elsif dataset.pfile? or dataset.geifile?
+        elsif dataset.pfile? or dataset.geifile? or dataset.scan_archive_h5_json?
           #data = ImageDataset.where(:path => dataset.directory, :scanned_file.matches => dataset.scanned_file).first
           data = ImageDataset.where("path in (?) and scanned_file in (?)", dataset.directory,  dataset.scanned_file).first
           #data = data.to_h
