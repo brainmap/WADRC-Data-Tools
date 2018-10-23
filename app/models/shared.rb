@@ -2365,7 +2365,7 @@ def  run_pet_av1451_harvest
 
  # MAKE TRACKER QC
                      @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
-
+                     v_qc_value = "Waiting"
                      if @trfiles.count == 0
                        puts "making trfile"
                        @trfile = Trfile.new
@@ -2409,6 +2409,11 @@ def  run_pet_av1451_harvest
                             v_tredit_action.save
                           end
                        end
+                     else
+                          v_qc_value = (@trfiles.first).qc_value
+                          if v_qc_value.nil? or v_qc_value.blank?
+                              v_qc_value = "Waiting"
+                          end
                      end
 
 
@@ -2482,7 +2487,7 @@ def  run_pet_av1451_harvest
                             end
                             
                           end # file read
-                          sql = "insert into cg_pet_av1451_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_av1451_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash[cn].nil?
@@ -2494,7 +2499,7 @@ def  run_pet_av1451_harvest
                           end
                           sql = sql+")"
                           results = connection.execute(sql)
-                          sql = "insert into cg_pet_av1451_roi_atlas_tjb_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_tjb_mni_v1+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_av1451_roi_atlas_tjb_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_tjb_mni_v1+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_tjb_mni_v1[cn].nil?
@@ -2506,7 +2511,7 @@ def  run_pet_av1451_harvest
                           end
                           sql = sql+")"
                           results = connection.execute(sql)
-                          sql = "insert into cg_pet_av1451_roi_atlas_homic_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_homic_mni_v1+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_av1451_roi_atlas_homic_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_homic_mni_v1+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_homic_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_homic_mni_v1[cn].nil?
@@ -2520,7 +2525,7 @@ def  run_pet_av1451_harvest
                           if  v_roi_hash_atlas_homic_mni_v1.length > 0 # has the atlas
                               results = connection.execute(sql)
                           end
-                          sql = "insert into cg_pet_av1451_roi_atlas_morimod_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_morimod_mni_v1+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_av1451_roi_atlas_morimod_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_morimod_mni_v1+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_morimod_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_morimod_mni_v1[cn].nil?
@@ -2534,7 +2539,7 @@ def  run_pet_av1451_harvest
                           if  v_roi_hash_atlas_morimod_mni_v1.length > 0 # has the atlas
                               results = connection.execute(sql)
                           end
-                          sql = "insert into cg_pet_av1451_roi_atlas_na_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_na+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_av1451_roi_atlas_na_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_na+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_na_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_na[cn].nil?
@@ -2582,7 +2587,7 @@ def  run_pet_av1451_harvest
                                 end 
                                 sql = sql+v_line_array.join(",")
                                 sql = sql+")"
-                                results = connection.execute(sql)
+                                ### skipping tacs.  results = connection.execute(sql)
                               end   
                               v_cnt = v_cnt + 1                 
                             end
@@ -2624,8 +2629,8 @@ def  run_pet_av1451_harvest
                 sql =  "truncate table cg_pet_av1451_roi"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_av1451_roi("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_av1451_roi_new t
+                sql = "insert into cg_pet_av1451_roi("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_av1451_roi_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -2655,8 +2660,8 @@ def  run_pet_av1451_harvest
                 sql =  "truncate table cg_pet_av1451_roi_atlas_tjb_mni_v1"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_av1451_roi_atlas_tjb_mni_v1("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_av1451_roi_atlas_tjb_mni_v1_new t
+                sql = "insert into cg_pet_av1451_roi_atlas_tjb_mni_v1("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_av1451_roi_atlas_tjb_mni_v1_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -2686,8 +2691,8 @@ def  run_pet_av1451_harvest
                 sql =  "truncate table cg_pet_av1451_roi_atlas_homic_mni_v1"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_av1451_roi_atlas_homic_mni_v1("+v_roi_homic_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_homic_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_av1451_roi_atlas_homic_mni_v1_new t
+                sql = "insert into cg_pet_av1451_roi_atlas_homic_mni_v1("+v_roi_homic_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_homic_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_av1451_roi_atlas_homic_mni_v1_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -2717,8 +2722,8 @@ def  run_pet_av1451_harvest
                 sql =  "truncate table cg_pet_av1451_roi_atlas_morimod_mni_v1"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_av1451_roi_atlas_morimod_mni_v1("+v_roi_morimod_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_morimod_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_av1451_roi_atlas_morimod_mni_v1_new t
+                sql = "insert into cg_pet_av1451_roi_atlas_morimod_mni_v1("+v_roi_morimod_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_morimod_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_av1451_roi_atlas_morimod_mni_v1_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -2748,8 +2753,8 @@ def  run_pet_av1451_harvest
                 sql =  "truncate table cg_pet_av1451_roi_atlas_na"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_av1451_roi_atlas_na("+v_roi_na_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_na_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_av1451_roi_atlas_na_new t
+                sql = "insert into cg_pet_av1451_roi_atlas_na("+v_roi_na_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_na_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_av1451_roi_atlas_na_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -2781,7 +2786,7 @@ def  run_pet_av1451_harvest
                 sql = "insert into cg_pet_av1451_tacs("+v_tacs_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name) 
                 select distinct "+v_tacs_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name from cg_pet_av1451_tacs_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
-                results = connection.execute(sql)
+                ####results = connection.execute(sql)
 
                 # apply edits  -- made into a function  in shared model
               
@@ -3386,7 +3391,7 @@ def  run_pet_mk6240_harvest
 
  # MAKE TRACKER QC
                      @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
-
+                     v_qc_value = "Waiting"
                      if @trfiles.count == 0
                        puts "making trfile"
                        @trfile = Trfile.new
@@ -3430,7 +3435,13 @@ def  run_pet_mk6240_harvest
                             v_tredit_action.save
                           end
                        end
+                     else
+                          v_qc_value = (@trfiles.first).qc_value
+                          if v_qc_value.nil? or v_qc_value.blank?
+                              v_qc_value = "Waiting"
+                          end
                      end
+
 # CHECK THAT TREDITS.STATUS_FLAG = 'Y'
 
                     # check for roi file
@@ -3503,7 +3514,7 @@ def  run_pet_mk6240_harvest
                             end
                             
                           end # file read
-                          sql = "insert into cg_pet_mk6240_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_mk6240_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash[cn].nil?
@@ -3515,7 +3526,7 @@ def  run_pet_mk6240_harvest
                           end
                           sql = sql+")"
                           results = connection.execute(sql)
-                          sql = "insert into cg_pet_mk6240_roi_atlas_tjb_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_tjb_mni_v1+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_mk6240_roi_atlas_tjb_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_tjb_mni_v1+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_tjb_mni_v1[cn].nil?
@@ -3527,7 +3538,7 @@ def  run_pet_mk6240_harvest
                           end
                           sql = sql+")"
                           results = connection.execute(sql)
-                          sql = "insert into cg_pet_mk6240_roi_atlas_homic_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_homic_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_homic_mni_v1+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_mk6240_roi_atlas_homic_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_homic_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_homic_mni_v1+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_homic_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_homic_mni_v1[cn].nil?
@@ -3541,7 +3552,7 @@ def  run_pet_mk6240_harvest
                           if  v_roi_hash_atlas_homic_mni_v1.length > 0 
                               results = connection.execute(sql)
                           end
-                          sql = "insert into cg_pet_mk6240_roi_atlas_morimod_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_morimod_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_morimod_mni_v1+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_mk6240_roi_atlas_morimod_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_morimod_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_morimod_mni_v1+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_morimod_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_morimod_mni_v1[cn].nil?
@@ -3555,7 +3566,7 @@ def  run_pet_mk6240_harvest
                           if  v_roi_hash_atlas_morimod_mni_v1.length > 0 
                               results = connection.execute(sql)
                           end
-                          sql = "insert into cg_pet_mk6240_roi_atlas_na_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_na_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_na+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_mk6240_roi_atlas_na_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_na_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_na+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_na_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_na[cn].nil?
@@ -3647,8 +3658,8 @@ def  run_pet_mk6240_harvest
                 sql =  "truncate table cg_pet_mk6240_roi"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_mk6240_roi("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_mk6240_roi_new t
+                sql = "insert into cg_pet_mk6240_roi("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_mk6240_roi_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -3678,8 +3689,8 @@ def  run_pet_mk6240_harvest
                 sql =  "truncate table cg_pet_mk6240_roi_atlas_tjb_mni_v1"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_mk6240_roi_atlas_tjb_mni_v1("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_mk6240_roi_atlas_tjb_mni_v1_new t
+                sql = "insert into cg_pet_mk6240_roi_atlas_tjb_mni_v1("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_mk6240_roi_atlas_tjb_mni_v1_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -3709,8 +3720,8 @@ def  run_pet_mk6240_harvest
                 sql =  "truncate table cg_pet_mk6240_roi_atlas_homic_mni_v1"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_mk6240_roi_atlas_homic_mni_v1("+v_roi_homic_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_homic_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_mk6240_roi_atlas_homic_mni_v1_new t
+                sql = "insert into cg_pet_mk6240_roi_atlas_homic_mni_v1("+v_roi_homic_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_homic_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_mk6240_roi_atlas_homic_mni_v1_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -3740,8 +3751,8 @@ def  run_pet_mk6240_harvest
                 sql =  "truncate table cg_pet_mk6240_roi_atlas_morimod_mni_v1"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_mk6240_roi_atlas_morimod_mni_v1("+v_roi_morimod_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_morimod_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_mk6240_roi_atlas_morimod_mni_v1_new t
+                sql = "insert into cg_pet_mk6240_roi_atlas_morimod_mni_v1("+v_roi_morimod_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_morimod_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_mk6240_roi_atlas_morimod_mni_v1_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -3771,8 +3782,8 @@ def  run_pet_mk6240_harvest
                 sql =  "truncate table cg_pet_mk6240_roi_atlas_na"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_mk6240_roi_atlas_na("+v_roi_na_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_na_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_mk6240_roi_atlas_na_new t
+                sql = "insert into cg_pet_mk6240_roi_atlas_na("+v_roi_na_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_na_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_mk6240_roi_atlas_na_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -4417,7 +4428,7 @@ def  run_pet_pib_dvr_harvest
 
  # MAKE TRACKER QC
                      @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
-
+                     v_qc_value = "Waiting"
                      if @trfiles.count == 0
                        puts "making trfile"
                        @trfile = Trfile.new
@@ -4461,6 +4472,11 @@ def  run_pet_pib_dvr_harvest
                             v_tredit_action.save
                           end
                        end
+                     else
+                          v_qc_value = (@trfiles.first).qc_value
+                          if v_qc_value.nil? or v_qc_value.blank?
+                              v_qc_value = "Waiting"
+                          end
                      end
 # CHECK THAT TREDITS.STATUS_FLAG = 'Y'
 
@@ -4555,7 +4571,7 @@ def  run_pet_pib_dvr_harvest
                           else
                               v_pib_index = (v_pib_index_sum/16).round(9)
                           end
-                          sql = "insert into cg_pet_pib_dvr_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,pib_index,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"','"+v_pib_index.to_s+"'"
+                          sql = "insert into cg_pet_pib_dvr_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,pib_index,general_comment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"','"+v_pib_index.to_s+"','"+v_qc_value+"'"
                           v_col_array = v_roi_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash[cn].nil?
@@ -4567,7 +4583,7 @@ def  run_pet_pib_dvr_harvest
                           end
                           sql = sql+")"
                           results = connection.execute(sql)
-                          sql = "insert into cg_pet_pib_dvr_roi_atlas_tjb_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_tjb_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_tjb_mni_v1+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_pib_dvr_roi_atlas_tjb_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_tjb_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_tjb_mni_v1+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_tjb_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_tjb_mni_v1[cn].nil?
@@ -4579,7 +4595,7 @@ def  run_pet_pib_dvr_harvest
                           end
                           sql = sql+")"
                           results = connection.execute(sql)
-                          sql = "insert into cg_pet_pib_dvr_roi_atlas_homic_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_homic_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_homic_mni_v1+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_pib_dvr_roi_atlas_homic_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_homic_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_homic_mni_v1+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_homic_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_homic_mni_v1[cn].nil?
@@ -4593,7 +4609,7 @@ def  run_pet_pib_dvr_harvest
                           if  v_roi_hash_atlas_homic_mni_v1.length > 0 
                               results = connection.execute(sql)
                           end
-                          sql = "insert into cg_pet_pib_dvr_roi_atlas_morimod_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_morimod_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_morimod_mni_v1+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_pib_dvr_roi_atlas_morimod_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_morimod_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_morimod_mni_v1+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_morimod_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_morimod_mni_v1[cn].nil?
@@ -4607,7 +4623,7 @@ def  run_pet_pib_dvr_harvest
                           if  v_roi_hash_atlas_morimod_mni_v1.length > 0 
                               results = connection.execute(sql)
                           end
-                          sql = "insert into cg_pet_pib_dvr_roi_atlas_na_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_na_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_na+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_pib_dvr_roi_atlas_na_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_na_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_na+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_na_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_na[cn].nil?
@@ -4699,8 +4715,8 @@ def  run_pet_pib_dvr_harvest
                 sql =  "truncate table cg_pet_pib_dvr_roi"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_pib_dvr_roi("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,pib_index) 
-                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,pib_index from cg_pet_pib_dvr_roi_new t
+                sql = "insert into cg_pet_pib_dvr_roi("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,pib_index,general_comment) 
+                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,pib_index,general_comment from cg_pet_pib_dvr_roi_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -4730,8 +4746,8 @@ def  run_pet_pib_dvr_harvest
                 sql =  "truncate table cg_pet_pib_dvr_roi_atlas_tjb_mni_v1"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_pib_dvr_roi_atlas_tjb_mni_v1("+v_roi_tjb_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_tjb_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_pib_dvr_roi_atlas_tjb_mni_v1_new t
+                sql = "insert into cg_pet_pib_dvr_roi_atlas_tjb_mni_v1("+v_roi_tjb_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_tjb_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_pib_dvr_roi_atlas_tjb_mni_v1_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -4761,8 +4777,8 @@ def  run_pet_pib_dvr_harvest
                 sql =  "truncate table cg_pet_pib_dvr_roi_atlas_homic_mni_v1"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_pib_dvr_roi_atlas_homic_mni_v1("+v_roi_homic_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_homic_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_pib_dvr_roi_atlas_homic_mni_v1_new t
+                sql = "insert into cg_pet_pib_dvr_roi_atlas_homic_mni_v1("+v_roi_homic_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_homic_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_pib_dvr_roi_atlas_homic_mni_v1_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -4792,8 +4808,8 @@ def  run_pet_pib_dvr_harvest
                 sql =  "truncate table cg_pet_pib_dvr_roi_atlas_morimod_mni_v1"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_pib_dvr_roi_atlas_morimod_mni_v1("+v_roi_morimod_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_morimod_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_pib_dvr_roi_atlas_morimod_mni_v1_new t
+                sql = "insert into cg_pet_pib_dvr_roi_atlas_morimod_mni_v1("+v_roi_morimod_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_morimod_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_pib_dvr_roi_atlas_morimod_mni_v1_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -4823,8 +4839,8 @@ def  run_pet_pib_dvr_harvest
                 sql =  "truncate table cg_pet_pib_dvr_roi_atlas_na"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_pib_dvr_roi_atlas_na("+v_roi_na_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_na_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_pib_dvr_roi_atlas_na_new t
+                sql = "insert into cg_pet_pib_dvr_roi_atlas_na("+v_roi_na_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_na_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_pib_dvr_roi_atlas_na_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -5339,7 +5355,7 @@ def  run_pet_pib_suvr_harvest
 
  # MAKE TRACKER QC
                      @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
-
+                     v_qc_value = "Waiting"
                      if @trfiles.count == 0
                        puts "making trfile"
                        @trfile = Trfile.new
@@ -5383,6 +5399,11 @@ def  run_pet_pib_suvr_harvest
                             v_tredit_action.save
                           end
                        end
+                     else
+                          v_qc_value = (@trfiles.first).qc_value
+                          if v_qc_value.nil? or v_qc_value.blank?
+                              v_qc_value = "Waiting"
+                          end
                      end
 # CHECK THAT TREDITS.STATUS_FLAG = 'Y'
 
@@ -5456,7 +5477,7 @@ def  run_pet_pib_suvr_harvest
                             end
                             
                           end # file read
-                          sql = "insert into cg_pet_pib_suvr_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_pib_suvr_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash[cn].nil?
@@ -5468,7 +5489,7 @@ def  run_pet_pib_suvr_harvest
                           end
                           sql = sql+")"
                           results = connection.execute(sql)
-                          sql = "insert into cg_pet_pib_suvr_roi_atlas_tjb_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_tjb_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_tjb_mni_v1+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_pib_suvr_roi_atlas_tjb_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_tjb_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_tjb_mni_v1+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_tjb_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_tjb_mni_v1[cn].nil?
@@ -5480,7 +5501,7 @@ def  run_pet_pib_suvr_harvest
                           end
                           sql = sql+")"
                           results = connection.execute(sql)
-                          sql = "insert into cg_pet_pib_suvr_roi_atlas_homic_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_homic_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_homic_mni_v1+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_pib_suvr_roi_atlas_homic_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_homic_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_homic_mni_v1+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_homic_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_homic_mni_v1[cn].nil?
@@ -5494,7 +5515,7 @@ def  run_pet_pib_suvr_harvest
                           if  v_roi_hash_atlas_homic_mni_v1.length > 0 
                               results = connection.execute(sql)
                           end
-                          sql = "insert into cg_pet_pib_suvr_roi_atlas_morimod_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_morimod_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_morimod_mni_v1+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_pib_suvr_roi_atlas_morimod_mni_v1_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_morimod_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_morimod_mni_v1+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_morimod_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_morimod_mni_v1[cn].nil?
@@ -5508,7 +5529,7 @@ def  run_pet_pib_suvr_harvest
                           if  v_roi_hash_atlas_morimod_mni_v1.length > 0 
                               results = connection.execute(sql)
                           end
-                          sql = "insert into cg_pet_pib_suvr_roi_atlas_na_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,"+v_roi_na_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_na+"','"+v_age_at_appointment+"'"
+                          sql = "insert into cg_pet_pib_suvr_roi_atlas_na_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,"+v_roi_na_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas_na+"','"+v_age_at_appointment+"','"+v_qc_value+"'"
                           v_col_array = v_roi_na_column_list.split(",")
                           v_col_array.each do |cn|
                                if v_roi_hash_atlas_na[cn].nil?
@@ -5600,8 +5621,8 @@ def  run_pet_pib_suvr_harvest
                 sql =  "truncate table cg_pet_pib_suvr_roi"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_pib_suvr_roi("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_pib_suvr_roi_new t
+                sql = "insert into cg_pet_pib_suvr_roi("+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_pib_suvr_roi_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -5631,8 +5652,8 @@ def  run_pet_pib_suvr_harvest
                 sql =  "truncate table cg_pet_pib_suvr_roi_atlas_tjb_mni_v1"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_pib_suvr_roi_atlas_tjb_mni_v1("+v_roi_tjb_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_tjb_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_pib_suvr_roi_atlas_tjb_mni_v1_new t
+                sql = "insert into cg_pet_pib_suvr_roi_atlas_tjb_mni_v1("+v_roi_tjb_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_tjb_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_pib_suvr_roi_atlas_tjb_mni_v1_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -5662,8 +5683,8 @@ def  run_pet_pib_suvr_harvest
                 sql =  "truncate table cg_pet_pib_suvr_roi_atlas_homic_mni_v1"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_pib_suvr_roi_atlas_homic_mni_v1("+v_roi_homic_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_homic_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_pib_suvr_roi_atlas_homic_mni_v1_new t
+                sql = "insert into cg_pet_pib_suvr_roi_atlas_homic_mni_v1("+v_roi_homic_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_homic_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_pib_suvr_roi_atlas_homic_mni_v1_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -5693,8 +5714,8 @@ def  run_pet_pib_suvr_harvest
                 sql =  "truncate table cg_pet_pib_suvr_roi_atlas_morimod_mni_v1"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_pib_suvr_roi_atlas_morimod_mni_v1("+v_roi_morimod_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_morimod_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_pib_suvr_roi_atlas_morimod_mni_v1_new t
+                sql = "insert into cg_pet_pib_suvr_roi_atlas_morimod_mni_v1("+v_roi_morimod_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_morimod_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_pib_suvr_roi_atlas_morimod_mni_v1_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
@@ -5724,8 +5745,8 @@ def  run_pet_pib_suvr_harvest
                 sql =  "truncate table cg_pet_pib_suvr_roi_atlas_na"
                 results = connection.execute(sql)
 
-                sql = "insert into cg_pet_pib_suvr_roi_atlas_na("+v_roi_na_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment) 
-                select distinct "+v_roi_na_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment from cg_pet_pib_suvr_roi_atlas_na_new t
+                sql = "insert into cg_pet_pib_suvr_roi_atlas_na("+v_roi_na_column_list+",subjectid,enrollment_id,scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment) 
+                select distinct "+v_roi_na_column_list+",t.subjectid,t.enrollment_id, scan_procedure_id,secondary_key,file_name,pet_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,atlas,age_at_appointment,general_comment from cg_pet_pib_suvr_roi_atlas_na_new t
                                                where t.scan_procedure_id is not null  and t.enrollment_id is not null "
                 results = connection.execute(sql)
 
