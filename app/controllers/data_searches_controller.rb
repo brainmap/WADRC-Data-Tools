@@ -355,8 +355,13 @@ class DataSearchesController < ApplicationController
            params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
       end
        # non-blank search down by the @v_dashboard_edit_columns
+       v_cg_table_types = CgTableType.where("table_type in (?)",@cg_tn.table_type)
+       @v_editable_dashboard_table_type_flag = "N"
 
-      if (@cg_tn.table_type == 'column_group' or @cg_tn.table_type == 'JohnsonInProcess'  or @cg_tn.table_type == 'BendlinInProcess'  ) and @cg_tn.secondary_edit_flag == "Y"  and !v_exclude_tables_array.include?(@cg_tn.tn.downcase) # want to limit to cg tables
+       if !v_cg_table_types.nil? and v_cg_table_types.count > 0
+               @v_editable_dashboard_table_type_flag = v_cg_table_types.first.editable_dashboard_table_type_flag
+       end
+      if (@cg_tn.table_type == 'column_group' or @cg_tn.table_type == 'JohnsonInProcess'  or @cg_tn.table_type == 'BendlinInProcess'  or @v_editable_dashboard_table_type_flag == "Y") and @cg_tn.secondary_edit_flag == "Y"  and !v_exclude_tables_array.include?(@cg_tn.tn.downcase) # want to limit to cg tables
         @cns = []
         @key_cns = []
         @v_key = []
