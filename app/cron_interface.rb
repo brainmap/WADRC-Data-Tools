@@ -249,9 +249,15 @@ v_user = v_user.gsub("\n","")
    elsif v_value_1 == "pet_pib_suvr_harvest"
       v_shared = Shared.new
       v_shared.run_pet_pib_suvr_harvest()
+   elsif v_value_1 == "pet_pib_suvr_process"
+      v_shared = Shared.new
+      v_shared.run_pet_pib_suvr_process()
    elsif v_value_1 == "pet_pib_dvr_harvest"
       v_shared = Shared.new
       v_shared.run_pet_pib_dvr_harvest()
+   elsif v_value_1 == "pet_pib_dvr_process"
+      v_shared = Shared.new
+      v_shared.run_pet_pib_dvr_process()
   elsif v_value_1 == "pib_status"
       v_shared = Shared.new
       v_shared.run_pib_status()
