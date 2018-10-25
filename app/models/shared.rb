@@ -2854,17 +2854,20 @@ def  run_pet_av1451_harvest
 end
 
 
-#WHAT SHOULD TRIGGER PROCCESSING 
-# panda record=> file path
-# file path ==> panda record
-# WHAT should stop processing
-# for now just that dir exisits
-# later file exists and log not say "something"
+#NEED SLICE COUNT
 def run_pet_av1451_process
       v_base_path = Shared.get_base_path()
       v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-      v_av1451_path = "/pet/av1451/suvr/code_ver2a"
-     @schedule = Schedule.where("name in ('pet_av1451_process')").first
+      v_av1451_path = "/pet/av1451/suvr/code_ver2b"
+      v_av1451_tracer_id = "9"
+      v_days_mri_pet_diff_limit = "180"
+      v_days_before_use_other_vgroup_mri = "5"
+      v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
+      v_exclude_sp_mri_array = [-1]
+      v_exclude_sp_pet_array = [49,50,79]
+      v_today_date = Date.today 
+
+      @schedule = Schedule.where("name in ('pet_av1451_process')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
       @schedulerun.comment ="starting pet_av1451_process"
@@ -2873,9 +2876,14 @@ def run_pet_av1451_process
       @schedulerun.save
       v_comment = ""
       v_comment_warning ="" 
-      v_av1451_tracer_id = "9"
+
     connection = ActiveRecord::Base.connection();
-      v_av1451_petscans = Petscan.where("petscans.lookup_pettracer_id in (?)",v_av1451_tracer_id)
+               # and id in (1737,1735,1717,1711) ones with no mri
+      v_av1451_petscans = Petscan.where("petscans.lookup_pettracer_id in (?)
+                  and petscans.appointment_id not in (select appointments.id from appointments, scan_procedures_vgroups
+                  where appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
+                  and scan_procedures_vgroups.scan_procedure_id in (?))",v_av1451_tracer_id,v_exclude_sp_pet_array)
+      
     # get list of av1451 Petscans
     #check if has precprocessed codever 2a dir
     # if there, stop, else 
@@ -2884,14 +2892,41 @@ def run_pet_av1451_process
     # run command, make tracker record
     # using ecat file name to get subjectid, scan_procedure from ecat file path
       v_av1451_petscans.each do |pet_appt|
-          # puts "pet_appt.path="+pet_appt.path
           v_enumber = ""
           v_scan_procedure = ""
-          v_pet_path_array = (pet_appt.path).split("/")
-          v_pet_path_ok = "Y"
-          v_scan_procedure_codename = ""
           v_subjectid = ""
-          if v_pet_path_array.count < 8 #or !File.file?(pet_appt.path)
+          v_scan_procedure_codename = ""
+          v_subjectid_pet_av1451_processed_path = ""
+
+          v_pet_preprocessed_dir_exists = "N"
+          v_multiple_petfiles = "N"
+          v_petfile_exists = "N"
+          v_pet_path_ok = "N"
+
+          v_pet_appointment = Appointment.find(pet_appt.appointment_id)
+          v_pet_date_string =(v_pet_appointment.appointment_date).to_s
+          v_participant = Participant.find(Vgroup.find(v_pet_appointment.vgroup_id).participant_id)
+          v_av1451_petfiles = Petfile.where("petscan_id in (?)",pet_appt.id)
+puts "v_participant.id="+v_participant.id.to_s
+          v_pet_path_array = Array.new
+          if !v_av1451_petfiles.nil? and v_av1451_petfiles.count > 1
+                v_multiple_petfiles = "Y"
+          elsif !v_av1451_petfiles.nil? and !v_av1451_petfiles.blank? and v_av1451_petfiles.count < 2 and v_av1451_petfiles.count > 0
+                 # everything fine
+                 if !v_av1451_petfiles.nil? and !v_av1451_petfiles.first.nil? and !v_av1451_petfiles.first.path.blank?
+                      v_pet_path_array = (v_av1451_petfiles.first.path).split("/")
+                      if File.file?(v_av1451_petfiles.first.path)
+puts v_av1451_petfiles.first.path
+                         v_petfile_exists = "Y"
+                         v_pet_path_ok = "Y"
+                      end
+                 else
+                    #v_comment = v_comment +" no petfile petscan_id="+pet_appt.id.to_s+"; "
+                 end
+          end
+          puts "aaaaa  start "+pet_appt.id.to_s
+
+          if v_pet_path_array.count < 8 or v_multiple_petfiles == "Y" or v_petfile_exists == "N"#or !File.file?(pet_appt.path)
              v_pet_path_ok = "N"
           else
              v_scan_procedure_codename = v_pet_path_array[4] # leading slash shifts register
@@ -2911,64 +2946,97 @@ def run_pet_av1451_process
                 v_pet_path_ok = "N"
              end
           end
-          v_subjectid_pet_av1451 = v_preprocessed_path+v_scan_procedure_codename+"/"+v_subjectid+v_av1451_path
-          if File.directory?(v_subjectid_pet_av1451) and v_pet_path_ok == "Y"
-           #  dir exists - not run - extend to look at logs - re-run criteria or flag
-           # puts "dddd v_subjectid_pet_av1451="+v_subjectid_pet_av1451
-          elsif File.file?(pet_appt.path)
-            # check for expected size
-            @petscan_tracer_file_size = {}
-            @petscan_tracer_file_size_multiple = {}
-            if !v_scan_procedure.petscan_tracer_file_size.nil?
-               v_tmp_tracer_size = v_scan_procedure.petscan_tracer_file_size.split("|")
-               v_tmp_tracer_size.each do |tr|
-                v_tmp_size = tr.split(":")
-                @petscan_tracer_file_size[v_tmp_size[0]] = v_tmp_size[1]
-                if @petscan_tracer_file_size_multiple[v_tmp_size[0]].nil?
-                   @petscan_tracer_file_size_multiple[v_tmp_size[0]] = [v_tmp_size[1]]
-                else
-                  @petscan_tracer_file_size_multiple[v_tmp_size[0]] = @petscan_tracer_file_size_multiple[v_tmp_size[0]].push(v_tmp_size[1])
-                end
-               end
-             #v_av1451_tracer_id
-               if !@petscan_tracer_file_size_multiple.nil? and !@petscan_tracer_file_size_multiple[v_av1451_tracer_id.to_s].nil? 
-                    if @petscan_tracer_file_size_multiple[v_av1451_tracer_id.to_s].include?(File.stat(pet_appt.path).size.to_s)
-                      # petfile not expected size
-                      v_pet_path_ok = "N"
-                      v_comment = v_comment+" :"+v_subjectid+" ecat file wrong size:"
-                    end
-               end
-             end
-
-            end
-            v_o_acpc_file = ""
-            if v_pet_path_ok == "Y"
-               # check for one o-acpc  file -- using tissue_seg - a winnowing of the unknown dir files
+          
+          if v_multiple_petfiles == "Y"
+            puts "jjjjj multiple petfiles"
+          elsif v_pet_path_ok == "N"
+            puts "kkkkk no ecat file"
+            #v_comment = v_comment+" : petscan_id="+pet_appt.id.to_s+" no ecat file;"
+          else # check for preprocessed dir
+            v_subjectid_pet_av1451_processed_path = v_preprocessed_path+v_scan_procedure_codename+"/"+v_subjectid+v_av1451_path
+            if File.directory?(v_subjectid_pet_av1451_processed_path) and v_pet_path_ok == "Y"
+          
+               puts "bbbb v_subjectid_pet_av1451_processed_path="+v_subjectid_pet_av1451_processed_path
+               puts "ccccc if no dir (would need to run) the pet_path is="+v_av1451_petfiles.first.path.to_s
+               v_pet_preprocessed_dir_exists = "Y"
+            elsif  v_pet_preprocessed_dir_exists == "N" and v_petfile_exists == "Y" and v_pet_path_ok == "Y"
+                # need to run processing - check if same vgroup.mri or other vgroup mri
+               puts "ddddd need to run v_av1451_petfiles.first.path="+v_av1451_petfiles.first.path.to_s
+               v_o_acpc_file = ""
+               v_oacpc_file_in_vgroup = "N"
                v_subjectid_tissue_seg = v_preprocessed_path+v_scan_procedure.codename+"/"+v_subjectid+"/tissue_seg"
-               
                if File.directory?(v_subjectid_tissue_seg)   # need to also look for [subjectid]b,c,d,.R
                     v_cnt = 0
                     v_dir_array = Dir.entries(v_subjectid_tissue_seg)
                     v_dir_array.each do |f|
                       if f.start_with?("o") and f.end_with?(".nii")
+                         v_oacpc_file_in_vgroup = "Y"
                          v_cnt = v_cnt + 1
                          v_o_acpc_file = f
+                         puts "eeee oacpc path= "+v_subjectid_tissue_seg
+                         puts "ffff oacpc file="+f
                       end
                     end
                     if v_cnt > 1
                       v_pet_path_ok = "N"
-                      v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in tissue_seg:"
+                      v_comment = v_subjectid+" multiple o_acpc in tissue_seg;"+v_comment
+                    else
+                       # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
+                       v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
+                       puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
                     end
-
-            end  
-            if v_pet_path_ok == "Y"
-              # netinjecteddose
-              puts " need to run="+v_subjectid_pet_av1451
+              else
+                # no oacpc file in pet vgroup
+                # check if less than v_days_before_use_other_vgroup_mri
+                if ((v_today_date - v_pet_appointment.appointment_date).to_i < v_days_before_use_other_vgroup_mri.to_i) and !v_sp_use_other_vgroup_mri_immediately_array.include?(v_scan_procedure.id)
+                   puts "hhh wait to look for mri is non-pet vgroup"
+                   v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" waiting to look for non-pet vgroup mri  v_scan_procedure.id="+v_scan_procedure.id.to_s+"  day diff ="+(v_today_date - v_pet_appointment.appointment_date).to_i.to_s
+                
+                else
+                  
+                   v_mri_visits = Visit.where("visits.appointment_id in (select appointments.id from appointments , vgroups 
+                                                    where appointments.vgroup_id = vgroups.id and vgroups.participant_id in (?)
+                                                    and vgroups.transfer_mri = 'yes' and appointments.appointment_type = 'mri'
+                                                    and abs(datediff(appointments.appointment_date,?))  < "+v_days_mri_pet_diff_limit+"
+                                                    and vgroups.id not in 
+                                                      (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups 
+                                                      where scan_procedures_vgroups.scan_procedure_id in (?)) )", v_participant.id,v_pet_date_string,v_exclude_sp_mri_array)
+                   v_mri_pet_min_date_diff = 0
+                   v_min_mri_visit = nil
+                   v_min_mri_appointment = nil
+                   v_mri_visits.each do |mri_visit|
+                      v_mri_appointment = Appointment.find(mri_visit.appointment_id)
+    puts "hhhhh mri_visit="+mri_visit.id.to_s+".   mri_appt="+v_mri_appointment.appointment_date.to_s
+                      if v_min_mri_visit.nil?
+                          v_min_mri_visit = mri_visit
+                          v_mri_pet_min_date_diff =(v_mri_appointment.appointment_date - v_pet_appointment.appointment_date).to_i.abs
+                          v_min_mri_appointment = v_mri_appointment
+                      else
+                          v_new_mri_pet_min_date_diff =(v_mri_appointment.appointment_date - v_pet_appointment.appointment_date).to_i.abs
+                          if v_new_mri_pet_min_date_diff < v_mri_pet_min_date_diff
+                              v_mri_pet_min_date_diff = v_new_mri_pet_min_date_diff
+                              v_min_mri_visit = mri_visit
+                              v_min_mri_appointment = v_mri_appointment
+                          end
+                      end
+                   end
+                   if !v_min_mri_visit.nil?
+                     puts "hhhhh min mri = "+v_min_mri_appointment.appointment_date.to_s+"     pet_appt= "+v_pet_appointment.appointment_date.to_s
+                     v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "+v_comment
+                    # optional auto run with min non-pet vgroup mri 
+                   else
+                    v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" does not have any non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days; "+v_comment
+                 
+                   end
+                end
+              end
+            
             end
-          else
-            puts "no ecat file"
-            v_comment = v_comment+" :"+v_subjectid+" no ecat file:"
           end
+
+    puts "zzzz end
+
+    "
       end
 
 
@@ -2980,6 +3048,9 @@ def run_pet_av1451_process
      @schedulerun.end_time = @schedulerun.updated_at      
      @schedulerun.save  
 end
+
+
+
 
 
 
@@ -3921,17 +3992,19 @@ def  run_pet_mk6240_harvest
 end
 
 
-#WHAT SHOULD TRIGGER PROCCESSING 
-# panda record=> file path
-# file path ==> panda record
-# WHAT should stop processing
-# for now just that dir exisits
-# later file exists and log not say "something"
+#NEED SLICE COUNT
 def run_pet_mk6240_process
       v_base_path = Shared.get_base_path()
       v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-      v_pib_path = "/pet/pib/suvr/code_ver2b"
-     @schedule = Schedule.where("name in ('pet_mk6240_process')").first
+      v_mk6240_path = "/pet/mk6240/suvr/code_ver2b"
+      v_mk6240_tracer_id = "11"
+      v_days_mri_pet_diff_limit = "180"
+      v_days_before_use_other_vgroup_mri = "5"
+      v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
+      v_exclude_sp_mri_array = [-1]
+      v_today_date = Date.today 
+
+      @schedule = Schedule.where("name in ('pet_mk6240_process')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
       @schedulerun.comment ="starting pet_mk6240_process"
@@ -3940,50 +4013,54 @@ def run_pet_mk6240_process
       @schedulerun.save
       v_comment = ""
       v_comment_warning ="" 
-      v_pib_tracer_id = "11"
-      v_days_mri_pet_diff_limit = "180"
+
     connection = ActiveRecord::Base.connection();
                # and id in (1737,1735,1717,1711) ones with no mri
-      v_pib_petscans = Petscan.where("petscans.lookup_pettracer_id in (?)",v_pib_tracer_id)
-      v_exclude_sp_mri = [-1]
-    # get list of pib Petscans
+      v_mk6240_petscans = Petscan.where("petscans.lookup_pettracer_id in (?)",v_mk6240_tracer_id)
+      
+    # get list of mk6240 Petscans
     #check if has precprocessed codever 2a dir
     # if there, stop, else 
     # check if ecat file exisits, single file, correct size
     # check for single o acpc corrected file linked to vgroup
     # run command, make tracker record
     # using ecat file name to get subjectid, scan_procedure from ecat file path
-      v_pib_petscans.each do |pet_appt|
-          v_pet_appointment = Appointment.find(pet_appt.appointment_id)
-          v_participant = Participant.find(Vgroup.find(v_pet_appointment.vgroup_id).participant_id)
-    puts "v_participant.id="+v_participant.id.to_s
+      v_mk6240_petscans.each do |pet_appt|
           v_enumber = ""
           v_scan_procedure = ""
-          v_pib_petfiles = Petfile.where("petscan_id in (?)",pet_appt.id)
+          v_subjectid = ""
+          v_scan_procedure_codename = ""
+          v_subjectid_pet_mk6240_processed_path = ""
+
           v_pet_preprocessed_dir_exists = "N"
           v_multiple_petfiles = "N"
-          v_no_petfile = "N"
+          v_petfile_exists = "N"
+          v_pet_path_ok = "N"
+
+          v_pet_appointment = Appointment.find(pet_appt.appointment_id)
+          v_pet_date_string =(v_pet_appointment.appointment_date).to_s
+          v_participant = Participant.find(Vgroup.find(v_pet_appointment.vgroup_id).participant_id)
+          v_mk6240_petfiles = Petfile.where("petscan_id in (?)",pet_appt.id)
+puts "v_participant.id="+v_participant.id.to_s
 
           v_pet_path_array = Array.new
-          if !v_pib_petfiles.nil? and v_pib_petfiles.count > 1
+          if !v_mk6240_petfiles.nil? and v_mk6240_petfiles.count > 1
                 v_multiple_petfiles = "Y"
-          elsif !v_pib_petfiles.nil? and !v_pib_petfiles.blank? and v_pib_petfiles.count < 2 and v_pib_petfiles.count > 0
+          elsif !v_mk6240_petfiles.nil? and !v_mk6240_petfiles.blank? and v_mk6240_petfiles.count < 2 and v_mk6240_petfiles.count > 0
                  # everything fine
-                 if !v_pib_petfiles.first.nil?
-                      v_pet_path_array = (v_pib_petfiles.first.path).split("/")
+                 if !v_mk6240_petfiles.nil? and !v_mk6240_petfiles.first.nil? and !v_mk6240_petfiles.first.path.blank?
+                      v_pet_path_array = (v_mk6240_petfiles.first.path).split("/")
+                      if File.file?(v_mk6240_petfiles.first.path)
+                         v_petfile_exists = "Y"
+                         v_pet_path_ok = "Y"
+                      end
                  else
-                    v_comment = v_comment +" no petfile petscan_id="+pet_appt.id.to_s+"; "
-                    v_no_petfile = "Y"
+                    #v_comment = v_comment +" no petfile petscan_id="+pet_appt.id.to_s+"; "
                  end
-          else # no petfile
-               v_no_petfile = "Y"
           end
           puts "aaaaa  start "+pet_appt.id.to_s
 
-          v_pet_path_ok = "Y"
-          v_scan_procedure_codename = ""
-          v_subjectid = ""
-          if v_pet_path_array.count < 8 or v_multiple_petfiles == "Y" or v_no_petfile == "Y"#or !File.file?(pet_appt.path)
+          if v_pet_path_array.count < 8 or v_multiple_petfiles == "Y" or v_petfile_exists == "N"#or !File.file?(pet_appt.path)
              v_pet_path_ok = "N"
           else
              v_scan_procedure_codename = v_pet_path_array[4] # leading slash shifts register
@@ -4003,25 +4080,25 @@ def run_pet_mk6240_process
                 v_pet_path_ok = "N"
              end
           end
-          v_subjectid_pet_pib = v_preprocessed_path+v_scan_procedure_codename+"/"+v_subjectid+v_pib_path
-          if File.directory?(v_subjectid_pet_pib) and v_pet_path_ok == "Y"
-           #  dir exists - not run - extend to look at logs - re-run criteria or flag
-            puts "bbbb v_subjectid_pet_pib="+v_subjectid_pet_pib
-            puts "ccccc if no dir (would need to run) the pet_path is="+pet_appt.path
-            v_pet_preprocessed_dir_exists = "Y"
-          elsif File.file?(pet_appt.path)
-            # check for slice count
-            # check for expected size. --- just use slice count?
-      puts "ddddd need to run pet_appt.path="+pet_appt.path
-           
-
-            end
-            v_o_acpc_file = ""
-            v_oacpc_file_in_vgroup = "N"
-            if v_pet_path_ok == "Y" 
-               # check for one o-acpc  file -- using tissue_seg - a winnowing of the unknown dir files
+          
+          if v_multiple_petfiles == "Y"
+            puts "jjjjj multiple petfiles"
+          elsif v_pet_path_ok == "N"
+            puts "kkkkk no ecat file"
+            #v_comment = v_comment+" : petscan_id="+pet_appt.id.to_s+" no ecat file;"
+          else # check for preprocessed dir
+            v_subjectid_pet_mk6240_processed_path = v_preprocessed_path+v_scan_procedure_codename+"/"+v_subjectid+v_mk6240_path
+            if File.directory?(v_subjectid_pet_mk6240_processed_path) and v_pet_path_ok == "Y"
+          
+               puts "bbbb v_subjectid_pet_mk6240_processed_path="+v_subjectid_pet_mk6240_processed_path
+               puts "ccccc if no dir (would need to run) the pet_path is="+v_mk6240_petfiles.first.path.to_s
+               v_pet_preprocessed_dir_exists = "Y"
+            elsif  v_pet_preprocessed_dir_exists == "N" and v_petfile_exists == "Y" and v_pet_path_ok == "Y"
+                # need to run processing - check if same vgroup.mri or other vgroup mri
+               puts "ddddd need to run v_mk6240_petfiles.first.path="+v_mk6240_petfiles.first.path.to_s
+               v_o_acpc_file = ""
+               v_oacpc_file_in_vgroup = "N"
                v_subjectid_tissue_seg = v_preprocessed_path+v_scan_procedure.codename+"/"+v_subjectid+"/tissue_seg"
-               
                if File.directory?(v_subjectid_tissue_seg)   # need to also look for [subjectid]b,c,d,.R
                     v_cnt = 0
                     v_dir_array = Dir.entries(v_subjectid_tissue_seg)
@@ -4030,42 +4107,38 @@ def run_pet_mk6240_process
                          v_oacpc_file_in_vgroup = "Y"
                          v_cnt = v_cnt + 1
                          v_o_acpc_file = f
-  puts "eeee oacpc path= "+v_subjectid_tissue_seg
-  puts "ffff oacpc file="+f
+                         puts "eeee oacpc path= "+v_subjectid_tissue_seg
+                         puts "ffff oacpc file="+f
                       end
                     end
                     if v_cnt > 1
                       v_pet_path_ok = "N"
                       v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in tissue_seg:"
+                    else
+                       # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
+                       v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
+                       puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
                     end
               else
-                v_oacpc_file_in_vgroup = "N"
-  puts "gggg no o-acpc in vgroup"
-              end  
-    puts "gggggg v_pet_path_ok="+v_pet_path_ok
-    puts "ggggg v_oacpc_file_in_vgroup="+v_oacpc_file_in_vgroup
-            if v_pet_path_ok == "Y" and v_pet_preprocessed_dir_exists == "N"
-              # netinjecteddose
-              if v_oacpc_file_in_vgroup == "N"
-                  puts "hhhhhh  need to run and no o-acpc corrected file in vgroup"
-                  # look for near by mri with this participant
-
-                  # v_pet_appointment. v_days_mri_pet_diff_limit, v_participant
-                  # get all mri_transfer = 'yes' and  appointment_type ='mri' for participant ( could exclude some study / then if not found, try those study)
-                  # loop thru - find date diff - set to min, each time thru loop check if still min
-                  v_pet_date_string =(v_pet_appointment.appointment_date).to_s
-puts "hhhhhhh v_pet_date_string="+v_pet_date_string
-# ADD IN v_exclude_sp_mri. either in the original Visit query, or as a check step on the v_min_mri_visit/v_min_mri_appointment
-                  v_mri_visits = Visit.where("visits.appointment_id in (select appointments.id from appointments , vgroups 
+                # no oacpc file in pet vgroup
+                # check if less than v_days_before_use_other_vgroup_mri
+                if ((v_today_date - v_pet_appointment.appointment_date).to_i < v_days_before_use_other_vgroup_mri.to_i) and !v_sp_use_other_vgroup_mri_immediately_array.include?(v_scan_procedure.id)
+                   puts "hhh wait to look for mri is non-pet vgroup"
+                   v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" waiting to look for non-pet vgroup mri  v_scan_procedure.id="+v_scan_procedure.id.to_s+"  day diff ="+(v_today_date - v_pet_appointment.appointment_date).to_i.to_s
+                
+                else
+                  
+                   v_mri_visits = Visit.where("visits.appointment_id in (select appointments.id from appointments , vgroups 
                                                     where appointments.vgroup_id = vgroups.id and vgroups.participant_id in (?)
                                                     and vgroups.transfer_mri = 'yes' and appointments.appointment_type = 'mri'
-                                                    and abs(datediff(appointments.appointment_date,?))  < "+v_days_mri_pet_diff_limit+" )", v_participant.id,v_pet_date_string)
-                  # get min diff mri appt
-                  #v_exclude_sp_mri
-                  v_mri_pet_min_date_diff = 0
-                  v_min_mri_visit = nil
-                  v_min_mri_appointment = nil
-                  v_mri_visits.each do |mri_visit|
+                                                    and abs(datediff(appointments.appointment_date,?))  < "+v_days_mri_pet_diff_limit+"
+                                                    and vgroups.id not in 
+                                                      (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups 
+                                                      where scan_procedures_vgroups.scan_procedure_id in (?)) )", v_participant.id,v_pet_date_string,v_exclude_sp_mri_array)
+                   v_mri_pet_min_date_diff = 0
+                   v_min_mri_visit = nil
+                   v_min_mri_appointment = nil
+                   v_mri_visits.each do |mri_visit|
                       v_mri_appointment = Appointment.find(mri_visit.appointment_id)
     puts "hhhhh mri_visit="+mri_visit.id.to_s+".   mri_appt="+v_mri_appointment.appointment_date.to_s
                       if v_min_mri_visit.nil?
@@ -4080,23 +4153,21 @@ puts "hhhhhhh v_pet_date_string="+v_pet_date_string
                               v_min_mri_appointment = v_mri_appointment
                           end
                       end
-                  end
-                  if !v_min_mri_visit.nil?
+                   end
+                   if !v_min_mri_visit.nil?
                      puts "hhhhh min mri = "+v_min_mri_appointment.appointment_date.to_s+"     pet_appt= "+v_pet_appointment.appointment_date.to_s
-                     v_comment = v_comment +" need run-has no vgroup mri petscan_id="+pet_appt.id.to_s+"  min mri = "+v_min_mri_appointment.appointment_date.to_s+"     pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "
-                  end
-              elsif v_pet_preprocessed_dir_exists == "N"
-
-                  puts "iiiiii  need to run and  o-acpc corrected file in vgroup"
-                  v_comment = v_comment +" need run-has vgroup mri petscan_id="+pet_appt.id.to_s+"; "
+                     v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "+v_comment
+                    # optional auto run with min non-pet vgroup mri 
+                   else
+                    v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" does not have any non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days; "+v_comment
+                 
+                   end
+                end
               end
+            
             end
-          elsif v_multiple_petfiles == "Y"
-            puts "jjjjj multiple petfiles"
-          elsif v_pet_path_ok == "N"
-            puts "kkkkk no ecat file"
-            v_comment = v_comment+" : petscan_id="+pet_appt.id.to_s+" no ecat file;"
           end
+
     puts "zzzz end
 
     "
@@ -4111,6 +4182,8 @@ puts "hhhhhhh v_pet_date_string="+v_pet_date_string
      @schedulerun.end_time = @schedulerun.updated_at      
      @schedulerun.save  
 end
+
+
 
 
 
@@ -5093,12 +5166,19 @@ def  run_pet_pib_dvr_harvest
 end
 
 
-
+#NEED SLICE COUNT
 def run_pet_pib_dvr_process
       v_base_path = Shared.get_base_path()
       v_preprocessed_path = v_base_path+"/preprocessed/visits/"
       v_pib_path = "/pet/pib/dvr/code_ver2b"
-     @schedule = Schedule.where("name in ('pet_pib_dvr_process')").first
+      v_pib_tracer_id = "1"
+      v_days_mri_pet_diff_limit = "180"
+      v_days_before_use_other_vgroup_mri = "5"
+      v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
+      v_exclude_sp_mri_array = [-1]
+      v_today_date = Date.today 
+
+      @schedule = Schedule.where("name in ('pet_pib_dvr_process')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
       @schedulerun.comment ="starting pet_pib_dvr_process"
@@ -5107,12 +5187,11 @@ def run_pet_pib_dvr_process
       @schedulerun.save
       v_comment = ""
       v_comment_warning ="" 
-      v_pib_tracer_id = "1"
-      v_days_mri_pet_diff_limit = "180"
+
     connection = ActiveRecord::Base.connection();
                # and id in (1737,1735,1717,1711) ones with no mri
       v_pib_petscans = Petscan.where("petscans.lookup_pettracer_id in (?)",v_pib_tracer_id)
-      v_exclude_sp_mri = [-1]
+      
     # get list of pib Petscans
     #check if has precprocessed codever 2a dir
     # if there, stop, else 
@@ -5121,36 +5200,41 @@ def run_pet_pib_dvr_process
     # run command, make tracker record
     # using ecat file name to get subjectid, scan_procedure from ecat file path
       v_pib_petscans.each do |pet_appt|
-          v_pet_appointment = Appointment.find(pet_appt.appointment_id)
-          v_participant = Participant.find(Vgroup.find(v_pet_appointment.vgroup_id).participant_id)
-    puts "v_participant.id="+v_participant.id.to_s
           v_enumber = ""
           v_scan_procedure = ""
-          v_pib_petfiles = Petfile.where("petscan_id in (?)",pet_appt.id)
+          v_subjectid = ""
+          v_scan_procedure_codename = ""
+          v_subjectid_pet_pib_processed_path = ""
+
           v_pet_preprocessed_dir_exists = "N"
           v_multiple_petfiles = "N"
-          v_no_petfile = "N"
+          v_petfile_exists = "N"
+          v_pet_path_ok = "N"
+
+          v_pet_appointment = Appointment.find(pet_appt.appointment_id)
+          v_pet_date_string =(v_pet_appointment.appointment_date).to_s
+          v_participant = Participant.find(Vgroup.find(v_pet_appointment.vgroup_id).participant_id)
+          v_pib_petfiles = Petfile.where("petscan_id in (?)",pet_appt.id)
+puts "v_participant.id="+v_participant.id.to_s
 
           v_pet_path_array = Array.new
           if !v_pib_petfiles.nil? and v_pib_petfiles.count > 1
                 v_multiple_petfiles = "Y"
           elsif !v_pib_petfiles.nil? and !v_pib_petfiles.blank? and v_pib_petfiles.count < 2 and v_pib_petfiles.count > 0
                  # everything fine
-                 if !v_pib_petfiles.first.nil?
+                 if !v_pib_petfiles.nil? and !v_pib_petfiles.first.nil? and !v_pib_petfiles.first.path.blank?
                       v_pet_path_array = (v_pib_petfiles.first.path).split("/")
+                      if File.file?(v_pib_petfiles.first.path)
+                         v_petfile_exists = "Y"
+                         v_pet_path_ok = "Y"
+                      end
                  else
-                    v_comment = v_comment +" no petfile petscan_id="+pet_appt.id.to_s+"; "
-                    v_no_petfile = "Y"
+                    #v_comment = v_comment +" no petfile petscan_id="+pet_appt.id.to_s+"; "
                  end
-          else # no petfile
-               v_no_petfile = "Y"
           end
           puts "aaaaa  start "+pet_appt.id.to_s
 
-          v_pet_path_ok = "Y"
-          v_scan_procedure_codename = ""
-          v_subjectid = ""
-          if v_pet_path_array.count < 8 or v_multiple_petfiles == "Y" or v_no_petfile == "Y"#or !File.file?(pet_appt.path)
+          if v_pet_path_array.count < 8 or v_multiple_petfiles == "Y" or v_petfile_exists == "N"#or !File.file?(pet_appt.path)
              v_pet_path_ok = "N"
           else
              v_scan_procedure_codename = v_pet_path_array[4] # leading slash shifts register
@@ -5170,25 +5254,25 @@ def run_pet_pib_dvr_process
                 v_pet_path_ok = "N"
              end
           end
-          v_subjectid_pet_pib = v_preprocessed_path+v_scan_procedure_codename+"/"+v_subjectid+v_pib_path
-          if File.directory?(v_subjectid_pet_pib) and v_pet_path_ok == "Y"
-           #  dir exists - not run - extend to look at logs - re-run criteria or flag
-            puts "bbbb v_subjectid_pet_pib="+v_subjectid_pet_pib
-            puts "ccccc if no dir (would need to run) the pet_path is="+pet_appt.path
-            v_pet_preprocessed_dir_exists = "Y"
-          elsif File.file?(pet_appt.path)
-            # check for slice count
-            # check for expected size. --- just use slice count?
-      puts "ddddd need to run pet_appt.path="+pet_appt.path
-           
-
-            end
-            v_o_acpc_file = ""
-            v_oacpc_file_in_vgroup = "N"
-            if v_pet_path_ok == "Y" 
-               # check for one o-acpc  file -- using tissue_seg - a winnowing of the unknown dir files
+          
+          if v_multiple_petfiles == "Y"
+            puts "jjjjj multiple petfiles"
+          elsif v_pet_path_ok == "N"
+            puts "kkkkk no ecat file"
+            #v_comment = v_comment+" : petscan_id="+pet_appt.id.to_s+" no ecat file;"
+          else # check for preprocessed dir
+            v_subjectid_pet_pib_processed_path = v_preprocessed_path+v_scan_procedure_codename+"/"+v_subjectid+v_pib_path
+            if File.directory?(v_subjectid_pet_pib_processed_path) and v_pet_path_ok == "Y"
+          
+               puts "bbbb v_subjectid_pet_pib_processed_path="+v_subjectid_pet_pib_processed_path
+               puts "ccccc if no dir (would need to run) the pet_path is="+v_pib_petfiles.first.path.to_s
+               v_pet_preprocessed_dir_exists = "Y"
+            elsif  v_pet_preprocessed_dir_exists == "N" and v_petfile_exists == "Y" and v_pet_path_ok == "Y"
+                # need to run processing - check if same vgroup.mri or other vgroup mri
+               puts "ddddd need to run v_pib_petfiles.first.path="+v_pib_petfiles.first.path.to_s
+               v_o_acpc_file = ""
+               v_oacpc_file_in_vgroup = "N"
                v_subjectid_tissue_seg = v_preprocessed_path+v_scan_procedure.codename+"/"+v_subjectid+"/tissue_seg"
-               
                if File.directory?(v_subjectid_tissue_seg)   # need to also look for [subjectid]b,c,d,.R
                     v_cnt = 0
                     v_dir_array = Dir.entries(v_subjectid_tissue_seg)
@@ -5197,42 +5281,38 @@ def run_pet_pib_dvr_process
                          v_oacpc_file_in_vgroup = "Y"
                          v_cnt = v_cnt + 1
                          v_o_acpc_file = f
-  puts "eeee oacpc path= "+v_subjectid_tissue_seg
-  puts "ffff oacpc file="+f
+                         puts "eeee oacpc path= "+v_subjectid_tissue_seg
+                         puts "ffff oacpc file="+f
                       end
                     end
                     if v_cnt > 1
                       v_pet_path_ok = "N"
                       v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in tissue_seg:"
+                    else
+                       # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
+                       v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
+                       puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
                     end
               else
-                v_oacpc_file_in_vgroup = "N"
-  puts "gggg no o-acpc in vgroup"
-              end  
-    puts "gggggg v_pet_path_ok="+v_pet_path_ok
-    puts "ggggg v_oacpc_file_in_vgroup="+v_oacpc_file_in_vgroup
-            if v_pet_path_ok == "Y" and v_pet_preprocessed_dir_exists == "N"
-              # netinjecteddose
-              if v_oacpc_file_in_vgroup == "N"
-                  puts "hhhhhh  need to run and no o-acpc corrected file in vgroup"
-                  # look for near by mri with this participant
-
-                  # v_pet_appointment. v_days_mri_pet_diff_limit, v_participant
-                  # get all mri_transfer = 'yes' and  appointment_type ='mri' for participant ( could exclude some study / then if not found, try those study)
-                  # loop thru - find date diff - set to min, each time thru loop check if still min
-                  v_pet_date_string =(v_pet_appointment.appointment_date).to_s
-puts "hhhhhhh v_pet_date_string="+v_pet_date_string
-# ADD IN v_exclude_sp_mri. either in the original Visit query, or as a check step on the v_min_mri_visit/v_min_mri_appointment
-                  v_mri_visits = Visit.where("visits.appointment_id in (select appointments.id from appointments , vgroups 
+                # no oacpc file in pet vgroup
+                # check if less than v_days_before_use_other_vgroup_mri
+                if ((v_today_date - v_pet_appointment.appointment_date).to_i < v_days_before_use_other_vgroup_mri.to_i) and !v_sp_use_other_vgroup_mri_immediately_array.include?(v_scan_procedure.id)
+                   puts "hhh wait to look for mri is non-pet vgroup"
+                   v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" waiting to look for non-pet vgroup mri  v_scan_procedure.id="+v_scan_procedure.id.to_s+"  day diff ="+(v_today_date - v_pet_appointment.appointment_date).to_i.to_s
+                
+                else
+                  
+                   v_mri_visits = Visit.where("visits.appointment_id in (select appointments.id from appointments , vgroups 
                                                     where appointments.vgroup_id = vgroups.id and vgroups.participant_id in (?)
                                                     and vgroups.transfer_mri = 'yes' and appointments.appointment_type = 'mri'
-                                                    and abs(datediff(appointments.appointment_date,?))  < "+v_days_mri_pet_diff_limit+" )", v_participant.id,v_pet_date_string)
-                  # get min diff mri appt
-                  #v_exclude_sp_mri
-                  v_mri_pet_min_date_diff = 0
-                  v_min_mri_visit = nil
-                  v_min_mri_appointment = nil
-                  v_mri_visits.each do |mri_visit|
+                                                    and abs(datediff(appointments.appointment_date,?))  < "+v_days_mri_pet_diff_limit+"
+                                                    and vgroups.id not in 
+                                                      (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups 
+                                                      where scan_procedures_vgroups.scan_procedure_id in (?)) )", v_participant.id,v_pet_date_string,v_exclude_sp_mri_array)
+                   v_mri_pet_min_date_diff = 0
+                   v_min_mri_visit = nil
+                   v_min_mri_appointment = nil
+                   v_mri_visits.each do |mri_visit|
                       v_mri_appointment = Appointment.find(mri_visit.appointment_id)
     puts "hhhhh mri_visit="+mri_visit.id.to_s+".   mri_appt="+v_mri_appointment.appointment_date.to_s
                       if v_min_mri_visit.nil?
@@ -5247,23 +5327,21 @@ puts "hhhhhhh v_pet_date_string="+v_pet_date_string
                               v_min_mri_appointment = v_mri_appointment
                           end
                       end
-                  end
-                  if !v_min_mri_visit.nil?
+                   end
+                   if !v_min_mri_visit.nil?
                      puts "hhhhh min mri = "+v_min_mri_appointment.appointment_date.to_s+"     pet_appt= "+v_pet_appointment.appointment_date.to_s
-                     v_comment = v_comment +" need run-has no vgroup mri petscan_id="+pet_appt.id.to_s+"  min mri = "+v_min_mri_appointment.appointment_date.to_s+"     pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "
-                  end
-              elsif v_pet_preprocessed_dir_exists == "N"
-
-                  puts "iiiiii  need to run and  o-acpc corrected file in vgroup"
-                  v_comment = v_comment +" need run-has vgroup mri petscan_id="+pet_appt.id.to_s+"; "
+                     v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "+v_comment
+                    # optional auto run with min non-pet vgroup mri 
+                   else
+                    v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" does not have any non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days; "+v_comment
+                 
+                   end
+                end
               end
+            
             end
-          elsif v_multiple_petfiles == "Y"
-            puts "jjjjj multiple petfiles"
-          elsif v_pet_path_ok == "N"
-            puts "kkkkk no ecat file"
-            v_comment = v_comment+" : petscan_id="+pet_appt.id.to_s+" no ecat file;"
           end
+
     puts "zzzz end
 
     "
@@ -6227,11 +6305,19 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
 
 end
 
+#NEED SLICE COUNT
 def run_pet_pib_suvr_process
       v_base_path = Shared.get_base_path()
       v_preprocessed_path = v_base_path+"/preprocessed/visits/"
       v_pib_path = "/pet/pib/suvr/code_ver2b"
-     @schedule = Schedule.where("name in ('pet_pib_suvr_process')").first
+      v_pib_tracer_id = "1"
+      v_days_mri_pet_diff_limit = "180"
+      v_days_before_use_other_vgroup_mri = "5"
+      v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
+      v_exclude_sp_mri_array = [-1]
+      v_today_date = Date.today 
+
+      @schedule = Schedule.where("name in ('pet_pib_suvr_process')").first
       @schedulerun = Schedulerun.new
       @schedulerun.schedule_id = @schedule.id
       @schedulerun.comment ="starting pet_pib_suvr_process"
@@ -6240,12 +6326,11 @@ def run_pet_pib_suvr_process
       @schedulerun.save
       v_comment = ""
       v_comment_warning ="" 
-      v_pib_tracer_id = "1"
-      v_days_mri_pet_diff_limit = "180"
+
     connection = ActiveRecord::Base.connection();
                # and id in (1737,1735,1717,1711) ones with no mri
       v_pib_petscans = Petscan.where("petscans.lookup_pettracer_id in (?)",v_pib_tracer_id)
-      v_exclude_sp_mri = [-1]
+      
     # get list of pib Petscans
     #check if has precprocessed codever 2a dir
     # if there, stop, else 
@@ -6254,36 +6339,41 @@ def run_pet_pib_suvr_process
     # run command, make tracker record
     # using ecat file name to get subjectid, scan_procedure from ecat file path
       v_pib_petscans.each do |pet_appt|
-          v_pet_appointment = Appointment.find(pet_appt.appointment_id)
-          v_participant = Participant.find(Vgroup.find(v_pet_appointment.vgroup_id).participant_id)
-    puts "v_participant.id="+v_participant.id.to_s
           v_enumber = ""
           v_scan_procedure = ""
-          v_pib_petfiles = Petfile.where("petscan_id in (?)",pet_appt.id)
+          v_subjectid = ""
+          v_scan_procedure_codename = ""
+          v_subjectid_pet_pib_processed_path = ""
+
           v_pet_preprocessed_dir_exists = "N"
           v_multiple_petfiles = "N"
-          v_no_petfile = "N"
+          v_petfile_exists = "N"
+          v_pet_path_ok = "N"
+
+          v_pet_appointment = Appointment.find(pet_appt.appointment_id)
+          v_pet_date_string =(v_pet_appointment.appointment_date).to_s
+          v_participant = Participant.find(Vgroup.find(v_pet_appointment.vgroup_id).participant_id)
+          v_pib_petfiles = Petfile.where("petscan_id in (?)",pet_appt.id)
+puts "v_participant.id="+v_participant.id.to_s
 
           v_pet_path_array = Array.new
           if !v_pib_petfiles.nil? and v_pib_petfiles.count > 1
                 v_multiple_petfiles = "Y"
           elsif !v_pib_petfiles.nil? and !v_pib_petfiles.blank? and v_pib_petfiles.count < 2 and v_pib_petfiles.count > 0
                  # everything fine
-                 if !v_pib_petfiles.first.nil?
+                 if !v_pib_petfiles.nil? and !v_pib_petfiles.first.nil? and !v_pib_petfiles.first.path.blank?
                       v_pet_path_array = (v_pib_petfiles.first.path).split("/")
+                      if File.file?(v_pib_petfiles.first.path)
+                         v_petfile_exists = "Y"
+                         v_pet_path_ok = "Y"
+                      end
                  else
-                    v_comment = v_comment +" no petfile petscan_id="+pet_appt.id.to_s+"; "
-                    v_no_petfile = "Y"
+                    #v_comment = v_comment +" no petfile petscan_id="+pet_appt.id.to_s+"; "
                  end
-          else # no petfile
-               v_no_petfile = "Y"
           end
           puts "aaaaa  start "+pet_appt.id.to_s
 
-          v_pet_path_ok = "Y"
-          v_scan_procedure_codename = ""
-          v_subjectid = ""
-          if v_pet_path_array.count < 8 or v_multiple_petfiles == "Y" or v_no_petfile == "Y"#or !File.file?(pet_appt.path)
+          if v_pet_path_array.count < 8 or v_multiple_petfiles == "Y" or v_petfile_exists == "N"#or !File.file?(pet_appt.path)
              v_pet_path_ok = "N"
           else
              v_scan_procedure_codename = v_pet_path_array[4] # leading slash shifts register
@@ -6303,25 +6393,25 @@ def run_pet_pib_suvr_process
                 v_pet_path_ok = "N"
              end
           end
-          v_subjectid_pet_pib = v_preprocessed_path+v_scan_procedure_codename+"/"+v_subjectid+v_pib_path
-          if File.directory?(v_subjectid_pet_pib) and v_pet_path_ok == "Y"
-           #  dir exists - not run - extend to look at logs - re-run criteria or flag
-            puts "bbbb v_subjectid_pet_pib="+v_subjectid_pet_pib
-            puts "ccccc if no dir (would need to run) the pet_path is="+pet_appt.path
-            v_pet_preprocessed_dir_exists = "Y"
-          elsif File.file?(pet_appt.path)
-            # check for slice count
-            # check for expected size. --- just use slice count?
-      puts "ddddd need to run pet_appt.path="+pet_appt.path
-           
-
-            end
-            v_o_acpc_file = ""
-            v_oacpc_file_in_vgroup = "N"
-            if v_pet_path_ok == "Y" 
-               # check for one o-acpc  file -- using tissue_seg - a winnowing of the unknown dir files
+          
+          if v_multiple_petfiles == "Y"
+            puts "jjjjj multiple petfiles"
+          elsif v_pet_path_ok == "N"
+            puts "kkkkk no ecat file"
+            #v_comment = v_comment+" : petscan_id="+pet_appt.id.to_s+" no ecat file;"
+          else # check for preprocessed dir
+            v_subjectid_pet_pib_processed_path = v_preprocessed_path+v_scan_procedure_codename+"/"+v_subjectid+v_pib_path
+            if File.directory?(v_subjectid_pet_pib_processed_path) and v_pet_path_ok == "Y"
+          
+               puts "bbbb v_subjectid_pet_pib_processed_path="+v_subjectid_pet_pib_processed_path
+               puts "ccccc if no dir (would need to run) the pet_path is="+v_pib_petfiles.first.path.to_s
+               v_pet_preprocessed_dir_exists = "Y"
+            elsif  v_pet_preprocessed_dir_exists == "N" and v_petfile_exists == "Y" and v_pet_path_ok == "Y"
+                # need to run processing - check if same vgroup.mri or other vgroup mri
+               puts "ddddd need to run v_pib_petfiles.first.path="+v_pib_petfiles.first.path.to_s
+               v_o_acpc_file = ""
+               v_oacpc_file_in_vgroup = "N"
                v_subjectid_tissue_seg = v_preprocessed_path+v_scan_procedure.codename+"/"+v_subjectid+"/tissue_seg"
-               
                if File.directory?(v_subjectid_tissue_seg)   # need to also look for [subjectid]b,c,d,.R
                     v_cnt = 0
                     v_dir_array = Dir.entries(v_subjectid_tissue_seg)
@@ -6330,42 +6420,38 @@ def run_pet_pib_suvr_process
                          v_oacpc_file_in_vgroup = "Y"
                          v_cnt = v_cnt + 1
                          v_o_acpc_file = f
-  puts "eeee oacpc path= "+v_subjectid_tissue_seg
-  puts "ffff oacpc file="+f
+                         puts "eeee oacpc path= "+v_subjectid_tissue_seg
+                         puts "ffff oacpc file="+f
                       end
                     end
                     if v_cnt > 1
                       v_pet_path_ok = "N"
                       v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in tissue_seg:"
+                    else
+                       # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
+                       v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
+                       puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
                     end
               else
-                v_oacpc_file_in_vgroup = "N"
-  puts "gggg no o-acpc in vgroup"
-              end  
-    puts "gggggg v_pet_path_ok="+v_pet_path_ok
-    puts "ggggg v_oacpc_file_in_vgroup="+v_oacpc_file_in_vgroup
-            if v_pet_path_ok == "Y" and v_pet_preprocessed_dir_exists == "N"
-              # netinjecteddose
-              if v_oacpc_file_in_vgroup == "N"
-                  puts "hhhhhh  need to run and no o-acpc corrected file in vgroup"
-                  # look for near by mri with this participant
-
-                  # v_pet_appointment. v_days_mri_pet_diff_limit, v_participant
-                  # get all mri_transfer = 'yes' and  appointment_type ='mri' for participant ( could exclude some study / then if not found, try those study)
-                  # loop thru - find date diff - set to min, each time thru loop check if still min
-                  v_pet_date_string =(v_pet_appointment.appointment_date).to_s
-puts "hhhhhhh v_pet_date_string="+v_pet_date_string
-# ADD IN v_exclude_sp_mri. either in the original Visit query, or as a check step on the v_min_mri_visit/v_min_mri_appointment
-                  v_mri_visits = Visit.where("visits.appointment_id in (select appointments.id from appointments , vgroups 
+                # no oacpc file in pet vgroup
+                # check if less than v_days_before_use_other_vgroup_mri
+                if ((v_today_date - v_pet_appointment.appointment_date).to_i < v_days_before_use_other_vgroup_mri.to_i) and !v_sp_use_other_vgroup_mri_immediately_array.include?(v_scan_procedure.id)
+                   puts "hhh wait to look for mri is non-pet vgroup"
+                   v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" waiting to look for non-pet vgroup mri  v_scan_procedure.id="+v_scan_procedure.id.to_s+"  day diff ="+(v_today_date - v_pet_appointment.appointment_date).to_i.to_s
+                
+                else
+                  
+                   v_mri_visits = Visit.where("visits.appointment_id in (select appointments.id from appointments , vgroups 
                                                     where appointments.vgroup_id = vgroups.id and vgroups.participant_id in (?)
                                                     and vgroups.transfer_mri = 'yes' and appointments.appointment_type = 'mri'
-                                                    and abs(datediff(appointments.appointment_date,?))  < "+v_days_mri_pet_diff_limit+" )", v_participant.id,v_pet_date_string)
-                  # get min diff mri appt
-                  #v_exclude_sp_mri
-                  v_mri_pet_min_date_diff = 0
-                  v_min_mri_visit = nil
-                  v_min_mri_appointment = nil
-                  v_mri_visits.each do |mri_visit|
+                                                    and abs(datediff(appointments.appointment_date,?))  < "+v_days_mri_pet_diff_limit+"
+                                                    and vgroups.id not in 
+                                                      (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups 
+                                                      where scan_procedures_vgroups.scan_procedure_id in (?)) )", v_participant.id,v_pet_date_string,v_exclude_sp_mri_array)
+                   v_mri_pet_min_date_diff = 0
+                   v_min_mri_visit = nil
+                   v_min_mri_appointment = nil
+                   v_mri_visits.each do |mri_visit|
                       v_mri_appointment = Appointment.find(mri_visit.appointment_id)
     puts "hhhhh mri_visit="+mri_visit.id.to_s+".   mri_appt="+v_mri_appointment.appointment_date.to_s
                       if v_min_mri_visit.nil?
@@ -6380,23 +6466,21 @@ puts "hhhhhhh v_pet_date_string="+v_pet_date_string
                               v_min_mri_appointment = v_mri_appointment
                           end
                       end
-                  end
-                  if !v_min_mri_visit.nil?
+                   end
+                   if !v_min_mri_visit.nil?
                      puts "hhhhh min mri = "+v_min_mri_appointment.appointment_date.to_s+"     pet_appt= "+v_pet_appointment.appointment_date.to_s
-                     v_comment = v_comment +" need run-has no vgroup mri petscan_id="+pet_appt.id.to_s+"  min mri = "+v_min_mri_appointment.appointment_date.to_s+"     pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "
-                  end
-              elsif v_pet_preprocessed_dir_exists == "N"
-
-                  puts "iiiiii  need to run and  o-acpc corrected file in vgroup"
-                  v_comment = v_comment +" need run-has vgroup mri petscan_id="+pet_appt.id.to_s+"; "
+                     v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "+v_comment
+                    # optional auto run with min non-pet vgroup mri 
+                   else
+                    v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" does not have any non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days; "+v_comment
+                 
+                   end
+                end
               end
+            
             end
-          elsif v_multiple_petfiles == "Y"
-            puts "jjjjj multiple petfiles"
-          elsif v_pet_path_ok == "N"
-            puts "kkkkk no ecat file"
-            v_comment = v_comment+" : petscan_id="+pet_appt.id.to_s+" no ecat file;"
           end
+
     puts "zzzz end
 
     "
@@ -6411,6 +6495,8 @@ puts "hhhhhhh v_pet_date_string="+v_pet_date_string
      @schedulerun.end_time = @schedulerun.updated_at      
      @schedulerun.save  
 end
+
+
 
 
 
