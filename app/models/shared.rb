@@ -2880,6 +2880,10 @@ def run_pet_av1451_process
     connection = ActiveRecord::Base.connection();
                # and id in (1737,1735,1717,1711) ones with no mri
       v_av1451_petscans = Petscan.where("petscans.lookup_pettracer_id in (?)
+                     and petscans.appointment_id in 
+                     ( select appointments.id from appointments, vgroups 
+                        where appointments.vgroup_id = vgroups.id 
+                         and vgroups.transfer_pet in ('no','yes') )
                   and petscans.appointment_id not in (select appointments.id from appointments, scan_procedures_vgroups
                   where appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
                   and scan_procedures_vgroups.scan_procedure_id in (?))",v_av1451_tracer_id,v_exclude_sp_pet_array)
@@ -4002,6 +4006,7 @@ def run_pet_mk6240_process
       v_days_before_use_other_vgroup_mri = "5"
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
       v_exclude_sp_mri_array = [-1]
+      v_exclude_sp_pet_array = [-1]
       v_today_date = Date.today 
 
       @schedule = Schedule.where("name in ('pet_mk6240_process')").first
@@ -4016,7 +4021,13 @@ def run_pet_mk6240_process
 
     connection = ActiveRecord::Base.connection();
                # and id in (1737,1735,1717,1711) ones with no mri
-      v_mk6240_petscans = Petscan.where("petscans.lookup_pettracer_id in (?)",v_mk6240_tracer_id)
+      v_mk6240_petscans = Petscan.where("petscans.lookup_pettracer_id in (?) and petscans.appointment_id in 
+                     ( select appointments.id from appointments, vgroups 
+                        where appointments.vgroup_id = vgroups.id 
+                         and vgroups.transfer_pet in ('no','yes') )
+                  and petscans.appointment_id not in (select appointments.id from appointments, scan_procedures_vgroups
+                  where appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
+                  and scan_procedures_vgroups.scan_procedure_id in (?))",v_mk6240_tracer_id,v_exclude_sp_pet_array)
       
     # get list of mk6240 Petscans
     #check if has precprocessed codever 2a dir
@@ -5176,6 +5187,7 @@ def run_pet_pib_dvr_process
       v_days_before_use_other_vgroup_mri = "5"
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
       v_exclude_sp_mri_array = [-1]
+      v_exclude_sp_pet_array = [-1]
       v_today_date = Date.today 
 
       @schedule = Schedule.where("name in ('pet_pib_dvr_process')").first
@@ -5190,7 +5202,13 @@ def run_pet_pib_dvr_process
 
     connection = ActiveRecord::Base.connection();
                # and id in (1737,1735,1717,1711) ones with no mri
-      v_pib_petscans = Petscan.where("petscans.lookup_pettracer_id in (?)",v_pib_tracer_id)
+      v_pib_petscans = Petscan.where("petscans.lookup_pettracer_id in (?) and petscans.appointment_id in 
+                     ( select appointments.id from appointments, vgroups 
+                        where appointments.vgroup_id = vgroups.id 
+                         and vgroups.transfer_pet in ('no','yes') )
+                  and petscans.appointment_id not in (select appointments.id from appointments, scan_procedures_vgroups
+                  where appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
+                  and scan_procedures_vgroups.scan_procedure_id in (?))",v_pib_tracer_id,v_exclude_sp_pet_array)
       
     # get list of pib Petscans
     #check if has precprocessed codever 2a dir
@@ -6315,6 +6333,7 @@ def run_pet_pib_suvr_process
       v_days_before_use_other_vgroup_mri = "5"
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
       v_exclude_sp_mri_array = [-1]
+      v_exclude_sp_pet_array = [-1]
       v_today_date = Date.today 
 
       @schedule = Schedule.where("name in ('pet_pib_suvr_process')").first
@@ -6329,7 +6348,13 @@ def run_pet_pib_suvr_process
 
     connection = ActiveRecord::Base.connection();
                # and id in (1737,1735,1717,1711) ones with no mri
-      v_pib_petscans = Petscan.where("petscans.lookup_pettracer_id in (?)",v_pib_tracer_id)
+      v_pib_petscans = Petscan.where("petscans.lookup_pettracer_id in (?) and petscans.appointment_id in 
+                     ( select appointments.id from appointments, vgroups 
+                        where appointments.vgroup_id = vgroups.id 
+                         and vgroups.transfer_pet in ('no','yes') )
+                  and petscans.appointment_id not in (select appointments.id from appointments, scan_procedures_vgroups
+                  where appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
+                  and scan_procedures_vgroups.scan_procedure_id in (?))",v_pib_tracer_id,v_exclude_sp_pet_array)
       
     # get list of pib Petscans
     #check if has precprocessed codever 2a dir
