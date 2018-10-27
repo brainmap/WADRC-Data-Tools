@@ -54,7 +54,7 @@ gem 'yaml_db' ,'0.4.2'
 gem 'rails-observers', github: 'rails/rails-observers'
 gem 'activeresource', github: 'rails/activeresource'
  
-gem 'metamri', '0.2.25'  # new gem version
+gem 'metamri', '0.2.26'  # new gem version
 ####gem 'metamri', :path => '/Users/caillingworth/code/metamri_5_0_1/metamri'
 # end
 gem 'builder', '3.2.3'#, '~>2.1.2'
@@ -84,7 +84,7 @@ gem 'bzip2-ruby', :git => 'https://github.com/chewi/bzip2-ruby.git'
  #gem 'capistrano-rvm', '0.1.2'
 # gem 'rvm1-capistrano3', :require => false
 # gem 'capistrano-bundler', '1.2.0'  
-gem 'prawn'
+gem 'prawn', '2.2.2'
 
 #gem 'escoffier', :path => '/Users/caillingworth/code/escoffier' # 
 gem 'escoffier', :path => '/Users/panda_user/code/escoffier'    # think required by metamri?    
@@ -114,6 +114,16 @@ group :development, :test do
   gem 'spring-watcher-listen', '2.0.1' #'~> 2.0.0'
   #gem 'prawn'
 end
+
+# gemlock prod differences vs dev
+#mime-types (3.1) vs. mime-types (3.1)
+#nokogiri (1.8.3) vs nokogiri (1.8.5)
+#sass (3.5.6) vs sass (3.6.0)
+#snmp (1.2.0) vs snmp (1.3.1)
+#sshkit (1.16.1) vs sshkit (1.17.0)
+#turbolinks-source (5.1.0) vs turbolinks-source (5.2.0)
+#dependencies
+#prawn   vs prawn (= 2.2.2)
 
 
 
