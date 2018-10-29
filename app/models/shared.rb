@@ -12182,7 +12182,7 @@ puts sql
 #f = File.open('foo.txt', 'a')
 #f.write('foo')
 #f.close
-
+              #puts "hhhhhh v_ids_path="+v_ids_path
               if v_pfile.include? "P" and v_pfile.include? ".7"
 
                 v_call = "ssh panda_user@kanga.dom.wisc.edu 'cd "+v_pfile_dir_path+";"+v_check_gating_base+v_pfile+"'"   #' >> "+v_pfile_dir_path+"/gating_check_output_"+v_pfile.strip+".txt'"
@@ -12267,9 +12267,9 @@ puts sql
                 v_cnt = v_cnt + 1
                 v_comment = "done "+v_subjectid_v_num+";"+v_comment
                 @schedulerun.comment = "done "+v_subjectid_v_num+";"+@schedulerun.comment
-              elsif v_pfile_path.include? "scan_archives" or v_pfile.include? "raw_data"
-                v_comment = "scan archive found "+v_subjectid_v_num+";"+v_comment
-                @schedulerun.comment = "scan archive found "+v_subjectid_v_num+";"+@schedulerun.comment
+              elsif v_ids_path.include? "scan_archives" or v_ids_path.include? "raw_data"
+                v_comment = "scan archive found "+v_subjectid_v_num+"  "+v_check_path_orig+";"+v_comment
+                @schedulerun.comment = "scan archive found "+v_subjectid_v_num+"  "+v_check_path_orig+";"+@schedulerun.comment
                 # do the new processing , make tracker record
    
                       #make tracker record
@@ -12310,7 +12310,7 @@ puts sql
                   end
                 end
               else
-                v_comment = "no scan arachive or  pfile found "+v_subjectid_v_num+";"+v_comment
+                v_comment = "no scan archive or  pfile found "+v_subjectid_v_num+";"+v_comment
                 @schedulerun.comment = "no scan archive or pfile found "+v_subjectid_v_num+";"+@schedulerun.comment
               end
 puts "end of ids loop"
