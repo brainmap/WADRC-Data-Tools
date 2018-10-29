@@ -14135,7 +14135,7 @@ puts "v_analyses_path="+v_analyses_path
                              v_final_file_array.pop
                              v_t1_scan_series_dir_waisman_flip = v_last_item+"."+(v_final_file_array.join("_")).gsub("-","_")
                              v_final_file_array.shift(1)
-                             v_t1_scan_series_dir_waisman_flip_shift = v_last_item+"."+(v_final_file_array..join("_")).gsub("-","_")
+                             v_t1_scan_series_dir_waisman_flip_shift = v_last_item+"."+(v_final_file_array.join("_")).gsub("-","_")
 
                              v_final_processesimages = Processedimage.where("file_path in (?)",v_final_file_full_path)
                              v_final_file_id = nil
