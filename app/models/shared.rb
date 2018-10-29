@@ -12267,9 +12267,51 @@ puts sql
                 v_cnt = v_cnt + 1
                 v_comment = "done "+v_subjectid_v_num+";"+v_comment
                 @schedulerun.comment = "done "+v_subjectid_v_num+";"+@schedulerun.comment
+              elsif v_pfile_path.include? "scan_archives" or v_pfile.include? "raw_data"
+                v_comment = "scan archive found "+v_subjectid_v_num+";"+v_comment
+                @schedulerun.comment = "scan archive found "+v_subjectid_v_num+";"+@schedulerun.comment
+                # do the new processing , make tracker record
+   
+                      #make tracker record
+                @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
+
+                if @trfiles.count == 0
+                  puts "making trfile"
+                  @trfile = Trfile.new
+                  @trfile.subjectid = v_subjectid_v_num
+                      # @trfile.secondary_key = v_secondary_key
+                  @trfile.enrollment_id = v_enrollment_id
+                  @trfile.scan_procedure_id = v_sp_id
+                  @trfile.trtype_id = v_trtype_id
+                  @trfile.image_dataset_id = v_ids_id
+                  @trfile.qc_notes = "scan archive - need to run recon with new version"
+                  @trfile.save
+                  @tredit = Tredit.new
+                  @tredit.trfile_id = @trfile.id
+                      #@tredit.user_id = current_user.id
+                  @tredit.save
+                  v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                  if !v_tractiontypes.nil?
+                    v_tractiontypes.each do |tat|
+                      v_tredit_action = TreditAction.new
+                      v_tredit_action.tredit_id = @tredit.id
+                      v_tredit_action.tractiontype_id = tat.id
+                      if !(tat.form_default_value).blank?
+                        v_tredit_action.value = tat.form_default_value
+                      end
+                                 # set each field if needed-- just an example from mcd
+                                 #if tat.id == 14 # despot 2
+                                 #   v_tredit_action.value = v_despot_2_flag
+                                 #elsif tat.id == 15 # mcdespot
+                                 #   v_tredit_action.value = v_mcdespot_flag
+                                 #end
+                      v_tredit_action.save
+                    end
+                  end
+                end
               else
-                v_comment = "no pfile found "+v_subjectid_v_num+";"+v_comment
-                @schedulerun.comment = "no pfile found "+v_subjectid_v_num+";"+@schedulerun.comment
+                v_comment = "no scan arachive or  pfile found "+v_subjectid_v_num+";"+v_comment
+                @schedulerun.comment = "no scan archive or pfile found "+v_subjectid_v_num+";"+@schedulerun.comment
               end
 puts "end of ids loop"
              end
