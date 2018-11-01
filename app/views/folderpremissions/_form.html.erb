@@ -1,0 +1,52 @@
+<%= form_for(folderpremission) do |f| %>
+  <% if folderpremission.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(folderpremission.errors.count, "error") %> prohibited this folderpremission from being saved:</h2>
+
+      <ul>
+      <% folderpremission.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :actual_vs_planned %>
+    <%= f.text_field :actual_vs_planned %>
+  </div>
+
+  <div class="field">
+    <%= f.label :network_user %>
+    <%= f.text_field :network_user %>
+  </div>
+
+  <div class="field">
+    <%= f.label :network_group %>
+    <%= f.text_field :network_group %>
+  </div>
+
+  <div class="field">
+    <%= f.label :permission_read %>
+    <%= f.text_field :permission_read %>
+  </div>
+
+  <div class="field">
+    <%= f.label :permission_write %>
+    <%= f.text_field :permission_write %>
+  </div>
+
+  <div class="field">
+    <%= f.label :permission_execute %>
+    <%= f.text_field :permission_execute %>
+  </div>
+
+  <div class="field">
+    <%= f.label :folder_id %>
+    <%= f.text_field :folder_id %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

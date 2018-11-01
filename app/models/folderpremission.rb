@@ -1,0 +1,2 @@
+class Folderpremission < ApplicationRecord
+end

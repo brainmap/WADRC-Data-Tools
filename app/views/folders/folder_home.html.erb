@@ -1,0 +1,18 @@
+folder_home
+<br>
+need to harvest actual perms<br>
+
+<table border="1">
+<% @top_folder.each do |top| %>
+<tr><td colspan="<%=@v_top_count_hash[top.id]%>"><%=top.folder_path %></td></tr>
+  
+<tr><% @v_next_one_hash[top.id].each do |nextfol_one|%>
+      <td><%= nextfol_one.folder_path %> 
+          <br> existing permissions - if different than parent
+          <br> form for entering more permissions
+          <br> multi select of next level of folders
+      </td>
+    <%end%>
+</tr>
+<%end%>
+</table>

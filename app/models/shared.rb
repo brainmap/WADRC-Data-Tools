@@ -2093,7 +2093,7 @@ def  run_pet_av1451_harvest
     v_tacs_column_list = "time_min,cblm_gm_inf,precentral_l,precentral_r,frontal_sup_l,frontal_sup_r,frontal_sup_orb_l,frontal_sup_orb_r,frontal_mid_l,frontal_mid_r,frontal_mid_orb_l,frontal_mid_orb_r,frontal_inf_oper_l,frontal_inf_oper_r,frontal_inf_tri_l,frontal_inf_tri_r,frontal_inf_orb_l,frontal_inf_orb_r,rolandic_oper_l,rolandic_oper_r,supp_motor_area_l,supp_motor_area_r,olfactory_l,olfactory_r,frontal_sup_medial_l,frontal_sup_medial_r,frontal_med_orb_l,frontal_med_orb_r,rectus_l,rectus_r,insula_l,insula_r,cingulum_ant_l,cingulum_ant_r,cingulum_mid_l,cingulum_mid_r,cingulum_post_l,cingulum_post_r,hippocampus_l,hippocampus_r,parahippocampal_l,parahippocampal_r,amygdala_l,amygdala_r,calcarine_l,calcarine_r,cuneus_l,cuneus_r,lingual_l,lingual_r,occipital_sup_l,occipital_sup_r,occipital_mid_l,occipital_mid_r,occipital_inf_l,occipital_inf_r,fusiform_l,fusiform_r,postcentral_l,postcentral_r,parietal_sup_l,parietal_sup_r,parietal_inf_l,parietal_inf_r,supramarginal_l,supramarginal_r,angular_l,angular_r,precuneus_l,precuneus_r,paracentral_lobule_l,paracentral_lobule_r,caudate_l,caudate_r,putamen_l,putamen_r,pallidum_l,pallidum_r,thalamus_l,thalamus_r,heschl_l,heschl_r,temporal_sup_l,temporal_sup_r,temporal_pole_sup_l,temporal_pole_sup_r,temporal_mid_l,temporal_mid_r,temporal_pole_mid_l,temporal_pole_mid_r,temporal_inf_l,temporal_inf_r,cerebelum_crus1_l,cerebelum_crus1_r,cerebelum_crus2_l,cerebelum_crus2_r,cerebelum_3_l,cerebelum_3_r,cerebelum_4_5_l,cerebelum_4_5_r,cerebelum_6_l,cerebelum_6_r,cerebelum_7b_l,cerebelum_7b_r,cerebelum_8_l,cerebelum_8_r,cerebelum_9_l,cerebelum_9_r,cerebelum_10_l,cerebelum_10_r,vermis_1_2,vermis_3,vermis_4_5,vermis_6,vermis_7,vermis_8,vermis_9,vermis_10,clivus,ethmoid,meninges,pineal,vermis_sup_ant,cerebellum_superior,substantia_nigra,sphenotemporalbuttress,pons"
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_exclude_array = [69,53,54,56,57,95,55,76,78,72,70,71,49,79,99,81,75,83,92,93,88,68,97,29,52,87,48,27,14,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,50,42,44,51,96,9,25,23,19,15,24,36,100,35,20,73,32,45,6,12,16,13,11,10,90,59,63,43,4,17,30,74,98]
+    sp_exclude_array = [69,53,54,56,57,95,55,76,78,72,70,71,49,79,99,81,75,83,92,93,88,68,97,29,52,87,48,27,14,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,50,42,44,51,96,9,25,23,19,15,24,36,100,35,20,73,32,45,6,12,16,13,11,10,90,59,63,43,4,17,30,74,98,101,102,103,108,110,111,112,113,114]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     # for testing
     ###@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
@@ -3135,7 +3135,7 @@ def  run_pet_mk6240_harvest
 # will change again - need to change tac table
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_exclude_array = [69,53,54,56,57,95,55,76,78,72,70,71,49,79,99,81,75,80,83,92,93,88,68,97,29,52,87,48,27,14,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,50,42,44,51,96,9,25,23,19,15,24,36,100,35,20,73,32,45,6,12,16,13,11,10,90,59,63,43,4,17,30,74,98]
+    sp_exclude_array = [69,53,54,56,57,95,55,76,78,72,70,71,49,79,99,81,75,80,83,92,93,88,68,97,29,52,87,48,27,14,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,50,42,44,51,96,9,25,23,19,15,24,36,100,35,20,73,32,45,6,12,16,13,11,10,90,59,63,43,4,17,30,74,98,101,102,103,108,110,111,112,113,114]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     # for testing
     ###@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
@@ -4280,7 +4280,7 @@ def  run_pet_pib_dvr_harvest
 # will change again - need to change tac table
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_exclude_array = [54,56,57,95,55,76,78,72,70,71,99,81,75,83,92,93,88,68,97,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,42,44,51,96,9,25,23,19,15,24,36,100,35,73,32,6,12,16,13,11,90,59,63,43,4,17,74,98]
+    sp_exclude_array = [54,56,57,95,55,76,78,72,70,71,99,81,75,83,92,93,88,68,97,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,42,44,51,96,9,25,23,19,15,24,36,100,35,73,32,6,12,16,13,11,90,59,63,43,4,17,74,98,101,102,103,108,110,111,112,113,114]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     # for testing
     ###@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
@@ -5467,7 +5467,7 @@ def  run_pet_pib_suvr_harvest
 # will change again - need to change tac table
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_exclude_array = [54,56,57,95,55,76,78,72,70,71,99,81,75,83,92,93,88,68,97,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,42,44,51,96,9,25,23,19,15,24,36,100,35,73,32,6,12,16,13,11,90,59,63,43,4,17,74,98]
+    sp_exclude_array = [54,56,57,95,55,76,78,72,70,71,99,81,75,83,92,93,88,68,97,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,42,44,51,96,9,25,23,19,15,24,36,100,35,73,32,6,12,16,13,11,90,59,63,43,4,17,74,98,101,102,103,108,110,111,112,113,114]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     # for testing
     ###@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")

@@ -1,0 +1,33 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Folders</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Folder path</th>
+      <th>Child path</th>
+      <th>Permission s flag</th>
+      <th>Parent</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @folders.each do |folder| %>
+      <tr>
+        <td><%= folder.folder_path %></td>
+        <td><%= folder.child_path %></td>
+        <td><%= folder.permission_s_flag %></td>
+        <td><%= folder.parent_id %></td>
+        <td><%= link_to 'Show', folder %></td>
+        <td><%= link_to 'Edit', edit_folder_path(folder) %></td>
+        <td><%= link_to 'Destroy', folder, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Folder', new_folder_path %>
