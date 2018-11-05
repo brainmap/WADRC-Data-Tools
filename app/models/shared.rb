@@ -12117,7 +12117,7 @@ puts sql
 
             v_check_path_done = v_pcvipr_recon_base+v_scan_procedure_name+"/"+v_scan_procedure_name+".done/"+v_subjectid+v_visit_number
             v_check_path_orig = v_pcvipr_recon_base+v_scan_procedure_name+"/"+v_scan_procedure_name+".orig/"+v_subjectid+v_visit_number
-            v_exisits = "N"
+            v_exists = "N"
                    #check that not in sp.visit#.orig. and not in sp.visit#.done
                   #make subjectid_v# directory
                   #copy over pfile/gating files
@@ -12127,15 +12127,15 @@ puts sql
             v_check_path_done_wildcard = v_check_path_done+"*"
             v_check_path_orig_wildcard = v_check_path_orig+"*"
             Dir.glob(v_check_path_done_wildcard).each do|f|
-                v_exisits = "Y"
+                v_exists = "Y"
                 puts "exisits = "+v_check_path_done
             end
             Dir.glob(v_check_path_orig_wildcard).each do|f|
-                v_exisits = "Y"
+                v_exists = "Y"
                 puts "exisits = "+v_check_path_orig
             end
-            if v_exisits == "Y"
-              v_exisits = "Y"
+            if v_exists == "Y"
+              v_exists = "Y"
               puts "exisits = "+v_check_path_done+" or "+v_check_path_orig
             else
               v_comment = "str "+v_subjectid+";"+v_comment
