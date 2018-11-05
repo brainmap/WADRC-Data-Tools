@@ -1,6 +1,8 @@
 WADRCDataTools::Application.routes.draw do
 
 
+  resources :folderpremissions
+  resources :folders
   resources :lookup_refs_change_logs
   resources :usernetworkgroups
   resources :networkgroups
@@ -279,6 +281,9 @@ WADRCDataTools::Application.routes.draw do
     match '/trtypes/trtype_home/:id', :controller => 'trtypes', :action => 'trtype_home', :as => :trtypes_trtype_home_id  ,via: [:get, :post] 
     match '/trtype_home/', :controller => 'trtypes', :action => 'trtype_home', :as => :trtype_home  ,via: [:get, :post] 
    
+
+    match '/folder_home/', :controller => 'folders', :action => 'folder_home', :as => :folder_home  ,via: [:get, :post] 
+
    #match '/vgroups/home', :controller => 'vgroups', :action => 'home', :as => :home
     match '/vgroups/home', :controller => 'vgroups', :action => 'vgroups_search', :as => :home  ,via: [:get, :post] 
    match '/vgroups/vgroups_search', :controller => 'vgroups', :action => 'vgroups_search', :as => :vgroups_search ,via: [:get, :post] 
