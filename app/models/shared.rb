@@ -7471,7 +7471,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
 
      v_pass =  "zzzz"
      v_days_back = "15"
-     v_default_xnat_run_upload_flag = 'Y'
+     v_default_xnat_run_upload_flag = 'R' # setting to run automatically R=run 'Y'
      connection = ActiveRecord::Base.connection();
      # get all participants in sp/id not in v_xnat_participant_tn
      #insert and make export_id
