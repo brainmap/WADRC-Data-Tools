@@ -1,2 +1,0 @@
-module FolderpremissionsHelper
-end

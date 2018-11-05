@@ -1,7 +1,7 @@
 WADRCDataTools::Application.routes.draw do
 
 
-  resources :folderpremissions
+  resources :folderpermissions
   resources :folders
   resources :lookup_refs_change_logs
   resources :usernetworkgroups

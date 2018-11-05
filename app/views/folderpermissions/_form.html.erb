@@ -1,10 +1,10 @@
-<%= form_for(folderpremission) do |f| %>
-  <% if folderpremission.errors.any? %>
+<%= form_for(folderpermission) do |f| %>
+  <% if folderpermission.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(folderpremission.errors.count, "error") %> prohibited this folderpremission from being saved:</h2>
+      <h2><%= pluralize(folderpermission.errors.count, "error") %> prohibited this folderpermission from being saved:</h2>
 
       <ul>
-      <% folderpremission.errors.full_messages.each do |message| %>
+      <% folderpermission.errors.full_messages.each do |message| %>
         <li><%= message %></li>
       <% end %>
       </ul>
