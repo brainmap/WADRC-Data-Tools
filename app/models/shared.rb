@@ -2499,6 +2499,10 @@ def  run_pet_av1451_harvest
                               if v_cnt > 0 
                                 v_line_array = []
                                 v_line_array =line.gsub(/\n/,"").split(",")
+                                if v_qc_value == "Waiting" or v_qc_value == "Fail" # blanking out data until quality checked or if Fail
+                                    v_line_array[3] = ""
+                                    v_line_array[4] = ""
+                                end
                                 if !v_atlas_array.include?(v_line_array[1])
                                    v_comment = "UNEXPECTED ATLAS "+v_line_array[1]+";"+v_comment
                                 end
@@ -3640,7 +3644,11 @@ def  run_pet_mk6240_harvest
                             while line = file_a.gets
                               if v_cnt > 0 
                                 v_line_array = []
-                                v_line_array =line.gsub(/\n/,"").split(",")
+                                v_line_array =line.gsub(/\n/,"").split(",")               
+                                if v_qc_value == "Waiting" or v_qc_value == "Fail" # blanking out data until quality checked or if Fail
+                                    v_line_array[3] = ""
+                                    v_line_array[4] = ""
+                                end
                                 if !v_atlas_array.include?(v_line_array[1])
                                    v_comment = "UNEXPECTED ATLAS "+v_line_array[1]+";"+v_comment
                                 end
@@ -4801,6 +4809,10 @@ def  run_pet_pib_dvr_harvest
                               if v_cnt > 0 
                                 v_line_array = []
                                 v_line_array =line.gsub(/\n/,"").split(",")
+                                if v_qc_value == "Waiting" or v_qc_value == "Fail" # blanking out data until quality checked or if Fail
+                                    v_line_array[3] = ""
+                                    v_line_array[4] = ""
+                                end
                                 if !v_atlas_array.include?(v_line_array[1])
                                    v_comment = "UNEXPECTED ATLAS "+v_line_array[1]+";"+v_comment
                                 end
@@ -5979,6 +5991,10 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
                               if v_cnt > 0 
                                 v_line_array = []
                                 v_line_array =line.gsub(/\n/,"").split(",")
+                                if v_qc_value == "Waiting" or v_qc_value == "Fail" # blanking out data until quality checked or if Fail
+                                    v_line_array[3] = ""
+                                    v_line_array[4] = ""
+                                end
                                 if !v_atlas_array.include?(v_line_array[1])
                                    v_comment = "UNEXPECTED ATLAS "+v_line_array[1]+";"+v_comment
                                 end

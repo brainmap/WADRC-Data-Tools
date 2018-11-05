@@ -7,7 +7,7 @@ need to harvest actual perms<br>
 <tr><td colspan="<%=@v_top_count_hash[top.id]%>"><%=top.folder_path %></td></tr>
   
 <tr><% @v_next_one_hash[top.id].each do |nextfol_one|%>
-      <td><%= nextfol_one.folder_path %> 
+      <td><%= nextfol_one.folder_path.gsub(top.folder_path,"") %> 
           <br> existing permissions - if different than parent
           <br> form for entering more permissions
           <br> multi select of next level of folders
