@@ -15076,11 +15076,11 @@ puts "v_analyses_path="+v_analyses_path
                                      end
                                   end
                                   if v_first_volume_hash.length < 1
-                                       sql = sql_first_base+"'"+dir_name_array[0]+v_visit_number+"','no calculated volumes in first directory',"+enrollment[0].id.to_s+","+sp.id.to_s+",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)"
+                                       sql = sql_first_base+"'"+dir_name_array[0]+v_visit_number+"','no calculated volumes in first directory',"+enrollment[0].id.to_s+","+sp.id.to_s+",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)"
                                        results = connection.execute(sql)
                                   end
                              else
-                               sql = sql_first_base+"'"+dir_name_array[0]+v_visit_number+"','no first calculated volumes directory',"+enrollment[0].id.to_s+","+sp.id.to_s+",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)"
+                               sql = sql_first_base+"'"+dir_name_array[0]+v_visit_number+"','no first calculated volumes directory',"+enrollment[0].id.to_s+","+sp.id.to_s+",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)"
                                  results = connection.execute(sql)
                              end
 
