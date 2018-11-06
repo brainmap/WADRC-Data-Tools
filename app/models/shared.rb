@@ -15176,6 +15176,35 @@ puts "v_analyses_path="+v_analyses_path
                              v_gm =""
                              v_wm = ""
                              v_csf = ""
+                             @trfileimage_processedimages = []
+      # check for oacpc file in processedimagesif File.directory?(v_subjectid_unknown)   # need to also look for [subjectid]b,c,d,.R
+                             v_original_t1_mri_file_unknown = "zzzzzzz"
+                             if File.directory?(v_subjectid_unknown)
+                               v_dir_array = Dir.entries(v_subjectid_unknown)
+                               v_dir_array.each do |f|
+                                 if f.start_with?("o") and f.end_with?(".nii")
+                                   v_original_t1_mri_file_unknown = f.to_s
+                                 end
+                               end
+
+                               v_mri_processedimage_id = ""
+                               v_mri_processesimages = Processedimage.where("file_path in (?)",v_subjectid_unknown+"/"+v_original_t1_mri_file_unknown)
+                               if v_mri_processesimages.count < 1
+                                 v_mri_processedimage = Processedimage.new
+                                 v_mri_processedimage.file_type ="o_acpc T1"
+                                 v_mri_processedimage.file_name = v_original_t1_mri_file_unknown
+                                 v_mri_processedimage.file_path = v_subjectid_unknown+"/"+v_original_t1_mri_file_unknown
+                                 v_mri_processedimage.scan_procedure_id = sp.id
+                                 v_mri_processedimage.enrollment_id = enrollment[0].id
+                                 v_mri_processedimage.save  
+                                 v_mri_processedimage_id = v_mri_processedimage.id
+                               else
+                                 v_mri_processedimage_id = v_mri_processesimages.first.id
+                               end
+                               if !v_mri_processedimage_id.blank?
+                                 @trfileimage_processedimages.push(v_mri_processedimage_id)
+                               end
+                             end 
                              if File.directory?(v_subjectid_first)
                                   v_first_volume_hash = {}
                                   v_dir_array = Dir.entries(v_subjectid_first)
@@ -15203,9 +15232,90 @@ puts "v_analyses_path="+v_analyses_path
                                              v_tmp_header_data_array.each do |hdr|
                                                v_first_volume_hash[hdr.downcase] = v_tmp_data_array[v_tmp_cnt]
                                                v_tmp_cnt = v_tmp_cnt + 1
+                                             end 
+                                             # check for fsl first roi tracker record, make new record or retrieve qc values for insert into fsl first table
+                                             if !v_secondary_key.blank?
+                                                @trfiles = Trfile.where("trtype_id in (?)",v_fsl_first_trtype_id).where("subjectid in (?) and secondary_key in (?)",dir_name_array[0]+v_visit_number,v_secondary_key)
+                                             else
+                                                @trfiles = Trfile.where("trtype_id in (?)",v_fsl_first_trtype_id).where("subjectid in (?)",dir_name_array[0]+v_visit_number)
+                                             end
+
+                                             v_qc_hippocampus_roi_value = "Waiting"
+                                             v_qc_other_roi_value = "Waiting"
+                                             if @trfiles.count == 0
+                                                puts "making trfile"
+                                                @trfile = Trfile.new
+                                                @trfile.subjectid = dir_name_array[0]+v_visit_number
+                                                # @trfile.secondary_key = v_secondary_key
+                                                @trfile.enrollment_id = enrollment[0].id
+                                                @trfile.scan_procedure_id = sp.id
+                                                @trfile.trtype_id = v_fsl_first_trtype_id
+        
+                                                @trfile.qc_notes = "autoinsert by panda "
+                                                @trfile.save
+                                               # NEED processedimage @trfile.image_dataset_id = v_ids_id
+                                                if @trfileimage_processedimages.kind_of?(Array)
+                                                   @trfileimage_processedimages.each do |img|
+                                                      v_img = Trfileimage.new
+                                                      v_img.trfile_id = @trfile.id
+                                                      v_img.image_category = "processedimage"
+                                                      v_img.image_id = img
+                                                      v_img.save
+                                                   end
+                                                end
+                                                @tredit = Tredit.new
+                                                @tredit.trfile_id = @trfile.id
+                                                #@tredit.user_id = current_user.id
+                                                @tredit.save
+                                                v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_fsl_first_trtype_id)
+                                                if !v_tractiontypes.nil?
+                                                   v_tractiontypes.each do |tat|
+                                                     v_tredit_action = TreditAction.new
+                                                     v_tredit_action.tredit_id = @tredit.id
+                                                     v_tredit_action.tractiontype_id = tat.id
+                                                     if !(tat.form_default_value).blank?
+                                                        v_tredit_action.value = tat.form_default_value
+                                                     end
+                                                     # set each field with defaults 
+                                                     v_tredit_action.save
+                                                   end
+                                                end
+                                         else
+          ##. CHANGE RETRIEVALv_qc_value = (@trfiles.first).qc_value
+                                             # get last edit
+                                             @tredits = Tredit.where("trfile_id in (?)",@trfiles[0].id).order("tredits.id desc")
+                                             v_tredit_id = @tredits[0].id
+                                             # the individual fields
+                                           ### v_qc_hippocampus_roi_value # tractiontype == 227 lookup_refs where label='pass_fail' 
+                                           ### v_qc_other_roi_value # tractiontype = 229 lookup_refs where label='pass_fail' 
+                                             v_label='pass_fail'
+                                             v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_fsl_first_trtype_id)
+                                             if !v_tractiontypes.nil?
+                                               v_tractiontypes.each do |tat|
+                                                  v_tredit_action = TreditAction.where("tredit_id in (?)",v_tredit_id).where("tractiontype_id in (?)", tat.id)
+                                                  if tat.id == 227 # ### v_qc_hippocampus_roi_value
+                                                     @lookup_refs = LookupRef.where("label in (?) and ref_value in (?)",v_label,v_tredit_action[0].value)
+                                                     if !@lookup_refs.nil? and @lookup_refs.count> 0
+                                                       v_qc_hippocampus_roi_value = (@lookup_refs.first).description
+                                                     end
+                                                  elsif tat.id == 229   ### v_qc_other_roi_value
+                                                     @lookup_refs = LookupRef.where("label in (?) and ref_value in (?)",v_label,v_tredit_action[0].value)
+                                                     if !@lookup_refs.nil? and @lookup_refs.count> 0
+                                                        v_qc_other_roi_value = (@lookup_refs.first).description
+                                                     end
+                                                  end
+                                               end
+                                             end
+
+
+                                             if v_qc_hippocampus_roi_value.nil? or v_qc_hippocampus_roi_value.blank?
+                                               v_qc_hippocampus_roi_value = "Waiting"
+                                             end
+                                             if v_qc_other_roi_value.nil? or v_qc_other_roi_value.blank?
+                                               v_qc_other_roi_value = "Waiting"
                                              end
                                   #l_accu,  l_amyg,l_caud ,l_hipp,l_pall,l_puta,  l_thal ,r_accu ,r_amyg,r_caud, r_hipp,r_pall,    r_puta,r_thal
-                                            sql = sql_first_base+"'"+enrollment[0].enumber+v_visit_number+"','',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_secondary_key+"'
+                                            sql = sql_first_base+"'"+enrollment[0].enumber+v_visit_number+"','',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_secondary_key+"','"+v_qc_hippocampus_roi_value+"','"+v_qc_other_roi_value+"'
                                              ,'"+v_first_volume_hash["l_accu"]+"','"+v_first_volume_hash["l_amyg"]+"','"+v_first_volume_hash["l_caud"]+"','"+v_first_volume_hash["l_hipp"]+"','"+v_first_volume_hash["l_pall"]+"'
                                              ,'"+v_first_volume_hash["l_puta"]+"','"+v_first_volume_hash["l_thal"]+"','"+v_first_volume_hash["r_accu"]+"','"+v_first_volume_hash["r_amyg"]+"','"+v_first_volume_hash["r_caud"]+"'
                                             ,'"+v_first_volume_hash["r_hipp"]+"','"+v_first_volume_hash["r_pall"]+"','"+v_first_volume_hash["r_puta"]+"','"+v_first_volume_hash["r_thal"]+"')"
@@ -15215,11 +15325,11 @@ puts "v_analyses_path="+v_analyses_path
                                      end
                                   end
                                   if v_first_volume_hash.length < 1
-                                       sql = sql_first_base+"'"+enrollment[0].enumber+v_visit_number+"','no calculated volumes in first directory',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_secondary_key+"',null,null,null,null,null,null,null,null,null,null,null,null,null,null)"
+                                       sql = sql_first_base+"'"+enrollment[0].enumber+v_visit_number+"','no calculated volumes in first directory',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_secondary_key+"',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)"
                                        results = connection.execute(sql)
                                   end
                              else
-                               sql = sql_first_base+"'"+enrollment[0].enumber+v_visit_number+"','no first calculated volumes directory',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_secondary_key+"',null,null,null,null,null,null,null,null,null,null,null,null,null,null)"
+                               sql = sql_first_base+"'"+enrollment[0].enumber+v_visit_number+"','no first calculated volumes directory',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_secondary_key+"',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)"
                                  results = connection.execute(sql)
                              end
                              if File.directory?(v_subjectid_t1seg)
