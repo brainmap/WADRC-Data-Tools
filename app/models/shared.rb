@@ -7200,7 +7200,7 @@ def run_sleep_t1
       connection = ActiveRecord::Base.connection();        
       results = connection.execute(sql)
       v_tissueseg_trtype_id = 13 # tissue seg gm_wm_csf
-      sql_base = "insert into cg_rbm_icv_new(subjectid,secondary_key,enrollment_id, scan_procedure_id,source_file,volume1_gm,volume2_wm,volume3_csf,tissue_seg_dir_flag,rbm_icv)values(" 
+      sql_base = "insert into cg_rbm_icv_new(subjectid,secondary_key,enrollment_id, scan_procedure_id,source_file,volume1_gm,volume2_wm,volume3_csf,tissue_seg_dir_flag,rbm_icv,qc_tissueseg_gm_value,qc_tissueseg_wm_value,qc_tissueseg_csf_value)values(" 
       v_comment = ""
       v_comment_warning =""
       v_error_comment = ""
@@ -7386,11 +7386,127 @@ def run_sleep_t1
                                           v_rbm_icv  = v_tmp_data.chomp()
                                        end
                                      end
+                                 # starting tracker and processedimage maker
+                                 @trfileimage_processedimages = []
+                                 v_original_t1_mri_file_unknown = "zzzzzzz"
+                             if File.directory?(v_subjectid_unknown)
+                               v_dir_array = Dir.entries(v_subjectid_unknown)
+                               v_dir_array.each do |f|
+                                 if f.start_with?("o") and f.end_with?(".nii")
+                                   v_original_t1_mri_file_unknown = f.to_s
+                                 end
+                               end
+
+                               v_mri_processedimage_id = ""
+                               v_mri_processesimages = Processedimage.where("file_path in (?)",v_subjectid_unknown+"/"+v_original_t1_mri_file_unknown)
+                               if v_mri_processesimages.count < 1
+                                 v_mri_processedimage = Processedimage.new
+                                 v_mri_processedimage.file_type ="o_acpc T1"
+                                 v_mri_processedimage.file_name = v_original_t1_mri_file_unknown
+                                 v_mri_processedimage.file_path = v_subjectid_unknown+"/"+v_original_t1_mri_file_unknown
+                                 v_mri_processedimage.scan_procedure_id = sp.id
+                                 v_mri_processedimage.enrollment_id = enrollment[0].id
+                                 v_mri_processedimage.save  
+                                 v_mri_processedimage_id = v_mri_processedimage.id
+                               else
+                                 v_mri_processedimage_id = v_mri_processesimages.first.id
+                               end
+                               if !v_mri_processedimage_id.blank?
+                                 @trfileimage_processedimages.push(v_mri_processedimage_id)
+                               end
+                             end
+                                # check for tissue_seg  tracker record, make new record or retrieve qc values for insert into tissue segt table
+                                @trfiles = Trfile.where("trtype_id in (?)",v_tissueseg_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
+                                v_qc_tissueseg_gm_value = "Waiting"
+                                v_qc_tissueseg_wm_value = "Waiting"
+                                v_qc_tissueseg_csf_value = "Waiting"
+                                if @trfiles.count == 0
+                                  puts "making trfile"
+                                  @trfile = Trfile.new
+                                  @trfile.subjectid = v_subjectid_v_num
+                                  # @trfile.secondary_key = v_secondary_key
+                                  @trfile.enrollment_id = enrollment[0].id
+                                  @trfile.scan_procedure_id = sp.id
+                                  @trfile.trtype_id = v_tissueseg_trtype_id
+        
+                                  @trfile.qc_notes = "autoinsert by panda "
+                                  @trfile.save
+                                  # NEED processedimage @trfile.image_dataset_id = v_ids_id
+                                  if @trfileimage_processedimages.kind_of?(Array)
+                                    @trfileimage_processedimages.each do |img|
+                                      v_img = Trfileimage.new
+                                      v_img.trfile_id = @trfile.id
+                                      v_img.image_category = "processedimage"
+                                      v_img.image_id = img
+                                      v_img.save
+                                    end
+                                  end
+                                  @tredit = Tredit.new
+                                  @tredit.trfile_id = @trfile.id
+                                                #@tredit.user_id = current_user.id
+                                  @tredit.save
+                                  v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_tissueseg_trtype_id)
+                                  if !v_tractiontypes.nil?
+                                    v_tractiontypes.each do |tat|
+                                      v_tredit_action = TreditAction.new
+                                      v_tredit_action.tredit_id = @tredit.id
+                                      v_tredit_action.tractiontype_id = tat.id
+                                      if !(tat.form_default_value).blank?
+                                        v_tredit_action.value = tat.form_default_value
+                                      end
+                                      # set each field with defaults 
+                                      v_tredit_action.save
+                                    end
+                                  end
+                                else
+          ##. CHANGE RETRIEVALv_qc_value = (@trfiles.first).qc_value
+                                  # get last edit
+                                  @tredits = Tredit.where("trfile_id in (?)",@trfiles[0].id).order("tredits.id desc")
+                                  v_tredit_id = @tredits[0].id
+                                  # the individual fields
+                                  v_label='pass_fail'
+                                  v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_tissueseg_trtype_id)
+                                  if !v_tractiontypes.nil?
+                                    v_tractiontypes.each do |tat|
+                                      v_tredit_action = TreditAction.where("tredit_id in (?)",v_tredit_id).where("tractiontype_id in (?)", tat.id)
+                                      if tat.id == 231 # ### v_qc_gm
+                                        @lookup_refs = LookupRef.where("label in (?) and ref_value in (?)",v_label,v_tredit_action[0].value)
+                                        if !@lookup_refs.nil? and @lookup_refs.count> 0
+                                          v_qc_tissueseg_gm_value = (@lookup_refs.first).description
+                                        end
+                                      elsif tat.id == 233   ### v_qc_wm
+                                        @lookup_refs = LookupRef.where("label in (?) and ref_value in (?)",v_label,v_tredit_action[0].value)
+                                        if !@lookup_refs.nil? and @lookup_refs.count> 0
+                                          v_qc_tissueseg_wm_value = (@lookup_refs.first).description
+                                        end
+                                      elsif tat.id == 235   ### v_qc_csf
+                                        @lookup_refs = LookupRef.where("label in (?) and ref_value in (?)",v_label,v_tredit_action[0].value)
+                                        if !@lookup_refs.nil? and @lookup_refs.count> 0
+                                          v_qc_tissueseg_csf_value = (@lookup_refs.first).description
+                                        end
+                                      end
+                                    end
+                                  end
+                                end
+
+                                if v_qc_tissueseg_gm_value.nil? or v_qc_tissueseg_gm_value.blank?
+                                    v_qc_tissueseg_gm_value = "Waiting"
+                                end
+                                if v_qc_tissueseg_wm_value.nil? or v_qc_tissueseg_wm_value.blank?
+                                    v_qc_tissueseg_wm_value = "Waiting"
+                                end
+                                if v_qc_tissueseg_csf_value.nil? or v_qc_tissueseg_csf_value.blank?
+                                    v_qc_tissueseg_csf_value = "Waiting"
+                                end
+                                
+                                # qc_tissueseg_gm_value,qc_tissueseg_wm_value,qc_tissueseg_csf_value
+                                #,'"+v_qc_tissueseg_gm_value+"','"+v_qc_tissueseg_wm_value+"','"+v_qc_tissueseg_csf_value+"'
+                                    
                                      
-sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"', "+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_file+"','"+v_gm+"','"+v_wm+"','"+v_csf+"','Y','"+v_rbm_icv+"')"
+sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"', "+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_file+"','"+v_gm+"','"+v_wm+"','"+v_csf+"','Y','"+v_rbm_icv+"','"+v_qc_tissueseg_gm_value+"','"+v_qc_tissueseg_wm_value+"','"+v_qc_tissueseg_csf_value+"')"
                                  results = connection.execute(sql)
                              else
-sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"', "+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,NULL,'N',NULL)"
+sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"', "+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,NULL,'N',NULL,NULL,NULL,NULL)"
                                  results = connection.execute(sql)
                         end
                     end
@@ -7405,7 +7521,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
         v_comment_warning = "warning on "+v_comment_warning
     end
     v_comment = self.move_present_to_old_new_to_present("cg_rbm_icv",
-             "subjectid,secondary_key,enrollment_id, scan_procedure_id,source_file,volume1_gm,volume2_wm,volume3_csf,tissue_seg_dir_flag,rbm_icv",
+             "subjectid,secondary_key,enrollment_id, scan_procedure_id,source_file,volume1_gm,volume2_wm,volume3_csf,tissue_seg_dir_flag,rbm_icv,qc_tissueseg_gm_value,qc_tissueseg_wm_value,qc_tissueseg_csf_value",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
     @schedulerun.comment =("successful finish tissueseg_spm12_gm_wm_csf_volumes "+v_comment_warning+" "+v_comment[0..3900])
     if !v_comment.include?("ERROR")
