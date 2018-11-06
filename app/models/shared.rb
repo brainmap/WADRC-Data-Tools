@@ -7199,7 +7199,7 @@ def run_sleep_t1
       sql = "truncate table cg_rbm_icv_new"
       connection = ActiveRecord::Base.connection();        
       results = connection.execute(sql)
-
+      v_tissueseg_trtype_id = 13 # tissue seg gm_wm_csf
       sql_base = "insert into cg_rbm_icv_new(subjectid,secondary_key,enrollment_id, scan_procedure_id,source_file,volume1_gm,volume2_wm,volume3_csf,tissue_seg_dir_flag,rbm_icv)values(" 
       v_comment = ""
       v_comment_warning =""
@@ -14849,6 +14849,7 @@ puts "v_analyses_path="+v_analyses_path
   # change  self.move_present_to_old_new_to_present  
   # getting t1_seg seg totals 
   # also getting first calculated volumes into cg_first_calculated_volumes
+  #THIS TISSUE_SEG IS THE OLD UNUSED SPM8 TABLE#######. stopping sql
   def run_t1seg_status
         v_base_path = Shared.get_base_path()
          @schedule = Schedule.where("name in ('t1seg_status')").first
@@ -14864,13 +14865,11 @@ puts "v_analyses_path="+v_analyses_path
     ####    begin   # catch all exception and put error in comment    
             sql = "truncate table cg_t1seg_status_new"
             connection = ActiveRecord::Base.connection();        
-            results = connection.execute(sql)
-            sql = "truncate table cg_t1seg_status_new"
-            connection = ActiveRecord::Base.connection();   
+            #results = connection.execute(sql)
             sql = "truncate table cg_first_calculated_volumes_new"
-            connection = ActiveRecord::Base.connection();       
             results = connection.execute(sql)
             v_comment_base = @schedulerun.comment
+            #qc_tissueseg_gm_value,qc_tissueseg_wm_value,qc_tissueseg_csf_value
             sql_base = "insert into cg_t1seg_status_new(t1seg_subjectid, t1seg_general_comment,t1seg_smoothed_and_warped_flag,o_star_nii_flag,multiple_o_star_nii_flag,enrollment_id, scan_procedure_id,gm,wm,csf,secondary_key)values("  
             sql_first_base = "insert into cg_first_calculated_volumes_new(subjectid,general_comment,enrollment_id, scan_procedure_id,secondary_key,qc_hippocampus_roi,qc_other_roi,l_accu_mm_cube,l_amyg_mm_cube,l_caud_mm_cube,l_hipp_mm_cube,l_pall_mm_cube,l_puta_mm_cube,l_thal_mm_cube,r_accu_mm_cube,r_amyg_mm_cube,r_caud_mm_cube,r_hipp_mm_cube,r_pall_mm_cube,r_puta_mm_cube,r_thal_mm_cube)values("  
             v_raw_path = v_base_path+"/raw"
@@ -15133,10 +15132,10 @@ puts "v_analyses_path="+v_analyses_path
                                       end
                                     end
                                   end
-                                end
+                                end 
                                 
                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','','"+v_t1seg_smoothed_and_warped_flag+"','"+ v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_gm+"','"+v_wm+"','"+v_csf+"',null)"
-                                 results = connection.execute(sql)
+                                ### results = connection.execute(sql)
                              else
                               if File.directory?(v_subjectid_unknown)
                                   v_dir_array = Dir.entries(v_subjectid_unknown)
@@ -15152,11 +15151,13 @@ puts "v_analyses_path="+v_analyses_path
                                       end
                                     end
                                   end
+                                   # qc_tissueseg_gm_value,qc_tissueseg_wm_value,qc_tissueseg_csf_value.  null,null,null
                                   sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','"+ v_o_star_nii_flag+"','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,NULL)"
-                                 results = connection.execute(sql)
+                                 ###results = connection.execute(sql)
                                 else
+                                   # qc_tissueseg_gm_value,qc_tissueseg_wm_value,qc_tissueseg_csf_value.  null,null,null
                                  sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,NULL)"
-                                 results = connection.execute(sql)
+                                 ###results = connection.execute(sql)
                                 end
                              end # check for subjectid t1 dir
 
@@ -15173,9 +15174,39 @@ puts "v_analyses_path="+v_analyses_path
                              v_subjectid_unknown = v_preprocessed_full_path+"/"+dir_name_array[0]+"/unknown"
                              v_o_star_nii_flag ="N"
                              v_multiple_o_star_nii_flag ="N"
+                             # these are the tissue seg harvested values
                              v_gm =""
                              v_wm = ""
                              v_csf = ""
+                             @trfileimage_processedimages = []
+      # check for oacpc file in processedimagesif File.directory?(v_subjectid_unknown)   # need to also look for [subjectid]b,c,d,.R
+                             v_original_t1_mri_file_unknown = "zzzzzzz"
+                             if File.directory?(v_subjectid_unknown)
+                               v_dir_array = Dir.entries(v_subjectid_unknown)
+                               v_dir_array.each do |f|
+                                 if f.start_with?("o") and f.end_with?(".nii")
+                                   v_original_t1_mri_file_unknown = f.to_s
+                                 end
+                               end
+
+                               v_mri_processedimage_id = ""
+                               v_mri_processesimages = Processedimage.where("file_path in (?)",v_subjectid_unknown+"/"+v_original_t1_mri_file_unknown)
+                               if v_mri_processesimages.count < 1
+                                 v_mri_processedimage = Processedimage.new
+                                 v_mri_processedimage.file_type ="o_acpc T1"
+                                 v_mri_processedimage.file_name = v_original_t1_mri_file_unknown
+                                 v_mri_processedimage.file_path = v_subjectid_unknown+"/"+v_original_t1_mri_file_unknown
+                                 v_mri_processedimage.scan_procedure_id = sp.id
+                                 v_mri_processedimage.enrollment_id = enrollment[0].id
+                                 v_mri_processedimage.save  
+                                 v_mri_processedimage_id = v_mri_processedimage.id
+                               else
+                                 v_mri_processedimage_id = v_mri_processesimages.first.id
+                               end
+                               if !v_mri_processedimage_id.blank?
+                                 @trfileimage_processedimages.push(v_mri_processedimage_id)
+                               end
+                             end 
                              if File.directory?(v_subjectid_first)
                                   v_first_volume_hash = {}
                                   v_dir_array = Dir.entries(v_subjectid_first)
@@ -15342,7 +15373,7 @@ puts "v_analyses_path="+v_analyses_path
                                 end
                                 
                                 sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','','"+v_t1seg_smoothed_and_warped_flag+"','"+ v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_gm+"','"+v_wm+"','"+v_csf+"','"+v_secondary_key+"')"
-                                 results = connection.execute(sql)
+                                # results = connection.execute(sql)
                              else
                               if File.directory?(v_subjectid_unknown)
                                   v_dir_array = Dir.entries(v_subjectid_unknown)
@@ -15357,12 +15388,12 @@ puts "v_analyses_path="+v_analyses_path
                                         v_multiple_o_star_nii_flag ="Y"
                                       end
                                     end
-                                  end
+                                  end                                
                                   sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','"+ v_o_star_nii_flag+"','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,'"+v_secondary_key+"')"
-                                 results = connection.execute(sql)
+                                 #results = connection.execute(sql)
                                 else
                                  sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,'"+v_secondary_key+"')"
-                                 results = connection.execute(sql)
+                                 #results = connection.execute(sql)
                                 end
                              end # check for subjectid asl dir
                          else
@@ -15377,11 +15408,11 @@ puts "v_analyses_path="+v_analyses_path
             # check move cg_ to cg_old
             # v_shared = Shared.new 
              # move from new to present table -- made into a function  in shared model
-             v_comment = self.move_present_to_old_new_to_present("cg_t1seg_status",
-             "t1seg_subjectid, t1seg_general_comment, t1seg_smoothed_and_warped_flag, t1seg_smoothed_and_warped_comment, t1seg_smoothed_and_warped_global_quality,o_star_nii_flag,multiple_o_star_nii_flag,enrollment_id,scan_procedure_id,gm,wm,csf,secondary_key",
-                            "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
+             ##v_comment = self.move_present_to_old_new_to_present("cg_t1seg_status",
+             #"t1seg_subjectid, t1seg_general_comment, t1seg_smoothed_and_warped_flag, t1seg_smoothed_and_warped_comment, t1seg_smoothed_and_warped_global_quality,o_star_nii_flag,multiple_o_star_nii_flag,enrollment_id,scan_procedure_id,gm,wm,csf,secondary_key",
+             #               "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
              # apply edits  -- made into a function  in shared model
-             self.apply_cg_edits('cg_t1seg_status')
+             #self.apply_cg_edits('cg_t1seg_status')
 
              # not sure why blank rows accumulating 
              sql = "delete from cg_first_calculated_volumes where l_accu_mm_cube is null and subjectid in 
@@ -15394,7 +15425,7 @@ puts "v_analyses_path="+v_analyses_path
              # apply edits  -- made into a function  in shared model
              self.apply_cg_edits('cg_first_calculated_volumes')
 
-             puts "successful finish t1seg_status and first calculated volumes"+v_comment[0..459]
+             puts "successful finish first calculated volumes"+v_comment[0..459]
               @schedulerun.comment =("successful finish t1seg_status  and first calculated volumes"+v_comment[0..459])
               if !v_comment.include?("ERROR")
                  @schedulerun.status_flag ="Y"
