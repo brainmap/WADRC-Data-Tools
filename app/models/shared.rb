@@ -3012,8 +3012,10 @@ puts v_av1451_petfiles.first.path
                    v_mri_pet_min_date_diff = 0
                    v_min_mri_visit = nil
                    v_min_mri_appointment = nil
+                   v_other_mri_appointment_array = []
                    v_mri_visits.each do |mri_visit|
                       v_mri_appointment = Appointment.find(mri_visit.appointment_id)
+                      v_other_mri_appointment_array.push(v_mri_appointment.appointment_date.to_s)
     puts "hhhhh mri_visit="+mri_visit.id.to_s+".   mri_appt="+v_mri_appointment.appointment_date.to_s
                       if v_min_mri_visit.nil?
                           v_min_mri_visit = mri_visit
@@ -3029,8 +3031,13 @@ puts v_av1451_petfiles.first.path
                       end
                    end
                    if !v_min_mri_visit.nil?
+                     v_other_mri_appointment_array.delete(v_min_mri_appointment.appointment_date.to_s)
                      puts "hhhhh min mri = "+v_min_mri_appointment.appointment_date.to_s+"     pet_appt= "+v_pet_appointment.appointment_date.to_s
-                     v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "+v_comment
+                     if v_other_mri_appointment_array.count > 0
+                       v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+"  other mri="+v_other_mri_appointment_array.join(",")+"; "+v_comment
+                     else
+                       v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "+v_comment
+                     end
                     # optional auto run with min non-pet vgroup mri 
                    else
                     v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" does not have any non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days; "+v_comment
@@ -4157,8 +4164,10 @@ puts "v_participant.id="+v_participant.id.to_s
                    v_mri_pet_min_date_diff = 0
                    v_min_mri_visit = nil
                    v_min_mri_appointment = nil
+                   v_other_mri_appointment_array = []
                    v_mri_visits.each do |mri_visit|
                       v_mri_appointment = Appointment.find(mri_visit.appointment_id)
+                      v_other_mri_appointment_array.push(v_mri_appointment.appointment_date.to_s)
     puts "hhhhh mri_visit="+mri_visit.id.to_s+".   mri_appt="+v_mri_appointment.appointment_date.to_s
                       if v_min_mri_visit.nil?
                           v_min_mri_visit = mri_visit
@@ -4174,8 +4183,13 @@ puts "v_participant.id="+v_participant.id.to_s
                       end
                    end
                    if !v_min_mri_visit.nil?
+                     v_other_mri_appointment_array.delete(v_min_mri_appointment.appointment_date.to_s)
                      puts "hhhhh min mri = "+v_min_mri_appointment.appointment_date.to_s+"     pet_appt= "+v_pet_appointment.appointment_date.to_s
-                     v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "+v_comment
+                     if v_other_mri_appointment_array.count > 0
+                       v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+"  other mri="+v_other_mri_appointment_array.join(",")+"; "+v_comment
+                     else
+                       v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "+v_comment
+                     end
                     # optional auto run with min non-pet vgroup mri 
                    else
                     v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" does not have any non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days; "+v_comment
@@ -5337,7 +5351,7 @@ def run_pet_pib_dvr_process
                 # check if less than v_days_before_use_other_vgroup_mri  --- waiting to see if the same vgroup mri oacpc will show up
                 if ((v_today_date - v_pet_appointment.appointment_date).to_i < v_days_before_use_other_vgroup_mri.to_i) and !v_sp_use_other_vgroup_mri_immediately_array.include?(v_scan_procedure.id)
                    puts "hhh wait to look for mri is non-pet vgroup"
-                   v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" waiting to look for non-pet vgroup mri  v_scan_procedure.id="+v_scan_procedure.id.to_s+"  day diff ="+(v_today_date - v_pet_appointment.appointment_date).to_i.to_s
+                   v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" waiting to look for non-pet vgroup mri  v_scan_procedure.id="+v_scan_procedure.id.to_s+"  day diff ="+(v_today_date - v_pet_appointment.appointment_date).to_i.to_s+"; "
                 
                 else
                   # get all mri for participant within time limit, excluding some studies
@@ -5352,9 +5366,12 @@ def run_pet_pib_dvr_process
                    v_mri_pet_min_date_diff = 0
                    v_min_mri_visit = nil
                    v_min_mri_appointment = nil
+                   v_other_mri_appointment_array = []
                    v_mri_visits.each do |mri_visit|
                       v_mri_appointment = Appointment.find(mri_visit.appointment_id)
     puts "hhhhh mri_visit="+mri_visit.id.to_s+".   mri_appt="+v_mri_appointment.appointment_date.to_s
+                      # also add enum and sp?
+                      v_other_mri_appointment_array.push(v_mri_appointment.appointment_date.to_s)
                       if v_min_mri_visit.nil?
                           v_min_mri_visit = mri_visit
                           v_mri_pet_min_date_diff =(v_mri_appointment.appointment_date - v_pet_appointment.appointment_date).to_i.abs
@@ -5369,8 +5386,13 @@ def run_pet_pib_dvr_process
                       end
                    end
                    if !v_min_mri_visit.nil?
+                     v_other_mri_appointment_array.delete(v_min_mri_appointment.appointment_date.to_s)
                      puts "hhhhh min mri = "+v_min_mri_appointment.appointment_date.to_s+"     pet_appt= "+v_pet_appointment.appointment_date.to_s
-                     v_comment = v_comment+" need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "
+                     if v_other_mri_appointment_array.count > 0
+                       v_comment = v_comment+" need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+"  other mri="+v_other_mri_appointment_array.join(",")+"; "
+                     else
+                     v_comment = v_comment+" need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+"; "
+                    end
                     # optional auto run with min non-pet vgroup mri 
                    else
                     v_comment = v_comment+" need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" does not have any non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days; "
@@ -6502,8 +6524,10 @@ puts "v_participant.id="+v_participant.id.to_s
                    v_mri_pet_min_date_diff = 0
                    v_min_mri_visit = nil
                    v_min_mri_appointment = nil
+                   v_other_mri_appointment_array = []
                    v_mri_visits.each do |mri_visit|
                       v_mri_appointment = Appointment.find(mri_visit.appointment_id)
+                      v_other_mri_appointment_array = []
     puts "hhhhh mri_visit="+mri_visit.id.to_s+".   mri_appt="+v_mri_appointment.appointment_date.to_s
                       if v_min_mri_visit.nil?
                           v_min_mri_visit = mri_visit
@@ -6519,8 +6543,13 @@ puts "v_participant.id="+v_participant.id.to_s
                       end
                    end
                    if !v_min_mri_visit.nil?
+                     v_other_mri_appointment_array.delete(v_min_mri_appointment.appointment_date.to_s)
                      puts "hhhhh min mri = "+v_min_mri_appointment.appointment_date.to_s+"     pet_appt= "+v_pet_appointment.appointment_date.to_s
-                     v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "+v_comment
+                     if v_other_mri_appointment_array.count > 0
+                        v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+"  other mri="+v_other_mri_appointment_array.join(",")+"; "+v_comment
+                     else
+                        v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "+v_comment
+                     end
                     # optional auto run with min non-pet vgroup mri 
                    else
                     v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" does not have any non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days; "+v_comment
@@ -7420,6 +7449,11 @@ def run_sleep_t1
                                 v_qc_tissueseg_gm_value = "Waiting"
                                 v_qc_tissueseg_wm_value = "Waiting"
                                 v_qc_tissueseg_csf_value = "Waiting"
+                                v_global_atrophy ="n/a"
+                                v_make_new_tredit_reset_file_completed = "N"
+                                if !v_gm.blank? and !v_wm.blank? and !v_csf.blank? 
+                                          v_global_atrophy = (v_csf.to_f/(v_gm.to_f + v_wm.to_f))
+                                end
                                 if @trfiles.count == 0
                                   puts "making trfile"
                                   @trfile = Trfile.new
@@ -7454,6 +7488,9 @@ def run_sleep_t1
                                       if !(tat.form_default_value).blank?
                                         v_tredit_action.value = tat.form_default_value
                                       end
+                                      if tat.id == 237 # global_atrophy
+                                          v_tredit_action.value = v_global_atrophy
+                                      end
                                       # set each field with defaults 
                                       v_tredit_action.save
                                     end
@@ -7484,9 +7521,16 @@ def run_sleep_t1
                                         if !@lookup_refs.nil? and @lookup_refs.count> 0
                                           v_qc_tissueseg_csf_value = (@lookup_refs.first).description
                                         end
+                                      elsif tat.id == 237 # global_atrophy
+                                          if v_tredit_action[0].value != v_global_atrophy
+                                            v_make_new_tredit_reset_file_completed = "Y"
+                                          end
                                       end
                                     end
                                   end
+                                end
+                                if v_make_new_tredit_reset_file_completed == "Y"
+### MAKE NEW TREDIT , RESET trfile.file_completed, trfile.qc
                                 end
 
                                 if v_qc_tissueseg_gm_value.nil? or v_qc_tissueseg_gm_value.blank?
@@ -7501,7 +7545,6 @@ def run_sleep_t1
                                 
                                 # qc_tissueseg_gm_value,qc_tissueseg_wm_value,qc_tissueseg_csf_value
                                 #,'"+v_qc_tissueseg_gm_value+"','"+v_qc_tissueseg_wm_value+"','"+v_qc_tissueseg_csf_value+"'
-                                    
                                      
 sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"', "+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_file+"','"+v_gm+"','"+v_wm+"','"+v_csf+"','Y','"+v_rbm_icv+"','"+v_qc_tissueseg_gm_value+"','"+v_qc_tissueseg_wm_value+"','"+v_qc_tissueseg_csf_value+"')"
                                  results = connection.execute(sql)
