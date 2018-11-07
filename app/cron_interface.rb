@@ -294,7 +294,7 @@ v_user = v_user.gsub("\n","")
     v_shared = Shared.new
     v_shared.run_table_cell_comparison()   
     
-  elsif v_value_1 == "t1seg_spm8_gm_wm_csf_volumes" # volumes being harvested in t1seg_status
+  elsif v_value_1 == "t1seg_spm8_gm_wm_csf_volumes" # volumes not being harvested any more 
       v_shared = Shared.new
       v_shared.run_t1seg_spm8_gm_wm_csf_volumes()
 
@@ -371,9 +371,9 @@ v_user = v_user.gsub("\n","")
         # puts "EXIT STATUS:"+status.exitstatus.to_s
 
         puts "  zzzzzzzz end of test_shell"
-  elsif v_value_1 == "t1seg_status"
+  elsif v_value_1 == "fsl_first_value_harvester"
       v_shared = Shared.new
-      v_shared.run_t1seg_status()
+      v_shared.run_fsl_first_value_harvester()
       
   # dev 
   #/usr/local/bin/rails  runner /Users/caillingworth/code/WADRC-Data-Tools/app/cron_interface.rb sp_series_desc_count

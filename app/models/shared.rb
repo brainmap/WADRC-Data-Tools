@@ -14966,12 +14966,13 @@ puts "v_analyses_path="+v_analyses_path
   # getting t1_seg seg totals 
   # also getting first calculated volumes into cg_first_calculated_volumes
   #THIS TISSUE_SEG IS THE OLD UNUSED SPM8 TABLE#######. stopping sql
-  def run_t1seg_status
+  # THIS SHOULD BE CALLED FSL_FIRST_HARVSTER
+  def run_fsl_first_value_harvester
         v_base_path = Shared.get_base_path()
-         @schedule = Schedule.where("name in ('t1seg_status')").first
+         @schedule = Schedule.where("name in ('fsl_first_value_harvester')").first
           @schedulerun = Schedulerun.new
           @schedulerun.schedule_id = @schedule.id
-          @schedulerun.comment ="starting t1seg_status and first calculated volumes"
+          @schedulerun.comment ="starting fsl_first_value_harvester"
           @schedulerun.save
           @schedulerun.start_time = @schedulerun.created_at
           @schedulerun.save
@@ -14979,14 +14980,11 @@ puts "v_analyses_path="+v_analyses_path
           v_comment = ""
           v_fsl_first_trtype_id = 12 #PFirst - ROI (FSL)
     ####    begin   # catch all exception and put error in comment    
-            sql = "truncate table cg_t1seg_status_new"
             connection = ActiveRecord::Base.connection();        
-            #results = connection.execute(sql)
             sql = "truncate table cg_first_calculated_volumes_new"
             results = connection.execute(sql)
             v_comment_base = @schedulerun.comment
             #qc_tissueseg_gm_value,qc_tissueseg_wm_value,qc_tissueseg_csf_value
-            sql_base = "insert into cg_t1seg_status_new(t1seg_subjectid, t1seg_general_comment,t1seg_smoothed_and_warped_flag,o_star_nii_flag,multiple_o_star_nii_flag,enrollment_id, scan_procedure_id,gm,wm,csf,secondary_key)values("  
             sql_first_base = "insert into cg_first_calculated_volumes_new(subjectid,general_comment,enrollment_id, scan_procedure_id,secondary_key,qc_hippocampus_roi,qc_other_roi,l_accu_mm_cube,l_amyg_mm_cube,l_caud_mm_cube,l_hipp_mm_cube,l_pall_mm_cube,l_puta_mm_cube,l_thal_mm_cube,r_accu_mm_cube,r_amyg_mm_cube,r_caud_mm_cube,r_hipp_mm_cube,r_pall_mm_cube,r_puta_mm_cube,r_thal_mm_cube)values("  
             v_raw_path = v_base_path+"/raw"
             v_mri = "/mri"
@@ -15217,22 +15215,6 @@ puts "v_analyses_path="+v_analyses_path
                                   if f.start_with?("smwc1o"+dir_name_array[0])  and f.end_with?(".nii")
                                     v_t1seg_smoothed_and_warped_flag = "Y"
                                   end
-                                  if f == "segtotals.txt"  #  one row in file, comma sep
-                                     v_tmp_data = "" 
-                                     v_tmp_data_array = []  
-                                     ftxt = File.open(v_subjectid_t1seg+"/segtotals.txt", "r") 
-                                     ftxt.each_line do |line|
-                                        v_tmp_data += line
-                                     end
-                                     ftxt.close
-
-                                     v_tmp_data_array = v_tmp_data.strip.split(",")
-                                     if v_tmp_data_array.length >2
-                                        v_gm =v_tmp_data_array[0]
-                                        v_wm  = v_tmp_data_array[1]
-                                        v_csf = v_tmp_data_array[2]
-                                     end
-                                  end
                                 end
                                 if File.directory?(v_subjectid_unknown)
                                   v_dir_array = Dir.entries(v_subjectid_unknown)
@@ -15250,8 +15232,6 @@ puts "v_analyses_path="+v_analyses_path
                                   end
                                 end 
                                 
-                                sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','','"+v_t1seg_smoothed_and_warped_flag+"','"+ v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_gm+"','"+v_wm+"','"+v_csf+"',null)"
-                                ### results = connection.execute(sql)
                              else
                               if File.directory?(v_subjectid_unknown)
                                   v_dir_array = Dir.entries(v_subjectid_unknown)
@@ -15267,13 +15247,6 @@ puts "v_analyses_path="+v_analyses_path
                                       end
                                     end
                                   end
-                                   # qc_tissueseg_gm_value,qc_tissueseg_wm_value,qc_tissueseg_csf_value.  null,null,null
-                                  sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','"+ v_o_star_nii_flag+"','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,NULL)"
-                                 ###results = connection.execute(sql)
-                                else
-                                   # qc_tissueseg_gm_value,qc_tissueseg_wm_value,qc_tissueseg_csf_value.  null,null,null
-                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,NULL)"
-                                 ###results = connection.execute(sql)
                                 end
                              end # check for subjectid t1 dir
 
@@ -15455,22 +15428,6 @@ puts "v_analyses_path="+v_analyses_path
                                   if f.start_with?("smwc1o"+dir_name_array[0])  and f.end_with?(".nii")
                                     v_t1seg_smoothed_and_warped_flag = "Y"
                                   end
-                                  if f == "segtotals.txt"  #  one row in file, comma sep
-                                     v_tmp_data = "" 
-                                     v_tmp_data_array = []  
-                                     ftxt = File.open(v_subjectid_t1seg+"/segtotals.txt", "r") 
-                                     ftxt.each_line do |line|
-                                        v_tmp_data += line
-                                     end
-                                     ftxt.close
-
-                                     v_tmp_data_array = v_tmp_data.strip.split(",")
-                                     if v_tmp_data_array.length >2
-                                        v_gm =v_tmp_data_array[0]
-                                        v_wm  = v_tmp_data_array[1]
-                                        v_csf = v_tmp_data_array[2]
-                                     end
-                                  end
                                 end
                                 if File.directory?(v_subjectid_unknown)
                                   v_dir_array = Dir.entries(v_subjectid_unknown)
@@ -15487,9 +15444,6 @@ puts "v_analyses_path="+v_analyses_path
                                     end
                                   end
                                 end
-                                
-                                sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','','"+v_t1seg_smoothed_and_warped_flag+"','"+ v_o_star_nii_flag+"','"+v_multiple_o_star_nii_flag+"',"+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_gm+"','"+v_wm+"','"+v_csf+"','"+v_secondary_key+"')"
-                                # results = connection.execute(sql)
                              else
                               if File.directory?(v_subjectid_unknown)
                                   v_dir_array = Dir.entries(v_subjectid_unknown)
@@ -15504,12 +15458,7 @@ puts "v_analyses_path="+v_analyses_path
                                         v_multiple_o_star_nii_flag ="Y"
                                       end
                                     end
-                                  end                                
-                                  sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','"+ v_o_star_nii_flag+"','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,'"+v_secondary_key+"')"
-                                 #results = connection.execute(sql)
-                                else
-                                 sql = sql_base+"'"+dir_name_array[0]+v_visit_number+"','no t1_aligned_newseg dir','N','N','N',"+enrollment[0].id.to_s+","+sp.id.to_s+",NULL,NULL,NULL,'"+v_secondary_key+"')"
-                                 #results = connection.execute(sql)
+                                  end  
                                 end
                              end # check for subjectid asl dir
                          else
@@ -15524,12 +15473,6 @@ puts "v_analyses_path="+v_analyses_path
             # check move cg_ to cg_old
             # v_shared = Shared.new 
              # move from new to present table -- made into a function  in shared model
-             ##v_comment = self.move_present_to_old_new_to_present("cg_t1seg_status",
-             #"t1seg_subjectid, t1seg_general_comment, t1seg_smoothed_and_warped_flag, t1seg_smoothed_and_warped_comment, t1seg_smoothed_and_warped_global_quality,o_star_nii_flag,multiple_o_star_nii_flag,enrollment_id,scan_procedure_id,gm,wm,csf,secondary_key",
-             #               "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
-             # apply edits  -- made into a function  in shared model
-             #self.apply_cg_edits('cg_t1seg_status')
-
              # not sure why blank rows accumulating 
              sql = "delete from cg_first_calculated_volumes where l_accu_mm_cube is null and subjectid in 
                         (select subjectid from cg_first_calculated_volumes_new where l_accu_mm_cube is not null)"
@@ -15541,8 +15484,8 @@ puts "v_analyses_path="+v_analyses_path
              # apply edits  -- made into a function  in shared model
              self.apply_cg_edits('cg_first_calculated_volumes')
 
-             puts "successful finish first calculated volumes"+v_comment[0..459]
-              @schedulerun.comment =("successful finish t1seg_status  and first calculated volumes"+v_comment[0..459])
+             puts "successful finish fsl_first_value_harvester"+v_comment[0..459]
+              @schedulerun.comment =("successful finish fsl_first_value_harvester"+v_comment[0..459])
               if !v_comment.include?("ERROR")
                  @schedulerun.status_flag ="Y"
                end
