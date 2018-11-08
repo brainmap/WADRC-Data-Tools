@@ -7245,7 +7245,7 @@ def run_sleep_t1
     sp_exclude_array = [-1,62,53,54,55,56,57 ] # if tissuesegmentation run on plaque, ok to run rbm [33,40]
     # @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     # applying exclusion further down to prevent running the process
-    @scan_procedures = ScanProcedure.all 
+    @scan_procedures = ScanProcedure.all
     v_comment_base = @schedulerun.comment
     @scan_procedures.each do |sp|
       @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
@@ -7490,6 +7490,12 @@ def run_sleep_t1
                                       end
                                       if tat.id == 237 # global_atrophy
                                           v_tredit_action.value = v_global_atrophy
+                                      elsif tat.id == 255 # gm
+                                          v_tredit_action.value = v_gm
+                                      elsif tat.id == 256 # wm
+                                          v_tredit_action.value = v_wm
+                                      elsif tat.id == 257 # csf
+                                          v_tredit_action.value = v_csf
                                       end
                                       # set each field with defaults 
                                       v_tredit_action.save
@@ -7522,15 +7528,43 @@ def run_sleep_t1
                                           v_qc_tissueseg_csf_value = (@lookup_refs.first).description
                                         end
                                       elsif tat.id == 237 # global_atrophy
-                                          if v_tredit_action[0].value != v_global_atrophy
+                                          if !v_tredit_action[0].nil? and v_tredit_action[0].value != v_global_atrophy
                                             v_make_new_tredit_reset_file_completed = "Y"
+                                            if v_make_new_tredit_reset_file_completed == "Y"
+### MAKE NEW TREDIT , RESET trfile.file_completed, trfile.qc
+                                               @trfiles[0].file_completed_flag = "N"
+                                               @trfiles[0].save
+                                               @new_tredit = Tredit.new
+                                               @new_tredit.trfile_id = @trfiles[0].id
+                                                #@tredit.user_id = current_user.id
+                                               @new_tredit.save
+                                               v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_tissueseg_trtype_id)
+                                               if !v_tractiontypes.nil?
+                                                  v_tractiontypes.each do |tat|
+                                                  v_tredit_action = TreditAction.new
+                                                  v_tredit_action.tredit_id = @new_tredit.id
+                                                  v_tredit_action.tractiontype_id = tat.id
+                                                  if !(tat.form_default_value).blank?
+                                                     v_tredit_action.value = tat.form_default_value
+                                                  end
+                                                  if tat.id == 237 # global_atrophy
+                                                     v_tredit_action.value = v_global_atrophy
+                                                  elsif tat.id == 255 # gm
+                                                     v_tredit_action.value = v_gm
+                                                  elsif tat.id == 256 # wm
+                                                     v_tredit_action.value = v_wm
+                                                  elsif tat.id == 257 # csf
+                                                     v_tredit_action.value = v_csf
+                                                  end
+                                                  # set each field with defaults 
+                                                  v_tredit_action.save
+                                                end
+                                              end
+                                            end # end of making new tredit
                                           end
                                       end
                                     end
                                   end
-                                end
-                                if v_make_new_tredit_reset_file_completed == "Y"
-### MAKE NEW TREDIT , RESET trfile.file_completed, trfile.qc
                                 end
 
                                 if v_qc_tissueseg_gm_value.nil? or v_qc_tissueseg_gm_value.blank?

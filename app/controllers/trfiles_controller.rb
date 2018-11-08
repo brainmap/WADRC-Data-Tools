@@ -1,6 +1,29 @@
 class TrfilesController < ApplicationController
  	before_action :set_trfile, only: [:show, :edit, :update, :destroy]   
 	respond_to :html
+
+  def sync_if_blank(p_enrollment_id,p_scan_procedure_id,p_secondary_key,p_trtype_id,p_tractiontype_id,p_tredit_action,p_form_default_value)
+    
+      if !p_secondary_key.nil?
+         v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?) and trfiles.secondary_key in (?)",p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_secondary_key)
+      else
+        v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?)",p_scan_procedure_id,p_enrollment_id,p_trtype_id)
+      end
+       # just get one
+      if !v_trfiles.nil? and v_trfiles.count > 0
+          v_trfiles.each do |trfile|
+            # get most recent tredit
+            v_tredits = Tredit.where("trfile_id in (?) and status_flag ='Y'",trfile.id).order("tredits.id asc")
+            v_tredit = v_tredits[0]
+            v_tredit_action = TreditAction.where("tractiontype_id in (?) and tredit_id in (?)",p_tractiontype_id, v_tredit.id)
+             if (v_tredit_action[0].value.blank? or  v_tredit_action[0].value == p_form_default_value)
+                    v_tredit_action[0].value = p_tredit_action.value
+                    v_tredit_action[0].save
+             end
+          end
+      end
+  end
+
   def trfile_edit_action
     scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
     v_shared = Shared.new
@@ -108,6 +131,28 @@ class TrfilesController < ApplicationController
                end
                if !params["value"][(ta.id).to_s].nil?
                 v_value = params["value"][(ta.id).to_s].join(',')
+               elsif !params["value_1"][(ta.id).to_s].nil?   # _# from javascript?
+                v_value = params["value_1"][(ta.id).to_s].join(',')
+               elsif !params["value_1"][(ta.id).to_s].nil?   # _# from javascript?
+                v_value = params["value_1"][(ta.id).to_s].join(',')
+               elsif !params["value_2"][(ta.id).to_s].nil?   # _# from javascript?
+                v_value = params["value_2"][(ta.id).to_s].join(',')
+               elsif !params["value_3"][(ta.id).to_s].nil?   # _# from javascript?
+                v_value = params["value_3"][(ta.id).to_s].join(',')
+               elsif !params["value_4"][(ta.id).to_s].nil?   # _# from javascript?
+                v_value = params["value_4"][(ta.id).to_s].join(',')
+               elsif !params["value_5"][(ta.id).to_s].nil?   # _# from javascript?
+                v_value = params["value_5"][(ta.id).to_s].join(',')
+               elsif !params["value_6"][(ta.id).to_s].nil?   # _# from javascript?
+                v_value = params["value_6"][(ta.id).to_s].join(',')
+               elsif !params["value_7"][(ta.id).to_s].nil?   # _# from javascript?
+                v_value = params["value_7"][(ta.id).to_s].join(',')
+               elsif !params["value_8"][(ta.id).to_s].nil?   # _# from javascript?
+                v_value = params["value_8"][(ta.id).to_s].join(',')
+               elsif !params["value_9"][(ta.id).to_s].nil?   # _# from javascript?
+                v_value = params["value_9"][(ta.id).to_s].join(',')
+               elsif !params["value_10"][(ta.id).to_s].nil?   # _# from javascript? hope there are less than 10 - not sure why this is there
+                v_value = params["value_10"][(ta.id).to_s].join(',')
 
                else
                   puts "bbbbbb nil = "+(ta.id).to_s
@@ -184,6 +229,14 @@ class TrfilesController < ApplicationController
                               PandaMailer.send_email(v_subject,{:send_to => address},v_body).deliver
                             end
                           end
+                      end
+                  elsif v_trigger_array[0] == "sync_if_blank_command_not_yet" and !@tredit_action.value.blank? and @tredit_action.value != ta.form_default_value
+                      v_trigger_array.drop(1).each do |trigpart|
+                         v_trigpart_array = trigpart.split("^")
+                         # trtype_id=8^tractiontype_id=202
+                         v_trigger_trtype_array = v_trigpart_array[0].split("=")
+                         v_trigger_traction_array = v_trigpart_array[1].split("=")
+                         sync_if_blank(@trfile.enrollment_id,@trfile.scan_procedure_id,@trfile.secondary_key,v_trigger_trtype_array[1],v_trigger_traction_array[1],@tredit_action,ta.form_default_value)
                       end
                   end
               end
