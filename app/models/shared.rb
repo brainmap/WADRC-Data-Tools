@@ -7272,6 +7272,7 @@ def run_sleep_t1
               enrollment = Enrollment.where("enumber='"+r[0]+"'")
               if !enrollment.blank?
                 v_log = ""
+      
                 v_subjectid_path = v_preprocessed_full_path+"/"+enrollment[0].enumber
                 v_subjectid = enrollment[0].enumber
                 v_subjectid_v_num = enrollment[0].enumber + v_visit_number
@@ -7305,13 +7306,23 @@ def run_sleep_t1
                         v_subjectid_actual = v_subjectid[0..-3]
                     end
                   end
+          
                   v_subjectid_v_num = v_subjectid_actual + v_visit_number
                   v_subjectid_path = v_preprocessed_full_path+"/"+subj
                   v_subjectid_unknown =v_subjectid_path+"/unknown"
-                  if File.directory?(v_subjectid_unknown)
+                  v_subjectid_tissue_seg =v_subjectid_path+"/tissue_seg"
+                  # problem with 2 oacpc files in unknown 
+                  # only go thru once
+                  v_o_acpc_cnt = 0
+                  if File.directory?(v_subjectid_tissue_seg)
+      
                     v_dir_array = Dir.entries(v_subjectid_unknown)
+                    v_cnt_o_acpc = 0 # probelms 
                     v_dir_array.each do |f|
-                    if (f.start_with?("o") and f.end_with?(".nii") )  or v_subjectid_actual.include?("shp")
+      
+                    if (f.start_with?("o") and f.end_with?(".nii") and v_cnt_o_acpc < 1 )  or v_subjectid_actual.include?("shp")
+                       v_cnt_o_acpc = v_cnt_o_acpc + 1
+         
                         # check for tissue_seg
                         v_subjectid_tissue_seg =v_subjectid_path+"/tissue_seg"
                         v_subjectid_rbm_icv =v_subjectid_path+"/rbm_icv"
@@ -7373,8 +7384,10 @@ def run_sleep_t1
                               end
                               process_log_append(v_log_path, v_log)
                           end
-                        end                          #harvest
+                        end     
+                                       #harvest
                         if File.file?(v_subjectid_tissue_seg+"/tissue_volumes.csv") 
+                
                                # open file, look for values 
                                      v_tmp_data = "" 
                                      v_tmp_data_array = []  
@@ -7586,7 +7599,7 @@ def run_sleep_t1
                                 
                                 # qc_tissueseg_gm_value,qc_tissueseg_wm_value,qc_tissueseg_csf_value
                                 #,'"+v_qc_tissueseg_gm_value+"','"+v_qc_tissueseg_wm_value+"','"+v_qc_tissueseg_csf_value+"'
-                                     
+                                          
 sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"', "+enrollment[0].id.to_s+","+sp.id.to_s+",'"+v_file+"','"+v_gm+"','"+v_wm+"','"+v_csf+"','Y','"+v_rbm_icv+"','"+v_qc_tissueseg_gm_value+"','"+v_qc_tissueseg_wm_value+"','"+v_qc_tissueseg_csf_value+"')"
                                  results = connection.execute(sql)
                              else
