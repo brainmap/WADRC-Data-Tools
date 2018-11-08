@@ -7445,7 +7445,11 @@ def run_sleep_t1
                                end
                              end
                                 # check for tissue_seg  tracker record, make new record or retrieve qc values for insert into tissue segt table
-                                @trfiles = Trfile.where("trtype_id in (?)",v_tissueseg_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
+                                if !v_secondary_key.blank?
+                                   @trfiles = Trfile.where("trtype_id in (?)",v_tissueseg_trtype_id).where("subjectid in (?) and secondary_key in (?)",v_subjectid_v_num,v_secondary_key)
+                                else
+                                   @trfiles = Trfile.where("trtype_id in (?)",v_tissueseg_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
+                                end
                                 v_qc_tissueseg_gm_value = "Waiting"
                                 v_qc_tissueseg_wm_value = "Waiting"
                                 v_qc_tissueseg_csf_value = "Waiting"
@@ -7464,6 +7468,9 @@ def run_sleep_t1
                                   @trfile.trtype_id = v_tissueseg_trtype_id
         
                                   @trfile.qc_notes = "autoinsert by panda "
+                                  if !v_secondary_key.blank?
+                                     @trfile.secondary_key = v_secondary_key
+                                  end
                                   @trfile.save
                                   # NEED processedimage @trfile.image_dataset_id = v_ids_id
                                   if @trfileimage_processedimages.kind_of?(Array)
@@ -12527,8 +12534,9 @@ puts "end of ids loop"
              rescue => msg
                 v_err = msg.inspect
                 if !v_err.nil? and v_err > ""
+        puts "IN ERRROR!!!!"
                   v_comment_error = v_err+"; "+v_comment_error
-                  v_comment = "ERROR  "+v_comment    # took out v_subjectid_v_num  - not defined?
+                  v_comment = "ERROR  image_dataset_id ="+v_ids_id.to_s+"  "+v_comment    # took out v_subjectid_v_num  - not defined?
                   @schedulerun.comment = "ERROR  "+v_err+";"+@schedulerun.comment
                   @schedulerun.save
                    v_schedule_owner_email_array.each do |e|
@@ -15413,6 +15421,9 @@ puts "v_analyses_path="+v_analyses_path
                                                 @trfile.trtype_id = v_fsl_first_trtype_id
         
                                                 @trfile.qc_notes = "autoinsert by panda "
+                                                if !v_secondary_key.blank?
+                                                   @trfile.secondary_key = v_secondary_key
+                                                end
                                                 @trfile.save
                                                # NEED processedimage @trfile.image_dataset_id = v_ids_id
                                                 if @trfileimage_processedimages.kind_of?(Array)
