@@ -7320,7 +7320,7 @@ def run_sleep_t1
                     v_cnt_o_acpc = 0 # probelms 
                     v_dir_array.each do |f|
       
-                    if (f.start_with?("o") and f.end_with?(".nii") and v_cnt_o_acpc < 1 )  or v_subjectid_actual.include?("shp")
+                    if (f.start_with?("o") and f.end_with?(".nii") and v_cnt_o_acpc < 1 )  or ( v_subjectid_actual.include?("shp") and v_cnt_o_acpc < 1)
                        v_cnt_o_acpc = v_cnt_o_acpc + 1
          
                         # check for tissue_seg
@@ -7548,7 +7548,7 @@ def run_sleep_t1
                                           v_qc_tissueseg_csf_value = (@lookup_refs.first).description
                                         end
                                       elsif tat.id == 237 # global_atrophy
-                                          if !v_tredit_action[0].nil? and v_tredit_action[0].value != v_global_atrophy
+                                          if !v_tredit_action[0].nil? and v_tredit_action[0].value.to_s != v_global_atrophy.to_s
                                             v_make_new_tredit_reset_file_completed = "Y"
                                             if v_make_new_tredit_reset_file_completed == "Y"
 ### MAKE NEW TREDIT , RESET trfile.file_completed, trfile.qc
