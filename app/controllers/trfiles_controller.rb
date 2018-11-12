@@ -2,12 +2,41 @@ class TrfilesController < ApplicationController
  	before_action :set_trfile, only: [:show, :edit, :update, :destroy]   
 	respond_to :html
 
-  def sync_if_blank(p_enrollment_id,p_scan_procedure_id,p_secondary_key,p_trtype_id,p_tractiontype_id,p_tredit_action,p_form_default_value)
-    
-      if !p_secondary_key.nil?
-         v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?) and trfiles.secondary_key in (?)",p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_secondary_key)
-      else
-        v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?)",p_scan_procedure_id,p_enrollment_id,p_trtype_id)
+
+  # going down 2 levels in processedimages
+  def sync_if_blank(p_trfile_id,p_enrollment_id,p_scan_procedure_id,p_secondary_key,p_trtype_id,p_tractiontype_id,p_tredit_action,p_form_default_value,p_match_on_processedimage_type)
+      if !p_match_on_processedimage_type.blank? 
+        if !p_secondary_key.nil?
+           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?) and trfiles.secondary_key in (?)
+                                      and (trfiles.id in (select trfileimages.trfile_id from trfileimages,processedimages,processedimagessources where trfileimages.image_category = 'processedimage' 
+                                      and trfileimages.image_id = processedimages.id and processedimagessources.processedimage_id = processedimages.id
+                                      and processedimages.file_type in (?)
+                                        and (processedimages.id in (select pi2.id from processedimages pi2, trfileimages ti2 
+                                                                     where pi2.id = ti2.image_id and t12.trfile_id in (?) )
+                                              or
+                                              processedimagessources.source_image_id in (select pis3.source_image_id from processedimagessources pis3, processedimages pi3,trfileimages ti3
+                                                                                          where pi3.id = pis3.processedimage_id
+                                                                                                and ti3.image_id = pi3.id and ti3.trfile_id in (?)
+                                        )   ) )",p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_secondary_key,p_match_on_processedimage_type,p_trfile_id,p_trfile_id)
+        else
+           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?)
+                                     and trfiles.id in (select trfileimages.trfile_id from trfileimages,processedimages,processedimagessources where trfileimages.image_category = 'processedimage' 
+                                      and trfileimages.image_id = processedimages.id and processedimagessources.processedimage_id = processedimages.id
+                                       and processedimages.file_type in (?)
+                                        and (processedimages.id in (select pi2.id from processedimages pi2, trfileimages ti2 
+                                                                     where pi2.id = ti2.image_id and ti2.trfile_id in (?) )
+                                              or
+                                              processedimagessources.source_image_id in (select pis3.source_image_id from processedimagessources pis3, processedimages pi3,trfileimages ti3
+                                                                                          where pi3.id = pis3.processedimage_id
+                                                                                                and ti3.image_id = pi3.id and ti3.trfile_id in (?)
+                                       )  )  )",p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_match_on_processedimage_type,p_trfile_id,p_trfile_id)
+        end
+      else 
+        if !p_secondary_key.nil?
+           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?) and trfiles.secondary_key in (?)",p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_secondary_key)
+        else
+           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?)",p_scan_procedure_id,p_enrollment_id,p_trtype_id)
+        end
       end
        # just get one
       if !v_trfiles.nil? and v_trfiles.count > 0
@@ -22,6 +51,60 @@ class TrfilesController < ApplicationController
              end
           end
       end
+  end
+  # p_tredit_action.value is blank or default
+  def sync_if_blank_on_load(p_trfile_id,p_enrollment_id,p_scan_procedure_id,p_secondary_key,p_trtype_id,p_tractiontype_id,p_tredit_action,p_form_default_value,p_match_on_processedimage_type)
+puts "aaaaaaa in sync_if_blank_on_load"
+
+
+      if !p_match_on_processedimage_type.blank? 
+        if !p_secondary_key.nil?
+           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?) and trfiles.secondary_key in (?)
+                                      and trfiles.id in (select trfileimages.trfile_id from trfileimages,processedimages,processedimagessources where trfileimages.image_category = 'processedimage' 
+                                      and trfileimages.image_id = processedimages.id and processedimagessources.processedimage_id = processedimages.id
+                                       and processedimages.file_type in (?)
+                                        and (processedimages.id in (select pi2.id from processedimages pi2, trfileimages ti2 
+                                                                     where pi2.id = ti2.image_id and ti2.trfile_id in (?) )
+                                              or
+                                              processedimagessources.source_image_id in (select pis3.source_image_id from processedimagessources pis3, processedimages pi3,trfileimages ti3
+                                                                                          where pi3.id = pis3.processedimage_id
+                                                                                                and ti3.image_id = pi3.id and ti3.trfile_id in (?)
+                                         )  ) )",p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_secondary_key,p_match_on_processedimage_type,p_trfile_id,p_trfile_id)
+        else
+           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?)
+                                     and trfiles.id in (select trfileimages.trfile_id from trfileimages,processedimages,processedimagessources where trfileimages.image_category = 'processedimage' 
+                                      and trfileimages.image_id = processedimages.id and processedimagessources.processedimage_id = processedimages.id
+                                       and processedimages.file_type in (?)
+                                        and (processedimages.id in (select pi2.id from processedimages pi2, trfileimages ti2 
+                                                                     where pi2.id = ti2.image_id and ti2.trfile_id in (?) )
+                                              or
+                                              processedimagessources.source_image_id in (select pis3.source_image_id from processedimagessources pis3, processedimages pi3,trfileimages ti3
+                                                                                          where pi3.id = pis3.processedimage_id
+                                                                                                and ti3.image_id = pi3.id and ti3.trfile_id in (?)
+                                           ) ) )",p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_match_on_processedimage_type,p_trfile_id,p_trfile_id)
+        end
+      else 
+        if !p_secondary_key.nil?
+           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?) and trfiles.secondary_key in (?)",p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_secondary_key)
+        else
+           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?)",p_scan_procedure_id,p_enrollment_id,p_trtype_id)
+        end
+      end
+       # just get one
+      if !v_trfiles.nil? and v_trfiles.count > 0
+          v_non_blank_non_default_value = ""
+          v_trfiles.each do |trfile|
+            # get most recent tredit
+            v_tredits = Tredit.where("trfile_id in (?) and status_flag ='Y'",trfile.id).order("tredits.id asc")
+            v_tredit = v_tredits[0]
+            v_tredit_action = TreditAction.where("tractiontype_id in (?) and tredit_id in (?)",p_tractiontype_id, v_tredit.id)
+             if !v_tredit_action[0].value.blank? and  v_tredit_action[0].value != p_form_default_value
+                    p_tredit_action.value =v_tredit_action[0].value 
+                    p_tredit_action.save
+             end
+          end
+      end
+  puts "zzzzz end sync_if_blank_on_load"
   end
 
   def trfile_edit_action
@@ -131,27 +214,25 @@ class TrfilesController < ApplicationController
                end
                if !params["value"][(ta.id).to_s].nil?
                 v_value = params["value"][(ta.id).to_s].join(',')
-               elsif !params["value_1"][(ta.id).to_s].nil?   # _# from javascript?
+               elsif !params["value_1"].nil? and !params["value_1"][(ta.id).to_s].nil?   # _# from javascript?
                 v_value = params["value_1"][(ta.id).to_s].join(',')
-               elsif !params["value_1"][(ta.id).to_s].nil?   # _# from javascript?
-                v_value = params["value_1"][(ta.id).to_s].join(',')
-               elsif !params["value_2"][(ta.id).to_s].nil?   # _# from javascript?
+               elsif !params["value_2"].nil? and !params["value_2"][(ta.id).to_s].nil?   # _# from javascript?
                 v_value = params["value_2"][(ta.id).to_s].join(',')
-               elsif !params["value_3"][(ta.id).to_s].nil?   # _# from javascript?
+               elsif !params["value_3"].nil? and !params["value_3"][(ta.id).to_s].nil?   # _# from javascript?
                 v_value = params["value_3"][(ta.id).to_s].join(',')
-               elsif !params["value_4"][(ta.id).to_s].nil?   # _# from javascript?
+               elsif !params["value_4"].nil? and !params["value_4"][(ta.id).to_s].nil?   # _# from javascript?
                 v_value = params["value_4"][(ta.id).to_s].join(',')
-               elsif !params["value_5"][(ta.id).to_s].nil?   # _# from javascript?
+               elsif !params["value_5"].nil? and !params["value_5"][(ta.id).to_s].nil?   # _# from javascript?
                 v_value = params["value_5"][(ta.id).to_s].join(',')
-               elsif !params["value_6"][(ta.id).to_s].nil?   # _# from javascript?
+               elsif !params["value_6"].nil? and !params["value_6"][(ta.id).to_s].nil?   # _# from javascript?
                 v_value = params["value_6"][(ta.id).to_s].join(',')
-               elsif !params["value_7"][(ta.id).to_s].nil?   # _# from javascript?
+               elsif !params["value_7"].nil? and !params["value_7"][(ta.id).to_s].nil?   # _# from javascript?
                 v_value = params["value_7"][(ta.id).to_s].join(',')
-               elsif !params["value_8"][(ta.id).to_s].nil?   # _# from javascript?
+               elsif !params["value_8"].nil? and !params["value_8"][(ta.id).to_s].nil?   # _# from javascript?
                 v_value = params["value_8"][(ta.id).to_s].join(',')
-               elsif !params["value_9"][(ta.id).to_s].nil?   # _# from javascript?
+               elsif !params["value_9"].nil? and !params["value_9"][(ta.id).to_s].nil?   # _# from javascript?
                 v_value = params["value_9"][(ta.id).to_s].join(',')
-               elsif !params["value_10"][(ta.id).to_s].nil?   # _# from javascript? hope there are less than 10 - not sure why this is there
+               elsif !params["value_10"].nil? and !params["value_10"][(ta.id).to_s].nil?   # _# from javascript? hope there are less than 10 - not sure why this is there
                 v_value = params["value_10"][(ta.id).to_s].join(',')
 
                else
@@ -230,13 +311,18 @@ class TrfilesController < ApplicationController
                             end
                           end
                       end
-                  elsif v_trigger_array[0] == "sync_if_blank_command_not_yet" and !@tredit_action.value.blank? and @tredit_action.value != ta.form_default_value
+                  elsif v_trigger_array[0].start_with?("sync_if_blank_command") and !@tredit_action.value.blank? and @tredit_action.value != ta.form_default_value
+                     v_match_on_processedimage_type = ""
+                     v_initial_command_array = v_trigger_array[0].split("^") # 
+                     if v_initial_command_array.count > 1
+                        v_match_on_processedimage_type = v_initial_command_array[1]
+                     end
                       v_trigger_array.drop(1).each do |trigpart|
                          v_trigpart_array = trigpart.split("^")
                          # trtype_id=8^tractiontype_id=202
                          v_trigger_trtype_array = v_trigpart_array[0].split("=")
                          v_trigger_traction_array = v_trigpart_array[1].split("=")
-                         sync_if_blank(@trfile.enrollment_id,@trfile.scan_procedure_id,@trfile.secondary_key,v_trigger_trtype_array[1],v_trigger_traction_array[1],@tredit_action,ta.form_default_value)
+                         sync_if_blank(@trfile.id,@trfile.enrollment_id,@trfile.scan_procedure_id,@trfile.secondary_key,v_trigger_trtype_array[1],v_trigger_traction_array[1],@tredit_action,ta.form_default_value,v_match_on_processedimage_type)
                       end
                   end
               end
@@ -456,6 +542,7 @@ v_composite_value = v_composite_value + "
   elsif !params[:trfile_action].nil? and    params[:trfile_action] == "get_edit" and !params[:trfile_id].nil?  and params[:tredit_id].nil?  
 
          @tredits = Tredit.where("trfile_id in (?) and status_flag ='Y' ",params[:trfile_id]).order("created_at")
+
          @tredits.each do |te|
             @tredit = te # want the last one - newest created_at
          end
@@ -502,6 +589,40 @@ v_composite_value = v_composite_value + "
           @trfileimage_imgs.push(tri.image_id)
     end 
 
+    #sync_if_blank_command
+    v_sync_tractiontypes = Tractiontype.where("trtype_id in (?)",@trfile.trtype_id)
+    # get last tredit 
+    v_sync_last_tredit = ""
+    v_sync_tredits = Tredit.where("tredits.trfile_id in (?) and tredits.status_flag ='Y'", @tredit.trfile_id).order(:id)
+    v_sync_tredits.each do |tredit|
+          v_sync_last_tredit = tredit
+    end
+   ### pull sync trigger on load
+    v_sync_tractiontypes.each do |ta|
+      if !(ta.triggers_1).blank?
+        v_trigger_array = (ta.triggers_1).split("|")
+        if v_trigger_array[0].start_with?("sync_if_blank_command") 
+           # get last tredit
+           v_sync_tredit_actions = TreditAction.where("tredit_id in (?)",v_sync_last_tredit.id).where("tractiontype_id in (?)",ta.id)
+           if !v_sync_tredit_actions.nil? and v_sync_tredit_actions.count> 0 and (v_sync_tredit_actions[0].value.blank? or v_sync_tredit_actions[0].value == ta.form_default_value)             
+              v_match_on_processedimage_type = ""
+              v_initial_command_array = v_trigger_array[0].split("^") # 
+              if v_initial_command_array.count > 1
+                 v_match_on_processedimage_type = v_initial_command_array[1]
+              end
+              v_trigger_array.drop(1).each do |trigpart|
+                v_trigpart_array = trigpart.split("^")
+                         # trtype_id=8^tractiontype_id=202
+                v_trigger_trtype_array = v_trigpart_array[0].split("=")
+                v_trigger_traction_array = v_trigpart_array[1].split("=")
+                sync_if_blank_on_load(@trfile.id,@trfile.enrollment_id,@trfile.scan_procedure_id,@trfile.secondary_key,v_trigger_trtype_array[1],v_trigger_traction_array[1],v_sync_tredit_actions[0],ta.form_default_value,v_match_on_processedimage_type)
+              end
+           end
+         end
+      end
+    end
+
+
     @trfileimage = @trfileimages.first
     @v_action_name = @trtype.action_name
     @vgroups = Vgroup.where("vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships where enrollment_id in (?) )",@trfile.enrollment_id).where("vgroups.id in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))",@trfile.scan_procedure_id)
@@ -523,6 +644,17 @@ v_composite_value = v_composite_value + "
              @processedimages = []
              #@processedimages_pet = {}
              #@processedimages_img = {}
+
+             # not everything showing up - but not like the cross linking???
+
+             @processedimagefiletypes.each do |processedimagefiletype|
+                  @tmp_processedimages = Processedimage.where("file_type in (?) and scan_procedure_id in (?) and enrollment_id in (?)",processedimagefiletype.file_type,@trfile.scan_procedure_id ,@trfile.enrollment_id)
+                  @tmp_processedimages.each do |tmp|
+                   ##   @processedimages.push(tmp)
+                  end
+             end
+
+
            @processedimagefiletypes.each do |processedimagefiletype|  
 
 
