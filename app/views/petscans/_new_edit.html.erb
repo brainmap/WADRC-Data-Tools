@@ -194,6 +194,10 @@ v_autodetect =  [["AutoDetect File On","On"],["AutoDetect File Off","Off"]]
 <%= f.label :Petscanner_Name %> : <%= select :v, :scanner_name, ["HR+","select a scanner name"] %>
   </p>
 
+  <p>
+<%= f.label :Petscan_file_Good_to_process %> : <%= select :v, :good_to_process_flag, ["Y","N","select..."] %>
+  </p>
+
     <%= @petscan.petscan_note.try(:html_safe)%>
   </div>
 
