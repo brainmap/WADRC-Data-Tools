@@ -4,7 +4,6 @@ class CgQueryTnCnsController < ApplicationController
   # GET /cg_query_tn_cns.xml
   def index
     @cg_query_tn_cns = CgQueryTnCn.all
-
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => @cg_query_tn_cns }

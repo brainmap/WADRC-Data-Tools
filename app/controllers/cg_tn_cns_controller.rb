@@ -3,7 +3,7 @@ class CgTnCnsController < ApplicationController
   # GET /cg_tn_cns
   # GET /cg_tn_cns.xml
   def index
-    @cg_tn_cns = CgTnCn.all.order("cg_tn_id DESC,display_order ASC")
+    @cg_tn_cns = CgTnCn.where("updated_at > DATE_ADD(NOW(),INTERVAL -1 MONTH)").order("cg_tn_id DESC,display_order ASC")
     @cg_tns = CgTn.order("common_name")
 
     respond_to do |format|
