@@ -3,7 +3,8 @@ class SchedulerunsController < ApplicationController
   # GET /scheduleruns
   # GET /scheduleruns.xml
   def index
-    @scheduleruns = Schedulerun.order("id DESC")
+    @scheduleruns = Schedulerun.where("updated_at > DATE_ADD(NOW(),INTERVAL -1 MONTH)").order("id DESC")
+
 
     respond_to do |format|
       format.html {@scheduleruns = Kaminari.paginate_array(@scheduleruns).page(params[:page]).per(50)}# index.html.erb
@@ -145,10 +146,14 @@ class SchedulerunsController < ApplicationController
              sql = sql +" WHERE  "+@conditions.join(' and ')
        end
       #conditions - feed thru ActiveRecord? stop sql injection -- replace : ; " ' ( ) = < > - others?
+      if params["search_criteria"] == ""
+         sql = sql + " where updated_at > DATE_ADD(NOW(),INTERVAL -10 DAY) "
+      end
        if @order_by.size > 0
          sql = sql +" ORDER BY "+@order_by.join(',')
        end
        connection = ActiveRecord::Base.connection();
+
        @results = connection.execute(sql)
 
      @results_total = @results # pageination makes result count wrong
@@ -156,7 +161,10 @@ class SchedulerunsController < ApplicationController
 
      t = Time.now 
      @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
-    @scheduleruns = Schedulerun.order("id DESC")
+
+     #not being used? @scheduleruns = Schedulerun.order("id DESC")
+  
+    
     
     respond_to do |format|
       format.xls # pet_search.xls.erb
