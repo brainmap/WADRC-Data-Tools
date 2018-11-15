@@ -68,7 +68,7 @@ class FoldersController < ApplicationController
          # getfacl from system over ssh - the user names/id different between brainapps and rest of machines
          # if have success in getting perms, delete existing folderpermissions
          # insert new folderpermissions
-
+puts "gggggggg folder.id="+folder.id.to_s
          v_call = "ssh "+v_user+"@"+v_computer+".dom.wisc.edu 'getfacl "+folder.folder_path+"' "
         puts "aaaaa="+v_call  
         v_val = "" 
@@ -81,7 +81,9 @@ class FoldersController < ApplicationController
         stderr.close
         puts v_val
         v_owner ="" ## owner:    default:user::
+        v_owner_permission =""
         v_owner_group = "" ## group   default:group::
+        v_owner_group_permission = ""
         v_flags = "" # flags:
         v_mask_permission = ""
         v_other_permission =""
@@ -92,7 +94,7 @@ class FoldersController < ApplicationController
         # default:user:<user_name>:rwx
         # default:group:<group_name>:rwx
         # default:mask::rwx    ???
-        #default:other::
+        #default:other:: 
         v_row_array = v_val.split(/\n+/)
         v_row_array.each do |v_row|
           if v_row.start_with?("# owner:")
@@ -115,9 +117,86 @@ class FoldersController < ApplicationController
                 v_group_permission_hash[v_tmp_array[2]] = v_tmp_array[3]
           elsif v_row.start_with?("default:other::")
                 v_other_permission = v_row.split(":")[3]
+          elsif  v_row.start_with?("user::")
+                v_owner_permission = v_row.split(":")[2]
+          elsif  v_row.start_with?("group::")
+                v_owner_group_permission = v_row.split(":")[2]
           end
         end
+        v_user_permission_hash[v_owner] = v_owner_permission
+        v_group_permission_hash[v_owner_group] = v_owner_group_permission
+#NOT GETTING ALL THE PERMISSIONS - especially owner
+
         # save in folderpermissions
+        v_user_array.each do |user|
+           v_perms=v_user_permission_hash[user]
+           puts "uuuuu user="+user+" "+v_perms
+           v_folderpermissions = Folderpermission.where("folder_id in (?) and network_user in (?) and actual_vs_planned in (?)",folder.id,user,"actual")
+           if !v_folderpermissions.nil? and v_folderpermissions.count > 0
+                v_folderpermissions.each do |v_folderpermission|
+                  if v_perms.include?("r")
+                    v_folderpermission.permission_read ="r"
+                  end
+                  if v_perms.include?("w")
+                    v_folderpermission.permission_write ="w"
+                  end
+                  if v_perms.include?("x")
+                    v_folderpermission.permission_execute ="x"
+                  end
+                  v_folderpermission.save
+                end
+           else
+                v_folderpermission = Folderpermission.new
+                v_folderpermission.folder_id = folder.id
+                v_folderpermission.actual_vs_planned = "actual"
+                v_folderpermission.network_user = user
+                if v_perms.include?("r")
+                    v_folderpermission.permission_read ="r"
+                end
+                if v_perms.include?("w")
+                    v_folderpermission.permission_write ="w"
+                end
+                if v_perms.include?("x")
+                    v_folderpermission.permission_execute ="x"
+                end
+                v_folderpermission.save
+           end
+        end
+        v_group_array.each do |group|
+            v_perms=v_group_permission_hash[group]
+            puts "gggg group="+group+" "+v_perms
+           v_folderpermissions = Folderpermission.where("folder_id in (?) and network_group in (?) and actual_vs_planned in (?)",folder.id,group,"actual")
+           if !v_folderpermissions.nil? and v_folderpermissions.count > 0
+                v_folderpermissions.each do |v_folderpermission|
+                  if v_perms.include?("r")
+                    v_folderpermission.permission_read ="r"
+                  end
+                  if v_perms.include?("w")
+                    v_folderpermission.permission_write ="w"
+                  end
+                  if v_perms.include?("x")
+                    v_folderpermission.permission_execute ="x"
+                  end
+                  v_folderpermission.save
+                end
+           else
+                v_folderpermission = Folderpermission.new
+                v_folderpermission.folder_id = folder.id
+                v_folderpermission.actual_vs_planned = "actual"
+                v_folderpermission.network_group = group
+                if v_perms.include?("r")
+                    v_folderpermission.permission_read ="r"
+                end
+                if v_perms.include?("w")
+                    v_folderpermission.permission_write ="w"
+                end
+                if v_perms.include?("x")
+                    v_folderpermission.permission_execute ="x"
+                end
+                v_folderpermission.save
+           end
+        end
+
 
      end
   end
