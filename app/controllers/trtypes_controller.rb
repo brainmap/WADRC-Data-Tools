@@ -11,7 +11,7 @@ class TrtypesController < ApplicationController
       if hide_date_flag_array.count > 0
         @hide_page_flag = 'Y'
       end
-    @trtypes = Trtype.where("status_flag ='Y' ")
+    @trtypes = Trtype.where("status_flag ='Y' ").order(:description)
     connection = ActiveRecord::Base.connection();
     @v_action_name ="action" 
     v_order_by ="" 
