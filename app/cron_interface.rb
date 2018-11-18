@@ -306,6 +306,10 @@ v_user = v_user.gsub("\n","")
       v_shared = Shared.new
       v_shared.run_tissueseg_spm12_gm_wm_csf_volumes() 
 
+  elsif v_value_1 == "up_reggieid_links"
+      v_shared = Shared.new
+      v_shared.run_up_reggieid_links()  
+
   elsif v_value_1 == "user_networkgroup_harvest"
       v_shared = Shared.new
       v_shared.run_user_networkgroup_harvest() 

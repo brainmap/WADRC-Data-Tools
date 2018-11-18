@@ -6915,6 +6915,133 @@ def run_sleep_t1
     @schedulerun.save
     
   end
+
+
+  #NEED TO ADD 
+  # check if soft link valid - delete
+  # make age at mri an pet appointment file?
+  def run_up_reggieid_links
+
+     @schedule = Schedule.where("name in ('up_reggieid_links')").first
+     @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting up_reggieid_links"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""
+      v_comment_warning =""
+      v_error_comment = ""
+      v_computer = "merida"
+      connection = ActiveRecord::Base.connection();
+      v_base_path = Shared.get_base_path()
+      v_target_path = v_base_path+"/preprocessed/visits/up_reggieid/"
+      v_preprocessed_visits_path = v_base_path+"/preprocessed/visits/"
+      v_parent_protocol_id = "38"  # UP protocol
+      v_dir_prepend ="reggieid_"
+
+
+      # get list of participants in UP sps with mri or pet
+      v_participants = Participant.where("participants.reggieid is not NULL
+                        and participants.id in (select vgroups.participant_id from vgroups, scan_procedures_vgroups,scan_procedures 
+                                                               where scan_procedures_vgroups.vgroup_id = vgroups.id
+                                                                      and (vgroups.transfer_mri = 'yes' or vgroups.transfer_pet = 'yes')
+                                                                and scan_procedures_vgroups.scan_procedure_id = scan_procedures.id
+                                                                and scan_procedures.protocol_id in (select protocols.id from protocols where protocols.parent_protocol_id in (?) ) )",v_parent_protocol_id)
+    v_participants.each do |participant|
+      v_reggieid = participant.reggieid.to_s.rjust(6, "0")
+            # check if dir exists
+      v_this_reggieid_dir = v_target_path+v_dir_prepend+v_reggieid
+      if !File.directory?(v_this_reggieid_dir)
+        # make the dir via merida - not sure about the users/group inheritance, so using merida
+        v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'mkdir "+v_this_reggieid_dir+"'"
+        begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+            rescue => msg    
+        end
+      end
+      # get the UP scan_procedures for this participants, check for/make reggieid/scan_procedures directories
+      v_scan_procedures = ScanProcedure.where("scan_procedures.id in ( select scan_procedures_vgroups.scan_procedure_id
+                                                 from scan_procedures_vgroups, vgroups where 
+                                                 scan_procedures_vgroups.vgroup_id = vgroups.id
+                                                 and (vgroups.transfer_mri = 'yes' or vgroups.transfer_pet = 'yes')
+                                                 and vgroups.participant_id in (?) 
+                                                 and scan_procedures.protocol_id in (select protocols.id from protocols where protocols.parent_protocol_id in (?) )) ",participant.id,v_parent_protocol_id)
+      v_scan_procedures.each do |sp|
+        v_this_reggieid_sp_dir = v_this_reggieid_dir+"/"+sp.codename
+        if !File.directory?(v_this_reggieid_sp_dir)
+        # make the dir via merida - not sure about the users/group inheritance, so using merida
+          v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'mkdir "+v_this_reggieid_sp_dir+"'"
+          begin
+            stdin, stdout, stderr = Open3.popen3(v_call)
+              while !stdout.eof?
+                puts stdout.read 1024    
+              end
+              stdin.close
+              stdout.close
+              stderr.close
+            rescue => msg    
+          end
+        end
+        # get enums, check in preprocessed/visits  for matching dirs
+        # check if soft links exisit
+        # make if not exist
+        
+        v_enrollments = Enrollment.where("enrollments.id in (select enrollment_vgroup_memberships.enrollment_id from 
+                                          enrollment_vgroup_memberships, vgroups, scan_procedures_vgroups
+                                          where vgroups.id = scan_procedures_vgroups.vgroup_id
+                                          and (vgroups.transfer_mri = 'yes' or vgroups.transfer_pet = 'yes')
+                                          and vgroups.id = enrollment_vgroup_memberships.vgroup_id
+                                          and  scan_procedures_vgroups.scan_procedure_id in (?)
+                                          and vgroups.participant_id in (?))",sp.id,participant.id)
+        v_enrollments.each do |enrollment|
+          v_directories_to_link_to = v_preprocessed_visits_path+sp.codename+"/"+enrollment.enumber+"*"
+           Dir.glob(v_directories_to_link_to).each do |f|
+               #get last part of path to make link within reggieid/sp/
+               v_link_name = File.basename(f)
+               v_link_path = v_this_reggieid_sp_dir+"/"+v_link_name
+               if File.symlink?(v_link_path)
+                   # check if valid? and delete? MAKE SURE IT's a SYMBOLIC LINK
+                    #puts "already there v_link_path"+v_link_path
+               else
+                 v_call = "ssh panda_user@"+v_computer+".dom.wisc.edu 'ln -s "+f.to_s+" "+v_link_path+"'"
+                 begin
+                   stdin, stdout, stderr = Open3.popen3(v_call)
+                     while !stdout.eof?
+                       puts stdout.read 1024    
+                     end
+                     stdin.close
+                     stdout.close
+                     stderr.close
+                   rescue => msg    
+                 end
+               end
+            end
+        end
+      end  
+    end
+
+    if v_comment_warning > ""
+        v_comment_warning = "warning on "+v_comment_warning
+    end
+    @schedulerun.comment =("successful finish up_reggieid_links "+v_comment_warning+" "+v_comment[0..3900])
+    if !v_comment.include?("ERROR")
+          @schedulerun.status_flag ="Y"
+    end
+    @schedulerun.save
+    @schedulerun.end_time = @schedulerun.updated_at      
+    @schedulerun.save
+    
+  end
+
+
+
  # ilinux id command - gets user groups
   def run_user_networkgroup_harvest
 
