@@ -1,0 +1,42 @@
+<%= form_for(dashboardcontentcondition) do |f| %>
+  <% if dashboardcontentcondition.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(dashboardcontentcondition.errors.count, "error") %> prohibited this dashboardcontentcondition from being saved:</h2>
+
+      <ul>
+      <% dashboardcontentcondition.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :dashboardcontent_id %>
+    <%= f.text_field :dashboardcontent_id %>
+  </div>
+
+  <div class="field">
+    <%= f.label :select_condition %>
+    <%= f.text_field :select_condition %>
+  </div>
+
+  <div class="field">
+    <%= f.label :value_1 %>
+    <%= f.text_field :value_1 %>
+  </div>
+
+  <div class="field">
+    <%= f.label :value_2 %>
+    <%= f.text_field :value_2 %>
+  </div>
+
+  <div class="field">
+    <%= f.label :status_flag %>
+    <%= f.text_field :status_flag %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

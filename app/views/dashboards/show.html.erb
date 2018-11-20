@@ -1,0 +1,34 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @dashboard.name %>
+</p>
+
+<p>
+  <strong>Display name:</strong>
+  <%= @dashboard.display_name %>
+</p>
+
+<p>
+  <strong>Description:</strong>
+  <%= @dashboard.description %>
+</p>
+
+<p>
+  <strong>Html col per row:</strong>
+  <%= @dashboard.html_col_per_row %>
+</p>
+
+<p>
+  <strong>One or many results:</strong>
+  <%= @dashboard.one_or_many_results %>
+</p>
+
+<p>
+  <strong>Status flag:</strong>
+  <%= @dashboard.status_flag %>
+</p>
+
+<%= link_to 'Edit', edit_dashboard_path(@dashboard) %> |
+<%= link_to 'Back', dashboards_path %>

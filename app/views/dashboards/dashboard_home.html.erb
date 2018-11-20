@@ -1,0 +1,53 @@
+<% if @hide_page_flag == "Y" 
+  else %>
+<%  v_y_n = {"Y"=>"Y","N"=>"N"}  %>
+<table class="search_form" >
+	<tr><td colspan="3" align="left"> 
+    <% if params[:dashboard_home][:id].nil? %>
+		<%= form_for 'dashboard_home' do |f| %>
+	       <b>Pick a Dashboard:</b>: 
+		   <select name="dashboard_home][id"> <!--onChange="if(this.selectedIndex!=0) self.location=this.options[this.selectedIndex].value"> -->
+		      <option value="">select a dashboard</option>
+		      <% @dashboards.each do |s| %>
+		         <% if (s.id).to_s  == params[:id]  %>
+			         <option  selected="selected" value=<%=s.id %>><%= s.display_name %></option>
+		         <%else%>
+	                  <option value=<%=s.id %>><%= s.display_name %></option>
+	             <%end%>
+	          <% end %>
+	        </select>
+</td></tr>
+   <tr>
+      <th><%= f.label :enumber %></th>
+      <td colspan="2" align="left" ><%= f.text_field :enumber %>&nbsp;&nbsp;<small> comma separated</small></td>
+    </tr>
+   
+   <tr>
+      <th><%= f.label :wrapnum %></th>
+      <td colspan="2" align="left" ><%= f.text_field :wrapnum %>&nbsp;&nbsp;<small>lpad 0000 - comma separated</small></td>
+    </tr>
+   
+   <tr>
+      <th><%= f.label :reggieid %></th>
+      <td colspan="2" align="left" ><%= f.text_field :reggieid %>&nbsp;&nbsp;<small>lpad 000000 - comma separated</small></td>
+    </tr>
+<%= f.submit "Search and retrieve Dashboard" %>
+	<% end %>
+
+
+  <%else%>
+<B>Dashboard: <%= Dashboard.find(params[:dashboard_home][:id]).display_name %></B>
+  <%end%>
+</td></tr>
+
+</table>
+
+<br><br>
+<br><br><br>
+
+<br><br><br>
+<%end%>
+
+
+
+

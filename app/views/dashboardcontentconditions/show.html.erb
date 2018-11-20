@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Dashboardcontent:</strong>
+  <%= @dashboardcontentcondition.dashboardcontent_id %>
+</p>
+
+<p>
+  <strong>Select condition:</strong>
+  <%= @dashboardcontentcondition.select_condition %>
+</p>
+
+<p>
+  <strong>Value 1:</strong>
+  <%= @dashboardcontentcondition.value_1 %>
+</p>
+
+<p>
+  <strong>Value 2:</strong>
+  <%= @dashboardcontentcondition.value_2 %>
+</p>
+
+<p>
+  <strong>Status flag:</strong>
+  <%= @dashboardcontentcondition.status_flag %>
+</p>
+
+<%= link_to 'Edit', edit_dashboardcontentcondition_path(@dashboardcontentcondition) %> |
+<%= link_to 'Back', dashboardcontentconditions_path %>

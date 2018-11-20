@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Dashboard:</strong>
+  <%= @dashboard_default.dashboard_id %>
+</p>
+
+<p>
+  <strong>Default type:</strong>
+  <%= @dashboard_default.default_type %>
+</p>
+
+<p>
+  <strong>Status flag:</strong>
+  <%= @dashboard_default.status_flag %>
+</p>
+
+<p>
+  <strong>Description:</strong>
+  <%= @dashboard_default.description %>
+</p>
+
+<%= link_to 'Edit', edit_dashboard_default_path(@dashboard_default) %> |
+<%= link_to 'Back', dashboard_defaults_path %>

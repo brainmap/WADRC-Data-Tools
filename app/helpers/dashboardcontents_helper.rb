@@ -1,0 +1,2 @@
+module DashboardcontentsHelper
+end

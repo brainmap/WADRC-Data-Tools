@@ -1,0 +1,79 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Dashboardcontents</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Dashboard</th>
+      <th>Status flag</th>
+      <th>Contact</th>
+      <th>Cg query</th>
+      <th>Display header 1 large</th>
+      <th>Display header 1 small</th>
+      <th>Display text 1</th>
+      <th>Display label</th>
+      <th>Display text 2</th>
+      <th>Display text 3</th>
+      <th>Print header 1 large</th>
+      <th>Print header 1 small</th>
+      <th>Print text 1</th>
+      <th>Print label</th>
+      <th>Print text 2</th>
+      <th>Print text 3</th>
+      <th>Html size</th>
+      <th>Html bold</th>
+      <th>Html color</th>
+      <th>Html col span</th>
+      <th>Html break between row</th>
+      <th>Row display order</th>
+      <th>Sql return one or many</th>
+      <th>Sql group by</th>
+      <th>Sql order by</th>
+      <th>Sql date override by dashboard search</th>
+      <th>Sql join type</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @dashboardcontents.each do |dashboardcontent| %>
+      <tr>
+        <td><%= dashboardcontent.dashboard_id %></td>
+        <td><%= dashboardcontent.status_flag %></td>
+        <td><%= dashboardcontent.contact %></td>
+        <td><%= dashboardcontent.cg_query_id %></td>
+        <td><%= dashboardcontent.display_header_1_large %></td>
+        <td><%= dashboardcontent.display_header_1_small %></td>
+        <td><%= dashboardcontent.display_text_1 %></td>
+        <td><%= dashboardcontent.display_label %></td>
+        <td><%= dashboardcontent.display_text_2 %></td>
+        <td><%= dashboardcontent.display_text_3 %></td>
+        <td><%= dashboardcontent.print_header_1_large %></td>
+        <td><%= dashboardcontent.print_header_1_small %></td>
+        <td><%= dashboardcontent.print_text_1 %></td>
+        <td><%= dashboardcontent.print_label %></td>
+        <td><%= dashboardcontent.print_text_2 %></td>
+        <td><%= dashboardcontent.print_text_3 %></td>
+        <td><%= dashboardcontent.html_size %></td>
+        <td><%= dashboardcontent.html_bold %></td>
+        <td><%= dashboardcontent.html_color %></td>
+        <td><%= dashboardcontent.html_col_span %></td>
+        <td><%= dashboardcontent.html_break_between_row %></td>
+        <td><%= dashboardcontent.row_display_order %></td>
+        <td><%= dashboardcontent.sql_return_one_or_many %></td>
+        <td><%= dashboardcontent.sql_group_by %></td>
+        <td><%= dashboardcontent.sql_order_by %></td>
+        <td><%= dashboardcontent.sql_date_override_by_dashboard_search %></td>
+        <td><%= dashboardcontent.sql_join_type %></td>
+        <td><%= link_to 'Show', dashboardcontent %></td>
+        <td><%= link_to 'Edit', edit_dashboardcontent_path(dashboardcontent) %></td>
+        <td><%= link_to 'Destroy', dashboardcontent, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Dashboardcontent', new_dashboardcontent_path %>

@@ -24,6 +24,9 @@ edit_count = edit_count -1
 <% if @schedules_users.include?( current_user.id) or current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium'%>
  | <%= link_to('Scheduled Runs', '/schedulerun_search') %>
 <% end %>
+<% if current_user.role == 'Admin_High'%>
+ | <small><%= link_to('Dashboards', '/dashboard_home') %></small>
+<% end %>
 </div>
 <%= render :partial => 'index_filters_search', :locals => { :edit_count => edit_count} %>
 

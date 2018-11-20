@@ -1,0 +1,157 @@
+<%
+  v_yes_no_display = [["Y","Y"], ["N","N"]]
+  v_one_or_many = [["one","one"], ["many","many"]]
+  %>
+
+<%= form_for(dashboardcontent) do |f| %>
+  <% if dashboardcontent.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(dashboardcontent.errors.count, "error") %> prohibited this dashboardcontent from being saved:</h2>
+
+      <ul>
+      <% dashboardcontent.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :dashboard_id %>
+    <%= collection_select(:dashboardcontent,:dashboard_id, Dashboard.all.sort_by(&:name),:id,:name,{:prompt => 'Select a Dashboard'},{:required => true})  %>
+  </div>
+
+  <div class="field">
+    <%= f.label :row_display_order %>
+    <%= f.select :row_display_order, (1..100).to_a %>
+  </div>
+
+  <div class="field">
+    <%= f.label :status_flag %>
+ <%= f.select :status_flag, options_for_select(v_yes_no_display, @dashboardcontent.status_flag),{:prompt => 'Select status'} %>
+  </div>
+
+  <div class="field">
+    <%= f.label :contact %>
+    <%= f.text_field :contact %>
+  </div>
+
+  <div class="field">
+    <%= f.label :cg_query_id %>
+    <%= f.select( :cg_query_id, @data_for_select_stored_search,{:include_blank => 'Select a stored search'} ) %>
+  </div>
+
+  <div class="field">
+    <%= f.label :display_header_1_large %>
+    <%= f.text_field :display_header_1_large %>
+  </div>
+
+  <div class="field">
+    <%= f.label :display_header_1_small %>
+    <%= f.text_field :display_header_1_small %>
+  </div>
+
+  <div class="field">
+    <%= f.label :display_text_1 %>
+    <%= f.text_field :display_text_1 %>
+  </div>
+
+  <div class="field">
+    <%= f.label :display_label %>
+    <%= f.text_field :display_label %>
+  </div>
+
+  <div class="field">
+    <%= f.label :display_text_2 %>
+    <%= f.text_field :display_text_2 %>
+  </div>
+
+  <div class="field">
+    <%= f.label :display_text_3 %>
+    <%= f.text_field :display_text_3 %>
+  </div>
+
+  <div class="field">
+    <%= f.label :print_header_1_large %>
+    <%= f.text_field :print_header_1_large %>
+  </div>
+
+  <div class="field">
+    <%= f.label :print_header_1_small %>
+    <%= f.text_field :print_header_1_small %>
+  </div>
+
+  <div class="field">
+    <%= f.label :print_text_1 %>
+    <%= f.text_field :print_text_1 %>
+  </div>
+
+  <div class="field">
+    <%= f.label :print_label %>
+    <%= f.text_field :print_label %>
+  </div>
+
+  <div class="field">
+    <%= f.label :print_text_2 %>
+    <%= f.text_field :print_text_2 %>
+  </div>
+
+  <div class="field">
+    <%= f.label :print_text_3 %>
+    <%= f.text_field :print_text_3 %>
+  </div>
+
+  <div class="field">
+    <%= f.label :html_size %>
+    <%= f.text_field :html_size %>
+  </div>
+
+  <div class="field">
+    <%= f.label :html_bold %>
+    <%= f.text_field :html_bold %>
+  </div>
+
+  <div class="field">
+    <%= f.label :html_color %>
+    <%= f.text_field :html_color %>
+  </div>
+
+  <div class="field">
+    <%= f.label :html_col_span %>
+    <%= f.text_field :html_col_span %>
+  </div>
+
+  <div class="field">
+    <%= f.label :html_break_between_row %>
+    <%= f.text_field :html_break_between_row %>
+  </div>
+
+  <div class="field">
+    <%= f.label :sql_return_one_or_many %>
+    <%= f.select :sql_return_one_or_many, options_for_select(v_one_or_many, @dashboardcontent.sql_return_one_or_many),{:prompt => 'Select number of results'} %>
+  </div>
+
+  <div class="field">
+    <%= f.label :sql_group_by %>
+    <%= f.text_field :sql_group_by %>
+  </div>
+
+  <div class="field">
+    <%= f.label :sql_order_by %>
+    <%= f.text_field :sql_order_by %>
+  </div>
+
+  <div class="field">
+    <%= f.label :sql_date_override_by_dashboard_search %>
+    <%= f.text_field :sql_date_override_by_dashboard_search %>
+  </div>
+
+  <div class="field">
+    <%= f.label :sql_join_type %>
+    <%= f.text_field :sql_join_type %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

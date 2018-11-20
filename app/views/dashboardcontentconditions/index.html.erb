@@ -1,0 +1,35 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Dashboardcontentconditions</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Dashboardcontent</th>
+      <th>Select condition</th>
+      <th>Value 1</th>
+      <th>Value 2</th>
+      <th>Status flag</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @dashboardcontentconditions.each do |dashboardcontentcondition| %>
+      <tr>
+        <td><%= dashboardcontentcondition.dashboardcontent_id %></td>
+        <td><%= dashboardcontentcondition.select_condition %></td>
+        <td><%= dashboardcontentcondition.value_1 %></td>
+        <td><%= dashboardcontentcondition.value_2 %></td>
+        <td><%= dashboardcontentcondition.status_flag %></td>
+        <td><%= link_to 'Show', dashboardcontentcondition %></td>
+        <td><%= link_to 'Edit', edit_dashboardcontentcondition_path(dashboardcontentcondition) %></td>
+        <td><%= link_to 'Destroy', dashboardcontentcondition, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Dashboardcontentcondition', new_dashboardcontentcondition_path %>

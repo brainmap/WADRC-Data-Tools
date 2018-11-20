@@ -1,0 +1,33 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Dashboard Defaults</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Dashboard</th>
+      <th>Default type</th>
+      <th>Status flag</th>
+      <th>Description</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @dashboard_defaults.each do |dashboard_default| %>
+      <tr>
+        <td><%= dashboard_default.dashboard_id %></td>
+        <td><%= dashboard_default.default_type %></td>
+        <td><%= dashboard_default.status_flag %></td>
+        <td><%= dashboard_default.description %></td>
+        <td><%= link_to 'Show', dashboard_default %></td>
+        <td><%= link_to 'Edit', edit_dashboard_default_path(dashboard_default) %></td>
+        <td><%= link_to 'Destroy', dashboard_default, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Dashboard Default', new_dashboard_default_path %>

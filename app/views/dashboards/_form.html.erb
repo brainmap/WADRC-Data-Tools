@@ -1,0 +1,53 @@
+<%
+  v_yes_no_display = [["Y","Y"], ["N","N"]]
+  v_one_or_many = [["one","one"], ["many","many"]]
+
+  %>
+
+<%= form_for(dashboard) do |f| %>
+  <% if dashboard.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(dashboard.errors.count, "error") %> prohibited this dashboard from being saved:</h2>
+
+      <ul>
+      <% dashboard.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :name %>
+    <%= f.text_field :name %>
+  </div>
+
+  <div class="field">
+    <%= f.label :display_name %>
+    <%= f.text_field :display_name %>
+  </div>
+
+  <div class="field">
+    <%= f.label :description %>
+    <%= f.text_field :description,{:size => "100"} %>
+  </div>
+
+  <div class="field">
+    <%= f.label :html_col_per_row %>
+    <%= f.text_field :html_col_per_row %>
+  </div>
+
+  <div class="field">
+    <%= f.label :one_or_many_results %>
+    <%= f.select :one_or_many_results, options_for_select(v_one_or_many, @dashboard.one_or_many_results),{:prompt => 'Select return number'} %>
+  </div>
+
+  <div class="field">
+    <%= f.label :status_flag %>
+    <%= f.select :status_flag, options_for_select(v_yes_no_display, @dashboard.status_flag),{:prompt => 'Select status'} %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,41 @@
+<%
+  v_yes_no_display = [["Y","Y"], ["N","N"]]
+  %>
+
+<%= form_for(dashboard_default) do |f| %>
+  <% if dashboard_default.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(dashboard_default.errors.count, "error") %> prohibited this dashboard_default from being saved:</h2>
+
+      <ul>
+      <% dashboard_default.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :dashboard_id %><%=  @dashboard_default.dashboard_id.to_s %>
+    <%= collection_select(:dashboard_default,:dashboard_id, Dashboard.all.sort_by(&:name),:id,:name,{:prompt => 'Select a Dashboard'},{:required => true})  %>
+  </div>
+
+  <div class="field">
+    <%= f.label :default_type %>
+    <%= f.text_field :default_type %>
+  </div>
+
+  <div class="field">
+    <%= f.label :status_flag %>
+     <%= f.select :status_flag, options_for_select(v_yes_no_display, @dashboard_default.status_flag),{:prompt => 'Select status'} %>
+  </div>
+
+  <div class="field">
+    <%= f.label :description %>
+    <%= f.text_field :description ,{:size => "100"}%>
+  </div>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

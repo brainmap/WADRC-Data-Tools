@@ -1,6 +1,10 @@
 WADRCDataTools::Application.routes.draw do
 
 
+  resources :dashboardcontentconditions
+  resources :dashboardcontents
+  resources :dashboard_defaults
+  resources :dashboards
   resources :folderpermissions
   resources :folders
   resources :lookup_refs_change_logs
@@ -195,6 +199,12 @@ WADRCDataTools::Application.routes.draw do
   	end
 	end 
      
+
+
+    match '/dashboard_home/:id', :controller => 'dashboards', :action => 'dashboard_home', :as => :dashboard_home_id  ,via: [:get, :post] 
+    match '/dashboard_home/', :controller => 'dashboards', :action => 'dashboard_home', :as => :dashboard_home  ,via: [:get, :post] 
+  
+   #???? match '/dashboards/dashboard_home/:id', :controller => 'dashboards', :action => 'dashboard_home', :as => :dashboards_dashboard_home_id  ,via: [:get, :post]   
   match '/visits/found(.:format)', :to => 'visits#found', :as => :found_visits, via: [:get, :post]
   match '/visits/find', :to => 'visits#find', :as => :find_visits ,via: [:get, :post]
   match '/visits/complete', :to => 'visits#index_by_scope', :scope => 'complete', :as => :complete_visits ,via: [:get, :post]
