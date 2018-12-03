@@ -85,10 +85,12 @@ class SharedController < ActionController::Base
             v_internal_cnt = 0
             if v_cnt > 0
              # WHAT ABOUT CSV WITH LAST BATCH OF CELLS BLANK
-puts "AAAAA "+v_content_array[v_cnt]
+#puts "AAAAA "+v_content_array[v_cnt]
+             if !v_content_array[v_cnt].gsub(",","").blank?  # skipping extra blank rows
               csv = CSV.parse(v_content_array[v_cnt])
               csv.each do  |c_row|
                  v_internal_cnt = 0
+  #puts "BBBBBB c_row ="+c_row.join("=")
                  c_row.each do |c|
                    v_cell = (c.to_s).gsub("'","''")
                    if v_include.include?(v_internal_cnt)
@@ -110,6 +112,7 @@ puts "AAAAA "+v_content_array[v_cnt]
                end
                v_sql_insert =  v_sql_insert+")"
                results = connection.execute(v_sql_insert)
+             end
             end
             v_cnt = v_cnt + 1
           end 
