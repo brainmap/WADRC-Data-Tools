@@ -1,0 +1,56 @@
+<% @current_tab = "searches" 
+v_schema = [["up_load_development","up_load_development"],["up_load_production","up_load_production"]]
+v_make_load_table_schema = [["Make Table in Source Schema","make_in_source_schema"],["Load from Source Schema","load_from_source_schema"]]
+
+v_key_type = [["enumber and visit# mapped to enrollment/scan_procedure","enrollment/sp"],["reggieid-participant_id","reggieid-kc-participant_id"],["wrapnum-participant_id","wrapnum-kc-participant_id"],["adrcnum-participant_id","adrcnum-kc-participant_id"]]
+
+v_yes_no = [["Y","Y"],["N","N"]]
+%>
+
+<% if current_user.role == 'Admin_High' %>
+
+
+
+<br>
+<%= form_tag  '/cg_validate_conversion'  do %>
+    <H2>Validate and Convert table values</H2><br>
+	 <table width="100%">
+	 	<tr><td align="left"><div class="field">
+	    <B>UP Table Name <small>key to up table definitions</small>:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "up_table_name" ,nil, :required => true, :size =>90%></div>
+		</td></tr>
+	 	<tr><td align="left"><div class="field">
+	    <B>UP Table Key Column Name:</B>&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "up_table_name_key_column" ,nil, :required => false%></div> <small>(enter reggieid or wrapnum - just needs something entered- not think its being used?)</small>
+		</td></tr>
+			 	<tr><td align="left"><div class="field">
+	    <B>Key Type:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= select_tag "key_type", options_for_select([["enumber and visit# mapped to enrollment/scan_procedure","enrollment/sp"],
+["reggieid-participant_id","reggieid-kc-participant_id"],["wrapnum-participant_id","wrapnum-kc-participant_id"],["adrcnum-participant_id","adrcnum-kc-participant_id"], ["subjectid-participant_id","subjectid-kc-participant_id"]], "enrollment/sp")%></div>
+		</td></tr>
+		<tr><td align="left"><div class="field">
+	    <B>Source Table Name <small> this table will be validated or updated, also key to up table definitions</small>:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	    <%= text_field_tag "source_up_table_name", nil , :size => 90 , :required => true%></div>
+		</td></tr>
+        <tr><td  align="left">
+	    <B>Source Schema</B>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<%= select_tag "source_schema", options_for_select(v_schema, "up_load_development")%>
+		</td></tr>
+
+			 	<tr><td align="left"><div class="field">
+	    <B>Validate Values, Frequencies:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= select_tag "validate_values", options_for_select([["Y","Y"],["N","N"]], "N")%></div>  
+		</td></tr>
+
+<tr><td align="left"><div class="field">
+	    <B>Convert Values ( CAREFUL!!!!!):</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= select_tag "convert_values", options_for_select([["Y","Y"],["N","N"]], "N")%></div>  
+
+		</td></tr>
+
+
+	   <tr><td  align="left">
+						  <div class="actions">
+						    <%= submit_tag("Validate and/or convert values in table") %>
+						  </div>
+		</td></tr>
+		</table>
+		<br>
+<% end %>
+
+<% end %>

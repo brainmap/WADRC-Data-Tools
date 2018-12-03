@@ -2149,11 +2149,11 @@ class DataSearchesController < ApplicationController
         @local_tables.push("vgroups")
         @local_tables_alias_hash["vgroups"] =   "vgroups" 
         @local_tables.push("appointments") # --- include in mri, pet, lp, lh, q views -- need for other limits -- ? switch to vgroup?
-        @local_tables_alias_hash["appointments"]
+        @local_tables_alias_hash["appointments"] # ? = "appointments"
         @local_tables.push("scan_procedures")
-        @local_tables_alias_hash["scan_procedures"]
+        @local_tables_alias_hash["scan_procedures"] # ? = "scan_procedures"
         @local_tables.push("scan_procedures_vgroups")
-        @local_tables_alias_hash["scan_procedures_vgroups"]
+        @local_tables_alias_hash["scan_procedures_vgroups"] # ? = "scan_procedures_vgroups"
         @fields_front =[]
         if !@cg_query.participant_centric.nil? and ( @cg_query.participant_centric == "1" or @cg_query.participant_centric == "2" ) and @local_fields.length() > 0
            # do not want to add vgroup centric columns
@@ -3767,6 +3767,90 @@ puts "CCCCCCC="+v_insert_sql
          flash[:notice] = 'All the fields are required'
     end # if blank fields  
        render :template => "data_searches/cg_up_load"
+
+end
+
+def cg_validate_conversion
+
+     v_up_table_name = params[:up_table_name]
+     v_up_table_name_key_column = params[:up_table_name_key_column]
+
+     v_key_type = params[:key_type]
+     v_source_up_table_name = params[:source_up_table_name]
+     v_source_schema = params[:source_schema]
+
+     v_validate_values = params[:validate_values]
+     v_convert_values = params[:convert_values]
+
+
+     # retrieve cg_up_table_definition 
+     # !v_up_table_name_key_column.blank? and 
+    if (!v_up_table_name.blank? and  !v_key_type.blank? and  !v_source_up_table_name.blank? and  !v_source_schema.blank?)
+      v_schema ='panda_production'
+      if Rails.env=="development" 
+        v_schema ='panda_development'
+      end
+      v_msg = ""
+      v_definition_table ="cg_up_table_definitions"
+      connection = ActiveRecord::Base.connection();
+      # THIS NEEDS TO NOT WIPE OUT THE TABLE EACH RELOAD
+      # check in cg_up_table_definitions_new   for v_up_table_name
+      v_sql = "Select count(*) from "+v_definition_table+" where target_table ='"+v_up_table_name+"' and table_name ='"+v_source_up_table_name+"'"  
+      results = connection.execute(v_sql)
+      v_cnt = results.first
+
+       if v_cnt[0].to_i > 0 
+  puts " there is a up_table_defnition"
+
+
+        # run conversions from up_table_definition
+        # add skip validation in validate_values
+        if v_convert_values == "Y"
+            v_sql = "Select * from "+v_definition_table+" where target_table ='"+v_up_table_name+"' and table_name ='"+v_source_up_table_name+"' order by display_order"  
+            results = connection.execute(v_sql)
+            #0=unit,
+            #1=col_db,
+            #2=col_display,
+            #3=col_function,
+            #4=col_format,
+            #5=col_type,
+            #6=col_size,
+            #7=table_name,
+            #8=target_table,
+            #9=target_table_display_name,
+            #10=display_order,
+            #11=column_active 
+            #12=search_list,
+            #13=column_searchable,
+            #14=valid_values,
+            #15=value_conversion,
+            #16=placeholder
+
+        # check box - update all values in this column
+        # check box - update all non-valid values occurances in all columns ( exclude the skippped ones)
+
+        end 
+     # add skip conversion in convert_values
+     # skip_valid_values  skip_value_conversion
+
+        if v_validate_values == "Y"
+
+       #column by column
+        # total count non blank 
+        # frequencies -each value
+
+        
+        # html display
+        # option to export cvs
+        # non-valid values - editable - new value - old value ( text field to not deal with hidden field html issues) 
+        # check box - update all values in this column
+        # check box - update all non-valid values occurances in all columns ( exclude the skippped ones)
+
+         
+        end
+      end
+
+         render :template => "data_searches/cg_validate_conversion"
 
 end
 
