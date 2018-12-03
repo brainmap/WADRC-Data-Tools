@@ -252,6 +252,7 @@ WADRCDataTools::Application.routes.draw do
 
     match '/cg_table_create_db' , :controller => 'data_searches', :action => 'cg_create_table_db', :as =>:cg_create_table_db ,via: [:get, :post] 
      match '/cg_up_load' , :controller => 'data_searches', :action => 'cg_up_load', :as =>:cg_up_load   ,via: [:get, :post] 
+     match '/cg_validate_conversion' , :controller => 'data_searches', :action => 'cg_validate_conversion', :as =>:cg_validate_conversion   ,via: [:get, :post] 
      match '/cg_snapshot' , :controller => 'data_searches', :action => 'cg_snapshot', :as =>:cg_snapshot   ,via: [:get, :post] 
       match '/cg_table_edit_db' , :controller => 'data_searches', :action => 'cg_edit_table_db', :as =>:cg_edit_table_db   ,via: [:get, :post] 
   match '/schedulerun_search' , :controller => 'scheduleruns', :action => 'schedulerun_search', :as =>:schedulerun_search   ,via: [:get, :post] 
