@@ -16,10 +16,10 @@ v_yes_no = [["Y","Y"],["N","N"]]
     <H2>Validate and Convert table values</H2><br>
 	 <table width="100%">
 	 	<tr><td align="left"><div class="field">
-	    <B>UP Table Name <small>key to up table definitions</small>:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "up_table_name" ,nil, :required => true, :size =>90%></div>
+	    <B>UP Table Name <small>key to up table definitions</small>:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "up_table_name" ,@v_up_table_name, :required => true, :size =>90%></div>
 		</td></tr>
 	 	<tr><td align="left"><div class="field">
-	    <B>UP Table Key Column Name:</B>&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "up_table_name_key_column" ,nil, :required => false%></div> <small>(enter reggieid or wrapnum - just needs something entered- not think its being used?)</small>
+	    <B>UP Table Key Column Name:</B>&nbsp;&nbsp;&nbsp;&nbsp;<%= text_field_tag "up_table_name_key_column" ,@v_up_table_name_key_column, :required => false%></div> <small>(enter reggieid or wrapnum - just needs something entered- not think its being used?)</small>
 		</td></tr>
 			 	<tr><td align="left"><div class="field">
 	    <B>Key Type:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= select_tag "key_type", options_for_select([["enumber and visit# mapped to enrollment/scan_procedure","enrollment/sp"],
@@ -27,7 +27,7 @@ v_yes_no = [["Y","Y"],["N","N"]]
 		</td></tr>
 		<tr><td align="left"><div class="field">
 	    <B>Source Table Name <small> this table will be validated or updated, also key to up table definitions</small>:</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	    <%= text_field_tag "source_up_table_name", nil , :size => 90 , :required => true%></div>
+	    <%= text_field_tag "source_up_table_name", @v_source_up_table_name, :size => 90 , :required => true%></div>
 		</td></tr>
         <tr><td  align="left">
 	    <B>Source Schema</B>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -52,5 +52,54 @@ v_yes_no = [["Y","Y"],["N","N"]]
 		</table>
 		<br>
 <% end %>
+
+<% end %>
+
+<% if @col_array.count > 0 %>
+<table><tr><td colspan=<%@col_array.count%> ><b> Valid values and counts</b></td></tr>
+<tr><% @col_array.each do |col| %>
+	<td ><b><%=col%></b></td>
+   <%end%>
+  </tr>
+<tr><% @col_array.each do |col| %>
+	<td><%  @col_valid_hash[col].each do |cnt| %>
+		<%=cnt[0]%> &nbsp;&nbsp;&nbsp;&nbsp;<%=cnt[1]%><br>
+       <%end%>
+	</td>
+   <%end%>
+  </tr>
+<tr><td colspan=<%@col_array.count%> ><hr><br><br><b> Non-Valid values and counts</b></td></tr>
+<%= form_tag  '/cg_validate_conversion'  do %>
+     <input type="hidden" id="up_table_name" name="up_table_name" value="<%=@v_up_table_name%>">
+     <input type="hidden" id="up_table_name_key_column" name="up_table_name_key_column" value="<%=@v_up_table_name_key_column%>">
+     <input type="hidden" id="key_type" name="key_type" value="<%=@v_key_type%>">
+     <input type="hidden" id="source_up_table_name" name="source_up_table_name" value="<%=@v_source_up_table_name%>">
+     <input type="hidden" id="source_schema" name="source_schema" value="<%=@v_source_schema%>">
+<tr><td>make hidden variables for tables, keys, etc, checkbox update column, checkbox update full form, current_value text, new_value text
+<tr><% @col_array.each do |col| %>
+	<td><b><%=col%></b></td>
+   <%end%>
+  </tr>
+<tr><% @col_array.each do |col| %>
+	<td><% v_cnt = 0
+	 @col_not_valid_hash[col].each do |cnt| %>
+		<%=cnt[0]%> &nbsp;&nbsp;&nbsp;&nbsp;<%=cnt[1]%><br>
+		<%= check_box_tag "column_"+col+"["+v_cnt.to_s+"]", "1",  FALSE, :name =>"column_"+col+"["+v_cnt.to_s+"]" %>
+		&nbsp; <small>original</small><%= text_field_tag "orig_"+col+"["+v_cnt.to_s+"]" ,cnt[1], :required => false%>&nbsp;&nbsp;&nbsp;<small>new</small>
+		<%= text_field_tag "new_"+col+"["+v_cnt.to_s+"]" ,nil, :required => false%>&nbsp;&nbsp;&nbsp;<small>all cols</small>&nbsp;<%= check_box_tag "global_"+col+"["+v_cnt.to_s+"]", "1",  FALSE, :name =>"global_"+col+"["+v_cnt.to_s+"]" %><br>
+       <% v_cnt = v_cnt + 1
+       end%>
+	</td>
+   <%end%>
+  </tr>
+<input type="hidden" id="non_valid_update" name="non_valid_update" value="Y">
+  
+ 	   <tr><td  align="left">
+						  <div class="actions">
+						    <%= submit_tag("Convert checked column values in table") %>
+						  </div>
+		</td></tr>
+		 <%end%>
+</table>
 
 <% end %>

@@ -3771,21 +3771,26 @@ puts "CCCCCCC="+v_insert_sql
 end
 
 def cg_validate_conversion
+  # DATA DICTIONARY DROP DOWNS WITH COMMA'S #0, 0 Main Consent, Version 10, 6/27/2014 | 1, 1 Main Consent POC, Version 1, 6/27/2014 | 2, 2 Study Partner, Version 7, 6/27/2014 | 
+  #SPLIT ON FIRST COMMA
 
-     v_up_table_name = params[:up_table_name]
-     v_up_table_name_key_column = params[:up_table_name_key_column]
 
-     v_key_type = params[:key_type]
-     v_source_up_table_name = params[:source_up_table_name]
-     v_source_schema = params[:source_schema]
+     @v_up_table_name = params[:up_table_name]
+     @v_up_table_name_key_column = params[:up_table_name_key_column]
+
+     @v_key_type = params[:key_type]
+     @v_source_up_table_name = params[:source_up_table_name]
+     @v_source_schema = params[:source_schema]
 
      v_validate_values = params[:validate_values]
      v_convert_values = params[:convert_values]
-
+     @col_array = []
+     @col_valid_hash = Hash.new
+     @col_not_valid_hash = Hash.new
 
      # retrieve cg_up_table_definition 
-     # !v_up_table_name_key_column.blank? and 
-    if (!v_up_table_name.blank? and  !v_key_type.blank? and  !v_source_up_table_name.blank? and  !v_source_schema.blank?)
+     # !@v_up_table_name_key_column.blank? and 
+    if (!@v_up_table_name.blank? and  !@v_key_type.blank? and  !@v_source_up_table_name.blank? and  !@v_source_schema.blank?)
       v_schema ='panda_production'
       if Rails.env=="development" 
         v_schema ='panda_development'
@@ -3795,18 +3800,52 @@ def cg_validate_conversion
       connection = ActiveRecord::Base.connection();
       # THIS NEEDS TO NOT WIPE OUT THE TABLE EACH RELOAD
       # check in cg_up_table_definitions_new   for v_up_table_name
-      v_sql = "Select count(*) from "+v_definition_table+" where target_table ='"+v_up_table_name+"' and table_name ='"+v_source_up_table_name+"'"  
+      v_sql = "Select count(*) from "+v_definition_table+" where target_table ='"+@v_up_table_name+"' and table_name ='"+@v_source_up_table_name+"'"  
       results = connection.execute(v_sql)
       v_cnt = results.first
 
        if v_cnt[0].to_i > 0 
   puts " there is a up_table_defnition"
+         if !params[:non_valid_update].blank?
+            v_base_sql = "update "+@v_source_schema+"."+@v_source_up_table_name+" set "
+            v_sql = "Select * from "+v_definition_table+" where target_table ='"+@v_up_table_name+"' and table_name ='"+@v_source_up_table_name+"' order by display_order"  
+            results = connection.execute(v_sql)
+            results.each do |vals|
+                if !vals[15].blank? and !vals[14].include?("skip_valid_values")
+                   v_column_name = vals[1]
+                   #"column_<col_name>"=>{"0"=>"1"}, "orig_<col_name>"=>{"0"=>"1"}, "new_<col_name>"=>{"0"=>"ADRC"}
+                   # "global_<col_name>"=>{"0"=>"1"}
+                   if !params["column_"+v_column_name].blank?
+                   # loop thru all hash key
+                   #    if value = 1
+                   #        get orig_<col_name>[hash#], new_<col_name>[hash#]
+                      non_valid_keys_array = params["column_"+v_column_name].keys
+                      non_valid_keys_array.each do |key|
+                          if params["column_"+v_column_name][key].to_s == "1"
+                             v_sql_update = v_base_sql + v_column_name+" = '"+params["new_"+v_column_name][key]+"' 
+                                where "+v_column_name+" = '"+params["orig_"+v_column_name][key]+"'"
+                             update_results = connection.execute(v_sql_update)
+                          end
+                      end
+                   elsif !params["global_"+v_column_name].blank?
+                   # loop thru all hash key
+                   #    if value = 1
+                   #        get orig_<col_name>[hash#], new_<col_name>[hash#]
 
+puts "global update" 
+                     # loop thru all columns which have this value as a non-valid value
+                    end   
+                end
+             end
+         end
 
         # run conversions from up_table_definition
         # add skip validation in validate_values
-        if v_convert_values == "Y"
-            v_sql = "Select * from "+v_definition_table+" where target_table ='"+v_up_table_name+"' and table_name ='"+v_source_up_table_name+"' order by display_order"  
+
+     # add skip conversion in convert_values
+     # skip_valid_values  skip_value_conversion
+             if v_convert_values == "Y"
+            v_sql = "Select * from "+v_definition_table+" where target_table ='"+@v_up_table_name+"' and table_name ='"+@v_source_up_table_name+"' order by display_order"  
             results = connection.execute(v_sql)
             #0=unit,
             #1=col_db,
@@ -3825,19 +3864,68 @@ def cg_validate_conversion
             #14=valid_values,
             #15=value_conversion,
             #16=placeholder
+            v_base_sql = "update "+@v_source_schema+"."+@v_source_up_table_name+" set "
+
+            results.each do |vals|
+                if !vals[15].blank? and !vals[15].include?("skip_value_conversion")
+                   v_column_name = vals[1]
+                   v_value_conversion_definition = vals[15]
+                   v_value_conversion_array = v_value_conversion_definition.split("|")
+                   v_value_conversion_array.each do |v_conversion|
+                     v_value_and_meaning_array = v_conversion.split(",")
+                     if v_value_and_meaning_array.count == 2
+                       v_value = v_value_and_meaning_array[0].strip
+                       v_meaning = v_value_and_meaning_array[1].strip
+                       if v_value != v_meaning
+                       # check if v_value is start of v_meaning
+                         if v_meaning.start_with?(v_value+" ") 
+                          v_meaning = v_meaning.sub(v_value+" ","")
+                         end
+                         v_sql_update = v_base_sql+v_column_name+" = '"+v_meaning+"' where "+v_column_name+" = '"+v_value+"'"
+                       puts v_sql_update 
+                       update_results = connection.execute(v_sql_update)
+                       else
+                       # not do anything   
+                       end
+                #replace leading and training spaces
+                # if v_value at start of v_meaning, replace and then trim leading space
+                     end
+                   end # loop thru each conversion
+                end # something to convert
+            end
 
         # check box - update all values in this column
         # check box - update all non-valid values occurances in all columns ( exclude the skippped ones)
 
         end 
-     # add skip conversion in convert_values
-     # skip_valid_values  skip_value_conversion
 
         if v_validate_values == "Y"
+
 
        #column by column
         # total count non blank 
         # frequencies -each value
+          v_sql = "Select * from "+v_definition_table+" where target_table ='"+@v_up_table_name+"' and table_name ='"+@v_source_up_table_name+"' order by display_order"  
+          results = connection.execute(v_sql)
+          
+          results.each do |vals|
+                if !vals[15].blank? and !vals[14].include?("skip_valid_values")
+                   v_column_name = vals[1]
+                   @col_array.push(v_column_name)
+                   v_valid_value_definition = vals[14]
+                   v_valid_value_array = v_valid_value_definition.split("|")
+                   v_sql_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
+                                 in ('"+v_valid_value_array.join("','")+"') group by "+v_column_name+" order by "+v_column_name
+                   @results_valid = connection.execute(v_sql_valid)
+                   @col_valid_hash[v_column_name] = @results_valid 
+
+                   v_sql_not_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
+                                not in ('"+v_valid_value_array.join("','")+"') group by "+v_column_name+" order by "+v_column_name
+
+                   @results_not_valid = connection.execute(v_sql_not_valid)
+                   @col_not_valid_hash[v_column_name] = @results_not_valid 
+                end
+            end
 
         
         # html display
@@ -3849,7 +3937,7 @@ def cg_validate_conversion
          
         end
       end
-
+     end 
          render :template => "data_searches/cg_validate_conversion"
 
 end
