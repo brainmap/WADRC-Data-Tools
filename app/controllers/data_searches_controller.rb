@@ -3820,7 +3820,7 @@ def cg_validate_conversion
                    # loop thru all hash key
                    #    if value = 1
                    #        get orig_<col_name>[hash#], new_<col_name>[hash#]
-                      non_valid_keys_array = params["column_"+v_column_name].keys
+                      non_valid_keys_array = params["column_"+v_column_name] #.keys
                       non_valid_keys_array.each do |key|
                           if params["column_"+v_column_name][key].to_s == "1"
                              v_sql_update = v_base_sql + v_column_name+" = '"+params["new_"+v_column_name][key].gsub("'","''")+"' 
@@ -3829,6 +3829,15 @@ def cg_validate_conversion
                           end
                       end
                    elsif !params["global_"+v_column_name].blank?
+                      v_validate_values = "Y"
+                      non_valid_keys_array = params["global_"+v_column_name].keys
+                      non_valid_keys_array.each do |key|
+                          if params["global_"+v_column_name][key].to_s == "1"
+                             v_sql_update = v_base_sql + v_column_name+" = '"+params["new_"+v_column_name][key].gsub("'","''")+"' 
+                                where "+v_column_name+" = '"+params["orig_"+v_column_name][key].gsub("'","''")+"'"
+                            # update_results = connection.execute(v_sql_update)
+                          end
+                      end
                    # loop thru all hash key
                    #    if value = 1
                    #        get orig_<col_name>[hash#], new_<col_name>[hash#]
@@ -4024,16 +4033,48 @@ puts "global update"
                     end
                 end
             end
+        end # end of validation
+        # doing the global update after the validation
+        if !params[:non_valid_update].blank?
+            v_base_sql = "update "+@v_source_schema+"."+@v_source_up_table_name+" set "
+            v_sql = "Select * from "+v_definition_table+" where target_table ='"+@v_up_table_name+"' and table_name ='"+@v_source_up_table_name+"' order by display_order"  
+            results = connection.execute(v_sql)
+            results_internal = connection.execute(v_sql)
+            results.each do |vals|
+              if !vals[15].blank? and !vals[14].include?("skip_valid_values")
+                v_column_name = vals[1]
+                   #"column_<col_name>"=>{"0"=>"1"}, "orig_<col_name>"=>{"0"=>"1"}, "new_<col_name>"=>{"0"=>"ADRC"}
+                   # "global_<col_name>"=>{"0"=>"1"}
+                if !params["global_"+v_column_name].blank?
+                   # loop thru all hash key
+                   #    if value = 1
+                   #        get orig_<col_name>[hash#], new_<col_name>[hash#]
+                   # loop thru all columns which have this value as a non-valid value
+                  non_valid_keys_array = params["global_"+v_column_name]  #.keys
+                  non_valid_keys_array.each do |key|
+                    if params["global_"+v_column_name][key].to_s == "1"
+                      results_internal.each do |vals_internal| 
+                        if !vals_internal[15].blank? and !vals_internal[14].include?("skip_valid_values")
+                          v_column_name_internal = vals_internal[1]
+                          if !@col_not_valid_hash[v_column_name_internal].nil?
+                                   # check for params["orig_"+v_column_name][key]
+                            @col_not_valid_hash[v_column_name_internal].each do |invalid_val_internal|
+                              if invalid_val_internal[1] == params["orig_"+v_column_name][key]
+                                v_sql_update = v_base_sql + v_column_name_internal+" = '"+params["new_"+v_column_name][key].gsub("'","''")+"' 
+                                where "+v_column_name_internal+" = '"+params["orig_"+v_column_name][key].gsub("'","''")+"'"
+                                update_results = connection.execute(v_sql_update)
+                              end
+                            end    
+                          end
+                        end
+                      end
+                    end
+                  end
+                end # global column 
+              end
+            end
+        end # doing old/new update - the global part
 
-        
-        # html display
-        # option to export cvs
-        # non-valid values - editable - new value - old value ( text field to not deal with hidden field html issues) 
-        # check box - update all values in this column
-        # check box - update all non-valid values occurances in all columns ( exclude the skippped ones)
-
-         
-        end
       end
      end  
          # count and value in same row, line break to next count/value 
