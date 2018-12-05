@@ -1,9 +1,6 @@
 <% @current_tab = "searches" 
 v_schema = [["up_load_development","up_load_development"],["up_load_production","up_load_production"]]
-v_make_load_table_schema = [["Make Table in Source Schema","make_in_source_schema"],["Load from Source Schema","load_from_source_schema"]]
-
 v_key_type = [["enumber and visit# mapped to enrollment/scan_procedure","enrollment/sp"],["reggieid-participant_id","reggieid-kc-participant_id"],["wrapnum-participant_id","wrapnum-kc-participant_id"],["adrcnum-participant_id","adrcnum-kc-participant_id"]]
-
 v_yes_no = [["Y","Y"],["N","N"]]
 %>
 
@@ -49,46 +46,67 @@ v_yes_no = [["Y","Y"],["N","N"]]
 						    <%= submit_tag("Validate and/or convert values in table") %>
 						  </div>
 		</td></tr>
+
+<% end %>
+<%= form_tag '/cg_validate_conversion.csv' do%>
+     <input type="hidden" id="up_table_name" name="up_table_name" value="<%=@v_up_table_name%>">
+     <input type="hidden" id="up_table_name_key_column" name="up_table_name_key_column" value="<%=@v_up_table_name_key_column%>">
+     <input type="hidden" id="key_type" name="key_type" value="<%=@v_key_type%>">
+     <input type="hidden" id="source_up_table_name" name="source_up_table_name" value="<%=@v_source_up_table_name%>">
+     <input type="hidden" id="source_schema" name="source_schema" value="<%=@v_source_schema%>">
+
+     <input type="hidden" id="export_csv" name="export_csv" value="Y">
+     <input type="hidden" id="validate_values" name="validate_values" value="Y">	   <tr><td  align="left">
+						  <div class="actions">
+						    <%= submit_tag("Export Validate values csv") %>
+						  </div>
+		</td></tr>
+
+<%end%>
+
 		</table>
 		<br>
-<% end %>
+
 
 <% end %>
 
 <% if @col_array.count > 0 %>
 <table><tr><td colspan=<%@col_array.count%> ><b> Valid values and counts</b></td></tr>
 <tr><% @col_array.each do |col| %>
-	<td ><b><%=col%></b></td>
+	<td ><b><%=col%></b>&nbsp;<small><%= @col_display_name_hash[col] %></small></td>
    <%end%>
   </tr>
 <tr><% @col_array.each do |col| %>
-	<td><%  @col_valid_hash[col].each do |cnt| %>
+	<td><% if !@col_valid_hash[col].nil?
+	        @col_valid_hash[col].each do |cnt| %>
 		<%=cnt[0]%> &nbsp;&nbsp;&nbsp;&nbsp;<%=cnt[1]%><br>
-       <%end%>
+       <%end
+        end%>
 	</td>
    <%end%>
   </tr>
-<tr><td colspan=<%@col_array.count%> ><hr><br><br><b> Non-Valid values and counts</b></td></tr>
+<tr><td colspan=<%@col_array.count%> ><br><br><b> Non-Valid values and counts</b></td></tr>
 <%= form_tag  '/cg_validate_conversion'  do %>
      <input type="hidden" id="up_table_name" name="up_table_name" value="<%=@v_up_table_name%>">
      <input type="hidden" id="up_table_name_key_column" name="up_table_name_key_column" value="<%=@v_up_table_name_key_column%>">
      <input type="hidden" id="key_type" name="key_type" value="<%=@v_key_type%>">
      <input type="hidden" id="source_up_table_name" name="source_up_table_name" value="<%=@v_source_up_table_name%>">
      <input type="hidden" id="source_schema" name="source_schema" value="<%=@v_source_schema%>">
-<tr><td>make hidden variables for tables, keys, etc, checkbox update column, checkbox update full form, current_value text, new_value text
 <tr><% @col_array.each do |col| %>
-	<td><b><%=col%></b></td>
+	<td><b><%=col%></b>&nbsp;<small><%= @col_display_name_hash[col] %></small></td>
    <%end%>
   </tr>
 <tr><% @col_array.each do |col| %>
 	<td><% v_cnt = 0
+	 if !@col_not_valid_hash[col].nil?
 	 @col_not_valid_hash[col].each do |cnt| %>
 		<%=cnt[0]%> &nbsp;&nbsp;&nbsp;&nbsp;<%=cnt[1]%><br>
 		<%= check_box_tag "column_"+col+"["+v_cnt.to_s+"]", "1",  FALSE, :name =>"column_"+col+"["+v_cnt.to_s+"]" %>
 		&nbsp; <small>original</small><%= text_field_tag "orig_"+col+"["+v_cnt.to_s+"]" ,cnt[1], :required => false%>&nbsp;&nbsp;&nbsp;<small>new</small>
 		<%= text_field_tag "new_"+col+"["+v_cnt.to_s+"]" ,nil, :required => false%>&nbsp;&nbsp;&nbsp;<small>all cols</small>&nbsp;<%= check_box_tag "global_"+col+"["+v_cnt.to_s+"]", "1",  FALSE, :name =>"global_"+col+"["+v_cnt.to_s+"]" %><br>
        <% v_cnt = v_cnt + 1
-       end%>
+       end
+      end%>
 	</td>
    <%end%>
   </tr>
@@ -100,6 +118,7 @@ v_yes_no = [["Y","Y"],["N","N"]]
 						  </div>
 		</td></tr>
 		 <%end%>
+
 </table>
 
 <% end %>

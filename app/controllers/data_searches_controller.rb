@@ -3785,6 +3785,7 @@ def cg_validate_conversion
      v_validate_values = params[:validate_values]
      v_convert_values = params[:convert_values]
      @col_array = []
+     @col_display_name_hash = Hash.new
      @col_valid_hash = Hash.new
      @col_not_valid_hash = Hash.new
 
@@ -3822,8 +3823,8 @@ def cg_validate_conversion
                       non_valid_keys_array = params["column_"+v_column_name].keys
                       non_valid_keys_array.each do |key|
                           if params["column_"+v_column_name][key].to_s == "1"
-                             v_sql_update = v_base_sql + v_column_name+" = '"+params["new_"+v_column_name][key]+"' 
-                                where "+v_column_name+" = '"+params["orig_"+v_column_name][key]+"'"
+                             v_sql_update = v_base_sql + v_column_name+" = '"+params["new_"+v_column_name][key].gsub("'","''")+"' 
+                                where "+v_column_name+" = '"+params["orig_"+v_column_name][key].gsub("'","''")+"'"
                              update_results = connection.execute(v_sql_update)
                           end
                       end
@@ -3844,7 +3845,7 @@ puts "global update"
 
      # add skip conversion in convert_values
      # skip_valid_values  skip_value_conversion
-             if v_convert_values == "Y"
+          if v_convert_values == "Y"
             v_sql = "Select * from "+v_definition_table+" where target_table ='"+@v_up_table_name+"' and table_name ='"+@v_source_up_table_name+"' order by display_order"  
             results = connection.execute(v_sql)
             #0=unit,
@@ -3873,15 +3874,21 @@ puts "global update"
                    v_value_conversion_array = v_value_conversion_definition.split("|")
                    v_value_conversion_array.each do |v_conversion|
                      v_value_and_meaning_array = v_conversion.split(",")
-                     if v_value_and_meaning_array.count == 2
+                     if v_value_and_meaning_array.count > 1
                        v_value = v_value_and_meaning_array[0].strip
-                       v_meaning = v_value_and_meaning_array[1].strip
+                       v_value_and_meaning_array.shift
+                     # extra splits if comma in value
+                       if v_value_and_meaning_array.count > 1
+                          v_meaning = v_value_and_meaning_array[0].join(",").strip
+                       else
+                          v_meaning = v_value_and_meaning_array[0].strip
+                       end
                        if v_value != v_meaning
                        # check if v_value is start of v_meaning
                          if v_meaning.start_with?(v_value+" ") 
                           v_meaning = v_meaning.sub(v_value+" ","")
                          end
-                         v_sql_update = v_base_sql+v_column_name+" = '"+v_meaning+"' where "+v_column_name+" = '"+v_value+"'"
+                         v_sql_update = v_base_sql+v_column_name+" = '"+v_meaning.gsub("'","''")+"' where "+v_column_name+" = '"+v_value.gsub("'","''")+"'"
                        puts v_sql_update 
                        update_results = connection.execute(v_sql_update)
                        else
@@ -3909,21 +3916,112 @@ puts "global update"
           results = connection.execute(v_sql)
           
           results.each do |vals|
-                if !vals[15].blank? and !vals[14].include?("skip_valid_values")
+                if !vals[14].blank? and !vals[14].include?("skip_valid_values")
                    v_column_name = vals[1]
+                   v_column_display_name = vals[2]
                    @col_array.push(v_column_name)
+                   @col_display_name_hash[v_column_name] = v_column_display_name
                    v_valid_value_definition = vals[14]
                    v_valid_value_array = v_valid_value_definition.split("|")
-                   v_sql_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
-                                 in ('"+v_valid_value_array.join("','")+"') group by "+v_column_name+" order by "+v_column_name
-                   @results_valid = connection.execute(v_sql_valid)
-                   @col_valid_hash[v_column_name] = @results_valid 
 
-                   v_sql_not_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
+                   if v_valid_value_array[0] == "run_count"
+                     v_sql_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" 
+                                group by "+v_column_name+" order by "+v_column_name
+                     @results_valid = connection.execute(v_sql_valid)
+                     @col_valid_hash[v_column_name] = @results_valid 
+                     @col_not_valid_hash[v_column_name] = nil
+                   elsif v_valid_value_array[0] == "run_count_int"
+                     v_sql_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" 
+                                group by "+v_column_name+" order by ABS("+v_column_name+")"
+                     @results_valid = connection.execute(v_sql_valid)
+                     @col_valid_hash[v_column_name] = @results_valid 
+                     @col_not_valid_hash[v_column_name] = nil
+                   elsif v_valid_value_array[0] == "stddev_2"
+                     v_sql_stddev = "SELECT  AVG("+v_column_name+"), STD("+v_column_name+") from "+@v_source_schema+"."+@v_source_up_table_name
+                     results_stddev = connection.execute(v_sql_stddev)
+                     v_mean = results_stddev.first[0]
+                     v_stddev = results_stddev.first[1]
+
+                     v_sql_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
+                                not in (SELECT "+v_column_name+" FROM "+@v_source_schema+"."+@v_source_up_table_name+" WHERE ABS(ABS("+v_column_name+")-"+v_mean.to_s+") > "+v_stddev.to_s+" * 2)
+                                 group by "+v_column_name+" order by "+v_column_name
+
+                     v_sql_not_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
+                                in (SELECT "+v_column_name+" FROM "+@v_source_schema+"."+@v_source_up_table_name+" WHERE ABS(ABS("+v_column_name+")-"+v_mean.to_s+") > "+v_stddev.to_s+" * 2)
+                                 group by "+v_column_name+" order by "+v_column_name
+
+                     @results_valid = connection.execute(v_sql_valid)
+                     @col_valid_hash[v_column_name] = @results_valid 
+
+                     @results_not_valid = connection.execute(v_sql_not_valid)
+                     @col_not_valid_hash[v_column_name] = @results_not_valid 
+                   elsif v_valid_value_array[0] == "date"
+                      v_date_format = vals[4]
+                      # HOW TO VALIDATE DATE
+                           @col_valid_hash[v_column_name] = nil
+                           @col_not_valid_hash[v_column_name] = nil
+                   elsif v_valid_value_array[0] == "reggieid"
+                     @col_valid_hash[v_column_name] = nil
+                     v_sql_not_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
+                                not in (select reggie_id from enrollments) group by "+v_column_name+" order by "+v_column_name
+                     @results_not_valid = connection.execute(v_sql_not_valid)
+                     @col_not_valid_hash[v_column_name] = @results_not_valid 
+
+                   elsif v_valid_value_array[0] == "wrapnum"
+                     @col_valid_hash[v_column_name] = nil
+                     v_sql_not_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
+                                not in (select wrapnum from participants) group by "+v_column_name+" order by "+v_column_name
+                     @results_not_valid = connection.execute(v_sql_not_valid)
+                     @col_not_valid_hash[v_column_name] = @results_not_valid 
+
+                   elsif v_valid_value_array[0] == "subjectid"
+                           @col_valid_hash[v_column_name] = nil
+                     v_sql_not_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
+                                not in (select enumber from enrollments) group by "+v_column_name+" order by "+v_column_name
+                     @results_not_valid = connection.execute(v_sql_not_valid)
+                     @col_not_valid_hash[v_column_name] = @results_not_valid
+
+                   elsif v_valid_value_array[0] == "range"
+                     v_sql_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
+                                between "+v_valid_value_array[1]+" and "+v_valid_value_array[2]+" group by "+v_column_name+" order by "+v_column_name
+
+                     v_sql_not_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
+                                not between "+v_valid_value_array[1]+" and "+v_valid_value_array[2]+" group by "+v_column_name+" order by "+v_column_name
+
+                     @results_valid = connection.execute(v_sql_valid)
+                     @col_valid_hash[v_column_name] = @results_valid 
+
+                     @results_not_valid = connection.execute(v_sql_not_valid)
+                     @col_not_valid_hash[v_column_name] = @results_not_valid 
+  
+
+                   elsif v_valid_value_array[0] == "range_int"
+                     v_sql_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where ABS("+v_column_name+")
+                                between "+v_valid_value_array[1]+" and "+v_valid_value_array[2]+" group by "+v_column_name+" order by ABS("+v_column_name+")"
+
+                     v_sql_not_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where ABS("+v_column_name+")
+                                not between "+v_valid_value_array[1]+" and "+v_valid_value_array[2]+" group by "+v_column_name+" order by ABS("+v_column_name+")"
+
+                     @results_valid = connection.execute(v_sql_valid)
+                     @col_valid_hash[v_column_name] = @results_valid 
+
+                     @results_not_valid = connection.execute(v_sql_not_valid)
+                     @col_not_valid_hash[v_column_name] = @results_not_valid
+
+                   else
+                     v_sql_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
+                                 in ('"+v_valid_value_array.join("','")+"') group by "+v_column_name+" order by "+v_column_name
+
+                     v_sql_not_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
                                 not in ('"+v_valid_value_array.join("','")+"') group by "+v_column_name+" order by "+v_column_name
 
-                   @results_not_valid = connection.execute(v_sql_not_valid)
-                   @col_not_valid_hash[v_column_name] = @results_not_valid 
+                     @results_valid = connection.execute(v_sql_valid)
+                     @col_valid_hash[v_column_name] = @results_valid 
+
+                     @results_not_valid = connection.execute(v_sql_not_valid)
+                     @col_not_valid_hash[v_column_name] = @results_not_valid 
+
+                    end
                 end
             end
 
@@ -3937,8 +4035,66 @@ puts "global update"
          
         end
       end
-     end 
-         render :template => "data_searches/cg_validate_conversion"
+     end  
+         # count and value in same row, line break to next count/value 
+         # vs count value in separate columns 
+         # separate row for each count/value pair - vs all in one cell with line breaks
+         if !params[:export_csv].nil? and params[:export_csv] =="Y"
+          @csv_array = []
+          if @col_array.count > 0 
+            @results_tmp_csv = []
+            @results_tmp_csv.push("Valid values and counts")
+            @csv_array.push(@results_tmp_csv)
+            @results_tmp_csv = []
+            @col_array.each do |col|
+              @results_tmp_csv.push(col+"    "+@col_display_name_hash[col])
+            end 
+            @csv_array.push(@results_tmp_csv)
+            
+            @results_tmp_csv = [] 
+            @col_array.each do |col| 
+              if !@col_valid_hash[col].nil?
+                v_tmp_string = ""
+                @col_valid_hash[col].each do |cnt| 
+                  v_tmp_string = v_tmp_string+cnt[0].to_s+"    "+cnt[1]+"\n"
+                end
+                @results_tmp_csv.push(v_tmp_string)
+              else
+               @results_tmp_csv.push(" ")
+              end
+            end
+            @csv_array.push(@results_tmp_csv)
+            @results_tmp_csv = []
+            @csv_array.push(@results_tmp_csv)
+            @results_tmp_csv.push("Non-Valid values and counts")
+            @csv_array.push(@results_tmp_csv)
+            @results_tmp_csv = []
+            @col_array.each do |col|
+              @results_tmp_csv.push(col+"     "+@col_display_name_hash[col])
+            end 
+            @csv_array.push(@results_tmp_csv)
+            
+            @results_tmp_csv = [] 
+            @col_array.each do |col| 
+              if !@col_not_valid_hash[col].nil?
+                v_tmp_string = ""
+                @col_not_valid_hash[col].each do |cnt| 
+                  v_tmp_string = v_tmp_string+cnt[0].to_s+"    "+cnt[1]+"\n"
+                end
+                @results_tmp_csv.push(v_tmp_string)
+              else
+               @results_tmp_csv.push(" ")
+              end
+            end
+            @csv_array.push(@results_tmp_csv)
+          end 
+            @csv_str = @csv_array.inject([]) { |csv, row|  csv << CSV.generate_line(row) }.join("") 
+            respond_to do |format|
+               format.csv { send_data @csv_str }
+            end
+        else
+          render :template => "data_searches/cg_validate_conversion"
+         end
 
 end
 
