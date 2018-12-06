@@ -3991,11 +3991,18 @@ puts "global update"
                      @col_not_valid_hash[v_column_name] = @results_not_valid
 
                    elsif v_valid_value_array[0] == "range"
+
+                    v_range_string_array = []
+                    (v_valid_value_array[1].to_i..v_valid_value_array[2].to_i).step(1) do |n|
+                         v_range_string_array.push("'"+n.to_s+"'")
+                    end
                      v_sql_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
-                                between "+v_valid_value_array[1]+" and "+v_valid_value_array[2]+" group by "+v_column_name+" order by "+v_column_name
+                               in ("+v_range_string_array.join(",")+") group by "+v_column_name+" order by abs("+v_column_name+")"
+                               # between '"+v_valid_value_array[1]+"' and '"+v_valid_value_array[2]+"' group by "+v_column_name+" order by "+v_column_name
 
                      v_sql_not_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
-                                not between "+v_valid_value_array[1]+" and "+v_valid_value_array[2]+" group by "+v_column_name+" order by "+v_column_name
+                                not in ("+v_range_string_array.join(",")+") group by "+v_column_name+" order by abs("+v_column_name+")"
+                                #not between '"+v_valid_value_array[1]+"' and '"+v_valid_value_array[2]+"' group by "+v_column_name+" order by "+v_column_name
 
                      @results_valid = connection.execute(v_sql_valid)
                      @col_valid_hash[v_column_name] = @results_valid 
@@ -4005,11 +4012,17 @@ puts "global update"
   
 
                    elsif v_valid_value_array[0] == "range_int"
-                     v_sql_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where ABS("+v_column_name+")
-                                between "+v_valid_value_array[1]+" and "+v_valid_value_array[2]+" group by "+v_column_name+" order by ABS("+v_column_name+")"
+                    v_range_string_array = []
+                    (v_valid_value_array[1].to_i..v_valid_value_array[2].to_i).step(1) do |n|
+                         v_range_string_array.push(n.to_s)
+                    end
+                     v_sql_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
+                                in ("+v_range_string_array.join(",")+") group by "+v_column_name+" order by ABS("+v_column_name+")"
+                                #between "+v_valid_value_array[1]+" and "+v_valid_value_array[2]+" group by "+v_column_name+" order by ABS("+v_column_name+")"
 
-                     v_sql_not_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where ABS("+v_column_name+")
-                                not between "+v_valid_value_array[1]+" and "+v_valid_value_array[2]+" group by "+v_column_name+" order by ABS("+v_column_name+")"
+                     v_sql_not_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
+                                not in ("+v_range_string_array.join(",")+") group by "+v_column_name+" order by ABS("+v_column_name+")"
+                               # not between "+v_valid_value_array[1]+" and "+v_valid_value_array[2]+" group by "+v_column_name+" order by ABS("+v_column_name+")"
 
                      @results_valid = connection.execute(v_sql_valid)
                      @col_valid_hash[v_column_name] = @results_valid 
