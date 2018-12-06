@@ -2532,6 +2532,68 @@ def  run_pet_av1451_harvest
                             end
                             
                           end # file read
+                #CHECK NEW_ROI vs PRESENT_ROI
+                #RESET trfile QC, keep comments
+                # make new tredit
+                # relinnk to tracer files
+                          v_sql_check = "Select "+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id from cg_pet_av1451_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                          results_check = connection.execute(v_sql_check)
+                          if !results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2
+                            v_change = "N"
+                            v_col_array = v_roi_column_list.split(",")
+                            v_cnt_col = 0
+                            v_col_array.each do |cn|
+                               if v_roi_hash[cn].nil?
+                               else
+                                  if  v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
+                                    v_change = "Y"
+                                  end
+                               end
+                               v_cnt_col = v_cnt_col + 1
+                              end
+                            if v_change == "Y"
+                              @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
+                              @trfiles.first.qc_notes = @trfiles.first.qc_notes+" adding second tredit roi changed"
+                              @trfiles.first.save
+                              @existing_trfileimages = Trfileimage.where("trfile_id in (?)",@trfiles.first.id)
+                              @existing_trfileimages.each do |trfileimage|
+                                 trfileimage.delete
+                              end
+                       # NEED processedimage @trfile.image_dataset_id = v_ids_id
+                              if @trfileimage_processedimages.kind_of?(Array)
+                                @trfileimage_processedimages.each do |img|
+                                   v_img = Trfileimage.new
+                                   v_img.trfile_id = @trfiles.first.id
+                                   v_img.image_category = "processedimage"
+                                   v_img.image_id = img
+                                   v_img.save
+                                end
+                              end
+                              @tredit = Tredit.new
+                              @tredit.trfile_id = @trfiles.first.id
+                              #@tredit.user_id = current_user.id
+                              @tredit.save
+                              v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                              if !v_tractiontypes.nil?
+                                v_tractiontypes.each do |tat|
+                                  v_tredit_action = TreditAction.new
+                                  v_tredit_action.tredit_id = @tredit.id
+                                  v_tredit_action.tractiontype_id = tat.id
+                                  if !(tat.form_default_value).blank?
+                                     v_tredit_action.value = tat.form_default_value
+                                  end
+                                 # set each field if needed-- just an example from mcd
+                                 #if tat.id == 14 # despot 2
+                                 #   v_tredit_action.value = v_despot_2_flag
+                                 #elsif tat.id == 15 # mcdespot
+                                 #   v_tredit_action.value = v_mcdespot_flag
+                                 #end
+                                  v_tredit_action.save
+                                end
+                              end
+                            end
+
+                          end
                           sql = "insert into cg_pet_av1451_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,pet_date_mri_date_diff_days,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"','"+v_qc_value+"','"+v_pet_date_mri_date_diff_days+"'"
                           v_col_array = v_roi_column_list.split(",")
                           v_col_array.each do |cn|
@@ -2862,6 +2924,9 @@ end
 def run_pet_av1451_process
       v_base_path = Shared.get_base_path()
       v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+
+      v_error_log_path = v_base_path+"/preprocessed/logs/failed_pet/"
+      # error format. <sp>_<subjectid>_pet-processing-log_<dd ? d>-<Mon>-<yyyy>_av1451_suvr.csv
       v_av1451_path = "/pet/av1451/suvr/code_ver2b"
       v_av1451_tracer_id = "9"
       v_days_mri_pet_diff_limit = "730"
@@ -2973,7 +3038,7 @@ puts v_av1451_petfiles.first.path
                puts "ddddd need to run v_av1451_petfiles.first.path="+v_av1451_petfiles.first.path.to_s
                v_o_acpc_file = ""
                v_oacpc_file_in_vgroup = "N"
-               v_subjectid_tissue_seg = v_preprocessed_path+v_scan_procedure.codename+"/"+v_subjectid+"/tissue_seg"
+               v_subjectid_tissue_seg = v_preprocessed_path+v_scan_procedure.codename+"/"+v_subjectid+"/unknown"
                if File.directory?(v_subjectid_tissue_seg)   # need to also look for [subjectid]b,c,d,.R
                     v_cnt = 0
                     v_dir_array = Dir.entries(v_subjectid_tissue_seg)
@@ -2988,11 +3053,13 @@ puts v_av1451_petfiles.first.path
                     end
                     if v_cnt > 1
                       v_pet_path_ok = "N"
-                      v_comment = v_subjectid+" multiple o_acpc in tissue_seg;"+v_comment
+                      v_comment = v_subjectid+" multiple o_acpc in unknown;"+v_comment
                     else
                        # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
                        v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
                        puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
+                       # check for error log with tghis subject, tracer, dvr/suvr, date stamp
+                       # send email to owner of failure
                     end
               else
                 # no oacpc file in pet vgroup
@@ -3686,6 +3753,68 @@ def  run_pet_mk6240_harvest
                             end
                             
                           end # file read
+                #CHECK NEW_ROI vs PRESENT_ROI
+                #RESET trfile QC, keep comments
+                # make new tredit
+                # relinnk to tracer files
+                          v_sql_check = "Select "+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id from cg_pet_mk6240_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                          results_check = connection.execute(v_sql_check)
+                          if !results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2
+                            v_change = "N"
+                            v_col_array = v_roi_column_list.split(",")
+                            v_cnt_col = 0
+                            v_col_array.each do |cn|
+                               if v_roi_hash[cn].nil?
+                               else
+                                  if  v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
+                                    v_change = "Y"
+                                  end
+                               end
+                               v_cnt_col = v_cnt_col + 1
+                              end
+                            if v_change == "Y"
+                              @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
+                              @trfiles.first.qc_notes = @trfiles.first.qc_notes+" adding second tredit roi changed"
+                              @trfiles.first.save
+                              @existing_trfileimages = Trfileimage.where("trfile_id in (?)",@trfiles.first.id)
+                              @existing_trfileimages.each do |trfileimage|
+                                 trfileimage.delete
+                              end
+                       # NEED processedimage @trfile.image_dataset_id = v_ids_id
+                              if @trfileimage_processedimages.kind_of?(Array)
+                                @trfileimage_processedimages.each do |img|
+                                   v_img = Trfileimage.new
+                                   v_img.trfile_id = @trfiles.first.id
+                                   v_img.image_category = "processedimage"
+                                   v_img.image_id = img
+                                   v_img.save
+                                end
+                              end
+                              @tredit = Tredit.new
+                              @tredit.trfile_id = @trfiles.first.id
+                              #@tredit.user_id = current_user.id
+                              @tredit.save
+                              v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                              if !v_tractiontypes.nil?
+                                v_tractiontypes.each do |tat|
+                                  v_tredit_action = TreditAction.new
+                                  v_tredit_action.tredit_id = @tredit.id
+                                  v_tredit_action.tractiontype_id = tat.id
+                                  if !(tat.form_default_value).blank?
+                                     v_tredit_action.value = tat.form_default_value
+                                  end
+                                 # set each field if needed-- just an example from mcd
+                                 #if tat.id == 14 # despot 2
+                                 #   v_tredit_action.value = v_despot_2_flag
+                                 #elsif tat.id == 15 # mcdespot
+                                 #   v_tredit_action.value = v_mcdespot_flag
+                                 #end
+                                  v_tredit_action.save
+                                end
+                              end
+                            end
+
+                          end
                           sql = "insert into cg_pet_mk6240_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,pet_date_mri_date_diff_days,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"','"+v_qc_value+"','"+v_pet_date_mri_date_diff_days+"'"
                           v_col_array = v_roi_column_list.split(",")
                           v_col_array.each do |cn|
@@ -4016,6 +4145,8 @@ end
 def run_pet_mk6240_process
       v_base_path = Shared.get_base_path()
       v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+            v_error_log_path = v_base_path+"/preprocessed/logs/failed_pet/"
+      # error format. <sp>_<subjectid>_pet-processing-log_<dd ? d>-<Mon>-<yyyy>_mk6240_suvr.csv
       v_mk6240_path = "/pet/mk6240/suvr/code_ver2b"
       v_mk6240_tracer_id = "11"
       v_days_mri_pet_diff_limit = "730"
@@ -4127,7 +4258,7 @@ puts "v_participant.id="+v_participant.id.to_s
                puts "ddddd need to run v_mk6240_petfiles.first.path="+v_mk6240_petfiles.first.path.to_s
                v_o_acpc_file = ""
                v_oacpc_file_in_vgroup = "N"
-               v_subjectid_tissue_seg = v_preprocessed_path+v_scan_procedure.codename+"/"+v_subjectid+"/tissue_seg"
+               v_subjectid_tissue_seg = v_preprocessed_path+v_scan_procedure.codename+"/"+v_subjectid+"/unknown"
                if File.directory?(v_subjectid_tissue_seg)   # need to also look for [subjectid]b,c,d,.R
                     v_cnt = 0
                     v_dir_array = Dir.entries(v_subjectid_tissue_seg)
@@ -4142,11 +4273,13 @@ puts "v_participant.id="+v_participant.id.to_s
                     end
                     if v_cnt > 1
                       v_pet_path_ok = "N"
-                      v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in tissue_seg:"
+                      v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in unknown:"
                     else
                        # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
                        v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
                        puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
+                       # check for error log with tghis subject, tracer, dvr/suvr, date stamp
+                       # send email to owner of failure
                     end
               else
                 # no oacpc file in pet vgroup
@@ -4782,6 +4915,7 @@ def  run_pet_pib_dvr_harvest
                           if v_qc_value.nil? or v_qc_value.blank?
                               v_qc_value = "Waiting"
                           end
+
                      end
 # CHECK THAT TREDITS.STATUS_FLAG = 'Y'
 
@@ -4875,11 +5009,63 @@ def  run_pet_pib_dvr_harvest
                                 end
                               end
                           end
+                          v_pib_index = ""
                           if v_pibindex_field_cnt < 16
                               v_pib_index = "na"
                           else
                               v_pib_index = (v_pib_index_sum/16).round(9)
                           end
+                #CHECK NEW_ROI vs PRESENT_ROI
+                #RESET trfile QC, keep comments
+                # make new tredit
+                # relinnk to tracer files
+                          v_sql_check = "Select pib_index,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                          results_check = connection.execute(v_sql_check)
+                          if !results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2
+                            if results_check.first[0].to_s != v_pib_index.to_s
+                              @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
+                              @trfiles.first.qc_notes = @trfiles.first.qc_notes+" adding second tredit roi changed"
+                              @trfiles.first.save
+                              @existing_trfileimages = Trfileimage.where("trfile_id in (?)",@trfiles.first.id)
+                              @existing_trfileimages.each do |trfileimage|
+                                 trfileimage.delete
+                              end
+                       # NEED processedimage @trfile.image_dataset_id = v_ids_id
+                              if @trfileimage_processedimages.kind_of?(Array)
+                                @trfileimage_processedimages.each do |img|
+                                   v_img = Trfileimage.new
+                                   v_img.trfile_id = @trfiles.first.id
+                                   v_img.image_category = "processedimage"
+                                   v_img.image_id = img
+                                   v_img.save
+                                end
+                              end
+                              @tredit = Tredit.new
+                              @tredit.trfile_id = @trfiles.first.id
+                              #@tredit.user_id = current_user.id
+                              @tredit.save
+                              v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                              if !v_tractiontypes.nil?
+                                v_tractiontypes.each do |tat|
+                                  v_tredit_action = TreditAction.new
+                                  v_tredit_action.tredit_id = @tredit.id
+                                  v_tredit_action.tractiontype_id = tat.id
+                                  if !(tat.form_default_value).blank?
+                                     v_tredit_action.value = tat.form_default_value
+                                  end
+                                 # set each field if needed-- just an example from mcd
+                                 #if tat.id == 14 # despot 2
+                                 #   v_tredit_action.value = v_despot_2_flag
+                                 #elsif tat.id == 15 # mcdespot
+                                 #   v_tredit_action.value = v_mcdespot_flag
+                                 #end
+                                  v_tredit_action.save
+                                end
+                              end
+                            end
+
+                          end
+
                           sql = "insert into cg_pet_pib_dvr_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,pib_index,general_comment,dvr_method,dvr_tstar_min,dvr_k2bar_1_min,pet_date_mri_date_diff_days,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"','"+v_pib_index.to_s+"','"+v_qc_value+"','"+v_dvr_method+"','"+v_dvr_tstar_min+"','"+v_dvr_k2bar_1_min+"','"+v_pet_date_mri_date_diff_days+"'"
                           v_col_array = v_roi_column_list.split(",")
                           v_col_array.each do |cn|
@@ -5000,7 +5186,8 @@ def  run_pet_pib_dvr_harvest
       end # preprocessed sp dir exists
     end   # scan procedure loop
     
-                
+
+
 
                 # check move cg_ to cg_old
                 sql = "select count(*) from cg_pet_pib_dvr_roi_old"
@@ -5210,6 +5397,8 @@ end
 def run_pet_pib_dvr_process
       v_base_path = Shared.get_base_path()
       v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+      v_error_log_path = v_base_path+"/preprocessed/logs/failed_pet/"
+      # error format. <sp>_<subjectid>_pet-processing-log_<dd ? d>-<Mon>-<yyyy>_pib_dvr.csv
       v_pib_path = "/pet/pib/dvr/code_ver2b"
       v_pib_tracer_id = "1"
       v_days_mri_pet_diff_limit = "730"
@@ -5328,7 +5517,7 @@ def run_pet_pib_dvr_process
                puts "ddddd need to run v_pib_petfiles.first.path="+v_pib_petfiles.first.path.to_s
                v_o_acpc_file = ""
                v_oacpc_file_in_vgroup = "N"
-               v_subjectid_tissue_seg = v_preprocessed_path+v_scan_procedure.codename+"/"+v_subjectid+"/tissue_seg"
+               v_subjectid_tissue_seg = v_preprocessed_path+v_scan_procedure.codename+"/"+v_subjectid+"/unknown"
                if File.directory?(v_subjectid_tissue_seg)   # need to also look for [subjectid]b,c,d,.R
                     # there is an mri with this vgroup with tissue_seg processed -- tissue seg sometimes has teh human selecte oacpc while unknown might have multiples
                     v_cnt = 0
@@ -5345,11 +5534,13 @@ def run_pet_pib_dvr_process
                     if v_cnt > 1
                       # multiple oacpc files - need to make choice, can't auto run procesing
                       v_pet_path_ok = "N"
-                      v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in tissue_seg:"
+                      v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in unknown:"
                     else
                        # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
                        v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
                        puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
+                       # check for error log with tghis subject, tracer, dvr/suvr, date stamp
+                       # send email to owner of failure
                     end
               else
                 # no oacpc file in pet vgroup
@@ -6051,6 +6242,69 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
                             end
                             
                           end # file read
+                #CHECK NEW_ROI vs PRESENT_ROI
+                #RESET trfile QC, keep comments
+                # make new tredit
+                # relinnk to tracer files
+                          v_sql_check = "Select "+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_suvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                          results_check = connection.execute(v_sql_check)
+                          if !results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2
+                            v_change = "N"
+                            v_col_array = v_roi_column_list.split(",")
+                            v_cnt_col = 0
+                            v_col_array.each do |cn|
+                               if v_roi_hash[cn].nil?
+                               else
+                                  if  v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
+                                    v_change = "Y"
+                                  end
+                               end
+                               v_cnt_col = v_cnt_col + 1
+                              end
+                            if v_change == "Y"
+                              @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
+                              @trfiles.first.qc_notes = @trfiles.first.qc_notes+" adding second tredit roi changed"
+                              @trfiles.first.save
+                              @existing_trfileimages = Trfileimage.where("trfile_id in (?)",@trfiles.first.id)
+                              @existing_trfileimages.each do |trfileimage|
+                                 trfileimage.delete
+                              end
+                       # NEED processedimage @trfile.image_dataset_id = v_ids_id
+                              if @trfileimage_processedimages.kind_of?(Array)
+                                @trfileimage_processedimages.each do |img|
+                                   v_img = Trfileimage.new
+                                   v_img.trfile_id = @trfiles.first.id
+                                   v_img.image_category = "processedimage"
+                                   v_img.image_id = img
+                                   v_img.save
+                                end
+                              end
+                              @tredit = Tredit.new
+                              @tredit.trfile_id = @trfiles.first.id
+                              #@tredit.user_id = current_user.id
+                              @tredit.save
+                              v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                              if !v_tractiontypes.nil?
+                                v_tractiontypes.each do |tat|
+                                  v_tredit_action = TreditAction.new
+                                  v_tredit_action.tredit_id = @tredit.id
+                                  v_tredit_action.tractiontype_id = tat.id
+                                  if !(tat.form_default_value).blank?
+                                     v_tredit_action.value = tat.form_default_value
+                                  end
+                                 # set each field if needed-- just an example from mcd
+                                 #if tat.id == 14 # despot 2
+                                 #   v_tredit_action.value = v_despot_2_flag
+                                 #elsif tat.id == 15 # mcdespot
+                                 #   v_tredit_action.value = v_mcdespot_flag
+                                 #end
+                                  v_tredit_action.save
+                                end
+                              end
+                            end
+
+                          end
+
                           sql = "insert into cg_pet_pib_suvr_roi_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,pet_code_version,original_t1_mri_file_name,bias_corrected_t1_mri_file,mni_space_t1_mri,multispectral_file,ecat_file_name,atlas,age_at_appointment,general_comment,pet_date_mri_date_diff_days,"+v_roi_column_list+" ) values('"+v_subjectid_roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_bias_corrected_t1_mri_file+"','"+v_mni_space_t1_mri+"','"+v_multispectral_file+"','"+v_ecat_file.to_s+"','"+v_atlas+"','"+v_age_at_appointment+"','"+v_qc_value+"','"+v_pet_date_mri_date_diff_days+"'"
                           v_col_array = v_roi_column_list.split(",")
                           v_col_array.each do |cn|
@@ -6380,6 +6634,8 @@ end
 def run_pet_pib_suvr_process
       v_base_path = Shared.get_base_path()
       v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+      v_error_log_path = v_base_path+"/preprocessed/logs/failed_pet/"
+      # error format. <sp>_<subjectid>_pet-processing-log_<dd ? d>-<Mon>-<yyyy>_pib_suvr.csv
       v_pib_path = "/pet/pib/suvr/code_ver2b"
       v_pib_tracer_id = "1"
       v_days_mri_pet_diff_limit = "730"
@@ -6491,7 +6747,7 @@ puts "v_participant.id="+v_participant.id.to_s
                puts "ddddd need to run v_pib_petfiles.first.path="+v_pib_petfiles.first.path.to_s
                v_o_acpc_file = ""
                v_oacpc_file_in_vgroup = "N"
-               v_subjectid_tissue_seg = v_preprocessed_path+v_scan_procedure.codename+"/"+v_subjectid+"/tissue_seg"
+               v_subjectid_tissue_seg = v_preprocessed_path+v_scan_procedure.codename+"/"+v_subjectid+"/unknown"   #tissue_seg"
                if File.directory?(v_subjectid_tissue_seg)   # need to also look for [subjectid]b,c,d,.R
                     v_cnt = 0
                     v_dir_array = Dir.entries(v_subjectid_tissue_seg)
@@ -6506,11 +6762,13 @@ puts "v_participant.id="+v_participant.id.to_s
                     end
                     if v_cnt > 1
                       v_pet_path_ok = "N"
-                      v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in tissue_seg:"
+                      v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in unknown:"
                     else
                        # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
                        v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
                        puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
+                       # check for error log with tghis subject, tracer, dvr/suvr, date stamp
+                       # send email to owner of failure
                     end
               else
                 # no oacpc file in pet vgroup
