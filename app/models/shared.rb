@@ -2536,6 +2536,8 @@ def  run_pet_av1451_harvest
                 #RESET trfile QC, keep comments
                 # make new tredit
                 # relinnk to tracer files
+                 # row in ROI table is blank if QC Status = Waiting, gets actual value when change to Partial/Pass
+                 # not make tredit if exisiting row are blanks and Pass makes new values
                           v_sql_check = "Select "+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id from cg_pet_av1451_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                           results_check = connection.execute(v_sql_check)
                           if !results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2
@@ -2545,7 +2547,7 @@ def  run_pet_av1451_harvest
                             v_col_array.each do |cn|
                                if v_roi_hash[cn].nil?
                                else
-                                  if  v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
+                                  if results_check.first[v_cnt_col].strip.to_s > "" and v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
                                     v_change = "Y"
                                   end
                                end
@@ -3757,6 +3759,8 @@ def  run_pet_mk6240_harvest
                 #RESET trfile QC, keep comments
                 # make new tredit
                 # relinnk to tracer files
+                 # row in ROI table is blank if QC Status = Waiting, gets actual value when change to Partial/Pass
+                 # not make tredit if exisiting row are blanks and Pass makes new values
                           v_sql_check = "Select "+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id from cg_pet_mk6240_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                           results_check = connection.execute(v_sql_check)
                           if !results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2
@@ -3766,7 +3770,7 @@ def  run_pet_mk6240_harvest
                             v_col_array.each do |cn|
                                if v_roi_hash[cn].nil?
                                else
-                                  if  v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
+                                  if results_check.first[v_cnt_col].strip.to_s > "" and  v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
                                     v_change = "Y"
                                   end
                                end
@@ -5021,10 +5025,15 @@ def  run_pet_pib_dvr_harvest
                 # relinnk to tracer files
                           v_sql_check = "Select pib_index,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                           results_check = connection.execute(v_sql_check)
-                          if !results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2
-                            if results_check.first[0].to_s != v_pib_index.to_s
+                          # row in ROI table is blank if QC Status = Waiting, gets actual value when change to Partial/Pass
+                          if !results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2 and !(results_check.first)[0].blank? and (results_check.first)[0].strip > "" and !(results_check.first)[0].include?("na")
+
+                            if results_check.first[0].to_s != v_pib_index.to_s and !(results_check.first)[0].include?("na")
+puts "YYYYYY results_check.first)[0]="+(results_check.first)[0].to_s+"="+v_pib_index.to_s+"="+v_subjectid_v_num
                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
-                              @trfiles.first.qc_notes = @trfiles.first.qc_notes+" adding second tredit roi changed"
+                              @trfiles.first.qc_notes = @trfiles.first.qc_notes+" adding second tredit roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"]"
+                              @trfiles.first.save
+                              @trfiles.first.qc_value = nil
                               @trfiles.first.save
                               @existing_trfileimages = Trfileimage.where("trfile_id in (?)",@trfiles.first.id)
                               @existing_trfileimages.each do |trfileimage|
@@ -6246,6 +6255,8 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
                 #RESET trfile QC, keep comments
                 # make new tredit
                 # relinnk to tracer files
+                  # row in ROI table is blank if QC Status = Waiting, gets actual value when change to Partial/Pass
+                  # not make new tredit if blank cells changed to Pass/values
                           v_sql_check = "Select "+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_suvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                           results_check = connection.execute(v_sql_check)
                           if !results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2
@@ -6255,7 +6266,7 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
                             v_col_array.each do |cn|
                                if v_roi_hash[cn].nil?
                                else
-                                  if  v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
+                                  if results_check.first[v_cnt_col].strip.to_s > "" and v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
                                     v_change = "Y"
                                   end
                                end
