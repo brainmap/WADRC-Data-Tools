@@ -7,7 +7,8 @@ class TrfilesController < ApplicationController
   def sync_if_blank(p_trfile_id,p_enrollment_id,p_scan_procedure_id,p_secondary_key,p_trtype_id,p_tractiontype_id,p_tredit_action,p_form_default_value,p_match_on_processedimage_type)
       if !p_match_on_processedimage_type.blank? 
         if !p_secondary_key.nil?
-           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?) and trfiles.secondary_key in (?)
+           v_trfiles = Trfile.where("trfiles.id not in (?)
+                                    and trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?) and trfiles.secondary_key in (?)
                                       and (trfiles.id in (select trfileimages.trfile_id from trfileimages,processedimages,processedimagessources where trfileimages.image_category = 'processedimage' 
                                       and trfileimages.image_id = processedimages.id and processedimagessources.processedimage_id = processedimages.id
                                       and processedimages.file_type in (?)
@@ -17,9 +18,10 @@ class TrfilesController < ApplicationController
                                               processedimagessources.source_image_id in (select pis3.source_image_id from processedimagessources pis3, processedimages pi3,trfileimages ti3
                                                                                           where pi3.id = pis3.processedimage_id
                                                                                                 and ti3.image_id = pi3.id and ti3.trfile_id in (?)
-                                        )   ) )",p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_secondary_key,p_match_on_processedimage_type,p_trfile_id,p_trfile_id)
+                                        )   ) )",p_trfile_id,p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_secondary_key,p_match_on_processedimage_type,p_trfile_id,p_trfile_id)
         else
-           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?)
+           v_trfiles = Trfile.where("trfiles.id not in (?)
+                                      and trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?)
                                      and trfiles.id in (select trfileimages.trfile_id from trfileimages,processedimages,processedimagessources where trfileimages.image_category = 'processedimage' 
                                       and trfileimages.image_id = processedimages.id and processedimagessources.processedimage_id = processedimages.id
                                        and processedimages.file_type in (?)
@@ -29,20 +31,24 @@ class TrfilesController < ApplicationController
                                               processedimagessources.source_image_id in (select pis3.source_image_id from processedimagessources pis3, processedimages pi3,trfileimages ti3
                                                                                           where pi3.id = pis3.processedimage_id
                                                                                                 and ti3.image_id = pi3.id and ti3.trfile_id in (?)
-                                       )  )  )",p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_match_on_processedimage_type,p_trfile_id,p_trfile_id)
+                                       )  )  )",p_trfile_id,p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_match_on_processedimage_type,p_trfile_id,p_trfile_id)
         end
       else 
         if !p_secondary_key.nil?
-           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?) and trfiles.secondary_key in (?)",p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_secondary_key)
+           v_trfiles = Trfile.where("trfiles.id not in (?) 
+                      and trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?) and trfiles.secondary_key in (?)",
+                      p_trfile_id,p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_secondary_key)
         else
-           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?)",p_scan_procedure_id,p_enrollment_id,p_trtype_id)
+           v_trfiles = Trfile.where("trfiles.id not in (?)
+                      and trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?)",
+                      p_trfile_id,p_scan_procedure_id,p_enrollment_id,p_trtype_id)
         end
       end
        # just get one
       if !v_trfiles.nil? and v_trfiles.count > 0
           v_trfiles.each do |trfile|
             # get most recent tredit
-            v_tredits = Tredit.where("trfile_id in (?) and status_flag ='Y'",trfile.id).order("tredits.id asc")
+            v_tredits = Tredit.where("trfile_id in (?) and status_flag ='Y'",trfile.id).order("tredits.id desc")
             v_tredit = v_tredits[0]
             v_tredit_action = TreditAction.where("tractiontype_id in (?) and tredit_id in (?)",p_tractiontype_id, v_tredit.id)
              if (v_tredit_action[0].value.blank? or  v_tredit_action[0].value == p_form_default_value)
@@ -59,7 +65,8 @@ puts "aaaaaaa in sync_if_blank_on_load"
 
       if !p_match_on_processedimage_type.blank? 
         if !p_secondary_key.nil?
-           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?) and trfiles.secondary_key in (?)
+           v_trfiles = Trfile.where("trfiles.id not in (?)
+                                and trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?) and trfiles.secondary_key in (?)
                                       and trfiles.id in (select trfileimages.trfile_id from trfileimages,processedimages,processedimagessources where trfileimages.image_category = 'processedimage' 
                                       and trfileimages.image_id = processedimages.id and processedimagessources.processedimage_id = processedimages.id
                                        and processedimages.file_type in (?)
@@ -69,9 +76,10 @@ puts "aaaaaaa in sync_if_blank_on_load"
                                               processedimagessources.source_image_id in (select pis3.source_image_id from processedimagessources pis3, processedimages pi3,trfileimages ti3
                                                                                           where pi3.id = pis3.processedimage_id
                                                                                                 and ti3.image_id = pi3.id and ti3.trfile_id in (?)
-                                         )  ) )",p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_secondary_key,p_match_on_processedimage_type,p_trfile_id,p_trfile_id)
+                                         )  ) )",p_trfile_id,p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_secondary_key,p_match_on_processedimage_type,p_trfile_id,p_trfile_id)
         else
-           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?)
+           v_trfiles = Trfile.where("trfiles.id not in (?)
+                                   and trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?)
                                      and trfiles.id in (select trfileimages.trfile_id from trfileimages,processedimages,processedimagessources where trfileimages.image_category = 'processedimage' 
                                       and trfileimages.image_id = processedimages.id and processedimagessources.processedimage_id = processedimages.id
                                        and processedimages.file_type in (?)
@@ -81,13 +89,17 @@ puts "aaaaaaa in sync_if_blank_on_load"
                                               processedimagessources.source_image_id in (select pis3.source_image_id from processedimagessources pis3, processedimages pi3,trfileimages ti3
                                                                                           where pi3.id = pis3.processedimage_id
                                                                                                 and ti3.image_id = pi3.id and ti3.trfile_id in (?)
-                                           ) ) )",p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_match_on_processedimage_type,p_trfile_id,p_trfile_id)
+                                           ) ) )",p_trfile_id,p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_match_on_processedimage_type,p_trfile_id,p_trfile_id)
         end
       else 
         if !p_secondary_key.nil?
-           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?) and trfiles.secondary_key in (?)",p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_secondary_key)
+           v_trfiles = Trfile.where("trfiles.id not in (?) 
+                    and trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?) and trfiles.secondary_key in (?)",
+                    p_trfile_id,p_scan_procedure_id,p_enrollment_id,p_trtype_id,p_secondary_key)
         else
-           v_trfiles = Trfile.where("trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?)",p_scan_procedure_id,p_enrollment_id,p_trtype_id)
+           v_trfiles = Trfile.where("trfiles.id not in (?) 
+                   and trfiles.scan_procedure_id in (?) and trfiles.enrollment_id in (?) and trfiles.trtype_id in (?)",
+                   p_trfile_id,p_scan_procedure_id,p_enrollment_id,p_trtype_id)
         end
       end
        # just get one
@@ -95,7 +107,7 @@ puts "aaaaaaa in sync_if_blank_on_load"
           v_non_blank_non_default_value = ""
           v_trfiles.each do |trfile|
             # get most recent tredit
-            v_tredits = Tredit.where("trfile_id in (?) and status_flag ='Y'",trfile.id).order("tredits.id asc")
+            v_tredits = Tredit.where("trfile_id in (?) and status_flag ='Y'",trfile.id).order("tredits.id desc")
             v_tredit = v_tredits[0]
             v_tredit_action = TreditAction.where("tractiontype_id in (?) and tredit_id in (?)",p_tractiontype_id, v_tredit.id)
              if !v_tredit_action[0].value.blank? and  v_tredit_action[0].value != p_form_default_value
