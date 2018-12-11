@@ -2513,7 +2513,7 @@ def  run_pet_av1451_harvest
                               if v_cnt > 0 
                                 v_line_array = []
                                 v_line_array =line.gsub(/\n/,"").split(",")
-                                if v_qc_value == "Waiting" or v_qc_value == "Fail" # blanking out data until quality checked or if Fail
+                                if v_qc_value == "Waiting" or v_qc_value == "Fail" or v_qc_value == "Reprocessed" or v_qc_value == "Partial"# blanking out data until quality checked or if Fail
                                     v_line_array[3] = ""
                                     v_line_array[4] = ""
                                 end
@@ -3788,7 +3788,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                               if v_cnt > 0 
                                 v_line_array = []
                                 v_line_array =line.gsub(/\n/,"").split(",")               
-                                if v_qc_value == "Waiting" or v_qc_value == "Fail" # blanking out data until quality checked or if Fail
+                                if v_qc_value == "Waiting" or v_qc_value == "Fail" or v_qc_value == "Reprocessed" or v_qc_value == "Partial" # blanking out data until quality checked or if Fail
                                     v_line_array[3] = ""
                                     v_line_array[4] = ""
                                 end
@@ -5113,7 +5113,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                               if v_cnt > 0 
                                 v_line_array = []
                                 v_line_array =line.gsub(/\n/,"").split(",")
-                                if v_qc_value == "Waiting" or v_qc_value == "Fail" # blanking out data until quality checked or if Fail
+                                if v_qc_value == "Waiting" or v_qc_value == "Fail" or v_qc_value == "Reprocessed" or v_qc_value == "Partial" # blanking out data until quality checked or if Fail
                                     v_line_array[3] = ""
                                     v_line_array[4] = ""
                                 end
@@ -6423,7 +6423,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                               if v_cnt > 0 
                                 v_line_array = []
                                 v_line_array =line.gsub(/\n/,"").split(",")
-                                if v_qc_value == "Waiting" or v_qc_value == "Fail" # blanking out data until quality checked or if Fail
+                                if v_qc_value == "Waiting" or v_qc_value == "Fail" or v_qc_value == "Reprocessed" or v_qc_value == "Partial" # blanking out data until quality checked or if Fail
                                     v_line_array[3] = ""
                                     v_line_array[4] = ""
                                 end
