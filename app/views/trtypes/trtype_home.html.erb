@@ -1,7 +1,7 @@
 <% if @hide_page_flag == "Y" 
   else %>
 <%  v_y_n = {"Y"=>"Y","N"=>"N"} 
-v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass"} %>
+v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass","Reprocessed"=>"Reprocessed"} %>
 <table class="search_form" >
 	<tr><td colspan="3" align="left"><b>Tracking file processing and <%= @v_action_name.pluralize %>:</b> <br>
     <% if params[:id].nil? %>
