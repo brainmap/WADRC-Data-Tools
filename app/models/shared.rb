@@ -2577,7 +2577,7 @@ def  run_pet_av1451_harvest
                               #added
                               @trfiles.first.file_completed_flag = "N"
                               # add comments if mri processed or pet processed date change
-                              @trfiles.first.qc_value = nil
+                              @trfiles.first.qc_value = "Reprocessed"
                               @trfiles.first.save
                               @existing_trfileimages = Trfileimage.where("trfile_id in (?)",@trfiles.first.id)
                               @existing_trfileimages.each do |trfileimage|
@@ -3852,7 +3852,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                               #added
                               @trfiles.first.file_completed_flag = "N"
                               # add comments if mri processed or pet processed date change
-                              @trfiles.first.qc_value = nil
+                              @trfiles.first.qc_value = "Reprocessed"
                               @trfiles.first.save
                               @existing_trfileimages = Trfileimage.where("trfile_id in (?)",@trfiles.first.id)
                               @existing_trfileimages.each do |trfileimage|
@@ -5191,7 +5191,7 @@ puts "YYYYYY results_check.first)[0]="+(results_check.first)[0].to_s+"="+v_pib_i
                               # add comments if mri processed or pet processed date change
 
                               @trfiles.first.save
-                              @trfiles.first.qc_value = nil
+                              @trfiles.first.qc_value = "Reprocessed"
                               @trfiles.first.save
                               @existing_trfileimages = Trfileimage.where("trfile_id in (?)",@trfiles.first.id)
                               @existing_trfileimages.each do |trfileimage|
@@ -6487,7 +6487,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                               #added
                               @trfiles.first.file_completed_flag = "N"
                               # add comments if mri processed or pet processed date change
-                              @trfiles.first.qc_value = nil
+                              @trfiles.first.qc_value = "Reprocessed"
                               @trfiles.first.save
                               @existing_trfileimages = Trfileimage.where("trfile_id in (?)",@trfiles.first.id)
                               @existing_trfileimages.each do |trfileimage|
