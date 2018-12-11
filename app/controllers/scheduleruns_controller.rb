@@ -98,7 +98,10 @@ class SchedulerunsController < ApplicationController
       condition =" scheduleruns.schedule_id in ( select schedules_users.schedule_id from schedules_users where user_id in ("+current_user.id.to_s+")) "
       @conditions.push(condition)
     end
-    
+      if params["search_criteria"] == ""
+         condition =" updated_at > DATE_ADD(NOW(),INTERVAL -10 DAY) "
+         @conditions.push(condition)
+      end
     if !params[:schedulerun_search][:status_flag].blank?
         var = params[:schedulerun_search][:status_flag]
         condition =" scheduleruns.status_flag  = '"+var.gsub(/[;:'"()=<>]/, '')+"' "
@@ -146,9 +149,7 @@ class SchedulerunsController < ApplicationController
              sql = sql +" WHERE  "+@conditions.join(' and ')
        end
       #conditions - feed thru ActiveRecord? stop sql injection -- replace : ; " ' ( ) = < > - others?
-      if params["search_criteria"] == ""
-         sql = sql + " where updated_at > DATE_ADD(NOW(),INTERVAL -10 DAY) "
-      end
+
        if @order_by.size > 0
          sql = sql +" ORDER BY "+@order_by.join(',')
        end
