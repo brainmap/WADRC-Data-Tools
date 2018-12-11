@@ -2340,13 +2340,24 @@ def  run_pet_av1451_harvest
                   if v_pet_processing_date.nil?
                        v_pet_processing_date =""
                   end
+                  if v_mri_processing_date.nil?
+                       v_mri_processing_date =""
+                  end
                   if v_original_t1_mri_file.nil?
                       v_original_t1_mri_file =""
                   end
                   if v_ecat_file.nil?
                      v_ecat_file= ""
                   end
+                  v_mri_processed_date_change ="N"
                   if v_skip_flag == "N"
+                     
+                  
+                    v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                    results_check = connection.execute(v_sql_check) 
+                    if !results_check.nil? and !results_check.first.nil? and !results_check.first[0].blank? and results_check.first[0].to_s != v_mri_processing_date and !v_mri_processing_date.blank?
+                      v_mri_processed_date_change ="Y"
+                    end
                      # CHECK IN PROCESSEDIMAGES for v_subjectid_pet_av1451+v_product_file - , insert with sources v_original_t1_mri_file, v_ecat_file 
                      v_processesimages = Processedimage.where("file_path in (?)",v_subjectid_pet_av1451+v_product_file)
                      @trfileimage_processedimages = []
@@ -2558,7 +2569,15 @@ def  run_pet_av1451_harvest
                               end
                             if v_change == "Y"
                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
-                              @trfiles.first.qc_notes = @trfiles.first.qc_notes+" adding second tredit roi changed"
+                              if v_mri_processed_date_change == "Y"
+                                 @trfiles.first.qc_notes = "mri reprocessed-"+v_mri_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              else
+                                 @trfiles.first.qc_notes = " roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              end
+                              #added
+                              @trfiles.first.file_completed_flag = "N"
+                              # add comments if mri processed or pet processed date change
+                              @trfiles.first.qc_value = nil
                               @trfiles.first.save
                               @existing_trfileimages = Trfileimage.where("trfile_id in (?)",@trfiles.first.id)
                               @existing_trfileimages.each do |trfileimage|
@@ -2574,28 +2593,28 @@ def  run_pet_av1451_harvest
                                    v_img.save
                                 end
                               end
-                              @tredit = Tredit.new
-                              @tredit.trfile_id = @trfiles.first.id
+                              ##### @tredit = Tredit.new
+                              ##### @tredit.trfile_id = @trfiles.first.id
                               #@tredit.user_id = current_user.id
-                              @tredit.save
-                              v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
-                              if !v_tractiontypes.nil?
-                                v_tractiontypes.each do |tat|
-                                  v_tredit_action = TreditAction.new
-                                  v_tredit_action.tredit_id = @tredit.id
-                                  v_tredit_action.tractiontype_id = tat.id
-                                  if !(tat.form_default_value).blank?
-                                     v_tredit_action.value = tat.form_default_value
-                                  end
+                              ##### @tredit.save
+                              ##### v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                              ##### if !v_tractiontypes.nil?
+                                ##### v_tractiontypes.each do |tat|
+                                  ##### v_tredit_action = TreditAction.new
+                                  ##### v_tredit_action.tredit_id = @tredit.id
+                                  ##### v_tredit_action.tractiontype_id = tat.id
+                                 #####  if !(tat.form_default_value).blank?
+                                   #####   v_tredit_action.value = tat.form_default_value
+                                 #####  end
                                  # set each field if needed-- just an example from mcd
                                  #if tat.id == 14 # despot 2
                                  #   v_tredit_action.value = v_despot_2_flag
                                  #elsif tat.id == 15 # mcdespot
                                  #   v_tredit_action.value = v_mcdespot_flag
                                  #end
-                                  v_tredit_action.save
-                                end
-                              end
+                                 #####  v_tredit_action.save
+                               #####  end
+                              ##### end
                             end
 
                           end
@@ -3466,13 +3485,24 @@ def  run_pet_mk6240_harvest
                   if v_pet_processing_date.nil?
                        v_pet_processing_date =""
                   end
+                  if v_mri_processing_date.nil?
+                       v_mri_processing_date =""
+                  end
                   if v_original_t1_mri_file.nil?
                       v_original_t1_mri_file =""
                   end
                   if v_ecat_file.nil?
                      v_ecat_file= ""
                   end
+                  v_mri_processed_date_change ="N"
                   if v_skip_flag == "N"
+                     
+                  
+                    v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                    results_check = connection.execute(v_sql_check) 
+                    if !results_check.nil? and !results_check.first.nil? and !results_check.first[0].blank? and results_check.first[0].to_s != v_mri_processing_date and !v_mri_processing_date.blank?
+                      v_mri_processed_date_change ="Y"
+                    end
 
                      # CHECK IN PROCESSEDIMAGES for v_subjectid_pet_mk6240+v_product_file - , insert with sources v_original_t1_mri_file, v_ecat_file 
                      v_processesimages = Processedimage.where("file_path in (?)",v_subjectid_pet_mk6240+v_product_file)
@@ -3536,6 +3566,36 @@ def  run_pet_mk6240_harvest
 
                     # NEED TO ADD CHECK IN processedimages for v_bias_corrected_t1_mri_file , link to unknown/tissueseg nii processedimage 
                     if v_bias_corrected_t1_mri_file  > ""
+                      v_processesimages = Processedimage.where("file_path in (?)",v_bias_corrected_t1_mri_file )
+                      v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                      results_check = connection.execute(v_sql_check) 
+                      if v_mri_processed_date_change == "Y"
+                        if v_processesimages.count > 0
+                            # rename exisiting processedimage file in database if  mri processing date changed - rename with old processing date
+                            # f.start_with?("w"+v_subjectid) and f.end_with?(".nii")
+                           #  15-Oct-2018 14:55:40 => 15_Oct_2018_14_55_40.
+                           v_date_time_nii = "_"+results_check.first[0].gsub(" ","_").gsub(":","_").gsub("-","_")+".nii"
+                           v_check_date_file_path = v_processesimages.first.file_path
+                           v_check_date_file_path = v_check_date_file_path.gsub(".nii",v_date_time_nii)
+                           v_processesimages_check = Processedimage.where("file_path in (?)",v_check_date_file_path)
+puts "ffff original file_path="+v_processesimages.first.file_path+"   id ="+v_processesimages.first.id.to_s
+                           if v_processesimages_check.count <1
+                             v_processesimages.first.file_path = v_processesimages.first.file_path.gsub(".nii",v_date_time_nii)
+                             v_processesimages.first.file_name = v_processesimages.first.file_name.gsub(".nii",v_date_time_nii)
+                             v_processesimages.first.save
+                           else
+                             v_trfileimages = Trfileimage.where("image_id in (?)",v_processesimages.first.id)
+                             v_trfileimages.each do |trfileimage|
+                                trfileimage.image_id = v_processesimages_check.first.id
+                                trfileimage.save
+                             end
+                           end
+puts "gggggg new file path ="+v_processesimages.first.file_path
+                           v_processesimages = nil
+                    
+                        end
+                      end
+                     v_processesimages = nil
                      v_processesimages = Processedimage.where("file_path in (?)",v_bias_corrected_t1_mri_file )
                      if v_processesimages.count <1
                                       # need to collect source files, then make processedimage record
@@ -3784,7 +3844,15 @@ def  run_pet_mk6240_harvest
                               end
                             if v_change == "Y"
                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
-                              @trfiles.first.qc_notes = @trfiles.first.qc_notes+" adding second tredit roi changed"
+                              if v_mri_processed_date_change == "Y"
+                                 @trfiles.first.qc_notes = "mri reprocessed-"+v_mri_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              else
+                                 @trfiles.first.qc_notes = " roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              end
+                              #added
+                              @trfiles.first.file_completed_flag = "N"
+                              # add comments if mri processed or pet processed date change
+                              @trfiles.first.qc_value = nil
                               @trfiles.first.save
                               @existing_trfileimages = Trfileimage.where("trfile_id in (?)",@trfiles.first.id)
                               @existing_trfileimages.each do |trfileimage|
@@ -3800,28 +3868,28 @@ def  run_pet_mk6240_harvest
                                    v_img.save
                                 end
                               end
-                              @tredit = Tredit.new
-                              @tredit.trfile_id = @trfiles.first.id
+                             #####  @tredit = Tredit.new
+                             #####  @tredit.trfile_id = @trfiles.first.id
                               #@tredit.user_id = current_user.id
-                              @tredit.save
-                              v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
-                              if !v_tractiontypes.nil?
-                                v_tractiontypes.each do |tat|
-                                  v_tredit_action = TreditAction.new
-                                  v_tredit_action.tredit_id = @tredit.id
-                                  v_tredit_action.tractiontype_id = tat.id
-                                  if !(tat.form_default_value).blank?
-                                     v_tredit_action.value = tat.form_default_value
-                                  end
+                             #####  @tredit.save
+                             #####  v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                              ##### if !v_tractiontypes.nil?
+                               #####  v_tractiontypes.each do |tat|
+                                 #####  v_tredit_action = TreditAction.new
+                                 #####  v_tredit_action.tredit_id = @tredit.id
+                                 #####  v_tredit_action.tractiontype_id = tat.id
+                                #####   if !(tat.form_default_value).blank?
+                                #####      v_tredit_action.value = tat.form_default_value
+                               #####    end
                                  # set each field if needed-- just an example from mcd
                                  #if tat.id == 14 # despot 2
                                  #   v_tredit_action.value = v_despot_2_flag
                                  #elsif tat.id == 15 # mcdespot
                                  #   v_tredit_action.value = v_mcdespot_flag
                                  #end
-                                  v_tredit_action.save
-                                end
-                              end
+                              #####     v_tredit_action.save
+                              #####   end
+                              ##### end
                             end
 
                           end
@@ -4474,7 +4542,7 @@ def  run_pet_pib_dvr_harvest
         v_subjectid_base_array = (sp.subjectid_base).split("-")   # pet sup - adrc-wrap 
         if v_subjectid_base_array.count > 1
             sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
-                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+"  
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" 
                                     and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id 
                                     and ( "
              v_enum_cnt = 0
@@ -4488,7 +4556,7 @@ def  run_pet_pib_dvr_harvest
              sql_enum = sql_enum+") order by enrollments.enumber"
         else
            sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
-                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+"  
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" 
                                     and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id 
                                     and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
         end
@@ -4616,7 +4684,6 @@ def  run_pet_pib_dvr_harvest
                                    elsif v[0] == "protocol description" 
                                      if v[1] == sp.codename
                                          v_protocol_description = v[1]
-
                                      else
                                          v_skip_flag = "Y"
                                      end
@@ -4709,16 +4776,27 @@ def  run_pet_pib_dvr_harvest
                   if v_pet_processing_date.nil?
                        v_pet_processing_date =""
                   end
+                  if v_mri_processing_date.nil?
+                       v_mri_processing_date =""
+                  end
                   if v_original_t1_mri_file.nil?
                       v_original_t1_mri_file =""
                   end
                   if v_ecat_file.nil?
                      v_ecat_file= ""
                   end
+                  v_mri_processed_date_change ="N"
                   if v_skip_flag == "N"
+                     
+                  
+                    v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                    results_check = connection.execute(v_sql_check) 
+                    if !results_check.nil? and !results_check.first.nil? and !results_check.first[0].blank? and results_check.first[0].to_s != v_mri_processing_date and !v_mri_processing_date.blank?
+                      v_mri_processed_date_change ="Y"
+                    end
+                     # CHECK IN PROCESSEDIMAGES for v_subjectid_pet_pib+v_product_file - , insert with sources v_original_t1_mri_file, v_ecat_file
+                    v_processesimages = Processedimage.where("file_path in (?)",v_subjectid_pet_pib+v_product_file)
 
-                     # CHECK IN PROCESSEDIMAGES for v_subjectid_pet_pib+v_product_file - , insert with sources v_original_t1_mri_file, v_ecat_file 
-                     v_processesimages = Processedimage.where("file_path in (?)",v_subjectid_pet_pib+v_product_file)
                      @trfileimage_processedimages = []
                      if v_processesimages.count <1
                                       # need to collect source files, then make processedimage record
@@ -4777,10 +4855,72 @@ def  run_pet_pib_dvr_harvest
                          end
                       else
                         @trfileimage_processedimages.push(v_processesimages.first.id)
+                        # get mri_processing_date and compare with v_mri_processing_date
+                        # if different change the source_id ---
                      end
 
                     # NEED TO ADD CHECK IN processedimages for v_bias_corrected_t1_mri_file , link to unknown/tissueseg nii processedimage 
                     if v_bias_corrected_t1_mri_file  > ""
+                      v_processesimages = Processedimage.where("file_path in (?)",v_bias_corrected_t1_mri_file )
+                      v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                      results_check = connection.execute(v_sql_check) 
+                      if v_mri_processed_date_change == "Y"
+                        if v_processesimages.count > 0
+                            # rename exisiting processedimage file in database if  mri processing date changed - rename with old processing date
+                            # f.start_with?("w"+v_subjectid) and f.end_with?(".nii")
+                           #  15-Oct-2018 14:55:40 => 15_Oct_2018_14_55_40.
+                           v_date_time_nii = "_"+results_check.first[0].gsub(" ","_").gsub(":","_").gsub("-","_")+".nii"
+                           v_check_date_file_path = v_processesimages.first.file_path
+                           v_check_date_file_path = v_check_date_file_path.gsub(".nii",v_date_time_nii)
+                           v_processesimages_check = Processedimage.where("file_path in (?)",v_check_date_file_path)
+puts "ffff original file_path="+v_processesimages.first.file_path+"   id ="+v_processesimages.first.id.to_s
+                           if v_processesimages_check.count <1
+                             v_processesimages.first.file_path = v_processesimages.first.file_path.gsub(".nii",v_date_time_nii)
+                             v_processesimages.first.file_name = v_processesimages.first.file_name.gsub(".nii",v_date_time_nii)
+                             v_processesimages.first.save
+                           else
+                             v_trfileimages = Trfileimage.where("image_id in (?)",v_processesimages.first.id)
+                             v_trfileimages.each do |trfileimage|
+                                trfileimage.image_id = v_processesimages_check.first.id
+                                trfileimage.save
+                             end
+                           end
+puts "gggggg new file path ="+v_processesimages.first.file_path
+                           v_processesimages = nil
+                    
+                        end
+                      end
+                     v_processesimages = nil
+                      v_processesimages = Processedimage.where("file_path in (?)",v_bias_corrected_t1_mri_file )
+                      v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                      results_check = connection.execute(v_sql_check) 
+                      if v_mri_processed_date_change == "Y"
+                        if v_processesimages.count > 0
+                            # rename exisiting processedimage file in database if  mri processing date changed - rename with old processing date
+                            # f.start_with?("w"+v_subjectid) and f.end_with?(".nii")
+                           #  15-Oct-2018 14:55:40 => 15_Oct_2018_14_55_40.
+                           v_date_time_nii = "_"+results_check.first[0].gsub(" ","_").gsub(":","_").gsub("-","_")+".nii"
+                           v_check_date_file_path = v_processesimages.first.file_path
+                           v_check_date_file_path = v_check_date_file_path.gsub(".nii",v_date_time_nii)
+                           v_processesimages_check = Processedimage.where("file_path in (?)",v_check_date_file_path)
+puts "ffff original file_path="+v_processesimages.first.file_path+"   id ="+v_processesimages.first.id.to_s
+                           if v_processesimages_check.count <1
+                             v_processesimages.first.file_path = v_processesimages.first.file_path.gsub(".nii",v_date_time_nii)
+                             v_processesimages.first.file_name = v_processesimages.first.file_name.gsub(".nii",v_date_time_nii)
+                             v_processesimages.first.save
+                           else
+                             v_trfileimages = Trfileimage.where("image_id in (?)",v_processesimages.first.id)
+                             v_trfileimages.each do |trfileimage|
+                                trfileimage.image_id = v_processesimages_check.first.id
+                                trfileimage.save
+                             end
+                           end
+puts "gggggg new file path ="+v_processesimages.first.file_path
+                           v_processesimages = nil
+                    
+                        end
+                      end
+                     v_processesimages = nil
                      v_processesimages = Processedimage.where("file_path in (?)",v_bias_corrected_t1_mri_file )
                      if v_processesimages.count <1
                                       # need to collect source files, then make processedimage record
@@ -5040,7 +5180,16 @@ def  run_pet_pib_dvr_harvest
                             if results_check.first[0].to_s != v_pib_index.to_s and !(results_check.first)[0].include?("na")
 puts "YYYYYY results_check.first)[0]="+(results_check.first)[0].to_s+"="+v_pib_index.to_s+"="+v_subjectid_v_num
                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
-                              @trfiles.first.qc_notes = @trfiles.first.qc_notes+" adding second tredit roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"]"
+                              if v_mri_processed_date_change == "Y"
+                                 @trfiles.first.qc_notes = "mri reprocessed-"+v_mri_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              else
+                                 @trfiles.first.qc_notes = " roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              end
+
+                              #added
+                              @trfiles.first.file_completed_flag = "N"
+                              # add comments if mri processed or pet processed date change
+
                               @trfiles.first.save
                               @trfiles.first.qc_value = nil
                               @trfiles.first.save
@@ -5058,28 +5207,28 @@ puts "YYYYYY results_check.first)[0]="+(results_check.first)[0].to_s+"="+v_pib_i
                                    v_img.save
                                 end
                               end
-                              @tredit = Tredit.new
-                              @tredit.trfile_id = @trfiles.first.id
+                              ##### @tredit = Tredit.new
+                              ##### @tredit.trfile_id = @trfiles.first.id
                               #@tredit.user_id = current_user.id
-                              @tredit.save
-                              v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
-                              if !v_tractiontypes.nil?
-                                v_tractiontypes.each do |tat|
-                                  v_tredit_action = TreditAction.new
-                                  v_tredit_action.tredit_id = @tredit.id
-                                  v_tredit_action.tractiontype_id = tat.id
-                                  if !(tat.form_default_value).blank?
-                                     v_tredit_action.value = tat.form_default_value
-                                  end
+                              ##### @tredit.save
+                              ##### v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                              ##### if !v_tractiontypes.nil?
+                                ##### v_tractiontypes.each do |tat|
+                                  ##### v_tredit_action = TreditAction.new
+                                  ##### v_tredit_action.tredit_id = @tredit.id
+                                  ##### v_tredit_action.tractiontype_id = tat.id
+                                  ##### if !(tat.form_default_value).blank?
+                                     ##### v_tredit_action.value = tat.form_default_value
+                                  ##### end
                                  # set each field if needed-- just an example from mcd
                                  #if tat.id == 14 # despot 2
                                  #   v_tredit_action.value = v_despot_2_flag
                                  #elsif tat.id == 15 # mcdespot
                                  #   v_tredit_action.value = v_mcdespot_flag
                                  #end
-                                  v_tredit_action.save
-                                end
-                              end
+                               #####   v_tredit_action.save
+                                ##### end
+                               ##### end
                             end
 
                           end
@@ -5970,13 +6119,24 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
                   if v_pet_processing_date.nil?
                        v_pet_processing_date =""
                   end
+                  if v_mri_processing_date.nil?
+                       v_mri_processing_date =""
+                  end
                   if v_original_t1_mri_file.nil?
                       v_original_t1_mri_file =""
                   end
                   if v_ecat_file.nil?
                      v_ecat_file= ""
                   end
+                  v_mri_processed_date_change ="N"
                   if v_skip_flag == "N"
+                     
+                  
+                    v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                    results_check = connection.execute(v_sql_check) 
+                    if !results_check.nil? and !results_check.first.nil? and !results_check.first[0].blank? and results_check.first[0].to_s != v_mri_processing_date and !v_mri_processing_date.blank?
+                      v_mri_processed_date_change ="Y"
+                    end
 
                      # CHECK IN PROCESSEDIMAGES for v_subjectid_pet_pib+v_product_file - , insert with sources v_original_t1_mri_file, v_ecat_file 
                      v_processesimages = Processedimage.where("file_path in (?)",v_subjectid_pet_pib+v_product_file)
@@ -6042,6 +6202,36 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
 
                     # NEED TO ADD CHECK IN processedimages for v_bias_corrected_t1_mri_file , link to unknown/tissueseg nii processedimage 
                     if v_bias_corrected_t1_mri_file  > ""
+                      v_processesimages = Processedimage.where("file_path in (?)",v_bias_corrected_t1_mri_file )
+                      v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                      results_check = connection.execute(v_sql_check) 
+                      if v_mri_processed_date_change == "Y"
+                        if v_processesimages.count > 0
+                            # rename exisiting processedimage file in database if  mri processing date changed - rename with old processing date
+                            # f.start_with?("w"+v_subjectid) and f.end_with?(".nii")
+                           #  15-Oct-2018 14:55:40 => 15_Oct_2018_14_55_40.
+                           v_date_time_nii = "_"+results_check.first[0].gsub(" ","_").gsub(":","_").gsub("-","_")+".nii"
+                           v_check_date_file_path = v_processesimages.first.file_path
+                           v_check_date_file_path = v_check_date_file_path.gsub(".nii",v_date_time_nii)
+                           v_processesimages_check = Processedimage.where("file_path in (?)",v_check_date_file_path)
+puts "ffff original file_path="+v_processesimages.first.file_path+"   id ="+v_processesimages.first.id.to_s
+                           if v_processesimages_check.count <1
+                             v_processesimages.first.file_path = v_processesimages.first.file_path.gsub(".nii",v_date_time_nii)
+                             v_processesimages.first.file_name = v_processesimages.first.file_name.gsub(".nii",v_date_time_nii)
+                             v_processesimages.first.save
+                           else
+                             v_trfileimages = Trfileimage.where("image_id in (?)",v_processesimages.first.id)
+                             v_trfileimages.each do |trfileimage|
+                                trfileimage.image_id = v_processesimages_check.first.id
+                                trfileimage.save
+                             end
+                           end
+puts "gggggg new file path ="+v_processesimages.first.file_path
+                           v_processesimages = nil
+                    
+                        end
+                      end
+                     v_processesimages = nil
                      v_processesimages = Processedimage.where("file_path in (?)",v_bias_corrected_t1_mri_file )
                      if v_processesimages.count <1
                                       # need to collect source files, then make processedimage record
@@ -6289,7 +6479,15 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
                               end
                             if v_change == "Y"
                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
-                              @trfiles.first.qc_notes = @trfiles.first.qc_notes+" adding second tredit roi changed"
+                              if v_mri_processed_date_change == "Y"
+                                 @trfiles.first.qc_notes = "mri reprocessed-"+v_mri_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              else
+                                 @trfiles.first.qc_notes = " roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              end
+                              #added
+                              @trfiles.first.file_completed_flag = "N"
+                              # add comments if mri processed or pet processed date change
+                              @trfiles.first.qc_value = nil
                               @trfiles.first.save
                               @existing_trfileimages = Trfileimage.where("trfile_id in (?)",@trfiles.first.id)
                               @existing_trfileimages.each do |trfileimage|
@@ -6305,28 +6503,28 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
                                    v_img.save
                                 end
                               end
-                              @tredit = Tredit.new
-                              @tredit.trfile_id = @trfiles.first.id
+                              ##### @tredit = Tredit.new
+                              ##### @tredit.trfile_id = @trfiles.first.id
                               #@tredit.user_id = current_user.id
-                              @tredit.save
-                              v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
-                              if !v_tractiontypes.nil?
-                                v_tractiontypes.each do |tat|
-                                  v_tredit_action = TreditAction.new
-                                  v_tredit_action.tredit_id = @tredit.id
-                                  v_tredit_action.tractiontype_id = tat.id
-                                  if !(tat.form_default_value).blank?
-                                     v_tredit_action.value = tat.form_default_value
-                                  end
+                              ##### @tredit.save
+                              ##### v_tractiontypes = Tractiontype.where("trtype_id in (?)",v_trtype_id)
+                              ##### if !v_tractiontypes.nil?
+                               #####  v_tractiontypes.each do |tat|
+                               #####    v_tredit_action = TreditAction.new
+                                #####   v_tredit_action.tredit_id = @tredit.id
+                                #####   v_tredit_action.tractiontype_id = tat.id
+                                 #####  if !(tat.form_default_value).blank?
+                                  #####    v_tredit_action.value = tat.form_default_value
+                                 #####  end
                                  # set each field if needed-- just an example from mcd
                                  #if tat.id == 14 # despot 2
                                  #   v_tredit_action.value = v_despot_2_flag
                                  #elsif tat.id == 15 # mcdespot
                                  #   v_tredit_action.value = v_mcdespot_flag
                                  #end
-                                  v_tredit_action.save
-                                end
-                              end
+                                 #####  v_tredit_action.save
+                               #####  end
+                              ##### end
                             end
 
                           end
