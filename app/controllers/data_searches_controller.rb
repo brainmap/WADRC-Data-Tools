@@ -3788,6 +3788,7 @@ def cg_validate_conversion
      @col_display_name_hash = Hash.new
      @col_valid_hash = Hash.new
      @col_not_valid_hash = Hash.new
+     @col_source_form_column_hash = Hash.new
 
      # retrieve cg_up_table_definition 
      # !@v_up_table_name_key_column.blank? and 
@@ -3928,8 +3929,10 @@ puts "global update"
                 if !vals[14].blank? and !vals[14].include?("skip_valid_values")
                    v_column_name = vals[1]
                    v_column_display_name = vals[2]
+                   v_source_form_column = vals[16]
                    @col_array.push(v_column_name)
                    @col_display_name_hash[v_column_name] = v_column_display_name
+                   @col_source_form_column_hash[v_column_name] = v_source_form_column
                    v_valid_value_definition = vals[14]
                    v_valid_value_array = v_valid_value_definition.split("|")
 
@@ -4101,7 +4104,12 @@ puts "global update"
             @csv_array.push(@results_tmp_csv)
             @results_tmp_csv = []
             @col_array.each do |col|
-              @results_tmp_csv.push(col+"    "+@col_display_name_hash[col])
+              @results_tmp_csv.push(col)
+            end 
+            @csv_array.push(@results_tmp_csv)
+            @results_tmp_csv = []
+            @col_array.each do |col|
+              @results_tmp_csv.push(@col_display_name_hash[col])
             end 
             @csv_array.push(@results_tmp_csv)
             
@@ -4141,6 +4149,15 @@ puts "global update"
               end
             end
             @csv_array.push(@results_tmp_csv)
+            @results_tmp_csv.push("Source Projects, Forms, and Columns")
+            @csv_array.push(@results_tmp_csv)
+            @results_tmp_csv = []
+            @col_array.each do |col|
+              @results_tmp_csv.push(@col_source_form_column_hash[col])
+            end 
+            @csv_array.push(@results_tmp_csv)
+
+          
           end 
             @csv_str = @csv_array.inject([]) { |csv, row|  csv << CSV.generate_line(row) }.join("") 
             respond_to do |format|

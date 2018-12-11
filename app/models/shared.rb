@@ -2353,7 +2353,7 @@ def  run_pet_av1451_harvest
                   if v_skip_flag == "N"
                      
                   
-                    v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                    v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_av1451_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                     results_check = connection.execute(v_sql_check) 
                     if !results_check.nil? and !results_check.first.nil? and !results_check.first[0].blank? and results_check.first[0].to_s != v_mri_processing_date and !v_mri_processing_date.blank?
                       v_mri_processed_date_change ="Y"
@@ -3498,7 +3498,7 @@ def  run_pet_mk6240_harvest
                   if v_skip_flag == "N"
                      
                   
-                    v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                    v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_mk6240_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                     results_check = connection.execute(v_sql_check) 
                     if !results_check.nil? and !results_check.first.nil? and !results_check.first[0].blank? and results_check.first[0].to_s != v_mri_processing_date and !v_mri_processing_date.blank?
                       v_mri_processed_date_change ="Y"
@@ -3567,7 +3567,7 @@ def  run_pet_mk6240_harvest
                     # NEED TO ADD CHECK IN processedimages for v_bias_corrected_t1_mri_file , link to unknown/tissueseg nii processedimage 
                     if v_bias_corrected_t1_mri_file  > ""
                       v_processesimages = Processedimage.where("file_path in (?)",v_bias_corrected_t1_mri_file )
-                      v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                      v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_mk6240_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                       results_check = connection.execute(v_sql_check) 
                       if v_mri_processed_date_change == "Y"
                         if v_processesimages.count > 0
@@ -6132,7 +6132,7 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
                   if v_skip_flag == "N"
                      
                   
-                    v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                    v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_suvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                     results_check = connection.execute(v_sql_check) 
                     if !results_check.nil? and !results_check.first.nil? and !results_check.first[0].blank? and results_check.first[0].to_s != v_mri_processing_date and !v_mri_processing_date.blank?
                       v_mri_processed_date_change ="Y"
@@ -6203,7 +6203,7 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
                     # NEED TO ADD CHECK IN processedimages for v_bias_corrected_t1_mri_file , link to unknown/tissueseg nii processedimage 
                     if v_bias_corrected_t1_mri_file  > ""
                       v_processesimages = Processedimage.where("file_path in (?)",v_bias_corrected_t1_mri_file )
-                      v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                      v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_suvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                       results_check = connection.execute(v_sql_check) 
                       if v_mri_processed_date_change == "Y"
                         if v_processesimages.count > 0
