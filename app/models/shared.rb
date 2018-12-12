@@ -2350,13 +2350,17 @@ def  run_pet_av1451_harvest
                      v_ecat_file= ""
                   end
                   v_mri_processed_date_change ="N"
+                  v_pet_processed_date_change ="N"
                   if v_skip_flag == "N"
                      
                   
-                    v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_av1451_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                    v_sql_check = "Select mri_processing_date,pet_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_av1451_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                     results_check = connection.execute(v_sql_check) 
                     if !results_check.nil? and !results_check.first.nil? and !results_check.first[0].blank? and results_check.first[0].to_s != v_mri_processing_date and !v_mri_processing_date.blank?
                       v_mri_processed_date_change ="Y"
+                    end
+                    if !results_check.nil? and !results_check.first.nil? and !results_check.first[1].blank? and results_check.first[1].to_s != v_pet_processing_date and !v_pet_processing_date.blank?
+                      v_pet_processed_date_change ="Y"
                     end
                      # CHECK IN PROCESSEDIMAGES for v_subjectid_pet_av1451+v_product_file - , insert with sources v_original_t1_mri_file, v_ecat_file 
                      v_processesimages = Processedimage.where("file_path in (?)",v_subjectid_pet_av1451+v_product_file)
@@ -2559,18 +2563,25 @@ def  run_pet_av1451_harvest
                             v_col_array = v_roi_column_list.split(",")
                             v_cnt_col = 0
                             v_col_array.each do |cn|
-                               if v_roi_hash[cn].nil?
+                               if v_roi_hash[cn].nil? or v_roi_hash[cn].blank?
                                else
                                   if results_check.first[v_cnt_col].strip.to_s > "" and v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
                                     v_change = "Y"
                                   end
                                end
                                v_cnt_col = v_cnt_col + 1
-                              end
+                            end
+                            if v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"
+                              v_change = "Y"
+                            end
                             if v_change == "Y"
                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
-                              if v_mri_processed_date_change == "Y"
-                                 @trfiles.first.qc_notes = "mri reprocessed-"+v_mri_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              if v_mri_processed_date_change == "Y" and  v_pet_processed_date_change == "Y" 
+                                 @trfiles.first.qc_notes = " mri reprocessed-"+v_mri_processing_date+", pet reprocessed-"+v_pet_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              elsif  v_mri_processed_date_change == "Y" 
+                                 @trfiles.first.qc_notes = " mri reprocessed-"+v_mri_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              elsif v_pet_processed_date_change == "Y" 
+                                 @trfiles.first.qc_notes = " pet reprocessed-"+v_pet_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
                               else
                                  @trfiles.first.qc_notes = " roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
                               end
@@ -3495,13 +3506,17 @@ def  run_pet_mk6240_harvest
                      v_ecat_file= ""
                   end
                   v_mri_processed_date_change ="N"
+                  v_pet_processed_date_change ="N"
                   if v_skip_flag == "N"
                      
                   
-                    v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_mk6240_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                    v_sql_check = "Select mri_processing_date,pet_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_mk6240_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                     results_check = connection.execute(v_sql_check) 
                     if !results_check.nil? and !results_check.first.nil? and !results_check.first[0].blank? and results_check.first[0].to_s != v_mri_processing_date and !v_mri_processing_date.blank?
                       v_mri_processed_date_change ="Y"
+                    end
+                    if !results_check.nil? and !results_check.first.nil? and !results_check.first[1].blank? and results_check.first[1].to_s != v_pet_processing_date and !v_pet_processing_date.blank?
+                      v_pet_processed_date_change ="Y"
                     end
 
                      # CHECK IN PROCESSEDIMAGES for v_subjectid_pet_mk6240+v_product_file - , insert with sources v_original_t1_mri_file, v_ecat_file 
@@ -3834,18 +3849,25 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                             v_col_array = v_roi_column_list.split(",")
                             v_cnt_col = 0
                             v_col_array.each do |cn|
-                               if v_roi_hash[cn].nil?
+                               if v_roi_hash[cn].nil? or v_roi_hash[cn].blank?
                                else
                                   if results_check.first[v_cnt_col].strip.to_s > "" and  v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
                                     v_change = "Y"
                                   end
                                end
                                v_cnt_col = v_cnt_col + 1
-                              end
+                            end
+                            if v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"
+                              v_change = "Y"
+                            end
                             if v_change == "Y"
                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
-                              if v_mri_processed_date_change == "Y"
-                                 @trfiles.first.qc_notes = "mri reprocessed-"+v_mri_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              if v_mri_processed_date_change == "Y" and  v_pet_processed_date_change == "Y" 
+                                 @trfiles.first.qc_notes = " mri reprocessed-"+v_mri_processing_date+", pet reprocessed-"+v_pet_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              elsif  v_mri_processed_date_change == "Y" 
+                                 @trfiles.first.qc_notes = " mri reprocessed-"+v_mri_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              elsif v_pet_processed_date_change == "Y" 
+                                 @trfiles.first.qc_notes = " pet reprocessed-"+v_pet_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
                               else
                                  @trfiles.first.qc_notes = " roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
                               end
@@ -4786,13 +4808,17 @@ def  run_pet_pib_dvr_harvest
                      v_ecat_file= ""
                   end
                   v_mri_processed_date_change ="N"
+                  v_pet_processed_date_change ="N"
                   if v_skip_flag == "N"
                      
                   
-                    v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                    v_sql_check = "Select mri_processing_date,pet_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                     results_check = connection.execute(v_sql_check) 
                     if !results_check.nil? and !results_check.first.nil? and !results_check.first[0].blank? and results_check.first[0].to_s != v_mri_processing_date and !v_mri_processing_date.blank?
                       v_mri_processed_date_change ="Y"
+                    end 
+                    if !results_check.nil? and !results_check.first.nil? and !results_check.first[1].blank? and results_check.first[1].to_s != v_pet_processing_date and !v_pet_processing_date.blank?
+                      v_pet_processed_date_change ="Y"
                     end
                      # CHECK IN PROCESSEDIMAGES for v_subjectid_pet_pib+v_product_file - , insert with sources v_original_t1_mri_file, v_ecat_file
                     v_processesimages = Processedimage.where("file_path in (?)",v_subjectid_pet_pib+v_product_file)
@@ -4862,7 +4888,7 @@ def  run_pet_pib_dvr_harvest
                     # NEED TO ADD CHECK IN processedimages for v_bias_corrected_t1_mri_file , link to unknown/tissueseg nii processedimage 
                     if v_bias_corrected_t1_mri_file  > ""
                       v_processesimages = Processedimage.where("file_path in (?)",v_bias_corrected_t1_mri_file )
-                      v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                      v_sql_check = "Select mri_processing_date,pet_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                       results_check = connection.execute(v_sql_check) 
                       if v_mri_processed_date_change == "Y"
                         if v_processesimages.count > 0
@@ -4892,7 +4918,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                       end
                      v_processesimages = nil
                       v_processesimages = Processedimage.where("file_path in (?)",v_bias_corrected_t1_mri_file )
-                      v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                      v_sql_check = "Select mri_processing_date,pet_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                       results_check = connection.execute(v_sql_check) 
                       if v_mri_processed_date_change == "Y"
                         if v_processesimages.count > 0
@@ -5175,21 +5201,23 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                           v_sql_check = "Select pib_index,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                           results_check = connection.execute(v_sql_check)
                           # row in ROI table is blank if QC Status = Waiting, gets actual value when change to Partial/Pass
-                          if !results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2 and !(results_check.first)[0].blank? and (results_check.first)[0].strip > "" and !(results_check.first)[0].include?("na")
+                          if !results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2 and !(results_check.first)[0].blank? and (results_check.first)[0].strip > "" and !(results_check.first)[0].include?("na") 
 
-                            if results_check.first[0].to_s != v_pib_index.to_s and !(results_check.first)[0].include?("na")
+                            if (results_check.first[0].to_s != v_pib_index.to_s and !(results_check.first)[0].include?("na") and !v_pib_index.to_s.include?("na")) or v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"
 puts "YYYYYY results_check.first)[0]="+(results_check.first)[0].to_s+"="+v_pib_index.to_s+"="+v_subjectid_v_num
                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
-                              if v_mri_processed_date_change == "Y"
-                                 @trfiles.first.qc_notes = "mri reprocessed-"+v_mri_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              if v_mri_processed_date_change == "Y" and  v_pet_processed_date_change == "Y" 
+                                 @trfiles.first.qc_notes = " mri reprocessed-"+v_mri_processing_date+", pet reprocessed-"+v_pet_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              elsif  v_mri_processed_date_change == "Y" 
+                                 @trfiles.first.qc_notes = " mri reprocessed-"+v_mri_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              elsif v_pet_processed_date_change == "Y" 
+                                 @trfiles.first.qc_notes = " pet reprocessed-"+v_pet_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
                               else
                                  @trfiles.first.qc_notes = " roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
                               end
-
                               #added
                               @trfiles.first.file_completed_flag = "N"
                               # add comments if mri processed or pet processed date change
-
                               @trfiles.first.save
                               @trfiles.first.qc_value = "Reprocessed"
                               @trfiles.first.save
@@ -6129,13 +6157,17 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
                      v_ecat_file= ""
                   end
                   v_mri_processed_date_change ="N"
+                  v_pet_processed_date_change ="N"
                   if v_skip_flag == "N"
                      
                   
-                    v_sql_check = "Select mri_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_suvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
+                    v_sql_check = "Select mri_processing_date,pet_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_suvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                     results_check = connection.execute(v_sql_check) 
                     if !results_check.nil? and !results_check.first.nil? and !results_check.first[0].blank? and results_check.first[0].to_s != v_mri_processing_date and !v_mri_processing_date.blank?
                       v_mri_processed_date_change ="Y"
+                    end
+                    if !results_check.nil? and !results_check.first.nil? and !results_check.first[1].blank? and results_check.first[1].to_s != v_pet_processing_date and !v_pet_processing_date.blank?
+                      v_pet_processed_date_change ="Y"
                     end
 
                      # CHECK IN PROCESSEDIMAGES for v_subjectid_pet_pib+v_product_file - , insert with sources v_original_t1_mri_file, v_ecat_file 
@@ -6469,18 +6501,25 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                             v_col_array = v_roi_column_list.split(",")
                             v_cnt_col = 0
                             v_col_array.each do |cn|
-                               if v_roi_hash[cn].nil?
+                               if v_roi_hash[cn].nil? or v_roi_hash[cn].blank?
                                else
                                   if results_check.first[v_cnt_col].strip.to_s > "" and v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
                                     v_change = "Y"
                                   end
                                end
                                v_cnt_col = v_cnt_col + 1
-                              end
+                            end
+                            if v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"
+                              v_change = "Y"
+                            end
                             if v_change == "Y"
                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
-                              if v_mri_processed_date_change == "Y"
-                                 @trfiles.first.qc_notes = "mri reprocessed-"+v_mri_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              if v_mri_processed_date_change == "Y" and  v_pet_processed_date_change == "Y" 
+                                 @trfiles.first.qc_notes = " mri reprocessed-"+v_mri_processing_date+", pet reprocessed-"+v_pet_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              elsif  v_mri_processed_date_change == "Y" 
+                                 @trfiles.first.qc_notes = " mri reprocessed-"+v_mri_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
+                              elsif v_pet_processed_date_change == "Y" 
+                                 @trfiles.first.qc_notes = " pet reprocessed-"+v_pet_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
                               else
                                  @trfiles.first.qc_notes = " roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
                               end
