@@ -4539,7 +4539,7 @@ def  run_pet_pib_dvr_harvest
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
     sp_exclude_array = [54,56,57,95,55,76,78,72,70,71,99,81,75,83,92,93,88,68,97,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,42,44,51,96,9,25,23,19,15,24,36,100,35,73,32,6,12,16,13,11,90,59,63,43,4,17,74,98,101,102,103,108,110,111,112,113,114]
-    @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
+    @scan_procedures = ScanProcedure.where("scan_procedures.id in (?)","26") #where("scan_procedures.id not in (?)", sp_exclude_array)
     # for testing
     ###@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
     @scan_procedures.each do |sp|
@@ -4564,7 +4564,7 @@ def  run_pet_pib_dvr_harvest
         v_subjectid_base_array = (sp.subjectid_base).split("-")   # pet sup - adrc-wrap 
         if v_subjectid_base_array.count > 1
             sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
-                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" 
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" and enrollments.enumber = 'pdt00113' 
                                     and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id 
                                     and ( "
              v_enum_cnt = 0
@@ -4578,7 +4578,7 @@ def  run_pet_pib_dvr_harvest
              sql_enum = sql_enum+") order by enrollments.enumber"
         else
            sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
-                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" 
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" and enrollments.enumber = 'pdt00113' 
                                     and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id 
                                     and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
         end
@@ -4816,6 +4816,7 @@ def  run_pet_pib_dvr_harvest
                     results_check = connection.execute(v_sql_check) 
                     if !results_check.nil? and !results_check.first.nil? and !results_check.first[0].blank? and results_check.first[0].to_s != v_mri_processing_date and !v_mri_processing_date.blank?
                       v_mri_processed_date_change ="Y"
+puts "RRRRRR v_mri_processed_date_change="+v_mri_processed_date_change
                     end 
                     if !results_check.nil? and !results_check.first.nil? and !results_check.first[1].blank? and results_check.first[1].to_s != v_pet_processing_date and !v_pet_processing_date.blank?
                       v_pet_processed_date_change ="Y"
@@ -5198,10 +5199,15 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                 #RESET trfile QC, keep comments
                 # make new tredit
                 # relinnk to tracer files
+puts "SSSSSSS v_mri_processed_date_change="+v_mri_processed_date_change
                           v_sql_check = "Select pib_index,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                           results_check = connection.execute(v_sql_check)
+  puts "loop thru results check"
+  results_check.each do |vals|
+    puts "vals="+vals.join("___")
+  end
                           # row in ROI table is blank if QC Status = Waiting, gets actual value when change to Partial/Pass
-                          if !results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2 and !(results_check.first)[0].blank? and (results_check.first)[0].strip > "" and !(results_check.first)[0].include?("na") 
+                          if (!results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2 and !(results_check.first)[0].blank? and (results_check.first)[0].strip > "" and !(results_check.first)[0].include?("na") ) or v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"
 
                             if (results_check.first[0].to_s != v_pib_index.to_s and !(results_check.first)[0].include?("na") and !v_pib_index.to_s.include?("na")) or v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"
 puts "YYYYYY results_check.first)[0]="+(results_check.first)[0].to_s+"="+v_pib_index.to_s+"="+v_subjectid_v_num
