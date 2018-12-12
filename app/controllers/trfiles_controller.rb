@@ -4,7 +4,12 @@ class TrfilesController < ApplicationController
 
 
   # going down 2 levels in processedimages
-  def sync_if_blank(p_trfile_id,p_enrollment_id,p_scan_procedure_id,p_secondary_key,p_trtype_id,p_tractiontype_id,p_tredit_action,p_form_default_value,p_match_on_processedimage_type)
+  def sync_if_blank(p_trfile_id,p_enrollment_id,p_scan_procedure_id,p_secondary_key,p_trtype_id,p_tractiontype_id,p_tredit_action,p_form_default_value,p_match_on_processedimage_type,p_run_no_matter_what)
+      # p_run_no_matter_what == "Y" means sync even if there are non-blank or non-defulat values 
+      v_run_no_matter_what = "N"
+      if !p_run_no_matter_what.blank?
+        v_run_no_matter_what = p_run_no_matter_what
+      end
       if !p_match_on_processedimage_type.blank? 
         if !p_secondary_key.nil?
            v_trfiles = Trfile.where("trfiles.id not in (?)
@@ -51,7 +56,7 @@ class TrfilesController < ApplicationController
             v_tredits = Tredit.where("trfile_id in (?) and status_flag ='Y'",trfile.id).order("tredits.id desc")
             v_tredit = v_tredits[0]
             v_tredit_action = TreditAction.where("tractiontype_id in (?) and tredit_id in (?)",p_tractiontype_id, v_tredit.id)
-             if (v_tredit_action[0].value.blank? or  v_tredit_action[0].value == p_form_default_value)
+             if (v_tredit_action[0].value.blank? or  v_tredit_action[0].value == p_form_default_value) or v_run_no_matter_what == "Y"
                     v_tredit_action[0].value = p_tredit_action.value
                     v_tredit_action[0].save
              end
@@ -59,8 +64,13 @@ class TrfilesController < ApplicationController
       end
   end
   # p_tredit_action.value is blank or default
-  def sync_if_blank_on_load(p_trfile_id,p_enrollment_id,p_scan_procedure_id,p_secondary_key,p_trtype_id,p_tractiontype_id,p_tredit_action,p_form_default_value,p_match_on_processedimage_type)
-puts "aaaaaaa in sync_if_blank_on_load"
+  def sync_if_blank_on_load(p_trfile_id,p_enrollment_id,p_scan_procedure_id,p_secondary_key,p_trtype_id,p_tractiontype_id,p_tredit_action,p_form_default_value,p_match_on_processedimage_type,p_run_no_matter_what)
+#puts "aaaaaaa in sync_if_blank_on_load"
+      # p_run_no_matter_what == "Y" means sync even if there are non-blank or non-defulat values 
+      v_run_no_matter_what = "N"
+      if !p_run_no_matter_what.blank?
+        v_run_no_matter_what = p_run_no_matter_what
+      end
 
 
       if !p_match_on_processedimage_type.blank? 
@@ -110,13 +120,13 @@ puts "aaaaaaa in sync_if_blank_on_load"
             v_tredits = Tredit.where("trfile_id in (?) and status_flag ='Y'",trfile.id).order("tredits.id desc")
             v_tredit = v_tredits[0]
             v_tredit_action = TreditAction.where("tractiontype_id in (?) and tredit_id in (?)",p_tractiontype_id, v_tredit.id)
-             if !v_tredit_action[0].value.blank? and  v_tredit_action[0].value != p_form_default_value
+             if (!v_tredit_action[0].value.blank? and  v_tredit_action[0].value != p_form_default_value ) or v_run_no_matter_what == "Y"
                     p_tredit_action.value =v_tredit_action[0].value 
                     p_tredit_action.save
              end
           end
       end
-  puts "zzzzz end sync_if_blank_on_load"
+  #puts "zzzzz end sync_if_blank_on_load"
   end
 
   def trfile_edit_action
@@ -324,6 +334,7 @@ puts "aaaaaaa in sync_if_blank_on_load"
                           end
                       end
                   elsif v_trigger_array[0].start_with?("sync_if_blank_command") and !@tredit_action.value.blank? and @tredit_action.value != ta.form_default_value
+      #puts "ffff save sync_if_blank_command"
                      v_match_on_processedimage_type = ""
                      v_initial_command_array = v_trigger_array[0].split("^") # 
                      if v_initial_command_array.count > 1
@@ -334,7 +345,21 @@ puts "aaaaaaa in sync_if_blank_on_load"
                          # trtype_id=8^tractiontype_id=202
                          v_trigger_trtype_array = v_trigpart_array[0].split("=")
                          v_trigger_traction_array = v_trigpart_array[1].split("=")
-                         sync_if_blank(@trfile.id,@trfile.enrollment_id,@trfile.scan_procedure_id,@trfile.secondary_key,v_trigger_trtype_array[1],v_trigger_traction_array[1],@tredit_action,ta.form_default_value,v_match_on_processedimage_type)
+                         sync_if_blank(@trfile.id,@trfile.enrollment_id,@trfile.scan_procedure_id,@trfile.secondary_key,v_trigger_trtype_array[1],v_trigger_traction_array[1],@tredit_action,ta.form_default_value,v_match_on_processedimage_type,"N")
+                      end
+                  elsif v_trigger_array[0].start_with?("sync_override_if_blank_command") ### overrideand !@tredit_action.value.blank? and @tredit_action.value != ta.form_default_value
+       # puts "hhhhhhh save sync_override_if_blank_command"
+                     v_match_on_processedimage_type = ""
+                     v_initial_command_array = v_trigger_array[0].split("^") # 
+                     if v_initial_command_array.count > 1
+                        v_match_on_processedimage_type = v_initial_command_array[1]
+                     end
+                      v_trigger_array.drop(1).each do |trigpart|
+                         v_trigpart_array = trigpart.split("^")
+                         # trtype_id=8^tractiontype_id=202
+                         v_trigger_trtype_array = v_trigpart_array[0].split("=")
+                         v_trigger_traction_array = v_trigpart_array[1].split("=")
+                         sync_if_blank(@trfile.id,@trfile.enrollment_id,@trfile.scan_procedure_id,@trfile.secondary_key,v_trigger_trtype_array[1],v_trigger_traction_array[1],@tredit_action,ta.form_default_value,v_match_on_processedimage_type,"Y")
                       end
                   end
               end
@@ -613,7 +638,8 @@ v_composite_value = v_composite_value + "
     v_sync_tractiontypes.each do |ta|
       if !(ta.triggers_1).blank?
         v_trigger_array = (ta.triggers_1).split("|")
-        if v_trigger_array[0].start_with?("sync_if_blank_command") 
+        if v_trigger_array[0].start_with?("sync_if_blank_command")
+#puts "eeee onload sync_if_blank_command" 
            # get last tredit
            v_sync_tredit_actions = TreditAction.where("tredit_id in (?)",v_sync_last_tredit.id).where("tractiontype_id in (?)",ta.id)
            if !v_sync_tredit_actions.nil? and v_sync_tredit_actions.count> 0 and (v_sync_tredit_actions[0].value.blank? or v_sync_tredit_actions[0].value == ta.form_default_value)             
@@ -627,10 +653,28 @@ v_composite_value = v_composite_value + "
                          # trtype_id=8^tractiontype_id=202
                 v_trigger_trtype_array = v_trigpart_array[0].split("=")
                 v_trigger_traction_array = v_trigpart_array[1].split("=")
-                sync_if_blank_on_load(@trfile.id,@trfile.enrollment_id,@trfile.scan_procedure_id,@trfile.secondary_key,v_trigger_trtype_array[1],v_trigger_traction_array[1],v_sync_tredit_actions[0],ta.form_default_value,v_match_on_processedimage_type)
+                sync_if_blank_on_load(@trfile.id,@trfile.enrollment_id,@trfile.scan_procedure_id,@trfile.secondary_key,v_trigger_trtype_array[1],v_trigger_traction_array[1],v_sync_tredit_actions[0],ta.form_default_value,v_match_on_processedimage_type,"N")
               end
            end
-         end
+        elsif v_trigger_array[0].start_with?("sync_override_if_blank_command") # overwrite target values even when non-blank or non-default
+           # get last tredit
+#puts "ddddd onload sync_override_if_blank_command"
+           v_sync_tredit_actions = TreditAction.where("tredit_id in (?)",v_sync_last_tredit.id).where("tractiontype_id in (?)",ta.id)
+           if !v_sync_tredit_actions.nil? and v_sync_tredit_actions.count> 0 ## override and (v_sync_tredit_actions[0].value.blank? or v_sync_tredit_actions[0].value == ta.form_default_value)             
+              v_match_on_processedimage_type = ""
+              v_initial_command_array = v_trigger_array[0].split("^") # 
+              if v_initial_command_array.count > 1
+                 v_match_on_processedimage_type = v_initial_command_array[1]
+              end
+              v_trigger_array.drop(1).each do |trigpart|
+                v_trigpart_array = trigpart.split("^")
+                         # trtype_id=8^tractiontype_id=202
+                v_trigger_trtype_array = v_trigpart_array[0].split("=")
+                v_trigger_traction_array = v_trigpart_array[1].split("=")
+                sync_if_blank_on_load(@trfile.id,@trfile.enrollment_id,@trfile.scan_procedure_id,@trfile.secondary_key,v_trigger_trtype_array[1],v_trigger_traction_array[1],v_sync_tredit_actions[0],ta.form_default_value,v_match_on_processedimage_type,"Y")
+              end
+           end
+        end
       end
     end
 
