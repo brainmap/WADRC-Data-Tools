@@ -4539,7 +4539,7 @@ def  run_pet_pib_dvr_harvest
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
     sp_exclude_array = [54,56,57,95,55,76,78,72,70,71,99,81,75,83,92,93,88,68,97,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,42,44,51,96,9,25,23,19,15,24,36,100,35,73,32,6,12,16,13,11,90,59,63,43,4,17,74,98,101,102,103,108,110,111,112,113,114]
-    @scan_procedures = ScanProcedure.where("scan_procedures.id in (?)","26") #where("scan_procedures.id not in (?)", sp_exclude_array)
+    @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     # for testing
     ###@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
     @scan_procedures.each do |sp|
@@ -4564,7 +4564,7 @@ def  run_pet_pib_dvr_harvest
         v_subjectid_base_array = (sp.subjectid_base).split("-")   # pet sup - adrc-wrap 
         if v_subjectid_base_array.count > 1
             sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
-                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" and enrollments.enumber = 'pdt00113' 
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" 
                                     and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id 
                                     and ( "
              v_enum_cnt = 0
@@ -4578,7 +4578,7 @@ def  run_pet_pib_dvr_harvest
              sql_enum = sql_enum+") order by enrollments.enumber"
         else
            sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
-                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" and enrollments.enumber = 'pdt00113' 
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" 
                                     and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id 
                                     and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
         end
