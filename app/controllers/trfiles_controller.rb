@@ -64,12 +64,14 @@ class TrfilesController < ApplicationController
       end
   end
   # p_tredit_action.value is blank or default
+  # stopping overload- problem if the questions have not been synced from the beginning - a linked question has default or blank, the rated tracker with non default /non-blank values 
+  # gets opened, pull the blank/default values and loses the rated values
   def sync_if_blank_on_load(p_trfile_id,p_enrollment_id,p_scan_procedure_id,p_secondary_key,p_trtype_id,p_tractiontype_id,p_tredit_action,p_form_default_value,p_match_on_processedimage_type,p_run_no_matter_what)
 #puts "aaaaaaa in sync_if_blank_on_load"
       # p_run_no_matter_what == "Y" means sync even if there are non-blank or non-defulat values 
       v_run_no_matter_what = "N"
       if !p_run_no_matter_what.blank?
-        v_run_no_matter_what = p_run_no_matter_what
+     #### stopping sync on load to avoid losing values from questions which have not been synced from the beginning   v_run_no_matter_what = p_run_no_matter_what
       end
 
 
