@@ -5609,7 +5609,9 @@ def run_pet_pib_dvr_process
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
       v_exclude_sp_mri_array = [-1]
       v_exclude_sp_pet_array = [-1]
+      v_include_sp_pet_array= [77]
       v_today_date = Date.today 
+      v_computer = "kanga"
 
       @schedule = Schedule.where("name in ('pet_pib_dvr_process')").first
       @schedulerun = Schedulerun.new
@@ -5633,6 +5635,16 @@ def run_pet_pib_dvr_process
                   and petscans.appointment_id not in (select appointments.id from appointments, scan_procedures_vgroups
                   where appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
                   and scan_procedures_vgroups.scan_procedure_id in (?))",v_pib_tracer_id,v_exclude_sp_pet_array)
+
+          v_pib_petscans = Petscan.where("petscans.lookup_pettracer_id in (?) 
+                   and petscans.good_to_process_flag = 'Y'
+                   and petscans.appointment_id in 
+                     ( select appointments.id from appointments, vgroups 
+                        where appointments.vgroup_id = vgroups.id 
+                         and vgroups.transfer_pet in ('no','yes') )
+                  and petscans.appointment_id in (select appointments.id from appointments, scan_procedures_vgroups
+                  where appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
+                  and scan_procedures_vgroups.scan_procedure_id in (?))",v_pib_tracer_id,v_include_sp_pet_array)
       
     # get list of pib Petscans
     #check if has precprocessed codever 2a dir
@@ -5744,7 +5756,20 @@ def run_pet_pib_dvr_process
                        puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
                        # check for error log with tghis subject, tracer, dvr/suvr, date stamp
                        # send email to owner of failure
-                       v_call = v_pet_processing_wrapper+" --protocol "+v_scan_procedure.codename+" --brain "+v_subjectid+" --tracer PiB --method DVR"
+                      # v_call = v_pet_processing_wrapper+" --protocol "+v_scan_procedure.codename+" --brain "+v_subjectid+" --tracer PiB --method DVR"
+                       v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'  +v_pet_processing_wrapper+' --protocol "+v_scan_procedure.codename+" --brain "+v_subjectid+" --tracer PiB --method DVR "  '
+                       v_comment = v_comment + v_call+"\n"
+                             begin
+                               stdin, stdout, stderr = Open3.popen3(v_call)
+                               rescue => msg  
+                                  v_comment = v_comment + msg+"\n"  
+                             end
+                            # v_success ="N"
+                             while !stdout.eof?
+                                v_output = stdout.read 1024 
+                              #  v_comment = v_comment + v_output  
+                                puts v_output  
+                             end
                     end
               else
                 # no oacpc file in pet vgroup
