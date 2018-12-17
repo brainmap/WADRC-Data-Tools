@@ -5757,7 +5757,7 @@ def run_pet_pib_dvr_process
                        # check for error log with tghis subject, tracer, dvr/suvr, date stamp
                        # send email to owner of failure
                       # v_call = v_pet_processing_wrapper+" --protocol "+v_scan_procedure.codename+" --brain "+v_subjectid+" --tracer PiB --method DVR"
-                       v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'  +v_pet_processing_wrapper+' --protocol "+v_scan_procedure.codename+" --brain "+v_subjectid+" --tracer PiB --method DVR "  '
+                       v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer PiB --method DVR "  '
                        v_comment = v_comment + v_call+"\n"
                        @schedulerun.comment = v_comment
                        @schedulerun.save
