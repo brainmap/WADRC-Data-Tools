@@ -3663,7 +3663,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                      v_processesimages = Processedimage.where("file_path in (?)",v_multispectral_file )
                      if v_processesimages.count <1
                                       # need to collect source files, then make processedimage record
-                         vv_multispectral_file_name = v_multispectral_file.split("/").last
+                         v_multispectral_file_name = v_multispectral_file.split("/").last
                          v_processedimage = Processedimage.new
                          v_processedimage.file_type ="multispectral mri"
                          v_processedimage.file_name = v_multispectral_file_name
@@ -5000,7 +5000,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                      v_processesimages = Processedimage.where("file_path in (?)",v_multispectral_file )
                      if v_processesimages.count <1
                                       # need to collect source files, then make processedimage record
-                         vv_multispectral_file_name = v_multispectral_file.split("/").last
+                         v_multispectral_file_name = v_multispectral_file.split("/").last
                          v_processedimage = Processedimage.new
                          v_processedimage.file_type ="multispectral mri"
                          v_processedimage.file_name = v_multispectral_file_name
@@ -6322,7 +6322,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                      v_processesimages = Processedimage.where("file_path in (?)",v_multispectral_file )
                      if v_processesimages.count <1
                                       # need to collect source files, then make processedimage record
-                         vv_multispectral_file_name = v_multispectral_file.split("/").last
+                         v_multispectral_file_name = v_multispectral_file.split("/").last
                          v_processedimage = Processedimage.new
                          v_processedimage.file_type ="multispectral mri"
                          v_processedimage.file_name = v_multispectral_file_name
