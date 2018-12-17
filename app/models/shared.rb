@@ -5626,6 +5626,17 @@ def run_pet_pib_dvr_process
     connection = ActiveRecord::Base.connection();
                # and id in (1737,1735,1717,1711) ones with no mri
       # get list of petscans - exclude some studies, exclude vgroups.transfer_pet = n/a
+      # for testing
+      v_pib_petscans = Petscan.where("petscans.lookup_pettracer_id in (?) 
+                   and petscans.good_to_process_flag = 'Y'
+                   and petscans.appointment_id in 
+                     ( select appointments.id from appointments, vgroups 
+                        where appointments.vgroup_id = vgroups.id 
+                         and vgroups.transfer_pet in ('no','yes') )
+                  and petscans.appointment_id in (select appointments.id from appointments, scan_procedures_vgroups
+                  where appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
+                  and scan_procedures_vgroups.scan_procedure_id in (?))",v_pib_tracer_id,v_include_sp_pet_array)
+
       v_pib_petscans = Petscan.where("petscans.lookup_pettracer_id in (?) 
                    and petscans.good_to_process_flag = 'Y'
                    and petscans.appointment_id in 
@@ -5636,15 +5647,6 @@ def run_pet_pib_dvr_process
                   where appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
                   and scan_procedures_vgroups.scan_procedure_id in (?))",v_pib_tracer_id,v_exclude_sp_pet_array)
 
-          v_pib_petscans = Petscan.where("petscans.lookup_pettracer_id in (?) 
-                   and petscans.good_to_process_flag = 'Y'
-                   and petscans.appointment_id in 
-                     ( select appointments.id from appointments, vgroups 
-                        where appointments.vgroup_id = vgroups.id 
-                         and vgroups.transfer_pet in ('no','yes') )
-                  and petscans.appointment_id in (select appointments.id from appointments, scan_procedures_vgroups
-                  where appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
-                  and scan_procedures_vgroups.scan_procedure_id in (?))",v_pib_tracer_id,v_include_sp_pet_array)
       
     # get list of pib Petscans
     #check if has precprocessed codever 2a dir
