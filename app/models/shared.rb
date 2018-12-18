@@ -5601,6 +5601,8 @@ def run_pet_pib_dvr_process
       v_error_log_path = v_base_path+"/preprocessed/logs/failed_pet/"
       # error format. <sp>_<subjectid>_pet-processing-log_<dd ? d>-<Mon>-<yyyy>_pib_dvr.csv
       v_pib_path = "/pet/pib/dvr/code_ver2b"
+      v_log_file_name = "_panda-log_pib_dvr_"
+      v_code_version = "2b"
       v_pib_tracer_id = "1"
       v_days_mri_pet_diff_limit = "730"
       v_days_before_use_other_vgroup_mri = "5"
@@ -5700,6 +5702,7 @@ def run_pet_pib_dvr_process
             # how to exclude old pdt scans
             # get study and enum from path - not sure how secondary keys will play out
              v_scan_procedure_codename = v_pet_path_array[4] # leading slash shifts register
+
              v_subjectid_array = v_pet_path_array[7].split("_")
              v_subjectid = v_subjectid_array[0].downcase
              #check if enumber and scan_procedure are valid
@@ -5763,17 +5766,31 @@ def run_pet_pib_dvr_process
                        v_comment = v_comment + v_call+"\n"
                        @schedulerun.comment = v_comment
                        @schedulerun.save
-                             begin
-                               stdin, stdout, stderr = Open3.popen3(v_call)
-                               rescue => msg  
-                                  v_comment = v_comment + msg+"\n"  
-                             end
+                       begin
+                        stdin, stdout, stderr = Open3.popen3(v_call)
+                        rescue => msg  
+                          v_comment = v_comment + msg+"\n"  
+                       end
                             # v_success ="N"
-                             while !stdout.eof?
-                                v_output = stdout.read 1024 
+                       while !stdout.eof?
+                         v_output = stdout.read 1024 
                               #  v_comment = v_comment + v_output  
-                                puts v_output  
-                             end
+                          puts v_output  
+                        end
+                       # check for panda-log - last thing made 
+                       # add to warning comment if not there ===> ERROR
+                      
+                       v_preprocessed_full_path = v_preprocessed_path+v_scan_procedure.codename
+                       v_codename_hyphen =  v_scan_procedure.codename
+                       v_codename_hyphen = v_codename_hyphen.gsub(".","-")
+                       v_subjectid_path = v_preprocessed_full_path+"/"+v_subjectid
+                       v_subjectid_pet_pib =v_subjectid_path+v_pib_path
+                       v_subjectid_log_file_name = v_subjectid_pet_pib+v_subjectid+v_log_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
+                       if !File.file?(v_subjectid_log_file_name)
+                         v_comment_warning = v_comment_warning+" ERROR "+v_call
+                       end
+
+
                     end
               else
                 # no oacpc file in pet vgroup
@@ -5839,8 +5856,8 @@ def run_pet_pib_dvr_process
       end
 
 
-    @schedulerun.comment =("successful finish pet_pib_dvr_process "+v_comment_warning+" "+v_comment[0..1990])
-    if !v_comment.include?("ERROR")
+    @schedulerun.comment =("successful finish pet_pib_dvr_process "+v_comment_warning+" "+v_comment[0..2990])
+    if !v_comment.include?("ERROR") and !v_comment_warning.include?("ERROR")
        @schedulerun.status_flag ="Y"
      end
      @schedulerun.save
@@ -6935,13 +6952,17 @@ def run_pet_pib_suvr_process
       v_error_log_path = v_base_path+"/preprocessed/logs/failed_pet/"
       # error format. <sp>_<subjectid>_pet-processing-log_<dd ? d>-<Mon>-<yyyy>_pib_suvr.csv
       v_pib_path = "/pet/pib/suvr/code_ver2b"
+      v_log_file_name = "_panda-log_pib_dvr_"
+      v_code_version = "2b"
       v_pib_tracer_id = "1"
+      v_pet_processing_wrapper = v_base_path+"/data1/lab_scripts/process_pet_wrapper.sh"
       v_days_mri_pet_diff_limit = "730"
       v_days_before_use_other_vgroup_mri = "5"
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
       v_exclude_sp_mri_array = [-1]
       v_exclude_sp_pet_array = [-1]
       v_today_date = Date.today 
+      v_computer = "kanga"
 
       @schedule = Schedule.where("name in ('pet_pib_suvr_process')").first
       @schedulerun = Schedulerun.new
@@ -7067,6 +7088,39 @@ puts "v_participant.id="+v_participant.id.to_s
                        puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
                        # check for error log with tghis subject, tracer, dvr/suvr, date stamp
                        # send email to owner of failure
+                       # check for error log with tghis subject, tracer, dvr/suvr, date stamp
+                       # send email to owner of failure
+                      # v_call = v_pet_processing_wrapper+" --protocol "+v_scan_procedure.codename+" --brain "+v_subjectid+" --tracer PiB --method DVR"
+                       v_uptake_duration = "SOME VALUE"
+                       v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer PiB --method SUVR --uptake_duration '+v_uptake_duration
+          puts " v_call="+v_call             
+                       v_comment = v_comment + v_call+"\n"
+                       @schedulerun.comment = v_comment
+                       @schedulerun.save
+                       v_call = "date" # skipping doing anything
+                       begin
+                        stdin, stdout, stderr = Open3.popen3(v_call)
+                        rescue => msg  
+                          v_comment = v_comment + msg+"\n"  
+                       end
+                            # v_success ="N"
+                       while !stdout.eof?
+                         v_output = stdout.read 1024 
+                              #  v_comment = v_comment + v_output  
+                          puts v_output  
+                        end
+                       # check for panda-log - last thing made 
+                       # add to warning comment if not there ===> ERROR
+                      
+                       v_preprocessed_full_path = v_preprocessed_path+v_scan_procedure.codename
+                       v_codename_hyphen =  v_scan_procedure.codename
+                       v_codename_hyphen = v_codename_hyphen.gsub(".","-")
+                       v_subjectid_path = v_preprocessed_full_path+"/"+v_subjectid
+                       v_subjectid_pet_pib =v_subjectid_path+v_pib_path
+                       v_subjectid_log_file_name = v_subjectid_pet_pib+v_subjectid+v_log_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
+                       if !File.file?(v_subjectid_log_file_name)
+                    ####     v_comment_warning = v_comment_warning+" ERROR "+v_call
+                       end
                     end
               else
                 # no oacpc file in pet vgroup
@@ -13341,6 +13395,7 @@ puts "end of ids loop"
          run_pcvipr_output_file_base("rerun_if_no_output")
   end
 
+  # add datetime to db column -- to trigger csv maker
   def run_pcvipr_output_file_base(p_output_log_rm)
          v_base_path = Shared.get_base_path()
          @schedule = Schedule.where("name in ('pcvipr_output_file')").first
@@ -13489,7 +13544,7 @@ puts "end of ids loop"
        @schedulerun.save
 
   end
-
+# check for [pcVIPR data collection successfull!] in *_output.csv.log
   def run_pcvipr_output_file_harvest
           v_base_path = Shared.get_base_path()
          @schedule = Schedule.where("name in ('pcvipr_output_file_harvest')").first
