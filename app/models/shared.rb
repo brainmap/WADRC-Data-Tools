@@ -3089,7 +3089,7 @@ puts v_av1451_petfiles.first.path
                     if v_cnt > 1
                       v_pet_path_ok = "N"
                       v_comment = v_subjectid+" multiple o_acpc in unknown;"+v_comment
-                    else
+                    elsif v_cnt > 0
                        # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
                        v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
                        puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
@@ -4379,21 +4379,22 @@ puts "v_participant.id="+v_participant.id.to_s
                     if v_cnt > 1
                       v_pet_path_ok = "N"
                       v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in unknown:"
-                    else
+                    elsif v_cnt > 0
                        # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
                       #v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
                        puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
                        # check for error log with tghis subject, tracer, dvr/suvr, date stamp
                        # send email to owner of failure
                        v_uptake_duration = ((pet_appt.scanstarttime - pet_appt.injecttiontime)/60).floor
-          puts "pet_appt.scanstarttime="+pet_appt.scanstarttime.to_s
-          puts "pet_appt.injecttiontime="+pet_appt.injecttiontime.to_s
-                       v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer PiB --method SUVR --uptake_duration '+v_uptake_duration.to_s+' "'
-          puts " v_call="+v_call             
+                       # surprised minus worked
+                       #puts "pet_appt.scanstarttime="+pet_appt.scanstarttime.to_s
+                       #puts "pet_appt.injecttiontime="+pet_appt.injecttiontime.to_s
+                       v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer MK6240 --method SUVR --uptake '+v_uptake_duration.to_s+' "'
+                        #puts " v_call="+v_call             
                        v_comment = v_comment + v_call+"\n"
                        @schedulerun.comment = v_comment
                        @schedulerun.save
-                       v_call = "date" # skipping doing anything
+                       #v_call = "date" # skipping doing anything
                        begin
                         stdin, stdout, stderr = Open3.popen3(v_call)
                         rescue => msg  
@@ -5792,7 +5793,7 @@ def run_pet_pib_dvr_process
                       # multiple oacpc files - need to make choice, can't auto run procesing
                       v_pet_path_ok = "N"
                       v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in unknown:"
-                    else
+                    elsif v_cnt > 0
                        # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
                        v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
                        puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
@@ -7119,7 +7120,7 @@ puts "v_participant.id="+v_participant.id.to_s
                     if v_cnt > 1
                       v_pet_path_ok = "N"
                       v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in unknown:"
-                    else
+                    elsif v_cnt > 0
                        # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
                       v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
                      #  puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
@@ -7129,7 +7130,7 @@ puts "v_participant.id="+v_participant.id.to_s
                        # send email to owner of failure
                       # v_call = v_pet_processing_wrapper+" --protocol "+v_scan_procedure.codename+" --brain "+v_subjectid+" --tracer PiB --method DVR"
                        v_uptake_duration = pet_appt.range
-                       v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer PiB --method SUVR --uptake_duration '+v_uptake_duration+' "'
+                       v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer PiB --method SUVR --uptake '+v_uptake_duration+' "'
           puts " v_call="+v_call             
                        v_comment = v_comment + v_call+"\n"
                        @schedulerun.comment = v_comment
