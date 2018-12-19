@@ -4389,34 +4389,38 @@ puts "v_participant.id="+v_participant.id.to_s
                        # surprised minus worked
                        #puts "pet_appt.scanstarttime="+pet_appt.scanstarttime.to_s
                        #puts "pet_appt.injecttiontime="+pet_appt.injecttiontime.to_s
-                       v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer MK6240 --method SUVR --uptake '+v_uptake_duration.to_s+' "'
+                       if (v_uptake_duration.to_i).between?(65,75)
+                         v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer MK6240 --method SUVR --uptake '+v_uptake_duration.to_s+' "'
                         #puts " v_call="+v_call             
-                       v_comment = v_comment + v_call+"\n"
-                       @schedulerun.comment = v_comment
-                       @schedulerun.save
-                       #v_call = "date" # skipping doing anything
-                       begin
-                        stdin, stdout, stderr = Open3.popen3(v_call)
-                        rescue => msg  
-                          v_comment = v_comment + msg+"\n"  
-                       end
+                         v_comment = v_comment + v_call+"\n"
+                         @schedulerun.comment = v_comment
+                         @schedulerun.save
+                         #v_call = "date" # skipping doing anything
+                         begin
+                          stdin, stdout, stderr = Open3.popen3(v_call)
+                          rescue => msg  
+                            v_comment = v_comment + msg+"\n"  
+                         end
                             # v_success ="N"
-                       while !stdout.eof?
-                         v_output = stdout.read 1024 
+                         while !stdout.eof?
+                           v_output = stdout.read 1024 
                               #  v_comment = v_comment + v_output  
-                          puts v_output  
-                        end
+                           puts v_output  
+                         end
                        # check for panda-log - last thing made 
                        # add to warning comment if not there ===> ERROR
                       
-                       v_preprocessed_full_path = v_preprocessed_path+v_scan_procedure.codename
-                       v_codename_hyphen =  v_scan_procedure.codename
-                       v_codename_hyphen = v_codename_hyphen.gsub(".","-")
-                       v_subjectid_path = v_preprocessed_full_path+"/"+v_subjectid
-                       v_subjectid_pet_mk6240 =v_subjectid_path+v_mk6240_path
-                       v_subjectid_log_file_name = v_subjectid_pet_mk6240+v_subjectid+v_log_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
-                       if !File.file?(v_subjectid_log_file_name)
-                    ####     v_comment_warning = v_comment_warning+" ERROR "+v_call
+                         v_preprocessed_full_path = v_preprocessed_path+v_scan_procedure.codename
+                         v_codename_hyphen =  v_scan_procedure.codename
+                         v_codename_hyphen = v_codename_hyphen.gsub(".","-")
+                         v_subjectid_path = v_preprocessed_full_path+"/"+v_subjectid
+                         v_subjectid_pet_mk6240 =v_subjectid_path+v_mk6240_path
+                         v_subjectid_log_file_name = v_subjectid_pet_mk6240+v_subjectid+v_log_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
+                         if !File.file?(v_subjectid_log_file_name)
+                           v_comment_warning = v_comment_warning+" ERROR "+v_call
+                         end
+                       else
+                         v_comment_warning = v_comment_warning+" ERROR bad uptake duration "+v_scan_procedure.codename+' --brain '+v_subjectid
                        end
                     end
               else
@@ -7122,27 +7126,33 @@ puts "v_participant.id="+v_participant.id.to_s
                       v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in unknown:"
                     elsif v_cnt > 0
                        # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
-                      v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
+                      #v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
                      #  puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
                        # check for error log with tghis subject, tracer, dvr/suvr, date stamp
                        # send email to owner of failure
                        # check for error log with tghis subject, tracer, dvr/suvr, date stamp
                        # send email to owner of failure
                       # v_call = v_pet_processing_wrapper+" --protocol "+v_scan_procedure.codename+" --brain "+v_subjectid+" --tracer PiB --method DVR"
-                       v_uptake_duration = pet_appt.range
-                       v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer PiB --method SUVR --uptake '+v_uptake_duration+' "'
+                       v_uptake_duration = ((pet_appt.scanstarttime - pet_appt.injecttiontime)/60).floor
+                       # surprised minus worked
+                       #puts "pet_appt.scanstarttime="+pet_appt.scanstarttime.to_s
+                       #puts "pet_appt.injecttiontime="+pet_appt.injecttiontime.to_s
+                       # pib scan should be the same time as the injecvtion time
+                      if v_uptake_duration.to_i == 0
+
+                        v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer PiB --method SUVR --uptake '+v_uptake_duration.to_s+' "'
           puts " v_call="+v_call             
-                       v_comment = v_comment + v_call+"\n"
-                       @schedulerun.comment = v_comment
-                       @schedulerun.save
-                       v_call = "date" # skipping doing anything
-                       begin
-                        stdin, stdout, stderr = Open3.popen3(v_call)
-                        rescue => msg  
+                        v_comment = v_comment + v_call+"\n"
+                        @schedulerun.comment = v_comment
+                        @schedulerun.save
+                        v_call = "date" # skipping doing anything
+                        begin
+                         stdin, stdout, stderr = Open3.popen3(v_call)
+                         rescue => msg  
                           v_comment = v_comment + msg+"\n"  
-                       end
+                        end
                             # v_success ="N"
-                       while !stdout.eof?
+                        while !stdout.eof?
                          v_output = stdout.read 1024 
                               #  v_comment = v_comment + v_output  
                           puts v_output  
@@ -7157,8 +7167,11 @@ puts "v_participant.id="+v_participant.id.to_s
                        v_subjectid_pet_pib =v_subjectid_path+v_pib_path
                        v_subjectid_log_file_name = v_subjectid_pet_pib+v_subjectid+v_log_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
                        if !File.file?(v_subjectid_log_file_name)
-                    ####     v_comment_warning = v_comment_warning+" ERROR "+v_call
+                         v_comment_warning = v_comment_warning+" ERROR "+v_call
                        end
+                      else
+                         v_comment_warning = v_comment_warning+" ERROR bad uptake duration "+v_scan_procedure.codename+' --brain '+v_subjectid
+                      end
                     end
               else
                 # no oacpc file in pet vgroup
@@ -7222,7 +7235,7 @@ puts "v_participant.id="+v_participant.id.to_s
       end
 
 
-    @schedulerun.comment =("successful finish pet_pib_suvr_process "+v_comment_warning+" "+v_comment[0..2990])
+    @schedulerun.comment =("successful finish pet_pib_suvr_process "+v_comment_warning+" "+v_comment) #[0..2990])
     if !v_comment.include?("ERROR")
        @schedulerun.status_flag ="Y"
      end
