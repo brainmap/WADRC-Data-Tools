@@ -645,6 +645,32 @@ class PetscansController < ApplicationController
      end 
           results_sp.each do |r_sp|
                if !params[:petfile].blank? and !params[:petfile][:petfile_autodetect].blank? and params[:petfile][:petfile_autodetect] == "On"
+                        @petfiles_dicoms_found_array = @petscan.get_pet_dicoms(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
+                        @petfile_header = nil
+                        if !@petfiles_dicoms_found_array.nil? and !@petfiles_dicoms_found_array[0].nil? and !@petfiles_dicoms_found_array[1].nil?
+                           @petfile_header = @petfiles_dicoms_found_array[1]
+                           # what to do with dicom header
+                           # GE vs Siemans machine
+                           petfile_dicom_dir = File.dirname(@petfiles_dicoms_found_array[0])
+                           v_petfile_check = Petfile.where("file_name in (?) and petscan_id in (?)", petfile_dicom_dir.to_s,@petscan.id)
+                            if !v_petfile_check.nil? and v_petfile_check.length > 0
+                                 v_petfile_check.each do |pf_check|
+                                    if pf_check.path.blank? and !v_path.blank?
+                                       pf_check.path = v_path
+                                       pf_check.save
+                                    end
+                                 end
+                            else
+                              v_new_petfile = Petfile.new
+                              v_new_petfile.petscan_id = @petscan.id
+                              v_new_petfile.file_name = ""
+                              v_new_petfile.path =  petfile_dicom_dir.to_s
+                              v_new_petfile.save
+                            end
+                        end
+
+
+
                         @petfiles_found = @petscan.get_pet_files(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
                         @petfiles_found.each do |pf_name|  # make sure not already in database with this petscan.id
                             v_petfile_check = Petfile.where("file_name in (?) and petscan_id in (?)", pf_name,@petscan.id)
@@ -850,6 +876,30 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
         results_sp = connection.execute(sql_sp)  
         results_sp.each do |r_sp|
                if !params[:petfile].blank? and !params[:petfile][:petfile_autodetect].blank? and params[:petfile][:petfile_autodetect] == "On"
+                        @petfiles_dicoms_found_array = @petscan.get_pet_dicoms(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
+                        @petfile_header = nil
+                        if !@petfiles_dicoms_found_array.nil? and !@petfiles_dicoms_found_array[0].nil? and !@petfiles_dicoms_found_array[1].nil?
+                           @petfile_header = @petfiles_dicoms_found_array[1]
+                           # what to do with dicom header
+                           # GE vs Siemans machine
+                           petfile_dicom_dir = File.dirname(@petfiles_dicoms_found_array[0])
+                           v_petfile_check = Petfile.where("file_name in (?) and petscan_id in (?)", petfile_dicom_dir.to_s,@petscan.id)
+                            if !v_petfile_check.nil? and v_petfile_check.length > 0
+                                 v_petfile_check.each do |pf_check|
+                                    if pf_check.path.blank? and !v_path.blank?
+                                       pf_check.path = v_path
+                                       pf_check.save
+                                    end
+                                 end
+                            else
+                              v_new_petfile = Petfile.new
+                              v_new_petfile.petscan_id = @petscan.id
+                              v_new_petfile.file_name = ""
+                              v_new_petfile.path =  petfile_dicom_dir.to_s
+                              v_new_petfile.save
+                            end
+                        end
+                
                         @petfiles_found = @petscan.get_pet_files(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
                         @petfiles_found.each do |pf_name|  # make sure not already in database with this petscan.id
                             v_petfile_check = Petfile.where("file_name in (?) and petscan_id in (?)", pf_name,@petscan.id)

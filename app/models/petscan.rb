@@ -1,3 +1,4 @@
+require 'tmpdir'
 class Petscan < ActiveRecord::Base
   belongs_to :appointment 
   has_many :petfiles,:class_name =>"Petfile", :dependent => :destroy  
@@ -117,6 +118,132 @@ class Petscan < ActiveRecord::Base
     end
     return v_file_name
   end
+
+  def get_pet_dicoms(p_sp_id, p_tracer_id, p_vgroup_id)
+
+    v_base_path = Shared.get_base_path()
+    v_sp = ScanProcedure.find(p_sp_id)
+    v_pet_target_path = ""
+    if !v_sp.petscan_tracer_path.blank?
+      v_tracer_path_array = v_sp.petscan_tracer_path.split("|")
+      v_tracer_path_array.each do |tr|
+        v_tracer_path = tr.split(":")
+        if v_tracer_path[0] == p_tracer_id.to_s
+            v_pet_target_path = v_tracer_path[1]
+        end
+      end
+    end
+    #v_key = p_tracer_id.to_s+"_"+v_sp.codename
+    v_directory_names = []
+    if !v_pet_target_path.blank? #v_pet_target_hash[v_key].blank?
+        v_path = v_base_path+"/raw/"+v_pet_target_path+"/" #v_pet_target_hash[v_key]+"/"
+        # check for file with enum 
+        vgroup = Vgroup.find(p_vgroup_id)
+        (vgroup.enrollments).each do |e|   # need case insensitive match 
+          # adcp#### needs to be adcp_##### for pattern match
+          v_enumber = e.enumber
+          if (e.enumber).start_with? "adcp"
+               v_enumber = v_enumber.gsub("_","")
+               v_last_four_chars = (e.enumber)[-4..-1]
+               if !v_last_four_chars.include? "_" and  v_last_four_chars =~ /^[0-9]+$/ 
+                      e.enumber = "adcp_"+v_last_four_chars #in the file name but not in the pet/enumber dir
+                      v_enumber = e.enumber.gsub("_","")
+              end
+          end
+          # check for dicoms
+          v_check_path = v_path+v_enumber+"/dicoms/"
+          if Dir.exist?(v_check_path)
+            # look for I*.dcm* 
+            # if not find look for dicoms another level down
+             # look for I*.dcm*  in sub folder
+            Dir.glob(v_check_path+"*").select {|f| 
+              Dir.glob(f+"/*").each do |leaf|
+              branch = leaf
+              if leaf.to_s =~ /^I\..*(\.bz2)?$|\.dcm(\.bz2)?$|\.[0-9]{2,}(\.bz2)?$/
+                lc = local_copy(leaf)
+                # path to copy of dcm in /tmp
+                # read dicom header
+               puts "ggggg dcm path local="+lc.to_s
+               header = DICOM::DObject.read(lc.to_s)
+    #puts "header="+header.to_s
+
+                begin
+                  yield lc
+                rescue Exception => e
+                  puts "#{e}"
+                ensure
+                lc.delete
+                end
+                return leaf,header
+              end 
+       
+             end
+
+            }
+              
+            
+
+
+          end
+        end
+    else
+        #puts "AAAAAAAAA "+v_key+"   no path for sp in hash"
+    end
+    return v_directory_names
+  end
+  # from metamri core_additions
+  def first_dicom
+    entries.each do |leaf|
+      branch = self + leaf
+      if leaf.to_s =~ /^I\..*(\.bz2)?$|\.dcm(\.bz2)?$|\.[0-9]{2,}(\.bz2)?$/
+        lc = branch.local_copy
+        begin
+          yield lc
+        rescue Exception => e
+          puts "#{e}"
+        ensure
+          lc.delete
+        end
+        return
+      end 
+    end
+  end
+
+   # from metamri core_additions
+  # Creates a local, unzipped copy of a file for use in scanning.
+  # Will return a pathname to the local copy if called directly, or can also be 
+  # passed a block.  If it is passed a block, it will create the local copy
+  # and ensure the local copy is deleted.
+  def local_copy(p_source_file, tempdir = Dir.mktmpdir, &block)
+    tfbase = p_source_file
+    tfbase = p_source_file.to_s =~ /\.bz2$/ ? File.basename(p_source_file).to_s.chomp(".bz2") : File.basename(p_source_file).to_s
+    tfbase.escape_filename
+    tmpfile = File.join(tempdir, tfbase)
+     puts "tmpfile="+tmpfile
+    # puts File.exist?(tmpfile)
+    File.delete(tmpfile) if File.exist?(tmpfile)
+    if p_source_file.to_s =~ /\.bz2$/
+      `bunzip2 -k -c '#{p_source_file.to_s}' >> '#{tmpfile}'`
+    else
+      FileUtils.cp(p_source_file.to_s, tmpfile)
+    end
+
+    lc = Pathname.new(tmpfile)
+    
+    if block
+      begin
+        yield lc
+      ensure
+        lc.delete
+      end
+
+    else
+      return lc
+    end
+  end
+
+  
+
   # MORE THAN ONE FILE!!!!!!
   def get_pet_files(p_sp_id, p_tracer_id, p_vgroup_id)
     # ???? '1_asthana.adrc-clinical-core.visit1'=>'', '2_bendlin.tami.visit1'=>'', '1_bendlin.wmad.visit1'=>'','1_bendlin.mets.visit1'=> '',    '2_bendlin.mets.visit1'=> ''
@@ -152,6 +279,13 @@ class Petscan < ActiveRecord::Base
           end
 
           # checking first for the enum dir in path, then the puddle of files
+          # add the dicom petfile detection
+          # only in subject_directory - maybe with the exam number/date for adni and adcp?
+          # dicoms/<scan_series_number>/I####.dcm.bz2
+          # bunzip2 into tmp - how does metmri read bunzip2 and dicoms - do it the same way without using metamri
+          # add a petscans_file dicom headewr blob
+          # display at the petscan file level
+          # populate as many fields as possible
           if !Dir.glob(v_path+v_enumber+"/"+e.enumber+"*", File::FNM_CASEFOLD).empty?   or !Dir.glob(v_path+v_enumber+"/"+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).empty?
             v_cnt = 0
             Dir.glob(v_path+v_enumber+"/"+e.enumber+"*", File::FNM_CASEFOLD).each do |f|
