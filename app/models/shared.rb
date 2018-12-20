@@ -2433,7 +2433,7 @@ def  run_pet_av1451_harvest
                        @trfile.enrollment_id = v_enrollment_id
                        @trfile.scan_procedure_id = v_sp_id
                        @trfile.trtype_id = v_trtype_id
-        
+                       @trfile.qc_value = "New Record"
                        @trfile.qc_notes = "autoinsert by panda "
                        @trfile.save
                        # NEED processedimage @trfile.image_dataset_id = v_ids_id
@@ -3718,7 +3718,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                        @trfile.enrollment_id = v_enrollment_id
                        @trfile.scan_procedure_id = v_sp_id
                        @trfile.trtype_id = v_trtype_id
-        
+                       @trfile.qc_value = "New Record"
                        @trfile.qc_notes = "autoinsert by panda "
                        @trfile.save
                        # NEED processedimage @trfile.image_dataset_id = v_ids_id
@@ -5097,7 +5097,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                        @trfile.enrollment_id = v_enrollment_id
                        @trfile.scan_procedure_id = v_sp_id
                        @trfile.trtype_id = v_trtype_id
-        
+                       @trfile.qc_value = "New Record"
                        @trfile.qc_notes = "autoinsert by panda "
                        @trfile.save
                        # NEED processedimage @trfile.image_dataset_id = v_ids_id
@@ -6465,7 +6465,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                        @trfile.enrollment_id = v_enrollment_id
                        @trfile.scan_procedure_id = v_sp_id
                        @trfile.trtype_id = v_trtype_id
-        
+                       @trfile.qc_value = "New Record"
                        @trfile.qc_notes = "autoinsert by panda "
                        @trfile.save
                        # NEED processedimage @trfile.image_dataset_id = v_ids_id
@@ -7145,7 +7145,7 @@ puts "v_participant.id="+v_participant.id.to_s
                         v_comment = v_comment + v_call+"\n"
                         @schedulerun.comment = v_comment
                         @schedulerun.save
-                        v_call = "date" # skipping doing anything
+                      #  v_call = "date" # skipping doing anything
                         begin
                          stdin, stdout, stderr = Open3.popen3(v_call)
                          rescue => msg  
@@ -8274,7 +8274,7 @@ def run_sleep_t1
                                   @trfile.enrollment_id = enrollment[0].id
                                   @trfile.scan_procedure_id = sp.id
                                   @trfile.trtype_id = v_tissueseg_trtype_id
-        
+                                  @trfile.qc_value = "New Record"
                                   @trfile.qc_notes = "autoinsert by panda "
                                   if !v_secondary_key.blank?
                                      @trfile.secondary_key = v_secondary_key
@@ -12372,6 +12372,7 @@ puts "AAAAAAA="+v_log
                       @trfile.enrollment_id = enrollment[0].id
                       @trfile.scan_procedure_id = sp.id
                       @trfile.trtype_id = v_trtype_id
+                      @trfile.qc_value = "New Record"
                       if v_error_in_log == "Y"
                           @trfile.qc_notes = "Error in log "
                        end
@@ -13263,6 +13264,7 @@ puts sql
                   @trfile.trtype_id = v_trtype_id
                   @trfile.image_dataset_id = v_ids_id
                   @trfile.qc_notes = "autorun recon by panda "
+                  @trfile.qc_value = "New Record"
                   @trfile.save
                   @tredit = Tredit.new
                   @tredit.trfile_id = @trfile.id
@@ -13308,6 +13310,7 @@ puts sql
                   @trfile.scan_procedure_id = v_sp_id
                   @trfile.trtype_id = v_trtype_id
                   @trfile.image_dataset_id = v_ids_id
+                  @trfile.qc_value = "New Record"
                   @trfile.qc_notes = "scan archive - need to run recon with new version"
                   @trfile.save
                   @tredit = Tredit.new
@@ -16004,7 +16007,7 @@ puts "v_analyses_path="+v_analyses_path
                                                 @trfile.enrollment_id = enrollment[0].id
                                                 @trfile.scan_procedure_id = sp.id
                                                 @trfile.trtype_id = v_fsl_first_trtype_id
-        
+                                                @trfile.qc_value = "New Record"
                                                 @trfile.qc_notes = "autoinsert by panda "
                                                 @trfile.save
                                                # NEED processedimage @trfile.image_dataset_id = v_ids_id
@@ -16228,7 +16231,7 @@ puts "v_analyses_path="+v_analyses_path
                                                 @trfile.enrollment_id = enrollment[0].id
                                                 @trfile.scan_procedure_id = sp.id
                                                 @trfile.trtype_id = v_fsl_first_trtype_id
-        
+                                                @trfile.qc_value = "New Record"
                                                 @trfile.qc_notes = "autoinsert by panda "
                                                 if !v_secondary_key.blank?
                                                    @trfile.secondary_key = v_secondary_key

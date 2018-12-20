@@ -1,7 +1,7 @@
 <% if @hide_page_flag == "Y" 
   else %>
 <%  v_y_n = {"Y"=>"Y","N"=>"N"}  
- v_p_p_f = {"Pass"=>"Pass","Partial"=>"Partial","Fail"=>"Fail","Reprocessed"=>"Reprocessed"} %> 
+ v_p_p_f = {"Pass"=>"Pass","Partial"=>"Partial","Fail"=>"Fail","Reprocessed"=>"Reprocessed","New Record"=>"New Record"} %> 
 <small><%= link_to 'View File List/Home' ,"/trtype_home/"+(@trfile.trtype_id).to_s %></small> |  
 <small><%= link_to 'View File '+@v_action_name.humanize+' List' ,"/tredit_home/"+(@trfile.trtype_id).to_s %></small> | 
  <small><%= link_to "Add "+@v_action_name,"/trfile_home/"+(@trfile.trtype_id).to_s+"?trfile_action=add_edit&trfile_id="+(@trfile.id).to_s,{:style=>'color:#000000;'} %></small>
