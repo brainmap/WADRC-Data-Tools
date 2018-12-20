@@ -4414,7 +4414,7 @@ puts "v_participant.id="+v_participant.id.to_s
                          v_codename_hyphen =  v_scan_procedure.codename
                          v_codename_hyphen = v_codename_hyphen.gsub(".","-")
                          v_subjectid_path = v_preprocessed_full_path+"/"+v_subjectid
-                         v_subjectid_pet_mk6240 =v_subjectid_path+v_mk6240_path
+                         v_subjectid_pet_mk6240 =v_subjectid_path+v_mk6240_path+"/"
                          v_subjectid_log_file_name = v_subjectid_pet_mk6240+v_subjectid+v_log_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
                          if !File.file?(v_subjectid_log_file_name)
                            v_comment_warning = v_comment_warning+" ERROR "+v_call
@@ -5826,7 +5826,7 @@ def run_pet_pib_dvr_process
                        v_codename_hyphen =  v_scan_procedure.codename
                        v_codename_hyphen = v_codename_hyphen.gsub(".","-")
                        v_subjectid_path = v_preprocessed_full_path+"/"+v_subjectid
-                       v_subjectid_pet_pib =v_subjectid_path+v_pib_path
+                       v_subjectid_pet_pib =v_subjectid_path+v_pib_path+"/"
                        v_subjectid_log_file_name = v_subjectid_pet_pib+v_subjectid+v_log_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
                        if !File.file?(v_subjectid_log_file_name)
                          v_comment_warning = v_comment_warning+" ERROR "+v_call
@@ -7164,7 +7164,8 @@ puts "v_participant.id="+v_participant.id.to_s
                        v_codename_hyphen =  v_scan_procedure.codename
                        v_codename_hyphen = v_codename_hyphen.gsub(".","-")
                        v_subjectid_path = v_preprocessed_full_path+"/"+v_subjectid
-                       v_subjectid_pet_pib =v_subjectid_path+v_pib_path
+                       v_subjectid_pet_pib =v_subjectid_path+v_pib_path+"/"
+
                        v_subjectid_log_file_name = v_subjectid_pet_pib+v_subjectid+v_log_file_name+v_codename_hyphen+"_"+v_code_version+".csv"
                        if !File.file?(v_subjectid_log_file_name)
                          v_comment_warning = v_comment_warning+" ERROR "+v_call
