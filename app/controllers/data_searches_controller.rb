@@ -536,6 +536,7 @@ class DataSearchesController < ApplicationController
       params["search_criteria"] =""
       # add a row
       if !params[:cg_edit_table].blank? and !params[:cg_edit_table][:add_a_row_key_value].blank?
+
               params[:cg_edit_table][:enumber] = params[:cg_edit_table][:add_a_row_key_value]
               # check if already in table
               v_cg_tn_cn = CgTnCn.where("key_column_flag ='Y' and cg_tn_id in (?)",@cg_tn.id)
@@ -725,7 +726,7 @@ class DataSearchesController < ApplicationController
               
             end
             
-      
+     
       # build up condition and join from @cg_tn
       if !params[:cg_edit_table].blank? and  !params[:cg_edit_table][:enumber].blank?
           if params[:cg_edit_table][:enumber].include?(',') # string of enumbers
@@ -756,9 +757,15 @@ class DataSearchesController < ApplicationController
            @scan_procedures = ScanProcedure.where("id in (?)",params[:cg_edit_table][:scan_procedure_id])
            params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
       end
+       v_cg_table_types = CgTableType.where("table_type in (?)",@cg_tn.table_type)
+       @v_editable_dashboard_table_type_flag = "N"
+
+       if !v_cg_table_types.nil? and v_cg_table_types.count > 0
+               @v_editable_dashboard_table_type_flag = v_cg_table_types.first.editable_dashboard_table_type_flag
+       end
 
       v_key_columns =""
-      if (@cg_tn.table_type == 'column_group' or @cg_tn.table_type == 'InProcess') and @cg_tn.editable_flag == "Y"  and !v_exclude_tables_array.include?(@cg_tn.tn.downcase) # want to limit to cg tables
+      if (@cg_tn.table_type == 'column_group' or @cg_tn.table_type == 'JohnsonInProcess'  or @cg_tn.table_type == 'BendlinInProcess'  or @v_editable_dashboard_table_type_flag == "Y") and @cg_tn.editable_flag == "Y"  and !v_exclude_tables_array.include?(@cg_tn.tn.downcase) # want to limit to cg tables
         
 
         
@@ -1075,7 +1082,7 @@ class DataSearchesController < ApplicationController
       @cns_common_name_dict = {}
       @cg_data_dict = {}
       @cg_edit_data_dict = {}
-      
+
       @cg_tn_cns =CgTnCn.where("cg_tn_id in (?) and status_flag = 'Y' ",@cg_tn.id).order("display_order")
       @cg_tn_cns.each do |cg_tn_cn|
           @cns.push(cg_tn_cn.cn)

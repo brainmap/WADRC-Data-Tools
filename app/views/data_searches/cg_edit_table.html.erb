@@ -9,7 +9,7 @@
 # add delete row checkbox
 @cg_tn = CgTn.find(params[:id])
 
-if @cg_tn.table_type == 'column_group' and @cg_tn.editable_flag == "Y"
+if ( @cg_tn.table_type == 'column_group' or @cg_tn.table_type == 'JohnsonInProcess'  or @cg_tn.table_type == 'BendlinInProcess' or @v_editable_dashboard_table_type_flag == "Y" ) and @cg_tn.editable_flag == "Y"
 %>
 cg_edit_table = <%= @cg_tn.common_name%>
 <% @cg_tn_cn = CgTnCn.where("key_column_flag ='Y' and cg_tn_id in (?)",@cg_tn.id) 
