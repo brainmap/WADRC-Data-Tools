@@ -2434,6 +2434,7 @@ def  run_pet_av1451_harvest
                        @trfile.scan_procedure_id = v_sp_id
                        @trfile.trtype_id = v_trtype_id
                        @trfile.qc_value = "New Record"
+                       v_qc_value = "New Record"
                        @trfile.qc_notes = "autoinsert by panda "
                        @trfile.save
                        # NEED processedimage @trfile.image_dataset_id = v_ids_id
@@ -2517,7 +2518,7 @@ def  run_pet_av1451_harvest
                               if v_cnt > 0 
                                 v_line_array = []
                                 v_line_array =line.gsub(/\n/,"").split(",")
-                                if v_qc_value == "Waiting" or v_qc_value == "Fail" or v_qc_value == "Reprocessed" or v_qc_value == "Partial"# blanking out data until quality checked or if Fail
+                                if v_qc_value == "Waiting" or v_qc_value == "Fail" or v_qc_value == "Reprocessed" or v_qc_value == "Partial" or  v_qc_value == "New Record"# blanking out data until quality checked or if Fail
                                     v_line_array[3] = ""
                                     v_line_array[4] = ""
                                 end
@@ -2558,18 +2559,25 @@ def  run_pet_av1451_harvest
                  # not make tredit if exisiting row are blanks and Pass makes new values
                           v_sql_check = "Select "+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id from cg_pet_av1451_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                           results_check = connection.execute(v_sql_check)
-                          if !results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2
+                          if (!results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2) or (v_qc_value != "New Record" and (results_check.nil? or (!results_check.nil? and (results_check.count) < 1) ) )
                             v_change = "N"
+                            v_blank_row = "N"
+                            if (v_qc_value != "New Record" and (results_check.nil? or (!results_check.nil? and (results_check.count) < 1) ) )
+                              v_change = "Y"
+                              v_blank_row = "Y"
+                            end
                             v_col_array = v_roi_column_list.split(",")
                             v_cnt_col = 0
-                            v_col_array.each do |cn|
+                            if v_blank_row == "N"
+                              v_col_array.each do |cn|
                                if v_roi_hash[cn].nil? or v_roi_hash[cn].blank?
                                else
-                                  if results_check.first[v_cnt_col].strip.to_s > "" and v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
+                                  if results_check.first[v_cnt_col].strip.to_s > "" and  v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
                                     v_change = "Y"
                                   end
                                end
                                v_cnt_col = v_cnt_col + 1
+                              end
                             end
                             if v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"
                               v_change = "Y"
@@ -3719,6 +3727,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                        @trfile.scan_procedure_id = v_sp_id
                        @trfile.trtype_id = v_trtype_id
                        @trfile.qc_value = "New Record"
+                       v_qc_value = "New Record"
                        @trfile.qc_notes = "autoinsert by panda "
                        @trfile.save
                        # NEED processedimage @trfile.image_dataset_id = v_ids_id
@@ -3803,7 +3812,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                               if v_cnt > 0 
                                 v_line_array = []
                                 v_line_array =line.gsub(/\n/,"").split(",")               
-                                if v_qc_value == "Waiting" or v_qc_value == "Fail" or v_qc_value == "Reprocessed" or v_qc_value == "Partial" # blanking out data until quality checked or if Fail
+                                if v_qc_value == "Waiting" or v_qc_value == "Fail" or v_qc_value == "Reprocessed" or v_qc_value == "Partial" or  v_qc_value == "New Record"# blanking out data until quality checked or if Fail
                                     v_line_array[3] = ""
                                     v_line_array[4] = ""
                                 end
@@ -3844,11 +3853,17 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                  # not make tredit if exisiting row are blanks and Pass makes new values
                           v_sql_check = "Select "+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id from cg_pet_mk6240_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                           results_check = connection.execute(v_sql_check)
-                          if !results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2
+                          if (!results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2) or (v_qc_value != "New Record" and (results_check.nil? or (!results_check.nil? and (results_check.count) < 1) ) )
                             v_change = "N"
+                            v_blank_row = "N"
+                            if (v_qc_value != "New Record" and (results_check.nil? or (!results_check.nil? and (results_check.count) < 1) ) )
+                              v_change = "Y"
+                              v_blank_row = "Y"
+                            end
                             v_col_array = v_roi_column_list.split(",")
                             v_cnt_col = 0
-                            v_col_array.each do |cn|
+                            if v_blank_row == "N"
+                              v_col_array.each do |cn|
                                if v_roi_hash[cn].nil? or v_roi_hash[cn].blank?
                                else
                                   if results_check.first[v_cnt_col].strip.to_s > "" and  v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
@@ -3856,6 +3871,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                                   end
                                end
                                v_cnt_col = v_cnt_col + 1
+                              end
                             end
                             if v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"
                               v_change = "Y"
@@ -4583,7 +4599,7 @@ def  run_pet_pib_dvr_harvest
     sp_exclude_array = [54,56,57,95,55,76,78,72,70,71,99,81,75,83,92,93,88,68,97,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,42,44,51,96,9,25,23,19,15,24,36,100,35,73,32,6,12,16,13,11,90,59,63,43,4,17,74,98,101,102,103,108,110,111,112,113,114]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     # for testing
-    ###@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
+    ####@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
     @scan_procedures.each do |sp|
       @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
       v_sp_id = sp.id
@@ -4620,7 +4636,7 @@ def  run_pet_pib_dvr_harvest
              sql_enum = sql_enum+") order by enrollments.enumber"
         else
            sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
-                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" 
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+"  
                                     and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id 
                                     and enrollments.enumber like '"+sp.subjectid_base+"%' order by enrollments.enumber"
         end
@@ -4856,6 +4872,7 @@ def  run_pet_pib_dvr_harvest
                   
                     v_sql_check = "Select mri_processing_date,pet_processing_date,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                     results_check = connection.execute(v_sql_check) 
+ 
                     if !results_check.nil? and !results_check.first.nil? and !results_check.first[0].blank? and results_check.first[0].to_s != v_mri_processing_date and !v_mri_processing_date.blank?
                       v_mri_processed_date_change ="Y"
 puts "RRRRRR v_mri_processed_date_change="+v_mri_processed_date_change
@@ -5098,6 +5115,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                        @trfile.scan_procedure_id = v_sp_id
                        @trfile.trtype_id = v_trtype_id
                        @trfile.qc_value = "New Record"
+                       v_qc_value = "New Record"
                        @trfile.qc_notes = "autoinsert by panda "
                        @trfile.save
                        # NEED processedimage @trfile.image_dataset_id = v_ids_id
@@ -5182,7 +5200,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                               if v_cnt > 0 
                                 v_line_array = []
                                 v_line_array =line.gsub(/\n/,"").split(",")
-                                if v_qc_value == "Waiting" or v_qc_value == "Fail" or v_qc_value == "Reprocessed" or v_qc_value == "Partial" # blanking out data until quality checked or if Fail
+                                if v_qc_value == "Waiting" or v_qc_value == "Fail" or v_qc_value == "Reprocessed" or v_qc_value == "Partial" or v_qc_value == "New Record" # blanking out data until quality checked or if Fail
                                     v_line_array[3] = ""
                                     v_line_array[4] = ""
                                 end
@@ -5241,17 +5259,14 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                 #RESET trfile QC, keep comments
                 # make new tredit
                 # relinnk to tracer files
-puts "SSSSSSS v_mri_processed_date_change="+v_mri_processed_date_change
+
                           v_sql_check = "Select pib_index,subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_dvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                           results_check = connection.execute(v_sql_check)
-  puts "loop thru results check"
-  results_check.each do |vals|
-    puts "vals="+vals.join("___")
-  end
-                          # row in ROI table is blank if QC Status = Waiting, gets actual value when change to Partial/Pass
-                          if (!results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2 and !(results_check.first)[0].blank? and (results_check.first)[0].strip > "" and !(results_check.first)[0].include?("na") ) or v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"
 
-                            if (results_check.first[0].to_s != v_pib_index.to_s and !(results_check.first)[0].include?("na") and !v_pib_index.to_s.include?("na")) or v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"
+                          # row in ROI table is blank if QC Status = Waiting, gets actual value when change to Partial/Pass
+                          if (!results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2 and !(results_check.first)[0].blank? and (results_check.first)[0].strip > "" and !(results_check.first)[0].include?("na") ) or v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"  or (v_qc_value != "New Record" and (results_check.nil? or (!results_check.nil? and (results_check.count) < 1) ) )
+
+                            if (results_check.first[0].to_s != v_pib_index.to_s and !(results_check.first)[0].include?("na") and !v_pib_index.to_s.include?("na")) or v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"  or (v_qc_value != "New Record" and (results_check.nil? or (!results_check.nil? and (results_check.count) < 1) ) )
 puts "YYYYYY results_check.first)[0]="+(results_check.first)[0].to_s+"="+v_pib_index.to_s+"="+v_subjectid_v_num
                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
                               if v_mri_processed_date_change == "Y" and  v_pet_processed_date_change == "Y" 
@@ -5264,6 +5279,7 @@ puts "YYYYYY results_check.first)[0]="+(results_check.first)[0].to_s+"="+v_pib_i
                                  @trfiles.first.qc_notes = " roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
                               end
                               #added
+      puts "ffffff reprocessed"
                               @trfiles.first.file_completed_flag = "N"
                               # add comments if mri processed or pet processed date change
                               @trfiles.first.save
@@ -6466,6 +6482,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                        @trfile.scan_procedure_id = v_sp_id
                        @trfile.trtype_id = v_trtype_id
                        @trfile.qc_value = "New Record"
+                       v_qc_value = "New Record"
                        @trfile.qc_notes = "autoinsert by panda "
                        @trfile.save
                        # NEED processedimage @trfile.image_dataset_id = v_ids_id
@@ -6549,7 +6566,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                               if v_cnt > 0 
                                 v_line_array = []
                                 v_line_array =line.gsub(/\n/,"").split(",")
-                                if v_qc_value == "Waiting" or v_qc_value == "Fail" or v_qc_value == "Reprocessed" or v_qc_value == "Partial" # blanking out data until quality checked or if Fail
+                                if v_qc_value == "Waiting" or v_qc_value == "Fail" or v_qc_value == "Reprocessed" or v_qc_value == "Partial" or v_qc_value == "New Record" # blanking out data until quality checked or if Fail
                                     v_line_array[3] = ""
                                     v_line_array[4] = ""
                                 end
@@ -6590,18 +6607,25 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                   # not make new tredit if blank cells changed to Pass/values
                           v_sql_check = "Select "+v_roi_column_list+",subjectid,enrollment_id,scan_procedure_id from cg_pet_pib_suvr_roi where enrollment_id = "+enrollment.first.id.to_s+" and scan_procedure_id = "+sp.id.to_s+" and secondary_key = '"+v_secondary_key.to_s+"'"
                           results_check = connection.execute(v_sql_check)
-                          if !results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2
+                          if (!results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2) or (v_qc_value != "New Record" and (results_check.nil? or (!results_check.nil? and (results_check.count) < 1) ) )
                             v_change = "N"
+                            v_blank_row = "N"
+                            if (v_qc_value != "New Record" and (results_check.nil? or (!results_check.nil? and (results_check.count) < 1) ) )
+                              v_change = "Y"
+                              v_blank_row = "Y"
+                            end
                             v_col_array = v_roi_column_list.split(",")
                             v_cnt_col = 0
-                            v_col_array.each do |cn|
+                            if v_blank_row == "N"
+                              v_col_array.each do |cn|
                                if v_roi_hash[cn].nil? or v_roi_hash[cn].blank?
                                else
-                                  if results_check.first[v_cnt_col].strip.to_s > "" and v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
+                                  if results_check.first[v_cnt_col].strip.to_s > "" and  v_roi_hash[cn].to_s != results_check.first[v_cnt_col].to_s
                                     v_change = "Y"
                                   end
                                end
                                v_cnt_col = v_cnt_col + 1
+                              end
                             end
                             if v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"
                               v_change = "Y"
@@ -9965,7 +9989,7 @@ def  run_asl_harvest
                   v_subjectid_array.push((v_subjectid+k))
                   v_subjectid_v_num = v_subjectid+k + v_visit_number
                   v_subjectid_path = v_preprocessed_full_path+"/"+v_subjectid+k
-                  v_subjectid_pet_mk6240 =v_subjectid_path+v_asl_pproc_v5_path
+                  v_subjectid_asl =v_subjectid_path+v_asl_pproc_v5_path
                 end
               end
              rescue => msg  
