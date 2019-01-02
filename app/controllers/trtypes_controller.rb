@@ -169,7 +169,7 @@ class TrtypesController < ApplicationController
                  v_value_sql = ""
                  # ("trfiles.id = v_"+act.id.to_s+".trfile_id")
                  @column_headers.push(act.form_display_label)
-                 v_col = (act.form_display_label).gsub(/ /,"").gsub(/\'/,"_").gsub(/\:/,"_").gsub(/\"/,"_").gsub(/\-/,"_").gsub(/\//,"_").downcase+"_" 
+                 v_col = (act.form_display_label).gsub("<br>","").gsub("<hr>","").gsub("<BR>","").gsub("<HR>","").gsub("<b>","").gsub("</b>","").gsub(/ /,"").gsub(/\'/,"_").gsub(/\:/,"_").gsub(/\"/,"_").gsub(/\-/,"_").gsub(/\//,"_").downcase+"_" 
                  v_column_array.push("v_"+act.id.to_s+"."+v_col) 
                  if v_tr_all == "Y"  
                    #puts "ddddd v_tr_all === Y"
