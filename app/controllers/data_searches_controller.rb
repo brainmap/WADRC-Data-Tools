@@ -4134,7 +4134,6 @@ puts "global update"
             end
             @csv_array.push(@results_tmp_csv)
             @results_tmp_csv = []
-            @csv_array.push(@results_tmp_csv)
             @results_tmp_csv.push("Non-Valid values and counts")
             @csv_array.push(@results_tmp_csv)
             @results_tmp_csv = []
@@ -4156,6 +4155,7 @@ puts "global update"
               end
             end
             @csv_array.push(@results_tmp_csv)
+            @results_tmp_csv = [] 
             @results_tmp_csv.push("Source Projects, Forms, and Columns")
             @csv_array.push(@results_tmp_csv)
             @results_tmp_csv = []
