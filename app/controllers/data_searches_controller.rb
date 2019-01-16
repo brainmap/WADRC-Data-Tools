@@ -4041,6 +4041,26 @@ puts "global update"
                      @col_not_valid_hash[v_column_name] = @results_not_valid
 
                    else
+                     v_tmp_valid_value_array = v_valid_value_definition.split("|")
+                     # check if 
+                     #0, 0 Absent | 1, 1 Present.  vs 1|2|3...
+                     # split on ,
+                     #trim leading space
+                     # split on space
+                     # see if the same
+                     v_check_array = v_tmp_valid_value_array[0].split(",")
+
+                     # expect problems with commas in values
+                     if v_check_array.count > 1
+                         v_check_second_part_array = (v_check_array[1].strip).split(" ")
+                         if v_check_array[0] == v_check_second_part_array[0]
+                            v_valid_value_array = []
+                            v_tmp_valid_value_array.each do |val|
+                              v_clean_check_array = val.split(",")
+                              v_valid_value_array.push(v_clean_check_array[0].strip)
+                            end
+                         end 
+                     end
                      v_sql_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
                                  in ('"+v_valid_value_array.join("','")+"') group by "+v_column_name+" order by "+v_column_name
 
