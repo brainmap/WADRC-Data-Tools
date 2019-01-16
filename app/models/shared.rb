@@ -5669,7 +5669,7 @@ def run_pet_pib_dvr_process
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
       v_exclude_sp_mri_array = [-1]
       v_exclude_sp_pet_array = [-1]
-      v_include_sp_pet_array= [77]
+      v_include_sp_pet_array= [105]
       v_today_date = Date.today 
       v_computer = "kanga"
 
@@ -5686,18 +5686,21 @@ def run_pet_pib_dvr_process
     connection = ActiveRecord::Base.connection();
                # and id in (1737,1735,1717,1711) ones with no mri
       # get list of petscans - exclude some studies, exclude vgroups.transfer_pet = n/a
+
       # for testing
       v_pib_petscans = Petscan.where("petscans.lookup_pettracer_id in (?) 
                    and petscans.good_to_process_flag = 'Y'
                    and petscans.appointment_id in 
                      ( select appointments.id from appointments, vgroups 
                         where appointments.vgroup_id = vgroups.id 
-                         and vgroups.transfer_pet in ('no','yes') )
+                         and vgroups.transfer_pet in ('no','yes') 
+                         and vgroups.id in ( select enrollment_vgroup_memberships.vgroup_id from enrollment_vgroup_memberships, enrollments 
+                                       where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.enumber in ('enumber','enumber')))
                   and petscans.appointment_id in (select appointments.id from appointments, scan_procedures_vgroups
                   where appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
                   and scan_procedures_vgroups.scan_procedure_id in (?))",v_pib_tracer_id,v_include_sp_pet_array)
 
-      v_pib_petscans = Petscan.where("petscans.lookup_pettracer_id in (?) 
+            v_pib_petscans = Petscan.where("petscans.lookup_pettracer_id in (?) 
                    and petscans.good_to_process_flag = 'Y'
                    and petscans.appointment_id in 
                      ( select appointments.id from appointments, vgroups 
@@ -5707,7 +5710,6 @@ def run_pet_pib_dvr_process
                   where appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
                   and scan_procedures_vgroups.scan_procedure_id in (?))",v_pib_tracer_id,v_exclude_sp_pet_array)
 
-      
     # get list of pib Petscans
     #check if has precprocessed codever 2a dir
     # if there, stop, else 
@@ -5871,32 +5873,126 @@ def run_pet_pib_dvr_process
                    v_min_mri_visit = nil
                    v_min_mri_appointment = nil
                    v_other_mri_appointment_array = []
+                   v_preprocessed_path_ti_no_leading_o = ""
+                   v_preprocessed_path+v_scan_procedure.codename+"/"+v_subjectid+"/unknown"
                    v_mri_visits.each do |mri_visit|
                       v_mri_appointment = Appointment.find(mri_visit.appointment_id)
-    puts "hhhhh mri_visit="+mri_visit.id.to_s+".   mri_appt="+v_mri_appointment.appointment_date.to_s
                       # also add enum and sp?
                       v_other_mri_appointment_array.push(v_mri_appointment.appointment_date.to_s)
                       if v_min_mri_visit.nil?
                           v_min_mri_visit = mri_visit
                           v_mri_pet_min_date_diff =(v_mri_appointment.appointment_date - v_pet_appointment.appointment_date).to_i.abs
                           v_min_mri_appointment = v_mri_appointment
+                          v_preprocessed_path_ti_no_leading_o = ""
+                          # get path to o-acpc - leave blank if no o-acpc
+                          # replace /mounts/data/raw - split on / get subjectid from third  item /split on _ ( second item in later scans is mri)
+                          if(mri_visit.path.include?("adcp"))
+                             # need to use mpnrage
+                          else
+                            v_raw_path = (mri_visit.path).gsub(v_base_path+"/raw/","")
+                            v_raw_path_array = v_raw_path.split("/")
+                            if v_raw_path.include?("/mri/")
+                               v_other_mri_unknown = v_preprocessed_path+v_raw_path_array[0]+"/"+(v_raw_path_array[2].split("_"))[0]+"/unknown"
+                            else
+                               v_other_mri_unknown = v_preprocessed_path+v_raw_path_array[0]+"/"+(v_raw_path_array[1].split("_"))[0]+"/unknown"
+                            end
+                            v_o_acpc_file = ""
+                            if File.directory?(v_other_mri_unknown)
+                              v_cnt = 0
+                              v_dir_array = Dir.entries(v_other_mri_unknown)
+                              v_dir_array.each do |f|
+                                if f.start_with?("o") and f.end_with?(".nii")
+                                  v_cnt = v_cnt + 1
+                                  v_o_acpc_file = f.to_s
+                                  v_o_acpc_file[0] =""
+                                 # trim leading o
+                                end
+                              end
+                              if v_cnt > 1
+                                # multiple oacpc files - need to make choice, can't auto run procesing
+                              elsif v_cnt > 0
+                                 v_preprocessed_path_ti_no_leading_o = v_other_mri_unknown+"/"+v_o_acpc_file
+                              end
+                            end
+                          end
                       else
                           v_new_mri_pet_min_date_diff =(v_mri_appointment.appointment_date - v_pet_appointment.appointment_date).to_i.abs
                           if v_new_mri_pet_min_date_diff < v_mri_pet_min_date_diff
                               v_mri_pet_min_date_diff = v_new_mri_pet_min_date_diff
                               v_min_mri_visit = mri_visit
                               v_min_mri_appointment = v_mri_appointment
+                              v_preprocessed_path_ti_no_leading_o = ""
+                              # get path to o-acpc - leave blank if no o-acpc
+                          # get path to o-acpc - leave blank if no o-acpc
+                          # replace /mounts/data/raw - split on / get subjectid from third  item /split on _ ( second item in later scans is mri)
+                          if(mri_visit.path.include?("adcp"))
+                             # need to use mpnrage
+                          else
+                            v_raw_path = (mri_visit.path).gsub(v_base_path+"/raw/","")
+                            v_raw_path_array = v_raw_path.split("/")
+                            if v_raw_path.include?("/mri/")
+                               v_other_mri_unknown = v_preprocessed_path+v_raw_path_array[0]+"/"+(v_raw_path_array[2].split("_"))[0]+"/unknown"
+                            else
+                               v_other_mri_unknown = v_preprocessed_path+v_raw_path_array[0]+"/"+(v_raw_path_array[1].split("_"))[0]+"/unknown"
+                            end
+                            v_o_acpc_file = ""
+                            if File.directory?(v_other_mri_unknown)
+                              v_cnt = 0
+                              v_dir_array = Dir.entries(v_other_mri_unknown)
+                              v_dir_array.each do |f|
+                                if f.start_with?("o") and f.end_with?(".nii")
+                                  v_cnt = v_cnt + 1
+                                  v_o_acpc_file = f.to_s
+                                  v_o_acpc_file[0] =""
+                                 # trim leading o
+                                end
+                              end
+                              if v_cnt > 1
+                                # multiple oacpc files - need to make choice, can't auto run procesing
+                              elsif v_cnt > 0
+                                 v_preprocessed_path_ti_no_leading_o = v_other_mri_unknown+"/"+v_o_acpc_file
+                              end
+                            end
+                          end
                           end
                       end
                    end
                    if !v_min_mri_visit.nil?
                      v_other_mri_appointment_array.delete(v_min_mri_appointment.appointment_date.to_s)
                      puts "hhhhh min mri = "+v_min_mri_appointment.appointment_date.to_s+"     pet_appt= "+v_pet_appointment.appointment_date.to_s
+
+                     # EXCLUDE ADCP IN RUN -- will use mpnrage
+                     # EXCLUDE RUN if v_preprocessed_path_ti_no_leading_o == ""
+                     # get o-acpc corrected path/file - trim off the o in the acpc file name, remake the full file path
                      if v_other_mri_appointment_array.count > 0
                        v_comment = v_comment+" need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+"  other mri="+v_other_mri_appointment_array.join(",")+"; "
                      else
                      v_comment = v_comment+" need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+"; "
                     end
+                       # check for error log with tghis subject, tracer, dvr/suvr, date stamp
+                       # send email to owner of failure
+                      # v_call = v_pet_processing_wrapper+" --protocol "+v_scan_procedure.codename+" --brain "+v_subjectid+" --tracer PiB --method DVR"
+                       if v_preprocessed_path_ti_no_leading_o > ""
+                         v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer PiB --method DVR --fid_t1 '+v_preprocessed_path_ti_no_leading_o+' " '  
+                         v_comment = v_comment +" cmd= "+ v_call+"\n"
+                         @schedulerun.comment = v_comment
+                         @schedulerun.save
+                       # if ADCP or v_preprocessed_path_ti_no_leading_o == "" 
+                       else 
+                         v_call = "date"
+                       end
+                       # end
+                       begin
+                        stdin, stdout, stderr = Open3.popen3(v_call)
+                        rescue => msg  
+                          v_comment = v_comment + msg+"\n"  
+                       end
+                            # v_success ="N"
+                       while !stdout.eof?
+                         v_output = stdout.read 1024 
+                              #  v_comment = v_comment + v_output  
+                          puts v_output  
+                        end
                     # optional auto run with min non-pet vgroup mri 
                    else
                     v_comment = v_comment+" need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" does not have any non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days; "
