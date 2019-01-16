@@ -4125,7 +4125,7 @@ puts "global update"
               if !@col_valid_hash[col].nil?
                 v_tmp_string = ""
                 @col_valid_hash[col].each do |cnt| 
-                  v_tmp_string = v_tmp_string+cnt[0].to_s+"    "+cnt[1]+"\n"
+                  v_tmp_string = v_tmp_string+cnt[0].to_s+"    "+cnt[1].to_s+"\n"
                 end
                 @results_tmp_csv.push(v_tmp_string)
               else
