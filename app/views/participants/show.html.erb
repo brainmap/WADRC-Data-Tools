@@ -158,6 +158,11 @@ edit_count = edit_count -1
 <% end %>
 <%end%>
 <br>
+<% if !@participant.note.blank? %>
+<b>Notes:</b><br>
+<%= @participant.note %>
+<br>
+<%end%>
  <%= link_to 'download pdf (very slow to load)', { :controller=>"participants", :action=>"participant_show_pdf", :id =>  @participant.id , :format => :pdf}, :target => "green" %>  
 
 
