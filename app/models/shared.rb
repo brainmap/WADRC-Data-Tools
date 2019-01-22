@@ -3189,6 +3189,54 @@ puts v_av1451_petfiles.first.path
      @schedulerun.save
      @schedulerun.end_time = @schedulerun.updated_at      
      @schedulerun.save  
+     # notification emails
+     v_email_body = ""
+     v_send_email_flag = "N"
+     if v_notification_run_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" run \n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end  
+
+     if v_notification_near_mri_run_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" run with nearby mri\n"
+       v_notification_near_mri_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end 
+
+     if v_notification_multiple_t1_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" not run due to multiple T1 \n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end 
+
+     if v_notification_nearer_mri_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" nearer mri found - rerun? \n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end
+
+     if v_notification_uptake_time_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" not run due to wrong uptake time\n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end
+     if v_send_email_flag == "Y"
+        v_schedule_owner_email_array.each do |e|
+            v_subject = "Runs:"+schedule.name 
+            PandaMailer.schedule_notice(v_subject,{:send_to => e},v_email_body).deliver
+         end
+     end  
 end
 
 
@@ -4638,6 +4686,54 @@ puts "v_participant.id="+v_participant.id.to_s
      @schedulerun.save
      @schedulerun.end_time = @schedulerun.updated_at      
      @schedulerun.save  
+     # notification emails
+     v_email_body = ""
+     v_send_email_flag = "N"
+     if v_notification_run_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" run \n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end  
+
+     if v_notification_near_mri_run_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" run with nearby mri\n"
+       v_notification_near_mri_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end 
+
+     if v_notification_multiple_t1_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" not run due to multiple T1 \n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end 
+
+     if v_notification_nearer_mri_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" nearer mri found - rerun? \n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end
+
+     if v_notification_uptake_time_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" not run due to wrong uptake time\n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end
+     if v_send_email_flag == "Y"
+        v_schedule_owner_email_array.each do |e|
+            v_subject = "Runs:"+schedule.name 
+            PandaMailer.schedule_notice(v_subject,{:send_to => e},v_email_body).deliver
+         end
+     end  
 end
 
 
@@ -7667,7 +7763,55 @@ puts "v_participant.id="+v_participant.id.to_s
      end
      @schedulerun.save
      @schedulerun.end_time = @schedulerun.updated_at      
-     @schedulerun.save  
+     @schedulerun.save   
+     # notification emails
+     v_email_body = ""
+     v_send_email_flag = "N"
+     if v_notification_run_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" run \n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end  
+
+     if v_notification_near_mri_run_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" run with nearby mri\n"
+       v_notification_near_mri_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end 
+
+     if v_notification_multiple_t1_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" not run due to multiple T1 \n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end 
+
+     if v_notification_nearer_mri_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" nearer mri found - rerun? \n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end
+
+     if v_notification_uptake_time_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" not run due to wrong uptake time\n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end
+     if v_send_email_flag == "Y"
+        v_schedule_owner_email_array.each do |e|
+            v_subject = "Runs:"+schedule.name 
+            PandaMailer.schedule_notice(v_subject,{:send_to => e},v_email_body).deliver
+         end
+     end 
 end
 
 
