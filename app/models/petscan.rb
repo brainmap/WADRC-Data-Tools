@@ -151,7 +151,7 @@ class Petscan < ActiveRecord::Base
               end
           end
           # check for dicoms
-          v_check_path = v_path+v_enumber+"/dicoms/"
+          v_check_path = v_path+v_enumber+"/dicoms/" # change to just look for a directory -- "/0*/" ??? but exclude lose ecat files
           if Dir.exist?(v_check_path)
             # look for I*.dcm* 
             # if not find look for dicoms another level down

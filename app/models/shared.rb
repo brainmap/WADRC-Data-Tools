@@ -2988,6 +2988,18 @@ def run_pet_av1451_process
       @schedulerun.save
       v_comment = ""
       v_comment_warning ="" 
+      v_notification_run_array = []
+      v_notification_near_mri_run_array = []
+      v_notification_multiple_t1_array = []
+      v_notification_nearer_mri_array = []
+      v_notification_uptake_time_array = []
+      v_runner_email = self.get_user_email()  #  want to send errors to the user running the process
+      v_schedule_owner_email_array = []
+      if !v_runner_email.blank?
+        v_schedule_owner_email_array.push(v_runner_email)
+      else
+        v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+      end
 
     connection = ActiveRecord::Base.connection();
                # and id in (1737,1735,1717,1711) ones with no mri
@@ -3097,10 +3109,12 @@ puts v_av1451_petfiles.first.path
                     if v_cnt > 1
                       v_pet_path_ok = "N"
                       v_comment = v_subjectid+" multiple o_acpc in unknown;"+v_comment
+                      v_notification_multiple_t1_array.push(v_subjectid)
                     elsif v_cnt > 0
                        # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
                        v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
                        puts " gggg run "+v_scan_procedure.codename+"/"+v_subjectid+" has mri same vgroup=>run "
+                       #v_notification_run_array.push(v_call)
                        # check for error log with tghis subject, tracer, dvr/suvr, date stamp
                        # send email to owner of failure
                     end
@@ -3149,6 +3163,8 @@ puts v_av1451_petfiles.first.path
                      else
                        v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "+v_comment
                      end
+                     # v_notification_near_mri_run_array.push(v_call)
+                     # if problem with uptake time v_notification_uptake_time_array.push(v_subjectid)
                     # optional auto run with min non-pet vgroup mri 
                    else
                     v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" does not have any non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days; "+v_comment
@@ -4286,6 +4302,18 @@ def run_pet_mk6240_process
       @schedulerun.save
       v_comment = ""
       v_comment_warning ="" 
+      v_notification_run_array = []
+      v_notification_near_mri_run_array = []
+      v_notification_multiple_t1_array = []
+      v_notification_nearer_mri_array = []
+      v_notification_uptake_time_array = []
+      v_runner_email = self.get_user_email()  #  want to send errors to the user running the process
+      v_schedule_owner_email_array = []
+      if !v_runner_email.blank?
+        v_schedule_owner_email_array.push(v_runner_email)
+      else
+        v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+      end
 
     connection = ActiveRecord::Base.connection();
                # and id in (1737,1735,1717,1711) ones with no mri
@@ -4395,6 +4423,7 @@ puts "v_participant.id="+v_participant.id.to_s
                     if v_cnt > 1
                       v_pet_path_ok = "N"
                       v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in unknown:"
+                      v_notification_multiple_t1_array.push(v_subjectid)
                     elsif v_cnt > 0
                        # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
                       #v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
@@ -4411,6 +4440,7 @@ puts "v_participant.id="+v_participant.id.to_s
                          v_comment = v_comment + v_call+"\n"
                          @schedulerun.comment = v_comment
                          @schedulerun.save
+                         v_notification_run_array.push(v_call)
                          #v_call = "date" # skipping doing anything
                          begin
                           stdin, stdout, stderr = Open3.popen3(v_call)
@@ -4437,6 +4467,7 @@ puts "v_participant.id="+v_participant.id.to_s
                          end
                        else
                          v_comment_warning = v_comment_warning+" ERROR bad uptake duration "+v_scan_procedure.codename+' --brain '+v_subjectid
+                        v_notification_uptake_time_array.push(v_scan_procedure.codename+' --brain '+v_subjectid)
                        end
                     end
               else
@@ -4562,6 +4593,10 @@ puts "v_participant.id="+v_participant.id.to_s
                              v_comment = v_comment +" cmd= "+ v_call+"\n"
                              @schedulerun.comment = v_comment
                              @schedulerun.save
+                             v_notification_near_mri_run_array.push(v_call)
+                          else
+                             v_comment_warning = v_comment_warning+" ERROR bad uptake duration "+v_scan_procedure.codename+' --brain '+v_subjectid
+                             v_notification_uptake_time_array.push(v_scan_procedure.codename+' --brain '+v_subjectid)
                           end
                        # if ADCP or v_preprocessed_path_ti_no_leading_o == "" 
                        else 
@@ -5777,6 +5812,18 @@ def run_pet_pib_dvr_process
       @schedulerun.save
       v_comment = ""
       v_comment_warning ="" 
+      v_notification_run_array = []
+      v_notification_near_mri_run_array = []
+      v_notification_multiple_t1_array = []
+      v_notification_nearer_mri_array = []
+      # v_notification_uptake_time_array = []
+      v_runner_email = self.get_user_email()  #  want to send errors to the user running the process
+      v_schedule_owner_email_array = []
+      if !v_runner_email.blank?
+        v_schedule_owner_email_array.push(v_runner_email)
+      else
+        v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+      end
 
     connection = ActiveRecord::Base.connection();
                # and id in (1737,1735,1717,1711) ones with no mri
@@ -5910,6 +5957,7 @@ def run_pet_pib_dvr_process
                       # multiple oacpc files - need to make choice, can't auto run procesing
                       v_pet_path_ok = "N"
                       v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in unknown:"
+                      v_notification_multiple_t1_array.push(v_subjectid)
                     elsif v_cnt > 0
                        # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
                        v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
@@ -5921,6 +5969,7 @@ def run_pet_pib_dvr_process
                        v_comment = v_comment + v_call+"\n"
                        @schedulerun.comment = v_comment
                        @schedulerun.save
+                       v_notification_run_array.push(v_call)
                        begin
                         stdin, stdout, stderr = Open3.popen3(v_call)
                         rescue => msg  
@@ -6070,6 +6119,7 @@ def run_pet_pib_dvr_process
                          v_comment = v_comment +" cmd= "+ v_call+"\n"
                          @schedulerun.comment = v_comment
                          @schedulerun.save
+                         v_notification_near_mri_run_array.push(v_call)
                        # if ADCP or v_preprocessed_path_ti_no_leading_o == "" 
                        else 
                          v_call = "date"
@@ -6110,6 +6160,54 @@ def run_pet_pib_dvr_process
      @schedulerun.save
      @schedulerun.end_time = @schedulerun.updated_at      
      @schedulerun.save  
+     # notification emails
+     v_email_body = ""
+     v_send_email_flag = "N"
+     if v_notification_run_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" run \n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end  
+
+     if v_notification_near_mri_run_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" run with nearby mri\n"
+       v_notification_near_mri_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end 
+
+     if v_notification_multiple_t1_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" not run due to multiple T1 \n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end 
+
+     if v_notification_nearer_mri_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" nearer mri found - rerun? \n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end
+
+     if v_notification_uptake_time_array.count > 0
+       v_send_email_flag = "Y"
+       v_email_body = v_email_body+"\n"+@schedule.name+" not run due to wrong uptake time\n"
+       v_notification_run_array.each do |val|
+         v_email_body = v_email_body+v_call+"\n"
+       end
+     end
+     if v_send_email_flag == "Y"
+        v_schedule_owner_email_array.each do |e|
+            v_subject = "Runs:"+schedule.name 
+            PandaMailer.schedule_notice(v_subject,{:send_to => e},v_email_body).deliver
+         end
+     end
 end
 
 
@@ -7228,6 +7326,18 @@ def run_pet_pib_suvr_process
       @schedulerun.save
       v_comment = ""
       v_comment_warning ="" 
+      v_notification_run_array = []
+      v_notification_near_mri_run_array = []
+      v_notification_multiple_t1_array = []
+      v_notification_nearer_mri_array = []
+      v_notification_uptake_time_array = []
+      v_runner_email = self.get_user_email()  #  want to send errors to the user running the process
+      v_schedule_owner_email_array = []
+      if !v_runner_email.blank?
+        v_schedule_owner_email_array.push(v_runner_email)
+      else
+        v_schedule_owner_email_array = get_schedule_owner_email(@schedule.id)
+      end
 
     connection = ActiveRecord::Base.connection();
                # and id in (1737,1735,1717,1711) ones with no mri
@@ -7337,6 +7447,7 @@ puts "v_participant.id="+v_participant.id.to_s
                     if v_cnt > 1
                       v_pet_path_ok = "N"
                       v_comment = v_comment+" :"+v_subjectid+" multiple o_acpc in unknown:"
+                      v_notification_multiple_t1_array.push(v_subjectid)
                     elsif v_cnt > 0
                        # RUN THE PROCESSING STEP WITH DEFAULT pet/mri o_acpc from same vgroup
                       #v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" has mri same vgroup=>run; "
@@ -7358,6 +7469,7 @@ puts "v_participant.id="+v_participant.id.to_s
                         v_comment = v_comment + v_call+"\n"
                         @schedulerun.comment = v_comment
                         @schedulerun.save
+                        v_notification_run_array.push(v_call)
                       #  v_call = "date" # skipping doing anything
                         begin
                          stdin, stdout, stderr = Open3.popen3(v_call)
@@ -7385,6 +7497,7 @@ puts "v_participant.id="+v_participant.id.to_s
                        end
                       else
                          v_comment_warning = v_comment_warning+" ERROR bad uptake duration "+v_scan_procedure.codename+' --brain '+v_subjectid
+                         v_notification_uptake_time_array.push(v_scan_procedure.codename+' --brain '+v_subjectid)
                       end
                     end
               else
@@ -7510,6 +7623,10 @@ puts "v_participant.id="+v_participant.id.to_s
                              v_comment = v_comment +" cmd= "+ v_call+"\n"
                              @schedulerun.comment = v_comment
                              @schedulerun.save
+                             v_notification_near_mri_run_array.push(v_call)
+                          else
+                            v_comment_warning = v_comment_warning+" ERROR bad uptake duration "+v_scan_procedure.codename+' --brain '+v_subjectid
+                            v_notification_uptake_time_array.push(v_scan_procedure.codename+' --brain '+v_subjectid)
                           end
                        # if ADCP or v_preprocessed_path_ti_no_leading_o == "" 
                        else 
