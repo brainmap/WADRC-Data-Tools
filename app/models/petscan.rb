@@ -41,6 +41,7 @@ class Petscan < ActiveRecord::Base
     end
     #v_key = p_tracer_id.to_s+"_"+v_sp.codename
     v_file_name = ""
+ puts "zzzzz v_file_name="+v_file_name
     if !v_pet_target_path.blank?
         v_path = v_base_path+"/raw/"+v_pet_target_path+"/"
         # check for file with enum 
@@ -50,8 +51,11 @@ class Petscan < ActiveRecord::Base
           if !Dir.glob(v_path+e.enumber+"/"+e.enumber+"*").empty?   or !Dir.glob(v_path+e.enumber+"/"+"*"+e.enumber[1..-1]+"*.img").empty?
             v_cnt = 0
             Dir.glob(v_path+e.enumber+"/"+e.enumber+"*").each do |f|
-               v_file_name = f.gsub(v_path+e.enumber+"/","")
-               v_cnt = v_cnt + 1
+               # need to exclude directories - so not pick up the dicom dirs
+               if File.file?(f)
+                 v_file_name = f.gsub(v_path+e.enumber+"/","")
+                 v_cnt = v_cnt + 1
+               end
             end   
             if v_cnt < 1
               Dir.glob(v_path+e.enumber+"/"+"*"+e.enumber[1..-1]+"*.img").each do |f|
@@ -65,8 +69,11 @@ class Petscan < ActiveRecord::Base
           elsif !Dir.glob(v_path+e.enumber+"/"+e.enumber.upcase+"*").empty?   or !Dir.glob(v_path+e.enumber+"/"+"*"+e.enumber[1..-1].upcase+"*.img").empty?
             v_cnt = 0
             Dir.glob(v_path+e.enumber+"/"+e.enumber.upcase+"*").each do |f|
-               v_file_name = f.gsub(v_path+e.enumber+"/","")
-               v_cnt = v_cnt + 1
+               # need to exclude directories - so not pick up the dicom dirs
+               if File.file?(f)
+                 v_file_name = f.gsub(v_path+e.enumber+"/","")
+                 v_cnt = v_cnt + 1
+               end
             end   
             if v_cnt < 1
               Dir.glob(v_path+e.enumber+"/"+"*"+e.enumber[1..-1].upcase+"*.img").each do |f|
@@ -81,8 +88,11 @@ class Petscan < ActiveRecord::Base
           elsif !Dir.glob(v_path+e.enumber+"*").empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img").empty?
             v_cnt = 0
             Dir.glob(v_path+e.enumber+"*").each do |f|
-               v_file_name = f.gsub(v_path,"")
-               v_cnt = v_cnt + 1
+               # need to exclude directories - so not pick up the dicom dirs
+               if File.file?(f)
+                 v_file_name = f.gsub(v_path,"")
+                 v_cnt = v_cnt + 1
+               end
             end   
             if v_cnt < 1
               Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img").each do |f|
@@ -96,8 +106,11 @@ class Petscan < ActiveRecord::Base
           elsif !Dir.glob(v_path+e.enumber.upcase+"*").empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1].upcase+"*.img").empty?
             v_cnt = 0
             Dir.glob(v_path+e.enumber.upcase+"*").each do |f|
-               v_file_name = f.gsub(v_path,"")
-               v_cnt = v_cnt + 1
+               # need to exclude directories - so not pick up the dicom dirs
+               if File.file?(f)
+                 v_file_name = f.gsub(v_path,"")
+                 v_cnt = v_cnt + 1
+               end
             end   
             if v_cnt < 1
               Dir.glob(v_path+"*"+e.enumber[1..-1].upcase+"*.img").each do |f|
@@ -151,10 +164,10 @@ class Petscan < ActiveRecord::Base
               end
           end
           # check for dicoms
-          v_check_path = v_path+v_enumber+"/dicoms/" # change to just look for a directory -- "/0*/" ??? but exclude lose ecat files
+          v_check_path = v_path+v_enumber #+"/dicoms/" # change to just look for a directory -- "/0*/" ??? but exclude lose ecat file
           if Dir.exist?(v_check_path)
             # look for I*.dcm* 
-            # if not find look for dicoms another level down
+            # if not find look for dicoms another 3 levels down
              # look for I*.dcm*  in sub folder
             Dir.glob(v_check_path+"*").select {|f| 
               Dir.glob(f+"/*").each do |leaf|
@@ -176,7 +189,66 @@ class Petscan < ActiveRecord::Base
                 end
                 return leaf,header
               end 
-       
+             end
+              Dir.glob(f+"/*/*").each do |leaf|
+              branch = leaf
+              if leaf.to_s =~ /^I\..*(\.bz2)?$|\.dcm(\.bz2)?$|\.[0-9]{2,}(\.bz2)?$/
+                lc = local_copy(leaf)
+                # path to copy of dcm in /tmp
+                # read dicom header
+               puts "ggggg dcm path local="+lc.to_s
+               header = DICOM::DObject.read(lc.to_s)
+    #puts "header="+header.to_s
+
+                begin
+                  yield lc
+                rescue Exception => e
+                  puts "#{e}"
+                ensure
+                lc.delete
+                end
+                return leaf,header
+              end 
+             end
+              Dir.glob(f+"/*/*/*").each do |leaf|
+              branch = leaf
+              if leaf.to_s =~ /^I\..*(\.bz2)?$|\.dcm(\.bz2)?$|\.[0-9]{2,}(\.bz2)?$/
+                lc = local_copy(leaf)
+                # path to copy of dcm in /tmp
+                # read dicom header
+               puts "ggggg dcm path local="+lc.to_s
+               header = DICOM::DObject.read(lc.to_s)
+    #puts "header="+header.to_s
+
+                begin
+                  yield lc
+                rescue Exception => e
+                  puts "#{e}"
+                ensure
+                lc.delete
+                end
+                return leaf,header
+              end 
+             end
+              Dir.glob(f+"/*/*/*/*").each do |leaf|
+              branch = leaf
+              if leaf.to_s =~ /^I\..*(\.bz2)?$|\.dcm(\.bz2)?$|\.[0-9]{2,}(\.bz2)?$/
+                lc = local_copy(leaf)
+                # path to copy of dcm in /tmp
+                # read dicom header
+               puts "ggggg dcm path local="+lc.to_s
+               header = DICOM::DObject.read(lc.to_s)
+    #puts "header="+header.to_s
+
+                begin
+                  yield lc
+                rescue Exception => e
+                  puts "#{e}"
+                ensure
+                lc.delete
+                end
+                return leaf,header
+              end 
              end
 
             }
@@ -261,6 +333,7 @@ class Petscan < ActiveRecord::Base
         end
       end
     end
+
     #v_key = p_tracer_id.to_s+"_"+v_sp.codename
     v_file_names = []
     if !v_pet_target_path.blank? #v_pet_target_hash[v_key].blank?
@@ -289,8 +362,11 @@ class Petscan < ActiveRecord::Base
           if !Dir.glob(v_path+v_enumber+"/"+e.enumber+"*", File::FNM_CASEFOLD).empty?   or !Dir.glob(v_path+v_enumber+"/"+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).empty?
             v_cnt = 0
             Dir.glob(v_path+v_enumber+"/"+e.enumber+"*", File::FNM_CASEFOLD).each do |f|
-               v_file_names.push(f.gsub(v_path+v_enumber+"/",""))
-               v_cnt = v_cnt + 1
+              # need to exclude directories - so not pick up the dicom dirs
+               if File.file?(f)
+                 v_file_names.push(f.gsub(v_path+v_enumber+"/",""))
+                 v_cnt = v_cnt + 1
+               end
             end   
             if v_cnt < 1
               Dir.glob(v_path+v_enumber+"/"+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).each do |f|
@@ -301,8 +377,11 @@ class Petscan < ActiveRecord::Base
           elsif !Dir.glob(v_path+e.enumber+"*", File::FNM_CASEFOLD).empty?   or !Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).empty?
             v_cnt = 0
             Dir.glob(v_path+e.enumber+"*", File::FNM_CASEFOLD).each do |f|
-               v_file_names.push(f.gsub(v_path,""))
-               v_cnt = v_cnt + 1
+              # need to exclude directories - so not pick up the dicom dirs
+              if File.file?(f)
+                 v_file_names.push(f.gsub(v_path,""))
+                 v_cnt = v_cnt + 1
+               end
             end   
             if v_cnt < 1
               Dir.glob(v_path+"*"+e.enumber[1..-1]+"*.img", File::FNM_CASEFOLD).each do |f|

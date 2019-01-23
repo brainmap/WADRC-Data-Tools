@@ -875,7 +875,7 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
         sql_sp = "select distinct scan_procedure_id from scan_procedures_vgroups where scan_procedures_vgroups.vgroup_id ="+@appointment.vgroup_id.to_s
         results_sp = connection.execute(sql_sp)  
         results_sp.each do |r_sp|
-               if !params[:petfile].blank? and !params[:petfile][:petfile_autodetect].blank? and params[:petfile][:petfile_autodetect] == "On"
+               if !params[:petfile].blank? and !params[:petfile][:petfile_autodetect].blank? and params[:petfile][:petfile_autodetect] == "On"       
                         @petfiles_dicoms_found_array = @petscan.get_pet_dicoms(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
                         @petfile_header = nil
                         if !@petfiles_dicoms_found_array.nil? and !@petfiles_dicoms_found_array[0].nil? and !@petfiles_dicoms_found_array[1].nil?
@@ -899,7 +899,6 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
                               v_new_petfile.save
                             end
                         end
-                
                         @petfiles_found = @petscan.get_pet_files(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
                         @petfiles_found.each do |pf_name|  # make sure not already in database with this petscan.id
                             v_petfile_check = Petfile.where("file_name in (?) and petscan_id in (?)", pf_name,@petscan.id)
