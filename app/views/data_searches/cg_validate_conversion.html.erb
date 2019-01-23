@@ -77,7 +77,7 @@ v_yes_no = [["Y","Y"],["N","N"]]
    <%end%>
   </tr>
 <tr><% @col_array.each do |col| %>
-	<td><% if !@col_valid_hash[col].nil?
+	<td valign="top"><% if !@col_valid_hash[col].nil?
 	        @col_valid_hash[col].each do |cnt| %>
 		<%=cnt[0]%> &nbsp;&nbsp;&nbsp;&nbsp;<%=cnt[1]%><br>
        <%end
@@ -97,7 +97,7 @@ v_yes_no = [["Y","Y"],["N","N"]]
    <%end%>
   </tr>
 <tr><% @col_array.each do |col| %>
-	<td><% v_cnt = 0
+	<td  valign="top">><% v_cnt = 0
 	 if !@col_not_valid_hash[col].nil?
 	 @col_not_valid_hash[col].each do |cnt| %>
 		<%=cnt[0]%> &nbsp;&nbsp;&nbsp;&nbsp;<%=cnt[1]%><br>
@@ -119,6 +119,27 @@ v_yes_no = [["Y","Y"],["N","N"]]
 		</td></tr>
 		 <%end%>
 
+</table>
+<table><tr><td>
+<b>Validation examples:</b>
+skip_valid_values<br>
+run_count_int<br>
+reggieid<br>
+wrapnum<br>
+subjectid<br>
+date<br>
+1|2|3|4|5|6|7|8|9|10|11<br>
+change|no_change<br>
+range|0|12<br>
+0, 0 Yes | 1, 1 No | 9, 9 Did not answer<br>
+
+<br><br>
+<b>Conversion examples:</b>
+skip_value_conversion<br>
+1, 1 Yes | 0, 0 No | 9, 9 Unknown<br>
+1, UWHC | 2, MCW | 3, CUPH<br>
+</td>
+</tr>
 </table>
 
 <% end %>
