@@ -13865,6 +13865,10 @@ puts sql
                 v_comment = "done "+v_subjectid_v_num+";"+v_comment
                 @schedulerun.comment = "done "+v_subjectid_v_num+";"+@schedulerun.comment
               elsif v_ids_path.include? "scan_archives" or v_ids_path.include? "raw_data"
+
+
+# !!!!!!! NEED TO CHECK IF A RECON IN orig, -- adjust tracker initial note
+# !!!! NEED TO CHECK IF DONE - log? phrase- last line or within certain number of lines of end, count of files?  the 20th frame exists ?
                 v_comment = "scan archive found "+v_subjectid_v_num+"  "+v_check_path_orig+";"+v_comment
                 @schedulerun.comment = "scan archive found "+v_subjectid_v_num+"  "+v_check_path_orig+";"+@schedulerun.comment
                 # do the new processing , make tracker record
