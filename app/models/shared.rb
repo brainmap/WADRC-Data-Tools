@@ -6291,14 +6291,14 @@ def run_pet_pib_dvr_process
          v_email_body = v_email_body+val+"\n "
        end
      end
-
-     if v_notification_uptake_time_array.count > 0
-       v_send_email_flag = "Y"
-       v_email_body = v_email_body+"\n"+@schedule.name+" not run due to wrong uptake time\n"
-       v_notification_run_array.each do |val|
-         v_email_body = v_email_body+val+"\n "
-       end
-     end
+  # dvr no update time value
+  #   if v_notification_uptake_time_array.count > 0
+  #     v_send_email_flag = "Y"
+  #     v_email_body = v_email_body+"\n"+@schedule.name+" not run due to wrong uptake time\n"
+  #     v_notification_run_array.each do |val|
+  #       v_email_body = v_email_body+val+"\n "
+  #     end
+  #   end
      if v_send_email_flag == "Y"
         v_schedule_owner_email_array.each do |e|
             v_subject = "Runs:"+schedule.name 
