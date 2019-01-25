@@ -3233,7 +3233,7 @@ puts v_av1451_petfiles.first.path
      end
      if v_send_email_flag == "Y"
         v_schedule_owner_email_array.each do |e|
-            v_subject = "Runs:"+schedule.name 
+            v_subject = "Runs:"+@schedule.name 
             PandaMailer.send_email(v_subject,{:send_to => e},v_email_body).deliver
           # PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
          end
@@ -4731,7 +4731,7 @@ puts "v_participant.id="+v_participant.id.to_s
      end
      if v_send_email_flag == "Y"
         v_schedule_owner_email_array.each do |e|
-            v_subject = "Runs:"+schedule.name 
+            v_subject = "Runs:"+@schedule.name 
             PandaMailer.send_email(v_subject,{:send_to => e},v_email_body).deliver
          end
      end  
@@ -6301,7 +6301,7 @@ def run_pet_pib_dvr_process
   #   end
      if v_send_email_flag == "Y"
         v_schedule_owner_email_array.each do |e|
-            v_subject = "Runs:"+schedule.name 
+            v_subject = "Runs:"+@schedule.name 
             PandaMailer.send_email(v_subject,{:send_to => e},v_email_body).deliver
          end
      end
@@ -7809,7 +7809,7 @@ puts "v_participant.id="+v_participant.id.to_s
      end
      if v_send_email_flag == "Y"
         v_schedule_owner_email_array.each do |e|
-            v_subject = "Runs:"+schedule.name 
+            v_subject = "Runs:"+@schedule.name 
             PandaMailer.send_email(v_subject,{:send_to => e},v_email_body).deliver
          end
      end 
