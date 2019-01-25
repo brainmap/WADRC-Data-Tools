@@ -3196,7 +3196,7 @@ puts v_av1451_petfiles.first.path
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" run \n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end  
 
@@ -3204,7 +3204,7 @@ puts v_av1451_petfiles.first.path
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" run with nearby mri\n"
        v_notification_near_mri_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end 
 
@@ -3212,7 +3212,7 @@ puts v_av1451_petfiles.first.path
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" not run due to multiple T1 \n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end 
 
@@ -3220,7 +3220,7 @@ puts v_av1451_petfiles.first.path
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" nearer mri found - rerun? \n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end
 
@@ -3228,7 +3228,7 @@ puts v_av1451_petfiles.first.path
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" not run due to wrong uptake time\n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end
      if v_send_email_flag == "Y"
@@ -4694,7 +4694,7 @@ puts "v_participant.id="+v_participant.id.to_s
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" run \n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end  
 
@@ -4702,7 +4702,7 @@ puts "v_participant.id="+v_participant.id.to_s
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" run with nearby mri\n"
        v_notification_near_mri_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end 
 
@@ -4710,7 +4710,7 @@ puts "v_participant.id="+v_participant.id.to_s
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" not run due to multiple T1 \n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end 
 
@@ -4718,7 +4718,7 @@ puts "v_participant.id="+v_participant.id.to_s
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" nearer mri found - rerun? \n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end
 
@@ -4726,7 +4726,7 @@ puts "v_participant.id="+v_participant.id.to_s
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" not run due to wrong uptake time\n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end
      if v_send_email_flag == "Y"
@@ -6264,7 +6264,7 @@ def run_pet_pib_dvr_process
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" run \n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end  
 
@@ -6272,7 +6272,7 @@ def run_pet_pib_dvr_process
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" run with nearby mri\n"
        v_notification_near_mri_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end 
 
@@ -6280,7 +6280,7 @@ def run_pet_pib_dvr_process
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" not run due to multiple T1 \n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end 
 
@@ -6288,7 +6288,7 @@ def run_pet_pib_dvr_process
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" nearer mri found - rerun? \n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end
 
@@ -6296,7 +6296,7 @@ def run_pet_pib_dvr_process
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" not run due to wrong uptake time\n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end
      if v_send_email_flag == "Y"
@@ -7772,7 +7772,7 @@ puts "v_participant.id="+v_participant.id.to_s
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" run \n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end  
 
@@ -7780,7 +7780,7 @@ puts "v_participant.id="+v_participant.id.to_s
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" run with nearby mri\n"
        v_notification_near_mri_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end 
 
@@ -7788,7 +7788,7 @@ puts "v_participant.id="+v_participant.id.to_s
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" not run due to multiple T1 \n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end 
 
@@ -7796,7 +7796,7 @@ puts "v_participant.id="+v_participant.id.to_s
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" nearer mri found - rerun? \n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end
 
@@ -7804,7 +7804,7 @@ puts "v_participant.id="+v_participant.id.to_s
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" not run due to wrong uptake time\n"
        v_notification_run_array.each do |val|
-         v_email_body = v_email_body+v_call+"\n"
+         v_email_body = v_email_body+val+"\n "
        end
      end
      if v_send_email_flag == "Y"
