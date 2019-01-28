@@ -3896,7 +3896,7 @@ puts "global update"
                        v_value_and_meaning_array.shift
                      # extra splits if comma in value
                        if v_value_and_meaning_array.count > 1
-                          v_meaning = v_value_and_meaning_array[0].join(",").strip
+                          v_meaning = v_value_and_meaning_array.join(",").strip
                        else
                           v_meaning = v_value_and_meaning_array[0].strip
                        end
