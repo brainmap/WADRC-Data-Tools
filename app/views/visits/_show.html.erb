@@ -43,6 +43,9 @@
   :MRI_Last_Nicotine_Total_Time => @visit.mrilast_nicotine_totaltime.nil?  ? @visit.mrilast_nicotine_totaltime_min.nil? ? nil : @visit.mrilast_nicotine_totaltime.to_s+" hrs : "+@visit.mrilast_nicotine_totaltime_min.to_s+" mins" :  @visit.mrilast_nicotine_totaltime.to_s+" hrs : "+@visit.mrilast_nicotine_totaltime_min.to_s+" mins" ,
   :MRI_Last_Caffeine_Total_Time => @visit.mrilast_caffeine_totaltime.nil?  ? @visit.mrilast_caffeine_totaltime_min.nil? ? nil : @visit.mrilast_caffeine_totaltime.to_s+" hrs : "+@visit.mrilast_caffeine_totaltime_min.to_s+" mins" :  @visit.mrilast_caffeine_totaltime.to_s+" hrs : "+@visit.mrilast_caffeine_totaltime_min.to_s+" mins" ,
 	
+  :Nicotine_more_history =>@visit.nicotine_more_history.nil? ? nil : @visit.nicotine_more_history,
+
+  :Caffeine_more_history =>@visit.caffeine_more_history.nil? ? nil : @visit.caffeine_more_history,
     })  #:Archive_Dvd =>@visit.archivedvd,:Dicom_DVD => @vgroup.dicom_dvd == 'no' ? nil : @vgroup.dicom_dvd,
     %>
   </div>

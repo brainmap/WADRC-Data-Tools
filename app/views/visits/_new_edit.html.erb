@@ -1,6 +1,8 @@
 <%
 v_yes_no_display = [["Yes","1"], ["No","0"]]
 v_0_30_min_display = [["0","0"], ["30","30"]]
+v_nicotine_more_history = [["Not Currently using Nicotine","Not Currently using Nicotine"],["Nicotine more than 48 hrs ago","Nicotine more than 48 hrs ago"]]
+v_caffeine_more_history = [["Not Currently using Caffeine","Not Currently using Caffeine"],["Caffeine more than 48 hrs ago","Caffeine more than 48 hrs ago"]]
 %>
 <% javascript_tag 'defaults' %>
 <div id="new_edit_form">
@@ -158,6 +160,11 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 											<%= f.select :mrilast_nicotine_totaltime_min, options_for_select(v_0_30_min_display, @visit.mrilast_nicotine_totaltime_min),
 																              {:prompt => 'Select Nicotine mins', :include_blank => true} %> <small> mins</small></td>
       </tr>  
+ <tr>
+        <td align="right"><small><small><%= f.label :Nicotine_more_history %></small></small></td>
+        <td><%= f.select :nicotine_more_history, options_for_select(v_nicotine_more_history, @visit.nicotine_more_history),{:prompt => 'Select if more nicotine history', :include_blank => true} %>
+   </tr>
+
 <tr><td> <%= f.label :Total_Last_Caffeine_Time %></td>
 		<td nowrap> 
       	<%= f.select :mrilast_caffeine_totaltime, options_for_select(0..48, @visit.mrilast_caffeine_totaltime),
@@ -166,6 +173,11 @@ v_0_30_min_display = [["0","0"], ["30","30"]]
 											<%= f.select :mrilast_caffeine_totaltime_min, options_for_select(v_0_30_min_display, @visit.mrilast_caffeine_totaltime_min),
 																              {:prompt => 'Select Caffeine mins', :include_blank => true} %> <small> mins</small></td>
       </tr> 
+
+ <tr>
+        <td align="right"><small><small><%= f.label :Caffeine_more_history %></small></small></td>
+        <td><%= f.select :caffeine_more_history, options_for_select(v_caffeine_more_history, @visit.caffeine_more_history),{:prompt => 'Select if more caffeine history', :include_blank => true} %>
+   </tr>
       	<tr>
       <td><%= f.label(:appointment_coordinator) %></td>
       <td><%= select(:appointment, :appointment_coordinator, Employee.where("1=1").order("status,first_name,last_name").collect {|p| [ p.name, p.id ] }, { :include_blank => "Select Appt Coordinator" }) %></td>
