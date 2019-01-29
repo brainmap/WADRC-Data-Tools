@@ -3211,7 +3211,7 @@ puts v_av1451_petfiles.first.path
      if v_notification_multiple_t1_array.count > 0
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" not run due to multiple T1 \n"
-       v_notification_run_array.each do |val|
+       v_notification_multiple_t1_array.each do |val|
          v_email_body = v_email_body+val+"\n "
        end
      end 
@@ -3219,7 +3219,7 @@ puts v_av1451_petfiles.first.path
      if v_notification_nearer_mri_array.count > 0
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" nearer mri found - rerun? \n"
-       v_notification_run_array.each do |val|
+       v_notification_nearer_mri_array.each do |val|
          v_email_body = v_email_body+val+"\n "
        end
      end
@@ -3227,7 +3227,7 @@ puts v_av1451_petfiles.first.path
      if v_notification_uptake_time_array.count > 0
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" not run due to wrong uptake time\n"
-       v_notification_run_array.each do |val|
+       v_notification_uptake_time_array.each do |val|
          v_email_body = v_email_body+val+"\n "
        end
      end
@@ -4709,7 +4709,7 @@ puts "v_participant.id="+v_participant.id.to_s
      if v_notification_multiple_t1_array.count > 0
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" not run due to multiple T1 \n"
-       v_notification_run_array.each do |val|
+       v_notification_multiple_t1_array.each do |val|
          v_email_body = v_email_body+val+"\n "
        end
      end 
@@ -4717,7 +4717,7 @@ puts "v_participant.id="+v_participant.id.to_s
      if v_notification_nearer_mri_array.count > 0
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" nearer mri found - rerun? \n"
-       v_notification_run_array.each do |val|
+       v_notification_nearer_mri_array.each do |val|
          v_email_body = v_email_body+val+"\n "
        end
      end
@@ -4725,7 +4725,7 @@ puts "v_participant.id="+v_participant.id.to_s
      if v_notification_uptake_time_array.count > 0
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" not run due to wrong uptake time\n"
-       v_notification_run_array.each do |val|
+       v_notification_uptake_time_array.each do |val|
          v_email_body = v_email_body+val+"\n "
        end
      end
@@ -6279,7 +6279,7 @@ def run_pet_pib_dvr_process
      if v_notification_multiple_t1_array.count > 0
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" not run due to multiple T1 \n"
-       v_notification_run_array.each do |val|
+       v_notification_multiple_t1_array.each do |val|
          v_email_body = v_email_body+val+"\n "
        end
      end 
@@ -6287,7 +6287,7 @@ def run_pet_pib_dvr_process
      if v_notification_nearer_mri_array.count > 0
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" nearer mri found - rerun? \n"
-       v_notification_run_array.each do |val|
+       v_notification_nearer_mri_array.each do |val|
          v_email_body = v_email_body+val+"\n "
        end
      end
@@ -6295,7 +6295,7 @@ def run_pet_pib_dvr_process
   #   if v_notification_uptake_time_array.count > 0
   #     v_send_email_flag = "Y"
   #     v_email_body = v_email_body+"\n"+@schedule.name+" not run due to wrong uptake time\n"
-  #     v_notification_run_array.each do |val|
+  #     v_notification_uptake_time_array.each do |val|
   #       v_email_body = v_email_body+val+"\n "
   #     end
   #   end
@@ -7787,7 +7787,7 @@ puts "v_participant.id="+v_participant.id.to_s
      if v_notification_multiple_t1_array.count > 0
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" not run due to multiple T1 \n"
-       v_notification_run_array.each do |val|
+       v_notification_multiple_t1_array.each do |val|
          v_email_body = v_email_body+val+"\n "
        end
      end 
@@ -7795,7 +7795,7 @@ puts "v_participant.id="+v_participant.id.to_s
      if v_notification_nearer_mri_array.count > 0
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" nearer mri found - rerun? \n"
-       v_notification_run_array.each do |val|
+       v_notification_nearer_mri_array.each do |val|
          v_email_body = v_email_body+val+"\n "
        end
      end
@@ -7803,7 +7803,7 @@ puts "v_participant.id="+v_participant.id.to_s
      if v_notification_uptake_time_array.count > 0
        v_send_email_flag = "Y"
        v_email_body = v_email_body+"\n"+@schedule.name+" not run due to wrong uptake time\n"
-       v_notification_run_array.each do |val|
+       v_notification_uptake_time_array.each do |val|
          v_email_body = v_email_body+val+"\n "
        end
      end
