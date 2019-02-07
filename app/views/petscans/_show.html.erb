@@ -24,7 +24,8 @@
       <tr><td colspan="2" align="left"><%= pf.note %></td></tr>
    <% if !pf.path.blank? and File.exists?(pf.path)%>
        <tr><td colspan="2"> <small><small>size <%= File.stat(pf.path).size %></small></small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <% if !@petscan_tracer_file_size_multiple.nil? and !@petscan_tracer_file_size_multiple[@petscan.lookup_pettracer_id.to_s].nil? 
+        <% if !@petscan_tracer_file_size_multiple.nil? and !@petscan_tracer_file_size_multiple[@petscan.lookup_pettracer_id.to_s].nil? and pf.dicom_taghash.blank? 
+          # ADD SLICE COUNT CHECK FOR DICOM? - skipping size check
               if @petscan_tracer_file_size_multiple[@petscan.lookup_pettracer_id.to_s].include?(File.stat(pf.path).size.to_s) %>
                   <small><small> -File is one of the expected sizes for this scan procedure/tracer</small></small>
                <%else%>
