@@ -87,6 +87,6 @@ class PetfilesController < ApplicationController
        @petfile = Petfile.find(params[:id])
     end
    def petfile_params
-          params.require(:petfile).permit(:note,:path,:file_name,:petscan_id,:id)
+          params.require(:petfile).permit(:note,:path,:file_name,:dicom_taghash,:petscan_id,:id)
    end
 end

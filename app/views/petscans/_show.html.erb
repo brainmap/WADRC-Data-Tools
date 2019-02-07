@@ -134,5 +134,13 @@
 
 <br style="clear: both" /><br />
 
-
+<% if !@petfiles.nil? and @petfiles.length >0 %>
+    <% @petfiles.each do |pf| 
+           @v_pf = pf%>
+  <h3>DICOM Header</h3>
+  <div id="dicom_taghash">
+    <%= render :partial => 'dicom_taghash', :locals => { :dataset => @v_pf }%>
+  </div>
+  <%end%>
+<%end%>
 

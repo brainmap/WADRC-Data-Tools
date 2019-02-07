@@ -1,4 +1,5 @@
 require 'tmpdir'
+require 'dicom'
 class Petscan < ActiveRecord::Base
   belongs_to :appointment 
   has_many :petfiles,:class_name =>"Petfile", :dependent => :destroy  
@@ -217,8 +218,9 @@ class Petscan < ActiveRecord::Base
                 # path to copy of dcm in /tmp
                 # read dicom header
                puts "ggggg dcm path local="+lc.to_s
-               header = DICOM::DObject.read(lc.to_s)
-    #puts "header="+header.to_s
+               header = create_dicom_taghash(DICOM::DObject.read(lc.to_s))
+    puts "header="+header.to_s
+
 
                 begin
                   yield lc
@@ -446,6 +448,15 @@ class Petscan < ActiveRecord::Base
   def petscan_appointment_date
       @appointment =Appointment.find(self.appointment_id)
       return @appointment.appointment_date
+  end
+
+ def create_dicom_taghash(header)
+    raise ScriptError, "A DICOM::DObject instance is required" unless header.kind_of? DICOM::DObject
+    h = Hash.new
+    header.children.each do |element|
+      h[element.tag] = {:value => element.instance_variable_get(:@value), :name => element.name}
+    end
+    return h
   end
   # how to order by the appointment_date????? 
   # in the db its regular time, but ror converts it to GMT?  --- actually utc in the database -- add 6 or 5 hours to the access db time during import to msql

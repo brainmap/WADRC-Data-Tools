@@ -1,0 +1,45 @@
+
+<%begin%>
+<% if dataset.dicom_taghash.blank? %>
+aaaaa<br>
+<p><%= "DICOM header not available...." %></p>
+<% elsif dataset.dicom_taghash.to_s[0,3] == "---" %>
+bbbbb <br>
+<p><%= "DICOM header not available. (Not being converted to hash properly.)" %></p>
+<!-- there are :value with multi-row values   -->
+<% else %>
+	<table class="tabular">
+		<tr>
+			<th>Name</th> <th>Tag</th> <th>Value</th>
+		</tr>
+
+	<% 
+	 dataset.dicom_taghash.sort_by{|k,v| k}.each do |tag,info| %>
+		<tr>
+			<td><%= tag%></td>
+			<td><%= info[:name] %></td>
+			<%  # problem with non UTF-8 characters coming in dicoms
+			    info[:value].to_s.encode!('UTF-16', :undef => :replace, :invalid => :replace, :replace => "")
+			    info[:value].to_s.encode!('UTF-8') %>
+						<td><strong><%= info[:value]  %></strong></td>
+		</tr>
+		
+	<% info.each do |tag2,info2|  # scan_archive h5 json hash 
+		if tag2.to_s != "value" and tag2.to_s != "name"%>
+				<tr><td></td>
+			<td><%= tag2 %></td><td><%=info2%></td>
+		</tr>
+
+   <%   end
+       end%>
+	<% end  %>
+	</table>
+<% end %>   
+<%rescue Exception => msg 
+    v_error = msg.to_s   
+    #messed up dicom header?  
+%>
+<p><%= "DICOM header not available." %></p>  
+<%
+ end
+%>
