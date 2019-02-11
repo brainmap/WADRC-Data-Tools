@@ -4638,7 +4638,7 @@ puts "v_participant.id="+v_participant.id.to_s
                           # pib scan should be the same time as the injecvtion time
                           v_call = "date"
                           if (v_uptake_duration.to_i).between?(65,75)
-                             v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer PiB --method MK6240 --uptake '+v_uptake_duration.to_s+' --fid_t1 '+v_preprocessed_path_ti_no_leading_o+' " '  
+                             v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer MK6240 --method SUVR --uptake '+v_uptake_duration.to_s+' --fid_t1 '+v_preprocessed_path_ti_no_leading_o+' " '  
                              v_comment = v_comment +" cmd= "+ v_call+"\n"
                              @schedulerun.comment = v_comment
                              @schedulerun.save
