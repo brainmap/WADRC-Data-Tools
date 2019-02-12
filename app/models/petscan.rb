@@ -178,8 +178,8 @@ class Petscan < ActiveRecord::Base
                 # path to copy of dcm in /tmp
                 # read dicom header
                puts "ggggg dcm path local="+lc.to_s
-               header = DICOM::DObject.read(lc.to_s)
-    #puts "header="+header.to_s
+               header = create_dicom_taghash(DICOM::DObject.read(lc.to_s))
+    #puts "A header="+header.to_s
 
                 begin
                   yield lc
@@ -198,8 +198,8 @@ class Petscan < ActiveRecord::Base
                 # path to copy of dcm in /tmp
                 # read dicom header
                puts "ggggg dcm path local="+lc.to_s
-               header = DICOM::DObject.read(lc.to_s)
-    #puts "header="+header.to_s
+               header = create_dicom_taghash(DICOM::DObject.read(lc.to_s))
+    #puts "Bheader="+header.to_s
 
                 begin
                   yield lc
@@ -219,7 +219,7 @@ class Petscan < ActiveRecord::Base
                 # read dicom header
                puts "ggggg dcm path local="+lc.to_s
                header = create_dicom_taghash(DICOM::DObject.read(lc.to_s))
-    puts "header="+header.to_s
+    #puts "Cheader="+header.to_s
 
 
                 begin
@@ -239,8 +239,8 @@ class Petscan < ActiveRecord::Base
                 # path to copy of dcm in /tmp
                 # read dicom header
                puts "ggggg dcm path local="+lc.to_s
-               header = DICOM::DObject.read(lc.to_s)
-    #puts "header="+header.to_s
+               header = create_dicom_taghash(DICOM::DObject.read(lc.to_s))
+    #puts "Dheader="+header.to_s
 
                 begin
                   yield lc
