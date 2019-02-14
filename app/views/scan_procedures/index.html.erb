@@ -5,6 +5,7 @@
     <tr>
       <th>Code Name</th>
 	      <th>Subjectid Base<br> <small><small>- this is a duplication<br> of the protocol.abbr</small></small></th>
+        <th>Visit Number Abbr.</th>
       <th>Description</th>
 	  <th>Petscan Flag</th>
     <th>Petscan Tracer File Size</th>
@@ -27,6 +28,7 @@
     <tr>
       <td><%= link_to(scan_procedure.codename, '/vgroups/home?vgroups_search[scan_procedure_id][id]='+scan_procedure.id.to_s) %></td>
       <td><%=h scan_procedure.subjectid_base %></td>
+      <td><%=h scan_procedure.visit_number_abbreviation %></td>
       <td><%=h scan_procedure.description %></td>
       <td><%=h scan_procedure.petscan_flag %></td>
        <td><%=h scan_procedure.petscan_tracer_file_size%></td>
