@@ -132,8 +132,10 @@ class Petscan < ActiveRecord::Base
     end
     return v_file_name
   end
+  # need to get multiple pet dicoms
+  def get_pet_dicoms(p_sp_id, p_tracer_id, p_vgroup_id,p_exclude_path_array)
 
-  def get_pet_dicoms(p_sp_id, p_tracer_id, p_vgroup_id)
+puts "hhhhh p_exclude_path_array="+p_exclude_path_array.join(";       ")
 
     v_base_path = Shared.get_base_path()
     v_sp = ScanProcedure.find(p_sp_id)
@@ -150,6 +152,7 @@ class Petscan < ActiveRecord::Base
     #v_key = p_tracer_id.to_s+"_"+v_sp.codename
     v_directory_names = []
     if !v_pet_target_path.blank? #v_pet_target_hash[v_key].blank?
+puts "fffff !v_pet_target_path.blank?"
         v_path = v_base_path+"/raw/"+v_pet_target_path+"/" #v_pet_target_hash[v_key]+"/"
         # check for file with enum 
         vgroup = Vgroup.find(p_vgroup_id)
@@ -173,13 +176,15 @@ class Petscan < ActiveRecord::Base
             Dir.glob(v_check_path+"*").select {|f| 
               Dir.glob(f+"/*").each do |leaf|
               branch = leaf
-              if leaf.to_s =~ /^I\..*(\.bz2)?$|\.dcm(\.bz2)?$|\.[0-9]{2,}(\.bz2)?$/
+      puts "aaaaa leaf="+leaf.to_s
+      puts "dir="+(File.dirname(leaf.to_s)).to_s
+              if leaf.to_s =~ /^I\..*(\.bz2)?$|\.dcm(\.bz2)?$|\.[0-9]{2,}(\.bz2)?$/ and !p_exclude_path_array.include?(File.dirname(leaf.to_s).to_s)
                 lc = local_copy(leaf)
                 # path to copy of dcm in /tmp
                 # read dicom header
-               puts "ggggg dcm path local="+lc.to_s
+               puts "aaggggg dcm path local="+lc.to_s
                header = create_dicom_taghash(DICOM::DObject.read(lc.to_s))
-    #puts "A header="+header.to_s
+    puts "A header="+header.to_s
 
                 begin
                   yield lc
@@ -193,13 +198,20 @@ class Petscan < ActiveRecord::Base
              end
               Dir.glob(f+"/*/*").each do |leaf|
               branch = leaf
-              if leaf.to_s =~ /^I\..*(\.bz2)?$|\.dcm(\.bz2)?$|\.[0-9]{2,}(\.bz2)?$/
+    puts "B leaf.to_s="+leaf.to_s
+    puts "b p_exclude_path_array="+p_exclude_path_array.join("::: ")
+    if !p_exclude_path_array.include?(File.dirname(leaf.to_s).to_s)
+      puts "B not in exclude"
+    else
+      puts "B in exclude"
+    end
+              if leaf.to_s =~ /^I\..*(\.bz2)?$|\.dcm(\.bz2)?$|\.[0-9]{2,}(\.bz2)?$/ and !p_exclude_path_array.include?(File.dirname(leaf.to_s).to_s)
                 lc = local_copy(leaf)
                 # path to copy of dcm in /tmp
                 # read dicom header
-               puts "ggggg dcm path local="+lc.to_s
+               puts "bbbggggg dcm path local="+lc.to_s
                header = create_dicom_taghash(DICOM::DObject.read(lc.to_s))
-    #puts "Bheader="+header.to_s
+    puts "Bheader="+header.to_s
 
                 begin
                   yield lc
@@ -213,13 +225,13 @@ class Petscan < ActiveRecord::Base
              end
               Dir.glob(f+"/*/*/*").each do |leaf|
               branch = leaf
-              if leaf.to_s =~ /^I\..*(\.bz2)?$|\.dcm(\.bz2)?$|\.[0-9]{2,}(\.bz2)?$/
+              if leaf.to_s =~ /^I\..*(\.bz2)?$|\.dcm(\.bz2)?$|\.[0-9]{2,}(\.bz2)?$/ and !p_exclude_path_array.include?(File.dirname(leaf.to_s).to_s)
                 lc = local_copy(leaf)
                 # path to copy of dcm in /tmp
                 # read dicom header
-               puts "ggggg dcm path local="+lc.to_s
+               puts "cccggggg dcm path local="+lc.to_s
                header = create_dicom_taghash(DICOM::DObject.read(lc.to_s))
-    #puts "Cheader="+header.to_s
+    puts "Cheader="+header.to_s
 
 
                 begin
@@ -234,13 +246,13 @@ class Petscan < ActiveRecord::Base
              end
               Dir.glob(f+"/*/*/*/*").each do |leaf|
               branch = leaf
-              if leaf.to_s =~ /^I\..*(\.bz2)?$|\.dcm(\.bz2)?$|\.[0-9]{2,}(\.bz2)?$/
+              if leaf.to_s =~ /^I\..*(\.bz2)?$|\.dcm(\.bz2)?$|\.[0-9]{2,}(\.bz2)?$/ and !p_exclude_path_array.include?(File.dirname(leaf.to_s).to_s)
                 lc = local_copy(leaf)
                 # path to copy of dcm in /tmp
                 # read dicom header
-               puts "ggggg dcm path local="+lc.to_s
+               puts "dddggggg dcm path local="+lc.to_s
                header = create_dicom_taghash(DICOM::DObject.read(lc.to_s))
-    #puts "Dheader="+header.to_s
+    puts "Dheader="+header.to_s
 
                 begin
                   yield lc

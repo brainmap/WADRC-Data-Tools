@@ -536,6 +536,7 @@ class PetscansController < ApplicationController
         @hide_page_flag = 'Y'
       end
     @petscan = Petscan.new(petscan_params)#params[:petscan])
+     v_exclude_path_array = []
     appointment_date = nil
     params[:date][:injectiont][0]="1899"
     params[:date][:injectiont][1]="12"
@@ -645,7 +646,19 @@ class PetscansController < ApplicationController
      end 
           results_sp.each do |r_sp|
                if !params[:petfile].blank? and !params[:petfile][:petfile_autodetect].blank? and params[:petfile][:petfile_autodetect] == "On"
-                        @petfiles_dicoms_found_array = @petscan.get_pet_dicoms(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
+                     v_keep_looking_for_pet_dicoms = 1
+                     v_cnt_escape = 0  # incrment and exit if infinite looping
+                     while  v_keep_looking_for_pet_dicoms > 0 # keep looking   
+                        v_cnt_escape = v_cnt_escape + 1
+
+                        @petfiles_dicoms_found_array = @petscan.get_pet_dicoms(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id, v_exclude_path_array)
+ 
+                        if @petfiles_dicoms_found_array.nil? or (!@petfiles_dicoms_found_array.nil? and  @petfiles_dicoms_found_array[0].nil? ) or v_cnt_escape > 10
+                            v_keep_looking_for_pet_dicoms = 0
+                        else
+                          petfile_dicom_dir = File.dirname(@petfiles_dicoms_found_array[0])
+                           v_exclude_path_array.push(petfile_dicom_dir)
+                        end
                         # [0] is path, [1] is dicom header
                         @petfile_header = nil
                         if !@petfiles_dicoms_found_array.nil? and !@petfiles_dicoms_found_array[0].nil? and !@petfiles_dicoms_found_array[1].nil?
@@ -653,6 +666,7 @@ class PetscansController < ApplicationController
                            # what to do with dicom header
                            # GE vs Siemans machine
                            petfile_dicom_dir = File.dirname(@petfiles_dicoms_found_array[0])
+                           v_exclude_path_array.push(petfile_dicom_dir.to_s)
                            v_petfile_check = Petfile.where("file_name in (?) and petscan_id in (?)", petfile_dicom_dir.to_s,@petscan.id)
                             if !v_petfile_check.nil? and v_petfile_check.length > 0
                                  v_petfile_check.each do |pf_check|
@@ -671,6 +685,7 @@ class PetscansController < ApplicationController
                               v_new_petfile.save
                             end
                         end
+                       end
 
 
 
@@ -765,6 +780,8 @@ class PetscansController < ApplicationController
     v_dicom_scanner_location = ""
     v_dicom_scanner_name = ""
     v_dicom_scan_date = ""
+
+    v_exclude_path_array = []
 
     @petscan = Petscan.where("petscans.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
@@ -875,10 +892,10 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
           end
        end
      end
-puts "ggggggg"
+
     respond_to do |format|
       if @petscan.update(petscan_params)#params[:petscan], :without_protection => true)
-  puts "hhhhhhhh"
+
         @appointment = Appointment.find(@petscan.appointment_id)
         @vgroup = Vgroup.find(@appointment.vgroup_id)
         # get sp_id's
@@ -886,72 +903,27 @@ puts "ggggggg"
         sql_sp = "select distinct scan_procedure_id from scan_procedures_vgroups where scan_procedures_vgroups.vgroup_id ="+@appointment.vgroup_id.to_s
         results_sp = connection.execute(sql_sp)  
         results_sp.each do |r_sp|
-               if !params[:petfile].blank? and !params[:petfile][:petfile_autodetect].blank? and params[:petfile][:petfile_autodetect] == "On"       
-                        @petfiles_dicoms_found_array = @petscan.get_pet_dicoms(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
+               if !params[:petfile].blank? and !params[:petfile][:petfile_autodetect].blank? and params[:petfile][:petfile_autodetect] == "On"  
+                     v_keep_looking_for_pet_dicoms = 1
+                     v_cnt_escape = 0  # incrment and exit if infinite looping
+                     while  v_keep_looking_for_pet_dicoms > 0 # keep looking   
+                        v_cnt_escape = v_cnt_escape + 1 
+                        @petfiles_dicoms_found_array = @petscan.get_pet_dicoms(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id, v_exclude_path_array)
+ 
+                        if @petfiles_dicoms_found_array.nil? or (!@petfiles_dicoms_found_array.nil? and  @petfiles_dicoms_found_array[0].nil? ) or v_cnt_escape > 10
+                            v_keep_looking_for_pet_dicoms = 0
+                        else
+                          petfile_dicom_dir = File.dirname(@petfiles_dicoms_found_array[0])
+                           v_exclude_path_array.push(petfile_dicom_dir)
+                        end
                         @petfile_header = nil
                         if !@petfiles_dicoms_found_array.nil? and !@petfiles_dicoms_found_array[0].nil? and !@petfiles_dicoms_found_array[1].nil?
                           @petfile_header = @petfiles_dicoms_found_array[1]
-                          if "ONE" == "ONE" # skipping - Discovery MI dicoms behave Biograph Horizon
-                           v_dicom_scanner_name = @petfile_header['0008,1090'][:value].to_s
-                           if v_dicom_scanner_name.include?("Discovery MI") 
-                             if params[:petscan][:scanner_name].nil? or params[:petscan][:scanner_name].blank? or params[:petscan][:scanner_name].include?("elect")
-                                params[:petscan][:scanner_name] = v_dicom_scanner_name
-                                @petscan.scanner_name = v_dicom_scanner_name
-                                @petscan.save
-                             end
-                             v_dicom_tracer = @petfile_header['0008,103E'][:value].to_s
-                             #0008,103E Series Description  AV_1451 30 MIN DYN
-                             # need some interpretation
-                             if v_dicom_tracer.include?("PiB") # MK6240
-                                 v_dicom_tracer_id = 1
-                             elsif v_dicom_tracer.include?("FDG") # MK6240
-                                 v_dicom_tracer_id = 2
-                             elsif v_dicom_tracer.include?("WAY") # MK6240
-                                 v_dicom_tracer_id = 3
-                             elsif v_dicom_tracer.include?("PBR28") # MK6240
-                                 v_dicom_tracer_id = 5
-                             elsif v_dicom_tracer.include?("AV45") # MK6240
-                                 v_dicom_tracer_id = 6
-                             elsif v_dicom_tracer.include?("1451") # AV_1451
-                                 v_dicom_tracer_id = 9
-                             elsif v_dicom_tracer.include?("NeuraCeq") # MK6240
-                                 v_dicom_tracer_id = 10
-                             elsif v_dicom_tracer.include?("6240") # MK6240
-                                 v_dicom_tracer_id = 11
-                             elsif v_dicom_tracer.include?("UCB-J") # MK6240
-                                 v_dicom_tracer_id = 12 
-                             end
-                             v_dicom_timezone_offset = @petfile_header['0008,0201'][:value].to_s
-                             #0008,0201 Timezone Offset From UTC  -0600
-                             v_dicom_scan_start_time = @petfile_header['0008,0031'][:value].to_s
-                             #0008,0031 Series Time. HHMMSS
-                             if params[:petscan][:scanstarttime].blank?
-                              # need to move the injection/scan start time to times in database WITH the GMT displacement
-                                # running up against UTC displayed /GMT saved in database 
-                                # and the petscan injection/scan start dates ignoring the GMT displacement
-                                # need to -06 hours , but from hh - and if displayment > hh, need the 12 back wrap
-
-                                scanstarttime =  "1899-12-30 "+v_dicom_scan_start_time[0]+v_dicom_scan_start_time[1]+":"+v_dicom_scan_start_time[2]+v_dicom_scan_start_time[3]
-                                #params[:petscan][:scanstarttime] = DateTime.strptime(scanstarttime, "%Y-%m-%d %H:%M") #scanstarttime
-                                #@petscan.scanstarttime = DateTime.strptime(scanstarttime, "%Y-%m-%d %H:%M")
-                                #@petscan.save
-     
-                             end
-                             v_dicom_scanner_location = @petfile_header['0008,0080'][:value].to_s    # Institution Name
-                             if params[:petscan][:scanner_location].nil? or params[:petscan][:scanner_location].blank? or params[:petscan][:scanner_location].include?("elect")
-                                params[:petscan][:scanner_location] = v_dicom_scanner_location
-                                @petscan.scanner_location = v_dicom_scanner_location
-                                @petscan.save
-                             end
-    
-                             v_dicom_scan_date = @petfile_header['0008,0020'][:value].to_s  # Study Date
-
-                             # raise warnings 
-                           end
-                          end
+                          
                            # what to do with dicom header
                            # GE vs Siemans machine
                            petfile_dicom_dir = File.dirname(@petfiles_dicoms_found_array[0])
+                           v_exclude_path_array.push(petfile_dicom_dir.to_s)
                            v_petfile_check = Petfile.where("file_name in (?) and petscan_id in (?)", petfile_dicom_dir.to_s,@petscan.id)
                           
                             if !v_petfile_check.nil? and v_petfile_check.length > 0
@@ -971,6 +943,7 @@ puts "ggggggg"
                               v_new_petfile.save
                             end
                         end
+                      end # end of dicom while
                         @petfiles_found = @petscan.get_pet_files(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id)
                         @petfiles_found.each do |pf_name|  # make sure not already in database with this petscan.id
                             v_petfile_check = Petfile.where("file_name in (?) and petscan_id in (?)", pf_name,@petscan.id)
