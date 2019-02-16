@@ -210,10 +210,23 @@ or   image_dataset_quality_checks.omnibus_f  = 'Severe'  or  spm_mask  = 'Severe
 
   def get_enrollment_id_from_subjectid_v(p_subjectid_v)
         v_enrollment_id = nil
-        v_subjectid_chop = (p_subjectid_v).gsub('_v2','').gsub('_v3','').gsub('_v4','').gsub('_v5','')
+        v_subjectid_chop = (p_subjectid_v).gsub('_v2','').gsub('_v3','').gsub('_v4','').gsub('_v5','').gsub('_v6','').gsub('_v7','')
         v_enrollment = Enrollment.where("enumber in (?)",v_subjectid_chop)
         if !v_enrollment[0].nil? 
             v_enrollment_id = v_enrollment[0].id
+        elsif v_subjectid_chop.include?("_") # hunt thru visit_number_abbreviation
+             # split off the last _<part> -- check if a visit_number_abbreviation
+             # look at the subject_base subjectid_base
+             v_subjectid_chop_parts_array = v_subjectid_chop.split("_")
+             v_last = v_subjectid_chop_parts_array.last
+             v_sp = ScanProcedure.where("scan_procedures.subjectid_base like '"+v_subjectid_chop_parts_array[0]+"%' and scan_procedures.visit_number_abbreviation in (?)",v_last )
+             if !v_sp.nil? and v_sp.count > 0
+               v_subjectid_chop = (p_subjectid_v).gsub(v_last,'')
+               v_enrollment = Enrollment.where("enumber in (?)",v_subjectid_chop)
+               if !v_enrollment[0].nil? 
+                  v_enrollment_id = v_enrollment[0].id 
+               end
+             end
         end    
     return v_enrollment_id
   end
@@ -229,6 +242,10 @@ or   image_dataset_quality_checks.omnibus_f  = 'Severe'  or  spm_mask  = 'Severe
           v_visit_number = 4
     elsif p_subjectid_v.include?('_v5')
           v_visit_number = 5
+    elsif p_subjectid_v.include?('_v6')
+          v_visit_number = 6
+    elsif p_subjectid_v.include?('_v7')
+          v_visit_number = 7
     end
     if(v_subjectid_chop.include? "wscs")
        v_subjectid_chop = "wscs"  # they have another letter 
@@ -236,7 +253,18 @@ or   image_dataset_quality_checks.omnibus_f  = 'Severe'  or  spm_mask  = 'Severe
     if v_visit_number > 1
       scan_procedures = ScanProcedure.where("subjectid_base ='"+v_subjectid_chop+"' and codename like '%visit"+v_visit_number.to_s+"'")
     else
-      scan_procedures = ScanProcedure.where("subjectid_base ='"+v_subjectid_chop+"' and ( codename like '%visit"+v_visit_number.to_s+"' or codename not like '%visit%' )")
+        if p_subjectid_v.include?("_") # hunt thru visit_number_abbreviation
+             # split off the last _<part> -- check if a visit_number_abbreviation
+             # look at the subject_base subjectid_base
+             v_subjectid_parts_array = p_subjectid_v.split("_")
+             v_last = v_subjectid_chop_parts_array.last
+             scan_procedures = ScanProcedure.where("scan_procedures.subjectid_base like '"+v_subjectid_parts_array[0]+"%' and scan_procedures.visit_number_abbreviation in (?)",v_last )
+             if scan_procedures.nil or (!scan_procedures.nil? and scan_procedures.count > 0)
+                scan_procedures = ScanProcedure.where("subjectid_base ='"+v_subjectid_chop+"' and ( codename like '%visit"+v_visit_number.to_s+"' or codename not like '%visit%' )")
+             end
+          else
+            scan_procedures = ScanProcedure.where("subjectid_base ='"+v_subjectid_chop+"' and ( codename like '%visit"+v_visit_number.to_s+"' or codename not like '%visit%' )")
+          end
     end
     v_cnt = 0
     scan_procedures.each do |sp|
@@ -246,7 +274,7 @@ or   image_dataset_quality_checks.omnibus_f  = 'Severe'  or  spm_mask  = 'Severe
       puts "MULTIPLE SP "+p_subjectid_v
     end
     if v_cnt < 1
-        v_subjectid = p_subjectid_v.gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
+        v_subjectid = p_subjectid_v.gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","").gsub("_v6","").gsub("_v7","")
 
         scan_procedures = ScanProcedure.where("scan_procedures.id in 
           ( select spvg.scan_procedure_id from scan_procedures_vgroups spvg,enrollment_vgroup_memberships evgm, enrollments e
@@ -546,7 +574,8 @@ or   image_dataset_quality_checks.omnibus_f  = 'Severe'  or  spm_mask  = 'Severe
       @schedulerun.comment =v_comment[0..1990]
       @schedulerun.save
       # update schedulerun comment - prepend 
-      v_subjectid_chop = (r[0]).gsub('_v2','').gsub('_v3','').gsub('_v4','').gsub('_v5','')
+      v_subjectid_chop = (r[0]).gsub('_v2','').gsub('_v3','').gsub('_v4','').gsub('_v5','').gsub('_v6','').gsub('_v7','')
+      # no adjustment for scan_procedures.visit_number_abbreviation - adrc follows visit# convention
       sql_vgroup = "select DATE_FORMAT(max(v.vgroup_date),'%Y%m%d' ) from vgroups v where v.id in (select evm.vgroup_id from enrollment_vgroup_memberships evm, enrollments e where evm.enrollment_id = e.id and e.enumber ='"+v_subjectid_chop+"')
     and v.id in (select spvg.vgroup_id from scan_procedures_vgroups spvg where spvg.scan_procedure_id = "+r[1].to_s+")"
       results_vgroup = connection.execute(sql_vgroup)
@@ -1274,7 +1303,14 @@ end
             v_visit_number ="_v4"
         elsif sp.codename.include?("visit5")
             v_visit_number ="_v5"
+        elsif sp.codename.include?("visit6")
+            v_visit_number ="_v6"
+        elsif sp.codename.include?("visit7")
+            v_visit_number ="_v7"
         end   
+        if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+           v_visit_number = "_"+sp.visit_number_abbreviation
+        end
         v_preprocessed_full_path = v_preprocessed_path+sp.codename  
         if File.directory?(v_preprocessed_full_path)
           sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
@@ -2110,7 +2146,14 @@ def  run_pet_av1451_harvest
             v_visit_number ="_v4"
       elsif sp.codename.include?("visit5")
             v_visit_number ="_v5"
-      end  
+      elsif sp.codename.include?("visit6")
+            v_visit_number ="_v6"
+      elsif sp.codename.include?("visit7")
+            v_visit_number ="_v7"
+      end   
+      if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+           v_visit_number = "_"+sp.visit_number_abbreviation
+      end
       v_codename_hyphen =  sp.codename
       v_codename_hyphen = v_codename_hyphen.gsub(".","-")
 
@@ -3339,7 +3382,14 @@ def  run_pet_mk6240_harvest
             v_visit_number ="_v4"
       elsif sp.codename.include?("visit5")
             v_visit_number ="_v5"
-      end  
+      elsif sp.codename.include?("visit6")
+            v_visit_number ="_v6"
+      elsif sp.codename.include?("visit7")
+            v_visit_number ="_v7"
+      end   
+      if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+           v_visit_number = "_"+sp.visit_number_abbreviation
+      end
       v_codename_hyphen =  sp.codename
       v_codename_hyphen = v_codename_hyphen.gsub(".","-")
 
@@ -4840,7 +4890,14 @@ def  run_pet_pib_dvr_harvest
             v_visit_number ="_v4"
       elsif sp.codename.include?("visit5")
             v_visit_number ="_v5"
-      end  
+      elsif sp.codename.include?("visit6")
+            v_visit_number ="_v6"
+      elsif sp.codename.include?("visit7")
+            v_visit_number ="_v7"
+      end   
+      if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+           v_visit_number = "_"+sp.visit_number_abbreviation
+      end 
       v_codename_hyphen =  sp.codename
       v_codename_hyphen = v_codename_hyphen.gsub(".","-")
 
@@ -6406,7 +6463,14 @@ def  run_pet_pib_suvr_harvest
             v_visit_number ="_v4"
       elsif sp.codename.include?("visit5")
             v_visit_number ="_v5"
-      end  
+      elsif sp.codename.include?("visit6")
+            v_visit_number ="_v6"
+      elsif sp.codename.include?("visit7")
+            v_visit_number ="_v7"
+      end   
+      if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+           v_visit_number = "_"+sp.visit_number_abbreviation
+      end 
       v_codename_hyphen =  sp.codename
       v_codename_hyphen = v_codename_hyphen.gsub(".","-")
 
@@ -8046,7 +8110,14 @@ def run_sleep_t1
             v_visit_number ="_v4"
         elsif sp.codename.include?("visit5")
             v_visit_number ="_v5"
+        elsif sp.codename.include?("visit6")
+            v_visit_number ="_v6"
+        elsif sp.codename.include?("visit7")
+            v_visit_number ="_v7"
         end   
+        if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+           v_visit_number = "_"+sp.visit_number_abbreviation
+        end  
         v_preprocessed_full_path = v_preprocessed_path+sp.codename  
         if File.directory?(v_preprocessed_full_path)
           sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
@@ -8437,7 +8508,14 @@ def run_sleep_t1
             v_visit_number ="_v4"
       elsif sp.codename.include?("visit5")
             v_visit_number ="_v5"
+      elsif sp.codename.include?("visit6")
+            v_visit_number ="_v6"
+      elsif sp.codename.include?("visit7")
+            v_visit_number ="_v7"
       end   
+      if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+           v_visit_number = "_"+sp.visit_number_abbreviation
+      end  
       v_preprocessed_full_path = v_preprocessed_path+sp.codename  
       v_log_msg = "Starting scan protocol "+v_preprocessed_full_path
       process_log_append(v_log_path, v_log_msg)
@@ -8625,6 +8703,13 @@ def run_sleep_t1
             v_visit_number ="_v4"
         elsif sp.codename.include?("visit5")
             v_visit_number ="_v5"
+        elsif sp.codename.include?("visit6")
+            v_visit_number ="_v6"
+        elsif sp.codename.include?("visit7")
+            v_visit_number ="_v7"
+        end   
+        if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+           v_visit_number = "_"+sp.visit_number_abbreviation
         end   
         v_preprocessed_full_path = v_preprocessed_path+sp.codename  
         if File.directory?(v_preprocessed_full_path)
@@ -9165,6 +9250,9 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
                  v_number = "_v7"
              elsif v_codename.include? "visit8"
                  v_number = "_v8"
+             end   
+             if !sp_array.first.visit_number_abbreviation.nil? and sp_array.first.visit_number_abbreviation > "" and v_number == ""
+                v_number = "_"+sp_array.first.visit_number_abbreviation
              end
              # issue with secondary scans into one session
              if !v_secondary_key.blank?
@@ -9937,6 +10025,13 @@ puts "hhhhh ="+sql_update
                 v_visit_number ="_v4"
               elsif sp.codename.include?("visit5")
                 v_visit_number ="_v5"
+              elsif sp.codename.include?("visit6")
+                v_visit_number ="_v6"
+              elsif sp.codename.include?("visit7")
+                v_visit_number ="_v7"
+              end   
+              if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+                      v_visit_number = "_"+sp.visit_number_abbreviation
               end
                if no_mri_path_sp_list.include?(sp.codename)
                  v_mri = ""
@@ -10313,7 +10408,19 @@ puts "ppppppp "+dir_name_array[0]
             t_now = Time.now
             v_log = v_log + "starting "+r[2]+"   "+ t_now.strftime("%Y%m%d:%H:%M")+"\n"
             v_subjectid_v_num = r[2]
-            v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
+            v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","").gsub("_v6","").gsub("_v7","")
+            v_test_enrollment = Enrollment.where("enumber in (?)",v_subjectid)
+            if !v_test_enrollment[0].nil? 
+                 # all good
+            elsif v_subjectid.include?("_") # hunt thru visit_number_abbreviation
+               v_sp = ScanProcedure.find(r[1]) # scan_procedure_id
+               if !v_sp.nil?    
+                 if !v_sp.visit_number_abbreviation.nil? and v_sp.visit_number_abbreviation > "" 
+                   v_subjectid = v_subjectid.gsub("_"+sp.visit_number_abbreviation,"") 
+                 end
+               end
+            end 
+
             # fs subjects dir  --- eventually use good2go fs edited dir as default
             v_fs_subjects_dir = v_base_path+"/preprocessed/modalities/freesurfer/orig_recon"
             if !r[7].blank? 
@@ -10504,7 +10611,14 @@ def  run_asl_harvest
             v_visit_number ="_v4"
       elsif sp.codename.include?("visit5")
             v_visit_number ="_v5"
-      end  
+      elsif sp.codename.include?("visit6")
+            v_visit_number ="_v6"
+      elsif sp.codename.include?("visit7")
+            v_visit_number ="_v7"
+      end   
+      if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+           v_visit_number = "_"+sp.visit_number_abbreviation
+      end
       v_codename_hyphen =  sp.codename
       v_codename_hyphen = v_codename_hyphen.gsub(".","-")
 
@@ -11282,7 +11396,14 @@ end
                 v_visit_number ="_v4"
               elsif sp.codename.include?("visit5")
                 v_visit_number ="_v5"
-              end
+              elsif sp.codename.include?("visit6")
+                v_visit_number ="_v6"
+              elsif sp.codename.include?("visit7")
+                v_visit_number ="_v7"
+            end   
+            if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+               v_visit_number = "_"+sp.visit_number_abbreviation
+            end
                if no_mri_path_sp_list.include?(sp.codename)
                  v_mri = ""
                 else
@@ -11491,6 +11612,13 @@ end
                   v_visit_number ="_v4"
                elsif sp.codename.include?("visit5")
                   v_visit_number ="_v5"
+               elsif sp.codename.include?("visit6")
+                  v_visit_number ="_v6"
+               elsif sp.codename.include?("visit7")
+                  v_visit_number ="_v7"
+               end   
+               if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+                   v_visit_number = "_"+sp.visit_number_abbreviation
                end
                 # petscans.lookup_pettracer_id = 2 ==> fdg
                 v_preprocessed_full_path = v_preprocessed_path+sp.codename
@@ -11636,6 +11764,11 @@ end
             v_subject = (trf.subjectid).gsub(/_v4/,"")+trf.secondary_key+"_v4"
           elsif trf.subjectid.include?("_v5")
             v_subject = (trf.subjectid).gsub(/_v5/,"")+trf.secondary_key+"_v5"
+          elsif trf.subjectid.include?("_v6")
+            v_subject = (trf.subjectid).gsub(/_v6/,"")+trf.secondary_key+"_v6"
+          elsif trf.subjectid.include?("_v7")
+            v_subject = (trf.subjectid).gsub(/_v7/,"")+trf.secondary_key+"_v7"
+          # check if v_subject has "_" etc.  UP TO HERE
           else
              v_subject = trf.subjectid+trf.secondary_key
           end
@@ -11726,6 +11859,10 @@ end
             v_subject = (trf.subjectid).gsub(/_v4/,"")+trf.secondary_key+"_v4"
           elsif trf.subjectid.include?("_v5")
             v_subject = (trf.subjectid).gsub(/_v5/,"")+trf.secondary_key+"_v5"
+          elsif trf.subjectid.include?("_v6")
+            v_subject = (trf.subjectid).gsub(/_v6/,"")+trf.secondary_key+"_v6"
+          elsif trf.subjectid.include?("_v7")
+            v_subject = (trf.subjectid).gsub(/_v7/,"")+trf.secondary_key+"_7"
           else
              v_subject = trf.subjectid+trf.secondary_key
           end
@@ -11972,6 +12109,13 @@ end
                 v_visit_number ="_v4"
               elsif sp.codename.include?("visit5")
                 v_visit_number ="_v5"
+              elsif sp.codename.include?("visit6")
+                v_visit_number ="_v6"
+              elsif sp.codename.include?("visit7")
+                v_visit_number ="_v7"
+              end   
+              if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+                v_visit_number = "_"+sp.visit_number_abbreviation
               end
                if no_mri_path_sp_list.include?(sp.codename)
                  v_mri = ""
@@ -12180,7 +12324,14 @@ end
                 v_visit_number ="_v4"
               elsif sp.codename.include?("visit5")
                 v_visit_number ="_v5"
-              end
+              elsif sp.codename.include?("visit6")
+                v_visit_number ="_v6"
+              elsif sp.codename.include?("visit7")
+                v_visit_number ="_v7"
+             end   
+             if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+                v_visit_number = "_"+sp.visit_number_abbreviation
+             end
                if no_mri_path_sp_list.include?(sp.codename)
                  v_mri = ""
                 else
@@ -12383,7 +12534,18 @@ end
           t_now = Time.now
           v_log = v_log + "starting "+r[2]+"   "+ t_now.strftime("%Y%m%d:%H:%M")+"\n"
           v_subjectid_v_num = r[2]
-          v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
+          v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","").gsub("_v6","").gsub("_v7","")
+            v_test_enrollment = Enrollment.where("enumber in (?)",v_subjectid)
+            if !v_test_enrollment[0].nil? 
+                 # all good
+            elsif v_subjectid.include?("_") # hunt thru visit_number_abbreviation
+               v_sp = ScanProcedure.find(r[1]) # scan_procedure_id
+               if !v_sp.nil?    
+                 if !v_sp.visit_number_abbreviation.nil? and v_sp.visit_number_abbreviation > "" 
+                   v_subjectid = v_subjectid.gsub("_"+sp.visit_number_abbreviation,"") 
+                 end
+               end
+            end
           # get location
           sql_loc = "select distinct v.path from visits v where v.appointment_id in (select a.id from appointments a, enrollment_vgroup_memberships evg, scan_procedures_vgroups spv where a.vgroup_id = evg.vgroup_id  and evg.enrollment_id = "+r[0].to_s+"  and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id = "+r[1].to_s+")"
           results_loc = connection.execute(sql_loc)
@@ -12553,7 +12715,18 @@ end
           v_subjectid_v_num = r[2]
           @schedulerun.comment = "start "+v_subjectid_v_num+" "+v_comment_base
            @schedulerun.save
-          v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
+          v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","").gsub("_v6","").gsub("_v7","")
+            v_test_enrollment = Enrollment.where("enumber in (?)",v_subjectid)
+            if !v_test_enrollment[0].nil? 
+                 # all good
+            elsif v_subjectid.include?("_") # hunt thru visit_number_abbreviation
+               v_sp = ScanProcedure.find(r[1]) # scan_procedure_id
+               if !v_sp.nil?    
+                 if !v_sp.visit_number_abbreviation.nil? and v_sp.visit_number_abbreviation > "" 
+                   v_subjectid = v_subjectid.gsub("_"+sp.visit_number_abbreviation,"") 
+                 end
+               end
+            end
           # get location
           sql_loc = "select distinct v.path from visits v where v.appointment_id in (select a.id from appointments a, enrollment_vgroup_memberships evg, scan_procedures_vgroups spv where a.vgroup_id = evg.vgroup_id  and evg.enrollment_id = "+r[0].to_s+"  and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id = "+r[1].to_s+")"
           results_loc = connection.execute(sql_loc)
@@ -12646,7 +12819,18 @@ puts "DDD mainrun"
           t_now = Time.now
           v_log = v_log + "starting "+r[2]+"   "+ t_now.strftime("%Y%m%d:%H:%M")+"\n"
           v_subjectid_v_num = r[2]
-          v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","")
+          v_subjectid = r[2].gsub("_v2","").gsub("_v3","").gsub("_v4","").gsub("_v5","").gsub("_v6","").gsub("_v7","")
+            v_test_enrollment = Enrollment.where("enumber in (?)",v_subjectid)
+            if !v_test_enrollment[0].nil? 
+                 # all good
+            elsif v_subjectid.include?("_") # hunt thru visit_number_abbreviation
+               v_sp = ScanProcedure.find(r[1]) # scan_procedure_id
+               if !v_sp.nil?    
+                 if !v_sp.visit_number_abbreviation.nil? and v_sp.visit_number_abbreviation > "" 
+                   v_subjectid = v_subjectid.gsub("_"+sp.visit_number_abbreviation,"") 
+                 end
+               end
+            end
           # get location
           sql_loc = "select distinct v.path from visits v where v.appointment_id in (select a.id from appointments a, enrollment_vgroup_memberships evg, scan_procedures_vgroups spv where a.vgroup_id = evg.vgroup_id  and evg.enrollment_id = "+r[0].to_s+"  and a.vgroup_id = spv.vgroup_id and spv.scan_procedure_id = "+r[1].to_s+")"
           results_loc = connection.execute(sql_loc)
@@ -12793,6 +12977,13 @@ puts "AAAAAAA="+v_log
             v_visit_number ="_v4"
         elsif sp.codename.include?("visit5")
             v_visit_number ="_v5"
+        elsif sp.codename.include?("visit6")
+            v_visit_number ="_v6"
+        elsif sp.codename.include?("visit7")
+            v_visit_number ="_v7"
+        end   
+        if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+           v_visit_number = "_"+sp.visit_number_abbreviation
         end   
         v_preprocessed_full_path = v_preprocessed_path+sp.codename  
         if File.directory?(v_preprocessed_full_path)
@@ -13045,6 +13236,13 @@ puts "AAAAAAA="+v_log
                   v_visit_number ="_v4"
                elsif sp.codename.include?("visit5")
                   v_visit_number ="_v5"
+               elsif sp.codename.include?("visit6")
+                  v_visit_number ="_v6"
+               elsif sp.codename.include?("visit7")
+                  v_visit_number ="_v7"
+               end   
+               if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+                 v_visit_number = "_"+sp.visit_number_abbreviation
                end
 
                 v_preprocessed_full_path = v_preprocessed_path+sp.codename
@@ -13653,6 +13851,17 @@ puts sql
             elsif v_scan_procedure_name.include? "visit7"
               v_visit_number = "_v7"
             end
+            if v_visit_number.blank?
+               v_sp = ScanProcedure.where("codename in (?)",v_scan_procedure_name)
+               if !v_sp.nil?    
+                 if !v_sp.visit_number_abbreviation.nil? and v_sp.visit_number_abbreviation > "" 
+                   v_visit_number = "_"+sp.visit_number_abbreviation 
+                 end
+               end
+
+            end
+
+
             if v_path_array[5] == "mri"
               v_subjectid_exam_date_array = v_path_array[6].split("_")
               v_subjectid = v_subjectid_exam_date_array[0]
@@ -14519,6 +14728,7 @@ puts "v_analyses_path="+v_analyses_path
           puts "setting the e.id"
           # update all the 
                 # update enrollment -- make into a function?
+                # NEED TO REPLACE THE t.subjectid based on sp.visit_number_abbreviation
                 sql = "update cg_pcvipr_values_new  t set t.enrollment_id = ( select e.id from enrollments e where e.enumber = replace(replace(replace(replace(t.subjectid,'_v2',''),'_v3',''),'_v4',''),'_v5',''))"
                 results = connection.execute(sql)
                 # secondary key
@@ -15004,6 +15214,13 @@ puts "v_analyses_path="+v_analyses_path
                   v_visit_number ="_v4"
                elsif sp.codename.include?("visit5")
                   v_visit_number ="_v5"
+               elsif sp.codename.include?("visit6")
+                  v_visit_number ="_v6"
+               elsif sp.codename.include?("visit7")
+                  v_visit_number ="_v7"
+               end   
+               if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+                  v_visit_number = "_"+sp.visit_number_abbreviation
                end
 
                 v_preprocessed_full_path = v_preprocessed_path+sp.codename
@@ -15117,6 +15334,13 @@ puts "v_analyses_path="+v_analyses_path
               v_visit_number ="_v4"
           elsif sp.codename.include?("visit5")
               v_visit_number ="_v5"
+          elsif sp.codename.include?("visit6")
+            v_visit_number ="_v6"
+          elsif sp.codename.include?("visit7")
+            v_visit_number ="_v7"
+          end   
+          if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+              v_visit_number = "_"+sp.visit_number_abbreviation
           end
           if no_mri_path_sp_list.include?(sp.codename)
               v_mri = ""
@@ -15476,6 +15700,13 @@ puts "v_analyses_path="+v_analyses_path
               v_visit_number ="_v4"
           elsif sp.codename.include?("visit5")
               v_visit_number ="_v5"
+          elsif sp.codename.include?("visit6")
+            v_visit_number ="_v6"
+          elsif sp.codename.include?("visit7")
+            v_visit_number ="_v7"
+          end   
+          if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+             v_visit_number = "_"+sp.visit_number_abbreviation
           end
           if no_mri_path_sp_list.include?(sp.codename)
               v_mri = ""
@@ -15717,7 +15948,7 @@ puts "v_analyses_path="+v_analyses_path
       v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
       @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp).where("scan_procedures.codename in ('asthana.adrc-clinical-core.visit1')")
       @scan_procedures.each do |sp|
-          v_visit_number =""
+          v_visit_number ="" # not being used
           if sp.codename.include?("visit2")
               v_visit_number ="_v2"
           elsif sp.codename.include?("visit3")
@@ -15726,6 +15957,13 @@ puts "v_analyses_path="+v_analyses_path
               v_visit_number ="_v4"
           elsif sp.codename.include?("visit5")
               v_visit_number ="_v5"
+          elsif sp.codename.include?("visit6")
+            v_visit_number ="_v6"
+          elsif sp.codename.include?("visit7")
+            v_visit_number ="_v7"
+          end   
+          if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+              v_visit_number = "_"+sp.visit_number_abbreviation
           end
           if no_mri_path_sp_list.include?(sp.codename)
               v_mri = ""
@@ -16491,6 +16729,13 @@ puts "v_analyses_path="+v_analyses_path
                 v_visit_number ="_v4"
               elsif sp.codename.include?("visit5")
                 v_visit_number ="_v5"
+              elsif sp.codename.include?("visit6")
+                v_visit_number ="_v6"
+              elsif sp.codename.include?("visit7")
+                v_visit_number ="_v7"
+              end   
+              if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
+                 v_visit_number = "_"+sp.visit_number_abbreviation
               end
                if no_mri_path_sp_list.include?(sp.codename)
                  v_mri = ""
