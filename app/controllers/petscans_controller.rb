@@ -663,6 +663,55 @@ class PetscansController < ApplicationController
                         @petfile_header = nil
                         if !@petfiles_dicoms_found_array.nil? and !@petfiles_dicoms_found_array[0].nil? and !@petfiles_dicoms_found_array[1].nil?
                            @petfile_header = @petfiles_dicoms_found_array[1]
+                          # GET FROM NEW FILE DIR STRUCTURE v_file_type = #######
+                           v_dicom_scanner_name = @petfile_header['0008,1090'][:value].to_s
+                           if v_dicom_scanner_name.include?("Discovery MI")
+                                params[:petscan][:scanner_name] = v_dicom_scanner_name
+                                @petscan.scanner_name = v_dicom_scanner_name
+                                @petscan.save
+                             v_dicom_tracer = @petfile_header['0008,103E'][:value].to_s
+                             #0008,103E Series Description  AV_1451 30 MIN DYN
+                             # need some interpretation
+                             if v_dicom_tracer.include?("PiB") # MK6240
+                                 v_dicom_tracer_id = 1
+                             elsif v_dicom_tracer.include?("FDG") # MK6240
+                                 v_dicom_tracer_id = 2
+                             elsif v_dicom_tracer.include?("WAY") # MK6240
+                                 v_dicom_tracer_id = 3
+                             elsif v_dicom_tracer.include?("PBR28") # MK6240
+                                 v_dicom_tracer_id = 5
+                             elsif v_dicom_tracer.include?("AV45") # MK6240
+                                 v_dicom_tracer_id = 6
+                             elsif v_dicom_tracer.include?("1451") # AV_1451
+                                 v_dicom_tracer_id = 9
+                             elsif v_dicom_tracer.include?("NeuraCeq") # MK6240
+                                 v_dicom_tracer_id = 10
+                             elsif v_dicom_tracer.include?("6240") # MK6240
+                                 v_dicom_tracer_id = 11
+                             elsif v_dicom_tracer.include?("UCB-J") # MK6240
+                                 v_dicom_tracer_id = 12 
+                             end
+                             v_dicom_timezone_offset = @petfile_header['0008,0201'][:value].to_s
+                             #0008,0201 Timezone Offset From UTC  -0600
+                              # need to move the injection/scan start time to times in database WITH the GMT displacement
+                                # running up against UTC displayed /GMT saved in database 
+                                # and the petscan injection/scan start dates ignoring the GMT displacement
+                                # need to -06 hours , but from hh - and if displayment > hh, need the 12 back wrap
+                             v_dicom_scan_start_time = @petfile_header['0008,0031'][:value].to_s
+                             #0008,0031 Series Time. HHMMSS
+                             v_dicom_scanner_location = @petfile_header['0008,0080'][:value].to_s    # Institution Name
+                             if params[:petscan][:scanner_location].nil? or params[:petscan][:scanner_location].blank? or params[:petscan][:scanner_location].include?("elect")
+                                params[:petscan][:scanner_location] = v_dicom_scanner_location
+                                @petscan.scanner_location = v_dicom_scanner_location
+                                @petscan.save
+                             end
+                             v_dicom_scan_date = @petfile_header['0008,0020'][:value].to_s  # Study Date
+                             # raise warnings
+
+                           elsif  v_dicom_scanner_name.include?("Biograph Horizon")
+
+
+                           end
                            # what to do with dicom header
                            # GE vs Siemans machine
                            petfile_dicom_dir = File.dirname(@petfiles_dicoms_found_array[0])
@@ -919,6 +968,55 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
                         @petfile_header = nil
                         if !@petfiles_dicoms_found_array.nil? and !@petfiles_dicoms_found_array[0].nil? and !@petfiles_dicoms_found_array[1].nil?
                           @petfile_header = @petfiles_dicoms_found_array[1]
+                          # GET FROM NEW FILE DIR STRUCTURE v_file_type = #######
+                           v_dicom_scanner_name = @petfile_header['0008,1090'][:value].to_s
+                           if v_dicom_scanner_name.include?("Discovery MI")
+                                params[:petscan][:scanner_name] = v_dicom_scanner_name
+                                @petscan.scanner_name = v_dicom_scanner_name
+                                @petscan.save
+                             v_dicom_tracer = @petfile_header['0008,103E'][:value].to_s
+                             #0008,103E Series Description  AV_1451 30 MIN DYN
+                             # need some interpretation
+                             if v_dicom_tracer.include?("PiB") # MK6240
+                                 v_dicom_tracer_id = 1
+                             elsif v_dicom_tracer.include?("FDG") # MK6240
+                                 v_dicom_tracer_id = 2
+                             elsif v_dicom_tracer.include?("WAY") # MK6240
+                                 v_dicom_tracer_id = 3
+                             elsif v_dicom_tracer.include?("PBR28") # MK6240
+                                 v_dicom_tracer_id = 5
+                             elsif v_dicom_tracer.include?("AV45") # MK6240
+                                 v_dicom_tracer_id = 6
+                             elsif v_dicom_tracer.include?("1451") # AV_1451
+                                 v_dicom_tracer_id = 9
+                             elsif v_dicom_tracer.include?("NeuraCeq") # MK6240
+                                 v_dicom_tracer_id = 10
+                             elsif v_dicom_tracer.include?("6240") # MK6240
+                                 v_dicom_tracer_id = 11
+                             elsif v_dicom_tracer.include?("UCB-J") # MK6240
+                                 v_dicom_tracer_id = 12 
+                             end
+                             v_dicom_timezone_offset = @petfile_header['0008,0201'][:value].to_s
+                             #0008,0201 Timezone Offset From UTC  -0600
+                              # need to move the injection/scan start time to times in database WITH the GMT displacement
+                                # running up against UTC displayed /GMT saved in database 
+                                # and the petscan injection/scan start dates ignoring the GMT displacement
+                                # need to -06 hours , but from hh - and if displayment > hh, need the 12 back wrap
+                             v_dicom_scan_start_time = @petfile_header['0008,0031'][:value].to_s
+                             #0008,0031 Series Time. HHMMSS
+                             v_dicom_scanner_location = @petfile_header['0008,0080'][:value].to_s    # Institution Name
+                             if params[:petscan][:scanner_location].nil? or params[:petscan][:scanner_location].blank? or params[:petscan][:scanner_location].include?("elect")
+                                params[:petscan][:scanner_location] = v_dicom_scanner_location
+                                @petscan.scanner_location = v_dicom_scanner_location
+                                @petscan.save
+                             end
+                             v_dicom_scan_date = @petfile_header['0008,0020'][:value].to_s  # Study Date
+                             # raise warnings
+
+                           elsif  v_dicom_scanner_name.include?("Biograph Horizon")
+
+
+                           end
                           
                            # what to do with dicom header
                            # GE vs Siemans machine
@@ -952,6 +1050,7 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
                                  v_petfile_check.each do |pf_check|
                                     if pf_check.path.blank? and !v_path.blank?
                                        pf_check.path = v_path
+                                       pf_check.file_type = "ecat"
                                        pf_check.save
                                     end
                                  end
@@ -960,6 +1059,7 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
                               v_new_petfile.petscan_id = @petscan.id
                               v_new_petfile.file_name = pf_name
                               v_new_petfile.path =  v_path
+                              v_new_petfile.file_type = "ecat"
                               v_new_petfile.save
                             end
                         end
