@@ -219,9 +219,9 @@ or   image_dataset_quality_checks.omnibus_f  = 'Severe'  or  spm_mask  = 'Severe
              # look at the subject_base subjectid_base
              v_subjectid_chop_parts_array = v_subjectid_chop.split("_")
              v_last = v_subjectid_chop_parts_array.last
-             v_sp = ScanProcedure.where("scan_procedures.subjectid_base like '"+v_subjectid_chop_parts_array[0]+"%' and scan_procedures.visit_number_abbreviation in (?)",v_last )
+             v_sp = ScanProcedure.where("scan_procedures.subjectid_base like '"+v_subjectid_chop_parts_array[0][0...2]+"%' and scan_procedures.visit_number_abbreviation in (?)",v_last )
              if !v_sp.nil? and v_sp.count > 0
-               v_subjectid_chop = (p_subjectid_v).gsub(v_last,'')
+               v_subjectid_chop = (p_subjectid_v).gsub("_"+v_last,'')
                v_enrollment = Enrollment.where("enumber in (?)",v_subjectid_chop)
                if !v_enrollment[0].nil? 
                   v_enrollment_id = v_enrollment[0].id 
@@ -233,39 +233,45 @@ or   image_dataset_quality_checks.omnibus_f  = 'Severe'  or  spm_mask  = 'Severe
   
   def get_sp_id_from_subjectid_v(p_subjectid_v)
     v_subjectid_chop = p_subjectid_v.gsub(/_v/,"").delete("0-9")
-    v_visit_number = 1
+    v_visit_number = "1"
     if p_subjectid_v.include?('_v2')
-          v_visit_number = 2
+          v_visit_number = "2"
     elsif p_subjectid_v.include?('_v3')
-          v_visit_number = 3
+          v_visit_number = "3"
     elsif p_subjectid_v.include?('_v4')
-          v_visit_number = 4
+          v_visit_number = "4"
     elsif p_subjectid_v.include?('_v5')
-          v_visit_number = 5
+          v_visit_number = "5"
     elsif p_subjectid_v.include?('_v6')
-          v_visit_number = 6
+          v_visit_number = "6"
     elsif p_subjectid_v.include?('_v7')
-          v_visit_number = 7
+          v_visit_number = "7"
     end
     if(v_subjectid_chop.include? "wscs")
        v_subjectid_chop = "wscs"  # they have another letter 
     end
-    if v_visit_number > 1
+    if v_visit_number > "1"
       scan_procedures = ScanProcedure.where("subjectid_base ='"+v_subjectid_chop+"' and codename like '%visit"+v_visit_number.to_s+"'")
     else
         if p_subjectid_v.include?("_") # hunt thru visit_number_abbreviation
              # split off the last _<part> -- check if a visit_number_abbreviation
              # look at the subject_base subjectid_base
              v_subjectid_parts_array = p_subjectid_v.split("_")
-             v_last = v_subjectid_chop_parts_array.last
-             scan_procedures = ScanProcedure.where("scan_procedures.subjectid_base like '"+v_subjectid_parts_array[0]+"%' and scan_procedures.visit_number_abbreviation in (?)",v_last )
-             if scan_procedures.nil or (!scan_procedures.nil? and scan_procedures.count > 0)
+             v_last = v_subjectid_parts_array.last
+             scan_procedures = ScanProcedure.where("scan_procedures.subjectid_base like '"+v_subjectid_parts_array[0][0...2]+"%' and scan_procedures.visit_number_abbreviation in (?)",v_last )
+             if scan_procedures.nil? or (!scan_procedures.nil? and scan_procedures.count > 1)
                 scan_procedures = ScanProcedure.where("subjectid_base ='"+v_subjectid_chop+"' and ( codename like '%visit"+v_visit_number.to_s+"' or codename not like '%visit%' )")
+             elsif (!scan_procedures.nil? and scan_procedures.count > 0)
+                  v_subjectid_chop = p_subjectid_v.gsub("_"+v_last,"").delete("0-9")
+                  v_visit_number = "_"+v_last
+             else
+              #puts "eeeeeee"
              end
           else
             scan_procedures = ScanProcedure.where("subjectid_base ='"+v_subjectid_chop+"' and ( codename like '%visit"+v_visit_number.to_s+"' or codename not like '%visit%' )")
           end
     end
+
     v_cnt = 0
     scan_procedures.each do |sp|
        v_cnt = v_cnt +1
