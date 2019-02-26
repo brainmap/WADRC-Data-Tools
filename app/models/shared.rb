@@ -13944,8 +13944,8 @@ puts sql
             if v_visit_number.blank?
                v_sp = ScanProcedure.where("codename in (?)",v_scan_procedure_name)
                if !v_sp.nil?    
-                 if !v_sp.visit_number_abbreviation.nil? and v_sp.visit_number_abbreviation > "" 
-                   v_visit_number = "_"+sp.visit_number_abbreviation 
+                 if !v_sp.first.visit_number_abbreviation.nil? and v_sp.first.visit_number_abbreviation > "" 
+                   v_visit_number = "_"+v_sp.first.visit_number_abbreviation 
                  end
                end
 
