@@ -13913,6 +13913,7 @@ puts sql
           v_ids_array = v_ids_array.where("image_datasets.series_description in (select series_description_maps.series_description from series_description_maps where series_description_maps.series_description_type_id in (15))")
           v_ids_array.each do |ids|
            begin
+            v_pfile = ""
             v_err = ""
             v_ids_path_full = ids.path
             v_subjectid = ""
