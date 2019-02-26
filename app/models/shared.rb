@@ -14030,50 +14030,72 @@ puts sql
               stdin.close
               stdout.close
               stderr.close
-              v_call = "ssh panda_user@kanga.dom.wisc.edu 'rsync -av  "+v_ids_path_full+"   "+v_check_path_orig+"/' "
-        puts v_call
-              stdin, stdout, stderr = Open3.popen3(v_call)
-              while !stdout.eof?
-                puts stdout.read 1024    
-              end
-              stdin.close
-              stdout.close
-              stderr.close
-              v_call = "ssh panda_user@kanga.dom.wisc.edu 'cd "+v_check_path_orig+";find . -name 'P*.7.bz2' -exec bunzip2 {} \\\;' "
-        puts v_call        
-              stdin, stdout, stderr = Open3.popen3(v_call)
-              while !stdout.eof?
-                puts stdout.read 1024    
-              end
-              stdin.close
-              stdout.close
-              stderr.close
+              # check if v_ids_path_full contains raw_data
+              # check if processed_data exists and has DAT or DICOM
+              if v_ids_path.include? "raw_data"
+                  v_ids_processed_image_path = v_ids_path.gsub("raw_data","processed_data")
+                  if File.directory?(v_ids_processed_image_path) and (File.directory?(v_ids_processed_image_path+"/DAT") or File.directory?(v_ids_processed_image_path+"/DICOM"))
+                    v_call = "ssh panda_user@kanga.dom.wisc.edu 'rsync -av  "+v_ids_processed_image_path+"   "+v_check_path_orig+"/' "
+                  else
+                     v_call = "ssh panda_user@kanga.dom.wisc.edu 'rsync -av  "+v_ids_path_full+"   "+v_check_path_orig+"/' "
+
+                  end
+                  puts v_call
+                  stdin, stdout, stderr = Open3.popen3(v_call)
+                  while !stdout.eof?
+                    puts stdout.read 1024    
+                  end
+                  stdin.close
+                  stdout.close
+                  stderr.close
+                 
+
+              else
+
+                v_call = "ssh panda_user@kanga.dom.wisc.edu 'rsync -av  "+v_ids_path_full+"   "+v_check_path_orig+"/' "
+          puts v_call
+                stdin, stdout, stderr = Open3.popen3(v_call)
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                end
+                stdin.close
+                stdout.close
+                stderr.close
+                v_call = "ssh panda_user@kanga.dom.wisc.edu 'cd "+v_check_path_orig+";find . -name 'P*.7.bz2' -exec bunzip2 {} \\\;' "
+          puts v_call        
+                stdin, stdout, stderr = Open3.popen3(v_call)
+                while !stdout.eof?
+                  puts stdout.read 1024    
+                end
+                stdin.close
+                stdout.close
+                stderr.close
        #make subjectid_v# directory
        #copy over pfile/gating files
        #bunzip2 pfile
                 #run gating check ==> output to gating_check_file.txt
 
-              v_check_gating_base ="check_gating -f "
-              v_pcvipr_recon_binary_base = "pcvipr_recon_binary -f "
-              v_pcvipr_recon_options =" -dat_plus_dicom -override_autorecon -pils -walsh -lp_frac 0.75 -vs_wdth_high 5 -weighted_echos 0 -viewshare_type tornado -frame_by_frame -echo_stop 0 -viewshare_type tornado -cardiac -tr 6800 -gate_delay 9 -rcframes 20 -gating_type retro_ecg"
+                v_check_gating_base ="check_gating -f "
+                v_pcvipr_recon_binary_base = "pcvipr_recon_binary -f "
+                v_pcvipr_recon_options =" -dat_plus_dicom -override_autorecon -pils -walsh -lp_frac 0.75 -vs_wdth_high 5 -weighted_echos 0 -viewshare_type tornado -frame_by_frame -echo_stop 0 -viewshare_type tornado -cardiac -tr 6800 -gate_delay 9 -rcframes 20 -gating_type retro_ecg"
                 # get path pfile
-              v_pfile_path = ""
-              v_pfile_dir_path = ""
-              v_pfile  = ""
-              v_call = "ssh panda_user@kanga.dom.wisc.edu 'cd "+v_check_path_orig+";find . -name 'P*.7' -exec readlink -f {} \\\;'"
-          puts v_call        
-              stdin, stdout, stderr = Open3.popen3(v_call)
-              while !stdout.eof?
-                v_pfile_path = stdout.read 1024    
+                v_pfile_path = ""
+                v_pfile_dir_path = ""
+                v_pfile  = ""
+                v_call = "ssh panda_user@kanga.dom.wisc.edu 'cd "+v_check_path_orig+";find . -name 'P*.7' -exec readlink -f {} \\\;'"
+            puts v_call        
+                stdin, stdout, stderr = Open3.popen3(v_call)
+                while !stdout.eof?
+                  v_pfile_path = stdout.read 1024    
+                end
+            puts "v_pfile_path="+v_pfile_path  
+                v_pfile_dir_path = File.dirname(v_pfile_path)
+                v_pfile = File.basename(v_pfile_path)
+                stdin.close
+                stdout.close
+                stderr.close
+                v_pfile = v_pfile.strip
               end
-          puts "v_pfile_path="+v_pfile_path  
-              v_pfile_dir_path = File.dirname(v_pfile_path)
-              v_pfile = File.basename(v_pfile_path)
-              stdin.close
-              stdout.close
-              stderr.close
-              v_pfile = v_pfile.strip
-
 #f = File.open('foo.txt', 'a')
 #f.write('foo')
 #f.close
@@ -14164,7 +14186,7 @@ puts sql
                 v_comment = "done "+v_subjectid_v_num+";"+v_comment
                 @schedulerun.comment = "done "+v_subjectid_v_num+";"+@schedulerun.comment
               elsif v_ids_path.include? "scan_archives" or v_ids_path.include? "raw_data"
-
+            
 
 # !!!!!!! NEED TO CHECK IF A RECON IN orig, -- adjust tracker initial note
 # !!!! NEED TO CHECK IF DONE - log? phrase- last line or within certain number of lines of end, count of files?  the 20th frame exists ?
