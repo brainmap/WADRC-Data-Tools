@@ -1295,7 +1295,7 @@ end
     connection = ActiveRecord::Base.connection();
     v_comment_base = @schedulerun.comment
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_exclude_array = [-1,62,53,54,55,56,57,15,19,17,30,6,13,11,12,32,35,25,23,8,48,16]   # old sp's
+    sp_exclude_array = [-1,62,53,54,55,56,57,15,19,17,30,6,13,11,12,32,35,25,23,8,48,16,100]   # old sp's
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     @scan_procedures.each do |sp|
         @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
@@ -1433,7 +1433,7 @@ end
     connection = ActiveRecord::Base.connection();
     # get from cg_generic_upload_config 
      v_wisc_siteid ="wisc" 
-     v_scan_procedure_exclude =   [8,21,28,31,34,53,64,55,56,57,22,65,64,67,47,12,16]
+     v_scan_procedure_exclude =   [8,21,28,31,34,53,64,55,56,57,22,65,64,67,47,12,16,100]
      v_scan_procedures = [4,29,27,14,15,19,24,36,35,20,26,41,16,11,37,38,39,58,66]  
      v_pet_tracer_array = [1,2]  
      v_scan_type_limit = 1 
@@ -2135,7 +2135,7 @@ def  run_pet_av1451_harvest
     v_tacs_column_list = "time_min,cblm_gm_inf,precentral_l,precentral_r,frontal_sup_l,frontal_sup_r,frontal_sup_orb_l,frontal_sup_orb_r,frontal_mid_l,frontal_mid_r,frontal_mid_orb_l,frontal_mid_orb_r,frontal_inf_oper_l,frontal_inf_oper_r,frontal_inf_tri_l,frontal_inf_tri_r,frontal_inf_orb_l,frontal_inf_orb_r,rolandic_oper_l,rolandic_oper_r,supp_motor_area_l,supp_motor_area_r,olfactory_l,olfactory_r,frontal_sup_medial_l,frontal_sup_medial_r,frontal_med_orb_l,frontal_med_orb_r,rectus_l,rectus_r,insula_l,insula_r,cingulum_ant_l,cingulum_ant_r,cingulum_mid_l,cingulum_mid_r,cingulum_post_l,cingulum_post_r,hippocampus_l,hippocampus_r,parahippocampal_l,parahippocampal_r,amygdala_l,amygdala_r,calcarine_l,calcarine_r,cuneus_l,cuneus_r,lingual_l,lingual_r,occipital_sup_l,occipital_sup_r,occipital_mid_l,occipital_mid_r,occipital_inf_l,occipital_inf_r,fusiform_l,fusiform_r,postcentral_l,postcentral_r,parietal_sup_l,parietal_sup_r,parietal_inf_l,parietal_inf_r,supramarginal_l,supramarginal_r,angular_l,angular_r,precuneus_l,precuneus_r,paracentral_lobule_l,paracentral_lobule_r,caudate_l,caudate_r,putamen_l,putamen_r,pallidum_l,pallidum_r,thalamus_l,thalamus_r,heschl_l,heschl_r,temporal_sup_l,temporal_sup_r,temporal_pole_sup_l,temporal_pole_sup_r,temporal_mid_l,temporal_mid_r,temporal_pole_mid_l,temporal_pole_mid_r,temporal_inf_l,temporal_inf_r,cerebelum_crus1_l,cerebelum_crus1_r,cerebelum_crus2_l,cerebelum_crus2_r,cerebelum_3_l,cerebelum_3_r,cerebelum_4_5_l,cerebelum_4_5_r,cerebelum_6_l,cerebelum_6_r,cerebelum_7b_l,cerebelum_7b_r,cerebelum_8_l,cerebelum_8_r,cerebelum_9_l,cerebelum_9_r,cerebelum_10_l,cerebelum_10_r,vermis_1_2,vermis_3,vermis_4_5,vermis_6,vermis_7,vermis_8,vermis_9,vermis_10,clivus,ethmoid,meninges,pineal,vermis_sup_ant,cerebellum_superior,substantia_nigra,sphenotemporalbuttress,pons"
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_exclude_array = [69,53,54,56,57,95,55,76,78,72,70,71,49,79,99,81,75,83,92,93,88,68,97,29,52,87,48,27,14,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,50,42,44,51,96,9,25,23,19,15,24,36,100,35,20,73,32,45,6,12,16,13,11,10,90,59,63,43,4,17,30,74,98,101,102,103,108,110,111,112,113,114]
+    sp_exclude_array = [69,53,54,56,57,95,55,76,78,72,70,71,49,79,99,81,75,83,92,93,88,68,97,29,52,87,48,27,14,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,50,42,44,51,96,9,25,23,19,15,24,36,100,35,20,73,32,45,6,12,16,13,11,10,90,59,63,43,4,17,30,74,98,100,101,102,103,108,110,111,112,113,114]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     # for testing
     ###@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
@@ -3045,8 +3045,8 @@ def run_pet_av1451_process
       v_days_mri_pet_diff_limit = "730"
       v_days_before_use_other_vgroup_mri = "5"
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
-      v_exclude_sp_mri_array = [-1]
-      v_exclude_sp_pet_array = [49,50,79]
+      v_exclude_sp_mri_array = [-1,100]
+      v_exclude_sp_pet_array = [49,50,79,100]
       v_today_date = Date.today 
 
       @schedule = Schedule.where("name in ('pet_av1451_process')").first
@@ -3392,7 +3392,7 @@ def  run_pet_mk6240_harvest
 # will change again - need to change tac table
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_exclude_array = [69,53,54,56,57,95,55,76,78,72,70,71,49,79,99,81,75,80,83,92,93,88,68,97,29,52,87,48,27,14,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,50,42,44,51,96,9,25,23,19,15,24,36,100,35,20,73,32,45,6,12,16,13,11,10,90,59,63,43,4,17,30,74,98,101,102,103,108,110,111,112,113,114]
+    sp_exclude_array = [69,53,54,56,57,95,55,76,78,72,70,71,49,79,99,81,75,80,83,92,93,88,68,97,29,52,87,48,27,14,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,50,42,44,51,96,9,25,23,19,15,24,36,100,35,20,73,32,45,6,12,16,13,11,10,90,59,63,43,4,17,30,74,98,100,101,102,103,108,110,111,112,113,114]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     # for testing
     ###@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
@@ -4435,8 +4435,8 @@ def run_pet_mk6240_process
       v_days_mri_pet_diff_limit = "730"
       v_days_before_use_other_vgroup_mri = "10"
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
-      v_exclude_sp_mri_array = [-1]
-      v_exclude_sp_pet_array = [-1]
+      v_exclude_sp_mri_array = [-1,100]
+      v_exclude_sp_pet_array = [-1,100]
       v_today_date = Date.today 
       v_computer = "kanga"
 
@@ -4921,7 +4921,7 @@ def  run_pet_pib_dvr_harvest
 # will change again - need to change tac table
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_exclude_array = [54,56,57,95,55,76,78,72,70,71,99,81,75,83,92,93,88,68,97,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,42,44,51,96,9,25,23,19,15,24,36,100,35,73,32,6,12,16,13,11,90,59,63,43,4,17,74,98,101,102,103,108,110,111,112,113,114]
+    sp_exclude_array = [54,56,57,95,55,76,78,72,70,71,99,81,75,83,92,93,88,68,97,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,42,44,51,96,9,25,23,19,15,24,36,100,35,73,32,6,12,16,13,11,90,59,63,43,4,17,74,98,100,101,102,103,108,110,111,112,113,114]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     # for testing
     ####@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
@@ -6020,8 +6020,8 @@ def run_pet_pib_dvr_process
       v_pet_processing_wrapper = v_base_path+"/data1/lab_scripts/process_pet_wrapper.sh"
 
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
-      v_exclude_sp_mri_array = [-1]
-      v_exclude_sp_pet_array = [80,115] # excluding adcp
+      v_exclude_sp_mri_array = [-1,100]
+      v_exclude_sp_pet_array = [80,115,100] # excluding adcp
       v_include_sp_pet_array= [105]
       v_today_date = Date.today 
       v_computer = "kanga"
@@ -6515,7 +6515,7 @@ def  run_pet_pib_suvr_harvest
 # will change again - need to change tac table
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_exclude_array = [54,56,57,95,55,76,78,72,70,71,99,81,75,83,92,93,88,68,97,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,42,44,51,96,9,25,23,19,15,24,36,100,35,73,32,6,12,16,13,11,90,59,63,43,4,17,74,98,101,102,103,108,110,111,112,113,114]
+    sp_exclude_array = [54,56,57,95,55,76,78,72,70,71,99,81,75,83,92,93,88,68,97,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,42,44,51,96,9,25,23,19,15,24,36,100,35,73,32,6,12,16,13,11,90,59,63,43,4,17,74,98,100,101,102,103,108,110,111,112,113,114]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     # for testing
     ###@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
@@ -7563,8 +7563,8 @@ def run_pet_pib_suvr_process
       v_days_mri_pet_diff_limit = "730"
       v_days_before_use_other_vgroup_mri = "5"
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
-      v_exclude_sp_mri_array = [-1]
-      v_exclude_sp_pet_array = [80,115]
+      v_exclude_sp_mri_array = [-1,100]
+      v_exclude_sp_pet_array = [80,100,115]
       v_today_date = Date.today 
       v_computer = "kanga"
 
@@ -8186,7 +8186,7 @@ def run_sleep_t1
     connection = ActiveRecord::Base.connection();
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_exclude_array = [33,40,62,53,54,55,56,57]
+    sp_exclude_array = [33,40,62,53,54,55,56,57,100]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     @scan_procedures.each do |sp|
       @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
@@ -8584,7 +8584,7 @@ def run_sleep_t1
     connection = ActiveRecord::Base.connection();
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_exclude_array = [33,40,62,53,54,55,56,57]
+    sp_exclude_array = [33,40,62,53,54,55,56,57,100]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     @scan_procedures.each do |sp|
        @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
@@ -8776,7 +8776,7 @@ def run_sleep_t1
     connection = ActiveRecord::Base.connection();
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_exclude_array = [-1,62,53,54,55,56,57 ] # if tissuesegmentation run on plaque, ok to run rbm [33,40]
+    sp_exclude_array = [-1,62,53,54,55,56,57,100 ] # if tissuesegmentation run on plaque, ok to run rbm [33,40]
     # @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     # applying exclusion further down to prevent running the process
     @scan_procedures = ScanProcedure.all
@@ -10103,7 +10103,7 @@ puts "hhhhh ="+sql_update
                 # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
                 # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
-            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
             @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
             @scan_procedures.each do |sp|
               v_visit_number =""
@@ -10686,7 +10686,7 @@ def  run_asl_harvest
     v_asl_column_list = "inversion_time,value,file_name,file_path"
     v_secondary_key_array =["b","c","d","e",".R"]
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
-    sp_exclude_array = [-1]
+    sp_exclude_array = [-1,100]
     @scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", sp_exclude_array)
     # for testing@scan_procedures = ScanProcedure.where("scan_procedures.id  in (?)", "77")
     @scan_procedures.each do |sp|
@@ -11474,7 +11474,7 @@ end
                 # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
                 # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
-            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
             @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
             @scan_procedures. each do |sp|
               v_visit_number =""
@@ -11690,7 +11690,7 @@ end
                 # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
                 # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
-            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
             @scan_procedures = ScanProcedure.where("petscan_flag='Y' and id not in (?)",v_exclude_sp)  # NEED ONLY sp with fdg, but filter later
             @scan_procedures. each do |sp|
                v_visit_number =""
@@ -12187,7 +12187,7 @@ end
                 # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
                 # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
-            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
             @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
             @scan_procedures. each do |sp|
               v_visit_number =""
@@ -12402,7 +12402,7 @@ end
                 # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
                 # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
-            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
            @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
             @scan_procedures. each do |sp|
               v_visit_number =""
@@ -12608,7 +12608,7 @@ end
       # do_not_run_process_wlesion_030 == Y means do not run
       # Jen's script deals with multiple sag cube flair
       #removing criteria and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) )
-      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_v3_status where if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y'  and (  lst_subjectid not like 'shp%') " #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_v3_status where if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (  lst_subjectid not like 'lmsd%') and (  lst_subjectid not like 'shp%') and (  lst_subjectid not like 'mrdp%') and (  lst_subjectid not like 'plq%') " #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
       results = connection.execute(sql)
       results.each do |r|
           v_break = 0  # need a kill swith
@@ -12786,7 +12786,7 @@ end
       #NORMALLY THIS IS NOT RUN  catchup on only_tlv - run everywhere except plq
       # Jen's script handles the multiple sag cube flair
       #removing criteria and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) )
-      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where lst_subjectid='DO NOT RUN THIS' and if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y'  and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y'  and (  lst_subjectid not like 'shp%') and (  lst_subjectid not like 'plq%')  " #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where lst_subjectid='DO NOT RUN THIS' and if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y'  and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y' and (  lst_subjectid not like 'lmsd%') and (  lst_subjectid not like 'shp%') and (  lst_subjectid not like 'mrdp%') and (  lst_subjectid not like 'plq%')  " #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
      
       results = connection.execute(sql)
       results.each do |r|
@@ -12892,7 +12892,7 @@ puts "DDD mainrun"
       # do_not_run_process_wlesion_030 == Y means do not run
       # Jen's script tests for multiple sag cube flair 
       #removing criteria and (multiple_sag_cube_flair_flag ='N' or (multiple_sag_cube_flair_flag ='Y' and sag_cube_flair_to_use is not null) )
-      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y'  and (  lst_subjectid not like 'shp%')" #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
+      sql = "select distinct enrollment_id, scan_procedure_id, lst_subjectid,multiple_o_star_nii_flag,o_star_nii_file_to_use, multiple_sag_cube_flair_flag, sag_cube_flair_to_use from cg_lst_116_status where if(do_not_run_process_wlesion_030 is NULL,'N',do_not_run_process_wlesion_030) != 'Y' and wlesion_030_flag = 'N' and o_star_nii_flag ='Y' and ( multiple_o_star_nii_flag = 'N' or (multiple_o_star_nii_flag = 'Y' and o_star_nii_file_to_use is not null)   ) and sag_cube_flair_flag = 'Y'  and (  lst_subjectid not like 'lmsd%') and (  lst_subjectid not like 'shp%') and (  lst_subjectid not like 'mrdp%')" #  or lst_subjectid like 'lead%' or  lst_subjectid like 'adrc%' or  lst_subjectid like 'pdt%'  or lst_subjectid like 'tami%'  or lst_subjectid like 'awr%'  or lst_subjectid like 'wmad%'  or lst_subjectid like 'plq%'  )"  #no acpcY, flairY fal, alz, tbi ;  problems 'shp%' 'pipr%' '
       results = connection.execute(sql)
       results.each do |r|
   puts "aaaaaa subjectid="+r[2]
@@ -13314,7 +13314,7 @@ puts "AAAAAAA="+v_log
                 # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
                 # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
-            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
             @scan_procedures = ScanProcedure.where("petscan_flag='Y' and id not in (?)",v_exclude_sp)  # NEED ONLY sp with pib, but filter later
             @scan_procedures. each do |sp|
                v_visit_number =""
@@ -13834,7 +13834,7 @@ puts sql
 
           v_pcvipr_values_tn = "cg_pcvipr_values"
           v_trtype_id = 2  # pcvipr
-          v_scan_procedure_id_exclude_array = [81,33,40,49,21,28,31,34] # barnes bbf , and dempsey plaque and 4 shps  # doing the mbe75
+          v_scan_procedure_id_exclude_array = [81,33,40,49,21,28,31,34,100] # barnes bbf , and dempsey plaque and 4 shps  # doing the mbe75
       # exclude list of sp's - e.g. barnes.bbf
       #check for pvvipr in month back which are not in v_pcvipr_values_tn
       # get spS ( could be multiples) and enumberS ( could be multiples)
@@ -15314,7 +15314,7 @@ puts "v_analyses_path="+v_analyses_path
                 # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
                 # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
-            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
             @scan_procedures = ScanProcedure.where("petscan_flag='Y' and id not in (?)",v_exclude_sp)  # NEED ONLY sp with pib, but filter later
             @scan_procedures. each do |sp|
                v_visit_number =""
@@ -15434,7 +15434,7 @@ puts "v_analyses_path="+v_analyses_path
       v_t1_series_description_type_id = "19"
       v_t2_series_description_type_id = "20"
 
-      v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
+      v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
       @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)   #.where("scan_procedures.codename in ('asthana.adrc-clinical-core.visit1')") where("id in (?)",95) #
       @scan_procedures.each do |sp|
           v_visit_number =""
@@ -15800,7 +15800,7 @@ puts "v_analyses_path="+v_analyses_path
       v_t1_series_description_type_id = "19"
       v_t2_series_description_type_id = "20"
 
-      v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
+      v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
       @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)  #.where("scan_procedures.codename in ('asthana.adrc-clinical-core.visit1')")
       @scan_procedures.each do |sp|
           v_visit_number =""
@@ -16057,7 +16057,7 @@ puts "v_analyses_path="+v_analyses_path
       v_asl_processedimage_type = 'asl version#5'
       v_source_image_type = 'image_dataset'
 
-      v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
+      v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
       @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp).where("scan_procedures.codename in ('asthana.adrc-clinical-core.visit1')")
       @scan_procedures.each do |sp|
           v_visit_number ="" # not being used
@@ -16827,7 +16827,7 @@ puts "v_analyses_path="+v_analyses_path
                 # NOT exists /Volumes/team-1/raw/johnson.tbi1000.visit2/mri
                 # NOT exists /Volumes/team-1/raw/johnnson.alz.repsup.visit1/mri
                 # NOT exists /Volumes/team-1/raw/johnson.pc4000.visit1/mri
-            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57]
+            v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
             @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
             @scan_procedures.each do |sp|
               @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
