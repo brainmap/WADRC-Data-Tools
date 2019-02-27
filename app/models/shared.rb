@@ -14037,6 +14037,9 @@ puts sql
                   v_ids_processed_image_path = v_ids_path.gsub("raw_data","processed_data")
                   if File.directory?(v_ids_processed_image_path) and (File.directory?(v_ids_processed_image_path+"/DAT") or File.directory?(v_ids_processed_image_path+"/DICOM"))
                     v_call = "ssh panda_user@kanga.dom.wisc.edu 'rsync -av  "+v_ids_processed_image_path+"   "+v_check_path_orig+"/' "
+                    v_comment = "rsync processed_data "+v_subjectid+";"+v_comment
+                    @schedulerun.comment = "rsync processed_data "+v_subjectid_v_num+";"+@schedulerun.comment
+                    @schedulerun.save
                   else
                      v_call = "ssh panda_user@kanga.dom.wisc.edu 'rsync -av  "+v_ids_path_full+"   "+v_check_path_orig+"/' "
 
