@@ -2374,7 +2374,8 @@ def  run_pet_av1451_harvest
                                    elsif v[0] == "ecat file"  or v[0] = "raw PET file"
                                      v_ecat_file = v[1].to_s
                                      # get v_age_at_appointment
-                                     v_petscans = Petscan.where("petscans.path in (?)",v_ecat_file)
+                                     #v_petscans = Petscan.where("petscans.path in (?)",v_ecat_file)
+                                     v_petscans = Petscan.where("petscans.id in (select petfiles.petscan_id from petfiles where petfiles.path in (?))",v_ecat_file)
                                      if v_petscans.count > 0
                                         v_appointment = Appointment.find(v_petscans.first.appointment_id)
                                         v_age_at_appointment = v_appointment.age_at_appointment.to_s
@@ -3632,7 +3633,8 @@ def  run_pet_mk6240_harvest
                                      v_ecat_file = v[1].to_s
                                      # get v_age_at_appointment
 
-                                     v_petscans = Petscan.where("petscans.path in (?)",v_ecat_file)
+                                     #v_petscans = Petscan.where("petscans.path in (?)",v_ecat_file)
+                                     v_petscans = Petscan.where("petscans.id in (select petfiles.petscan_id from petfiles where petfiles.path in (?))",v_ecat_file)
                                      if v_petscans.count > 0
                                         v_appointment = Appointment.find(v_petscans.first.appointment_id)
                                         v_age_at_appointment = v_appointment.age_at_appointment.to_s
@@ -4954,7 +4956,7 @@ def  run_pet_pib_dvr_harvest
         v_subjectid_base_array = (sp.subjectid_base).split("-")   # pet sup - adrc-wrap 
         if v_subjectid_base_array.count > 1
             sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
-                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+" 
+                                    where scan_procedures_vgroups.scan_procedure_id = "+sp.id.to_s+"  
                                     and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id and enrollment_vgroup_memberships.enrollment_id = enrollments.id 
                                     and ( "
              v_enum_cnt = 0
@@ -5173,10 +5175,11 @@ def  run_pet_pib_dvr_harvest
                                      
                                      # get v_age_at_appointment
 
-                                     v_petscans = Petscan.where("petscans.path in (?)",v_ecat_file)
+                                     v_petscans = Petscan.where("petscans.id in (select petfiles.petscan_id from petfiles where petfiles.path in (?))",v_ecat_file)
                                      if v_petscans.count > 0
                                         v_appointment = Appointment.find(v_petscans.first.appointment_id)
                                         v_age_at_appointment = v_appointment.age_at_appointment.to_s
+              
                                         v_pet_date  = v_appointment.appointment_date
                                      else # sometimes the processing ecat not match the panda ecat 
                                           # use tracer, enumber and scan_procedure
@@ -5190,6 +5193,7 @@ def  run_pet_pib_dvr_harvest
                                                v_age_at_appointment = v_appointments.first.age_at_appointment.to_s
                                                v_pet_date  = v_appointments.first.appointment_date
                                            end
+                                     
 
                                      end
                                        
@@ -5617,10 +5621,9 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                           results_check = connection.execute(v_sql_check)
 
                           # row in ROI table is blank if QC Status = Waiting, gets actual value when change to Partial/Pass
-                          if (!results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2 and !(results_check.first)[0].blank? and (results_check.first)[0].strip > "" and !(results_check.first)[0].include?("na") ) or v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"  or (v_qc_value != "New Record" and (results_check.nil? or (!results_check.nil? and (results_check.count) < 1) ) )
+                          if (!results_check.nil? and !results_check.first.nil? and !results_check.first[0].nil? and (results_check.count) > 0 and (results_check.count) < 2 and !(results_check.first)[0].blank? and (results_check.first)[0].strip > "" and !(results_check.first)[0].include?("NaN") ) or v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"  or (v_qc_value != "New Record" and (results_check.nil? or (!results_check.nil? and (results_check.count) < 1) ) )
 
-                            if (results_check.first[0].to_s != v_pib_index.to_s and !(results_check.first)[0].include?("NaN") and !v_pib_index.to_s.include?("NaN")) or v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"  or (v_qc_value != "New Record" and (results_check.nil? or (!results_check.nil? and (results_check.count) < 1) ) )
-puts "YYYYYY results_check.first)[0]="+(results_check.first)[0].to_s+"="+v_pib_index.to_s+"="+v_subjectid_v_num
+                            if (!results_check.nil? and !results_check.first.nil? and !results_check.first[0].nil?) and (results_check.first[0].to_s != v_pib_index.to_s and !(results_check.first)[0].include?("NaN") and !v_pib_index.to_s.include?("NaN")) or v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"  or (v_qc_value != "New Record" and (results_check.nil? or (!results_check.nil? and (results_check.count) < 1) ) )
                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
                               if v_mri_processed_date_change == "Y" and  v_pet_processed_date_change == "Y" 
                                  @trfiles.first.qc_notes = " mri reprocessed-"+v_mri_processing_date+", pet reprocessed-"+v_pet_processing_date+" roi changed [qc_status was="+@trfiles.first.qc_value.to_s+"] "+@trfiles.first.qc_notes
@@ -6759,7 +6762,8 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
                                      
                                      # get v_age_at_appointment
 
-                                     v_petscans = Petscan.where("petscans.path in (?)",v_ecat_file)
+                                     #v_petscans = Petscan.where("petscans.path in (?)",v_ecat_file)
+                                    v_petscans = Petscan.where("petscans.id in (select petfiles.petscan_id from petfiles where petfiles.path in (?))",v_ecat_file)
                                      if v_petscans.count > 0
                                         v_appointment = Appointment.find(v_petscans.first.appointment_id)
                                         v_age_at_appointment = v_appointment.age_at_appointment.to_s
