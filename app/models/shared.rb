@@ -5604,7 +5604,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                           end
                           v_pib_index = ""
                           if v_pibindex_field_cnt < 16
-                              v_pib_index = "na"
+                              v_pib_index = "NaN"
                           else
                               v_pib_index = (v_pib_index_sum/16).round(9)
                           end
@@ -5619,7 +5619,7 @@ puts "gggggg new file path ="+v_processesimages.first.file_path
                           # row in ROI table is blank if QC Status = Waiting, gets actual value when change to Partial/Pass
                           if (!results_check.nil? and (results_check.count) > 0 and (results_check.count) < 2 and !(results_check.first)[0].blank? and (results_check.first)[0].strip > "" and !(results_check.first)[0].include?("na") ) or v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"  or (v_qc_value != "New Record" and (results_check.nil? or (!results_check.nil? and (results_check.count) < 1) ) )
 
-                            if (results_check.first[0].to_s != v_pib_index.to_s and !(results_check.first)[0].include?("na") and !v_pib_index.to_s.include?("na")) or v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"  or (v_qc_value != "New Record" and (results_check.nil? or (!results_check.nil? and (results_check.count) < 1) ) )
+                            if (results_check.first[0].to_s != v_pib_index.to_s and !(results_check.first)[0].include?("NaN") and !v_pib_index.to_s.include?("NaN")) or v_mri_processed_date_change == "Y" or v_pet_processed_date_change == "Y"  or (v_qc_value != "New Record" and (results_check.nil? or (!results_check.nil? and (results_check.count) < 1) ) )
 puts "YYYYYY results_check.first)[0]="+(results_check.first)[0].to_s+"="+v_pib_index.to_s+"="+v_subjectid_v_num
                               @trfiles = Trfile.where("trtype_id in (?)",v_trtype_id).where("subjectid in (?)",v_subjectid_v_num)
                               if v_mri_processed_date_change == "Y" and  v_pet_processed_date_change == "Y" 
