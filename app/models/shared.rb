@@ -2373,9 +2373,17 @@ def  run_pet_av1451_harvest
                                       v_pet_analysis_log_file = v[1].to_s.strip
                                    elsif v[0] == "ecat file"  or v[0] = "raw PET file"
                                      v_ecat_file = v[1].to_s
+                                     v_ecat_file_array = []
+                                     v_ecat_file_chop_array = v_ecat_file.split("-")
+                                     if v_ecat_file_chop_array.count > 1
+                                        v_ecat_file_chop_array.each do |val|
+                                            v_ecat_file_array.push(File.dirname(val).to_s)
+                                        end
+                                     end
+                                     v_ecat_file_array.push(v_ecat_file)
                                      # get v_age_at_appointment
                                      #v_petscans = Petscan.where("petscans.path in (?)",v_ecat_file)
-                                     v_petscans = Petscan.where("petscans.id in (select petfiles.petscan_id from petfiles where petfiles.path in (?))",v_ecat_file)
+                                     v_petscans = Petscan.where("petscans.id in (select petfiles.petscan_id from petfiles where petfiles.path in (?))",v_ecat_file_array)
                                      if v_petscans.count > 0
                                         v_appointment = Appointment.find(v_petscans.first.appointment_id)
                                         v_age_at_appointment = v_appointment.age_at_appointment.to_s
@@ -2449,7 +2457,16 @@ def  run_pet_av1451_harvest
                          @trfileimage_processedimages.push(v_processedimage.id)
                          # sources - ecat pet file -- petfile_id?
                          # petfile_id from ecat file
-                         v_petfiles = Petfile.where("petfiles.path in (?)",v_ecat_file)
+                         # pet dicoms - 2 files with - between NOT SURE HOW THE LINK TO processedimages will work
+                                     v_ecat_file_array = []
+                                     v_ecat_file_chop_array = v_ecat_file.split("-")
+                                     if v_ecat_file_chop_array.count > 1
+                                        v_ecat_file_chop_array.each do |val|
+                                            v_ecat_file_array.push(File.dirname(val).to_s)
+                                        end
+                                     end
+                                     v_ecat_file_array.push(v_ecat_file)
+                         v_petfiles = Petfile.where("petfiles.path in (?)",v_ecat_file_array)
                          if v_petfiles.count > 0
                            v_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'petfile'",v_processedimage_file_id,v_petfiles.first.id)
                            if v_processedimagesources.count < 1 and v_petfiles.count > 0
@@ -3632,9 +3649,17 @@ def  run_pet_mk6240_harvest
                                    elsif v[0] == "ecat file" or v[0] == "raw PET file"
                                      v_ecat_file = v[1].to_s
                                      # get v_age_at_appointment
+                                     v_ecat_file_array = []
+                                     v_ecat_file_chop_array = v_ecat_file.split("-")
+                                     if v_ecat_file_chop_array.count > 1
+                                        v_ecat_file_chop_array.each do |val|
+                                            v_ecat_file_array.push(File.dirname(val).to_s)
+                                        end
+                                     end
+                                     v_ecat_file_array.push(v_ecat_file)
 
                                      #v_petscans = Petscan.where("petscans.path in (?)",v_ecat_file)
-                                     v_petscans = Petscan.where("petscans.id in (select petfiles.petscan_id from petfiles where petfiles.path in (?))",v_ecat_file)
+                                     v_petscans = Petscan.where("petscans.id in (select petfiles.petscan_id from petfiles where petfiles.path in (?))",v_ecat_file_array)
                                      if v_petscans.count > 0
                                         v_appointment = Appointment.find(v_petscans.first.appointment_id)
                                         v_age_at_appointment = v_appointment.age_at_appointment.to_s
@@ -3708,7 +3733,16 @@ def  run_pet_mk6240_harvest
                          @trfileimage_processedimages.push(v_processedimage.id)
                          # sources - ecat pet file -- petfile_id?
                          # petfile_id from ecat file
-                         v_petfiles = Petfile.where("petfiles.path in (?)",v_ecat_file)
+                         # pet dicoms - 2 files with - between NOT SURE HOW THE LINK TO processedimages will work
+                                     v_ecat_file_array = []
+                                     v_ecat_file_chop_array = v_ecat_file.split("-")
+                                     if v_ecat_file_chop_array.count > 1
+                                        v_ecat_file_chop_array.each do |val|
+                                            v_ecat_file_array.push(File.dirname(val).to_s)
+                                        end
+                                     end
+                                     v_ecat_file_array.push(v_ecat_file)
+                         v_petfiles = Petfile.where("petfiles.path in (?)",v_ecat_file_array)
                          if v_petfiles.count > 0
                            v_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'petfile'",v_processedimage_file_id,v_petfiles.first.id)
                            if v_processedimagesources.count < 1 and v_petfiles.count > 0
@@ -5174,8 +5208,16 @@ def  run_pet_pib_dvr_harvest
                                      v_ecat_file = v[1].to_s
                                      
                                      # get v_age_at_appointment
+                                     v_ecat_file_array = []
+                                     v_ecat_file_chop_array = v_ecat_file.split("-")
+                                     if v_ecat_file_chop_array.count > 1
+                                        v_ecat_file_chop_array.each do |val|
+                                            v_ecat_file_array.push(File.dirname(val).to_s)
+                                        end
+                                     end
+                                     v_ecat_file_array.push(v_ecat_file)
 
-                                     v_petscans = Petscan.where("petscans.id in (select petfiles.petscan_id from petfiles where petfiles.path in (?))",v_ecat_file)
+                                     v_petscans = Petscan.where("petscans.id in (select petfiles.petscan_id from petfiles where petfiles.path in (?))",v_ecat_file_array)
                                      if v_petscans.count > 0
                                         v_appointment = Appointment.find(v_petscans.first.appointment_id)
                                         v_age_at_appointment = v_appointment.age_at_appointment.to_s
@@ -5254,7 +5296,16 @@ puts "RRRRRR v_mri_processed_date_change="+v_mri_processed_date_change
                          @trfileimage_processedimages.push(v_processedimage.id)
                          # sources - ecat pet file -- petfile_id?
                          # petfile_id from ecat file
-                         v_petfiles = Petfile.where("petfiles.path in (?)",v_ecat_file)
+                         # pet dicoms - 2 files with - between NOT SURE HOW THE LINK TO processedimages will work
+                                     v_ecat_file_array = []
+                                     v_ecat_file_chop_array = v_ecat_file.split("-")
+                                     if v_ecat_file_chop_array.count > 1
+                                        v_ecat_file_chop_array.each do |val|
+                                            v_ecat_file_array.push(File.dirname(val).to_s)
+                                        end
+                                     end
+                                     v_ecat_file_array.push(v_ecat_file)
+                         v_petfiles = Petfile.where("petfiles.path in (?)",v_ecat_file_array)
                          puts " hhhh before ecat file cnt"
                          if v_petfiles.count > 0
                            v_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'petfile'",v_processedimage_file_id,v_petfiles.first.id)
@@ -6761,9 +6812,17 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
                                      v_ecat_file = v[1].to_s
                                      
                                      # get v_age_at_appointment
+                                     v_ecat_file_array = []
+                                     v_ecat_file_chop_array = v_ecat_file.split("-")
+                                     if v_ecat_file_chop_array.count > 1
+                                        v_ecat_file_chop_array.each do |val|
+                                            v_ecat_file_array.push(File.dirname(val).to_s)
+                                        end
+                                     end
+                                     v_ecat_file_array.push(v_ecat_file)
 
                                      #v_petscans = Petscan.where("petscans.path in (?)",v_ecat_file)
-                                    v_petscans = Petscan.where("petscans.id in (select petfiles.petscan_id from petfiles where petfiles.path in (?))",v_ecat_file)
+                                    v_petscans = Petscan.where("petscans.id in (select petfiles.petscan_id from petfiles where petfiles.path in (?))",v_ecat_file_array)
                                      if v_petscans.count > 0
                                         v_appointment = Appointment.find(v_petscans.first.appointment_id)
                                         v_age_at_appointment = v_appointment.age_at_appointment.to_s
@@ -6838,7 +6897,16 @@ puts "ggggg v_preprocessed_full_path="+v_preprocessed_full_path
                          @trfileimage_processedimages.push(v_processedimage.id)
                          # sources - ecat pet file -- petfile_id?
                          # petfile_id from ecat file
-                         v_petfiles = Petfile.where("petfiles.path in (?)",v_ecat_file)
+                         # pet dicoms - 2 files with - between NOT SURE HOW THE LINK TO processedimages will work
+                                     v_ecat_file_array = []
+                                     v_ecat_file_chop_array = v_ecat_file.split("-")
+                                     if v_ecat_file_chop_array.count > 1
+                                        v_ecat_file_chop_array.each do |val|
+                                            v_ecat_file_array.push(File.dirname(val).to_s)
+                                        end
+                                     end
+                                     v_ecat_file_array.push(v_ecat_file)
+                         v_petfiles = Petfile.where("petfiles.path in (?)",v_ecat_file_array)
                          puts " hhhh before ecat file cnt"
                          if v_petfiles.count > 0
                            v_processedimagesources = Processedimagessource.where("processedimage_id in (?) and source_image_id in (?) and source_image_type = 'petfile'",v_processedimage_file_id,v_petfiles.first.id)
@@ -14503,6 +14571,15 @@ puts "end of ids loop"
 
   end
 # check for [pcVIPR data collection successfull!] in *_output.csv.log
+#- check the log for 
+#"pcVIPR data collection successfull!"
+#if it's there - ok.
+#if not there I will check  for
+#"pcVIPR data collection completed with error(s)!"
+#if there I will get all the lines which contain 
+#ERROR!:
+#and add to the log.
+#if not there I will add comments that success and error not there
   def run_pcvipr_output_file_harvest
           v_base_path = Shared.get_base_path()
          @schedule = Schedule.where("name in ('pcvipr_output_file_harvest')").first
@@ -14602,7 +14679,7 @@ puts "v_analyses_path="+v_analyses_path
                                if v_subject_id_sp_id != v_scan_procedures[0].id   # difference between directory and subject sp - ussually a missing _v#
                                       v_comment_warning = v_comment_warning+"; sp mismatch "+v_subjectid+" sp="+v_scan_procedures[0].id .to_s
                                elsif v_second_viewer_flag == "N"
-                                     v_comment = v_comment+"; "+v_subjectid+" not done"
+                                     ## v_comment = v_comment+"; "+v_subjectid+" not done"
                                else
                                    puts v_return_comment
                                    v_comment = v_return_comment+v_comment
@@ -14674,7 +14751,7 @@ puts "v_analyses_path="+v_analyses_path
                                if v_subject_id_sp_id != v_scan_procedures[0].id   # difference between directory and subject sp - ussually a missing _v#
                                       v_comment_warning = v_comment_warning+"; sp mismatch "+v_subjectid+" sp="+v_scan_procedures[0].id .to_s
                                elsif v_second_viewer_flag == "N"
-                                     v_comment = v_comment+"; "+v_subjectid+" not done"
+                                     ## v_comment = v_comment+"; "+v_subjectid+" not done"
                                else
                                    puts v_return_comment
                                    v_comment = v_return_comment+v_comment
@@ -14746,7 +14823,7 @@ puts "v_analyses_path="+v_analyses_path
                                if v_subject_id_sp_id != v_scan_procedures[0].id   # difference between directory and subject sp - ussually a missing _v#
                                       v_comment_warning = v_comment_warning+"; sp mismatch "+v_subjectid+" sp="+v_scan_procedures[0].id .to_s
                                elsif v_second_viewer_flag == "N"
-                                     v_comment = v_comment+"; "+v_subjectid+" not done"
+                                     ##v_comment = v_comment+"; "+v_subjectid+" not done"
                                else
                                    puts v_return_comment
                                    v_comment = v_return_comment+v_comment
@@ -14815,7 +14892,7 @@ puts "v_analyses_path="+v_analyses_path
                                if v_subject_id_sp_id != v_scan_procedures[0].id   # difference between directory and subject sp - ussually a missing _v#
                                       v_comment_warning = v_comment_warning+"; sp mismatch "+v_subjectid+" sp="+v_scan_procedures[0].id .to_s
                                elsif v_second_viewer_flag == "N"
-                                     v_comment = v_comment+"; "+v_subjectid+" not done"
+                                     ##v_comment = v_comment+"; "+v_subjectid+" not done"
                                else
                                    puts v_return_comment
                                    v_comment = v_return_comment+v_comment
