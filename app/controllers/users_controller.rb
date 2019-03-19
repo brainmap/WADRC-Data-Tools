@@ -120,7 +120,7 @@ class UsersController < ApplicationController
        @user = User.find(params[:id]) 
     end
    def user_params
-          params.require(:user).permit(:view_low_scan_procedure_array,:edit_low_scan_procedure_array,:description,:role,:last_sign_in_ip,:current_sign_in_ip,:edit_low_protocol_array,:view_low_protocol_array,:admin_low_scan_procedure_array,:admin_high_scan_procedure_array,:edit_high_protocol_array,:admin_low_protocol_array,:admin_high_protocol_array,:hide_date_flag_array,:last_sign_in_at,:current_sign_in_at,:id,:username,:crypted_password,:salt,:remember_token,:remember_token_expires_at,:first_name,:last_name,:sign_in_count,:remember_created_at,:reset_password_sent_at,:reset_password_token,:encrypted_password,:email)
+          params.require(:user).permit(:view_low_scan_procedure_array,:edit_low_scan_procedure_array,:description,:role,:last_sign_in_ip,:current_sign_in_ip,:edit_low_protocol_array,:view_low_protocol_array,:admin_low_scan_procedure_array,:admin_high_scan_procedure_array,:edit_high_protocol_array,:admin_low_protocol_array,:admin_high_protocol_array,:edit_medium_scan_procedure_array,:edit_medium_protocol_array,:hide_date_flag_array,:last_sign_in_at,:current_sign_in_at,:id,:username,:crypted_password,:salt,:remember_token,:remember_token_expires_at,:first_name,:last_name,:sign_in_count,:remember_created_at,:reset_password_sent_at,:reset_password_token,:encrypted_password,:email)
    end
   
 =begin
