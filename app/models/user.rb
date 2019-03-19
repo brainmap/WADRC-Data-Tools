@@ -94,6 +94,10 @@ class User < ActiveRecord::Base
           var = set_edit_view_array('edit_low_protocol_array')
           "#{var}"
   end
+  def edit_medium_protocol_array
+          var = set_edit_view_array('edit_medium_protocol_array')
+          "#{var}"
+  end
 =begin    # hiding calls since not using yet
   def admin_low_protocol_array
             var = set_edit_view_array('admin_low_protocol_array')
@@ -102,10 +106,6 @@ class User < ActiveRecord::Base
   def view_medium_protocol_array
          var = set_edit_view_array('view_medium_protocol_array')
          "#{var}"
-  end
-  def edit_medium_protocol_array
-          var = set_edit_view_array('edit_medium_protocol_array')
-          "#{var}"
   end
   def admin_medium_protocol_array
             var = set_edit_view_array('admin_medium_protocol_array')
@@ -185,7 +185,7 @@ class User < ActiveRecord::Base
              @current_self_scan_procedure.each do |p2|
                scan_procedure_array << p2.id
                end
-             self[:edit_me3dium_scan_procedure_array] = scan_procedure_array.join(" ")
+             self[:edit_medium_scan_procedure_array] = scan_procedure_array.join(" ")
           end
 
           if p.role == "Edit_Low"

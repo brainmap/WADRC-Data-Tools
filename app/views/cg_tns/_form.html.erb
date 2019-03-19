@@ -1,6 +1,6 @@
 <%   v_y_n = {"Y"=>"Y","N"=>"N"}%>
 
-
+<% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium'%> 
 <%= form_for(@cg_tn, :html => {:multipart => true}) do |f| %>
   <% if @cg_tn.errors.any? %>
     <div id="error_explanation">
@@ -114,4 +114,4 @@
   </div><br>
 <% end %>
 
-
+<%end%>

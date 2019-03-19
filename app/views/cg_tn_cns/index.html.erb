@@ -67,7 +67,9 @@
     <td><%= cg_tn_cn.exclude_from_char_replacement_flag %></td>
     <td><%= link_to 'Show', cg_tn_cn %></td>
     <td><%= link_to 'Edit', edit_cg_tn_cn_path(cg_tn_cn) %></td>
+    <% if current_user.role == 'Admin_High'%> 
     <td><%= link_to 'Destroy', cg_tn_cn, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
+    <%end%>
   </tr>
 <% end %>
 </table>

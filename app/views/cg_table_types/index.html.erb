@@ -32,7 +32,9 @@
       <% if current_user.role == 'Admin_High' or current_user.role == 'Admin_Medium'%>
     <td><%= link_to 'Show', cg_table_type %></td>
     <td><%= link_to 'Edit', edit_cg_table_type_path(cg_table_type) %></td>
+    <% if current_user.role == 'Admin_High'%> 
     <td><%= link_to 'Destroy', cg_table_type, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+    <%end%>
     <% end %>
   </tr>
 <% end %>

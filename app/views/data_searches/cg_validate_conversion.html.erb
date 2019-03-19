@@ -4,7 +4,7 @@ v_key_type = [["enumber and visit# mapped to enrollment/scan_procedure","enrollm
 v_yes_no = [["Y","Y"],["N","N"]]
 %>
 
-<% if current_user.role == 'Admin_High' %>
+<% if current_user.role == 'Admin_High' or current_user.role == 'Edit_Medium'%>
 
 
 

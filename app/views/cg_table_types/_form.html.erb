@@ -1,3 +1,4 @@
+<% if current_user.role == 'Admin_High'%> 
 <%  v_y_n = {"Y"=>"Y","N"=>"N"}%>
 <%= form_for(@cg_table_type) do |f| %>
   <% if @cg_table_type.errors.any? %>
@@ -57,3 +58,4 @@
     <%= f.submit %>
   </div>
 <% end %>
+<%end%>

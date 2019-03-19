@@ -2,6 +2,7 @@
     v_data_type = {"integer"=>"integer","string"=>"string","date"=>"date","float"=>"float"}
 
 %>
+<% if current_user.role == 'Admin_High'%> 
 
 <%= form_for(@cg_tn_cn) do |f| %>
   <% if @cg_tn_cn.errors.any? %>
@@ -125,6 +126,6 @@ Most fields have "Search Between" = N. <br>
 Ref Table a will be the model name in camel case for a reference table, <br>
 or == LOOKUP_REFS plus the identifying "label" for the set of reference rows.<br>
 
-
+<%end%>
 
 

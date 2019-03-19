@@ -17,7 +17,9 @@
     <td><%= cg_query_tn.join_type %></td>
     <td><%= link_to 'Show', cg_query_tn %></td>
     <td><%= link_to 'Edit', edit_cg_query_tn_path(cg_query_tn) %></td>
+    <% if current_user.role == 'Admin_High'%> 
     <td><%= link_to 'Destroy', cg_query_tn, :method => :delete,data: {confirm: 'Are you sure?' } %></td>
+    <%end%>
   </tr>
 <% end %>
 </table>

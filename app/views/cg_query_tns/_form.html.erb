@@ -1,3 +1,4 @@
+<% if current_user.role == 'Admin_High'%> 
 <%= form_for(@cg_query_tn) do |f| %>
   <% if @cg_query_tn.errors.any? %>
     <div id="error_explanation">
@@ -27,3 +28,4 @@
     <%= f.submit %>
   </div>
 <% end %>
+<%end%>
