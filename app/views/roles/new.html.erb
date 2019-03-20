@@ -1,5 +1,7 @@
+<% if current_user.role == 'Admin_High' %>
 <h1>New role</h1>
 
 <%= render 'form' %>
 
 <%= link_to 'Back', roles_path %>
+<%end%>

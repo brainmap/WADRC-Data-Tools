@@ -22,8 +22,23 @@
   The only Users with global roles are the Panda Admins - [ full admin rights]<br>
   the Question making Users - [lower level admin rights]<br>
   the UP table validator - [edit_most_fields rights] - Edit_Medium.<br>
-  Leave the role BLANK unless the users should have global access.
-<% end %>
+  Leave the role BLANK unless the users should have global access.<br><br>
+
+  Only some of the global roles are fully implemented.<br>
+Admin_High ==== full admin rights-ONLY FULL ADMINS<br>
+Admin_Low ====lower level admin rights- Make Question Forms<br>
+Admin_Medium ==== most admin rights- All scheduler runs, all appt edits <br>
+Edit_Medium ==== edit most fields- run Validator<br>
+<br>
+To activate more of the global roles:
+In the user_controller.rb  add :[role_name]_scan_procedure_array,:[role_name]_protocol_array to    def user_params<br>
+In the database add 2 columns to the user tables, varchar(255), for  [role_name]_scan_procedure_array, [role_name]_protocol_array <br>
+In the user model, uncover the  def [role_name]_protocol_array<br>
+<br>
+
+
+<%end%>
+
 
 <h3>Cancel the account</h3>
 

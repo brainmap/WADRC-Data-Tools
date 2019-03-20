@@ -1,6 +1,9 @@
+<% if current_user.role == 'Admin_High' %>
 <h1>Editing role</h1>
 
 <%= render 'form' %>
 
 <%= link_to 'Show', @role %> |
 <%= link_to 'Back', roles_path %>
+
+<%end%>
