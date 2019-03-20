@@ -331,7 +331,10 @@ puts "fffff !v_pet_target_path.blank?"
   
 
   # MORE THAN ONE FILE!!!!!!
+  # if the pet files are not being detected,
+  # check the scan_procedure.[Petscan tracer path] field- the file detect uses the expected pet tracer path, defined in the scan_procedure of the scan
   def get_pet_files(p_sp_id, p_tracer_id, p_vgroup_id)
+
     # ???? '1_asthana.adrc-clinical-core.visit1'=>'', '2_bendlin.tami.visit1'=>'', '1_bendlin.wmad.visit1'=>'','1_bendlin.mets.visit1'=> '',    '2_bendlin.mets.visit1'=> ''
     # 2_ries.mosaic.visit1    3_ries.mosaic.visit1
     # tracer 1=pib, 2=fdg, 3=way, 4=015
@@ -364,7 +367,6 @@ puts "fffff !v_pet_target_path.blank?"
                       e.enumber = "adcp_"+v_last_four_chars #in the file name but not in the pet/enumber dir
               end
           end
-
           # checking first for the enum dir in path, then the puddle of files
           # add the dicom petfile detection
           # only in subject_directory - maybe with the exam number/date for adni and adcp?
