@@ -240,6 +240,9 @@ v_user = v_user.gsub("\n","")
    elsif v_value_1 == "pet_av1451_process"
       v_shared = Shared.new
       v_shared.run_pet_av1451_process()
+   elsif v_value_1 == "pet_fdg_harvest"
+      v_shared = Shared.new
+      v_shared.run_pet_fdg_harvest()
    elsif v_value_1 == "pet_mk6240_harvest"
       v_shared = Shared.new
       v_shared.run_pet_mk6240_harvest()
