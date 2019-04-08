@@ -3063,7 +3063,7 @@ def run_pet_av1451_process
       v_days_mri_pet_diff_limit = "730"
       v_days_before_use_other_vgroup_mri = "5"
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
-      v_exclude_sp_mri_array = [-1,100]
+      v_exclude_sp_mri_array = [-1,100,80]
       v_exclude_sp_pet_array = [49,50,79,100]
       v_today_date = Date.today 
 
@@ -3128,12 +3128,25 @@ puts "v_participant.id="+v_participant.id.to_s
           v_pet_path_array = Array.new
           if !v_av1451_petfiles.nil? and v_av1451_petfiles.count > 1
                 v_multiple_petfiles = "Y"
+                # ok to have multiples if they are directories
+                v_av1451_petfiles.each do |val|
+
+                  if File.directory?(val.path)  # ct pet dirs
+                     v_petfile_exists = "Y"
+                     v_pet_path_ok = "Y"
+                     v_multiple_petfiles = "N"
+                     v_pet_path_array = (val.path).split("/")
+                  end
+                end
           elsif !v_av1451_petfiles.nil? and !v_av1451_petfiles.blank? and v_av1451_petfiles.count < 2 and v_av1451_petfiles.count > 0
                  # everything fine
                  if !v_av1451_petfiles.nil? and !v_av1451_petfiles.first.nil? and !v_av1451_petfiles.first.path.blank?
                       v_pet_path_array = (v_av1451_petfiles.first.path).split("/")
                       if File.file?(v_av1451_petfiles.first.path)
 puts v_av1451_petfiles.first.path
+                         v_petfile_exists = "Y"
+                         v_pet_path_ok = "Y"
+                      elsif File.directory?(v_av1451_petfiles.first.path)  # ct pet dirs
                          v_petfile_exists = "Y"
                          v_pet_path_ok = "Y"
                       end
@@ -7223,7 +7236,7 @@ def run_pet_pib_dvr_process
       v_pet_processing_wrapper = v_base_path+"/data1/lab_scripts/process_pet_wrapper.sh"
 
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
-      v_exclude_sp_mri_array = [-1,100]
+      v_exclude_sp_mri_array = [-1,100,80] # excluding adcp
       v_exclude_sp_pet_array = [80,115,100] # excluding adcp
       v_include_sp_pet_array= [105]
       v_today_date = Date.today 
@@ -7307,12 +7320,25 @@ def run_pet_pib_dvr_process
           if !v_pib_petfiles.nil? and v_pib_petfiles.count > 1
                 # eclude if there are multiple petfiles - need choice to run
                 v_multiple_petfiles = "Y"
+                # ok to have multiples if they are directories
+                v_pib_petfiles.each do |val|
+
+                  if File.directory?(val.path)  # ct pet dirs
+                     v_petfile_exists = "Y"
+                     v_pet_path_ok = "Y"
+                     v_multiple_petfiles = "N"
+                     v_pet_path_array = (val.path).split("/")
+                  end
+                end
           elsif !v_pib_petfiles.nil? and !v_pib_petfiles.blank? and v_pib_petfiles.count < 2 and v_pib_petfiles.count > 0
                  # everything fine - there is a petfile and only one
                  # check that petfile actually exists in file structure
                  if !v_pib_petfiles.nil? and !v_pib_petfiles.first.nil? and !v_pib_petfiles.first.path.blank?
                       v_pet_path_array = (v_pib_petfiles.first.path).split("/")
                       if File.file?(v_pib_petfiles.first.path)
+                         v_petfile_exists = "Y"
+                         v_pet_path_ok = "Y"
+                      elsif File.directory?(v_pib_petfiles.first.path)  # ct pet dirs
                          v_petfile_exists = "Y"
                          v_pet_path_ok = "Y"
                       end
@@ -8784,7 +8810,7 @@ def run_pet_pib_suvr_process
       v_days_mri_pet_diff_limit = "730"
       v_days_before_use_other_vgroup_mri = "5"
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
-      v_exclude_sp_mri_array = [-1,100]
+      v_exclude_sp_mri_array = [-1,100,80] # excluding adcp
       v_exclude_sp_pet_array = [80,100,115]
       v_today_date = Date.today 
       v_computer = "kanga"
@@ -8851,11 +8877,24 @@ puts "v_participant.id="+v_participant.id.to_s
           v_pet_path_array = Array.new
           if !v_pib_petfiles.nil? and v_pib_petfiles.count > 1
                 v_multiple_petfiles = "Y"
+                # ok to have multiples if they are directories
+                v_pib_petfiles.each do |val|
+
+                  if File.directory?(val.path)  # ct pet dirs
+                     v_petfile_exists = "Y"
+                     v_pet_path_ok = "Y"
+                     v_multiple_petfiles = "N"
+                     v_pet_path_array = (val.path).split("/")
+                  end
+                end
           elsif !v_pib_petfiles.nil? and !v_pib_petfiles.blank? and v_pib_petfiles.count < 2 and v_pib_petfiles.count > 0
                  # everything fine
                  if !v_pib_petfiles.nil? and !v_pib_petfiles.first.nil? and !v_pib_petfiles.first.path.blank?
                       v_pet_path_array = (v_pib_petfiles.first.path).split("/")
-                      if File.file?(v_pib_petfiles.first.path)
+                      if File.file?(v_pib_petfiles.first.path)  # ecat file
+                         v_petfile_exists = "Y"
+                         v_pet_path_ok = "Y"
+                      elsif File.directory?(v_pib_petfiles.first.path)  # ct pet dirs
                          v_petfile_exists = "Y"
                          v_pet_path_ok = "Y"
                       end
