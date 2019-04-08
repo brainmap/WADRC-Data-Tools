@@ -5599,7 +5599,7 @@ def run_pet_mk6240_process
       v_days_mri_pet_diff_limit = "730"
       v_days_before_use_other_vgroup_mri = "10"
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
-      v_exclude_sp_mri_array = [-1,100]
+      v_exclude_sp_mri_array = [-1,80,100]
       v_exclude_sp_pet_array = [-1,100]
       v_today_date = Date.today 
       v_computer = "kanga"
@@ -5666,11 +5666,24 @@ puts "v_participant.id="+v_participant.id.to_s
           v_pet_path_array = Array.new
           if !v_mk6240_petfiles.nil? and v_mk6240_petfiles.count > 1
                 v_multiple_petfiles = "Y"
+                # ok to have multiples if they are directories
+                v_mk6240_petfiles.each do |val|
+
+                  if File.directory?(val.path)  # ct pet dirs
+                     v_petfile_exists = "Y"
+                     v_pet_path_ok = "Y"
+                     v_multiple_petfiles = "N"
+                     v_pet_path_array = (val.path).split("/")
+                  end
+                end
           elsif !v_mk6240_petfiles.nil? and !v_mk6240_petfiles.blank? and v_mk6240_petfiles.count < 2 and v_mk6240_petfiles.count > 0
                  # everything fine
                  if !v_mk6240_petfiles.nil? and !v_mk6240_petfiles.first.nil? and !v_mk6240_petfiles.first.path.blank?
                       v_pet_path_array = (v_mk6240_petfiles.first.path).split("/")
-                      if File.file?(v_mk6240_petfiles.first.path)
+                      if File.file?(v_mk6240_petfiles.first.path)  # ecat
+                         v_petfile_exists = "Y"
+                         v_pet_path_ok = "Y"
+                      elsif File.directory?(v_mk6240_petfiles.first.path)  # ct pet dirs
                          v_petfile_exists = "Y"
                          v_pet_path_ok = "Y"
                       end
@@ -5678,7 +5691,10 @@ puts "v_participant.id="+v_participant.id.to_s
                     #v_comment = v_comment +" no petfile petscan_id="+pet_appt.id.to_s+"; "
                  end
           end
-          puts "aaaaa  start "+pet_appt.id.to_s
+          #puts "aaaaa  start "+pet_appt.id.to_s
+          #puts "bbbb v_multiple_petfiles="+v_multiple_petfiles
+          #puts "cccc v_petfile_exists="+v_petfile_exists
+          #puts "dddddd v_pet_path_array.count="+v_pet_path_array.count.to_s
 
           if v_pet_path_array.count < 8 or v_multiple_petfiles == "Y" or v_petfile_exists == "N"#or !File.file?(pet_appt.path)
              v_pet_path_ok = "N"
@@ -5686,6 +5702,8 @@ puts "v_participant.id="+v_participant.id.to_s
              v_scan_procedure_codename = v_pet_path_array[4] # leading slash shifts register
              v_subjectid_array = v_pet_path_array[7].split("_")
              v_subjectid = v_subjectid_array[0].downcase
+        #puts "eeeee v_scan_procedure_codename="+v_scan_procedure_codename
+        #puts "fffff v_subjectid="+v_subjectid
              #check if enumber and scan_procedure are valid
              v_enumbers = Enrollment.where("enumber in (?)", v_subjectid)
              v_scan_procedures =ScanProcedure.where("codename in (?)",v_scan_procedure_codename)
@@ -5789,7 +5807,7 @@ puts "v_participant.id="+v_participant.id.to_s
                    v_comment = v_comment+" "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" waiting to look for non-pet vgroup mri  v_scan_procedure.id="+v_scan_procedure.id.to_s+"  day diff ="+(v_today_date - v_pet_appointment.appointment_date).to_i.to_s
                 
                 else
-                  
+                   # excluding adcp early-- fails in the o acpc corrected 
                    v_mri_visits = Visit.where("visits.appointment_id in (select appointments.id from appointments , vgroups 
                                                     where appointments.vgroup_id = vgroups.id and vgroups.participant_id in (?)
                                                     and vgroups.transfer_mri = 'yes' and appointments.appointment_type = 'mri'
@@ -5885,22 +5903,25 @@ puts "v_participant.id="+v_participant.id.to_s
                    end
                    if !v_min_mri_visit.nil?
                      v_other_mri_appointment_array.delete(v_min_mri_appointment.appointment_date.to_s)
-                     puts "hhhhh min mri = "+v_min_mri_appointment.appointment_date.to_s+"     pet_appt= "+v_pet_appointment.appointment_date.to_s
+                     puts "mmmmmmm min mri = "+v_min_mri_appointment.appointment_date.to_s+"     pet_appt= "+v_pet_appointment.appointment_date.to_s
                      if v_other_mri_appointment_array.count > 0
                        v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+"  other mri="+v_other_mri_appointment_array.join(",")+"; "+v_comment
                      else
                        v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days   min mri = "+v_min_mri_appointment.appointment_date.to_s+"   pet_appt= "+v_pet_appointment.appointment_date.to_s+" ; "+v_comment
                      end
+                  #puts "nnnnnnnn"
                        if v_preprocessed_path_ti_no_leading_o > ""
-
+                  #puts "ooooooo"
                           v_uptake_duration = ((pet_appt.scanstarttime - pet_appt.injecttiontime)/60).floor
                           # surprised minus worked
                           #puts "pet_appt.scanstarttime="+pet_appt.scanstarttime.to_s
                           #puts "pet_appt.injecttiontime="+pet_appt.injecttiontime.to_s
                           # pib scan should be the same time as the injecvtion time
                           v_call = "date"
+        #puts "ppppppp v_uptake_duration="+v_uptake_duration.to_s
                           if (v_uptake_duration.to_i).between?(65,75)
                              v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer MK6240 --method SUVR --uptake '+v_uptake_duration.to_s+' --fid_t1 '+v_preprocessed_path_ti_no_leading_o+' " '  
+         #puts "hhhhhhh v_call="+v_call                    
                              v_comment = v_comment +" cmd= "+ v_call+"\n"
                              @schedulerun.comment = v_comment
                              @schedulerun.save
