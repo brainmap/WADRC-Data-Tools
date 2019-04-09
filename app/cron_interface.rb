@@ -267,6 +267,9 @@ v_user = v_user.gsub("\n","")
   elsif v_value_1 == "pib_cereb_tac"
       v_shared = Shared.new
       v_shared.run_pib_cereb_tac()
+  elsif v_value_1 == "primary_enumber_scan_procedure"
+      v_shared = Shared.new
+      v_shared.run_primary_enumber_scan_procedure()
   elsif v_value_1 == "processedimage_asl_harvest"
       v_shared = Shared.new
       v_shared.run_processedimage_asl_harvest()

@@ -14686,7 +14686,96 @@ puts "AAAAAAA="+v_log
     
     
   end
+
+def run_primary_enumber_scan_procedure
+    v_base_path = Shared.get_base_path()
+     @schedule = Schedule.where("name in ('primary_enumber_scan_procedure')").first
+      @schedulerun = Schedulerun.new
+      @schedulerun.schedule_id = @schedule.id
+      @schedulerun.comment ="starting primary_enumber_scan_procedure"
+      @schedulerun.save
+      @schedulerun.start_time = @schedulerun.created_at
+      @schedulerun.save
+      v_comment = ""      
+  # get mri path exclude list
+  # get rid of the b's in path of mri
+      v_mri = "/mri"
+      no_mri_path_sp_list =['asthana.adrc-clinical-core.visit1',
+      'bendlin.mets.visit1','bendlin.tami.visit1','bendlin.wmad.visit1','carlson.sharp.visit1','carlson.sharp.visit2',
+       'carlson.sharp.visit3','carlson.sharp.visit4','dempsey.plaque.visit1','dempsey.plaque.visit2','gleason.falls.visit1',
+      'johnson.merit220.visit1','johnson.merit220.visit2','johnson.tbi.aware.visit3','johnson.tbi-va.visit1','ries.aware.visit1','wrap140']
+      v_vgroups = Vgroup.where("transfer_mri in (?) or transfer_pet in (?)  ","yes", "yes")
+      v_vgroups.each do |val|
+           v_primary_enumber_array = []
+           v_primary_scan_procedure_array = []
+           v_mriscans = Visit.where("visits.appointment_id in (select appointments.id from appointments where appointments.vgroup_id in (?) )",val.id)
+          # v_petscans = Petscan.where("petscans.appointment_id in (select appointments.id from appointments where appointments.vgroup_id in (?))",val.id)
+
+   
+           v_mriscans.each do |val|
+              # watch for mri in path +/-
+             # get path, split on /, pick out scan_procedure ==> array
+              # pick out enumber(secondary_key)_exam#_date ==> split on _, trim secondary key => array  
+              if !val.path.nil? 
+                v_path_array = (val.path).split("/")  # leading / adds a member to array
+                v_primary_scan_procedure_array.push(v_path_array[4])
+                v_enumber_exam_date_array = []
+                if  no_mri_path_sp_list.include?(v_path_array[4]) 
+                  if !v_path_array[5].nil?
+                    v_enumber_exam_date_array = v_path_array[5].split("_")
+                  end
+                else
+                  if !v_path_array[6].nil?
+                     v_enumber_exam_date_array = v_path_array[6].split("_")
+                  end
+                end
+                v_appointment = Appointment.find(val.appointment_id)
+                if !v_enumber_exam_date_array[0].nil? and !v_appointment.secondary_key.nil? and v_appointment.secondary_key > '' # replace from end of enumber
+                  if v_enumber_exam_date_array[0].include? v_appointment.secondary_key and v_enumber_exam_date_array[0].end_with? v_appointment.secondary_key
+                    v_primary_enumber_array.push(v_enumber_exam_date_array[0].chomp(v_appointment.secondary_key))
+                  end
+                else
+                  v_primary_enumber_array.push(v_enumber_exam_date_array[0])
+                end
+              end
+           end
+           v_petscans.each do |val|
+             # get petfiles
+             # get path, split on /, pick out scan_procedure ==> array
+              # pick out enumber => array   -- only  reorged     
+
+           end
+
+
+        val.primary_enumber = (v_primary_enumber_array.uniq).join(",")
+        val.primary_scan_procedure = (v_primary_scan_procedure_array.uniq).join(",")
+        val.save
+
+
+
+      end
+
+
+
+
+
+
+
+
+      @schedulerun.comment =("successful finish primary_enumber_scan_procedure "+v_comment[0..459])
+      if !v_comment.include?("ERROR")
+         @schedulerun.status_flag ="Y"
+       end
+       @schedulerun.save
+       @schedulerun.end_time = @schedulerun.updated_at      
+       @schedulerun.save
+
+
   
+end
+
+  
+  # I think this only gets the path if the ecat file name is filled in, but the full path is not????
   def run_pet_path
     v_base_path = Shared.get_base_path()
      @schedule = Schedule.where("name in ('pet_path')").first
