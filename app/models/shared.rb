@@ -14704,12 +14704,12 @@ def run_primary_enumber_scan_procedure
       'bendlin.mets.visit1','bendlin.tami.visit1','bendlin.wmad.visit1','carlson.sharp.visit1','carlson.sharp.visit2',
        'carlson.sharp.visit3','carlson.sharp.visit4','dempsey.plaque.visit1','dempsey.plaque.visit2','gleason.falls.visit1',
       'johnson.merit220.visit1','johnson.merit220.visit2','johnson.tbi.aware.visit3','johnson.tbi-va.visit1','ries.aware.visit1','wrap140']
-      v_vgroups = Vgroup.where("transfer_mri in (?) or transfer_pet in (?)  ","yes", "yes")
+      v_vgroups = Vgroup.where("(transfer_mri in (?) or transfer_pet in (?)) and vgroups.id not in (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups where scan_procedures_vgroups.scan_procedure_id in (4))  ","yes", "yes")
       v_vgroups.each do |val|
            v_primary_enumber_array = []
            v_primary_scan_procedure_array = []
            v_mriscans = Visit.where("visits.appointment_id in (select appointments.id from appointments where appointments.vgroup_id in (?) )",val.id)
-          # v_petscans = Petscan.where("petscans.appointment_id in (select appointments.id from appointments where appointments.vgroup_id in (?))",val.id)
+           v_petscans = Petscan.where("petscans.appointment_id in (select appointments.id from appointments where appointments.vgroup_id in (?))",val.id)
 
    
            v_mriscans.each do |val|
@@ -14742,26 +14742,27 @@ def run_primary_enumber_scan_procedure
            v_petscans.each do |val|
              # get petfiles
              # get path, split on /, pick out scan_procedure ==> array
-              # pick out enumber => array   -- only  reorged     
-
+              # pick out enumber => array   -- only  reorged   
+              v_petfiles = Petfile.where("petfiles.petscan_id in (?)",val.id) 
+              v_petfiles.each do |val_file|
+                if !(val_file.path).nil? and val_file.path > ''
+                  v_path_array = (val_file.path).split("/")  # leading / adds a member to array
+                  v_primary_scan_procedure_array.push(v_path_array[4])
+                  if !v_path_array[7].nil?   # some pipr/adrc/pib_pilot
+                    if v_path_array[7].end_with? ".v"  # if the ecat files haven't been re-organized within enumber dirs
+                      v_pet_file_name_array = v_path_array[6].split("_")
+                      v_primary_enumber_array.push(v_pet_file_name_array[0])
+                    else
+                      v_primary_enumber_array.push(v_path_array[7])
+                    end
+                  end
+                end
+              end
            end
-
-
         val.primary_enumber = (v_primary_enumber_array.uniq).join(",")
         val.primary_scan_procedure = (v_primary_scan_procedure_array.uniq).join(",")
         val.save
-
-
-
       end
-
-
-
-
-
-
-
-
       @schedulerun.comment =("successful finish primary_enumber_scan_procedure "+v_comment[0..459])
       if !v_comment.include?("ERROR")
          @schedulerun.status_flag ="Y"
