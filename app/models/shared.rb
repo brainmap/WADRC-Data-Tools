@@ -3061,7 +3061,7 @@ def run_pet_av1451_process
       v_av1451_path = "/pet/av1451/suvr/code_ver2b"
       v_av1451_tracer_id = "9"
       v_days_mri_pet_diff_limit = "730"
-      v_days_before_use_other_vgroup_mri = "5"
+      v_days_before_use_other_vgroup_mri = "10"
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
       v_exclude_sp_mri_array = [-1,100,80]
       v_exclude_sp_pet_array = [49,50,79,100]
@@ -3283,7 +3283,7 @@ puts v_av1451_petfiles.first.path
       end
 
 
-    @schedulerun.comment =("successful finish pet_av1451_process "+v_comment_warning+" "+v_comment[0..1990])
+    @schedulerun.comment =("successful finish pet_av1451_process "+v_comment_warning+" "+v_comment) #[0..1990])
     if !v_comment.include?("ERROR")
        @schedulerun.status_flag ="Y"
      end
@@ -7605,7 +7605,7 @@ def run_pet_pib_dvr_process
       end
 
 
-    @schedulerun.comment =("successful finish pet_pib_dvr_process "+v_comment_warning+" "+v_comment[0..2990])
+    @schedulerun.comment =("successful finish pet_pib_dvr_process "+v_comment_warning+" "+v_comment)  #[0..2990])
     if !v_comment.include?("ERROR") and !v_comment_warning.include?("ERROR")
        @schedulerun.status_flag ="Y"
      end
@@ -8808,7 +8808,7 @@ def run_pet_pib_suvr_process
       v_pib_tracer_id = "1"
       v_pet_processing_wrapper = v_base_path+"/data1/lab_scripts/process_pet_wrapper.sh"
       v_days_mri_pet_diff_limit = "730"
-      v_days_before_use_other_vgroup_mri = "5"
+      v_days_before_use_other_vgroup_mri = "10"
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
       v_exclude_sp_mri_array = [-1,100,80] # excluding adcp
       v_exclude_sp_pet_array = [80,100,115]
