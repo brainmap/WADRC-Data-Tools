@@ -223,6 +223,7 @@ class VgroupsController < ApplicationController
   # GET /vgroups/new.xml
   def new
     @vgroup = Vgroup.new
+    @scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ')
      #undefined method `<<' for #<ActiveRecord::Relation []> 
      # also seems to have gotten rid of the exisiting enumber error
     ####@vgroup.enrollments << Enrollment.new

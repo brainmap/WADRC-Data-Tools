@@ -3,7 +3,8 @@ require 'metamri'
 class RawDataImportsController < ApplicationController
   
   def new
-    @recent_visits = Visit.where("created_at <= DATE_SUB(NOW(), INTERVAL 1 MONTH)").load #all # where("created_at => ?",1.week.ago)   
+    scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ')
+    @recent_visits = Visit.where("created_at <= DATE_SUB(NOW(), INTERVAL 1 MONTH)").where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).load #all # where("created_at => ?",1.week.ago)   
     # vipr files need to be bzip2 or they don't get imported into panda
     respond_to do |format|
       format.html # new.html.erb
@@ -24,11 +25,12 @@ class RawDataImportsController < ApplicationController
         flash[:error] = "Awfully sorry, this raw data directory could not be scanned. #{e}"
       end
       unless v.nil?
-        puts "GGGGGGGGGG before Visit.create_or_update_from_metamri"
+        puts "GGGGGGGGGG before Visit.create_or_update_from_metamri user="+Etc.getlogin.to_s
         @visit = Visit.create_or_update_from_metamri(v, created_by = current_user)
         unless @visit.new_record?
           flash[:notice] = "Sucessfully imported raw data directory."
-          begin
+          begin  
+           
             PandaMailer.visit_confirmation(@visit, {:send_to => "noreply_johnson_lab@medicine.wisc.edu"}).deliver
             flash[:notice] = flash[:notice].to_s + "; Email was succesfully sent."
           rescue Errno::ECONNREFUSED, LoadError, OpenSSL::SSL::SSLError => load_error
