@@ -41,3 +41,7 @@ def trfile_draw_text_field(p_question_id, p_value_number,p_size,p_default_value,
   end
 
 end
+
+def trfile_draw_hidden_field(p_question_id, p_value_number,p_default_value, p_value)
+    hidden_field_tag "value_"+p_value_number+"["+p_question_id.to_s+"][]",(p_value.try(:strip) or p_default_value) 
+end

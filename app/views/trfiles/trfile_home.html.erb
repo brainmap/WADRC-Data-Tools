@@ -162,6 +162,11 @@
              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value["+act.id.to_s+"][]", theme.id,  (@tredit_actions[0].value.to_i == theme.id.to_i)?  true:false    %> <%= theme.description %>
             <% end %>
           <% end %>
+
+           <% elsif act.form_display_field_type == "text_read_only"    %>
+<%= @tredit_actions[0].value %> 
+<%= trfile_draw_hidden_field(act.id,"1",act.form_default_value,@tredit_actions[0].value) %>
+
            <% elsif act.form_display_field_type == "text_5"    %>
 <%= trfile_draw_text_field(act.id,"1",5, act.form_default_value,@tredit_actions[0].value,act.form_js,act.form_required_y_n_1) %> 
            <% elsif act.form_display_field_type == "text_10"    %>
