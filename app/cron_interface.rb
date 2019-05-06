@@ -327,9 +327,24 @@ v_user = v_user.gsub("\n","")
   elsif v_value_1 == "xnat_file"
       v_shared = Shared.new
       v_shared.run_xnat_file()  
-  elsif v_value_1 == "xnat_upload"
-      v_shared = Shared.new
-      v_shared.run_xnat_upload()   
+      
+  #elsif v_value_1 == "xnat_upload"
+  #    v_shared = Shared.new
+  #    v_shared.run_xnat_upload()
+
+  elsif v_value_1 == "xnat_recruitment"
+
+      xnat_recruit = SharedUpload::XnatRecruitment.new
+      params = SharedUpload::XnatRecruitment.default_params
+      params[:project] = "wbbsp"
+
+      xnat_recruit.run params
+
+  elsif v_value_1 == "xnat_curated_upload"
+
+      xnat = SharedUpload::XnatCuratedUpload.new
+      xnat.run
+
   elsif v_value_1 == "xnat_session"
       v_shared = Shared.new
       v_shared.run_xnat_session()
