@@ -4,7 +4,7 @@ class RawDataImportsController < ApplicationController
   
   def new
     scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ')
-    @recent_visits = Visit.where("created_at <= DATE_SUB(NOW(), INTERVAL 1 MONTH)").where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).load #all # where("created_at => ?",1.week.ago)   
+    #@recent_visits = Visit.where("created_at <= DATE_SUB(NOW(), INTERVAL 1 MONTH)").where("visits.id in (select visit_id from scan_procedures_visits where scan_procedure_id in (?))", scan_procedure_array).load #all # where("created_at => ?",1.week.ago)   
     # vipr files need to be bzip2 or they don't get imported into panda
     respond_to do |format|
       format.html # new.html.erb

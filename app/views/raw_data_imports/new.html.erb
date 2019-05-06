@@ -19,15 +19,6 @@
 		  </p>
 		<% end %>
 	</div>
-	<hr>
-	<div id="recent-imports-sidebar" >
-		<h3>Recently Imported Visit Directories:</h3>
-		<ul>
-			<% for visit in @recent_visits %>
-				<li><%= visit.path %><%= " by #{visit.created_by.login}" if visit.created_by %><%= " on #{visit.created_at.to_formatted_s(:datetime_daymonthweek)}" %></li>
-			<% end %>
-		</ul>
-	</div>
 
 	
 </div>
