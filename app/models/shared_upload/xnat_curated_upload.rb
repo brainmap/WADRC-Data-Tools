@@ -11,9 +11,6 @@ class SharedUpload::XnatCuratedUpload < SharedUpload::SharedUploadBase
     			stop_file_name: "xnat_curated_file_stop",
       			stop_file_path: "/mounts/data/preprocessed/logs/xnat_curated_file_stop",
 
-      			scan_procedure_array: [26,41,77,91], #pdt's and mk
-      			series_description_category_array: ['T1_Volumetric','T2'], # mpnrage?
-	      		series_description_category_id_array: [19, 20], #,1 ]
       			project: nil,
 
               #usually this script will grab the project from the driver table along with imageset ids,
@@ -53,7 +50,8 @@ class SharedUpload::XnatCuratedUpload < SharedUpload::SharedUploadBase
                   join visits on image_datasets.visit_id = visits.id 
                   join enrollment_visit_memberships on visits.id = enrollment_visit_memberships.visit_id
                   join enrollments on enrollment_visit_memberships.enrollment_id = enrollments.id
-                where enrollments.do_not_share_scans_flag = 'N'"
+                where enrollments.do_not_share_scans_flag = 'N'
+                  and (enrollments.participant_id, #{ p[:xnat_driver_tn] }.project) not in (select participant_id, project from #{ p[:xnat_participant_tn] }) "
 
       if !p[:project].nil?
         sql += " and #{ p[:xnat_driver_tn] }.project = '#{ p[:project] }'"
@@ -123,11 +121,14 @@ class SharedUpload::XnatCuratedUpload < SharedUpload::SharedUploadBase
               join enrollments on enrollment_visit_memberships.enrollment_id = enrollments.id
               join appointments on visits.appointment_id = appointments.id
               where enrollments.do_not_share_scans_flag = 'N'
-              and (appointments.id, visits.id, #{ p[:xnat_driver_tn] }.project) not in (select appointment_id, visit_id, project from #{ p[:xnat_appointment_mri_tn] })"
+              and (appointments.id, #{ p[:xnat_driver_tn] }.project) not in (select appointment_id, project from #{ p[:xnat_appointment_mri_tn] })
+              and (visits.id, #{ p[:xnat_driver_tn] }.project) not in (select visit_id, project from #{ p[:xnat_appointment_mri_tn] })"
 
       if !p[:project].nil?
         sql += " and #{ p[:xnat_driver_tn] }.project = '#{ p[:project] }'"
       end
+
+      sql += " group by #{ p[:xnat_driver_tn] }.project, appointments.id"
 
       results = @connection.execute(sql)
 
