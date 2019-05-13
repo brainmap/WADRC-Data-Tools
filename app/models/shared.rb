@@ -1300,23 +1300,8 @@ end
     @scan_procedures.each do |sp|
         @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
         @schedulerun.save
-        v_visit_number =""
-        if sp.codename.include?("visit2")
-            v_visit_number ="_v2"
-        elsif sp.codename.include?("visit3")
-            v_visit_number ="_v3"
-        elsif sp.codename.include?("visit4")
-            v_visit_number ="_v4"
-        elsif sp.codename.include?("visit5")
-            v_visit_number ="_v5"
-        elsif sp.codename.include?("visit6")
-            v_visit_number ="_v6"
-        elsif sp.codename.include?("visit7")
-            v_visit_number ="_v7"
-        end   
-        if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-           v_visit_number = "_"+sp.visit_number_abbreviation
-        end
+        v_visit_number = sp.visit_abbr
+
         v_preprocessed_full_path = v_preprocessed_path+sp.codename  
         if File.directory?(v_preprocessed_full_path)
           sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
@@ -2143,23 +2128,7 @@ def  run_pet_av1451_harvest
       @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
       v_sp_id = sp.id
       @schedulerun.save
-      v_visit_number =""
-      if sp.codename.include?("visit2")
-            v_visit_number ="_v2"
-      elsif sp.codename.include?("visit3")
-            v_visit_number ="_v3"
-      elsif sp.codename.include?("visit4")
-            v_visit_number ="_v4"
-      elsif sp.codename.include?("visit5")
-            v_visit_number ="_v5"
-      elsif sp.codename.include?("visit6")
-            v_visit_number ="_v6"
-      elsif sp.codename.include?("visit7")
-            v_visit_number ="_v7"
-      end   
-      if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-           v_visit_number = "_"+sp.visit_number_abbreviation
-      end
+      v_visit_number = sp.visit_abbr
       v_codename_hyphen =  sp.codename
       v_codename_hyphen = v_codename_hyphen.gsub(".","-")
 
@@ -3063,7 +3032,7 @@ def run_pet_av1451_process
       v_days_mri_pet_diff_limit = "730"
       v_days_before_use_other_vgroup_mri = "10"
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
-      v_exclude_sp_mri_array = [-1,100,80]
+      v_exclude_sp_mri_array = [-1,100,80,76,78]
       v_exclude_sp_pet_array = [49,50,79,100]
       v_today_date = Date.today 
 
@@ -3433,23 +3402,7 @@ def  run_pet_fdg_harvest
       @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
       v_sp_id = sp.id
       @schedulerun.save
-      v_visit_number =""
-      if sp.codename.include?("visit2")
-            v_visit_number ="_v2"
-      elsif sp.codename.include?("visit3")
-            v_visit_number ="_v3"
-      elsif sp.codename.include?("visit4")
-            v_visit_number ="_v4"
-      elsif sp.codename.include?("visit5")
-            v_visit_number ="_v5"
-      elsif sp.codename.include?("visit6")
-            v_visit_number ="_v6"
-      elsif sp.codename.include?("visit7")
-            v_visit_number ="_v7"
-      end   
-      if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-           v_visit_number = "_"+sp.visit_number_abbreviation
-      end 
+      v_visit_number = sp.visit_abbr
       v_codename_hyphen =  sp.codename
       v_codename_hyphen = v_codename_hyphen.gsub(".","-")
 
@@ -4559,23 +4512,7 @@ def  run_pet_mk6240_harvest
       @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
       v_sp_id = sp.id
       @schedulerun.save
-      v_visit_number =""
-      if sp.codename.include?("visit2")
-            v_visit_number ="_v2"
-      elsif sp.codename.include?("visit3")
-            v_visit_number ="_v3"
-      elsif sp.codename.include?("visit4")
-            v_visit_number ="_v4"
-      elsif sp.codename.include?("visit5")
-            v_visit_number ="_v5"
-      elsif sp.codename.include?("visit6")
-            v_visit_number ="_v6"
-      elsif sp.codename.include?("visit7")
-            v_visit_number ="_v7"
-      end   
-      if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-           v_visit_number = "_"+sp.visit_number_abbreviation
-      end
+      v_visit_number = sp.visit_abbr
       v_codename_hyphen =  sp.codename
       v_codename_hyphen = v_codename_hyphen.gsub(".","-")
 
@@ -5612,7 +5549,7 @@ def run_pet_mk6240_process
       v_days_mri_pet_diff_limit = "730"
       v_days_before_use_other_vgroup_mri = "10"
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
-      v_exclude_sp_mri_array = [-1,80,100]
+      v_exclude_sp_mri_array = [-1,80,100,76,78]
       v_exclude_sp_pet_array = [-1,100]
       v_today_date = Date.today 
       v_computer = "kanga"
@@ -6127,23 +6064,8 @@ def  run_pet_pib_dvr_harvest
       @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
       v_sp_id = sp.id
       @schedulerun.save
-      v_visit_number =""
-      if sp.codename.include?("visit2")
-            v_visit_number ="_v2"
-      elsif sp.codename.include?("visit3")
-            v_visit_number ="_v3"
-      elsif sp.codename.include?("visit4")
-            v_visit_number ="_v4"
-      elsif sp.codename.include?("visit5")
-            v_visit_number ="_v5"
-      elsif sp.codename.include?("visit6")
-            v_visit_number ="_v6"
-      elsif sp.codename.include?("visit7")
-            v_visit_number ="_v7"
-      end   
-      if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-           v_visit_number = "_"+sp.visit_number_abbreviation
-      end 
+      v_visit_number = sp.visit_abbr
+
       v_codename_hyphen =  sp.codename
       v_codename_hyphen = v_codename_hyphen.gsub(".","-")
 
@@ -7236,7 +7158,10 @@ def run_pet_pib_dvr_process
       v_pet_processing_wrapper = v_base_path+"/data1/lab_scripts/process_pet_wrapper.sh"
 
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
-      v_exclude_sp_mri_array = [-1,100,80] # excluding adcp
+      v_exclude_sp_mri_array = [-1,100,80,76,78] # excluding adcp, exert
+
+        #this occours in all of the pet processing
+
       v_exclude_sp_pet_array = [80,115,100] # excluding adcp
       v_include_sp_pet_array= [105]
       v_today_date = Date.today 
@@ -7752,23 +7677,7 @@ def  run_pet_pib_suvr_harvest
       @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
       v_sp_id = sp.id
       @schedulerun.save
-      v_visit_number =""
-      if sp.codename.include?("visit2")
-            v_visit_number ="_v2"
-      elsif sp.codename.include?("visit3")
-            v_visit_number ="_v3"
-      elsif sp.codename.include?("visit4")
-            v_visit_number ="_v4"
-      elsif sp.codename.include?("visit5")
-            v_visit_number ="_v5"
-      elsif sp.codename.include?("visit6")
-            v_visit_number ="_v6"
-      elsif sp.codename.include?("visit7")
-            v_visit_number ="_v7"
-      end   
-      if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-           v_visit_number = "_"+sp.visit_number_abbreviation
-      end 
+      v_visit_number = sp.visit_abbr
       v_codename_hyphen =  sp.codename
       v_codename_hyphen = v_codename_hyphen.gsub(".","-")
 
@@ -8810,7 +8719,7 @@ def run_pet_pib_suvr_process
       v_days_mri_pet_diff_limit = "730"
       v_days_before_use_other_vgroup_mri = "10"
       v_sp_use_other_vgroup_mri_immediately_array = [105]   # pet_supp
-      v_exclude_sp_mri_array = [-1,100,80] # excluding adcp
+      v_exclude_sp_mri_array = [-1,100,80,76,78] # excluding adcp
       v_exclude_sp_pet_array = [80,100,115]
       v_today_date = Date.today 
       v_computer = "kanga"
@@ -9451,23 +9360,7 @@ def run_sleep_t1
     @scan_procedures.each do |sp|
       @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
       @schedulerun.save
-        v_visit_number =""
-        if sp.codename.include?("visit2")
-            v_visit_number ="_v2"
-        elsif sp.codename.include?("visit3")
-            v_visit_number ="_v3"
-        elsif sp.codename.include?("visit4")
-            v_visit_number ="_v4"
-        elsif sp.codename.include?("visit5")
-            v_visit_number ="_v5"
-        elsif sp.codename.include?("visit6")
-            v_visit_number ="_v6"
-        elsif sp.codename.include?("visit7")
-            v_visit_number ="_v7"
-        end   
-        if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-           v_visit_number = "_"+sp.visit_number_abbreviation
-        end  
+        v_visit_number = sp.visit_abbr
         v_preprocessed_full_path = v_preprocessed_path+sp.codename  
         if File.directory?(v_preprocessed_full_path)
           sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
@@ -9849,23 +9742,7 @@ def run_sleep_t1
     @scan_procedures.each do |sp|
        @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
       @schedulerun.save
-      v_visit_number =""
-      if sp.codename.include?("visit2")
-            v_visit_number ="_v2"
-      elsif sp.codename.include?("visit3")
-            v_visit_number ="_v3"
-      elsif sp.codename.include?("visit4")
-            v_visit_number ="_v4"
-      elsif sp.codename.include?("visit5")
-            v_visit_number ="_v5"
-      elsif sp.codename.include?("visit6")
-            v_visit_number ="_v6"
-      elsif sp.codename.include?("visit7")
-            v_visit_number ="_v7"
-      end   
-      if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-           v_visit_number = "_"+sp.visit_number_abbreviation
-      end  
+      v_visit_number = sp.visit_abbr
       v_preprocessed_full_path = v_preprocessed_path+sp.codename  
       v_log_msg = "Starting scan protocol "+v_preprocessed_full_path
       process_log_append(v_log_path, v_log_msg)
@@ -10044,23 +9921,7 @@ def run_sleep_t1
     @scan_procedures.each do |sp|
       @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
       @schedulerun.save
-        v_visit_number =""
-        if sp.codename.include?("visit2")
-            v_visit_number ="_v2"
-        elsif sp.codename.include?("visit3")
-            v_visit_number ="_v3"
-        elsif sp.codename.include?("visit4")
-            v_visit_number ="_v4"
-        elsif sp.codename.include?("visit5")
-            v_visit_number ="_v5"
-        elsif sp.codename.include?("visit6")
-            v_visit_number ="_v6"
-        elsif sp.codename.include?("visit7")
-            v_visit_number ="_v7"
-        end   
-        if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-           v_visit_number = "_"+sp.visit_number_abbreviation
-        end   
+        v_visit_number = sp.visit_abbr
         v_preprocessed_full_path = v_preprocessed_path+sp.codename  
         if File.directory?(v_preprocessed_full_path)
           sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
@@ -10585,25 +10446,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
         sp_array = ScanProcedure.where("codename in (?)",v_codename)
         if sp_array.count> 0
              v_prepend = "_"+sp_array.first.subjectid_base
-             v_number = "_v1"
-             if v_codename.include? "visit2"
-                 v_number = "_v2"
-             elsif v_codename.include? "visit3"
-                 v_number = "_v3"
-             elsif v_codename.include? "visit4"
-                 v_number = "_v4"
-             elsif v_codename.include? "visit5"
-                 v_number = "_v5"
-             elsif v_codename.include? "visit6"
-                 v_number = "_v6"
-             elsif v_codename.include? "visit7"
-                 v_number = "_v7"
-             elsif v_codename.include? "visit8"
-                 v_number = "_v8"
-             end   
-             if !sp_array.first.visit_number_abbreviation.nil? and sp_array.first.visit_number_abbreviation > "" and v_number == ""
-                v_number = "_"+sp_array.first.visit_number_abbreviation
-             end
+             v_number = sp_array.first.visit_abbr("_v1")
              # issue with secondary scans into one session
              if !v_secondary_key.blank?
                  v_xnat_session_id = v_export_id.to_s+v_prepend+v_number+"_sk"+v_secondary_key
@@ -11366,23 +11209,7 @@ puts "hhhhh ="+sql_update
             v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
             @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
             @scan_procedures.each do |sp|
-              v_visit_number =""
-              if sp.codename.include?("visit2")
-                v_visit_number ="_v2"
-              elsif sp.codename.include?("visit3")
-                v_visit_number ="_v3"
-              elsif sp.codename.include?("visit4")
-                v_visit_number ="_v4"
-              elsif sp.codename.include?("visit5")
-                v_visit_number ="_v5"
-              elsif sp.codename.include?("visit6")
-                v_visit_number ="_v6"
-              elsif sp.codename.include?("visit7")
-                v_visit_number ="_v7"
-              end   
-              if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-                      v_visit_number = "_"+sp.visit_number_abbreviation
-              end
+              v_visit_number = sp.visit_abbr
                if no_mri_path_sp_list.include?(sp.codename)
                  v_mri = ""
                 else
@@ -11952,24 +11779,8 @@ def  run_asl_harvest
     @scan_procedures.each do |sp|
       @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
       @schedulerun.save
-      v_visit_number =""
-      if sp.codename.include?("visit2")
-            v_visit_number ="_v2"
-      elsif sp.codename.include?("visit3")
-            v_visit_number ="_v3"
-      elsif sp.codename.include?("visit4")
-            v_visit_number ="_v4"
-      elsif sp.codename.include?("visit5")
-            v_visit_number ="_v5"
-      elsif sp.codename.include?("visit6")
-            v_visit_number ="_v6"
-      elsif sp.codename.include?("visit7")
-            v_visit_number ="_v7"
-      end   
-      if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-           v_visit_number = "_"+sp.visit_number_abbreviation
-      end
-      v_codename_hyphen =  sp.codename
+      v_visit_number = sp.visit_abbr
+      v_codename_hyphen = sp.codename
       v_codename_hyphen = v_codename_hyphen.gsub(".","-")
 
       v_preprocessed_full_path = v_preprocessed_path+sp.codename  
@@ -12737,23 +12548,7 @@ end
             v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
             @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
             @scan_procedures. each do |sp|
-              v_visit_number =""
-              if sp.codename.include?("visit2")
-                v_visit_number ="_v2"
-              elsif sp.codename.include?("visit3")
-                v_visit_number ="_v3"
-              elsif sp.codename.include?("visit4")
-                v_visit_number ="_v4"
-              elsif sp.codename.include?("visit5")
-                v_visit_number ="_v5"
-              elsif sp.codename.include?("visit6")
-                v_visit_number ="_v6"
-              elsif sp.codename.include?("visit7")
-                v_visit_number ="_v7"
-            end   
-            if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-               v_visit_number = "_"+sp.visit_number_abbreviation
-            end
+              v_visit_number = sp.visit_abbr
                if no_mri_path_sp_list.include?(sp.codename)
                  v_mri = ""
                 else
@@ -12953,23 +12748,7 @@ end
             v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
             @scan_procedures = ScanProcedure.where("petscan_flag='Y' and id not in (?)",v_exclude_sp)  # NEED ONLY sp with fdg, but filter later
             @scan_procedures. each do |sp|
-               v_visit_number =""
-               if sp.codename.include?("visit2")
-                  v_visit_number ="_v2"
-               elsif sp.codename.include?("visit3")
-                  v_visit_number ="_v3"
-               elsif sp.codename.include?("visit4")
-                  v_visit_number ="_v4"
-               elsif sp.codename.include?("visit5")
-                  v_visit_number ="_v5"
-               elsif sp.codename.include?("visit6")
-                  v_visit_number ="_v6"
-               elsif sp.codename.include?("visit7")
-                  v_visit_number ="_v7"
-               end   
-               if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-                   v_visit_number = "_"+sp.visit_number_abbreviation
-               end
+               v_visit_number = sp.visit_abbr
                 # petscans.lookup_pettracer_id = 2 ==> fdg
                 v_preprocessed_full_path = v_preprocessed_path+sp.codename
                 sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups, vgroups, appointments, petscans, enrollment_vgroup_memberships
@@ -13450,23 +13229,7 @@ end
             v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
             @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
             @scan_procedures. each do |sp|
-              v_visit_number =""
-              if sp.codename.include?("visit2")
-                v_visit_number ="_v2"
-              elsif sp.codename.include?("visit3")
-                v_visit_number ="_v3"
-              elsif sp.codename.include?("visit4")
-                v_visit_number ="_v4"
-              elsif sp.codename.include?("visit5")
-                v_visit_number ="_v5"
-              elsif sp.codename.include?("visit6")
-                v_visit_number ="_v6"
-              elsif sp.codename.include?("visit7")
-                v_visit_number ="_v7"
-              end   
-              if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-                v_visit_number = "_"+sp.visit_number_abbreviation
-              end
+              v_visit_number = sp.visit_abbr
                if no_mri_path_sp_list.include?(sp.codename)
                  v_mri = ""
                 else
@@ -13550,7 +13313,7 @@ end
                                   v_sag_cube_flair_cnt = 0
                                   v_dir_array.each do |f|
                                     
-                                    if (f.include? "Sag-CUBE-FLAIR" or f.include? "Sag-CUBE-flair"  or f.include?"Sag-CUBE-T2-FLAIR") and !f.include?"PU" and f.end_with?(".nii")
+                                    if (f.include? "Sag-CUBE-FLAIR" or f.include? "Sag-CUBE-flair"  or f.include?"Sag-CUBE-T2-FLAIR"  or f.include?"Sag-T2-FLAIR-CUBE") and !f.include?"PU" and f.end_with?(".nii")
                                       v_sag_cube_flair_flag = "Y"
                                       v_sag_cube_flair_cnt = v_sag_cube_flair_cnt + 1
                                       if v_sag_cube_flair_cnt > 1
@@ -13665,23 +13428,7 @@ end
             v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
            @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)
             @scan_procedures. each do |sp|
-              v_visit_number =""
-              if sp.codename.include?("visit2")
-                v_visit_number ="_v2"
-              elsif sp.codename.include?("visit3")
-                v_visit_number ="_v3"
-              elsif sp.codename.include?("visit4")
-                v_visit_number ="_v4"
-              elsif sp.codename.include?("visit5")
-                v_visit_number ="_v5"
-              elsif sp.codename.include?("visit6")
-                v_visit_number ="_v6"
-              elsif sp.codename.include?("visit7")
-                v_visit_number ="_v7"
-             end   
-             if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-                v_visit_number = "_"+sp.visit_number_abbreviation
-             end
+              v_visit_number = sp.visit_abbr
                if no_mri_path_sp_list.include?(sp.codename)
                  v_mri = ""
                 else
@@ -13753,7 +13500,7 @@ end
                                   v_sag_cube_flair_cnt = 0
                                   v_dir_array.each do |f|
                                     
-                                    if (f.include? "Sag-CUBE-FLAIR" or f.include? "Sag-CUBE-flair"  or f.include?"Sag-CUBE-T2-FLAIR") and !f.include?"PU" and f.end_with?(".nii")
+                                    if (f.include? "Sag-CUBE-FLAIR" or f.include? "Sag-CUBE-flair"  or f.include?"Sag-CUBE-T2-FLAIR"  or f.include?"Sag-T2-FLAIR-CUBE") and !f.include?"PU" and f.end_with?(".nii")
                                       v_sag_cube_flair_flag = "Y"
                                       v_sag_cube_flair_cnt = v_sag_cube_flair_cnt + 1
                                       if v_sag_cube_flair_cnt > 1
@@ -14318,23 +14065,7 @@ puts "AAAAAAA="+v_log
     @scan_procedures.each do |sp|
         @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
         @schedulerun.save
-        v_visit_number =""
-        if sp.codename.include?("visit2")
-            v_visit_number ="_v2"
-        elsif sp.codename.include?("visit3")
-            v_visit_number ="_v3"
-        elsif sp.codename.include?("visit4")
-            v_visit_number ="_v4"
-        elsif sp.codename.include?("visit5")
-            v_visit_number ="_v5"
-        elsif sp.codename.include?("visit6")
-            v_visit_number ="_v6"
-        elsif sp.codename.include?("visit7")
-            v_visit_number ="_v7"
-        end   
-        if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-           v_visit_number = "_"+sp.visit_number_abbreviation
-        end   
+        v_visit_number = sp.visit_abbr
         v_preprocessed_full_path = v_preprocessed_path+sp.codename  
         if File.directory?(v_preprocessed_full_path)
           sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups,  appointments, enrollment_vgroup_memberships
@@ -14577,23 +14308,7 @@ puts "AAAAAAA="+v_log
             v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
             @scan_procedures = ScanProcedure.where("petscan_flag='Y' and id not in (?)",v_exclude_sp)  # NEED ONLY sp with pib, but filter later
             @scan_procedures. each do |sp|
-               v_visit_number =""
-               if sp.codename.include?("visit2")
-                  v_visit_number ="_v2"
-               elsif sp.codename.include?("visit3")
-                  v_visit_number ="_v3"
-               elsif sp.codename.include?("visit4")
-                  v_visit_number ="_v4"
-               elsif sp.codename.include?("visit5")
-                  v_visit_number ="_v5"
-               elsif sp.codename.include?("visit6")
-                  v_visit_number ="_v6"
-               elsif sp.codename.include?("visit7")
-                  v_visit_number ="_v7"
-               end   
-               if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-                 v_visit_number = "_"+sp.visit_number_abbreviation
-               end
+               v_visit_number = sp.visit_abbr
 
                 v_preprocessed_full_path = v_preprocessed_path+sp.codename
                 sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups, vgroups, appointments, petscans, enrollment_vgroup_memberships
@@ -15306,31 +15021,8 @@ puts sql
  
             v_path_array = v_ids_path.split("/")
             v_scan_procedure_name = v_path_array[4]
-
-            v_visit_number = ""   # might have to add more some day
-            if v_scan_procedure_name.include? "visit2"
-              v_visit_number = "_v2"
-            elsif v_scan_procedure_name.include? "visit3"
-              v_visit_number = "_v3"
-            elsif v_scan_procedure_name.include? "visit4"
-              v_visit_number = "_v4"
-            elsif v_scan_procedure_name.include? "visit5"
-              v_visit_number = "_v5"
-            elsif v_scan_procedure_name.include? "visit6"
-              v_visit_number = "_v6"
-            elsif v_scan_procedure_name.include? "visit7"
-              v_visit_number = "_v7"
-            end
-            if v_visit_number.blank?
-               v_sp = ScanProcedure.where("codename in (?)",v_scan_procedure_name)
-               if !v_sp.nil?    
-                 if !v_sp.first.visit_number_abbreviation.nil? and v_sp.first.visit_number_abbreviation > "" 
-                   v_visit_number = "_"+v_sp.first.visit_number_abbreviation 
-                 end
-               end
-
-            end
-
+            v_sp = ScanProcedure.where("codename in (?)",v_scan_procedure_name)
+            v_visit_number = sp.visit_abbr
 
             if v_path_array[5] == "mri"
               v_subjectid_exam_date_array = v_path_array[6].split("_")
@@ -16709,23 +16401,7 @@ puts "v_analyses_path="+v_analyses_path
             v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
             @scan_procedures = ScanProcedure.where("petscan_flag='Y' and id not in (?)",v_exclude_sp)  # NEED ONLY sp with pib, but filter later
             @scan_procedures. each do |sp|
-               v_visit_number =""
-               if sp.codename.include?("visit2")
-                  v_visit_number ="_v2"
-               elsif sp.codename.include?("visit3")
-                  v_visit_number ="_v3"
-               elsif sp.codename.include?("visit4")
-                  v_visit_number ="_v4"
-               elsif sp.codename.include?("visit5")
-                  v_visit_number ="_v5"
-               elsif sp.codename.include?("visit6")
-                  v_visit_number ="_v6"
-               elsif sp.codename.include?("visit7")
-                  v_visit_number ="_v7"
-               end   
-               if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-                  v_visit_number = "_"+sp.visit_number_abbreviation
-               end
+               v_visit_number = sp.visit_abbr
 
                 v_preprocessed_full_path = v_preprocessed_path+sp.codename
                 sql_enum = "select distinct enrollments.enumber from enrollments, scan_procedures_vgroups, vgroups, appointments, petscans, enrollment_vgroup_memberships
@@ -16829,23 +16505,7 @@ puts "v_analyses_path="+v_analyses_path
       v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
       @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)   #.where("scan_procedures.codename in ('asthana.adrc-clinical-core.visit1')") where("id in (?)",95) #
       @scan_procedures.each do |sp|
-          v_visit_number =""
-          if sp.codename.include?("visit2")
-              v_visit_number ="_v2"
-          elsif sp.codename.include?("visit3")
-              v_visit_number ="_v3"
-          elsif sp.codename.include?("visit4")
-              v_visit_number ="_v4"
-          elsif sp.codename.include?("visit5")
-              v_visit_number ="_v5"
-          elsif sp.codename.include?("visit6")
-            v_visit_number ="_v6"
-          elsif sp.codename.include?("visit7")
-            v_visit_number ="_v7"
-          end   
-          if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-              v_visit_number = "_"+sp.visit_number_abbreviation
-          end
+          v_visit_number = sp.visit_abbr
           if no_mri_path_sp_list.include?(sp.codename)
               v_mri = ""
           else
@@ -17195,23 +16855,7 @@ puts "v_analyses_path="+v_analyses_path
       v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
       @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp)  #.where("scan_procedures.codename in ('asthana.adrc-clinical-core.visit1')")
       @scan_procedures.each do |sp|
-          v_visit_number =""
-          if sp.codename.include?("visit2")
-              v_visit_number ="_v2"
-          elsif sp.codename.include?("visit3")
-              v_visit_number ="_v3"
-          elsif sp.codename.include?("visit4")
-              v_visit_number ="_v4"
-          elsif sp.codename.include?("visit5")
-              v_visit_number ="_v5"
-          elsif sp.codename.include?("visit6")
-            v_visit_number ="_v6"
-          elsif sp.codename.include?("visit7")
-            v_visit_number ="_v7"
-          end   
-          if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-             v_visit_number = "_"+sp.visit_number_abbreviation
-          end
+          v_visit_number = sp.visit_abbr
           if no_mri_path_sp_list.include?(sp.codename)
               v_mri = ""
           else
@@ -17452,23 +17096,7 @@ puts "v_analyses_path="+v_analyses_path
       v_exclude_sp =[4,10,15,19,32,53,54,55,56,57,100]
       @scan_procedures = ScanProcedure.where("id not in (?)",v_exclude_sp).where("scan_procedures.codename in ('asthana.adrc-clinical-core.visit1')")
       @scan_procedures.each do |sp|
-          v_visit_number ="" # not being used
-          if sp.codename.include?("visit2")
-              v_visit_number ="_v2"
-          elsif sp.codename.include?("visit3")
-              v_visit_number ="_v3"
-          elsif sp.codename.include?("visit4")
-              v_visit_number ="_v4"
-          elsif sp.codename.include?("visit5")
-              v_visit_number ="_v5"
-          elsif sp.codename.include?("visit6")
-            v_visit_number ="_v6"
-          elsif sp.codename.include?("visit7")
-            v_visit_number ="_v7"
-          end   
-          if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-              v_visit_number = "_"+sp.visit_number_abbreviation
-          end
+          v_visit_number = sp.visit_abbr
           if no_mri_path_sp_list.include?(sp.codename)
               v_mri = ""
           else
@@ -18224,23 +17852,7 @@ puts "v_analyses_path="+v_analyses_path
             @scan_procedures.each do |sp|
               @schedulerun.comment = "start "+sp.codename+" "+v_comment_base
               @schedulerun.save
-              v_visit_number =""
-              if sp.codename.include?("visit2")
-                v_visit_number ="_v2"
-              elsif sp.codename.include?("visit3")
-                v_visit_number ="_v3"
-              elsif sp.codename.include?("visit4")
-                v_visit_number ="_v4"
-              elsif sp.codename.include?("visit5")
-                v_visit_number ="_v5"
-              elsif sp.codename.include?("visit6")
-                v_visit_number ="_v6"
-              elsif sp.codename.include?("visit7")
-                v_visit_number ="_v7"
-              end   
-              if !sp.visit_number_abbreviation.nil? and sp.visit_number_abbreviation > "" and v_visit_number == ""
-                 v_visit_number = "_"+sp.visit_number_abbreviation
-              end
+              v_visit_number = sp.visit_abbr
                if no_mri_path_sp_list.include?(sp.codename)
                  v_mri = ""
                 else
