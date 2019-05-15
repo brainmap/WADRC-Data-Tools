@@ -421,6 +421,9 @@ class SharedUpload::XnatCuratedUpload < SharedUpload::SharedUploadBase
        
         if v_status == "D"
           results_update = @connection.execute(sql_update)
+          
+          sql_update = "update #{ p[:xnat_participant_tn] } set xnat_exists_flag = 'Y', xnat_run_upload_flag = 'D' where project = '#{ v_xnat_project }' and export_id = '#{ v_xnat_export_id }'"
+          results_update = @connection.execute(sql_update)
         elsif v_status == "F"        
           sql_update = "update #{ p[:xnat_ids_tn] } set #{ p[:xnat_ids_tn] }.xnat_exists_flag = 'Q' 
             where #{ p[:xnat_ids_tn] }.visit_id = #{ v_visit_id.to_s } and #{ p[:xnat_ids_tn] }.xnat_exists_flag in ('N','Q')
@@ -428,6 +431,7 @@ class SharedUpload::XnatCuratedUpload < SharedUpload::SharedUploadBase
             results_update = @connection.execute(sql_update)
         end
 
+        @params[:comment].push v_status_comment
         #clean up our working files
         #ssh panda_user@merida.dom.wisc.edu "cd /tmp/; rm -rf /tmp/{%xnat_session_id%}.zip
         response = r_call "ssh panda_user@#{ p[:computer] }.dom.wisc.edu 'cd #{ p[:working_directory] }; rm -rf #{ p[:working_directory] }/#{ v_xnat_session }.zip'"
