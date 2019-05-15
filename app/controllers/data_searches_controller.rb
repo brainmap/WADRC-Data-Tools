@@ -3890,7 +3890,13 @@ puts "global update"
                    v_value_conversion_definition = vals[15]
                    v_value_conversion_array = v_value_conversion_definition.split("|")
                    v_value_conversion_array.each do |v_conversion|
-                     v_value_and_meaning_array = v_conversion.split(",")
+                     # fields with comma in them cause problems in split
+                      if v_conversion[0] == "^"
+                        v_conversion = v_conversion[1..-1] # remove the first ^, 
+                        v_value_and_meaning_array = v_conversion.chop.split("^,^") #and last ^
+                      else
+                        v_value_and_meaning_array = v_conversion.split(",")
+                      end
                      if v_value_and_meaning_array.count > 1
                        v_value = v_value_and_meaning_array[0].strip
                        v_value_and_meaning_array.shift
