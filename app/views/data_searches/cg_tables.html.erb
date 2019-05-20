@@ -9,7 +9,7 @@
  </tr>
 <% @cg_table_types.each do |tt| 
    if !@cg_tn_dict[tt.table_type].nil? %>
-          <tr><td align="left" colspan="2"><b><%= tt.display_name %></b> </td></tr>
+          <tr><td align="left" colspan="2"><b id='show_<%= tt.table_type %>'><%= tt.display_name %></b> </td></tr>
 		  <%   @cg_tn_dict[tt.table_type].each do |tn| %>
 	            <tr><td><%= hidden_field(:cg_search, "add_cg_tn_id][", :value=>tn.id.to_s) %>
 		           <%= check_box_tag "include_add_cg_tns", "1",  FALSE , :name => "cg_search[include_add_cg_tn]["+tn.id.to_s+"]", :onclick =>"checkbox_cascade(this,'"+tn.id.to_s+"')"%></td>
@@ -37,7 +37,7 @@
                   </tr>
 	      <% end %>
       <%else%>
-      <tr><td align="left" colspan="4"> &nbsp;&nbsp;&nbsp;<%= link_to tt.display_name+'- click to open table listing', '/cg_tables?'+tt.table_type+'=Y'%></td></tr>
+      <tr><td align="left" colspan="4"> &nbsp;&nbsp;&nbsp;<%= link_to tt.display_name+'- click to open table listing', '/cg_tables?'+tt.table_type+'=Y#show_'+tt.table_type %></td></tr>
      <% end %>
 <% end %>
 <tr><td align="left" colspan="2"><%= submit_tag("add tables checked to search")%> </td></tr>
