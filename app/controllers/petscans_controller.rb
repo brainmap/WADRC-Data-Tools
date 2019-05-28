@@ -170,7 +170,7 @@ class PetscansController < ApplicationController
       if !params[:pet_search][:scan_procedure_id].blank?
          condition =" petscans.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                                 appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
-                                                and scan_procedure_id in ("+params[:pet_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+                                                and scan_procedure_id in ("+params[:pet_search][:scan_procedure_id].join(',').gsub(/[;:'"“”()=<>]/, '')+"))"
          @conditions.push(condition)
          v_petfile_conditions.push(condition)
          @scan_procedures = ScanProcedure.where("id in (?)",params[:pet_search][:scan_procedure_id])
@@ -179,7 +179,7 @@ class PetscansController < ApplicationController
       # moved file_name to petfiles from petscans
       if !params[:pet_search][:file_name].blank?
           var = "%"+params[:pet_search][:file_name].downcase+"%"
-          condition =" petscans.id in ( select petfiles.petscan_id from petfiles where petfiles.file_name  like '"+var.gsub(/[;:'"()=<>]/, '')+"' )"
+          condition =" petscans.id in ( select petfiles.petscan_id from petfiles where petfiles.file_name  like '"+var.gsub(/[;:'"“”()=<>]/, '')+"' )"
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +", File name "+params[:pet_search][:file_name]
       end
@@ -191,12 +191,12 @@ class PetscansController < ApplicationController
          v_enumber = v_enumber.gsub(/,/,"','")
            condition =" petscans.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
            where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-           and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"
+           and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:'"“”()=<>]/, '')+"'))"
           
         else
           condition =" petscans.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
           where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-          and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:pet_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+          and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:pet_search][:enumber].gsub(/[;:'"“”()=<>]/, '')+"')))"
         end
         @conditions.push(condition)
         params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:pet_search][:enumber]
@@ -204,20 +204,29 @@ class PetscansController < ApplicationController
 
       if !params[:pet_search][:rmr].blank? 
           condition =" petscans.appointment_id in (select appointments.id from appointments,vgroups
-                    where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:pet_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
+                    where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:pet_search][:rmr].gsub(/[;:'"“”()=<>]/, '')+"')   ))"
           @conditions.push(condition)           
           params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:pet_search][:rmr]
       end   
+
+      if !params[:pet_search][:reggieid].blank? 
+          condition ="  petscans.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
+           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+           and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                  and participants.reggieid is not NULL and participants.reggieid in ("+params[:pet_search][:reggieid].gsub(/[;:'"“”()=<>]/, '')+") )"
+           @conditions.push(condition)           
+          params["search_criteria"] = params["search_criteria"] +",  Reggie ID in ("+params[:pet_search][:reggieid]+") "
+       end   
       
       if !params[:pet_search][:pet_status].blank? 
           condition =" petscans.appointment_id in (select appointments.id from appointments,vgroups
-                              where appointments.vgroup_id = vgroups.id and  lower(vgroups.transfer_pet) in (lower('"+params[:pet_search][:pet_status].gsub(/[;:'"()=<>]/, '')+"')   ))"
+                              where appointments.vgroup_id = vgroups.id and  lower(vgroups.transfer_pet) in (lower('"+params[:pet_search][:pet_status].gsub(/[;:'"“”()=<>]/, '')+"')   ))"
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  Pet status "+params[:pet_search][:pet_status]
       end
 
       if !params[:pet_search][:lookup_pettracer_id].blank? 
-          condition ="  petscans.lookup_pettracer_id in ("+params[:pet_search][:lookup_pettracer_id].gsub(/[;:'"()=<>]/, '')+"   )"
+          condition ="  petscans.lookup_pettracer_id in ("+params[:pet_search][:lookup_pettracer_id].gsub(/[;:'"“”()=<>]/, '')+"   )"
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  Tracer "+LookupPettracer.find(params[:pet_search][:lookup_pettracer_id]).description
       end
@@ -267,7 +276,7 @@ class PetscansController < ApplicationController
                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                            and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                           and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:pet_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                           and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:pet_search][:min_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
             @conditions.push(condition)
            params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:pet_search][:min_age]
        elsif params[:pet_search][:min_age].blank? && !params[:pet_search][:max_age].blank?
@@ -275,7 +284,7 @@ class PetscansController < ApplicationController
                                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                             and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                             and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                        and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:pet_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                        and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:pet_search][:max_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
            @conditions.push(condition)
            params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:pet_search][:max_age]
        elsif !params[:pet_search][:min_age].blank? && !params[:pet_search][:max_age].blank?
@@ -283,7 +292,7 @@ class PetscansController < ApplicationController
                              where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                           and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                           and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                      and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:pet_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:pet_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                      and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:pet_search][:min_age].gsub(/[;:'"“”()=<>]/, '')+" and "+params[:pet_search][:max_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
          @conditions.push(condition)
          params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:pet_search][:min_age]+" and "+params[:pet_search][:max_age]
        end

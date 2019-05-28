@@ -193,7 +193,7 @@ respond_to :html
       if !params[:lh_search][:scan_procedure_id].blank?
          condition ="   blooddraws.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                                 appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
-                                                and scan_procedure_id in ("+params[:lh_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+                                                and scan_procedure_id in ("+params[:lh_search][:scan_procedure_id].join(',').gsub(/[;:'"“”()=<>]/, '')+"))"
          @scan_procedures = ScanProcedure.where("id in (?)",params[:lh_search][:scan_procedure_id])
          @conditions.push(condition)
          params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
@@ -206,12 +206,12 @@ respond_to :html
          v_enumber = v_enumber.gsub(/,/,"','")
           condition ="   blooddraws.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
            where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-           and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"
+           and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:'"“”()=<>]/, '')+"'))"
           
         else
          condition ="   blooddraws.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
           where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-          and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:lh_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+          and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:lh_search][:enumber].gsub(/[;:'"“”()=<>]/, '')+"')))"
         end
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:lh_search][:enumber]
@@ -219,14 +219,23 @@ respond_to :html
 
       if !params[:lh_search][:rmr].blank? 
           condition ="   blooddraws.appointment_id in (select appointments.id from appointments,vgroups
-                    where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:lh_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
+                    where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:lh_search][:rmr].gsub(/[;:'"“”()=<>]/, '')+"')   ))"
                     @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:lh_search][:rmr]
       end
-      
+
+      if !params[:lh_search][:reggieid].blank? 
+          condition ="   blooddraws.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
+           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+           and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                  and participants.reggieid is not NULL and participants.reggieid in ("+params[:lh_search][:reggieid].gsub(/[;:'"“”()=<>]/, '')+") )"
+          @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +",  Reggie ID ("+params[:lh_search][:reggieid]+")"
+      end
+
       if !params[:lh_search][:lh_status].blank? 
           condition =" blooddraws.appointment_id in (select appointments.id from appointments,vgroups
-                              where appointments.vgroup_id = vgroups.id and  lower(vgroups.completedblooddraw) in (lower('"+params[:lh_search][:lh_status].gsub(/[;:'"()=<>]/, '')+"')   ))"
+                              where appointments.vgroup_id = vgroups.id and  lower(vgroups.completedblooddraw) in (lower('"+params[:lh_search][:lh_status].gsub(/[;:'"“”()=<>]/, '')+"')   ))"
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  LH status "+params[:lh_search][:lh_status]
       end
@@ -264,7 +273,7 @@ respond_to :html
            condition ="    blooddraws.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
             where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
-                   and participants.gender is not NULL and participants.gender in ("+params[:lh_search][:gender].gsub(/[;:'"()=<>]/, '')+") )"
+                   and participants.gender is not NULL and participants.gender in ("+params[:lh_search][:gender].gsub(/[;:'"“”()=<>]/, '')+") )"
             @conditions.push(condition)
             if params[:lh_search][:gender] == 1
                params["search_criteria"] = params["search_criteria"] +",  sex is Male"
@@ -278,7 +287,7 @@ respond_to :html
                                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                             and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                             and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                            and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:lh_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                            and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:lh_search][:min_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
             @conditions.push(condition)
             params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:lh_search][:min_age]
         elsif params[:lh_search][:min_age].blank? && !params[:lh_search][:max_age].blank?
@@ -286,7 +295,7 @@ respond_to :html
                                 where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                              and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                              and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                         and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:lh_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                         and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:lh_search][:max_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
             @conditions.push(condition)
             params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:lh_search][:max_age]
         elsif !params[:lh_search][:min_age].blank? && !params[:lh_search][:max_age].blank?
@@ -294,7 +303,7 @@ respond_to :html
                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                            and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                       and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:lh_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:lh_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                       and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:lh_search][:min_age].gsub(/[;:'"“”()=<>]/, '')+" and "+params[:lh_search][:max_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:lh_search][:min_age]+" and "+params[:lh_search][:max_age]
         end

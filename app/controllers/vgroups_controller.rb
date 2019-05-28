@@ -1409,7 +1409,7 @@ end
 
       if !params[:vgroups_search][:scan_procedure_id].blank? and !params[:vgroups_search][:scan_procedure_id][:id].blank?
          condition =" vgroups.id in (select vgroup_id from scan_procedures_vgroups where 
-                                                 scan_procedure_id in ("+params[:vgroups_search][:scan_procedure_id][:id].gsub(/[;:'"()=<>]/, '')+"))"
+                                                 scan_procedure_id in ("+params[:vgroups_search][:scan_procedure_id][:id].gsub(/[;:'"“”()=<>]/, '')+"))"
          @conditions.push(condition)
          @scan_procedures = ScanProcedure.where("id in (?)",params[:vgroups_search][:scan_procedure_id][:id])
          params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
@@ -1420,23 +1420,31 @@ end
          v_enumber =  params[:vgroups_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
          v_enumber = v_enumber.gsub(/,/,"','")
            condition =" vgroups.id in (select vgroup_id from enrollment_vgroup_memberships,enrollments
-           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"         
+           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:'"“”()=<>]/, '')+"'))"         
         else
           condition =" vgroups.id in (select vgroup_id from enrollment_vgroup_memberships,enrollments
-          where enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:vgroups_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+          where enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:vgroups_search][:enumber].gsub(/[;:'"“”()=<>]/, '')+"')))"
         end
         @conditions.push(condition)
         params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:vgroups_search][:enumber]
       end 
+
+      if !params[:vgroups_search][:reggieid].blank? 
+          condition ="   vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from participants,  enrollment_vgroup_memberships, enrollments
+           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+           and participants.reggieid is not NULL and participants.reggieid in ("+params[:vgroups_search][:reggieid].gsub(/[;:'"“”()=<>]/, '')+") )"
+          @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +",  Reggie ID ("+params[:vgroups_search][:reggieid]+")"
+      end
       
       if !params[:vgroups_search][:qc_completed].blank?
-          condition =" vgroups.qc_completed in ('"+params[:vgroups_search][:qc_completed].gsub(/[;:'"()=<>]/, '')+"')"
+          condition =" vgroups.qc_completed in ('"+params[:vgroups_search][:qc_completed].gsub(/[;:'"“”()=<>]/, '')+"')"
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  QC completed "+params[:vgroups_search][:qc_completed]
       end 
       
       if !params[:vgroups_search][:entered_by].blank?
-          condition =" vgroups.entered_by in ('"+params[:vgroups_search][:entered_by].gsub(/[;:'"()=<>]/, '')+"')"
+          condition =" vgroups.entered_by in ('"+params[:vgroups_search][:entered_by].gsub(/[;:'"“”()=<>]/, '')+"')"
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  Entered by "+User.find(params[:vgroups_search][:entered_by]).username_name
       end          

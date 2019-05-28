@@ -19,12 +19,15 @@
 <%= collection_select('vgroups_search[scan_procedure_id]', :id,ScanProcedure.where(" scan_procedures.id in (?) and scan_procedures.permission_type in (?)",scan_procedure_array,"study_permission").order(:codename), :id, :codename,  {:prompt => 'Choose scan procedure'}, {:multiple =>  false} ) %>
      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <%= f.label :enumber %>
-<%= f.text_field :enumber %>
+<%= f.text_field(:enumber) %>
      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <%= select(:vgroups_search, :entered_by, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select who entered data" }) %>
      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <%= f.label :QC_ed %>
 <%= select :vgroups_search, :qc_completed, ["", "no", "yes", "n/a"] %>
+
+<%= f.label "Reggie ID" %>
+<%= f.text_field(:reggieid) %>
 	<% end %> 	
 </td></tr></table>
 </div>

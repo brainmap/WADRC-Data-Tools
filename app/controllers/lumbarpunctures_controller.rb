@@ -567,7 +567,7 @@ class LumbarpuncturesController < ApplicationController
      if !params[:lp_search][:scan_procedure_id].blank?
         condition =" lumbarpunctures.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                                appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
-                                               and scan_procedure_id in ("+params[:lp_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+                                               and scan_procedure_id in ("+params[:lp_search][:scan_procedure_id].join(',').gsub(/[;:'"“”()=<>]/, '')+"))"
         @conditions.push(condition)
         @scan_procedures = ScanProcedure.where("id in (?)",params[:lp_search][:scan_procedure_id])
         params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
@@ -580,11 +580,11 @@ class LumbarpuncturesController < ApplicationController
         v_enumber = v_enumber.gsub(/,/,"','")
           condition =" lumbarpunctures.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
              where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-             and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"         
+             and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:'"“”()=<>]/, '')+"'))"         
        else
         condition =" lumbarpunctures.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
          where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-         and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:lp_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+         and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:lp_search][:enumber].gsub(/[;:'"“”()=<>]/, '')+"')))"
        end
        @conditions.push(condition)
        params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:lp_search][:enumber]
@@ -592,14 +592,23 @@ class LumbarpuncturesController < ApplicationController
 
      if !params[:lp_search][:rmr].blank? 
          condition =" lumbarpunctures.appointment_id in (select appointments.id from appointments,vgroups
-                   where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:lp_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
+                   where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:lp_search][:rmr].gsub(/[;:'"“”()=<>]/, '')+"')   ))"
          @conditions.push(condition)           
          params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:lp_search][:rmr]
+     end  
+
+     if !params[:lp_search][:reggieid].blank? 
+         condition =" lumbarpunctures.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
+           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+           and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                  and participants.reggieid is not NULL and participants.reggieid in ("+params[:lp_search][:reggieid].gsub(/[;:'"“”()=<>]/, '')+") )"
+         @conditions.push(condition)           
+         params["search_criteria"] = params["search_criteria"] +",  Reggie ID ("+params[:lp_search][:reggieid]+")"
      end  
      
       if !params[:lp_search][:lp_status].blank? 
           condition =" lumbarpunctures.appointment_id in (select appointments.id from appointments,vgroups
-                              where appointments.vgroup_id = vgroups.id and  lower(vgroups.completedlumbarpuncture) in (lower('"+params[:lp_search][:lp_status].gsub(/[;:'"()=<>]/, '')+"')   ))"
+                              where appointments.vgroup_id = vgroups.id and  lower(vgroups.completedlumbarpuncture) in (lower('"+params[:lp_search][:lp_status].gsub(/[;:'"“”()=<>]/, '')+"')   ))"
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  LP status "+params[:lp_search][:lp_status]
       end 
@@ -635,7 +644,7 @@ class LumbarpuncturesController < ApplicationController
          condition ="  lumbarpunctures.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
           and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
-                 and participants.gender is not NULL and participants.gender in ("+params[:lp_search][:gender].gsub(/[;:'"()=<>]/, '')+") )"
+                 and participants.gender is not NULL and participants.gender in ("+params[:lp_search][:gender].gsub(/[;:'"“”()=<>]/, '')+") )"
           @conditions.push(condition)
           if params[:lp_search][:gender] == 1
              params["search_criteria"] = params["search_criteria"] +",  sex is Male"
@@ -649,7 +658,7 @@ class LumbarpuncturesController < ApplicationController
                              where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                           and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                           and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                          and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:lp_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                          and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:lp_search][:min_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
            @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:lp_search][:min_age]
       elsif params[:lp_search][:min_age].blank? && !params[:lp_search][:max_age].blank?
@@ -657,7 +666,7 @@ class LumbarpuncturesController < ApplicationController
                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                            and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                       and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:lp_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                       and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:lp_search][:max_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:lp_search][:max_age]
       elsif !params[:lp_search][:min_age].blank? && !params[:lp_search][:max_age].blank?
@@ -665,7 +674,7 @@ class LumbarpuncturesController < ApplicationController
                             where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                          and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                          and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                     and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:lp_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:lp_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                     and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:lp_search][:min_age].gsub(/[;:'"“”()=<>]/, '')+" and "+params[:lp_search][:max_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
         @conditions.push(condition)
         params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:lp_search][:min_age]+" and "+params[:lp_search][:max_age]
       end

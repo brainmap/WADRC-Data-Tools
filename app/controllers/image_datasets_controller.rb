@@ -160,7 +160,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
           if !params[:ids_search][:scan_procedure_id].blank?
              condition =" visits.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                                     appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
-                                                    and scan_procedure_id in ("+params[:ids_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+                                                    and scan_procedure_id in ("+params[:ids_search][:scan_procedure_id].join(',').gsub(/[;:'"“”()=<>]/, '')+"))"
              @conditions.push(condition)
              @scan_procedures = ScanProcedure.where("id in (?)",params[:ids_search][:scan_procedure_id])
              params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
@@ -168,21 +168,21 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
 
           if !params[:ids_search][:path].blank?
               var = "%"+params[:ids_search][:path].downcase+"%"
-              condition =" image_datasets.path  like '"+var.gsub(/[;:'"()=<>]/, '')+"' "
+              condition =" image_datasets.path  like '"+var.gsub(/[;:'"“”()=<>]/, '')+"' "
               @conditions.push(condition)
               params["search_criteria"] = params["search_criteria"] +", Path contains "+params[:ids_search][:path]
           end
   
           if !params[:ids_search][:series_description].blank?
               var = "%"+params[:ids_search][:series_description].downcase+"%"
-              condition =" image_datasets.series_description  like '"+var.gsub(/[;:'"()=<>]/, '')+"' "
+              condition =" image_datasets.series_description  like '"+var.gsub(/[;:'"“”()=<>]/, '')+"' "
               @conditions.push(condition)
               params["search_criteria"] = params["search_criteria"] +", Series desc contains "+params[:ids_search][:series_description]
           end
           
           if !params[:ids_search][:series_description_type_id].blank?
               var = params[:ids_search][:series_description_type_id]
-              condition =" image_datasets.series_description  in ( select series_description from series_description_maps where series_description_type_id = '"+var.gsub(/[;:'"()=<>]/, '')+"'  )"
+              condition =" image_datasets.series_description  in ( select series_description from series_description_maps where series_description_type_id = '"+var.gsub(/[;:'"“”()=<>]/, '')+"'  )"
               @conditions.push(condition)
               params["search_criteria"] = params["search_criteria"] +", Series category is "+SeriesDescriptionType.find(params[:ids_search][:series_description_type_id]).series_description_type
           end
@@ -194,12 +194,12 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
              v_enumber = v_enumber.gsub(/,/,"','")
                condition =" visits.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
                where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-               and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"
+               and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:'"“”()=<>]/, '')+"'))"
 
             else
               condition =" visits.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
               where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-              and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:ids_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+              and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:ids_search][:enumber].gsub(/[;:'"“”()=<>]/, '')+"')))"
             end
             @conditions.push(condition)
             params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:ids_search][:enumber]
@@ -207,10 +207,20 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
 
           if !params[:ids_search][:rmr].blank? 
               condition =" visits.appointment_id in (select appointments.id from appointments,vgroups
-                        where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:ids_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
+                        where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:ids_search][:rmr].gsub(/[;:'"“”()=<>]/, '')+"')   ))"
               @conditions.push(condition)           
               params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:ids_search][:rmr]
           end   
+
+
+          if !params[:ids_search][:reggieid].blank? 
+              condition ="   visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
+               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+               and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                      and participants.reggieid is not NULL and participants.reggieid in ("+params[:ids_search][:reggieid].gsub(/[;:'"“”()=<>]/, '')+") )"
+              @conditions.push(condition)
+              params["search_criteria"] = params["search_criteria"] +",  Reggie ID ("+params[:ids_search][:reggieid]+")"
+          end
 
           #  build expected date format --- between, >, < 
           v_date_latest =""
@@ -243,7 +253,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
               condition ="  visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
                and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
-                      and participants.gender is not NULL and participants.gender in ("+params[:ids_search][:gender].gsub(/[;:'"()=<>]/, '')+") )"
+                      and participants.gender is not NULL and participants.gender in ("+params[:ids_search][:gender].gsub(/[;:'"“”()=<>]/, '')+") )"
                @conditions.push(condition)
                if params[:ids_search][:gender] == 1
                   params["search_criteria"] = params["search_criteria"] +",  sex is Male"
@@ -257,7 +267,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
                                   where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                                and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                                and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                               and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:ids_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                               and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:ids_search][:min_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
                 @conditions.push(condition)
                params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:ids_search][:min_age]
            elsif params[:ids_search][:min_age].blank? && !params[:ids_search][:max_age].blank?
@@ -265,7 +275,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
                                    where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                                 and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                                 and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                            and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:ids_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                            and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:ids_search][:max_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
                @conditions.push(condition)
                params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:ids_search][:max_age]
            elsif !params[:ids_search][:min_age].blank? && !params[:ids_search][:max_age].blank?
@@ -273,7 +283,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
                                  where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                               and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                               and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                          and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:ids_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:ids_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                          and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:ids_search][:min_age].gsub(/[;:'"“”()=<>]/, '')+" and "+params[:ids_search][:max_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
              @conditions.push(condition)
              params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:ids_search][:min_age]+" and "+params[:ids_search][:max_age]
            end

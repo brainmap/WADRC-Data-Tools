@@ -1315,7 +1315,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
       if !params[:mri_search].blank? and !params[:mri_search][:scan_procedure_id].blank?
          condition =" visits.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                                 appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
-                                                and scan_procedure_id in ("+params[:mri_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+                                                and scan_procedure_id in ("+params[:mri_search][:scan_procedure_id].join(',').gsub(/[;:'"“”()=<>]/, '')+"))"
          @conditions.push(condition)
          @scan_procedures = ScanProcedure.where("id in (?)",params[:mri_search][:scan_procedure_id])
          params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
@@ -1324,7 +1324,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
       if !params[:mri_search].blank? and !params[:mri_search][:series_description].blank?
          var = "%"+params[:mri_search][:series_description].downcase+"%"
          condition ="  visits.id in (select image_datasets.visit_id from image_datasets
-          where lower(image_datasets.series_description) like '"+var.gsub(/[;:'"()=<>]/, '')+"' )"
+          where lower(image_datasets.series_description) like '"+var.gsub(/[;:'"“”()=<>]/, '')+"' )"
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +", Series description "+params[:mri_search][:series_description]
       end      
@@ -1336,11 +1336,11 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
          v_enumber = v_enumber.gsub(/,/,"','")
           condition =" visits.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
              where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-             and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"         
+             and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:'"“”()=<>]/, '')+"'))"         
         else
          condition =" visits.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
           where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-          and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:mri_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+          and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:mri_search][:enumber].gsub(/[;:'"“”()=<>]/, '')+"')))"
         end
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:mri_search][:enumber]
@@ -1348,14 +1348,23 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
 
       if !params[:mri_search].blank? and !params[:mri_search][:rmr].blank? 
           condition =" visits.appointment_id in (select appointments.id from appointments,vgroups
-                    where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:mri_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
+                    where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:mri_search][:rmr].gsub(/[;:'"“”()=<>]/, '')+"')   ))"
           @conditions.push(condition)           
           params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:mri_search][:rmr]
       end   
 
+      if !params[:mri_search][:reggieid].blank? 
+          condition ="   visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
+           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+           and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                  and participants.reggieid is not NULL and participants.reggieid in ("+params[:mri_search][:reggieid].gsub(/[;:'"“”()=<>]/, '')+") )"
+          @conditions.push(condition)
+          params["search_criteria"] = params["search_criteria"] +",  Reggie ID ("+params[:mri_search][:reggieid]+")"
+      end
+
       if !params[:mri_search].blank? and !params[:mri_search][:mri_status].blank? 
           condition =" visits.appointment_id in (select appointments.id from appointments,vgroups
-                              where appointments.vgroup_id = vgroups.id and  lower(vgroups.transfer_mri) in (lower('"+params[:mri_search][:mri_status].gsub(/[;:'"()=<>]/, '')+"')   ))"
+                              where appointments.vgroup_id = vgroups.id and  lower(vgroups.transfer_mri) in (lower('"+params[:mri_search][:mri_status].gsub(/[;:'"“”()=<>]/, '')+"')   ))"
           @conditions.push(condition)
           params["search_criteria"] = params["search_criteria"] +",  Mri status "+params[:mri_search][:mri_status]
       end
@@ -1390,7 +1399,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
           condition ="  visits.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
            where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
            and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
-                  and participants.gender is not NULL and participants.gender in ("+params[:mri_search][:gender].gsub(/[;:'"()=<>]/, '')+") )"
+                  and participants.gender is not NULL and participants.gender in ("+params[:mri_search][:gender].gsub(/[;:'"“”()=<>]/, '')+") )"
            @conditions.push(condition)
            if params[:mri_search][:gender] == 1
               params["search_criteria"] = params["search_criteria"] +",  sex is Male"
@@ -1404,7 +1413,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
                               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                            and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                            and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                           and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:mri_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                           and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:mri_search][:min_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
             @conditions.push(condition)
            params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:mri_search][:min_age]
        elsif !params[:mri_search].blank? and params[:mri_search][:min_age].blank? && !params[:mri_search][:max_age].blank?
@@ -1412,7 +1421,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
                                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                             and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                             and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                        and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:mri_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                        and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:mri_search][:max_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
            @conditions.push(condition)
            params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:mri_search][:max_age]
        elsif !params[:mri_search].blank? and !params[:mri_search][:min_age].blank? && !params[:mri_search][:max_age].blank?
@@ -1420,7 +1429,7 @@ limit_visits =  [:user_id ,:initials,:transfer_mri,:transfer_pet,:conference,:id
                              where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                           and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                           and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                      and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:mri_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:mri_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                      and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:mri_search][:min_age].gsub(/[;:'"“”()=<>]/, '')+" and "+params[:mri_search][:max_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
          @conditions.push(condition)
          params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:mri_search][:min_age]+" and "+params[:mri_search][:max_age]
        end

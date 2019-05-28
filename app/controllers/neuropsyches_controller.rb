@@ -195,7 +195,7 @@ class NeuropsychesController < ApplicationController
         if !params[:np_search][:scan_procedure_id].blank?
            condition ="   neuropsyches.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                                   appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
-                                                  and scan_procedure_id in ("+params[:np_search][:scan_procedure_id].join(',').gsub(/[;:'"()=<>]/, '')+"))"
+                                                  and scan_procedure_id in ("+params[:np_search][:scan_procedure_id].join(',').gsub(/[;:'"“”()=<>]/, '')+"))"
            @scan_procedures = ScanProcedure.where("id in (?)",params[:np_search][:scan_procedure_id])
            @conditions.push(condition)
            params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
@@ -208,11 +208,11 @@ class NeuropsychesController < ApplicationController
            v_enumber = v_enumber.gsub(/,/,"','")
             condition ="    neuropsyches.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
                where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-               and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in  ('"+v_enumber.gsub(/[;:"()=<>]/, '')+"'))"
+               and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in  ('"+v_enumber.gsub(/[;:'"“”()=<>]/, '')+"'))"
           else
            condition ="    neuropsyches.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
             where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-            and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in  (lower('"+params[:np_search][:enumber].gsub(/[;:'"()=<>]/, '')+"')))"
+            and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in  (lower('"+params[:np_search][:enumber].gsub(/[;:'"“”()=<>]/, '')+"')))"
           end
             @conditions.push(condition)
             params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:np_search][:enumber]
@@ -220,14 +220,23 @@ class NeuropsychesController < ApplicationController
 
         if !params[:np_search][:rmr].blank? 
             condition ="    neuropsyches.appointment_id in (select appointments.id from appointments,vgroups
-                      where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:np_search][:rmr].gsub(/[;:'"()=<>]/, '')+"')   ))"
+                      where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower('"+params[:np_search][:rmr].gsub(/[;:'"“”()=<>]/, '')+"')   ))"
                       @conditions.push(condition)
             params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:np_search][:rmr]
+        end
+        
+        if !params[:np_search][:reggieid].blank? 
+            condition ="   neuropsyches.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
+             where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
+             and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
+                    and participants.reggieid is not NULL and participants.reggieid in ("+params[:np_search][:reggieid].gsub(/[;:'"“”()=<>]/, '')+") )"
+            @conditions.push(condition)
+            params["search_criteria"] = params["search_criteria"] +",  Reggie ID ("+params[:np_search][:reggieid]+")"
         end
 
         if !params[:np_search][:np_status].blank? 
             condition =" neuropsyches.appointment_id in (select appointments.id from appointments,vgroups
-                                where appointments.vgroup_id = vgroups.id and  lower(vgroups.completedneuropsych) in (lower('"+params[:np_search][:np_status].gsub(/[;:'"()=<>]/, '')+"')   ))"
+                                where appointments.vgroup_id = vgroups.id and  lower(vgroups.completedneuropsych) in (lower('"+params[:np_search][:np_status].gsub(/[;:'"“”()=<>]/, '')+"')   ))"
             @conditions.push(condition)
             params["search_criteria"] = params["search_criteria"] +",  NP status "+params[:np_search][:np_status]
         end
@@ -265,7 +274,7 @@ class NeuropsychesController < ApplicationController
              condition ="    neuropsyches.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
               where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
               and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
-                     and participants.gender is not NULL and participants.gender in ("+params[:np_search][:gender].gsub(/[;:'"()=<>]/, '')+") )"
+                     and participants.gender is not NULL and participants.gender in ("+params[:np_search][:gender].gsub(/[;:'"“”()=<>]/, '')+") )"
               @conditions.push(condition)
               if params[:np_search][:gender] == 1
                  params["search_criteria"] = params["search_criteria"] +",  sex is Male"
@@ -279,7 +288,7 @@ class NeuropsychesController < ApplicationController
                                  where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                               and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                               and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                              and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:np_search][:min_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                              and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= "+params[:np_search][:min_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
               @conditions.push(condition)
               params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:np_search][:min_age]
           elsif params[:np_search][:min_age].blank? && !params[:np_search][:max_age].blank?
@@ -287,7 +296,7 @@ class NeuropsychesController < ApplicationController
                                   where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                                and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                                and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                           and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:np_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                           and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= "+params[:np_search][:max_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
               @conditions.push(condition)
               params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:np_search][:max_age]
           elsif !params[:np_search][:min_age].blank? && !params[:np_search][:max_age].blank?
@@ -295,7 +304,7 @@ class NeuropsychesController < ApplicationController
                                 where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
                              and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
                              and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                         and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:np_search][:min_age].gsub(/[;:'"()=<>]/, '')+" and "+params[:np_search][:max_age].gsub(/[;:'"()=<>]/, '')+"   )"
+                         and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between "+params[:np_search][:min_age].gsub(/[;:'"“”()=<>]/, '')+" and "+params[:np_search][:max_age].gsub(/[;:'"“”()=<>]/, '')+"   )"
             @conditions.push(condition)
             params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:np_search][:min_age]+" and "+params[:np_search][:max_age]
           end

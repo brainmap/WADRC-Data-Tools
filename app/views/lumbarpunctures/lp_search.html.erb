@@ -51,6 +51,10 @@ edit_count =   edit_count -1
       <td><%= f.text_field :rmr %></td>
     </tr>
     <tr>
+      <th>Reggie ID</th>
+      <td><%= f.text_field :reggieid %></td>
+    </tr>
+    <tr>
       <th><%= f.label :scan_date_before %></th>
       <td><%= f.date_select "latest_timestamp", :start_year => 1995, :include_blank => true %></td>
     </tr>

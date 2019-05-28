@@ -78,10 +78,12 @@ edit_count = edit_count -1
       <th><%= f.label :scan_date_after %></th>
       <td><%= f.date_select :earliest_timestamp, :start_year => 1995, :include_blank => true %></td>
     </tr>
-  </table>
+    
+    <tr>
+      <th>Reggie ID</th>
+      <td><%= f.text_field :reggieid %></td>
+    </tr>
 
-
-  <table class="search_form">
     <tr>
       <th><%= f.label :gender %></th>
       <td><%= select :pet_search, :gender, { "M" => 1, "F" => 2 }, :include_blank => true %></td>
