@@ -23,7 +23,9 @@ class SharedUpload::XnatCuratedUpload < SharedUpload::SharedUploadBase
             xnat_driver_tn: "xnat_curated_driver",
       			working_directory: "/tmp",
       			rm_endings: ["json","pickle","yaml","txt","xml","doc","xls","xlsx"],
-            default_xnat_run_upload_flag: 'R'}
+            default_xnat_run_upload_flag: 'W',
+            xnat_filesize_limit: '52428800',
+            dry_run: false }
 
       params[:xnat_script_dir] = params[:base_path]+"/analyses/rpcary/xnat/scripts/"
       params[:script_dicom_clean] =  params[:xnat_script_dir]+"xnat_dicom_upload_cleaner.rb"
@@ -198,11 +200,13 @@ class SharedUpload::XnatCuratedUpload < SharedUpload::SharedUploadBase
             join enrollments on enrollment_visit_memberships.enrollment_id = enrollments.id
           where (image_datasets.do_not_share_scans_flag is null or image_datasets.do_not_share_scans_flag != 'Y')
             and (enrollments.do_not_share_scans_flag is null or enrollments.do_not_share_scans_flag != 'Y')
-            and (image_datasets.visit_id, image_datasets.id,  #{ p[:xnat_driver_tn] }.project) not in (select visit_id, image_dataset_id, project from xnat_curated_image_datasets) "
+            and (#{ p[:xnat_driver_tn] }.image_dataset_id,  #{ p[:xnat_driver_tn] }.project) not in (select image_dataset_id, project from xnat_curated_image_datasets) "
 
       if !p[:project].nil?
         sql += " and #{ p[:xnat_driver_tn] }.project = '#{ p[:project] }'"
       end
+
+      sql += " group by image_datasets.id "
 
       results = @connection.execute(sql)
 
@@ -233,21 +237,37 @@ class SharedUpload::XnatCuratedUpload < SharedUpload::SharedUploadBase
       end
 
       #then select our set of files, visits, xnat_session_ids etc. for the uploads
-      sql = "select #{ p[:xnat_ids_tn] }.file_path, #{ p[:xnat_ids_tn] }.visit_id, #{ p[:xnat_appointment_mri_tn] }.xnat_session_id, #{ p[:xnat_appointment_mri_tn] }.xnat_exists_flag,
-        #{ p[:xnat_participant_tn] }.export_id, #{ p[:xnat_participant_tn] }.xnat_exists_flag,  #{ p[:xnat_ids_tn] }.project
+      # sql = "select #{ p[:xnat_ids_tn] }.file_path, #{ p[:xnat_ids_tn] }.visit_id, #{ p[:xnat_appointment_mri_tn] }.xnat_session_id, #{ p[:xnat_appointment_mri_tn] }.xnat_exists_flag,
+      #   #{ p[:xnat_participant_tn] }.export_id, #{ p[:xnat_participant_tn] }.xnat_exists_flag,  #{ p[:xnat_ids_tn] }.project
+      #   from #{ p[:xnat_participant_tn] } join #{ p[:xnat_appointment_mri_tn] } on #{ p[:xnat_participant_tn] }.participant_id = #{ p[:xnat_appointment_mri_tn] }.participant_id and #{ p[:xnat_participant_tn] }.project = #{ p[:xnat_appointment_mri_tn] }.project
+      #     join #{ p[:xnat_ids_tn] } on #{ p[:xnat_appointment_mri_tn] }.visit_id = #{ p[:xnat_ids_tn] }.visit_id and #{ p[:xnat_appointment_mri_tn] }.project = #{ p[:xnat_ids_tn] }.project
+      #   where #{ p[:xnat_ids_tn] }.xnat_do_not_share_flag = 'N' 
+      #     and #{ p[:xnat_ids_tn] }.xnat_exists_flag = 'N' 
+      #     and #{ p[:xnat_participant_tn] }.participant_id = #{ p[:xnat_appointment_mri_tn] }.participant_id
+      #     and #{ p[:xnat_appointment_mri_tn] }.visit_id = #{ p[:xnat_ids_tn] }.visit_id
+      #     and #{ p[:xnat_participant_tn] }.xnat_run_upload_flag = 'R'"
+
+      # if !p[:project].nil?
+      #   sql += " and #{ p[:xnat_ids_tn] }.project = '#{ p[:project] }'"
+      # end
+
+      # sql += " order by #{ p[:xnat_appointment_mri_tn] }.xnat_session_id "
+
+      # trying to group our scans by session, to reduce conflicts in the future.
+      sql = "select #{ p[:xnat_appointment_mri_tn] }.visit_id, #{ p[:xnat_appointment_mri_tn] }.xnat_session_id, #{ p[:xnat_appointment_mri_tn] }.xnat_exists_flag,
+        #{ p[:xnat_participant_tn] }.export_id,  #{ p[:xnat_participant_tn] }.project
         from #{ p[:xnat_participant_tn] } join #{ p[:xnat_appointment_mri_tn] } on #{ p[:xnat_participant_tn] }.participant_id = #{ p[:xnat_appointment_mri_tn] }.participant_id and #{ p[:xnat_participant_tn] }.project = #{ p[:xnat_appointment_mri_tn] }.project
-          join #{ p[:xnat_ids_tn] } on #{ p[:xnat_appointment_mri_tn] }.visit_id = #{ p[:xnat_ids_tn] }.visit_id and #{ p[:xnat_appointment_mri_tn] }.project = #{ p[:xnat_ids_tn] }.project
-        where #{ p[:xnat_ids_tn] }.xnat_do_not_share_flag = 'N' 
-          and #{ p[:xnat_ids_tn] }.xnat_exists_flag = 'N' 
-          and #{ p[:xnat_participant_tn] }.participant_id = #{ p[:xnat_appointment_mri_tn] }.participant_id
-          and #{ p[:xnat_appointment_mri_tn] }.visit_id = #{ p[:xnat_ids_tn] }.visit_id
+        where #{ p[:xnat_appointment_mri_tn] }.xnat_do_not_share_flag = 'N' 
+          and #{ p[:xnat_appointment_mri_tn] }.xnat_exists_flag = 'N' 
           and #{ p[:xnat_participant_tn] }.xnat_run_upload_flag = 'R'"
 
       if !p[:project].nil?
-        sql += " and #{ p[:xnat_ids_tn] }.project = '#{ p[:project] }'"
+        sql += " and #{ p[:xnat_participant_tn] }.project = '#{ p[:project] }'"
       end
 
       sql += " order by #{ p[:xnat_appointment_mri_tn] }.xnat_session_id "
+
+
 
       #puts "selecting for our export: " + sql
 
@@ -262,12 +282,15 @@ class SharedUpload::XnatCuratedUpload < SharedUpload::SharedUploadBase
       results.each do |scan|
 
         v_cnt_ids = v_cnt_ids + 1
-        v_visit_id = scan[1]
-        v_xnat_session = scan[2]
-        v_xnat_project = scan[6]
-        v_xnat_export_id = scan[4]
-        v_file_path = scan[0]
-        v_path_full_list_array.push(v_file_path)
+        v_visit_id = scan[0]
+        v_xnat_session = scan[1]
+        v_xnat_project = scan[4]
+        v_xnat_export_id = scan[3]
+        # v_file_path = scan[0]
+        # v_path_full_list_array.push(v_file_path)
+
+        response = r_call "ssh panda_user@#{ p[:computer] }.dom.wisc.edu 'cd #{ p[:working_directory] }; rm -rf #{ p[:working_directory] }/#{ v_xnat_session }.tgz'"
+        response = r_call "ssh panda_user@#{ p[:computer] }.dom.wisc.edu 'cd #{ p[:working_directory] }; rm -rf #{ p[:working_directory] }/#{ v_xnat_session }.log'"
 
         #make a working dir for this session
         cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu 'cd #{ p[:working_directory] }; mkdir #{ v_xnat_session }'"
@@ -279,165 +302,209 @@ class SharedUpload::XnatCuratedUpload < SharedUpload::SharedUploadBase
         #puts cmd
         #response = r_call cmd
 
-        v_log_file_path = "#{ p[:working_directory] }/#{ v_xnat_session }.log"
-        cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"cd #{ p[:working_directory] }; curl --netrc -o #{ v_log_file_path } -w \\\"%{http_code}\\\" -X PUT https://#{ p[:xnat_address] }/data/archive/projects/#{ v_xnat_project }/subjects/#{ v_xnat_export_id }\""
-        puts cmd
-        response = r_call cmd
-        puts response
+        if !p[:dry_run] then
+          v_log_file_path = "#{ p[:working_directory] }/#{ v_xnat_session }.log"
+          cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"cd #{ p[:working_directory] }; curl --netrc -o #{ v_log_file_path } -w \\\"%{http_code}\\\" -X PUT https://#{ p[:xnat_address] }/data/archive/projects/#{ v_xnat_project }/subjects/#{ v_xnat_export_id }\""
+          puts cmd
+          response = r_call cmd
+          puts response
 
-        #run the upload
-        #v_log_file_path = "#{ p[:working_directory] }/#{ v_xnat_session }.log"
-        #puts "log file is #{ v_log_file_path }"
-        #cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"cd #{ p[:working_directory] }; curl --netrc -o #{ v_log_file_path } -w \\\"%{http_code}\\\" --form project=#{ v_xnat_project } --form image_archive=@#{ v_xnat_session }.zip https://#{ p[:xnat_address] }/data/services/import?format=html\""
-        #puts cmd
-        #response = r_call cmd
-        
-        #retrieve the log
-        v_status =""
-        v_status_comment = ""
-        cmd = "rsync -av panda_user@#{ p[:computer] }.dom.wisc.edu:#{ v_log_file_path } #{ v_log_file_path }"
-        puts cmd
-        response = r_call cmd
+          #run the upload
+          #v_log_file_path = "#{ p[:working_directory] }/#{ v_xnat_session }.log"
+          #puts "log file is #{ v_log_file_path }"
+          #cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"cd #{ p[:working_directory] }; curl --netrc -o #{ v_log_file_path } -w \\\"%{http_code}\\\" --form project=#{ v_xnat_project } --form image_archive=@#{ v_xnat_session }.zip https://#{ p[:xnat_address] }/data/services/import?format=html\""
+          #puts cmd
+          #response = r_call cmd
+          
+          #retrieve the log
+          v_status =""
+          v_status_comment = ""
+          cmd = "rsync -av panda_user@#{ p[:computer] }.dom.wisc.edu:#{ v_log_file_path } #{ v_log_file_path }"
+          puts cmd
+          response = r_call cmd
 
-        File.foreach(v_log_file_path).detect { |line| 
-          if line.include?("Session processing may already be in progress")
-            v_status ='F'
-            v_status_comment = "record already loaded:="+line
-          elsif  line.include?("following sessions have been uploaded")
-            v_status ='D'
-            v_status_comment = "recordloaded:="+line
-          elsif  line.include?("HTTP Status 401")
-            v_status ='F'
-            v_status_comment = "failed login:="+line
-          elsif  line.include?("RMR")
-            v_status ='F'
-            v_status_comment = "failed dicom cleaning:="+line
-          else  
-            v_status ='F'
-            v_status_comment = "something unexpected:="+line
-          end
-        }
+          File.foreach(v_log_file_path).detect { |line| 
+            if line.include?("Session processing may already be in progress")
+              v_status ='F'
+              v_status_comment = "record already loaded:="+line
+            elsif  line.include?("following sessions have been uploaded")
+              v_status ='D'
+              v_status_comment = "recordloaded:="+line
+            elsif  line.include?("HTTP Status 401")
+              v_status ='F'
+              v_status_comment = "failed login:="+line
+            elsif  line.include?("RMR")
+              v_status ='F'
+              v_status_comment = "failed dicom cleaning:="+line
+            else  
+              v_status ='F'
+              v_status_comment = "something unexpected:="+line
+            end
+          }
 
-        puts v_status
-        puts v_status_comment
-        #clean up the log file
-        response = r_call "rm -rf "+v_log_file_path
+          puts v_status
+          puts v_status_comment
+          #clean up the log file
+          response = r_call "rm -rf "+v_log_file_path
 
-        sql_update = "update #{ p[:xnat_ids_tn] } set #{ p[:xnat_ids_tn] }.xnat_exists_flag = 'Y' 
-          where #{ p[:xnat_ids_tn] }.visit_id = #{ v_visit_id.to_s } and #{ p[:xnat_ids_tn] }.xnat_exists_flag in ('N','Q')
-          and #{ p[:xnat_ids_tn] }.file_path in('#{ v_path_full_list_array.join("','") }') and #{ p[:xnat_ids_tn] }.project = '#{ v_xnat_project }'"
-       
-        if v_status == "D"
-          results_update = @connection.execute(sql_update)
-        elsif v_status == "F"        
-          sql_update = "update #{ p[:xnat_ids_tn] } set #{ p[:xnat_ids_tn] }.xnat_exists_flag = 'Q' 
-            where #{ p[:xnat_ids_tn] }.visit_id = #{ v_visit_id.to_s } and #{ p[:xnat_ids_tn] }.xnat_exists_flag in ('N','Q')
-            and #{ p[:xnat_ids_tn] }.file_path in('#{ v_path_full_list_array.join("','") }') and #{ p[:xnat_ids_tn] }.project = '#{ v_xnat_project }' "
+          sql_update = "update #{ p[:xnat_appointment_mri_tn] } set #{ p[:xnat_appointment_mri_tn] }.xnat_exists_flag = 'Y' 
+            where #{ p[:xnat_appointment_mri_tn] }.visit_id = #{ v_visit_id.to_s } and #{ p[:xnat_appointment_mri_tn] }.xnat_exists_flag in ('N','Q')
+            and #{ p[:xnat_appointment_mri_tn] }.project = '#{ v_xnat_project }'"
+         
+          if v_status == "D"
             results_update = @connection.execute(sql_update)
-        end
+          elsif v_status == "F"        
+            sql_update = "update #{ p[:xnat_appointment_mri_tn] } set #{ p[:xnat_appointment_mri_tn] }.xnat_exists_flag = 'Q' 
+              where #{ p[:xnat_appointment_mri_tn] }.visit_id = #{ v_visit_id.to_s } and #{ p[:xnat_appointment_mri_tn] }.xnat_exists_flag in ('N','Q')
+              and #{ p[:xnat_appointment_mri_tn] }.project = '#{ v_xnat_project }' "
+              results_update = @connection.execute(sql_update)
+          end
+        end #!dry_run
 
         #then clean up our dummy .zip
-        cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu 'cd #{ p[:working_directory] }; rm -rf #{ p[:working_directory] }/#{ v_xnat_session }.zip'"
+        cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu 'cd #{ p[:working_directory] }; rm -rf #{ p[:working_directory] }/#{ v_xnat_session }.tgz'"
         puts cmd
         response = r_call cmd
 
-        #copy the scan files to the working directory
-        cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu 'rsync -av #{ scan[0] } #{ p[:working_directory] }/#{ v_xnat_session }/'"
-        puts cmd
-        response = r_call cmd
+        #collect all of the scans, and move each one into the working dir
+        # scrub the dicoms for each one
+        # then arcive them as a group, and upload
 
-        #decompress the .bz2 archive
-        v_path = scan[0]
-        v_path_array = v_path.split("/")
-        cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"cd #{ p[:working_directory] }/#{ v_xnat_session }/#{ v_path_array.last };find . -name '*.bz2' -exec bunzip2 {} \\\;\" "
-        puts cmd
-        response = r_call cmd
+        sql = "select #{ p[:xnat_ids_tn] }.file_path from #{ p[:xnat_ids_tn] } where visit_id = #{ v_visit_id } and project = '#{ v_xnat_project }' and xnat_do_not_share_flag = 'N';"
+        individual_scans = @connection.execute(sql)
 
-        #remove any extra stuff we don't want to upload
-        p[:rm_endings].each do |file_ending|
-          cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"cd #{ p[:working_directory] }/#{ v_xnat_session }/#{ v_path_array.last }/;rm -rf *.#{ file_ending } \""
-          #puts cmd
+        individual_scans.each do |ids_scan|
+
+          v_path = ids_scan[0]
+          v_path_full_list_array.push(v_path)
+
+          #copy the scan files to the working directory
+          cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu 'rsync -av #{ v_path } #{ p[:working_directory] }/#{ v_xnat_session }/'"
+          puts cmd
           response = r_call cmd
-        end
 
-        #strip dicom headers from the uploadable stuff
-        cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"#{ p[:script_dicom_clean] } '#{ p[:working_directory] }/#{ v_xnat_session }/#{ v_path_array.last }' '#{ scan[4].to_s }' '#{ v_xnat_project }' '#{ v_xnat_session }' \" "
-        puts cmd
-        response = r_call cmd
+          #decompress the .bz2 archive
+          v_path_array = v_path.split("/")
+          cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"cd #{ p[:working_directory] }/#{ v_xnat_session }/#{ v_path_array.last };find . -name '*.bz2' -exec bunzip2 {} \\\;\" "
+          puts cmd
+          response = r_call cmd
+
+          #remove any extra stuff we don't want to upload
+          p[:rm_endings].each do |file_ending|
+            cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"cd #{ p[:working_directory] }/#{ v_xnat_session }/#{ v_path_array.last }/;rm -rf *.#{ file_ending } \""
+            #puts cmd
+            response = r_call cmd
+          end
+
+          #strip dicom headers from the uploadable stuff
+          cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"#{ p[:script_dicom_clean] } '#{ p[:working_directory] }/#{ v_xnat_session }/#{ v_path_array.last }' '#{ scan[4].to_s }' '#{ v_xnat_project }' '#{ v_xnat_session }' \" "
+          puts cmd
+          response = r_call cmd
+
+        end #looping over the individual scans
 
         #compress the result
-        cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"cd #{ p[:working_directory] }/;zip -r  #{ v_xnat_session }.zip  #{ v_xnat_session }\""
+        # cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"cd #{ p[:working_directory] }/;tar czf  #{ v_xnat_session }.tgz  #{ v_xnat_session }\""
+        # puts cmd
+        # response = r_call cmd
+
+        cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"cd #{ p[:working_directory] }/;tar czf  #{ v_xnat_session }.tgz  #{ v_xnat_session }\""
         puts cmd
         response = r_call cmd
 
         #run the upload
 
-        v_log_file_path = "#{ p[:working_directory] }/#{ v_xnat_session }.log"
-        puts "log file is #{ v_log_file_path }"
-        cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"cd #{ p[:working_directory] }/; curl --netrc -o #{ v_xnat_session }.log -w \\\"%{http_code}\\\" --form project=#{ v_xnat_project } --form image_archive=@#{ v_xnat_session }.zip https://#{ p[:xnat_address] }/data/services/import?format=html\""
-        puts cmd
-        response = r_call cmd
-        puts response
+        # v_log_file_path = "#{ p[:working_directory] }/#{ v_xnat_session }.log"
+        # puts "log file is #{ v_log_file_path }"
+        # cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"cd #{ p[:working_directory] }/; filesize=$(stat -c%s \"#{ v_xnat_session }.tgz\"); if (( filesize > #{p[:xnat_filesize_limit]} )); then echo \"Too Big! #{ v_xnat_session }.tgz is $filesize\" > #{ v_xnat_session }.log; else curl --netrc -o #{ v_xnat_session }.log -w \\\"%{http_code}\\\" --form project=#{ v_xnat_project } --form image_archive=@#{ v_xnat_session }.tgz https://#{ p[:xnat_address] }/data/services/import?format=html\"; fi"
+        # puts cmd
+        # response = r_call cmd
+        # puts response
         
-        #retrieve the log
-        cmd = "rsync -av panda_user@#{ p[:computer] }.dom.wisc.edu:#{ v_log_file_path } #{ v_log_file_path }"
-        puts cmd
-        response = r_call cmd
-
-        #then get back any log output, and search it for status of the upload
-        # => "Session processing may already be in progress" -> 'F' (already in progress)
-        # => "following sessions have been uploaded" -> 'D' (done)
-        # => "HTTP Status 401" -> 'F' failed login
-        # => "RMR" -> 'F' failed dicom cleaning
-        # else: some other failure
-        File.foreach(v_log_file_path).detect { |line| 
-          if line.include?("Session processing may already be in progress")
-            v_status ='F'
-            v_status_comment = "record already loaded:="+line
-          elsif  line.include?("following sessions have been uploaded")
-            v_status ='D'
-            v_status_comment = "recordloaded:="+line
-          elsif  line.include?("HTTP Status 401")
-            v_status ='F'
-            v_status_comment = "failed login:="+line
-          elsif  line.include?("RMR")
-            v_status ='F'
-            v_status_comment = "failed dicom cleaning:="+line
-          else  
-            v_status ='F'
-            v_status_comment = "something unexpected:="+line
-          end
-        }
-
-        puts v_status
-        puts v_status_comment
-
-        #clean up the log file
-        response = r_call "rm -rf "+v_log_file_path
-
-        sql_update = "update #{ p[:xnat_ids_tn] } set #{ p[:xnat_ids_tn] }.xnat_exists_flag = 'Y' 
-          where #{ p[:xnat_ids_tn] }.visit_id = #{ v_visit_id.to_s } and #{ p[:xnat_ids_tn] }.xnat_exists_flag in ('N','Q')
-          and #{ p[:xnat_ids_tn] }.file_path in('#{ v_path_full_list_array.join("','") }') and #{ p[:xnat_ids_tn] }.project = '#{ v_xnat_project }'"
-       
-        if v_status == "D"
-          results_update = @connection.execute(sql_update)
+        if !p[:dry_run] then
+          v_log_file_path = "#{ p[:working_directory] }/#{ v_xnat_session }.log"
+          puts "log file is #{ v_log_file_path }"
+          cmd = "ssh panda_user@#{ p[:computer] }.dom.wisc.edu \"cd #{ p[:working_directory] }/; curl --netrc -o #{ v_xnat_session }.log --speed-time 30 --speed-limit 10 -w \\\"%{http_code}\\\" --form project=#{ v_xnat_project } --form image_archive=@#{ v_xnat_session }.tgz --form dest=/archive/projects/#{ v_xnat_project }/subjects/#{ v_xnat_export_id }/experiments/#{ v_xnat_session } https://#{ p[:xnat_address] }/data/services/import?format=html\""
+          puts cmd
+          response = r_call cmd
+          puts response
           
-          sql_update = "update #{ p[:xnat_participant_tn] } set xnat_exists_flag = 'Y', xnat_run_upload_flag = 'D' where project = '#{ v_xnat_project }' and export_id = '#{ v_xnat_export_id }'"
-          results_update = @connection.execute(sql_update)
-        elsif v_status == "F"        
-          sql_update = "update #{ p[:xnat_ids_tn] } set #{ p[:xnat_ids_tn] }.xnat_exists_flag = 'Q' 
-            where #{ p[:xnat_ids_tn] }.visit_id = #{ v_visit_id.to_s } and #{ p[:xnat_ids_tn] }.xnat_exists_flag in ('N','Q')
-            and #{ p[:xnat_ids_tn] }.file_path in('#{ v_path_full_list_array.join("','") }') and #{ p[:xnat_ids_tn] }.project = '#{ v_xnat_project }'"
+          
+          #retrieve the log
+          cmd = "rsync -av panda_user@#{ p[:computer] }.dom.wisc.edu:#{ v_log_file_path } #{ v_log_file_path }"
+          puts cmd
+          response = r_call cmd
+
+          #then get back any log output, and search it for status of the upload
+          # => "Session processing may already be in progress" -> 'F' (already in progress)
+          # => "following sessions have been uploaded" -> 'D' (done)
+          # => "HTTP Status 401" -> 'F' failed login
+          # => "RMR" -> 'F' failed dicom cleaning
+          # else: some other failure
+          File.foreach(v_log_file_path).detect { |line| 
+            if line.include?("Session processing may already be in progress")
+              v_status ='F'
+              v_status_comment = "record already loaded:="+line
+            elsif  line.include?("following sessions have been uploaded")
+              v_status ='D'
+              v_status_comment = "recordloaded:="+line
+            elsif  line.include?("HTTP Status 401")
+              v_status ='F'
+              v_status_comment = "failed login:="+line
+            elsif  line.include?("RMR")
+              v_status ='F'
+              v_status_comment = "failed dicom cleaning:="+line
+            elsif  line.include?("Too Big!")
+              v_status ='B'
+              v_status_comment = "the archive we tried to upload was too large:="+line
+            else  
+              v_status ='F'
+              v_status_comment = "something unexpected:="+line
+            end
+          }
+
+          puts v_status
+          puts v_status_comment
+
+          #clean up the log file
+          response = r_call "rm -rf "+v_log_file_path
+
+          sql_update = "update #{ p[:xnat_appointment_mri_tn] } set #{ p[:xnat_appointment_mri_tn] }.xnat_exists_flag = 'Y' 
+            where #{ p[:xnat_appointment_mri_tn] }.visit_id = #{ v_visit_id.to_s } and #{ p[:xnat_appointment_mri_tn] }.xnat_exists_flag in ('N','Q')
+            and #{ p[:xnat_appointment_mri_tn] }.project = '#{ v_xnat_project }'"
+         
+          if v_status == "D"
             results_update = @connection.execute(sql_update)
-        end
+            
+            sql_update = "update #{ p[:xnat_participant_tn] } set xnat_exists_flag = 'Y', xnat_run_upload_flag = 'D' where project = '#{ v_xnat_project }' and export_id = '#{ v_xnat_export_id }'"
+            results_update = @connection.execute(sql_update)
+          elsif v_status == "F"        
+            sql_update = "update #{ p[:xnat_appointment_mri_tn] } set #{ p[:xnat_appointment_mri_tn] }.xnat_exists_flag = 'Q' 
+              where #{ p[:xnat_appointment_mri_tn] }.visit_id = #{ v_visit_id.to_s } and #{ p[:xnat_appointment_mri_tn] }.xnat_exists_flag in ('N','Q')
+              and #{ p[:xnat_appointment_mri_tn] }.project = '#{ v_xnat_project }'"
+              results_update = @connection.execute(sql_update)
 
-        @params[:comment].push v_status_comment
-        #clean up our working files
-        #ssh panda_user@merida.dom.wisc.edu "cd /tmp/; rm -rf /tmp/{%xnat_session_id%}.zip
-        response = r_call "ssh panda_user@#{ p[:computer] }.dom.wisc.edu 'cd #{ p[:working_directory] }; rm -rf #{ p[:working_directory] }/#{ v_xnat_session }.zip'"
+              sql_update = "update #{ p[:xnat_participant_tn] } set xnat_exists_flag = 'Q', xnat_run_upload_flag = 'D' where project = '#{ v_xnat_project }' and export_id = '#{ v_xnat_export_id }'"
+              results_update = @connection.execute(sql_update)
+          elsif v_status == "B"        
+            sql_update = "update #{ p[:xnat_appointment_mri_tn] } set #{ p[:xnat_appointment_mri_tn] }.xnat_exists_flag = 'B' 
+              where #{ p[:xnat_appointment_mri_tn] }.visit_id = #{ v_visit_id.to_s } and #{ p[:xnat_appointment_mri_tn] }.xnat_exists_flag in ('N','Q')
+              and #{ p[:xnat_appointment_mri_tn] }.project = '#{ v_xnat_project }'"
+              results_update = @connection.execute(sql_update)
+          end
 
-        #ssh panda_user@merida.dom.wisc.edu "cd /tmp/; rm -rf /tmp/{%xnat_session_id%}
-        response = r_call "ssh panda_user@#{ p[:computer] }.dom.wisc.edu 'cd #{ p[:working_directory] }; rm -rf #{ p[:working_directory] }/#{ v_xnat_session }'"
+          @params[:comment].push v_status_comment
+
+          #clean up our working files
+          #ssh panda_user@merida.dom.wisc.edu "cd /tmp/; rm -rf /tmp/{%xnat_session_id%}.zip
+          response = r_call "ssh panda_user@#{ p[:computer] }.dom.wisc.edu 'cd #{ p[:working_directory] }; rm -rf #{ p[:working_directory] }/#{ v_xnat_session }.tgz'"
+
+          #ssh panda_user@merida.dom.wisc.edu "cd /tmp/; rm -rf /tmp/{%xnat_session_id%}
+          response = r_call "ssh panda_user@#{ p[:computer] }.dom.wisc.edu 'cd #{ p[:working_directory] }; rm -rf #{ p[:working_directory] }/#{ v_xnat_session }'"
+
+          sleep(1.minute)
+
+        end #!dry_run
       end #looping over results
 
     #clean up and tell the SecheduledJob that we're done
