@@ -1005,7 +1005,12 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
                              elsif v_dicom_tracer.include?("UCB-J") # MK6240
                                  v_dicom_tracer_id = 12 
                              end
-                             v_dicom_timezone_offset = @petfile_header['0008,0201'][:value].to_s
+
+                             if @petfile_header.has_key?('0008,0201') and !@petfile_header['0008,0201'].nil? and !@petfile_header['0008,0201'].blank?
+                               v_dicom_timezone_offset = @petfile_header['0008,0201'][:value].to_s
+                             else
+                               v_dicom_timezone_offset = ""
+                             end
                              #0008,0201 Timezone Offset From UTC  -0600
                               # need to move the injection/scan start time to times in database WITH the GMT displacement
                                 # running up against UTC displayed /GMT saved in database 
