@@ -8,6 +8,7 @@
 <p><%= "DICOM header not available. (Not being converted to hash properly.)" %></p>
 <!-- there are :value with multi-row values   -->
 <% else %>
+	<div style='font-size:14px;padding-bottom:10px;font-family:sans-serif;'><%= dataset.path.to_s %></div>
 	<table class="tabular">
 		<tr>
 			<th>Name</th> <th>Tag</th> <th>Value</th>
