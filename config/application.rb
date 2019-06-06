@@ -42,6 +42,17 @@ module WADRCDataTools
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
 
+    #tagging the user_id onto our logs, so that we can segment our log data for workflow analysis
+    config.log_tags = [
+        ->(req){
+            if user_id = WardenTaggedLogger.extract_user_id_from_request(req)
+                "user: #{user_id.to_s}"
+            else
+                "?"
+            end
+        }
+    ]
+
     # JavaScript files you want as :defaults (application.js is always included).
     # config.action_view.javascript_expansions[:defaults] = %w(jquery rails)
 

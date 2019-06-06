@@ -210,11 +210,11 @@ class QuestionnairesController < ApplicationController
            v_enumber = v_enumber.gsub(/,/,"','")
              condition ="    questionnaires.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
               where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-              and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in  ('"+v_enumber.gsub(/[;:'"“”()=<>]/, '')+"'))"
+              and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in  ('"+v_enumber.gsub(/[;:"“”()=<>]/, '')+"'))"
           else
            condition ="    questionnaires.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
             where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-            and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in  (lower('"+params[:q_search][:enumber].gsub(/[;:'"“”()=<>]/, '')+"')))"
+            and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in  (lower('"+params[:q_search][:enumber].gsub(/[;:"“”()=<>]/, '')+"')))"
           end
             @conditions.push(condition)
             params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:q_search][:enumber]
@@ -228,12 +228,17 @@ class QuestionnairesController < ApplicationController
         end
         
         if !params[:q_search][:reggieid].blank? 
+            reggieid_param = params[:q_search][:reggieid]
+            if reggieid_param.include?(',')
+              #this should solve the trailing comma problem
+              reggieid_param = reggieid_param.split(',').select { |x| !x.blank? }.join(',')
+            end
             condition ="   questionnaires.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
              where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
              and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
-                    and participants.reggieid is not NULL and participants.reggieid in ("+params[:q_search][:reggieid].gsub(/[;:'"“”()=<>]/, '')+") )"
+                    and participants.reggieid is not NULL and participants.reggieid in ("+reggieid_param.gsub(/[;:'"“”()=<>]/, '')+") )"
             @conditions.push(condition)
-            params["search_criteria"] = params["search_criteria"] +",  Reggie ID ("+params[:q_search][:reggieid]+")"
+            params["search_criteria"] = params["search_criteria"] +",  Reggie ID ("+reggieid_param+")"
         end
         
         if !params[:q_search][:q_status].blank? 

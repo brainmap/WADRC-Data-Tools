@@ -1420,7 +1420,7 @@ end
          v_enumber =  params[:vgroups_search][:enumber].gsub(/ /,'').gsub(/'/,'').downcase
          v_enumber = v_enumber.gsub(/,/,"','")
            condition =" vgroups.id in (select vgroup_id from enrollment_vgroup_memberships,enrollments
-           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:'"“”()=<>]/, '')+"'))"         
+           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"“”()=<>]/, '')+"'))"         
         else
           condition =" vgroups.id in (select vgroup_id from enrollment_vgroup_memberships,enrollments
           where enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower('"+params[:vgroups_search][:enumber].gsub(/[;:'"“”()=<>]/, '')+"')))"
@@ -1430,11 +1430,16 @@ end
       end 
 
       if !params[:vgroups_search][:reggieid].blank? 
+          reggieid_param = params[:vgroups_search][:reggieid]
+          if reggieid_param.include?(',')
+            #this should solve the trailing comma problem
+            reggieid_param = reggieid_param.split(',').select { |x| !x.blank? and x.length > 0 }.join(',')
+          end
           condition ="   vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from participants,  enrollment_vgroup_memberships, enrollments
            where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
-           and participants.reggieid is not NULL and participants.reggieid in ("+params[:vgroups_search][:reggieid].gsub(/[;:'"“”()=<>]/, '')+") )"
+           and participants.reggieid is not NULL and participants.reggieid in ("+reggieid_param.gsub(/[;:'"“”()=<>]/, '')+") )"
           @conditions.push(condition)
-          params["search_criteria"] = params["search_criteria"] +",  Reggie ID ("+params[:vgroups_search][:reggieid]+")"
+          params["search_criteria"] = params["search_criteria"] +",  Reggie ID ("+reggieid_param+")"
       end
       
       if !params[:vgroups_search][:qc_completed].blank?

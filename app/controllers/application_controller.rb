@@ -316,6 +316,7 @@ puts sql
   @v_petfile_cnt.to_s
     return @results
  end
+
  def run_search_participant
   scan_procedure_list = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i).join(',')
   if @tables.size == 1  or @tables.include?("image_datasets")
