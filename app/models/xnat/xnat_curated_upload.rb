@@ -163,7 +163,7 @@ class Xnat::XnatCuratedUpload
     def sync(p=@params)
 
     	#get all of the subjects where "xnat_exists_flag" != 'Y'
-    	subjects = Xnat::XnatCuratedSubject.where("xnat_exists_flag != 'Y'")
+    	subjects = Xnat::XnatCuratedSubject.all #where("xnat_exists_flag != 'Y'")
 
     	if !p[:project].nil?
     		project = Xnat::XnatCuratedProject.where("name = ?",p[:project])
