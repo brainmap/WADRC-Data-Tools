@@ -58,6 +58,56 @@ class Xnat::XnatCuratedUpload
 
     end
 
+    def copy_forward_old_exports(p=@params)
+
+    	mcw_lisj = Xnat::XnatCuratedProject.where(:name => 'mcw_lisj').first
+    	drivers = Xnat::XnatCuratedDriver.where(:project => mcw_lisj)
+
+		# for each driver
+		drivers.each do |driver|
+			# get the image_dataset
+			image_ds = ImageDataset.find(driver.image_dataset_id)
+			visit = Visit.find(image_ds.visit_id)
+			enrollment = Enrollment.where("id in (select enrollment_id from enrollment_visit_memberships where visit_id = ?)",visit.id).first
+			participant = Participant.find(enrollment.participant_id)
+
+			connection = ActiveRecord::Base.connection()
+			sql = "select xnat_exists_flag, xnat_do_not_share_flag, xnat_session_id, secondary_key from xnat_curated_mri_appointment where project = 'mcw_lisj' and participant_id = #{participant.id} and visit_id = #{visit.id} and appointment_id = #{visit.appointment_id}"
+			mri_appointment_result = connection.execute(sql)
+
+			sql = "select xnat_exists_flag, xnat_do_not_share_flag, export_id from xnat_curated_participants where project = 'mcw_lisj' and participant_id = #{participant.id}"
+			xnat_participant_result = connection.execute(sql)
+			
+			# check that an xnat_curated_subject for this image_dataset exists. if not, create the subject
+			subject = Xnat::XnatCuratedSubject.find_or_create_by(project: driver.project, participant_id: participant.id)
+
+			if xnat_participant_result.count > 0
+				subject.xnat_do_not_share_flag = xnat_participant_result.first[1]
+				subject.export_id = xnat_participant_result.first[2]
+				subject.save
+			end
+
+			# check that an xnat_curated_session exists for this subject. if not, create the session
+			session = Xnat::XnatCuratedSession.find_or_create_by(project: driver.project, subject: subject, visit: visit, appointment_id: visit.appointment_id)
+
+			if mri_appointment_result.count > 0
+				session.xnat_do_not_share_flag = mri_appointment_result.first[1]
+				session.xnat_session_id = mri_appointment_result.first[2]
+				session.secondary_key = mri_appointment_result.first[3]
+				session.save
+			end
+
+			# check that an xnat_curated_scan exists for this session & image_dataset. if not, create the scan
+			image_scan = Xnat::XnatCuratedScan.find_or_create_by(image_dataset:image_ds, project: driver.project, session: session)
+
+			#should carry forward the "do not share scans" flags from visits, enrollments, vgroups, appointments, etc.
+			
+
+
+		end
+
+    end
+
     def check(p=@params)
 
     	#without params filtering our drivers (or subjects, etc.) this should just grab everything and check that it's
