@@ -116,7 +116,7 @@ class Xnat::XnatCuratedUpload
     	#param to check only those where xnat_exists_flag == the param
 
     	#get all of the subjects where "xnat_exists_flag" != 'Y'
-    	subjects = Xnat::XnatCuratedSubject.where("xnat_exists_flag != 'Y'")
+    	subjects = Xnat::XnatCuratedSubject.all
 
     	if !p[:project].nil?
     		project = Xnat::XnatCuratedProject.where("name = ?",p[:project])
@@ -138,16 +138,24 @@ class Xnat::XnatCuratedUpload
     					#if all of the scans exist, then we can mark the session as 'Y'
     					if session.scans.all { |s| s.xnat_exists_flag == 'Y' }
 	    					session.xnat_exists_flag = 'Y'
-	    					session.save
+	    				elsif session.scans.select { |s| s.xnat_exists_flag == 'Y' }.length > 0
+	    					session.xnat_exists_flag = 'P'
+	    				else
+	    					session.xnat_exists_flag = 'N'
 	    				end
+	    				session.save
 
     				end
     			end
 
     			if subject.sessions.all { |s| s.xnat_exists_flag == 'Y' }
 	    			subject.xnat_exists_flag = 'Y'
-	    			subject.save
+	    		elsif subject.sessions.select { |s| s.xnat_exists_flag == 'Y' }.length > 0
+	    			subject.xnat_exists_flag = 'P'
+	    		else
+	    			subject.xnat_exists_flag = 'N'
 	    		end
+	    		subject.save
     		end
     	end
     end
