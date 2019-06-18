@@ -1433,7 +1433,7 @@ end
           reggieid_param = params[:vgroups_search][:reggieid]
           if reggieid_param.include?(',')
             #this should solve the trailing comma problem
-            reggieid_param = reggieid_param.split(',').select { |x| !x.blank? and x.length > 0 }.join(',')
+            reggieid_param = reggieid_param.split(',').select { |x| !x.blank? and x.length > 0 }.collect { |x| x.strip || x }.join(',')
           end
           condition ="   vgroups.id in (select enrollment_vgroup_memberships.vgroup_id from participants,  enrollment_vgroup_memberships, enrollments
            where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 

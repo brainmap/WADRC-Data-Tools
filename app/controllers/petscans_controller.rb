@@ -213,7 +213,7 @@ class PetscansController < ApplicationController
           reggieid_param = params[:pet_search][:reggieid]
           if reggieid_param.include?(',')
             #this should solve the trailing comma problem
-            reggieid_param = reggieid_param.split(',').select { |x| !x.blank? }.join(',')
+            reggieid_param = reggieid_param.split(',').select { |x| !x.blank? }.collect { |x| x.strip || x }.join(',')
           end
           condition ="  petscans.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
            where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 

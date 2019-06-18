@@ -206,7 +206,7 @@ respond_to :html
          v_enumber = v_enumber.gsub(/,/,"','")
           condition ="   blooddraws.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
            where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-           and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:'"“”()=<>]/, '')+"'))"
+           and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in ('"+v_enumber.gsub(/[;:"“”()=<>]/, '')+"'))"
           
         else
          condition ="   blooddraws.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
@@ -224,13 +224,18 @@ respond_to :html
           params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:lh_search][:rmr]
       end
 
-      if !params[:lh_search][:reggieid].blank? 
+      if !params[:lh_search][:reggieid].blank?  
+          reggieid_param = params[:lh_search][:reggieid]
+          if reggieid_param.include?(',')
+            #this should solve the trailing comma problem
+            reggieid_param = reggieid_param.split(',').select { |x| !x.blank? and x.length > 0 }.collect { |x| x.strip || x }.join(',')
+          end
           condition ="   blooddraws.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
            where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
            and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
-                  and participants.reggieid is not NULL and participants.reggieid in ("+params[:lh_search][:reggieid].gsub(/[;:'"“”()=<>]/, '')+") )"
+                  and participants.reggieid is not NULL and participants.reggieid in ("+reggieid_param.gsub(/[;:"“”()=<>]/, '')+") )"
           @conditions.push(condition)
-          params["search_criteria"] = params["search_criteria"] +",  Reggie ID ("+params[:lh_search][:reggieid]+")"
+          params["search_criteria"] = params["search_criteria"] +",  Reggie ID ("+reggieid_param+")"
       end
 
       if !params[:lh_search][:lh_status].blank? 
