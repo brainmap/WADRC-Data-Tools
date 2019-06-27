@@ -11980,7 +11980,7 @@ def run_dicom_header_field_harvest
          vgroup_id = r[1]  
          #puts "starting vgroup_id="+vgroup_id.to_s 
          v_comment_last_vgroup  ="starting vgroup_id="+vgroup_id.to_s
-         image_datasets = ImageDataset.where("image_datasets.visit_id in (?)",r[2])   
+         image_datasets = ImageDataset.where("image_datasets.visit_id in (?)",r[2])
          v_scanner_protocol = ""
          image_datasets.each do |dataset| 
              begin
@@ -15022,7 +15022,7 @@ puts sql
             v_path_array = v_ids_path.split("/")
             v_scan_procedure_name = v_path_array[4]
             v_sp = ScanProcedure.where("codename in (?)",v_scan_procedure_name)
-            v_visit_number = sp.visit_abbr
+            v_visit_number = v_sp.visit_abbr
 
             if v_path_array[5] == "mri"
               v_subjectid_exam_date_array = v_path_array[6].split("_")
