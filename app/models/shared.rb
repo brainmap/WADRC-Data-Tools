@@ -15021,7 +15021,7 @@ puts sql
  
             v_path_array = v_ids_path.split("/")
             v_scan_procedure_name = v_path_array[4]
-            v_sp = ScanProcedure.where("codename in (?)",v_scan_procedure_name)
+            v_sp = ScanProcedure.where("codename in (?)",v_scan_procedure_name).first
             v_visit_number = v_sp.visit_abbr
 
             if v_path_array[5] == "mri"
