@@ -157,7 +157,7 @@ puts "WWWWWWWWWWWW in create_or_update_from_metamri"
       visit = Visit.where(dicom_study_uid: visit_attrs[:dicom_study_uid]).first_or_initialize  
     else
       #visit = Visit.find_or_initialize_by_rmr(visit_attrs) 
-      visit = Visit.find_or_initialize_by(rmr: visit_attrs)   # not tested   - think is working 
+      visit = Visit.find_or_initialize_by(rmr: visit_attrs[:dicom_study_uid])   # not tested   - think is working 
     end
     # CHECK IN DEV IF THIS IS WORKING - IS THIS WHERE visit.date comes from 
     # what is visit_attrs
