@@ -6,7 +6,7 @@ module WardenTaggedLogger
 			warden_data = session_data["warden.user.user.key"]
 			warden_data[0][0]
 		rescue StandardError => e
-			puts e.message
+			Rails.logger.info e.message
 			nil
 		end
 	end
