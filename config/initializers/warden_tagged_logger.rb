@@ -6,8 +6,7 @@ module WardenTaggedLogger
 			warden_data = session_data["warden.user.user.key"]
 			warden_data[0][0]
 		rescue StandardError => e
-			logger.debug "Error finding the current user: #{e.message}"
-			logger.debug "Backtrace: #{e.backtrace.inspect}"
+			puts e.message
 			nil
 		end
 	end
