@@ -513,6 +513,7 @@ class DataSearchesController < ApplicationController
       end
     end
 
+
     def cg_edit_table
       v_schema ='panda_production'
       if Rails.env=="development" 
@@ -528,6 +529,8 @@ class DataSearchesController < ApplicationController
         'scheduleruns','schedules','schedules_users','series_descriptions','users','vgroups','visits','vitals'] 
       @cg_tn = CgTn.find(params[:id])
       v_new_key_value =""
+      v_new_secondary_key_value = ""
+      # enumber_v# works, other visit designators not work for edit or insert
       @enumber_search =""
       v_sp =""
       @sp_array =[]
@@ -536,18 +539,30 @@ class DataSearchesController < ApplicationController
       params["search_criteria"] =""
       # add a row
       if !params[:cg_edit_table].blank? and !params[:cg_edit_table][:add_a_row_key_value].blank?
+              if !params[:cg_edit_table][:add_a_row_secondary_key_value].blank?
+                params[:cg_edit_table][:secondary_key] = params[:cg_edit_table][:add_a_row_secondary_key_value]
+                v_new_secondary_key_value =  params[:cg_edit_table][:add_a_row_secondary_key_value].gsub(/ /,'').gsub(/'/,'').downcase
+              end
 
               params[:cg_edit_table][:enumber] = params[:cg_edit_table][:add_a_row_key_value]
               # check if already in table
               v_cg_tn_cn = CgTnCn.where("key_column_flag ='Y' and cg_tn_id in (?)",@cg_tn.id)
               # expect only one key column --- want an error if 
               v_new_key_value =  params[:cg_edit_table][:add_a_row_key_value].gsub(/ /,'').gsub(/'/,'').downcase
-              if v_cg_tn_cn.size == 1
-                 sql = "select count(*) from "+@cg_tn.tn+" where "+v_cg_tn_cn[0].cn+"= '"+v_new_key_value+"'"
+              if v_cg_tn_cn.size == 1 or (v_cg_tn_cn.size == 2 and @cg_tn.secondary_key_flag == 'Y' )
+                 if @cg_tn.secondary_key_flag == 'Y' #!v_new_secondary_key_value.blank?
+                    sql = "select count(*) from "+@cg_tn.tn+" where "+v_cg_tn_cn[0].cn+"= '"+v_new_key_value+"' and secondary_key = '"+v_new_secondary_key_value+"'" 
+                 else
+                    sql = "select count(*) from "+@cg_tn.tn+" where "+v_cg_tn_cn[0].cn+"= '"+v_new_key_value+"'"
+                 end
                  connection = ActiveRecord::Base.connection();
                  @results = connection.execute(sql)
                  if @results.first.to_s.to_i > 0
-                     flash[:notice] = v_new_key_value+" is already in  "+@cg_tn.common_name+"."
+                     if !v_new_secondary_key_value.blank?
+                      flash[:notice] = v_new_key_value+" and secondary_key "+v_new_secondary_key_value+" is already in  "+@cg_tn.common_name+"."
+                     else
+                       flash[:notice] = v_new_key_value+" is already in  "+@cg_tn.common_name+"."
+                     end
                  else # new key
                     # get link type from join table and joins --- only good for subject_v# => enrollment_id and scan_procedure_id 
                     v_key_type =""   # should this be moved from schedule to cg_tns?
@@ -576,18 +591,34 @@ class DataSearchesController < ApplicationController
                        # insert into _new 
                        sql = "truncate table "+@cg_tn.tn+"_new"
                        @results = connection.execute(sql)
-                       sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ")values('"+v_new_key_value+"')"
+      
+                       if @cg_tn.secondary_key_flag == 'Y' #!v_new_secondary_key_value.blank?
+                         sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ",secondary_key)values('"+v_new_key_value+"','"+v_new_secondary_key_value+"')"
+                       else
+                         sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ")values('"+v_new_key_value+"')"
+                       end
                        @results = connection.execute(sql)
                       # map key to link column 
                       v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload
-                      sql = "update "+@cg_tn.tn+"_new  t set t.enrollment_id = ( select e.id from enrollments e where e.enumber = replace(replace(replace(replace(t."+v_cg_tn_cn[0].cn+",'_v2',''),'_v3',''),'_v4',''),'_v5',''))"
+                      #sql = "update "+@cg_tn.tn+"_new  t set t.enrollment_id = ( select e.id from enrollments e where e.enumber = replace(replace(replace(replace(t."+v_cg_tn_cn[0].cn+",'_v2',''),'_v3',''),'_v4',''),'_v5',''))"
+                      #results = connection.execute(sql)
+                      sql = "select enrollment_id from "+@cg_tn.tn+"_new where "+v_cg_tn_cn[0].cn+" = '"+v_new_key_value+"'"
                       results = connection.execute(sql)
+                      if results.count > 0
+                        v_new_enrollment_id = results.first[0]
+                      end
                       sql = "select distinct "+v_cg_tn_cn[0].cn+" from "+@cg_tn.tn+"_new"
                       results = connection.execute(sql)
                       results.each do |r|
                         v_sp_id = v_shared.get_sp_id_from_subjectid_v(r[0])
                         if !v_sp_id.blank?
+                          v_new_scan_procedure_id = v_sp_id.to_s
                           sql = "update "+@cg_tn.tn+"_new  t set t.scan_procedure_id = "+v_sp_id.to_s+" where "+v_cg_tn_cn[0].cn+" ='"+r[0]+"'"
+                          results = connection.execute(sql)
+                        end
+                        v_enrollment_id = v_shared.get_enrollment_id_from_subjectid_v(r[0])
+                        if !v_enrollment_id.blank?
+                          sql = "update "+@cg_tn.tn+"_new  t set t.enrollment_id = "+v_enrollment_id.to_s+" where "+v_cg_tn_cn[0].cn+" ='"+r[0]+"'"
                           results = connection.execute(sql)
                         end
                       end
@@ -610,9 +641,13 @@ class DataSearchesController < ApplicationController
                          v_cols.push(c[0])
                       end
                       # this will get all the _edit into _new , but _edit is still ok
-                      v_sql = "insert into "+@cg_tn.tn+"_new("+v_cols.join(',')+")  select "+v_cols.join(',')+" from "+@cg_tn.tn+" where "+@cg_tn.tn+"."+v_cg_tn_cn[0].cn+" not in (select "+v_cg_tn_cn[0].cn+" from "+@cg_tn.tn+"_new)"
-                      results = connection.execute(v_sql)
-                      
+                      if @cg_tn.secondary_key_flag == 'Y' # making an assumption that secondary_key is column name
+                        v_sql = "insert into "+@cg_tn.tn+"_new("+v_cols.join(',')+")  select "+v_cols.join(',')+" from "+@cg_tn.tn+" where ("+@cg_tn.tn+"."+v_cg_tn_cn[0].cn+",secondary_key) not in (select "+v_cg_tn_cn[0].cn+",replace(secondary_key,'|','') from "+@cg_tn.tn+"_new)"
+                        results = connection.execute(v_sql)
+                      else
+                        v_sql = "insert into "+@cg_tn.tn+"_new("+v_cols.join(',')+")  select "+v_cols.join(',')+" from "+@cg_tn.tn+" where "+@cg_tn.tn+"."+v_cg_tn_cn[0].cn+" not in (select "+v_cg_tn_cn[0].cn+" from "+@cg_tn.tn+"_new)"
+                        results = connection.execute(v_sql)
+                      end
                       v_msg = v_shared.move_present_to_old_new_to_present(@cg_tn.tn,
                       v_cols.join(','), "scan_procedure_id is not null  and enrollment_id is not null ",v_msg)
                       v_shared.apply_cg_edits(@cg_tn.tn)
@@ -620,7 +655,11 @@ class DataSearchesController < ApplicationController
                       # insert into _new 
                       sql = "truncate table "+@cg_tn.tn+"_new"
                       @results = connection.execute(sql)
-                      sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ")values('"+v_new_key_value+"')"
+                       if @cg_tn.secondary_key_flag == 'Y' # !v_new_secondary_key_value.blank?
+                         sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ",secondary_key)values('"+v_new_key_value+"','"+v_new_secondary_key_value+"')"
+                       else
+                         sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ")values('"+v_new_key_value+"')"
+                       end
                       @results = connection.execute(sql)   
                       # map key to link column 
                       v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload
@@ -655,7 +694,11 @@ class DataSearchesController < ApplicationController
                       # insert into _new 
                       sql = "truncate table "+@cg_tn.tn+"_new"
                       @results = connection.execute(sql)
-                      sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ")values('"+v_new_key_value+"')"
+                       if @cg_tn.secondary_key_flag == 'Y' #!v_new_secondary_key_value.blank?
+                         sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ",secondary_key)values('"+v_new_key_value+"','"+v_new_secondary_key_value+"')"
+                       else
+                         sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ")values('"+v_new_key_value+"')"
+                       end
                       @results = connection.execute(sql)
                       # map key to link column 
                       v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload
@@ -690,7 +733,11 @@ class DataSearchesController < ApplicationController
                       # insert into _new 
                       sql = "truncate table "+@cg_tn.tn+"_new"
                       @results = connection.execute(sql)
-                      sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ")values('"+v_new_key_value+"')"
+                       if @cg_tn.secondary_key_flag == 'Y' #!v_new_secondary_key_value.blank?
+                         sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ",secondary_key)values('"+v_new_key_value+"','"+v_new_secondary_key_value+"')"
+                       else
+                         sql = "insert into "+@cg_tn.tn+"_new ( "+v_cg_tn_cn[0].cn+ ")values('"+v_new_key_value+"')"
+                       end
                       @results = connection.execute(sql)
                       # map key to link column 
                       v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload
@@ -724,8 +771,7 @@ class DataSearchesController < ApplicationController
                  end
               end
               
-            end
-            
+            end           
      
       # build up condition and join from @cg_tn
       if !params[:cg_edit_table].blank? and  !params[:cg_edit_table][:enumber].blank?
@@ -767,9 +813,6 @@ class DataSearchesController < ApplicationController
       v_key_columns =""
       if (@cg_tn.table_type == 'column_group' or @cg_tn.table_type == 'JohnsonInProcess'  or @cg_tn.table_type == 'BendlinInProcess'  or @v_editable_dashboard_table_type_flag == "Y") and @cg_tn.editable_flag == "Y"  and !v_exclude_tables_array.include?(@cg_tn.tn.downcase) # want to limit to cg tables
         
-
-        
-        
         @cns = []
         @key_cns = []
         @v_key = []
@@ -780,6 +823,7 @@ class DataSearchesController < ApplicationController
         @ref_table_a_dict ={}
         @ref_table_b_dict ={}
         @value_list_dict ={}
+
         
         @cg_tn_cns =CgTnCn.where("cg_tn_id in (?) and status_flag='Y'",@cg_tn.id)
         @cg_tn_cns.each do |cg_tn_cn|
@@ -892,29 +936,35 @@ class DataSearchesController < ApplicationController
               v_key_value_array = []
               v_key_pipe_array.each do |cn_v|
                 v_tmp = cn_v.split("^")
-                v_key_array.push(v_tmp[0]+"='"+v_tmp[1].gsub(/'/, "''")+"'")
-                v_key_cn_array.push(v_tmp[0])
-                v_key_value_array.push("'"+v_tmp[1].gsub(/'/, "''")+"'")
+                if !v_tmp[1].nil?
+                   v_key_array.push(v_tmp[0]+"='"+v_tmp[1].gsub(/'/, "''")+"'")
+                   v_key_cn_array.push(v_tmp[0])
+                   v_key_value_array.push("'"+v_tmp[1].gsub(/'/, "''")+"'")
+                else
+                   v_key_array.push(v_tmp[0]+"=''")
+                   v_key_cn_array.push(v_tmp[0])
+                   v_key_value_array.push("'|'")
+                end
               end
               v_edit_in_row_flag ="N"
   #puts "CCCCCCC blank to nil"
               @cns.each do |cn|
-            	    if  !@cg_edit_data_dict[k+cn].nil? and @cg_edit_data_dict[k+cn] != "|" and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)
-            		      v_edit_in_row_flag ="Y"
-            		      
-            		   end
-            	end
-            	v_delete_edit_row ="Y"
-            	@cns.each do |cn|  # deleting all | only row
-            	    if @cg_edit_data_dict[k+cn] != "|" and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)
-            	      v_delete_edit_row ="N"
-            	    end
-            	end
-            	if v_delete_edit_row == "Y"
-            	  sql = " delete from "+@cg_tn.tn+"_edit  where "+v_key_array.join(" and ")
+                  if  !@cg_edit_data_dict[k+cn].nil? and @cg_edit_data_dict[k+cn] != "|" and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)
+                      v_edit_in_row_flag ="Y"
+                      
+                   end
+              end
+              v_delete_edit_row ="Y"
+              @cns.each do |cn|  # deleting all | only row
+                  if @cg_edit_data_dict[k+cn] != "|" and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)
+                    v_delete_edit_row ="N"
+                  end
+              end
+              if v_delete_edit_row == "Y"
+                sql = " delete from "+@cg_tn.tn+"_edit  where "+v_key_array.join(" and ")
                  @results = connection.execute(sql)
-            	end
-            	
+              end
+              
               if !params[:cg_edit_table][:delete_data].blank? and !params[:cg_edit_table][:delete_data][v_cnt.to_s].blank?              
                 # check if key in edit_table
                 if v_edit_in_row_flag =="Y"
@@ -1009,26 +1059,80 @@ class DataSearchesController < ApplicationController
               end
               
               v_delete_edit_row ="Y"
-            	@cns.each do |cn|  # deleting all | only row
-            	    if @cg_edit_data_dict[k+cn] != "|" and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)
-            	      v_delete_edit_row ="N"
-            	    end
-            	end
-            	if v_delete_edit_row == "Y"
-            	  sql = " delete from "+@cg_tn.tn+"_edit  where "+v_key_array.join(" and ")
+              @cns.each do |cn|  # deleting all | only row
+                  if @cg_edit_data_dict[k+cn] != "|" and cn != "delete_key_flag" and !v_key_cn_array.include?(cn)
+                    v_delete_edit_row ="N"
+                  end
+              end
+              if v_delete_edit_row == "Y"
+                sql = " delete from "+@cg_tn.tn+"_edit  where "+v_key_array.join(" and ")
                  @results = connection.execute(sql)
-            	end
+              end
               # puts " v_cnt ="+v_cnt.to_s+" end  key="+k
               v_cnt = v_cnt +1
             end
         end
-        
+
+        # update _edit scan_procedure_id, enrollment_id, participant_id
+        v_key_type =""   # should this be moved from schedule to cg_tns?
+        if @cg_tn.join_left_parent_tn == "vgroups" and @cg_tn.join_right.include?("scan_procedures_vgroups.scan_procedure_id") and @cg_tn.join_right.include?("enrollment_vgroup_memberships.enrollment_id")
+          v_key_type = "enrollment/sp"
+        elsif @cg_tn.join_left_parent_tn == "vgroups" and @cg_tn.join_right.include?("vgroups.participant_id") 
+          connection = ActiveRecord::Base.connection();
+          sql = "SELECT `COLUMN_NAME`,`DATA_TYPE`, `CHARACTER_MAXIMUM_LENGTH` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA`='"+v_schema+"' AND `TABLE_NAME`='"+@cg_tn.tn+"'"
+          @results_cg_tn_cn = connection.execute(sql)
+          v_cols = [] 
+          @results_cg_tn_cn.each do |c|
+            v_cols.push(c[0])
+          end
+          v_key_type = "participant_id"
+          if v_cols.include?('participant_id') and v_cols.include?('reggieid_kc') 
+            v_key_type = "reggieid-kc-participant_id"
+          elsif v_cols.include?('participant_id') and v_cols.include?('wrapnum_kc') 
+            v_key_type = "wrapnum-kc-participant_id"
+          elsif v_cols.include?('participant_id') and v_cols.include?('adrcnum_kc') 
+            v_key_type = "adrcnum-kc-participant_id"
+          end
+        end
+
+        v_cg_tn_cn = CgTnCn.where("key_column_flag ='Y' and cg_tn_id in (?)",@cg_tn.id)
+        if v_key_type == "enrollment/sp"
+          v_shared = Shared.new # using some functions in the Shared model --- this is the same as in schedule file upload
+          sql = "update "+@cg_tn.tn+"_edit  t set t.enrollment_id = ( select e.id from enrollments e where e.enumber = replace(replace(replace(replace(t."+v_cg_tn_cn[0].cn+",'_v2',''),'_v3',''),'_v4',''),'_v5',''))"     
+          results = connection.execute(sql)
+          sql = "select distinct "+v_cg_tn_cn[0].cn+" from "+@cg_tn.tn+"_edit"
+          results = connection.execute(sql)
+          results.each do |r|
+            v_sp_id = v_shared.get_sp_id_from_subjectid_v(r[0])
+            if !v_sp_id.blank?
+              v_new_scan_procedure_id = v_sp_id.to_s
+              sql = "update "+@cg_tn.tn+"_edit  t set t.scan_procedure_id = "+v_sp_id.to_s+" where "+v_cg_tn_cn[0].cn+" ='"+r[0]+"'"
+              results = connection.execute(sql)
+            end
+            v_enrollment_id = v_shared.get_enrollment_id_from_subjectid_v(r[0])
+            if !v_enrollment_id.blank?
+              sql = "update "+@cg_tn.tn+"_edit  t set t.enrollment_id = "+v_enrollment_id.to_s+" where "+v_cg_tn_cn[0].cn+" ='"+r[0]+"'"
+              results = connection.execute(sql)
+            end
+          end
+        elsif v_key_type == "reggieid-kc-participant_id"
+          sql = "update "+@cg_tn.tn+"_edit  t set t.participant_id = ( select distinct p.id from participants p where p.reggieid = t."+v_cg_tn_cn[0].cn+")"
+          results = connection.execute(sql)
+        elsif v_key_type == "wrapnum-kc-participant_id"
+          sql = "update "+@cg_tn.tn+"_edit  t set t.participant_id = ( select distinct p.id from participants p where p.wrapnum = t."+v_cg_tn_cn[0].cn+")"
+          results = connection.execute(sql)
+        elsif v_key_type == "adrcnum-kc-participant_id"
+          sql = "update "+@cg_tn.tn+"_edit  t set t.participant_id = ( select distinct p.id from participants p where p.adrcnum = t."+v_cg_tn_cn[0].cn+")"
+           results = connection.execute(sql)
+        end
+
       if !params[:cg_edit_table].blank? and !params[:cg_edit_table][:key].blank?  
         # apply cg_edit to cg_data and refresh cg_edit , same as above, but no key array ---  made into a function  in shared model - needswitch to that function
         sql = "SELECT "+@cns.join(',') +",delete_key_flag FROM "+@cg_tn.tn+"_edit" 
         @edit_results = connection.execute(sql)         
         @edit_results.each do |r|
             v_key_array = []
+            v_key_replace_pipe_array = []
             v_cnt  = 0
             v_key =""
             v_delete_data_row="N"
@@ -1036,6 +1140,7 @@ class DataSearchesController < ApplicationController
               if @key_cns.include?(@cns[v_cnt]) # key column
                 v_key = v_key+@cns[v_cnt] +"^"+rc.to_s+"|"
                 v_key_array.push( @cns[v_cnt] +"='"+rc.to_s+"'")
+                v_key_replace_pipe_array.push( @cns[v_cnt] +"=replace('"+rc.to_s+"','|','')")
               end
               v_cnt = v_cnt + 1
             end  
@@ -1063,11 +1168,11 @@ class DataSearchesController < ApplicationController
             end
             if v_delete_data_row=="N"
                 if v_col_value_array.size > 0
-                  sql = "update "+@cg_tn.tn+" set "+v_col_value_array.join(',')+" where "+v_key_array.join(" and ")
+                  sql = "update "+@cg_tn.tn+" set "+v_col_value_array.join(',')+" where "+v_key_replace_pipe_array.join(" and ") #v_key_array.join(" and ")
                    @results = connection.execute(sql)
                  end
             else
-                sql = "delete from "+@cg_tn.tn+" where "+v_key_array.join(" and ")
+                sql = "delete from "+@cg_tn.tn+" where "+v_key_replace_pipe_array.join(" and ") #v_key_array.join(" and ")
                  @results = connection.execute(sql)
             end        
         end
@@ -1113,9 +1218,6 @@ class DataSearchesController < ApplicationController
       end
       sql = "SELECT distinct "+@cns_plus_tn.join(',')+" FROM appointments,scan_procedures,scan_procedures_vgroups,vgroups, "+ @cg_tn.tn+" where "+@conditions.uniq.join(' and ') # add in conditions from search # NEED TO ADD ACL   WHERE keys in ( select keys where vgroup_id in ( normal acl ))    
       # sql = "SELECT "+@cns.join(',')+" FROM "+@cg_tn.tn        
-
-
- 
     
       connection = ActiveRecord::Base.connection();
       @results = connection.execute(sql)
@@ -1139,7 +1241,6 @@ class DataSearchesController < ApplicationController
            v_cnt = v_cnt + 1
         end         
       end
-      
       
       # get current state of cg_edit
       sql = "SELECT "+@cns.join(',') +",delete_key_flag FROM "+@cg_tn.tn+"_edit" 
@@ -1172,13 +1273,13 @@ class DataSearchesController < ApplicationController
         end         
       end
         
-        
       end
       respond_to do |format|
           format.html {@v_key = Kaminari.paginate_array(@v_key).page(params[:page]).per(50)}
       end
       
     end
+
    # can not do a self join-- unless two copies of table - unique tn_id, tn_cn_id
    # this has glimpses of maddness and wonder
     def cg_search 

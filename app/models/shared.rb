@@ -36,6 +36,7 @@ class Shared  < ActionController::Base
   end
   
   def apply_cg_edits(p_tn)
+    # updates and deletes also happening toward end of data_searches_comntroller/ def cg_edit_table
     connection = ActiveRecord::Base.connection();
     if !p_tn.include?('cg_')  
         v_tn = "cg_"+p_tn.gsub(/\./,'_')  # made for the fs aseg, lh.aparc.arae, rh.aprac.area
@@ -74,6 +75,7 @@ class Shared  < ActionController::Base
     @edit_results = connection.execute(sql)         
     @edit_results.each do |r|
         v_key_array = []
+        v_key_replace_pipe_array = []
         v_cnt  = 0
         v_key =""
         v_delete_data_row="N"
@@ -81,6 +83,7 @@ class Shared  < ActionController::Base
           if @key_cns.include?(@cns[v_cnt]) # key column
             v_key = v_key+@cns[v_cnt] +"^"+rc.to_s+"|"
             v_key_array.push( @cns[v_cnt] +"='"+rc.to_s+"'")
+            v_key_replace_pipe_array.push( @cns[v_cnt] +"=replace('"+rc.to_s+"','|','')" )
           end
           v_cnt = v_cnt + 1
         end  
@@ -108,11 +111,31 @@ class Shared  < ActionController::Base
         end
         if v_delete_data_row=="N"
             if v_col_value_array.size > 0
-              sql = "update "+@cg_tn.tn+" set "+v_col_value_array.join(',')+" where "+v_key_array.join(" and ")
+              sql = "update "+@cg_tn.tn+" set "+v_col_value_array.join(',')+" where "+v_key_replace_pipe_array.join(" and ") #"+v_key_array.join(" and ")
                @results = connection.execute(sql)
+               #  do insert if an add-a-row - not in new and not a delete
+               sql_check_if_need_insert = "select count(*) from "+@cg_tn.tn+" where "+v_key_replace_pipe_array.join(" and ") #v_key_array.join(" and ")
+               @results = connection.execute(sql_check_if_need_insert )
+               if @results.first[0] < 1
+                    puts "EEEEE need to do insert"
+                    sql_insert = "insert into "+@cg_tn.tn+" select * from "+@cg_tn.tn+"_edit where "+v_key_array.join(" and ")
+
+                      sql = "SHOW COLUMNS FROM "+@cg_tn.tn #+"_new"
+                      connection = ActiveRecord::Base.connection();
+                      v_cols =[]
+                      v_cols_replace_pipe =[]
+                      @results = connection.execute(sql)
+                      @results.each do |c|
+                         v_cols.push(c[0])
+                         v_cols_replace_pipe.push("replace("+c[0]+",'|','')")
+                      end
+                      # this will get all the _edit into _new , but _edit is still ok
+                      v_sql = "insert into "+@cg_tn.tn+"("+v_cols.join(',')+")  select "+v_cols_replace_pipe.join(',')+" from "+@cg_tn.tn+"_edit where "+v_key_array.join(" and ")
+                      results = connection.execute(v_sql)
+               end
              end
         else
-            sql = "delete from "+@cg_tn.tn+" where "+v_key_array.join(" and ")
+            sql = "delete from "+@cg_tn.tn+" where "+v_key_replace_pipe_array.join(" and ") #v_key_array.join(" and ")
              @results = connection.execute(sql)
         end        
     end
@@ -10283,6 +10306,7 @@ sql = sql_base+"'"+enrollment[0].enumber+v_visit_number+"','"+v_secondary_key+"'
              "subjectid,secondary_key,enrollment_id, scan_procedure_id,source_file,volume1_gm,volume2_wm,volume3_csf,tissue_seg_dir_flag,rbm_icv,qc_tissueseg_gm_value,qc_tissueseg_wm_value,qc_tissueseg_csf_value",
                             "scan_procedure_id is not null  and enrollment_id is not null ",v_comment)
     @schedulerun.comment =("successful finish tissueseg_spm12_gm_wm_csf_volumes "+v_comment_warning+" "+v_comment[0..3900])
+    self.apply_cg_edits('cg_rbm_icv')
     if !v_comment.include?("ERROR")
           @schedulerun.status_flag ="Y"
     end

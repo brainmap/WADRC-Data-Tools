@@ -18,6 +18,13 @@ if @cg_tn_cn.size == 1 # only want to show if key is one column %>
      <table width="90%"><tr><td width="80%">&nbsp;&nbsp;&nbsp;&nbsp;</td><td> <b>Add a row - enter key value:</b> <%= @cg_tn_cn[0].common_name%><br><%= text_field :cg_edit_table, :add_a_row_key_value %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= f.submit "Add Row" %></td></tr>
 	 </table>
    <%end%>
+ <% elsif @cg_tn_cn.size == 2 and @cg_tn.secondary_key_flag == 'Y' %>
+   <%= form_for '/cg_edit_table'+params[:id] do |f| %>
+     <table width="90%"><tr><td width="80%">&nbsp;&nbsp;&nbsp;&nbsp;</td><td> <b>Add a row - enter key value:</b> <%= @cg_tn_cn[0].common_name%><br><%= text_field :cg_edit_table, :add_a_row_key_value %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+     	 Secondary Key<br><%= text_field :cg_edit_table, :add_a_row_secondary_key_value %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+     	<%= f.submit "Add Row" %></td></tr>
+	 </table>
+   <%end%>
 <% end %>
 <% # check if key is unique !!!!!!!!!!!%>
 <%= form_for '/cg_edit_table'+params[:id] do |f| %>
