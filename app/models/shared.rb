@@ -2786,46 +2786,46 @@ def  run_pet_av1451_harvest
                                 
                        end
                     end
-                    if File.file?(v_subjectid_tacs_file_name)
-                          # check column headers  
-                        v_cnt = 0
-                        v_header = ""
-                        File.open(v_subjectid_tacs_file_name,'r') do |file_a|
-                          while line = file_a.gets and v_cnt < 1
-                            if v_cnt < 1
-                              v_header = line.gsub("\n","")
-                            end
-                            v_cnt = v_cnt +1
-                          end
-                        end
-                       v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_tacs_cn_array.join(","))
-                       if v_return_flag == "N" 
-                               v_comment = v_file_path+"=>"+v_return_comment+" \n"+v_comment
-                               puts v_return_comment               
-                       else
-                        # insert v_cg_tn_tacs -- with _v# ?
-                           v_cnt = 0
-                          v_line_array = []
-                          File.open(v_subjectid_tacs_file_name,'r') do |file_a|
+                    # if File.file?(v_subjectid_tacs_file_name)
+                    #       # check column headers  
+                    #     v_cnt = 0
+                    #     v_header = ""
+                    #     File.open(v_subjectid_tacs_file_name,'r') do |file_a|
+                    #       while line = file_a.gets and v_cnt < 1
+                    #         if v_cnt < 1
+                    #           v_header = line.gsub("\n","")
+                    #         end
+                    #         v_cnt = v_cnt +1
+                    #       end
+                    #     end
+                    #    v_return_flag,v_return_comment  = v_shared.compare_file_header(v_header,v_tacs_cn_array.join(","))
+                    #    if v_return_flag == "N" 
+                    #            v_comment = v_file_path+"=>"+v_return_comment+" \n"+v_comment
+                    #            puts v_return_comment               
+                    #    else
+                    #     # insert v_cg_tn_tacs -- with _v# ?
+                    #        v_cnt = 0
+                    #       v_line_array = []
+                    #       File.open(v_subjectid_tacs_file_name,'r') do |file_a|
 
-                            while line = file_a.gets
-                              if v_cnt > 0 and v_cnt < 2
-                                sql = "insert into cg_pet_av1451_tacs_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,mri_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,"+v_tacs_column_list+" ) values('"+v_subjectid_tacs_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_mri_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_ecat_file.to_s+"',"
-                                v_line_array = []
-                                line.gsub(/\n/,"").split(",").each do |v|
-                                  v_line_array.push("'"+v+"'")
-                                end 
-                                sql = sql+v_line_array.join(",")
-                                sql = sql+")"
-                                ### skipping tacs.  results = connection.execute(sql)
-                              end   
-                              v_cnt = v_cnt + 1                 
-                            end
+                    #         while line = file_a.gets
+                    #           if v_cnt > 0 and v_cnt < 2
+                    #             sql = "insert into cg_pet_av1451_tacs_new(file_name,subjectid,enrollment_id,scan_procedure_id,secondary_key,pet_processing_date,mri_processing_date,pet_code_version,ecat_file_name,original_t1_mri_file_name,"+v_tacs_column_list+" ) values('"+v_subjectid_tacs_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.first.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+v_pet_processing_date.to_s+"','"+v_mri_processing_date.to_s+"','"+v_pet_code_version+"','"+v_original_t1_mri_file.to_s+"','"+v_ecat_file.to_s+"',"
+                    #             v_line_array = []
+                    #             line.gsub(/\n/,"").split(",").each do |v|
+                    #               v_line_array.push("'"+v+"'")
+                    #             end 
+                    #             sql = sql+v_line_array.join(",")
+                    #             sql = sql+")"
+                    #             ### skipping tacs.  results = connection.execute(sql)
+                    #           end   
+                    #           v_cnt = v_cnt + 1                 
+                    #         end
                             
-                          end
-                       end
+                    #       end
+                    #    end
                         
-                    end
+                    # end
                   end # end of skip flag
                 end # file loop  
               end # if pet_av1451 exists
