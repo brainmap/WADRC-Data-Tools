@@ -517,6 +517,7 @@ class PetscansController < ApplicationController
 
   # GET /petscans/1/edit
   def edit
+    #puts "edit (#{__LINE__}):"+ params.to_s
      @current_tab = "petscans"
      scan_procedure_array = []
      scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
@@ -559,6 +560,15 @@ class PetscansController < ApplicationController
     params[:date][:scanstartt][0]="1899"
     params[:date][:scanstartt][1]="12"
     params[:date][:scanstartt][2]="30"  
+
+
+    params[:date][:collection_time][0]="1899"
+    params[:date][:collection_time][1]="12"
+    params[:date][:collection_time][2]="30" 
+    params[:date][:collection_time_post][0]="1899"
+    params[:date][:collection_time_post][1]="12"
+    params[:date][:collection_time_post][2]="30" 
+
     if !params[:appointment]["#{'appointment_date'}(1i)"].blank? && !params[:appointment]["#{'appointment_date'}(2i)"].blank? && !params[:appointment]["#{'appointment_date'}(3i)"].blank?
          appointment_date = params[:appointment]["#{'appointment_date'}(1i)"] +"-"+params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")+"-"+params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
         #params[:date][:injectiont][0]=params[:appointment]["#{'appointment_date'}(1i)"]
@@ -774,45 +784,97 @@ class PetscansController < ApplicationController
                end
         end
 
-        # @appointment.save
+        # # @appointment.save
+        # if !params[:vital_id].blank?
+        #   @vital = Vital.find(params[:vital_id])
+        #   @vital.pulse = params[:pulse]
+        #   @vital.bp_systol = params[:bp_systol]
+        #   @vital.bp_diastol = params[:bp_diastol]
+        #   @vital.bloodglucose = params[:bloodglucose]
+        #   @vital.weight = params[:weight]
+        #   @vital.height = params[:height]
+        #   @vital.pre_post_flag  = 'pre'
+        #   @vital.save
+        # else
+        #   @vital = Vital.new
+        #   @vital.appointment_id = @petscan.appointment_id
+        #   @vital.pulse = params[:pulse]
+        #   @vital.bp_systol = params[:bp_systol]
+        #   @vital.bp_diastol = params[:bp_diastol]
+        #   @vital.bloodglucose = params[:bloodglucose]
+        #   @vital.weight = params[:weight]
+        #    @vital.height = params[:height]
+        #   @vital.pre_post_flag  = 'pre'
+        #   @vital.save      
+        # end     
+        # if !params[:vital_id_post].blank?
+        #   @vital = Vital.find(params[:vital_id_post])
+        #   @vital.pulse = params[:pulse_post]
+        #   @vital.bp_systol = params[:bp_systol_post]
+        #   @vital.bp_diastol = params[:bp_diastol_post]
+        #   @vital.pre_post_flag  = 'post'
+        #   @vital.save
+        # else
+        #   @vital = Vital.new
+        #   @vital.appointment_id = @petscan.appointment_id
+        #   @vital.pulse = params[:pulse_post]
+        #   @vital.bp_systol = params[:bp_systol_post]
+        #   @vital.bp_diastol = params[:bp_diastol_post]
+        #   @vital.pre_post_flag  = 'post'
+        #   @vital.save      
+        # end    
+
+        @vital = nil
         if !params[:vital_id].blank?
           @vital = Vital.find(params[:vital_id])
-          @vital.pulse = params[:pulse]
-          @vital.bp_systol = params[:bp_systol]
-          @vital.bp_diastol = params[:bp_diastol]
-          @vital.bloodglucose = params[:bloodglucose]
-          @vital.weight = params[:weight]
-          @vital.height = params[:height]
-          @vital.pre_post_flag  = 'pre'
-          @vital.save
         else
           @vital = Vital.new
           @vital.appointment_id = @petscan.appointment_id
-          @vital.pulse = params[:pulse]
-          @vital.bp_systol = params[:bp_systol]
-          @vital.bp_diastol = params[:bp_diastol]
-          @vital.bloodglucose = params[:bloodglucose]
-          @vital.weight = params[:weight]
-           @vital.height = params[:height]
-          @vital.pre_post_flag  = 'pre'
-          @vital.save      
-        end     
+        end
+        @vital.pulse = params[:pulse]
+        @vital.bp_systol = params[:bp_systol]
+        @vital.bp_diastol = params[:bp_diastol]
+        @vital.respiratory_rate = params[:respiratory_rate]
+        @vital.bloodglucose = params[:bloodglucose]
+        @vital.weight = params[:weight]
+        @vital.height = params[:height]
+        @vital.weight_units = params[:weight_units]
+        @vital.height_units = params[:height_units]
+        @vital.pre_post_flag = 'pre'
+
+        collection_time_dt = nil
+        if !params[:date][:collection_time][0].blank? && !params[:date][:collection_time][1].blank? && !params[:date][:collection_time][2].blank? && !params[:date][:collection_time][3].blank? && !params[:date][:collection_time][4].blank?
+          params[:date][:collection_time][3]  = ((params[:date][:collection_time][3].to_i)+v_offset).to_s
+          collection_time =  params[:date][:collection_time][0]+"-"+params[:date][:collection_time][1]+"-"+params[:date][:collection_time][2]+" "+params[:date][:collection_time][3]+":"+params[:date][:collection_time][4]
+          collection_time_dt = DateTime.strptime(collection_time, "%Y-%m-%d %H:%M")
+        end
+        @vital.collection_time = collection_time_dt
+
+        @vital.save   
+
+        @vital_post = nil
         if !params[:vital_id_post].blank?
-          @vital = Vital.find(params[:vital_id_post])
-          @vital.pulse = params[:pulse_post]
-          @vital.bp_systol = params[:bp_systol_post]
-          @vital.bp_diastol = params[:bp_diastol_post]
-          @vital.pre_post_flag  = 'post'
-          @vital.save
+          @vital_post = Vital.find(params[:vital_id_post])
         else
-          @vital = Vital.new
-          @vital.appointment_id = @petscan.appointment_id
-          @vital.pulse = params[:pulse_post]
-          @vital.bp_systol = params[:bp_systol_post]
-          @vital.bp_diastol = params[:bp_diastol_post]
-          @vital.pre_post_flag  = 'post'
-          @vital.save      
-        end    
+          @vital_post = Vital.new
+          @vital_post.appointment_id = @petscan.appointment_id
+        end
+        @vital_post.pulse = params[:pulse_post]
+        @vital_post.bp_systol = params[:bp_systol_post]
+        @vital_post.bp_diastol = params[:bp_diastol_post]
+        @vital_post.respiratory_rate = params[:respiratory_rate_post]
+        @vital_post.pre_post_flag = 'post'
+
+        collection_time_post_dt = nil
+        if !params[:date][:collection_time_post][0].blank? && !params[:date][:collection_time_post][1].blank? && !params[:date][:collection_time_post][2].blank? && !params[:date][:collection_time_post][3].blank? && !params[:date][:collection_time_post][4].blank?
+          params[:date][:collection_time_post][3]  = ((params[:date][:collection_time_post][3].to_i)+v_offset).to_s
+          collection_time_post =  params[:date][:collection_time_post][0]+"-"+params[:date][:collection_time_post][1]+"-"+params[:date][:collection_time_post][2]+" "+params[:date][:collection_time_post][3]+":"+params[:date][:collection_time_post][4]
+          collection_time_post_dt = DateTime.strptime(collection_time_post, "%Y-%m-%d %H:%M") #scanstarttime
+        end
+        @vital_post.collection_time = collection_time_post_dt
+
+        @vital_post.save  
+    
         format.html { redirect_to(@petscan, :notice => 'Petscan was successfully created.') }
         format.xml  { render :xml => @petscan, :status => :created, :location => @petscan }
       else
@@ -825,7 +887,10 @@ class PetscansController < ApplicationController
 
   # PUT /petscans/1
   # PUT /petscans/1.xml
-  def update    
+  def update
+    #puts "update (#{__LINE__}):"+ params.to_s
+
+
     v_offset = Time.zone_offset('CST') 
     v_offset = (v_offset*(-1))/(60*60) # mess with storing date as local in db - but shifting to utc
     scan_procedure_array = []
@@ -851,12 +916,21 @@ class PetscansController < ApplicationController
                                       and scan_procedure_id in (?))", scan_procedure_array).find(params[:id])
                                       
     appointment_date = nil
+
+    #we have to do this weird date init thing for out datetimes, so that strptime doesn't change our times. it's weird.
+
       params[:date][:injectiont][0]="1899"
       params[:date][:injectiont][1]="12"
       params[:date][:injectiont][2]="30"
       params[:date][:scanstartt][0]="1899"
       params[:date][:scanstartt][1]="12"
       params[:date][:scanstartt][2]="30" 
+      params[:date][:collection_time][0]="1899"
+      params[:date][:collection_time][1]="12"
+      params[:date][:collection_time][2]="30" 
+      params[:date][:collection_time_post][0]="1899"
+      params[:date][:collection_time_post][1]="12"
+      params[:date][:collection_time_post][2]="30" 
 
     if !params[:appointment]["#{'appointment_date'}(1i)"].blank? && !params[:appointment]["#{'appointment_date'}(2i)"].blank? && !params[:appointment]["#{'appointment_date'}(3i)"].blank?
          appointment_date = params[:appointment]["#{'appointment_date'}(1i)"] +"-"+params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")+"-"+params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
@@ -887,44 +961,56 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
       end
 
     # ok to update vitals even if other update fail
+    @vital = nil
     if !params[:vital_id].blank?
       @vital = Vital.find(params[:vital_id])
-      @vital.pulse = params[:pulse]
-      @vital.bp_systol = params[:bp_systol]
-      @vital.bp_diastol = params[:bp_diastol]
-      @vital.bloodglucose = params[:bloodglucose]
-      @vital.weight = params[:weight]
-      @vital.height = params[:height]
-      @vital.pre_post_flag = 'pre'
-      @vital.save
     else
       @vital = Vital.new
       @vital.appointment_id = @petscan.appointment_id
-      @vital.pulse = params[:pulse]
-      @vital.bp_systol = params[:bp_systol]
-      @vital.bp_diastol = params[:bp_diastol]
-      @vital.bloodglucose = params[:bloodglucose]
-      @vital.weight = params[:weight]
-      @vital.height = params[:height]
-      @vital.pre_post_flag = 'pre'
-      @vital.save      
     end
+    @vital.pulse = params[:pulse]
+    @vital.bp_systol = params[:bp_systol]
+    @vital.bp_diastol = params[:bp_diastol]
+    @vital.respiratory_rate = params[:respiratory_rate]
+    @vital.bloodglucose = params[:bloodglucose]
+    @vital.weight = params[:weight]
+    @vital.height = params[:height]
+    @vital.weight_units = params[:weight_units]
+    @vital.height_units = params[:height_units]
+    @vital.pre_post_flag = 'pre'
+
+    collection_time_dt = nil
+    if !params[:date][:collection_time][0].blank? && !params[:date][:collection_time][1].blank? && !params[:date][:collection_time][2].blank? && !params[:date][:collection_time][3].blank? && !params[:date][:collection_time][4].blank?
+      params[:date][:collection_time][3]  = ((params[:date][:collection_time][3].to_i)+v_offset).to_s
+      collection_time =  params[:date][:collection_time][0]+"-"+params[:date][:collection_time][1]+"-"+params[:date][:collection_time][2]+" "+params[:date][:collection_time][3]+":"+params[:date][:collection_time][4]
+      collection_time_dt = DateTime.strptime(collection_time, "%Y-%m-%d %H:%M")
+    end
+    @vital.collection_time = collection_time_dt
+
+    @vital.save   
+
+    @vital_post = nil
     if !params[:vital_id_post].blank?
-      @vital = Vital.find(params[:vital_id_post])
-      @vital.pulse = params[:pulse_post]
-      @vital.bp_systol = params[:bp_systol_post]
-      @vital.bp_diastol = params[:bp_diastol_post]
-      @vital.pre_post_flag = 'post'
-      @vital.save
+      @vital_post = Vital.find(params[:vital_id_post])
     else
-      @vital = Vital.new
-      @vital.appointment_id = @petscan.appointment_id
-      @vital.pulse = params[:pulse_post]
-      @vital.bp_systol = params[:bp_systol_post]
-      @vital.bp_diastol = params[:bp_diastol_post]
-      @vital.pre_post_flag = 'post'
-      @vital.save      
+      @vital_post = Vital.new
+      @vital_post.appointment_id = @petscan.appointment_id
     end
+    @vital_post.pulse = params[:pulse_post]
+    @vital_post.bp_systol = params[:bp_systol_post]
+    @vital_post.bp_diastol = params[:bp_diastol_post]
+    @vital_post.respiratory_rate = params[:respiratory_rate_post]
+    @vital_post.pre_post_flag = 'post'
+
+    collection_time_post_dt = nil
+    if !params[:date][:collection_time_post][0].blank? && !params[:date][:collection_time_post][1].blank? && !params[:date][:collection_time_post][2].blank? && !params[:date][:collection_time_post][3].blank? && !params[:date][:collection_time_post][4].blank?
+      params[:date][:collection_time_post][3]  = ((params[:date][:collection_time_post][3].to_i)+v_offset).to_s
+      collection_time_post =  params[:date][:collection_time_post][0]+"-"+params[:date][:collection_time_post][1]+"-"+params[:date][:collection_time_post][2]+" "+params[:date][:collection_time_post][3]+":"+params[:date][:collection_time_post][4]
+      collection_time_post_dt = DateTime.strptime(collection_time_post, "%Y-%m-%d %H:%M") #scanstarttime
+    end
+    @vital_post.collection_time = collection_time_post_dt
+
+    @vital_post.save      
     
      if !params[:petfile].blank? and !params[:petfile][:id].blank?
       params[:petfile][:id].each do |pf_id|

@@ -79,45 +79,61 @@
     <%=  RedCloth.new(@petscan.petscan_note.blank? ? "" : @petscan.petscan_note).to_html.html_safe 
             %>
   </div>
-<% @vital =  Vital.where("appointment_id in (?) and pre_post_flag ='pre' ",@petscan.appointment_id).first
- if !@vital.blank?
-	 vital = Vital.find(@vital.id) 
-	if ( ((vital.pulse.blank?? 911 :vital.pulse) < 911) or
-		      ((vital.bp_systol.blank?? 911 :vital.bp_systol) < 911 ) or 
-		        ( (vital.bp_diastol.blank?? 911 :vital.bp_diastol) < 911) or 
-		           ((vital.bloodglucose.blank?? 911 :vital.bloodglucose) < 911) or
-                 !vital.weight.blank? or !vital.height.blank? )%>
-	
+
+<%  vital =  Vital.where("appointment_id in (?) and pre_post_flag ='pre' ",@petscan.appointment_id).first
+    vital_post =  Vital.where("appointment_id in (?) and pre_post_flag ='post' ",@petscan.appointment_id).first 
+
+    if !vital.nil? or !vital_post.nil?
+
+    %>
 <h4>Vitals:</h4>
-<div id="vital" class="sticky">
-     <%= vital.pulse==991 ?  "" :("Pre-Pulse: "+vital.pulse.to_s+"<br>").html_safe %>
-     <%= vital.bp_systol==991 ?  "" :("Pre-BP Systol: "+vital.bp_systol.to_s+"<br>").html_safe %>
-     <%= vital.bp_diastol==991 ?  "" :("Pre-BP Diastol: "+vital.bp_diastol.to_s+"<br>").html_safe %>
-     <%= vital.bloodglucose==991 ?  "" :("Blood Glucose: "+vital.bloodglucose.to_s+"<br>").html_safe %>
-     <%= vital.weight==991 ?  "" :("Weight lbs: "+vital.weight.to_s+"<br>").html_safe %>
-     <%= vital.height==991 ?  "" :("Height inches: "+vital.height.to_s+"<br>").html_safe %>
-</div>
-
-<%    end 
-  end %>
-<% @vital =  Vital.where("appointment_id in (?) and pre_post_flag ='post' ",@petscan.appointment_id).first
- if !@vital.blank?
-   vital = Vital.find(@vital.id) 
-  if ( ((vital.pulse.blank?? 911 :vital.pulse) < 911) or
-          ((vital.bp_systol.blank?? 911 :vital.bp_systol) < 911 ) or 
-            ( (vital.bp_diastol.blank?? 911 :vital.bp_diastol) < 911) or 
-               ((vital.bloodglucose.blank?? 911 :vital.bloodglucose) < 911) or
-                 !vital.weight.blank? or !vital.height.blank? )%>
-  
 
 <div id="vital" class="sticky">
-     <%= vital.pulse==991 ?  "" :("Post-Pulse: "+vital.pulse.to_s+"<br>").html_safe %>
-     <%= vital.bp_systol==991 ?  "" :("Post-BP Systol: "+vital.bp_systol.to_s+"<br>").html_safe %>
-     <%= vital.bp_diastol==991 ?  "" :("Post-BP Diastol: "+vital.bp_diastol.to_s+"<br>").html_safe %>
+  <table>
+
+    <tr>
+      <th></th>
+      <th style='text-align:left;'>Pre-scan</th>
+      <th style='text-align:left;'>Post-scan</th>
+    </tr>
+    <tr>
+      <td></td>
+      <td colspan=2><hr></td>
+    </tr>
+    <tr>
+      <td style='text-align:right;width:150px;padding-right:20px;'>Pulse</td>
+      <td style='text-align:left;width:100px;'><%= vital.pulse==991 ?  "" :vital.pulse.to_s.html_safe %></td>
+      <td style='text-align:left;width:100px;'><%= vital_post.pulse==991 ?  "" :vital_post.pulse.to_s.html_safe %></td>
+    </tr>
+    <tr>
+      <td style='text-align:right;padding-right:20px;'>BP Systol</td>
+      <td style='text-align:left;'><%= vital.bp_systol==991 ?  "" :vital.bp_systol.to_s.html_safe %></td>
+      <td style='text-align:left;'><%= vital_post.bp_systol==991 ?  "" :vital_post.bp_systol.to_s.html_safe %></td>
+    </tr>
+    <tr>
+      <td style='text-align:right;padding-right:20px;'>BP Diastol</td>
+      <td style='text-align:left;'><%= vital.bp_diastol==991 ?  "" :vital.bp_diastol.to_s.html_safe %></td>
+      <td style='text-align:left;'><%= vital_post.bp_diastol==991 ?  "" :vital_post.bp_diastol.to_s.html_safe %></td>
+    </tr>
+    <tr>
+      <td style='text-align:right;padding-right:20px;'>Blood Glucose</td>
+      <td style='text-align:left;'><%= vital.bloodglucose==991 ?  "" :vital.bloodglucose.to_s.html_safe %></td>
+    </tr>
+    <tr>
+      <td style='text-align:right;padding-right:20px;'>Weight</td>
+      <td style='text-align:left;'><%= vital.weight==991 || vital.weight.blank? ?  "" :"#{vital.weight.to_s.html_safe} #{vital.weight_units.to_s.html_safe}" %></td>
+    </tr>
+    <tr>
+      <td style='text-align:right;padding-right:20px;'>Height</td>
+      <td style='text-align:left;'><%= vital.height==991 || vital.height.blank? ?  "" : "#{vital.height.to_s.html_safe} #{vital.height_units.to_s.html_safe}" %></td>
+    </tr>
+
+
+  </table>
 </div>
 
-<%    end 
-  end %>
+<% end %>
+
 
 </div>
 
