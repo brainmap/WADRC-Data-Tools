@@ -28,11 +28,6 @@ v_autodetect =  [["AutoDetect File On","On"],["AutoDetect File Off","Off"]]
 
 
         <div class='form_group' style='padding-bottom:10px;'>
-          <div class='form_label'>Petscan Entered</div>
-          <div class='form_field'><%= f.select :enteredpetscan, options_for_select(v_yes_no_display, @petscan.enteredpetscan), {:prompt => 'Select if the petscan has been entered.'} %></div>
-        </div>
-
-        <div class='form_group' style='padding-bottom:10px;'>
           <div class='form_label'>Petscan Completed</div>
           <div class='form_field'><%= select :vgroup, :transfer_pet, ["no", "yes", "n/a"] %></div>
         </div>
