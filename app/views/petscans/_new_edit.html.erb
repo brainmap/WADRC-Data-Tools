@@ -32,9 +32,14 @@ v_autodetect =  [["AutoDetect File On","On"],["AutoDetect File Off","Off"]]
           <div class='form_field'><%= select :vgroup, :transfer_pet, ["no", "yes", "n/a"] %></div>
         </div>
 
-        <% if !params[:new_appointment_vgroup_id].blank? 
-          hidden_field_tag('new_appointment_vgroup_id', params[:new_appointment_vgroup_id])
-          end %>
+        <% 
+
+          puts "from #{__LINE__}:: #{params[:new_appointment_vgroup_id]} is vgroup id"
+          if !params[:new_appointment_vgroup_id].blank?
+
+            puts "#{params[:new_appointment_vgroup_id]} is vgroup id!!!" %>
+        <%=    hidden_field_tag('new_appointment_vgroup_id', params[:new_appointment_vgroup_id]) %>
+        <%  end %>
 
         <div class='form_group' style='padding-bottom:10px;'>
           <div class='form_label'>Date</div>
