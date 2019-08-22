@@ -36,10 +36,12 @@ module ImageDatasetsHelper
 
     if list.blank?
       output = "<span class='warning'>Warning: No files in this directory on vtrak!</span>"
-    else
+    elsif list.length > 20
       output = list.first(10).join(" ")
       output << '<br>...<br>'
       output << list.last(10).join(" ")
+    else
+      output = list.join(" ")
     end
     
     return output.html_safe
