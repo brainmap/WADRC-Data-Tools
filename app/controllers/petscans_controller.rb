@@ -598,6 +598,7 @@ class PetscansController < ApplicationController
 
     
     vgroup_id =params[:new_appointment_vgroup_id]
+    puts "#{vgroup_id} id vgroup id"
     @vgroup = Vgroup.where("vgroups.id in (select vgroup_id from scan_procedures_vgroups where scan_procedure_id in (?))", scan_procedure_array).find(vgroup_id)
     @appointment = Appointment.new
     @appointment.vgroup_id = vgroup_id
@@ -732,7 +733,7 @@ class PetscansController < ApplicationController
                              v_dicom_scan_date = @petfile_header['0008,0020'][:value].to_s  # Study Date
                              # raise warnings
 
-                           elsif  v_dicom_scanner_name.include?("Biograph Horizon")
+                           #elsif  v_dicom_scanner_name.include?("Biograph Horizon")
 
 
                            end
@@ -844,9 +845,9 @@ class PetscansController < ApplicationController
 
         collection_time_dt = nil
         if !params[:date][:collection_time][0].blank? && !params[:date][:collection_time][1].blank? && !params[:date][:collection_time][2].blank? && !params[:date][:collection_time][3].blank? && !params[:date][:collection_time][4].blank?
-          params[:date][:collection_time][3]  = ((params[:date][:collection_time][3].to_i)+v_offset).to_s
+          #params[:date][:collection_time][3]  = ((params[:date][:collection_time][3].to_i)+v_offset).to_s
           collection_time =  params[:date][:collection_time][0]+"-"+params[:date][:collection_time][1]+"-"+params[:date][:collection_time][2]+" "+params[:date][:collection_time][3]+":"+params[:date][:collection_time][4]
-          collection_time_dt = DateTime.strptime(collection_time, "%Y-%m-%d %H:%M")
+          collection_time_dt = Time.strptime(collection_time, "%Y-%m-%d %H:%M")
         end
         @vital.collection_time = collection_time_dt
 
@@ -867,14 +868,14 @@ class PetscansController < ApplicationController
 
         collection_time_post_dt = nil
         if !params[:date][:collection_time_post][0].blank? && !params[:date][:collection_time_post][1].blank? && !params[:date][:collection_time_post][2].blank? && !params[:date][:collection_time_post][3].blank? && !params[:date][:collection_time_post][4].blank?
-          params[:date][:collection_time_post][3]  = ((params[:date][:collection_time_post][3].to_i)+v_offset).to_s
+          #params[:date][:collection_time_post][3]  = ((params[:date][:collection_time_post][3].to_i)+v_offset).to_s
           collection_time_post =  params[:date][:collection_time_post][0]+"-"+params[:date][:collection_time_post][1]+"-"+params[:date][:collection_time_post][2]+" "+params[:date][:collection_time_post][3]+":"+params[:date][:collection_time_post][4]
-          collection_time_post_dt = DateTime.strptime(collection_time_post, "%Y-%m-%d %H:%M") #scanstarttime
+          collection_time_post_dt = Time.strptime(collection_time_post, "%Y-%m-%d %H:%M") #scanstarttime
         end
         @vital_post.collection_time = collection_time_post_dt
 
         @vital_post.save  
-    
+
         format.html { redirect_to(@petscan, :notice => 'Petscan was successfully created.') }
         format.xml  { render :xml => @petscan, :status => :created, :location => @petscan }
       else
@@ -944,18 +945,18 @@ class PetscansController < ApplicationController
 
       injectiontime = nil
       if !params[:date][:injectiont][0].blank? && !params[:date][:injectiont][1].blank? && !params[:date][:injectiont][2].blank? && !params[:date][:injectiont][3].blank? && !params[:date][:injectiont][4].blank?
-      params[:date][:injectiont][3]  = ((params[:date][:injectiont][3].to_i)+v_offset).to_s
-injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]+"-"+params[:date][:injectiont][2]+" "+params[:date][:injectiont][3]+":"+params[:date][:injectiont][4]
-      params[:petscan][:injecttiontime] =  DateTime.strptime(injectiontime, "%Y-%m-%d %H:%M") #injectiontime
+      #params[:date][:injectiont][3]  = ((params[:date][:injectiont][3].to_i)+v_offset).to_s
+      injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]+"-"+params[:date][:injectiont][2]+" "+params[:date][:injectiont][3]+":"+params[:date][:injectiont][4]
+      params[:petscan][:injecttiontime] =  Time.strptime(injectiontime, "%Y-%m-%d %H:%M") #injectiontime
       else
       params[:petscan][:injecttiontime] =  ""
        end
      
         scanstarttime = nil
       if !params[:date][:scanstartt][0].blank? && !params[:date][:scanstartt][1].blank? && !params[:date][:scanstartt][2].blank? && !params[:date][:scanstartt][3].blank? && !params[:date][:scanstartt][4].blank?
-      params[:date][:scanstartt][3]  = ((params[:date][:scanstartt][3].to_i)+v_offset).to_s
-  scanstarttime =  params[:date][:scanstartt][0]+"-"+params[:date][:scanstartt][1]+"-"+params[:date][:scanstartt][2]+" "+params[:date][:scanstartt][3]+":"+params[:date][:scanstartt][4]
-       params[:petscan][:scanstarttime] = DateTime.strptime(scanstarttime, "%Y-%m-%d %H:%M") #scanstarttime
+       #params[:date][:scanstartt][3]  = ((params[:date][:scanstartt][3].to_i)+v_offset).to_s
+       scanstarttime =  params[:date][:scanstartt][0]+"-"+params[:date][:scanstartt][1]+"-"+params[:date][:scanstartt][2]+" "+params[:date][:scanstartt][3]+":"+params[:date][:scanstartt][4]
+       params[:petscan][:scanstarttime] = Time.strptime(scanstarttime, "%Y-%m-%d %H:%M") #scanstarttime
      else
         params[:petscan][:scanstarttime] = ""
       end
@@ -981,9 +982,9 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
 
     collection_time_dt = nil
     if !params[:date][:collection_time][0].blank? && !params[:date][:collection_time][1].blank? && !params[:date][:collection_time][2].blank? && !params[:date][:collection_time][3].blank? && !params[:date][:collection_time][4].blank?
-      params[:date][:collection_time][3]  = ((params[:date][:collection_time][3].to_i)+v_offset).to_s
+      #params[:date][:collection_time][3]  = ((params[:date][:collection_time][3].to_i)+v_offset).to_s
       collection_time =  params[:date][:collection_time][0]+"-"+params[:date][:collection_time][1]+"-"+params[:date][:collection_time][2]+" "+params[:date][:collection_time][3]+":"+params[:date][:collection_time][4]
-      collection_time_dt = DateTime.strptime(collection_time, "%Y-%m-%d %H:%M")
+      collection_time_dt = Time.strptime(collection_time, "%Y-%m-%d %H:%M")
     end
     @vital.collection_time = collection_time_dt
 
@@ -1004,9 +1005,9 @@ injectiontime =  params[:date][:injectiont][0]+"-"+params[:date][:injectiont][1]
 
     collection_time_post_dt = nil
     if !params[:date][:collection_time_post][0].blank? && !params[:date][:collection_time_post][1].blank? && !params[:date][:collection_time_post][2].blank? && !params[:date][:collection_time_post][3].blank? && !params[:date][:collection_time_post][4].blank?
-      params[:date][:collection_time_post][3]  = ((params[:date][:collection_time_post][3].to_i)+v_offset).to_s
+      #params[:date][:collection_time_post][3]  = ((params[:date][:collection_time_post][3].to_i)+v_offset).to_s
       collection_time_post =  params[:date][:collection_time_post][0]+"-"+params[:date][:collection_time_post][1]+"-"+params[:date][:collection_time_post][2]+" "+params[:date][:collection_time_post][3]+":"+params[:date][:collection_time_post][4]
-      collection_time_post_dt = DateTime.strptime(collection_time_post, "%Y-%m-%d %H:%M") #scanstarttime
+      collection_time_post_dt = Time.strptime(collection_time_post, "%Y-%m-%d %H:%M") #scanstarttime
     end
     @vital_post.collection_time = collection_time_post_dt
 

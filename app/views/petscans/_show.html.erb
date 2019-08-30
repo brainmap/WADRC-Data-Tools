@@ -101,6 +101,11 @@
       <td colspan=2><hr></td>
     </tr>
     <tr>
+      <td style='text-align:right;width:150px;padding-right:20px;'>Collection Time</td>
+      <td style='text-align:left;width:100px;'><%= vital.collection_time.nil? ?  "" : vital.collection_time.strftime("%H:%M").to_s.html_safe %></td>
+      <td style='text-align:left;width:100px;'><%= (vital_post.nil? or vital_post.collection_time.nil? ) ?  "" : vital_post.collection_time.strftime("%H:%M").to_s.html_safe %></td>
+    </tr>
+    <tr>
       <td style='text-align:right;width:150px;padding-right:20px;'>Pulse</td>
       <td style='text-align:left;width:100px;'><%= vital.pulse==991 ?  "" :vital.pulse.to_s.html_safe %></td>
       <td style='text-align:left;width:100px;'><%= (vital_post.nil? or vital_post.pulse==991) ?  "" : "#{vital_post.pulse.to_s.html_safe}" %></td>
