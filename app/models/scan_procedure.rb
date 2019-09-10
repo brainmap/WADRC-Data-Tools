@@ -23,4 +23,11 @@ class ScanProcedure < ActiveRecord::Base
 
   	return out
   end
+
+  def protocol
+    proto = Protocol.where("id = ?",protocol_id).first
+
+    proto
+  end
+
 end
