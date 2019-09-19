@@ -5,24 +5,6 @@ require 'dicom'
 # sort a list of files in a directory, because we would prefer to use peer corrected
 # files (their filenames have "PU"), and would prefer to discourage "ORIG" files.
 
-def path_sort(a,b)
-  if !a.scan(/PU/).blank? and !b.scan(/PU/).blank?
-    return 0
-  elsif !a.scan(/ORIG/).blank? and !b.scan(/ORIG/).blank?
-    return 0
-  elsif !a.scan(/PU/).blank?
-    return -1
-  elsif !a.scan(/ORIG/).blank?
-    return 1
-  elsif !b.scan(/PU/).blank?
-    return 1
-  elsif !b.scan(/ORIG/).blank?
-    return -1
-  else
-    return 0
-  end
-end
-
 class Petscan < ActiveRecord::Base
   belongs_to :appointment 
   has_many :petfiles,:class_name =>"Petfile", :dependent => :destroy  
@@ -627,8 +609,12 @@ puts "fffff !v_pet_target_path.blank?"
       v_path_array = pet_path.split('/')
 
       if File.exist?(pet_path) and !File.directory?(pet_path) and pet_path.end_with?(".v")
-        v_subjectid_array = v_path_array[-1].split("_")
-        v_subjectid = v_subjectid_array[0].downcase
+        # v_subjectid_array = v_path_array[-1].split("_")
+        # v_subjectid = v_subjectid_array[0].downcase
+
+        all_enums = related_appointment.vgroup.enrollments.map{|enrl| enrl.enumber}
+        intersection = all_enums & v_path_array #this should always just be one enrollment number or nothing.
+        v_subjectid = intersection.first
 
       #others are paths to a directory under raw. these should have a subject id as a directory
       # in the middle of their path
@@ -723,6 +709,24 @@ puts "fffff !v_pet_target_path.blank?"
     return false
   end
 
+  def path_sort(a,b)
+    if !a.scan(/PU/).blank? and !b.scan(/PU/).blank?
+      return 0
+    elsif !a.scan(/ORIG/).blank? and !b.scan(/ORIG/).blank?
+      return 0
+    elsif !a.scan(/PU/).blank?
+      return -1
+    elsif !a.scan(/ORIG/).blank?
+      return 1
+    elsif !b.scan(/PU/).blank?
+      return 1
+    elsif !b.scan(/ORIG/).blank?
+      return -1
+    else
+      return 0
+    end
+  end
+
   def get_o_acpc_file
     v_base_path = Shared.get_base_path()
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
@@ -750,9 +754,11 @@ puts "fffff !v_pet_target_path.blank?"
         return true
       elsif filename.include?('CUBE-T2')
         return true
-      elsif filename.include?('CUBE-Flair') or filename.include?('CUBE-FLAIR')
+      elsif filename.downcase.include?('cube-flair') or filename.downcase.include?('cube_flair') or filename.downcase.include?('flair_cube')
         return true
       end
+    elsif filename.downcase.include?('cube-flair') or filename.downcase.include?('cube_flair') or filename.downcase.include?('flair_cube')
+      return true
     end
     return false
   end
@@ -860,6 +866,36 @@ puts "fffff !v_pet_target_path.blank?"
     return false
   end
 
+  def get_recent_o_acpc_visit(v_mri_visits)
+    v_base_path = Shared.get_base_path()
+    v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+
+    v_mri_visits.each do |mri_visit|
+      if mri_visit.path.include?("adcp")
+        next
+      end
+
+      v_raw_path_array = (mri_visit.path).gsub(v_base_path+"/raw/","").split("/")
+      if v_raw_path_array.include?("mri")
+        v_other_mri_unknown = v_preprocessed_path+v_raw_path_array[0]+"/"+(v_raw_path_array[2].split("_"))[0]+"/unknown"
+      else
+        v_other_mri_unknown = v_preprocessed_path+v_raw_path_array[0]+"/"+(v_raw_path_array[1].split("_"))[0]+"/unknown"
+      end
+
+      if File.directory?(v_other_mri_unknown)
+        Dir.entries(v_other_mri_unknown).each do |f|
+          if f.start_with?("o") and f.end_with?(".nii")
+            return mri_visit
+          end
+        end
+      end
+
+    end
+
+    #we didn't find a file, so
+    return false
+  end
+
   def recent_multispectral_file_exists?(v_mri_visits)
     v_base_path = Shared.get_base_path()
     v_preprocessed_path = v_base_path+"/preprocessed/visits/"
@@ -914,6 +950,35 @@ puts "fffff !v_pet_target_path.blank?"
         Dir.entries(v_other_mri_unknown).each do |f|
           if appropriate_T2?(f)
             return "#{v_other_mri_unknown}/#{f}"
+          end
+        end
+      end
+    end
+
+    #we didn't find a file, so
+    return false
+  end
+
+  def get_recent_multispectral_visit(v_mri_visits)
+    v_base_path = Shared.get_base_path()
+    v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+
+    v_mri_visits.each do |mri_visit|
+      if mri_visit.path.include?("adcp")
+        next
+      end
+
+      v_raw_path_array = (mri_visit.path).gsub(v_base_path+"/raw/","").split("/")
+      if v_raw_path_array.include?("mri")
+        v_other_mri_unknown = v_preprocessed_path+v_raw_path_array[0]+"/"+(v_raw_path_array[2].split("_"))[0]+"/unknown"
+      else
+        v_other_mri_unknown = v_preprocessed_path+v_raw_path_array[0]+"/"+(v_raw_path_array[1].split("_"))[0]+"/unknown"
+      end
+
+      if File.directory?(v_other_mri_unknown)
+        Dir.entries(v_other_mri_unknown).each do |f|
+          if appropriate_T2?(f)
+            return mri_visit
           end
         end
       end

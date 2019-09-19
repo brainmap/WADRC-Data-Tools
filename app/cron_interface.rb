@@ -955,7 +955,30 @@ vgroup_20_total,vgroup_20_fraction_of_20,vgroup_5_total,vgroup_5_fraction_of_5 )
            @schedulerun.status_flag="E"
            @schedulerun.save
        end   
+
+
+
+    elsif v_value_1 == "parallel_pet_mk6240_process"
+     job = Pet::ParallelPetProcess.new
+     params = Pet::ParallelPetProcess.mk6240_params
+     job.run(params)
+    
+    elsif v_value_1 == "parallel_pet_pib_dvr_process"
+     job = Pet::ParallelPetProcess.new
+     params = Pet::ParallelPetProcess.pib_dvr_params
+     job.run(params)
+    
+    elsif v_value_1 == "parallel_pet_pib_then_mk"
+     job1 = Pet::ParallelPetProcess.new
+     job1_params = Pet::ParallelPetProcess.pib_dvr_params
+     job1.run(job1_params)
+
+     job2 = Pet::ParallelPetProcess.new
+     job2_params = Pet::ParallelPetProcess.mk6240_params
+     job2.run(job2_params)
+
     end
+
   end
   
 end

@@ -25,20 +25,30 @@ class PandaMailer < ActionMailer::Base
   
   def schedule_notice( p_subject,email_params)
     email_params.to_options! 
-      mail(
-        :to => email_params[:send_to],
-        :subject => p_subject
-      )
-    end
+    mail(
+      :to => email_params[:send_to],
+      :subject => p_subject
+    )
+  end
 
-      def send_email( p_subject,email_params,p_body)
+  def send_email( p_subject,email_params,p_body)
     email_params.to_options! 
-      mail(
-        :to => email_params[:send_to],
-        :subject => p_subject,
-        :body => p_body
-      )
-    end
+    mail(
+      :to => email_params[:send_to],
+      :subject => p_subject,
+      :body => p_body
+    )
+  end
+
+  def send_email_with_csv( p_subject,email_params,p_body,csv_attachment, csv_attachment_name="report.csv")
+    email_params.to_options! 
+    attachments[csv_attachment_name] = {mime_type: 'text/csv', content: csv_attachment}
+    mail(
+      :to => email_params[:send_to],
+      :subject => p_subject,
+      :body => p_body
+    )
+  end
   
   def self.smtp_credentialed?
     !ActionMailer::Base.smtp_settings[:user_name].blank? && !ActionMailer::Base.smtp_settings[:password].blank?
