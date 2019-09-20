@@ -24,16 +24,12 @@ class Pet::ParallelPetProcess < Pet::PetBase
                  base_path: Shared.get_base_path(), 
                  computer: "kanga",
                  comment: [],
-                 dry_run: false, #a dry run will generate our driver csv (with a "_dry_run" suffix), but not actuall run processing
+                 dry_run: false,
                  tracer_id: "11",
                  comment_warning: "",
                  method: "suvr",
                  exclude_sp_pet_array: [-1,100]
                 }
-
-      #Setting dry_run = true will generate our driver csv (with a "_dry_run" suffix), and send out the "Can't Process PET Report"
-      # but won't actually run processing.
-
       params
     end
     def self.pib_dvr_params
@@ -42,16 +38,27 @@ class Pet::ParallelPetProcess < Pet::PetBase
                  base_path: Shared.get_base_path(), 
                  computer: "kanga",
                  comment: [],
-                 dry_run: true, #a dry run will generate our driver csv (with a "_dry_run" suffix), but not actuall run processing
+                 dry_run: true,
                  tracer_id: "1",
                  comment_warning: "",
                  method: "dvr",
                  exclude_sp_pet_array: [-1,80,115,100] # excluding adcp
                 }
 
-      #Setting dry_run = true will generate our driver csv (with a "_dry_run" suffix), and send out the "Can't Process PET Report"
-      # but won't actually run processing.
-
+      params
+    end
+    def self.av45_params
+      # - set up params
+      params = { schedule_name: 'parallel_pet_av45_process',
+                 base_path: Shared.get_base_path(), 
+                 computer: "kanga",
+                 comment: [],
+                 dry_run: true,
+                 tracer_id: "6",
+                 comment_warning: "",
+                 method: "suvr",
+                 exclude_sp_pet_array: [-1,100]
+                }
       params
     end
 
@@ -75,7 +82,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
       v_comment = ""
       v_comment_warning ="" 
 
-      v_days_mri_pet_diff_limit = "365"
+      v_days_mri_pet_diff_limit = "730"
       v_exclude_sp_mri_array = [-1,100,80,76,78]
       v_exclude_sp_pet_array = [-1,100]
 
