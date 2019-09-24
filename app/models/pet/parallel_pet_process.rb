@@ -82,7 +82,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
       v_comment = ""
       v_comment_warning ="" 
 
-      v_days_mri_pet_diff_limit = "730"
+      v_days_mri_pet_diff_limit = "365"
       v_exclude_sp_mri_array = [-1,100,80,76,78]
       v_exclude_sp_pet_array = [-1,100]
 
