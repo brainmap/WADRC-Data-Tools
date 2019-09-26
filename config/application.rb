@@ -29,6 +29,7 @@ module WADRCDataTools
 
     #also, the extensions that used to be in metamri, and now stay in Panda "for real life"
     config.autoload_paths += Dir[File.join(Rails.root, "lib", "extensions.rb")].each {|l| require l }
+    config.autoload_paths += Dir[File.join(Rails.root, "lib", "exceptions.rb")].each {|l| require l }
     
     # Only load the plugins named here, in the order given (default is alphabetical).
     # :all can be used as a placeholder for all plugins not explicitly named.
