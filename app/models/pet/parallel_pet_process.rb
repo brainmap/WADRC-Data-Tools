@@ -38,7 +38,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
                  base_path: Shared.get_base_path(), 
                  computer: "kanga",
                  comment: [],
-                 dry_run: true,
+                 dry_run: false,
                  tracer_id: "1",
                  comment_warning: "",
                  method: "dvr",
