@@ -82,7 +82,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
       v_comment = ""
       v_comment_warning ="" 
 
-      v_days_mri_pet_diff_limit = "365"
+      v_days_mri_pet_diff_limit = "730"
       v_exclude_sp_mri_array = [-1,100,80,76,78]
       v_exclude_sp_pet_array = [-1,100]
 
@@ -328,29 +328,14 @@ class Pet::ParallelPetProcess < Pet::PetBase
       v_send_email = false
       v_email_body = ""
 
-      # The "Can't Process PET Report". Organize the errored petscans by scan procedure, and list each subject. 
-      # "This list represents PET records that have never been processed before, but coudln't be for some reason."
-      # "No ACPC T1" and "No multispectral" -> check for the latest of these, and show how recent / if never.
-      # "No ECATs" / "Too many ECATs" -> show the path where these are / should be.
-      # "Too many ACPC T1s" -> show the path where these should be
-      # "Black Swans" -> It's unclear why this subject failed. Make sure Bill knows.
-      # "Bad uptake duration"
-
       pet_mri_overdue = []
-
-      report_body = "The Can't Process PET Report\n\n"
-      report_body += "This list represents PET records that have never been processed before, but coudln't be for some reason.\n\n"
 
       v_error_report.keys.each do |scan_procedure|
         v_error_report[scan_procedure].keys.each do |subject_id|
-          report_body += "#{scan_procedure} #{subject_id} (participant id: #{v_error_report[scan_procedure][subject_id]["participant_id"]})\n"
-
+          
           if v_error_report[scan_procedure][subject_id].keys.include?("no_recent_acpc")
             pet_appt = v_error_report[scan_procedure][subject_id]["no_recent_acpc"]
 
-            report_body += "\t- No recent ACPC T1 (o*.nii)\n"
-            #let's try to find the most recent MRI. If there is one, how many days old & where.
-            #if there isn't one, say that, too.
             all_mri_visits = Visit.where("visits.appointment_id in (select appointments.id from appointments join vgroups on appointments.vgroup_id = vgroups.id 
                   where vgroups.participant_id in (?)
                   and vgroups.transfer_mri = 'yes' and appointments.appointment_type = 'mri'
@@ -363,14 +348,8 @@ class Pet::ParallelPetProcess < Pet::PetBase
               o_acpc_file_path = pet_appt.get_recent_o_acpc_file(all_mri_visits)
               visit_date = o_acpc_file_visit.appointment.appointment_date
               pet_appt_date = pet_appt.related_appointment.appointment_date
-              if pet_appt_date < visit_date
-                #the pet_appt happend before the MRI, which is unusual, and we should probably update the processing code.
-                report_body += "\t\t- The participant's last ACPC T1 was #{(Date.today - visit_date).to_i} days ago. The PET happened #{(pet_appt_date - visit_date).to_i} days BEFORE the MRI?! This is weird, and we should probaby update processing code to handle it.\n"
+              
 
-              else
-                report_body += "\t\t- The participant's last ACPC T1 was #{(Date.today - visit_date).to_i} days ago, #{(pet_appt_date - visit_date).to_i} days between MRI and PET.\n"
-              end
-              report_body += "\t\t  #{o_acpc_file_path}\n"
               pet_mri_overdue << {:participant_id => v_error_report[scan_procedure][subject_id]["participant_id"], 
                                   :scan_procedure => scan_procedure, 
                                   :enumber => subject_id, 
@@ -381,7 +360,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
                                   :pet_mri_time_gap => (pet_appt_date - visit_date).to_i
                                   }
             else
-              report_body += "\t\t- Can't find a correctly named ACPC T1 for this participant!\n"
+
               pet_mri_overdue << {:participant_id => v_error_report[scan_procedure][subject_id]["participant_id"], 
                                   :scan_procedure => scan_procedure, 
                                   :enumber => subject_id, 
@@ -393,71 +372,10 @@ class Pet::ParallelPetProcess < Pet::PetBase
                                   }
             end
           end
-
-          if v_error_report[scan_procedure][subject_id].keys.include?("no_recent_multispectral")
-            pet_appt = v_error_report[scan_procedure][subject_id]["no_recent_multispectral"]
-
-            report_body += "\t- No recent Multispectral/T2\n"
-            #let's try to find the most recent MRI. If there is one, how many days old & where.
-            #if there isn't one, say that, too.
-            all_mri_visits = Visit.where("visits.appointment_id in (select appointments.id from appointments join vgroups on appointments.vgroup_id = vgroups.id 
-                  where vgroups.participant_id in (?)
-                  and vgroups.transfer_mri = 'yes' and appointments.appointment_type = 'mri'
-                  and vgroups.id not in 
-                  (select scan_procedures_vgroups.vgroup_id from scan_procedures_vgroups 
-                     where scan_procedures_vgroups.scan_procedure_id in (?)) )", pet_appt.related_participant.id,v_exclude_sp_mri_array).order("date desc")
-
-            if pet_appt.recent_multispectral_file_exists?(all_mri_visits)
-              multispectral_file_visit = pet_appt.get_recent_multispectral_visit(all_mri_visits)
-              multispectral_file_path = pet_appt.get_recent_multispectral_file(all_mri_visits)
-              visit_date = multispectral_file_visit.appointment.appointment_date
-              pet_appt_date = pet_appt.related_appointment.appointment_date
-              if pet_appt_date < visit_date
-                #the pet_appt happend before the MRI, which is unusual, and we should probably update the processing code.
-                report_body += "\t\t- The participant's last appropriate T2 was #{(Date.today - visit_date).to_i} days ago. The PET happened #{(pet_appt_date - visit_date).to_i} days BEFORE the MRI?! This is weird, and we should probaby update processing code to handle it.\n"
-              else
-                report_body += "\t\t- The participant's last appropriate T2 was #{(Date.today - visit_date).to_i} days ago, #{(pet_appt_date - visit_date).to_i} days between MRI and PET.\n"
-              end
-              report_body += "\t\t  #{multispectral_file_path}\n"
-            else
-              report_body += "\t\t- Can't find a correctly named/appropriate T2 for this participant!\n"
-            end
-          end
-
-          if v_error_report[scan_procedure][subject_id].keys.include?("bad_uptake_duration")
-            pet_appt = v_error_report[scan_procedure][subject_id]["bad_uptake_duration"]
-
-            report_body += "\t- Bad uptake duration on an SUVR\n"
-            report_body += "\t\t- The participant's uptake duration was #{v_error_report[scan_procedure][subject_id]["uptake_duration"]} seconds.\n"
-          end
-
-          if v_error_report[scan_procedure][subject_id].keys.include?("no_ecat_files")
-            pet_appt = v_error_report[scan_procedure][subject_id]["no_ecat_files"]
-
-            report_body += "\t- There weren't any ECAT files in this PET scan's directory.\n"
-            report_body += "\t\t (#{v_error_report[scan_procedure][subject_id]["no_ecat_files_message"]})\n"
-          end
-
-          if v_error_report[scan_procedure][subject_id].keys.include?("too_many_ecat_files")
-            pet_appt = v_error_report[scan_procedure][subject_id]["too_many_ecat_files"]
-
-            report_body += "\t- There was more than one ECAT file in this PET scan's directory, and it should probably be processed by hand.\n"
-            report_body += "\t\t (#{v_error_report[scan_procedure][subject_id]["too_many_ecat_files_message"]})\n"
-          end
-
-          if v_error_report[scan_procedure][subject_id].keys.include?("black_swan")
-            pet_appt = v_error_report[scan_procedure][subject_id]["black_swan"]
-
-            report_body += "\t- Could not process this PET scan for an uncategorized reason.\n"
-            report_body += "\t\t (#{v_error_report[scan_procedure][subject_id]["black_swan_message"]})\n"
-          end
-
-          report_body += "\n\n"
-
         end
       end
 
-      #send the report
+      #write out the time gap failures
 
       headers = ["participant id", "PET scan procedure", "enumber", "age at appointment", "closest MRI scan procedure", "closest MRI enumber", "closest MRI age at appointment", "PET / MRI time gap (days)"]
 
@@ -469,15 +387,6 @@ class Pet::ParallelPetProcess < Pet::PetBase
           csv << [line[:participant_id], line[:scan_procedure], line[:enumber], line[:age_at_appt], line[:closest_mri_protocol], line[:closest_mri_enumber], line[:closest_mri_age_at_appt], line[:pet_mri_time_gap]]
         end
       end
-
-      attachment_csv = File.open(pet_failed_csv, 'r').read
-
-      v_subject = "The Can't Process PET Report, #{Date.today}"
-      v_schedule_owner_email_array.each do |e|
-        PandaMailer.send_email_with_csv(v_subject,{:send_to => e},report_body, attachment_csv, "PET_MRI_time_gap.csv").deliver
-      end
-
-      # here ends "The Can't Process PET Report".
 
       if p[:dry_run]
 
