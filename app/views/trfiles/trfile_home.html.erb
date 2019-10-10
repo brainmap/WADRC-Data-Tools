@@ -41,7 +41,7 @@
       <%= f.select(:image_id, @processedimages.collect {|p| [ p.file_type+" - "+p.file_path, p.id ] },  { :include_blank => "Select a processed image", :selected => @trfileimage_imgs},{ :multiple => true, :size => 5 } )%>
 
       <% if !@pet_time_gaps.nil? %>
-        <small><b>Time Gaps:</b></small>
+        <br><small><b>Time Gaps:</b></small>
         <% @pet_time_gaps.keys.each do |key| %>
           <small <% if @pet_time_gaps[key] > 364 %> class="problem-orange-circle" <% end %> ><%= key %>: <%= @pet_time_gaps[key] %> days </small> <br>
         <% end %>
