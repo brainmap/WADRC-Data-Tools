@@ -134,8 +134,11 @@ class SharedController < ActionController::Base
             results = connection.execute(sql)
             results.each do |r|
               v_sp_id = v_shared.get_sp_id_from_subjectid_v(r[0])
+              v_enrollment_id = v_shared.get_enrollment_id_from_subjectid_v(r[0])
               if !v_sp_id.blank?
                 sql = "update "+(@schedule.target_table).strip+"_new  t set t.scan_procedure_id = "+v_sp_id.to_s+" where "+v_table_key_source+" ='"+r[0]+"'"
+                results = connection.execute(sql)
+                sql = "update "+(@schedule.target_table).strip+"_new  t set t.enrollment_id = "+v_enrollment_id.to_s+" where "+v_table_key_source+" ='"+r[0]+"'"
                 results = connection.execute(sql)
               end
             end

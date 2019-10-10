@@ -4089,7 +4089,7 @@ puts "global update"
                    elsif v_valid_value_array[0] == "reggieid"
                      @col_valid_hash[v_column_name] = nil
                      v_sql_not_valid = "select count(*),"+v_column_name+" from "+@v_source_schema+"."+@v_source_up_table_name+" where "+v_column_name+"
-                                not in (select reggie_id from participants) group by "+v_column_name+" order by "+v_column_name
+                                not in (select reggieid from participants) group by "+v_column_name+" order by "+v_column_name
                      @results_not_valid = connection.execute(v_sql_not_valid)
                      @col_not_valid_hash[v_column_name] = @results_not_valid 
 

@@ -349,3 +349,36 @@ pre {
 }
 
 
+line.ct-target-line {
+  stroke:blue;
+}
+
+
+@keyframes up-right {
+    0% {
+        opacity: .25
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: .25;
+    }
+}
+
+.problem-orange-circle {
+}
+
+.problem-orange-circle:after {
+  display: inline-block;
+  vertical-align: middle;
+  content: "\2B24";
+    opacity: .25;
+    color: #EA7317;
+    -webkit-animation: up-right 1.2s infinite;
+    -moz-animation: up-right 1.2s infinite;
+    -o-animation: up-right 1.2s infinite;
+    animation: up-right 1.2s infinite;
+
+}
+

@@ -700,6 +700,7 @@ v_composite_value = v_composite_value + "
             #NEED TO LIMIT TO THIS VISIT
              #  image_dataset vs petfile -- but if using a oT1 should still link up - need all oT1 harvested
              @processedimages = []
+             @pet_time_gaps = {}
              #@processedimages_pet = {}
              #@processedimages_img = {}
 
@@ -820,6 +821,49 @@ v_composite_value = v_composite_value + "
               # add to collection @processedimages
                 if @processedimages_pet.count > 0
                  @processedimages_pet.each do |pi_pet|
+
+                    #there should be 2 source images for a processed PET image like this
+                    # => one or many ECAT files that we'll store as just one Petfile record, which has a parent vgroup
+                    # => one ACPC corrected T1, which also has a parent vgroup
+                    # we can use these vgroups to show the time gap between the two procedures, which can be useful for QC
+
+                    sources = pi_pet.processedimagessources
+
+                    pet_vgroup = nil
+                    mri_vgroup = nil
+
+                    sources.each do |source|
+                      puts "looking at source image #{source.id} (#{source.source_image_type})"
+                      case source.source_image_type
+                      when 'petfile'
+                        pet_vgroup = source.related_vgroup
+                      when 'processedimage'
+                        # we should really chech that this is an 'o_acpc T1'
+                        proc_source = Processedimage.find(source.source_image_id)
+
+                        if proc_source.file_type == 'o_acpc T1'
+                          mri_vgroup = proc_source.related_vgroup
+                        end
+                      end
+                    end
+
+                    if pet_vgroup.nil?
+                      puts "pet_vgroup is nil"
+                    else
+                      puts "pet_vgroup is #{pet_vgroup.id}"
+                    end
+
+                    if mri_vgroup.nil?
+                      puts "mri_vgroup is nil"
+                    else
+                      puts "mri_vgroup is #{mri_vgroup.id}"
+                    end
+
+                    if !pet_vgroup.nil? and !mri_vgroup.nil?
+                      time_gap = (pet_vgroup.vgroup_date - mri_vgroup.vgroup_date).to_i
+                      @pet_time_gaps["#{pi_pet.file_type} #{pi_pet.file_name}"] = time_gap
+                    end
+
                     @processedimages.push(pi_pet)
                  end
                 end
