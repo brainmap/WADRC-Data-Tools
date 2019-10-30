@@ -150,7 +150,7 @@ class ImageDataset < ActiveRecord::Base
     v_call = "dcmj2pnm -v +Wi 1 --write-png #{file_to_scan} "+thumbnail_path_expanded
     v_results = %x[#{v_call}]
     puts "results= "+v_results
-    puts "dicom_file= "+dicom_file.to_s
+    puts "dicom_file= "+file_to_scan
     puts "output_file= "+thumbnail_path_expanded
 
     raise(ScriptError, "Error creating thumbnail #{thumbnail_path_expanded}") unless File.exist?(thumbnail_path_expanded)
