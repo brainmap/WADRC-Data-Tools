@@ -123,7 +123,7 @@ class ImageDataset < ActiveRecord::Base
   
   def create_thumbnail
     # Only available for Dicoms - Done through glob.
-    raise StandardError, "#{scanned_file} is not a DICOM image." if dicom?
+    raise StandardError, "#{scanned_file} is not a DICOM image." if !dicom?
     if File.exist?(File.join(path, scanned_file))
       original_zip_status = false
       file_to_scan = File.join(path, scanned_file)
@@ -147,7 +147,7 @@ class ImageDataset < ActiveRecord::Base
     
     dcm = DICOM::DObject.read(file_to_scan)
     raise ScriptError, "Could not read dicom #{file_to_scan}" unless dcm.read_success
-    v_call = "dcmj2pnm -v +Wi 1 --write-png "+lc.to_s+" "+thumbnail_path_expanded
+    v_call = "dcmj2pnm -v +Wi 1 --write-png #{file_to_scan} "+thumbnail_path_expanded
     v_results = %x[#{v_call}]
     puts "results= "+v_results
     puts "dicom_file= "+dicom_file.to_s
