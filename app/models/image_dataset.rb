@@ -133,12 +133,35 @@ class ImageDataset < ActiveRecord::Base
     else
       raise StandardError, "Could not find file #{File.join(path, scanned_file)} on filesystem."
     end
-    ds = RawImageDataset.new(path, RawImageFile.new(file_to_scan))  
-    png_path = RawImageDatasetThumbnail.new(ds).create_thumbnail 
-    tf = File.open(png_path)  
-    self.thumbnail = tf   
-    raise(StandardError, "Could not create thumbnail for #{File.join(path, scanned_file)}") unless File.exists?(png_path)
-    return png_path
+    #ds = RawImageDataset.new(path, RawImageFile.new(file_to_scan))  
+    #png_path = RawImageDatasetThumbnail.new(ds).create_thumbnail 
+
+    #first, get the output path, and check that everything exists
+    #if not, raise an error
+
+    output_directory = Dir.mktmpdir
+    default_name = self.series_description.escape_filename
+    thumbnail_path = File.join(output_directory, default_name + '.png')
+
+    thumbnail_path_expanded = File.expand_path(thumbnail_path)
+    
+    dcm = DICOM::DObject.read(file_to_scan)
+    raise ScriptError, "Could not read dicom #{file_to_scan}" unless dcm.read_success
+    v_call = "dcmj2pnm -v +Wi 1 --write-png "+lc.to_s+" "+thumbnail_path_expanded
+    v_results = %x[#{v_call}]
+    puts "results= "+v_results
+    puts "dicom_file= "+dicom_file.to_s
+    puts "output_file= "+thumbnail_path_expanded
+
+    raise(ScriptError, "Error creating thumbnail #{thumbnail_path_expanded}") unless File.exist?(thumbnail_path_expanded)
+
+    tf = File.open(thumbnail_path_expanded)
+    self.thumbnail = tf
+    return thumbnail_path_expanded
+  end
+
+  def thumbnail_exists?
+    return FileTest.file? self.thumbnail.path
   end
   
   def dicom?
