@@ -280,6 +280,18 @@ v_user = v_user.gsub("\n","")
      job2_params = Pet::ParallelPetProcess.mk6240_params
      job2.run(job2_params)
 
+  elsif v_value_1 == "pcvipr_ica_harvest"
+
+    job = Pcvipr::PcviprIcaHarvest.new
+    params = Pcvipr::PcviprIcaHarvest.default_params
+    job.run(params)
+
+  elsif v_value_1 == "pcvipr_ica_process"
+
+    job = Pcvipr::PcviprIcaProcess.new
+    params = Pcvipr::PcviprIcaProcess.default_params
+    job.run(params)
+
    elsif v_value_1 == "pet_pib_dvr_process"
       v_shared = Shared.new
       v_shared.run_pet_pib_dvr_process()
