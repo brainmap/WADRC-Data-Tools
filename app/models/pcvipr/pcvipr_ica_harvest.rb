@@ -169,7 +169,7 @@ class Pcvipr::PcviprIcaHarvest < Pcvipr::PcviprBase
                                        v_tractiontypes.each do |tat|
                                            v_tredit_action = TreditAction.where("tredit_id in (?)",v_tredit_id).where("tractiontype_id in (?)", tat.id)
                                            if tat.id == 79 # load
-                                              puts "v_tredit_action is #{v_tredit_action[0].value.to_s}"
+                                              #puts "v_tredit_action is #{v_tredit_action[0].value.to_s}"
                                                if  !v_tredit_action[0].nil? and !v_tredit_action[0].value.nil? and v_tredit_action[0].value == "1"
                                                    v_second_viewer_flag = "Y"
                                                end
@@ -191,7 +191,7 @@ class Pcvipr::PcviprIcaHarvest < Pcvipr::PcviprBase
                                    File.open(v_file_path,'r') do |file_a|
                                    while line = file_a.gets
                                      if v_cnt > 0
-                                        puts "column list: #{v_column_list}, file_path: #{v_file_path.split("/").last}, subject id #{v_subjectid}"
+                                        #puts "column list: #{v_column_list}, file_path: #{v_file_path.split("/").last}, subject id #{v_subjectid}"
                                         sql = "insert into cg_pcvipr_ica_qmeans_values_new ( file_name,subjectid, "+v_column_list+" ) values('"+v_file_path.split("/").last+"','"+v_subjectid+"',"
                                         v_line_array = []
                                         line.gsub(/\n/,"").split(",").each do |v|
@@ -441,6 +441,66 @@ class Pcvipr::PcviprIcaHarvest < Pcvipr::PcviprBase
 end
 
 #   CREATE TABLE `cg_pcvipr_ica_qmeans_values_new` (
+#   `subjectid` varchar(50) DEFAULT NULL,
+#   `enrollment_id` int(11) DEFAULT NULL,
+#   `scan_procedure_id` int(11) DEFAULT NULL,
+#   `secondary_key` varchar(200) DEFAULT NULL,
+# `regionname` varchar(50) DEFAULT NULL,
+# `centerline_point` varchar(30) DEFAULT NULL,
+# `frame0` varchar(30) DEFAULT NULL,
+# `frame1` varchar(30) DEFAULT NULL,
+# `frame2` varchar(30) DEFAULT NULL,
+# `frame3` varchar(30) DEFAULT NULL,
+# `frame4` varchar(30) DEFAULT NULL,
+# `frame5` varchar(30) DEFAULT NULL,
+# `frame6` varchar(30) DEFAULT NULL,
+# `frame7` varchar(30) DEFAULT NULL,
+# `frame8` varchar(30) DEFAULT NULL,
+# `frame9` varchar(30) DEFAULT NULL,
+# `frame10` varchar(30) DEFAULT NULL,
+# `frame11` varchar(30) DEFAULT NULL,
+# `frame12` varchar(30) DEFAULT NULL,
+# `frame13` varchar(30) DEFAULT NULL,
+# `frame14` varchar(30) DEFAULT NULL,
+# `frame15` varchar(30) DEFAULT NULL,
+# `frame16` varchar(30) DEFAULT NULL,
+# `frame17` varchar(30) DEFAULT NULL,
+# `frame18` varchar(30) DEFAULT NULL,
+# `frame19` varchar(30) DEFAULT NULL,
+#   `file_name` varchar(200) DEFAULT NULL
+# ) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+#   CREATE TABLE `cg_pcvipr_ica_qmeans_values_old` (
+#   `subjectid` varchar(50) DEFAULT NULL,
+#   `enrollment_id` int(11) DEFAULT NULL,
+#   `scan_procedure_id` int(11) DEFAULT NULL,
+#   `secondary_key` varchar(200) DEFAULT NULL,
+# `regionname` varchar(50) DEFAULT NULL,
+# `centerline_point` varchar(30) DEFAULT NULL,
+# `frame0` varchar(30) DEFAULT NULL,
+# `frame1` varchar(30) DEFAULT NULL,
+# `frame2` varchar(30) DEFAULT NULL,
+# `frame3` varchar(30) DEFAULT NULL,
+# `frame4` varchar(30) DEFAULT NULL,
+# `frame5` varchar(30) DEFAULT NULL,
+# `frame6` varchar(30) DEFAULT NULL,
+# `frame7` varchar(30) DEFAULT NULL,
+# `frame8` varchar(30) DEFAULT NULL,
+# `frame9` varchar(30) DEFAULT NULL,
+# `frame10` varchar(30) DEFAULT NULL,
+# `frame11` varchar(30) DEFAULT NULL,
+# `frame12` varchar(30) DEFAULT NULL,
+# `frame13` varchar(30) DEFAULT NULL,
+# `frame14` varchar(30) DEFAULT NULL,
+# `frame15` varchar(30) DEFAULT NULL,
+# `frame16` varchar(30) DEFAULT NULL,
+# `frame17` varchar(30) DEFAULT NULL,
+# `frame18` varchar(30) DEFAULT NULL,
+# `frame19` varchar(30) DEFAULT NULL,
+#   `file_name` varchar(200) DEFAULT NULL
+# ) ENGINE=MyISAM DEFAULT CHARSET=latin1
+
+#   CREATE TABLE `cg_pcvipr_ica_qmeans_values` (
 #   `subjectid` varchar(50) DEFAULT NULL,
 #   `enrollment_id` int(11) DEFAULT NULL,
 #   `scan_procedure_id` int(11) DEFAULT NULL,
