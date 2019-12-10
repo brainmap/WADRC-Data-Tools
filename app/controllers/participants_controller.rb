@@ -167,7 +167,7 @@ class ParticipantsController < ApplicationController
              v_lumbar_puncture_array.push(v_value)
          elsif appt[1] == "mri" and !appt[7].blank?
              v_visit = Visit.find(appt[7])
-             v_value = "-  "+v_visit.date.to_s+"     "+v_visit.scan_procedures.collect {|sp| sp.codename }.join(", ")+" with enumber "+ v_visit.enrollments.collect {|e|e.enumber }.join(", ")+"  [scanner "+v_visit.scanner_source+"   "+v_visit.mri_manufacturer_model_name+" ]"
+             v_value = "-  "+v_visit.date.to_s+"     "+v_visit.scan_procedures.collect {|sp| sp.codename }.join(", ")+" with enumber "+ v_visit.enrollments.collect {|e|e.enumber }.join(", ")+", #{v_visit.rmr},  [scanner "+v_visit.scanner_source+"   "+v_visit.mri_manufacturer_model_name+" ]"
              v_mri_array.push(v_value)
          elsif appt[1] == "neuropsych"
             v_value = "-  "+appt[2].to_s+"     "+v_vgroup_sp_hash[appt[0]]+"\n"
