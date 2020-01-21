@@ -178,7 +178,7 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
           Aspiration
           <%= select :lumbarpuncture, :lpmethod_aspiration, ["no", "yes", "n/a"] %>
           Amount Collected
-          <%= f.select :lpmethod_aspiration_collected, options_for_select(0...26, @lumbarpuncture.lpmethod_gravity_collected),{:prompt => 'Select ....'} %><small> ml</small><br>
+          <%= f.select :lpmethod_aspiration_collected, options_for_select(0...26, @lumbarpuncture.lpmethod_aspiration_collected),{:prompt => 'Select ....'} %><small> ml</small><br>
           <br>
 
       </div>

@@ -21,13 +21,13 @@ class Lumbarpuncture < ActiveRecord::Base
       :LP_Fast_Completed => completedlpfast == 1 ? "Yes" : "No",
      :LP_Fast_Total_time_range => lpfasttotaltime_range.nil?  ? nil : lpfasttotaltime_range,
      :LP_time_last_intake => lptimelastintake.nil?  ? lptimelastintake_min.nil? ? nil : lptimelastintake.to_s+" hrs : "+lptimelastintake_min.to_s+" mins" :  lptimelastintake.to_s+" hrs : "+lptimelastintake_min.to_s+" mins" ,
-     :LP_time_last_intake_unknown => lptimelastintake_unk == "2" ? "Unknown" : nil,
+     :LP_time_last_intake_unknown => lptimelastintake_unk.to_i == 2 ? "Unknown" : nil,
 
-     :Radiculopathy_complications => lpcomplications_radiculopathy == 1 ? "Yes" : "No" ,
-     :Vasovagal_complications => lpcomplications_vasovagal == 1 ? "Yes" : "No" ,
-     :Pain_complications => lpcomplications_pain == 1 ? "Yes" : "No" ,
-     :Headache_complications => lpcomplications_headache == 1 ? "Yes" : "No" ,
-     :Other_complications => lpcomplications_other == 1 ? "Yes" : "No" ,
+     :Radiculopathy_complications => lpcomplications_radiculopathy.to_i == 1 ? "Yes" : "No" ,
+     :Vasovagal_complications => lpcomplications_vasovagal.to_i == 1 ? "Yes" : "No" ,
+     :Pain_complications => lpcomplications_pain.to_i == 1 ? "Yes" : "No" ,
+     :Headache_complications => lpcomplications_headache.to_i == 1 ? "Yes" : "No" ,
+     :Other_complications => lpcomplications_other.to_i == 1 ? "Yes" : "No" ,
      :Other_comlicatoins_description => lpcomplications_other_specify,
 
       :CSF_Amount_collected =>  lpamountcollected.nil? ? nil : lpamountcollected.to_s+" ml"  ,
@@ -39,12 +39,12 @@ class Lumbarpuncture < ActiveRecord::Base
      :Needle_length => lpneedle_length,
      :Needle_type => lpneedletype,
 
-     :Sitting_position? => lpposition_sitting == 1 ? "Yes" : "No" ,
-     :Decubitus_position? => lpposition_decubitus == 1 ? "Yes" : "No" ,
+     :Sitting_position? => lpposition_sitting.to_i == 1 ? "Yes" : "No" ,
+     :Decubitus_position? => lpposition_decubitus.to_i == 1 ? "Yes" : "No" ,
 
-     :Extracted_by_gravity? => lpmethod_gravity == 1 ? "Yes" : "No" ,
+     :Extracted_by_gravity? => lpmethod_gravity.to_i == 1 ? "Yes" : "No" ,
      :Amount_extracted_by_gravity => lpmethod_gravity_collected.nil? ? nil : lpmethod_gravity_collected.to_s+" ml"  ,
-     :Extracted_by_aspiration? => lpmethod_aspiration == 1 ? "Yes" : "No" ,
+     :Extracted_by_aspiration? => lpmethod_aspiration.to_i == 1 ? "Yes" : "No" ,
      :Amount_extracted_by_aspiration => lpmethod_aspiration_collected.nil? ? nil : lpmethod_aspiration_collected.to_s+" ml"  ,
 
     :Significant_post_LP_Headache => followupheadache,
@@ -65,10 +65,10 @@ class Lumbarpuncture < ActiveRecord::Base
 
       :LP_Successful => lpsuccess == 1 ? "Yes" : lpsuccess == 0 ? "No" : "Unknown",
 
-    :If_unsuccessful_LP_Unable_to_access_CSF => lpsuccess == 1 ? nil : lpcsfunsuccessful_noaccess == 1 ? "Yes" : nil,
-    :If_unsuccessful_Participant_Pain_discomfort => lpsuccess == 1 ? nil : lpcsfunsuccessful_pain == 1 ? "Yes" : nil,
-    :If_unsuccessful_Participant_vasoval => lpsuccess == 1 ? nil : lpcsfunsuccessful_vasovagal == 1 ? "Yes" : nil,
-    :If_unsuccessful_other => lpsuccess == 0 ? lpcsfunsuccessful_other == 1  ? lpcsfunsuccessful_other_specify.nil? ? nil : lpcsfunsuccessful_other_specify : nil : nil,
+    :If_unsuccessful_LP_Unable_to_access_CSF => lpsuccess.to_i == 1 ? nil : lpcsfunsuccessful_noaccess.to_i == 1 ? "Yes" : nil,
+    :If_unsuccessful_Participant_Pain_discomfort => lpsuccess.to_i == 1 ? nil : lpcsfunsuccessful_pain.to_i == 1 ? "Yes" : nil,
+    :If_unsuccessful_Participant_vasoval => lpsuccess.to_i == 1 ? nil : lpcsfunsuccessful_vasovagal.to_i == 1 ? "Yes" : nil,
+    :If_unsuccessful_other => lpsuccess.to_i == 0 ? lpcsfunsuccessful_other.to_i == 1  ? lpcsfunsuccessful_other_specify.nil? ? nil : lpcsfunsuccessful_other_specify : nil : nil,
 
       # :LP_Abnormality_Found =>  lpabnormality == 1 ? "Yes" : "No" ,
       :Participant => @participant.nil? ? nil : link_to('view participant', @participant),

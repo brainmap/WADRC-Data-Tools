@@ -138,61 +138,64 @@ class LumbarpuncturesController < ApplicationController
     v_offset = Time.zone_offset('CST') 
     v_offset = (v_offset*(-1))/(60*60) # mess with storing date as local in db - but shifting to utc
     # get hour+6hrs utc shift error if too late in day
-            params[:date][:lpstartt][0]="1899"
-             params[:date][:lpstartt][1]="12"
-             params[:date][:lpstartt][2]="30"       
+            lumbarpuncture_params[:date][:lpstartt][0]="1899"
+             lumbarpuncture_params[:date][:lpstartt][1]="12"
+             lumbarpuncture_params[:date][:lpstartt][2]="30"       
              lpstarttime = nil 
-              params[:lumbarpuncture][:lpstarttime] = ''
-              params[:lumbarpuncture][:lpstarttime_hour] = ''
-              params[:lumbarpuncture][:lpstarttime_minute] = ''
-            if !params[:date][:lpstartt][0].blank? && !params[:date][:lpstartt][1].blank? && !params[:date][:lpstartt][2].blank? && !params[:date][:lpstartt][3].blank? && !params[:date][:lpstartt][4].blank?
-             params[:lumbarpuncture][:lpstarttime_hour] = params[:date][:lpstartt][3]
-             params[:lumbarpuncture][:lpstarttime_minute] =params[:date][:lpstartt][4]   
-             params[:date][:lpstartt][3] = ((params[:date][:lpstartt][3].to_i)+v_offset).to_s
-             if params[:date][:lpstartt][3].to_i > 23
-                params[:date][:lpstartt][3] = (params[:date][:lpstartt][3].to_i - 24).to_s
+              lumbarpuncture_params[:lumbarpuncture][:lpstarttime] = ''
+              lumbarpuncture_params[:lumbarpuncture][:lpstarttime_hour] = ''
+              lumbarpuncture_params[:lumbarpuncture][:lpstarttime_minute] = ''
+            if !lumbarpuncture_params[:date][:lpstartt][0].blank? && !lumbarpuncture_params[:date][:lpstartt][1].blank? && !lumbarpuncture_params[:date][:lpstartt][2].blank? && !lumbarpuncture_params[:date][:lpstartt][3].blank? && !lumbarpuncture_params[:date][:lpstartt][4].blank?
+
+               lpstarttime_hour = lumbarpuncture_params[:date][:lpstartt][3]
+               lpstarttime_minute =lumbarpuncture_params[:date][:lpstartt][4] 
+             lumbarpuncture_params[:date][:lpstartt][3] = ((lumbarpuncture_params[:date][:lpstartt][3].to_i)+v_offset).to_s
+             if lumbarpuncture_params[:date][:lpstartt][3].to_i > 23
+                lumbarpuncture_params[:date][:lpstartt][3] = (lumbarpuncture_params[:date][:lpstartt][3].to_i - 24).to_s
              end
                # mess with storing date as local in db - but shifting to utc
-             lpstarttime =  params[:date][:lpstartt][0]+"-"+params[:date][:lpstartt][1]+"-"+params[:date][:lpstartt][2]+" "+params[:date][:lpstartt][3]+":"+params[:date][:lpstartt][4]
-             params[:lumbarpuncture][:lpstarttime] = DateTime.strptime(lpstarttime, "%Y-%m-%d %H:%M")    # lpstarttime  4.0 date format change?
+             lpstarttime =  lumbarpuncture_params[:date][:lpstartt][0]+"-"+lumbarpuncture_params[:date][:lpstartt][1]+"-"+lumbarpuncture_params[:date][:lpstartt][2]+" "+lumbarpuncture_params[:date][:lpstartt][3]+":"+lumbarpuncture_params[:date][:lpstartt][4]
+             lumbarpuncture_params[:lumbarpuncture][:lpstarttime] = DateTime.strptime(lpstarttime, "%Y-%m-%d %H:%M")    # lpstarttime  4.0 date format change?
             end
 
-         params[:date][:lpfluidstartt][0]="1899"
-         params[:date][:lpfluidstartt][1]="12"
-         params[:date][:lpfluidstartt][2]="30"       
+         lumbarpuncture_params[:date][:lpfluidstartt][0]="1899"
+         lumbarpuncture_params[:date][:lpfluidstartt][1]="12"
+         lumbarpuncture_params[:date][:lpfluidstartt][2]="30"       
           lpfluidstarttime = nil   
-           params[:lumbarpuncture][:lpfluidstarttime] = '' 
-          params[:lumbarpuncture][:lpfluidstarttime_hour] = ''
-          params[:lumbarpuncture][:lpfluidstarttime_minute] =''
-        if !params[:date][:lpfluidstartt][0].blank? && !params[:date][:lpfluidstartt][1].blank? && !params[:date][:lpfluidstartt][2].blank? && !params[:date][:lpfluidstartt][3].blank? && !params[:date][:lpfluidstartt][4].blank?
-          params[:lumbarpuncture][:lpfluidstarttime_hour] = params[:date][:lpfluidstartt][3]
-          params[:lumbarpuncture][:lpfluidstarttime_minute] =params[:date][:lpfluidstartt][4]
-          params[:date][:lpfluidstartt][3] = ((params[:date][:lpfluidstartt][3].to_i)+v_offset).to_s
-          if params[:date][:lpfluidstartt][3].to_i > 23
-                params[:date][:lpfluidstartt][3] = (params[:date][:lpfluidstartt][3].to_i - 24).to_s
+           lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime] = '' 
+          lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime_hour] = ''
+          lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime_minute] =''
+        if !lumbarpuncture_params[:date][:lpfluidstartt][0].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][1].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][2].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][3].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][4].blank?
+          
+               lpfluidstarttime_hour = lumbarpuncture_params[:date][:lpstartt][3]
+               lpfluidstarttime_minute =lumbarpuncture_params[:date][:lpstartt][4] 
+          lumbarpuncture_params[:date][:lpfluidstartt][3] = ((lumbarpuncture_params[:date][:lpfluidstartt][3].to_i)+v_offset).to_s
+          if lumbarpuncture_params[:date][:lpfluidstartt][3].to_i > 23
+                lumbarpuncture_params[:date][:lpfluidstartt][3] = (lumbarpuncture_params[:date][:lpfluidstartt][3].to_i - 24).to_s
           end
             # mess with storing date as local in db - but shifting to utc
-          lpfluidstarttime =  params[:date][:lpfluidstartt][0]+"-"+params[:date][:lpfluidstartt][1]+"-"+params[:date][:lpfluidstartt][2]+" "+params[:date][:lpfluidstartt][3]+":"+params[:date][:lpfluidstartt][4]
-          params[:lumbarpuncture][:lpfluidstarttime] = DateTime.strptime(lpfluidstarttime, "%Y-%m-%d %H:%M")  #lpfluidstarttime 
+          lpfluidstarttime =  lumbarpuncture_params[:date][:lpfluidstartt][0]+"-"+lumbarpuncture_params[:date][:lpfluidstartt][1]+"-"+lumbarpuncture_params[:date][:lpfluidstartt][2]+" "+lumbarpuncture_params[:date][:lpfluidstartt][3]+":"+lumbarpuncture_params[:date][:lpfluidstartt][4]
+          lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime] = DateTime.strptime(lpfluidstarttime, "%Y-%m-%d %H:%M")  #lpfluidstarttime 
         end 
 
-         params[:date][:lpendt][0]="1899"
-         params[:date][:lpendt][1]="12"
-         params[:date][:lpendt][2]="30"       
+         lumbarpuncture_params[:date][:lpendt][0]="1899"
+         lumbarpuncture_params[:date][:lpendt][1]="12"
+         lumbarpuncture_params[:date][:lpendt][2]="30"       
           lpendtime = nil   
-           params[:lumbarpuncture][:lpendtime] = '' 
-          params[:lumbarpuncture][:lpendtime_hour] = ''
-          params[:lumbarpuncture][:lpendtime_minute] =''
-        if !params[:date][:lpendt][0].blank? && !params[:date][:lpendt][1].blank? && !params[:date][:lpendt][2].blank? && !params[:date][:lpendt][3].blank? && !params[:date][:lpendt][4].blank?
-          params[:lumbarpuncture][:lpendtime_hour] = params[:date][:lpendt][3]
-          params[:lumbarpuncture][:lpendtime_minute] =params[:date][:lpendt][4]
-          params[:date][:lpendt][3] = ((params[:date][:lpendt][3].to_i)+v_offset).to_s
-          if params[:date][:lpendt][3].to_i > 23
-                params[:date][:lpendt][3] = (params[:date][:lpendt][3].to_i - 24).to_s
+           lumbarpuncture_params[:lumbarpuncture][:lpendtime] = '' 
+          lumbarpuncture_params[:lumbarpuncture][:lpendtime_hour] = ''
+          lumbarpuncture_params[:lumbarpuncture][:lpendtime_minute] =''
+        if !lumbarpuncture_params[:date][:lpendt][0].blank? && !lumbarpuncture_params[:date][:lpendt][1].blank? && !lumbarpuncture_params[:date][:lpendt][2].blank? && !lumbarpuncture_params[:date][:lpendt][3].blank? && !lumbarpuncture_params[:date][:lpendt][4].blank?
+          
+               lpendtime_hour = lumbarpuncture_params[:date][:lpstartt][3]
+               lpendtime_minute =lumbarpuncture_params[:date][:lpstartt][4] 
+          lumbarpuncture_params[:date][:lpendt][3] = ((lumbarpuncture_params[:date][:lpendt][3].to_i)+v_offset).to_s
+          if lumbarpuncture_params[:date][:lpendt][3].to_i > 23
+                lumbarpuncture_params[:date][:lpendt][3] = (lumbarpuncture_params[:date][:lpendt][3].to_i - 24).to_s
           end
             # mess with storing date as local in db - but shifting to utc
-          lpendtime =  params[:date][:lpendt][0]+"-"+params[:date][:lpendt][1]+"-"+params[:date][:lpendt][2]+" "+params[:date][:lpendt][3]+":"+params[:date][:lpendt][4]
-          params[:lumbarpuncture][:lpendtime] = DateTime.strptime(lpendtime, "%Y-%m-%d %H:%M")  #lpendtime 
+          lpendtime =  lumbarpuncture_params[:date][:lpendt][0]+"-"+lumbarpuncture_params[:date][:lpendt][1]+"-"+lumbarpuncture_params[:date][:lpendt][2]+" "+lumbarpuncture_params[:date][:lpendt][3]+":"+lumbarpuncture_params[:date][:lpendt][4]
+          lumbarpuncture_params[:lumbarpuncture][:lpendtime] = DateTime.strptime(lpendtime, "%Y-%m-%d %H:%M")  #lpendtime 
         end  
 
      @current_tab = "lumbarpunctures"
@@ -206,8 +209,8 @@ class LumbarpuncturesController < ApplicationController
       end
          #@lumbarpuncture = Lumbarpuncture.new( lumbarpuncture_params)#params[:lumbarpuncture])  
     appointment_date = nil
-    if !params[:appointment]["#{'appointment_date'}(1i)"].blank? && !params[:appointment]["#{'appointment_date'}(2i)"].blank? && !params[:appointment]["#{'appointment_date'}(3i)"].blank?
-         appointment_date = params[:appointment]["#{'appointment_date'}(1i)"] +"-"+params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")+"-"+params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
+    if !lumbarpuncture_params[:appointment]["#{'appointment_date'}(1i)"].blank? && !lumbarpuncture_params[:appointment]["#{'appointment_date'}(2i)"].blank? && !lumbarpuncture_params[:appointment]["#{'appointment_date'}(3i)"].blank?
+         appointment_date = lumbarpuncture_params[:appointment]["#{'appointment_date'}(1i)"] +"-"+lumbarpuncture_params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")+"-"+lumbarpuncture_params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
     end
     
     vgroup_id =params[:new_appointment_vgroup_id]
@@ -216,9 +219,9 @@ class LumbarpuncturesController < ApplicationController
     @appointment.vgroup_id = vgroup_id
     @appointment.appointment_type ='lumbar_puncture'
     @appointment.appointment_date =appointment_date
-    @appointment.comment = params[:appointment][:comment]
-    if !params[:appointment].nil? and !params[:appointment][:appointment_coordinator].nil?
-                @appointment.appointment_coordinator = params[:appointment][:appointment_coordinator]
+    @appointment.comment = lumbarpuncture_params[:appointment][:comment]
+    if !lumbarpuncture_params[:appointment].nil? and !lumbarpuncture_params[:appointment][:appointment_coordinator].nil?
+                @appointment.appointment_coordinator = lumbarpuncture_params[:appointment][:appointment_coordinator]
     end
     @appointment.user = current_user
     if !@vgroup.participant_id.blank?
@@ -229,7 +232,7 @@ class LumbarpuncturesController < ApplicationController
     end
     @appointment.save 
   #   params[:lumbarpuncture][:appointment_id]  = @appointment.id 
-    @lumbarpuncture = Lumbarpuncture.new( lumbarpuncture_params[:lumbarpuncture])#params[:lumbarpuncture])  
+    @lumbarpuncture = Lumbarpuncture.new( lumbarpuncture_params[:lumbarpuncture])
     @lumbarpuncture.appointment_id = @appointment.id
     if @lumbarpuncture.lp_data_entered_by.blank?
        @lumbarpuncture.lp_data_entered_by = current_user.id
@@ -240,9 +243,27 @@ class LumbarpuncturesController < ApplicationController
 
     respond_to do |format|
       if @lumbarpuncture.save
-         @vgroup.completedlumbarpuncture = params[:lumbarpuncture][:lpsuccess] == '1' ? "yes" : "no"
+         @vgroup.completedlumbarpuncture = lumbarpuncture_params[:lumbarpuncture][:lpsuccess] == '1' ? "yes" : "no"
           @vgroup.save
-        
+
+
+            @lumbarpuncture.lpstarttime_hour = lpstarttime_hour.to_i+v_offset
+            @lumbarpuncture.lpstarttime_minute = lpstarttime_minute
+            @lumbarpuncture.lpfluidstarttime_hour = lpfluidstarttime_hour.to_i+v_offset
+            @lumbarpuncture.lpfluidstarttime_minute = lpfluidstarttime_minute
+            @lumbarpuncture.lpendtime_hour = lpendtime_hour.to_i+v_offset
+            @lumbarpuncture.lpendtime_minute = lpendtime_minute
+
+            # puts "once we get down here, start time: #{DateTime.strptime("1899-12-30 #{lpstarttime_hour.to_i+v_offset}:#{lpstarttime_minute}", "%Y-%m-%d %H:%M")}"
+            # puts "fluid time: #{DateTime.strptime("1899-12-30 #{lpfluidstarttime_hour.to_i+v_offset}:#{lpfluidstarttime_minute}", "%Y-%m-%d %H:%M")}"
+            # puts "end time: #{DateTime.strptime("1899-12-30 #{lpendtime_hour.to_i+v_offset}:#{lpendtime_minute}", "%Y-%m-%d %H:%M")}"
+            
+            @lumbarpuncture.lpstarttime = DateTime.strptime("1899-12-30 #{lpstarttime_hour.to_i+v_offset}:#{lpstarttime_minute}", "%Y-%m-%d %H:%M")
+            @lumbarpuncture.lpfluidstarttime = DateTime.strptime("1899-12-30 #{lpfluidstarttime_hour.to_i+v_offset}:#{lpfluidstarttime_minute}", "%Y-%m-%d %H:%M")
+            @lumbarpuncture.lpendtime = DateTime.strptime("1899-12-30 #{lpendtime_hour.to_i+v_offset}:#{lpendtime_minute}", "%Y-%m-%d %H:%M")
+
+            @lumbarpuncture.save
+
         # @appointment.save
         if !vitals_params[:vital_id].blank?
           @vital = Vital.find(vitals_params[:vital_id])
@@ -310,6 +331,7 @@ class LumbarpuncturesController < ApplicationController
 
 
 
+        # puts "lp date params: #{lumbarpuncture_params[:date]}"
         appointment_date = nil
         if !lumbarpuncture_params[:appointment]["#{'appointment_date'}(1i)"].blank? && !lumbarpuncture_params[:appointment]["#{'appointment_date'}(2i)"].blank? && !lumbarpuncture_params[:appointment]["#{'appointment_date'}(3i)"].blank?
              appointment_date = params[:appointment]["#{'appointment_date'}(1i)"] +"-"+lumbarpuncture_params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")+"-"+lumbarpuncture_params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
@@ -319,8 +341,10 @@ class LumbarpuncturesController < ApplicationController
              lumbarpuncture_params[:date][:lpstartt][2]="30"       
              lpstarttime = nil
             if !lumbarpuncture_params[:date][:lpstartt][0].blank? && !lumbarpuncture_params[:date][:lpstartt][1].blank? && !lumbarpuncture_params[:date][:lpstartt][2].blank? && !lumbarpuncture_params[:date][:lpstartt][3].blank? && !lumbarpuncture_params[:date][:lpstartt][4].blank?
-               lumbarpuncture_params[:lumbarpuncture][:lpstarttime_hour] = lumbarpuncture_params[:date][:lpstartt][3]
-               lumbarpuncture_params[:lumbarpuncture][:lpstarttime_minute] =lumbarpuncture_params[:date][:lpstartt][4] 
+
+               lpstarttime_hour = lumbarpuncture_params[:date][:lpstartt][3]
+               lpstarttime_minute =lumbarpuncture_params[:date][:lpstartt][4] 
+               # puts "start time set as :#{lpstarttime_hour}:#{lpstarttime_minute}"
                lumbarpuncture_params[:date][:lpstartt][3] = ((lumbarpuncture_params[:date][:lpstartt][3].to_i)+v_offset).to_s
                if lumbarpuncture_params[:date][:lpstartt][3].to_i > 23
                   lumbarpuncture_params[:date][:lpstartt][3] = (lumbarpuncture_params[:date][:lpstartt][3].to_i - 24).to_s
@@ -336,14 +360,16 @@ class LumbarpuncturesController < ApplicationController
          lumbarpuncture_params[:date][:lpfluidstartt][2]="30"       
           lpfluidstarttime = nil
         if !lumbarpuncture_params[:date][:lpfluidstartt][0].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][1].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][2].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][3].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][4].blank?
-           lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime_hour] = lumbarpuncture_params[:date][:lpfluidstartt][3]
-           lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime_minute] =lumbarpuncture_params[:date][:lpfluidstartt][4] 
+           lpfluidstarttime_hour = lumbarpuncture_params[:date][:lpfluidstartt][3]
+           lpfluidstarttime_minute =lumbarpuncture_params[:date][:lpfluidstartt][4] 
+           # puts "fluid time set as :#{lpfluidstarttime_hour}:#{lpfluidstarttime_minute}"
            lumbarpuncture_params[:date][:lpfluidstartt][3] = ((lumbarpuncture_params[:date][:lpfluidstartt][3].to_i)+v_offset).to_s
           if lumbarpuncture_params[:date][:lpfluidstartt][3].to_i > 23
                 lumbarpuncture_params[:date][:lpfluidstartt][3] = (lumbarpuncture_params[:date][:lpfluidstartt][3].to_i - 24).to_s
           end
            lpfluidstarttime =  lumbarpuncture_params[:date][:lpfluidstartt][0]+"-"+lumbarpuncture_params[:date][:lpfluidstartt][1]+"-"+lumbarpuncture_params[:date][:lpfluidstartt][2]+" "+lumbarpuncture_params[:date][:lpfluidstartt][3]+":"+lumbarpuncture_params[:date][:lpfluidstartt][4]
            lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime] = DateTime.strptime(lpfluidstarttime, "%Y-%m-%d %H:%M") #lpfluidstarttime
+
         end
 
 
@@ -353,31 +379,36 @@ class LumbarpuncturesController < ApplicationController
          lumbarpuncture_params[:date][:lpendt][2]="30"       
           lpendtime = nil
         if !lumbarpuncture_params[:date][:lpendt][0].blank? && !lumbarpuncture_params[:date][:lpendt][1].blank? && !lumbarpuncture_params[:date][:lpendt][2].blank? && !lumbarpuncture_params[:date][:lpendt][3].blank? && !lumbarpuncture_params[:date][:lpendt][4].blank?
-           lumbarpuncture_params[:lumbarpuncture][:lpendtime_hour] = lumbarpuncture_params[:date][:lpendt][3]
-           lumbarpuncture_params[:lumbarpuncture][:lpendtime_minute] =lumbarpuncture_params[:date][:lpendt][4] 
+           lpendtime_hour = lumbarpuncture_params[:date][:lpendt][3]
+           lpendtime_minute =lumbarpuncture_params[:date][:lpendt][4] 
+
+           # puts "end time set as :#{lpendtime_hour}:#{lpendtime_minute}"
            lumbarpuncture_params[:date][:lpendt][3] = ((lumbarpuncture_params[:date][:lpendt][3].to_i)+v_offset).to_s
            if lumbarpuncture_params[:date][:lpendt][3].to_i > 23
                   lumbarpuncture_params[:date][:lpendt][3] = (lumbarpuncture_params[:date][:lpendt][3].to_i - 24).to_s
            end
            lpendtime =  lumbarpuncture_params[:date][:lpendt][0]+"-"+lumbarpuncture_params[:date][:lpendt][1]+"-"+lumbarpuncture_params[:date][:lpendt][2]+" "+lumbarpuncture_params[:date][:lpendt][3]+":"+lumbarpuncture_params[:date][:lpendt][4]
            lumbarpuncture_params[:lumbarpuncture][:lpendtime] = DateTime.strptime(lpendtime, "%Y-%m-%d %H:%M") #lpendtime
+
         end
         
+        # puts "lp needle times #{lumbarpuncture_params[:lumbarpuncture][:lpstarttime_hour]}:#{lumbarpuncture_params[:lumbarpuncture][:lpstarttime_minute]}, #{lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime_hour]}:#{lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime_minute]}, #{lumbarpuncture_params[:lumbarpuncture][:lpendtime_hour]}:#{lumbarpuncture_params[:lumbarpuncture][:lpendtime_minute]}"
+
         # ok to update vitals even if other update fail
-        if !lumbarpuncture_params[:vital_id].blank?
-          @vital = Vital.find(lumbarpuncture_params[:vital_id])
-          @vital.pulse = lumbarpuncture_params[:pulse]
-          @vital.bp_systol = lumbarpuncture_params[:bp_systol]
-          @vital.bp_diastol = lumbarpuncture_params[:bp_diastol]
-          @vital.bloodglucose = lumbarpuncture_params[:bloodglucose]
+        if !vitals_params[:vital_id].blank?
+          @vital = Vital.find(vitals_params[:vital_id])
+          @vital.pulse = vitals_params[:pulse]
+          @vital.bp_systol = vitals_params[:bp_systol]
+          @vital.bp_diastol = vitals_params[:bp_diastol]
+          @vital.bloodglucose = vitals_params[:bloodglucose]
           @vital.save
         else
           @vital = Vital.new
           @vital.appointment_id = @lumbarpuncture.appointment_id
-          @vital.pulse = lumbarpuncture_params[:pulse]
-          @vital.bp_systol = lumbarpuncture_params[:bp_systol]
-          @vital.bp_diastol = lumbarpuncture_params[:bp_diastol]
-          @vital.bloodglucose = lumbarpuncture_params[:bloodglucose]
+          @vital.pulse = vitals_params[:pulse]
+          @vital.bp_systol = vitals_params[:bp_systol]
+          @vital.bp_diastol = vitals_params[:bp_diastol]
+          @vital.bloodglucose = vitals_params[:bloodglucose]
           @vital.save      
         end
         
@@ -400,6 +431,24 @@ class LumbarpuncturesController < ApplicationController
 
         respond_to do |format|
           if @lumbarpuncture.update( lumbarpuncture_params[:lumbarpuncture])#params[:lumbarpuncture], :without_protection => true)
+           
+            @lumbarpuncture.lpstarttime_hour = lpstarttime_hour.to_i+v_offset
+            @lumbarpuncture.lpstarttime_minute = lpstarttime_minute
+            @lumbarpuncture.lpfluidstarttime_hour = lpfluidstarttime_hour.to_i+v_offset
+            @lumbarpuncture.lpfluidstarttime_minute = lpfluidstarttime_minute
+            @lumbarpuncture.lpendtime_hour = lpendtime_hour.to_i+v_offset
+            @lumbarpuncture.lpendtime_minute = lpendtime_minute
+
+            # puts "once we get down here, start time: #{DateTime.strptime("1899-12-30 #{lpstarttime_hour.to_i+v_offset}:#{lpstarttime_minute}", "%Y-%m-%d %H:%M")}"
+            # puts "fluid time: #{DateTime.strptime("1899-12-30 #{lpfluidstarttime_hour.to_i+v_offset}:#{lpfluidstarttime_minute}", "%Y-%m-%d %H:%M")}"
+            # puts "end time: #{DateTime.strptime("1899-12-30 #{lpendtime_hour.to_i+v_offset}:#{lpendtime_minute}", "%Y-%m-%d %H:%M")}"
+            
+            @lumbarpuncture.lpstarttime = DateTime.strptime("1899-12-30 #{lpstarttime_hour.to_i+v_offset}:#{lpstarttime_minute}", "%Y-%m-%d %H:%M")
+            @lumbarpuncture.lpfluidstarttime = DateTime.strptime("1899-12-30 #{lpfluidstarttime_hour.to_i+v_offset}:#{lpfluidstarttime_minute}", "%Y-%m-%d %H:%M")
+            @lumbarpuncture.lpendtime = DateTime.strptime("1899-12-30 #{lpendtime_hour.to_i+v_offset}:#{lpendtime_minute}", "%Y-%m-%d %H:%M")
+
+            @lumbarpuncture.save
+
             @appointment = Appointment.find(@lumbarpuncture.appointment_id)
             @vgroup = Vgroup.find(@appointment.vgroup_id)
             @appointment.comment = params[:appointment][:comment]
@@ -428,126 +477,6 @@ class LumbarpuncturesController < ApplicationController
     end
   end
   
-# NOT BEING USED - REPLACED BY lp_search, next function
-    def lumbarpuncture_search
-       @current_tab = "lumbarpunctures"
-       params["search_criteria"] =""
-
-       if params[:lumbarpuncture_search].nil?
-            params[:lumbarpuncture_search] =Hash.new  
-       end
-
-       scan_procedure_array = []
-       scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)   
-
-  #    @lumbarpunctures = Lumbarpuncture.where("lumbarpunctures.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
-  #                                       appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
-  #    and scan_procedure_id in (?))", scan_procedure_array).all
-  #     sql = "select * from lumbarpunctures inner join  appointments on appointments.id = lumbarpunctures.appointment_id order by appointment_date desc"
-  #      @search = Lumbarpuncture.find_by_sql(sql)
-  #     @search = Lumbarpuncture.where("lumbarpunctures.appointment_id in (select appointments.id from appointments)").all
-        @search = Lumbarpuncture.search(params[:search])    # parms search makes something which works with where?
-
-        if !params[:lumbarpuncture_search][:scan_procedure_id].blank?
-           @search =@search.where("lumbarpunctures.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
-                                                  appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
-                                                  and scan_procedure_id in (?))",params[:lumbarpuncture_search][:scan_procedure_id])
-           @scan_procedures = ScanProcedure.where("id in (?)",params[:lumbarpuncture_search][:scan_procedure_id])
-           params["search_criteria"] = params["search_criteria"] +", "+@scan_procedures.sort_by(&:codename).collect {|sp| sp.codename}.join(", ").html_safe
-        end
-
-        if !params[:lumbarpuncture_search][:enumber].blank?
-           @search =@search.where(" lumbarpunctures.appointment_id in (select appointments.id from enrollment_vgroup_memberships,enrollments, appointments
-            where enrollment_vgroup_memberships.vgroup_id= appointments.vgroup_id 
-            and enrollment_vgroup_memberships.enrollment_id = enrollments.id and lower(enrollments.enumber) in (lower(?)))",params[:lumbarpuncture_search][:enumber])
-            params["search_criteria"] = params["search_criteria"] +",  enumber "+params[:lumbarpuncture_search][:enumber]
-        end      
-
-        if !params[:lumbarpuncture_search][:rmr].blank? 
-            @search = @search.where(" lumbarpunctures.appointment_id in (select appointments.id from appointments,vgroups
-                      where appointments.vgroup_id = vgroups.id and  lower(vgroups.rmr) in (lower(?)   ))",params[:lumbarpuncture_search][:rmr])
-            params["search_criteria"] = params["search_criteria"] +",  RMR "+params[:lumbarpuncture_search][:rmr]
-        end
-
-         #  build expected date format --- between, >, < 
-         v_date_latest =""
-         #want all three date parts
-
-         if !params[:lumbarpuncture_search]["#{'latest_timestamp'}(1i)"].blank? && !params[:lumbarpuncture_search]["#{'latest_timestamp'}(2i)"].blank? && !params[:lumbarpuncture_search]["#{'latest_timestamp'}(3i)"].blank?
-              v_date_latest = params[:lumbarpuncture_search]["#{'latest_timestamp'}(1i)"] +"-"+params[:lumbarpuncture_search]["#{'latest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:lumbarpuncture_search]["#{'latest_timestamp'}(3i)"].rjust(2,"0")
-         end
-
-         v_date_earliest =""
-         #want all three date parts
-
-         if !params[:lumbarpuncture_search]["#{'earliest_timestamp'}(1i)"].blank? && !params[:lumbarpuncture_search]["#{'earliest_timestamp'}(2i)"].blank? && !params[:lumbarpuncture_search]["#{'earliest_timestamp'}(3i)"].blank?
-               v_date_earliest = params[:lumbarpuncture_search]["#{'earliest_timestamp'}(1i)"] +"-"+params[:lumbarpuncture_search]["#{'earliest_timestamp'}(2i)"].rjust(2,"0")+"-"+params[:lumbarpuncture_search]["#{'earliest_timestamp'}(3i)"].rjust(2,"0")
-          end
-
-         if v_date_latest.length>0 && v_date_earliest.length >0
-           @search = @search.where(" lumbarpunctures.appointment_id in (select appointments.id from appointments where appointments.appointment_date between ? and ? )",v_date_earliest,v_date_latest)
-           params["search_criteria"] = params["search_criteria"] +",  visit date between "+v_date_earliest+" and "+v_date_latest
-         elsif v_date_latest.length>0
-           @search = @search.where(" lumbarpunctures.appointment_id in (select appointments.id from appointments where appointments.appointment_date < ?  )",v_date_latest)
-            params["search_criteria"] = params["search_criteria"] +",  visit date before "+v_date_latest 
-         elsif  v_date_earliest.length >0
-           @search = @search.where(" lumbarpunctures.appointment_id in (select appointments.id from appointments where appointments.appointment_date > ? )",v_date_earliest)
-            params["search_criteria"] = params["search_criteria"] +",  visit date after "+v_date_earliest
-          end
-
-          if !params[:lumbarpuncture_search][:gender].blank?
-             @search =@search.where(" lumbarpunctures.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments,appointments
-              where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id 
-              and enrollment_vgroup_memberships.vgroup_id = appointments.vgroup_id
-                     and participants.gender is not NULL and participants.gender in (?) )", params[:lumbarpuncture_search][:gender])
-              if params[:lumbarpuncture_search][:gender] == 1
-                 params["search_criteria"] = params["search_criteria"] +",  sex is Male"
-              elsif params[:lumbarpuncture_search][:gender] == 2
-                 params["search_criteria"] = params["search_criteria"] +",  sex is Female"
-              end
-          end   
-
-          if !params[:lumbarpuncture_search][:min_age].blank? && params[:lumbarpuncture_search][:max_age].blank?
-              @search = @search.where("  lumbarpunctures.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
-                                 where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                              and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
-                              and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                              and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) >= ?   )",params[:lumbarpuncture_search][:min_age])
-              params["search_criteria"] = params["search_criteria"] +",  age at visit >= "+params[:lumbarpuncture_search][:min_age]
-          elsif params[:lumbarpuncture_search][:min_age].blank? && !params[:lumbarpuncture_search][:max_age].blank?
-               @search = @search.where("  lumbarpunctures.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
-                                  where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                               and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
-                               and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                           and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) <= ?   )",params[:lumbarpuncture_search][:max_age])
-              params["search_criteria"] = params["search_criteria"] +",  age at visit <= "+params[:lumbarpuncture_search][:max_age]
-          elsif !params[:lumbarpuncture_search][:min_age].blank? && !params[:lumbarpuncture_search][:max_age].blank?
-             @search = @search.where("   lumbarpunctures.appointment_id in (select appointments.id from participants,  enrollment_vgroup_memberships, enrollments, scan_procedures_vgroups,appointments
-                                where enrollment_vgroup_memberships.enrollment_id = enrollments.id and enrollments.participant_id = participants.id
-                             and  scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id 
-                             and appointments.vgroup_id = enrollment_vgroup_memberships.vgroup_id
-                         and round((DATEDIFF(appointments.appointment_date,participants.dob)/365.25),2) between ? and ?   )",params[:lumbarpuncture_search][:min_age],params[:lumbarpuncture_search][:max_age])
-            params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:lumbarpuncture_search][:min_age]+" and "+params[:lumbarpuncture_search][:max_age]
-          end
-          # trim leading ","
-          params["search_criteria"] = params["search_criteria"].sub(", ","")
-          # pass to download file?
-
-      @search =  @search.where("lumbarpunctures.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
-                                                 appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 
-                                                 and scan_procedure_id in (?))", scan_procedure_array)
-
-
-      @lumbarpunctures =  @search.page(params[:page])
-
-      ### LOOK WHERE TITLE IS SHOWING UP
-      @collection_title = 'All Lumbarpuncture appts'
-
-      respond_to do |format|
-        format.html # index.html.erb
-        format.xml  { render :xml => @lumbarpunctures }
-      end
-    end
     
  def lp_search 
    if !params[:lp_search].blank?
