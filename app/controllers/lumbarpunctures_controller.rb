@@ -414,7 +414,7 @@ class LumbarpuncturesController < ApplicationController
               end
             end
             @appointment.save
-            @vgroup.completedlumbarpuncture = params[:vgroup][:completedlumbarpuncture]
+            @vgroup.completedlumbarpuncture = 'yes'
             @vgroup.save
             
            
