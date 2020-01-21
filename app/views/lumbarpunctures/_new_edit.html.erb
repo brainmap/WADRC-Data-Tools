@@ -41,15 +41,15 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
   <table>
     <tr><td valign='top'>
     <div class=''>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
         <%= f.label :date %><br />
         <%= date_select :appointment, :appointment_date, :include_blank => true, :end_year => Time.now.year + 1 %>
       </div>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
         <%= f.label(:appointment_coordinator) %>
         <%= select(:appointment, :appointment_coordinator, Employee.all.sort_by(&:name).collect {|p| [ p.name, p.id ] }, { :include_blank => "Select Appt Coordinator" }) %>
       </div>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
         <div>Procedure Time</div>
 
         <%= f.label(:Initial_needle_insertion_time,'Initial Needle Insertion Time') %>
@@ -61,7 +61,7 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
         <%= f.label(:Final_Needle_Removal_Time,'Final Needle Removal Time') %>
         <%= select_time( @lumbarpuncture.lpendtime,:field_name =>'lpendt][', :include_blank => true) %>
       </div>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
         <div>Blood Pressure (sitting)</div>
         <%     @vitals = Vital.where("vitals.appointment_id in (?)",@lumbarpuncture.appointment_id)     
          @vitals.each do |v|  # could have multiples? %>
@@ -91,7 +91,7 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
    <small>999=unknown, all sitting</small>
   <%   end %>
       </div>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
       <span>Pre-procedure fasting</span><br>
         <%= f.label :Fast_Completed %>
         <%= f.select :completedlpfast, options_for_select(v_yes_no_unk_display, @lumbarpuncture.completedlpfast),
@@ -105,7 +105,7 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
         <%= f.select :lptimelastintake, options_for_select(0..48, @lumbarpuncture.lptimelastintake),
                           {:prompt => 'Select hrs'} %> <small>hrs </small>
       </div>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
         <div>Intra-procedural Adverse Effects/Complications</div>
         <%= f.label :Radiculopathy %>
         <%= select :lumbarpuncture, :lpcomplications_radiculopathy, v_yes_no_unk_display %><br>
@@ -120,7 +120,7 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
         <%= f.label :If_other_specify %>
         <%= text_area( :lumbarpuncture,:lpcomplications_other_specify,:cols => 30, :rows => 1, ) %>
       </div>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
 
         <%= f.label :Comments %><br/>
         <%= text_area( :appointment,:comment,:cols => 30, :rows => 10, :value=>@appointment.comment) %><br />
@@ -129,7 +129,7 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
     </div>
     </td><td valign='top'>
     <div class=''>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
           Amount Collected
           <%= f.select :lpamountcollected, options_for_select(0...26, @lumbarpuncture.lpamountcollected),{:prompt => 'Select ....'} %> <small>ml</small><br>
           Amount Stored
@@ -138,7 +138,7 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
           <%= f.select :lpamountoflidocaine, options_for_select(0...26, @lumbarpuncture.lpamountoflidocaine),{:prompt => 'Select ....'} %><small> ml</small><br>
 
       </div>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
           LP Technique<br>
 
           Gauge of needle
@@ -154,7 +154,7 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
           If Other, specify<br><%= text_area( :lumbarpuncture,:lpneedletype_other,:cols => 30, :rows => 1, ) %>
 
       </div>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
           Position<br>
 
           Sitting
@@ -163,7 +163,7 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
           <%= select :lumbarpuncture, :lpposition_decubitus, v_yes_no_unk_display %><br>
 
       </div>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
           Method<br>
 
           Gravity
@@ -178,41 +178,41 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
           <br>
 
       </div>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
           Significant post-LP Headache<br>
           <%= f.select :followupheadache, options_for_select(v_yes_no_na_display, @lumbarpuncture.followupheadache),{:prompt => 'Select ....'} %>
           date resolved: <%= date_select :lumbarpuncture, :lpheadache_dateresolved, :include_blank => true, :end_year => Time.now.year + 1 %><br>
           severity:<%= f.select :lpheadache_severity, options_for_select(v_severity_display, @lumbarpuncture.lpheadache_severity),{:prompt => 'Select ....'} %><br>
           Notes:<br><%= text_area( :lumbarpuncture,:lpheadache_note,:cols => 30, :rows => 3, ) %>
       </div>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
           Significant low back pain <%= f.select :lplowbackpain, options_for_select(v_yes_no_na_display, @lumbarpuncture.lplowbackpain),{:prompt => 'Select ....'} %><br>
           date resolved: <%= date_select :lumbarpuncture, :lplowbackpain_dateresolved, :include_blank => true, :end_year => Time.now.year + 1 %><br>
           severity: <%= f.select :lplowbackpain_severity, options_for_select(v_severity_display, @lumbarpuncture.lplowbackpain_severity),{:prompt => 'Select ....'} %><br>
           Notes:<br><%= text_area( :lumbarpuncture,:lplowbackpain_note,:cols => 30, :rows => 3, ) %>
       </div>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
           Other side effects<%= f.select :lpothersideeffects, options_for_select(v_yes_no_na_display, @lumbarpuncture.lpothersideeffects),{:prompt => 'Select ....'} %><br> 
           date resolved: <%= date_select :lumbarpuncture, :lpothersideeffects_dateresolved, :include_blank => true, :end_year => Time.now.year + 1 %><br>
           severity: <%= f.select :lpothersideeffects_severity, options_for_select(v_severity_display, @lumbarpuncture.lpothersideeffects_severity),{:prompt => 'Select ....'} %><br>
           Notes:<br><%= text_area( :lumbarpuncture,:lpothersideeffects_note,:cols => 30, :rows => 3, ) %>
 
       </div>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
         <%= f.label :Comments_on_follow_up_symptoms,'Side Effect Remarks' %><br/>
         <%= text_area( :lumbarpuncture,:lpfollownote,:cols => 30, :rows => 10, ) %><br />
       </div>
     </div>
     </td><td valign='top'>
     <div class=''>
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
 
         CSF Nucleated Cell Count <%= f.select :lpcsfnucleatedcellcount, options_for_select(0...6, @lumbarpuncture.lpcsfnucleatedcellcount),{:prompt => 'Select ....'} %> <small> /uL</small><br>
         CSF Red Cell Count  <%= f.select :lpcsfredcellcount, options_for_select(0...21, @lumbarpuncture.lpcsfredcellcount),{:prompt => 'Select ....'} %> <small> /uL</small><br>
         Cell Count Remarks<br><%= text_area( :lumbarpuncture,:lpcsfcellcount_note,:cols => 30, :rows => 3, ) %>
       </div>
 
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
 
 
        Practitioner Name<br />
@@ -220,7 +220,7 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
 
       </div>
 
-      <div class='p-2'>
+      <div class='p-2' style='padding:0.5em;'>
 
         <%= f.label :CSF_collection_attempted_and_successful? %>
         <%= f.select :lpsuccess, options_for_select(v_yes_no_unk_display, @lumbarpuncture.lpsuccess),
