@@ -112,15 +112,15 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
       <div class='p-2' style='padding:0.5em;'>
         <div>Intra-procedural Adverse Effects/Complications</div>
         <%= f.label :Radiculopathy %>
-        <%= select :lumbarpuncture, :lpcomplications_radiculopathy, v_yes_no_unk_display %><br>
+        <%= select :lumbarpuncture, :lpcomplications_radiculopathy, v_yes_no_unk_display, {:include_blank => "Select"} %><br>
         <%= f.label :Vasovagal %>
-        <%= select :lumbarpuncture, :lpcomplications_vasovagal, v_yes_no_unk_display %><br>
+        <%= select :lumbarpuncture, :lpcomplications_vasovagal, v_yes_no_unk_display, {:include_blank => "Select"}  %><br>
         <%= f.label :Pain %>
-        <%= select :lumbarpuncture, :lpcomplications_pain, v_yes_no_unk_display %><br>
+        <%= select :lumbarpuncture, :lpcomplications_pain, v_yes_no_unk_display, {:include_blank => "Select"}  %><br>
         <%= f.label :Headache %>
-        <%= select :lumbarpuncture, :lpcomplications_headache, v_yes_no_unk_display %><br>
+        <%= select :lumbarpuncture, :lpcomplications_headache, v_yes_no_unk_display, {:include_blank => "Select"}  %><br>
         <%= f.label :Other %>
-        <%= select :lumbarpuncture, :lpcomplications_other, v_yes_no_unk_display %><br>
+        <%= select :lumbarpuncture, :lpcomplications_other, v_yes_no_unk_display, {:include_blank => "Select"}  %><br>
         <%= f.label :If_other_specify %>
         <%= text_area( :lumbarpuncture,:lpcomplications_other_specify,:cols => 30, :rows => 1, ) %>
       </div>

@@ -240,7 +240,7 @@ class LumbarpuncturesController < ApplicationController
 
     respond_to do |format|
       if @lumbarpuncture.save
-         @vgroup.completedlumbarpuncture = params[:lumbarpuncture][:lpsuccess]
+         @vgroup.completedlumbarpuncture = params[:lumbarpuncture][:lpsuccess] == '1' ? "yes" : "no"
           @vgroup.save
         
         # @appointment.save
