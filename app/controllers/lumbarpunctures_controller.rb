@@ -229,7 +229,7 @@ class LumbarpuncturesController < ApplicationController
     end
     @appointment.save 
   #   params[:lumbarpuncture][:appointment_id]  = @appointment.id 
-    @lumbarpuncture = Lumbarpuncture.new( lumbarpuncture_params)#params[:lumbarpuncture])  
+    @lumbarpuncture = Lumbarpuncture.new( lumbarpuncture_params[:lumbarpuncture])#params[:lumbarpuncture])  
     @lumbarpuncture.appointment_id = @appointment.id
     if @lumbarpuncture.lp_data_entered_by.blank?
        @lumbarpuncture.lp_data_entered_by = current_user.id
@@ -240,24 +240,24 @@ class LumbarpuncturesController < ApplicationController
 
     respond_to do |format|
       if @lumbarpuncture.save
-         @vgroup.completedlumbarpuncture = params[:vgroup][:completedlumbarpuncture]
+         @vgroup.completedlumbarpuncture = params[:lumbarpuncture][:lpsuccess]
           @vgroup.save
         
         # @appointment.save
-        if !params[:vital_id].blank?
-          @vital = Vital.find(params[:vital_id])
-          @vital.pulse = params[:pulse]
-          @vital.bp_systol = params[:bp_systol]
-          @vital.bp_diastol = params[:bp_diastol]
-          @vital.bloodglucose = params[:bloodglucose]
+        if !vitals_params[:vital_id].blank?
+          @vital = Vital.find(vitals_params[:vital_id])
+          @vital.pulse = vitals_params[:pulse]
+          @vital.bp_systol = vitals_params[:bp_systol]
+          @vital.bp_diastol = vitals_params[:bp_diastol]
+          @vital.bloodglucose = vitals_params[:bloodglucose]
           @vital.save
         else
           @vital = Vital.new
           @vital.appointment_id = @lumbarpuncture.appointment_id
-          @vital.pulse = params[:pulse]
-          @vital.bp_systol = params[:bp_systol]
-          @vital.bp_diastol = params[:bp_diastol]
-          @vital.bloodglucose = params[:bloodglucose]
+          @vital.pulse = vitals_params[:pulse]
+          @vital.bp_systol = vitals_params[:bp_systol]
+          @vital.bp_diastol = vitals_params[:bp_diastol]
+          @vital.bloodglucose = vitals_params[:bloodglucose]
           @vital.save      
         end    
         
@@ -858,9 +858,13 @@ class LumbarpuncturesController < ApplicationController
     def set_lumbarpuncture
        @lumbarpuncture = Lumbarpuncture.find(params[:id])
     end
+
+    def vitals_params
+      params.permit(:pulse,:bp_systol,:bp_diastol,:bloodglucose,:vital_id)
+    end
    def lumbarpuncture_params
           # params.permit!
-          params.permit(:pulse,:bp_systol,:bp_diastol,:bloodglucose,:vital_id,vgroup:[],:lumbarpuncture =>[:id, :lpfasttotaltime_min,:lpfasttotaltime,:lumbarpuncture_note,:enteredlumbarpuncturewho,:enteredlumbarpuncturedate,:needlesize,
+          params.permit(vgroup:[],:lumbarpuncture =>[:id, :lpfasttotaltime_min,:lpfasttotaltime,:lumbarpuncture_note,:enteredlumbarpuncturewho,:enteredlumbarpuncturedate,:needlesize,
           :followupheadache,:lpstarttime,:lpendtime,:lpstarttime_hour,:lpstarttime_minute,:lpendtime_hour,:lpendtime_minute,:enteredlumbarpuncture,:completedlumbarpuncture_moved_to_vgroups,
           :lpfollownote,:id,:completedlpfast,:lp_exam_md_id,:lpsuccess,:lpabnormality,:appointment_id, :lptimelastintake, :lptimelastintake_min, :lptimelastintake_unk, 
           :lpfasttotaltime_unk, :lpamountcollected, :lpinitialamountstored, :lpneedletype, :lpneedletype_other, :lpposition, :lpmethod, :lpfluidstarttime, :lpfluidstarttime_hour, 

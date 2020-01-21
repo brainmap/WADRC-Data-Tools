@@ -38,6 +38,10 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
     </div>
   <% end %>
 
+  <% if !params[:new_appointment_vgroup_id].nil? %>
+  <%= hidden_field_tag "new_appointment_vgroup_id", params[:new_appointment_vgroup_id] %>
+  <% end %>
+
   <table>
     <tr><td valign='top'>
     <div class=''>
@@ -82,11 +86,11 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
    %>
     <%= f.label :Pulse,'Resting Heart Rate' %>
       <%=  text_field_tag( 'pulse',v.pulse==991?"":v.pulse, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %><br>
-    <%= f.label :BP_Systol %> </td>
+    <%= f.label :BP_Systol %>
       <%=  text_field_tag( 'bp_systol',v.bp_systol==991? "":v.bp_systol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %><br>
-    <%= f.label :BP_Diastol %> </td>
+    <%= f.label :BP_Diastol %>
     <%=  text_field_tag( 'bp_diastol',v.bp_diastol==991?"":v.bp_diastol, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %><br>
-    <%= f.label :Blood_Glucose %> </td>
+    <%= f.label :Blood_Glucose %>
     <%=  text_field_tag( 'bloodglucose',v.bloodglucose==991?"":v.bloodglucose, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %><br>
    <small>999=unknown, all sitting</small>
   <%   end %>
