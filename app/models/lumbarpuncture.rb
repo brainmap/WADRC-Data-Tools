@@ -23,11 +23,11 @@ class Lumbarpuncture < ActiveRecord::Base
      :LP_time_last_intake => lptimelastintake.nil?  ? lptimelastintake_min.nil? ? nil : lptimelastintake.to_s+" hrs : "+lptimelastintake_min.to_s+" mins" :  lptimelastintake.to_s+" hrs : "+lptimelastintake_min.to_s+" mins" ,
      :LP_time_last_intake_unknown => lptimelastintake_unk.to_i == 2 ? "Unknown" : nil,
 
-     :Radiculopathy_complications => lpcomplications_radiculopathy.to_i == 1 ? "Yes" : "No" ,
-     :Vasovagal_complications => lpcomplications_vasovagal.to_i == 1 ? "Yes" : "No" ,
-     :Pain_complications => lpcomplications_pain.to_i == 1 ? "Yes" : "No" ,
-     :Headache_complications => lpcomplications_headache.to_i == 1 ? "Yes" : "No" ,
-     :Other_complications => lpcomplications_other.to_i == 1 ? "Yes" : "No" ,
+     :Radiculopathy_complications => lpcomplications_radiculopathy.to_i == 1 ? "Yes" : lpcomplications_radiculopathy.to_i == 0 ? "No" : "Unk",
+     :Vasovagal_complications => lpcomplications_vasovagal.to_i == 1 ? "Yes" : lpcomplications_vasovagal.to_i == 0 ? "No" : "Unk",
+     :Pain_complications => lpcomplications_pain.to_i == 1 ? "Yes" : lpcomplications_pain.to_i == 0 ? "No" : "Unk",
+     :Headache_complications => lpcomplications_headache.to_i == 1 ? "Yes" : lpcomplications_headache.to_i == 0 ? "No" : "Unk",
+     :Other_complications => lpcomplications_other.to_i == 1 ? "Yes" : lpcomplications_other.to_i == 0 ? "No" : "Unk",
      :Other_comlicatoins_description => lpcomplications_other_specify,
 
       :CSF_Amount_collected =>  lpamountcollected.nil? ? nil : lpamountcollected.to_s+" ml"  ,
@@ -42,9 +42,9 @@ class Lumbarpuncture < ActiveRecord::Base
      :Sitting_position? => lpposition_sitting.to_i == 1 ? "Yes" : "No" ,
      :Decubitus_position? => lpposition_decubitus.to_i == 1 ? "Yes" : "No" ,
 
-     :Extracted_by_gravity? => lpmethod_gravity.to_i == 1 ? "Yes" : "No" ,
+     :Extracted_by_gravity? => lpmethod_gravity,
      :Amount_extracted_by_gravity => lpmethod_gravity_collected.nil? ? nil : lpmethod_gravity_collected.to_s+" ml"  ,
-     :Extracted_by_aspiration? => lpmethod_aspiration.to_i == 1 ? "Yes" : "No" ,
+     :Extracted_by_aspiration? => lpmethod_aspiration,
      :Amount_extracted_by_aspiration => lpmethod_aspiration_collected.nil? ? nil : lpmethod_aspiration_collected.to_s+" ml"  ,
 
     :Significant_post_LP_Headache => followupheadache,
