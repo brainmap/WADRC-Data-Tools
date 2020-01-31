@@ -443,9 +443,9 @@ class LumbarpuncturesController < ApplicationController
             # puts "fluid time: #{DateTime.strptime("1899-12-30 #{lpfluidstarttime_hour.to_i+v_offset}:#{lpfluidstarttime_minute}", "%Y-%m-%d %H:%M")}"
             # puts "end time: #{DateTime.strptime("1899-12-30 #{lpendtime_hour.to_i+v_offset}:#{lpendtime_minute}", "%Y-%m-%d %H:%M")}"
             
-            @lumbarpuncture.lpstarttime = DateTime.strptime("1899-12-30 #{lpstarttime_hour.to_i}:#{lpstarttime_minute.to_i}", "%Y-%m-%d %H:%M") + v_offset
-            @lumbarpuncture.lpfluidstarttime = DateTime.strptime("1899-12-30 #{lpfluidstarttime_hour.to_i}:#{lpfluidstarttime_minute.to_i}", "%Y-%m-%d %H:%M") + v_offset
-            @lumbarpuncture.lpendtime = DateTime.strptime("1899-12-30 #{lpendtime_hour.to_i}:#{lpendtime_minute.to_i}", "%Y-%m-%d %H:%M") + v_offset
+            @lumbarpuncture.lpstarttime = DateTime.strptime("1899-12-30 #{"%02d" % lpstarttime_hour.to_i}:#{"%02d" % lpstarttime_minute.to_i}", "%Y-%m-%d %H:%M") + v_offset
+            @lumbarpuncture.lpfluidstarttime = DateTime.strptime("1899-12-30 #{"%02d" % lpfluidstarttime_hour.to_i}:#{"%02d" % lpfluidstarttime_minute.to_i}", "%Y-%m-%d %H:%M") + v_offset
+            @lumbarpuncture.lpendtime = DateTime.strptime("1899-12-30 #{"%02d" % lpendtime_hour.to_i}:#{"%02d" % lpendtime_minute.to_i}", "%Y-%m-%d %H:%M") + v_offset
 
             @lumbarpuncture.save
 
