@@ -432,20 +432,20 @@ class LumbarpuncturesController < ApplicationController
         respond_to do |format|
           if @lumbarpuncture.update( lumbarpuncture_params[:lumbarpuncture])#params[:lumbarpuncture], :without_protection => true)
            
-            @lumbarpuncture.lpstarttime_hour = lpstarttime_hour.to_i+v_offset
+            @lumbarpuncture.lpstarttime_hour = lpstarttime_hour.to_i
             @lumbarpuncture.lpstarttime_minute = lpstarttime_minute
-            @lumbarpuncture.lpfluidstarttime_hour = lpfluidstarttime_hour.to_i+v_offset
+            @lumbarpuncture.lpfluidstarttime_hour = lpfluidstarttime_hour.to_i
             @lumbarpuncture.lpfluidstarttime_minute = lpfluidstarttime_minute
-            @lumbarpuncture.lpendtime_hour = lpendtime_hour.to_i+v_offset
+            @lumbarpuncture.lpendtime_hour = lpendtime_hour.to_i
             @lumbarpuncture.lpendtime_minute = lpendtime_minute
 
             # puts "once we get down here, start time: #{DateTime.strptime("1899-12-30 #{lpstarttime_hour.to_i+v_offset}:#{lpstarttime_minute}", "%Y-%m-%d %H:%M")}"
             # puts "fluid time: #{DateTime.strptime("1899-12-30 #{lpfluidstarttime_hour.to_i+v_offset}:#{lpfluidstarttime_minute}", "%Y-%m-%d %H:%M")}"
             # puts "end time: #{DateTime.strptime("1899-12-30 #{lpendtime_hour.to_i+v_offset}:#{lpendtime_minute}", "%Y-%m-%d %H:%M")}"
             
-            @lumbarpuncture.lpstarttime = DateTime.strptime("1899-12-30 #{lpstarttime_hour.to_i+v_offset}:#{lpstarttime_minute}", "%Y-%m-%d %H:%M")
-            @lumbarpuncture.lpfluidstarttime = DateTime.strptime("1899-12-30 #{lpfluidstarttime_hour.to_i+v_offset}:#{lpfluidstarttime_minute}", "%Y-%m-%d %H:%M")
-            @lumbarpuncture.lpendtime = DateTime.strptime("1899-12-30 #{lpendtime_hour.to_i+v_offset}:#{lpendtime_minute}", "%Y-%m-%d %H:%M")
+            @lumbarpuncture.lpstarttime = DateTime.strptime("1899-12-30 #{lpstarttime_hour.to_i}:#{lpstarttime_minute.to_i}", "%Y-%m-%d %H:%M") + v_offset
+            @lumbarpuncture.lpfluidstarttime = DateTime.strptime("1899-12-30 #{lpfluidstarttime_hour.to_i}:#{lpfluidstarttime_minute.to_i}", "%Y-%m-%d %H:%M") + v_offset
+            @lumbarpuncture.lpendtime = DateTime.strptime("1899-12-30 #{lpendtime_hour.to_i}:#{lpendtime_minute.to_i}", "%Y-%m-%d %H:%M") + v_offset
 
             @lumbarpuncture.save
 

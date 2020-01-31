@@ -57,13 +57,13 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
         <div>Procedure Time</div>
 
         <%= f.label(:Initial_needle_insertion_time,'Initial Needle Insertion Time') %>
-        <%= select_time( @lumbarpuncture.lpstarttime,:field_name =>'lpstartt][', :include_blank => true) %>
+        <%= select_time( @lumbarpuncture.lpstarttime.in_time_zone('UTC'),:field_name =>'lpstartt][', :include_blank => true) %>
         <br>
         <%= f.label(:Fluid_Collection_Start_Time,'Fluid Collection Start Time') %>
-        <%= select_time( @lumbarpuncture.lpfluidstarttime,:field_name =>'lpfluidstartt][', :include_blank => true) %>
+        <%= select_time( @lumbarpuncture.lpfluidstarttime.in_time_zone('UTC'),:field_name =>'lpfluidstartt][', :include_blank => true) %>
         <br>
         <%= f.label(:Final_Needle_Removal_Time,'Final Needle Removal Time') %>
-        <%= select_time( @lumbarpuncture.lpendtime,:field_name =>'lpendt][', :include_blank => true) %>
+        <%= select_time( @lumbarpuncture.lpendtime.in_time_zone('UTC'),:field_name =>'lpendt][', :include_blank => true) %>
       </div>
       <div class='p-2' style='padding:0.5em;'>
         <div>Blood Pressure (sitting)</div>
