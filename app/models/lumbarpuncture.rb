@@ -14,9 +14,9 @@ class Lumbarpuncture < ActiveRecord::Base
     	{
       :Lumbarpuncture_appt_date => appointment.appointment_date,
        :Appt_Coordinator =>@appointment.appointment_coordinator.blank? ? "" : Employee.find(@appointment.appointment_coordinator).name,
-      :LP_Initial_needle_insertion_Time => lpstarttime.nil? ? nil : lpstarttime.hour.to_s.rjust(2,'0')+":"+lpstarttime.min.to_s.rjust(2,'0'),
-  	  :Fluid_Collection_Start_Time => lpfluidstarttime.nil? ? nil : lpfluidstarttime.hour.to_s.rjust(2,'0')+":"+lpfluidstarttime.min.to_s.rjust(2,'0'),
-   	  :LP_final_needle_removal_Time => lpendtime.nil? ? nil : lpendtime.hour.to_s.rjust(2,'0')+":"+lpendtime.min.to_s.rjust(2,'0'),
+      :LP_Initial_needle_insertion_Time => lpstarttime.nil? ? nil : lpstarttime.in_time_zone('UTC').hour.to_s.rjust(2,'0')+":"+lpstarttime.in_time_zone('UTC').min.to_s.rjust(2,'0'),
+  	  :Fluid_Collection_Start_Time => lpfluidstarttime.nil? ? nil : lpfluidstarttime.in_time_zone('UTC').hour.to_s.rjust(2,'0')+":"+lpfluidstarttime.in_time_zone('UTC').min.to_s.rjust(2,'0'),
+   	  :LP_final_needle_removal_Time => lpendtime.nil? ? nil : lpendtime.in_time_zone('UTC').hour.to_s.rjust(2,'0')+":"+lpendtime.in_time_zone('UTC').min.to_s.rjust(2,'0'),
 
       :LP_Fast_Completed => completedlpfast == 1 ? "Yes" : "No",
      :LP_Fast_Total_time_range => lpfasttotaltime_range.nil?  ? nil : lpfasttotaltime_range,
