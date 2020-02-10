@@ -635,7 +635,7 @@ class LumbarpuncturesController < ApplicationController
           # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
           @column_number =   @column_headers.size
           @fields =["vgroups.completedlumbarpuncture", "CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'yes' ELSE 'no' end" ,"CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'yes' WHEN 2 THEN 'unk' ELSE 'no' end ","lumbarpunctures.lpfollownote",
-            "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'yes' ELSE 'no' end","lumbarpunctures.followupheadache","lumbarpunctures.needlesize",
+            "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'yes' ELSE 'no' end","lumbarpunctures.followupheadache","CONCAT(lumbarpunctures.lpneedle_gauge, ' x ',lumbarpunctures.lpneedle_length)",
             "lumbarpunctures.lumbarpuncture_note","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
           @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
         else
@@ -645,13 +645,26 @@ class LumbarpuncturesController < ApplicationController
               'Post-LP Headache','Post-LP Headache-Date Resolved','Post-LP Headache-Severity','Post-LP Headache-Note',
               'Post-LP Low Back Pain','Post-LP Low Back Pain-Date Resolved','Post-LP Low Back Pain-Severity','Post-LP Low Back Pain-Note',
               'Post-LP Other Side Effects','Post-LP Other Side Effects-Date Resolved','Post-LP Other Side Effects-Severity','Post-LP Other Side Effects-Note',
-              'Needle Size','Needle Type','Needle Type -Other','LP Position','LP Method',
+              'Needle Length','Needle Gauge','Needle Type','Needle Type -Other','LP Position','LP Method',
               'Initial Needle Insertion Hour',
                'Initial Needle Insertion Minute','Fluid Collection Start Hour','Fluid Collection Start Minute','Final Needle Removal Hour', 'Final Needle Removal Minute',
                 'CSF Amount Collected (ml)','CSF Initial Amount Stored (ml)','CSF Nucleated Cell Count','CSF Red Cell Count','Cell Count Remarks',
                 'If LP unsuccessful-Unable to access CSF','If LP unsuccessful-Participant pain/discomfort','If LP unsuccessful-Participant vasovagal','If LP unsuccessful-Other',
+                "Complications - headache",
+                  "Complications - other",
+                  "Complications - pain",
+                  "Complications - radiculopathy",
+                  "Complications - vasovagal",
+                  "Complications - other specify",
+                  "Amount of lidocaine administered",
+                  "Position - sitting",
+                  "Position - decubitus",
+                  "Method - gravity",
+                  "Method - aspiration",
+                  "Amount collected - gravity",
+                  "Amount collected - aspiration",
                 'LP Data entered by','LP Data entry date','LP Data QCed by','LP Data QCed date',
-               'LP Note','BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt', 'Appt Note'] # need to look up values
+               'LP Note', 'Preanalytic protocol', 'Form version', 'BP Systol','BP Diastol','Pulse','Blood Glucose','Age at Appt', 'Appt Note'] # need to look up values
               # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
               @column_number =   @column_headers.size
               @fields =["CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'Yes' WHEN 2 THEN 'unk' ELSE 'No' end ","CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'Yes' ELSE 'No' end" ,"lumbarpunctures.lpfollownote",
@@ -664,7 +677,7 @@ class LumbarpuncturesController < ApplicationController
                 "lumbarpunctures.followupheadache","DATE_FORMAT(lumbarpunctures.lpheadache_dateresolved,'%Y-%m-%d')","lumbarpunctures.lpheadache_severity","lumbarpunctures.lpheadache_note",
                 "lumbarpunctures.lplowbackpain","DATE_FORMAT(lumbarpunctures.lplowbackpain_dateresolved,'%Y-%m-%d')","lumbarpunctures.lplowbackpain_severity","lumbarpunctures.lplowbackpain_note",
                 "lumbarpunctures.lpothersideeffects","DATE_FORMAT(lumbarpunctures.lpothersideeffects_dateresolved,'%Y-%m-%d')","lumbarpunctures.lpothersideeffects_severity","lumbarpunctures.lpothersideeffects_note",
-                "lumbarpunctures.needlesize",
+                "lumbarpunctures.lpneedle_gauge","lumbarpunctures.lpneedle_length",
                 "lumbarpunctures.lpneedletype","lumbarpunctures.lpneedletype_other","lumbarpunctures.lpposition","lumbarpunctures.lpmethod",
                 "lumbarpunctures.lpstarttime_hour","lumbarpunctures.lpstarttime_minute","lumbarpunctures.lpfluidstarttime_hour","lumbarpunctures.lpfluidstarttime_minute",
                 "lumbarpunctures.lpendtime_hour","lumbarpunctures.lpendtime_minute",
@@ -672,9 +685,23 @@ class LumbarpuncturesController < ApplicationController
                  "CASE lumbarpunctures.lpcsfunsuccessful_noaccess WHEN 1 THEN 'yes' ELSE '' end",
                  "CASE lumbarpunctures.lpcsfunsuccessful_pain WHEN 1 THEN 'yes' ELSE '' end",
                  "CASE lumbarpunctures.lpcsfunsuccessful_vasovagal WHEN 1 THEN 'yes' ELSE '' end","lumbarpunctures.lpcsfunsuccessful_other_specify",
+                 "lumbarpunctures.lpcomplications_headache",
+                  "lumbarpunctures.lpcomplications_other",
+                  "lumbarpunctures.lpcomplications_pain",
+                  "lumbarpunctures.lpcomplications_radiculopathy",
+                  "lumbarpunctures.lpcomplications_vasovagal",
+                  "lumbarpunctures.lpcomplications_other_specify",
+                  "lumbarpunctures.lpamountoflidocaine",
+                  "lumbarpunctures.lpposition_sitting",
+                  "lumbarpunctures.lpposition_decubitus",
+                  "lumbarpunctures.lpmethod_gravity",
+                  "lumbarpunctures.lpmethod_aspiration",
+                  "lumbarpunctures.lpmethod_gravity_collected",
+                  "lumbarpunctures.lpmethod_aspiration_collected",
                  "concat(u2.first_name,' ',u2.last_name)", "DATE_FORMAT(lumbarpunctures.lp_data_entered_date,'%Y-%m-%d')",
                  "concat(u3.first_name,' ',u3.last_name)", "DATE_FORMAT(lumbarpunctures.lp_data_qced_date,'%Y-%m-%d')",
-                "lumbarpunctures.lumbarpuncture_note","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
+                "lumbarpunctures.lumbarpuncture_note", "lumbarpunctures.preanalytic_protocol", "lumbarpunctures.form_version","vitals.bp_systol","vitals.bp_diastol","vitals.pulse","vitals.bloodglucose","appointments.age_at_appointment","appointments.comment"] # vgroups.id vgroup_id always first, include table name
+
               @left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id",
                 "LEFT JOIN users u2 on lumbarpunctures.lp_data_entered_by = u2.id  ",
                 "LEFT JOIN users u3 on lumbarpunctures.lp_data_qced_by = u3.id  ",
@@ -807,7 +834,7 @@ class LumbarpuncturesController < ApplicationController
           :lpcsfunsuccessful_other_specify,:lp_data_entered_by,:lp_data_entered_date,:lp_data_qced_by,:lp_data_qced_date,:lpfasttotaltime_range, 
           :lpcomplications_headache,:lpcomplications_other,:lpcomplications_pain, :lpcomplications_radiculopathy, :lpcomplications_vasovagal, :lpcomplications_other_specify,
           :lpamountoflidocaine, :lpneedle_gauge, :lpneedle_length, :lpposition_sitting, :lpposition_decubitus, :lpmethod_gravity, :lpmethod_aspiration, :lpmethod_gravity_collected,
-          :lpmethod_aspiration_collected, :lpheadache], appointment:[:appointment_date, :appointment_coordinator, :comment],
+          :lpmethod_aspiration_collected, :lpheadache, :preanalytic_protocol, :form_version], appointment:[:appointment_date, :appointment_coordinator, :comment],
           :date =>{:lpstartt =>[], :lpfluidstartt=>[], :lpendt=>[]}) #,:temp_fklumbarpunctureid)
    end 
    def appointment_params

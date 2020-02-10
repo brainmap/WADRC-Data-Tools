@@ -138,9 +138,11 @@ edit_count =   edit_count -1
        <%= show_bool(result[i].to_s ) %>
             <% elsif i == 10 %>
        <%= show_bool(result[i].to_s ) %>
-	    <% elsif i == 11 %>
-	      <td><%= popup_note('peek', key_val_table('path_popup', { :LPNote => result[i].to_s })) unless result[i].to_s.blank? %></td>
+            <% elsif i == 11 %>
+       <%= show_bool(result[i].to_s ) %>
 	    <% elsif i == 12 %>
+	      <td><%= popup_note('peek', key_val_table('path_popup', { :LPNote => result[i].to_s })) unless result[i].to_s.blank? %></td>
+	    <% elsif i == 13 %>
 	      <td><%= popup_note('peek', key_val_table('path_popup', { :ApptNote => result[i].to_s })) unless result[i].to_s.blank? %></td>	
 	    <% else %>
 	    <td><%= result[i] %></td>

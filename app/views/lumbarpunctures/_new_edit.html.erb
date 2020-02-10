@@ -17,6 +17,8 @@ v_position_display = [["Sitting","Sitting"],["Decubitus","Decubitis"]]
 v_method_display = [["Gravity","Gravity"],["Aspiration","Aspiration"],["Aspiration/Gravity","Aspiration/Gravity"]]
 v_yes_no_na_display = [["Yes","yes"], ["No","no"], ["n/a","n/a"]]
 v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moderate(4-6/10)"],["severe(7-10/10)","severe(7-10/10)"] ]
+
+v_preanalytic_protocol = [["Drip A","Drip A"],["Drip A + Blood","Drip A + Blood"],["Drip A + Blood (WRAP only)","Drip A + Blood (WRAP only)"],["Drip B + Blood","Drip B + Blood"],["Pull + Blood","Pull + Blood"],["Pull","Pull"]]
 %>
 <% javascript_tag 'defaults' %>
 <div id="new_edit_form">
@@ -252,6 +254,11 @@ v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moder
         <div>Patient pain/discomfort</div>
         <%= text_area( :lumbarpuncture,:lpcsfunsuccessful_other_specify,:cols => 30, :rows => 10, ) %><br />
 
+        <div>Peranalytic Protocol</div>
+        <%= f.select :preanalytic_protocol, options_for_select(v_preanalytic_protocol, @lumbarpuncture.preanalytic_protocol),{:prompt => 'Select ...'} %><br>
+
+
+    <%=  hidden_field_tag( 'form_version',"E4v5") %>
       </div>
     </div>
   </div>
