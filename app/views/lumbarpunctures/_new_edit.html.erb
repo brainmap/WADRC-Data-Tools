@@ -132,6 +132,15 @@ v_preanalytic_protocol = [["Drip A","Drip A"],["Drip A + Blood","Drip A + Blood"
         <%= text_area( :appointment,:comment,:cols => 30, :rows => 10, :value=>@appointment.comment) %><br />
 
       </div>
+
+      <div class='p-2' style='padding:0.5em;'>
+
+        <%= f.label :QCed_by %><br/>
+        <%= select(:lumbarpuncture,:lp_data_qced_by , User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select who QCed LP data" }) %>
+        <%= f.label :LP_data_QC_date %><br>
+        <%= date_select :lumbarpuncture, :lp_data_qced_date, :include_blank => true, :end_year => Time.now.year + 1 %>
+      </div>        
+
     </div>
     </td><td valign='top'>
     <div class=''>
