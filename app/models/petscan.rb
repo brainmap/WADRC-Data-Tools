@@ -546,6 +546,47 @@ puts "fffff !v_pet_target_path.blank?"
 
   end
 
+  def preprocessed_dir(dir_name='/pet/pib/dvr/code_ver2b')
+
+    if pet_path.nil?
+      return false
+    end
+
+    if pet_path.split("/").length < 9
+      return false
+    end
+
+    #some pet paths are paths to an ecat file, which should end with ".v". These we've got
+    # get the subject id by cutting it out of the ecat name.
+    v_subjectid = ''
+    v_path_array = pet_path.split('/')
+
+    if File.exist?(pet_path) and !File.directory?(pet_path) and pet_path.end_with?(".v")
+      v_subjectid_array = v_path_array[-1].split("_")
+      v_subjectid = v_subjectid_array[0].downcase
+
+    #others are paths to a directory under raw. these should have a subject id as a directory
+    # in the middle of their path
+    elsif File.directory?(pet_path)
+      v_subjectid = v_path_array[7]
+    else
+      return false
+    end
+
+    v_base_path = Shared.get_base_path()
+    v_preprocessed_path = v_base_path+"/preprocessed/visits/"
+
+    v_scan_procedure_codename = v_path_array[4]
+
+    v_subjectid_pet_pib_processed_path = v_preprocessed_path + v_scan_procedure_codename + "/" + v_subjectid + dir_name
+
+    #puts "check path: #{v_subjectid_pet_pib_processed_path} (id:#{self.id})"
+
+    return v_subjectid_pet_pib_processed_path
+
+  end
+
+
   def paths_ok!
     #like paths_ok?, but raises errors that should be caught by the calling function to diagnose weird/bad petfile records
     #scan_files = Petfile.where("petscan_id = ?", self.id)
