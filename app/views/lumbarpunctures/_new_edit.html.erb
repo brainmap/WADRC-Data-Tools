@@ -108,8 +108,8 @@ v_preanalytic_protocol = [["Drip A","Drip A"],["Drip A + Blood","Drip A + Blood"
                           {:prompt => 'Select range'} %> <br>
 
         Time of last intake <small>(except water)</small>
-        <%= f.select :lptimelastintake, options_for_select(0..48, @lumbarpuncture.lptimelastintake),
-                          {:prompt => 'Select hrs'} %> <small>hrs </small>
+        <%= f.select :lptimelastintake, options_for_select(0..48, @lumbarpuncture.lptimelastintake) %>
+        <%= f.select :lptimelastintake_min, options_for_select((0..59).map{|t| "%02d" % t}, ("%02d" % (@lumbarpuncture.lptimelastintake_min.nil? ? 0 : @lumbarpuncture.lptimelastintake_min))) %>
       </div>
       <div class='p-2' style='padding:0.5em;'>
         <div>Intra-procedural Adverse Effects/Complications</div>
@@ -146,11 +146,11 @@ v_preanalytic_protocol = [["Drip A","Drip A"],["Drip A + Blood","Drip A + Blood"
     <div class=''>
       <div class='p-2' style='padding:0.5em;'>
           Amount Collected
-          <%= f.select :lpamountcollected, options_for_select(0...26, @lumbarpuncture.lpamountcollected),{:prompt => 'Select ....'} %> <small>ml</small><br>
+          <%= f.select :lpamountcollected, options_for_select((0...26), @lumbarpuncture.lpamountcollected),{:prompt => 'Select ....'} %> <small>ml</small><br>
           Amount Stored
-          <%= f.select :lpinitialamountstored, options_for_select(0...26, @lumbarpuncture.lpinitialamountstored),{:prompt => 'Select ....'} %><small> ml</small><br>
+          <%= f.select :lpinitialamountstored, options_for_select((0...26), @lumbarpuncture.lpinitialamountstored),{:prompt => 'Select ....'} %><small> ml</small><br>
           Amount of lidocaine administered
-          <%= f.select :lpamountoflidocaine, options_for_select(0...26, @lumbarpuncture.lpamountoflidocaine),{:prompt => 'Select ....'} %><small> ml</small><br>
+          <%= f.select :lpamountoflidocaine, options_for_select((0...26), @lumbarpuncture.lpamountoflidocaine),{:prompt => 'Select ....'} %><small> ml</small><br>
 
       </div>
       <div class='p-2' style='padding:0.5em;'>
@@ -173,9 +173,9 @@ v_preanalytic_protocol = [["Drip A","Drip A"],["Drip A + Blood","Drip A + Blood"
           Position<br>
 
           Sitting
-          <%= select :lumbarpuncture, :lpposition_sitting, v_yes_no_unk_display %><br>
+          <%= select :lumbarpuncture, :lpposition_sitting, v_yes_no_unk_display, {:include_blank => true}%><br>
           Decubitus
-          <%= select :lumbarpuncture, :lpposition_decubitus, v_yes_no_unk_display %><br>
+          <%= select :lumbarpuncture, :lpposition_decubitus, v_yes_no_unk_display, {:include_blank => true}%><br>
 
       </div>
       <div class='p-2' style='padding:0.5em;'>
@@ -184,12 +184,12 @@ v_preanalytic_protocol = [["Drip A","Drip A"],["Drip A + Blood","Drip A + Blood"
           Gravity
           <%= select :lumbarpuncture, :lpmethod_gravity, ["no", "yes", "n/a"] %>
           Amount Collected
-          <%= f.select :lpmethod_gravity_collected, options_for_select(0...26, @lumbarpuncture.lpmethod_gravity_collected),{:prompt => 'Select ....'} %><small> ml</small><br>
+          <%= f.select :lpmethod_gravity_collected, options_for_select((0...26), @lumbarpuncture.lpmethod_gravity_collected),{:prompt => 'Select ....'} %><small> ml</small><br>
 
           Aspiration
           <%= select :lumbarpuncture, :lpmethod_aspiration, ["no", "yes", "n/a"] %>
           Amount Collected
-          <%= f.select :lpmethod_aspiration_collected, options_for_select(0...26, @lumbarpuncture.lpmethod_aspiration_collected),{:prompt => 'Select ....'} %><small> ml</small><br>
+          <%= f.select :lpmethod_aspiration_collected, options_for_select((0...26), @lumbarpuncture.lpmethod_aspiration_collected),{:prompt => 'Select ....'} %><small> ml</small><br>
           <br>
 
       </div>

@@ -147,7 +147,7 @@ class LumbarpuncturesController < ApplicationController
               lumbarpuncture_params[:lumbarpuncture][:lpstarttime_minute] = ''
             if !lumbarpuncture_params[:date][:lpstartt][0].blank? && !lumbarpuncture_params[:date][:lpstartt][1].blank? && !lumbarpuncture_params[:date][:lpstartt][2].blank? && !lumbarpuncture_params[:date][:lpstartt][3].blank? && !lumbarpuncture_params[:date][:lpstartt][4].blank?
 
-               lpstarttime_hour = lumbarpuncture_params[:date][:lpstartt][3]
+               lpstarttime_hour = lumbarpuncture_params[:date][:lpstartt][3].to_i - v_offset
                lpstarttime_minute =lumbarpuncture_params[:date][:lpstartt][4] 
              lumbarpuncture_params[:date][:lpstartt][3] = ((lumbarpuncture_params[:date][:lpstartt][3].to_i)+v_offset).to_s
              if lumbarpuncture_params[:date][:lpstartt][3].to_i > 23
@@ -167,8 +167,8 @@ class LumbarpuncturesController < ApplicationController
           lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime_minute] =''
         if !lumbarpuncture_params[:date][:lpfluidstartt][0].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][1].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][2].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][3].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][4].blank?
           
-               lpfluidstarttime_hour = lumbarpuncture_params[:date][:lpstartt][3]
-               lpfluidstarttime_minute =lumbarpuncture_params[:date][:lpstartt][4] 
+               lpfluidstarttime_hour = lumbarpuncture_params[:date][:lpfluidstartt][3].to_i - v_offset
+               lpfluidstarttime_minute =lumbarpuncture_params[:date][:lpfluidstartt][4] 
           lumbarpuncture_params[:date][:lpfluidstartt][3] = ((lumbarpuncture_params[:date][:lpfluidstartt][3].to_i)+v_offset).to_s
           if lumbarpuncture_params[:date][:lpfluidstartt][3].to_i > 23
                 lumbarpuncture_params[:date][:lpfluidstartt][3] = (lumbarpuncture_params[:date][:lpfluidstartt][3].to_i - 24).to_s
@@ -187,8 +187,8 @@ class LumbarpuncturesController < ApplicationController
           lumbarpuncture_params[:lumbarpuncture][:lpendtime_minute] =''
         if !lumbarpuncture_params[:date][:lpendt][0].blank? && !lumbarpuncture_params[:date][:lpendt][1].blank? && !lumbarpuncture_params[:date][:lpendt][2].blank? && !lumbarpuncture_params[:date][:lpendt][3].blank? && !lumbarpuncture_params[:date][:lpendt][4].blank?
           
-               lpendtime_hour = lumbarpuncture_params[:date][:lpstartt][3]
-               lpendtime_minute =lumbarpuncture_params[:date][:lpstartt][4] 
+               lpendtime_hour = lumbarpuncture_params[:date][:lpendt][3].to_i - v_offset
+               lpendtime_minute =lumbarpuncture_params[:date][:lpendt][4] 
           lumbarpuncture_params[:date][:lpendt][3] = ((lumbarpuncture_params[:date][:lpendt][3].to_i)+v_offset).to_s
           if lumbarpuncture_params[:date][:lpendt][3].to_i > 23
                 lumbarpuncture_params[:date][:lpendt][3] = (lumbarpuncture_params[:date][:lpendt][3].to_i - 24).to_s
@@ -247,11 +247,11 @@ class LumbarpuncturesController < ApplicationController
           @vgroup.save
 
 
-            @lumbarpuncture.lpstarttime_hour = lpstarttime_hour.to_i+v_offset
+            @lumbarpuncture.lpstarttime_hour = lpstarttime_hour.to_i #+v_offset
             @lumbarpuncture.lpstarttime_minute = lpstarttime_minute
-            @lumbarpuncture.lpfluidstarttime_hour = lpfluidstarttime_hour.to_i+v_offset
+            @lumbarpuncture.lpfluidstarttime_hour = lpfluidstarttime_hour.to_i #+v_offset
             @lumbarpuncture.lpfluidstarttime_minute = lpfluidstarttime_minute
-            @lumbarpuncture.lpendtime_hour = lpendtime_hour.to_i+v_offset
+            @lumbarpuncture.lpendtime_hour = lpendtime_hour.to_i #+v_offset
             @lumbarpuncture.lpendtime_minute = lpendtime_minute
 
             # puts "once we get down here, start time: #{DateTime.strptime("1899-12-30 #{lpstarttime_hour.to_i+v_offset}:#{lpstarttime_minute}", "%Y-%m-%d %H:%M")}"
