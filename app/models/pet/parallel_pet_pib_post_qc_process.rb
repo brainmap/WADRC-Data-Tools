@@ -265,7 +265,7 @@ class Pet::ParallelPetPibPostQcProcess < Pet::ParallelPetProcess
       #write out the csv
       require 'csv'
       filename_suffix = p[:dry_run] ? "_dry_run" : ""
-      pet_csv = "/mounts/data/preprocessed/logs/parallel_driver/#{Date.today.strftime("%Y-%m-%d")}_parallel_pet_#{v_pettracer.name.downcase}_driver#{filename_suffix}.csv"
+      pet_csv = "/mounts/data/preprocessed/logs/parallel_driver/#{Date.today.strftime("%Y-%m-%d")}_parallel_pet_#{v_pettracer.name.downcase}_#{p[:method].downcase}_driver#{filename_suffix}.csv"
       CSV.open(pet_csv, 'wb', row_sep: "\n", encoding: "UTF-8") do |writer|
 
 
