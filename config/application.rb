@@ -26,7 +26,7 @@ module WADRCDataTools
 
     # Custom directories with classes and modules you want to be autoloadable.
     config.autoload_paths += %W(#{config.root}/lib)
-    # config.autoload_paths += %W(#{config.root}/forms)
+    config.autoload_paths += %W(#{config.root}/forms)
 
     #also, the extensions that used to be in metamri, and now stay in Panda "for real life"
     config.autoload_paths += Dir[File.join(Rails.root, "lib", "extensions.rb")].each {|l| require l }
