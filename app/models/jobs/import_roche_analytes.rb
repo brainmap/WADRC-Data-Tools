@@ -12,7 +12,8 @@ class Jobs::ImportRocheAnalytes < Jobs::BaseJob
 	  				:xlsx_filename => "Local Roche Master Run.xlsx",
 	  				:csv_path => "/mounts/data/analyses/panda_user/lp_roche_data",
 	  				:csv_filename => "Local Roche Master Run.csv",
-	  				:roche_table => "cg_csf_local_roche_analytes"
+	  				:roche_table => "cg_csf_local_roche_analytes",
+	  				:dry_run => false
 	  			}
         params.default = ''
         params
@@ -81,6 +82,9 @@ class Jobs::ImportRocheAnalytes < Jobs::BaseJob
 
 		csv = CSV.read("#{params[:csv_path]}/#{params[:csv_filename]}", :headers => true)
 
+		sql = "truncate table #{params[:roche_table]}_new"
+		@connection.execute(sql)
+
 		csv.each do |row|
 
 			roche_form = CsfAnalyteForm.from_csv(row)
@@ -90,10 +94,11 @@ class Jobs::ImportRocheAnalytes < Jobs::BaseJob
 			end
 
 			begin
-
 				sql = roche_form.to_sql_insert("#{params[:roche_table]}_new")
 				puts "#{sql}"
-				@connection.execute(sql)
+				if !params[:dry_run]
+					@connection.execute(sql)
+				end
 
 			rescue ArgumentError => e
 				puts "there was an error: #{e.message}, with: #{row.to_s}"
