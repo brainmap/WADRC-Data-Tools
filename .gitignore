@@ -20,4 +20,6 @@ lib/CLUs
 public/system/**/*
 config/database.yml
 config/ldap.yml
+config/secrets.yml
+config/initializers/devise.rb
 .bundle\n
