@@ -22,4 +22,5 @@ config/database.yml
 config/ldap.yml
 config/secrets.yml
 config/initializers/devise.rb
+config/deplo*
 .bundle\n
