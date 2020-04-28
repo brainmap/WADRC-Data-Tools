@@ -46,6 +46,10 @@ class Jobs::Pet::CentiloidsHarvester < Jobs::BaseJob
 	end
 
 	def setup(params)
+
+		sql = "truncate #{params[:centiloid_table]}_new"
+		@connection.execute(sql)
+
 		@pettracer = LookupPettracer.where("id = ?",params[:tracer_id]).first
 
 		@tracer_path = "/pet/#{@pettracer.name.downcase}/#{params[:method]}/code_ver2b"
@@ -53,15 +57,7 @@ class Jobs::Pet::CentiloidsHarvester < Jobs::BaseJob
 		@preprocessed_path = params[:base_path]+"/preprocessed/visits/"
 		@secondary_key_array =["b","c","d","e",".R"]
 
-	end
-	
-	def harvest(params)
-
-		if params[:write_to_sql]
-			sql_file = File.open("#{params[:sql_path]}/#{params[:sql_filename]}",'wb')
-		end
-
-		@scan_procedures = []
+		# @scan_procedures = []
 		
 		if !params[:sp_blacklist].blank?
 			@scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", params[:sp_blacklist])
@@ -70,6 +66,15 @@ class Jobs::Pet::CentiloidsHarvester < Jobs::BaseJob
 		else
 			@scan_procedures = ScanProcedure.all()
 		end
+	end
+	
+	def harvest(params)
+
+		if params[:write_to_sql]
+			sql_file = File.open("#{params[:sql_path]}/#{params[:sql_filename]}",'wb')
+		end
+
+		self.log << "there are #{@scan_procedures.count} scan procedures to loop over"
 
 		@scan_procedures.each do |sp|
 			self.log << "start "+sp.codename
