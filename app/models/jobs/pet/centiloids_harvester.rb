@@ -62,10 +62,13 @@ class Jobs::Pet::CentiloidsHarvester < Jobs::BaseJob
 		end
 
 		@scan_procedures = []
-		if !params[:sp_whitelist].blank?
+		
+		if !params[:sp_blacklist].blank?
+			@scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", params[:sp_blacklist])
+		elsif !params[:sp_whitelist].blank?
 			@scan_procedures = ScanProcedure.where("scan_procedures.id in (?)", params[:sp_whitelist])
 		else
-			@scan_procedures = ScanProcedure.where("scan_procedures.id not in (?)", params[:sp_blacklist])
+			@scan_procedures = ScanProcedure.all()
 		end
 
 		@scan_procedures.each do |sp|
