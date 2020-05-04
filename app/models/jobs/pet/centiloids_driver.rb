@@ -13,7 +13,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
                 tracer_id: 1,
                 method: "suvr",
                 run_by_user: "panda_user",
-                qc_tracker_id: 10 #pib suvr
+                qc_tracker_id: 10, #pib suvr
                 dry_run: false
     		}
         params.default = ''
