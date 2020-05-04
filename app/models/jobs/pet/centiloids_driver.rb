@@ -94,7 +94,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 					#if there is one, let's add it to the list under this subject
 					enrollment = pet_appt.appointment.vgroup.enrollments.first
 					scan_procedure_codename = pet_appt.appointment.vgroup.scan_procedures.first.codename
-					analysis_log_path = "#{path}/#{analysis_logs.first}"
+					analysis_log_path = "#{analysis_logs.first}"
 					output_path = "#{path}/#{enrollment.enumber}_centiloids-log_#{@pettracer.name.downcase}_#{params[:method]}_#{scan_procedure_codename}.csv"
 
 					@driver[enrollment.enumber] = {:analysis_log => analysis_log_path,:output => output_path}
