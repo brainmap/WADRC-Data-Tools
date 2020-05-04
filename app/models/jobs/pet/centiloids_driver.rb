@@ -14,6 +14,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
                 method: "suvr",
                 run_by_user: "panda_user",
                 qc_tracker_id: 10 #pib suvr
+                dry_run: false
     		}
         params.default = ''
         params
@@ -122,7 +123,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 	def cleanup_centiloids_products(petscan_path,globs=["*centiloids-log*.csv","*centiloid*.csv.error"])
 		globs.each do |glob_pattern|
 			matching_products = Dir.glob("#{petscan_path}#{glob_pattern}")
-			matching_products.each do product_path
+			matching_products.each do |product_path|
 				File.open(product_path, 'r') do |f|
 					File.delete(f)
 				end
