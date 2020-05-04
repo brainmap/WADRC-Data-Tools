@@ -75,8 +75,8 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 			if pet_appt.paths_ok? and pet_appt.preprocessed_dir_exists?(@preprocessed_tracer_path)
 				#then look for a *analysis-log*.mat file in the preprocessed dir. 
 				path = pet_appt.preprocessed_dir(@preprocessed_tracer_path)
-				analysis_logs = Dir.glob("*analysis-log*.mat",:base => path)
-				centiloids_logs = Dir.glob("*centiloids-log*.csv",:base => path)
+				analysis_logs = Dir.glob("#{path}/*analysis-log*.mat")
+				centiloids_logs = Dir.glob("#{path}/*centiloids-log*.csv")
 
 				# We're also going to need only QC'd images, so if there isn't a QC pass in the tracker for a processed image
 				# in this dir, fail the case.
@@ -121,7 +121,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 
 	def cleanup_centiloids_products(petscan_path,globs=["*centiloids-log*.csv","*centiloid*.csv.error"])
 		globs.each do |glob_pattern|
-			matching_products = Dir.glob(glob_pattern,:base => petscan_path)
+			matching_products = Dir.glob("#{petscan_path}#{glob_pattern}")
 			matching_products.each do product_path
 				File.open(product_path, 'r') do |f|
 					File.delete(f)
