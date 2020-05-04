@@ -12,6 +12,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
     			computer: "merida",
                 tracer_id: 1,
                 method: "suvr",
+                run_by_user: "panda_user",
                 qc_tracker_id: 10 #pib suvr
     		}
         params.default = ''
@@ -118,11 +119,22 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 		end
 	end
 
+	def cleanup_centiloids_products(petscan_path,globs=["*centiloids-log*.csv","*centiloid*.csv.error"])
+		globs.each do |glob_pattern|
+			matching_products = Dir.glob(glob_pattern,:base => petscan_path)
+			matching_products.each do product_path
+				File.open(product_path, 'r') do |f|
+					File.delete(f)
+				end
+			end
+		end
+	end
+
 	def write_driver(params)
 		#write out the csv
 		require 'csv'
-		filename_suffix = params[:dry_run] ? "_dry_run" : ""
-		@centiloid_csv = "#{params[:base_path]}/preprocessed/logs/parallel_driver/#{Date.today.strftime("%Y-%m-%d")}_#{@pettracer.name.downcase}_#{params[:method]}_centiloids_driver#{filename_suffix}.csv"
+		filename_suffix = !!!(params[:dry_run]) ? "_dry_run" : ""
+		@centiloid_csv = "#{params[:base_path]}preprocessed/logs/parallel_driver/#{Date.today.strftime("%Y-%m-%d")}_#{@pettracer.name.downcase}_#{params[:method]}_centiloids_driver#{filename_suffix}.csv"
 		CSV.open(@centiloid_csv, 'wb', row_sep: "\n", encoding: "UTF-8") do |writer|
 
         	writer << ["analysis_log", "output_path"].map{|s| s.encode("UTF-8")}
@@ -138,27 +150,24 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 
 			#this is code from the pet driver. make the call something like this
 
-	        # pet_scripts_dir="/mounts/data/analyses/tjbetthauser/MATLAB_Mac/pet_proc_v2b/batch_parallel"
+	        pet_scripts_dir="/mounts/data/analyses/rvcadman/centiloidcalc"
+	        matlab_template = "export MATLABPATH=$MATLABPATH:#{pet_scripts_dir}" + " && matlab -nodesktop -nosplash -r \\\"try %{command}; catch exception; display(getReport(exception)); pause(1); end; exit;\\\""
+	        matlab_command = matlab_template % {command: "computecentiloid('#{@centiloid_csv}','#{@pettracer.name.downcase}','#{params[:method]}')"}
+	        v_computer = params[:computer]
+	        v_call =  "ssh panda_user@#{v_computer}.dom.wisc.edu \"#{matlab_command}\""
 
-	        # matlab_template = "export MATLABPATH=$MATLABPATH:#{pet_scripts_dir}" + " && matlab -nodesktop -nosplash -r \\\"try %{command}; catch exception; display(getReport(exception)); pause(1); end; exit;\\\""
-	        # matlab_command = matlab_template % {command: "batch_pet_parallel_auto('#{centiloid_csv}','#{v_pettracer.name.downcase}','#{params[:method]}')"}
-	        # v_computer = params[:computer]
-	        # v_call =  "ssh panda_user@#{v_computer}.dom.wisc.edu \"#{matlab_command}\""
-
-	        # v_comment = v_comment + v_call+"\n"
-	        # @schedulerun.comment = v_comment
-	        # @schedulerun.save
-	        # begin
-	        #   stdin, stdout, stderr = Open3.popen3(v_call)
-	        #   rescue => msg  
-	        #   v_comment = v_comment + msg.to_s + "\n"  
-	        # end
-	        # # v_success ="N"
-	        # while !stdout.eof?
-	        #   v_output = stdout.read 1024 
-	        #   #  v_comment = v_comment + v_output  
-	        #   puts v_output  
-	        # end
+	        self.log << "calling #{v_call}"
+	        begin
+	          stdin, stdout, stderr = Open3.popen3(v_call)
+	          rescue => msg  
+	        	self.error_log << "error #{msg.to_s}"
+	        end
+	        # v_success ="N"
+	        while !stdout.eof?
+	          v_output = stdout.read 1024 
+	          #  v_comment = v_comment + v_output  
+	          self.log << v_output  
+	        end
 		end
 	end
 	
