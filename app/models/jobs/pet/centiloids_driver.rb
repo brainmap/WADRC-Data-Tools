@@ -9,7 +9,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 	def self.default_params
 		params = { schedule_name: 'centiloids_driver',
 				base_path: "/mounts/data/", 
-    			computer: "merida",
+    			computer: "kanga",
                 tracer_id: 1,
                 method: "suvr",
                 run_by_user: "panda_user",

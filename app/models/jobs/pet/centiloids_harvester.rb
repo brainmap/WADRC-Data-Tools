@@ -9,7 +9,7 @@ class Jobs::Pet::CentiloidsHarvester < Jobs::BaseJob
 	def self.default_params
 		params = { schedule_name: 'centiloids_harvester',
 				base_path: "/mounts/data/", 
-    			computer: "merida",
+    			computer: "kanga",
                 tracer_id: 1,
                 method: "suvr",
                 dry_run: false,
