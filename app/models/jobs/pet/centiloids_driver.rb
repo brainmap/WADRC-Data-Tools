@@ -148,6 +148,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 	
 	def matlab_call(params)
 		if !!!(params[:dry_run])
+			require 'open3'
 
 			#this is code from the pet driver. make the call something like this
 
