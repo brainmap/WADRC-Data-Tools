@@ -98,7 +98,9 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 					analysis_log_path = "#{analysis_logs.first}"
 					output_path = "#{path}/#{enrollment.enumber}_centiloids-log_#{@pettracer.name.downcase}_#{params[:method]}_#{scan_procedure_codename}.csv"
 
-					@driver[enrollment.enumber] = {:analysis_log => analysis_log_path,:output => output_path}
+					# The key to the driver should be the preprocessed path, not the enumber, because enumbers can
+					# have multiple enrollments.
+					@driver[path] = {:analysis_log => analysis_log_path,:output => output_path}
 
 					self.outputs << "< #{pet_appt.class} id:#{pet_appt.id} output_path:#{output_path}>"
 				else 
