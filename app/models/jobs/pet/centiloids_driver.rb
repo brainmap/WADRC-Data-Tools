@@ -122,7 +122,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 
 	def cleanup_centiloids_products(petscan_path,globs=["*centiloids-log*.csv","*centiloid*.csv.error"])
 		globs.each do |glob_pattern|
-			matching_products = Dir.glob("#{petscan_path}#{glob_pattern}")
+			matching_products = Dir.glob("#{petscan_path}/#{glob_pattern}")
 			matching_products.each do |product_path|
 				File.delete(product_path)
 			end
