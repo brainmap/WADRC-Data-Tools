@@ -280,6 +280,15 @@ v_user = v_user.gsub("\n","")
      job2_params = Pet::ParallelPetProcess.mk6240_params
      job2.run(job2_params)
 
+  elsif v_value_1 == 'centiloids_pipeline'
+     job1_params = Jobs::Pet::CentiloidsDriver.default_params
+     job1 = Jobs::Pet::CentiloidsDriver.new(job1_params)
+     job1.run(job1_params)
+
+     job2_params = Jobs::Pet::CentiloidsHarvester.default_params
+     job2 = Jobs::Pet::CentiloidsHarvester.new(job2_params)
+     job2.run(job2_params)
+
   elsif v_value_1 == "pcvipr_ica_harvest"
 
     job = Pcvipr::PcviprIcaHarvest.new
