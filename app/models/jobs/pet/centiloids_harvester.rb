@@ -5,6 +5,8 @@ class Jobs::Pet::CentiloidsHarvester < Jobs::BaseJob
   attr_accessor :preprocessed_path
   attr_accessor :secondary_key_array
   attr_accessor :scan_procedures
+  attr_accessor :petscans
+
 
 	def self.default_params
 		params = { schedule_name: 'centiloids_harvester',
@@ -74,132 +76,78 @@ class Jobs::Pet::CentiloidsHarvester < Jobs::BaseJob
 			sql_file = File.open("#{params[:sql_path]}/#{params[:sql_filename]}",'wb')
 		end
 
-		self.log << "there are #{@scan_procedures.count} scan procedures to loop over"
+		@petscans = Jobs::Pet::Petscan.where("petscans.lookup_pettracer_id in (?) 
+                   and petscans.good_to_process_flag = 'Y'
+                   and petscans.appointment_id in 
+                     ( select appointments.id from appointments, vgroups 
+                        where appointments.vgroup_id = vgroups.id 
+                         and vgroups.transfer_pet in ('no','yes') )
+                  and petscans.appointment_id in (select appointments.id from appointments, scan_procedures_vgroups
+                  where appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
+                  and scan_procedures_vgroups.scan_procedure_id in (?))",params[:tracer_id],@scan_procedures.map(&:id))
 
-		@scan_procedures.each do |sp|
-			self.log << "start "+sp.codename
-			v_visit_number = sp.visit_abbr
-			v_codename_hyphen =  sp.codename.gsub(".","-")
-			v_preprocessed_full_path = @preprocessed_path+sp.codename
-        	if File.directory?(v_preprocessed_full_path)
+		self.log << "there are #{@petscans.count} petscans to look in for products"
 
-        		enrollment_conditions = ''
-        		if sp.subjectid_base.include? "-"
-        			enrollment_conditions = sp.subjectid_base.split('-').map{|sp_base| "enrollments.enumber like '#{sp_base}%'"}.join(" or ")
-        		else
-        			enrollment_conditions = "enrollments.enumber like '#{sp.subjectid_base}%'"
-        		end
+		@petscans.each do |pet_appt|
+			print "."
+			if pet_appt.paths_ok? and pet_appt.preprocessed_dir_exists?(@preprocessed_tracer_path)
 
-        		enrollments = Enrollment.joins("LEFT JOIN enrollment_vgroup_memberships ON enrollment_vgroup_memberships.enrollment_id = enrollments.id")
-                              .joins("LEFT JOIN scan_procedures_vgroups ON scan_procedures_vgroups.vgroup_id = enrollment_vgroup_memberships.vgroup_id")
-                              .where("scan_procedures_vgroups.scan_procedure_id = #{sp.id.to_s}")
-                              .where(enrollment_conditions)
-                              .uniq
-                self.log << "we got #{enrollments.count} for #{sp.codename}"
+				path = pet_appt.preprocessed_dir(@preprocessed_tracer_path)
+				centiloids_logs = Dir.glob("#{path}/*centiloids-log*.csv")
+				centiloids_errors = Dir.glob("#{path}/*centiloid*.csv.error")
 
-          		enrollments.each do |enrollment|
-	                self.log << "starting #{enrollment.enumber}"
-	                print "."
+		        if centiloids_logs.count > 0
+		        	centiloid_file_name = centiloids_logs.first
+		            print "*"
+			        self.log << "centiloid.csv is #{centiloid_file_name}"
 
-		            v_subjectid_path = v_preprocessed_full_path+"/"+enrollment.enumber
-		            v_subjectid_v_num = enrollment.enumber + v_visit_number
+			        #let's also get the petscan for this directory
+			        vgroups = enrollment.vgroups.select{|vgroup| vgroup.scan_procedures.map(&:codename).include? sp.codename}.flatten
+			        csv = CSV.open(centiloid_file_name,:headers => true)
+			        centiloid_form = CentiloidForm.from_csv(csv, params[:method], centiloid_file_name, pet_appt)
 
-		            v_subjectid_pet_tracer_path = v_subjectid_path+@tracer_path
-		            v_subjectid_array = []
+					sql = ''
+					if !centiloid_form.valid?
+						@error_rows << centiloid_form
+					end
 
-		            #sometimes there are _2 etc. visits, like if they've got to rescan the person
-		            begin
-		                if File.directory?(v_subjectid_pet_tracer_path)
-		                    v_subjectid_array.push(enrollment.enumber)
-		                end
-		                @secondary_key_array.each do |k|
-		                    if File.directory?(v_subjectid_path+k+@tracer_path)
-		                        v_subjectid_array.push((enrollment.enumber+k))
-		                        v_subjectid_v_num = enrollment.enumber+k + v_visit_number
-		                        v_subjectid_path = v_preprocessed_full_path+"/"+enrollment.enumber+k
-		                        v_subjectid_pet_tracer_path =v_subjectid_path+@tracer_path
-		                    end
-		                end
-		            rescue => msg  
-		                self.log << "IN RESCUE ERROR: #{msg}"
-		            end
-		            v_subjectid_array = v_subjectid_array.uniq
+					begin
 
-		            v_subjectid_array.each do |subj|
-		            	v_secondary_key =""
-		            	if subj != enrollment.enumber
-		            		v_secondary_key = subj.gsub(enrollment.enumber,"")
-		            	end
+						sql = centiloid_form.to_sql_insert("#{params[:centiloid_table]}_new")
+						puts "#{sql}"
+						if !params[:dry_run]
+							@connection.execute(sql)
+						end
+						if params[:write_to_sql]
+							sql_file.write("#{sql}\n")
+						end
 
-		            	v_subjectid = subj
-		            	v_subjectid_v_num = subj + v_visit_number
-		            	v_subjectid_path = v_preprocessed_full_path+"/"+subj
-		            	v_subjectid_pet_tracer_path =v_subjectid_path+@tracer_path
+					rescue ArgumentError => e
+						self.error_log << "#{e.message}, with: #{centiloid_file_name}"
+					end
+				end
 
-		            	if File.directory?(v_subjectid_pet_tracer_path)
+				# we also need to scan for error logs for this 
+		        if centiloids_errors.count > 0
+		        	centiloid_error_file_name = centiloids_errors.first
+		            print "_"
+			        self.log << "centiloid.csv.error is #{centiloid_error_file_name}"
 
-		            		centiloid_file_name = Dir.glob(v_subjectid_pet_tracer_path + "/*centiloid*.csv").first
-		            		centiloid_error_file_name = Dir.glob(v_subjectid_pet_tracer_path + "/*centiloid*.csv.error").first
+			        error_csv = CSV.open(centiloid_error_file_name,:headers => true)
+			        error_values = {}
+					error_csv.each do |row|
+						error_values[row["Description"]] = row["Value"]
+					end
 
-		            		if !centiloid_file_name.nil?
-		            			print "*"
-			            		self.log << "centiloid.csv is #{centiloid_file_name}"
-
-			            		#let's also get the petscan for this directory
-			            		vgroups = enrollment.vgroups.select{|vgroup| vgroup.scan_procedures.map(&:codename).include? sp.codename}.flatten
-			            		petscans = Petscan.where(:lookup_pettracer_id => @pettracer).where(:appointment_id => vgroups.map{|vgroup| vgroup.appointments.map(&:id)}.flatten)
-			            		petscan = nil
-			            		if petscans.count == 1
-			            			petscan = petscans.first
-			            		elsif petscans.count == 0
-			            			self.exclusions << "can't find a matching Petscan for #{v_subjectid_pet_tracer_path}"
-			            			next
-			            		elsif petscans.count > 1
-			            			self.exclusions << "too many Petscans for #{v_subjectid_pet_tracer_path}! (ids: #{petscan.map(&:id).join(", ")})"
-			            			next
-			            		end
-
-			            		csv = CSV.open(centiloid_file_name,:headers => true)
-			            		centiloid_form = CentiloidForm.from_csv(csv, params[:method], centiloid_file_name, petscan)
-
-								sql = ''
-								if !centiloid_form.valid?
-									@error_rows << centiloid_form
-								end
-
-								begin
-
-									sql = centiloid_form.to_sql_insert("#{params[:centiloid_table]}_new")
-									puts "#{sql}"
-									if !params[:dry_run]
-										@connection.execute(sql)
-									end
-									if params[:write_to_sql]
-										sql_file.write("#{sql}\n")
-							  		end
-
-								rescue ArgumentError => e
-									self.error_log << "#{e.message}, with: #{centiloid_file_name}"
-								end
-							end
-
-							# we also need to scan for error logs for this 
-		            		if !centiloid_error_file_name.nil?
-		            			print "_"
-			            		self.log << "centiloid.csv.error is #{centiloid_error_file_name}"
-
-			            		error_csv = CSV.open(centiloid_error_file_name,:headers => true)
-			            		error_values = {}
-								error_csv.each do |row|
-									error_values[row["Description"]] = row["Value"]
-								end
-
-			            		self.exclusions << "centiloid error: ExceptionIdentifier: #{error_values['ExceptionIdentifier']}, ExceptionMessage: #{error_values['ExceptionMessage']}, InputFile: #{error_values['InputFile']}"
-			            		next
-		            		end
-		            	end
-		            end
+			        self.exclusions << "centiloid error: ExceptionIdentifier: #{error_values['ExceptionIdentifier']}, ExceptionMessage: #{error_values['ExceptionMessage']}, InputFile: #{error_values['InputFile']}"
+			        next
 		        end
+		    else
+				if !pet_appt.paths_ok?
+					self.exclusions << "< #{pet_appt.class} id:#{pet_appt.id} message:'paths not ok'>"
+				elsif !pet_appt.preprocessed_dir_exists?(@preprocessed_tracer_path)
+					self.exclusions << "< #{pet_appt.class} id:#{pet_appt.id} message:'preprocessed dir isnt there'>"
+				end
         	end
     	end
 
