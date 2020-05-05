@@ -159,16 +159,16 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 
 	        self.log << "calling #{v_call}"
 	        begin
-	          stdin, stdout, stderr = Open3.popen3(v_call)
-	          rescue => msg  
+	        	stdin, stdout, stderr = Open3.popen3(v_call)
+		        while !stdout.eof?
+		        	v_output = stdout.read 1024 
+		        	#  v_comment = v_comment + v_output  
+		        	self.log << v_output  
+		        end
+	        rescue => msg
 	        	self.error_log << "error #{msg.to_s}"
 	        end
 	        # v_success ="N"
-	        while !stdout.eof?
-	          v_output = stdout.read 1024 
-	          #  v_comment = v_comment + v_output  
-	          self.log << v_output  
-	        end
 		end
 	end
 	
