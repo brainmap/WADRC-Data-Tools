@@ -124,9 +124,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 		globs.each do |glob_pattern|
 			matching_products = Dir.glob("#{petscan_path}#{glob_pattern}")
 			matching_products.each do |product_path|
-				File.open(product_path, 'r') do |f|
-					File.delete(f)
-				end
+				File.delete(product_path)
 			end
 		end
 	end
