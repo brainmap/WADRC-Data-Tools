@@ -90,9 +90,9 @@ class Jobs::Pet::CentiloidsHarvester < Jobs::BaseJob
 
 		@petscans.each do |pet_appt|
 			print "."
-			if pet_appt.paths_ok? and pet_appt.preprocessed_dir_exists?(@preprocessed_tracer_path)
+			if pet_appt.paths_ok? and pet_appt.preprocessed_dir_exists?(@tracer_path)
 
-				path = pet_appt.preprocessed_dir(@preprocessed_tracer_path)
+				path = pet_appt.preprocessed_dir(@tracer_path)
 				centiloids_logs = Dir.glob("#{path}/*centiloids-log*.csv")
 				centiloids_errors = Dir.glob("#{path}/*centiloid*.csv.error")
 
@@ -145,7 +145,7 @@ class Jobs::Pet::CentiloidsHarvester < Jobs::BaseJob
 		    else
 				if !pet_appt.paths_ok?
 					self.exclusions << "< #{pet_appt.class} id:#{pet_appt.id} message:'paths not ok'>"
-				elsif !pet_appt.preprocessed_dir_exists?(@preprocessed_tracer_path)
+				elsif !pet_appt.preprocessed_dir_exists?(@tracer_path)
 					self.exclusions << "< #{pet_appt.class} id:#{pet_appt.id} message:'preprocessed dir isnt there'>"
 				end
         	end
