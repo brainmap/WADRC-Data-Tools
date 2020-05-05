@@ -100,9 +100,6 @@ class Jobs::Pet::CentiloidsHarvester < Jobs::BaseJob
 		        	centiloid_file_name = centiloids_logs.first
 		            print "*"
 			        self.log << "centiloid.csv is #{centiloid_file_name}"
-
-			        #let's also get the petscan for this directory
-			        vgroups = enrollment.vgroups.select{|vgroup| vgroup.scan_procedures.map(&:codename).include? sp.codename}.flatten
 			        csv = CSV.open(centiloid_file_name,:headers => true)
 			        centiloid_form = CentiloidForm.from_csv(csv, params[:method], centiloid_file_name, pet_appt)
 
