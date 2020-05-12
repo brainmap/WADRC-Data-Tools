@@ -93,48 +93,57 @@ class Jobs::Pet::CentiloidsHarvester < Jobs::BaseJob
 						centiloids_errors = Dir.glob("#{path}/*centiloid*.csv.error")
 
 				        if centiloids_logs.count > 0
-				        	#starting from petscans seems not to work, so let's get the petscan here
+				        	centiloids_logs.each do |centiloid_log|
+					        	#starting from petscans seems not to work, so let's get the petscan here
 
-							scan_procedure = ScanProcedure.where(:codename => codename)
+								scan_procedure = ScanProcedure.where(:codename => codename)
 
-							appointments = Appointment.joins("LEFT JOIN vgroups ON vgroups.id = appointments.vgroup_id")
-													.joins("LEFT JOIN enrollment_vgroup_memberships ON vgroups.id = enrollment_vgroup_memberships.vgroup_id")
-													.joins("LEFT JOIN enrollments ON enrollments.id = enrollment_vgroup_memberships.enrollment_id")
-													.where("enrollments.enumber = '#{subject_id}'")
-													.where(:appointment_type => 'pet_scan')
+								appointments = Appointment.joins("LEFT JOIN vgroups ON vgroups.id = appointments.vgroup_id")
+														.joins("LEFT JOIN enrollment_vgroup_memberships ON vgroups.id = enrollment_vgroup_memberships.vgroup_id")
+														.joins("LEFT JOIN enrollments ON enrollments.id = enrollment_vgroup_memberships.enrollment_id")
+														.where("enrollments.enumber = '#{subject_id}'")
+														.where(:appointment_type => 'pet_scan')
 
-							petscans = Jobs::Pet::Petscan.where("petscans.lookup_pettracer_id in (?) 
-								and petscans.good_to_process_flag = 'Y'
-								and petscans.appointment_id in (?)
-								and petscans.appointment_id in (select appointments.id from appointments, scan_procedures_vgroups
-								where appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
-								and scan_procedures_vgroups.scan_procedure_id in (?))",1,appointments.map(&:id),scan_procedure.map(&:id))
+								petscans = Jobs::Pet::Petscan.where("petscans.lookup_pettracer_id in (?) 
+									and petscans.good_to_process_flag = 'Y'
+									and petscans.appointment_id in (?)
+									and petscans.appointment_id in (select appointments.id from appointments, scan_procedures_vgroups
+									where appointments.vgroup_id = scan_procedures_vgroups.vgroup_id
+									and scan_procedures_vgroups.scan_procedure_id in (?))",params[:tracer_id],appointments.map(&:id),scan_procedure.map(&:id))
 
-							pet_appt = petscans.first
-				        	centiloid_file_name = centiloids_logs.first
-				            print "*"
-					        self.log << "centiloid.csv is #{centiloid_file_name}"
-					        csv = CSV.open(centiloid_file_name,:headers => true)
-					        centiloid_form = CentiloidForm.from_csv(csv, params[:method], centiloid_file_name, pet_appt)
+								pet_appt = petscans.first
 
-							sql = ''
-							if !centiloid_form.valid?
-								@error_rows << centiloid_form
-							end
+								if pet_appt.nil?
+									#we don't have a petscan appointment
+									self.error_log << "#{path} isn't matching a petscan"
+								else
 
-							begin
+						        	centiloid_file_name = centiloid_log
+						            print "*"
+							        self.log << "centiloid.csv is #{centiloid_file_name}"
+							        csv = CSV.open(centiloid_file_name,:headers => true)
+							        centiloid_form = CentiloidForm.from_csv(csv, params[:method], centiloid_file_name, pet_appt)
 
-								sql = centiloid_form.to_sql_insert("#{params[:centiloid_table]}_new")
-								puts "#{sql}"
-								if !params[:dry_run]
-									@connection.execute(sql)
+									sql = ''
+									if !centiloid_form.valid?
+										@error_rows << centiloid_form
+									end
+
+									begin
+
+										sql = centiloid_form.to_sql_insert("#{params[:centiloid_table]}_new")
+										puts "#{sql}"
+										if !params[:dry_run]
+											@connection.execute(sql)
+										end
+										if params[:write_to_sql]
+											sql_file.write("#{sql}\n")
+										end
+
+									rescue ArgumentError => e
+										self.error_log << "#{e.message}, with: #{centiloid_file_name}"
+									end
 								end
-								if params[:write_to_sql]
-									sql_file.write("#{sql}\n")
-								end
-
-							rescue ArgumentError => e
-								self.error_log << "#{e.message}, with: #{centiloid_file_name}"
 							end
 						end
 
