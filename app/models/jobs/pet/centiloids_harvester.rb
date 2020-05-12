@@ -84,7 +84,7 @@ class Jobs::Pet::CentiloidsHarvester < Jobs::BaseJob
 
 				subject_ids = Dir.entries(protocol_path) - ['.','..']
 				subject_ids.each do |subject_id|
-					path = "#{protocol_path}/#{subject_id}#{@preprocessed_tracer_path}"
+					path = "#{protocol_path}/#{subject_id}#{@preprocessed_path}"
 					if Dir.exists?(path)
 
 						cleaned_subject_id = subject_id.split("_")
