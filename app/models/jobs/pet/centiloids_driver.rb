@@ -27,8 +27,6 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 
 			selection(params)
 
-			filter(params)
-
 			write_driver(params)
 
 			matlab_call(params)
@@ -69,54 +67,66 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 		end
 	end
 	
-	def filter(params)
-		#if the paths are ok, and there's a preprocessed dir for our tracer and method
-		@petscans.each do |pet_appt|
-			print "."
-			if pet_appt.paths_ok? and pet_appt.preprocessed_dir_exists?(@preprocessed_tracer_path)
-				#then look for a *analysis-log*.mat file in the preprocessed dir. 
-				path = pet_appt.preprocessed_dir(@preprocessed_tracer_path)
-				analysis_logs = Dir.glob("#{path}/*analysis-log*.mat")
-				centiloids_logs = Dir.glob("#{path}/*centiloids-log*.csv")
+	def selection(params)
 
-				# We're also going to need only QC'd images, so if there isn't a QC pass in the tracker for a processed image
-				# in this dir, fail the case.
+		scan_procedures = ScanProcedure.all().map(&:codename)
+		scan_procedures.each do |codename|
 
-				# here, file_type should be something like "suvr pib"
-                processed_images = Processedimage.where("file_path like ?","#{path}%").where(:file_type => "#{params[:method].downcase} #{@pettracer.name.downcase}")
-                qc_value = ''
+			protocol_path = "#{params[:base_path]}preprocessed/visits/#{codename}"
+			if Dir.exists?(protocol_path)
 
-	            if processed_images.count > 0
-	                tracker = Trfileimage.joins(:trfile).where("trfiles.trtype_id = #{params[:qc_tracker_id]}").where(:image_id => processed_images.map(&:id), :image_category => 'processedimage')
-	                qc_value = tracker.first.trfile.qc_value
-	            end
+				subject_ids = Dir.entries(protocol_path) - ['.','..']
+				subject_ids.each do |subject_id|
+					path = "#{protocol_path}/#{subject_id}#{@preprocessed_tracer_path}"
+					if Dir.exists?(path)
+						# there may be cases where the "subject_id" here isn't quite what we
+						# expect a subject_id to be elsewhere, i.e. when they rescan a subject),
+						# sometimes they'll append a "_v2" to the id. The scan is filed with a
+						# "subject_id_v2" in the filesystem, but might not have the "_v2" in 
+						# nii product.
 
-				if analysis_logs.length > 0 and centiloids_logs.length == 0 and qc_value == 'Pass'
-					#if there is one, let's add it to the list under this subject
-					enrollment = pet_appt.appointment.vgroup.enrollments.first
-					scan_procedure_codename = pet_appt.appointment.vgroup.scan_procedures.first.codename
-					analysis_log_path = "#{analysis_logs.first}"
-					output_path = "#{path}/#{enrollment.enumber}_centiloids-log_#{@pettracer.name.downcase}_#{params[:method]}_#{scan_procedure_codename}.csv"
+						cleaned_subject_id = subject_id.split("_")
 
-					# The key to the driver should be the preprocessed path, not the enumber, because enumbers can
-					# have multiple enrollments.
-					@driver[path] = {:analysis_log => analysis_log_path,:output => output_path}
+						analysis_logs = Dir.glob("#{path}/*analysis-log*.mat")
+						centiloids_logs = Dir.glob("#{path}/*centiloids-log*.csv")
+						images = Dir.glob("#{path}/w#{cleaned_subject_id[0]}*pib_suvr*_2b.nii")
 
-					self.outputs << "< #{pet_appt.class} id:#{pet_appt.id} output_path:#{output_path}>"
-				else 
-					if analysis_logs.length == 0
-						self.exclusions << "< #{pet_appt.class} id:#{pet_appt.id} message:'no analysis-log.mat file'>"
-					elsif centiloids_logs.length > 0
-						self.exclusions << "< #{pet_appt.class} id:#{pet_appt.id} message:'already has a centiloids-log.csv'>"
-					elsif qc_value != 'Pass'
-						self.exclusions << "< #{pet_appt.class} id:#{pet_appt.id} message:'hasnt passed QC'>"
+						# We're also going to need only QC'd images, so if there isn't a QC pass in the tracker for a processed image
+						# in this dir, fail the case.
+
+						# here, file_type should be something like "suvr pib"
+		                processed_images = Processedimage.where(:file_path => images.map{|img| "#{path}/#{img}"}.join(",")).where(:file_type => "#{params[:method].downcase} #{@pettracer.name.downcase}")
+		                qc_values = []
+
+			            if processed_images.count > 0
+			                tracker = Trfileimage.joins(:trfile).where("trfiles.trtype_id = #{params[:qc_tracker_id]}").where(:image_id => processed_images.map(&:id), :image_category => 'processedimage')
+			                tracker.each do |tr|
+				                qc_values += [tr.trfile.qc_value]
+				            end
+			            end
+
+						if analysis_logs.length > 0 and centiloids_logs.length == 0 and qc_values.include?('Pass')
+							#if there is one, let's add it to the list under this subject
+							analysis_log_path = "#{analysis_logs.first}"
+							output_path = "#{path}/#{cleaned_subject_id[0]}_centiloids-log_#{@pettracer.name.downcase}_#{params[:method]}_#{codename}.csv"
+
+							# The key to the driver should be the preprocessed path, not the enumber, because enumbers can
+							# have multiple enrollments.
+							@driver[path] = {:analysis_log => analysis_log_path,:output => output_path}
+
+							self.outputs << "< #{codename} #{subject_id} output_path:#{output_path}>"
+						else 
+							if analysis_logs.length == 0
+								self.exclusions << "< #{codename} #{subject_id} message:'no analysis-log.mat file'>"
+							elsif centiloids_logs.length > 0
+								self.exclusions << "< #{codename} #{subject_id} message:'already has a centiloids-log.csv'>"
+							elsif !qc_values.include?('Pass')
+								self.exclusions << "< #{codename} #{subject_id} message:'hasnt passed QC'>"
+							end
+						end
+					else
+						self.exclusions << "< #{codename} #{subject_id} message:'paths not ok'>"
 					end
-				end
-			else
-				if !pet_appt.paths_ok?
-					self.exclusions << "< #{pet_appt.class} id:#{pet_appt.id} message:'paths not ok'>"
-				elsif !pet_appt.preprocessed_dir_exists?(@preprocessed_tracer_path)
-					self.exclusions << "< #{pet_appt.class} id:#{pet_appt.id} message:'preprocessed dir isnt there'>"
 				end
 			end
 		end
@@ -169,7 +179,6 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 	        rescue => msg
 	        	self.error_log << "error #{msg.to_s}"
 	        end
-	        # v_success ="N"
 		end
 	end
 	
