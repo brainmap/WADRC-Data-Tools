@@ -311,6 +311,9 @@ class LumbarpuncturesController < ApplicationController
   # PUT /lumbarpunctures/1
   # PUT /lumbarpunctures/1.xml
   def update
+    puts "hey, we're updating."
+
+    puts "lumbarpuncture_params[:lumbarpuncture] : #{lumbarpuncture_params[:lumbarpuncture]}"
        v_offset = Time.zone_offset('CST') 
        v_offset = (v_offset*(-1))/(60*60) # mess with storing date as local in db - but shifting to utc  
         scan_procedure_array = []
@@ -321,9 +324,6 @@ class LumbarpuncturesController < ApplicationController
       if hide_date_flag_array.count > 0
         @hide_page_flag = 'Y'
       end
-
-      puts "'lumbarpuncture_params': #{lumbarpuncture_params}"
-      puts "vs 'params': #{params}"
 
         @lumbarpuncture = Lumbarpuncture.where("lumbarpunctures.appointment_id in (select appointments.id from appointments,scan_procedures_vgroups where 
                                           appointments.vgroup_id = scan_procedures_vgroups.vgroup_id 

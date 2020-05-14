@@ -146,11 +146,15 @@ v_preanalytic_protocol = [["Drip A","Drip A"],["Drip A + Blood","Drip A + Blood"
     <div class=''>
       <div class='p-2' style='padding:0.5em;'>
           Amount Collected
-          <%= f.select :lpamountcollected, options_for_select((0...26), @lumbarpuncture.lpamountcollected),{:prompt => 'Select ....'} %> <small>ml</small><br>
+          <%=  text_field_tag( 'lumbarpuncture[lpamountcollected]',@lumbarpuncture.lpamountcollected, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %><small>ml</small><br>
+
+          
           Amount Stored
-          <%= f.select :lpinitialamountstored, options_for_select((0...26), @lumbarpuncture.lpinitialamountstored),{:prompt => 'Select ....'} %><small> ml</small><br>
+          
+          <%=  text_field_tag( 'lumbarpuncture[lpinitialamountstored]',@lumbarpuncture.lpinitialamountstored, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %><small> ml</small><br>
           Amount of lidocaine administered
-          <%= f.select :lpamountoflidocaine, options_for_select((0...26), @lumbarpuncture.lpamountoflidocaine),{:prompt => 'Select ....'} %><small> ml</small><br>
+          <%=  text_field_tag( 'lumbarpuncture[lpamountoflidocaine]',@lumbarpuncture.lpamountoflidocaine, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %>
+          <small> ml</small><br>
 
       </div>
       <div class='p-2' style='padding:0.5em;'>
@@ -184,12 +188,14 @@ v_preanalytic_protocol = [["Drip A","Drip A"],["Drip A + Blood","Drip A + Blood"
           Gravity
           <%= select :lumbarpuncture, :lpmethod_gravity, ["no", "yes", "n/a"] %>
           Amount Collected
-          <%= f.select :lpmethod_gravity_collected, options_for_select((0...26), @lumbarpuncture.lpmethod_gravity_collected),{:prompt => 'Select ....'} %><small> ml</small><br>
+          <%=  text_field_tag( 'lumbarpuncture[lpmethod_gravity_collected]',@lumbarpuncture.lpmethod_gravity_collected, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %>
+          <small> ml</small><br>
 
           Aspiration
           <%= select :lumbarpuncture, :lpmethod_aspiration, ["no", "yes", "n/a"] %>
           Amount Collected
-          <%= f.select :lpmethod_aspiration_collected, options_for_select((0...26), @lumbarpuncture.lpmethod_aspiration_collected),{:prompt => 'Select ....'} %><small> ml</small><br>
+          <%=  text_field_tag( 'lumbarpuncture[lpmethod_aspiration_collected]',@lumbarpuncture.lpmethod_aspiration_collected, :size => 6,:onchange =>"if ( isNaN(this.value)){alert('The field needs to be all numeric.');this.value =''}") %>
+          <small> ml</small><br>
           <br>
 
       </div>
