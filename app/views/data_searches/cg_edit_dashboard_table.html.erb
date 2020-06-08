@@ -60,8 +60,10 @@ if( @cg_tn.table_type == 'column_group' or @cg_tn.table_type == 'JohnsonInProces
       <%= hidden_field 'cg_edit_dashboard_table','id' ,  :value=>params[:id]%>
        <table  class="tabular"><tr>
        <% @cns.each do |cn|    %>
+        <% if !@v_hidden_dashboard_edit_columns.include? cn %>
           <th><%= @cns_common_name_dict[cn]%>
              <% if @key_cns.include?(cn)  %><br> key column <% end %></th>
+        <% end %>
        <% end %>
        </tr>
        <tfoot><tr><td colspan=<%= @cns.size+2 %> align="left">
@@ -83,7 +85,8 @@ if( @cg_tn.table_type == 'column_group' or @cg_tn.table_type == 'JohnsonInProces
            if !@cg_data_dict[k+cn].blank?
               v_cg_data_row = "Y"
            end %>
-           <td  wrap ><small>(<%= @cg_data_dict[k+cn] %>)</small>
+           <% if !@v_hidden_dashboard_edit_columns.include? cn %>
+           <td  wrap ><small>(<%= @cg_data_dict[k+cn] %>)</small><% end %>
            <% if !@key_cns.include?(cn) %>
              <% if !@value_list_dict[cn].blank?
                    v_value_list_array =  @value_list_dict[cn].split("|")
@@ -99,8 +102,11 @@ if( @cg_tn.table_type == 'column_group' or @cg_tn.table_type == 'JohnsonInProces
                    else
                            v_val = @cg_data_dict[k+cn]
                    end%>
-                   <% if @v_dashboard_edit_columns.include? cn %>
+                   <% if @v_dashboard_edit_columns.include? cn  and !@v_hidden_dashboard_edit_columns.include? cn %>
                        <%=  select  :cg_edit_dashboard_table, 'edit_col]['+k+']['+cn, options_for_select(v_value_list, v_val)   %>  
+                   <% elsif @v_dashboard_edit_columns.include? cn  and @v_hidden_dashboard_edit_columns.include? cn %>
+
+                       <%=  hidden_field  :cg_edit_dashboard_table, 'edit_col]['+k+']['+cn ,  :value=>v_val %>  
                    <%end%>      
              <%  elsif @cns_type_dict[cn] == "date"   # format YYYY-MM-DD %>
                    <% if @v_dashboard_edit_columns.include? cn %>
@@ -137,6 +143,7 @@ if( @cg_tn.table_type == 'column_group' or @cg_tn.table_type == 'JohnsonInProces
      <%  if v_cg_data_row == "Y"  %>
        <%= hidden_field 'cg_edit_dashboard_table','key_data][' ,  :value=>k %>         
        <%    end %>
+
      </tr>
    
 
@@ -144,7 +151,10 @@ if( @cg_tn.table_type == 'column_group' or @cg_tn.table_type == 'JohnsonInProces
       if v_cnt%25 == 0 %>
       <tr>
        <% @cns.each do |cn| %>
+
+           <% if !@v_hidden_dashboard_edit_columns.include? cn %>
             <th><small><%= @cns_common_name_dict[cn]%></small></th>
+          <% end %>
         <% end %>
       </tr>
     <% end %>

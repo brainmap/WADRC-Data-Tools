@@ -323,6 +323,8 @@ class DataSearchesController < ApplicationController
       v_key_columns =""
       v_delete_data_row="N"
 
+      @hide_columns = CgDashboardHiddenColumn.where(:active => 1, :user => current_user).map{|column_ref| column_ref.cg_tn_cn}
+      # puts "#{@hide_columns.map(&:id)}"
       
       # build up condition and join from @cg_tn
       if !params[:cg_edit_dashboard_table].blank? and  !params[:cg_edit_dashboard_table][:enumber].blank?
@@ -366,6 +368,7 @@ class DataSearchesController < ApplicationController
         @key_cns = []
         @v_key = []
         @v_dashboard_edit_columns = []
+        @v_hidden_dashboard_edit_columns = []
         @cns_type_dict ={}
         @cns_common_name_dict = {}
         @cg_data_dict = {}
@@ -391,6 +394,13 @@ class DataSearchesController < ApplicationController
             # make so its the first column in display
             if cg_tn_cn.key_column_flag == "Y"
               @key_cns.push(cg_tn_cn.cn)
+            end 
+
+
+
+            if @hide_columns.include? cg_tn_cn
+              puts "#{cg_tn_cn.common_name} is in @hide_columns"
+              @v_hidden_dashboard_edit_columns.push(cg_tn_cn.cn)
             end 
             # make so its the first columns after the keys
             if cg_tn_cn.dashboard_edit_flag == "Y"
@@ -2281,7 +2291,7 @@ class DataSearchesController < ApplicationController
         @local_conditions.push("appointments.vgroup_id = vgroups.id")
                                             # everything always joined
         # undoing - need in mysql 5.6
-        @order_by =["vgroups.vgroup_date DESC", "vgroups.rmr"] # newer version of mysql in dev? only do orderby on columns in select?
+        @order_by =["vgroups.vgroup_date DESC"] # newer version of mysql in dev? only do orderby on columns in select?
      
         #run_search_q_data tn_cn_id/tn_id in (686/676,687/677,688/688) common_name = "question fields" vs run_search if 
       end     
