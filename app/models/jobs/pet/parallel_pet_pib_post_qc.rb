@@ -101,9 +101,9 @@ class Jobs::Pet::ParallelPetPibPostQc < Jobs::Pet::ParallelPetPibSuvr
 
               if neighbor_dvr_images.count > 0
                 tracker = Trfileimage.where(:image_id => neighbor_dvr_images.first.id, :image_category => 'processedimage')
-                qc_value = tracker.first.trfile.qc_value
+                qc_value = tracker.map{|trfi| trfi.trfile.qc_value}
 
-                if qc_value == "Pass"
+                if qc_value.include? "Pass"
 
                   pet_dvr_directory = File.dirname(neighbor_dvr_images.first.file_path)
 

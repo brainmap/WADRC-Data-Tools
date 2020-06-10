@@ -89,11 +89,11 @@ class Jobs::Pet::ParallelPetPibSuvr < Jobs::Pet::PetBase
               v_participant = Participant.find(vgroup.participant_id)
 
             else
-              self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"message\":\"vgroup had a broken participant_id\"}"
+              self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"enum\":\"#{pet_appt.related_enumber.enumber}\", \"protocol\":\"#{pet_appt.related_scan_procedure.codename}\", \"message\":\"vgroup had a broken participant_id\"}"
               next
             end
           else
-            self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"message\":\"appointment had a broken vgroup_id\"}"
+            self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"enum\":\"#{pet_appt.related_enumber.enumber}\", \"protocol\":\"#{pet_appt.related_scan_procedure.codename}\", \"message\":\"appointment had a broken vgroup_id\"}"
             next
           end
 
@@ -129,7 +129,7 @@ class Jobs::Pet::ParallelPetPibSuvr < Jobs::Pet::PetBase
                 o_acpc_file_path = pet_appt.get_recent_o_acpc_file(recent_mri_visits)
               else
 
-                self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"message\":\"no recent o_acpc files\"}"
+                self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"enum\":\"#{pet_appt.related_enumber.enumber}\", \"protocol\":\"#{pet_appt.related_scan_procedure.codename}\", \"message\":\"no recent o_acpc files\"}"
                 @error_no_recent_acpc << pet_appt
               end
             end
@@ -151,7 +151,7 @@ class Jobs::Pet::ParallelPetPibSuvr < Jobs::Pet::PetBase
                 multispectral_file_path = pet_appt.get_recent_multispectral_file(recent_mri_visits)
               else
 
-                self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"message\":\"no multispectral file\"}"
+                self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"enum\":\"#{pet_appt.related_enumber.enumber}\", \"protocol\":\"#{pet_appt.related_scan_procedure.codename}\", \"message\":\"no multispectral file\"}"
                 # @error_no_multispectral << pet_appt
               end
             end
@@ -182,7 +182,7 @@ class Jobs::Pet::ParallelPetPibSuvr < Jobs::Pet::PetBase
                   @driver << {:proto => proto, :visit => visit, :enum => pet_appt.related_enumber.enumber, :t_uptake => v_uptake_duration, :file_t1 => o_acpc_file_path, :file_mult => multispectral_file_path, :norm_samp => 1.0}
                   self.outputs << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"t_uptake\":\"#{v_uptake_duration}\", \"file_t1\":\"#{o_acpc_file_path}\", \"file_mult\":\"#{multispectral_file_path}\", \"norm_samp\":\"1.0\"}"
                 else
-                  self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"message\":\"bad uptake duration (#{v_uptake_duration.to_i})\"}"
+                  self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"enum\":\"#{pet_appt.related_enumber.enumber}\", \"protocol\":\"#{pet_appt.related_scan_procedure.codename}\", \"message\":\"bad uptake duration (#{v_uptake_duration.to_i})\"}"
                 end
               end
             elsif params[:method] == 'dvr'
@@ -203,7 +203,7 @@ class Jobs::Pet::ParallelPetPibSuvr < Jobs::Pet::PetBase
             if !pet_appt.paths_ok?
               self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"message\":\"paths not ok\"}"
             elsif pet_appt.preprocessed_dir_exists?(@preprocessed_tracer_path)
-              self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"message\":\"already processed\"}"
+              self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"enum\":\"#{pet_appt.related_enumber.enumber}\", \"protocol\":\"#{pet_appt.related_scan_procedure.codename}\", \"message\":\"already processed\"}"
             end
             #try paths_ok!, and catch errors to categorize our petfile failures
             if pet_appt.related_scan_procedure.nil? or pet_appt.related_enumber.nil?
@@ -214,15 +214,15 @@ class Jobs::Pet::ParallelPetPibSuvr < Jobs::Pet::PetBase
               pet_appt.paths_ok!
             rescue Exceptions::PetscanNoEcatsError => e
 
-              self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"message\":\"no ecat files\"}"
+              self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"enum\":\"#{pet_appt.related_enumber.enumber}\", \"protocol\":\"#{pet_appt.related_scan_procedure.codename}\", \"message\":\"no ecat files\"}"
 
             rescue Exceptions::PetscanTooManyEcatsError => e
 
-              self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"message\":\"too many ecat files\"}"
+              self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"enum\":\"#{pet_appt.related_enumber.enumber}\", \"protocol\":\"#{pet_appt.related_scan_procedure.codename}\", \"message\":\"too many ecat files\"}"
 
             rescue Exceptions::PetscanError, Exceptions::PetscanPathError => e
 
-              self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"message\":\"Just weird: #{e.message}\"}"
+              self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"enum\":\"#{pet_appt.related_enumber.enumber}\", \"protocol\":\"#{pet_appt.related_scan_procedure.codename}\", \"message\":\"Just weird: #{e.message}\"}"
 
             end
           end
@@ -334,7 +334,7 @@ class Jobs::Pet::ParallelPetPibSuvr < Jobs::Pet::PetBase
         v_call =  "ssh panda_user@#{v_computer}.dom.wisc.edu \"#{matlab_command}\""
 
         self.log << v_call
-        self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
+        # self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
 
         begin
           stdin, stdout, stderr = Open3.popen3(v_call)
