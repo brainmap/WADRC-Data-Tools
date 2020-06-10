@@ -160,7 +160,18 @@ class Jobs::Pet::ParallelPetPibSuvr < Jobs::Pet::PetBase
 
               if !o_acpc_file_path.blank? && !multispectral_file_path.blank? && !pet_appt.scanstarttime.nil? && !pet_appt.injecttiontime.nil?
                 v_uptake_duration = ((pet_appt.scanstarttime - pet_appt.injecttiontime)/60).floor
-                if (v_uptake_duration.to_i).between?(65,75)
+                
+                #in the case of pib, if we're doing suvr, there's really no uptake duration criterion
+                if params[:tracer_id].to_i == 1 #this is the tracer id for PiB
+
+                  proto = pet_appt.related_scan_procedure.protocol.path.split('.')[0..1].join('.')
+                  #visit = pet_appt.related_scan_procedure.codename.remove(pet_appt.related_scan_procedure.protocol.path)
+                  visit = pet_appt.related_scan_procedure.codename.remove(proto).remove(".")
+
+                  @driver << {:proto => proto, :visit => visit, :enum => pet_appt.related_enumber.enumber, :t_uptake => v_uptake_duration, :file_t1 => o_acpc_file_path, :file_mult => multispectral_file_path, :norm_samp => 1.0}
+                  self.outputs << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"t_uptake\":\"#{v_uptake_duration}\", \"file_t1\":\"#{o_acpc_file_path}\", \"file_mult\":\"#{multispectral_file_path}\", \"norm_samp\":\"1.0\"}"
+
+                elsif (v_uptake_duration.to_i).between?(65,75)
 
                   # we're finally happy with all of the params we need, and we can make a csv for parallel processing
 
@@ -175,7 +186,7 @@ class Jobs::Pet::ParallelPetPibSuvr < Jobs::Pet::PetBase
                 end
               end
             elsif params[:method] == 'dvr'
-
+              # if we're doing pib dvr, then uptake duration should be zero.
               if !o_acpc_file_path.blank? && !multispectral_file_path.blank?
                 # we're finally happy with all of the params we need, and we can make a csv for parallel processing
 
