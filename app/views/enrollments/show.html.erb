@@ -32,7 +32,7 @@ edit_count = edit_count -1
 <%= content_tag(:p, "No visits for this enrollment") if @enrollment.vgroups.blank? %>
 <ul>
   <% @enrollment.vgroups.each do |vgroup| %>
-    <li><%= link_to vgroup.vgroup_date, vgroup %> in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
+    <li><%= link_to vgroup.vgroup_date, vgroup %> in <%= vgroup.scan_procedures.collect {|sp| sp.display_alias }.join(", ") %></li>
   <% end %>
 </ul>
 
@@ -40,7 +40,7 @@ edit_count = edit_count -1
 <%= content_tag(:p, "No mri appointments for this enrollment") if @enrollment.visits.blank? %>
 <ul>
   <% @enrollment.visits.each do |visit| %>
-    <li><%= link_to visit.date, visit %> in <%= visit.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
+    <li><%= link_to visit.date, visit %> in <%= visit.scan_procedures.collect {|sp| sp.display_alias }.join(", ") %></li>
   <% end %>
 </ul>
 <% 
@@ -63,7 +63,7 @@ edit_count = edit_count -1
 	      appointment = Appointment.find(petscan.appointment_id)
 	      vgroup = Vgroup.find(appointment.vgroup_id)%>
         <li><%= link_to appointment.appointment_date , petscan %>  <%= LookupPettracer.find(petscan.lookup_pettracer_id).name_description.html_safe %>&nbsp;&nbsp;&nbsp;&nbsp;
-	in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
+	in <%= vgroup.scan_procedures.collect {|sp| sp.display_alias }.join(", ") %></li>
   <% end %>
 </ul>
 <% if !@lumbarpunctures.blank?%>
@@ -74,7 +74,7 @@ edit_count = edit_count -1
 	      appointment = Appointment.find(lp.appointment_id)
 	      vgroup = Vgroup.find(appointment.vgroup_id)%>
         <li><%= link_to appointment.appointment_date , lp %>  
-	in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
+	in <%= vgroup.scan_procedures.collect {|sp| sp.display_alias }.join(", ") %></li>
   <% end %>
 </ul>
 <% end %>
@@ -86,7 +86,7 @@ edit_count = edit_count -1
 	      appointment = Appointment.find(lh.appointment_id)
 	      vgroup = Vgroup.find(appointment.vgroup_id)%>
         <li><%= link_to appointment.appointment_date , lh %>  
-	in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
+	in <%= vgroup.scan_procedures.collect {|sp| sp.display_alias }.join(", ") %></li>
   <% end %>
 </ul>
 <% end %>
@@ -98,7 +98,7 @@ edit_count = edit_count -1
 	      appointment = Appointment.find(np.appointment_id)
 	      vgroup = Vgroup.find(appointment.vgroup_id)%>
         <li><%= link_to appointment.appointment_date , np %>  
-	in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
+	in <%= vgroup.scan_procedures.collect {|sp| sp.display_alias }.join(", ") %></li>
   <% end %>
 </ul>
 <% end %>
@@ -110,7 +110,7 @@ edit_count = edit_count -1
 	      appointment = Appointment.find(q.appointment_id)
 	      vgroup = Vgroup.find(appointment.vgroup_id)%>
         <li><%= link_to appointment.appointment_date , q %>  
-	in <%= vgroup.scan_procedures.collect {|sp| sp.codename }.join(", ") %></li>
+	in <%= vgroup.scan_procedures.collect {|sp| sp.display_alias }.join(", ") %></li>
   <% end %>
 </ul>
 <% end %>

@@ -18,7 +18,7 @@
     <td><%= consent_form.status_flag %></td>
     <td><% @scan_procedures_consent_forms = ScanProcedure.where("scan_procedures.id in (select scan_procedure_id from consent_form_scan_procedures where  consent_form_id in (?))",consent_form.id.to_s) 
      @scan_procedures_consent_forms.each do |sp| %>
-&nbsp;&nbsp;<%= sp.codename %> ;
+&nbsp;&nbsp;<%= sp.display_alias %> ;
 <%end%>
 
 

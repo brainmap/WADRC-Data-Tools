@@ -11,7 +11,7 @@
       :RMR_Number => @vgroup.rmr,
       :Appt_Coordinator =>@appointment.appointment_coordinator.blank? ? "" : Employee.find(@appointment.appointment_coordinator).name,
      :Participant => @participant.nil? ? nil : link_to('view participant', @participant),
-     :Study_Protocol => @vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, '/q_search?q_search[scan_procedure_id][]='+sp.id.to_s)}.join(", ").html_safe,
+     :Study_Protocol => @vgroup.scan_procedures.sort_by(&:display_alias).collect {|sp| link_to(sp.display_alias, '/q_search?q_search[scan_procedure_id][]='+sp.id.to_s)}.join(", ").html_safe,
     }) %>
   </div>
 

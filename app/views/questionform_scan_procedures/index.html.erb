@@ -13,7 +13,7 @@
 <% @questionform_scan_procedures.each do |questionform_scan_procedure| %>
   <tr>
     <td><%= Questionform.find(questionform_scan_procedure.questionform_id).description %></td><td align=center> | </td>
-    <td><%= ScanProcedure.find(questionform_scan_procedure.scan_procedure_id).codename%> </td>
+    <td><%= ScanProcedure.find(questionform_scan_procedure.scan_procedure_id).display_alias%> </td>
     <td><%= questionform_scan_procedure.include_exclude %></td>
     <% if current_user.role == 'Admin_High' %>
     <td><%= link_to 'Show', questionform_scan_procedure %></td>

@@ -54,7 +54,7 @@
              <%  for vg in @vgroups_one 
                  @scan_procedures_vgroups = ScanProcedure.where("scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  vgroup_id in (?))",vg.id)%>
                    <%=vg.vgroup_date %> &nbsp;&nbsp;&nbsp;
-              <%= @scan_procedures_vgroups.blank? ? "None" : @scan_procedures_vgroups.sort_by(&:codename).collect {|sp| sp.codename}.join(", ") %> <br>
+              <%= @scan_procedures_vgroups.blank? ? "None" : @scan_procedures_vgroups.sort_by(&:display_alias).collect {|sp| sp.display_alias}.join(", ") %> <br>
             <% end %>
               <br>
           <%end%>
@@ -95,7 +95,7 @@
              <%  for vg in @vgroups_two 
                  @scan_procedures_vgroups = ScanProcedure.where("scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  vgroup_id in (?))",vg.id)%>
                    <%=vg.vgroup_date %> &nbsp;&nbsp;&nbsp;
-              <%= @scan_procedures_vgroups.blank? ? "None" : @scan_procedures_vgroups.sort_by(&:codename).collect {|sp| sp.codename}.join(", ") %> <br>
+              <%= @scan_procedures_vgroups.blank? ? "None" : @scan_procedures_vgroups.sort_by(&:display_alias).collect {|sp| sp.display_alias}.join(", ") %> <br>
             <% end %>
               <br>
           <%end%>

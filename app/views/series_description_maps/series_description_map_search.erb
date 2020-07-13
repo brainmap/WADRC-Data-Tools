@@ -25,7 +25,7 @@
         v_sp_cnt_array = Array.new
          sdsps.each do |sdsp|
                v_sp = ScanProcedure.find(sdsp.scan_procedure_id)
-               v_sp_cnt_array.push(v_sp.codename+"  cnt ="+(sdsp.scan_count).to_s)
+               v_sp_cnt_array.push(v_sp.display_alias+"  cnt ="+(sdsp.scan_count).to_s)
           end %>
           <%= v_sp_cnt_array.join(", ") %>
     </td>
@@ -49,12 +49,6 @@
 	<ul>
 	<% SeriesDescriptionType.all.sort_by(&:series_description_type).each do |series_description_type| %>
 		<li>
-			<%#= f.fields_for scan_procedure do |scan_fields| %>
-				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
-				<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
-			<%# end %>
-		</li>
-		<li>
 			<%= check_box_tag "series_description_type_ids", series_description_type.id,FALSE , :name => 'series_description_map_search[series_description_type_id][]' %>
 			<%= label_tag '', series_description_type.series_description_type %>
 		</li>
@@ -65,16 +59,10 @@
 <%= f.label :scan_procedures %><br>
   <div id="scan_procedure_list">
   <ul>
-  <% ScanProcedure.all.sort_by(&:codename).each do |scan_procedure| %>
-    <li>
-      <%#= f.fields_for scan_procedure do |scan_fields| %>
-        <%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
-        <%#= f.label :scan_procedure_ids, scan_procedure.codename %>
-      <%# end %>
-    </li>
+  <% ScanProcedure.all.sort_by(&:display_alias).each do |scan_procedure| %>
     <li>
          <%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'series_description_map_search[scan_procedure_id][]' %>
-      <%= label_tag '', scan_procedure.codename %>
+      <%= label_tag '', scan_procedure.display_alias %>
     </li>
   <% end %>
   </ul>

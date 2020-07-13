@@ -77,7 +77,7 @@
                 <%= link_to "placeholder", vgroup %>
              <%end%>
              </td>
-        <td><%= vgroup.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, "/vgroups/in_scan_procedure/"+sp.id.to_s)}.join(", ").html_safe %></td>
+        <td><%= vgroup.blank? ? "None" : vgroup.scan_procedures.sort_by(&:display_alias).collect {|sp| link_to(sp.display_alias, "/vgroups/in_scan_procedure/"+sp.id.to_s)}.join(", ").html_safe %></td>
         <td><%= vgroup.blank? ? "" :vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
         <td><%= vgroup.blank? ? "" : vgroup.rmr %></td>
      <td><%= #@a.blank? ?  "None" :	@a.collect{|sp| link_to("appt",appointment_path(sp))}.join(", ").html_safe 
@@ -113,20 +113,7 @@
 <% if edit_count > 0 %>
     <td><%= link_to  'add-Q', new_questionnaire_path+"/"+vgroup.id.to_s %></td>
 <% end %> 
-<!--       <td><= vgroup.appointments.blank? ? "None" : vgroup.appointmets.sort_by(&:codename).collect {|sp| sp.appointment_type}.join(", ").html_safe %></td>
- 
-        <td><= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
-        <td><= visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
-        <td><= visit.rmr %></td>
 
--->
-<!--        <td><= popup_note('peek', key_val_table('path_popup', { :Path => visit.path })) unless visit.path.blank? %></td>
-        <= show_bool(visit.transfer_mri) %>
-        <= show_bool(visit.transfer_pet) %>
-        <= show_rad_review(visit.radiology_outcome) %>
-        <= show_bool(visit.compile_folder) %>
-        <= show_bool(visit.conference) %>
--->
         <td style="width: 6em;">
 <% if edit_count > 0 %>
           <%= link_to 'edit', edit_vgroup_path(vgroup) %>

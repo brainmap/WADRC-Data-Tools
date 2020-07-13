@@ -5,9 +5,9 @@
 	<tr><td colspan="3" align="left" nowrap>
       <%= form_for 'tredit_home/'+params[:trtype_id] do |f| %>
       <%= label_tag :search %>:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= label_tag :trfile %>: <%= select(:tr_search,:trfile_id, (@trfiles.order(:subjectid)).collect {|p| [ p.subjectid+" "+(p.secondary_key).to_s+"- "+ScanProcedure.find(p.scan_procedure_id).codename, p.id ] },  { :include_blank => "Select a subject" }) %>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= label_tag :trfile %>: <%= select(:tr_search,:trfile_id, (@trfiles.order(:subjectid)).collect {|p| [ p.subjectid+" "+(p.secondary_key).to_s+"- "+ScanProcedure.find(p.scan_procedure_id).display_alias, p.id ] },  { :include_blank => "Select a subject" }) %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= label_tag :scan_procedure %>:      <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
-    <%= collection_select(:tr_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'choose scan procedure'}, {:multiple =>  false} ) %><br>
+    <%= collection_select(:tr_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:display_alias), :id, :display_alias,  {:prompt => 'choose scan procedure'}, {:multiple =>  false} ) %><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= label_tag :user %>: 
     <%= select(:tr_search, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select user" }) %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

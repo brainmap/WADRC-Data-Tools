@@ -5,7 +5,7 @@
 		<%= f.label :scan_procedures_codename_contains_any, "Scan Procedure:" %>
 		<div id="scan_procedure_list">
 			<ul>
-				<%= f.collection_checks :scan_procedures_codename_contains_any, ScanProcedure.order(:codename), :codename, :codename do |sp| %>
+				<%= f.collection_checks :scan_procedures_codename_contains_any, ScanProcedure.order(:display_alias), :display_alias, :display_alias do |sp| %>
 				<li>
 					<%= sp.box %>
 					<%= sp.label %>
@@ -54,94 +54,3 @@
 	<p class="button"><%= f.submit "Find MRI appts" %></p>
 <% end %>
 
-<!-- <%= form_tag("/visits/found") do %>
-  <table class="search_form">
-    <tr>
-      <th><%= label_tag :scan_procedure %></th>
-      <td><%= collection_select(:visit_search, :scan_procedure, ScanProcedure.find(:all, :order => 'codename ASC'), :codename, :codename, {}, {:multiple =>  true}) %></td>
-    </tr>
-  </table>
-  <table class="search_form">
-    <tr>
-      <th><%= label_tag :scan_number %></th>
-      <td><%= text_field :visit_search, :scan_number, :size => 15 %></td>
-    </tr>
-    <tr>
-      <th><%= label_tag :enumber %></th>
-      <td><%= text_field :visit_search, :enumber, :size => 15 %></td>
-    </tr>
-    <tr>
-      <th><%= label_tag :initials %></th>
-      <td><%= text_field :visit_search, :initials, :size => 15 %></td>
-    </tr>
-    <tr>
-      <th><%= label_tag :rmr %></th>
-      <td><%= text_field :visit_search, :rmr, :size => 15 %></td>
-    </tr>
-    <tr>
-      <th><%= label_tag :directory %></th>
-      <td><%= text_field :visit_search, :path, :size => 15 %></td>
-    </tr>
-  </table>
-  <table class="search_form">
-    <tr>
-      <th><%= label_tag :radiology_outcome %></th>
-      <td><%= select :visit_search, :radiology_outcome, [nil, 'no', 'Nm', 'A-NF', 'A-F', 'n/a'] %></td>
-    </tr>
-    <tr>
-      <th><%= label_tag :Transfer_MRI %></th>
-      <td><%= select :visit_search, :transfer_mri, [nil, 'no', 'yes', 'n/a'] %></td>
-    </tr>
-    <tr>
-      <th><%= label_tag :Transfer_PET %></th>
-      <td><%= select :visit_search, :transfer_pet, [nil, 'no', 'yes', 'n/a'] %></td>
-    </tr>
-    <tr>
-      <th><%= label_tag :Transfer_behavioral_log %></th>
-      <td><%= select :visit_search, :transfer_behavioral_log, [nil, 'no', 'yes', 'n/a'] %></td>
-    </tr>
-    <tr>
-      <th><%= label_tag :Check_Imaging %></th>
-      <td><%= select :visit_search, :check_imaging, [nil, 'no', 'yes', 'n/a'] %></td>
-    </tr>
-    <tr>
-      <th><%= label_tag :Check_NP %></th>
-      <td><%= select :visit_search, :check_np, [nil, 'no', 'yes', 'n/a'] %></td>
-    </tr>
-    <tr>
-      <th><%= label_tag :Check_MR5_DVD %></th>
-      <td><%= select :visit_search, :check_MR5_DVD, [nil, 'no', 'yes', 'n/a'] %></td>
-    </tr>
-  </table>
-  <table class="search_form">
-    <tr>
-      <th><%= label_tag :Burn_DICOM_DVD %></th>
-      <td><%= select :visit_search, :burn_DICOM_DVD, [nil, 'no', 'yes', 'n/a'] %></td>
-    </tr>
-    <tr>
-      <th><%= label_tag :First_Score %></th>
-      <td><%= select :visit_search, :first_score, [nil, 'no', 'yes', 'n/a'] %></td>
-    </tr>
-    <tr>
-      <th><%= label_tag :Second_Score %></th>
-      <td><%= select :visit_search, :second_score, [nil, 'no', 'yes', 'n/a'] %></td>
-    </tr>
-    <tr>
-      <th><%= label_tag :Enter_Info_In_DB %></th>
-      <td><%= select :visit_search, :enter_info_in_db, [nil, 'no', 'yes', 'n/a'] %></td>
-    </tr>
-    <tr>
-      <th><%= label_tag :Conference %></th>
-      <td><%= select :visit_search, :conference, [nil, 'no', 'yes', 'n/a'] %></td>
-    </tr>
-    <tr>
-      <th><%= label_tag :Compile_Folder %></th>
-      <td><%= select :visit_search, :compile_folder, [nil, 'no', 'yes', 'n/a'] %></td>
-    </tr>
-  </table>
-
-  <br style="clear:both" \>
-
-  <%#= submit_tag("Find Visits") %>
-
-<% end %> -->

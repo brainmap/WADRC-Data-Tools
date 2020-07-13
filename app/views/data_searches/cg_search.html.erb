@@ -117,20 +117,14 @@ v_tn_cn_searchable_hash = []
 	<tr><td><%= f.label :scan_procedures %><br>
 	<div id="scan_procedure_list">
 	<ul>
-	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).sort_by(&:codename).each do |scan_procedure| %>
-		<li>
-			<%#= f.fields_for scan_procedure do |scan_fields| %>
-				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
-				<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
-			<%# end %>
-		</li>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).sort_by(&:display_alias).each do |scan_procedure| %>
 		<li>
 			<% if @sp_array.include?(scan_procedure.id.to_s)%>
 			   <%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,TRUE , :name => 'cg_search[scan_procedure_id][]' %>
 			<% else %>
 			   <%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'cg_search[scan_procedure_id][]' %>
 			<% end %>
-			<%= label_tag '', scan_procedure.codename %>
+			<%= label_tag '', scan_procedure.display_alias %>
 		</li>
 	<% end %>
 	</ul>
@@ -671,7 +665,7 @@ v_tn_cn_searchable_hash = []
                     <% if i == 0 %>
                        <td></td>
                     <% elsif i== 1%>
-   <td><%= vgroup.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| sp.codename }.join(", ").html_safe %></td>
+   <td><%= vgroup.blank? ? "None" : vgroup.scan_procedures.sort_by(&:display_alias).collect {|sp| sp.display_alias }.join(", ").html_safe %></td>
                     <% elsif i== 2%>
 <td><%= vgroup.blank? ? "" :vgroup.enrollments.collect {|e| e.enumber}.join(", ").html_safe %></td>
                     <% else %> 
@@ -681,7 +675,7 @@ v_tn_cn_searchable_hash = []
                     <% if i == 0 %>
                        <td> <% if vgroup.vgroup_date  > (DateTime.now - 100.year) %><%= link_to vgroup.vgroup_date.to_s(:datetime_military), vgroup %><%else%> <small>placeholder</small><%end%></td>
                     <% elsif i== 1%>
-   <td><%= vgroup.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, '/vgroups/vgroups_search?vgroups_search[scan_procedure_id][id]='+sp.id.to_s)}.join(", ").html_safe %></td>
+   <td><%= vgroup.blank? ? "None" : vgroup.scan_procedures.sort_by(&:display_alias).collect {|sp| link_to(sp.display_alias, '/vgroups/vgroups_search?vgroups_search[scan_procedure_id][id]='+sp.id.to_s)}.join(", ").html_safe %></td>
                     <% elsif i== 2%>
 <td><%= vgroup.blank? ? "" :vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
                     <% else %> 

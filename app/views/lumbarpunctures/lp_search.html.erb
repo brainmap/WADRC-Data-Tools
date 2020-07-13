@@ -29,11 +29,11 @@ edit_count =   edit_count -1
 	<tr><td><%= f.label :scan_procedures %><br>
 	<div id="scan_procedure_list">
 	<ul>
-	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).load.sort_by(&:codename).each do |scan_procedure| %> 
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).load.sort_by(&:display_alias).each do |scan_procedure| %> 
 	
 		<li>
 			<%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'lp_search[scan_procedure_id][]' %>
-			<%= label_tag '', scan_procedure.codename %>
+			<%= label_tag '', scan_procedure.display_alias %>
 		</li>
 	<% end %>
 	</ul>
@@ -121,7 +121,7 @@ edit_count =   edit_count -1
 	    <% if i == 0 %>
 	     <td><%= link_to result[i].to_s(:datetime_military), lumbarpuncture %></td>
 	    <% elsif i == 1 %>
-	     <td><%= vgroup.scan_procedures.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, '/lp_search?lp_search[scan_procedure_id][]='+sp.id.to_s)}.join(", ").html_safe %></td>
+	     <td><%= vgroup.scan_procedures.blank? ? "None" : vgroup.scan_procedures.sort_by(&:display_alias).collect {|sp| link_to(sp.display_alias, '/lp_search?lp_search[scan_procedure_id][]='+sp.id.to_s)}.join(", ").html_safe %></td>
 	    <% elsif i == 2 %>
 	     <td><%= vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %> <%= vgroup.enrollments.count > 0 ? "" : vgroup.participant.nil? ? "" : vgroup.participant.wrapnum.blank? ? "" : vgroup.participant.wrapnum %></td>
 	    <% elsif i == 4  %>

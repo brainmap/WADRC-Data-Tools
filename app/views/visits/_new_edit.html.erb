@@ -33,14 +33,10 @@ v_caffeine_more_history = [["Not Currently using Caffeine","Not Currently using 
       <%= f.label :date %><br />
       <%= date_select :visit, :date, :include_blank => true, :end_year => Time.now.year + 1 %><br />
     </p>
-    <!-- <p>
-      <%#= f.label :scan_procedure %>
-      <%#= collection_select(:visit, :scan_procedure_id, ScanProcedure.all.sort_by(&:codename), :id, :codename, :include_blank => "Select a scan_procedure") %>
-    </p>
-		<p> -->
+
 			<div id="scan_procedure_list">
 			<ul>
-				<!-- ??DEPRECATION WARNING: Relation#all is deprecated  ScanProcedure.where(" scan_procedures.id in (?)",  current_user[:edit_low_scan_procedure_array] ).all.sort_by(&:codename)--> 
+	
 			<%
 			# sometimes a string -edit, sometimes and array -new - arrrg
 			   if(current_user[:edit_low_scan_procedure_array].kind_of?(Array))
@@ -50,16 +46,11 @@ v_caffeine_more_history = [["Not Currently using Caffeine","Not Currently using 
 			   end
 			
 			%>
-			<% ScanProcedure.where(" scan_procedures.id in (?) and scan_procedures.permission_type in (?)", v_edit_low_sp_string.split(' '),"study_permission").sort_by(&:codename).each do |scan_procedure| %>
-				<li>
-					<%#= f.fields_for scan_procedure do |scan_fields| %>
-						<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
-						<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
-					<%# end %>
-				</li>
+			<% ScanProcedure.where(" scan_procedures.id in (?) and scan_procedures.permission_type in (?)", v_edit_low_sp_string.split(' '),"study_permission").sort_by(&:display_alias).each do |scan_procedure| %>
+			
 				<li>
 					<%= check_box_tag "visit_scan_procedure_ids", scan_procedure.id, @visit.scan_procedures.include?(scan_procedure), :name => 'visit[scan_procedure_ids][]' %>
-					<%= label_tag '', scan_procedure.codename %>
+					<%= label_tag '', scan_procedure.display_alias %>
 				</li>
 			<% end %>
 			</ul>  

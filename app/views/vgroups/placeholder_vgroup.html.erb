@@ -11,7 +11,7 @@
 
   <br><br>
     <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
-    <%= collection_select(:scan_procedure, :id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  {:prompt => 'choose scan procedure'}, {multiple: false,required:  true} ) %>
+    <%= collection_select(:scan_procedure, :id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:display_alias), :id, :display_alias,  {:prompt => 'choose scan procedure'}, {multiple: false,required:  true} ) %>
 
   <br><br>
   <% if !@v_message.blank? %>

@@ -32,14 +32,14 @@ if @cg_tn_cn.size == 1 # only want to show if key is one column %>
 	<tr><td><%= f.label :scan_procedures %><br>
 	<div id="scan_procedure_list">
 	<ul>
-	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:display_alias).each do |scan_procedure| %>
 		<li>
 		<% if @sp_array.include?(scan_procedure.id.to_s)%>
 		   <%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,TRUE , :name => 'cg_edit_table[scan_procedure_id][]' %>
 		<% else %>
 		   <%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'cg_edit_table[scan_procedure_id][]' %>
 		<% end %>
-			<%= label_tag '', scan_procedure.codename %>
+			<%= label_tag '', scan_procedure.display_alias %>
 		</li>
 	<% end %>
 	</ul>

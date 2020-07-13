@@ -9,14 +9,14 @@ Links a question to a form.<br>
 
     <%= hidden_field_tag 'orig_scan_procedure_id',  @v_scan_procedure_id.to_s%>
     <%= submit_tag("Add all these questions to another Scan Procedure") %><br>
-    <%= collection_select('questionform_question[scan_procedure_id]', :id,ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  :prompt => 'Choose scan procedure', :multiple =>  false, :selected => @v_scan_procedure_id  ) %>
+    <%= collection_select('questionform_question[scan_procedure_id]', :id,ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:display_alias), :id, :display_alias,  :prompt => 'Choose scan procedure', :multiple =>  false, :selected => @v_scan_procedure_id  ) %>
 <%end%>
 </td></tr></table>
 <%end%>
  <%= form_tag '/questionform_questions/index' do %>
   <%= collection_select :questionform_question,  :questionform_id, Questionform.where("status_flag in ('Y')").order(:entrance_page_type,:display_order,:description), :id, :description,:prompt => 'Select a Form to show the linked Questions',:required => true, :selected => @v_questionform_id %>
   <br>
-<%= collection_select('questionform_question[scan_procedure_id]', :id,ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename,  :prompt => 'Choose scan procedure', :multiple =>  false, :selected => @v_scan_procedure_id  ) %>
+<%= collection_select('questionform_question[scan_procedure_id]', :id,ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:display_alias), :id, :display_alias,  :prompt => 'Choose scan procedure', :multiple =>  false, :selected => @v_scan_procedure_id  ) %>
 <br>  <% if  @v_edit_display_order == "Y" %><%= submit_tag("Update Question Order") %>   &nbsp;&nbsp;<small><small><%= link_to('Redo Search', '/questionform_questions') %> </small></small><%else%><%= submit_tag("Search") %> <%end%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

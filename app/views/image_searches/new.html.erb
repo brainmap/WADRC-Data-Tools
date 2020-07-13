@@ -8,7 +8,7 @@
   <table class="search_form">
     <th><%= f.label :scan_procedures %></th>
     <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
-    <td><%= collection_select(:scan_procedure, :ids, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename, {}, {:multiple =>  true}) %></td>
+    <td><%= collection_select(:scan_procedure, :ids, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:display_alias), :id, :display_alias, {}, {:multiple =>  true}) %></td>
   </table>
   <table class="search_form">
     <tr>

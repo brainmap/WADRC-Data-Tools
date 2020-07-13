@@ -13,7 +13,7 @@
 <td>
   <%= popup_note("peek", key_val_table("visit_details", {
     :Visit_date => im_ds.visit.date,
-    :scan_procedure => im_ds.visit.scan_procedure.nil? ? nil : im_ds.visit.scan_procedure.codename,
+    :scan_procedure => im_ds.visit.scan_procedure.nil? ? nil : im_ds.visit.scan_procedure.display_alias,
     :Scan_number => im_ds.visit.scan_number,
     :enumber => im_ds.visit.enrollment.nil? ? nil : im_ds.visit.enrollment.enumber,
     :Initials => im_ds.visit.initials,

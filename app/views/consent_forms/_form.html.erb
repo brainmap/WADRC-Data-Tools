@@ -28,16 +28,10 @@
   <div id="scan_procedure_list">
   <ul>
   <% scan_procedure_array =current_user.edit_low_scan_procedure_array.split(' ')
-  ScanProcedure.where(" scan_procedures.id in (?)",  scan_procedure_array).all.sort_by(&:codename).each do |scan_procedure| %>
-    <li>
-      <%#= f.fields_for scan_procedure do |scan_fields| %>
-        <%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
-        <%#= f.label :scan_procedure_ids, scan_procedure.codename %>
-      <%# end %>
-    </li>
+  ScanProcedure.where(" scan_procedures.id in (?)",  scan_procedure_array).all.sort_by(&:display_alias).each do |scan_procedure| %>
     <li>
       <%= check_box_tag "consent_form_scan_procedure_ids", scan_procedure.id, @consent_form.scan_procedures.include?(scan_procedure), :name => 'consent_form[scan_procedure_ids][]' %>
-      <%= label_tag '', scan_procedure.codename %>
+      <%= label_tag '', scan_procedure.display_alias %>
     </li>
   <% end %>
   </ul>

@@ -55,8 +55,8 @@
 				:id, :enumber, {:include_blank => "Select an enrollment", :selected => @q_data_form.enrollment_id } %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;			
 	<% elsif  vl.try("to_s") == "scan_procedure"  or  vl.try("to_s") == '["scan_procedure"]'  %> Scan Procedure: 
-			<%= collection_select "value_link","scan_procedure_id", ScanProcedure.all.sort_by(&:codename),
-				:id, :codename, {:include_blank => "Select a scan_procedure", :selected => @q_data_form.scan_procedure_id } %>
+			<%= collection_select "value_link","scan_procedure_id", ScanProcedure.all.sort_by(&:display_alias),
+				:id, :display_alias, {:include_blank => "Select a scan_procedure", :selected => @q_data_form.scan_procedure_id } %>
 <%	  end %>
   <% end %>
 <%    # scan_procedure id --- access control, limit participants, visits, etc%>

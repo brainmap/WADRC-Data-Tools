@@ -26,7 +26,7 @@
   <tbody>
     <% @scan_procedures.each do |scan_procedure| %>
     <tr>
-      <td><%= link_to(scan_procedure.codename, '/vgroups/home?vgroups_search[scan_procedure_id][id]='+scan_procedure.id.to_s) %></td>
+      <td><%= link_to(scan_procedure.display_alias, '/vgroups/home?vgroups_search[scan_procedure_id][id]='+scan_procedure.id.to_s) %></td>
       <td><%=h scan_procedure.subjectid_base %></td>
       <td><%=h scan_procedure.visit_number_abbreviation %></td>
       <td><%=h scan_procedure.description %></td>

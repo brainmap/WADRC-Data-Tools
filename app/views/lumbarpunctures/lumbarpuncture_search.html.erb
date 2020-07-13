@@ -22,28 +22,14 @@ edit_count =   edit_count -1
 
 
 <%= form_for 'lumbarpuncture_search' do |f| %>
-<!--
-  <table class="search_form">
-	
-    <th><%= f.label :scan_procedures %></th>
-    <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
-    <td><%= collection_select(:lumbarpuncture_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename, {}, {:multiple =>  true}) %></td>
-  </table>
--->
 <table class="search_form">
 	<tr><td><%= f.label :scan_procedures %><br>
 	<div id="scan_procedure_list">
 	<ul>
-	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
-		<li>
-			<%#= f.fields_for scan_procedure do |scan_fields| %>
-				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
-				<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
-			<%# end %>
-		</li>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_vgroups where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:display_alias).each do |scan_procedure| %>
 		<li>
 			<%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'lumbarpuncture_search[scan_procedure_id][]' %>
-			<%= label_tag '', scan_procedure.codename %>
+			<%= label_tag '', scan_procedure.display_alias %>
 		</li>
 	<% end %>
 	</ul>
@@ -128,7 +114,7 @@ edit_count =   edit_count -1
         %>
       <tr>
         <td><%= link_to appointment.appointment_date.to_s(:datetime_military), lumbarpuncture %></td>
-        <td><%= vgroup.scan_procedures.blank? ? "None" : vgroup.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
+        <td><%= vgroup.scan_procedures.blank? ? "None" : vgroup.scan_procedures.sort_by(&:display_alias).collect {|sp| link_to(sp.display_alias, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
         <td><%= vgroup.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
         <td><%= vgroup.rmr %></td>
         <td><%= lumbarpuncture.lp_exam_md_id.blank? ? nil : Employee.find(lumbarpuncture.lp_exam_md_id).name.html_safe %></td>
@@ -153,81 +139,3 @@ edit_count =   edit_count -1
 
 </table>
 
-
-<!--
-<% 
-=begin
-%>
-<br><br><br><br><br><br><br><br><br><br>
-<%
-@column_headers = ['Protocol','Enumber','RMR','Appt Date','LP success','LP abnormality','LP followup','LP MD','Completed Fast','Fast hrs','Fast min','LP status','LP Note', 'Appt Note'] # need to look up values
-# Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
-@column_number =   @column_headers.size
-@fields =["CASE lumbarpunctures.lpsuccess WHEN 1 THEN 'Yes' ELSE 'No' end ","CASE lumbarpunctures.lpabnormality WHEN 1 THEN 'Yes' ELSE 'No' end" ,"lumbarpunctures.lpfollownote",
-  "concat(employees.first_name,' ',employees.last_name)",
-  "CASE lumbarpunctures.completedlpfast WHEN 1 THEN 'Yes' ELSE 'No' end",
-  "lumbarpunctures.lpfasttotaltime","lumbarpunctures.lpfasttotaltime_min","vgroups.completedlumbarpuncture","lumbarpunctures.lumbarpuncture_note","lumbarpunctures.id"] # vgroups.id vgroup_id always first, include table name
-@tables =['lumbarpunctures'] # trigger joins --- vgroups and appointments by default
-@left_join = ["LEFT JOIN employees on lumbarpunctures.lp_exam_md_id = employees.id"] # left join needs to be in sql right after the parent table!!!!!!!
-@conditions =["scan_procedures.codename='johnson.pipr.visit1'"] # need look up for like, lt, gt, between  
-@order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
-%>
-<%= render :partial => 'data_searches/index_partial', :locals => { } %>
-
-<table class="tabular">
-  
-  <caption><%= pluralize(@results.size, 'Lumbarpuncture appt') %><%#= paginated ? pagination_info(@lumbarpunctures) : pluralize(@lumbarpunctures.length, 'Lumbarpuncture appt') %></caption>
-  <thead>
-    <tr>
-		<% @column_headers.each do |column_header|%>
-	      <th><%= column_header%></th>
-	  <% end %>
-
-      <th></th>
-<% if edit_count > 0 %>
-       <th></th>
-<% end %>
-      <th></th>
-    </tr>
-  </thead>
-
-
-  <tfoot><tr><td colspan=(column_header.size+3)>
-		 <%# NEED TO HAVE PAGINATION -- array vs hash  paginate @results %> 
-		<%# if paginated %>
-    	<%#= @lumbarpuncture_search.nil? ? will_paginate(@lumbarpunctures) : will_paginate(@lumbarpunctures, :params => { :lumbarpuncture_search => @lumbarpuncture_search }) %>
-		<%# end %>
-  </td></tr></tfoot>
-
-  <tbody>
-    <% @results.each do |result| %>
-       <%   
-             lumbarpuncture = Lumbarpuncture.find(result[@column_headers.size-1])
-             appointment = Appointment.find(lumbarpuncture.appointment_id) 
-             vgroup = Vgroup.find(appointment.vgroup_id)
-            result.delete_at(@column_headers.size-1)
-        %>
-	  <tr>
-	   <% for i in 0..@column_number-1 %>
-	    <td><%= result[i] %></td>
-	   <% end %>
-        <td style="width: 6em;" nowrap>
-          <%= link_to 'show', lumbarpuncture %>
-		  <% if edit_count > 0 %>
-		          <%= link_to 'edit', edit_lumbarpuncture_path(lumbarpuncture) %>
-		  <% end %>
-        </td>
-       <td>
-<% if edit_count > 0 %>
-	<%= link_to  'New', new_lumbarpuncture_path+"/"+vgroup.id.to_s %>
-<% end %></td>
-
-      </tr>
-    <% end %>
-  </tbody>
-
-</table>
-<%
-=end
-%>
--->

@@ -20,28 +20,14 @@ edit_count = edit_count -1
 
 
 <%= form_for 'visit_search' do |f| %>
-<!--
-  <table class="search_form">
-	
-    <th><%= f.label :scan_procedures %></th>
-    <% scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) %>
-    <td><%= collection_select(:visit_search, :scan_procedure_id, ScanProcedure.where(" scan_procedures.id in (?)",scan_procedure_array).order(:codename), :id, :codename, {}, {:multiple =>  true}) %></td>
-  </table>
--->
 <table class="search_form">
 	<tr><td><%= f.label :scan_procedures %><br>
 	<div id="scan_procedure_list">
 	<ul>
-	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_visits where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:codename).each do |scan_procedure| %>
-		<li>
-			<%#= f.fields_for scan_procedure do |scan_fields| %>
-				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
-				<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
-			<%# end %>
-		</li>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_visits where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).all.sort_by(&:display_alias).each do |scan_procedure| %>
 		<li>
 			<%= check_box_tag "visit_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'visit_search[scan_procedure_id][]' %>
-			<%= label_tag '', scan_procedure.codename %>
+			<%= label_tag '', scan_procedure.display_alias %>
 		</li>
 	<% end %>
 	</ul>
@@ -183,7 +169,7 @@ end
 	     vgroup = Vgroup.find(appointment.vgroup_id)%>
       <tr>
         <td><%= link_to visit.date.to_s(:datetime_military), visit %></td>
-        <td><%= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
+        <td><%= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:display_alias).collect {|sp| link_to(sp.display_alias, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
         <td><%= visit.scan_number %></td>
         <td><%= visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
         <td><%= visit.rmr %></td>

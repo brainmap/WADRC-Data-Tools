@@ -20,7 +20,7 @@
 <p>
   <b>Scan procedure:</b>
   <% if !@trfile.scan_procedure_id.nil? %>
-  <%= ScanProcedure.find(@trfile.scan_procedure_id).codename %>
+  <%= ScanProcedure.find(@trfile.scan_procedure_id).display_alias %>
   <%end%>
 </p>
 

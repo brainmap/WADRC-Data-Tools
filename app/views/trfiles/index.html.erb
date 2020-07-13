@@ -23,7 +23,7 @@
     <td><%= trfile.subjectid %></td>
     <td><%= trfile.enrollment_id %></td>
     <td><%= if !(trfile.scan_procedure_id).nil? 
-        ScanProcedure.find(trfile.scan_procedure_id).codename
+        ScanProcedure.find(trfile.scan_procedure_id).display_alias
        end %></td>
     <td><% if !(trfile.image_dataset_id).nil?
           v_ids =ImageDataset.find(trfile.image_dataset_id) %>

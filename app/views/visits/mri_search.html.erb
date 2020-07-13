@@ -30,16 +30,11 @@ edit_count = edit_count -1
 	<tr><td><%= f.label :scan_procedures %><br>
 	<div id="scan_procedure_list">
 	<ul>
-	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_visits where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).load.sort_by(&:codename).each do |scan_procedure| %>
-		<li>
-			<%#= f.fields_for scan_procedure do |scan_fields| %>
-				<%#= f.check_box :scan_procedure_ids, {}, scan_procedure.id, :name => 'visit[scan_procedure_ids][]' %>
-				<%#= f.label :scan_procedure_ids, scan_procedure.codename %>
-			<%# end %>
-		</li>
+	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_visits where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).load.sort_by(&:display_alias).each do |scan_procedure| %>
+  
 		<li>
 			<%= check_box_tag "visit_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'mri_search[scan_procedure_id][]' %>
-			<%= label_tag '', scan_procedure.codename %>
+			<%= label_tag '', scan_procedure.display_alias %>
 		</li>
 	<% end %>
 	</ul>
@@ -163,7 +158,7 @@ edit_count = edit_count -1
 	    <% if i == 0 %>
 	     <td><%= link_to result[i].to_s(:datetime_military), visit %></td>
 	   <% elsif i == 1 %>
-	     <td><%= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, '/mri_search?mri_search[scan_procedure_id][]='+sp.id.to_s)}.join(", ").html_safe %></td>
+	     <td><%= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:display_alias).collect {|sp| link_to(sp.display_alias, '/mri_search?mri_search[scan_procedure_id][]='+sp.id.to_s)}.join(", ").html_safe %></td>
 	    <% elsif i == 2 %>
 	     <td><%= visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
 	    <% elsif i == 5 %>

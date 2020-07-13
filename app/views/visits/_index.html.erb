@@ -32,7 +32,7 @@
     <% visits.each do |visit| %>
       <tr>
         <td><%= link_to visit.date.to_s(:datetime_military), visit %></td>
-        <td><%= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:codename).collect {|sp| link_to(sp.codename, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
+        <td><%= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:display_alias).collect {|sp| link_to(sp.display_alias, in_scan_procedure_path(sp))}.join(", ").html_safe %></td>
         <td><%= visit.scan_number %></td>
         <td><%= visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
         <td><%= visit.rmr %></td>
