@@ -34,7 +34,7 @@ class Jobs::RemoteRequest::BookedRequest < Jobs::RemoteRequest::RemoteRequestBas
     end
 
 	class BookedReader
-		include HTTParty
+		# include HTTParty #can't have this in the old panda
 		base_uri 'https://booked.medicine.wisc.edu'
 	end
 

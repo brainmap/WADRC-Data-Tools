@@ -14,7 +14,7 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
     end
 
 	class RadReader
-		include HTTParty
+		# include HTTParty # can't have this in old panda
 		base_uri 'https://www.radiology.wisc.edu'
 	end
 
