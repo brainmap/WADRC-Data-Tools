@@ -1,9 +1,9 @@
 class Jobs::JobRun < ActiveRecord::Base
-  has_one_attached :log
-  has_one_attached :inputs
-  has_one_attached :outputs
-  has_one_attached :exclusions
-  has_one_attached :error_log
+  # has_one_attached :log
+  # has_one_attached :inputs
+  # has_one_attached :outputs
+  # has_one_attached :exclusions
+  # has_one_attached :error_log
 
   serialize :params
 
