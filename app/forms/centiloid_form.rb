@@ -6,6 +6,7 @@ class CentiloidForm
 	attr_accessor :petscan_id, :subject_id, :centiloid_value, :reference_roi, :signal_roi
 	attr_accessor :pet_method, :signal_value, :reference_value, :renormalized_value, :age_at_appointment
 	attr_accessor :source_file_path, :input_file_path, :image_path, :code_version, :created_at, :processed_at
+	attr_accessor :participant_id
 
 	def self.attributes
 		{
@@ -25,6 +26,7 @@ class CentiloidForm
 			'code_version' => '',
 			'created_at' => '',
 			'processed_at' => '',
+			'participant_id' => '',
 		}
 	end
 
@@ -48,6 +50,12 @@ class CentiloidForm
 
 
 		choices['subject_id'] = values["subject/study ID"].to_s
+
+		enr = Enrollment.where(:enumber => choices['subject_id']).first
+		if !enr.nil?
+			choices['participant_id'] = enr.participant_id
+		end
+		
 		choices['centiloid_value'] = values["Centiloid"].to_f
 		choices['reference_roi'] = comments["#{pet_method.upcase} for signal VOI"]
 		choices['signal_roi'] = comments["#{pet_method.upcase} for signal VOI"]
@@ -93,7 +101,8 @@ class CentiloidForm
 			'image_path' => @image_path,
 			'code_version' => @code_version,
 			'created_at' => @created_at,
-			'processed_at' => @processed_at
+			'processed_at' => @processed_at,
+			'participant_id' => @participant_id
 		}
 	end
 
