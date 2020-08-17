@@ -138,6 +138,7 @@ GEM
       activesupport (>= 4.2.0)
     hirb (0.7.3)
     hpricot (0.8.6)
+    httpclient (2.8.3)
     i18n (1.1.0)
       concurrent-ruby (~> 1.0)
     jbuilder (2.6.3)
@@ -315,7 +316,7 @@ DEPENDENCIES
   activeresource!
   acts_as_reportable (= 1.1.1)
   builder (= 3.2.3)
-  bundler (= 1.16.1)
+  bundler (= 1.17.3)
   bundler-unload (= 1.0.2)
   byebug
   bzip2-ruby!
@@ -335,6 +336,7 @@ DEPENDENCIES
   exception_notification (= 2.4.1)
   hirb (= 0.7.3)
   hpricot (= 0.8.6)
+  httpclient
   jbuilder (= 2.6.3)
   jquery-rails (= 4.2.2)
   json (= 2.0.3)
@@ -365,4 +367,4 @@ DEPENDENCIES
   yaml_db (= 0.4.2)
 
 BUNDLED WITH
-   1.16.1
+   1.17.3

@@ -6,11 +6,11 @@ git_source(:github) do |repo_name|
   repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?("/")
   "https://github.com/#{repo_name}.git"
 end
-####gem 'httpclient'
+gem 'httpclient'
 gem 'net-ssh'   
 gem 'net-sftp' 
 # not finding bundler in cap deploy - rvm issue?
-gem 'bundler','1.16.1' # '1.15.4' #  '1.14.6'  # was , '1.14.6'
+gem 'bundler','1.17.3' # '1.15.4' #  '1.14.6'  # was , '1.14.6'
 gem 'bundler-unload','1.0.2'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'

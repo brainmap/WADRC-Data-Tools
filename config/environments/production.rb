@@ -102,5 +102,9 @@ config.action_mailer.default_url_options = {:host => 'adrcdev2.dom.wisc.edu'}
 #     :sender_address => %{"Exception Notifier" <noreply_johnson_lab@medicine.wisc.edu>},
 #     :exception_recipients => %w{noreply_johnson_lab@medicine.wisc.edu}
 #   }
+
+
+  config.adrc_neuropathology_token = begin IO.read("/home/panda_user/.neuropathology").gsub(/\n/,'') rescue "" end
+  config.wrap_neuropathology_token = begin IO.read("/home/panda_user/.wrap_neuropathology").gsub(/\n/,'') rescue "" end
     
 end

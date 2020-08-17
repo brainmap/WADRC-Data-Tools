@@ -60,5 +60,8 @@ WADRCDataTools::Application.configure do
   
   config.action_mailer.default_url_options = {:host => 'localhost:3000'}
   
+  config.adrc_neuropathology_token = begin IO.read("/Users/panda_user/.neuropathology").gsub(/\n/,'') rescue "" end
+  config.wrap_neuropathology_token = begin IO.read("/Users/panda_user/.wrap_neuropathology").gsub(/\n/,'') rescue "" end
+    
 end
 

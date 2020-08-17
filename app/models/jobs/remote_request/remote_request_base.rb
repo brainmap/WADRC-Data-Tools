@@ -1,4 +1,4 @@
-class Jobs::RemoteRequest::RemoteRequestBase < Jobs::BaseJob
+	class Jobs::RemoteRequest::RemoteRequestBase < Jobs::BaseJob
 
 	def self.default_params
 	  	params = { :schedule_name => '', :run_by_user => 'panda_user'}
@@ -14,6 +14,8 @@ class Jobs::RemoteRequest::RemoteRequestBase < Jobs::BaseJob
 			selection(params)
 
 			record(params)
+
+			rotate_tables(params)
 
 			close(params)
 		
