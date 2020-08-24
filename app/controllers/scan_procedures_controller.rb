@@ -99,7 +99,7 @@ load_and_authorize_resource
        @scan_procedure = ScanProcedure.find(params[:id])
     end
    def scan_procedure_params
-          params.require(:scan_procedure).permit(:petscan_tracer_path,:rmraic_reggieid_flag,:make_participant_flag,:rmr_dicom_field,:petscan_tracer_file_size,:subjectid_base,:petscan_flag,:protocol_id,:description,:codename,:id,:permission_type,:visit_number_abbreviation)
+          params.require(:scan_procedure).permit(:petscan_tracer_path,:rmraic_reggieid_flag,:make_participant_flag,:rmr_dicom_field,:petscan_tracer_file_size,:subjectid_base,:petscan_flag,:protocol_id,:description,:codename,:id,:permission_type,:visit_number_abbreviation, :display_alias)
    end     
     
   
