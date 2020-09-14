@@ -3299,8 +3299,10 @@ def cg_up_load
                      v_create_sql = v_create_sql+" "+col[0]+"   TEXT "
               end
                if col[3] == "date"  # making a colname_date   DATE and age_at_activity
+                      # I don't think this place in the code is ever reached - no commas would give errors
                       v_create_sql = v_create_sql+" "+col[0]+"_date   DATE "
                       v_create_sql = v_create_sql+" "+col[0]+"_age_at_activity   FLOAT "
+                      v_create_sql = v_create_sql+" shareable_age_at_appointment   VARCHAR(10) "
                end
          end
 
@@ -3402,6 +3404,7 @@ def cg_up_load
                       v_age_at_activity_col_hash[col[0]] = col[0]+"_age_at_activity"
                       v_create_sql = v_create_sql+", "+col[0]+"_date   DATE "
                       v_create_sql = v_create_sql+", "+col[0]+"_age_at_activity   FLOAT "
+                      v_create_sql = v_create_sql+", shareable_age_at_appointment   VARCHAR(10) "
               end
          end
          v_create_sql = v_create_sql+")"
@@ -3509,16 +3512,27 @@ puts "aaaaa = "+v_create_index_visno_datasource_participant
                                              and e.id = t.enrollment_id)
                         WHERE  "+v_date_date_col_hash[key]+"  > '' and "+v_date_date_col_hash[key]+" IS NOT NULL
                         AND t.enrollment_id IS NOT NULL AND t.enrollment_id >'' "
-            results = connection.execute(sql) 
-
+                results = connection.execute(sql) 
+                sql = "UPDATE "+v_schema+"."+v_tn+"  t set shareable_age_at_appointment =round("+v_age_at_activity_col_hash[key]+",2)
+                        WHERE  "+v_date_date_col_hash[key]+"  > '' and "+v_date_date_col_hash[key]+" IS NOT NULL
+                        AND t.enrollment_id IS NOT NULL AND t.enrollment_id >'' "
+                results = connection.execute(sql)
+                sql = "UPDATE "+v_schema+"."+v_tn+"  t set shareable_age_at_appointment ='90+' where "+v_age_at_activity_col_hash[key]+" > 89.99"
+                results = connection.execute(sql)
             elsif v_key_type == "subjectid-kc-participant_id" or v_key_type == "reggieid-kc-participant_id"   or v_key_type == "wrapnum-kc-participant_id" or v_key_type == "adrcnum-kc-participant_id"
-                 sql = "UPDATE "+v_schema+"."+v_tn+"  t set "+v_age_at_activity_col_hash[key]+" = 
+                sql = "UPDATE "+v_schema+"."+v_tn+"  t set "+v_age_at_activity_col_hash[key]+" = 
                     ( SELECT distinct round((DATEDIFF( "+v_date_date_col_hash[key]+",  p.dob)/365.25),2)  FROM participants p
                                            where p.dob is not null and p.dob > ''
                                            and t.participant_id = p.id)
                         WHERE  "+v_date_date_col_hash[key]+"  > '' and "+v_date_date_col_hash[key]+" IS NOT NULL
                         AND t.participant_id IS NOT NULL AND t.participant_id >'' "
-            results = connection.execute(sql) 
+                results = connection.execute(sql) 
+                sql = "UPDATE "+v_schema+"."+v_tn+"  t set shareable_age_at_appointment=round("+v_age_at_activity_col_hash[key]+",2)
+                        WHERE  "+v_date_date_col_hash[key]+"  > '' and "+v_date_date_col_hash[key]+" IS NOT NULL
+                        AND t.participant_id IS NOT NULL AND t.participant_id >'' "
+                results = connection.execute(sql)
+                sql = "UPDATE "+v_schema+"."+v_tn+"  t set shareable_age_at_appointment ='90+' where "+v_age_at_activity_col_hash[key]+" > 89.99"
+                results = connection.execute(sql)
             end
         end
         v_msg = v_msg+"; Updated key column in table "+v_tn
@@ -3581,6 +3595,16 @@ puts "aaaaa = "+v_create_index_visno_datasource_participant
                       v_cg_tn_cn_age.export_name = col[3]+" age at activity"
                       v_cg_tn_cn_age.cg_tn_id = v_cg_tns_archive[0].id
                       v_cg_tn_cn_age.data_type ="float"
+                      v_cg_tn_cn_age.save
+                      #shareable_age_at_appointment-90+
+                      v_cg_tn_cn_age = CgTnCn.new
+                      v_cg_tn_cn_age.display_order = 2000 # want it at the end
+                      v_cg_tn_cn_age.cn = "shareable_age_at_appointment"
+                      v_cg_tn_cn_age.order_by_flag = "N"
+                      v_cg_tn_cn_age.common_name = "shareable_age_at_appointment-90+"
+                      v_cg_tn_cn_age.export_name = "shareable_age_at_appointment-90+"
+                      v_cg_tn_cn_age.cg_tn_id = v_cg_tns_archive[0].id
+                      v_cg_tn_cn_age.data_type ="string"
                       v_cg_tn_cn_age.save
                     end
                 end
@@ -3680,9 +3704,11 @@ puts "aaaaa = "+v_create_index_visno_datasource_participant
                       v_age_at_activity_col_hash[col[0]] = col[0]+"_age_at_activity"
                       v_create_sql = v_create_sql+", "+col[0]+"_date   DATE "
                       v_create_sql = v_create_sql+", "+col[0]+"_age_at_activity   FLOAT "
+                      v_create_sql = v_create_sql+", shareable_age_at_appointment   VARCHAR(10) "
               end
          end
          v_create_sql = v_create_sql+")"
+         # this might be the only path for making create table
           # make new table with v_up_table_yyyymmdd, 
          results = connection.execute(v_create_sql)   # new-present-old_edit ?
          results = connection.execute(v_create_index_key_type)
@@ -3759,16 +3785,28 @@ puts "CCCCCCC="+v_insert_sql
                                              and e.id = t.enrollment_id)
                         WHERE  "+v_date_date_col_hash[key]+"  > '' and "+v_date_date_col_hash[key]+" IS NOT NULL
                         AND t.enrollment_id IS NOT NULL AND t.enrollment_id >'' "
-            results = connection.execute(sql) 
+                results = connection.execute(sql) 
+                sql = "UPDATE "+v_schema+"."+v_tn+"  t set shareable_age_at_appointment=round("+v_age_at_activity_col_hash[key]+",2) 
+                        WHERE  "+v_date_date_col_hash[key]+"  > '' and "+v_date_date_col_hash[key]+" IS NOT NULL
+                        AND t.enrollment_id IS NOT NULL AND t.enrollment_id >'' "
+                results = connection.execute(sql) 
+                sql = "UPDATE "+v_schema+"."+v_tn+"  t set shareable_age_at_appointment='90+' WHERE "+v_age_at_activity_col_hash[key]+" > 89.99"
+                results = connection.execute(sql)
 
             elsif v_key_type == "subjectid-kc-participant_id" or v_key_type == "reggieid-kc-participant_id"   or v_key_type == "wrapnum-kc-participant_id" or v_key_type == "adrcnum-kc-participant_id"
-                 sql = "UPDATE "+v_schema+"."+v_tn+"  t set "+v_age_at_activity_col_hash[key]+" = 
+                sql = "UPDATE "+v_schema+"."+v_tn+"  t set "+v_age_at_activity_col_hash[key]+" = 
                     ( SELECT distinct round((DATEDIFF( "+v_date_date_col_hash[key]+",  p.dob)/365.25),2)  FROM participants p
                                            where p.dob is not null and p.dob > ''
                                            and t.participant_id = p.id)
                         WHERE  "+v_date_date_col_hash[key]+"  > '' and "+v_date_date_col_hash[key]+" IS NOT NULL
                         AND t.participant_id IS NOT NULL AND t.participant_id >'' "
-            results = connection.execute(sql) 
+                results = connection.execute(sql) 
+                sql = "UPDATE "+v_schema+"."+v_tn+"  t set shareable_age_at_appointment=round("+v_age_at_activity_col_hash[key]+",2) 
+                        WHERE  "+v_date_date_col_hash[key]+"  > '' and "+v_date_date_col_hash[key]+" IS NOT NULL
+                        AND t.participant_id IS NOT NULL AND t.participant_id >'' "
+                results = connection.execute(sql)
+                sql = "UPDATE "+v_schema+"."+v_tn+"  t set shareable_age_at_appointment='90+' WHERE "+v_age_at_activity_col_hash[key]+" > 89.99" 
+                results = connection.execute(sql)
             end 
 
         end
@@ -3818,7 +3856,7 @@ puts "CCCCCCC="+v_insert_sql
     # add columns 
          # change cg_search status = active
          #
-        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_display, col_function, col_format from "+v_definition_table+" where target_table ='"+v_up_table_name+"' order by display_order"   
+        v_sql_cols = "Select lower(col_db), upper(col_type), col_size,col_display, col_function, col_format,column_active,search_list,column_searchable from "+v_definition_table+" where target_table ='"+v_up_table_name+"' order by display_order"   
         result_cols = connection.execute(v_sql_cols)
         v_cnt =1
         result_cols.each do |col|
@@ -3865,9 +3903,22 @@ puts "CCCCCCC="+v_insert_sql
                     v_cg_tn_cn_age.cg_tn_id = v_cg_search.id
                     v_cg_tn_cn_age.data_type ="float"
                     v_cg_tn_cn_age.save
+                    # shareable_age_at_appointment-90+
+                    v_cg_tn_cn_age = CgTnCn.new
+                    v_cg_tn_cn_age.display_order = 2000 # want to go to end
+                    v_cg_tn_cn_age.cn = v_age_at_activity_col_hash[col[0]]
+                    v_cg_tn_cn_age.order_by_flag = "Y"
+                    v_cg_tn_cn_age.common_name = "shareable_age_at_appointment"
+                    v_cg_tn_cn_age.export_name = "shareable_age_at_appointment-90+"
+                    v_cg_tn_cn_age.cg_tn_id = v_cg_search.id
+                    v_cg_tn_cn_age.data_type ="string"
+                    v_cg_tn_cn_age.save
                 end
 
             end
+              v_cg_tn_cn.status_flag = col[6]  # column_active
+              v_cg_tn_cn.value_list = col[7]  # search_list
+              v_cg_tn_cn.searchable_flag = col[8] # column searchable
               v_cg_tn_cn.cg_tn_id = v_cg_search.id
               v_cg_tn_cn.save
         end
