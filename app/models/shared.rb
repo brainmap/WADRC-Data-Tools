@@ -13663,7 +13663,7 @@ end
                v_sp = ScanProcedure.find(r[1]) # scan_procedure_id
                if !v_sp.nil?    
                  if !v_sp.visit_number_abbreviation.nil? and v_sp.visit_number_abbreviation > "" 
-                   v_subjectid = v_subjectid.gsub("_"+sp.visit_number_abbreviation,"") 
+                   v_subjectid = v_subjectid.gsub("_"+v_sp.visit_number_abbreviation,"") 
                  end
                end
             end
