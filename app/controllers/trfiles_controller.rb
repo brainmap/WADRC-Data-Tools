@@ -425,6 +425,7 @@ v_composite_value = v_composite_value + "
   end
 
   def trfile_home
+
     scan_procedure_array =  (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
     scan_procedure_edit_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
           hide_date_flag_array = []
@@ -889,7 +890,8 @@ v_composite_value = v_composite_value + "
       if v_display_form  == "N"
          format.html { redirect_to( '/trtype_home/'+params[:id], :notice => ' ' )}
       else
-        format.html # index.html.erb
+        puts "trying to render flexible"
+        format.html { render layout: "flexible" }
       end
       #format.json { render json: @trfiles }
     end

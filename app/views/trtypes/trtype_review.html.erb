@@ -1,0 +1,537 @@
+<% if @hide_page_flag == "Y" 
+  else %>
+<%  
+
+@current_tab = "qc"
+
+%>
+<h3>File Tracker: <%= @trtype.description%></h3>
+
+
+    <div class="row">
+      <div class="col-md-8 d-none d-md-block">
+          <div class="card m-b-30 card-body bg-grey">
+            <!--<form id='trtypes-search-form'>-->
+              <div class='row'>
+                <div class='col-6'>
+                  <span class="card-title mt-0 pr-2 text-left">Search filters</span>
+                </div>
+                <div class='col-6 text-right'>
+                  <i class="fas fa-chevron-down rotate filter-toggle"></i>
+                </div>
+              </div>
+
+              <div class="filter-group collapse">
+                
+                <div class="form-group row">
+                  <label for="example-text-input" class="col-sm-4 col-form-label filter-label text-right">Scan procedure</label>
+                  <div class="col-sm-8">
+
+                    <%= collection_select(:tr_search, :scan_procedure, ScanProcedure.where(" scan_procedures.id in (?)",@scan_procedure_array).order(:display_alias), :id, :display_alias,  {:prompt => 'choose scan procedure'}, {:multiple =>  false, :class => "custom-select trtype-search-input", :id => "scan-procedure-filter", :displaytitle => "Scan Procedure == '{value}'" } ) %>
+                  </div>
+                </div>
+                
+                <div class="form-group row">
+                  <label for="example-text-input" class="col-sm-4 col-form-label filter-label text-right">File Completed?</label>
+                  <div class="col-sm-8">
+                    <%= select :trtypes_search, :completed_filter, ['',"Y","N"]  , {:prompt => ""},{:class => "custom-select trtype-search-input", :id => "completed-filter", :displaytitle => "File Completed == '{value}'"} %>
+                  </div>
+                </div>
+                
+                <div class="form-group row">
+                  <label for="example-text-input" class="col-sm-4 col-form-label filter-label text-right">QC Value</label>
+                  <div class="col-sm-8">
+                    <%= select(:tr_search,  :qc_value_filter, ["Fail","Partial","Pass","Reprocessed","New Record"], {:prompt => ''},{:class => "custom-select trtype-search-input",:id => "qc-filter", :displaytitle => "QC Value == '{value}'"} ) %>
+                  </div>
+                </div>
+
+
+                <div class="form-group row">
+                  <label for="example-text-input" class="col-sm-4 col-form-label filter-label text-right">Subject ID</label>
+                  <div class="col-sm-8">
+                    <input class="form-control trtype-search-input" type="text" value="" placeholder="000000" id="subjectid-filter" displaytitle="Subject ID contains '{value}'">
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label for="example-text-input" class="col-sm-4 col-form-label filter-label text-right">Secondary Key</label>
+                  <div class="col-sm-8">
+                    <input class="form-control trtype-search-input" type="text" value="" placeholder="v1" id="secondary-key-filter" displaytitle="Secondary Key contains '{value}'">
+                  </div>
+                </div>
+                
+
+                <div class="form-group row">
+                  <div class="col-sm-12 text-right">
+                    <button class="btn btn-secondary" id='trtype-search-clear'>clear</button>
+                    <button class="btn btn-primary" id='trtype-search-filter'>filter</button>
+                  </div>
+                </div>
+              </div>
+              <div id='filter-list' class='pt-2 text-sm'>
+              </div>
+          </div>
+      </div>
+    </div>
+
+<div class='row'>
+  <div class='col-md-4 d-none d-md-block p-2'>
+    <strong>Candidates</strong>
+
+    <div>
+      
+      <table class="table compact" id="candidates" cellpadding=0 cellspacing=0>
+        <thead>
+          <tr style='display:none;'>
+            <th>Candidates</th>
+          </tr>
+        </thead>
+
+      </table>
+
+    </div>
+  </div>
+  <div class='col-md-8 col-sm-12 p-2'>
+    <strong id='central_title'></strong>
+    <div>
+      <div id="image_dataset_accordion">
+        <h5>Click a visit on the left to begin.</h5>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<% content_for :css_includes do %>
+
+
+        <link href="/stylesheets/all.css" rel="stylesheet" type="text/css" />
+        <link href="/stylesheets/icons.css" rel="stylesheet" type="text/css" />
+        <link href="/stylesheets/panda_icons.css" rel="stylesheet" type="text/css" />
+        <link href="/javascripts/plugins/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+        <link href="/javascripts/plugins/datatables/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+        <link href="/javascripts/plugins/datatables/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+
+<% end %>
+
+<% content_for :javascript_includes do %>
+
+
+        <script src="/javascripts/plugins/datatables/jquery.dataTables.min.js"></script>
+        <script src="/javascripts/plugins/datatables/dataTables.bootstrap4.min.js"></script>
+        <script src="/javascripts/plugins/datatables/dataTables.buttons.min.js"></script>
+        <script src="/javascripts/plugins/datatables/buttons.bootstrap4.min.js"></script>
+        <script src="/javascripts/plugins/datatables/jszip.min.js"></script>
+        <script src="/javascripts/plugins/datatables/pdfmake.min.js"></script>
+        <script src="/javascripts/plugins/datatables/vfs_fonts.js"></script>
+        <script src="/javascripts/plugins/datatables/buttons.html5.min.js"></script>
+        <script src="/javascripts/plugins/datatables/buttons.print.min.js"></script>
+        <script src="/javascripts/plugins/datatables/buttons.colVis.min.js"></script>
+        <!-- Responsive examples -->
+        <script src="/javascripts/plugins/datatables/dataTables.responsive.min.js"></script>
+        <script src="/javascripts/plugins/datatables/responsive.bootstrap4.min.js"></script>
+        <script src="/javascripts/plugins/datatables/pipeline.js"></script>
+        <script src="/javascripts/bootstrap-datepicker.min.js"></script>
+        <script src="/javascripts/plugins/alertify/js/alertify.js"></script>
+        <div class="alertify-logs"></div>
+
+<% end %>
+
+<% content_for :javascript_custom do %>
+<script type="text/javascript">
+
+function format_candidate (row) {
+  candidates.push(row);
+
+  out = '<a onclick="load_fields(\'' + row.scan_procedure + ' ' + row.subjectid + '\', '+row.id+')" id="candidate_' + row.scan_procedure + '_' + row.subjectid + '" class="text-sm"><div class="d-inline"><i class="fas fa-circle pr-2 grey align-top pt-1 indicator'+row.id+'"></i></div> <div class="d-inline-block">' + row.scan_procedure + '<br>' + row.subjectid + '</div></a>';
+  return out;
+}
+
+async function copy_path(path_id) {
+  // alert(path_id);
+  var link = document.querySelector(path_id);
+  var range = document.createRange();
+  range.selectNode(link);
+  window.getSelection().addRange(range);
+
+  var val = $(link).text();
+
+  try {
+    var successful = document.execCommand('copy');
+    await navigator.clipboard.writeText(val);
+
+    if (successful) {
+      alertify.success("Path copied to clipboard. ("+val+")");
+      console.log('Path copied to clipboard.');
+    } else {
+      alertify.error("Oops, unable to copy.");
+      console.log('Oops, unable to copy');
+    }
+  } catch(err) {
+    alertify.error("Oops, unable to copy.");
+    console.log('Oops, unable to copy');
+  }
+  window.getSelection().removeAllRanges();
+}
+
+function update_filter_list () {
+  criteria = [];
+  
+  $('input.trtype-search-input').each(function () {
+    if ($(this).val() != ''){
+      criteria.push('<li class="text-sm"><span class="fa-li"><i class="fas fa-filter fa-sm"></i></span>' + $(this).attr('displaytitle').replace(/{value}/g, $(this).val()) + '</li>');
+    }
+  });
+  $('select.trtype-search-input').each(function () {
+    if ($(this).val() != ''){
+      criteria.push('<li class="text-sm"><span class="fa-li"><i class="fas fa-filter fa-sm"></i></span>' + $(this).attr('displaytitle').replace(/{value}/g, $(this).children("option:selected").text()) + '</li>');
+    }
+  });
+
+  if (criteria.length == 0) {
+    $("#filter-list").html('').hide();
+    return;
+  } else {
+    $("#filter-list").html('<ul class="fa-ul">' + criteria.join("\n") + '</ul>').show();
+  }
+}
+
+var trfiles = [];
+var candidates = [];
+var table_index = null;
+
+function next_candidate(value){
+  var table = $('#candidates').DataTable();
+  var data = table.rows().data();
+
+  for(count = 0; count < data.length; count++) {
+    if (data[count]['id'] == value){
+
+      // console.log("there's a match at index " + count);
+      if (count == data.length){
+
+        // console.log("but this looks like it's the last spot");
+        return null; //because this is the last element
+      } else {
+
+        // console.log("and we've got a next ("+trfiles[(count + 1)]+")");
+        return data[(count + 1)];
+      }
+    }
+  }
+
+  return null;
+}
+
+
+function load_fields (central_title, id) {
+  table_index = id;
+  $.ajax({
+    type: "GET",
+    url: '<%= current_user.api_key.api_url %>/api/trtype_review/fields/<%= @trtype.id %>',
+    data: {'trfile_id': id },
+    success: function(data)
+      {
+        
+        trfiles = [];
+        //take each image out of the data
+
+        // $('#central_title').html(central_title);
+
+        var outbound = [];
+
+        $.each(data.data, function (key, item){
+          trfiles.push(item.id);
+
+          console.log("keys are " + Object.keys(item));
+
+          var indicator_class = (item.qc_value == "Pass" ? 'positive' : (item.qc_value == 'Fail' ? 'negative' : 'grey'));
+
+          out = '<div class="card"><div class="card-header" id="heading' + item.id + '"><h5 class="mb-0 mt-0 font-16">' + central_title + ' <i class="fas fa-circle ' + indicator_class + ' indicator' + item.id + 'pl-3"></i></h5></div>';
+
+            out += '<div class="card-body">';
+
+            out += '<div class="row p-2">';
+            out += '<div class="col-4"><span class="panda-label">Trfile ID:</span></div><div class="col-8 panda-data">' + item.id + '</div>';
+            out += '<div class="col-4"><span class="panda-label">Related Files:</span></div><div class="col-8"></div>';
+
+            image_paths = '';
+            $.each(item.images, function (key, image){
+              if (image.file_path.includes("windows")){
+                var path = image.file_path.replace("/mounts/data","s:")
+                image_paths += '<div class="col-12 panda-data"> <span id="path' + image.id + '" class="d-none">file://' + path + '</span><span>' + image.file_name + '</span> <i class="fas fa-copy pl-1" onclick="copy_path(\'#path' + image.id + '\')"></i></div>';
+              } else {
+                image_paths += '<div class="col-12 panda-data"> <span id="path' + image.id + '" class="d-none">file://' + image.file_path + '</span><span>' + image.file_name + '</span> <i class="fas fa-copy pl-1" onclick="copy_path(\'#path' + image.id + '\')"></i></div>';
+              }
+              
+              
+            });
+
+            out += image_paths;
+
+            out += '</div>';
+
+            out+= '<form id="form' + item.id + '">';
+
+            // :image_dataset_id, 
+            out += '<input type="hidden" name="trfile_id" value="' + item.id + '">';
+            out += '<input type="hidden" name="tredit_id" value="' + item.tredit_id + '">';
+
+            // :user_id,
+            out += '<input type="hidden" name="user_id" value="<%= current_user.id %>">';
+
+            form_fields = '';
+            $.each(item.checks, function (key, check){
+              form_fields += '<div class="row p-2">';
+                form_fields += '<div class="col-4 float-right">';
+                  form_fields += '<span class="panda-label text-med">'+check.title +'</span>';
+                form_fields += '</div>';
+                form_fields += '<div class="col-4">';
+              if (check.field_type == 'dropdown') {
+
+                    form_fields += '<select class="custom-select" name="'+check.tractiontype_id+'">';
+                    form_fields += '<option '+(check.value == '' ? 'selected' : '')+'></option>';
+                      $.each(check.options, function (opt_value, opt_label){
+                        form_fields += '<option value="'+opt_value+'" ' + (check.value == opt_value ? 'selected' : '') + '>'+opt_label+'</option>';
+                      });
+                    form_fields += '</select>';
+
+              } else if (check.field_type == 'textarea') {
+
+                  form_fields += '<textarea name="'+check.tractiontype_id+'">'+check.value+'</textarea>';
+
+              } else if (check.field_type == 'textarea_3x60') {
+
+                  form_fields += '<textarea name="'+check.tractiontype_id+'">'+check.value+'</textarea>';
+
+              } else if (check.field_type == 'text') {
+
+                  form_fields += '<input name="'+check.tractiontype_id+'" value="'+check.value+'">';
+
+              } else if (check.field_type == 'text_read_only') {
+
+                  form_fields += '<div class="panda-data" >'+check.value+'</div>';
+
+              } else if (check.field_type == 'text_20') {
+
+                  form_fields += '<input name="'+check.tractiontype_id+'" value="'+check.value+'">';
+
+              }
+
+
+                  form_fields += '</div>';
+                  form_fields += '<div class="col-4">';
+                  form_fields += '</div>';
+                form_fields += '</div>';
+              
+            });
+
+            out += form_fields;
+
+              //qc value
+            out += '<div class="row p-2">';
+              out += '<div class="col-4 float-right">';
+                out += '<span class="panda-label text-med">Overall Score</span>';
+              out += '</div>';
+              out += '<div class="col-4">';
+                out += '<select class="custom-select" name="qc_value">';
+                  out += '<option '+(item.qc_value == '' ? 'selected' : '')+'></option>';
+                  out += '<option value="Pass" ' + (item.qc_value == 'Pass' ? 'selected' : '') + '>Pass</option>';
+                  out += '<option value="Needs Review" ' + (item.qc_value == 'Needs Review' ? 'selected' : '') + '>Needs Review</option>';
+                  out += '<option value="Fail" ' + (item.qc_value == 'Fail' ? 'selected' : '') + '>Fail</option>';
+                out += '</select>';
+              out += '</div>';
+              out += '<div class="col-4">';
+              out += '</div>';
+            out += '</div>';
+
+            out += '<div class="form-group row pt-3 text-right">';
+              out += '<div class="col-sm-12">';
+                out += '<button type="button" class="btn btn-primary qa_check_save_button m-1" form_target="form' + item.id + '">save & next</button>';
+                out += '<button type="button" class="btn btn-secondary qa_check_save_button m-1"  form_target="form' + item.id + '">save & close</button>';
+              out += '</div>';
+            out += '</div>';
+
+              out += '</form>';
+            out += '</div>';
+          out += '</div>';
+
+          outbound.push(out);
+
+        });
+
+        $('#image_dataset_accordion').html(outbound.join(''));
+        $('.info-circle').popover({'template': '<div class="popover brain-popover" role="tooltip"><div class="arrow"></div><h3 class="popover-header brain-popover-header"></h3><div class="popover-body"></div></div>'});
+        $('button.qa_check_save_button').each(function(index,item){$(item).on('click', {form_target:$(item).attr('form_target')}, submit_check);})
+      },
+    error: function(data)
+      {
+
+        console.log(Object.keys(data.responseJSON.errors).join(","));
+        
+      },
+    beforeSend: function (request) {
+      request.setRequestHeader("Authorization","Bearer <%= current_user.api_key.access_token %>")
+    }
+  });
+}
+
+function submit_check(event){
+
+  // alert(event.data.form_target);
+
+
+  var fields = [];
+  var qc_form = {};
+  $('#' + event.data.form_target).serializeArray().map(function(x){fields.push({'name':x.name,'value':x.value});});
+  // alert(data);
+  qc_form["fields"] = fields;
+  console.log(qc_form);
+  // console.log("could this be qc_value?" + $('#' + event.data.form_target + " select[name='qc_value']").val());
+
+
+  var trfile_id = $('#' + event.data.form_target + " input[name='trfile_id']").val();
+  var user_id = $('#' + event.data.form_target + " input[name='user_id']").val();
+  var qc_value = $('#' + event.data.form_target + " select[name='qc_value']").val();
+  var tredit_id = $('#' + event.data.form_target + " input[name='tredit_id']").val();
+
+  var bulb_status = (qc_value == "Pass" ? 'positive' : (qc_value == 'Fail' ? 'negative' : 'grey'));
+
+  var data = {'qc_form': qc_form, 'trfile_id': trfile_id, 'user_id': user_id, 'tredit_id': tredit_id, 'qc_value': qc_value };
+  data['id'] = null;
+
+  $.ajax({
+    type: "POST",
+    url: '<%= current_user.api_key.api_url %>/api/trtype_review/update',
+    data: data,
+    success: function (data) {
+      $(".indicator" + trfile_id).removeClass('grey').addClass(bulb_status);
+      // $("#save" + trfile_id).prop('disabled', true);
+      var next_row = next_candidate(trfile_id);
+      // console.log("next_id is " + next_id);
+      // $("#collapse" + trfile_id).toggle('show');
+      if (next_row != null){
+        // console.log("so let's try showing the next one");
+        // console.log("we've got " + $("#collapse" + next_id).length + " of #collapse" + next_id);
+        // $("#collapse" + next_id).toggle('show');
+
+        load_fields(next_row['scan_procedure'] + " " + next_row['subjectid'], next_row['id']);
+
+      }
+    },
+    dataType: 'json',
+    beforeSend: function (request) {
+      request.setRequestHeader("Authorization","Bearer <%= current_user.api_key.access_token %>")
+    },
+    error: function(xhr, status, error) {
+
+      if (xhr.status != 200) {
+
+        alertify.error("Error: "+xhr.status + " " +error+".");
+
+      } else {
+
+        var error_message = Object.keys(xhr.responseJSON.errors).join(", ");
+
+        alertify.error("There were problems with these fields: "+error_message+".");
+
+      }
+      console.log(xhr);
+    }
+  });
+
+}
+
+$(document).ready(function() {
+
+    // console.log("hey hey");
+
+
+    update_filter_list();
+    candidates = [];
+
+    $('#scan-date-after-filter').datepicker({
+        autoclose: true
+    });
+    $('#scan-date-before-filter').datepicker({
+        autoclose: true
+    });
+
+    $(".filter-toggle").click(function(){
+      $(".filter-toggle").toggleClass("down");
+      $(".filter-group").collapse('toggle');
+    });
+
+    $('#candidates').DataTable( {
+        "pageLength": 10,
+        "serverSide": true,
+        "processing": true,
+        "dom": 'tp',
+        "pagingType": 'simple',
+        'language': {
+            'loadingRecords': '&nbsp;',
+            'processing': '<i class="fas fa-cog fa-spin fa-2x"></i>'
+        },
+        "ajax": $.fn.dataTable.pipeline( {
+            url: '<%= current_user.api_key.api_url %>/api/trtype_review/candidates/<%= @trtype.id %>',
+            pages: 5, // number of pages to cache
+            length: 25,
+            data : function (d){
+
+              d.scan_procedure_filter = $('#scan-procedure-filter').val();
+              d.qc_filter = $('#qc-filter').val();
+              d.completed_filter = $('#completed-filter').val();
+              d.subjectid_filter = $('#subjectid-filter').val();
+              d.secondary_key_filter = $('#secondary-key-filter').val();
+              
+            },
+            beforeSend: function (request) {
+              request.setRequestHeader("Authorization","Bearer <%= current_user.api_key.access_token %>")
+            }
+          }),
+        "order": [0,"desc"],
+        "columns":[
+          {'data':function(row,type,val,meta){ return format_candidate (row); }}
+        ],
+        error: function(xhr, error, code) {
+          console.log(code);
+          //hide the processing spinner "#datatable_processing", and show some kind of error description
+          $("#datatable_processing").hide();
+          alert("An error occurred: " + code);
+        }
+    } );
+
+
+    $('#trtype-search-filter').click( function() {
+      // console.log("hey hey");
+      update_filter_list();
+      var table = $('#candidates').DataTable();
+      table.clearPipeline();
+      table.ajax.reload();
+      
+      $(".filter-toggle").toggleClass("down");
+      $(".filter-group").collapse('toggle');
+    });
+
+    $('#trtype-search-clear').click( function() {
+      $(".trtype-search-input").each(function(){
+        $(this).val("");
+      });
+
+      update_filter_list();
+
+      var table = $('#candidates').DataTable();
+      table.clearPipeline();
+      table.ajax.reload();
+      
+      $(".filter-toggle").toggleClass("down");
+      $(".filter-group").collapse('toggle');
+    });
+    
+});
+
+</script>
+<% end %>
+
+<% end %>
+

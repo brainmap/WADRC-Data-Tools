@@ -79,7 +79,16 @@ v_qc = {"Fail"=>"Fail","Partial"=>"Partial","Pass"=>"Pass","Reprocessed"=>"Repro
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <small><%= link_to 'ALL Edits download xls', { :controller=>"trtypes", :action=>"trtype_home", :tr_search =>  params[:tr_search], :tr_all =>"Y" , :format => :xls} %></small>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small><%= link_to 'View File '+@v_action_name.humanize+' List' ,{ :controller=>"tredits", :action=>"tredit_home", :trtype_id =>  params[:id]} %></small>
-    </td></tr>
+    </td>
+
+    <td>
+
+
+        <i class="fas fa-arrow-right"></i><%= link_to('Review', "/trtype_review/#{params[:id]}")%>
+
+
+    </td>
+  </tr>
   <%end%>   
 
 

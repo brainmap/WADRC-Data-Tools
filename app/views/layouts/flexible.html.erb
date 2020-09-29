@@ -6,12 +6,12 @@
     <%= stylesheet_link_tag 'application' %>
     <!--  javascript_include_tag :defaults -->  
 
-        <!-- <link href="/stylesheets/bootstrap.min.css" rel="stylesheet" type="text/css" /> -->
+        <link href="/stylesheets/bootstrap.min.css" rel="stylesheet" type="text/css" />
         <%= yield :css_includes %>
 
- <%= javascript_include_tag  "application.js" %>  
- <%= javascript_include_tag  "jquery_ujs.js" %>  
- <%= javascript_include_tag  "rails.js" %>  
+ <!-- <%= javascript_include_tag  "application.js" %>   -->
+ <!-- <%= javascript_include_tag  "jquery_ujs.js" %>   -->
+ <!-- <%= javascript_include_tag  "rails.js" %>   -->
 <!-- script src="/javascripts/application.js"></script  moved to app/assets/public -->
   	<%= csrf_meta_tag %>
 		<link rel="apple-touch-icon" href="/images/favicon.ico" />
@@ -37,7 +37,8 @@
         end
        if @hide_page_flag == "Y" 
        @current_tab  = "searches" %>
-       <div id="visit_index_main" class="main">
+       <div id="visit_index_main" class="main_flex">
+        hey hey
           <div id="visits_tab_bar" class="tabs">
           <ul>            <li <%= "class=current" if @current_tab == "searches" %>>
               <%= link_to "Search", '/cg_search' %> <small><small><%= link_to " -cg's", '/cg_tables'%></small></small>
@@ -55,7 +56,7 @@
 	   <%  if @current_tab == "vgroups" %>
       <div id="visit_index_main" class="main_vgroup">
 	   <% else %>
-	      <div id="visit_index_main" class="main">
+	      <div id="visit_index_main" class="main_flex">
 		<% end %>
         <div id="visits_tab_bar" class="tabs">
           <ul>
@@ -120,13 +121,16 @@
       <script src="/javascripts/jquery.min.js"></script>
       <script src="/javascripts/popper.min.js"></script>
       <script src="/javascripts/bootstrap.min.js"></script>
-      <script src="/javascripts/modernizr.min.js"></script>
+      <script src="/javascripts/modernizr.min.js"></script><!-- 
       <script src="/javascripts/waves.js"></script>
       <script src="/javascripts/jquery.slimscroll.js"></script>
       <script src="/javascripts/jquery.nicescroll.js"></script>
-      <script src="/javascripts/jquery.scrollTo.min.js"></script>
+      <script src="/javascripts/jquery.scrollTo.min.js"></script>-->
 
         <%= yield :javascript_includes %>
+
+
+      <%= yield :javascript_custom %>
 
   </body>
 </html>

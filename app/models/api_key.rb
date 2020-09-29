@@ -4,6 +4,17 @@ class ApiKey < ActiveRecord::Base
 
   before_create :generate_access_token
 
+  def api_url
+  	if Rails.env == 'development'
+  		"http://localhost:3002"
+  	elsif Rails.env == 'staging'
+  		"https://panda-demo.medicine.wisc.edu"
+  	else
+  		"https://panda.medicine.wisc.edu"
+  	end
+  		
+  end
+
   private
   def generate_access_token
     begin

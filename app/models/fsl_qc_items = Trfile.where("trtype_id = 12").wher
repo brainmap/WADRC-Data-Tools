@@ -1,0 +1,34 @@
+fsl_qc_items = Trfile.where("trtype_id = 12").where(:qc_value => ["New Record","Repreocessed"])
+
+fsl_qc_items.each do |item|
+	sp = ScanProcedure.where(:id => item.scan_procedure_id).first
+
+	enumber = item.subjectid.gsub(/_\w*/,'')
+
+	first_path = "/mounts/data/preprocessed/visits/#{sp.codename}/#{enumber}/first"
+
+	if File.exists?(first_path) and File.directory?(first_path)
+		html_candidates = Dir.glob("*.html",:base=>first_path)
+
+		if html_candidates.count > 0
+			html_candidates.each do |html|
+				asdf = Trfileimage.new
+				asdf.trfile_id = item.id
+
+				img = Processedimage.new
+				img.file_name = html
+				img.scan_procedure_id = sp.id
+				img.enrollment_id = item.subjectid
+				img.status_flag = "Y"
+				img.exists_flag = "Y"
+				img.file_path = "#{first_path}/#{html}"
+				img.file_type = Processedimagesfiletype.where(:file_type => "html").first.file_type
+				img.save
+
+				asdf.image_id = img.id
+				asdf.image_category = 'html'
+				asdf.save
+			end
+		end
+	end
+end

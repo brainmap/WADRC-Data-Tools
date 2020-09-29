@@ -263,6 +263,25 @@ class TrtypesController < ApplicationController
       #format.json { render json: @trtypes }
     end
   end
+
+  def trtype_review
+    @trtype = Trtype.find(params[:id])
+    
+    @scan_procedure_array = (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i)
+
+          hide_date_flag_array = []
+      hide_date_flag_array =  (current_user.hide_date_flag_array).split(' ').map(&:to_i)
+      @hide_page_flag = 'N'
+      if hide_date_flag_array.count > 0
+        @hide_page_flag = 'Y'
+      end
+    
+    respond_to do |format|
+      format.html { render layout: "flexible" }
+      format.json { render json: @trfiles }
+    end
+  end
+
   # GET /trtypes
   # GET /trtypes.json
   def index

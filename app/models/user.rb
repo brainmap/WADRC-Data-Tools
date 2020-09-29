@@ -33,6 +33,8 @@ class User < ActiveRecord::Base
   has_many :protocol_roles, :dependent => :destroy
   has_many :usernetworkgroups,:dependent => :destroy
   
+  has_one :api_key,:dependent => :destroy
+  
   
   def username_name
     "#{self.first_name} #{self.last_name} #{self.username}"

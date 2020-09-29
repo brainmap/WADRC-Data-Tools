@@ -18,27 +18,57 @@
 <%= form_for('trfile_edit_action', :url => {:action => "trfile_edit_action"}) do |f| %>
 <%= hidden_field_tag 'tredit_id',@tredit.id %>
 
-<table width="80%" >
-  <tr><td align="left" colspan="3"> <b> <%= (@trtype.description).humanize %> file <%= @v_action_name.humanize %> tracking: </b> <small><%= @v_action_name.humanize %> #<%= @v_edit_cnt.to_s%> <%if @v_last_edit == "Y" %> (most recent <%= @v_action_name %>)<%end%></small></td></tr>
-  <tr><td align="left" colspan="3"> <small><b>Scan Protcol(s):</b>  <%= @vgroups[0].scan_procedures.blank? ? "None" : @vgroups[0].scan_procedures.sort_by(&:display_alias).collect {|sp| sp.display_alias}.join(", ").html_safe %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<div class='container-fluid'>
+<div class='row'>
+  <div class='col-md-8'>
+    <b> <%= (@trtype.description).humanize %> file <%= @v_action_name.humanize %> tracking: </b> <small><%= @v_action_name.humanize %> #<%= @v_edit_cnt.to_s%> <%if @v_last_edit == "Y" %> (most recent <%= @v_action_name %>)<%end%></small>
+  </div>
+</div>
+
+<div class='row'>
+  <div class='col-md-4'>
+    <b>Scan Protcol(s):</b>  <%= @vgroups[0].scan_procedures.blank? ? "None" : @vgroups[0].scan_procedures.sort_by(&:display_alias).collect {|sp| sp.display_alias}.join(", ").html_safe %>
+  </div>
+  <div class='col-md-4'>
     <b>Enrollment(s):</b> <%= @vgroups[0].enrollments.collect {|e| e.enumber }.join(", ").html_safe %></small>
-   <br>
-    <small><b>File Completed:</b></small> <%= f.select :file_completed_flag, v_y_n, {:prompt => 'Completed?',:selected => @trfile.file_completed_flag}  %>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<small><b>QC:</b></small>  <%= f.select :qc_value, v_p_p_f, {:prompt => 'QC?',:selected => @trfile.qc_value}  %>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<small><b>Active File:</b></small> <%= f.select :status_flag, v_y_n, {:prompt => 'Active?',:selected => @trfile.status_flag}  %>
-  </td></tr>
-  <tr><td align="left" colspan="3"> 
- <small><b>QC notes:</b></small>  <br>
- <%= f.text_area :qc_notes ,:size => '80X4',:value => @trfile.qc_notes%>
-  </td></tr>
+  </div>
+</div>
+
+
+<div class='row'>
+  <div class='col-md-4'>
+    <b>File Completed:</b> <%= f.select :file_completed_flag, v_y_n, {:prompt => 'Completed?',:selected => @trfile.file_completed_flag}  %>
+  </div>
+  <div class='col-md-4'>
+    <b>QC:</b>  <%= f.select :qc_value, v_p_p_f, {:prompt => 'QC?',:selected => @trfile.qc_value}  %>
+  </div>
+  <div class='col-md-4'>
+    <b>Active File:</b> <%= f.select :status_flag, v_y_n, {:prompt => 'Active?',:selected => @trfile.status_flag}  %>
+  </div>
+</div>
+
+
+
+<div class='row'>
+  <div class='col-md-4'>
+    <b>QC notes:</b>
+  </div>
+</div>
+
+<div class='row'>
+  <div class='col-md-8'>
+    <%= f.text_area :qc_notes ,:size => '80X4',:value => @trfile.qc_notes, :class => 'form-control' %>
+  </div>
+</div>
+
   <% if !@trtype.series_description_type_id.blank? or !@trtype.processedimagesfiletype_id.blank?%>
-  <tr><td align="left" colspan="3">
   <% if !(@trtype.processedimagesfiletype_id).nil? %>
-<small><b>Processed Image:</b></small>
+
+<div class='row'>
+  <div class='col-md-12'>
+    <b>Processed Image:</b>
     <% if !@trfileimage_imgs.nil? %>
-      <%= f.select(:image_id, @processedimages.collect {|p| [ p.file_type+" - "+p.file_path, p.id ] },  { :include_blank => "Select a processed image", :selected => @trfileimage_imgs},{ :multiple => true, :size => 5 } )%>
+      <%= f.select(:image_id, @processedimages.collect {|p| [ p.file_type+" - "+p.file_path, p.id ] },  { :include_blank => "Select a processed image", :selected => @trfileimage_imgs},{ :multiple => true,  :class =>"form-control" } )%>
 
       <% if !@pet_time_gaps.nil? %>
         <br><small><b>Time Gaps:</b></small>
@@ -51,12 +81,15 @@
        <%= f.select(:image_id, @processedimages.collect {|p| [ p.file_type+" - "+p.file_path, p.id ] },  { :include_blank => "Select a processed image"},{ :multiple => true, :size => 5 } )%>
 
      <%end%>
+   </div>
   <%elsif !@trtype.series_description_type_id.blank? %>
-    <small><b>Image Dataset:</b></small>
+
+  <div class='col-md-8'>
+    <b>Image Dataset:</b>
      <% if @trtype.series_description_display == 'text' %>
          <br>
       <%   @ids.each do |image| %>
-           <%= image.series_description  %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= image.path  %><br>
+           <span class='p-2'><%= image.series_description  %></span><span class='p-2'><%= image.path  %></span>
      <%  end
       else %>
        <% if !(@trfile.trtype_id).nil? and !Trtype.find(@trfile.trtype_id).series_description_type_id.nil? and   !@trfile.enrollment_id.nil? and  !@trfile.scan_procedure_id.nil? %>
@@ -66,24 +99,40 @@
      <%else%>
       <%= f.select(:image_id, @ids.collect {|p| [ p.series_description+" - "+p.path, p.id ] },  { :include_blank => "Select a scan series"},  { :multiple => true, :size => 5 } )%>
      <%end%>
+
      <%end%>
+
     <%end%>
+  </div>
+
     <%end%>
-  </td></tr>
+
+
   <% end %>
-	<tr> <!-- constant accross trtypes -->
-		<td align="left"><small><b>Subjectid_v#:</b></small> <%=@trfile.subjectid %> <small><%=@trfile.secondary_key %></small></td>
-		<td align="left"><small><b>User:</b></small> <%= select(:tredit, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select user" ,:selected => @tredit.user_id }) %></td>
-		<td align="left"><small><b>Updated:</b> <%=   @tredit.updated_at.strftime('%Y-%m-%d %H:%M'  ) %> </small>
+<div class='row'>
+	<div class='col-md-4'>
+    <b>Subjectid_v#:</b> <%=@trfile.subjectid %> <small><%=@trfile.secondary_key %></small>
+  </div>
+  <div class='col-md-4'>
+		<b>User:</b> <%= select(:tredit, :user_id, User.all.sort_by(&:username_name).collect {|p| [ p.username_name, p.id ] }, { :include_blank => "Select user" ,:selected => @tredit.user_id }) %>
+  </div>
+  <div class='col-md-4'>
+		<b>Updated:</b> <%=   @tredit.updated_at.strftime('%Y-%m-%d %H:%M'  ) %>
+  </div>
+</div>
 
 <% if current_user.role == 'Admin_High' or (current_user.id).to_s == (@tredit.user_id).to_s %>
-      <br>
+
+<div class='row'>
+  <div class='col-md-8'>
     <small><small>Active?: <%= select( :tredit, :status_flag, v_y_n, {:prompt => 'Active?',:selected => @tredit.status_flag} ) %> set to N to delete <%= @v_action_name %> </small></small>
       <% if current_user.role == 'Admin_High' %>
    <small><small>  or <%= link_to 'full delete', @tredit, method: :delete, data: { confirm: 'Are you sure?' } %></small></small>
     <%end%>
-  <%end%> </td>
-	</tr>
+  <%end%>
+  </div>
+</div>
+
 <%  v_tractiontypes = Tractiontype.where("trtype_id in (?)",params[:id]).where("tractiontypes.status_flag ='Y' and tractiontypes.form_display_order is not null").order(:form_display_order) 
 
    if !v_tractiontypes.nil? 
@@ -95,11 +144,13 @@
      	<%end
          if v_cnt + act.form_col_span > 3 
          	v_cnt = 0
-     	%>
-     	   </tr><tr>
-             
-     	  <% end%>
-     	<td align="left" colspan="<%= act.form_col_span%>"> <small><b><%=act.form_display_label.try(:html_safe) %> </b></small> <% @tredit_actions = nil
+          end
+          %>
+
+<div class='row'>
+  <div class='col-md-12'>
+    <b><%=act.form_display_label.try(:html_safe) %> </b> <% 
+      @tredit_actions = nil
       @tredit_actions = TreditAction.where("tredit_actions.tredit_id in (?)",@tredit.id).where("tredit_actions.tractiontype_id in (?)",act.id).to_a
       if @tredit_actions[0].nil? # added metric?
        # @tredit_actions = []
@@ -113,28 +164,32 @@
         @tredit_actions.push(v_tredit_action)
       else
         puts "aaaaaaaa not nil "+act.id.to_s
-      end %> 
-        <% # make the question types
-           if act.form_display_field_type == "checkbox_in_line" 
-               val_array =[]
-             if !@tredit_actions[0].nil? and !@tredit_actions[0].value.blank?
-                      val_array = @tredit_actions[0].value.split(',')
-             end %>
-                   <% if act.ref_table_a_1 == "lookup_refs" 
+      end 
+           
+      if act.form_display_field_type == "checkbox_in_line" 
+        val_array =[]
+        if !@tredit_actions[0].nil? and !@tredit_actions[0].value.blank?
+          val_array = @tredit_actions[0].value.split(',')
+        end
+        if act.ref_table_a_1 == "lookup_refs" 
            sql = "select ref_value, description from lookup_refs where label ='"+act.ref_table_b_1+"' order by display_order"
            connection = ActiveRecord::Base.connection();
              results = connection.execute(sql)
           %>
             <% results.each do |theme| %> 
-               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value['+act.id.to_s+"][]", theme[0], checked=val_array.include?( theme[0].to_s) %>
+              <span class='p-2'>
+               <%= check_box_tag 'value['+act.id.to_s+"][]", theme[0], checked=val_array.include?( theme[0].to_s) %>
                 <%= theme[1].humanize %>
+              </span>
             <% end %>
        <% else 
              results = ((act.ref_table_a_1).constantize).all.sort_by(&:description)
            %>
             <% results.each do |theme| %>
-               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value['+act.id.to_s+"][]", theme.id,  checked=val_array.include?( theme.id.to_s) %>
+              <span class='p-2'>
+              <%= check_box_tag 'value['+act.id.to_s+"][]", theme.id,  checked=val_array.include?( theme.id.to_s) %>
                 <%= (theme.description) %>
+              </span>
             <% end %>
           <% end %>
            <%   elsif act.form_display_field_type == "radio_1_col" %>
@@ -159,15 +214,18 @@
                  results = connection.execute(sql)
           %>
             <% results.each do |theme| %>
-                 
-                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value["+act.id.to_s+"][]", theme[0], @tredit_actions[0].value.to_i == theme[0] %>
+              <span class='p-2'>
+                <%= radio_button_tag "value["+act.id.to_s+"][]", theme[0], @tredit_actions[0].value.to_i == theme[0] %>
                 <%= theme[1].humanize %>
+              </span>
             <% end %>
        <% else 
              results = ((act.ref_table_a_1).constantize).all.sort_by(&:description)
            %>
-            <% results.each do |theme| %>
-             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value["+act.id.to_s+"][]", theme.id,  (@tredit_actions[0].value.to_i == theme.id.to_i)?  true:false    %> <%= theme.description %>
+            <% results.each do |theme| %> 
+              <span class='p-2'>
+                <%= radio_button_tag "value["+act.id.to_s+"][]", theme.id,  (@tredit_actions[0].value.to_i == theme.id.to_i)?  true:false    %> <%= theme.description %>
+              </span>
             <% end %>
           <% end %>
 
@@ -235,15 +293,51 @@
                 end  
               end
            end %>
-    </td>
        <% v_cnt = v_cnt + act.form_col_span
           if v_cnt > 2
           	v_cnt = 0 %>
-          </tr>
           <%end
        end
     end %>
-    <tr><td align="left" colspan="3"><%= f.submit('Save') %> </td></tr>
-</table>
+  </div>
+</div>
+
+<%= f.submit('Save') %>
+
 <%end%>
 <%end%>
+
+
+<% content_for :css_includes do %>
+
+
+        <!-- DataTables -->
+        <link href="/javascripts/plugins/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+        <link href="/javascripts/plugins/datatables/buttons.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+        <!-- Responsive datatable examples -->
+        <link href="/javascripts/plugins/datatables/responsive.bootstrap4.min.css" rel="stylesheet" type="text/css" />
+
+<% end %>
+
+<% content_for :javascript_includes do %>
+
+
+        <script src="/javascripts/plugins/datatables/jquery.dataTables.min.js"></script>
+        <script src="/javascripts/plugins/datatables/dataTables.bootstrap4.min.js"></script>
+        <script src="/javascripts/plugins/datatables/dataTables.buttons.min.js"></script>
+        <script src="/javascripts/plugins/datatables/buttons.bootstrap4.min.js"></script>
+        <script src="/javascripts/plugins/datatables/jszip.min.js"></script>
+        <script src="/javascripts/plugins/datatables/pdfmake.min.js"></script>
+        <script src="/javascripts/plugins/datatables/vfs_fonts.js"></script>
+        <script src="/javascripts/plugins/datatables/buttons.html5.min.js"></script>
+        <script src="/javascripts/plugins/datatables/buttons.print.min.js"></script>
+        <script src="/javascripts/plugins/datatables/buttons.colVis.min.js"></script>
+        <!-- Responsive examples -->
+        <script src="/javascripts/plugins/datatables/dataTables.responsive.min.js"></script>
+        <script src="/javascripts/plugins/datatables/responsive.bootstrap4.min.js"></script>
+        <script src="/javascripts/plugins/datatables/pipeline.js"></script>
+        <script src="/javascripts/bootstrap-datepicker.min.js"></script>
+        <script src="/javascripts/plugins/alertify/js/alertify.js"></script>
+        <div class="alertify-logs"></div>
+
+<% end %>

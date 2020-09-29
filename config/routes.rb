@@ -292,6 +292,7 @@ WADRCDataTools::Application.routes.draw do
     match '/trtypes/trtype_home/:id', :controller => 'trtypes', :action => 'trtype_home', :as => :trtypes_trtype_home_id  ,via: [:get, :post] 
     match '/trtype_home/', :controller => 'trtypes', :action => 'trtype_home', :as => :trtype_home  ,via: [:get, :post] 
    
+   match '/trtype_review/:id', :controller => 'trtypes', :action => 'trtype_review', :as => :trtype_review,via: [:get, :post] 
 
     match '/folder_home/', :controller => 'folders', :action => 'folder_home', :as => :folder_home  ,via: [:get, :post] 
 
@@ -367,6 +368,19 @@ WADRCDataTools::Application.routes.draw do
   
   resources :lumbarpunctures, :shallow => true do
     resources :lumbarpuncture_results
+  end
+
+
+
+  namespace :api, defaults: {format: 'json'} do
+    scope module: :v1, constraints: ApiConstraints.new(version: 1, default: true) do
+      
+      match '/trtype_review/candidates/:id' , :controller => 'trtype_reviews', :action => 'candidates', :as => :candidates, via: [:get]
+      match '/trtype_review/fields/:id' , :controller => 'trtype_reviews', :action => 'fields', :as => :fields, via: [:get]
+      match '/trtype_review/update' , :controller => 'trtype_reviews', :action => 'update', :as => :update, via: [:post]
+
+
+    end
   end
 
 ####  match '/signup', :controller => 'users', :action => 'new', :as => :signup

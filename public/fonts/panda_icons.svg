@@ -1,0 +1,16 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg">
+<metadata>Copyright (C) 2020 by original authors @ fontello.com</metadata>
+<defs>
+<font id="panda_icons" horiz-adv-x="1000" >
+<font-face font-family="panda_icons" font-weight="400" font-stretch="normal" units-per-em="1000" ascent="850" descent="-150" />
+<missing-glyph horiz-adv-x="1000" />
+<glyph glyph-name="psi" unicode="&#xe801;" d="M551 849v-578q47 8 75 23a103 103 0 0 1 43 45q14 30 18 75t5 115v320h208v-356q0-119-22-202t-66-137a278 278 0 0 0-109-81q-65-27-153-33v-189h-199v189q-90 6-155 33a268 268 0 0 0-109 81q-43 53-64 137t-22 202v356h209v-320q0-59 3-104t18-79a115 115 0 0 1 42-52q28-18 78-23v578z" horiz-adv-x="901" />
+
+<glyph glyph-name="psi2" unicode="&#xe802;" d="M1 849h165v-234q0-174 36-238t131-64v536h164v-536q64 1 99 27t52 89q16 62 16 186v234h164v-267q0-154-28-240a285 285 0 0 0-98-141q-71-54-205-59v-291h-164v291q-128 5-201 57t-101 138q-30 87-30 245z" horiz-adv-x="829" />
+
+<glyph glyph-name="sag-mri" unicode="&#xe803;" d="M997 320c-12 34-99 297-144 360-77 107-198 169-332 169h-142c-212 0-376-166-378-374 0-104 46-205 125-278v-346l499 2q1 62 3 123h120c71 0 128 55 128 130v121h59c25 0 37 7 53 27 11 15 9 55 9 66z m-342 126h-98s9-12 7-32c0-53-43-96-94-94-28 6-31 7-31 7l-3-102-123 2v95c-4-1-12-2-32-2-47 0-93 41-91 96-43 16-68 62-61 105 9 55 38 77 91 77 0 55 41 96 91 96 43 2 46-20 48-11 20 27 45 41 77 43a95 95 0 0 0 80-46c25 16 82 12 77 9 26-6 48-29 60-56 57-3 95-41 95-96s-38-91-93-91z" horiz-adv-x="999" />
+</font>
+</defs>
+</svg>
