@@ -298,15 +298,15 @@ function load_fields (central_title, id) {
 
               } else if (check.field_type == 'textarea') {
 
-                  form_fields += '<textarea name="'+check.tractiontype_id+'">'+(check.value == 'null' ? '' : check.value)+'</textarea>';
+                  form_fields += '<textarea name="'+check.tractiontype_id+'">'+(check.value == null ? '' : check.value)+'</textarea>';
 
               } else if (check.field_type == 'textarea_3x60') {
 
-                  form_fields += '<textarea name="'+check.tractiontype_id+'">'+(check.value == 'null' ? '' : check.value)+'</textarea>';
+                  form_fields += '<textarea name="'+check.tractiontype_id+'">'+(check.value == null ? '' : check.value)+'</textarea>';
 
               } else if (check.field_type == 'text') {
 
-                  form_fields += '<input name="'+check.tractiontype_id+'" value="'+(check.value == 'null' ? '' : check.value)+'">';
+                  form_fields += '<input name="'+check.tractiontype_id+'" value="'+(check.value == null ? '' : check.value)+'">';
 
               } else if (check.field_type == 'text_read_only') {
 
@@ -314,7 +314,7 @@ function load_fields (central_title, id) {
 
               } else if (check.field_type == 'text_20') {
 
-                  form_fields += '<input name="'+check.tractiontype_id+'" value="'+(check.value == 'null' ? '' : check.value)+'">';
+                  form_fields += '<input name="'+check.tractiontype_id+'" value="'+(check.value == null ? '' : check.value)+'">';
 
               }
 
