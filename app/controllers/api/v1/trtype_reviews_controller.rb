@@ -189,7 +189,7 @@ class Api::V1::TrtypeReviewsController < API::APIController
 						}
 				else
 					checks << {'title' => tractiontype.display_column_header_1,
-							'value'=> tredit_action.value,
+							'value'=> (tredit_action.value == 'null' or tredit_action.value.blank? ? '' : tredit_action.value),
 							'field_type' => tractiontype.form_display_field_type,
 							'options' => [],
 							'form_name' => tractiontype.description,
