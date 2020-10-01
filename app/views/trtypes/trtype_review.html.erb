@@ -34,14 +34,15 @@
                 <div class="form-group row">
                   <label for="example-text-input" class="col-sm-4 col-form-label filter-label text-right">File Completed?</label>
                   <div class="col-sm-8">
-                    <%= select :trtypes_search, :completed_filter, ['',"Y","N"]  , {:prompt => ""},{:class => "custom-select trtype-search-input", :id => "completed-filter", :displaytitle => "File Completed == '{value}'"} %>
+                    <%= select :tr_search, :completed_filter, ['',"Y","N"]  , {:selected => "N
+                      "},{:class => "custom-select trtype-search-input", :id => "completed-filter", :displaytitle => "File Completed == '{value}'"} %>
                   </div>
                 </div>
                 
                 <div class="form-group row">
                   <label for="example-text-input" class="col-sm-4 col-form-label filter-label text-right">QC Value</label>
                   <div class="col-sm-8">
-                    <%= select(:tr_search,  :qc_value_filter, ["Fail","Partial","Pass","Reprocessed","New Record"], {:prompt => '', :selected => "New Record"},{:class => "custom-select trtype-search-input",:id => "qc-filter", :displaytitle => "QC Value == '{value}'"} ) %>
+                    <%= select(:tr_search,  :qc_value_filter, ['',"Fail","Partial","Pass","Reprocessed","New Record"], {:prompt => ''},{:class => "custom-select trtype-search-input",:id => "qc-filter", :displaytitle => "QC Value == '{value}'"} ) %>
                   </div>
                 </div>
 
@@ -223,6 +224,42 @@ function next_candidate(value){
   return null;
 }
 
+function prev_candidate(value){
+  var table = $('#candidates').DataTable();
+  var data = table.rows().data();
+
+  for(count = 0; count < data.length; count++) {
+    if (data[count]['id'] == value){
+
+      // console.log("there's a match at index " + count);
+      if (count == 0){
+
+        // console.log("but this looks like it's the last spot");
+        return null; //because this is the last element
+      } else {
+
+        // console.log("and we've got a next ("+trfiles[(count + 1)]+")");
+        return data[(count - 1)];
+      }
+    }
+  }
+
+  return null;
+}
+
+function prev(event){
+  var prev_row = prev_candidate(event.data.current_index);
+  if (prev_row != null){
+      load_fields(prev_row['scan_procedure'] + " " + prev_row['subjectid'], prev_row['id']);
+  }
+}
+
+function next(event){
+  var next_row = next_candidate(event.data.current_index);
+  if (next_row != null){
+      load_fields(next_row['scan_procedure'] + " " + next_row['subjectid'], next_row['id']);
+  }
+}
 
 function load_fields (central_title, id) {
   table_index = id;
@@ -347,8 +384,11 @@ function load_fields (central_title, id) {
 
             out += '<div class="form-group row pt-3 text-right">';
               out += '<div class="col-sm-12">';
+               out += '<button type="button" class="btn btn-secondary prev_button m-1">prev</button>';
                 out += '<button type="button" class="btn btn-primary qa_check_save_button m-1" form_target="form' + item.id + '">save & next</button>';
-                out += '<button type="button" class="btn btn-secondary qa_check_save_button m-1"  form_target="form' + item.id + '">save & close</button>';
+               out += '<button type="button" class="btn btn-secondary next_button m-1">next</button>';
+                // out += '<button type="button" class="btn btn-secondary qa_check_save_button m-1"  form_target="form' + item.id + '">save & close</button>';
+
               out += '</div>';
             out += '</div>';
 
@@ -362,6 +402,8 @@ function load_fields (central_title, id) {
 
         $('#image_dataset_accordion').html(outbound.join(''));
         $('.info-circle').popover({'template': '<div class="popover brain-popover" role="tooltip"><div class="arrow"></div><h3 class="popover-header brain-popover-header"></h3><div class="popover-body"></div></div>'});
+        $('button.prev_button').each(function(index,item){$(item).on('click', {current_index:table_index}, prev);})
+        $('button.next_button').each(function(index,item){$(item).on('click', {current_index:table_index}, next);})
         $('button.qa_check_save_button').each(function(index,item){$(item).on('click', {form_target:$(item).attr('form_target')}, submit_check);})
       },
     error: function(data)
@@ -375,6 +417,7 @@ function load_fields (central_title, id) {
     }
   });
 }
+
 
 function submit_check(event){
 
@@ -477,7 +520,7 @@ $(document).ready(function() {
         "ajax": $.fn.dataTable.pipeline( {
             url: '<%= current_user.api_key.api_url %>/api/trtype_review/candidates/<%= @trtype.id %>',
             pages: 5, // number of pages to cache
-            length: 25,
+            length: 10,
             data : function (d){
 
               d.scan_procedure_filter = $('#scan-procedure-filter').val();
