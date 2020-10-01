@@ -261,6 +261,16 @@ v_user = v_user.gsub("\n","")
 
 
 
+   elsif v_value_1 == "lst_lpa_process"
+     params = Jobs::Lst::LstLpaDriver.production_params
+     job = Jobs::Lst::LstLpaDriver.new(params)
+     job.run(params)
+
+   elsif v_value_1 == "lst_lpa_harvest"
+     params = Jobs::Lst::LstLpaHarvester.production_params
+     job = Jobs::Lst::LstLpaHarvester.new(params)
+     job.run(params)
+
    elsif v_value_1 == "parallel_pet_mk6240_process"
      job = Pet::ParallelPetProcess.new
      params = Pet::ParallelPetProcess.mk6240_params
