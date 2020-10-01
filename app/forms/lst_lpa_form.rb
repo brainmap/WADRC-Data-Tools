@@ -4,7 +4,7 @@ class LstLpaForm
 	include ActiveModel::Serialization
 
 	attr_accessor :subject_id, :scan_procedure, :os_version, :matlab_version, :spm_version
-	attr_accessor :spm_revision, :lst_version, :lstlpa_local_code_version, 
+	attr_accessor :spm_revision, :lst_version, :lstlpa_local_code_version
 	attr_accessor :original_image_path_flair, :original_image_path_T1, :lesion_volume_ml
 	attr_accessor :number_of_lesions, :created_at, :processed_at, :participant_id
 
