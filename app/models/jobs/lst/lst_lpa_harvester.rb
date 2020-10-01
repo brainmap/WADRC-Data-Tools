@@ -123,6 +123,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 			                    end
 
 								html_candidates.each do |candidate|
+
 					            	image = Processedimage.new
 			                        image.file_type = "html"
 			                        image.file_name = candidate
