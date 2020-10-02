@@ -144,7 +144,7 @@
 function format_candidate (row) {
   candidates.push(row);
 
-  out = '<a onclick="load_fields(\'' + row.scan_procedure + ' ' + row.subjectid + '\', '+row.id+')" id="candidate_' + row.scan_procedure + '_' + row.subjectid + '" class="text-sm"><div class="d-inline"><i class="fas fa-circle pr-2 grey align-top pt-1 indicator'+row.id+'"></i></div> <div class="d-inline-block">' + row.scan_procedure + '<br>' + row.subjectid + '</div></a>';
+  out = '<a onclick="load_fields(\'' + row.scan_procedure + ' ' + row.subjectid + '\', '+row.id+')" id="candidate_' + row.scan_procedure + '_' + row.subjectid + '" class="text-sm"><div class="d-inline"><i class="fas fa-circle pr-2 '+ (row.qc_value == "Pass" ? 'positive' : (row.qc_value == "Fail" ? 'negative' : 'grey')) +' align-top pt-1 indicator'+row.id+'"></i></div> <div class="d-inline-block">' + row.scan_procedure + '<br>' + row.subjectid + '</div></a>';
   return out;
 }
 
@@ -276,6 +276,7 @@ function load_fields (central_title, id) {
         // $('#central_title').html(central_title);
 
         var outbound = [];
+        var method = '';
 
         $.each(data.data, function (key, item){
           trfiles.push(item.id);
@@ -283,6 +284,8 @@ function load_fields (central_title, id) {
           console.log("keys are " + Object.keys(item));
 
           var indicator_class = (item.qc_value == "Pass" ? 'positive' : (item.qc_value == 'Fail' ? 'negative' : 'grey'));
+
+          method = (item.qc_value == 'Pass' || item.qc_value == 'Fail' || item.qc_value == 'Needs Review' ? 'new' : 'update');
 
           out = '<div class="card"><div class="card-header" id="heading' + item.id + '"><h5 class="mb-0 mt-0 font-16">' + central_title + ' <i class="fas fa-circle ' + indicator_class + ' indicator' + item.id + 'pl-3"></i></h5></div>';
 
@@ -404,7 +407,9 @@ function load_fields (central_title, id) {
         $('.info-circle').popover({'template': '<div class="popover brain-popover" role="tooltip"><div class="arrow"></div><h3 class="popover-header brain-popover-header"></h3><div class="popover-body"></div></div>'});
         $('button.prev_button').each(function(index,item){$(item).on('click', {current_index:table_index}, prev);})
         $('button.next_button').each(function(index,item){$(item).on('click', {current_index:table_index}, next);})
-        $('button.qa_check_save_button').each(function(index,item){$(item).on('click', {form_target:$(item).attr('form_target')}, submit_check);})
+
+        $('button.qa_check_save_button').each(function(index,item){$(item).on('click', {form_target:$(item).attr('form_target'), method:method}, submit_check);})
+        
       },
     error: function(data)
       {
@@ -418,11 +423,7 @@ function load_fields (central_title, id) {
   });
 }
 
-
 function submit_check(event){
-
-  // alert(event.data.form_target);
-
 
   var fields = [];
   var qc_form = {};
@@ -445,7 +446,7 @@ function submit_check(event){
 
   $.ajax({
     type: "POST",
-    url: '<%= current_user.api_key.api_url %>/api/trtype_review/update',
+    url: '<%= current_user.api_key.api_url %>/api/trtype_review/' + event.data.method,
     data: data,
     success: function (data) {
 
@@ -508,7 +509,7 @@ $(document).ready(function() {
     });
 
     $('#candidates').DataTable( {
-        "pageLength": 10,
+        "pageLength": 500,
         "serverSide": true,
         "processing": true,
         "dom": 'tp',
@@ -519,8 +520,8 @@ $(document).ready(function() {
         },
         "ajax": $.fn.dataTable.pipeline( {
             url: '<%= current_user.api_key.api_url %>/api/trtype_review/candidates/<%= @trtype.id %>',
-            pages: 5, // number of pages to cache
-            length: 10,
+            pages: 1, // number of pages to cache
+            length: 500,
             data : function (d){
 
               d.scan_procedure_filter = $('#scan-procedure-filter').val();

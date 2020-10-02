@@ -284,6 +284,57 @@ class Api::V1::TrtypeReviewsController < API::APIController
 
 	end
 
+	def new
+
+		puts "posted: #{new_params[:qc_form]}"
+
+		# if trfile_qc_form.valid?
+
+		file = Trfile.find(new_params[:trfile_id].to_i)
+
+		#on the object directly, there's qc_value, and file_completed_flag, which we're going to call 'Y'
+		file.qc_value = new_params[:qc_value]
+		file.file_completed_flag = 'Y'
+
+		file.save
+
+		#then, make a new tredit
+		tredit = Tredit.new
+		tredit.trfile_id = file.id
+		tredit.user_id = new_params[:user_id].to_i
+		tredit.status_flag = 'Y'
+		tredit.save
+
+		#then make some new tredit_actions, and fill them for this new edit
+		ignorable_field_names = ['qc_value', 'tredit_id', 'trfile_id', 'user_id']
+		fields_to_fill = Tractiontype.where("trtype_id = ?", file.trtype_id)
+		new_params[:qc_form]['fields'].keys.each do |key|
+			# look through tht existing tredit_actions for this tredit, and match with the 'name' field
+
+			if !ignorable_field_names.include? new_params[:qc_form]['fields'][key]['name']
+				potential_matches = fields_to_fill.select{|action| action.id == new_params[:qc_form]['fields'][key]['name'].to_i}
+				if potential_matches.count == 1
+					#new tredit_action with this tractiontype
+					field = TreditAction.new
+					field.tredit_id = tredit.id
+					field.tractiontype_id = potential_matches.first.id
+					field.value = new_params[:qc_form]['fields'][key]['value']
+					field.status_flag = 'Y'
+					field.save
+
+				end
+			end
+
+		end
+
+		render :json => {'success' => true, 'id' => file.id}
+
+		# else
+			# puts "not valid: " + lp_form.errors.messages.to_s
+			# render :json => {'success' => false, 'errors' => trfile_qc_form.errors.messages}, :status => 403
+		# end 
+
+	end
 
 	private
 
@@ -293,6 +344,10 @@ class Api::V1::TrtypeReviewsController < API::APIController
 
 
 	def update_params
+		params.permit(:id, :trfile_id, :tredit_id, :user_id, :qc_value, :qc_form => [:fields => [:name,:value]])
+	end
+
+	def new_params
 		params.permit(:id, :trfile_id, :tredit_id, :user_id, :qc_value, :qc_form => [:fields => [:name,:value]])
 	end
 

@@ -378,6 +378,7 @@ WADRCDataTools::Application.routes.draw do
       match '/trtype_review/candidates/:id' , :controller => 'trtype_reviews', :action => 'candidates', :as => :candidates, via: [:get]
       match '/trtype_review/fields/:id' , :controller => 'trtype_reviews', :action => 'fields', :as => :fields, via: [:get]
       match '/trtype_review/update' , :controller => 'trtype_reviews', :action => 'update', :as => :update, via: [:post]
+      match '/trtype_review/new' , :controller => 'trtype_reviews', :action => 'new', :as => :new, via: [:post]
 
 
     end
