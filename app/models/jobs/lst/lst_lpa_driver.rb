@@ -31,7 +31,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
   end
 
   def self.production_params
-    params = { schedule_name: 'LST LPA Driver',
+    params = { schedule_name: 'LST/LPA Pipeline Driver',
                 base_path: "/mounts/data", 
                 computer: "kanga",
                 dry_run: false,
