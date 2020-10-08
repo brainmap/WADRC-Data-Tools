@@ -20,6 +20,28 @@
 
 		end
 
+		def secondary_dir_exists?(base_path='/mounts/data')
+			
+			entries = Dir.glob(base_path+"/preprocessed/visits/#{related_scan_procedure.codename}/#{related_enrollment.enumber}*")
+			if entries.count > 1
+				return true
+			end
+			false
+
+		end
+
+		def secondary_dirs(dir_name='unknown', base_path='/mounts/data')
+			
+			pre = []
+			if preprocessed_dir_exists?
+				pre << preprocessed_dir
+			end
+			entries = Dir.glob(base_path+"/preprocessed/visits/#{related_scan_procedure.codename}/#{related_enrollment.enumber}*")
+			((entries.map{|entry| base_path+"/preprocessed/visits/#{related_scan_procedure.codename}/#{entry}/#{dir_name}"}) - pre).select{|path| File.exists? path}
+			
+
+		end
+
 		def related_enrollment
 
 			vgroup = appointment.vgroup

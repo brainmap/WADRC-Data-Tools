@@ -6,24 +6,50 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
   attr_accessor :driver
 
   def self.default_params
-  	params = { schedule_name: 'LST LPA Driver',
-  				      base_path: "/mounts/data", 
+    params = { schedule_name: 'LST LPA Driver',
+                base_path: "/mounts/data", 
                 computer: "kanga",
                 dry_run: false,
                 run_by_user: 'panda_user',
                 exclude_sp_mri_array: [-1,100,80,76,78],
                 date_cutoff: '2018-10-11',
-                csv_headers: ['scan procedure','enrollment','ACPC T1 path','T2 FLAIR', 'FLAIR incomplete_series',
-                        'FLAIR garbled_series_comment','FLAIR garbled_series','FLAIR garbled_series_comment',
-                        'FLAIR fov_cutoff', 'FLAIR fov_cutoff_comment', 'FLAIR field_inhomogeneity','FLAIR field_inhomogeneity_comment',
-                        'FLAIR ghosting_wrapping', 'FLAIR ghosting_wrapping_comment', 'FLAIR banding','FLAIR banding_comment',
-                        'FLAIR registration_risk', 'FLAIR registration_risk_comment', 'FLAIR motion_warning', 'FLAIR motion_warning_comment',
-                        'FLAIR omnibus_f', 'FLAIR omnibus_f_comment', 'FLAIR spm_mask','FLAIR spm_mask_comment', 'FLAIR nos_concerns',
-                        'FLAIR nos_concerns_comment','FLAIR other_issues'],
+                csv_headers: ['scan_procedure','enrollment','ACPC_T1_path','T2_FLAIR', 'FLAIR_incomplete_series',
+                        'FLAIR_garbled_series_comment','FLAIR_garbled_series','FLAIR_garbled_series_comment',
+                        'FLAIR_fov_cutoff', 'FLAIR_fov_cutoff_comment', 'FLAIR_field_inhomogeneity','FLAIR_field_inhomogeneity_comment',
+                        'FLAIR_ghosting_wrapping', 'FLAIR_ghosting_wrapping_comment', 'FLAIR_banding','FLAIR_banding_comment',
+                        'FLAIR_registration_risk', 'FLAIR_registration_risk_comment', 'FLAIR_motion_warning', 'FLAIR_motion_warning_comment',
+                        'FLAIR_omnibus_f', 'FLAIR_omnibus_f_comment', 'FLAIR_spm_mask','FLAIR_spm_mask_comment', 'FLAIR_nos_concerns',
+                        'FLAIR_nos_concerns_comment','FLAIR_other_issues'],
                 driver_path: "/mounts/data/analyses/wbbevis/lst_lpa/",
                 driver_file_name: "#{Date.today.strftime("%Y-%m-%d")}_lst_lpa_driver.csv",
                 processing_output_path: "/mounts/data/development/lstlpa/output",
+                processing_input_path: "/mounts/data/development/lstlpa/input",
                 processing_executable_path: "/mounts/data/development/lstlpa/src/run_lpa.sh",
+              }
+    params.default = ''
+    params
+  end
+
+  def self.production_params
+    params = { schedule_name: 'LST LPA Driver',
+                base_path: "/mounts/data", 
+                computer: "kanga",
+                dry_run: false,
+                run_by_user: 'panda_user',
+                exclude_sp_mri_array: [-1,100,80,76,78],
+                date_cutoff: '2018-10-11',
+                csv_headers: ['scan_procedure','enrollment','ACPC_T1_path','T2_FLAIR', 'FLAIR_incomplete_series',
+                        'FLAIR_garbled_series_comment','FLAIR_garbled_series','FLAIR_garbled_series_comment',
+                        'FLAIR_fov_cutoff', 'FLAIR_fov_cutoff_comment', 'FLAIR_field_inhomogeneity','FLAIR_field_inhomogeneity_comment',
+                        'FLAIR_ghosting_wrapping', 'FLAIR_ghosting_wrapping_comment', 'FLAIR_banding','FLAIR_banding_comment',
+                        'FLAIR_registration_risk', 'FLAIR_registration_risk_comment', 'FLAIR_motion_warning', 'FLAIR_motion_warning_comment',
+                        'FLAIR_omnibus_f', 'FLAIR_omnibus_f_comment', 'FLAIR_spm_mask','FLAIR_spm_mask_comment', 'FLAIR_nos_concerns',
+                        'FLAIR_nos_concerns_comment','FLAIR_other_issues'],
+                driver_path: "/mounts/data/analyses/wbbevis/lst_lpa/",
+                driver_file_name: "#{Date.today.strftime("%Y-%m-%d")}_lst_lpa_driver.csv",
+                processing_output_path: "/mounts/data/pipelines/lstlpa/output",
+                processing_input_path: "/mounts/data/pipelines/lstlpa/input",
+                processing_executable_path: "/mounts/data/pipelines/lstlpa/src/run_lpa.sh",
               }
     params.default = ''
     params
@@ -62,7 +88,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
 
   def selection(params)
     # we're looking at all of the MRI visits from any protocol that isn't on the blacklist
-    @selection = Jobs::Lst::Visit.joins("LEFT JOIN appointments on appointments.id = visits.appointment_id")
+    @selected = Jobs::Lst::Visit.joins("LEFT JOIN appointments on appointments.id = visits.appointment_id")
                               .joins("LEFT JOIN vgroups on appointments.vgroup_id = vgroups.id")
                               .joins("LEFT JOIN scan_procedures_vgroups ON vgroups.id = scan_procedures_vgroups.vgroup_id")
                               .where("appointments.appointment_date > ?",params[:date_cutoff])
@@ -72,7 +98,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
 
   def filter(params)
 
-    @selection.each do |visit|
+    @selected.each do |visit|
 
           @total_scans_considered += 1
 
@@ -127,8 +153,29 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
             if t2_nii_candidates.count == 1
               t2_nii_path = "#{preprocessed_path}/#{t2_nii_candidates.first}"
             elsif t2_nii_candidates.count == 0
-              self.exclusions << {:class => visit.class, :id => visit.id, :message => "no T2 FLAIR nii for this visit in preprocessed"}
-              next
+
+              # before we give up, we should see if there are 2ndary scans for this person's visit, and look to see if there are viable scans in there
+              if visit.secondary_dir_exists?
+
+                secondaries = visit.seconday_dirs
+                secondaries.each do |secondary|
+                  t2_nii_candidates = Dir.entries(secondary).select{|img| (img =~ series_description_re) and !(img =~ /ORIG/)}
+                  if t2_nii_candidates.count == 1
+                    t2_nii_path = "#{preprocessed_path}/#{t2_nii_candidates.first}"
+                  elsif t2_nii_candidates.count == 0
+                    self.exclusions << {:class => visit.class, :id => visit.id, :message => "no T2 FLAIR nii for this visit in preprocessed"}
+                    next
+                  else
+                    self.exclusions << {:class => visit.class, :id => visit.id, :message => "too many T2 FLAIR nii for this visit in preprocessed"}
+                    next
+                  end
+                end
+
+              else
+
+                self.exclusions << {:class => visit.class, :id => visit.id, :message => "no T2 FLAIR nii for this visit in preprocessed"}
+                next
+              end
             else
               self.exclusions << {:class => visit.class, :id => visit.id, :message => "too many T2 FLAIR nii for this visit in preprocessed"}
               next
@@ -143,8 +190,29 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
             if acpc_candidates.count == 1
               acpc_path = "#{visit.preprocessed_dir}/#{acpc_candidates.first}"
             elsif acpc_candidates.count == 0
-              self.exclusions << {:class => visit.class, :id => visit.id, :message => "no o*.nii files for this visit"}
-              next
+
+              # before we give up, we should see if there are 2ndary scans for this person's visit, and look to see if there are viable scans in there
+              if visit.secondary_dir_exists?
+
+                secondaries = visit.seconday_dirs
+                secondaries.each do |secondary|
+                  acpc_candidates = Dir.entries(secondary).select { |f| f.start_with?("o") and f.end_with?(".nii") }
+                  if acpc_candidates.count == 1
+                    acpc_path = "#{preprocessed_path}/#{acpc_candidates.first}"
+
+                  elsif acpc_candidates.count == 0
+                    self.exclusions << {:class => visit.class, :id => visit.id, :message => "no o*.nii files for this visit"}
+                    next
+                  else
+                    self.exclusions << {:class => visit.class, :id => visit.id, :message => "too many o*.nii files for this visit"}
+                    next
+                  end
+                end
+
+              else
+                self.exclusions << {:class => visit.class, :id => visit.id, :message => "no o*.nii files for this visit"}
+                next
+              end
             else
               self.exclusions << {:class => visit.class, :id => visit.id, :message => "too many o*.nii files for this visit"}
               next
@@ -161,7 +229,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
 
   def write_driver(params)
 
-    csv = CSV.open("#{params[:driver_path]}#{params[:driver_file_name]}",'wb')
+    csv = CSV.open("#{params[:processing_input_path]}/#{params[:driver_file_name]}",'wb')
     csv << params[:csv_headers]
     @driver.each do |row|
 
@@ -223,7 +291,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
           end
       end
 
-      command = "#{params[:processing_executable_path]} #{params[:driver_path]}/#{params[:driver_file_name]}"
+      command = "#{params[:processing_executable_path]} #{params[:processing_input_path]}/#{params[:driver_file_name]}"
       
       processing_call =  "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"#{command}\""
 
@@ -237,6 +305,11 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
           v_output = stdout.read 1024  
           # puts v_output
           self.log << {:message => v_output.to_s}
+
+          err_output = stderr.read 1024
+          if err_output != ''
+            self.error_log << {:message => err_output.to_s}
+          end
             
         end
 
