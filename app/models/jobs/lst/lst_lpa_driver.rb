@@ -6,7 +6,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
   attr_accessor :driver
 
   def self.default_params
-    params = { schedule_name: 'LST LPA Driver',
+    params = { schedule_name: 'LST/LPA Pipeline Driver',
                 base_path: "/mounts/data", 
                 computer: "kanga",
                 dry_run: false,
