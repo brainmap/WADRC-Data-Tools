@@ -246,7 +246,9 @@ class Api::V1::TrtypeReviewsController < API::APIController
 
 		#on the object directly, there's qc_value, and file_completed_flag, which we're going to call 'Y'
 		file.qc_value = update_params[:qc_value]
-		file.file_completed_flag = 'Y'
+		if update_params[:qc_value] != 'Needs Review'
+			file.file_completed_flag = 'Y'
+		end
 
 		file.save
 
@@ -294,7 +296,9 @@ class Api::V1::TrtypeReviewsController < API::APIController
 
 		#on the object directly, there's qc_value, and file_completed_flag, which we're going to call 'Y'
 		file.qc_value = new_params[:qc_value]
-		file.file_completed_flag = 'Y'
+		if new_params[:qc_value] != 'Needs Review'
+			file.file_completed_flag = 'Y'
+		end
 
 		file.save
 
