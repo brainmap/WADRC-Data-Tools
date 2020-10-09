@@ -312,7 +312,8 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
       processing_call =  "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"#{command}\""
 
       self.log << {:message => processing_call}
-      self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
+      # We don't have the "save_with_logs" on old Panda. :(
+      # self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
 
       begin
         stdin, stdout, stderr = Open3.popen3(processing_call)
