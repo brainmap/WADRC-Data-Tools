@@ -310,7 +310,14 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
           if !File.directory?(visit_dir)
             Dir.mkdir(visit_dir)
           end
+
+          # This is a kluge to try to get the file permissions readable by panda_user on each of the 
+          # processing machines. "panda_user" on the network is different from "panda_user" on the 
+          # old Panda server. 
+          FileUtils.chown 22972, 17192, visit_dir
       end
+
+
 
       command = "#{params[:processing_executable_path]} #{params[:processing_input_path]}/#{params[:driver_file_name]}"
       
