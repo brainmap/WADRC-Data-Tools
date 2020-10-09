@@ -139,7 +139,8 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
             else
               # if we can't decide which one to use, we should fail the case
               self.exclusions << {:class => visit.class, :id => visit.id, :message => "too many T2 FLAIR images for this visit"}
-            next
+              next
+            end
           end
 
           # Here, we actually need an nii file from preprocessed/visits. The path from the image_dataset is in raw.
