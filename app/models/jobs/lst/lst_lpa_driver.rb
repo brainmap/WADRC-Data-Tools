@@ -299,23 +299,23 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
 
       require 'open3'
 
-      # the processing script expects the directories to already be built
-      @driver.each do |row|
-          proto_dir = "#{params[:processing_output_path]}/#{row[:scan_procedure]}"
-          if !File.directory?(proto_dir)
-            Dir.mkdir(proto_dir)
-          end
+      # Robert's processing script will do this part, and given all the trouble I'm having, I'm going to let it.
+      # @driver.each do |row|
+      #     proto_dir = "#{params[:processing_output_path]}/#{row[:scan_procedure]}"
+      #     if !File.directory?(proto_dir)
+      #       Dir.mkdir(proto_dir)
+      #     end
 
-          visit_dir = "#{params[:processing_output_path]}/#{row[:scan_procedure]}/#{row[:enrollment].enumber}"
-          if !File.directory?(visit_dir)
-            Dir.mkdir(visit_dir)
-          end
+      #     visit_dir = "#{params[:processing_output_path]}/#{row[:scan_procedure]}/#{row[:enrollment].enumber}"
+      #     if !File.directory?(visit_dir)
+      #       Dir.mkdir(visit_dir)
+      #     end
 
-          # This is a kluge to try to get the file permissions readable by panda_user on each of the 
-          # processing machines. "panda_user" on the network is different from "panda_user" on the 
-          # old Panda server. 
-          FileUtils.chown 22972, 17192, visit_dir
-      end
+      #     # This is a kluge to try to get the file permissions readable by panda_user on each of the 
+      #     # processing machines. "panda_user" on the network is different from "panda_user" on the 
+      #     # old Panda server. 
+      #     FileUtils.chown 22972, 17192, visit_dir
+      # end
 
 
 
