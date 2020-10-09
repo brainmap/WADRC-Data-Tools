@@ -122,10 +122,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
 
           # t2_candidates = visit.image_datasets.select{|image| (image.series_description =~ /ORIG/).nil? and (image.series_description =~ /FLAIR/i) and (image.series_description =~ /T2/)}
 
-          t2_candidates = visit.image_datasets.select{|image| (image.series_description =~ /ORIG/).nil? and ((image.series_description =~ /SAG Cube T2 FLAIR/) 
-                                                                                                            or (image.series_description =~ /Sag T2 FLAIR Cube/)
-                                                                                                            or (image.series_description =~ /Sag CUBE T2FLAIR/)
-                                                                                                            or (image.series_description =~ /Sag CUBE flair/))}
+          t2_candidates = visit.image_datasets.select{|image| (image.series_description =~ /ORIG/).nil? and ((image.series_description =~ /SAG Cube T2 FLAIR/)  or (image.series_description =~ /Sag T2 FLAIR Cube/)  or (image.series_description =~ /Sag CUBE T2FLAIR/) or (image.series_description =~ /Sag CUBE flair/))}
           t2_file = nil
           if t2_candidates.count == 1
             t2_file = t2_candidates.first
