@@ -66,7 +66,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
 
       process(params)
 
-      final_pass(params)
+      # final_pass(params)
 
       close(params)
     
@@ -284,6 +284,11 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
     end
 
     csv.close
+
+    # This is a kluge to try to get the file permissions readable by panda_user on each of the 
+    # processing machines. "panda_user" on the network is different from "panda_user" on the 
+    # old Panda server. 
+    FileUtils.chown 'panda_user', 10513, "#{params[:processing_input_path]}/#{params[:driver_file_name]}"
 
   end
 
