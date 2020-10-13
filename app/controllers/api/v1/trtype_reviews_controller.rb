@@ -180,7 +180,7 @@ class Api::V1::TrtypeReviewsController < API::APIController
 
 				if displayable_tractiontypes.map(&:id).include? tredit_action.tractiontype_id
 
-					checks << {'title' => tractiontype.display_column_header_1,
+					checks << {'title' => tractiontype.form_display_label,
 							'value'=> tredit_action.value,
 							'field_type' => tractiontype.form_display_field_type,
 							'options' => label_map[tractiontype.ref_table_b_1],
@@ -188,7 +188,7 @@ class Api::V1::TrtypeReviewsController < API::APIController
 							'tractiontype_id' => tractiontype.id
 						}
 				else
-					checks << {'title' => tractiontype.display_column_header_1,
+					checks << {'title' => tractiontype.form_display_label,
 							'value'=> (tredit_action.value == 'null' or tredit_action.value.blank? ? '' : tredit_action.value),
 							'field_type' => tractiontype.form_display_field_type,
 							'options' => [],
