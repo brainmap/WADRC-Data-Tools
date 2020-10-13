@@ -22,4 +22,8 @@ class ImageDatasetQualityCheck < ActiveRecord::Base
     failing_checks.to_a.join(', ')
   end
 
+  def pass?
+    failing_checks.empty?
+  end
+
 end
