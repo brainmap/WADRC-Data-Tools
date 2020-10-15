@@ -392,3 +392,8 @@ line.ct-target-line {
 
 }
 
+.brain-popover {
+  background-color: #fffbdd;
+  width: 30em !important;
+}
+

@@ -375,6 +375,11 @@ function load_fields (central_title, id) {
 
                   form_fields += '</div>';
                   form_fields += '<div class="col-4">';
+
+                  if (check.popover != '' && check.popover != null){
+                    form_fields += '<i class="fas fa-info-circle fa-lg info-circle grey" data-toggle="popover" data-placement="right" data-title="How should I use this field?" data-trigger="hover" data-html="true" data-content="'+check.popover+'"></i>';
+                  }
+
                   form_fields += '</div>';
                 form_fields += '</div>';
               
@@ -396,6 +401,11 @@ function load_fields (central_title, id) {
                 out += '</select>';
               out += '</div>';
               out += '<div class="col-4">';
+
+                  if (item.qc_value_popover != '' && item.qc_value_popover != null){
+                    out += '<i class="fas fa-info-circle fa-lg info-circle grey" data-toggle="popover" data-placement="right" data-title="How should I use this field?" data-trigger="hover" data-html="true" data-content="'+item.qc_value_popover+'"></i>';
+                  }
+
               out += '</div>';
             out += '</div>';
 

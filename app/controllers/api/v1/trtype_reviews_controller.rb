@@ -151,6 +151,8 @@ class Api::V1::TrtypeReviewsController < API::APIController
 		scan_procedure_array = @current_user.view_low_scan_procedure_array.split(' ')
 		scan_procedure_list = scan_procedure_array.map(&:to_i)
 
+		trtype = Trtype.find(params[:id])
+
 		file = Trfile.where("trtype_id = ?", params[:id]).where("id" => params[:trfile_id]).first
 
 		displayable_tractiontypes = Tractiontype.where("trtype_id = ?",params[:id])
@@ -185,7 +187,8 @@ class Api::V1::TrtypeReviewsController < API::APIController
 							'field_type' => tractiontype.form_display_field_type,
 							'options' => label_map[tractiontype.ref_table_b_1],
 							'form_name' => tractiontype.description,
-							'tractiontype_id' => tractiontype.id
+							'tractiontype_id' => tractiontype.id,
+							'popover' => tractiontype.popover
 						}
 				else
 					checks << {'title' => tractiontype.form_display_label,
@@ -193,7 +196,8 @@ class Api::V1::TrtypeReviewsController < API::APIController
 							'field_type' => tractiontype.form_display_field_type,
 							'options' => [],
 							'form_name' => tractiontype.description,
-							'tractiontype_id' => tractiontype.id
+							'tractiontype_id' => tractiontype.id,
+							'popover' => tractiontype.popover
 							}
 				end
 
@@ -225,6 +229,7 @@ class Api::V1::TrtypeReviewsController < API::APIController
 								'subjectid' => file.subjectid,
 								'scan_procedure' => scan_proc_name,
 								'qc_value' => file.qc_value,
+								'qc_value_popover' => trtype.popover,
 								'checks' => checks,
 								'images' => images
 							}
