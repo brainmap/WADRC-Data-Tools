@@ -66,7 +66,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
 
       process(params)
 
-      # final_pass(params)
+      final_pass(params)
 
       close(params)
     
@@ -349,4 +349,28 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
     end
   end
 
+  def final_pass(params)
+
+    # To ease QC, we should translate the report html to something more friendly with the Windows machines
+    # Loop over everyone on the driver, find the html files, and run them through a little sed to translate
+
+    @driver.each do |row|
+
+      output_dir = "#{params[:processing_output_path]}/#{row[:scan_procedure].codename}/#{row[:enrollment].enumber}"
+      if File.exists?(output_dir) and File.directory?(output_dir)
+        html_candidates = Dir.entries(output_dir).select{|item| item =~ /.html/}
+
+        html_candidates.each do |filename|
+          file_data = File.read("#{output_dir}/#{filename}")
+          translated_file_data = file_data.gsub(/\/mounts\/data/, "file://s:")
+          translated_filename = filename.gsub(/.html/, 'windows.html')
+          file_handle = File.open("#{output_dir}/#{translated_filename}",'wb')
+          file_handle.write(translated_file_data)
+          file_handle.close
+        end
+      end
+
+    end
+
+  end
 end

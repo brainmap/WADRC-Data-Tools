@@ -221,6 +221,16 @@ class Pet::ParallelPetProcess < Pet::PetBase
                   #visit = pet_appt.related_scan_procedure.codename.remove(pet_appt.related_scan_procedure.protocol.path)
                   visit = pet_appt.related_scan_procedure.codename.remove(proto).remove(".")
 
+                  # 2020-10-19 wbbevis -- Found out that these file paths aren't following links, which they should.
+
+                  if File.symlink?(o_acpc_file_path)
+                    o_acpc_file_path = File.realpath(o_acpc_file_path)
+                  end
+
+                  if File.symlink?(o_acpc_file_path)
+                    multispectral_file_path = File.realpath(multispectral_file_path)
+                  end
+                  
                   v_petscan_normal_run << {:proto => proto, :visit => visit, :enum => pet_appt.related_enumber.enumber, :t_uptake => v_uptake_duration, :file_t1 => o_acpc_file_path, :file_mult => multispectral_file_path, :norm_samp => 1.0}
 
                 else
@@ -236,6 +246,14 @@ class Pet::ParallelPetProcess < Pet::PetBase
 
               if !o_acpc_file_path.blank? && !multispectral_file_path.blank?
                 # we're finally happy with all of the params we need, and we can make a csv for parallel processing
+
+                if File.symlink?(o_acpc_file_path)
+                  o_acpc_file_path = File.realpath(o_acpc_file_path)
+                end
+
+                if File.symlink?(o_acpc_file_path)
+                  multispectral_file_path = File.realpath(multispectral_file_path)
+                end
 
                 proto = pet_appt.related_scan_procedure.protocol.path.split('.')[0..1].join('.')
                 visit = pet_appt.related_scan_procedure.codename.remove(proto).remove(".")
