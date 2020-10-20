@@ -238,6 +238,23 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
             next
           end
 
+          # dereference the paths, in case I've actually found symlinks
+          if File.symlink?(acpc_path)
+            acpc_path = File.realpath(acpc_path)
+            if !File.exists?(acpc_path)
+              self.exclusions << {:class => visit.class, :id => visit.id, :message => "symlink to acpc file is broken"}
+              next
+            end
+          end
+
+          if File.symlink?(t2_nii_path)
+            t2_nii_path = File.realpath(t2_nii_path)
+            if !File.exists?(t2_nii_path)
+              self.exclusions << {:class => visit.class, :id => visit.id, :message => "symlink to t2_nii file is broken"}
+              next
+            end
+          end
+
           @driver << {:visit => visit, :t2_ids => t2_file, :t2_nii_path => t2_nii_path, :acpc_path => acpc_path, :scan_procedure => scan_procedure.codename, :enrollment => enrollment}
 
       end
