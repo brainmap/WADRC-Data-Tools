@@ -95,6 +95,10 @@ edit_count = edit_count -1
 </div>
 <%= render(:partial => "visit_confirmation") %>
 
+<div style='clear:both;'>
+<hr style='clear:both;'>
+</div>
+
 <%= content_tag :p, "STUDY UID: %s" % @visit.dicom_study_uid, :class => "uid" if @visit.dicom_study_uid %>
 
 <%end%>

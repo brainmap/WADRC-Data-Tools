@@ -92,7 +92,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
                               .joins("LEFT JOIN vgroups on appointments.vgroup_id = vgroups.id")
                               .joins("LEFT JOIN scan_procedures_vgroups ON vgroups.id = scan_procedures_vgroups.vgroup_id")
                               .where("appointments.appointment_date > ?",params[:date_cutoff])
-                              .order(id: :desc)
+                              .order(id: :desc).uniq
 
   end
 

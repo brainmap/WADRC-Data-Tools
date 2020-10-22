@@ -4,6 +4,10 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 	# that we can call like `job.run(params)`. Driver jobs and harvest jobs are broken up
 	# by convention, as it allows more flexibility for how we run our processing, but 
 	# the two could just as easily be a single sequence.
+	attr_accessor :success
+	attr_accessor :failed
+	attr_accessor :total_cases
+	attr_accessor :success_log
 
   	def self.default_params
 		params = { schedule_name: 'LST/LPA Pipeline Harvester',
@@ -54,6 +58,10 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 	end
 
 	def setup(params)
+		self.success = []
+		self.success_log = []
+		self.failed = []
+		self.total_cases = 0
 		sql = "truncate #{params[:destination_table]}_new"
 		@connection.execute(sql)
 	end
@@ -78,11 +86,14 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 					code_version_dir = "#{protocol_path}/#{subject}/#{params[:code_ver]}"
 
 					if File.exists?(code_version_dir) and File.directory?(code_version_dir)
+						self.total_cases += 1
 						filenames = Dir.entries(code_version_dir)
 						csv_candidates = filenames.select{|entry| entry =~ /_lstlpa.csv$/}
 						html_candidates = filenames.select{|entry| entry =~ /.html$/}
 
 						if html_candidates.length > 0 and csv_candidates.length == 1
+							self.success << {:protocol => protocol, :subject => subject}
+
 							html_path = "#{code_version_dir}/#{html_candidates.first}"
 
 							#Is there a QC tracker for this object?
@@ -90,27 +101,29 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 
 				            if existing_tracked_image.count > 0
 				            	#this files has been QC tracked, so if it's passed, we should add it to the searchable table
+				            	self.success_log << {:message => 'a case with an existing tracked image', :protocol => protocol, :subject => subject}
+				            	matching_image = Trfileimage.where(:image_id => existing_tracked_image.first.id, :image_category => 'html').first
 
-				            	tracker = Trfileimage.where(:image_id => existing_tracked_image.first.id, :image_category => 'html')
-				                qc_value = tracker.first.trfile.qc_value
+				            	qc_value = tracker.first.trfile.qc_value
 
-				                if qc_value == 'Pass'
-				                	# create an insert from the csv
-				                	csv = CSV.open("#{code_version_dir}/#{csv_candidates.first}",:headers => true)
+					            if qc_value == 'Pass'
+					            	# create an insert from the csv
+					            	csv = CSV.open("#{code_version_dir}/#{csv_candidates.first}",:headers => true)
 
-								    new_form = LstLpaForm.from_csv(csv)
+									new_form = LstLpaForm.from_csv(csv)
 
 								    if new_form.valid?
-					                	sql = new_form.to_sql_insert("#{params[:destination_table]}_new")
+						               	sql = new_form.to_sql_insert("#{params[:destination_table]}_new")
 										@connection.execute(sql)
 									end
-				                end
+					            end
 
 				            else
 				            	#this file isn't tracked yet, so let's start tracking it
+				            	self.success_log << {:message => 'a case that isnt tracked yet', :protocol => protocol, :subject => subject}
 
 				            	#then create a trfile and add the images to it.
-				            	trfiles = Trfile.where("trtype_id in (?)",params[:tracker_id]).where("subjectid in (?)",subject)
+				            	trfiles = Trfile.where("trtype_id in (?)",params[:tracker_id]).where("subjectid in (?)",subject).where(:scan_procedure_id => sp.id)
 			                    trfile = trfiles.first
 			                    if trfiles.count == 0
 			                       trfile = Trfile.new
@@ -161,9 +174,11 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 						elsif html_candidates.length == 0
 							#processing is done, but there's no product? log this.
 							self.error_log <<  {"message" => "Output dir exists, but there isn't any html product.", "subject" => subject, "protocol" => sp.codename}
+							self.failed << {:protocol => protocol, :subject => subject}
 						else
 							#weirdness. Too many products? Also log this.
 							self.error_log <<  {"message" => "More than 1 html product, maybe more than one csv?", "subject" => subject, "protocol" => sp.codename}
+							self.failed << {:protocol => protocol, :subject => subject}
 						end
 					end
 				end
