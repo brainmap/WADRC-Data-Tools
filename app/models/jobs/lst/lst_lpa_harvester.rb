@@ -89,7 +89,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 						self.total_cases += 1
 						filenames = Dir.entries(code_version_dir)
 						csv_candidates = filenames.select{|entry| entry =~ /_lstlpa.csv$/}
-						html_candidates = filenames.select{|entry| entry =~ /.html$/}
+						html_candidates = filenames.select{|entry| (entry =~ /.html$/) and !(entry =~ /-/)}
 
 						if html_candidates.length > 0 and csv_candidates.length == 1
 							self.success << {:protocol => protocol, :subject => subject}
@@ -173,7 +173,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 
 						elsif html_candidates.length == 0
 							#processing is done, but there's no product? log this.
-							self.error_log <<  {"message" => "Output dir exists, but there isn't any html product.", "subject" => subject, "protocol" => sp.codename}
+							self.error_log <<  {"message" => "Output dir exists, but there isn't any html product. (or this is a case with hyphens in the filename).", "subject" => subject, "protocol" => sp.codename}
 							self.failed << {:protocol => protocol, :subject => subject}
 						else
 							#weirdness. Too many products? Also log this.
