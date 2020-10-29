@@ -22,30 +22,22 @@ class RadiologyOverread < ActiveRecord::Base
 		self.summary = form.summary
 		self.comments = form.comments
 
+		self.clerical_notes = form.clerical_notes
+		self.reader_last_name = form.reader_last_name
+		self.reader_first_name = form.reader_first_name
+		self.read_date = form.read_date
+		self.mpnrage_uncorrected = form.mpnrage_uncorrected
+		self.mpnrage_classic_moco = form.mpnrage_classic_moco
+		self.mpnrage_new_recon = form.mpnrage_new_recon
+
 		return self
 	end
 
 end
 
-# id 
-# scanEntryDate
-# subjID
-# gender
-# DOB
-# whiteMatterChange
-# ADRC_large_vessel_infarcts
-# ADRC_lacunar_infarcts
-# ADRC_macrohemorrhages
-# ADRC_microHemorrhages
-# ADRC_moderate_white_matter_hyperintensity
-# ADRC_extensive_white_matter_hyperintensity
-# summary
-# comments
-
-
 # CREATE TABLE `radiology_overreads` (
-#   `id` int(11) NOT NULL AUTO_INCREMENT,
-#   `visit_id` int(11) DEFAULT NULL,
+#   `id` int NOT NULL AUTO_INCREMENT,
+#   `visit_id` int DEFAULT NULL,
 #   `scan_entry_date` date DEFAULT NULL,
 #   `rmr` varchar(20) DEFAULT NULL,
 #   `gender` varchar(2) DEFAULT NULL,
@@ -59,5 +51,12 @@ end
 #   `summary` varchar(2000) DEFAULT NULL,
 #   `comments` varchar(2000) DEFAULT NULL,
 #   `adrc_microhemorrhages` varchar(2) DEFAULT NULL,
+#   `clerical_notes` varchar(2000) DEFAULT NULL,
+#   `reader_last_name` varchar(40) DEFAULT NULL,
+#   `reader_first_name` varchar(40) DEFAULT NULL,
+#   `read_date` date DEFAULT NULL,
+#   `mpnrage_uncorrected` varchar(2) DEFAULT NULL,
+#   `mpnrage_classic_moco` varchar(2) DEFAULT NULL,
+#   `mpnrage_new_recon` varchar(2) DEFAULT NULL,
 #   PRIMARY KEY (`id`)
 # )

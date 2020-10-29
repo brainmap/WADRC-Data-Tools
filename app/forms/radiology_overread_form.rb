@@ -7,6 +7,8 @@ class RadiologyOverreadForm
 	attr_accessor :adrc_lacunar_infarcts, :adrc_macrohemorrhages, :adrc_microhemorrhages
 	attr_accessor :adrc_moderate_white_matter_hyperintensity, :adrc_extensive_white_matter_hyperintensity
 	attr_accessor :summary, :comments
+	attr_accessor :clerical_notes, :reader_last_name, :reader_first_name, :read_date
+	attr_accessor :mpnrage_uncorrected, :mpnrage_classic_moco, :mpnrage_new_recon
 
 
 	def self.attributes
@@ -24,7 +26,14 @@ class RadiologyOverreadForm
 			'adrc_extensive_white_matter_hyperintensity' => nil,
 			'summary' => nil, 
 			'comments' => nil,
-			'id' => nil
+			'id' => nil,
+			"clerical_notes" => nil,
+			"reader_last_name" => nil,
+			"reader_first_name" => nil,
+			"read_date" => nil,
+			"mpnrage_uncorrected" => nil,
+			"mpnrage_classic_moco" => nil,
+			"mpnrage_new_recon" => nil
 		}
 	end
 
@@ -52,6 +61,15 @@ class RadiologyOverreadForm
 		choices['summary'] = json['summary']
 		choices['comments'] = json['comments']
 
+
+		choices['clerical_notes'] = json["clericalNotes"]
+		choices['reader_last_name'] = json["readerLastName"]
+		choices['reader_first_name'] = json["readerFirstName"]
+		choices['read_date'] = json["readDate"]
+		choices['mpnrage_uncorrected'] = json["MPnRAGE_uncorrected"]
+		choices['mpnrage_classic_moco'] = json["MPnRAGE_classicMoco"]
+		choices['mpnrage_new_recon'] = json["MPnRAGE_newRecon"]
+
 		return self.new(choices)
 	end
 
@@ -71,7 +89,14 @@ class RadiologyOverreadForm
 			'adrc_extensive_white_matter_hyperintensity' => @adrc_extensive_white_matter_hyperintensity,
 			'summary' => @summary, 
 			'comments' => @comments,
-			'id' => @id
+			'id' => @id,
+			"clerical_notes" => @clerical_notes,
+			"reader_last_name" => @reader_last_name,
+			"reader_first_name" => @reader_first_name,
+			"read_date" => @read_date,
+			"mpnrage_uncorrected" => @mpnrage_uncorrected,
+			"mpnrage_classic_moco" => @mpnrage_classic_moco,
+			"mpnrage_new_recon" => @mpnrage_new_recon
 		}
 	end
 
@@ -91,6 +116,13 @@ class RadiologyOverreadForm
 			:adrc_extensive_white_matter_hyperintensity => { as: :string },
 			:summary => { as: :text },
 			:comments => { as: :text },
+			:clerical_notes => { as: :text },
+			:reader_last_name => { as: :string },
+			:reader_first_name => { as: :string },
+			:read_date => { as: :string, input_html: { class: 'datepicker-input'}, label: "Read date"},
+			:mpnrage_uncorrected => { as: :string },
+			:mpnrage_classic_moco => { as: :string },
+			:mpnrage_new_recon => { as: :string }
 		}
 	end
 end

@@ -6,7 +6,8 @@
 <div class='sticky'>
 <table class='key_value'>
 	<tbody>
-	<tr><th>Scan Entry Date</th><td><%= rad.scan_entry_date.strftime("%Y-%m-%d") %></td></tr>
+	<tr><th>Scan Entry Date</th><td><%= rad.scan_entry_date.nil? ? '??' : rad.scan_entry_date.strftime("%Y-%m-%d") %>
+	</td></tr>
 	<tr><th>RMR</th><td><%= rad.rmr %></td></tr>
 	<tr><th>Gender</th><td><%= rad.gender %></td></tr>
 	<tr><th>White matter change</th><td><%= rad.white_matter_change %></td></tr>
@@ -16,8 +17,16 @@
 	<tr><th>Mcrohemorrhages</th><td><%= rad.adrc_microhemorrhages %></td></tr>
 	<tr><th>Moderate white matter hyperintensity</th><td><%= rad.adrc_moderate_white_matter_hyperintensity %></td></tr>
 	<tr><th>Extensive white matter hyperintensity</th><td><%= rad.adrc_extensive_white_matter_hyperintensity %></td></tr>
+	<tr><th>MPnRAGE Uncorrected?</th><td><%= rad.mpnrage_uncorrected %></td></tr>
+	<tr><th>MPnRAGE Classic MOCO?</th><td><%= rad.mpnrage_classic_moco %></td></tr>
+	<tr><th>MPnRAGE new recon?</th><td><%= rad.mpnrage_new_recon %></td></tr>
+
 	<tr><th>Summary</th><td><%= rad.summary %></td></tr>
 	<tr><th>Comments</th><td><%= rad.comments %></td></tr>
+	<tr><th>Clerical Notes</th><td><%= rad.clerical_notes %></td></tr>
+	<tr><th>Reader</th><td><%= rad.reader_first_name %> <%= rad.reader_last_name %></td></tr>
+	<tr><th>Read on</th><td><%= rad.read_date.nil? ? '??' : rad.read_date.strftime("%Y-%m-%d") %></td></tr>
+
 	</tbody>
 
 </table>
