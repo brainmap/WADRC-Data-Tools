@@ -33,7 +33,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
   def self.production_params
     params = { schedule_name: 'LST/LPA Pipeline Driver',
                 base_path: "/mounts/data", 
-                computer: "kanga",
+                computer: "moana",
                 dry_run: false,
                 run_by_user: 'panda_user',
                 exclude_sp_mri_array: [-1,100,80,76,78],
