@@ -124,6 +124,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
 
           t2_candidates = visit.image_datasets.select{|image| (image.series_description =~ /ORIG/).nil? and ((image.series_description =~ /SAG Cube T2 FLAIR/i)  or (image.series_description =~ /Sag T2 FLAIR Cube/i)  or (image.series_description =~ /Sag CUBE T2FLAIR/i) or (image.series_description =~ /Sag CUBE flair/i))}
           t2_file = nil
+          marked_as_default = []
           if t2_candidates.count == 1
             t2_file = t2_candidates.first
           elsif t2_candidates.count == 0
@@ -150,14 +151,29 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
           if !t2_file.nil?
 
             preprocessed_path = "#{params[:base_path]}/preprocessed/visits/#{scan_procedure.codename}/#{enrollment.enumber}/unknown"
+
+            # for cases with multiple FLAIR images, one is supposed to be flagged as default, but the object with that
+            # flag points to the /raw/ directories, not to preprocessed. In order to find the matching .nii in 
+            # preprocessed, we'll need to check to see if there's been one marked as default, and if so add a little
+            # more to the regex so that we know which one to pick.
+
+            #default regex
             series_description_re = Regexp.new("#{t2_file.series_description.gsub(/ /,'[-_ ]')}\\w*.nii","i")
+            
+            if marked_as_default.count > 0
+              #this _should_ be the sequence number of this particular image within the overall acquisition sequence.
+              image_number = marked_as_default.first.path.split("/").last
+
+              #more stuff regex
+              series_description_re = Regexp.new("#{t2_file.series_description.gsub(/ /,'[-_ ]')}\\w*#{image_number}.nii","i")
+            end
 
             if !File.exist?(preprocessed_path) or !File.directory?(preprocessed_path)
               self.exclusions << {:class => visit.class, :id => visit.id, :message => "no preprocessed path, or doesn't exist"}
               next
             end
 
-            t2_nii_candidates = Dir.entries(preprocessed_path).select{|img| (img =~ series_description_re) and !(img =~ /ORIG/)}
+            t2_nii_candidates = Dir.entries(preprocessed_path).select{|img| (img =~ series_description_re) and !(img =~ /ORIG/) and (img =~ /^[^.]/)}
 
             if t2_nii_candidates.count == 1
               t2_nii_path = "#{preprocessed_path}/#{t2_nii_candidates.first}"
@@ -168,7 +184,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
 
                 secondaries = visit.seconday_dirs
                 secondaries.each do |secondary|
-                  t2_nii_candidates = Dir.entries(secondary).select{|img| (img =~ series_description_re) and !(img =~ /ORIG/)}
+                  t2_nii_candidates = Dir.entries(secondary).select{|img| (img =~ series_description_re) and !(img =~ /ORIG/) and (img =~ /^[^.]/)}
                   if t2_nii_candidates.count == 1
                     t2_nii_path = "#{preprocessed_path}/#{t2_nii_candidates.first}"
                   elsif t2_nii_candidates.count == 0
