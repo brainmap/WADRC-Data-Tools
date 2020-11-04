@@ -37,7 +37,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
                 dry_run: false,
                 run_by_user: 'panda_user',
                 exclude_sp_mri_array: [-1,100,80,76,78],
-                date_cutoff: '2018-10-11',
+                date_cutoff: '2015-06-01',
                 csv_headers: ['scan_procedure','enrollment','ACPC_T1_path','T2_FLAIR', 'FLAIR_incomplete_series',
                         'FLAIR_garbled_series_comment','FLAIR_garbled_series','FLAIR_garbled_series_comment',
                         'FLAIR_fov_cutoff', 'FLAIR_fov_cutoff_comment', 'FLAIR_field_inhomogeneity','FLAIR_field_inhomogeneity_comment',
