@@ -64,6 +64,8 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
 
       filter(params)
 
+      write_driver(params)
+
       process(params)
 
       final_pass(params)
@@ -249,7 +251,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
 
           #finally, if this case has already been run, don't rerun it.
           processing_path = "#{params[:processing_output_path]}/#{scan_procedure.codename}/#{enrollment.enumber}/"
-          if File.exists?(processing_path) and File.directory?(processing_path) and Dir.entries(processing_path).count > 0
+          if File.exists?(processing_path) and File.directory?(processing_path) and Dir.entries(processing_path).select{|item| item =~ /^[^.]/}}.count > 0
             self.exclusions << {:class => visit.class, :id => visit.id, :message => "already processed"}
             next
           end
@@ -389,7 +391,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
 
     @driver.each do |row|
 
-      output_dir = "#{params[:processing_output_path]}/#{row[:scan_procedure].codename}/#{row[:enrollment].enumber}"
+      output_dir = "#{params[:processing_output_path]}/#{row[:scan_procedure]}/#{row[:enrollment].enumber}"
       if File.exists?(output_dir) and File.directory?(output_dir)
         html_candidates = Dir.entries(output_dir).select{|item| item =~ /.html/}
 
