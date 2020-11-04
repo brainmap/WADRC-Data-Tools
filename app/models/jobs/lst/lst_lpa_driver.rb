@@ -251,7 +251,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
 
           #finally, if this case has already been run, don't rerun it.
           processing_path = "#{params[:processing_output_path]}/#{scan_procedure.codename}/#{enrollment.enumber}/"
-          if File.exists?(processing_path) and File.directory?(processing_path) and Dir.entries(processing_path).select{|item| item =~ /^[^.]/}}.count > 0
+          if File.exists?(processing_path) and File.directory?(processing_path) and Dir.entries(processing_path).select{|item| item =~ /^[^.]/}.count > 0
             self.exclusions << {:class => visit.class, :id => visit.id, :message => "already processed"}
             next
           end
