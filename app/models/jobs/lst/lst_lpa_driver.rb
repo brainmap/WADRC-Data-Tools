@@ -256,6 +256,11 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
             next
           end
 
+          if acpc_path.nil?
+            self.exclusions << {:class => visit.class, :id => visit.id, :message => "failed to find an acpc file for this case. does one exist?"}
+            next
+          end
+
           # dereference the paths, in case I've actually found symlinks
           if File.symlink?(acpc_path)
             acpc_path = File.realpath(acpc_path)
