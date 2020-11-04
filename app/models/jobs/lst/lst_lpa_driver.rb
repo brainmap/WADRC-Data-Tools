@@ -184,7 +184,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
               # before we give up, we should see if there are 2ndary scans for this person's visit, and look to see if there are viable scans in there
               if visit.secondary_dir_exists?
 
-                secondaries = visit.seconday_dirs
+                secondaries = visit.secondary_dirs
                 secondaries.each do |secondary|
                   t2_nii_candidates = Dir.entries(secondary).select{|img| (img =~ series_description_re) and !(img =~ /ORIG/) and (img =~ /^[^.]/)}
                   if t2_nii_candidates.count == 1
@@ -221,7 +221,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
               # before we give up, we should see if there are 2ndary scans for this person's visit, and look to see if there are viable scans in there
               if visit.secondary_dir_exists?
 
-                secondaries = visit.seconday_dirs
+                secondaries = visit.secondary_dirs
                 secondaries.each do |secondary|
                   acpc_candidates = Dir.entries(secondary).select { |f| f.start_with?("o") and f.end_with?(".nii") }
                   if acpc_candidates.count == 1
