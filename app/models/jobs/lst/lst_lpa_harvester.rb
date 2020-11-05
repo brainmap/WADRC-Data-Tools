@@ -104,7 +104,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 				            	self.success_log << {:message => 'a case with an existing tracked image', :protocol => protocol, :subject => subject}
 				            	matching_image = Trfileimage.where(:image_id => existing_tracked_image.first.id, :image_category => 'html').first
 
-				            	qc_value = tracker.first.trfile.qc_value
+				            	qc_value = matching_image.first.trfile.qc_value
 
 					            if qc_value == 'Pass'
 					            	# create an insert from the csv
