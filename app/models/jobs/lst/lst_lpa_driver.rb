@@ -11,6 +11,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
                 computer: "kanga",
                 dry_run: false,
                 run_by_user: 'panda_user',
+                code_ver: '20ae61c',
                 exclude_sp_mri_array: [-1,100,80,76,78],
                 date_cutoff: '2018-10-11',
                 csv_headers: ['scan_procedure','enrollment','ACPC_T1_path','T2_FLAIR', 'FLAIR_incomplete_series',
@@ -36,6 +37,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
                 computer: "moana",
                 dry_run: false,
                 run_by_user: 'panda_user',
+                code_ver: '20ae61c',
                 exclude_sp_mri_array: [-1,100,80,76,78],
                 date_cutoff: '2015-06-01',
                 csv_headers: ['scan_procedure','enrollment','ACPC_T1_path','T2_FLAIR', 'FLAIR_incomplete_series',
@@ -396,18 +398,30 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
 
     @driver.each do |row|
 
-      output_dir = "#{params[:processing_output_path]}/#{row[:scan_procedure]}/#{row[:enrollment].enumber}"
+      output_dir = "#{params[:processing_output_path]}/#{row[:scan_procedure]}/#{row[:enrollment].enumber}/#{params[:code_ver]}/"
       if File.exists?(output_dir) and File.directory?(output_dir)
         html_candidates = Dir.entries(output_dir).select{|item| item =~ /.html/}
 
-        html_candidates.each do |filename|
-          file_data = File.read("#{output_dir}/#{filename}")
-          translated_file_data = file_data.gsub(/\/mounts\/data/, "file://s:")
-          translated_filename = filename.gsub(/.html/, 'windows.html')
-          file_handle = File.open("#{output_dir}/#{translated_filename}",'wb')
-          file_handle.write(translated_file_data)
-          file_handle.close
-        end
+        subdirectory = Dir.glob("#{output_dir}**/").select{|item| item != output_dir}.first
+        js_candidates = Dir.entries(subdirectory).select{|item| item =~ /.js/}
+  
+        non_windows_js = "#{subdirectory}#{js_candidates.first}"
+
+        js_raw = File.read(non_windows_js)
+        js_translated = js_raw.gsub(/\/mounts\/data/,"file://s:")
+        new_js_filename = non_windows_js.gsub(/.js/,"Windows.js")
+        js_handle = File.open(new_js_filename,'wb')
+        js_handle.write(js_translated)
+        js_handle.close
+
+        file_data = File.read("#{output_dir}/#{html_candidates.first}")
+        translated_file_data = file_data.gsub(/\/mounts\/data/, "file://s:")
+        translated_file_data = translated_file_data.gsub(non_windows_js,new_js_filename)
+        translated_filename = filename.gsub(/.html/, 'windows.html')
+        file_handle = File.open("#{output_dir}/#{translated_filename}",'wb')
+        file_handle.write(translated_file_data)
+        file_handle.close
+
       end
 
     end
