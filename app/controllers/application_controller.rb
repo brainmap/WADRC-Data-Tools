@@ -505,8 +505,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                  @fields_q_data.push(col_3)
                  if @question.value_link == "appointment"
                    if @question.ref_table_a_1 == "lookup_refs" and v_raw_data != "Y"
-                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description a_"+@question.id.to_s+
-                       " from q_data,lookup_refs where q_data.value_1 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) a_"+@question.id.to_s+
+                       " from q_data,lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_1) <> 0 and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+") a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                    elsif @question.ref_table_a_1 != "" and v_raw_data != "Y"
                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
                           " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -517,8 +517,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
 
                  elsif      @question.value_link == "participant"
                         if @question.ref_table_a_1 == "lookup_refs" and v_raw_data != "Y"
-                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description a_"+@question.id.to_s+
-                            " from q_data, lookup_refs where q_data.value_1 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) a_"+@question.id.to_s+
+                            " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_1) <> 0 and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                         elsif @question.ref_table_a_1 != "" and v_raw_data != "Y"
                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
                                " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -531,8 +531,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                 # outer join to table.appointment_id  vs vgroups.participant_id
                  if @question.value_link == "appointment"
                     if @question.ref_table_a_2 == "lookup_refs" and v_raw_data != "Y"
-                        left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description b_"+@question.id.to_s+
-                        " from q_data , lookup_refs where q_data.value_2 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                        left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) b_"+@question.id.to_s+
+                        " from q_data , lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_2) <> 0 and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+") b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                     elsif @question.ref_table_a_2 != "" and v_raw_data != "Y"
                        left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
                            " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -543,8 +543,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
 
                   elsif      @question.value_link == "participant"
                          if @question.ref_table_a_2 == "lookup_refs" and v_raw_data != "Y"
-                             left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description b_"+@question.id.to_s+
-                             " from q_data, lookup_refs where q_data.value_2 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                             left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) b_"+@question.id.to_s+
+                             " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_2) <> 0 and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                          elsif @question.ref_table_a_2 != "" and v_raw_data != "Y"
                             left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
                                 " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -557,8 +557,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                   # outer join to table.appointment_id  vs vgroups.participant_id
                     if @question.value_link == "appointment"
                       if @question.ref_table_a_3 == "lookup_refs" and v_raw_data != "Y"
-                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description c_"+@question.id.to_s+
-                          " from q_data, lookup_refs where q_data.value_3 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) c_"+@question.id.to_s+
+                          " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_3) <> 0 and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                       elsif @question.ref_table_a_3 != "" and v_raw_data != "Y"
                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
                              " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -569,8 +569,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                       
                     elsif      @question.value_link == "participant"
                            if @question.ref_table_a_3 == "lookup_refs" and v_raw_data != "Y"
-                               left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description c_"+@question.id.to_s+
-                               " from q_data, lookup_refs where q_data.value_3 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                               left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) c_"+@question.id.to_s+
+                               " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_3) <> 0 and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                            elsif @question.ref_table_a_3 != "" and v_raw_data != "Y"
                               left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
                                   " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -610,8 +610,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
              # outer join to table.appointment_id  vs vgroups.participant_id
              if @question.value_link == "appointment"
                  if @question.ref_table_a_1 == "lookup_refs" and v_raw_data != "Y"
-                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description a_"+@question.id.to_s+
-                     " from q_data, lookup_refs where q_data.value_1 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) a_"+@question.id.to_s+
+                     " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_1) <> 0 and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                  elsif @question.ref_table_a_1 != "" and v_raw_data != "Y"
                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
                         " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -622,8 +622,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                   
              elsif      @question.value_link == "participant"
                       if @question.ref_table_a_1 == "lookup_refs" and v_raw_data != "Y"
-                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description a_"+@question.id.to_s+
-                          " from q_data, lookup_refs where q_data.value_1 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) a_"+@question.id.to_s+
+                          " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_1) <> 0 and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                       elsif @question.ref_table_a_1 != "" and v_raw_data != "Y"
                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
                              " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -638,8 +638,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
               # outer join to table.appointment_id  vs vgroups.participant_id
               if @question.value_link == "appointment"
                   if @question.ref_table_a_2 == "lookup_refs" and v_raw_data != "Y"
-                      left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description b_"+@question.id.to_s+
-                      " from q_data, lookup_refs where q_data.value_2 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                      left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) b_"+@question.id.to_s+
+                      " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_2) <> 0 and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                   elsif @question.ref_table_a_2 != "" and v_raw_data != "Y"
                      left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
                          " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -650,8 +650,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                   
               elsif      @question.value_link == "participant"
                        if @question.ref_table_a_2 == "lookup_refs" and v_raw_data != "Y"
-                           left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description b_"+@question.id.to_s+
-                           " from q_data, lookup_refs where q_data.value_2 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                           left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) b_"+@question.id.to_s+
+                           " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_2) <> 0 and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                        elsif @question.ref_table_a_2 != "" and v_raw_data != "Y"
                           left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
                               " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -690,8 +690,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
             # outer join to table.appointment_id  vs vgroups.participant_id
             if @question.value_link == "appointment"
                 if @question.ref_table_a_2 == "lookup_refs" and v_raw_data != "Y"
-                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description b_"+@question.id.to_s+
-                    " from q_data, lookup_refs where q_data.value_2 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) b_"+@question.id.to_s+
+                    " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_2) <> 0 and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                 elsif @question.ref_table_a_2 != "" and v_raw_data != "Y"
                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
                        " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -702,8 +702,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                 
             elsif      @question.value_link == "participant"
                      if @question.ref_table_a_2 == "lookup_refs" and v_raw_data != "Y"
-                         left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description b_"+@question.id.to_s+
-                         " from q_data, lookup_refs where q_data.value_2 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                         left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) b_"+@question.id.to_s+
+                         " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_2) <> 0 and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                      elsif @question.ref_table_a_2 != "" and v_raw_data != "Y"
                         left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
                             " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -719,8 +719,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                # outer join to table.appointment_id  vs vgroups.participant_id
                if @question.value_link == "appointment"
                    if @question.ref_table_a_3 == "lookup_refs" and v_raw_data != "Y"
-                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description c_"+@question.id.to_s+
-                       " from q_data, lookup_refs where q_data.value_3 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) c_"+@question.id.to_s+
+                       " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_3) <> 0 and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                    elsif @question.ref_table_a_3 != "" and v_raw_data != "Y"
                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
                           " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -731,8 +731,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                     
                elsif      @question.value_link == "participant"
                         if @question.ref_table_a_3 == "lookup_refs" and v_raw_data != "Y"
-                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description c_"+@question.id.to_s+
-                            " from q_data, lookup_refs where q_data.value_3 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) c_"+@question.id.to_s+
+                            " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_3) <> 0 and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                         elsif @question.ref_table_a_3 != "" and v_raw_data != "Y"
                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
                                " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -771,8 +771,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
              # outer join to table.appointment_id  vs vgroups.participant_id
              if @question.value_link == "appointment"
                  if @question.ref_table_a_1 == "lookup_refs" and v_raw_data != "Y"
-                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description a_"+@question.id.to_s+
-                     " from q_data, lookup_refs where q_data.value_1 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) a_"+@question.id.to_s+
+                     " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_1) <> 0 and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                  elsif @question.ref_table_a_1 != "" and v_raw_data != "Y"
                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
                         " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -783,8 +783,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                  
              elsif      @question.value_link == "participant"
                       if @question.ref_table_a_1 == "lookup_refs" and v_raw_data != "Y"
-                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description a_"+@question.id.to_s+
-                          " from q_data, lookup_refs where q_data.value_1 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) a_"+@question.id.to_s+
+                          " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_1) <> 0 and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                       elsif @question.ref_table_a_1 != "" and v_raw_data != "Y"
                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
                              " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -799,8 +799,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                # outer join to table.appointment_id  vs vgroups.participant_id
                if @question.value_link == "appointment"
                    if @question.ref_table_a_3 == "lookup_refs" and v_raw_data != "Y"
-                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description c_"+@question.id.to_s+
-                       " from q_data, lookup_refs where q_data.value_3 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) c_"+@question.id.to_s+
+                       " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_3) <> 0 and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                    elsif @question.ref_table_a_3 != "" and v_raw_data != "Y"
                       left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
                           " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -811,8 +811,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                     
                elsif      @question.value_link == "participant"
                         if @question.ref_table_a_3 == "lookup_refs" and v_raw_data != "Y"
-                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description c_"+@question.id.to_s+
-                            " from q_data, lookup_refs where q_data.value_3 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) c_"+@question.id.to_s+
+                            " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_3) <> 0 and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                         elsif @question.ref_table_a_3 != "" and v_raw_data != "Y"
                            left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
                                " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -831,8 +831,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
              # outer join to table.appointment_id  vs vgroups.participant_id
              if @question.value_link == "appointment"
                  if @question.ref_table_a_1 == "lookup_refs" and v_raw_data != "Y"
-                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description a_"+@question.id.to_s+
-                     " from q_data, lookup_refs where q_data.value_1 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) a_"+@question.id.to_s+
+                     " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_1) <> 0 and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                  elsif @question.ref_table_a_1 != "" and v_raw_data != "Y"
                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
                         " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -843,8 +843,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                  
              elsif      @question.value_link == "participant"
                       if @question.ref_table_a_1 == "lookup_refs" and v_raw_data != "Y"
-                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description a_"+@question.id.to_s+
-                          " from q_data, lookup_refs where q_data.value_1 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) a_"+@question.id.to_s+
+                          " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_1) <> 0 and lookup_refs.label ='"+@question.ref_table_b_1+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                       elsif @question.ref_table_a_1 != "" and v_raw_data != "Y"
                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_1.pluralize.underscore+".description a_"+@question.id.to_s+
                              " from q_data , "+@question.ref_table_a_1.pluralize.underscore+" where q_data.value_1 = "+@question.ref_table_a_1.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) a_alias_"+@question.id.to_s+" on vgroups.participant_id = a_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -861,8 +861,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
             # outer join to table.appointment_id  vs vgroups.participant_id
             if @question.value_link == "appointment"
                 if @question.ref_table_a_2 == "lookup_refs" and v_raw_data != "Y"
-                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description b_"+@question.id.to_s+
-                    " from q_data, lookup_refs where q_data.value_2 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) b_"+@question.id.to_s+
+                    " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_2) <> 0 and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                 elsif @question.ref_table_a_2 != "" and v_raw_data != "Y"
                    left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
                        " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -873,8 +873,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                  
             elsif      @question.value_link == "participant"
                      if @question.ref_table_a_2 == "lookup_refs" and v_raw_data != "Y"
-                         left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description b_"+@question.id.to_s+
-                         " from q_data, lookup_refs where q_data.value_2 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                         left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) b_"+@question.id.to_s+
+                         " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_2) <> 0 and lookup_refs.label ='"+@question.ref_table_b_2+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                      elsif @question.ref_table_a_2 != "" and v_raw_data != "Y"
                         left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_2.pluralize.underscore+".description b_"+@question.id.to_s+
                             " from q_data , "+@question.ref_table_a_2.pluralize.underscore+" where q_data.value_2 = "+@question.ref_table_a_2.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) b_alias_"+@question.id.to_s+" on vgroups.participant_id = b_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -891,8 +891,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
              # outer join to table.appointment_id  vs vgroups.participant_id
              if @question.value_link == "appointment"
                  if @question.ref_table_a_3 == "lookup_refs" and v_raw_data != "Y"
-                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description c_"+@question.id.to_s+
-                     " from q_data, lookup_refs where q_data.value_3 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) c_"+@question.id.to_s+
+                     " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_3) <> 0 and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                  elsif @question.ref_table_a_3 != "" and v_raw_data != "Y"
                     left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
                         " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on "+v_table_base_appt+".appointment_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
@@ -903,8 +903,8 @@ def run_search_q_data ( tables,fields,p_left_join,p_left_join_vgroup,*p_raw_data
                   
              elsif      @question.value_link == "participant"
                       if @question.ref_table_a_3 == "lookup_refs" and v_raw_data != "Y"
-                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", lookup_refs.description c_"+@question.id.to_s+
-                          " from q_data, lookup_refs where q_data.value_3 = lookup_refs.ref_value and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
+                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", GROUP_CONCAT(lookup_refs.description) c_"+@question.id.to_s+
+                          " from q_data, lookup_refs where find_in_set(lookup_refs.ref_value, q_data.value_3) <> 0 and lookup_refs.label ='"+@question.ref_table_b_3+"' and q_data.question_id ="+q.question_id.to_s+" group by id_"+@question.id.to_s+") c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s                 
                       elsif @question.ref_table_a_3 != "" and v_raw_data != "Y"
                          left_join = "LEFT JOIN (select q_data.value_link id_"+@question.id.to_s+", "+@question.ref_table_a_3.pluralize.underscore+".description c_"+@question.id.to_s+
                              " from q_data , "+@question.ref_table_a_3.pluralize.underscore+" where q_data.value_3 = "+@question.ref_table_a_3.pluralize.underscore+".id and q_data.question_id ="+q.question_id.to_s+" ) c_alias_"+@question.id.to_s+" on vgroups.participant_id = c_alias_"+@question.id.to_s+".id_"+@question.id.to_s
