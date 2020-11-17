@@ -1,6 +1,7 @@
 class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 	attr_accessor :sdm_filter
+	attr_accessor :sdt_filter
 	attr_accessor :selected
 	attr_accessor :driver
 
