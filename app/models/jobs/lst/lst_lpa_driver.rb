@@ -162,7 +162,9 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
             # more to the regex so that we know which one to pick.
 
             #default regex
-            series_description_re = Regexp.new("#{t2_file.series_description.gsub(/ /,'[-_ ]')}\\w*.nii","i")
+            # 2020-11-17 wbbevis -- Thanks to the dempsy.plaque.visit1 study, this has to account for "+C Sag CUBE T2 FLAIR".
+            # These are actual scans, not typos, but they break the regex. 
+            series_description_re = Regexp.new("#{t2_file.series_description.gsub(/ /,'[-_ ]').gsub(/\+/,'')}\\w*.nii","i")
             
             if marked_as_default.count > 0
               #this _should_ be the sequence number of this particular image within the overall acquisition sequence.
