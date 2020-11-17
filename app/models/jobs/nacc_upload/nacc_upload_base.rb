@@ -53,6 +53,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 		@sdt_filter = SeriesDescriptionType.where(:series_description_type => ['T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','T2','T2 Flair','T2_Flair','T2+Flair','DTI'])
 		@sdm_filter = SeriesDescriptionMap.where(:series_description_type_id => sdt_filter.map(&:id)).map{|item| item.series_description.downcase}
+		@selected = []
 
 	    if !File.directory?(params[:target_dir])
 	      Dir.mkdir(params[:target_dir])
