@@ -222,8 +222,8 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 	        #this case passes, so let's set it up for prep
 
-		    adrc_case[:case_directory] = "#{adrc_case[:subject_id]}_#{vgroup.vgroup_date.strftime("%Y%m%d")}_wisc"
-		    adrc_case[:subject_dir] = "#{params[:target_dir]}/#{adrc_case[:case_directory]}"
+		    adrc_case[:case_dir] = "#{adrc_case[:subject_id]}_#{vgroup.vgroup_date.strftime("%Y%m%d")}_wisc"
+		    adrc_case[:subject_dir] = "#{params[:target_dir]}/#{adrc_case[:case_dir]}"
 
 		    if !File.directory?(adrc_case[:subject_dir])
 		      Dir.mkdir(adrc_case[:subject_dir])
@@ -308,13 +308,18 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
                 end
 
 	            # rsync this to 
-	            r_call "rsync -av #{image_case[:target_dir]} panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/"
+	         #    r_call "rsync -av #{image_case[:target_dir]} panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/"
 
-	            r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"tar -C /home/panda_user/upload_adrc -zcf /home/panda_user/upload_adrc/#{adrc_case[:subject_dir]}.tar.gz #{adrc_case[:subject_dir]}/\""
+	         #    r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"tar -C /home/panda_user/upload_adrc -zcf /home/panda_user/upload_adrc/#{adrc_case[:subject_dir]}.tar.gz #{adrc_case[:subject_dir]}/\""
 
-		        r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"rm -rf /home/panda_user/upload_adrc/#{adrc_case[:subject_dir]}/\""
+		        # r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"rm -rf /home/panda_user/upload_adrc/#{adrc_case[:subject_dir]}/\""
 
-		        r_call "rsync -av panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/#{adrc_case[:subject_dir]}.tar.gz #{image_case[:target_dir]}/#{adrc_case[:subject_dir]}.tar.gz"
+		        # r_call "rsync -av panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/#{adrc_case[:subject_dir]}.tar.gz #{image_case[:target_dir]}/#{adrc_case[:subject_dir]}.tar.gz"
+		        r_call "tar -C /tmp/adrc_upload -zcf /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz #{adrc_case[:case_dir]}/"
+
+		        r_call "rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}/"
+
+		        r_call "rsync -av /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/"
 
             end
 		end
@@ -328,17 +333,17 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 		@driver.each do |adrc_case|
 
-        	v_call_sftp = 'ssh panda_user@'+v_computer+'.dom.wisc.edu "/home/panda_user/upload_adrc/sftp_adrc_upload.py" '
+        	r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"/home/panda_user/upload_adrc/s3_adrc_upload.py\""
+
+        	r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"ls /home/panda_user/upload_adrc/#{adrc_case[:case_dir]}.tar.gz\""
+
+        	# if v_return.include?("No such file or directory")
+        	# 	#this upload failed
+        	# 	next
+        	# end
 
 
-        	v_call = 'ssh panda_user@'+v_computer+'.dom.wisc.edu "ls /home/panda_user/upload_adrc/'+v_subject_dir+'.tar.gz"'
-
-        	if v_return.include?("No such file or directory")
-        		#this upload failed
-        	end
-
-
-        	r_call " rm -rf "+v_target_dir+"/"+v_subject_dir+".tar.gz"
+        	r_call " rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz"
 
         	sql_sent = "update cg_adrc_upload set sent_flag ='Y' where subjectid ='#{adrc_case[:subject_id]}'"
         	@connection.execute(sql_sent)
