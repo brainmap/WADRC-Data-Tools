@@ -13,7 +13,8 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 	  				:remote_bucket => "naccimageraw",
 	  				:cg_table => "cg_adrc_upload",
 	  				:computer => "moana",
-	  				:target_dir => "/tmp/adrc_upload"
+	  				:target_dir => "/tmp/adrc_upload",
+	  				:weeks_back => 2
 	  			}
         params.default = ''
         params
@@ -79,13 +80,12 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
     	@connection.execute(sql)
 
 	    # recruit new adrc scans ---   change 
-	    v_weeks_back = "2"
 	    sql = "select distinct enrollments.enumber from enrollments,enrollment_vgroup_memberships, vgroups, scan_procedures_vgroups  where enrollments.enumber like 'adrc%' 
               and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
               and enrollment_vgroup_memberships.enrollment_id = enrollments.id
               and scan_procedures_vgroups.vgroup_id = vgroups.id
               and scan_procedures_vgroups.scan_procedure_id = 22
-              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL "+v_weeks_back+" WEEK)             
+              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL #{params[:weeks_back].to_s} WEEK)             
               and enrollments.enumber NOT IN ( select subjectid from cg_adrc_upload_new)
               and vgroups.transfer_mri ='yes'"
 	    results = @connection.execute(sql)
@@ -100,7 +100,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 	              and enrollment_vgroup_memberships.enrollment_id = enrollments.id
 	              and scan_procedures_vgroups.vgroup_id = vgroups.id
 	              and scan_procedures_vgroups.scan_procedure_id = 65
-	              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL "+v_weeks_back+" WEEK)             
+	              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL #{params[:weeks_back].to_s} WEEK)             
 	              and concat(enrollments.enumber,'_v2') NOT IN ( select subjectid from cg_adrc_upload_new)
 	              and vgroups.transfer_mri ='yes'"
 	    results = @connection.execute(sql)
@@ -115,13 +115,28 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 	              and enrollment_vgroup_memberships.enrollment_id = enrollments.id
 	              and scan_procedures_vgroups.vgroup_id = vgroups.id
 	              and scan_procedures_vgroups.scan_procedure_id = 89
-	              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL "+v_weeks_back+" WEEK)             
+	              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL #{params[:weeks_back].to_s} WEEK)             
 	              and concat(enrollments.enumber,'_v3') NOT IN ( select subjectid from cg_adrc_upload_new)
 	              and vgroups.transfer_mri ='yes'"
 	    results = @connection.execute(sql)
 	    results.each do |r|
 	          enrollment = Enrollment.where("enumber in (?)",r[0])
 	          sql2 = "insert into #{params[:cg_table]}_new (subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,dti_sent_flag,dti_status_flag) values('"+r[0]+"_v3','N','Y', "+enrollment.first.id.to_s+",89,'N','Y')"
+	          results2 = @connection.execute(sql2)
+	    end 
+
+	    sql = "select distinct enrollments.enumber from enrollments,enrollment_vgroup_memberships, vgroups, scan_procedures_vgroups  where enrollments.enumber like 'adrc%' 
+	              and vgroups.id = enrollment_vgroup_memberships.vgroup_id 
+	              and enrollment_vgroup_memberships.enrollment_id = enrollments.id
+	              and scan_procedures_vgroups.vgroup_id = vgroups.id
+	              and scan_procedures_vgroups.scan_procedure_id = 119
+	              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL "+v_weeks_back+" WEEK)             
+	              and concat(enrollments.enumber,'_v4') NOT IN ( select subjectid from cg_adrc_upload_new)
+	              and vgroups.transfer_mri ='yes'"
+	    results = @connection.execute(sql)
+	    results.each do |r|
+	          enrollment = Enrollment.where("enumber in (?)",r[0])
+	          sql2 = "insert into #{params[:cg_table]}_new (subjectid,sent_flag,status_flag, enrollment_id, scan_procedure_id,dti_sent_flag,dti_status_flag) values('"+r[0]+"_v4','N','Y', "+enrollment.first.id.to_s+",119,'N','Y')"
 	          results2 = @connection.execute(sql2)
 	    end 
 
