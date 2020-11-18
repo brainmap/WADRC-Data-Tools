@@ -270,7 +270,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 				r_call "mkdir #{image_case[:target_dir]}"
 
 				# copy over the image
-				r_call "cp -r #{image_case[:path]} #{image_case[:target_dir]}"
+				r_call "cp -r #{image_case[:path]}/* #{image_case[:target_dir]}/"
 
 				# unzip what's in the target dir
 				r_call "/usr/bin/bunzip2 #{image_case[:target_dir]}/*.bz2"
