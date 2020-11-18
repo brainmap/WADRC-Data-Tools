@@ -319,7 +319,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 		        r_call "rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}/"
 
-		        r_call "rsync -av /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/"
+		        r_call "scp -av /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/"
 
             end
 		end
