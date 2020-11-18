@@ -307,16 +307,16 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
                 	end
                 end
 
+	            # rsync this to 
+	            r_call "rsync -av #{image_case[:target_dir]} panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/"
+
+	            r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"tar -C /home/panda_user/upload_adrc -zcf /home/panda_user/upload_adrc/#{adrc_case[:subject_dir]}.tar.gz #{adrc_case[:subject_dir]}/\""
+
+		        r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"rm -rf /home/panda_user/upload_adrc/#{adrc_case[:subject_dir]}/\""
+
+		        r_call "rsync -av panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/#{adrc_case[:subject_dir]}.tar.gz #{image_case[:target_dir]}/#{adrc_case[:subject_dir]}.tar.gz"
+
             end
-                
-            # rsync this to 
-            r_call "rsync -av #{image_case[:target_dir]} panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/"
-
-            r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"tar -C /home/panda_user/upload_adrc -zcf /home/panda_user/upload_adrc/#{adrc_case[:subject_dir]}.tar.gz #{adrc_case[:subject_dir]}/\""
-
-	        r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"rm -rf /home/panda_user/upload_adrc/#{adrc_case[:subject_dir]}/\""
-
-	        r_call "rsync -av panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/#{adrc_case[:subject_dir]}.tar.gz #{image_case[:target_dir]}/#{adrc_case[:subject_dir]}.tar.gz"
 		end
 	end
 
