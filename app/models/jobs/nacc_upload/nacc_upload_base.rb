@@ -224,8 +224,8 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 		    adrc_case[:case_directory] = "#{adrc_case[:subject_id]}_#{vgroup.vgroup_date.strftime("%Y%m%d")}_wisc"
 		    adrc_case[:subject_dir] = "#{params[:target_dir]}/#{adrc_case[:case_directory]}"
 
-		    if !File.directory?(subject_dir)
-		      Dir.mkdir(subject_dir)
+		    if !File.directory?(adrc_case[:subject_dir])
+		      Dir.mkdir(adrc_case[:subject_dir])
 		    end
 
 		    subject_subdirs = []
@@ -237,7 +237,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 		    	if image.passed_iqc?
 
 			    	path_parts = image.path.split("/")
-			    	image_target_dir = "#{subject_dir}/#{path_parts.last}"
+			    	image_target_dir = "#{adrc_case[:subject_dir]}/#{path_parts.last}"
 
 			    	if subject_subdirs.include? image_target_dir
 			    		#tack something on the end so that we don't overwrite
