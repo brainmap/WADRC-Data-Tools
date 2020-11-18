@@ -130,7 +130,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 	              and enrollment_vgroup_memberships.enrollment_id = enrollments.id
 	              and scan_procedures_vgroups.vgroup_id = vgroups.id
 	              and scan_procedures_vgroups.scan_procedure_id = 119
-	              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL "+v_weeks_back+" WEEK)             
+	              and vgroups.vgroup_date < DATE_SUB(curdate(), INTERVAL #{params[:weeks_back].to_s} WEEK)             
 	              and concat(enrollments.enumber,'_v4') NOT IN ( select subjectid from cg_adrc_upload_new)
 	              and vgroups.transfer_mri ='yes'"
 	    results = @connection.execute(sql)
