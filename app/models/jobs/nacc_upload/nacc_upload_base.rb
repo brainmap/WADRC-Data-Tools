@@ -52,7 +52,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 	def setup(params)
 
 		@sdt_filter = SeriesDescriptionType.where(:series_description_type => ['T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','T2','T2 Flair','T2_Flair','T2+Flair','DTI'])
-		@sdm_filter = SeriesDescriptionMap.where(:series_description_type_id => sdt_filter.map(&:id)).map{|item| item.series_description.downcase}
+		@sdm_filter = SeriesDescriptionMap.where(:series_description_type_id => sdt_filter.map(&:id))
 		@selected = []
 
 	    if !File.directory?(params[:target_dir])
@@ -205,7 +205,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 		    #does this vgroup have the right image datasets?
 		    visits = Visit.where(:appointment_id => vgroup.appointments.select{|item| item.appointment_type == 'mri'}.map(&:id))
-		    images = Jobs::NaccUpload::ImageDataset.where(:visit_id => visits.map(&:id)).select{|item| (@sdm_filter.include? item.series_description.downcase) and (item.series_description != 'DTI whole brain  2mm FATSAT ASSET')}
+		    images = Jobs::NaccUpload::ImageDataset.where(:visit_id => visits.map(&:id)).select{|item| (@sdm_filter.map{|x| x.series_description.downcase}.include? item.series_description.downcase) and (item.series_description != 'DTI whole brain  2mm FATSAT ASSET')}
 
 	        # if we only have 2 different scan types, or the status flag for this case is 'R', fail the case
 	        series_description_counts = images.each_with_object(Hash.new(0)){|item,hash| hash[@sdm_filter.select{|sdm| sdm.series_description.downcase == item.series_description.downcase}.first.series_description_type_id] += 1}
