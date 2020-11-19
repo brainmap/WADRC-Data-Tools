@@ -29,7 +29,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
     			computer: "merida",
                 run_by_user: 'panda_user',
                 destination_table: 'cg_lst_lpa',
-                code_ver: '20ae61c',
+                code_ver: '6bbec87',
                 processing_output_path: "/mounts/data/pipelines/lstlpa/output",
                 tracker_id: 17
     		}
