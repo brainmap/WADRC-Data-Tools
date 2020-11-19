@@ -155,7 +155,7 @@ class Api::V1::TrtypeReviewsController < API::APIController
 
 		file = Trfile.where("trtype_id = ?", params[:id]).where("id" => params[:trfile_id]).first
 
-		displayable_tractiontypes = Tractiontype.where("trtype_id = ?",params[:id])
+		displayable_tractiontypes = Tractiontype.where("trtype_id = ?",params[:id]).order(:form_display_order)
 
 		case request.format
 		when "application/json"
@@ -177,31 +177,32 @@ class Api::V1::TrtypeReviewsController < API::APIController
 
 			checks = []
 
-			tredit_actions.each do |tredit_action|
-				tractiontype = Tractiontype.find(tredit_action.tractiontype_id)
+			displayable_tractiontypes.each do |tractiontype|
+				if tredit_actions.map(&:tractiontype_id).include? tractiontype.id
 
-				if displayable_tractiontypes.map(&:id).include? tredit_action.tractiontype_id
+					tredit_action = tredit_actions.select{|item| item.tractiontype_id == tractiontype.id}.first
 
-					checks << {'title' => tractiontype.form_display_label,
-							'value'=> tredit_action.value,
-							'field_type' => tractiontype.form_display_field_type,
-							'options' => label_map[tractiontype.ref_table_b_1],
-							'form_name' => tractiontype.description,
-							'tractiontype_id' => tractiontype.id,
-							'popover' => tractiontype.popover
-						}
-				else
-					checks << {'title' => tractiontype.form_display_label,
-							'value'=> (tredit_action.value == 'null' or tredit_action.value.blank? ? '' : tredit_action.value),
-							'field_type' => tractiontype.form_display_field_type,
-							'options' => [],
-							'form_name' => tractiontype.description,
-							'tractiontype_id' => tractiontype.id,
-							'popover' => tractiontype.popover
+					if tractiontype.id == tredit_action.tractiontype_id
+
+						checks << {'title' => tractiontype.form_display_label,
+								'value'=> tredit_action.value,
+								'field_type' => tractiontype.form_display_field_type,
+								'options' => label_map[tractiontype.ref_table_b_1],
+								'form_name' => tractiontype.description,
+								'tractiontype_id' => tractiontype.id,
+								'popover' => tractiontype.popover
 							}
+					else
+						checks << {'title' => tractiontype.form_display_label,
+								'value'=> (tredit_action.value == 'null' or tredit_action.value.blank? ? '' : tredit_action.value),
+								'field_type' => tractiontype.form_display_field_type,
+								'options' => [],
+								'form_name' => tractiontype.description,
+								'tractiontype_id' => tractiontype.id,
+								'popover' => tractiontype.popover
+								}
+					end
 				end
-
-				
 			end
 
 			images = []
