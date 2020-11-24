@@ -54,6 +54,9 @@ if filename in files:
 
 	report[filename]['remote_size'] = int(response['ContentLength'])
 	report[filename]['local_size'] = int(local_size)
+
+	if options.verbose:
+		print("local size is %s, and remote size is %s" % (local_size, response['ContentLength']))
 	
 	if report[filename]['remote_size'] == report[filename]['local_size']:
 		report[filename]['status'] = 'success'
