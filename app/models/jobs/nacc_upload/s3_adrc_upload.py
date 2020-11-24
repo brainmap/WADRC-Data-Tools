@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import boto3
-import os, sys
+import os, sys, json
 from optparse import OptionParser
 
 usage = "usage: %prog [-f] filename [-p prefix] [-t target_bucket]"
