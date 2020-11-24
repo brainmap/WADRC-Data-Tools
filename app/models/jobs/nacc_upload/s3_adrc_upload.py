@@ -9,6 +9,7 @@ parser = OptionParser(usage)
 parser.add_option("-f", "--filename", dest="filename", type=str, help="the name of the file to send to S3")
 parser.add_option("-p", "--prefix", dest="prefix", type=str, default="MRI/37/", help="a filename prefix for the destination S3 file")
 parser.add_option("-t", "--target_bucket", dest="target_bucket", type=str, default="naccimageraw", help="the name of the S3 bucket to upload to")
+parser.add_option("-v", "--verbose", action="store_true", dest="verbose", help="log verbosely")
 
 (options, args) = parser.parse_args()
 
@@ -18,6 +19,9 @@ if len(args) != 1:
 filename = options.filename if options.filename else args[0]
 
 directory = "/home/panda_user/upload_adrc/"
+
+if options.verbose:
+	print("filename is %s" % filename)
 
 # This script will try to upload a specific archive file if finds it in this directory. It will then check
 # S3 to see if the file has uploaded correctly (that the remote size matches the local size), and if
@@ -31,6 +35,9 @@ directory = "/home/panda_user/upload_adrc/"
 s3 = boto3.resource('s3')
 
 files = [x for x in os.listdir(directory) if x.endswith(".zip") or x.endswith(".tar.gz") or x.endswith(".tgz") ]
+
+if options.verbose:
+	print("filename is%s in the file list in %s" % ("" if filename in files else " not", directory))
 
 report = {}
 client = boto3.client(service_name='s3', use_ssl=True)
