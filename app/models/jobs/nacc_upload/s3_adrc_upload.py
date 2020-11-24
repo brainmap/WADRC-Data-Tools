@@ -56,4 +56,4 @@ if filename in files:
 	else:
 		report[filename]['status'] = 'fail'
 
-json.dumps(report)
+print(json.dumps(report))
