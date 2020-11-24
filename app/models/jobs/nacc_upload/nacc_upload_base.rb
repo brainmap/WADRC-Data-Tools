@@ -330,9 +330,10 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 		@driver.each do |adrc_case|
 
-        	json_report = r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"cd /home/panda_user/adrc_upload/; source ./bin/activate && ./s3_adrc_upload.py #{adrc_case[:case_dir]}.zip\""
+        	json_report = r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"cd /home/panda_user/adrc_upload/; source ./bin/activate && python s3_adrc_upload.py #{adrc_case[:case_dir]}.zip\""
+        	report = JSON.parse(json_report)
 
-        	r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"ls /home/panda_user/upload_adrc/#{adrc_case[:case_dir]}.zip\""
+        	# r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"ls /home/panda_user/upload_adrc/#{adrc_case[:case_dir]}.zip\""
 
         	r_call "rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}.zip"
 
