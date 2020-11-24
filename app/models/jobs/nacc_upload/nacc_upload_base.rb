@@ -309,10 +309,12 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
             end
 
             # serialize the directory
-		    r_call "tar -C /tmp/adrc_upload -zcf /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz #{adrc_case[:case_dir]}"
+		    # r_call "tar -C /tmp/adrc_upload -zcf /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz #{adrc_case[:case_dir]}"
+		    # sounds like they actually want .zip files
+		    r_call "cd /tmp/adrc_upload; zip -r /tmp/adrc_upload/#{adrc_case[:case_dir]}.zip #{adrc_case[:case_dir]}"
 
 		    # copy that to the sending host
-		    r_call "rsync -av /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/"
+		    r_call "rsync -av /tmp/adrc_upload/#{adrc_case[:case_dir]}.zip panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/"
 
 		    # remove the local copy
 		    r_call "rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}/"
@@ -328,12 +330,11 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 		@driver.each do |adrc_case|
 
-        	json_report = r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"cd /home/panda_user/upload_adrc/; source ./bin/activate && ./s3_adrc_upload.py #{adrc_case[:case_dir]}.tar.gz\""
+        	json_report = r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"cd /home/panda_user/upload_adrc/; source ./bin/activate && ./s3_adrc_upload.py #{adrc_case[:case_dir]}.zip\""
 
-        	r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"ls /home/panda_user/upload_adrc/#{adrc_case[:case_dir]}.tar.gz\""
+        	r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"ls /home/panda_user/upload_adrc/#{adrc_case[:case_dir]}.zip\""
 
-
-        	r_call "rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz"
+        	r_call "rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}.zip"
 
         	sql_sent = "update cg_adrc_upload set sent_flag ='Y' where subjectid ='#{adrc_case[:subject_id]}'"
         	@connection.execute(sql_sent)

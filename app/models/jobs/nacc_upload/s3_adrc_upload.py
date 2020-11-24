@@ -19,7 +19,7 @@ filename = options.filename if options.filename else args[0]
 
 directory = "/home/panda_user/upload_adrc/"
 
-# This script will try to upload a specific "*.tar.gz" file if finds it in this directory. It will then check
+# This script will try to upload a specific archive file if finds it in this directory. It will then check
 # S3 to see if the file has uploaded correctly (that the remote size matches the local size), and if
 # so, moves that tar.gz to the "sent" folder.
 # Finally, it builds a report, and prints the report in JSON to STDOUT. This is used by the Panda to 
@@ -30,7 +30,7 @@ directory = "/home/panda_user/upload_adrc/"
 
 s3 = boto3.resource('s3')
 
-files = [x for x in os.listdir(directory) if x.endswith(".tar.gz")]
+files = [x for x in os.listdir(directory) if x.endswith(".zip") or x.endswith(".tar.gz") or x.endswith(".tgz") ]
 
 report = {}
 client = boto3.client(service_name='s3', use_ssl=True)
