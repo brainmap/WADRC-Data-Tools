@@ -308,18 +308,13 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
                 end
             end
 
-	            # rsync this to 
-	         #    r_call "rsync -av #{image_case[:target_dir]} panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/"
-
-	         #    r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"tar -C /home/panda_user/upload_adrc -zcf /home/panda_user/upload_adrc/#{adrc_case[:subject_dir]}.tar.gz #{adrc_case[:subject_dir]}/\""
-
-		        # r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"rm -rf /home/panda_user/upload_adrc/#{adrc_case[:subject_dir]}/\""
-
-		        # r_call "rsync -av panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/#{adrc_case[:subject_dir]}.tar.gz #{image_case[:target_dir]}/#{adrc_case[:subject_dir]}.tar.gz"
+            # serialize the directory
 		    r_call "tar -C /tmp/adrc_upload -zcf /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz #{adrc_case[:case_dir]}"
 
+		    # copy that to the sending host
 		    r_call "rsync -av /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/"
 
+		    # remove the local copy
 		    r_call "rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}/"
 
 		end
@@ -333,17 +328,12 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 		@driver.each do |adrc_case|
 
-        	r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"/home/panda_user/upload_adrc/s3_adrc_upload.py #{adrc_case[:case_dir]}.tar.gz\""
+        	json_report = r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"cd /home/panda_user/upload_adrc/; source ./bin/activate && ./s3_adrc_upload.py #{adrc_case[:case_dir]}.tar.gz\""
 
         	r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"ls /home/panda_user/upload_adrc/#{adrc_case[:case_dir]}.tar.gz\""
 
-        	# if v_return.include?("No such file or directory")
-        	# 	#this upload failed
-        	# 	next
-        	# end
 
-
-        	r_call " rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz"
+        	r_call "rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz"
 
         	sql_sent = "update cg_adrc_upload set sent_flag ='Y' where subjectid ='#{adrc_case[:subject_id]}'"
         	@connection.execute(sql_sent)
