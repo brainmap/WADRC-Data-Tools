@@ -37,10 +37,10 @@ client = boto3.client(service_name='s3', use_ssl=True)
 
 if filename in files:
 	report[filename] = {}
-	s3.meta.client.upload_file(directory + filename, options.target_bucket, options.remote_prefix + filename)
+	s3.meta.client.upload_file(directory + filename, options.target_bucket, options.prefix + filename)
 
 	#the "head_object" for this file will tell us the remote file size
-	response = client.head_object(Bucket=options.target_bucket, Key=options.remote_prefix + filename)
+	response = client.head_object(Bucket=options.target_bucket, Key=options.prefix + filename)
 
 	#and this tells us the local filesize
 	local_size = os.stat(directory + filename).st_size
