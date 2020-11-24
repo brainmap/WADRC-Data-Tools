@@ -53,7 +53,7 @@ if filename in files:
 
 		#move the tar.gz to sent
 		os.rename(directory + filename, directory + 'sent/' + filename)
-	else
+	else:
 		report[filename]['status'] = 'fail'
 
 json.dumps(report)
