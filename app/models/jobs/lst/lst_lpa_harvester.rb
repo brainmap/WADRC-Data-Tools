@@ -16,6 +16,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
                 run_by_user: 'panda_user',
                 destination_table: 'cg_lst_lpa',
                 code_ver: '6992d9e',
+                older_versions: ['dd1ceef-mod','fc14b99','6992d9e','20ae61c','6bbec87','d0fc77a9a2'],
                 processing_output_path: "/mounts/data/development/lstlpa/output",
                 tracker_id: 17
     		}
@@ -30,6 +31,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
                 run_by_user: 'panda_user',
                 destination_table: 'cg_lst_lpa',
                 code_ver: 'd0fc77a9a2',
+                older_versions: ['dd1ceef-mod','fc14b99','6992d9e','20ae61c','6bbec87','d0fc77a9a2'],
                 processing_output_path: "/mounts/data/pipelines/lstlpa/output",
                 tracker_id: 17
     		}
@@ -83,15 +85,28 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 				subject_dirs.each do |subject|
 					enrollment = Enrollment.where(:enumber => subject).first
 
-					code_version_dir = "#{protocol_path}/#{subject}/#{params[:code_ver]}"
+					# 2020-12-01 wbbevis - given that there are a lot of new versions of the code,
+					# we're going to need to loop through the available code version subdirs, and
+					# find the latest version with all the products we need.
 
-					if File.exists?(code_version_dir) and File.directory?(code_version_dir)
-						self.total_cases += 1
-						filenames = Dir.entries(code_version_dir)
-						csv_candidates = filenames.select{|entry| entry =~ /_lstlpa.csv$/}
-						html_candidates = filenames.select{|entry| (entry =~ /.html$/) and !(entry =~ /-/)}
+					params[:older_versions].reverse.each do |code_version|
 
-						if html_candidates.length > 0 and csv_candidates.length == 1
+						code_version_dir = "#{protocol_path}/#{subject}/#{code_version}"
+
+						csv_candidates = []
+						html_candidates = []
+
+						if File.exists?(code_version_dir) and File.directory?(code_version_dir)
+							filenames = Dir.entries(code_version_dir)
+							csv_candidates = filenames.select{|entry| entry =~ /_lstlpa.csv$/}
+							html_candidates = filenames.select{|entry| (entry =~ /.html$/) and !(entry =~ /-/)}
+						end
+
+						if html_candidates.length == 0 or csv_candidates.length != 1
+							next
+						else
+
+							self.total_cases += 1
 							self.success << {:protocol => protocol, :subject => subject}
 
 							html_path = "#{code_version_dir}/#{html_candidates.first}"
@@ -170,16 +185,21 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 		                          	end
 		                       	end
 				            end
+				            
+				            # here we got the most recent tracked products, so we're good, and we don't need to keep going
+				            break
+				            
+				        end
 
-						elsif html_candidates.length == 0
-							#processing is done, but there's no product? log this.
-							self.error_log <<  {"message" => "Output dir exists, but there isn't any html product. (or this is a case with hyphens in the filename).", "subject" => subject, "protocol" => sp.codename}
-							self.failed << {:protocol => protocol, :subject => subject}
-						else
-							#weirdness. Too many products? Also log this.
-							self.error_log <<  {"message" => "More than 1 html product, maybe more than one csv?", "subject" => subject, "protocol" => sp.codename}
-							self.failed << {:protocol => protocol, :subject => subject}
-						end
+						# elsif html_candidates.length == 0
+						# 	#processing is done, but there's no product? log this.
+						# 	self.error_log <<  {"message" => "Output dir exists, but there isn't any html product. (or this is a case with hyphens in the filename).", "subject" => subject, "protocol" => sp.codename}
+						# 	self.failed << {:protocol => protocol, :subject => subject}
+						# else
+						# 	#weirdness. Too many products? Also log this.
+						# 	self.error_log <<  {"message" => "More than 1 html product, maybe more than one csv?", "subject" => subject, "protocol" => sp.codename}
+						# 	self.failed << {:protocol => protocol, :subject => subject}
+						# end
 					end
 				end
 			end
