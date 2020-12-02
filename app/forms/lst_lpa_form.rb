@@ -7,7 +7,7 @@ class LstLpaForm
 	attr_accessor :spm_revision, :lst_version, :lstlpa_local_code_version
 	attr_accessor :original_image_path_flair, :original_image_path_T1, :lesion_volume_ml
 	attr_accessor :number_of_lesions, :created_at, :processed_at, :participant_id
-
+	attr_accessor :enrollment_id, :scan_procedure_id
 
 	def self.attributes
 		{
@@ -25,7 +25,9 @@ class LstLpaForm
 			'number_of_lesions' => 0, 
 			'created_at' => '', 
 			'processed_at' => '', 
-			'participant_id' => nil
+			'participant_id' => nil,
+			'enrollment_id' => nil,
+			'scan_procedure_id' => nil
 		}
 	end
 
@@ -47,9 +49,16 @@ class LstLpaForm
 		enr = Enrollment.where(:enumber => choices['subject_id']).first
 		if !enr.nil?
 			choices['participant_id'] = enr.participant_id
+			choices['enrollment_id'] = enr.id
 		end
 
 		choices['scan_procedure'] = hash_flip["Protocol"]
+
+		sp = ScanProcedure.where(:codename => choices['scan_procedure']).first
+		if !sp.nil?
+			choices['scan_procedure_id'] = sp.id
+		end
+
 		choices['os_version'] = hash_flip['OS version'].to_s
 		choices['matlab_version'] = hash_flip["MATLAB version"].to_s
 		choices['spm_version'] = hash_flip["SPM version"].to_s
@@ -87,7 +96,9 @@ class LstLpaForm
 			'number_of_lesions' => @number_of_lesions, 
 			'created_at' => @created_at, 
 			'processed_at' => @processed_at, 
-			'participant_id' => @participant_id
+			'participant_id' => @participant_id,
+			'enrollment_id' => @enrollment_id,
+			'scan_procedure_id' => @scan_procedure_id
 
 		}
 	end

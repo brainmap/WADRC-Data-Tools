@@ -21,7 +21,10 @@
 		end
 
 		def secondary_dir_exists?(base_path='/mounts/data')
-			
+			if related_scan_procedure.nil? or related_enrollment.nil?
+				return false
+			end
+
 			entries = Dir.glob(base_path+"/preprocessed/visits/#{related_scan_procedure.codename}/#{related_enrollment.enumber}*")
 			if entries.count > 1
 				return true
