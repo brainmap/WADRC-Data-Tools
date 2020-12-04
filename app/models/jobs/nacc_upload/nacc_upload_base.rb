@@ -12,7 +12,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 	  				# :secret_key => Rails.application.config.nacc_secret_key
 	  				:remote_bucket => "naccimageraw",
 	  				:cg_table => "cg_adrc_upload",
-	  				:computer => "moana",
+	  				:computer => "tamatoa",
 	  				:target_dir => "/tmp/adrc_upload"
 	  			}
         params.default = ''
@@ -272,50 +272,54 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 				# copy over the image
 				r_call "cp -r #{image_case[:path]}/* #{image_case[:target_dir]}/"
 
+			end
+
+			# 2020-12-04 wbbevis -- Until Merida gets reimaged and returned to the lab, I'm going to have to use
+			# Tamatoa as the host for this process. Not a bad fit, really, as everyone is out of the office, and 
+			# it's a relatively hefty machine that can do this kind of work pretty quickly. Once Merida is back, 
+			# I'll need to upgrade python3 on it to 3.8. 
+
+
+		    r_call "cd #{params[:target_dir]}; zip -r #{adrc_case[:case_dir]}.zip #{adrc_case[:case_dir]}"
+
+		    # copy that to the sending host
+		    r_call "rsync -av #{params[:target_dir]}/#{adrc_case[:case_dir]}.zip panda_user@#{params[:computer]}.dom.wisc.edu:/Users/panda_user/adrc_upload/"
+
+			r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"/usr/bin/gunzip /Users/panda_user/adrc_upload/#{adrc_case[:case_dir]}.zip\""
+
+			adrc_case[:images].each do |image_case|
+
 				# unzip what's in the target dir
-				r_call "/usr/bin/bunzip2 #{image_case[:target_dir]}/*.bz2"
+				r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"/usr/bin/bunzip2 /Users/panda_user/adrc_upload/#{image_case[:target_dir]}/*.bz2\""
 
 				# remove any of those extraneous files
 				# this may seem less readable than doing it other ways, but this ... is actually better.
 				glob_patterns = ['/*','/*/*','/*/*/*'].map{|prefix| ['.json','.yaml','.pickle'].map{|suffix| "#{prefix}#{suffix}"}}.flatten
 				glob_patterns.each do |pattern|
-					if(File.exist?(image_case[:target_dir]+pattern))
-						File.delete(image_case[:target_dir]+pattern)
+					Dir.glob(image_case[:target_dir]+pattern).each do |deleteable_file|
+						remote_file_path = deleteable_file.gsub(params[:target_dir],'/Users/panda_user/adrc_upload')
+						# File.delete(image_case[:target_dir]+pattern)
+						r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"rm #{remote_file_path}\""
+
 					end
 				end
 
-				# scrub any dicom files we find within the target dir
-
-				v_dicom_field_array =['0010,0030','0010,0010','0008,0050','0008,1030','0010,0020','0040,0254','0008,0080','0008,1010','0009,1002','0009,1030','0018,1000',
-                        '0025,101A','0040,0242','0040,0243']
-        		v_dicom_field_value_hash ={'0010,0030'=>'DOB','0010,0010'=>'Name','0008,0050'=>'Accession Number',
-                           '0008,1030'=>'Study Description', '0010,0020'=>'Patient ID','0040,0254'=>'Performed Proc Step Desc',
-                            '0008,0080'=>'Institution Name','0008,1010'=>'Station Name','0009,1002'=>'Private',
-                            '0009,1030'=>'Private','0018,1000'=>'Device Serial Number','0025,101A'=>'Private',
-                            '0040,0242'=>'Performed Station Name','0040,0243'=>'Performed Location'}
-
-                scrubbable_file_extensions = ['/*/*/*.dcm', '/*/*/*.0*', '/*/*/*.1*', '/*/*/*.2*', '/*/*/*.3*']
+                scrubbable_file_extensions = ['/*','/*/*','/*/*/*'].map{|prefix| ['.dcm','.0*','.1*', '.2*','.3*'].map{|suffix| "#{prefix}#{suffix}"}}.flatten
                 scrubbable_file_extensions.each do |file_extention|
                 	Dir.glob(image_case[:target_dir]+file_extention).each do |scrubbable_dcm_filename|
-                		d = DICOM::DObject.read(scrubbable_dcm_filename); 
-                        v_dicom_field_array.each do |dicom_key|
-                        	if !d[dicom_key].nil? 
-                            	d[dicom_key].value = v_dicom_field_value_hash[dicom_key]
-                            	d.write(scrubbable_dcm_filename);
-                            end 
-                        end
+                		remote_scrubbable_filename = scrubbable_dcm_filename.gsub(params[:target_dir],'/Users/panda_user/adrc_upload')
+                		r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"cd /Users/panda_user/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{remote_scrubbable_filename} \""
                 	end
                 end
+
+                # instead of 
             end
+
+            r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"cd /Users/panda_user/adrc_upload/; /usr/bin/zip -r #{adrc_case[:case_dir]}.zip #{adrc_case[:case_dir]}"
 
             # serialize the directory
 		    # r_call "tar -C /tmp/adrc_upload -zcf /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz #{adrc_case[:case_dir]}"
 		    # sounds like they actually want .zip files
-		    r_call "cd /tmp/adrc_upload; zip -r /tmp/adrc_upload/#{adrc_case[:case_dir]}.zip #{adrc_case[:case_dir]}"
-
-		    # copy that to the sending host
-		    r_call "rsync -av /tmp/adrc_upload/#{adrc_case[:case_dir]}.zip panda_user@#{params[:computer]}.dom.wisc.edu:/home/panda_user/upload_adrc/"
-
 		    # remove the local copy
 		    r_call "rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}/"
 
@@ -330,7 +334,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 		@driver.each do |adrc_case|
 
-        	json_report = r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"cd /home/panda_user/adrc_upload/; source ./bin/activate && python s3_adrc_upload.py #{adrc_case[:case_dir]}.zip\""
+        	json_report = r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"cd /Users/panda_user/adrc_upload/; source ./bin/activate && python s3_adrc_upload.py #{adrc_case[:case_dir]}.zip\""
         	report = JSON.parse(json_report)
 
         	# r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"ls /home/panda_user/upload_adrc/#{adrc_case[:case_dir]}.zip\""
