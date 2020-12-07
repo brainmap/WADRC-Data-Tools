@@ -283,10 +283,10 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 			# I'll need to upgrade python3 on it to 3.8. 
 
 
-		    r_call "cd #{params[:target_dir]}; zip -r #{adrc_case[:case_dir]}.zip #{adrc_case[:case_dir]}"
-
 		    if !params[:local]
 			    # copy that to the sending host
+
+			    r_call "cd #{params[:target_dir]}; zip -r #{adrc_case[:case_dir]}.zip #{adrc_case[:case_dir]}"
 			    r_call "rsync -av #{params[:target_dir]}/#{adrc_case[:case_dir]}.zip #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu:/Users/#{params[:run_by_user]}/adrc_upload/"
 				r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"/usr/bin/gunzip /Users/#{params[:run_by_user]}/adrc_upload/#{adrc_case[:case_dir]}.zip\""
 			end
@@ -298,7 +298,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 					# unzip what's in the target dir
 					r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"/usr/bin/bunzip2 /Users/#{params[:run_by_user]}/adrc_upload/#{image_case[:target_dir]}/*.bz2\""
 				else
-					r_call "/usr/bin/bunzip2 /tmp/adrc_upload/#{image_case[:target_dir]}/*.bz2"
+					r_call "/usr/bin/bunzip2 #{image_case[:target_dir]}/*.bz2"
 				end
 
 				# remove any of those extraneous files
@@ -324,9 +324,9 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 			    		if !params[:local]
 	                		remote_scrubbable_filename = scrubbable_dcm_filename.gsub(params[:target_dir],"/Users/#{params[:run_by_user]}/adrc_upload")
-	                		r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{remote_scrubbable_filename} #{adrc_case[:participant].adrcnum}; deactivate\""
+	                		r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{remote_scrubbable_filename} -a #{adrc_case[:participant].adrcnum}; deactivate\""
 	                	else
-	                		r_call "cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{scrubbable_dcm_filename} #{adrc_case[:participant].adrcnum}; deactivate"
+	                		r_call "cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{scrubbable_dcm_filename} -a #{adrc_case[:participant].adrcnum}; deactivate"
 	                	end
                 	end
                 end
