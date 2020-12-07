@@ -324,9 +324,9 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 			    		if !params[:local]
 	                		remote_scrubbable_filename = scrubbable_dcm_filename.gsub(params[:target_dir],"/Users/#{params[:run_by_user]}/adrc_upload")
-	                		r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{remote_scrubbable_filename} -a #{adrc_case[:participant].adrcnum}; deactivate\""
+	                		r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{remote_scrubbable_filename} -a #{adrc_case[:participant].adrcnum.gsub(/adrc/,'')}; deactivate\""
 	                	else
-	                		r_call "cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{scrubbable_dcm_filename} -a #{adrc_case[:participant].adrcnum}; deactivate"
+	                		r_call "cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{scrubbable_dcm_filename} -a #{adrc_case[:participant].adrcnum.gsub(/adrc/,'')}; deactivate"
 	                	end
                 	end
                 end
