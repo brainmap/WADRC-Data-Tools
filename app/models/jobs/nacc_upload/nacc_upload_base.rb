@@ -321,7 +321,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 		    # r_call "tar -C /tmp/adrc_upload -zcf /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz #{adrc_case[:case_dir]}"
 		    # sounds like they actually want .zip files
 		    # remove the local copy
-		    r_call "rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}/"
+		    # r_call "rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}/"
 
 		end
 	end
@@ -336,10 +336,11 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
         	json_report = r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate && python s3_adrc_upload.py #{adrc_case[:case_dir]}.zip\""
         	report = JSON.parse(json_report)
+        	puts json_report
 
         	# r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"ls /home/panda_user/upload_adrc/#{adrc_case[:case_dir]}.zip\""
 
-        	r_call "rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}.zip"
+        	# r_call "rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}.zip"
 
         	sql_sent = "update cg_adrc_upload set sent_flag ='Y' where subjectid ='#{adrc_case[:subject_id]}'"
         	@connection.execute(sql_sent)
