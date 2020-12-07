@@ -13,7 +13,8 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 	  				:remote_bucket => "naccimageraw",
 	  				:cg_table => "cg_adrc_upload",
 	  				:computer => "tamatoa",
-	  				:target_dir => "/tmp/adrc_upload"
+	  				:target_dir => "/tmp/adrc_upload",
+	  				:local => false
 	  			}
         params.default = ''
         params
@@ -282,24 +283,35 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 		    r_call "cd #{params[:target_dir]}; zip -r #{adrc_case[:case_dir]}.zip #{adrc_case[:case_dir]}"
 
-		    # copy that to the sending host
-		    r_call "rsync -av #{params[:target_dir]}/#{adrc_case[:case_dir]}.zip #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu:/Users/#{params[:run_by_user]}/adrc_upload/"
-
-			r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"/usr/bin/gunzip /Users/#{params[:run_by_user]}/adrc_upload/#{adrc_case[:case_dir]}.zip\""
+		    if !params[:local]
+			    # copy that to the sending host
+			    r_call "rsync -av #{params[:target_dir]}/#{adrc_case[:case_dir]}.zip #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu:/Users/#{params[:run_by_user]}/adrc_upload/"
+				r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"/usr/bin/gunzip /Users/#{params[:run_by_user]}/adrc_upload/#{adrc_case[:case_dir]}.zip\""
+			end
 
 			adrc_case[:images].each do |image_case|
 
-				# unzip what's in the target dir
-				r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"/usr/bin/bunzip2 /Users/#{params[:run_by_user]}/adrc_upload/#{image_case[:target_dir]}/*.bz2\""
+
+			    if !params[:local]
+					# unzip what's in the target dir
+					r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"/usr/bin/bunzip2 /Users/#{params[:run_by_user]}/adrc_upload/#{image_case[:target_dir]}/*.bz2\""
+				else
+					r_call "/usr/bin/bunzip2 /tmp/adrc_upload/#{image_case[:target_dir]}/*.bz2"
+				end
 
 				# remove any of those extraneous files
 				# this may seem less readable than doing it other ways, but this ... is actually better.
 				glob_patterns = ['/*','/*/*','/*/*/*'].map{|prefix| ['.json','.yaml','.pickle'].map{|suffix| "#{prefix}#{suffix}"}}.flatten
 				glob_patterns.each do |pattern|
 					Dir.glob(image_case[:target_dir]+pattern).each do |deleteable_file|
-						remote_file_path = deleteable_file.gsub(params[:target_dir],"/Users/#{params[:run_by_user]}/adrc_upload")
-						# File.delete(image_case[:target_dir]+pattern)
-						r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"rm #{remote_file_path}\""
+
+			    		if !params[:local]
+							remote_file_path = deleteable_file.gsub(params[:target_dir],"/Users/#{params[:run_by_user]}/adrc_upload")
+							# File.delete(image_case[:target_dir]+pattern)
+							r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"rm #{remote_file_path}\""
+						else
+							r_call "rm #{deleteable_file}"
+						end
 
 					end
 				end
@@ -307,15 +319,25 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
                 scrubbable_file_extensions = ['/*','/*/*','/*/*/*'].map{|prefix| ['.dcm','.0*','.1*', '.2*','.3*'].map{|suffix| "#{prefix}#{suffix}"}}.flatten
                 scrubbable_file_extensions.each do |file_extention|
                 	Dir.glob(image_case[:target_dir]+file_extention).each do |scrubbable_dcm_filename|
-                		remote_scrubbable_filename = scrubbable_dcm_filename.gsub(params[:target_dir],"/Users/#{params[:run_by_user]}/adrc_upload")
-                		r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{remote_scrubbable_filename} \""
+
+			    		if !params[:local]
+	                		remote_scrubbable_filename = scrubbable_dcm_filename.gsub(params[:target_dir],"/Users/#{params[:run_by_user]}/adrc_upload")
+	                		r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{remote_scrubbable_filename} \""
+	                	else
+	                		r_call "cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{scrubbable_dcm_filename}; deactivate"
+	                	end
                 	end
                 end
 
                 # instead of 
             end
 
-            r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; /usr/bin/zip -r #{adrc_case[:case_dir]}.zip #{adrc_case[:case_dir]}"
+
+			if !params[:local]
+            	r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; /usr/bin/zip -r #{adrc_case[:case_dir]}.zip #{adrc_case[:case_dir]}"
+            else
+            	r_call "cd /tmp/adrc_upload/; /usr/bin/zip -r #{adrc_case[:case_dir]}.zip #{adrc_case[:case_dir]}"
+            end
 
             # serialize the directory
 		    # r_call "tar -C /tmp/adrc_upload -zcf /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz #{adrc_case[:case_dir]}"
@@ -334,7 +356,12 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 		@driver.each do |adrc_case|
 
-        	json_report = r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate && python s3_adrc_upload.py #{adrc_case[:case_dir]}.zip\""
+			json_report = ''
+			if !params[:local]
+        		json_report = r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate && python s3_adrc_upload.py #{adrc_case[:case_dir]}.zip\""
+        	else
+        		json_report = r_call "cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate && python s3_adrc_upload.py #{adrc_case[:case_dir]}.zip;  deactivate"
+        	end
         	report = JSON.parse(json_report)
         	puts json_report
 
