@@ -14,7 +14,7 @@ parser.add_option("-d", "--directory", dest="directory", help="Source directory"
 
 (options, args) = parser.parse_args()
 
-if len(args) != 1:
+if len(args) < 1:
 	parser.error("incorrect number of arguments")
 
 filename = options.filename if options.filename else args[0]
