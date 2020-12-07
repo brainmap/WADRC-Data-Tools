@@ -6,6 +6,7 @@ from optparse import OptionParser
 usage = "usage: %prog [-f] filename"
 parser = OptionParser(usage)
 parser.add_option("-f", "--filename", dest="filename", type=str, help="Path to the file we're going to scrub")
+parser.add_option("-a", "--adrcnum", dest="adrcnum", type=str, help="The ADRC ID to populate into this file")
 
 (options, args) = parser.parse_args()
 
@@ -54,6 +55,8 @@ dcm = pydicom.dcmread(filename)
 
 for field in to_scrub:
 	scrub(dcm, field)
+
+dcm.PatientID = options.adrcnum
 
 dcm.save_as(filename)
 

@@ -9,7 +9,8 @@ parser = OptionParser(usage)
 parser.add_option("-f", "--filename", dest="filename", type=str, help="the name of the file to send to S3")
 parser.add_option("-p", "--prefix", dest="prefix", type=str, default="MRI/37/", help="a filename prefix for the destination S3 file")
 parser.add_option("-t", "--target_bucket", dest="target_bucket", type=str, default="naccimageraw", help="the name of the S3 bucket to upload to")
-parser.add_option("-v", "--verbose", action="store_true", dest="verbose", help="log verbosely")
+parser.add_option("-v", "--verbose", action="store_true", dest="verbose", help="Log verbosely")
+parser.add_option("-d", "--directory", dest="directory", help="Source directory")
 
 (options, args) = parser.parse_args()
 
@@ -18,7 +19,7 @@ if len(args) != 1:
 
 filename = options.filename if options.filename else args[0]
 
-directory = "/home/panda_user/upload_adrc/"
+directory = options.directory if options.directory else "/home/panda_user/upload_adrc/"
 
 if options.verbose:
 	print("filename is %s" % filename)
