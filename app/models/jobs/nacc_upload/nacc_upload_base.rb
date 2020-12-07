@@ -283,23 +283,23 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 		    r_call "cd #{params[:target_dir]}; zip -r #{adrc_case[:case_dir]}.zip #{adrc_case[:case_dir]}"
 
 		    # copy that to the sending host
-		    r_call "rsync -av #{params[:target_dir]}/#{adrc_case[:case_dir]}.zip panda_user@#{params[:computer]}.dom.wisc.edu:/Users/panda_user/adrc_upload/"
+		    r_call "rsync -av #{params[:target_dir]}/#{adrc_case[:case_dir]}.zip #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu:/Users/#{params[:run_by_user]}/adrc_upload/"
 
-			r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"/usr/bin/gunzip /Users/panda_user/adrc_upload/#{adrc_case[:case_dir]}.zip\""
+			r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"/usr/bin/gunzip /Users/#{params[:run_by_user]}/adrc_upload/#{adrc_case[:case_dir]}.zip\""
 
 			adrc_case[:images].each do |image_case|
 
 				# unzip what's in the target dir
-				r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"/usr/bin/bunzip2 /Users/panda_user/adrc_upload/#{image_case[:target_dir]}/*.bz2\""
+				r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"/usr/bin/bunzip2 /Users/#{params[:run_by_user]}/adrc_upload/#{image_case[:target_dir]}/*.bz2\""
 
 				# remove any of those extraneous files
 				# this may seem less readable than doing it other ways, but this ... is actually better.
 				glob_patterns = ['/*','/*/*','/*/*/*'].map{|prefix| ['.json','.yaml','.pickle'].map{|suffix| "#{prefix}#{suffix}"}}.flatten
 				glob_patterns.each do |pattern|
 					Dir.glob(image_case[:target_dir]+pattern).each do |deleteable_file|
-						remote_file_path = deleteable_file.gsub(params[:target_dir],'/Users/panda_user/adrc_upload')
+						remote_file_path = deleteable_file.gsub(params[:target_dir],"/Users/#{params[:run_by_user]}/adrc_upload")
 						# File.delete(image_case[:target_dir]+pattern)
-						r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"rm #{remote_file_path}\""
+						r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"rm #{remote_file_path}\""
 
 					end
 				end
@@ -307,15 +307,15 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
                 scrubbable_file_extensions = ['/*','/*/*','/*/*/*'].map{|prefix| ['.dcm','.0*','.1*', '.2*','.3*'].map{|suffix| "#{prefix}#{suffix}"}}.flatten
                 scrubbable_file_extensions.each do |file_extention|
                 	Dir.glob(image_case[:target_dir]+file_extention).each do |scrubbable_dcm_filename|
-                		remote_scrubbable_filename = scrubbable_dcm_filename.gsub(params[:target_dir],'/Users/panda_user/adrc_upload')
-                		r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"cd /Users/panda_user/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{remote_scrubbable_filename} \""
+                		remote_scrubbable_filename = scrubbable_dcm_filename.gsub(params[:target_dir],"/Users/#{params[:run_by_user]}/adrc_upload")
+                		r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{remote_scrubbable_filename} \""
                 	end
                 end
 
                 # instead of 
             end
 
-            r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"cd /Users/panda_user/adrc_upload/; /usr/bin/zip -r #{adrc_case[:case_dir]}.zip #{adrc_case[:case_dir]}"
+            r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; /usr/bin/zip -r #{adrc_case[:case_dir]}.zip #{adrc_case[:case_dir]}"
 
             # serialize the directory
 		    # r_call "tar -C /tmp/adrc_upload -zcf /tmp/adrc_upload/#{adrc_case[:case_dir]}.tar.gz #{adrc_case[:case_dir]}"
@@ -334,7 +334,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 		@driver.each do |adrc_case|
 
-        	json_report = r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"cd /Users/panda_user/adrc_upload/; source ./bin/activate && python s3_adrc_upload.py #{adrc_case[:case_dir]}.zip\""
+        	json_report = r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate && python s3_adrc_upload.py #{adrc_case[:case_dir]}.zip\""
         	report = JSON.parse(json_report)
 
         	# r_call "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"ls /home/panda_user/upload_adrc/#{adrc_case[:case_dir]}.zip\""
