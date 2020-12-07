@@ -208,6 +208,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 		    #does this vgroup have the right image datasets?
 		    visits = Visit.where(:appointment_id => vgroup.appointments.select{|item| item.appointment_type == 'mri'}.map(&:id))
 		    images = Jobs::NaccUpload::ImageDataset.where(:visit_id => visits.map(&:id)).select{|item| (@sdm_filter.map{|x| x.series_description.downcase}.include? item.series_description.downcase) and (item.series_description != 'DTI whole brain  2mm FATSAT ASSET')}
+		    ppt = vgroup.enrollments.first.participant
 
 	        # if we only have 2 different scan types, or the status flag for this case is 'R', fail the case
 	        series_description_counts = images.each_with_object(Hash.new(0)){|item,hash| hash[@sdm_filter.select{|sdm| sdm.series_description.downcase == item.series_description.downcase}.first.series_description_type_id] += 1}
@@ -225,6 +226,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 		    adrc_case[:case_dir] = "#{adrc_case[:subject_id]}_#{vgroup.vgroup_date.strftime("%Y%m%d")}_wisc"
 		    adrc_case[:subject_dir] = "#{params[:target_dir]}/#{adrc_case[:case_dir]}"
+		    adrc_case[:participant] = ppt
 
 		    if !File.directory?(adrc_case[:subject_dir])
 		      Dir.mkdir(adrc_case[:subject_dir])
@@ -322,9 +324,9 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 			    		if !params[:local]
 	                		remote_scrubbable_filename = scrubbable_dcm_filename.gsub(params[:target_dir],"/Users/#{params[:run_by_user]}/adrc_upload")
-	                		r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{remote_scrubbable_filename} \""
+	                		r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{remote_scrubbable_filename} #{adrc_case[:participant].adrcnum}; deactivate\""
 	                	else
-	                		r_call "cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{scrubbable_dcm_filename}; deactivate"
+	                		r_call "cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate; python dicom_scrubber.py #{scrubbable_dcm_filename} #{adrc_case[:participant].adrcnum}; deactivate"
 	                	end
                 	end
                 end
