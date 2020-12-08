@@ -60,17 +60,17 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
   # 2020-12-08 wbbevis -- I'm adding this to prioritize the PURE corrected T2s over other scans.
 
   def path_sort(a,b)
-      if !a.scan(/PU/).blank? and !b.scan(/PU/).blank?
+      if (a.path =~ /PU/) and (b.path =~ /PU/)
         return 0
-      elsif !a.scan(/ORIG/).blank? and !b.scan(/ORIG/).blank?
+      elsif (a.path =~ /ORIG/) and (b.path =~ /ORIG/)
         return 0
-      elsif !a.scan(/PU/).blank?
+      elsif (a.path =~ /PU/)
         return -1
-      elsif !a.scan(/ORIG/).blank?
+      elsif (a.path =~ /ORIG/)
         return 1
-      elsif !b.scan(/PU/).blank?
+      elsif (b.path =~ /PU/)
         return 1
-      elsif !b.scan(/ORIG/).blank?
+      elsif (b.path =~ /ORIG/)
         return -1
       else
         return 0
