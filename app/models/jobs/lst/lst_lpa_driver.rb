@@ -57,6 +57,26 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
     params
   end
 
+  # 2020-12-08 wbbevis -- I'm adding this to prioritize the PURE corrected T2s over other scans.
+
+  def path_sort(a,b)
+      if !a.scan(/PU/).blank? and !b.scan(/PU/).blank?
+        return 0
+      elsif !a.scan(/ORIG/).blank? and !b.scan(/ORIG/).blank?
+        return 0
+      elsif !a.scan(/PU/).blank?
+        return -1
+      elsif !a.scan(/ORIG/).blank?
+        return 1
+      elsif !b.scan(/PU/).blank?
+        return 1
+      elsif !b.scan(/ORIG/).blank?
+        return -1
+      else
+        return 0
+      end
+  end
+
   def run(params)
 
     begin
@@ -127,6 +147,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
           # t2_candidates = visit.image_datasets.select{|image| (image.series_description =~ /ORIG/).nil? and (image.series_description =~ /FLAIR/i) and (image.series_description =~ /T2/)}
 
           t2_candidates = visit.image_datasets.select{|image| (image.series_description =~ /ORIG/).nil? and ((image.series_description =~ /SAG Cube T2 FLAIR/i)  or (image.series_description =~ /Sag T2 FLAIR Cube/i)  or (image.series_description =~ /Sag CUBE T2FLAIR/i) or (image.series_description =~ /Sag CUBE flair/i))}
+          t2_candidates.sort!{|a,b| path_sort(a,b)}
           t2_file = nil
           marked_as_default = []
           if t2_candidates.count == 1
