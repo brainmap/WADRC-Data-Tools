@@ -60,17 +60,17 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
   # 2020-12-08 wbbevis -- I'm adding this to prioritize the PURE corrected T2s over other scans.
 
   def path_sort(a,b)
-      if (a.path =~ /PU/) and (b.path =~ /PU/)
+      if (a.series_description =~ /PU/) and (b.series_description =~ /PU/)
         return 0
-      elsif (a.path =~ /ORIG/) and (b.path =~ /ORIG/)
+      elsif (a.series_description =~ /ORIG/) and (b.series_description =~ /ORIG/)
         return 0
-      elsif (a.path =~ /PU/)
+      elsif (a.series_description =~ /PU/)
         return -1
-      elsif (a.path =~ /ORIG/)
+      elsif (a.series_description =~ /ORIG/)
         return 1
-      elsif (b.path =~ /PU/)
+      elsif (b.series_description =~ /PU/)
         return 1
-      elsif (b.path =~ /ORIG/)
+      elsif (b.series_description =~ /ORIG/)
         return -1
       else
         return 0
@@ -189,8 +189,9 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
             # 2020-11-17 wbbevis -- Thanks to the dempsy.plaque.visit1 study, this has to account for "+C Sag CUBE T2 FLAIR".
             # These are actual scans, not typos, but they break the regex. 
 
-            image_number = t2_file.path.split("/").last
-            series_description_re = Regexp.new("#{t2_file.series_description.gsub(/ /,'[-_ ]').gsub(/\+/,'')}\\w*#{image_number}.nii","i")
+            # this is ugly, but it works.
+            image_number = t2_file.path.split("/").last.split(".").first
+            series_description_re = Regexp.new("#{t2_file.series_description.gsub(/ /,'[-_ ]').gsub(/\+/,'').gsub(/:/,'[-_ ]')}\\w*#{image_number}.nii","i")
 
             if !File.exist?(preprocessed_path) or !File.directory?(preprocessed_path)
               self.exclusions << {:class => visit.class, :id => visit.id, :message => "no preprocessed path, or doesn't exist"}
