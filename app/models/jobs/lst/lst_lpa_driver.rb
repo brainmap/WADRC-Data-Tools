@@ -163,9 +163,12 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
             if marked_as_default.count == 1
               t2_file = marked_as_default.first
             else
-              # if we can't decide which one to use, we should fail the case
-              self.exclusions << {:class => visit.class, :id => visit.id, :message => "too many T2 FLAIR images for this visit"}
-              next
+
+              # 2020-12-08 wbbevis -- We've got a tie between the candidates on our list of T2 FLAIRs. Since we added
+              # the path_sort, that should put any PURE corrected cases to the front of the list, which is what we prefer.
+
+              t2_file = t2_candidates.first
+
             end
           end
 
