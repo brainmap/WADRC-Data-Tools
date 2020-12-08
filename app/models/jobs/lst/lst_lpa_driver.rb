@@ -192,7 +192,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
             # this is ugly, but it works.
             image_number = t2_file.path.split("/").last.split(".").first
             image_number = image_number.gsub(/0/,"")
-            series_description_re = Regexp.new("#{t2_file.series_description.gsub(/ /,'[-_ ]').gsub(/\+/,'').gsub(/:/,'[-_ ]')}\\w*#{image_number}.nii","i")
+            series_description_re = Regexp.new("#{t2_file.series_description.gsub(/ /,'[-_ ]').gsub(/\+/,'').gsub(/:/,'[-_ ]')}\\w*#{image_number}*.nii","i")
 
             if !File.exist?(preprocessed_path) or !File.directory?(preprocessed_path)
               self.exclusions << {:class => visit.class, :id => visit.id, :message => "no preprocessed path, or doesn't exist"}
