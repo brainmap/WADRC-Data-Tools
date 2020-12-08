@@ -188,15 +188,9 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
             #default regex
             # 2020-11-17 wbbevis -- Thanks to the dempsy.plaque.visit1 study, this has to account for "+C Sag CUBE T2 FLAIR".
             # These are actual scans, not typos, but they break the regex. 
-            series_description_re = Regexp.new("#{t2_file.series_description.gsub(/ /,'[-_ ]').gsub(/\+/,'')}\\w*.nii","i")
-            
-            if marked_as_default.count > 0
-              #this _should_ be the sequence number of this particular image within the overall acquisition sequence.
-              image_number = marked_as_default.first.path.split("/").last
 
-              #more stuff regex
-              series_description_re = Regexp.new("#{t2_file.series_description.gsub(/ /,'[-_ ]')}\\w*#{image_number}.nii","i")
-            end
+            image_number = t2_file.path.split("/").last
+            series_description_re = Regexp.new("#{t2_file.series_description.gsub(/ /,'[-_ ]').gsub(/\+/,'')}\\w*#{image_number}.nii","i")
 
             if !File.exist?(preprocessed_path) or !File.directory?(preprocessed_path)
               self.exclusions << {:class => visit.class, :id => visit.id, :message => "no preprocessed path, or doesn't exist"}
@@ -232,6 +226,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
                 next
               end
             else
+
               self.exclusions << {:class => visit.class, :id => visit.id, :message => "too many T2 FLAIR nii for this visit in preprocessed"}
               next
             end
