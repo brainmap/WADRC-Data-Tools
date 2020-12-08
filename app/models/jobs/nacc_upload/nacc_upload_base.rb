@@ -362,7 +362,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 			if !params[:local]
         		json_report = r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate && python s3_adrc_upload.py #{adrc_case[:case_dir]}.zip\""
         	else
-        		json_report = r_call "cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate && python s3_adrc_upload.py #{adrc_case[:case_dir]}.zip;  deactivate"
+        		json_report = r_call "cd /Users/#{params[:run_by_user]}/adrc_upload/; source ./bin/activate && python s3_adrc_upload.py #{adrc_case[:case_dir]}.zip -d /tmp/adrc_upload;  deactivate"
         	end
         	report = JSON.parse(json_report)
         	puts json_report
