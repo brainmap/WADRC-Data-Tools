@@ -16,7 +16,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
                 run_by_user: 'panda_user',
                 destination_table: 'cg_lst_lpa',
                 code_ver: '6992d9e',
-                older_versions: ['dd1ceef-mod','fc14b99','6992d9e','20ae61c','6bbec87','d0fc77a9a2'],
+                older_versions: ['dd1ceef-mod','fc14b99','6992d9e','20ae61c','6bbec87','d0fc77a9'],
                 processing_output_path: "/mounts/data/development/lstlpa/output",
                 tracker_id: 17
     		}
@@ -30,8 +30,8 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
     			computer: "merida",
                 run_by_user: 'panda_user',
                 destination_table: 'cg_lst_lpa',
-                code_ver: 'd0fc77a9a2',
-                older_versions: ['dd1ceef-mod','fc14b99','6992d9e','20ae61c','6bbec87','d0fc77a9a2'],
+                code_ver: 'd0fc77a9',
+                older_versions: ['dd1ceef-mod','fc14b99','6992d9e','20ae61c','6bbec87','d0fc77a9'],
                 processing_output_path: "/mounts/data/pipelines/lstlpa/output",
                 tracker_id: 17
     		}

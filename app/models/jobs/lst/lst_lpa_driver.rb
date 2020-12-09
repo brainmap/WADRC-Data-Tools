@@ -37,7 +37,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
                 computer: "moana",
                 dry_run: false,
                 run_by_user: 'panda_user',
-                code_ver: '6bbec87',
+                code_ver: 'd0fc77a9',
                 exclude_sp_mri_array: [-1,100,80,76,78],
                 date_cutoff: '2015-06-01',
                 csv_headers: ['scan_procedure','enrollment','ACPC_T1_path','T2_FLAIR', 'FLAIR_incomplete_series',
