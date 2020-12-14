@@ -17,7 +17,7 @@ class HanssonForm
 			'reggieid' => '',
 			'dt_blood' => '',
 			'age_at_blood' => '',
-			'reggieid' => '',
+			'visno' => '',
 			'participant_id' => ''
 		}
 	end
@@ -52,7 +52,7 @@ class HanssonForm
 			'reggieid' => @reggieid,
 			'dt_blood' => @dt_blood,
 			'age_at_blood' => @age_at_blood,
-			'reggieid' => @reggieid,
+			'visno' => @visno,
 			'participant_id' => @participant_id
 		}
 	end
