@@ -304,11 +304,18 @@ v_user = v_user.gsub("\n","")
      job = Jobs::RemoteRequest::NeuropathologyRequest.new(job1_params)
      job.run(job_params)
 
+  elsif v_value_1 == "lstlpa_harvest"
+
+    params = Jobs::Lst::LstLpaHarvester.production_params
+    job = Jobs::Lst::LstLpaHarvester.new(params)
+    job.run(params)
+
   elsif v_value_1 == "pcvipr_ica_harvest"
 
     job = Pcvipr::PcviprIcaHarvest.new
     params = Pcvipr::PcviprIcaHarvest.default_params
     job.run(params)
+
 
   elsif v_value_1 == "pcvipr_ica_process"
 
