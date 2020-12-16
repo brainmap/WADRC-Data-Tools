@@ -266,7 +266,7 @@ v_user = v_user.gsub("\n","")
      job = Jobs::Lst::LstLpaDriver.new(params)
      job.run(params)
 
-   elsif v_value_1 == "lst_lpa_harvest"
+   elsif v_value_1 == 'LST/LPA Pipeline Harvester'
      params = Jobs::Lst::LstLpaHarvester.production_params
      job = Jobs::Lst::LstLpaHarvester.new(params)
      job.run(params)

@@ -115,6 +115,7 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
     @selected = Jobs::Lst::Visit.joins("LEFT JOIN appointments on appointments.id = visits.appointment_id")
                               .joins("LEFT JOIN vgroups on appointments.vgroup_id = vgroups.id")
                               .joins("LEFT JOIN scan_procedures_vgroups ON vgroups.id = scan_procedures_vgroups.vgroup_id")
+                              .where("scan_procedures_vgroups.scan_procedure_id not in (?)", params[:exclude_sp_mri_array])
                               .where("appointments.appointment_date > ?",params[:date_cutoff])
                               .order(id: :desc).uniq
 
