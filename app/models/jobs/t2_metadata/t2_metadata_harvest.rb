@@ -113,7 +113,7 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 			r_call "cp #{first_dicom} #{params[:staging_dir]}/"
 			filename = first_dicom.split("/").last
 
-			json_response = r_call "source #{params[:python_bin_dir]}/bin/activate && python #{params[:python_bin_dir]}/t2_metadata.py #{params[:staging_dir]}/#{filename}"
+			json_response = r_call "source #{params[:python_bin_dir]}/bin/activate && python #{params[:python_bin_dir]}/scrape_meta.py #{params[:staging_dir]}/#{filename}"
 
 			# the JSON response will be either an error, or a complete report on the fields, or some other 
 			# error that doesn't parse as JSON.
@@ -165,3 +165,15 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 
 	end
 end
+
+# CREATE TABLE `cg_image_dataset_metadata` (
+# `id` int NOT NULL AUTO_INCREMENT,
+# `image_dataset_id` int(11) DEFAULT NULL,
+# `path` varchar(255) DEFAULT NULL,
+# `t2_prep` varchar(24) DEFAULT NULL,
+# `pure_correction` varchar(255) DEFAULT NULL,
+# `channel_count` int DEFAULT NULL,
+# `coil_name` varchar(50) DEFAULT NULL,
+# `scanner` varchar(50) DEFAULT NULL,
+#  PRIMARY KEY (`id`)
+#  )
