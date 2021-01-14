@@ -17,6 +17,7 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 	  				:staging_dir => "/mounts/data/analyses/wbbevis/t2_metadata_staging",
 	  				:python_bin_dir => "/mounts/data/analyses/wbbevis/t2_metadata",
 	  				:write_sql_to_file => true,
+	  				:sql_outfile => "/mounts/data/analyses/wbbevis/t2_metadata/sql_outfile.sql"
 	  				:auto_insert => false
 	  			}
         params.default = ''
