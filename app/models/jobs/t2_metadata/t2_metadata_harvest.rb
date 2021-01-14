@@ -132,7 +132,7 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 					values << (parsed_json[key].nil? ? "NULL" : @connection.quote(parsed_json[key]))
 				end
 
-				sql = "INSERT INTO #{params[:target_table]} (image_dataset_id, path, #{columns.join(', ')}) values (#{image.id}, #{image.path}, #{values.join(', ')});"
+				sql = "INSERT INTO #{params[:target_table]}_new (image_dataset_id, path, #{columns.join(', ')}) values (#{image.id}, #{image.path}, #{values.join(', ')});"
 
 				if params[:write_sql_to_file]
 					sql.write("#{sql}\n")
