@@ -53,7 +53,7 @@ try:
 
 except Exception as e:
 	if 'error' not in json_report.keys():
-		json['error'] = []
+		json_report['error'] = []
 	json_report['error'].append("%s, %s" % (type(e), e))
 
 
