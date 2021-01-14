@@ -114,6 +114,7 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 			first_dicom =  dicoms.first
 			r_call "cp #{first_dicom} #{params[:staging_dir]}/"
 			filename = first_dicom.split("/").last
+			r_call "bzip2 -d #{params[:staging_dir]}/#{filename}"
 
 			json_response = r_call "source #{params[:python_bin_dir]}/bin/activate && python #{params[:python_bin_dir]}/scrape_meta.py #{params[:staging_dir]}/#{filename}"
 
