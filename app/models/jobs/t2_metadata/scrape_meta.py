@@ -41,7 +41,7 @@ try:
 	elif ('FILTERED_GEMS' in scan_options.value) or (filter_mode.value in ["P+", "p+", "wp+"]):
 		pure_corrected_status = 'Other - (scan options is %s, filter mode is %s' % (','.join(scan_options.value), filter_mode.value)
 
-	t2_prep = dcm[(0x0018,0x9021)] # 'T2 Preparation', this may be blank :(
+	t2_prep = dcm[(0x0018,0x9021)] if (0x0018,0x9021) in dcm.keys() else None # 'T2 Preparation', this may be blank :(
 	coil_name = dcm[(0x0018,0x1250)] # 'Receive Coil Name', from which I can get the number of channels
 	scanner = dcm[(0x0008,0x1090)] # 'Manufacturer's mode name', which will become 'scanner_name'
 

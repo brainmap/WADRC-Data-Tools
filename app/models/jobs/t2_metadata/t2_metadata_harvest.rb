@@ -143,6 +143,9 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 				end
 
 			end
+
+			#finally, we've got to clean up the staging dir.
+			File.delete "#{params[:staging_dir]}/#{filename}"
 		end
 
 		if params[:write_sql_to_file]
