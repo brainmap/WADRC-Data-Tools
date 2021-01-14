@@ -53,6 +53,7 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 		@header = ["t2_prep", "pure_correction", "channel_count", "coil_name", "scanner"]
 		@error_rows = []
 		@connection = ActiveRecord::Base.connection
+		@driver = []
 
 		# set up the staging dir
 		if !File.exists? params[:staging_dir]
