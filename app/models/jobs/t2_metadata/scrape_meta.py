@@ -28,7 +28,7 @@ filename = options.filename if options.filename else args[0]
 
 dcm = pydicom.dcmread(filename)
 
-json = {}
+json_report = {}
 
 try:
 	scan_options = dcm[(0x0018,0x0022)] # Scan Options, should include 'FILTERED_GEMS' is this is PURE corrected
@@ -49,13 +49,13 @@ try:
 	if coil_name == '8HRBRAIN':
 		channel_count = 8
 
-	json = {'t2_prep': t2_prep, 'pure_correction': pure_corrected_status, 'channel_count':channel_count, 'coil_name':coil_name, 'scanner':scanner}
+	json_report = {'t2_prep': t2_prep, 'pure_correction': pure_corrected_status, 'channel_count':channel_count, 'coil_name':coil_name, 'scanner':scanner}
 
 except Exception as e:
 	if 'error' not in json.keys():
 		json['error'] = []
-	json['error'].append("%s, %s" % (type(e), e))
+	json_report['error'].append("%s, %s" % (type(e), e))
 
 
-print(json.dumps(json))
+print(json.dumps(json_report))
 
