@@ -54,7 +54,7 @@ try:
 except Exception as e:
 	if 'error' not in json.keys():
 		json['error'] = []
-	json['error'].append "%s, %s" % (type(e), e)
+	json['error'].append("%s, %s" % (type(e), e))
 
 
 print(json.dumps(json))
