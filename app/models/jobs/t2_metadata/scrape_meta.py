@@ -46,8 +46,10 @@ try:
 	scanner = dcm[(0x0008,0x1090)] # 'Manufacturer's mode name', which will become 'scanner_name'
 
 	channel_count = 0
-	if coil_name == '8HRBRAIN':
+	if coil_name.value == '8HRBRAIN':
 		channel_count = 8
+	elif coil_name.value == 'RM:Nova32ch':
+		channel_count = 32
 
 	json_report = {'t2_prep': t2_prep, 'pure_correction': pure_corrected_status, 'channel_count':channel_count, 'coil_name':coil_name.value, 'scanner':scanner.value}
 
