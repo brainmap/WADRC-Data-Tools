@@ -52,7 +52,7 @@ try:
 	json_report = {'t2_prep': t2_prep, 'pure_correction': pure_corrected_status, 'channel_count':channel_count, 'coil_name':coil_name, 'scanner':scanner}
 
 except Exception as e:
-	if 'error' not in json.keys():
+	if 'error' not in json_report.keys():
 		json['error'] = []
 	json_report['error'].append("%s, %s" % (type(e), e))
 
