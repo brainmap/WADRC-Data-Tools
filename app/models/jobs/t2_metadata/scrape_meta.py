@@ -41,7 +41,7 @@ try:
 	elif ('FILTERED_GEMS' in scan_options.value) or (filter_mode.value in ["P+", "p+", "wp+"]):
 		pure_corrected_status = 'Other - (scan options is %s, filter mode is %s' % (','.join(scan_options.value), filter_mode.value)
 
-	t2_prep = dcm[(0x0018,0x9021)] if (0x0018,0x9021) in dcm.keys() else None # 'T2 Preparation', this may be blank :(
+	t2_prep = dcm[(0x0018,0x9021)].value if (0x0018,0x9021) in dcm.keys() else None # 'T2 Preparation', this may be blank :(
 	coil_name = dcm[(0x0018,0x1250)] # 'Receive Coil Name', from which I can get the number of channels
 	scanner = dcm[(0x0008,0x1090)] # 'Manufacturer's mode name', which will become 'scanner_name'
 
@@ -49,7 +49,7 @@ try:
 	if coil_name == '8HRBRAIN':
 		channel_count = 8
 
-	json_report = {'t2_prep': t2_prep.value, 'pure_correction': pure_corrected_status, 'channel_count':channel_count, 'coil_name':coil_name.value, 'scanner':scanner.value}
+	json_report = {'t2_prep': t2_prep, 'pure_correction': pure_corrected_status, 'channel_count':channel_count, 'coil_name':coil_name.value, 'scanner':scanner.value}
 
 except Exception as e:
 	if 'error' not in json_report.keys():
