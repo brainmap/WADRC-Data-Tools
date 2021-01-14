@@ -49,7 +49,7 @@ try:
 	if coil_name == '8HRBRAIN':
 		channel_count = 8
 
-	json_report = {'t2_prep': t2_prep, 'pure_correction': pure_corrected_status, 'channel_count':channel_count, 'coil_name':coil_name, 'scanner':scanner}
+	json_report = {'t2_prep': t2_prep.value, 'pure_correction': pure_corrected_status, 'channel_count':channel_count, 'coil_name':coil_name.value, 'scanner':scanner.value}
 
 except Exception as e:
 	if 'error' not in json_report.keys():
