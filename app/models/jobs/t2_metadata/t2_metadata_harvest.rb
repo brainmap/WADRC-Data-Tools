@@ -143,14 +143,14 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 				end
 
 				if params[:auto_insert]
-					@connection.execute(sql)
+					connection.execute(sql)
 				end
 
 			end
 
 			#finally, we've got to clean up the staging dir.
-			File.delete "#{params[:staging_dir]}/#{filename}"
-			File.delete "#{params[:staging_dir]}/#{filename}.bz2"
+			File.delete "#{params[:staging_dir]}/#{filename}" if File.exists? "#{params[:staging_dir]}/#{filename}"
+			File.delete "#{params[:staging_dir]}/#{filename}.bz2" if File.exists? "#{params[:staging_dir]}/#{filename}.bz2"
 		end
 
 		if params[:write_sql_to_file]
