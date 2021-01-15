@@ -140,7 +140,7 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 				sql = "INSERT INTO #{params[:target_table]}_new (image_dataset_id, path, #{columns.join(', ')}) values (#{image.id}, #{image.path}, #{values.join(', ')});"
 
 				if params[:write_sql_to_file]
-					sql.write("#{sql}\n")
+					sql_outfile.write("#{sql}\n")
 				end
 
 				if params[:auto_insert]
