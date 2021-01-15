@@ -50,7 +50,6 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 	end
 
 	def setup(params)
-		@header = ["t2_prep", "pure_correction", "channel_count", "coil_name", "scanner"]
 		@error_rows = []
 		@connection = ActiveRecord::Base.connection
 		@driver = []
@@ -132,7 +131,7 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 
 				columns = []
 				values = []
-				@header.each do |key|
+				["t2_prep", "pure_correction", "channel_count", "coil_name", "scanner"].each do |key|
 					columns << key
 					values << (parsed_json[key].nil? ? "NULL" : @connection.quote(parsed_json[key]))
 				end
