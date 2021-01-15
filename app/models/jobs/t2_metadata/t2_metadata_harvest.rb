@@ -14,10 +14,10 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 	  				:base_path => "/mounts/data/raw",
 	  				:run_by_user => 'panda_user',
 	  				:target_table => 'cg_image_dataset_metadata',
-	  				:staging_dir => "/mounts/data/analyses/wbbevis/t2_metadata_staging",
-	  				:python_bin_dir => "/mounts/data/analyses/wbbevis/t2_metadata",
+	  				:staging_dir => "/mounts/data/analyses/panda_user/t2_metadata_staging",
+	  				:python_bin_dir => "/mounts/data/analyses/panda_user/t2_metadata",
 	  				:write_sql_to_file => true,
-	  				:sql_outfile => "/mounts/data/analyses/wbbevis/t2_metadata/sql_outfile.sql",
+	  				:sql_outfile => "/mounts/data/analyses/panda_user/t2_metadata/sql_outfile.sql",
 	  				:auto_insert => false
 	  			}
         params.default = ''
