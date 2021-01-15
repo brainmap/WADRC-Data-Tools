@@ -128,15 +128,15 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 				#record the error
 			else
 				# prepare this response for insert into the metadata table
-
+				connection = ActiveRecord::Base.connection
 				columns = []
 				values = []
 				["t2_prep", "pure_correction", "channel_count", "coil_name", "scanner"].each do |key|
 					columns << key
-					values << (parsed_json[key].nil? ? "NULL" : @connection.quote(parsed_json[key]))
+					values << (parsed_json[key].nil? ? "NULL" : connection.quote(parsed_json[key]))
 				end
 
-				sql = "INSERT INTO #{params[:target_table]}_new (image_dataset_id, path, #{columns.join(', ')}) values (#{image.id}, #{image.path}, #{values.join(', ')});"
+				sql = "INSERT INTO #{params[:target_table]}_new (image_dataset_id, path, #{columns.join(', ')}) values (#{image.id}, '#{image.path}', #{values.join(', ')});"
 
 				if params[:write_sql_to_file]
 					sql_outfile.write("#{sql}\n")
