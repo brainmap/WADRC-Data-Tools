@@ -116,6 +116,8 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 			filename = first_dicom.split("/").last
 			r_call "bzip2 -d #{params[:staging_dir]}/#{filename}"
 
+			filename = filename.gsub('.bz2', '')
+
 			json_response = r_call "source #{params[:python_bin_dir]}/bin/activate && python #{params[:python_bin_dir]}/scrape_meta.py #{params[:staging_dir]}/#{filename}"
 
 			# the JSON response will be either an error, or a complete report on the fields, or some other 
@@ -149,6 +151,7 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 
 			#finally, we've got to clean up the staging dir.
 			File.delete "#{params[:staging_dir]}/#{filename}"
+			File.delete "#{params[:staging_dir]}/#{filename}.bz2"
 		end
 
 		if params[:write_sql_to_file]
