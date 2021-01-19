@@ -105,37 +105,37 @@ class CognitiveCrosswalkForm
 		end
 
 
-		choices['age'] = row["age"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
+		choices['age'] = row["age"].to_f == "NA" ? 'missing' : row["age"].to_f
 		choices['visit_number'] = row["Visit_Number"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
 
-		choices['data_source'] = row["Data.Source"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['orrt_unc_std'] = row["ORRT.Unc_Std"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['anartraw'] = row["anartraw"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['readstn'] = row["readstn"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['animtotraw'] = row["animtotraw"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['bnttot'] = row["bnttot"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['bnttot30'] = row["bnttot30"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['cfltot'] = row["cfltot"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['craftdre'] = row["CRAFTDRE"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['crafturs'] = row["CRAFTURS"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['digbacct'] = row["DIGBACCT"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['digforct'] = row["DIGFORCT"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['digib'] = row["DIGIB"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['digif'] = row["DIGIF"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['drraw'] = row["drraw"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['iqdspb'] = row["iqdspb"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['iqdspf'] = row["iqdspf"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['minttots'] = row["MINTTOTS"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['mmsetot'] = row["mmsetot"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['mocatots'] = row["MOCATOTS"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['t6raw'] = row["t6raw"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['trla'] = row["trla"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['trlb'] = row["trlb"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['ttotal'] = row["ttotal"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['udsvertin'] = row["UDSVERTN"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['waisrtot'] = row["waisrtot"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['wmsrar'] = row["wmsrar"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
-		choices['wmsrar2'] = row["wmsrar2"].to_s == "NA" ? 'missing' : row["Visit_Number"].to_s
+		choices['data_source'] = row["Data.Source"].to_s == "NA" ? 'missing' : row["Data.Source"].to_s
+		choices['orrt_unc_std'] = row["ORRT.Unc_Std"].to_s == "NA" ? 'missing' : row["ORRT.Unc_Std"].to_s
+		choices['anartraw'] = row["anartraw"].to_s == "NA" ? 'missing' : row["anartraw"].to_s
+		choices['readstn'] = row["readstn"].to_s == "NA" ? 'missing' : row["readstn"].to_s
+		choices['animtotraw'] = row["animtotraw"].to_s == "NA" ? 'missing' : row["animtotraw"].to_s
+		choices['bnttot'] = row["bnttot"].to_s == "NA" ? 'missing' : row["bnttot"].to_s
+		choices['bnttot30'] = row["bnttot30"].to_s == "NA" ? 'missing' : row["bnttot30"].to_s
+		choices['cfltot'] = row["cfltot"].to_s == "NA" ? 'missing' : row["cfltot"].to_s
+		choices['craftdre'] = row["CRAFTDRE"].to_s == "NA" ? 'missing' : row["CRAFTDRE"].to_s
+		choices['crafturs'] = row["CRAFTURS"].to_s == "NA" ? 'missing' : row["CRAFTURS"].to_s
+		choices['digbacct'] = row["DIGBACCT"].to_s == "NA" ? 'missing' : row["DIGBACCT"].to_s
+		choices['digforct'] = row["DIGFORCT"].to_s == "NA" ? 'missing' : row["DIGFORCT"].to_s
+		choices['digib'] = row["DIGIB"].to_s == "NA" ? 'missing' : row["DIGIB"].to_s
+		choices['digif'] = row["DIGIF"].to_s == "NA" ? 'missing' : row["DIGIF"].to_s
+		choices['drraw'] = row["drraw"].to_s == "NA" ? 'missing' : row["drraw"].to_s
+		choices['iqdspb'] = row["iqdspb"].to_s == "NA" ? 'missing' : row["iqdspb"].to_s
+		choices['iqdspf'] = row["iqdspf"].to_s == "NA" ? 'missing' : row["iqdspf"].to_s
+		choices['minttots'] = row["MINTTOTS"].to_s == "NA" ? 'missing' : row["MINTTOTS"].to_s
+		choices['mmsetot'] = row["mmsetot"].to_s == "NA" ? 'missing' : row["mmsetot"].to_s
+		choices['mocatots'] = row["MOCATOTS"].to_s == "NA" ? 'missing' : row["MOCATOTS"].to_s
+		choices['t6raw'] = row["t6raw"].to_s == "NA" ? 'missing' : row["t6raw"].to_s
+		choices['trla'] = row["trla"].to_s == "NA" ? 'missing' : row["trla"].to_s
+		choices['trlb'] = row["trlb"].to_s == "NA" ? 'missing' : row["trlb"].to_s
+		choices['ttotal'] = row["ttotal"].to_s == "NA" ? 'missing' : row["ttotal"].to_s
+		choices['udsvertin'] = row["UDSVERTN"].to_s == "NA" ? 'missing' : row["UDSVERTN"].to_s
+		choices['waisrtot'] = row["waisrtot"].to_s == "NA" ? 'missing' : row["waisrtot"].to_s
+		choices['wmsrar'] = row["wmsrar"].to_s == "NA" ? 'missing' : row["wmsrar"].to_s
+		choices['wmsrar2'] = row["wmsrar2"].to_s == "NA" ? 'missing' : row["wmsrar2"].to_s
 
 		choices['bnt_xw'] = row["bnt.xw"].to_s == "NA" ? 'missing' : row["bnt.xw"].to_s
 		choices['dspb_xw'] = row["dspb.xw"].to_s == "NA" ? 'missing' : row["dspb.xw"].to_s
@@ -146,30 +146,30 @@ class CognitiveCrosswalkForm
 		choices["mmse_xw"] = row["mmse.xw"].to_s == "NA" ? 'missing' : row["mmse.xw"].to_s
 		choices["trlb_xw"] = row["trlb.xw"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
 
-		choices["pacc3_cfl_xw"] = row["pacc3.cfl.xw"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
+		choices["pacc3_cfl_xw"] = row["pacc3.cfl.xw"].to_s == "NA" ? 'missing' : row["pacc3.cfl.xw"].to_s
 		choices["pacc3_cfl_xw_sca"] = row["pacc3.cfl.xw.sca"].to_s == "NA" ? 'missing' : row["pacc3.cfl.xw.sca"].to_s
-		choices["pacc3_cfl_xw_z"] = row["pacc3.cfl.xw.z"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
-		choices["pacc3_trlb_xw"] = row["pacc3.trlb.xw"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
+		choices["pacc3_cfl_xw_z"] = row["pacc3.cfl.xw.z"].to_s == "NA" ? 'missing' : row["pacc3.cfl.xw.z"].to_s
+		choices["pacc3_trlb_xw"] = row["pacc3.trlb.xw"].to_s == "NA" ? 'missing' : row["pacc3.trlb.xw"].to_s
 		choices["pacc3_trlb_xw_sca"] = row["pacc3.trlb.xw.sca"].to_s == "NA" ? 'missing' : row["pacc3.trlb.xw.sca"].to_s
-		choices["pacc3_trlb_xw_z"] = row["pacc3.trlb.xw.z"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
-		choices["pacc3_wrap"] = row["pacc3.wrap"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
+		choices["pacc3_trlb_xw_z"] = row["pacc3.trlb.xw.z"].to_s == "NA" ? 'missing' : row["pacc3.trlb.xw.z"].to_s
+		choices["pacc3_wrap"] = row["pacc3.wrap"].to_s == "NA" ? 'missing' : row["pacc3.wrap"].to_s
 		choices["pacc3_wrap_sca"] = row["pacc3.wrap.sca"].to_s == "NA" ? 'missing' : row["pacc3.wrap.sca"].to_s
-		choices["pacc3_wrap_z"] = row["pacc3.wrap.z"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
-		choices["pacc4_cfl_trlb_xw"] = row["pacc4.cfl.trlb.xw"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
+		choices["pacc3_wrap_z"] = row["pacc3.wrap.z"].to_s == "NA" ? 'missing' : row["pacc3.wrap.z"].to_s
+		choices["pacc4_cfl_trlb_xw"] = row["pacc4.cfl.trlb.xw"].to_s == "NA" ? 'missing' : row["pacc4.cfl.trlb.xw"].to_s
 		choices["pacc4_cfl_trlb_xw_sca"] = row["pacc4.cfl.trlb.xw.sca"].to_s == "NA" ? 'missing' : row["pacc4.cfl.trlb.xw.sca"].to_s
-		choices["pacc4_cfl_trlb_xw_z"] = row["pacc4.cfl.trlb.xw.z"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
-		choices["pacc4_trlb_xw"] = row["pacc4.trlb.xw"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
+		choices["pacc4_cfl_trlb_xw_z"] = row["pacc4.cfl.trlb.xw.z"].to_s == "NA" ? 'missing' : row["pacc4.cfl.trlb.xw.z"].to_s
+		choices["pacc4_trlb_xw"] = row["pacc4.trlb.xw"].to_s == "NA" ? 'missing' : row["pacc4.trlb.xw"].to_s
 		choices["pacc4_trlb_xw_sca"] = row["pacc4.trlb.xw.sca"].to_s == "NA" ? 'missing' : row["pacc4.trlb.xw.sca"].to_s
-		choices["pacc4_trlb_xw_z"] = row["pacc4.trlb.xw.z"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
-		choices["pacc4_wrap"] = row["pacc4.wrap"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
+		choices["pacc4_trlb_xw_z"] = row["pacc4.trlb.xw.z"].to_s == "NA" ? 'missing' : row["pacc4.trlb.xw.z"].to_s
+		choices["pacc4_wrap"] = row["pacc4.wrap"].to_s == "NA" ? 'missing' : row["pacc4.wrap"].to_s
 		choices["pacc4_wrap_sca"] = row["pacc4.wrap.sca"].to_s == "NA" ? 'missing' : row["pacc4.wrap.sca"].to_s
-		choices["pacc4_wrap_z"] = row["pacc4.wrap.z"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
-		choices["pacc5_wrap"] = row["pacc5.wrap"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
+		choices["pacc4_wrap_z"] = row["pacc4.wrap.z"].to_s == "NA" ? 'missing' : row["pacc4.wrap.z"].to_s
+		choices["pacc5_wrap"] = row["pacc5.wrap"].to_s == "NA" ? 'missing' : row["pacc5.wrap"].to_s
 		choices["pacc5_wrap_sca"] = row["pacc5.wrap.sca"].to_s == "NA" ? 'missing' : row["pacc5.wrap.sca"].to_s
-		choices["pacc5_wrap_z"] = row["pacc5.wrap.z"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
-		choices["theo_mem_xw"] = row["theo.mem.xw"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
+		choices["pacc5_wrap_z"] = row["pacc5.wrap.z"].to_s == "NA" ? 'missing' : row["pacc5.wrap.z"].to_s
+		choices["theo_mem_xw"] = row["theo.mem.xw"].to_s == "NA" ? 'missing' : row["theo.mem.xw"].to_s
 		choices["theo_mem_xw_sca"] = row["theo.mem.xw.sca"].to_s == "NA" ? 'missing' : row["theo.mem.xw.sca"].to_s
-		choices["theo_mem_xw_z"] = row["theo.mem.xw.z"].to_s == "NA" ? 'missing' : row["trlb.xw"].to_s
+		choices["theo_mem_xw_z"] = row["theo.mem.xw.z"].to_s == "NA" ? 'missing' : row["theo.mem.xw.z"].to_s
 
 
 		return self.new(choices)
