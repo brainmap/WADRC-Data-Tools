@@ -68,8 +68,8 @@ class Jobs::T2Metadata::T2MetadataHarvest < Jobs::BaseJob
 	end
 
 	def selection(params)
-		#@selected = ImageDataset.where("(series_description not like 'ORIG%') and ((series_description like 'SAG Cube T2 FLAIR%') or (series_description like 'Sag T2 FLAIR Cube%')  or (series_description like 'Sag CUBE T2FLAIR%') or (series_description like 'Sag CUBE flair%'))").where("id not in (select image_dataset_id from #{params[:target_table]})")
-		@selected = ImageDataset.where("(series_description not like 'ORIG%' and ())").where("id not in (select image_dataset_id from #{params[:target_table]})")
+		#@selected = ImageDataset.where("(series_description not like 'ORIG%') and ((series_description like 'SAG Cube T2 FLAIR%') or (series_description like 'Sag T2 FLAIR Cube%')  or (series_description like 'Sag CUBE T2FLAIR%') or (series_description like 'Sag CUBE flair%'))")
+		@selected = ImageDataset.where("(series_description like '%T2%') or (series_description like '%T1%') or (series_description like '%Pseudo%')").where("id not in (select image_dataset_id from #{params[:target_table]})")
 	end
 
 	def filter(params)
