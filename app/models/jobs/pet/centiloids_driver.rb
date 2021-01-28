@@ -27,6 +27,8 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 
 			selection(params)
 
+			filter(params)
+
 			write_driver(params)
 
 			matlab_call(params)
@@ -67,7 +69,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 		end
 	end
 	
-	def selection(params)
+	def filter(params)
 
 		scan_procedures = ScanProcedure.all().map(&:codename)
 		scan_procedures.each do |codename|
