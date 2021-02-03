@@ -119,11 +119,11 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 							self.outputs << "< #{codename} #{subject_id} output_path:#{output_path}>"
 						else 
 							if analysis_logs.length == 0
-								self.exclusions << "< #{codename} #{subject_id} message:'no analysis-log.mat file'>"
+								self.exclusions << {:protocol => codename, :subject => subject_id, :message => 'no analysis-log.mat file'}
 							elsif centiloids_logs.length > 0
-								self.exclusions << "< #{codename} #{subject_id} message:'already has a centiloids-log.csv'>"
+								self.exclusions << {:protocol => codename, :subject => subject_id, :message => 'already has a centiloids-log.csv'}
 							elsif !qc_values.include?('Pass')
-								self.exclusions << "< #{codename} #{subject_id} message:'hasnt passed QC'>"
+								self.exclusions << {:protocol => codename, :subject => subject_id, :message => 'hasnt passed QC'}
 							end
 						end
 					else
