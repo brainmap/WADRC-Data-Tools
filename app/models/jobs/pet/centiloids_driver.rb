@@ -127,7 +127,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 							end
 						end
 					else
-						self.exclusions << "< #{codename} #{subject_id} message:'paths not ok'>"
+						self.exclusions << {:protocol => codename, :subject => subject_id, :message => 'paths not ok'}
 					end
 				end
 			end
