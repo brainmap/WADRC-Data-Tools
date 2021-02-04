@@ -123,7 +123,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 							elsif centiloids_logs.length > 0
 								self.exclusions << {:protocol => codename, :subject => subject_id, :message => 'already has a centiloids-log.csv'}
 							elsif !qc_values.include?('Pass')
-								self.exclusions << {:protocol => codename, :subject => subject_id, :message => 'hasnt passed QC'}
+								self.exclusions << {:protocol => codename, :subject => subject_id, :message => 'hasnt passed QC', :image_paths => images}
 							end
 						end
 					else
