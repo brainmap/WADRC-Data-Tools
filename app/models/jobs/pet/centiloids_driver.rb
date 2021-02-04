@@ -97,7 +97,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 						# in this dir, fail the case.
 
 						# here, file_type should be something like "suvr pib"
-		                processed_images = Processedimage.where(:file_path => images.map{|img| "#{path}/#{img}"}.join(",")).where(:file_type => "#{params[:method].downcase} #{@pettracer.name.downcase}")
+		                processed_images = Processedimage.where(:file_path => images.join(",")).where(:file_type => "#{params[:method].downcase} #{@pettracer.name.downcase}")
 		                qc_values = []
 
 			            if processed_images.count > 0
