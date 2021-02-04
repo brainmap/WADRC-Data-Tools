@@ -109,7 +109,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 
 						if analysis_logs.length > 0 and centiloids_logs.length == 0 and qc_values.include?('Pass')
 							#if there is one, let's add it to the list under this subject
-							analysis_log_path = "#{path}/#{analysis_logs.first}"
+							analysis_log_path = analysis_logs.first
 							output_path = "#{path}/#{cleaned_subject_id[0]}_centiloids-log_#{@pettracer.name.downcase}_#{params[:method]}_#{codename}.csv"
 
 							# The key to the driver should be the preprocessed path, not the enumber, because enumbers can
