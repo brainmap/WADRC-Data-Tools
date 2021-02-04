@@ -77,7 +77,7 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 			protocol_path = "#{params[:base_path]}preprocessed/visits/#{codename}"
 			if Dir.exists?(protocol_path)
 
-				subject_ids = Dir.entries(protocol_path) - ['.','..']
+				subject_ids = Dir.entries(protocol_path).select{|item| item =~ /^[^.]/}
 				subject_ids.each do |subject_id|
 					path = "#{protocol_path}/#{subject_id}#{@preprocessed_tracer_path}"
 					if Dir.exists?(path)
