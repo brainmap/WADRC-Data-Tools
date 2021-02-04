@@ -222,6 +222,7 @@ end
 #   `code_version` varchar(50) DEFAULT NULL,
 #   `created_at` datetime DEFAULT NULL,
 #   `processed_at` datetime DEFAULT NULL,
+#   `comment` varchar(1000) DEFAULT NULL,
 #   PRIMARY KEY (`id`),
 #   KEY `petscan_id` (`petscan_id`)
 # );
@@ -244,6 +245,7 @@ end
 #   `code_version` varchar(50) DEFAULT NULL,
 #   `created_at` datetime DEFAULT NULL,
 #   `processed_at` datetime DEFAULT NULL,
+#   `comment` varchar(1000) DEFAULT NULL,
 #   PRIMARY KEY (`id`),
 #   KEY `petscan_id` (`petscan_id`)
 # );
@@ -266,6 +268,7 @@ end
 #   `code_version` varchar(50) DEFAULT NULL,
 #   `created_at` datetime DEFAULT NULL,
 #   `processed_at` datetime DEFAULT NULL,
+#   `comment` varchar(1000) DEFAULT NULL,
 #   PRIMARY KEY (`id`),
 #   KEY `petscan_id` (`petscan_id`)
 # );
@@ -288,6 +291,7 @@ end
 #   `code_version` varchar(50) DEFAULT NULL,
 #   `created_at` datetime DEFAULT NULL,
 #   `processed_at` datetime DEFAULT NULL,
+#   `comment` varchar(1000) DEFAULT NULL,
 #   PRIMARY KEY (`id`),
 #   KEY `petscan_id` (`petscan_id`)
 # );
