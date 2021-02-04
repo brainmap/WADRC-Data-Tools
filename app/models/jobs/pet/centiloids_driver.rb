@@ -127,7 +127,18 @@ class Jobs::Pet::CentiloidsDriver < Jobs::BaseJob
 							end
 						end
 					else
-						self.exclusions << {:protocol => codename, :subject => subject_id, :message => 'paths not ok'}
+						# it would be helpful to know how the paths are bad. 
+						path_parts = @preprocessed_tracer_path.split("/")[1..-1]
+						path = "#{protocol_path}/#{subject_id}"
+						last_part = path_parts.shift
+
+						while path_parts.count > 0 and Dir.exists? path + "/" + last_part
+							path += "/" + last_part
+							last_part = path_parts.shift
+						end
+						# now, path should exist, and be the deepest existing path we can find.
+
+						self.exclusions << {:protocol => codename, :subject => subject_id, :message => 'paths not ok', :last_existing_path => path}
 					end
 				end
 			end
