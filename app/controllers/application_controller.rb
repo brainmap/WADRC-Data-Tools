@@ -138,6 +138,8 @@ def run_search_ids
         @tables.each do |tab|
           if tab == "image_datasets"
             sql = sql +" AND "+tab+".visit_id = visits.id  "
+          elsif tab =~ /image_dataset_metadata/
+            sql = sql +" AND "+tab+".image_dataset_id = image_datasets.id"
           else
             sql = sql +" AND "+tab+".appointment_id = appointments.id  "
           end

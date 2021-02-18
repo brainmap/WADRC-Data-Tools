@@ -94,6 +94,13 @@ edit_count = edit_count -1
       <th><%= f.label :scan_date_after %></th>
       <td><%= f.date_select :earliest_timestamp, :start_year => 1995, :include_blank => true %></td>
     </tr>
+    <tr>
+      <th><%= f.label :metadata %></th>
+      <td>
+        <%= f.text_field :metadata_label, id: 'metadata_label', :placeholder => '(0000,0000) Private' %>
+        <%= f.text_field :metadata_value, id: 'metadata_value' %>
+      </td>
+    </tr>
   </table>
 
   
@@ -165,4 +172,36 @@ edit_count = edit_count -1
     <% end %>
   </tbody>
 </table>
+
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+    $( "#metadata_label" ).autoComplete({
+      source: function( term, suggest ) {
+        $.ajax({
+          url: '<%= current_user.api_key.api_url %>/api/image_dataset_metadata_labels/',
+          dataType: "json",
+          data: {
+            label_filter: $('#metadata_label').val()
+          },
+          success: function( data ) {
+            var matches = [];
+            // console.log(data.data.length);
+            for (i=0; i<data.data.length; i++) {
+              matches.push(data.data[i]["display_label"]);
+            }
+            // console.log(matches);
+            suggest( matches );
+          },
+          beforeSend: function (request) {
+            request.setRequestHeader("Authorization","Bearer <%= current_user.api_key.access_token %>")
+          }
+        });
+      }
+    });
+
+});
+
+</script>
 <%end%>

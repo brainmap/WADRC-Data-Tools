@@ -292,6 +292,27 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
              @conditions.push(condition)
              params["search_criteria"] = params["search_criteria"] +",  age at visit between "+params[:ids_search][:min_age]+" and "+params[:ids_search][:max_age]
            end
+
+          if !params[:ids_search][:metadata_label].blank? && !params[:ids_search][:metadata_value].blank?
+
+              address = params[:ids_search][:metadata_label].split(" ").first.gsub('(','').gsub(')','')
+              underscore = "_#{address.gsub(',','_')}"
+
+              if underscore =~ /^_001/
+                condition = "image_dataset_metadata_001.#{underscore} like '%#{params[:ids_search][:metadata_value]}%'"
+              elsif underscore =~ /^_002/
+                condition = "image_dataset_metadata_002.#{underscore} like '%#{params[:ids_search][:metadata_value]}%'"
+              elsif underscore =~ /^_004/
+                condition = "image_dataset_metadata_004.#{underscore} like '%#{params[:ids_search][:metadata_value]}%'"
+              else
+                condition = "image_dataset_metadata_other.#{underscore} like '%#{params[:ids_search][:metadata_value]}%'"
+              end
+
+                @conditions.push(condition)
+               params["search_criteria"] = params["search_criteria"] +", #{params[:ids_search][:metadata_label]} contains '#{params[:ids_search][:metadata_value]}'"
+
+          end
+
            # trim leading ","
            params["search_criteria"] = params["search_criteria"].sub(", ","")
 
@@ -338,9 +359,36 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
                             "LEFT JOIN users on image_comments.user_id = users.id"] # left join needs to be in sql right after the parent table!!!!!!!   
                             # "LEFT JOIN employees on petscans.enteredpetscanwho = employees.id", 
               # SHOULD  this be in the image_comments left joins???? LEFT JOIN users on image_comments.user_id = users.id             
+              
 
              end
+
            @tables =['visits','image_datasets'] # trigger joins --- vgroups and appointments by default
+            if !params[:ids_search][:metadata_label].blank? && !params[:ids_search][:metadata_value].blank?
+
+              puts "metadata -> "
+
+                address = params[:ids_search][:metadata_label].split(" ").first.gsub('(','').gsub(')','')
+                underscore = "_#{address.gsub(',','_')}"
+
+                if underscore =~ /^_001/
+                  @tables << "image_dataset_metadata_001"
+                elsif underscore =~ /^_002/
+                  @tables << "image_dataset_metadata_002"
+                elsif underscore =~ /^_004/
+                  @tables << "image_dataset_metadata_004"
+                else
+                  @tables << "image_dataset_metadata_other"
+                end
+
+                puts "underscore is #{underscore} and tables is #{@tables}"
+            else
+              puts "I guess there wasn't any metadata. :("
+              puts "-> (#{params[:ids_search][:metadata_label]})"
+              puts "-> (#{params[:ids_search][:metadata_value]})"
+            end
+
+
            @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
            #@results = self.run_search   # in the application controller
            @results = self.run_search_ids    # in the application controller. --- need to do some extra pop/push
@@ -513,7 +561,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
        @image_dataset = ImageDataset.find(params[:id])
     end
    def image_dataset_params
-          params.require(:image_dataset).permit(:lock_default_scan_flag_parse,:scanned_file,:slices_per_volume,:bold_reps,:rep_time,:glob,:visit_id,:timestamp,:path,:series_description,:rmr,:thumbnail_file_name,:thumbnail_content_type,:mri_coil_name,:mri_station_name, :mri_manufacturer_model_name,:lock_default_scan_flag,:use_as_default_scan_flag,:coil_channel_number,:do_not_share_scans_flag,:image_uid,:dicom_taghash,:dicom_series_uid,:thumbnail_updated_at,:thumbnail_file_size,:id,:dcm_file_count,:thumbnail,:thumb)
+          params.require(:image_dataset).permit(:lock_default_scan_flag_parse,:scanned_file,:slices_per_volume,:bold_reps,:rep_time,:glob,:visit_id,:timestamp,:path,:series_description,:rmr,:thumbnail_file_name,:thumbnail_content_type,:mri_coil_name,:mri_station_name, :mri_manufacturer_model_name,:lock_default_scan_flag,:use_as_default_scan_flag,:coil_channel_number,:do_not_share_scans_flag,:image_uid,:dicom_taghash,:dicom_series_uid,:thumbnail_updated_at,:thumbnail_file_size,:id,:dcm_file_count,:thumbnail,:thumb, :metadata_label, :metadata_value)
    end  
    def ids_search_params
           params.require(:ids_search).permit!
