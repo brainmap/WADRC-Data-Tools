@@ -52,8 +52,19 @@ class ImageDataset < ActiveRecord::Base
   has_one :metadata004, class_name: "ImageDatasetMetadataFour"
   has_one :metadataOther, class_name: "ImageDatasetMetadataOther"
 
-  delegate :filter_mode, to: :metadata004, allow_nil: true
+  delegate :body_part, to: :metadata001, allow_nil: true
+  delegate :scanning_sequence, to: :metadata001, allow_nil: true
+  delegate :sequence_variant, to: :metadata001, allow_nil: true
   delegate :scan_options, to: :metadata001, allow_nil: true
+  delegate :mr_acquisition_type, to: :metadata001,allow_nil: true
+  delegate :protocol_name, to: :metadata001, allow_nil: true
+  delegate :receive_coil_name, to: :metadata001, allow_nil: true
+  delegate :filter_mode, to: :metadata004, allow_nil: true
+  
+  delegate :station_name, to: :metadata004, allow_nil: true
+  delegate :study_description, to: :metadata004, allow_nil: true
+  #delegate :series_description, to: :metadata004, :allow_nil
+
 
   def pure_corrected?
     !!(((filter_mode =~ /p+/) or (filter_mode =~ /P+/)) and (scan_options =~ /FILTERED_GEMS/))
