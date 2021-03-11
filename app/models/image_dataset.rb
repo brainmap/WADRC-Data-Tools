@@ -45,6 +45,19 @@ class ImageDataset < ActiveRecord::Base
  #     attr_unsearchable :dicom_taghash    #   hashed out cai 20130926 -- used in old search ? meta_search, meta_where
   
   delegate :participant, :to => :visit
+
+
+  has_one :metadata001, class_name: "ImageDatasetMetadataOne"
+  has_one :metadata002, class_name: "ImageDatasetMetadataTwo"
+  has_one :metadata004, class_name: "ImageDatasetMetadataFour"
+  has_one :metadataOther, class_name: "ImageDatasetMetadataOther"
+
+  delegate :filter_mode, to: :metadata004, allow_nil: true
+  delegate :scan_options, to: :metadata001, allow_nil: true
+
+  def pure_corrected?
+    !!(((filter_mode =~ /p+/) or (filter_mode =~ /P+/)) and (scan_options =~ /FILTERED_GEMS/))
+  end
   
   # Note: As of 8/24/2011, default excludes (:except => :id) are not working.
   # Use the Class Constant ImageDataset::EXCLUDED_REPORT_ATTRIBUTES instead.
