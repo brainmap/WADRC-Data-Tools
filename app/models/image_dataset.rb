@@ -61,9 +61,8 @@ class ImageDataset < ActiveRecord::Base
   delegate :receive_coil_name, to: :metadata001, allow_nil: true
   delegate :filter_mode, to: :metadata004, allow_nil: true
   
-  delegate :station_name, to: :metadata004, allow_nil: true
-  delegate :study_description, to: :metadata004, allow_nil: true
-  #delegate :series_description, to: :metadata004, :allow_nil
+  delegate :mri_station_name, to: :metadataOther, allow_nil: true
+  delegate :study_description, to: :metadataOther, allow_nil: true
 
 
   def pure_corrected?

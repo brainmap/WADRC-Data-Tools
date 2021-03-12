@@ -11,17 +11,32 @@
 # and each of the twp parts of the form elements
 %>
 <%
- @questionform_questions = QuestionformQuestion.where(" questionform_id = ?",params[:id]).sort_by(&:display_order)
-   params["q_data_form_id"] = "" #"17"
-  if params["q_data_form_id"].length > 0 
-   @q_data_form = QDataForm.find(params["q_data_form_id"])
+ params[:id] = @questionform.id.to_s
+      # was passing in @scanprocedures   but need @scanprocedures_ids 
+@scanprocedure_ids = []
+@scanprocedures.each do |sp|
+	@scanprocedure_ids.push(sp.id)
+end
+ @questionform_questions = QuestionformQuestion.where("( question_id not in (select question_id from question_scan_procedures)
+                                                           or (question_id in 
+                                                                   (select question_id from question_scan_procedures where  include_exclude ='include' and scan_procedure_id in (?))
+                                                                and
+                                                             question_id not in 
+                                        (select question_id from question_scan_procedures where include_exclude ='exclude' and scan_procedure_id in (?)))) and (questionform_id = ?)",
+                                                   @scanprocedure_ids,@scanprocedure_ids,params[:id]).sort_by(&:display_order)
+
+   puts "id= "+params[:id] 
+  if !@q_data_form.blank?
+   #@q_data_form = QDataForm.find(params[:q_data_form_id])
   else
-   @q_data_form = QDataForm.new
+    # THIS WILL FAIL IF NO q_data_form already exisit
+   @q_data_form = QDataForm.new 
   end
+ params[:q_data_form_id] = @q_data_form.id.to_s
+puts "q_data_form_id="+params[:q_data_form_id]
 # need front porch --- need consitant participant with enrollment with appointment with visit -- derive other values from one selection
 # just display -- rederive, even with hidden field
 %>
-<b><%= Questionform.find(params[:id]).long_description%></b><br>
 <%= form_tag( "/questionform/question_enter",:url => { :controller=>"questionform",:action => "question_enter" } ,  :html => { :id => params[:id] }) do |f| %>
 <!-- THIS WILL CHANGE TO questionform_id   -->
 	<%= hidden_field_tag(:questionform_id, params[:id]) %>
@@ -38,25 +53,12 @@
      value_link_array = [] %>
 <%    results.each do |vl|  
 	  value_link_array << vl.try(:to_s)
-     if vl.try(:to_s) == "participant"  or vl.try(:to_s) == '["participant"]'  %> Participant: 
-	  	<%= collection_select "value_link","participant_id", Participant.all,
-	    	:id, :reggieid, options={ :selected => @q_data_form.participant_id.to_i,:include_blank => "Select a participant" } %>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   <% elsif vl.try(:to_s) == "visit"  or  vl.try(:to_s) == '["visit"]'  %> Visit: 
-			<%= collection_select "value_link","visit_id", Visit.all.sort_by(&:rmr_scan_date),
-				:id, :rmr_scan_date, {:include_blank => "Select a visit", :selected => @q_data_form.visit_id } %>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   <% elsif vl.try(:to_s) == "appointment"  or vl.try(:to_s) == '["appointment"]'  %><!-- Appointment: 
-			<%= collection_select "value_link","appointment_id", Visit.all.sort_by(&:rmr_scan_date),
-				:id, :rmr_scan_date, {:include_blank => "Select an appointment", :selected => @q_data_form.appointment_id } %>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   -->
-   <% elsif vl.try("to_s") == "enrollment" or vl.try("to_s") == '["enrollment"]'   %> Enrollment: 
-			<%= collection_select "value_link","enrollment_id", Enrollment.all.sort_by(&:enumber),
-				:id, :enumber, {:include_blank => "Select an enrollment", :selected => @q_data_form.enrollment_id } %>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;			
-	<% elsif  vl.try("to_s") == "scan_procedure"  or  vl.try("to_s") == '["scan_procedure"]'  %> Scan Procedure: 
-			<%= collection_select "value_link","scan_procedure_id", ScanProcedure.all.sort_by(&:display_alias),
-				:id, :display_alias, {:include_blank => "Select a scan_procedure", :selected => @q_data_form.scan_procedure_id } %>
+     if vl.try(:to_s) == "participant"  or vl.try(:to_s) == '["participant"]'  %> 
+             <%= hidden_field_tag("value_1[-1]","") %> <%= hidden_field_tag("value_link[participant_id]",params[:participant_id]) %>
+   <% elsif vl.try(:to_s) == "visit"  or vl.try(:to_s) == '["visit"]' %> <%= hidden_field_tag("value_link[visit_id]",params[:visit_id]) %>
+   <% elsif vl.try(:to_s) == "appointment"  or vl.try(:to_s) == '["appointment"]'  %><%= hidden_field_tag("value_link[appointment_id]",@appointment.id.to_s) %>
+   <% elsif vl.try("to_s") == "enrollment" or vl.try("to_s") == '["enrollment"]'    %> <%= hidden_field_tag("value_link[enrollment_id]",params[:enrollment_id]) %>			
+	<% elsif  vl.try("to_s") == "scan_procedure" or vl.try("to_s") == '["scan_procedure"]'  %> <%= hidden_field_tag("value_link[scan_procedure_id]",params[:scan_procedure_id]) %>
 <%	  end %>
   <% end %>
 <%    # scan_procedure id --- access control, limit participants, visits, etc%>
@@ -66,17 +68,20 @@
 	@question = Question.find(qfq.question_id)
 			# pass @question to draw_question
 			params["q_data_id["+qfq.question_id.to_s+"]"] = "" #"33" 
-		  if params["q_data_form_id"].length > 0  # get this q_data_form_id / question_id ==> assuming no duplicate question_id in one form
-			sql = "select distinct q_data.id from q_data where q_data_form_id ="+params["q_data_form_id"]+" and 
+		  if !@q_data_form.blank?  # get this q_data_form_id / question_id ==> assuming no duplicate question_id in one form
+			sql = "select distinct q_data.id from q_data where q_data_form_id ="+@q_data_form.id.to_s+" and 
 			       q_data.question_id  ="+@question.id.to_s
 		    connection = ActiveRecord::Base.connection();
 		    results = connection.execute(sql)
 		    results.each do |id|
 				params["q_data_id["+qfq.question_id.to_s+"]"] =  id.try(:to_s)
+				params["q_data_id["+qfq.question_id.to_s+"]"]= params["q_data_id["+qfq.question_id.to_s+"]"].gsub("[","").gsub("]","")
 			end
 		  end	
-		  if params["q_data_id["+qfq.question_id.to_s+"]"].length > 0 
-		   @q_data = QDatum.find(params["q_data_id["+qfq.question_id.to_s+"]"])
+		  # added check to see if q_data exisits - cai 20131003 -- not sure how a q_data didn't get made
+		  if params["q_data_id["+qfq.question_id.to_s+"]"].length > 0 and QDatum.exists?(params["q_data_id["+qfq.question_id.to_s+"]"])
+		   #@q_data = QDatum.find(params["q_data_id["+qfq.question_id.to_s+"]"])
+            @q_data = QDatum.find(params["q_data_id["+qfq.question_id.to_s+"]"])
 		  else
 		   @q_data = QDatum.new
 		   @q_data.value_1 = @question.default_val_1
@@ -93,7 +98,7 @@
 		<B><%=  @question.heading_1.try(:html_safe) %></B> <br>
 	   <% end %>
 	  <%if !@question.phrase_a_1.blank? %>
-		<%=  @question.phrase_a_1.try(:html_safe) %>  
+		<b><%=  @question.phrase_a_1.try(:html_safe) %></b>  
 	  <% end %>	
 	  <%if !@question.phrase_b_1.blank? %>
 		<%=  @question.phrase_b_1.try(:html_safe) %>  
@@ -105,9 +110,9 @@
 			end
 		 
 	      if @question.value_type_1 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
-	         <%= draw_text_area(@question.id,"1","60x7", @question.default_val_1,@q_data.value_1,@question.required_y_n_1) %>
+	         <%= RedCloth.new(@q_data.value_1.blank? ? "" : @q_data.value_1).to_html.html_safe %>
 	      <% elsif @question.value_type_1 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
-	         <%= draw_text_area(@question.id,"1","60x7", @question.default_val_1,@q_data.value_1,@question.required_y_n_1) %>
+	        <%= RedCloth.new(@q_data.value_1.blank? ? "" : @q_data.value_1).to_html.html_safe %>
 		<% elsif @question.value_type_1 == "dropdown"
 		    if @question.ref_table_a_1 == "lookup_refs"  ## use ref_table_b_1 %>
 				<%= collection_select "value_1",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_1).sort_by(&:display_order),
@@ -116,25 +121,57 @@
 			  	<%= collection_select "value_1",@question.id.to_s, ((@question.ref_table_a_1).constantize).all.sort_by(&:description),
 			    	:id, :description, {:include_blank => @question.prompt_1,:selected => (@q_data.value_1 or @question.default_val_1)} %>			
 		     <%   end   %>
+			 <% elsif @question.value_type_1 == "date"  
+                    if !@q_data.value_1.blank?
+                          v_tmp_date = Date.strptime(@q_data.value_1,'%Y-%m-%d') %>
+                          <%= date_select "value_1",@question.id.to_s+"][", :default => v_tmp_date %>
+                   <% else %>
+                    	<%= date_select "value_1",@question.id.to_s+"][", :prompt => "" %>
+                    <% end %> 
+			<% elsif @question.value_type_1 == "date_dob"  
+	                    if !@q_data.value_1.blank?
+	                          v_tmp_date = Date.strptime(@q_data.value_1,'%Y-%m-%d') %>
+	                          <%= date_select "value_1",@question.id.to_s+"][", :default => v_tmp_date , :start_year => Time.now.year - 100,:end_year => Time.now.year%>
+	                   <% else %>
+	                    	<%= date_select "value_1",@question.id.to_s+"][", :prompt => "", :start_year => Time.now.year - 100,:end_year => Time.now.year %>
+	                    <% end %>
+			        
+             <% elsif @question.value_type_1 == "date_time"  
+                    if !@q_data.value_1.blank?
+                          v_tmp_datetime = DateTime.strptime(@q_data.value_1,'%Y-%m-%d-%H-%M') %>
+                          <%= datetime_select "value_1",@question.id.to_s+"][", :default => v_tmp_datetime  %>
+                   <% else %>
+                    	<%= datetime_select "value_1",@question.id.to_s+"][", :prompt => " "  %>
+                   <% end
+                    %>
+             <% elsif @question.value_type_1 == "time"                      
+                    if !@q_data.value_1.blank?
+                          v_tmp_time = Time.strptime(@q_data.value_1,'%H-%M') %>
+                          <%= time_select "value_1",@question.id.to_s+"][", :default => v_tmp_time  %>
+                   <% else %>
+                    	<%= time_select "value_1",@question.id.to_s+"][", :prompt => " "  %>
+                   <% end
+                    %>
 		<% elsif @question.value_type_1 == "text_5"  %>
 			<% #question_id, value_number,size %>
-			<%= draw_text_field(@question.id,"1",5, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>
+			<%= @q_data.value_1 %>
 		<% elsif @question.value_type_1 == "text_10"  %>
 		<% #question_id, value_number,size %>
-		   <%= draw_text_field(@question.id,"1",10, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>	
+		   <%= @q_data.value_1 %>	
 		<% elsif @question.value_type_1 == "text_20"  %>
-		   <%= draw_text_field(@question.id,"1",20, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>	
+		   <%= @q_data.value_1 %>	
 		<% elsif @question.value_type_1 == "text_30"  %>
-		   <%= draw_text_field(@question.id,"1",30, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>	
+		   <%= @q_data.value_1 %>	
 		<% elsif @question.value_type_1 == "text_50"  %>
-		   <%= draw_text_field(@question.id,"1",50, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>
+		   <%= @q_data.value_1 %>
 		<% elsif @question.value_type_1 == "text_70"  %>
-		   <%= draw_text_field(@question.id,"1",70, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>	
+		   <%= @q_data.value_1 %>	
 		<% elsif @question.value_type_1 == "text_90"  %>
-		   <%= draw_text_field(@question.id,"1",90, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>	
+		   <%= @q_data.value_1 %>
 		<% elsif @question.value_type_1 == "date"  %>
-			<% #question_id, value_number,size   NEED TO CHANGE!!!%>
-			<%= draw_text_field(@question.id,"1",10, @question.default_val_1,@q_data.value_1,@question.js_1,@question.required_y_n_1) %>							
+		   <%= @q_data.value_1 %> 
+		<% elsif @question.value_type_1 == "date_dob"  %>
+		   <%= @q_data.value_1 %>   							
 		<% elsif @question.value_type_1 == "checkbox_1_col"  %>
 		   <% if @question.ref_table_a_1 == "lookup_refs" 
 			     sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_1+"' order by display_order"
@@ -142,14 +179,14 @@
               results = connection.execute(sql)
 			    %>
 	          <% results.each do |theme| %>
-                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0],  checked=val_array.include?( theme[0].to_s) %> 
+                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0],   checked=val_array.include?( theme[0].to_s) %> 
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id,  checked=val_array.include?( theme.id.to_s) %>
+                <br><%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id,   checked=val_array.include?( theme.id.to_s) %>
 	              <%= (theme.description) %>
 	          <% end %>
 	        <% end %>	
@@ -160,14 +197,14 @@
              results = connection.execute(sql)
 			    %>
 	          <% results.each do |theme| %>
-               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0], checked=val_array.include?( theme[0].to_s) %>
+               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme[0],  checked=val_array.include?( theme[0].to_s) %>
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id, checked=val_array.include?( theme.id.to_s) %>
+               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_1['+@question.id.to_s+"][]", theme.id,  checked=val_array.include?( theme.id.to_s) %>
 	              <%= (theme.description) %>
 	          <% end %>
 	        <% end %>
@@ -178,14 +215,14 @@
                  results = connection.execute(sql)
 			    %>
 	          <% results.each do |theme| %>
-                   <br><%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme[0], @q_data.value_1.to_i  == theme[0] %>
+                   <br><%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme[0], @q_data.value_1.to_s  == theme[0] %>
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-                   <br><%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme.id,  (@q_data.value_1.to_i == theme.id.to_i)?  true:false %>
+                   <br><%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme.id,  (@q_data.value_1.to_s == theme.id.to_s)?  true:false %>
 	              <%= (theme.description) %>
 	          <% end %>
 	        <% end %>		
@@ -197,27 +234,27 @@
 			    %>
 	          <% results.each do |theme| %>
 	               
-                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme[0], @q_data.value_1.to_i == theme[0] %>
+                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme[0], @q_data.value_1.to_s == theme[0] %>
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme.id,  (@q_data.value_1.to_i == theme.id.to_i)?  true:false    %> <%= theme.description%>
+                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme.id,  (@q_data.value_1.to_s == theme.id.to_s)?  true:false    %> <%= theme.description%>
 	          <% end %>
 	        <% end %>		
 		<%  end %>		
 	  <% end %>
 	  <%if !@question.phrase_c_1.blank? %>
-		<%=  @question.phrase_c_1 %>  
+		<%=  @question.phrase_c_1.try(:html_safe) %>  
 	  <% end %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	  <%if !@question.heading_2.blank? %>
 		<B><%=  @question.heading_2.try(:html_safe) %></B> <br>
 	   <% end %>
 	  <%if !@question.phrase_a_2.blank? %>
-		<%=  @question.phrase_a_2.try(:html_safe) %>  
+		<b><%=  @question.phrase_a_2.try(:html_safe) %></b>  
 	  <% end %>	
 	  <%if !@question.phrase_b_2.blank? %>
 		<%=  @question.phrase_b_2.try(:html_safe) %>  
@@ -228,9 +265,9 @@
 				val_array = @q_data.value_2.split(',')
 			end
 		     if @question.value_type_2 == "textarea"   # walk thru each value_type --- get each disoplay value  %>			
-	         <%= draw_text_area(@question.id,"2","60x7", @question.default_val_2,@q_data.value_2,@question.required_y_n_2) %>
+	         <%= RedCloth.new(@q_data.value_2.blank? ? "" : @q_data.value_2).to_html.html_safe %>
 	        <% elsif @question.value_type_2 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
-	         <%= draw_text_area(@question.id,"2","60x7", @question.default_val_2,@q_data.value_2,@question.required_y_n_2) %>
+	         <%= RedCloth.new(@q_data.value_2.blank? ? "" : @q_data.value_2).to_html.html_safe %>
 			<% elsif @question.value_type_2 == "dropdown"
 			    if @question.ref_table_a_2 == "lookup_refs"  ## use ref_table_b_2 %>
 					<%= collection_select "value_2",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_2).sort_by(&:display_order),
@@ -239,23 +276,56 @@
 				  	<%= collection_select "value_2",@question.id.to_s, ((@question.ref_table_a_2).constantize).all.sort_by(&:description),
 				    	:id, :description, {:include_blank => @question.prompt_2,:selected => (@q_data.value_2 or @question.default_val_2)} %>
 			     <%   end   %>
+
+			 <% elsif @question.value_type_2 == "date"  
+                    if !@q_data.value_2.blank?
+                          v_tmp_date = Date.strptime(@q_data.value_2,'%Y-%m-%d') %>
+                          <%= date_select "value_2",@question.id.to_s+"][", :default => v_tmp_date %>
+                   <% else %>
+                    	<%= date_select "value_2",@question.id.to_s+"][", :prompt => "" %>
+                    <% end %>
+			<% elsif @question.value_type_2 == "date_dob"  
+	                    if !@q_data.value_2.blank?
+	                          v_tmp_date = Date.strptime(@q_data.value_2,'%Y-%m-%d') %>
+	                          <%= date_select "value_2",@question.id.to_s+"][", :default => v_tmp_date, :start_year => Time.now.year - 100,:end_year => Time.now.year %>
+	                   <% else %>
+	                    	<%= date_select "value_2",@question.id.to_s+"][", :prompt => "", :start_year => Time.now.year - 100,:end_year => Time.now.year %>
+	                    <% end %>			        
+             <% elsif @question.value_type_2 == "date_time"  
+                    if !@q_data.value_2.blank?
+                          v_tmp_datetime = DateTime.strptime(@q_data.value_2,'%Y-%m-%d-%H-%M') %>
+                          <%= datetime_select "value_2",@question.id.to_s+"][", :default => v_tmp_datetime  %>
+                   <% else %>
+                    	<%= datetime_select "value_2",@question.id.to_s+"][", :prompt => " "  %>
+                   <% end
+                    %>
+             <% elsif @question.value_type_2 == "time"                      
+                    if !@q_data.value_2.blank?
+                          v_tmp_time = Time.strptime(@q_data.value_2,'%H-%M') %>
+                          <%= time_select "value_2",@question.id.to_s+"][", :default => v_tmp_time  %>
+                   <% else %>
+                    	<%= time_select "value_2",@question.id.to_s+"][", :prompt => " "  %>
+                   <% end
+                    %>
 			<% elsif @question.value_type_2 == "text_5"  %>
 						<% #question_id, value_number,size %>
-				<%= draw_text_field(@question.id,"2",5, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>
+				<%= @q_data.value_2 %>
 			<% elsif @question.value_type_2 == "text_10"  %>
-			  <%= draw_text_field(@question.id,"2",10, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>	
+			  <%= @q_data.value_2 %>	
 			<% elsif @question.value_type_2 == "text_20"  %>
-			  <%= draw_text_field(@question.id,"2",20, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>	
+			  <%= @q_data.value_2 %>	
 			<% elsif @question.value_type_2 == "text_30"  %>
-			   <%= draw_text_field(@question.id,"2",30, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>
+			   <%= @q_data.value_2 %>
 			<% elsif @question.value_type_2 == "text_50"  %>
-			   <%= draw_text_field(@question.id,"2",50, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>
+			   <%= @q_data.value_2 %>
 			<% elsif @question.value_type_2 == "text_70"  %>
-			   <%= draw_text_field(@question.id,"2",70, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>	
+			   <%= @q_data.value_2 %>	
 			<% elsif @question.value_type_2 == "text_90"  %>
-			   <%= draw_text_field(@question.id,"2",90, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>
+			   <%= @q_data.value_2 %>
 			<% elsif @question.value_type_2 == "date"  %>
-			   <%= draw_text_field(@question.id,"2",10, @question.default_val_2,@q_data.value_2,@question.js_2,@question.required_y_n_2) %>
+			   <%= @q_data.value_2 %>  
+			<% elsif @question.value_type_2 == "date_dob"  %>
+			   <%= @q_data.value_2 %>
 			<% elsif @question.value_type_2 == "checkbox_1_col"  %>
 		   		<% if @question.ref_table_a_2 == "lookup_refs" 
 			     	sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_2+"' order by display_order"
@@ -263,14 +333,14 @@
               		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme[0],  val_array.include?( theme[0].to_s) %>
+                		<br><%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme[0],   checked=val_array.include?( theme[0].to_s) %>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_2).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme.id,  val_array.include?( theme.id.to_s) %>
+                		<br><%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme.id,   checked=val_array.include?( theme.id.to_s) %>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>
@@ -281,14 +351,14 @@
            		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme[0],  val_array.include?( theme[0].to_s) %>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme[0],   checked=val_array.include?( theme[0].to_s) %>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_2).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme.id,  val_array.include?( theme.id.to_s) %>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_2['+@question.id.to_s+"][]", theme.id,   checked=val_array.include?( theme.id.to_s) %>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>
@@ -299,14 +369,14 @@
 	                 results = connection.execute(sql)
 				    %>
 		          <% results.each do |theme| %>
-	                   <br><%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme[0], @q_data.value_2.to_i  == theme[0] %>
+	                   <br><%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme[0], @q_data.value_2.to_s  == theme[0] %>
 		              <%= theme[1].humanize %>
 		          <% end %>
 			   <% else 
 			         results = ((@question.ref_table_a_2).constantize).all.sort_by(&:description)
 			       %>
 		          <% results.each do |theme| %>
-	                   <br><%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme.id,  (@q_data.value_2.to_i == theme.id.to_i)?  true:false %>
+	                   <br><%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme.id,  (@q_data.value_2.to_s == theme.id.to_s)?  true:false %>
 		              <%= (theme.description) %>
 		          <% end %>
 		        <% end %>						
@@ -317,28 +387,28 @@
 	                 results = connection.execute(sql)
 				    %>
 		          <% results.each do |theme| %>
-	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme[0], @q_data.value_2.to_i  == theme[0] %>
+	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme[0], @q_data.value_2.to_s  == theme[0] %>
 		              <%= theme[1].humanize %>
 		          <% end %>
 			   <% else 
 			         results = ((@question.ref_table_a_2).constantize).all.sort_by(&:description)
 			       %>
 		          <% results.each do |theme| %>
-	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme.id,  (@q_data.value_2.to_i == theme.id.to_i)?  true:false %>
+	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme.id,  (@q_data.value_2.to_s == theme.id.to_s)?  true:false %>
 		              <%= (theme.description) %>
 		          <% end %>
 		        <% end %>				
 			<%  end %>
 		  <% end %>	
 	  <%if !@question.phrase_c_2.blank? %>
-		<%=  @question.phrase_c_2 %>  
+		<%=  @question.phrase_c_2.try(:html_safe) %>  
 	  <% end %>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	  <%if !@question.heading_3.blank? %>
 		<B><%=  @question.heading_3.try(:html_safe) %></B> <br>
 	   <% end %>
 	  <%if !@question.phrase_a_3.blank? %>
-		<%=  @question.phrase_a_3.try(:html_safe) %>  
+		<b><%=  @question.phrase_a_3.try(:html_safe) %> </b> 
 	  <% end %>	
 	  <%if !@question.phrase_b_3.blank? %>
 		<%=  @question.phrase_b_3.try(:html_safe) %>  
@@ -350,9 +420,9 @@
 				val_array = @q_data.value_3.split(',')
 			end
 		      if @question.value_type_3 == "textarea"   # walk thru each value_type --- get each disoplay value  %>
-	           <%= draw_text_area(@question.id,"3","60x7", @question.default_val_3,@q_data.value_3,@question.required_y_n_3) %>
+	           <%= RedCloth.new(@q_data.value_3.blank? ? "" : @q_data.value_3).to_html.html_safe %>
 	        <% elsif @question.value_type_3 == "textarea_3x60"   # walk thru each value_type --- get each disoplay value  %>			
-	         <%= draw_text_area(@question.id,"3","60x7", @question.default_val_3,@q_data.value_3,@question.required_y_n_3) %>
+	         <%= RedCloth.new(@q_data.value_3.blank? ? "" : @q_data.value_3).to_html.html_safe %>
 			<% elsif @question.value_type_3 == "dropdown"
 			    if @question.ref_table_a_3 == "lookup_refs"  ## use ref_table_b_3 %>
 					<%= collection_select "value_3",@question.id.to_s, LookupRef.where("label = ?",@question.ref_table_b_3).sort_by(&:display_order),
@@ -361,22 +431,57 @@
 				  	<%= collection_select "value_3",@question.id.to_s, ((@question.ref_table_a_3).constantize).all.sort_by(&:description),
 				    	:id, :description, {:include_blank => @question.prompt_3,:selected => (@q_data.value_3 or @question.default_val_3)} %>
 			     <%   end   %>
+
+			 <% elsif @question.value_type_3 == "date"  
+                    if !@q_data.value_3.blank?
+                          v_tmp_date = Date.strptime(@q_data.value_3,'%Y-%m-%d') %>
+                          <%= date_select "value_3",@question.id.to_s+"][", :default => v_tmp_date %>
+                   <% else %>
+                    	<%= date_select "value_3",@question.id.to_s+"][", :prompt => "" %>
+                    <% end %>    
+			 <% elsif @question.value_type_3 == "date_dob"  
+	                    if !@q_data.value_3.blank?
+	                          v_tmp_date = Date.strptime(@q_data.value_3,'%Y-%m-%d') %>
+	                          <%= date_select "value_3",@question.id.to_s+"][", :default => v_tmp_date , :start_year => Time.now.year - 100,:end_year => Time.now.year%>
+	                   <% else %>
+	                    	<%= date_select "value_3",@question.id.to_s+"][", :prompt => "" , :start_year => Time.now.year - 100,:end_year => Time.now.year%>
+	                    <% end %>
+			        
+             <% elsif @question.value_type_3 == "date_time"  
+                    if !@q_data.value_3.blank?
+                          v_tmp_datetime = DateTime.strptime(@q_data.value_3,'%Y-%m-%d-%H-%M') %>
+                          <%= datetime_select "value_3",@question.id.to_s+"][", :default => v_tmp_datetime  %>
+                   <% else %>
+                    	<%= datetime_select "value_3",@question.id.to_s+"][", :prompt => " "  %>
+                   <% end
+                    %>
+             <% elsif @question.value_type_3 == "time"                      
+                    if !@q_data.value_3.blank?
+                          v_tmp_time = Time.strptime(@q_data.value_3,'%H-%M') %>
+                          <%= time_select "value_3",@question.id.to_s+"][", :default => v_tmp_time  %>
+                   <% else %>
+                    	<%= time_select "value_3",@question.id.to_s+"][", :prompt => " "  %>
+                   <% end
+                    %>
+
 			<% elsif @question.value_type_3 == "text_5"  %>
-					 <%= draw_text_field(@question.id,"3",5, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>
+					 <%= @q_data.value_3 %>
 			<% elsif @question.value_type_3 == "text_10"  %>
-				   <%= draw_text_field(@question.id,"3",10, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>	
+				   <%= @q_data.value_3 %>	
 			<% elsif @question.value_type_3 == "text_20"  %>
-					<%= draw_text_field(@question.id,"3",20, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>	
+					<%= @q_data.value_3 %>	
 			<% elsif @question.value_type_3 == "text_30"  %>
-					<%= draw_text_field(@question.id,"3",30, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>	
+					<%= @q_data.value_3 %>	
 			<% elsif @question.value_type_3 == "text_50"  %>
-					<%= draw_text_field(@question.id,"3",50, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>
+					<%= @q_data.value_3 %>
 			<% elsif @question.value_type_3 == "text_70"  %>
-					<%= draw_text_field(@question.id,"3",70, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>	
+					<%= @q_data.value_3 %>	
 			<% elsif @question.value_type_3 == "text_90"  %>
-					<%= draw_text_field(@question.id,"3",90, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>
+					<%= @q_data.value_3 %>
 			<% elsif @question.value_type_3 == "date"  %>
-					<%= draw_text_field(@question.id,"3",10, @question.default_val_3,@q_data.value_3,@question.js_3,@question.required_y_n_3) %>
+					<%= @q_data.value_3 %>   
+		   <% elsif @question.value_type_3 == "date_dob"  %>
+							<%= @q_data.value_3 %>
 			<% elsif @question.value_type_3 == "checkbox_1_col"  %>
 		    	<% if @question.ref_table_a_3 == "lookup_refs" 
 			     	sql = "select ref_value, description from lookup_refs where label ='"+@question.ref_table_b_3+"' order by display_order"
@@ -384,14 +489,14 @@
               		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme[0],  val_array.include?( theme[0].to_s)%>
+                		<br><%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme[0],   checked=val_array.include?( theme[0].to_s)%>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_3).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-                		<br><%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme.id, val_array.include?( theme.id.to_s) %>
+                		<br><%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme.id,  checked=val_array.include?( theme.id.to_s) %>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>
@@ -402,14 +507,14 @@
            		results = connection.execute(sql)
 			    	%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme[0], val_array.include?( theme[0].to_s) %>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme[0],  checked=val_array.include?( theme[0].to_s) %>
 	              		<%= theme[1].humanize %>
 	          		<% end %>
 		   		<% else 
 		         	results = ((@question.ref_table_a_3).constantize).all.sort_by(&:description)
 		       		%>
 	          		<% results.each do |theme| %>
-             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme.id,  val_array.include?( theme.id.to_s)%>
+             		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= check_box_tag 'value_3['+@question.id.to_s+"][]", theme.id,   checked=val_array.include?( theme.id.to_s)%>
 	              		<%= (theme.description) %>
 	          		<% end %>
 	        	<% end %>          
@@ -420,14 +525,14 @@
 	                 results = connection.execute(sql)
 				    %>
 		          <% results.each do |theme| %>
-	                   <br><%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme[0], @q_data.value_3.to_i  == theme[0] %>
+	                   <br><%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme[0], @q_data.value_3.to_s  == theme[0] %>
 		              <%= theme[1].humanize %>
 		          <% end %>
 			   <% else 
 			         results = ((@question.ref_table_a_3).constantize).all.sort_by(&:description)
 			       %>
 		          <% results.each do |theme| %>
-	                   <br><%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme.id,  (@q_data.value_3.to_i == theme.id.to_i)?  true:false %>
+	                   <br><%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme.id,  (@q_data.value_3.to_s == theme.id.to_s)?  true:false %>
 		              <%= (theme.description) %>
 		          <% end %>
 		        <% end %>
@@ -438,24 +543,23 @@
 	                 results = connection.execute(sql)
 				    %>
 		          <% results.each do |theme| %>
-	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme[0], @q_data.value_3.to_i  == theme[0] %>
+	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme[0], @q_data.value_3.to_s  == theme[0] %>
 		              <%= theme[1].humanize %>
 		          <% end %>
 			   <% else 
 			         results = ((@question.ref_table_a_3).constantize).all.sort_by(&:description)
 			       %>
 		          <% results.each do |theme| %>
-	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme.id,  (@q_data.value_3.to_i == theme.id.to_i)?  true:false %>
+	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme.id,  (@q_data.value_3.to_s == theme.id.to_s)?  true:false %>
 		              <%= (theme.description) %>
 		          <% end %>
 		        <% end %>
 			<%  end %>
 		  <% end %>		
 	  <%if !@question.phrase_c_3.blank? %>
-		<%=  @question.phrase_c_3 %>  
+		<%=  @question.phrase_c_3.try(:html_safe) %>  
 	  <% end %>	  
 	</td></tr>	
 	<% end %>
 </table>
-<%= submit_tag("Enter") %>
 <% end %>

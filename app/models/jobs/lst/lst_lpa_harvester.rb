@@ -242,5 +242,11 @@ end
 # `created_at` datetime DEFAULT NULL,
 # `processed_at` datetime DEFAULT NULL,
 # `participant_id` int(11) DEFAULT NULL,
+
 #   PRIMARY KEY (`id`)
 #   );
+
+# alter table  cg_lst_lpa add column t2_prep varchar(5) default NULL;
+# alter table  cg_lst_lpa add column receive_coil_name varchar(20) default NULL;
+# alter table  cg_lst_lpa add column pure_corrected varchar(5) default NULL;
+# alter table  cg_lst_lpa add column station_name varchar(20) default NULL;

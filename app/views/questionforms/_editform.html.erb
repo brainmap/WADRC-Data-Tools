@@ -281,14 +281,14 @@ end
                  results = connection.execute(sql)
 			    %>
 	          <% results.each do |theme| %>
-                   <br><%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme[0], @q_data.value_1.to_i  == theme[0] %>
+                   <br><%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme[0], @q_data.value_1.to_s  == theme[0] %>
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-                   <br><%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme.id,  (@q_data.value_1.to_i == theme.id.to_i)?  true:false %>
+                   <br><%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme.id,  (@q_data.value_1.to_s == theme.id.to_s)?  true:false %>
 	              <%= (theme.description) %>
 	          <% end %>
 	        <% end %>		
@@ -300,14 +300,14 @@ end
 			    %>
 	          <% results.each do |theme| %>
 	               
-                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme[0], @q_data.value_1.to_i == theme[0] %>
+                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme[0], @q_data.value_1.to_s == theme[0] %>
 	              <%= theme[1].humanize %>
 	          <% end %>
 		   <% else 
 		         results = ((@question.ref_table_a_1).constantize).all.sort_by(&:description)
 		       %>
 	          <% results.each do |theme| %>
-                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme.id,  (@q_data.value_1.to_i == theme.id.to_i)?  true:false    %> <%= theme.description%>
+                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_1["+@question.id.to_s+"][]", theme.id,  (@q_data.value_1.to_s == theme.id.to_s)?  true:false    %> <%= theme.description%>
 	          <% end %>
 	        <% end %>		
 		<%  end %>		
@@ -434,14 +434,14 @@ end
 	                 results = connection.execute(sql)
 				    %>
 		          <% results.each do |theme| %>
-	                   <br><%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme[0], @q_data.value_2.to_i  == theme[0] %>
+	                   <br><%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme[0], @q_data.value_2.to_s  == theme[0] %>
 		              <%= theme[1].humanize %>
 		          <% end %>
 			   <% else 
 			         results = ((@question.ref_table_a_2).constantize).all.sort_by(&:description)
 			       %>
 		          <% results.each do |theme| %>
-	                   <br><%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme.id,  (@q_data.value_2.to_i == theme.id.to_i)?  true:false %>
+	                   <br><%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme.id,  (@q_data.value_2.to_s == theme.id.to_s)?  true:false %>
 		              <%= (theme.description) %>
 		          <% end %>
 		        <% end %>						
@@ -452,14 +452,14 @@ end
 	                 results = connection.execute(sql)
 				    %>
 		          <% results.each do |theme| %>
-	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme[0], @q_data.value_2.to_i  == theme[0] %>
+	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme[0], @q_data.value_2.to_s  == theme[0] %>
 		              <%= theme[1].humanize %>
 		          <% end %>
 			   <% else 
 			         results = ((@question.ref_table_a_2).constantize).all.sort_by(&:description)
 			       %>
 		          <% results.each do |theme| %>
-	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme.id,  (@q_data.value_2.to_i == theme.id.to_i)?  true:false %>
+	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_2["+@question.id.to_s+"][]", theme.id,  (@q_data.value_2.to_s == theme.id.to_s)?  true:false %>
 		              <%= (theme.description) %>
 		          <% end %>
 		        <% end %>				
@@ -587,14 +587,14 @@ end
 	                 results = connection.execute(sql)
 				    %>
 		          <% results.each do |theme| %>
-	                   <br><%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme[0], @q_data.value_3.to_i  == theme[0] %>
+	                   <br><%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme[0], @q_data.value_3.to_s  == theme[0] %>
 		              <%= theme[1].humanize %>
 		          <% end %>
 			   <% else 
 			         results = ((@question.ref_table_a_3).constantize).all.sort_by(&:description)
 			       %>
 		          <% results.each do |theme| %>
-	                   <br><%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme.id,  (@q_data.value_3.to_i == theme.id.to_i)?  true:false %>
+	                   <br><%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme.id,  (@q_data.value_3.to_s == theme.id.to_s)?  true:false %>
 		              <%= (theme.description) %>
 		          <% end %>
 		        <% end %>
@@ -605,14 +605,14 @@ end
 	                 results = connection.execute(sql)
 				    %>
 		          <% results.each do |theme| %>
-	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme[0], @q_data.value_3.to_i  == theme[0] %>
+	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme[0], @q_data.value_3.to_s  == theme[0] %>
 		              <%= theme[1].humanize %>
 		          <% end %>
 			   <% else 
 			         results = ((@question.ref_table_a_3).constantize).all.sort_by(&:description)
 			       %>
 		          <% results.each do |theme| %>
-	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme.id,  (@q_data.value_3.to_i == theme.id.to_i)?  true:false %>
+	                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<%= radio_button_tag "value_3["+@question.id.to_s+"][]", theme.id,  (@q_data.value_3.to_s == theme.id.to_s)?  true:false %>
 		              <%= (theme.description) %>
 		          <% end %>
 		        <% end %>
