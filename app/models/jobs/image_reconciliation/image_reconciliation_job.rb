@@ -14,15 +14,16 @@ class Jobs::ImageReconciliation::ImageReconciliationJob < Jobs::BaseJob
 	  	params = { :schedule_name => 'Image Reconciliation', 
 	  				:run_by_user => 'panda_user',
 	  				:base_path => "/mounts/data",
-	  				:scan_procedure_white_list => [6, 8, 9, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26,
-	  												 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 
+	  				:scan_procedure_white_list => [6, 8, 9, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26,
+	  												 27, 28, 29, 30, 31, 32, 33, 34, 36, 37, 38, 39, 40, 41, 42, 43, 
 	  												 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 
 	  												 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 
-	  												 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 
+	  												 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 91, 92, 93, 94, 
 	  												 95, 96, 97, 98, 99, 100, 104, 105, 106, 107, 109, 110, 111, 112, 113, 
 	  												 114, 115, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 129, 
 	  												 130, 131, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145, 146, 147, 
 	  												 148, 149, 150, 151],
+	  				:scan_procedure_black_list => [4, 10, 74, 11, 12, 13, 35, 90, 74]
 	  				:insert_now => true,
 	  				:save_to_sql => true,
 	  				:sql_path => '/mounts/data/analyses/wbbevis/reconciliation/insert.sql'
@@ -79,6 +80,7 @@ class Jobs::ImageReconciliation::ImageReconciliationJob < Jobs::BaseJob
 						.joins("LEFT JOIN vgroups ON vgroups.id = appointments.vgroup_id")
 						.joins("LEFT JOIN scan_procedures_vgroups ON vgroups.id = scan_procedures_vgroups.vgroup_id")
 						.where("scan_procedures_vgroups.scan_procedure_id in (#{params[:scan_procedure_white_list].join(",")})")
+						.where("scan_procedures_vgroups.scan_procedure_id not in (#{params[:scan_procedure_black_list].join(",")})")
 
 	end
 
