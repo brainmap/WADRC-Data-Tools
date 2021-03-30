@@ -23,7 +23,7 @@ class Jobs::ImageReconciliation::ImageReconciliationJob < Jobs::BaseJob
 	  												 114, 115, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 129, 
 	  												 130, 131, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145, 146, 147, 
 	  												 148, 149, 150, 151],
-	  				:scan_procedure_black_list => [4, 10, 74, 11, 12, 13, 35, 90, 74]
+	  				:scan_procedure_black_list => [4, 10, 74, 11, 12, 13, 35, 90, 74],
 	  				:insert_now => true,
 	  				:save_to_sql => true,
 	  				:sql_path => '/mounts/data/analyses/wbbevis/reconciliation/insert.sql'
