@@ -63,8 +63,8 @@ class Jobs::ImageReconciliation::ImageDataset < ImageDataset
 	    path_relevant_enrollment = enrollments.select{|item| path =~ Regexp.new(item.enumber)}.first
 	    preprocessed_path = "#{path_prefix}/preprocessed/visits/#{path_relevant_sp.codename}/#{path_relevant_enrollment.enumber}/unknown/"
 
-	    study_id = dicom_taghash["0020,0010"].nil? ? '*' : dicom_taghash["0020,0010"][:value]
-	    series_number = dicom_taghash["0020,0011"].nil? ? '*' : dicom_taghash["0020,0011"][:value].rjust(3,'0')
+	    study_id = dicom_taghash.nil? ? '\d*' : (dicom_taghash["0020,0010"].nil? ? '\d*' : dicom_taghash["0020,0010"][:value])
+	    series_number = dicom_taghash.nil? ? '\d*' : (dicom_taghash["0020,0011"].nil? ? '\d*' : dicom_taghash["0020,0011"][:value].rjust(3,'0'))
 
 	    unfixed_filename = "#{path_relevant_enrollment.enumber}_#{series_description}_#{study_id}_#{series_number}.nii"
 	    fixed_filename = clean_series_description(unfixed_filename)
@@ -129,6 +129,19 @@ class Jobs::ImageReconciliation::ImageDataset < ImageDataset
 	    end
 
 	    return result
+	end
+
+	def scan_procedures_have_path_relevancy?(image)
+
+	    scan_procedures = image.visit.appointment.vgroup.scan_procedures
+	    path_relevant_sp = scan_procedures.select{|item| image.path =~ Regexp.new(item.codename)}.first
+
+	    if path_relevant_sp.nil?
+	    	return false
+	    end
+
+	    return true
+
 	end
 		
 end
