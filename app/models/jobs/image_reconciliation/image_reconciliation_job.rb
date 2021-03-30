@@ -78,7 +78,7 @@ class Jobs::ImageReconciliation::ImageReconciliationJob < Jobs::BaseJob
 						.joins("LEFT JOIN appointments ON appointments.id = visits.appointment_id")
 						.joins("LEFT JOIN vgroups ON vgroups.id = appointments.vgroup_id")
 						.joins("LEFT JOIN scan_procedures_vgroups ON vgroups.id = scan_procedures_vgroups.vgroup_id")
-						.where("scan_procedures_vgroups.scan_procedure_id in (?)",params[:scan_procedure_white_list].join(","))
+						.where("scan_procedures_vgroups.scan_procedure_id in (#{params[:scan_procedure_white_list].join(",")})")
 
 	end
 
