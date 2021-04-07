@@ -137,6 +137,23 @@ class TreditsController < ApplicationController
                           elsif !@tredit_actions[0].nil?
                             @tredit_row.push(@tredit_actions[0].value)
                           end
+
+                          # also look up file paths
+
+                          possible_images = Trfileimage.where(:trfile_id => trfile[0])
+                          if possible_images.count > 0
+                            image_paths = []
+                            possible_images.each do |possible_image|
+                              if possible_image.image_category == 'html'
+                                image = Processedimage.where(:id => possible_image.image_id).first
+                                if !image.nil?
+                                  image_paths.push(image.file_path)
+                                end
+                              end
+                            end
+                            @tredit_row.push(image_paths.join(','))
+                          end
+
                         end
                         @tredits_search.push(@tredit_row)
                       end

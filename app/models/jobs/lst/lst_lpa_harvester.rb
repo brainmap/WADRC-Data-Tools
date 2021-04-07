@@ -249,4 +249,4 @@ end
 # alter table  cg_lst_lpa add column t2_prep varchar(5) default NULL;
 # alter table  cg_lst_lpa add column receive_coil_name varchar(20) default NULL;
 # alter table  cg_lst_lpa add column pure_corrected varchar(5) default NULL;
-# alter table  cg_lst_lpa add column station_name varchar(20) default NULL;
+# alter table  cg_lst_lpa add column mri_station_name varchar(20) default NULL;

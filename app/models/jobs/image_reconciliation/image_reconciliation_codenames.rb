@@ -24,7 +24,7 @@ class Jobs::ImageReconciliation::ImageReconciliationJob < Jobs::BaseJob
 	  												 114, 115, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 129, 
 	  												 130, 131, 133, 134, 135, 136, 137, 138, 139, 143, 144, 145, 146, 147, 
 	  												 148, 149, 150, 151],
-	  				:scan_procedure_black_list => [4, 10, 74, 11, 12, 13, 15, 16, 19, 35, 56, 90, 74, 76, 78, 32, 80, 115],
+	  				:scan_procedure_black_list => [4, 10, 74, 11, 12, 13, 15, 16, 19, 35, 56, 90, 74, 76, 78, 32],
 	  				:insert_now => true,
 	  				:save_to_sql => true,
 	  				:sql_path => '/mounts/data/analyses/wbbevis/reconciliation/insert.sql'
@@ -33,9 +33,21 @@ class Jobs::ImageReconciliation::ImageReconciliationJob < Jobs::BaseJob
         params
     end
 
-    # As part of testing this script, and validating that we've got everything there, this should
-    # be run on daily.0 ("/Volumes/backup/daily.0/BRAINDATA/data") to give us a baseline. Using base_path to do path conversion should actually
-    # work really well. 
+	# +-----+-------------------------+-----------------------------+--------------------------------------+
+	# | id  | codename                | actual path codename in raw | actual path codename in preprocessed |
+	# +-----+-------------------------+-----------------------------+--------------------------------------+
+	# |  19 | johnson.alz.visit1      | alz_2000                    | johnson.alz.visit1
+	# |  15 | johnson.alz.visit2      | alz_2000                    | johnson.alz.visit2
+	# |  35 | johnson.pc.visit1       | pc_4000                     | johnson.pc.visit1
+	# |  32 | johnson.pmri            | pmri                        | ???
+	# |  12 | johnson.tbi1000.visit1  | tbi_1000                    | ???
+	# |  16 | johnson.tbi1000.visit2  | tbi_1000                    | ???
+	# |  13 | johnson.tbiaware.visit3 | johnson.tbi.aware.visit3    | johnson.tbi.aware.visit3
+	# |  11 | johnson.w_140.visit1    | wrap140                     | wrap140.visit1
+	# |  10 | MAM Pilot               | ??                          | 
+	# |   4 | PIB Pilot               | pib_pilot_mri               | johnson.pibpilot.visit1
+	# |  74 | WRAP                    | ??                          | 
+	# +-----+-------------------------+-----------------------------+--------------------------------------+
 
 	def run(params)
 

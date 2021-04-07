@@ -7,6 +7,7 @@ class Jobs::ImageReconciliation::ImageReconciliationForm
 	attr_accessor :raw_path_exists, :longest_existing_raw_path, :bz2s_exist_in_raw, :bz2_count
 	attr_accessor :bz2_count_matches_image, :preprocessed_path_exists, :longest_existing_preprocessed_path
 	attr_accessor :best_matching_candidate, :matched_with_study_id, :matched_count_with_study_id, :matched_count_without_study_id
+	attr_accessor :scan_archives
 
 
 	def self.attributes
@@ -24,7 +25,8 @@ class Jobs::ImageReconciliation::ImageReconciliationForm
 			"best_matching_candidate" => '',
 			"matched_with_study_id" => nil,
 			"matched_count_with_study_id" => nil,
-			"matched_count_without_study_id" => nil
+			"matched_count_without_study_id" => nil,
+			"scan_archives" => nil
 		}
 	end
 
@@ -54,6 +56,7 @@ class Jobs::ImageReconciliation::ImageReconciliationForm
 		choices["matched_with_study_id"] = result[:matched_with_study_id].to_s
 		choices["matched_count_with_study_id"] = result[:matched_count_with_study_id].to_i
 		choices["matched_count_without_study_id"] = result[:matched_count_without_study_id].to_i
+		choices["scan_archives"] = result[:scan_archives].to_s
 
 		return self.new(choices)
 	end
@@ -73,7 +76,8 @@ class Jobs::ImageReconciliation::ImageReconciliationForm
 			"best_matching_candidate" => @best_matching_candidate,
 			"matched_with_study_id" => @matched_with_study_id,
 			"matched_count_with_study_id" => @matched_count_with_study_id,
-			"matched_count_without_study_id" => @matched_count_without_study_id
+			"matched_count_without_study_id" => @matched_count_without_study_id,
+			"scan_archives" => @scan_archives
 		}
 	end
 
@@ -108,6 +112,7 @@ end
 # `matched_with_study_id` varchar(5) DEFAULT NULL,
 # `matched_count_with_study_id` int DEFAULT NULL,
 # `matched_count_without_study_id` int DEFAULT NULL,
+# `scan_archives` varchar(5) DEFAULT NULL,
 # `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 # PRIMARY KEY (`id`)
 # );
