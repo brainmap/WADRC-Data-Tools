@@ -135,69 +135,7 @@ class LumbarpuncturesController < ApplicationController
   # POST /lumbarpunctures
   # POST /lumbarpunctures.xml
   def create     
-    v_offset = Time.zone_offset('CST') 
-    v_offset = (v_offset*(-1))/(60*60) # mess with storing date as local in db - but shifting to utc
-    # get hour+6hrs utc shift error if too late in day
-            lumbarpuncture_params[:date][:lpstartt][0]="1899"
-             lumbarpuncture_params[:date][:lpstartt][1]="12"
-             lumbarpuncture_params[:date][:lpstartt][2]="30"       
-             lpstarttime = nil 
-              lumbarpuncture_params[:lumbarpuncture][:lpstarttime] = ''
-              lumbarpuncture_params[:lumbarpuncture][:lpstarttime_hour] = ''
-              lumbarpuncture_params[:lumbarpuncture][:lpstarttime_minute] = ''
-            if !lumbarpuncture_params[:date][:lpstartt][0].blank? && !lumbarpuncture_params[:date][:lpstartt][1].blank? && !lumbarpuncture_params[:date][:lpstartt][2].blank? && !lumbarpuncture_params[:date][:lpstartt][3].blank? && !lumbarpuncture_params[:date][:lpstartt][4].blank?
-
-               lpstarttime_hour = lumbarpuncture_params[:date][:lpstartt][3].to_i - v_offset
-               lpstarttime_minute =lumbarpuncture_params[:date][:lpstartt][4] 
-             lumbarpuncture_params[:date][:lpstartt][3] = ((lumbarpuncture_params[:date][:lpstartt][3].to_i)+v_offset).to_s
-             if lumbarpuncture_params[:date][:lpstartt][3].to_i > 23
-                lumbarpuncture_params[:date][:lpstartt][3] = (lumbarpuncture_params[:date][:lpstartt][3].to_i - 24).to_s
-             end
-               # mess with storing date as local in db - but shifting to utc
-             lpstarttime =  lumbarpuncture_params[:date][:lpstartt][0]+"-"+lumbarpuncture_params[:date][:lpstartt][1]+"-"+lumbarpuncture_params[:date][:lpstartt][2]+" "+lumbarpuncture_params[:date][:lpstartt][3]+":"+lumbarpuncture_params[:date][:lpstartt][4]
-             lumbarpuncture_params[:lumbarpuncture][:lpstarttime] = DateTime.strptime(lpstarttime, "%Y-%m-%d %H:%M")    # lpstarttime  4.0 date format change?
-            end
-
-         lumbarpuncture_params[:date][:lpfluidstartt][0]="1899"
-         lumbarpuncture_params[:date][:lpfluidstartt][1]="12"
-         lumbarpuncture_params[:date][:lpfluidstartt][2]="30"       
-          lpfluidstarttime = nil   
-           lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime] = '' 
-          lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime_hour] = ''
-          lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime_minute] =''
-        if !lumbarpuncture_params[:date][:lpfluidstartt][0].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][1].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][2].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][3].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][4].blank?
-          
-               lpfluidstarttime_hour = lumbarpuncture_params[:date][:lpfluidstartt][3].to_i - v_offset
-               lpfluidstarttime_minute =lumbarpuncture_params[:date][:lpfluidstartt][4] 
-          lumbarpuncture_params[:date][:lpfluidstartt][3] = ((lumbarpuncture_params[:date][:lpfluidstartt][3].to_i)+v_offset).to_s
-          if lumbarpuncture_params[:date][:lpfluidstartt][3].to_i > 23
-                lumbarpuncture_params[:date][:lpfluidstartt][3] = (lumbarpuncture_params[:date][:lpfluidstartt][3].to_i - 24).to_s
-          end
-            # mess with storing date as local in db - but shifting to utc
-          lpfluidstarttime =  lumbarpuncture_params[:date][:lpfluidstartt][0]+"-"+lumbarpuncture_params[:date][:lpfluidstartt][1]+"-"+lumbarpuncture_params[:date][:lpfluidstartt][2]+" "+lumbarpuncture_params[:date][:lpfluidstartt][3]+":"+lumbarpuncture_params[:date][:lpfluidstartt][4]
-          lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime] = DateTime.strptime(lpfluidstarttime, "%Y-%m-%d %H:%M")  #lpfluidstarttime 
-        end 
-
-         lumbarpuncture_params[:date][:lpendt][0]="1899"
-         lumbarpuncture_params[:date][:lpendt][1]="12"
-         lumbarpuncture_params[:date][:lpendt][2]="30"       
-          lpendtime = nil   
-           lumbarpuncture_params[:lumbarpuncture][:lpendtime] = '' 
-          lumbarpuncture_params[:lumbarpuncture][:lpendtime_hour] = ''
-          lumbarpuncture_params[:lumbarpuncture][:lpendtime_minute] =''
-        if !lumbarpuncture_params[:date][:lpendt][0].blank? && !lumbarpuncture_params[:date][:lpendt][1].blank? && !lumbarpuncture_params[:date][:lpendt][2].blank? && !lumbarpuncture_params[:date][:lpendt][3].blank? && !lumbarpuncture_params[:date][:lpendt][4].blank?
-          
-               lpendtime_hour = lumbarpuncture_params[:date][:lpendt][3].to_i - v_offset
-               lpendtime_minute =lumbarpuncture_params[:date][:lpendt][4] 
-          lumbarpuncture_params[:date][:lpendt][3] = ((lumbarpuncture_params[:date][:lpendt][3].to_i)+v_offset).to_s
-          if lumbarpuncture_params[:date][:lpendt][3].to_i > 23
-                lumbarpuncture_params[:date][:lpendt][3] = (lumbarpuncture_params[:date][:lpendt][3].to_i - 24).to_s
-          end
-            # mess with storing date as local in db - but shifting to utc
-          lpendtime =  lumbarpuncture_params[:date][:lpendt][0]+"-"+lumbarpuncture_params[:date][:lpendt][1]+"-"+lumbarpuncture_params[:date][:lpendt][2]+" "+lumbarpuncture_params[:date][:lpendt][3]+":"+lumbarpuncture_params[:date][:lpendt][4]
-          lumbarpuncture_params[:lumbarpuncture][:lpendtime] = DateTime.strptime(lpendtime, "%Y-%m-%d %H:%M")  #lpendtime 
-        end  
-
+    
      @current_tab = "lumbarpunctures"
      scan_procedure_array = []
      scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
@@ -232,7 +170,14 @@ class LumbarpuncturesController < ApplicationController
     end
     @appointment.save 
   #   params[:lumbarpuncture][:appointment_id]  = @appointment.id 
-    @lumbarpuncture = Lumbarpuncture.new( lumbarpuncture_params[:lumbarpuncture])
+
+    lp_params = lumbarpuncture_params[:lumbarpuncture]
+
+    lp_params[:lpstarttime_time]= "#{lumbarpuncture_params[:time_fields][:lpstarttime_time][:hour].to_s.rjust(2,'0')}:#{lumbarpuncture_params[:time_fields][:lpstarttime_time][:minute].to_s.rjust(2,'0')}"
+    lp_params[:lpfluidstarttime_time]= "#{lumbarpuncture_params[:time_fields][:lpfluidstarttime_time][:hour].to_s.rjust(2,'0')}:#{lumbarpuncture_params[:time_fields][:lpfluidstarttime_time][:minute].to_s.rjust(2,'0')}"
+    lp_params[:lpendtime_time]= "#{lumbarpuncture_params[:time_fields][:lpendtime_time][:hour].to_s.rjust(2,'0')}:#{lumbarpuncture_params[:time_fields][:lpendtime_time][:minute].to_s.rjust(2,'0')}"
+
+    @lumbarpuncture = Lumbarpuncture.new( lp_params )
     @lumbarpuncture.appointment_id = @appointment.id
     if @lumbarpuncture.lp_data_entered_by.blank?
        @lumbarpuncture.lp_data_entered_by = current_user.id
@@ -242,27 +187,10 @@ class LumbarpuncturesController < ApplicationController
     end
 
     respond_to do |format|
+
       if @lumbarpuncture.save
          @vgroup.completedlumbarpuncture = lumbarpuncture_params[:lumbarpuncture][:lpsuccess] == '1' ? "yes" : "no"
           @vgroup.save
-
-
-            @lumbarpuncture.lpstarttime_hour = lpstarttime_hour.to_i #+v_offset
-            @lumbarpuncture.lpstarttime_minute = lpstarttime_minute
-            @lumbarpuncture.lpfluidstarttime_hour = lpfluidstarttime_hour.to_i #+v_offset
-            @lumbarpuncture.lpfluidstarttime_minute = lpfluidstarttime_minute
-            @lumbarpuncture.lpendtime_hour = lpendtime_hour.to_i #+v_offset
-            @lumbarpuncture.lpendtime_minute = lpendtime_minute
-
-            # puts "once we get down here, start time: #{DateTime.strptime("1899-12-30 #{lpstarttime_hour.to_i+v_offset}:#{lpstarttime_minute}", "%Y-%m-%d %H:%M")}"
-            # puts "fluid time: #{DateTime.strptime("1899-12-30 #{lpfluidstarttime_hour.to_i+v_offset}:#{lpfluidstarttime_minute}", "%Y-%m-%d %H:%M")}"
-            # puts "end time: #{DateTime.strptime("1899-12-30 #{lpendtime_hour.to_i+v_offset}:#{lpendtime_minute}", "%Y-%m-%d %H:%M")}"
-            
-            @lumbarpuncture.lpstarttime = DateTime.strptime("1899-12-30 #{lpstarttime_hour.to_i+v_offset}:#{lpstarttime_minute}", "%Y-%m-%d %H:%M")
-            @lumbarpuncture.lpfluidstarttime = DateTime.strptime("1899-12-30 #{lpfluidstarttime_hour.to_i+v_offset}:#{lpfluidstarttime_minute}", "%Y-%m-%d %H:%M")
-            @lumbarpuncture.lpendtime = DateTime.strptime("1899-12-30 #{lpendtime_hour.to_i+v_offset}:#{lpendtime_minute}", "%Y-%m-%d %H:%M")
-
-            @lumbarpuncture.save
 
         # @appointment.save
         if !vitals_params[:vital_id].blank?
@@ -313,9 +241,6 @@ class LumbarpuncturesController < ApplicationController
   def update
     puts "hey, we're updating."
 
-    puts "lumbarpuncture_params[:lumbarpuncture] : #{lumbarpuncture_params[:lumbarpuncture]}"
-       v_offset = Time.zone_offset('CST') 
-       v_offset = (v_offset*(-1))/(60*60) # mess with storing date as local in db - but shifting to utc  
         scan_procedure_array = []
         scan_procedure_array =  (current_user.edit_low_scan_procedure_array).split(' ').map(&:to_i)
               hide_date_flag_array = []
@@ -336,64 +261,7 @@ class LumbarpuncturesController < ApplicationController
         if !lumbarpuncture_params[:appointment]["#{'appointment_date'}(1i)"].blank? && !lumbarpuncture_params[:appointment]["#{'appointment_date'}(2i)"].blank? && !lumbarpuncture_params[:appointment]["#{'appointment_date'}(3i)"].blank?
              appointment_date = params[:appointment]["#{'appointment_date'}(1i)"] +"-"+lumbarpuncture_params[:appointment]["#{'appointment_date'}(2i)"].rjust(2,"0")+"-"+lumbarpuncture_params[:appointment]["#{'appointment_date'}(3i)"].rjust(2,"0")
         end
-              lumbarpuncture_params[:date][:lpstartt][0]="1899"
-             lumbarpuncture_params[:date][:lpstartt][1]="12"
-             lumbarpuncture_params[:date][:lpstartt][2]="30"       
-             lpstarttime = nil
-            if !lumbarpuncture_params[:date][:lpstartt][0].blank? && !lumbarpuncture_params[:date][:lpstartt][1].blank? && !lumbarpuncture_params[:date][:lpstartt][2].blank? && !lumbarpuncture_params[:date][:lpstartt][3].blank? && !lumbarpuncture_params[:date][:lpstartt][4].blank?
-
-               lpstarttime_hour = lumbarpuncture_params[:date][:lpstartt][3]
-               lpstarttime_minute =lumbarpuncture_params[:date][:lpstartt][4] 
-               # puts "start time set as :#{lpstarttime_hour}:#{lpstarttime_minute}"
-               lumbarpuncture_params[:date][:lpstartt][3] = ((lumbarpuncture_params[:date][:lpstartt][3].to_i)+v_offset).to_s
-               if lumbarpuncture_params[:date][:lpstartt][3].to_i > 23
-                  lumbarpuncture_params[:date][:lpstartt][3] = (lumbarpuncture_params[:date][:lpstartt][3].to_i - 24).to_s
-               end
-                 # mess with storing date as local in db - but shifting to utc
-               lpstarttime =  lumbarpuncture_params[:date][:lpstartt][0]+"-"+lumbarpuncture_params[:date][:lpstartt][1]+"-"+lumbarpuncture_params[:date][:lpstartt][2]+" "+lumbarpuncture_params[:date][:lpstartt][3]+":"+lumbarpuncture_params[:date][:lpstartt][4]
-               lumbarpuncture_params[:lumbarpuncture][:lpstarttime] = DateTime.strptime(lpstarttime, "%Y-%m-%d %H:%M")#lpstarttime      
-
-            end
-
-         lumbarpuncture_params[:date][:lpfluidstartt][0]="1899"
-         lumbarpuncture_params[:date][:lpfluidstartt][1]="12"
-         lumbarpuncture_params[:date][:lpfluidstartt][2]="30"       
-          lpfluidstarttime = nil
-        if !lumbarpuncture_params[:date][:lpfluidstartt][0].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][1].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][2].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][3].blank? && !lumbarpuncture_params[:date][:lpfluidstartt][4].blank?
-           lpfluidstarttime_hour = lumbarpuncture_params[:date][:lpfluidstartt][3]
-           lpfluidstarttime_minute =lumbarpuncture_params[:date][:lpfluidstartt][4] 
-           # puts "fluid time set as :#{lpfluidstarttime_hour}:#{lpfluidstarttime_minute}"
-           lumbarpuncture_params[:date][:lpfluidstartt][3] = ((lumbarpuncture_params[:date][:lpfluidstartt][3].to_i)+v_offset).to_s
-          if lumbarpuncture_params[:date][:lpfluidstartt][3].to_i > 23
-                lumbarpuncture_params[:date][:lpfluidstartt][3] = (lumbarpuncture_params[:date][:lpfluidstartt][3].to_i - 24).to_s
-          end
-           lpfluidstarttime =  lumbarpuncture_params[:date][:lpfluidstartt][0]+"-"+lumbarpuncture_params[:date][:lpfluidstartt][1]+"-"+lumbarpuncture_params[:date][:lpfluidstartt][2]+" "+lumbarpuncture_params[:date][:lpfluidstartt][3]+":"+lumbarpuncture_params[:date][:lpfluidstartt][4]
-           lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime] = DateTime.strptime(lpfluidstarttime, "%Y-%m-%d %H:%M") #lpfluidstarttime
-
-        end
-
-
-
-         lumbarpuncture_params[:date][:lpendt][0]="1899"
-         lumbarpuncture_params[:date][:lpendt][1]="12"
-         lumbarpuncture_params[:date][:lpendt][2]="30"       
-          lpendtime = nil
-        if !lumbarpuncture_params[:date][:lpendt][0].blank? && !lumbarpuncture_params[:date][:lpendt][1].blank? && !lumbarpuncture_params[:date][:lpendt][2].blank? && !lumbarpuncture_params[:date][:lpendt][3].blank? && !lumbarpuncture_params[:date][:lpendt][4].blank?
-           lpendtime_hour = lumbarpuncture_params[:date][:lpendt][3]
-           lpendtime_minute =lumbarpuncture_params[:date][:lpendt][4] 
-
-           # puts "end time set as :#{lpendtime_hour}:#{lpendtime_minute}"
-           lumbarpuncture_params[:date][:lpendt][3] = ((lumbarpuncture_params[:date][:lpendt][3].to_i)+v_offset).to_s
-           if lumbarpuncture_params[:date][:lpendt][3].to_i > 23
-                  lumbarpuncture_params[:date][:lpendt][3] = (lumbarpuncture_params[:date][:lpendt][3].to_i - 24).to_s
-           end
-           lpendtime =  lumbarpuncture_params[:date][:lpendt][0]+"-"+lumbarpuncture_params[:date][:lpendt][1]+"-"+lumbarpuncture_params[:date][:lpendt][2]+" "+lumbarpuncture_params[:date][:lpendt][3]+":"+lumbarpuncture_params[:date][:lpendt][4]
-           lumbarpuncture_params[:lumbarpuncture][:lpendtime] = DateTime.strptime(lpendtime, "%Y-%m-%d %H:%M") #lpendtime
-
-        end
-        
-        # puts "lp needle times #{lumbarpuncture_params[:lumbarpuncture][:lpstarttime_hour]}:#{lumbarpuncture_params[:lumbarpuncture][:lpstarttime_minute]}, #{lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime_hour]}:#{lumbarpuncture_params[:lumbarpuncture][:lpfluidstarttime_minute]}, #{lumbarpuncture_params[:lumbarpuncture][:lpendtime_hour]}:#{lumbarpuncture_params[:lumbarpuncture][:lpendtime_minute]}"
-
+       
         # ok to update vitals even if other update fail
         if !vitals_params[:vital_id].blank?
           @vital = Vital.find(vitals_params[:vital_id])
@@ -429,30 +297,18 @@ class LumbarpuncturesController < ApplicationController
            # update to null or delete?
         end
 
+        lp_params = lumbarpuncture_params[:lumbarpuncture]
+
+        lp_params[:lpstarttime_time]= "#{lumbarpuncture_params[:time_fields][:lpstarttime_time][:hour].to_s.rjust(2,'0')}:#{lumbarpuncture_params[:time_fields][:lpstarttime_time][:minute].to_s.rjust(2,'0')}"
+        lp_params[:lpfluidstarttime_time]= "#{lumbarpuncture_params[:time_fields][:lpfluidstarttime_time][:hour].to_s.rjust(2,'0')}:#{lumbarpuncture_params[:time_fields][:lpfluidstarttime_time][:minute].to_s.rjust(2,'0')}"
+        lp_params[:lpendtime_time]= "#{lumbarpuncture_params[:time_fields][:lpendtime_time][:hour].to_s.rjust(2,'0')}:#{lumbarpuncture_params[:time_fields][:lpendtime_time][:minute].to_s.rjust(2,'0')}"
+
+        # puts "final params: #{lp_params}"
+
         respond_to do |format|
-          if @lumbarpuncture.update( lumbarpuncture_params[:lumbarpuncture])#params[:lumbarpuncture], :without_protection => true)
+
+          if @lumbarpuncture.update(lp_params)#params[:lumbarpuncture], :without_protection => true)
            
-            @lumbarpuncture.lpstarttime_hour = lpstarttime_hour.to_i
-            @lumbarpuncture.lpstarttime_minute = lpstarttime_minute
-            @lumbarpuncture.lpfluidstarttime_hour = lpfluidstarttime_hour.to_i
-            @lumbarpuncture.lpfluidstarttime_minute = lpfluidstarttime_minute
-            @lumbarpuncture.lpendtime_hour = lpendtime_hour.to_i
-            @lumbarpuncture.lpendtime_minute = lpendtime_minute
-
-            # puts "once we get down here, start time: #{DateTime.strptime("1899-12-30 #{lpstarttime_hour.to_i+v_offset}:#{lpstarttime_minute}", "%Y-%m-%d %H:%M")}"
-            # puts "fluid time: #{DateTime.strptime("1899-12-30 #{lpfluidstarttime_hour.to_i+v_offset}:#{lpfluidstarttime_minute}", "%Y-%m-%d %H:%M")}"
-            # puts "end time: #{DateTime.strptime("1899-12-30 #{lpendtime_hour.to_i+v_offset}:#{lpendtime_minute}", "%Y-%m-%d %H:%M")}"
-            
-            Rails.logger.debug "hoping #{"1899-12-30 #{"%02d" % lpstarttime_hour.to_i}:#{"%02d" % lpstarttime_minute.to_i}"} ends up looking like a valid date (lpstarttime)"
-            Rails.logger.debug "#{"1899-12-30 #{"%02d" % lpfluidstarttime_hour.to_i}:#{"%02d" % lpfluidstarttime_minute.to_i}"} (fluid start time)"
-            Rails.logger.debug "#{"1899-12-30 #{"%02d" % lpendtime_hour.to_i}:#{"%02d" % lpendtime_minute.to_i}"} (end time)"
-
-            @lumbarpuncture.lpstarttime = DateTime.strptime("1899-12-30 #{"%02d" % lpstarttime_hour.to_i}:#{"%02d" % lpstarttime_minute.to_i}", "%Y-%m-%d %H:%M") + v_offset
-            @lumbarpuncture.lpfluidstarttime = DateTime.strptime("1899-12-30 #{"%02d" % lpfluidstarttime_hour.to_i}:#{"%02d" % lpfluidstarttime_minute.to_i}", "%Y-%m-%d %H:%M") + v_offset
-            @lumbarpuncture.lpendtime = DateTime.strptime("1899-12-30 #{"%02d" % lpendtime_hour.to_i}:#{"%02d" % lpendtime_minute.to_i}", "%Y-%m-%d %H:%M") + v_offset
-
-            @lumbarpuncture.save
-
             @appointment = Appointment.find(@lumbarpuncture.appointment_id)
             @vgroup = Vgroup.find(@appointment.vgroup_id)
             @appointment.comment = params[:appointment][:comment]
@@ -646,8 +502,7 @@ class LumbarpuncturesController < ApplicationController
               'Post-LP Low Back Pain','Post-LP Low Back Pain-Date Resolved','Post-LP Low Back Pain-Severity','Post-LP Low Back Pain-Note',
               'Post-LP Other Side Effects','Post-LP Other Side Effects-Date Resolved','Post-LP Other Side Effects-Severity','Post-LP Other Side Effects-Note',
               'Needle Length','Needle Gauge','Needle Type','Needle Type -Other','LP Position','LP Method',
-              'Initial Needle Insertion Hour',
-               'Initial Needle Insertion Minute','Fluid Collection Start Hour','Fluid Collection Start Minute','Final Needle Removal Hour', 'Final Needle Removal Minute',
+              'Initial Needle Insertion','Fluid Collection Start','Final Needle Removal',
                 'CSF Amount Collected (ml)','CSF Initial Amount Stored (ml)','CSF Nucleated Cell Count','CSF Red Cell Count','Cell Count Remarks',
                 'If LP unsuccessful-Unable to access CSF','If LP unsuccessful-Participant pain/discomfort','If LP unsuccessful-Participant vasovagal','If LP unsuccessful-Other',
                 "Complications - headache",
@@ -679,8 +534,8 @@ class LumbarpuncturesController < ApplicationController
                 "lumbarpunctures.lpothersideeffects","DATE_FORMAT(lumbarpunctures.lpothersideeffects_dateresolved,'%Y-%m-%d')","lumbarpunctures.lpothersideeffects_severity","lumbarpunctures.lpothersideeffects_note",
                 "lumbarpunctures.lpneedle_gauge","lumbarpunctures.lpneedle_length",
                 "lumbarpunctures.lpneedletype","lumbarpunctures.lpneedletype_other","lumbarpunctures.lpposition","lumbarpunctures.lpmethod",
-                "lumbarpunctures.lpstarttime_hour","lumbarpunctures.lpstarttime_minute","lumbarpunctures.lpfluidstarttime_hour","lumbarpunctures.lpfluidstarttime_minute",
-                "lumbarpunctures.lpendtime_hour","lumbarpunctures.lpendtime_minute",
+                "lumbarpunctures.lpstarttime_time","lumbarpunctures.lpfluidstarttime_time",
+                "lumbarpunctures.lpendtime_time",
                  "lumbarpunctures.lpamountcollected","lumbarpunctures.lpinitialamountstored","lumbarpunctures.lpcsfnucleatedcellcount","lumbarpunctures.lpcsfredcellcount","lumbarpunctures.lpcsfcellcount_note",
                  "CASE lumbarpunctures.lpcsfunsuccessful_noaccess WHEN 1 THEN 'yes' ELSE '' end",
                  "CASE lumbarpunctures.lpcsfunsuccessful_pain WHEN 1 THEN 'yes' ELSE '' end",
@@ -834,8 +689,11 @@ class LumbarpuncturesController < ApplicationController
           :lpcsfunsuccessful_other_specify,:lp_data_entered_by,:lp_data_entered_date,:lp_data_qced_by,:lp_data_qced_date,:lpfasttotaltime_range, 
           :lpcomplications_headache,:lpcomplications_other,:lpcomplications_pain, :lpcomplications_radiculopathy, :lpcomplications_vasovagal, :lpcomplications_other_specify,
           :lpamountoflidocaine, :lpneedle_gauge, :lpneedle_length, :lpposition_sitting, :lpposition_decubitus, :lpmethod_gravity, :lpmethod_aspiration, :lpmethod_gravity_collected,
-          :lpmethod_aspiration_collected, :lpheadache, :preanalytic_protocol, :form_version], appointment:[:appointment_date, :appointment_coordinator, :comment],
-          :date =>{:lpstartt =>[], :lpfluidstartt=>[], :lpendt=>[]}) #,:temp_fklumbarpunctureid)
+          :lpmethod_aspiration_collected, :lpheadache, :preanalytic_protocol, :form_version, :lpstarttime_time => [:hour, :minute], :lpfluidstarttime_time => [:hour, :minute], :lpendtime_time => [:hour, :minute]],
+          :time_fields => [:lpstarttime_time => [:hour, :minute], :lpfluidstarttime_time => [:hour, :minute], :lpendtime_time => [:hour, :minute]], 
+          appointment:[:appointment_date, :appointment_coordinator, :comment]
+          ) #,:temp_fklumbarpunctureid)
+
    end 
    def appointment_params
       params.require(:appointment).permit!

@@ -19,6 +19,9 @@ v_yes_no_na_display = [["Yes","yes"], ["No","no"], ["n/a","n/a"]]
 v_severity_display = [["mild(0-3/10)","mild(0-3/10)"],["moderate(4-6/10)","moderate(4-6/10)"],["severe(7-10/10)","severe(7-10/10)"] ]
 
 v_preanalytic_protocol = [["Drip A","Drip A"],["Drip A + Blood","Drip A + Blood"],["Drip A + Blood (WRAP only)","Drip A + Blood (WRAP only)"],["Drip B + Blood","Drip B + Blood"],["Pull + Blood","Pull + Blood"],["Pull","Pull"]]
+
+hour_options = (0..23).to_a.map{|opt| opt.to_s.rjust(2,'0')}.map{|item| [item,item]}
+minute_options = (0..59).to_a.map{|opt| opt.to_s.rjust(2,'0')}.map{|item| [item,item]}
 %>
 <% javascript_tag 'defaults' %>
 <div id="new_edit_form">
@@ -59,13 +62,22 @@ v_preanalytic_protocol = [["Drip A","Drip A"],["Drip A + Blood","Drip A + Blood"
         <div>Procedure Time</div>
 
         <%= f.label(:Initial_needle_insertion_time,'Initial Needle Insertion Time') %>
-        <%= select_time( (!@lumbarpuncture.lpstarttime.nil? ? @lumbarpuncture.lpstarttime.in_time_zone('UTC') : nil) ,:field_name =>'lpstartt][', :include_blank => true) %>
+
+        <%= select("time_fields", "lpstarttime_time[hour]", hour_options, {:selected => (!@lumbarpuncture.lpstarttime_time.nil? ? @lumbarpuncture.lpstarttime_time.split(":")[0] : nil)}) %>
+        <%= select("time_fields", "lpstarttime_time[minute]", minute_options, {:selected => (!@lumbarpuncture.lpstarttime_time.nil? ? @lumbarpuncture.lpstarttime_time.split(":")[1] : nil)}) %>
+
         <br>
         <%= f.label(:Fluid_Collection_Start_Time,'Fluid Collection Start Time') %>
-        <%= select_time( (!@lumbarpuncture.lpfluidstarttime.nil? ? @lumbarpuncture.lpfluidstarttime.in_time_zone('UTC') : nil ),:field_name =>'lpfluidstartt][', :include_blank => true) %>
+
+        <%= select("time_fields", "lpfluidstarttime_time[hour]", hour_options, {:selected => (!@lumbarpuncture.lpfluidstarttime_time.nil? ? @lumbarpuncture.lpfluidstarttime_time.split(":")[0] : nil)}) %>
+        <%= select("time_fields", "lpfluidstarttime_time[minute]", minute_options, {:selected => (!@lumbarpuncture.lpfluidstarttime_time.nil? ? @lumbarpuncture.lpfluidstarttime_time.split(":")[1] : nil)}) %>
+
         <br>
         <%= f.label(:Final_Needle_Removal_Time,'Final Needle Removal Time') %>
-        <%= select_time( (!@lumbarpuncture.lpendtime.nil? ? @lumbarpuncture.lpendtime.in_time_zone('UTC') : nil ),:field_name =>'lpendt][', :include_blank => true) %>
+
+        <%= select("time_fields", "lpendtime_time[hour]", hour_options, {:selected => (!@lumbarpuncture.lpendtime_time.nil? ? @lumbarpuncture.lpendtime_time.split(":")[0] : nil)}) %>
+        <%= select("time_fields", "lpendtime_time[minute]", minute_options, {:selected => (!@lumbarpuncture.lpendtime_time.nil? ? @lumbarpuncture.lpendtime_time.split(":")[1] : nil)}) %>
+
       </div>
       <div class='p-2' style='padding:0.5em;'>
         <div>Blood Pressure (sitting)</div>
