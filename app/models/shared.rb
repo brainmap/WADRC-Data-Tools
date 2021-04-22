@@ -18056,7 +18056,7 @@ puts "v_analyses_path="+v_analyses_path
                                              ,'"+v_first_volume_hash["l_accu"]+"','"+v_first_volume_hash["l_amyg"]+"','"+v_first_volume_hash["l_caud"]+"','"+v_first_volume_hash["l_hipp"]+"','"+v_first_volume_hash["l_pall"]+"'
                                             ,'"+v_first_volume_hash["l_puta"]+"','"+v_first_volume_hash["l_thal"]+"','"+v_first_volume_hash["r_accu"]+"','"+v_first_volume_hash["r_amyg"]+"','"+v_first_volume_hash["r_caud"]+"'
                                             ,'"+v_first_volume_hash["r_hipp"]+"','"+v_first_volume_hash["r_pall"]+"','"+v_first_volume_hash["r_puta"]+"','"+v_first_volume_hash['r_thal']+"')"
-                                            results = connection.execute(sql)                                            #
+                                            results = connection.execute(sql)
 
                                           end
 
@@ -18074,7 +18074,7 @@ puts "v_analyses_path="+v_analyses_path
                                       image.file_name = first_html
                                       image.file_path = "#{v_subjectid_first}/#{first_html}"
                                       image.scan_procedure_id = sp.id
-                                      image.enrollment_id = enrollment.id
+                                      image.enrollment_id = trfile.enrollment_id
                                       image.save
 
                                       trimg = Trfileimage.new
