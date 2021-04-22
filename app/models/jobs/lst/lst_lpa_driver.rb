@@ -438,11 +438,11 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
         js_handle.write(js_translated)
         js_handle.close
 
-        file_data = File.read("#{output_dir}/#{html_candidates.first}")
+        file_data = File.read("#{output_dir}#{html_candidates.first}")
         translated_file_data = file_data.gsub(/\/mounts\/data/, "file://s:")
         translated_file_data = translated_file_data.gsub(non_windows_js,new_js_filename)
-        translated_filename = filename.gsub(/.html/, 'windows.html')
-        file_handle = File.open("#{output_dir}/#{translated_filename}",'wb')
+        translated_filename = "#{html_candidates.first}".gsub(/.html/, 'windows.html')
+        file_handle = File.open("#{output_dir}#{translated_filename}",'wb')
         file_handle.write(translated_file_data)
         file_handle.close
 

@@ -1285,9 +1285,13 @@ end
     v_base_path = Shared.get_base_path()
     v_log_base ="/mounts/data/preprocessed/logs/"
     v_process_name = "fsl_first_volumes"
-    v_script_dev = "singularity run -B /mounts:/mounts /mounts/data/analyses/wbbevis/fsl_test/centos6.10_fsl5.0.10.sif"
-    v_script = "singularity run -B /mounts:/mounts /mounts/data/analyses/wbbevis/fsl_test/centos6.10_fsl5.0.10.sif"
-    v_computer = "moana"
+
+    v_script_dev = v_base_path+"/data1/lab_scripts/FIRST_LabSetup/v4/first_labsetup.sh"
+    v_script = v_base_path+"/data1/lab_scripts/FIRST_LabSetup/v4/first_labsetup.sh"
+    v_computer = "kanga"
+    # v_script_dev = "singularity run -B /mounts:/mounts /mounts/data/analyses/wbbevis/fsl_test/centos6.10_fsl5.0.10.sif"
+    # v_script = "singularity run -B /mounts:/mounts /mounts/data/analyses/wbbevis/fsl_test/centos6.10_fsl5.0.10.sif"
+    # v_computer = "moana"
     # only in dev
     v_script = v_script_dev
     process_logs_delete_old( v_process_name, v_log_base)

@@ -67,7 +67,7 @@ class Api::V1::TrtypeReviewsController < API::APIController
 			# going to build a little hash I can use for labels. This is much faster.
 			label_map = {}
 			displayable_tractiontypes.map(&:ref_table_b_1).uniq.each do |label|
-				label_map[label] = LookupRef.where("label = ?",label).map{|lookup_ref| [lookup_ref.ref_value,lookup_ref.description]}.to_h
+				label_map[label] = LookupRef.where("label = ?",label).order(:display_order).map{|lookup_ref| [lookup_ref.ref_value,lookup_ref.description]}.to_h
 			end
 
 			trfiles_page.each do |file|
@@ -166,7 +166,7 @@ class Api::V1::TrtypeReviewsController < API::APIController
 			# going to build a little hash I can use for labels. This is much faster.
 			label_map = {}
 			displayable_tractiontypes.map(&:ref_table_b_1).uniq.each do |label|
-				label_map[label] = LookupRef.where("label = ?",label).map{|lookup_ref| [lookup_ref.ref_value,lookup_ref.description]}.to_h
+				label_map[label] = LookupRef.where("label = ?",label).order(:display_order).map{|lookup_ref| [lookup_ref.ref_value,lookup_ref.description]}.to_h
 			end
 
 			# puts "label_map is #{label_map}"
