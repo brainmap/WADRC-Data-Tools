@@ -18067,7 +18067,7 @@ puts "v_analyses_path="+v_analyses_path
                                     #we need to track these as well.
                                     trfile = Trfile.where("trtype_id in (?)",v_fsl_first_trtype_id).where("subjectid in (?)",dir_name_array[0]+v_visit_number).first
 
-                                    if trfile.trfileimages.select{|image| image.image_category == 'html' and image.image.file_path == "#{v_subjectid_first}/#{first_html}"}.count == 0
+                                    if trfile.trfileimages.select{|image| processed = Processedimage.where(:id => image.image_id).first; image.image_category == 'html' and !processed.nil? and processed.file_path == "#{v_subjectid_first}/#{first_html}"}.count == 0
 
                                       image = Processedimage.new
                                       image.file_type = "html"
