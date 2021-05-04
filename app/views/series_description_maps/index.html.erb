@@ -59,7 +59,7 @@
 <%= f.label :scan_procedures %><br>
   <div id="scan_procedure_list">
   <ul>
-  <% ScanProcedure.all.sort_by(&:display_alias).each do |scan_procedure| %>
+  <% ScanProcedure.all.sort_by(&:codename).each do |scan_procedure| %>
     <li>
          <%= check_box_tag "vgroup_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'series_description_map_search[scan_procedure_id][]' %>
       <%= label_tag '', scan_procedure.display_alias %>
