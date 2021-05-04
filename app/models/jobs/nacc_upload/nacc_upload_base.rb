@@ -52,6 +52,8 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 		
 	def setup(params)
 
+		self.log << "Starting setup"
+
 		@sdt_filter = SeriesDescriptionType.where(:series_description_type => ['T1 Volumetic','T1 Volumetric','T1+Volumetric','T1_Volumetric','T1','T2','T2 Flair','T2_Flair','T2+Flair','DTI'])
 		@sdm_filter = SeriesDescriptionMap.where(:series_description_type_id => sdt_filter.map(&:id))
 		@selected = []
@@ -60,6 +62,8 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 	    if !File.directory?(params[:target_dir])
 	      Dir.mkdir(params[:target_dir])
 	    end
+
+	    self.log << "Setup complete"
 
 	end
 
@@ -71,6 +75,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 	
 	def table_rotation(params)
 
+		self.log << "Starting table rotation"
 
 		sql = "truncate #{params[:cg_table]}_new"
 		@connection.execute(sql)
@@ -152,6 +157,8 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 	    shared = Shared.new
 	    shared.apply_cg_edits(params[:cg_table])
 
+	    self.log << "Table rotation complete"
+
 	end
 
 	# selection
@@ -177,6 +184,8 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 		
 	def selection(params)
 
+	    self.log << "Starting selection"
+
 		sql = "select distinct subjectid,scan_procedure_id,status_flag from cg_adrc_upload where sent_flag ='N' and status_flag in ('Y','R') "
     	results = @connection.execute(sql)
 
@@ -188,12 +197,16 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 
 	    	@selected << adrc_case
 	    end
+
+	    self.log << "Selection complete"
 	end
 
 
 	# => if we have < 2 files to send, error out this case & remove the subject's target dir
 
 	def filter(params)
+
+	    self.log << "Started filtering cases"
 
 		@selected.each do |adrc_case|
 
@@ -256,6 +269,8 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 		    @driver << adrc_case
 
 		end
+
+		self.log << "Filtering cases complete (#{@driver.count} new cases, #{self.exclusions.count} exclusions from processing)"
 	end
 
 	# 	prep for send
@@ -265,6 +280,8 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 	# => scrub some values
 	
 	def prep_for_send(params)
+
+		self.log << "Starting prep for send"
 
 		@driver.each do |adrc_case|
 
@@ -338,6 +355,7 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 			if !params[:local]
             	r_call "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"cd /Users/#{params[:run_by_user]}/adrc_upload/; /usr/bin/zip -r #{adrc_case[:case_dir]}.zip #{adrc_case[:case_dir]}"
             else
+
             	r_call "cd /tmp/adrc_upload/; /usr/bin/zip -r #{adrc_case[:case_dir]}.zip #{adrc_case[:case_dir]}"
             end
 
@@ -348,6 +366,8 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 		    # r_call "rm -rf /tmp/adrc_upload/#{adrc_case[:case_dir]}/"
 
 		end
+
+		self.log << "Prep for send complete"
 	end
 
 	# send
@@ -356,7 +376,11 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
 		
 	def send_to_s3(params)
 
+		self.log << "Sending scans to S3"
+
 		@driver.each do |adrc_case|
+
+			self.log << "Sending scans for #{adrc_case[:subject_id]}"
 
 			json_report = ''
 			if !params[:local]
@@ -374,6 +398,8 @@ class Jobs::NaccUpload::NaccUploadBase < Jobs::BaseJob
         	sql_sent = "update cg_adrc_upload set sent_flag ='Y' where subjectid ='#{adrc_case[:subject_id]}'"
         	@connection.execute(sql_sent)
     	end
+
+    	self.log << "Sending scans complete"
 	end
 
 end
