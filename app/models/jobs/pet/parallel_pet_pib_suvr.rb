@@ -89,11 +89,11 @@ class Jobs::Pet::ParallelPetPibSuvr < Jobs::Pet::PetBase
               v_participant = Participant.find(vgroup.participant_id)
 
             else
-              self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"enum\":\"#{pet_appt.related_enumber.enumber}\", \"protocol\":\"#{pet_appt.related_scan_procedure.codename}\", \"message\":\"vgroup had a broken participant_id\"}"
+              self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"enum\":\"#{(pet_appt.related_enumber.nil? ? '' : pet_appt.related_enumber.enumber)}\", \"protocol\":\"#{(pet_appt.related_scan_procedure.nil? ? '' : pet_appt.related_scan_procedure.codename)}\", \"message\":\"vgroup had a broken participant_id\"}"
               next
             end
           else
-            self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"enum\":\"#{pet_appt.related_enumber.enumber}\", \"protocol\":\"#{pet_appt.related_scan_procedure.codename}\", \"message\":\"appointment had a broken vgroup_id\"}"
+            self.exclusions << "{\"class\":\"#{pet_appt.class}\", \"id\":\"#{pet_appt.id}\", \"enum\":\"#{(pet_appt.related_enumber.nil? ? '' : pet_appt.related_enumber.enumber)}\", \"protocol\":\"#{(pet_appt.related_scan_procedure.nil? ? '' : pet_appt.related_scan_procedure.codename)}\", \"message\":\"appointment had a broken vgroup_id\"}"
             next
           end
 

@@ -344,7 +344,8 @@ function load_fields (central_title, id) {
               if (check.field_type == 'dropdown') {
 
                     form_fields += '<select class="custom-select" name="'+check.tractiontype_id+'">';
-                    form_fields += '<option '+(check.value == '' ? 'selected' : '')+'></option>';
+                    /*form_fields += '<option '+(check.value == '' ? 'selected' : '')+'></option>';*/
+                    
                       $.each(check.options, function (opt_value, opt_label){
                         form_fields += '<option value="'+opt_value+'" ' + (check.value == opt_value ? 'selected' : '') + '>'+opt_label+'</option>';
                       });

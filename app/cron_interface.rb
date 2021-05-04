@@ -259,18 +259,6 @@ v_user = v_user.gsub("\n","")
       v_shared = Shared.new
       v_shared.run_pet_pib_dvr_harvest()
 
-
-
-   elsif v_value_1 == "lst_lpa_process"
-     params = Jobs::Lst::LstLpaDriver.production_params
-     job = Jobs::Lst::LstLpaDriver.new(params)
-     job.run(params)
-
-   elsif v_value_1 == 'LST/LPA Pipeline Harvester'
-     params = Jobs::Lst::LstLpaHarvester.production_params
-     job = Jobs::Lst::LstLpaHarvester.new(params)
-     job.run(params)
-
    elsif v_value_1 == "parallel_pet_mk6240_process"
      job = Pet::ParallelPetProcess.new
      params = Pet::ParallelPetProcess.mk6240_params
@@ -304,11 +292,19 @@ v_user = v_user.gsub("\n","")
      job = Jobs::RemoteRequest::NeuropathologyRequest.new(job1_params)
      job.run(job_params)
 
-  elsif v_value_1 == "lstlpa_harvest"
 
-    params = Jobs::Lst::LstLpaHarvester.production_params
-    job = Jobs::Lst::LstLpaHarvester.new(params)
-    job.run(params)
+  elsif v_value_1 == 'LST LPA Pipeline'
+     job1_params = Jobs::Lst::LstLpaDriver.production_params
+     job1 = Jobs::Lst::LstLpaDriver.new(job1_params)
+     job1.run(job1_params)
+
+     job2_params = Jobs::Lst::AdcpDriver.production_params
+     job2 = Jobs::Lst::AdcpDriver.new(job2_params)
+     job2.run(job2_params)
+
+     params = Jobs::Lst::LstLpaHarvester.production_params
+     job = Jobs::Lst::LstLpaHarvester.new(params)
+     job.run(params)
 
   elsif v_value_1 == "pcvipr_ica_harvest"
 
