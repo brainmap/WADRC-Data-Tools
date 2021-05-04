@@ -219,6 +219,62 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 	end
 	
 	def post_harvest(params)
+		success = []
+		failure = []
+		sql = "select original_image_path_flair, id from cg_lst_lpa"
+		result = @connection.execute(sql).to_a
+
+		result.each do |row|
+			path_parts = row[0].split("/")
+			filename_parts = path_parts.last.split("_")
+			sp_path = "/mounts/data/raw/#{path_parts[5]}/"
+			if File.exists?(sp_path) and File.directory?(sp_path)
+
+				if Dir.entries(sp_path).include? "mri"
+					sp_path = sp_path + "mri/"
+				end
+
+				subdir = Dir.entries(sp_path).select{|item| item =~ Regexp.new(path_parts[6])}.first
+
+				raw_glob = "#{sp_path}#{subdir}/#{filename_parts.last.gsub(/.nii/,'')}"
+				#glob_hits = Dir.glob(raw_glob)
+					
+				visits = Visit.joins("LEFT JOIN appointments ON appointments.id = visits.appointment_id").joins("LEFT JOIN vgroups ON vgroups.id = appointments.vgroup_id").joins("LEFT JOIN enrollment_vgroup_memberships ON vgroups.id = enrollment_vgroup_memberships.vgroup_id").joins("LEFT JOIN enrollments ON enrollment_vgroup_memberships.enrollment_id = enrollments.id").joins("LEFT JOIN scan_procedures_vgroups ON vgroups.id = scan_procedures_vgroups.vgroup_id").joins("LEFT JOIN scan_procedures ON scan_procedures_vgroups.scan_procedure_id = scan_procedures.id").where("enrollments.enumber = '#{path_parts[6]}'").where("scan_procedures.codename = '#{path_parts[5]}'")
+
+				images = visits.map(&:image_datasets).flatten
+
+				if File.exists?(raw_glob) and File.directory?(raw_glob)
+
+					#success!
+
+					image = images.select{|item| item.path == raw_glob}.first
+
+					success << {:id => row[1], :pure_corrected => image.pure_corrected?.to_s, :receive_coil_name => image.receive_coil_name, :mri_station_name => image.mri_station_name, :method => 'found by path'}
+
+					sql = "update cg_lst_lpa set pure_corrected = '#{image.pure_corrected?.to_s}', receive_coil_name = '#{image.receive_coil_name}', mri_station_name = '#{image.mri_station_name}' where id = #{row[1]};"
+					connection.execute(sql)
+
+
+				else
+					# let's try something a little different
+
+					filtered_images = images.select{|image| (image.series_description =~ /ORIG/).nil? and ((image.series_description =~ /SAG Cube T2 FLAIR/i)  or (image.series_description =~ /Sag T2 FLAIR Cube/i)  or (image.series_description =~ /Sag CUBE T2FLAIR/i) or (image.series_description =~ /Sag CUBE flair/i))}
+
+					if filtered_images.count == 1
+						image = filtered_images.first
+						success << {:id => row[1], :pure_corrected => image.pure_corrected?.to_s, :receive_coil_name => image.receive_coil_name, :mri_station_name => image.mri_station_name, :method => 'found by filter'}
+						
+						sql = "update cg_lst_lpa set pure_corrected = '#{image.pure_corrected?.to_s}', receive_coil_name = '#{image.receive_coil_name}', mri_station_name = '#{image.mri_station_name}' where id = #{row[1]};"
+						connection.execute(sql)
+
+					else
+						failure << {:id => row[1], :path => row[0], :message => "can't find a path, filter didn't work (#{filtered_images.count})", :raw_dir => raw_glob, :scan_procedure => path_parts[5]}
+					end
+				end
+			else
+				failure << {:id => row[1], :path => row[0], :message => "paths didn't exist (scan procedure)"}
+			end
+		end
 	end
 
 
