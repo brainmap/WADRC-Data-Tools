@@ -252,7 +252,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 					success << {:id => row[1], :pure_corrected => image.pure_corrected?.to_s, :receive_coil_name => image.receive_coil_name, :mri_station_name => image.mri_station_name, :method => 'found by path'}
 
 					sql = "update cg_lst_lpa set pure_corrected = '#{image.pure_corrected?.to_s}', receive_coil_name = '#{image.receive_coil_name}', mri_station_name = '#{image.mri_station_name}' where id = #{row[1]};"
-					connection.execute(sql)
+					@connection.execute(sql)
 
 
 				else
@@ -265,7 +265,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 						success << {:id => row[1], :pure_corrected => image.pure_corrected?.to_s, :receive_coil_name => image.receive_coil_name, :mri_station_name => image.mri_station_name, :method => 'found by filter'}
 						
 						sql = "update cg_lst_lpa set pure_corrected = '#{image.pure_corrected?.to_s}', receive_coil_name = '#{image.receive_coil_name}', mri_station_name = '#{image.mri_station_name}' where id = #{row[1]};"
-						connection.execute(sql)
+						@connection.execute(sql)
 
 					else
 						failure << {:id => row[1], :path => row[0], :message => "can't find a path, filter didn't work (#{filtered_images.count})", :raw_dir => raw_glob, :scan_procedure => path_parts[5]}
