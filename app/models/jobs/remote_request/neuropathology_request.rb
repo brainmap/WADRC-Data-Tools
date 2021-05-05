@@ -27,6 +27,9 @@ class Jobs::RemoteRequest::NeuropathologyRequest < Jobs::RemoteRequest::RemoteRe
 
 	def record(params)
 
+		sql = "truncate #{params[:neuropathology_table]}_new"
+		@connection.execute(sql)
+
 		@base_args = {
 			:token => params[:adrc_token],
 			:content => 'record',

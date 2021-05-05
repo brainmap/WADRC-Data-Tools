@@ -50,6 +50,8 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 			rotate_tables(params)
 
 			close(params)
+
+			post_harvest(params)
 		
 		rescue StandardError => error
 
