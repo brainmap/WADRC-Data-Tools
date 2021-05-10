@@ -2,61 +2,37 @@
 <h2>Radiology Findings</h2>
 	<% @rad_reads.each do |rad|%>
 
-<div class='two_col_left'>
-<div class='sticky'>
-<table class='key_value'>
+<table style='max-width:500px;'>
 	<tbody>
-	<tr><th>Scan Entry Date</th><td><%= rad.scan_entry_date.nil? ? '??' : rad.scan_entry_date.strftime("%Y-%m-%d") %>
-	</td></tr>
-	<tr><th>RMR</th><td><%= rad.rmr %></td></tr>
-	<tr><th>Gender</th><td><%= rad.gender %></td></tr>
-	<tr><th>White matter change</th><td><%= rad.white_matter_change %></td></tr>
-	<tr><th>Large vessel infarcts</th><td><%= rad.adrc_large_vessel_infarcts %></td></tr>
-	<tr><th>Lacunar infarcts</th><td><%= rad.adrc_lacunar_infarcts %></td></tr>
-	<tr><th>Macrohemorrhages</th><td><%= rad.adrc_macrohemorrhages %></td></tr>
-	<tr><th>Mcrohemorrhages</th><td><%= rad.adrc_microhemorrhages %></td></tr>
-	<tr><th>Moderate white matter hyperintensity</th><td><%= rad.adrc_moderate_white_matter_hyperintensity %></td></tr>
-	<tr><th>Extensive white matter hyperintensity</th><td><%= rad.adrc_extensive_white_matter_hyperintensity %></td></tr>
-	<tr><th>MPnRAGE Uncorrected?</th><td><%= rad.mpnrage_uncorrected %></td></tr>
-	<tr><th>MPnRAGE Classic MOCO?</th><td><%= rad.mpnrage_classic_moco %></td></tr>
-	<tr><th>MPnRAGE new recon?</th><td><%= rad.mpnrage_new_recon %></td></tr>
-
-	<tr><th>Summary</th><td><%= rad.summary %></td></tr>
-	<tr><th>Comments</th><td><%= rad.comments %></td></tr>
-	<tr><th>Clerical Notes</th><td><%= rad.clerical_notes %></td></tr>
-	<tr><th>Reader</th><td><%= rad.reader_first_name %> <%= rad.reader_last_name %></td></tr>
-	<tr><th>Read on</th><td><%= rad.read_date.nil? ? '??' : rad.read_date.strftime("%Y-%m-%d") %></td></tr>
-
+		<tr><th>Field</th><th>Value</th></tr>
+		<tr><td style='text-align:right;padding:3px;padding:3px;'>Scan Entry Date</td><td style='text-align:left;max-width:500pxpadding:3px;padding:3px;'><%= rad.scan_entry_date.nil? ? '??' : rad.scan_entry_date.strftime("%Y-%m-%d") %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>RMR</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.rmr %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>Gender</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.gender %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>White matter change</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.white_matter_change %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>Large vessel infarcts</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.adrc_large_vessel_infarcts %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>Lacunar infarcts</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.adrc_lacunar_infarcts %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>Macrohemorrhages</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.adrc_macrohemorrhages %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>Microhemorrhages</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.adrc_microhemorrhages %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>Moderate white matter hyperintensity</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.adrc_moderate_white_matter_hyperintensity %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>Extensive white matter hyperintensity</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.adrc_extensive_white_matter_hyperintensity %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>MPnRAGE Uncorrected?</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.mpnrage_uncorrected %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>MPnRAGE Classic MOCO?</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.mpnrage_classic_moco %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>MPnRAGE new recon?</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.mpnrage_new_recon %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>Summary</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.summary %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>Comments</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.comments %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>Clerical Notes</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.clerical_notes %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>Reader</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.reader_first_name %> <%= rad.reader_last_name %></td></tr>
+		<tr><td style='text-align:right;padding:3px;'>Read on</td><td style='text-align:left;max-width:500pxpadding:3px;'><%= rad.read_date.nil? ? '??' : rad.read_date.strftime("%Y-%m-%d") %></td></tr>
 	</tbody>
-
 </table>
-</div>
-</div>
+
 	<% end %>
-
-
-<div class='two_col_right'>
+<% if @rad_reads.count == 0 %>
 <% @radiology_comments = RadiologyComment.where(" radiology_comments.visit_id in (?)",@visit.id).to_a %>
 <%    v_radiology_id = ""
      @radiology_comments.each do |r| 
      	    v_radiology_id = r.id %>
 	  <%=r.comment_html_1.try(:html_safe)%><%=r.comment_html_2.try(:html_safe) %><%=r.comment_html_3.try(:html_safe) %><%=r.comment_html_4.try(:html_safe) %><%=r.comment_html_5.try(:html_safe) %><br><br>
 <%	 end   %>
-</div>	
-<br>
-<br>
-<%= form_tag "https://www.radiology.wisc.edu/a/overreads/scanList.php", :target => "_blank" do -%>
-	<%= hidden_field_tag("origin", "searchForm") %>
-	<%= hidden_field_tag("subjID",rmr) %>
-	<%= submit_tag("Check Radiology Site [in a new tab]") %>
 <% end %>
-<% if current_user.role == 'Admin_High'%>
-&nbsp;&nbsp;&nbsp;
-<% if !(v_radiology_id.to_s).empty?  
-	    @radiology_comments.each do |r|%>
-    <small><small> <%= link_to 'Edit Radiology Record', edit_radiology_comment_path(r), :target => "_edit_blank" %></small></small>&nbsp;&nbsp;
-<%     end
-else %>
-  <small><small> <%= link_to("Add new Radiology Comment",'/radiology_comments/new?visit_id='+(@visit.id).to_s, :target => "_new_blank")%> </small></small>
-<%end%>
-<%end%>
+

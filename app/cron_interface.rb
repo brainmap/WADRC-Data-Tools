@@ -401,6 +401,13 @@ v_user = v_user.gsub("\n","")
 
       xnat_recruit.run params
 
+  elsif v_value_1 == "Radiology Request"
+
+    params = Jobs::RemoteRequest::RadiologyRequest.default_params
+    job = Jobs::RemoteRequest::RadiologyRequest.new(params)
+
+    job.run(params)
+
   elsif v_value_1 == "xnat_curated_upload"
 
       xnat = SharedUpload::XnatCuratedUpload.new
