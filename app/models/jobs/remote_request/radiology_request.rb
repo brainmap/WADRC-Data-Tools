@@ -80,7 +80,7 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 				#try finding a matching visit
 				visit = Visit.where(:rmr => rad_read_form.rmr.upcase).first
 
-				if !visit.nil? and visit.date < (Date.today - 1.month)
+				if !visit.nil? and visit.date < (Date.today - 3.weeks)
 					#check that we're not making duplicates.
 					if RadiologyOverread.where(:visit => visit).count == 0
 
