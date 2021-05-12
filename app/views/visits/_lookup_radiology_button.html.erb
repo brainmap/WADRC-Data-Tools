@@ -59,6 +59,7 @@
 
 	<% end %>
 <% if @rad_reads.count == 0 %>
+<!-- load rad comments -->
 <% @radiology_comments = RadiologyComment.where(" radiology_comments.visit_id in (?)",@visit.id).to_a %>
 <%    v_radiology_id = ""
      @radiology_comments.each do |r| 
