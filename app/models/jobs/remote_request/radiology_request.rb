@@ -61,7 +61,7 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 		#if the response wasn't a 200, then there was an error we should log, and add to errors.
 
 		rad_reads = JSON.parse(@response.body)
-		visit_rmrs = Visit.all().map(&:rmr)
+		visit_rmrs = Visit.all().map(&:rmr).map{|item| item.upcase}
 
 		@filtered_rad_reads = rad_reads.select{|rad| visit_rmrs.include? rad['subjID'].upcase}
 		@log << {:message => "We got #{@filtered_rad_reads.count} overreads."}
