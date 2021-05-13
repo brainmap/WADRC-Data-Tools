@@ -23,7 +23,7 @@
 
 	<tr><th>Summary</th><td><%= rad.summary %></td></tr>
 	<tr><th>Comments</th><td><%= rad.comments %></td></tr>
-	<tr><th>Clerical Notes</th><td><%= rad.clerical_notes.gsub(/\n/,"<br>").html_safe %></td></tr>
+	<tr><th>Clerical Notes</th><td><%= rad.clerical_notes.nil? ? '' : rad.clerical_notes.gsub(/\n/,"<br>").html_safe %></td></tr>
 	<tr><th>Reader</th><td><%= rad.reader_first_name %> <%= rad.reader_last_name %></td></tr>
 	<tr><th>Read on</th><td><%= rad.read_date.nil? ? '??' : rad.read_date.strftime("%Y-%m-%d") %></td></tr>
 
