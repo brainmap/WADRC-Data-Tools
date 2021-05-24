@@ -80,7 +80,7 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 				#try finding a matching visit
 				visit = Visit.where(:rmr => rad_read_form.rmr.upcase).first
 
-				if !visit.nil? and visit.date < (Date.today - 3.weeks)
+				if !visit.nil?
 					#check that we're not making duplicates.
 					if RadiologyOverread.where(:visit => visit).count == 0
 
@@ -90,7 +90,18 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 						rad_read.save
 						@log << {:message => "New overread created for visit(id:#{visit.id})."}
 					else
-						@log << {:message => "An overread already exists for visit(id:#{visit.id}), skipping."}
+						
+						if visit.date > (Date.today - 4.weeks)
+
+							rad_read = RadiologyOverread.where(:visit => visit).first
+							rad_read.from_form(rad_read_form)
+							rad_read.save
+
+							@log << {:message => "An overread already exists for visit(id:#{visit.id}), but it's new enough to update."}
+						else
+
+							@log << {:message => "An overread already exists for visit(id:#{visit.id}), skipping."}
+						end
 					end
 				else
 					#record this one as unmatched.

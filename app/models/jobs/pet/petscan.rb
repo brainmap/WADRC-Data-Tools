@@ -164,49 +164,22 @@
 		    if pet_path.nil?
 		      return nil
 		    end
-		    if @v_enumber.nil?
 
-		      v_subjectid = ''
-		      v_path_array = pet_path.split('/')
+			enrollments = appointment.vgroup.enrollments
+		    path_relevant_enrollment = enrollments.select{|item| pet_path =~ Regexp.new(item.enumber)}.first
+		    return path_relevant_enrollment
 
-		      if File.exist?(pet_path) and !File.directory?(pet_path) and pet_path.end_with?(".v")
-		        # v_subjectid_array = v_path_array[-1].split("_")
-		        # v_subjectid = v_subjectid_array[0].downcase
-
-		        all_enums = related_appointment.vgroup.enrollments.map{|enrl| enrl.enumber}
-		        intersection = all_enums & v_path_array #this should always just be one enrollment number or nothing.
-		        v_subjectid = intersection.first
-
-		      #others are paths to a directory under raw. these should have a subject id as a directory
-		      # in the middle of their path
-		      elsif File.directory?(pet_path)
-		        v_subjectid = v_path_array[7]
-		      end
-		      v_enumbers = Enrollment.where("enumber in (?)", v_subjectid)
-		      if v_enumbers.count <= 0
-		        return nil
-		      else
-		        @v_enumber = v_enumbers.first
-		      end
-		    end
-		    return @v_enumber
 		end
 
 		def related_scan_procedure
 		    if pet_path.nil?
 		      return nil
 		    end
-		    if @v_scan_procedure.nil?
-		      v_path_array = pet_path.split('/')
-		      v_scan_procedure_codename = v_path_array[4]
-		      v_scan_procedures = ScanProcedure.where("codename in (?)",v_scan_procedure_codename)
-		      if v_scan_procedures.count <= 0
-		        return nil
-		      else
-		        @v_scan_procedure = v_scan_procedures.first
-		      end
-		    end
-		    return @v_scan_procedure
+
+		    scan_procedures = appointment.vgroup.scan_procedures
+		    path_relevant_sp = scan_procedures.select{|item| pet_path =~ Regexp.new(item.codename)}.first
+		    return path_relevant_sp
+
 		end
 
 		def related_appointment

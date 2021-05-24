@@ -48,13 +48,13 @@ end
 def show_rad_review(field)
   html = case field
   when "n/a" then
-    "<td style='background-color: #ffbbbb; min-width: 1.5em; max-width: 3em;'>n/a</td>"
+    "<td style='background-color: #ffbbbb; min-width: 1.5em; max-width: 1.5em;'>n/a</td>"
   when "no" then
-    "<td style='background-color: #cccccc; min-width: 1.5em; max-width: 3em;'>no</td>"
+    "<td style='background-color: #cccccc; min-width: 1.5em; max-width: 1.5em;'>no</td>"
   when "yes" then
-    "<td style='background-color: #bbffbb; min-width: 1.5em; max-width: 3em;'>yes</td>"
+    "<td style='background-color: #bbffbb; min-width: 1.5em; max-width: 1.5em;'>yes</td>"
   else
-    "<td style='background-color: #eee; min-width: 1.5em; max-width: 3em;'>#{field}</td>"
+    "<td style='background-color: #eee; min-width: 1.5em; max-width: 1.5em;'>#{field}</td>"
   end
   return html.html_safe
 end

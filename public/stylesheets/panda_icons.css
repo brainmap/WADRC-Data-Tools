@@ -1,11 +1,11 @@
 @font-face {
   font-family: 'panda_icons';
-  src: url('../fonts/panda_icons.eot?104394');
-  src: url('../fonts/panda_icons.eot?104394#iefix') format('embedded-opentype'),
-       url('../fonts/panda_icons.woff2?104394') format('woff2'),
-       url('../fonts/panda_icons.woff?104394') format('woff'),
-       url('../fonts/panda_icons.ttf?104394') format('truetype'),
-       url('../fonts/panda_icons.svg?104394#panda_icons') format('svg');
+  src: url('../webfonts/panda_icons.eot?104394');
+  src: url('../webfonts/panda_icons.eot?104394#iefix') format('embedded-opentype'),
+       url('../webfonts/panda_icons.woff2?104394') format('woff2'),
+       url('../webfonts/panda_icons.woff?104394') format('woff'),
+       url('../webfonts/panda_icons.ttf?104394') format('truetype'),
+       url('../webfonts/panda_icons.svg?104394#panda_icons') format('svg');
   font-weight: normal;
   font-style: normal;
 }

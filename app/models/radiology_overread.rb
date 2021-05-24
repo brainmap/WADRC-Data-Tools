@@ -29,6 +29,7 @@ class RadiologyOverread < ActiveRecord::Base
 		self.mpnrage_uncorrected = form.mpnrage_uncorrected
 		self.mpnrage_classic_moco = form.mpnrage_classic_moco
 		self.mpnrage_new_recon = form.mpnrage_new_recon
+		self.white_matter_score = form.white_matter_score
 
 		return self
 	end

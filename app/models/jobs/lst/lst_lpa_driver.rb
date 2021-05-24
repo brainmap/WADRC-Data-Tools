@@ -14,18 +14,13 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
                 code_ver: 'b42e83aa',
                 exclude_sp_mri_array: [-1,100,80,76,78],
                 date_cutoff: '2018-10-11',
-                csv_headers: ['scan_procedure','enrollment','ACPC_T1_path','T2_FLAIR', 'FLAIR_incomplete_series',
-                        'FLAIR_garbled_series_comment','FLAIR_garbled_series','FLAIR_garbled_series_comment',
-                        'FLAIR_fov_cutoff', 'FLAIR_fov_cutoff_comment', 'FLAIR_field_inhomogeneity','FLAIR_field_inhomogeneity_comment',
-                        'FLAIR_ghosting_wrapping', 'FLAIR_ghosting_wrapping_comment', 'FLAIR_banding','FLAIR_banding_comment',
-                        'FLAIR_registration_risk', 'FLAIR_registration_risk_comment', 'FLAIR_motion_warning', 'FLAIR_motion_warning_comment',
-                        'FLAIR_omnibus_f', 'FLAIR_omnibus_f_comment', 'FLAIR_spm_mask','FLAIR_spm_mask_comment', 'FLAIR_nos_concerns',
-                        'FLAIR_nos_concerns_comment','FLAIR_other_issues'],
+                csv_headers: ['scan_procedure','enrollment','ACPC_T1_path','T2_FLAIR', 'processing_flag'],
                 driver_path: "/mounts/data/analyses/wbbevis/lst_lpa/",
                 driver_file_name: "#{Date.today.strftime("%Y-%m-%d")}_lst_lpa_driver.csv",
                 processing_output_path: "/mounts/data/development/lstlpa/output",
                 processing_input_path: "/mounts/data/development/lstlpa/input",
                 processing_executable_path: "/mounts/data/development/lstlpa/src/run_lpa.sh",
+                special_flag: nil
               }
     params.default = ''
     params
@@ -40,18 +35,13 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
                 code_ver: 'b42e83aa',
                 exclude_sp_mri_array: [-1,100,80,76,78],
                 date_cutoff: '2015-06-01',
-                csv_headers: ['scan_procedure','enrollment','ACPC_T1_path','T2_FLAIR', 'FLAIR_incomplete_series',
-                        'FLAIR_garbled_series_comment','FLAIR_garbled_series','FLAIR_garbled_series_comment',
-                        'FLAIR_fov_cutoff', 'FLAIR_fov_cutoff_comment', 'FLAIR_field_inhomogeneity','FLAIR_field_inhomogeneity_comment',
-                        'FLAIR_ghosting_wrapping', 'FLAIR_ghosting_wrapping_comment', 'FLAIR_banding','FLAIR_banding_comment',
-                        'FLAIR_registration_risk', 'FLAIR_registration_risk_comment', 'FLAIR_motion_warning', 'FLAIR_motion_warning_comment',
-                        'FLAIR_omnibus_f', 'FLAIR_omnibus_f_comment', 'FLAIR_spm_mask','FLAIR_spm_mask_comment', 'FLAIR_nos_concerns',
-                        'FLAIR_nos_concerns_comment','FLAIR_other_issues'],
+                csv_headers: ['scan_procedure','enrollment','ACPC_T1_path','T2_FLAIR', 'processing_flag'],
                 driver_path: "/mounts/data/analyses/wbbevis/lst_lpa/",
                 driver_file_name: "#{Date.today.strftime("%Y-%m-%d")}_lst_lpa_driver.csv",
                 processing_output_path: "/mounts/data/pipelines/lstlpa/output",
                 processing_input_path: "/mounts/data/pipelines/lstlpa/input",
                 processing_executable_path: "/mounts/data/pipelines/lstlpa/src/run_lpa.sh",
+                special_flag: nil
               }
     params.default = ''
     params
@@ -315,36 +305,11 @@ class Jobs::Lst::LstLpaDriver < Jobs::BaseJob
     csv << params[:csv_headers]
     @driver.each do |row|
 
-      t2_quality_check = row[:t2_ids].image_dataset_quality_checks.last
-
       out = [row[:scan_procedure],
               row[:enrollment].enumber,
               row[:acpc_path],
               row[:t2_nii_path],
-
-              !t2_quality_check.nil? ? t2_quality_check.incomplete_series : "NULL",
-              !t2_quality_check.nil? ? t2_quality_check.incomplete_series_comment : "NULL",
-              !t2_quality_check.nil? ? t2_quality_check.garbled_series : "NULL",
-              !t2_quality_check.nil? ? t2_quality_check.garbled_series_comment : "NULL",
-              !t2_quality_check.nil? ? t2_quality_check.fov_cutoff : "NULL", 
-              !t2_quality_check.nil? ? t2_quality_check.fov_cutoff_comment : "NULL", 
-              !t2_quality_check.nil? ? t2_quality_check.field_inhomogeneity : "NULL",
-              !t2_quality_check.nil? ? t2_quality_check.field_inhomogeneity_comment : "NULL",
-              !t2_quality_check.nil? ? t2_quality_check.ghosting_wrapping : "NULL", 
-              !t2_quality_check.nil? ? t2_quality_check.ghosting_wrapping_comment : "NULL", 
-              !t2_quality_check.nil? ? t2_quality_check.banding : "NULL",
-              !t2_quality_check.nil? ? t2_quality_check.banding_comment : "NULL",
-              !t2_quality_check.nil? ? t2_quality_check.registration_risk : "NULL", 
-              !t2_quality_check.nil? ? t2_quality_check.registration_risk_comment : "NULL", 
-              !t2_quality_check.nil? ? t2_quality_check.motion_warning : "NULL", 
-              !t2_quality_check.nil? ? t2_quality_check.motion_warning_comment : "NULL",
-              !t2_quality_check.nil? ? t2_quality_check.omnibus_f : "NULL", 
-              !t2_quality_check.nil? ? t2_quality_check.omnibus_f_comment : "NULL", 
-              !t2_quality_check.nil? ? t2_quality_check.spm_mask : "NULL",
-              !t2_quality_check.nil? ? t2_quality_check.spm_mask_comment : "NULL", 
-              !t2_quality_check.nil? ? t2_quality_check.nos_concerns : "NULL",
-              !t2_quality_check.nil? ? t2_quality_check.nos_concerns_comment : "NULL",
-              !t2_quality_check.nil? ? t2_quality_check.other_issues : "NULL"]
+              params[:special_flag].to_s]
 
       csv << out
     end

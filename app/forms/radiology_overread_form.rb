@@ -8,7 +8,8 @@ class RadiologyOverreadForm
 	attr_accessor :adrc_moderate_white_matter_hyperintensity, :adrc_extensive_white_matter_hyperintensity
 	attr_accessor :summary, :comments
 	attr_accessor :clerical_notes, :reader_last_name, :reader_first_name, :read_date
-	attr_accessor :mpnrage_uncorrected, :mpnrage_classic_moco, :mpnrage_new_recon
+	attr_accessor :mpnrage_uncorrected, :mpnrage_classic_moco, :mpnrage_new_recon, :white_matter_score
+
 
 
 	def self.attributes
@@ -33,7 +34,8 @@ class RadiologyOverreadForm
 			"read_date" => nil,
 			"mpnrage_uncorrected" => nil,
 			"mpnrage_classic_moco" => nil,
-			"mpnrage_new_recon" => nil
+			"mpnrage_new_recon" => nil,
+			"white_matter_score" => nil
 		}
 	end
 
@@ -51,7 +53,8 @@ class RadiologyOverreadForm
 			choices['dob'] = !json['DOB'].nil? ? Date.strptime(json['DOB'],"%Y-%m-%d") : nil
 		end
 
-		choices['white_matter_change'] = json['whiteMatterChange']
+		choices['white_matter_score'] = json['whiteMatterScore']
+		choices['white_matter_change'] = json['White Matter Change?']
 		choices['adrc_large_vessel_infarcts'] = json['ADRC_large_vessel_infarcts']
 		choices['adrc_lacunar_infarcts'] = json['ADRC_lacunar_infarcts']
 		choices['adrc_macrohemorrhages'] = json['ADRC_macrohemorrhages']
@@ -72,7 +75,6 @@ class RadiologyOverreadForm
 
 		return self.new(choices)
 	end
-
 
 	def attributes
 		{
@@ -96,7 +98,8 @@ class RadiologyOverreadForm
 			"read_date" => @read_date,
 			"mpnrage_uncorrected" => @mpnrage_uncorrected,
 			"mpnrage_classic_moco" => @mpnrage_classic_moco,
-			"mpnrage_new_recon" => @mpnrage_new_recon
+			"mpnrage_new_recon" => @mpnrage_new_recon,
+			"white_matter_score" => @white_matter_score
 		}
 	end
 
@@ -122,7 +125,8 @@ class RadiologyOverreadForm
 			:read_date => { as: :string, input_html: { class: 'datepicker-input'}, label: "Read date"},
 			:mpnrage_uncorrected => { as: :string },
 			:mpnrage_classic_moco => { as: :string },
-			:mpnrage_new_recon => { as: :string }
+			:mpnrage_new_recon => { as: :string },
+			:white_matter_score => { as: :string }
 		}
 	end
 end

@@ -42,6 +42,8 @@ gem 'coffee-rails', '4.2.1' #'~> 4.2'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
+gem 'ancestry'
+
 # 3.2-4.0 gems   
 gem 'yaml_db' ,'0.4.2' 
 # in production
