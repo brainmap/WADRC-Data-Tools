@@ -146,6 +146,8 @@ edit_count = edit_count -1
   </td></tr></tfoot>
 
   <tbody>
+
+
     <% @results.each do |result| %>
        <%  visit = Visit.find(result[@column_headers.size-1])
            appointment = Appointment.find(visit.appointment_id) 
@@ -153,42 +155,71 @@ edit_count = edit_count -1
            result.delete_at(@column_headers.size-1)
 
         %>
+
+
+
 	  <tr>
-	   <% for i in 0..@column_number-1 %>
-	    <% if i == 0 %>
-	     <td><%= link_to result[i].to_s(:datetime_military), visit %></td>
-	   <% elsif i == 1 %>
-	     <td><%= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:display_alias).collect {|sp| link_to(sp.display_alias, '/mri_search?mri_search[scan_procedure_id][]='+sp.id.to_s)}.join(", ").html_safe %></td>
-	    <% elsif i == 2 %>
-	     <td><%= visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
-	    <% elsif i == 5 %>
-	      <td><%= popup_note('peek', key_val_table('path_popup', { :Path => result[i].to_s })) unless result[i].to_s.blank? %></td>
-	    <% elsif i == 6 # no problem in radiology %>
-	    <%= show_bool(result[i].to_s ) %>
-	    <% elsif i == 7 # no problem in radiology %>
-	      <% if params[:mri_search][:include_radiology_comment]  == "1" %>
-	       <td><% if !result[i].blank? %><a href="https://www.radiology.wisc.edu/a/overreads/<%=result[i]%>" target="_blank">Radiology Site</a><% end %></td>
-	      <% else %>
-	       <%= show_rad_review(result[i].to_s ) %>
-	      <% end %>
-	    <% elsif i == 8 %>
-	      <td><%= popup_note('peek', key_val_table('path_popup', { :MriNote => result[i].to_s })) unless result[i].to_s.blank? %></td>
-	    <% elsif i == 9 %>
-	      <td><%= popup_note('peek', key_val_table('path_popup', { :ApptNote => result[i].to_s })) unless result[i].to_s.blank? %></td>
-	    <% else %>
-	       <td><%= result[i].to_s.html_safe %></td>
-	    <% end%>
-	   <% end %>
+
+      <% if params[:mri_search][:include_radiology_comment]  == "1" %>
+       <td><%= link_to result[0].to_s(:datetime_military), visit %></td>
+       
+       <td><%= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:display_alias).collect {|sp| link_to(sp.display_alias, '/mri_search?mri_search[scan_procedure_id][]='+sp.id.to_s)}.join(", ").html_safe %></td>
+
+       <td><%= visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
+
+       <td><%= result[3].to_s.html_safe %></td>
+       <td><%= result[4].to_s.html_safe %></td>
+
+       <td><%= popup_note('peek', key_val_table('path_popup', { :Path => result[5].to_s })) unless result[5].to_s.blank? %></td>
+      
+        <td style='overflow-wrap: break-word;max-width:5.0em;'><%= result[6].to_s.html_safe %></td>
+        
+        <td style='overflow-wrap: break-word;max-width:5.0em;'><%= result[7].to_s.html_safe %></td>
+
+         <% if !result[8].blank? %><td><a href="https://www.radiology.wisc.edu/a/overreads/<%=result[i]%>" target="_blank">Radiology Site</a></td>
+          <% else %>
+         <td style='overflow-wrap: break-word;'><%= result[8].to_s.html_safe %></td>
+         <% end %>
+
+        <td><%= popup_note('peek', key_val_table('path_popup', { :MriNote => result[9].to_s })) unless result[9].to_s.blank? %></td>
+
+        <td><%= popup_note('peek', key_val_table('path_popup', { :ApptNote => result[10].to_s })) unless result[10].to_s.blank? %></td>
+
+    <% else %>
+
+
+       <td><%= link_to result[0].to_s(:datetime_military), visit %></td>
+       
+       <td><%= visit.scan_procedures.blank? ? "None" : visit.scan_procedures.sort_by(&:display_alias).collect {|sp| link_to(sp.display_alias, '/mri_search?mri_search[scan_procedure_id][]='+sp.id.to_s)}.join(", ").html_safe %></td>
+
+       <td><%= visit.enrollments.collect {|e| link_to(e.enumber, e) }.join(", ").html_safe %></td>
+
+       <td><%= result[3].to_s.html_safe %></td>
+       <td><%= result[4].to_s.html_safe %></td>
+
+       <td><%= popup_note('peek', key_val_table('path_popup', { :Path => result[5].to_s })) unless result[5].to_s.blank? %></td>
+      
+        <%= show_bool(result[6].to_s ) %>
+        
+        <%= show_rad_review(result[7].to_s ) %>
+
+        <td><%= popup_note('peek', key_val_table('path_popup', { :MriNote => result[8].to_s })) unless result[8].to_s.blank? %></td>
+
+        <td><%= popup_note('peek', key_val_table('path_popup', { :ApptNote => result[9].to_s })) unless result[9].to_s.blank? %></td>
+
+
+     <% end %>
        <td style="width: 6em;" nowrap><%= link_to 'show', visit %>
-		  <% if edit_count > 0 %>
-			<%= link_to 'edit', edit_visit_path(visit) %>
-		  <% end %>
+      <% if edit_count > 0 %>
+      <%= link_to 'edit', edit_visit_path(visit) %>
+      <% end %>
        </td>
        <td>
           <% if edit_count > 0 %>
-	         <%= link_to  'New', new_visit_path+"/"+vgroup.id.to_s %>
+           <%= link_to  'New', new_visit_path+"/"+vgroup.id.to_s %>
           <% end %>
        </td>
+	   
       </tr>
     <% end %>
   </tbody>
