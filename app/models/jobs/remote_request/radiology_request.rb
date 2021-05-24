@@ -6,6 +6,7 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 
 	attr_accessor :response
 	attr_accessor :http
+	attr_accessor :filtered_rad_reads
 
 	def self.default_params
 	  	params = { :schedule_name => 'Radiology Request', 
@@ -71,6 +72,13 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 	def record(params)
 		#we need visits to associate these with, and we need to validate these inputs before we save them.
 
+		# 'Nm' => 'normal'
+		normal_visit_ids = []
+      	# 'A-NF' => 'abnormal no follow up' / 'abnormal'
+      	abnormal_no_follow_up = []
+      	# 'A-F' => 'abnormal, needs follow up' / 'abnormalFollow'
+      	abnormal_needs_follow_up = []
+
 		@log << {:message => "Starting to record the overreads."}
 		@filtered_rad_reads.each do |rad|
 			#we should validate this JSON
@@ -82,12 +90,21 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 
 				if !visit.nil?
 					#check that we're not making duplicates.
+					if rad_read_form.summary == 'normal'
+						normal_visit_ids << visit.id
+					elsif rad_read_form.summary == 'abnormal'
+						abnormal_no_follow_up << visit.id
+					elsif rad_read_form.summary == 'abnormalFollow'
+						abnormal_needs_follow_up << visit.id
+					end
+
 					if RadiologyOverread.where(:visit => visit).count == 0
 
 						rad_read = RadiologyOverread.new().from_form(rad_read_form)
 						rad_read.visit_id = visit.id
 
 						rad_read.save
+
 						@log << {:message => "New overread created for visit(id:#{visit.id})."}
 					else
 						
@@ -112,6 +129,24 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 		end
 
 		@log << {:message => "Storing is complete!"}
+
+		@log << {:message => "updating visits"}
+
+		Visit.where(:id => normal_visit_ids).each do |visit|
+			visit.radiology_outcome = 'Nm'
+			visit.save
+		end
+		Visit.where(:id => abnormal_no_follow_up).each do |visit|
+			visit.radiology_outcome = 'A-NF'
+			visit.save
+		end
+		Visit.where(:id => abnormal_needs_follow_up).each do |visit|
+			visit.radiology_outcome = 'A-F'
+			visit.save
+		end
+
+		@log << {:message => "updating visits complete"}
+
 	end
 
 	def rotate_tables(params)
