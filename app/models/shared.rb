@@ -1394,14 +1394,14 @@ end
                                v_err = stderr.read 1024
                                v_log = v_log +v_err
                               end
-                              if v_err > ""
-                                 v_schedule_owner_email_array.each do |e|
-                                    v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see ==> "+v_log_path+" <== ALl the output from process is in the file."
-                                    PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
-                                end
-                              end
-                   #           puts "err="+v_err
                               if v_success == "N"
+                                if v_err > ""
+                                   v_schedule_owner_email_array.each do |e|
+                                      v_subject = "Error in "+v_process_name+": "+v_subjectid_v_num+ " see ==> "+v_log_path+" <== ALl the output from process is in the file."
+                                      PandaMailer.schedule_notice(v_subject,{:send_to => e}).deliver
+                                  end
+                                end
+                   #           puts "err="+v_err
                                  v_comment_warning = " "+ v_subjectid_v_num +"; "+v_comment_warning 
                                  v_log = "warning on "+ v_subjectid_v_num +"; "+v_log
                               end

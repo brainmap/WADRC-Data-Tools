@@ -178,6 +178,9 @@ cookie
   if !comment_html_5.blank?
       var = var + comment_html_5
   end
+  if !comment_html_6.blank?
+      var = var + comment_html_6
+  end
     return var
   end  
 
