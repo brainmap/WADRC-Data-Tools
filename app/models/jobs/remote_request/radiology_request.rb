@@ -68,6 +68,15 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 		@log << {:message => "We got #{@filtered_rad_reads.count} overreads."}
 	end
 
+	def abs_sort(a,b)
+      if a[0].abs > b[0].abs
+        return 1
+      elsif a[0].abs < b[0].abs
+        return -1
+      else
+        return 0
+      end
+  	end
 
 	def record(params)
 		#we need visits to associate these with, and we need to validate these inputs before we save them.
@@ -86,7 +95,17 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 
 			if rad_read_form.valid?
 				#try finding a matching visit
-				visit = Visit.where(:rmr => rad_read_form.rmr.upcase).first
+
+				# 2021-05-25 wbbevis -- Matching these reads to their visits is a little more complicated than
+				# just finding the first one with a matching RMR. We need to actually find the visit that's 
+				# closest to the date that the read was entered. 
+
+				visits = Visit.where(:rmr => rad_read_form.rmr.upcase)
+
+				sortable_list = visits.map{|item| [item.date - rad_read_form.scan_entry_date, item]}
+				sorted_list = sortable_list.sort!{|a,b| abs_sort(a,b)}
+
+				visit = sorted_list.first[1]
 
 				if !visit.nil?
 					#check that we're not making duplicates.

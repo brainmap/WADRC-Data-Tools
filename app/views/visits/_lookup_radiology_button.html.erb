@@ -21,7 +21,7 @@
 	<tr><th>MPnRAGE Classic MOCO?</th><td><%= rad.mpnrage_classic_moco %></td></tr>
 	<tr><th>MPnRAGE new recon?</th><td><%= rad.mpnrage_new_recon %></td></tr>
 
-	<tr><th>Summary</th><td><%= rad.summary %></td></tr>
+	<tr><th>Summary</th><td><%= rad.summary == 'normal' ? "Normal" : (rad.summary == 'abnormal' ? "Abnormal, no follow-up necessary" : (rad.summary == 'abnormalFollow' ? "Abnormal, needs follow-up" : "")) %></td></tr>
 	<tr><th>Comments</th><td><%= rad.comments %></td></tr>
 	<tr><th>Clerical Notes</th><td><%= rad.clerical_notes.nil? ? '' : rad.clerical_notes.gsub(/\n/,"<br>").html_safe %></td></tr>
 	<tr><th>Reader</th><td><%= rad.reader_first_name %> <%= rad.reader_last_name %></td></tr>
