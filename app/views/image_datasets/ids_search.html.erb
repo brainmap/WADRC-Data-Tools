@@ -70,6 +70,10 @@ edit_count = edit_count -1
       <th><%= f.label :Series_desc_contains %></th>
       <td><%= f.text_field :series_description %></td>
     </tr>
+    <tr>
+      <th><%= f.label :Shareable? %></th>
+      <td><%= select(:ids_search, :shareable_status, [['True','true'],['False','false'],['Show status','display']], { :include_blank => "" }) %> </td>
+    </tr>
   </table>
 
 
@@ -137,11 +141,12 @@ edit_count = edit_count -1
 
   <tbody>
     <% @results.each do |result| %>
-       <%  image_dataset = ImageDataset.find(result[@column_headers.size-1])
+      <% puts "result is #{result}" %>
+       <%  image_dataset = ImageDataset.find(result[-2])
            visit = Visit.find(image_dataset.visit_id)
            appointment = Appointment.find(visit.appointment_id) 
            vgroup = Vgroup.find(appointment.vgroup_id)
-           result.delete_at(@column_headers.size-1)
+           result.delete_at(-2)
         %>
 	  <tr>
 	   <% for i in 0..@column_number-1 %>
@@ -158,8 +163,10 @@ edit_count = edit_count -1
 		      <td><%= popup_note("peek", key_val_table("image_details", image_dataset.details_hash))%></td>
 		    <% elsif i == 7 %>
 		      <td><%= qc_popup_or_link_to_new(image_dataset) %></td>
-		    <% elsif i == 8 %>
-		    <td><%=h image_dataset.excluded_by_any_analyses? ? image_dataset.analysis_memberships.out.size.to_s : "None" %></td>
+        <% elsif i == 8 %>
+        <td><%=h image_dataset.excluded_by_any_analyses? ? image_dataset.analysis_memberships.out.size.to_s : "None" %></td>
+        <% elsif i == 9 %>
+        <td class='shareable_column'><%=h image_dataset.shareable? ? "True" : "False" %></td>
 		    <!-- <% elsif i == 9 %>
 		      <td><%= popup_note('peek', key_val_table('path_popup', { :ApptNote => result[i].to_s })) unless result[i].to_s.blank? %></td> -->
 		    <% else %>
@@ -176,7 +183,16 @@ edit_count = edit_count -1
 
 <script type="text/javascript">
 
+function set_shareable_visible () {
+  if ($('#shareable-filter').val() != "") {
+    $('.shareable_column').show();
+  } else {
+    $('.shareable_column').hide();
+  } 
+}
+
 $(document).ready(function() {
+    set_shareable_visible();
     $( "#metadata_label" ).autoComplete({
       source: function( term, suggest ) {
         $.ajax({

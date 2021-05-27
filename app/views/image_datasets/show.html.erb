@@ -78,16 +78,20 @@ edit_count = edit_count -1
 
 
 <div id="dataset_extras" class="two_col_right">
+
   <div id="comments">
     <%= render :partial => 'comments_table', :locals => { :image_dataset => @image_dataset, :image_comments => @image_comments } %>
   </div>
+
   <% if edit_count > 0 %>
     <p style="float:right; text-align:right"><a id="myHeader1" href="javascript:togglecomment('new_comment_box','myHeader1','Add new comment', 'Done adding comments');" >Add new Comment</a></p>
-	<div id="new_comment_box" style="display: none;">
-		 <%= render :partial => 'new_comment_box', :locals => { :image_dataset => @image_dataset, :image_comment => @image_comment, :current_user => current_user } %></div>
+	  <div id="new_comment_box" style="display: none;">
+		  <%= render :partial => 'new_comment_box', :locals => { :image_dataset => @image_dataset, :image_comment => @image_comment, :current_user => current_user } %>
+    </div>
   <!-- still giving an rjs error in the update -->
   <br />
   <% end %>
+
   <div id="quality_checks">
     <h3>Quality Checks:</h3>
     <%= render :partial => 'quality_checks_list', :locals => { :quality_checks => @image_dataset.image_dataset_quality_checks, :edit_count => edit_count } %>
@@ -95,6 +99,9 @@ edit_count = edit_count -1
   <% if edit_count > 0 %>
   <p><%= link_to 'perform new quality check', new_image_dataset_image_dataset_quality_check_path(@image_dataset) %></p>
   <% end %>
+
+  <%= render :partial => 'image_datasets/sharing', :locals => {:image_dataset => @image_dataset} %>
+
 </div>
 
 <% if @image_dataset.image_dataset_quality_checks.count > 1 %>
@@ -144,8 +151,14 @@ edit_count = edit_count -1
     <small>Some scans types are picks as default scan via scheduled processes. Lock block the process from setting the default for this scan. Un-Lock restores the process to set this image_dataset flag.</small>
 
   <%end%>
-</div>
+
+
 <%= clearing_br %>
+</div>
+
+<%= clearing_br %>
+
+
 
 <%= render :partial => 'image_datasets/streamlined_table', :locals => {:image_datasets => @image_datasets} %>
 

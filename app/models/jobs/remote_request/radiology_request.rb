@@ -127,7 +127,7 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 						@log << {:message => "New overread created for visit(id:#{visit.id})."}
 					else
 						
-						if visit.date > (Date.today - 4.weeks)
+						if visit.date > (Date.today - 5.weeks)
 
 							rad_read = RadiologyOverread.where(:visit => visit).first
 							rad_read.from_form(rad_read_form)

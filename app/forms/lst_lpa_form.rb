@@ -7,7 +7,7 @@ class LstLpaForm
 	attr_accessor :spm_revision, :lst_version, :lstlpa_local_code_version
 	attr_accessor :original_image_path_flair, :original_image_path_T1, :lesion_volume_ml
 	attr_accessor :number_of_lesions, :created_at, :processed_at, :participant_id
-	attr_accessor :enrollment_id, :scan_procedure_id
+	attr_accessor :enrollment_id, :scan_procedure_id, :processing_flag
 
 	def self.attributes
 		{
@@ -27,7 +27,8 @@ class LstLpaForm
 			'processed_at' => '', 
 			'participant_id' => nil,
 			'enrollment_id' => nil,
-			'scan_procedure_id' => nil
+			'scan_procedure_id' => nil,
+			'processing_flag' => nil
 		}
 	end
 
@@ -98,7 +99,8 @@ class LstLpaForm
 			'processed_at' => @processed_at, 
 			'participant_id' => @participant_id,
 			'enrollment_id' => @enrollment_id,
-			'scan_procedure_id' => @scan_procedure_id
+			'scan_procedure_id' => @scan_procedure_id,
+			'processing_flag' => @processing_flag
 
 		}
 	end

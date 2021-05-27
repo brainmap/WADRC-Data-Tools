@@ -15,8 +15,8 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
     			computer: "merida",
                 run_by_user: 'panda_user',
                 destination_table: 'cg_lst_lpa',
-                code_ver: '019',
-                older_versions: ['dd1ceef-mod','fc14b99','6992d9e','20ae61c','6bbec87','d0fc77a9','b42e83aa','019'],
+                code_ver: '020',
+                older_versions: ['dd1ceef-mod','fc14b99','6992d9e','20ae61c','6bbec87','d0fc77a9','b42e83aa','019','020'],
                 processing_output_path: "/mounts/data/development/lstlpa/output",
                 tracker_id: 17
     		}
@@ -30,8 +30,8 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
     			computer: "merida",
                 run_by_user: 'panda_user',
                 destination_table: 'cg_lst_lpa',
-                code_ver: '019',
-                older_versions: ['dd1ceef-mod','fc14b99','6992d9e','20ae61c','6bbec87','d0fc77a9a2','b42e83aa','019'],
+                code_ver: '020',
+                older_versions: ['dd1ceef-mod','fc14b99','6992d9e','20ae61c','6bbec87','d0fc77a9a2','b42e83aa','019','020'],
                 processing_output_path: "/mounts/data/pipelines/lstlpa/output",
                 tracker_id: 17
     		}
@@ -91,107 +91,131 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 					# we're going to need to loop through the available code version subdirs, and
 					# find the latest version with all the products we need.
 
+					# 2021-05-26 wbbevis - We need to harvest stuff that's been processed with a
+					# special "processing flag", which gets its own special subdir. We should
+					# harvest this if it's the latest stuff. Bascially, there will be cases where
+					# we've got both a most-recently processed subdir, and a sibling special 
+					# processing subdir, and we want to be able to harvest both.
+
 					params[:older_versions].reverse.each do |code_version|
 
-						code_version_dir = "#{protocol_path}/#{subject}/#{code_version}"
+						subject_dir_path = "#{protocol_path}/#{subject}/"
 
-						csv_candidates = []
-						html_candidates = []
+						candidate_subdirs = Dir.entries(subject_dir_path).select{|entry| (entry =~ /^[^.]/) and (entry =~ Regexp.new(code_version))}
 
-						if File.exists?(code_version_dir) and File.directory?(code_version_dir)
-							filenames = Dir.entries(code_version_dir)
-							csv_candidates = filenames.select{|entry| entry =~ /_lstlpa.csv$/}
-							html_candidates = filenames.select{|entry| (entry =~ /.html$/) and !(entry =~ /-/)}
-						end
+						found_trackable = false
 
-						if html_candidates.length == 0 or csv_candidates.length != 1
-							next
-						else
+						candidate_subdirs.each do |subdir|
+							code_version_dir = "#{subject_dir_path}#{subdir}"
+							processing_flag = ''
 
-							self.total_cases += 1
-							self.success << {:protocol => protocol, :subject => subject}
+							if (subdir =~ /_/)
+								# if subdir is "020_ADNIFLAIR", then processing_flag will end up == "ADNIFLAIR"
+								processing_flag = subdir.split("_").last
+							end
 
-							html_path = "#{code_version_dir}/#{html_candidates.first}"
+							csv_candidates = []
+							html_candidates = []
 
-							#Is there a QC tracker for this object?
-							existing_tracked_image = Processedimage.where("file_path like ?","%#{html_path}%")
+							if File.exists?(code_version_dir) and File.directory?(code_version_dir)
+								filenames = Dir.entries(code_version_dir)
+								csv_candidates = filenames.select{|entry| entry =~ /_lstlpa.csv$/}
+								html_candidates = filenames.select{|entry| (entry =~ /.html$/) and !(entry =~ /-/)}
+							end
 
-				            if existing_tracked_image.count > 0
-				            	#this files has been QC tracked, so if it's passed, we should add it to the searchable table
-				            	self.success_log << {:message => 'a case with an existing tracked image', :protocol => protocol, :subject => subject}
-				            	matching_image = Trfileimage.where(:image_id => existing_tracked_image.first.id, :image_category => 'html').first
+							if html_candidates.length == 0 or csv_candidates.length != 1
+								next
+							else
 
-				            	qc_value = matching_image.trfile.qc_value
+								self.total_cases += 1
+								self.success << {:protocol => protocol, :subject => subject}
 
-					            if qc_value == 'Pass'
-					            	# create an insert from the csv
-					            	csv = CSV.open("#{code_version_dir}/#{csv_candidates.first}",:headers => true)
+								html_path = "#{code_version_dir}/#{html_candidates.first}"
 
-									new_form = LstLpaForm.from_csv(csv)
+								#Is there a QC tracker for this object?
+								existing_tracked_image = Processedimage.where("file_path like ?","%#{html_path}%")
 
-								    if new_form.valid?
-						               	sql = new_form.to_sql_insert("#{params[:destination_table]}_new")
-										@connection.execute(sql)
-									end
+					            if existing_tracked_image.count > 0
+					            	#this files has been QC tracked, so if it's passed, we should add it to the searchable table
+					            	self.success_log << {:message => 'a case with an existing tracked image', :protocol => protocol, :subject => subject}
+					            	matching_image = Trfileimage.where(:image_id => existing_tracked_image.first.id, :image_category => 'html').first
+
+					            	qc_value = matching_image.trfile.qc_value
+
+						            if qc_value == 'Pass'
+						            	# create an insert from the csv
+						            	csv = CSV.open("#{code_version_dir}/#{csv_candidates.first}",:headers => true)
+
+										new_form = LstLpaForm.from_csv(csv)
+										new_form.processing_flag = processing_flag
+
+									    if new_form.valid?
+							               	sql = new_form.to_sql_insert("#{params[:destination_table]}_new")
+											@connection.execute(sql)
+										end
+						            end
+
+					            else
+					            	#this file isn't tracked yet, so let's start tracking it
+					            	self.success_log << {:message => 'a case that isnt tracked yet', :protocol => protocol, :subject => subject}
+
+					            	#then create a trfile and add the images to it.
+					            	trfiles = Trfile.where("trtype_id in (?)",params[:tracker_id]).where("subjectid in (?)",subject).where(:scan_procedure_id => sp.id)
+				                    trfile = trfiles.first
+				                    if trfiles.count == 0
+				                       trfile = Trfile.new
+				                       trfile.subjectid = subject
+				                       trfile.enrollment_id = enrollment.id
+				                       trfile.scan_procedure_id = sp.id
+				                       trfile.trtype_id = params[:tracker_id]
+				                       trfile.qc_value = "New Record"
+				                       trfile.save
+				                    end
+
+									html_candidates.each do |candidate|
+
+						            	image = Processedimage.new
+				                        image.file_type = "html"
+				                        image.file_name = candidate
+				                        image.file_path = "#{code_version_dir}/#{candidate}"
+				                        image.scan_procedure_id = sp.id
+				                        image.enrollment_id = enrollment.id
+				                        image.save
+
+					                    trimg = Trfileimage.new
+				                        trimg.trfile_id = trfile.id
+				                        trimg.image_id = image.id
+				                        trimg.image_category = "html"
+				                        trimg.save
+				                    end
+
+				                    tredit = Tredit.new
+			                       	tredit.trfile_id = trfile.id
+			                       	tredit.save
+
+			                       	#and set up the fields on this file
+			                       	qc_fields = Tractiontype.where("trtype_id in (?)",params[:tracker_id])
+			                       	if qc_fields.count > 0
+			                        	qc_fields.each do |field|
+			                            	rating = TreditAction.new
+			                            	rating.tredit_id = tredit.id
+			                            	rating.tractiontype_id = field.id
+			                            	if !(field.form_default_value).blank?
+			                               		rating.value = field.form_default_value
+			                            	end
+			                            	rating.save
+			                          	end
+			                       	end
 					            end
+					            
+					            found_trackable = true
+					            
+					        end
 
-				            else
-				            	#this file isn't tracked yet, so let's start tracking it
-				            	self.success_log << {:message => 'a case that isnt tracked yet', :protocol => protocol, :subject => subject}
-
-				            	#then create a trfile and add the images to it.
-				            	trfiles = Trfile.where("trtype_id in (?)",params[:tracker_id]).where("subjectid in (?)",subject).where(:scan_procedure_id => sp.id)
-			                    trfile = trfiles.first
-			                    if trfiles.count == 0
-			                       trfile = Trfile.new
-			                       trfile.subjectid = subject
-			                       trfile.enrollment_id = enrollment.id
-			                       trfile.scan_procedure_id = sp.id
-			                       trfile.trtype_id = params[:tracker_id]
-			                       trfile.qc_value = "New Record"
-			                       trfile.save
-			                    end
-
-								html_candidates.each do |candidate|
-
-					            	image = Processedimage.new
-			                        image.file_type = "html"
-			                        image.file_name = candidate
-			                        image.file_path = "#{code_version_dir}/#{candidate}"
-			                        image.scan_procedure_id = sp.id
-			                        image.enrollment_id = enrollment.id
-			                        image.save
-
-				                    trimg = Trfileimage.new
-			                        trimg.trfile_id = trfile.id
-			                        trimg.image_id = image.id
-			                        trimg.image_category = "html"
-			                        trimg.save
-			                    end
-
-			                    tredit = Tredit.new
-		                       	tredit.trfile_id = trfile.id
-		                       	tredit.save
-
-		                       	#and set up the fields on this file
-		                       	qc_fields = Tractiontype.where("trtype_id in (?)",params[:tracker_id])
-		                       	if qc_fields.count > 0
-		                        	qc_fields.each do |field|
-		                            	rating = TreditAction.new
-		                            	rating.tredit_id = tredit.id
-		                            	rating.tractiontype_id = field.id
-		                            	if !(field.form_default_value).blank?
-		                               		rating.value = field.form_default_value
-		                            	end
-		                            	rating.save
-		                          	end
-		                       	end
-				            end
-				            
-				            # here we got the most recent tracked products, so we're good, and we don't need to keep going
-				            break
-				            
-				        end
+					        if found_trackable
+					        	break
+					        end
+					    end
 
 						# elsif html_candidates.length == 0
 						# 	#processing is done, but there's no product? log this.
