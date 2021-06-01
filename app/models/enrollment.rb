@@ -19,6 +19,32 @@ class Enrollment < ActiveRecord::Base
   def withdrawn?
     not withdrawl_reason.blank?
   end
+
+
+  has_one :sharing, :as => :shareable, :dependent => :destroy
+
+  # has_ancestry
+
+  def shareable?(category=nil)
+    !sharing.nil? ? sharing.shareable?(category) : (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N')
+  end
+
+  def heal_sharing
+    
+    if self.sharing.nil?
+      self.sharing = Sharing.new(:shareable => self)
+      self.sharing.save
+    end
+
+    self.sharing.can_share = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
+    self.sharing.can_share_wrap = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
+    self.sharing.can_share_adrc = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
+    self.sharing.can_share_up = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
+    self.sharing.can_share_internal = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
+    self.sharing.save
+
+  end
+
 end
           
 

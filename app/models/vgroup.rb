@@ -32,6 +32,58 @@ class Vgroup < ActiveRecord::Base
   
   has_many :appointments,  :class_name =>"Appointment",:dependent => :destroy
   has_and_belongs_to_many :scan_procedures
+
+  has_one :sharing, :as => :shareable, :dependent => :destroy
+  
+  #for shareable
+  # has_ancestry
+
+  def shareable?(category=nil)
+
+     # this vgroup is shareable if any of its scan procedures are shareable, and all of its enrollments are shareable
+     !sharing.nil? ? sharing.shareable?(category) : (scan_procedures.inject(true){|value, sp| value || sp.shareable?(category)} && enrollments.inject(true){|value, enr| value && enr.shareable?(category)})
+  end
+
+  def heal_sharing
+
+    if self.sharing.nil?
+      self.sharing = Sharing.new(:shareable => self)
+      self.sharing.save
+    end
+
+    scan_procedures.each do |sp|
+      if sp.sharing.nil?
+        sp.heal_sharing
+      end
+    end
+
+    enrollments.each do |enr|
+      if enr.sharing.nil?
+        enr.heal_sharing
+      end
+    end
+
+
+    self.sharing.can_share = (do_not_share_scans != "DO NOT SHARE") && (scan_procedures.inject(false){|value, sp| value || sp.shareable?} && enrollments.inject(true){|value, enr| value && enr.shareable?})
+    self.sharing.can_share_adrc = (do_not_share_scans != "DO NOT SHARE") && (scan_procedures.inject(false){|value, sp| value || sp.shareable?(:ADRC)} && enrollments.inject(true){|value, enr| value && enr.shareable?(:ADRC)})
+    self.sharing.can_share_wrap = (do_not_share_scans != "DO NOT SHARE") && (scan_procedures.inject(false){|value, sp| value || sp.shareable?(:WRAP)} && enrollments.inject(true){|value, enr| value && enr.shareable?(:WRAP)})
+    self.sharing.can_share_up = (do_not_share_scans != "DO NOT SHARE") && (scan_procedures.inject(false){|value, sp| value || sp.shareable?(:UP)} && enrollments.inject(true){|value, enr| value && enr.shareable?(:UP)})
+    self.sharing.can_share_internal = (do_not_share_scans != "DO NOT SHARE") && (scan_procedures.inject(false){|value, sp| value || sp.shareable?(:internal)} && enrollments.inject(true){|value, enr| value && enr.shareable?(:internal)})
+
+    self.sharing.save!
+
+    appointments.each do |appt|
+      if appt.sharing.nil?
+        appt.heal_sharing
+        appt.sharing.parent = self.sharing
+        appt.sharing.save!
+
+      end
+    end
+
+    self.sharing.descendants.each{|child| child.inherit(true)}
+
+  end
   
   def get_base_path()  # this is a duplicate of visit model function --- need a common location
   	# look for mount to adrc image server - different on linux vs mac os , and different on mac os delending on login order

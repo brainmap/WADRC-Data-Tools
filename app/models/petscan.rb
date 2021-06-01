@@ -20,6 +20,22 @@ class Petscan < ActiveRecord::Base
       @appointment =Appointment.find(self.appointment_id)
       return @appointment
   end
+
+  has_one :sharing, :as => :shareable, :dependent => :destroy
+
+   def shareable?(category=nil)
+    !sharing.nil? ? sharing.shareable?(category) : appointment.shareable?(category)
+   end
+
+   def heal_sharing
+
+     if self.sharing.nil?
+        self.sharing = Sharing.new(:shareable => self)
+        self.sharing.save
+     end
+
+   end
+
   # ONLY ONE FILE
   def get_pet_file(p_sp_id, p_tracer_id, p_vgroup_id)
     # ???? '1_asthana.adrc-clinical-core.visit1'=>'', '2_bendlin.tami.visit1'=>'', '1_bendlin.wmad.visit1'=>'','1_bendlin.mets.visit1'=> '',    '2_bendlin.mets.visit1'=> ''

@@ -323,8 +323,11 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
            @html_request ="Y"
            case  request_format
              when "[text/html]","text/html" then # ? application/html
-               @column_headers = ['Date','Protocol','Enumber','RMR','Directory', 'Series Description','Imaging Details','Quality Check', 'Analysis Exclusions',' ' ] # need to look up values
+               @column_headers = ['Date','Protocol','Enumber','RMR','Directory', 'Series Description','Imaging Details','Quality Check', 'Analysis Exclusions'] # need to look up values
                    # Protocol,Enumber,RMR,Appt_Date get prepended to the fields, appointment_note appended
+                   if params[:ids_search][:search_filter] == 'true' or params[:ids_search][:search_filter] == 'display'
+                    @column_headers << 'Shareable?'
+                  end
                @column_number =   @column_headers.size
                @fields =["SUBSTRING_INDEX(image_datasets.path,'/',-1)","series_description","'peek'","'Quality check'","'Analysis exclusion'","image_datasets.id"] # vgroups.id vgroup_id always first, include table name
 # need to substitue peek- details, quality check, eclusion --- need links
@@ -392,6 +395,12 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
            @order_by =["appointments.appointment_date DESC", "vgroups.rmr"]
            #@results = self.run_search   # in the application controller
            @results = self.run_search_ids    # in the application controller. --- need to do some extra pop/push
+
+           if params[:ids_search][:shareable_filter] == 'true' or params[:ids_search][:shareable_filter] == 'false'
+            @results = @results.select{|row| ids = ImageDataset.find(row[@column_headers.size-1]); ids.shareable?.to_s == params[:ids_search][:shareable_filter]}
+            end
+
+            
           @results_total = @results  # pageination makes result count wrong
           t = Time.now 
           @export_file_title ="Search Criteria: "+params["search_criteria"]+" "+@results_total.size.to_s+" records "+t.strftime("%m/%d/%Y %I:%M%p")
@@ -561,7 +570,7 @@ class ImageDatasetsController < ApplicationController # AuthorizedController #  
        @image_dataset = ImageDataset.find(params[:id])
     end
    def image_dataset_params
-          params.require(:image_dataset).permit(:lock_default_scan_flag_parse,:scanned_file,:slices_per_volume,:bold_reps,:rep_time,:glob,:visit_id,:timestamp,:path,:series_description,:rmr,:thumbnail_file_name,:thumbnail_content_type,:mri_coil_name,:mri_station_name, :mri_manufacturer_model_name,:lock_default_scan_flag,:use_as_default_scan_flag,:coil_channel_number,:do_not_share_scans_flag,:image_uid,:dicom_taghash,:dicom_series_uid,:thumbnail_updated_at,:thumbnail_file_size,:id,:dcm_file_count,:thumbnail,:thumb, :metadata_label, :metadata_value)
+          params.require(:image_dataset).permit(:lock_default_scan_flag_parse,:scanned_file,:slices_per_volume,:bold_reps,:rep_time,:glob,:visit_id,:timestamp,:path,:series_description,:rmr,:thumbnail_file_name,:thumbnail_content_type,:mri_coil_name,:mri_station_name, :mri_manufacturer_model_name,:lock_default_scan_flag,:use_as_default_scan_flag,:coil_channel_number,:do_not_share_scans_flag,:image_uid,:dicom_taghash,:dicom_series_uid,:thumbnail_updated_at,:thumbnail_file_size,:id,:dcm_file_count,:thumbnail,:thumb, :metadata_label, :metadata_value, :search_filter)
    end  
    def ids_search_params
           params.require(:ids_search).permit!

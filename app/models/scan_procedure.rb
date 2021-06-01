@@ -5,6 +5,30 @@ class ScanProcedure < ActiveRecord::Base
   has_many :consent_form_scan_procedures,:dependent => :destroy
   #has_and_belongs_to_many :consent_form    -- was causing delete error - looking for consent_formS_scan_procedures
 
+  belongs_to :protocol
+
+  has_one :sharing, :as => :shareable, :dependent => :destroy
+
+  def shareable?(category=nil)
+    !sharing.nil? ? sharing.shareable?(category) : protocol.shareable?(category)
+  end
+
+  def heal_sharing
+
+    protocol.heal_sharing
+
+    if self.sharing.nil?
+      self.sharing = Sharing.new(:shareable => self)
+      self.sharing.save
+    end
+
+    self.sharing.parent = protocol.sharing
+    self.sharing.save
+
+    self.sharing.inherit
+
+  end
+
   def visit_abbr(iv="")
   	#because sometimes we want this to return "_v1"
   	out = iv
@@ -24,10 +48,5 @@ class ScanProcedure < ActiveRecord::Base
   	return out
   end
 
-  def protocol
-    proto = Protocol.where("id = ?",protocol_id).first
-
-    proto
-  end
 
 end

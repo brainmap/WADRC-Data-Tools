@@ -8,6 +8,22 @@ class Lumbarpuncture < ActiveRecord::Base
         @appointment =Appointment.find(self.appointment_id)
         return @appointment
     end
+
+
+  has_one :sharing, :as => :shareable, :dependent => :destroy
+
+  def shareable?(category=nil)
+    !sharing.nil? ? sharing.shareable?(category) : appointment.shareable?(category)
+  end
+
+  def heal_sharing
+
+    if self.sharing.nil?
+      self.sharing = Sharing.new(:shareable => self)
+      self.sharing.save
+    end
+
+  end
     
 	def summary_hash
 

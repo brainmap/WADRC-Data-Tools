@@ -43,7 +43,7 @@ class ImageDataset < ActiveRecord::Base
   
   serialize :dicom_taghash #, Hash      # added Hash # 20140324 hashed out Hash - ? 1.9.2 ruby? -- seems to work now
  #     attr_unsearchable :dicom_taghash    #   hashed out cai 20130926 -- used in old search ? meta_search, meta_where
-  
+
   delegate :participant, :to => :visit
 
 
@@ -75,6 +75,11 @@ class ImageDataset < ActiveRecord::Base
   
   # Note - Path is NOT unique (due to PFiles)
   # validates :path, :filesytem_format => true
+
+
+  def shareable?(category=nil)
+    visit.shareable?(category)
+  end
 
   def rep_time_hundredths
     # if !rep_time.blank?  # put default 0 in the db instead

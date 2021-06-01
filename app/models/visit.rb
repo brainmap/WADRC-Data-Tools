@@ -62,6 +62,21 @@ class Visit < ActiveRecord::Base
   paginates_per 50
   
   delegate :enumber, :to => :enrollment, :prefix => true
+
+  has_one :sharing, :as => :shareable, :dependent => :destroy
+
+  def shareable?(category=nil)
+    !sharing.nil? ? sharing.shareable?(category) : appointment.shareable?(category)
+  end
+
+  def heal_sharing
+
+    if self.sharing.nil?
+      self.sharing = Sharing.new(:shareable => self)
+      self.sharing.save
+    end
+
+ end
   
   acts_as_reportable
   def appointment

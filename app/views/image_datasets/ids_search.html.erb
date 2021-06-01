@@ -166,7 +166,7 @@ edit_count = edit_count -1
         <% elsif i == 8 %>
         <td><%=h image_dataset.excluded_by_any_analyses? ? image_dataset.analysis_memberships.out.size.to_s : "None" %></td>
         <% elsif i == 9 %>
-        <td class='shareable_column'></td>
+        <td class='shareable_column'><%=h image_dataset.shareable? ? "True" : "False" %></td>
 		    <!-- <% elsif i == 9 %>
 		      <td><%= popup_note('peek', key_val_table('path_popup', { :ApptNote => result[i].to_s })) unless result[i].to_s.blank? %></td> -->
 		    <% else %>
