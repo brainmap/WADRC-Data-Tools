@@ -5,7 +5,7 @@ class Protocol < ActiveRecord::Base
   has_one :sharing, :as => :shareable, :dependent => :destroy
 
   def shareable?(category=nil)
-  	!shareable.nil? ? sharing.shareable?(category) : true
+  	!sharing.nil? ? sharing.shareable?(category) : true
   end
 
   def heal_sharing
