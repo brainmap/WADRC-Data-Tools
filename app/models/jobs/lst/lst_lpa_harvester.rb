@@ -160,16 +160,30 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 					            	self.success_log << {:message => 'a case that isnt tracked yet', :protocol => protocol, :subject => subject}
 
 					            	#then create a trfile and add the images to it.
-					            	trfiles = Trfile.where("trtype_id in (?)",params[:tracker_id]).where("subjectid in (?)",subject).where(:scan_procedure_id => sp.id)
-				                    trfile = trfiles.first
-				                    if trfiles.count == 0
-				                       trfile = Trfile.new
-				                       trfile.subjectid = subject
-				                       trfile.enrollment_id = enrollment.id
-				                       trfile.scan_procedure_id = sp.id
-				                       trfile.trtype_id = params[:tracker_id]
-				                       trfile.qc_value = "New Record"
-				                       trfile.save
+
+					            	# 2021-06-07 wbbevis - previously, we were checking for an existing tracker file. Now we're just making a new one, in order to 
+					            	# accommodate special processing.
+					            	# trfiles = Trfile.where("trtype_id in (?)",params[:tracker_id]).where("subjectid in (?)",subject).where(:scan_procedure_id => sp.id)
+
+				                    trfile = Trfile.new
+				                    trfile.subjectid = subject
+				                    trfile.enrollment_id = enrollment.id
+				                    trfile.scan_procedure_id = sp.id
+				                    trfile.trtype_id = params[:tracker_id]
+				                    trfile.qc_value = "New Record"
+				                    trfile.save
+
+				                    if !processing_flag.nil?
+				                    	tags = TrTag.where(:name => processing_flag)
+				                    	tag = tags.first
+				                    	if tags.count == 0
+				                    		tag = TrTag.new(:name => processing_flag)
+				                    		tag.save
+				                    	end
+
+				                    	tag.trfiles << trfiles
+				                    	tag.save
+
 				                    end
 
 									html_candidates.each do |candidate|
