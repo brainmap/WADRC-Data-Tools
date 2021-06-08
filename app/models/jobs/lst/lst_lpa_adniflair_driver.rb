@@ -73,7 +73,7 @@ class Jobs::Lst::LstLpaAdniflairDriver < Jobs::Lst::LstLpaDriver
 
           # 2021-06-07 wbbevis -- this is the only difference between the normal job and this ADNIFLAIR job: which T2 we're picking.
 
-          t2_candidates = visit.image_datasets.select{|image| (image.series_description =~ /ORIG/).nil? and ((image.series_description =~ /Sagittal 3D FLAIR/i)  or (image.series_description =~ /Sag T2 FLAIR Cube/i))}
+          t2_candidates = visit.image_datasets.select{|image| (image.series_description =~ /ORIG/).nil? and (image.series_description =~ /Sagittal 3D FLAIR/i)}
           t2_candidates.sort!{|a,b| path_sort(a,b)}
           t2_file = nil
           marked_as_default = []
