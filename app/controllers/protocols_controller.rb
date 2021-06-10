@@ -39,6 +39,11 @@ respond_to :html
   # GET /protocols/1/edit
   def edit
     @protocol = Protocol.find(params[:id])
+
+    puts "Hey, it's the #{@protocol.name} protocol"
+    puts "Sharing is: #{@protocol.sharing}"
+
+    @sharing = @protocol.sharing
   end
 
   # POST /protocols

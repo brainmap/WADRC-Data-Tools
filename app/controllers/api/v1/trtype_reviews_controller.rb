@@ -12,8 +12,14 @@ class Api::V1::TrtypeReviewsController < API::APIController
 
 		overall_trfiles = Trfile.where("trtype_id = ?", params[:id]).where("scan_procedure_id" => scan_procedure_list)
 
+		# tags were pretty easy to implement here. Eventually there may be more than one tag per file, and we'll be able
+		# to accommodate that with minimal refactoring.
 		if [:tag_filter].any?{|selector| !review_params[selector].blank? }
-			overall_trfiles = overall_trfiles.joins(:tr_tags)
+			if review_params[:tag_filter] == 'NULL'
+				overall_trfiles = overall_trfiles.joins("LEFT JOIN tr_tags_trfiles ON trfiles.id = tr_tags_trfiles.trfile_id")
+			else
+				overall_trfiles = overall_trfiles.joins(:tr_tags)
+			end
 		end
 
 		recordsTotal = Trfile.all.count #overall_trfiles.count
@@ -35,8 +41,13 @@ class Api::V1::TrtypeReviewsController < API::APIController
 			overall_trfiles = overall_trfiles.where("trfiles.scan_procedure_id = #{review_params[:scan_procedure_filter]}")
 		end
 		if !review_params[:tag_filter].blank?
-			# puts "filtering for tag (#{review_params[:tag_filter]})"
-			overall_trfiles = overall_trfiles.where("tr_tags_trfiles.tr_tag_id = #{review_params[:tag_filter]}")
+
+			if review_params[:tag_filter] == 'NULL'
+				# we're looking for files with no tag
+				overall_trfiles = overall_trfiles.where("tr_tags_trfiles.id is null")
+			else
+				overall_trfiles = overall_trfiles.where("tr_tags_trfiles.tr_tag_id = #{review_params[:tag_filter]}")
+			end
 		end
 
 		overall_trfiles = overall_trfiles.distinct

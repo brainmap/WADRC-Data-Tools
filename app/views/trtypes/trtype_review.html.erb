@@ -4,6 +4,8 @@
 
 @current_tab = "qc"
 
+@tag_options = [['(untagged)', 'NULL']] + TrTag.all.map{|item| [item.name, item.id]}
+
 %>
 <h3>File Tracker: <%= @trtype.description%></h3>
 
@@ -57,7 +59,7 @@
                 <div class="form-group row">
                   <label for="example-text-input" class="col-sm-4 col-form-label filter-label text-right">Tag</label>
                   <div class="col-sm-8">
-                    <%= collection_select(:tr_search, :tag_filter, TrTag.all, :id, :name,  {:prompt => 'choose a tag'}, {:multiple =>  false, :class => "custom-select trtype-search-input", :id => "tag-filter", :displaytitle => "Tag == '{value}'" } ) %>
+                    <%= select(:tr_search,  :tag_filter, @tag_options, {:prompt => 'choose a tag'},{:class => "custom-select trtype-search-input",:id => "tag-filter", :displaytitle => "Tag == '{value}'"} ) %>
                   </div>
                 </div>
 
