@@ -140,7 +140,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 					            	self.success_log << {:message => 'a case with an existing tracked image', :protocol => protocol, :subject => subject}
 					            	matching_image = Trfileimage.where(:image_id => existing_tracked_image.first.id, :image_category => 'html').first
 
-					            	if matching_image.nil?
+					            	if matching_image.nil? or matching_image.trfile.nil?
 					            		# 2021-06-10 wbbevis -- this is a failed case: we've got an existing processedimage 
 					            		# without a corresponding trfileimage. Let's record this in failed so we can see them 
 					            		# when harvesting manually, but otherwise next
