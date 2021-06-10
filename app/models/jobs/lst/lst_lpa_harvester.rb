@@ -107,7 +107,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 
 						candidate_subdirs.each do |subdir|
 							code_version_dir = "#{subject_dir_path}#{subdir}"
-							processing_flag = ''
+							processing_flag = nil
 
 							if (subdir =~ /_/)
 								# if subdir is "020_ADNIFLAIR", then processing_flag will end up == "ADNIFLAIR"

@@ -9,9 +9,9 @@ end
 #   `name` varchar(100) DEFAULT NULL,
 #   PRIMARY KEY (`id`)
 # );
-# CREATE TABLE `trfiles_tr_tags` (
-#   `id` int NOT NULL AUTO_INCREMENT,
+# CREATE TABLE `tr_tags_trfiles` (
+#   `id` int(11) NOT NULL AUTO_INCREMENT,
 #   `trfile_id` int(11) NOT NULL,
 #   `tr_tag_id` int(11) NOT NULL,
 #   PRIMARY KEY (`id`)
-# );
+# )
