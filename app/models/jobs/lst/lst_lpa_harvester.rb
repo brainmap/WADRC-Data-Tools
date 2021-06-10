@@ -181,7 +181,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 				                    		tag.save
 				                    	end
 
-				                    	tag.trfiles << trfiles
+				                    	tag.trfiles << trfile
 				                    	tag.save
 
 				                    end
