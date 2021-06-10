@@ -11,7 +11,11 @@ class Api::V1::TrtypeReviewsController < API::APIController
 		scan_procedure_list = scan_procedure_array.map(&:to_i)
 
 		overall_trfiles = Trfile.where("trtype_id = ?", params[:id]).where("scan_procedure_id" => scan_procedure_list)
-		
+
+		if [:tag_filter].any?{|selector| !review_params[selector].blank? }
+			overall_trfiles = overall_trfiles.joins(:tr_tags)
+		end
+
 		recordsTotal = Trfile.all.count #overall_trfiles.count
 
 		if !review_params[:subjectid_filter].blank?
@@ -29,6 +33,10 @@ class Api::V1::TrtypeReviewsController < API::APIController
 		if !review_params[:scan_procedure_filter].blank?
 			# puts "filtering for scan procedure (#{review_params[:scan_procedure_filter]})"
 			overall_trfiles = overall_trfiles.where("trfiles.scan_procedure_id = #{review_params[:scan_procedure_filter]}")
+		end
+		if !review_params[:tag_filter].blank?
+			# puts "filtering for tag (#{review_params[:tag_filter]})"
+			overall_trfiles = overall_trfiles.where("tr_tags_trfiles.tr_tag_id = #{review_params[:tag_filter]}")
 		end
 
 		overall_trfiles = overall_trfiles.distinct
@@ -349,7 +357,7 @@ class Api::V1::TrtypeReviewsController < API::APIController
 	private
 
 	def review_params
-		params.permit(:id, :trtype_id, :trfile_id, :length, :start, :scan_date_before_filter, :scan_procedure_filter, :subjectid_filter, :secondary_key_filter, :qc_filter, :completed_filter, :scan_date_after_filter, :draw, order: [:column, :dir])
+		params.permit(:id, :trtype_id, :trfile_id, :length, :start, :scan_date_before_filter, :scan_procedure_filter, :tag_filter, :subjectid_filter, :secondary_key_filter, :qc_filter, :completed_filter, :scan_date_after_filter, :draw, order: [:column, :dir])
 	end
 
 

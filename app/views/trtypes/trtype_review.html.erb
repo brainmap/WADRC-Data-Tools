@@ -54,6 +54,13 @@
                   </div>
                 </div>
 
+                <div class="form-group row">
+                  <label for="example-text-input" class="col-sm-4 col-form-label filter-label text-right">Tag</label>
+                  <div class="col-sm-8">
+                    <%= collection_select(:tr_search, :tag_filter, TrTag.all, :id, :name,  {:prompt => 'choose a tag'}, {:multiple =>  false, :class => "custom-select trtype-search-input", :id => "tag-filter", :displaytitle => "Tag == '{value}'" } ) %>
+                  </div>
+                </div>
+
                 <!-- <div class="form-group row">
                   <label for="example-text-input" class="col-sm-4 col-form-label filter-label text-right">Secondary Key</label>
                   <div class="col-sm-8">
@@ -554,6 +561,7 @@ $(document).ready(function() {
               d.completed_filter = $('#completed-filter').val();
               d.subjectid_filter = $('#subjectid-filter').val();
               d.secondary_key_filter = $('#secondary-key-filter').val();
+              d.tag_filter = $('#tag-filter').val();
               
             },
             beforeSend: function (request) {
