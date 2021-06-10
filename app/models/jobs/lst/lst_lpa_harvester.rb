@@ -140,20 +140,29 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 					            	self.success_log << {:message => 'a case with an existing tracked image', :protocol => protocol, :subject => subject}
 					            	matching_image = Trfileimage.where(:image_id => existing_tracked_image.first.id, :image_category => 'html').first
 
-					            	qc_value = matching_image.trfile.qc_value
+					            	if matching_image.nil?
+					            		# 2021-06-10 wbbevis -- this is a failed case: we've got an existing processedimage 
+					            		# without a corresponding trfileimage. Let's record this in failed so we can see them 
+					            		# when harvesting manually, but otherwise next
 
-						            if qc_value == 'Pass'
-						            	# create an insert from the csv
-						            	csv = CSV.open("#{code_version_dir}/#{csv_candidates.first}",:headers => true)
+					            		self.failed << {:message => "an existing tracked image without a matching trfileimage", :processed_image_id => existing_tracked_image.first.id}
+					            	else	
 
-										new_form = LstLpaForm.from_csv(csv)
-										new_form.processing_flag = processing_flag
+						            	qc_value = matching_image.trfile.qc_value
 
-									    if new_form.valid?
-							               	sql = new_form.to_sql_insert("#{params[:destination_table]}_new")
-											@connection.execute(sql)
-										end
-						            end
+							            if qc_value == 'Pass'
+							            	# create an insert from the csv
+							            	csv = CSV.open("#{code_version_dir}/#{csv_candidates.first}",:headers => true)
+
+											new_form = LstLpaForm.from_csv(csv)
+											new_form.processing_flag = processing_flag
+
+										    if new_form.valid?
+								               	sql = new_form.to_sql_insert("#{params[:destination_table]}_new")
+												@connection.execute(sql)
+											end
+							            end
+							        end
 
 					            else
 					            	#this file isn't tracked yet, so let's start tracking it
