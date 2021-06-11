@@ -37,9 +37,9 @@ class Enrollment < ActiveRecord::Base
     end
 
     self.sharing.can_share = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
-    self.sharing.can_share_wrap = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
-    self.sharing.can_share_adrc = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
-    self.sharing.can_share_up = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
+    self.sharing.can_share_wrap = self.sharing.can_share && !participant.wrapnum.blank?
+    self.sharing.can_share_adrc = self.sharing.can_share && !participant.adrcnum.blank?
+    self.sharing.can_share_up = self.sharing.can_share_wrap || self.sharing.can_share_adrc
     self.sharing.can_share_internal = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
     self.sharing.save
 

@@ -104,6 +104,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 						candidate_subdirs = Dir.entries(subject_dir_path).select{|entry| (entry =~ /^[^.]/) and (entry =~ Regexp.new(code_version))}
 
 						found_trackable = false
+						found_non_special = false
 
 						candidate_subdirs.each do |subdir|
 							code_version_dir = "#{subject_dir_path}#{subdir}"
@@ -193,6 +194,8 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 				                    	tag.trfiles << trfile
 				                    	tag.save
 
+				                    else
+				                    	found_non_special = true
 				                    end
 
 									html_candidates.each do |candidate|
@@ -235,7 +238,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 					            
 					        end
 
-					        if found_trackable
+					        if found_trackable and found_non_special
 					        	break
 					        end
 					    end
