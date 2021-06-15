@@ -287,7 +287,7 @@
 		end
 
 		def appropriate_T2?(filename)
-		    if filename.include?('-T2-') and filename.end_with?(".nii")
+		    if filename.include?('T2') and filename.end_with?(".nii")
 		      if filename.include?('ORIG')
 		        return true
 		      elsif filename.include?('PU')
