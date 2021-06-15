@@ -296,6 +296,8 @@
 		        return true
 		      elsif filename.include?('CUBE-Flair') or filename.include?('CUBE-FLAIR')
 		        return true
+		      elsif filename =~ /FLAIR_CUBE/i
+		        return true
 		      end
 		    end
 		    return false
