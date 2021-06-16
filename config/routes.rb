@@ -380,10 +380,18 @@ WADRCDataTools::Application.routes.draw do
       match '/trtype_review/update' , :controller => 'trtype_reviews', :action => 'update', :as => :update, via: [:post]
       match '/trtype_review/new' , :controller => 'trtype_reviews', :action => 'new', :as => :new, via: [:post]
 
-
       resources :image_dataset_metadata_labels do
         collection do
           get 'search'
+        end
+      end
+
+      resources :sharing do
+        collection do
+          post 'create'
+        end
+        member do
+          put 'update'
         end
       end
 

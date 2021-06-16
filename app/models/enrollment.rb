@@ -36,13 +36,24 @@ class Enrollment < ActiveRecord::Base
       self.sharing.save
     end
 
-    self.sharing.can_share = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
-    self.sharing.can_share_wrap = self.sharing.can_share && !participant.wrapnum.blank?
-    self.sharing.can_share_adrc = self.sharing.can_share && !participant.adrcnum.blank?
-    self.sharing.can_share_up = self.sharing.can_share_wrap || self.sharing.can_share_adrc
-    self.sharing.can_share_internal = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
-    self.sharing.save
+    if participant.nil?
 
+      self.sharing.can_share = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
+      self.sharing.can_share_wrap = false
+      self.sharing.can_share_adrc = false
+      self.sharing.can_share_up = false
+      self.sharing.can_share_internal = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
+      self.sharing.save
+    else
+
+      self.sharing.can_share = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
+      self.sharing.can_share_wrap = self.sharing.can_share && !participant.wrapnum.blank?
+      self.sharing.can_share_adrc = self.sharing.can_share && !participant.adrcnum.blank?
+      self.sharing.can_share_up = self.sharing.can_share_wrap || self.sharing.can_share_adrc
+      self.sharing.can_share_internal = (do_not_share_scans_flag == 'O' || do_not_share_scans_flag == 'N') ? true : false
+      self.sharing.save
+    end
+    
   end
 
 end
