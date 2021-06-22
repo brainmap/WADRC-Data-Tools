@@ -17,6 +17,7 @@ class Jobs::ScanUploads::ScanHarvester < Jobs::BaseJob
 				tracer_whitelist: [1, 11],
     			computer: "moana",
                 run_by_user: 'panda_user',
+                date_limit: '2021-01-01',
                 tracker_id: 20
     		}
         params.default = ''
@@ -31,6 +32,7 @@ class Jobs::ScanUploads::ScanHarvester < Jobs::BaseJob
 				tracer_whitelist: [1, 11],
     			computer: "moana",
                 run_by_user: 'panda_user',
+                date_limit: '2021-01-01',
                 tracker_id: 20
     		}
         params.default = ''
@@ -90,7 +92,7 @@ class Jobs::ScanUploads::ScanHarvester < Jobs::BaseJob
 
 			# ok, do we have the right scans?
 
-			visits = Visit.where(:appointment_id => vgroup.appointments.map(&:id))
+			visits = Visit.where(:appointment_id => vgroup.appointments.select{|item| item.appointment_date > Date.new(2020, 12, 31)}.map(&:id))
 
 			visits.each do |visit|
 				# we should really do one upload for each visit if there are multiple visits. So each visit gets its own tracker file.
@@ -201,7 +203,7 @@ class Jobs::ScanUploads::ScanHarvester < Jobs::BaseJob
 			end
 			
 			# and also check this vgroup for PET
-			pet_appts = Petscan.where(:appointment_id => vgroup.appointments.map(&:id))
+			pet_appts = Petscan.where(:appointment_id => vgroup.appointments.select{|item| item.appointment_date > Date.new(2021, 2, 28)}.map(&:id))
 
 			pet_appts.each do |pet_appt|
 				# We need to check this against the PET tracer whitelist
