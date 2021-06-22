@@ -227,13 +227,24 @@ class Api::V1::TrtypeReviewsController < API::APIController
 			images = []
 
 			file.trfileimages.each do |image|
-				processedimage = Processedimage.find(image.image_id)
-				images << {'id' => processedimage.id,
-							'file_path' => processedimage.file_path,
-							'file_name' => processedimage.file_name,
-							'processed_image_id' => processedimage.id,
-							'file_type' => processedimage.file_type
-							}
+				if image.image_category == 'html' or image.image_category == 'processedimage'
+					processedimage = Processedimage.find(image.image_id)
+					images << {'id' => processedimage.id,
+								'file_path' => processedimage.file_path,
+								'file_name' => processedimage.file_name,
+								'processed_image_id' => processedimage.id,
+								'file_type' => processedimage.file_type
+								}
+				elsif image.image_category == 'image_dataset'
+					img = ImageDataset.find(image.image_id)
+					images << {'id' => img.id,
+								'file_path' => img.path,
+								'file_name' => img.path.split('/').last,
+								'processed_image_id' => 0,
+								'file_type' => 'image_dataset'
+								}
+				end
+
 			end
 
 			scan_procedure = ScanProcedure.where("id = ?",file.scan_procedure_id).first
