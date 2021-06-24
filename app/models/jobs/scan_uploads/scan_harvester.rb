@@ -123,7 +123,11 @@ class Jobs::ScanUploads::ScanHarvester < Jobs::BaseJob
 
 				# ok, so this case is looking good. Has it already been tracked?
 
-				existing_files = Trfile.joins(:tr_tags).where(:trtype_id => params[:tracker_id]).where(:scan_procedure_id => vgroup.scan_procedures.map(&:id)).where(:enrollment_id => vgroup.enrollments.map(&:id)).where("tr_tags.name = 'SCAN_MRI'")
+				existing_files = Trfile.joins(:tr_tags)
+									.where(:trtype_id => params[:tracker_id])
+									.where(:scan_procedure_id => vgroup.scan_procedures.map(&:id))
+									.where(:enrollment_id => vgroup.enrollments.map(&:id))
+									.where("tr_tags.name = 'SCAN_MRI'")
 
 				if existing_files.count > 0
 
@@ -176,7 +180,7 @@ class Jobs::ScanUploads::ScanHarvester < Jobs::BaseJob
 		                    when "ADRC Number"
 		                      	rating.value = ppt.adrcnum
 		                    when "Scan date"
-		                      	rating.value = visit.date.strftime("%y-%m-%d")
+		                      	rating.value = visit.date.strftime("%Y-%m-%d")
 		            		
 		                    else
 			                    if !(field.form_default_value).blank?
@@ -203,7 +207,7 @@ class Jobs::ScanUploads::ScanHarvester < Jobs::BaseJob
 			end
 			
 			# and also check this vgroup for PET
-			pet_appts = Petscan.where(:appointment_id => vgroup.appointments.select{|item| item.appointment_date > Date.new(2021, 2, 28)}.map(&:id))
+			pet_appts = Petscan.where(:appointment_id => vgroup.appointments.select{|item| item.appointment_date > Date.new(2020, 12, 31)}.map(&:id))
 
 			pet_appts.each do |pet_appt|
 				# We need to check this against the PET tracer whitelist
@@ -215,9 +219,21 @@ class Jobs::ScanUploads::ScanHarvester < Jobs::BaseJob
 
 				# ok, so this case is looking good. Has it already been tracked?
 
-				existing_files = Trfile.joins(:tr_tags).where(:trtype_id => params[:tracker_id]).where(:scan_procedure_id => vgroup.scan_procedures.map(&:id)).where(:enrollment_id => vgroup.enrollments.map(&:id)).where("tr_tags.name = 'SCAN_PET'")
+				existing_files = Trfile.joins(:tr_tags).where(:trtype_id => params[:tracker_id])
+													.where(:scan_procedure_id => vgroup.scan_procedures.map(&:id))
+													.where(:enrollment_id => vgroup.enrollments.map(&:id))
+													.where("tr_tags.name = 'SCAN_PET'")
 
-				if existing_files.count > 0
+				# 2021-06-24 wbbevis -- thanks to kkellett for catching this. We were only getting one tracer tracked, 
+				# because the second pet appt would find the tracker we just made for the first pet appt, and skip recording.
+				# We want to be able to get both, so we're only counting trfiles that match this enumber/scan procedure, AND
+				# PET tracer as "already being tracked". 
+
+				tracer = LookupPettracer.where(:id => pet_appt.lookup_pettracer_id).first
+
+				tracer_fields_for_existing_files = existing_files.map(&:tredits).flatten.map(&:tredit_actions).flatten.select{|item| actiontype = Tractiontype.find(item.tractiontype_id); actiontype.description == "Tracer"}
+
+				if existing_files.count > 0 and tracer_fields_for_existing_files.select{|item| item.value == tracer.name}.count > 0
 
 					# this is case is already being tracked in this tracker. 
 					# right now, we don't have to do anything to these guys.
@@ -228,7 +244,6 @@ class Jobs::ScanUploads::ScanHarvester < Jobs::BaseJob
 
 					enrollment = vgroup.enrollments.first
 					scan_procedure = vgroup.scan_procedures.select{|item| params[:scan_relevant_whitelist].include? item.id}.first
-					tracer = LookupPettracer.where(:id => pet_appt.lookup_pettracer_id).first
 					appointment = Appointment.where(:id => pet_appt.appointment_id).first
 
 			        trfile = Trfile.new
@@ -257,7 +272,7 @@ class Jobs::ScanUploads::ScanHarvester < Jobs::BaseJob
 		                    when "Tracer"
 		                      	rating.value = tracer.name
 		                    when "Scan date"
-		                      	rating.value = appointment.appointment_date.strftime("%y-%m-%d")
+		                      	rating.value = appointment.appointment_date.strftime("%Y-%m-%d")
 		                    else
 			                    if !(field.form_default_value).blank?
 			                        rating.value = field.form_default_value
