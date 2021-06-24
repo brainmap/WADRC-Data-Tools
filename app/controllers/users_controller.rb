@@ -68,7 +68,17 @@ class UsersController < ApplicationController
        else
         var = "insert into users(username,email,last_name,first_name,role,description) values('"+params[:user][:username]+"','"+params[:user][:email]+"','"+params[:user][:last_name].gsub("'","''")+"','"+params[:user][:first_name].gsub("'","''")+"','"+params[:user][:role]+"','"+params[:user][:username]+"')"
         results = connection.execute(var)
-        flash[:notice] = 'User was successfully updated.'
+        user = User.where(:username => params[:user][:username]).first
+
+        if !user.nil?
+
+          flash[:notice] = 'User was successfully updated.'
+          api_key = ApiKey.new(:user => user)
+          api_key.save
+        else
+          flash[:notice] = 'Something went wrong.'
+        end
+
        end
         respond_to do |format|
           format.html { redirect_to('/protocol_roles') }
