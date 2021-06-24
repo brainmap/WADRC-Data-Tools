@@ -321,21 +321,24 @@ function load_fields (central_title, id) {
             image_paths = '';
             <% if @trtype.id == 20 %>
 
-            image_paths += '<div class="col-12 panda-data">Mac/Linux:</div>'
+            if (item.images.length > 0) {
 
-            $.each(item.images, function (key, image){
-              image_paths += '<div class="col-12 panda-data"> <span id="path' + image.id + '_mac" class="d-none">file://' + image.file_path + '</span><span>' + image.file_name + '</span> <i class="fas fa-copy pl-1" onclick="copy_path(\'#path' + image.id + '_mac\')"></i></div>';
-              
-            });
+              image_paths += '<div class="col-12 panda-data">Mac/Linux:</div>'
+
+              $.each(item.images, function (key, image){
+                image_paths += '<div class="col-12 panda-data"> <span id="path' + image.id + '_mac" class="d-none">file://' + image.file_path + '</span><span>' + image.file_name + '</span> <i class="fas fa-copy pl-1" onclick="copy_path(\'#path' + image.id + '_mac\')"></i></div>';
+                
+              });
 
 
-            image_paths += '<div class="col-12 panda-data">Windows:</div>'
-            $.each(item.images, function (key, image){
-              console.log(image.file_path + " vs. " + image.file_path.replace("/mounts/data","s:"));
-              var path = image.file_path.replace("/mounts/data","s:")
-              image_paths += '<div class="col-12 panda-data"> <span id="path' + image.id + '_win" class="d-none">file://' + path + '</span><span>' + image.file_name + '</span> <i class="fas fa-copy pl-1" onclick="copy_path(\'#path' + image.id + '_win\')"></i></div>';
-              
-            });
+              image_paths += '<div class="col-12 panda-data">Windows:</div>'
+              $.each(item.images, function (key, image){
+                console.log(image.file_path + " vs. " + image.file_path.replace("/mounts/data","s:"));
+                var path = image.file_path.replace("/mounts/data","s:")
+                image_paths += '<div class="col-12 panda-data"> <span id="path' + image.id + '_win" class="d-none">file://' + path + '</span><span>' + image.file_name + '</span> <i class="fas fa-copy pl-1" onclick="copy_path(\'#path' + image.id + '_win\')"></i></div>';
+                
+              });
+            }
 
             <% else %>
             image_paths = '';
