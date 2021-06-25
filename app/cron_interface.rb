@@ -298,9 +298,9 @@ v_user = v_user.gsub("\n","")
      job1 = Jobs::Lst::LstLpaDriver.new(job1_params)
      job1.run(job1_params)
 
-     job2_params = Jobs::Lst::AdcpDriver.production_params
-     job2 = Jobs::Lst::AdcpDriver.new(job2_params)
-     job2.run(job2_params)
+     # job2_params = Jobs::Lst::AdcpDriver.production_params
+     # job2 = Jobs::Lst::AdcpDriver.new(job2_params)
+     # job2.run(job2_params)
 
      params = Jobs::Lst::LstLpaHarvester.production_params
      job = Jobs::Lst::LstLpaHarvester.new(params)
