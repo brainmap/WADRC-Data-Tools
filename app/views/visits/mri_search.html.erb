@@ -30,7 +30,7 @@ edit_count = edit_count -1
 	<tr><td><%= f.label :scan_procedures %><br>
 	<div id="scan_procedure_list">
 	<ul>
-	<% ScanProcedure.where(" scan_procedures.id in (select scan_procedure_id from scan_procedures_visits where  scan_procedure_id in (?))",   (current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).load.sort_by(&:display_alias).each do |scan_procedure| %>
+	<% ScanProcedure.where(" scan_procedures.id in (?)",(current_user.view_low_scan_procedure_array).split(' ').map(&:to_i) ).where(:permission_type => 'study_permission').load.sort_by(&:display_alias).each do |scan_procedure| %>
   
 		<li>
 			<%= check_box_tag "visit_scan_procedure_ids", scan_procedure.id,FALSE , :name => 'mri_search[scan_procedure_id][]' %>
