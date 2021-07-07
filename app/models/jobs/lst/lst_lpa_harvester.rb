@@ -298,9 +298,12 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 				if File.exists?(raw_glob) and File.directory?(raw_glob)
 
 
-					image = images.select{|item| item.path == raw_glob}.first
+					image = images.select{|item| item.path == raw_glob}.compact.first
 
-					if image.metadata001.nil? or image.metadata004.nil?
+					if image.nil?
+						# this one needs its metadata refreshed.
+						failure << {:id => row[1], :path => row[0], :message => "not enough images for this path.", :image_id => image.id}
+					elsif image.metadata001.nil? or image.metadata004.nil?
 						# this one needs its metadata refreshed.
 						failure << {:id => row[1], :path => row[0], :message => "this image needs its metadata refreshed.", :image_id => image.id}
 					else
@@ -322,8 +325,10 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 					if filtered_images.count == 1
 						image = filtered_images.first
 
-
-						if image.metadata001.nil? or image.metadata004.nil?
+						if image.nil?
+							# this one needs its metadata refreshed.
+							failure << {:id => row[1], :path => row[0], :message => "not enough images for this path.", :image_id => image.id}
+						elsif image.metadata001.nil? or image.metadata004.nil?
 							# this one needs its metadata refreshed.
 							failure << {:id => row[1], :path => row[0], :message => "this image needs its metadata refreshed.", :image_id => image.id}
 						else
