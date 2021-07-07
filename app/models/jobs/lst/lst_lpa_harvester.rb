@@ -302,7 +302,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 
 					if image.metadata001.nil? or image.metadata004.nil?
 						# this one needs its metadata refreshed.
-						failure << {:id => row[1], :path => row[0], :message => "this image needs its metadata refreshed." :image_id => image.id, :line => __LINE__}
+						failure << {:id => row[1], :path => row[0], :message => "this image needs its metadata refreshed." :image_id => image.id}
 					else
 
 
@@ -325,7 +325,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 
 						if image.metadata001.nil? or image.metadata004.nil?
 							# this one needs its metadata refreshed.
-							failure << {:id => row[1], :path => row[0], :message => "this image needs its metadata refreshed." :image_id => image.id, :line => __LINE__}
+							failure << {:id => row[1], :path => row[0], :message => "this image needs its metadata refreshed." :image_id => image.id}
 						else
 							success << {:id => row[1], :pure_corrected => image.pure_corrected?.to_s, :receive_coil_name => image.receive_coil_name, :mri_station_name => image.mri_station_name, :method => 'found by filter'}
 							
