@@ -302,7 +302,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 
 					if image.nil?
 						# this one needs its metadata refreshed.
-						failure << {:id => row[1], :path => row[0], :message => "not enough images for this path.", :image_id => image.id}
+						failure << {:id => row[1], :path => row[0], :message => "not enough images for this path."}
 					elsif image.metadata001.nil? or image.metadata004.nil?
 						# this one needs its metadata refreshed.
 						failure << {:id => row[1], :path => row[0], :message => "this image needs its metadata refreshed.", :image_id => image.id}
@@ -327,7 +327,7 @@ class Jobs::Lst::LstLpaHarvester < Jobs::BaseJob
 
 						if image.nil?
 							# this one needs its metadata refreshed.
-							failure << {:id => row[1], :path => row[0], :message => "not enough images for this path.", :image_id => image.id}
+							failure << {:id => row[1], :path => row[0], :message => "not enough images for this path."}
 						elsif image.metadata001.nil? or image.metadata004.nil?
 							# this one needs its metadata refreshed.
 							failure << {:id => row[1], :path => row[0], :message => "this image needs its metadata refreshed.", :image_id => image.id}
