@@ -408,6 +408,13 @@ v_user = v_user.gsub("\n","")
 
     job.run(params)
 
+  elsif v_value_1 == "SCAN Upload Harvester"
+
+    params = Jobs::ScanUploads::ScanHarvester.default_params
+    job = Jobs::ScanUploads::ScanHarvester.new(params)
+
+    job.run(params)
+
   elsif v_value_1 == "xnat_curated_upload"
 
       xnat = SharedUpload::XnatCuratedUpload.new
