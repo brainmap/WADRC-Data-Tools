@@ -107,5 +107,6 @@ config.action_mailer.default_url_options = {:host => 'adrcdev2.dom.wisc.edu'}
   config.radiology_pass = begin IO.read("/home/panda_user/.radiology").gsub(/\n/,'') rescue "" end
   config.adrc_neuropathology_token = begin IO.read("/home/panda_user/.neuropathology").gsub(/\n/,'') rescue "" end
   config.wrap_neuropathology_token = begin IO.read("/home/panda_user/.wrap_neuropathology").gsub(/\n/,'') rescue "" end
+  config.redcap_adrc_token = begin IO.read("/Users/panda_user/.redcap_adrc").gsub(/\n/,'') rescue "" end
     
 end
