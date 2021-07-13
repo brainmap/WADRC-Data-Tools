@@ -131,7 +131,7 @@ class RedcapE4V6Form
 		end
 
 		if row["hdacherslv_e4_v6"] != ''
-			out.lumbarpuncture_fields["lpheadache_dateresolved"] = Date.strptime(row["hdacherslv_e4_v6"],"%Y-%m-%d %H:%M")
+			out.lumbarpuncture_fields["lpheadache_dateresolved"] = Date.strptime(row["hdacherslv_e4_v6"],"%Y-%m-%d")
 		else
 			out.lumbarpuncture_fields["lpheadache_dateresolved"] = nil
 		end
@@ -160,7 +160,7 @@ class RedcapE4V6Form
 		end
 
 		if row["lwbkpainrslv_e4_v6"] != ''
-			out.lumbarpuncture_fields["lplowbackpain_dateresolved"] = Date.strptime(row["lwbkpainrslv_e4_v6"],"%Y-%m-%d %H:%M")
+			out.lumbarpuncture_fields["lplowbackpain_dateresolved"] = Date.strptime(row["lwbkpainrslv_e4_v6"],"%Y-%m-%d")
 		else
 			out.lumbarpuncture_fields["lplowbackpain_dateresolved"] = nil
 		end
@@ -187,7 +187,7 @@ class RedcapE4V6Form
 		end
 
 		if row["othreff_res_e4_v6"] != ''
-			out.lumbarpuncture_fields["lpothersideeffects_dateresolved"] = Date.strptime(row["othreff_res_e4_v6"],"%Y-%m-%d %H:%M")
+			out.lumbarpuncture_fields["lpothersideeffects_dateresolved"] = Date.strptime(row["othreff_res_e4_v6"],"%Y-%m-%d")
 		else
 			out.lumbarpuncture_fields["lpothersideeffects_dateresolved"] = nil
 		end
@@ -243,7 +243,10 @@ class RedcapE4V6Form
 
 	def create_lp_appointment(vgroup)
 
+		ppt = Participant.find(vgroup.enrollments.map(&:participant_id).uniq.compact.first)
+
 		new_appt = Appointment.new(@appointment_fields.merge({:vgroup_id => vgroup.id, :appointment_type => 'lumbar_puncture'}))
+		new_appt.age_at_appointment = ((new_appt.appointment_date - ppt.dob)/365.25).round(2)
 		new_appt.save
 
 		new_lp = Lumbarpuncture.new(@lumbarpuncture_fields.merge({:appointment_id => new_appt.id}))
