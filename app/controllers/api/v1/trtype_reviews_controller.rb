@@ -73,6 +73,12 @@ class Api::V1::TrtypeReviewsController < API::APIController
 			end
 		end
 
+		# special for training people: randomize the order these return in.
+		trtype = Trtype.where(:id => params[:id]).first
+		if !trtype.nil? and trtype.randomize
+			overall_trfiles = overall_trfiles.order("RAND()")
+		end
+
 		displayable_tractiontypes = Tractiontype.where("trtype_id = ?",params[:id]).where("display_in_summary = 'Y'")
 
 		case request.format
