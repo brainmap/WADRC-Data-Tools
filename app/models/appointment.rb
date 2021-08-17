@@ -9,6 +9,10 @@ class Appointment < ActiveRecord::Base
   has_many :lumbarpunctures,:dependent => :destroy
   has_many :blooddraws,:dependent => :destroy
   has_many :vitals,:dependent => :destroy
+
+  has_many :appointment_tubetypes
+
+  has_many :tubes, :through => :appointment_tubetypes, :source => :lookup_ref
   
  # has_many :vitals,:class_name =>"Vital",:dependent => :destroy
 

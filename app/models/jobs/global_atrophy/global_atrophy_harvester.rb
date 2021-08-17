@@ -52,10 +52,10 @@ class Jobs::GlobalAtrophy::GlobalAtrophyHarvester < Jobs::BaseJob
 	end
 
 	def setup(params)
-		self.success = []
-		self.success_log = []
-		self.failed = []
-		self.total_cases = 0
+		@success = []
+		@success_log = []
+		@failed = []
+		@total_cases = 0
 		# sql = "truncate #{params[:destination_table]}_new"
 		# @connection.execute(sql)
 	end
@@ -86,7 +86,7 @@ class Jobs::GlobalAtrophy::GlobalAtrophyHarvester < Jobs::BaseJob
 				enrollment = Enrollment.where(:enumber => subject_cleaned).first
 
 				if enrollment.nil?
-					self.failed << {:protocol => protocol, :subject => subject, :message => "this subject id probably doesn't exist"}
+					@failed << {:protocol => protocol, :subject => subject, :message => "this subject id probably doesn't exist"}
 					next
 				end
 
@@ -95,7 +95,7 @@ class Jobs::GlobalAtrophy::GlobalAtrophyHarvester < Jobs::BaseJob
 				rbm_icv_folder = "#{protocol_path}/#{subject}/rbm_icv"
 
 				if !File.exists?(tissue_seg_folder) or !File.directory?(tissue_seg_folder)
-					self.failed << {:protocol => protocol, :subject => subject, :message => "tissue_seg folder doesn't exist for this subject"}
+					@failed << {:protocol => protocol, :subject => subject, :message => "tissue_seg folder doesn't exist for this subject"}
 					next
 				end
 
@@ -103,12 +103,12 @@ class Jobs::GlobalAtrophy::GlobalAtrophyHarvester < Jobs::BaseJob
 				tissue_seg_csv = tissue_seg_filenames.select{|entry| entry =~ /tissue_volumes.csv/}.first
 
 				if tissue_seg_csv.nil? or tissue_seg_csv.blank?
-					self.failed << {:protocol => protocol, :subject => subject, :message => "no tissue_seg csv file for this subject"}
+					@failed << {:protocol => protocol, :subject => subject, :message => "no tissue_seg csv file for this subject"}
 					next
 				end
 
 				if !File.exists?(rbm_icv_folder) or !File.directory?(rbm_icv_folder)
-					self.failed << {:protocol => protocol, :subject => subject, :message => "rbm_icv folder doesn't exist for this subject"}
+					@failed << {:protocol => protocol, :subject => subject, :message => "rbm_icv folder doesn't exist for this subject"}
 					next
 				end
 
@@ -117,11 +117,11 @@ class Jobs::GlobalAtrophy::GlobalAtrophyHarvester < Jobs::BaseJob
 				icv_mask = rbm_icv_filenames.select{|entry| entry =~ /wmask_ICV.nii/}.first
 
 				if rbm_icv_txt.nil? or rbm_icv_txt.blank?
-					self.failed << {:protocol => protocol, :subject => subject, :message => "no rbm_icv txt file for this subject"}
+					@failed << {:protocol => protocol, :subject => subject, :message => "no rbm_icv txt file for this subject"}
 					next
 				end
 				if icv_mask.nil? or icv_mask.blank?
-					self.failed << {:protocol => protocol, :subject => subject, :message => "no wmask_ICV.nii for this subject"}
+					@failed << {:protocol => protocol, :subject => subject, :message => "no wmask_ICV.nii for this subject"}
 					next
 				end
 
@@ -138,7 +138,7 @@ class Jobs::GlobalAtrophy::GlobalAtrophyHarvester < Jobs::BaseJob
 
 				if existing_tracked_image.count > 0
 			        #this files has been QC tracked, so if it's passed, we should add it to the searchable table
-			        self.success_log << {:message => 'a case with an existing tracked image', :protocol => protocol, :subject => subject}
+			        @success_log << {:message => 'a case with an existing tracked image', :protocol => protocol, :subject => subject}
 			        matching_image = Trfileimage.where(:image_id => existing_tracked_image.first.id, :image_category => 'nii').first
 
 			        qc_value = matching_image.trfile.qc_value
@@ -160,7 +160,7 @@ class Jobs::GlobalAtrophy::GlobalAtrophyHarvester < Jobs::BaseJob
 
 				else
 			        #this file isn't tracked yet, so let's start tracking it
-			   	    self.success_log << {:message => 'a case that isnt tracked yet', :protocol => protocol, :subject => subject}
+			   	    @success_log << {:message => 'a case that isnt tracked yet', :protocol => protocol, :subject => subject}
 
 			        #then create a trfile and add the images to it.
 				    trfiles = Trfile.where("trtype_id in (?)",params[:tracker_id]).where("subjectid in (?)",subject).where(:scan_procedure_id => sp.id)

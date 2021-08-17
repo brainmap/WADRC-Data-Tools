@@ -59,12 +59,12 @@ class CsfAnalyteForm
 			end
 		end
 
-		choices['processed_at'] = DateTime.strptime(row["Run Date and Time"].to_s)
-		choices['ab_42_value'] = row["AB 42 Value"].to_f
+		choices['processed_at'] = DateTime.strptime(row["Run Date and Time"].to_s, "%Y-%m-%d %H:%M:%S")
+		choices['ab_42_value'] = row["AB 42 Value"].blank? ? nil : row["AB 42 Value"].to_f
 		choices['ab_42_unit'] = row[6].to_s.rstrip
-		choices['ttau_value'] = row["tTau Value"].to_f
+		choices['ttau_value'] = row["tTau Value"].blank? ? nil : row["tTau Value"].to_f
 		choices['ttau_unit'] = row[9].to_s.rstrip
-		choices['ptau_value'] = row["pTau Value"].to_f
+		choices['ptau_value'] = row["pTau Value"].blank? ? nil : row["pTau Value"].to_f
 		choices['ptau_unit'] = row[12].to_s.rstrip
 		choices['machine'] = row["Machine"].to_s
 
@@ -80,8 +80,13 @@ class CsfAnalyteForm
 			choices['tube_type'] = LookupRef.where(:label => 'tubetypes', :description => "Sarstedt 0.5 mL screw top").first.ref_value
 		when "2.5ml sarstedt tube"
 			choices['tube_type'] = LookupRef.where(:label => 'tubetypes', :description => "Sarstedt 2.5 mL non-stick").first.ref_value
+		when "2.5ml Sarstedt"
+			choices['tube_type'] = LookupRef.where(:label => 'tubetypes', :description => "Sarstedt 2.5 mL non-stick").first.ref_value
 		when "0.5 Sarstedt tube"
 			choices['tube_type'] = LookupRef.where(:label => 'tubetypes', :description => "Sarstedt 0.5 mL screw top").first.ref_value
+		when "0.5ml Sarstedt"
+			choices['tube_type'] = LookupRef.where(:label => 'tubetypes', :description => "Sarstedt 0.5 mL screw top").first.ref_value
+			
 		else
 			choices['tube_type'] = nil
 			choices['notes'] += "\n'Tube Type' was '#{row["Tube Type"].to_s}'"
@@ -113,9 +118,20 @@ class CsfAnalyteForm
 		end
 
 		# row["Preanalytic Protocol"].downcase should be in ["pull", "fresh", "drip"]
-		choices['preanalytic_protocol'] = row["Preanalytic Protocol"].to_s.downcase
+		if row["Preanalytic Protocol"].to_s.downcase == 'fresh'
+			choices['preanalytic_protocol'] = 'drip'
+		else
+			choices['preanalytic_protocol'] = row["Preanalytic Protocol"].to_s.downcase
+		end
 
-		choices['sample_visit_date'] = row["Sample Visit Date"].blank? ? nil : Date.strptime(row["Sample Visit Date"].to_s)
+		if row["Sample Visit Date"].blank?
+			choices['sample_visit_date'] = nil
+		else
+			# date_parts = row["Sample Visit Date"].to_s.split("/")
+
+			# choices['sample_visit_date'] = Date.new(date_parts[2].to_i + 2000, date_parts[0].to_i, date_parts[1].to_i)
+			choices['sample_visit_date'] = Date.strptime(row["Sample Visit Date"].to_s, "%Y-%m-%d %H:%M:%S")
+		end
 
 		return self.new(choices)
 	end

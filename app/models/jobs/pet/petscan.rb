@@ -298,6 +298,8 @@
 		        return true
 		      elsif filename =~ /FLAIR_CUBE/i
 		        return true
+		      elsif filename =~ /CUBE_FLAIR/i
+		        return true
 		      end
 		    end
 		    return false
