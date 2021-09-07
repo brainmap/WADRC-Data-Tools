@@ -4,7 +4,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
       # - set up params
       params = { schedule_name: 'parallel_pet_mk6240_process',
                  base_path: Shared.get_base_path(), 
-                 computer: "kanga",
+                 computer: "cruella",
                  comment: [],
                  dry_run: false, #a dry run will generate our driver csv (with a "_dry_run" suffix), but not actuall run processing
                  tracer_id: "11",
@@ -22,7 +22,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
       # - set up params
       params = { schedule_name: 'parallel_pet_mk6240_process',
                  base_path: Shared.get_base_path(), 
-                 computer: "kanga",
+                 computer: "cruella",
                  comment: [],
                  dry_run: false,
                  tracer_id: "11",
@@ -36,7 +36,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
       # - set up params
       params = { schedule_name: 'parallel_pet_pib_dvr_process',
                  base_path: Shared.get_base_path(), 
-                 computer: "kanga",
+                 computer: "cruella",
                  comment: [],
                  dry_run: false,
                  tracer_id: "1",
@@ -51,7 +51,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
       # - set up params
       params = { schedule_name: 'parallel_pet_av45_process',
                  base_path: Shared.get_base_path(), 
-                 computer: "kanga",
+                 computer: "cruella",
                  comment: [],
                  dry_run: true,
                  tracer_id: "6",
