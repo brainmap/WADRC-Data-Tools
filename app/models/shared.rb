@@ -8749,7 +8749,7 @@ def run_pet_pib_suvr_process
       v_exclude_sp_mri_array = [-1,100,80,76,78] # excluding adcp
       v_exclude_sp_pet_array = [80,100,115]
       v_today_date = Date.today 
-      v_computer = "kanga"
+      v_computer = "cruella"
 
       @schedule = Schedule.where("name in ('pet_pib_suvr_process')").first
       @schedulerun = Schedulerun.new
