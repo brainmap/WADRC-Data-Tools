@@ -8845,7 +8845,15 @@ puts "v_participant.id="+v_participant.id.to_s
           else
              v_scan_procedure_codename = v_pet_path_array[4] # leading slash shifts register
              v_subjectid_array = v_pet_path_array[7].split("_")
-             v_subjectid = v_subjectid_array[0].downcase
+
+             v_subjectid = ''
+
+            if v_subjectid_array[0] =~ /WRAP/i
+              v_subjectid = v_subjectid_array[0].gsub(/WRAP/i, 'wrap')
+            else
+              v_subjectid = v_subjectid_array[0].downcase
+            end
+
              #check if enumber and scan_procedure are valid
              v_enumbers = Enrollment.where("enumber in (?)", v_subjectid)
              v_scan_procedures =ScanProcedure.where("codename in (?)",v_scan_procedure_codename)
