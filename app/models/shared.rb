@@ -9101,7 +9101,7 @@ puts "v_participant.id="+v_participant.id.to_s
                        begin
                         stdin, stdout, stderr = Open3.popen3(v_call)
                         rescue => msg  
-                          v_comment = v_comment + msg.to_s +"\n"  
+                          v_comment = v_comment + msg.message + "\n"  
                        end
                             # v_success ="N"
                        while !stdout.eof?
