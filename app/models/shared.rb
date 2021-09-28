@@ -9067,21 +9067,31 @@ puts "v_participant.id="+v_participant.id.to_s
                      end
                        if v_preprocessed_path_ti_no_leading_o > ""
 
-                          v_uptake_duration = ((pet_appt.scanstarttime - pet_appt.injecttiontime)/60).floor
-                          # surprised minus worked
-                          #puts "pet_appt.scanstarttime="+pet_appt.scanstarttime.to_s
-                          #puts "pet_appt.injecttiontime="+pet_appt.injecttiontime.to_s
-                          # pib scan should be the same time as the injecvtion time
-                          v_call = "date"
-                          if v_uptake_duration.to_i == 0
-                             v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer PiB --method SUVR  --uptake '+v_uptake_duration.to_s+' --fid_t1 '+v_preprocessed_path_ti_no_leading_o+' " '  
-                             v_comment = v_comment +" cmd= "+ v_call+"\n"
-                             @schedulerun.comment = v_comment
-                             @schedulerun.save
-                             v_notification_near_mri_run_array.push(v_call)
-                          else
-                            v_comment_warning = v_comment_warning+" ERROR bad uptake duration "+v_scan_procedure.codename+' --brain '+v_subjectid
+                          if pet_appt.scanstarttime.nil? or pet_appt.injecttiontime.nil?
+                            v_comment_warning = v_comment_warning+" ERROR bad scan start time or injection time"+v_scan_procedure.codename+' --brain '+v_subjectid
                             v_notification_uptake_time_array.push(v_scan_procedure.codename+' --brain '+v_subjectid)
+                          else
+
+                            v_uptake_duration = ((pet_appt.scanstarttime - pet_appt.injecttiontime)/60).floor
+                            # surprised minus worked
+                            #puts "pet_appt.scanstarttime="+pet_appt.scanstarttime.to_s
+                            #puts "pet_appt.injecttiontime="+pet_appt.injecttiontime.to_s
+                            # pib scan should be the same time as the injecvtion time
+                            v_call = "date"
+
+                            # 2021-09-28 wbbevis -- PiB usually has an uptake duration of 0 (they start the scan immediately upon injection),
+                            # but sometimes that can also be 50 minutes in. So 50 is also acceptable.
+
+                            if v_uptake_duration.to_i == 0 or v_uptake_duration.to_i == 50
+                               v_call =  'ssh panda_user@'+v_computer+'.dom.wisc.edu "'+v_pet_processing_wrapper+' --protocol '+v_scan_procedure.codename+' --brain '+v_subjectid+' --tracer PiB --method SUVR  --uptake '+v_uptake_duration.to_s+' --fid_t1 '+v_preprocessed_path_ti_no_leading_o+' " '  
+                               v_comment = v_comment +" cmd= "+ v_call+"\n"
+                               @schedulerun.comment = v_comment
+                               @schedulerun.save
+                               v_notification_near_mri_run_array.push(v_call)
+                            else
+                              v_comment_warning = v_comment_warning+" ERROR bad uptake duration "+v_scan_procedure.codename+' --brain '+v_subjectid
+                              v_notification_uptake_time_array.push(v_scan_procedure.codename+' --brain '+v_subjectid)
+                            end
                           end
                        # if ADCP or v_preprocessed_path_ti_no_leading_o == "" 
                        else 
