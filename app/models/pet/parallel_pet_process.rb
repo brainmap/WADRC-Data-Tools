@@ -213,7 +213,10 @@ class Pet::ParallelPetProcess < Pet::PetBase
 
               if !o_acpc_file_path.blank? && !multispectral_file_path.blank? && !pet_appt.scanstarttime.nil? && !pet_appt.injecttiontime.nil?
                 v_uptake_duration = ((pet_appt.scanstarttime - pet_appt.injecttiontime)/60).floor
-                if (v_uptake_duration.to_i).between?(65,75)
+
+                # tracer_id == 1 is PiB, tracer_id == 11 is Mk6240
+                # so either the tracer is mk6240 and the the uptake duration is between 65 and 75 minutes, or the tracer is PiB
+                if (p[:tracer_id] == "11" and (v_uptake_duration.to_i).between?(65,75)) or (p[:tracer_id] == "1")
 
                   # we're finally happy with all of the params we need, and we can make a csv for parallel processing
 
