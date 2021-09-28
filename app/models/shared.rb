@@ -9100,15 +9100,15 @@ puts "v_participant.id="+v_participant.id.to_s
                        # end
                        begin
                         stdin, stdout, stderr = Open3.popen3(v_call)
+                            # v_success ="N"
+                         while !stdout.eof?
+                           v_output = stdout.read 1024 
+                                #  v_comment = v_comment + v_output  
+                            puts v_output  
+                          end
                         rescue => msg  
                           v_comment = v_comment + msg.message + "\n"  
                        end
-                            # v_success ="N"
-                       while !stdout.eof?
-                         v_output = stdout.read 1024 
-                              #  v_comment = v_comment + v_output  
-                          puts v_output  
-                        end
                     # optional auto run with min non-pet vgroup mri 
                    else
                     v_comment = "need to run "+v_scan_procedure.codename+"/"+v_subjectid+" "+v_pet_date_string+" does not have any non-pet vgroup mri within "+v_days_mri_pet_diff_limit.to_s+" days; "+v_comment
