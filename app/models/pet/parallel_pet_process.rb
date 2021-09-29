@@ -10,7 +10,10 @@ class Pet::ParallelPetProcess < Pet::PetBase
                  tracer_id: "11",
                  comment_warning: "",
                  method: "suvr",
-                 exclude_sp_pet_array: [-1,100]
+                 exclude_sp_pet_array: [-1,100],
+                 uptake_duration_check: true,
+                 uptake_duration_lower_bound: 65,
+                 uptake_duration_upper_bound: 75
                 }
 
       #Setting dry_run = true will generate our driver csv (with a "_dry_run" suffix), and send out the "Can't Process PET Report"
@@ -28,7 +31,11 @@ class Pet::ParallelPetProcess < Pet::PetBase
                  tracer_id: "11",
                  comment_warning: "",
                  method: "suvr",
-                 exclude_sp_pet_array: [-1,100]
+                 exclude_sp_pet_array: [-1,100],
+                 uptake_duration_check: true,
+                 uptake_duration_lower_bound: 65,
+                 uptake_duration_upper_bound: 75
+
                 }
       params
     end
@@ -42,7 +49,28 @@ class Pet::ParallelPetProcess < Pet::PetBase
                  tracer_id: "1",
                  comment_warning: "",
                  method: "dvr",
-                 exclude_sp_pet_array: [-1,80,115,100] # excluding adcp
+                 exclude_sp_pet_array: [-1,80,115,100], # excluding adcp
+                 uptake_duration_check: false,
+                 uptake_duration_lower_bound: nil,
+                 uptake_duration_upper_bound: nil
+                }
+
+      params
+    end
+    def self.pib_suvr_params
+      # - set up params
+      params = { schedule_name: 'parallel_pet_pib_suvr_process',
+                 base_path: Shared.get_base_path(), 
+                 computer: "cruella",
+                 comment: [],
+                 dry_run: false,
+                 tracer_id: "1",
+                 comment_warning: "",
+                 method: "suvr",
+                 exclude_sp_pet_array: [-1,80,115,100], # excluding adcp
+                 uptake_duration_check: true,
+                 uptake_duration_lower_bound: 45,
+                 uptake_duration_upper_bound: 55
                 }
 
       params
@@ -57,7 +85,44 @@ class Pet::ParallelPetProcess < Pet::PetBase
                  tracer_id: "6",
                  comment_warning: "",
                  method: "suvr",
-                 exclude_sp_pet_array: [-1,100]
+                 exclude_sp_pet_array: [-1,100],
+                 uptake_duration_check: false,
+                 uptake_duration_lower_bound: nil,
+                 uptake_duration_upper_bound: nil
+                }
+      params
+    end
+    def self.neuraceq_params
+      # - set up params
+      params = { schedule_name: 'parallel_pet_neuraceq_dvr_process',
+                 base_path: Shared.get_base_path(), 
+                 computer: "cruella",
+                 comment: [],
+                 dry_run: true,
+                 tracer_id: "10",
+                 comment_warning: "",
+                 method: "dvr",
+                 exclude_sp_pet_array: [-1,100],
+                 uptake_duration_check: true,
+                 uptake_duration_lower_bound: 85,
+                 uptake_duration_upper_bound: 95
+                }
+      params
+    end
+    def self.neuraceq_params
+      # - set up params
+      params = { schedule_name: 'parallel_pet_neuraceq_suvr_process',
+                 base_path: Shared.get_base_path(), 
+                 computer: "cruella",
+                 comment: [],
+                 dry_run: true,
+                 tracer_id: "10",
+                 comment_warning: "",
+                 method: "suvr",
+                 exclude_sp_pet_array: [-1,100],
+                 uptake_duration_check: true,
+                 uptake_duration_lower_bound: 85,
+                 uptake_duration_upper_bound: 95
                 }
       params
     end
@@ -214,9 +279,8 @@ class Pet::ParallelPetProcess < Pet::PetBase
               if !o_acpc_file_path.blank? && !multispectral_file_path.blank? && !pet_appt.scanstarttime.nil? && !pet_appt.injecttiontime.nil?
                 v_uptake_duration = ((pet_appt.scanstarttime - pet_appt.injecttiontime)/60).floor
 
-                # tracer_id == 1 is PiB, tracer_id == 11 is Mk6240
-                # so either the tracer is mk6240 and the the uptake duration is between 65 and 75 minutes, or the tracer is PiB
-                if (p[:tracer_id] == "11" and (v_uptake_duration.to_i).between?(65,75)) or (p[:tracer_id] == "1")
+                # 2021-09-29 wbbevis -- I never really checked uptake duration differences before. Adding these as params.
+                if (p[:uptake_duration_check] == false) or ((v_uptake_duration.to_i).between?(p[:uptake_duration_lower_bound],p[:uptake_duration_upper_bound]))
 
                   # we're finally happy with all of the params we need, and we can make a csv for parallel processing
 
