@@ -247,7 +247,14 @@ class Pet::ParallelPetProcess < Pet::PetBase
 
           v_pet_appointment = Appointment.find(pet_appt.appointment_id)
           v_pet_date_string =(v_pet_appointment.appointment_date).to_s
-          v_participant = Participant.find(Vgroup.find(v_pet_appointment.vgroup_id).participant_id)
+          v_vgroup = Vgroup.find(v_pet_appointment.vgroup_id)
+
+          if v_vgroup.participant_id.nil?
+            v_error_appt_weirdness << {:pet_id => pet_appt.id}
+            next
+          end
+
+          v_participant = Participant.find(.participant_id)
           puts "v_participant.id="+v_participant.id.to_s
 
           o_acpc_file_path = ''
