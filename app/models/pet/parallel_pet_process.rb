@@ -254,7 +254,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
             next
           end
 
-          v_participant = Participant.find(.participant_id)
+          v_participant = Participant.find(v_vgroup.participant_id)
           puts "v_participant.id="+v_participant.id.to_s
 
           o_acpc_file_path = ''
