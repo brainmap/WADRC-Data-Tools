@@ -132,7 +132,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
                  base_path: Shared.get_base_path(), 
                  computer: "cruella",
                  comment: [],
-                 dry_run: true,
+                 dry_run: false,
                  tracer_id: "2",
                  comment_warning: "",
                  method: "dvr",
@@ -149,7 +149,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
                  base_path: Shared.get_base_path(), 
                  computer: "cruella",
                  comment: [],
-                 dry_run: true,
+                 dry_run: false,
                  tracer_id: "2",
                  comment_warning: "",
                  method: "suvr",
@@ -514,7 +514,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
         end
       end
 
-      if p[:dry_run]
+      if p[:dry_run] == true
 
         if v_petscan_normal_run.length > 0
           puts "\n\nnormal pet_#{v_pettracer.name}_processing: "
@@ -602,7 +602,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
         end
 
         matlab_template = "export MATLABPATH=$MATLABPATH:#{pet_scripts_dir}" + " && matlab -nodesktop -nosplash -r \\\"try %{command}; catch exception; display(getReport(exception)); pause(1); end; exit;\\\""
-        matlab_command = matlab_template % {command: "batch_pet_parallel_auto('#{pet_csv}',12,'#{v_pettracer.name.downcase}','#{p[:method]}')"}
+        matlab_command = matlab_template % {command: "batch_pet_parallel_auto('#{pet_csv}',48,'#{v_pettracer.name.downcase}','#{p[:method]}')"}
         v_computer = p[:computer]
         v_call =  "ssh panda_user@#{v_computer}.dom.wisc.edu \"#{matlab_command}\""
 
