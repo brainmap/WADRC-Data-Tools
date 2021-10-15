@@ -92,7 +92,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
                 }
       params
     end
-    def self.neuraceq_params
+    def self.neuraceq_dvr_params
       # - set up params
       params = { schedule_name: 'parallel_pet_neuraceq_dvr_process',
                  base_path: Shared.get_base_path(), 
@@ -103,13 +103,13 @@ class Pet::ParallelPetProcess < Pet::PetBase
                  comment_warning: "",
                  method: "dvr",
                  exclude_sp_pet_array: [-1,100],
-                 uptake_duration_check: true,
+                 uptake_duration_check: false,
                  uptake_duration_lower_bound: 85,
                  uptake_duration_upper_bound: 95
                 }
       params
     end
-    def self.neuraceq_params
+    def self.neuraceq_suvr_params
       # - set up params
       params = { schedule_name: 'parallel_pet_neuraceq_suvr_process',
                  base_path: Shared.get_base_path(), 
@@ -123,6 +123,40 @@ class Pet::ParallelPetProcess < Pet::PetBase
                  uptake_duration_check: true,
                  uptake_duration_lower_bound: 85,
                  uptake_duration_upper_bound: 95
+                }
+      params
+    end
+    def self.fdg_dvr_params
+      # - set up params
+      params = { schedule_name: 'parallel_pet_fdg_dvr_process',
+                 base_path: Shared.get_base_path(), 
+                 computer: "cruella",
+                 comment: [],
+                 dry_run: true,
+                 tracer_id: "2",
+                 comment_warning: "",
+                 method: "dvr",
+                 exclude_sp_pet_array: [-1,100],
+                 uptake_duration_check: false,
+                 uptake_duration_lower_bound: 20,
+                 uptake_duration_upper_bound: 40
+                }
+      params
+    end
+    def self.fdg_suvr_params
+      # - set up params
+      params = { schedule_name: 'parallel_pet_fdg_suvr_process',
+                 base_path: Shared.get_base_path(), 
+                 computer: "cruella",
+                 comment: [],
+                 dry_run: true,
+                 tracer_id: "2",
+                 comment_warning: "",
+                 method: "suvr",
+                 exclude_sp_pet_array: [-1,100],
+                 uptake_duration_check: true,
+                 uptake_duration_lower_bound: 20,
+                 uptake_duration_upper_bound: 40
                 }
       params
     end
