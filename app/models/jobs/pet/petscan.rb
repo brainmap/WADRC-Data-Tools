@@ -149,7 +149,17 @@
 
 		    if File.exist?(pet_path) and !File.directory?(pet_path) and pet_path.end_with?(".v")
 		      v_subjectid_array = v_path_array[-1].split("_")
-		      v_subjectid = v_subjectid_array[0].downcase
+		      
+		      # 2021-06-04 wbbevis - The downcasing I was doing here for consistency ended up missing some 
+		      # wrap cases where the subject id is correctly "wrapLXXXX" (where Xs are numbers). They could
+		      # have a capital A, L or M, and the filesystem reflects this. So, we should get that right, 
+		      # or else we keep reprocessing the same cases over and over.
+
+		      if v_subjectid_array[0] =~ /WRAP/i
+		      	v_subjectid = v_subjectid_array[0].gsub(/WRAP/i, 'wrap')
+		      else
+			    v_subjectid = v_subjectid_array[0].downcase
+			  end
 
 		    #others are paths to a directory under raw. these should have a subject id as a directory
 		    # in the middle of their path
