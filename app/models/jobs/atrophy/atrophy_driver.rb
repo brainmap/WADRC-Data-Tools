@@ -132,36 +132,36 @@ class Jobs::Atrophy::AtrophyDriver < Jobs::BaseJob
                     acpc_path = "#{preprocessed_path}/#{acpc_candidates.first}"
 
                   elsif acpc_candidates.count == 0
-                    self.exclusions << {:class => visit.class, :id => visit.id, :message => "no o*.nii files for this visit"}
+                    self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "no o*.nii files for this visit"}
                     next
                   else
-                    self.exclusions << {:class => visit.class, :id => visit.id, :message => "too many o*.nii files for this visit"}
+                    self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "too many o*.nii files for this visit"}
                     next
                   end
                 end
 
               else
-                self.exclusions << {:class => visit.class, :id => visit.id, :message => "no o*.nii files for this visit"}
+                self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "no o*.nii files for this visit"}
                 next
               end
             else
-              self.exclusions << {:class => visit.class, :id => visit.id, :message => "too many o*.nii files for this visit"}
+              self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "too many o*.nii files for this visit"}
               next
             end
           else
-            self.exclusions << {:class => visit.class, :id => visit.id, :message => "no proprocessed directory for this visit"}
+            self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "no proprocessed directory for this visit"}
             next
           end
 
           #finally, if this case has already been run, don't rerun it.
           processing_path = "#{params[:processing_output_path]}/#{scan_procedure.codename}/#{enrollment.enumber}/"
           if File.exists?(processing_path) and File.directory?(processing_path) and Dir.entries(processing_path).select{|item| item =~ /^[^.]/}.count > 0
-            self.exclusions << {:class => visit.class, :id => visit.id, :message => "already processed"}
+            self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "already processed"}
             next
           end
 
           if acpc_path.nil?
-            self.exclusions << {:class => visit.class, :id => visit.id, :message => "failed to find an acpc file for this case. does one exist?"}
+            self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "failed to find an acpc file for this case. does one exist?"}
             next
           end
 
@@ -169,7 +169,7 @@ class Jobs::Atrophy::AtrophyDriver < Jobs::BaseJob
           if File.symlink?(acpc_path)
             acpc_path = File.realpath(acpc_path)
             if !File.exists?(acpc_path)
-              self.exclusions << {:class => visit.class, :id => visit.id, :message => "symlink to acpc file is broken"}
+              self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "symlink to acpc file is broken"}
               next
             end
           end
