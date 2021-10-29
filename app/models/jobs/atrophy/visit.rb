@@ -45,31 +45,28 @@
 
 		end
 
-		def related_enrollment
 
-			vgroup = appointment.vgroup
-		    vgroup.enrollments.first
+		def related_enrollment
+		    if path.nil?
+		      return nil
+		    end
+
+			enrollments = appointment.vgroup.enrollments
+		    path_relevant_enrollment = enrollments.select{|item| path =~ Regexp.new(item.enumber)}.first
+		    return path_relevant_enrollment
 
 		end
 
 		def related_scan_procedure
+		    if path.nil?
+		      return nil
+		    end
 
-			vgroup = appointment.vgroup
+		    scan_procedures = appointment.vgroup.scan_procedures
+		    path_relevant_sp = scan_procedures.select{|item| path =~ Regexp.new(item.codename)}.first
+		    return path_relevant_sp
 
-			if vgroup.scan_procedures.count == 0
-				return nil
-			elsif vgroup.scan_procedures.count == 1
-            	vgroup.scan_procedures.first
-          	elsif vgroup.scan_procedures.count > 1
-	            if !vgroup.primary_scan_procedure.blank?
-	              vgroup.scan_procedures.select{|sp| sp.codename == vgroup.primary_scan_procedure}.first
-	            else
-	              nil
-	            end
-	        else
-	        	nil
-	        end
-        end
+		end
 
 		def o_acpc_file_exists?
 
