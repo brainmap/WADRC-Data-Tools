@@ -102,7 +102,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
                  tracer_id: "10",
                  comment_warning: "",
                  method: "dvr",
-                 exclude_sp_pet_array: [-1,100],
+                 exclude_sp_pet_array: [-1,80,115,100, 79,129, 104, 145, 157],
                  uptake_duration_check: false,
                  uptake_duration_lower_bound: 85,
                  uptake_duration_upper_bound: 95
@@ -119,7 +119,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
                  tracer_id: "10",
                  comment_warning: "",
                  method: "suvr",
-                 exclude_sp_pet_array: [-1,100],
+                 exclude_sp_pet_array: [-1,80,115,100, 79,129, 104, 145, 157],
                  uptake_duration_check: true,
                  uptake_duration_lower_bound: 85,
                  uptake_duration_upper_bound: 95
