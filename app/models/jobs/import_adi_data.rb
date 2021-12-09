@@ -48,7 +48,7 @@ class Jobs::ImportAdiData < Jobs::BaseJob
 
 	def import(params)
 
-		sql = "truncate table #{params[:roche_table]}_new"
+		sql = "truncate table #{params[:cg_table_name]}_new"
 		@connection.execute(sql)
 
 		#adrc
