@@ -3,13 +3,12 @@ class WrapAdiForm
 	include ActiveModel::Model
 	include ActiveModel::Serialization
 
-	attr_accessor :wrapnum, :reggieid, :participant_id
+	attr_accessor :wrapnum, :participant_id
 	attr_accessor :adi_natran, :adi_stater, :prim_ruca, :sec_ruca
 
 	def self.attributes
 		{
 			'wrapnum' => '',
-			'reggieid' => '',
 			'participant_id' => '',
 			'adi_natran' => '',
 			'adi_stater' => '',
@@ -28,7 +27,6 @@ class WrapAdiForm
 		if !ppt.nil?
 
 			choices['wrapnum'] = ppt.wrapnum
-			choices['reggieid'] = ppt.reggieid
 			choices['participant_id'] = ppt.id
 			choices['adi_natran'] = row['ADI_NATRAN']
 			choices['adi_stater'] = row['ADI_STATER']
@@ -45,7 +43,6 @@ class WrapAdiForm
 	def attributes
 		{
 			'wrapnum' => @wrapnum,
-			'reggieid' => @reggieid,
 			'participant_id' => @participant_id,
 			'adi_natran' => @adi_natran,
 			'adi_stater' => @adi_stater,

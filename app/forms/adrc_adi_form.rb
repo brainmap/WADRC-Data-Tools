@@ -3,7 +3,7 @@ class AdrcAdiForm
 	include ActiveModel::Model
 	include ActiveModel::Serialization
 
-	attr_accessor :adrcnum, :reggieid, :participant_id
+	attr_accessor :adrcnum, :participant_id
 	attr_accessor :adi_natran, :adi_stater, :prim_ruca, :sec_ruca
 
 	def self.attributes
@@ -28,7 +28,6 @@ class AdrcAdiForm
 		if !ppt.nil?
 
 			choices['adrcnum'] = ppt.adrcnum
-			choices['reggieid'] = ppt.reggieid
 			choices['participant_id'] = ppt.id
 			choices['adi_natran'] = row['ADI_NATRAN']
 			choices['adi_stater'] = row['ADI_STATER']
@@ -45,7 +44,6 @@ class AdrcAdiForm
 	def attributes
 		{
 			'wrapnum' => @wrapnum,
-			'reggieid' => @reggieid,
 			'participant_id' => @participant_id,
 			'adi_natran' => @adi_natran,
 			'adi_stater' => @adi_stater,
