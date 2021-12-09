@@ -68,7 +68,7 @@ class AdrcAdiForm
 
 end
 
-# CREATE TABLE `cg_lst_lpa` (
+# CREATE TABLE `cg_area_disadvantage_index` (
 #   `id` int NOT NULL AUTO_INCREMENT,
 #   `wrapnum` varchar(20) DEFAULT NULL,
 #   `adrcnum` varchar(20) DEFAULT NULL,

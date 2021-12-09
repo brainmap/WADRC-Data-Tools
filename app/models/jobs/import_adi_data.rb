@@ -1,11 +1,11 @@
-class Jobs::ImportCleanedRocheAnalytes < Jobs::BaseJob
+class Jobs::ImportAdiData < Jobs::BaseJob
 
 	attr_accessor :header
 	attr_accessor :error_rows
 	attr_accessor :connection
 
 	def self.default_params
-	  	params = { :schedule_name => 'import_cleaned_roche_analytes', 
+	  	params = { :schedule_name => 'import_area_disadvantage_index', 
 	  				:base_path => "/mounts/data",
 	  				:run_by_user => 'panda_user',
 	  				:csv_path => "/mounts/data/analyses/panda_user/adi_data",
