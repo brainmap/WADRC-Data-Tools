@@ -60,8 +60,9 @@ class Jobs::ImportAdiData < Jobs::BaseJob
 
 				adi_form = AdrcAdiForm.from_csv(row)
 				sql = ''
-				if !adi_form.valid?
+				if !adi_form.nil? and !adi_form.valid?
 					@error_rows << adi_form
+					next
 				end
 
 				begin
@@ -87,8 +88,9 @@ class Jobs::ImportAdiData < Jobs::BaseJob
 
 				adi_form = WrapAdiForm.from_csv(row)
 				sql = ''
-				if !adi_form.valid?
+				if !adi_form.nil? and !adi_form.valid?
 					@error_rows << adi_form
+					next
 				end
 
 				begin
