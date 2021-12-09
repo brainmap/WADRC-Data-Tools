@@ -58,6 +58,25 @@ class Jobs::Pet::PibSuvrHarvest < Jobs::Pet::PetHarvestBase
 
     params
   end
+  def self.neuraceq_params
+    # - set up params
+    params = { schedule_name: 'pet_neuraceq_harvest',
+                base_path: '/mounts/data', 
+                computer: "kanga",
+                comment: [],
+                dry_run: false,
+                tracer_id: "10",
+                run_by_user: 'panda_user',
+                method: "suvr",
+                code_version: "code_ver2b",
+                product_file_type: "suvr neuraceq",
+                trtype_id: 16,
+                sp_blacklist: [54,56,57,95,55,76,78,72,70,71,99,81,75,83,92,93,88,68,97,61,62,46,60,8,21,28,31,34,82,84,85,86,33,40,42,44,51,96,9,25,23,19,15,24,36,100,35,73,32,6,12,16,13,11,90,59,63,43,4,17,74,98,100,101,102,103,108,110,111,112,113,114]
+                # sp_whitelist: [52]
+              }
+
+    params
+  end
 
   def compare_file_header(p_standard_header,p_file_header)
     v_comment =""
