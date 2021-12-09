@@ -43,7 +43,7 @@ class AdrcAdiForm
 
 	def attributes
 		{
-			'wrapnum' => @wrapnum,
+			'adrcnum' => @adrcnum,
 			'participant_id' => @participant_id,
 			'adi_natran' => @adi_natran,
 			'adi_stater' => @adi_stater,
