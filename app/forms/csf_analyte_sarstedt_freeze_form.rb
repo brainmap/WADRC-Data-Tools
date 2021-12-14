@@ -94,7 +94,7 @@ class CsfAnalyteSarstedtFreezeForm
 
 	def validate_reggieid
 		# this is supposed to tell us if the first column on the input spreadsheet matches an enumber in the Panda
-		if Participant.where(:reggieid => row['Reggieid']).first.nil?
+		if Participant.where(:reggieid => @participant_id).first.nil?
 			errors.add(:reggieid, "should match an existing reggieid in Panda")
 		end
 	end
