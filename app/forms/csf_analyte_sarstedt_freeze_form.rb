@@ -7,7 +7,7 @@ class CsfAnalyteSarstedtFreezeForm
 	attr_accessor :run_datetime_pTau, :run_datetime_tTau, :ABeta_1_42, :pTau, :tTau, :pTau_ABeta_1_42_derived
 	attr_accessor :ABeta_1_42_bin, :pTau_bin, :tTau_bin, :pTau_ABeta_1_42_derived_bin
 
-	validate :validate_reggied
+	validate :validate_reggieid
 
 	def self.attributes
 		{
