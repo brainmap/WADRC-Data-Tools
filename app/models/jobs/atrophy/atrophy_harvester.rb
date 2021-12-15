@@ -12,11 +12,11 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
   	def self.default_params
 		params = { schedule_name: 'CAT12 Atrophy Pipeline Harvester',
 				base_path: '/mounts/data', 
-    			computer: "merida",
+    			computer: "moana",
                 run_by_user: 'panda_user',
                 destination_table: 'cg_atrophy',
-                code_ver: '001',
-                older_versions: ['001'],
+                code_ver: '007',
+                older_versions: ['007'],
                 processing_output_path: "/mounts/data/development/atrophy/output",
                 tracker_id: 29
     		}
@@ -27,11 +27,11 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
   	def self.production_params
 		params = { schedule_name: 'CAT12 Atrophy Pipeline Harvester',
 				base_path: '/mounts/data', 
-    			computer: "merida",
+    			computer: "moana",
                 run_by_user: 'panda_user',
                 destination_table: 'cg_atrophy',
-                code_ver: '001',
-                older_versions: ['001'],
+                code_ver: '007',
+                older_versions: ['007'],
                 processing_output_path: "/mounts/data/pipelines/atrophy/output",
                 tracker_id: 29
     		}
@@ -51,7 +51,7 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 
 			close(params)
 
-			post_harvest(params)
+			# post_harvest(params)
 		
 		rescue StandardError => error
 
@@ -108,6 +108,7 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 
 						candidate_subdirs.each do |subdir|
 							code_version_dir = "#{subject_dir_path}#{subdir}"
+							report_subdir = "#{code_version_dir}/report"
 							processing_flag = nil
 
 							if (subdir =~ /_/)
@@ -118,10 +119,16 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 							csv_candidates = []
 							pdf_candidates = []
 
+							# CSV
 							if File.exists?(code_version_dir) and File.directory?(code_version_dir)
 								filenames = Dir.entries(code_version_dir)
-								csv_candidates = filenames.select{|entry| entry =~ /_atrophy.csv$/}
-								pdf_candidates = filenames.select{|entry| (entry =~ /.pdf$/) and !(entry =~ /-/)}
+								csv_candidates = filenames.select{|entry| entry =~ /atrophy[_0-9a-zA-Z]*\.csv$/}
+							end
+
+							# PDF
+							if File.exists?(report_subdir) and File.directory?(report_subdir)
+								filenames = Dir.entries(report_subdir)
+								pdf_candidates = filenames.select{|entry| (entry =~ /\.pdf$/)}
 							end
 
 							if pdf_candidates.length == 0 or csv_candidates.length != 1
@@ -131,7 +138,16 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 								self.total_cases += 1
 								self.success << {:protocol => protocol, :subject => subject}
 
-								pdf_path = "#{code_version_dir}/#{pdf_candidates.first}"
+								pdf_path = "#{report_subdir}/#{pdf_candidates.first}"
+
+								# csv report
+			                    csv_path = "#{code_version_dir}/#{csv_candidates.first}"
+
+			                    # we may need these values in just a minute
+			                    csv_data = Hash.new("")
+			                    CSV.foreach(csv_path, :headers => true) do |row|
+			                      csv_data[row["Description"]] = row["Value"].to_s.strip
+			                    end
 
 								#Is there a QC tracker for this object?
 								existing_tracked_image = Processedimage.where("file_path like ?","%#{pdf_path}%")
@@ -198,12 +214,12 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 				                    	found_non_special = true
 				                    end
 
-									html_candidates.each do |candidate|
+									pdf_candidates.each do |candidate|
 
 						            	image = Processedimage.new
 				                        image.file_type = "pdf"
 				                        image.file_name = candidate
-				                        image.file_path = "#{code_version_dir}/#{candidate}"
+				                        image.file_path = "#{report_subdir}/#{candidate}"
 				                        image.scan_procedure_id = sp.id
 				                        image.enrollment_id = enrollment.id
 				                        image.save
@@ -222,15 +238,78 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 			                       	#and set up the fields on this file
 			                       	qc_fields = Tractiontype.where("trtype_id in (?)",params[:tracker_id])
 			                       	if qc_fields.count > 0
-			                        	qc_fields.each do |field|
-			                            	rating = TreditAction.new
-			                            	rating.tredit_id = tredit.id
-			                            	rating.tractiontype_id = field.id
-			                            	if !(field.form_default_value).blank?
-			                               		rating.value = field.form_default_value
-			                            	end
-			                            	rating.save
-			                          	end
+
+			                       		#TIV
+			                       		tiv_field = qc_fields.select{|item| item.description == 'Total Intracranial Volume'}.first
+			                            tiv_rating = TreditAction.new
+			                            tiv_rating.tredit_id = tredit.id
+			                            tiv_rating.tractiontype_id = tiv_field.id
+			                            tiv_rating.value = csv_data["TIV"].to_s
+			                            tiv_rating.save
+
+			                       		#GM volume
+			                       		gm_field = qc_fields.select{|item| item.description == 'GM Volume'}.first
+			                            gm_rating = TreditAction.new
+			                            gm_rating.tredit_id = tredit.id
+			                            gm_rating.tractiontype_id = gm_field.id
+			                            gm_rating.value = csv_data["GM volume"].to_s
+			                            gm_rating.save
+
+			                       		#WM volume
+			                       		wm_field = qc_fields.select{|item| item.description == 'WM Volume'}.first
+			                            wm_rating = TreditAction.new
+			                            wm_rating.tredit_id = tredit.id
+			                            wm_rating.tractiontype_id = wm_field.id
+			                            wm_rating.value = csv_data["WM volume"].to_s
+			                            wm_rating.save
+
+			                       		#CSF volume
+			                       		csf_field = qc_fields.select{|item| item.description == 'CSF Volume'}.first
+			                            csf_rating = TreditAction.new
+			                            csf_rating.tredit_id = tredit.id
+			                            csf_rating.tractiontype_id = csf_field.id
+			                            csf_rating.value = csv_data["WM volume"].to_s
+			                            csf_rating.save
+
+			                       		#WMH volume
+			                       		wmh_field = qc_fields.select{|item| item.description == 'WMH Volume'}.first
+			                            wmh_rating = TreditAction.new
+			                            wmh_rating.tredit_id = tredit.id
+			                            wmh_rating.tractiontype_id = wmh_field.id
+			                            wmh_rating.value = csv_data["WMH volume"].to_s
+			                            wmh_rating.save
+
+			                       		#%IQR
+			                       		iqr_pct_field = qc_fields.select{|item| item.description == '%IQR'}.first
+			                            iqr_pct_rating = TreditAction.new
+			                            iqr_pct_rating.tredit_id = tredit.id
+			                            iqr_pct_rating.tractiontype_id = iqr_pct_field.id
+			                            iqr_pct_rating.value = csv_data["%IQR"].to_s
+			                            iqr_pct_rating.save
+
+			                       		#IQR letter grade
+			                       		iqr_letter_field = qc_fields.select{|item| item.description == 'IQR Letter Grade'}.first
+			                            iqr_letter_rating = TreditAction.new
+			                            iqr_letter_rating.tredit_id = tredit.id
+			                            iqr_letter_rating.tractiontype_id = iqr_letter_field.id
+			                            iqr_letter_rating.value = csv_data["IQR letter grade"].to_s
+			                            iqr_letter_rating.save
+
+			                       		#Rating
+			                       		rating_field = qc_fields.select{|item| item.description == 'Rating'}.first
+			                            rating_rating = TreditAction.new
+			                            rating_rating.tredit_id = tredit.id
+			                            rating_rating.tractiontype_id = rating_field.id
+			                            rating_rating.value = "Pass"
+			                            rating_rating.save
+
+			                       		#Rating comment
+			                       		comment_field = qc_fields.select{|item| item.description == 'Rating Comment'}.first
+			                            comment_rating = TreditAction.new
+			                            comment_rating.tredit_id = tredit.id
+			                            comment_rating.tractiontype_id = comment_field.id
+			                            comment_rating.value = ""
+			                            comment_rating.save
 			                       	end
 					            end
 					            
@@ -273,7 +352,7 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 end
 
 
-# CREATE TABLE `cg_lst_lpa` (
+# CREATE TABLE `cg_atrophy_new` (
 #   `id` int NOT NULL AUTO_INCREMENT,
 # `subject_id` varchar(255) DEFAULT NULL,
 # `scan_procedure` varchar(255) DEFAULT NULL,
@@ -281,20 +360,20 @@ end
 # `matlab_version` varchar(255) DEFAULT NULL,
 # `spm_version` varchar(255) DEFAULT NULL,
 # `spm_revision` varchar(255) DEFAULT NULL,
-# `lst_version` varchar(255) DEFAULT NULL,
-# `lstlpa_local_code_version` varchar(255) DEFAULT NULL,
-# `original_image_path_flair` varchar(255) DEFAULT NULL,
-# `original_image_path_T1` varchar(255) DEFAULT NULL,
-# `lesion_volume_ml` float DEFAULT NULL,
-# `number_of_lesions` int(11) DEFAULT NULL,
+# `cat12_release` varchar(255) DEFAULT NULL,
+# `cat12_version` varchar(255) DEFAULT NULL,
+# `cat12_date` varchar(20) DEFAULT NULL,
+# `atrophy_local_code_version` varchar(255) DEFAULT NULL,
+# `original_image_path` varchar(255) DEFAULT NULL,
+# `tiv` float DEFAULT NULL,
+# `gm_volume` float DEFAULT NULL,
+# `wm_volume` float DEFAULT NULL,
+# `csf_volume` float DEFAULT NULL,
+# `wmh_volume` float DEFAULT NULL,
+# `iqr_percent` float DEFAULT NULL,
+# `iqr_letter_grade` float DEFAULT NULL,
 # `created_at` datetime DEFAULT NULL,
 # `processed_at` datetime DEFAULT NULL,
 # `participant_id` int(11) DEFAULT NULL,
-
 #   PRIMARY KEY (`id`)
 #   );
-
-# alter table  cg_lst_lpa add column t2_prep varchar(5) default NULL;
-# alter table  cg_lst_lpa add column receive_coil_name varchar(20) default NULL;
-# alter table  cg_lst_lpa add column pure_corrected varchar(5) default NULL;
-# alter table  cg_lst_lpa add column mri_station_name varchar(20) default NULL;

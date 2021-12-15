@@ -11,7 +11,8 @@ class Jobs::Atrophy::AtrophyDriver < Jobs::BaseJob
                 computer: "kanga",
                 dry_run: false,
                 run_by_user: 'panda_user',
-                exclude_sp_mri_array: [-1,100,80,115,76,78,53, 54, 55, 56, 57, 69, 95, 133, 49, 79, 104, 129, 145, 157],
+                code_ver: 'b42e83aa',
+                exclude_sp_mri_array: [-1,100,80,76,78],
                 date_cutoff: '2018-10-11',
                 csv_headers: ['scan_procedure','enrollment','ACPC_T1_path', 'processing_flag'],
                 driver_path: "/mounts/data/analyses/wbbevis/atrophy/",
@@ -31,8 +32,9 @@ class Jobs::Atrophy::AtrophyDriver < Jobs::BaseJob
                 computer: "moana",
                 dry_run: false,
                 run_by_user: 'panda_user',
-                exclude_sp_mri_array: [-1,100,80,115,76,78, 53, 54, 55, 56, 57, 69, 95, 133, 49, 79, 104, 129, 145, 157],
-                date_cutoff: '2018-10-11',
+                code_ver: 'b42e83aa',
+                exclude_sp_mri_array: [-1,100,80,76,78],
+                date_cutoff: '2015-06-01',
                 csv_headers: ['scan_procedure','enrollment','ACPC_T1_path', 'processing_flag'],
                 driver_path: "/mounts/data/analyses/wbbevis/atrophy/",
                 driver_file_name: "#{Date.today.strftime("%Y-%m-%d")}_atrophy_driver.csv",
@@ -130,36 +132,36 @@ class Jobs::Atrophy::AtrophyDriver < Jobs::BaseJob
                     acpc_path = "#{preprocessed_path}/#{acpc_candidates.first}"
 
                   elsif acpc_candidates.count == 0
-                    self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "no o*.nii files for this visit"}
+                    self.exclusions << {:class => visit.class, :id => visit.id, :message => "no o*.nii files for this visit"}
                     next
                   else
-                    self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "too many o*.nii files for this visit"}
+                    self.exclusions << {:class => visit.class, :id => visit.id, :message => "too many o*.nii files for this visit"}
                     next
                   end
                 end
 
               else
-                self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "no o*.nii files for this visit"}
+                self.exclusions << {:class => visit.class, :id => visit.id, :message => "no o*.nii files for this visit"}
                 next
               end
             else
-              self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "too many o*.nii files for this visit"}
+              self.exclusions << {:class => visit.class, :id => visit.id, :message => "too many o*.nii files for this visit"}
               next
             end
           else
-            self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "no proprocessed directory for this visit"}
+            self.exclusions << {:class => visit.class, :id => visit.id, :message => "no proprocessed directory for this visit"}
             next
           end
 
           #finally, if this case has already been run, don't rerun it.
           processing_path = "#{params[:processing_output_path]}/#{scan_procedure.codename}/#{enrollment.enumber}/"
           if File.exists?(processing_path) and File.directory?(processing_path) and Dir.entries(processing_path).select{|item| item =~ /^[^.]/}.count > 0
-            self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "already processed"}
+            self.exclusions << {:class => visit.class, :id => visit.id, :message => "already processed"}
             next
           end
 
           if acpc_path.nil?
-            self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "failed to find an acpc file for this case. does one exist?"}
+            self.exclusions << {:class => visit.class, :id => visit.id, :message => "failed to find an acpc file for this case. does one exist?"}
             next
           end
 
@@ -167,13 +169,12 @@ class Jobs::Atrophy::AtrophyDriver < Jobs::BaseJob
           if File.symlink?(acpc_path)
             acpc_path = File.realpath(acpc_path)
             if !File.exists?(acpc_path)
-              self.exclusions << {:scan_procedures => visit.appointment.vgroup.scan_procedures.map(&:codename).join(','), :enrollments => visit.appointment.vgroup.enrollments.map(&:enumber).join(','), :id => visit.id, :message => "symlink to acpc file is broken"}
+              self.exclusions << {:class => visit.class, :id => visit.id, :message => "symlink to acpc file is broken"}
               next
             end
           end
 
           @driver << {:visit => visit, :acpc_path => acpc_path, :scan_procedure => scan_procedure.codename, :enrollment => enrollment}
-
       end
   end
 
@@ -222,11 +223,6 @@ class Jobs::Atrophy::AtrophyDriver < Jobs::BaseJob
           v_output = stdout.read 1024  
           # puts v_output
           self.log << {:message => v_output.to_s}
-
-          err_output = stderr.read 1024
-          if err_output != ''
-            self.error_log << {:message => err_output.to_s}
-          end
             
         end
 
