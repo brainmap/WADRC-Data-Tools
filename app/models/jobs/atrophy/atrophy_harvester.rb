@@ -295,16 +295,16 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 			                            iqr_letter_rating.value = csv_data["IQR letter grade"].to_s
 			                            iqr_letter_rating.save
 
-			                       		#Rating
-			                       		rating_field = qc_fields.select{|item| item.description == 'Rating'}.first
-			                            rating_rating = TreditAction.new
-			                            rating_rating.tredit_id = tredit.id
-			                            rating_rating.tractiontype_id = rating_field.id
-			                            rating_rating.value = "Pass"
-			                            rating_rating.save
+			                       		# #Rating
+			                       		# rating_field = qc_fields.select{|item| item.description == 'Rating'}.first
+			                         #    rating_rating = TreditAction.new
+			                         #    rating_rating.tredit_id = tredit.id
+			                         #    rating_rating.tractiontype_id = rating_field.id
+			                         #    rating_rating.value = "Pass"
+			                         #    rating_rating.save
 
 			                       		#Rating comment
-			                       		comment_field = qc_fields.select{|item| item.description == 'Rating Comment'}.first
+			                       		comment_field = qc_fields.select{|item| item.description == 'QC Rating Comment'}.first
 			                            comment_rating = TreditAction.new
 			                            comment_rating.tredit_id = tredit.id
 			                            comment_rating.tractiontype_id = comment_field.id
