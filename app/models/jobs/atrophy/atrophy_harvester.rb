@@ -268,7 +268,7 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 			                            csf_rating = TreditAction.new
 			                            csf_rating.tredit_id = tredit.id
 			                            csf_rating.tractiontype_id = csf_field.id
-			                            csf_rating.value = csv_data["WM volume"].to_s
+			                            csf_rating.value = csv_data["CSF volume"].to_s
 			                            csf_rating.save
 
 			                       		#WMH volume
