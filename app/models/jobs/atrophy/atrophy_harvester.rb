@@ -15,8 +15,9 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
     			computer: "moana",
                 run_by_user: 'panda_user',
                 destination_table: 'cg_atrophy',
-                code_ver: '007',
-                older_versions: ['007'],
+                roi_destination_table: 'cg_atrophy_roi',
+                code_ver: '009',
+                older_versions: ['007','008','009'],
                 processing_output_path: "/mounts/data/development/atrophy/output",
                 tracker_id: 29
     		}
@@ -30,8 +31,9 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
     			computer: "moana",
                 run_by_user: 'panda_user',
                 destination_table: 'cg_atrophy',
-                code_ver: '007',
-                older_versions: ['007'],
+                roi_destination_table: 'cg_atrophy_roi',
+                code_ver: '009',
+                older_versions: ['009'],
                 processing_output_path: "/mounts/data/pipelines/atrophy/output",
                 tracker_id: 29
     		}
@@ -122,7 +124,7 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 							# CSV
 							if File.exists?(code_version_dir) and File.directory?(code_version_dir)
 								filenames = Dir.entries(code_version_dir)
-								csv_candidates = filenames.select{|entry| entry =~ /atrophy[_0-9a-zA-Z]*\.csv$/}
+								csv_candidates = filenames.select{|entry| entry =~ /atrophy[0-9a-zA-Z_-]*\.csv$/}
 							end
 
 							# PDF
@@ -131,7 +133,7 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 								pdf_candidates = filenames.select{|entry| (entry =~ /\.pdf$/)}
 							end
 
-							if pdf_candidates.length == 0 or csv_candidates.length != 1
+							if pdf_candidates.length == 0 or csv_candidates.length != 2
 								next
 							else
 
@@ -140,8 +142,11 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 
 								pdf_path = "#{report_subdir}/#{pdf_candidates.first}"
 
+								summary_csv = csv_candidates.select{|entry| entry =~ /summary/}
+								roi_csv = csv_candidates.select{|entry| entry =~ /roiVolumes/}
+
 								# csv report
-			                    csv_path = "#{code_version_dir}/#{csv_candidates.first}"
+			                    csv_path = "#{code_version_dir}/#{summary_csv.first}"
 
 			                    # we may need these values in just a minute
 			                    csv_data = Hash.new("")
@@ -169,13 +174,24 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 
 							            if qc_value == 'Pass'
 							            	# create an insert from the csv
-							            	csv = CSV.open("#{code_version_dir}/#{csv_candidates.first}",:headers => true)
+							            	#the global products table
+							            	csv = CSV.open("#{code_version_dir}/#{summary_csv.first}",:headers => true)
 
-											new_form = LstLpaForm.from_csv(csv)
+											new_form = AtrophyForm.from_csv(csv)
 											new_form.processing_flag = processing_flag
 
 										    if new_form.valid?
 								               	sql = new_form.to_sql_insert("#{params[:destination_table]}_new")
+												@connection.execute(sql)
+											end
+
+											#ROIs
+							            	roi = CSV.open("#{code_version_dir}/#{roi_csv.first}",:headers => true)
+
+											new_roi_form = AtrophyRoiForm.from_csv(roi,subject,sp.codename)
+
+										    if new_roi_form.valid?
+								               	sql = new_roi_form.to_sql_insert("#{params[:roi_destination_table]}_new")
 												@connection.execute(sql)
 											end
 							            end
@@ -268,7 +284,7 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 			                            csf_rating = TreditAction.new
 			                            csf_rating.tredit_id = tredit.id
 			                            csf_rating.tractiontype_id = csf_field.id
-			                            csf_rating.value = csv_data["CSF volume"].to_s
+			                            csf_rating.value = csv_data["WM volume"].to_s
 			                            csf_rating.save
 
 			                       		#WMH volume
@@ -295,7 +311,7 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 			                            iqr_letter_rating.value = csv_data["IQR letter grade"].to_s
 			                            iqr_letter_rating.save
 
-			                       		# #Rating
+			                       		#Rating
 			                       		# rating_field = qc_fields.select{|item| item.description == 'Rating'}.first
 			                         #    rating_rating = TreditAction.new
 			                         #    rating_rating.tredit_id = tredit.id
