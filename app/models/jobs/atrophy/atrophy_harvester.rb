@@ -188,13 +188,19 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 											end
 
 											#ROIs
-							            	roi = CSV.open("#{code_version_dir}/#{roi_csv.first}",:headers => true)
+								        	roi = CSV.open("#{code_version_dir}/#{roi_csv.first}",:headers => true)
+								        	# puts "#{code_version_dir}/#{roi_csv.first}"
 
-											new_roi_form = AtrophyRoiForm.from_csv(roi,subject,sp.codename)
+								        	roi.each do |roi_row|
 
-										    if new_roi_form.valid?
-								               	sql = new_roi_form.to_sql_insert("#{params[:roi_destination_table]}_new")
-												@connection.execute(sql)
+								        		# puts "roi_row is #{roi_row.to_h}"
+
+												new_roi_form = AtrophyRoiForm.from_csv(roi_row,subject,sp.codename)
+
+											    if new_roi_form.valid?
+										           	sql = new_roi_form.to_sql_insert("#{params[:roi_destination_table]}")
+													connection.execute(sql)
+												end
 											end
 							            end
 							        end
