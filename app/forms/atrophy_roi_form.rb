@@ -34,11 +34,11 @@ class AtrophyRoiForm
 		end
 
 		choices['scan_procedure'] = scan_procedure
-		choices['atlas'] = csv['Atlas'].to_s,
-		choices['region'] = csv['Region'].to_s,
-		choices['roi_number'] = csv['roi_number'].to_i,
-		choices['v_gm'] = csv['Vgm'].to_f,
-		choices['v_wm'] = csv['Vwm'].to_f,
+		choices['atlas'] = csv['Atlas'].to_s
+		choices['region'] = csv['Region'].to_s
+		choices['roi_number'] = csv['roi_number'].to_i
+		choices['v_gm'] = csv['Vgm'].to_f
+		choices['v_wm'] = csv['Vwm'].to_f
 		choices['v_csf'] = csv['Vcsf'].to_f
 
 		return self.new(choices)
@@ -63,7 +63,7 @@ class AtrophyRoiForm
 		values = []
 		connection = ActiveRecord::Base.connection
 		attributes.keys.each do |key|
-			puts "#{key} #{attributes[key]}"
+			# puts "#{key} #{attributes[key]}"
 			columns << key
 			values << (attributes[key].nil? ? "NULL" : connection.quote(attributes[key]))
 		end
