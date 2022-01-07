@@ -343,7 +343,12 @@ function load_fields (central_title, id) {
             <% else %>
             image_paths = '';
             $.each(item.images, function (key, image){
-              if (image.file_path.includes("windows")){
+
+              if (image.file_type == "command"){
+
+                image_paths += '<div class="col-12 panda-data"> <span id="path' + image.id + '" class="d-none">' + image.file_path + '</span><span>' + image.file_path + '</span> <i class="fas fa-copy pl-1" onclick="copy_path(\'#path' + image.id + '\')"></i></div>';
+
+              } else if (image.file_path.includes("windows")){
                 var path = image.file_path.replace("/mounts/data","s:")
                 image_paths += '<div class="col-12 panda-data"> <span id="path' + image.id + '" class="d-none">file://' + path + '</span><span>' + image.file_name + '</span> <i class="fas fa-copy pl-1" onclick="copy_path(\'#path' + image.id + '\')"></i></div>';
               } else {

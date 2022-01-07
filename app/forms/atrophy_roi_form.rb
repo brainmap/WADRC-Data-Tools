@@ -63,6 +63,7 @@ class AtrophyRoiForm
 		values = []
 		connection = ActiveRecord::Base.connection
 		attributes.keys.each do |key|
+			puts "#{key} #{attributes[key]}"
 			columns << key
 			values << (attributes[key].nil? ? "NULL" : connection.quote(attributes[key]))
 		end

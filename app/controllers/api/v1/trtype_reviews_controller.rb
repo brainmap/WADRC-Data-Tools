@@ -233,7 +233,7 @@ class Api::V1::TrtypeReviewsController < API::APIController
 			images = []
 
 			file.trfileimages.each do |image|
-				if ['html','processedimage','pdf'].include? image.image_category
+				if ['html','processedimage','pdf','command'].include? image.image_category
 					processedimage = Processedimage.find(image.image_id)
 					images << {'id' => processedimage.id,
 								'file_path' => processedimage.file_path,

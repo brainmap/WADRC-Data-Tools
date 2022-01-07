@@ -128,19 +128,21 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 							end
 
 							# PDF
-							if File.exists?(report_subdir) and File.directory?(report_subdir)
-								filenames = Dir.entries(report_subdir)
-								pdf_candidates = filenames.select{|entry| (entry =~ /\.pdf$/)}
-							end
+							# if File.exists?(report_subdir) and File.directory?(report_subdir)
+							# 	filenames = Dir.entries(report_subdir)
+							# 	pdf_candidates = filenames.select{|entry| (entry =~ /\.pdf$/)}
+							# end
 
-							if pdf_candidates.length == 0 or csv_candidates.length != 2
+							if csv_candidates.length != 2
 								next
 							else
 
 								self.total_cases += 1
 								self.success << {:protocol => protocol, :subject => subject}
 
-								pdf_path = "#{report_subdir}/#{pdf_candidates.first}"
+								# pdf_path = "#{report_subdir}/#{pdf_candidates.first}"
+
+								command_path = "/mounts/data/pipelines/atrophy/src/atrophyqc.sh /mounts/data/pipelines/atrophy/output/#{protocol}/#{subject}/#{code_version}"
 
 								summary_csv = csv_candidates.select{|entry| entry =~ /summary/}
 								roi_csv = csv_candidates.select{|entry| entry =~ /roiVolumes/}
@@ -154,13 +156,13 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 			                      csv_data[row["Description"]] = row["Value"].to_s.strip
 			                    end
 
-								#Is there a QC tracker for this object?
-								existing_tracked_image = Processedimage.where("file_path like ?","%#{pdf_path}%")
+								#We're not quite tracking images like we are in other places. 
+								existing_tracked_image = Processedimage.where("file_path like ?","%#{command_path}%")
 
 					            if existing_tracked_image.count > 0
 					            	#this files has been QC tracked, so if it's passed, we should add it to the searchable table
 					            	self.success_log << {:message => 'a case with an existing tracked image', :protocol => protocol, :subject => subject}
-					            	matching_image = Trfileimage.where(:image_id => existing_tracked_image.first.id, :image_category => 'pdf').first
+					            	matching_image = Trfileimage.where(:image_id => existing_tracked_image.first.id, :image_category => 'command').first
 
 					            	if matching_image.nil? or matching_image.trfile.nil?
 					            		# 2021-06-10 wbbevis -- this is a failed case: we've got an existing processedimage 
@@ -230,22 +232,19 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 				                    	found_non_special = true
 				                    end
 
-									pdf_candidates.each do |candidate|
+					            	image = Processedimage.new
+				                    image.file_type = "command"
+				                    image.file_name = command_path
+			                        image.file_path = command_path
+			                        image.scan_procedure_id = sp.id
+			                        image.enrollment_id = enrollment.id
+				                    image.save
 
-						            	image = Processedimage.new
-				                        image.file_type = "pdf"
-				                        image.file_name = candidate
-				                        image.file_path = "#{report_subdir}/#{candidate}"
-				                        image.scan_procedure_id = sp.id
-				                        image.enrollment_id = enrollment.id
-				                        image.save
-
-					                    trimg = Trfileimage.new
-				                        trimg.trfile_id = trfile.id
-				                        trimg.image_id = image.id
-				                        trimg.image_category = "pdf"
-				                        trimg.save
-				                    end
+					                trimg = Trfileimage.new
+				                    trimg.trfile_id = trfile.id
+				                    trimg.image_id = image.id
+				                    trimg.image_category = "command"
+				                    trimg.save
 
 				                    tredit = Tredit.new
 			                       	tredit.trfile_id = trfile.id
