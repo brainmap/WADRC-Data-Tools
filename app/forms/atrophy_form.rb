@@ -71,7 +71,7 @@ class AtrophyForm
 		choices['csf_volume'] = hash_flip["CSF volume"].to_f
 		choices['wmh_volume'] = hash_flip["WMH volume"].to_f
 		choices['iqr_percent'] = hash_flip["%IQR"].to_f
-		choices['iqr_letter_grade'] = hash_flip["IQR Letter Grade"]
+		choices['iqr_letter_grade'] = hash_flip["IQR letter grade"]
 		choices['created_at'] = DateTime.now()
 
 		choices['processed_at'] = ''
