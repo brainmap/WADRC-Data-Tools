@@ -198,8 +198,25 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 												new_roi_form = AtrophyRoiForm.from_csv(roi_row,subject,sp.codename)
 
 											    if new_roi_form.valid?
-										           	sql = new_roi_form.to_sql_insert("#{params[:roi_destination_table]}")
-													connection.execute(sql)
+										           	
+											    	case new_roi_form.atlas
+											    	when 'aal3'
+										           		sql = new_roi_form.to_sql_insert("#{params[:roi_destination_table]}_aal3")
+														connection.execute(sql)
+
+											    	when 'cobra'
+										           		sql = new_roi_form.to_sql_insert("#{params[:roi_destination_table]}_cobra")
+														connection.execute(sql)
+
+													when 'julichbrain'	
+										           		sql = new_roi_form.to_sql_insert("#{params[:roi_destination_table]}_julichbrain")
+														connection.execute(sql)
+														
+													when 'neuromorphometrics'	
+										           		sql = new_roi_form.to_sql_insert("#{params[:roi_destination_table]}_neuromorphometrics")
+														connection.execute(sql)
+														
+										           	end
 												end
 											end
 							            end
