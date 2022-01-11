@@ -1,9 +1,5 @@
 class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 
-	# Like the driver class for this pipeline, the harvester is set up as a service class
-	# that we can call like `job.run(params)`. Driver jobs and harvest jobs are broken up
-	# by convention, as it allows more flexibility for how we run our processing, but 
-	# the two could just as easily be a single sequence.
 	attr_accessor :success
 	attr_accessor :failed
 	attr_accessor :total_cases
@@ -88,16 +84,6 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 				subject_dirs = Dir.entries(protocol_path).select{|entry| entry =~ /^[^.]/}
 				subject_dirs.each do |subject|
 					enrollment = Enrollment.where(:enumber => subject).first
-
-					# 2020-12-01 wbbevis - given that there are a lot of new versions of the code,
-					# we're going to need to loop through the available code version subdirs, and
-					# find the latest version with all the products we need.
-
-					# 2021-05-26 wbbevis - We need to harvest stuff that's been processed with a
-					# special "processing flag", which gets its own special subdir. We should
-					# harvest this if it's the latest stuff. Bascially, there will be cases where
-					# we've got both a most-recently processed subdir, and a sibling special 
-					# processing subdir, and we want to be able to harvest both.
 
 					params[:older_versions].reverse.each do |code_version|
 
@@ -225,12 +211,6 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 					            else
 					            	#this file isn't tracked yet, so let's start tracking it
 					            	self.success_log << {:message => 'a case that isnt tracked yet', :protocol => protocol, :subject => subject}
-
-					            	#then create a trfile and add the images to it.
-
-					            	# 2021-06-07 wbbevis - previously, we were checking for an existing tracker file. Now we're just making a new one, in order to 
-					            	# accommodate special processing.
-					            	# trfiles = Trfile.where("trtype_id in (?)",params[:tracker_id]).where("subjectid in (?)",subject).where(:scan_procedure_id => sp.id)
 
 				                    trfile = Trfile.new
 				                    trfile.subjectid = subject

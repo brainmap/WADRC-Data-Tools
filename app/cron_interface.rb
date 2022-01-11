@@ -300,6 +300,16 @@ v_user = v_user.gsub("\n","")
      job2 = Jobs::Pet::CentiloidsHarvester.new(job2_params)
      job2.run(job2_params)
 
+  elsif v_value_1 == 'Atrophy'
+     job_params = Jobs::Atrophy::AtrophyHarvester.production_params
+     job = Jobs::Atrophy::AtrophyHarvester.new(job_params)
+     job.run(job_params)
+     
+  elsif v_value_1 == 'ImageDataset Metadata Harvest'
+     job_params = Jobs::ImageDatasetHarvester.production_params
+     job = Jobs::ImageDatasetHarvester.new(job_params)
+     job.run(job_params)
+
   elsif v_value_1 == 'Neuropathology Request'
      job_params = Jobs::RemoteRequest::NeuropathologyRequest.default_params
      job = Jobs::RemoteRequest::NeuropathologyRequest.new(job1_params)
