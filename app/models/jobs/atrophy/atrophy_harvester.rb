@@ -66,6 +66,14 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 		self.total_cases = 0
 		sql = "truncate #{params[:destination_table]}_new"
 		@connection.execute(sql)
+		sql = "truncate #{params[:roi_destination_table]}_aal3"
+		@connection.execute(sql)
+		sql = "truncate #{params[:roi_destination_table]}_cobra"
+		@connection.execute(sql)
+		sql = "truncate #{params[:roi_destination_table]}_julichbrain"
+		@connection.execute(sql)
+		sql = "truncate #{params[:roi_destination_table]}_neuromorphometrics"
+		@connection.execute(sql)
 	end
 	
 	def harvest(params)
