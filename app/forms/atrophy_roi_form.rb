@@ -28,7 +28,7 @@ class AtrophyRoiForm
 
 		#need to match this log file to its petscan, which we can also know from its path
 
-		enr = Enrollment.where(:enumber => choices['subject_id']).first
+		enr = Enrollment.where(:enumber => subject_id).first
 		if !enr.nil?
 			choices['participant_id'] = enr.participant_id
 			choices['enrollment_id'] = enr.id
