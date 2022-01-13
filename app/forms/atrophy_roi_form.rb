@@ -3,14 +3,16 @@ class AtrophyRoiForm
 	include ActiveModel::Model
 	include ActiveModel::Serialization
 
-	attr_accessor :subject_id, :scan_procedure, :participant_id, :atlas, :region
+	attr_accessor :enrollment_id, :enumber, :scan_procedure_id, :scan_procedure_codename, :participant_id, :atlas, :region
 	attr_accessor :roi_number, :v_gm, :v_wm, :v_csf
 
 	def self.attributes
 		{
 
-			'subject_id' => nil, 
-			'scan_procedure' => nil,
+			'enumber' => nil, 
+			'enrollment_id' => nil, 
+			'scan_procedure_codename' => nil,
+			'scan_procedure_id' => nil,
 			'participant_id' => nil,
 			'atlas' => '',
 			'region' => '',
@@ -26,14 +28,19 @@ class AtrophyRoiForm
 
 		#need to match this log file to its petscan, which we can also know from its path
 
-		choices['subject_id'] = subject_id
-
 		enr = Enrollment.where(:enumber => choices['subject_id']).first
 		if !enr.nil?
 			choices['participant_id'] = enr.participant_id
+			choices['enrollment_id'] = enr.id
+			choices['enumber'] = enr.enumber
 		end
 
-		choices['scan_procedure'] = scan_procedure
+		sp = ScanProcedure.where(:codename => scan_procedure).first
+		if !sp.nil?
+			choices['scan_procedure_id'] = sp.id
+			choices['scan_procedure_codename'] = sp.codename
+		end
+
 		choices['atlas'] = csv['Atlas'].to_s
 		choices['region'] = csv['Region'].to_s
 		choices['roi_number'] = csv['roi_number'].to_i
@@ -46,8 +53,10 @@ class AtrophyRoiForm
 
 	def attributes
 		{
-			'subject_id' => @subject_id, 
-			'scan_procedure' => @scan_procedure, 
+			'enumber' => @enumber, 
+			'enrollment_id' => @enrollment_id, 
+			'scan_procedure_codename' => @scan_procedure_codename,
+			'scan_procedure_id' => @scan_procedure_id,
 			'participant_id' => @participant_id,
 			'atlas' => @atlas,
 			'region' => @region,
