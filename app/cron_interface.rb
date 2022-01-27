@@ -277,6 +277,12 @@ v_user = v_user.gsub("\n","")
      params = Pet::ParallelPetProcess.mk6240_params
      job.run(params)
     
+   elsif v_value_1 == "parallel_pet_pib_suvr_process"
+    
+     params = Pet::ParallelPetProcess.pib_suvr_params
+     job = Pet::ParallelPetProcess.new(params)
+     job.run(params)
+    
    elsif v_value_1 == "parallel_pet_pib_dvr_process"
      job = Pet::ParallelPetProcess.new
      params = Pet::ParallelPetProcess.pib_dvr_params
