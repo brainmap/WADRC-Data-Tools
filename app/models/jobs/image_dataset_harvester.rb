@@ -56,7 +56,7 @@ class Jobs::ImageDatasetHarvester < Jobs::BaseJob
 	def selection(params)
 
 		@selected = ImageDataset.where("created_at > '(?)'",(Date.today - params[:weeks_in_the_past].weeks).strftime("%Y-%m-%d"))
-                              .where("appointments.appointment_date > ?",params[:date_cutoff])
+                              # .where("appointments.appointment_date > ?",params[:date_cutoff])
 
 	end
 	

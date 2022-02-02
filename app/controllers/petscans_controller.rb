@@ -1059,6 +1059,8 @@ class PetscansController < ApplicationController
                      while  v_keep_looking_for_pet_dicoms > 0 # keep looking   
                         v_cnt_escape = v_cnt_escape + 1 
                         @petfiles_dicoms_found_array = @petscan.get_pet_dicoms(r_sp[0], @petscan.lookup_pettracer_id,@vgroup.id, v_exclude_path_array)
+
+                        puts "petflies_dicoms_found: #{@petfiles_dicoms_found_array}"
  
                         if @petfiles_dicoms_found_array.nil? or (!@petfiles_dicoms_found_array.nil? and  @petfiles_dicoms_found_array[0].nil? ) or v_cnt_escape > 10
                             v_keep_looking_for_pet_dicoms = 0
