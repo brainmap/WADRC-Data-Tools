@@ -278,7 +278,7 @@ v_user = v_user.gsub("\n","")
      job.run(params)
     
    elsif v_value_1 == "parallel_pet_pib_suvr_process"
-    
+
      params = Pet::ParallelPetProcess.pib_suvr_params
      job = Pet::ParallelPetProcess.new(params)
      job.run(params)
@@ -307,9 +307,13 @@ v_user = v_user.gsub("\n","")
      job2.run(job2_params)
 
   elsif v_value_1 == 'Atrophy'
-     job_params = Jobs::Atrophy::AtrophyHarvester.production_params
-     job = Jobs::Atrophy::AtrophyHarvester.new(job_params)
-     job.run(job_params)
+     processing_job_params = Jobs::Atrophy::AtrophyDriver.production_params
+     processing_job = Jobs::Atrophy::AtrophyDriver.new(processing_job_params)
+     processing_job.run(processing_job_params)
+
+     harvest_job_params = Jobs::Atrophy::AtrophyHarvester.production_params
+     harvest_job = Jobs::Atrophy::AtrophyHarvester.new(harvest_job_params)
+     harvest_job.run(harvest_job_params)
      
   elsif v_value_1 == 'ImageDataset Metadata Harvest'
      job_params = Jobs::ImageDatasetHarvester.production_params
