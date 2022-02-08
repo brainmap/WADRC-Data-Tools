@@ -260,14 +260,14 @@ module CreateTrCgBrave
 #        roi_names = "#{neuro_table[1][1...].map { |s| s.downcase.tr(' ', '_')}.join('`, `')}" #downcase all ROI names, replace spaces with _, and then seperate by comma and space for MySQL syntax #skip first column because that is "ROIname"
 #        column_names = "cg_asl_id, #{roi_names}"
         column_names = "`cg_asl_id`"
-        neuro_table[1][1...].each { |name| column_names << ",`#{name.downcase.tr(" ","_")}`" }
+        #neuro_table[1][1...].each { |name| column_names << ",`#{name.downcase.tr(" ","_")}`" }
         #CBF
         #cbf_values = neuro_table[3][1...].map { |s| s.to_f }.each { |val| val.join(`', '`) }
-        cbf_values = neuro_table[3][1...].join(', ')
+        #cbf_values = neuro_table[3][1...].join(', ')
         cbf_values.gsub!("NaN", "NULL")
         #VGM
         #vgm_values = neuro_table[2][1...].map { |s| s.to_i }.each { |val| val.join(`', '`) }
-        vgm_values = neuro_table[2][1...].join(', ')
+        #vgm_values = neuro_table[2][1...].join(', ')
         vgm_values.gsub!("NaN", "NULL")
         #ASL
         asl_column_names = "scan_procedure_id, enrollment_id, participant_id, trfile_id, processed_image_id, neuromorph_cbf_metrics_id, neuromorph_vgm_metrics_id, research_cbf, gm_cbf_median, gm_cbf_mad, gm_cbf_mean, gm_cbf_std, wm_cbf_median, wm_cbf_mad, wm_cbf_mean, wm_cbf_std"

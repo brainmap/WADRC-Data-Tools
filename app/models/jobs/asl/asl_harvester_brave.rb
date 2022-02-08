@@ -268,6 +268,7 @@ class Jobs::ASL::ASLHarvesterBrave < Jobs::BaseJob
   #def post_harvest(params)
   #end
 
+end
 
 end
 
