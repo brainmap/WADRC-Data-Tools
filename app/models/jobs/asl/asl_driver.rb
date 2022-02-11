@@ -477,7 +477,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
 
 
       self.log << {:message => processing_call}
-      self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
+      # self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
 
       # All of the STDOUT output from the processing script gets captured and logged, and
       # after the processing script is complete, we save everything and update the overall
@@ -495,7 +495,8 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
       rescue => msg  
         self.log << {:message => msg.to_s}
       end
-      self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
+      # self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
+      self.close(params)
     end
   end
 end
