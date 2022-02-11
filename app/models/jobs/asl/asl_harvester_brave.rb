@@ -147,15 +147,18 @@ class Jobs::ASL::ASLHarvesterBrave < Jobs::BaseJob
 	
   def harvest(params)
     #loop over any results, create qc html, and collect outputs in a _new table
-    protocol_dirs = []
-    params[:protocols].each do |glob| #specific to brave dirs only
-      protocol_dirs = protocol_dirs + Dir.glob(glob,:base=>params[:processing_output_path])
-    end
+    #protocol_dirs = []
+    #params[:protocols].each do |glob| #specific to brave dirs only
+      #protocol_dirs = protocol_dirs + Dir.glob(glob,:base=>params[:processing_output_path])
+    #end
     #protocol_dirs = Dir.glob("*.visit*",:base=>params[:processing_output_path])
-    protocol_dirs.each do |protocol|
+    #protocol_dirs.each do |protocol|
+    params[:processing_output_path].each do |protocol|
       sp = ScanProcedure.where(:codename => protocol).first #first just in case mult entries??
       protocol_path = "#{params[:processing_output_path]}/#{protocol}"
-      subject_dirs = Dir.glob("[!.]*",:base=>protocol_path)
+      #subject_dirs = Dir.glob("[!.]*",:base=>protocol_path)
+      subject_dirs = []
+      Dir.glob("#{protocol_path}/[!.]*").each { |full| subject_dirs.push(full.split('/').last) } #get array of subject dirs
       subject_dirs.each do |subject|
         subject_dir = "#{protocol_path}/#{subject}"
         #log actions for each participant in their output dir
@@ -168,7 +171,9 @@ class Jobs::ASL::ASLHarvesterBrave < Jobs::BaseJob
         harvest_log_path = "#{pt_logs}/#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}_harvest_log.txt"
         harvest_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nSUBJECT: #{subject}\nPROTOCOL: #{protocol}\n"
 
-        cbf_names = Dir.glob("#{subject}*CBF*",:base=>subject_dir)
+       # cbf_names = Dir.glob("#{subject}*CBF*",:base=>subject_dir)
+        cbf_names = []
+        Dir.glob("#{subject_dir}/#{subject}*CBF*").each { |full| cbf_names.push(full.split('/').last) } #get array of cbf file names
         enrollment = Enrollment.where(:enumber => subject).first
         cbf_names.each do |cbf_dir|
           cbf_dir_path = "#{protocol_path}/#{subject}/#{cbf_dir}"
