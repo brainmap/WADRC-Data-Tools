@@ -29,12 +29,17 @@ class Jobs::ASL::ASLHarvester < Jobs::BaseJob
   end
 
   def self.production_params
-    params = { schedule_name: 'Hello World Pipeline Harvester',
+    params = { schedule_name: 'ASL Pipeline Harvester',
       base_path: '/mounts/data', 
-      computer: "merida",
+      computer: "thumper",
       run_by_user: 'panda_user',
-      destination_table: 'cg_hello_world',
-      processing_output_path: "/mounts/data/pipelines/HelloWolrdPipeline/output"
+      destination_table: 'cg_asl',
+      processing_scripts_path: "/mounts/data/pipelines/asl-pipeline/src",
+      processing_output_path: "/mounts/data/pipelines/asl-pipeline/output",
+      tracker_id: 37,
+      record_dir: "/mounts/data/pipelines/asl-pipeline/output/qc_records",
+      new_record_file_name: "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}_new_records_need_qc",
+      fail_record_file_name: "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}_records_failed_qc"
     }
     params.default = ''
     params

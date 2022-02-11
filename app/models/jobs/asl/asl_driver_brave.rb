@@ -43,7 +43,7 @@ class Jobs::ASL::ASLDriverBrave < Jobs::BaseJob
       computer: "thumper",
       parallel_jobs: 10,
       dry_run: false,
-      run_by_user: 'ngretzon',
+      run_by_user: 'panda_user',
       cbf_series_des: ["CBF"],
       visits: ["carlsson.brave.visit1"],
       processing_output_path: "/mounts/data/pipelines/asl-pipeline/output",

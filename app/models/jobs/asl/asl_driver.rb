@@ -42,15 +42,23 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
   end
 
   def self.production_params
-    params = { schedule_name: 'Hello World Pipeline Driver',
-      computer: "kanga",
+    params = { schedule_name: 'ASL Pipeline Driver',
+      computer: "thumper",
+      parallel_jobs: 10,
       dry_run: false,
       run_by_user: 'panda_user',
-      sp_whitelist: [77],
-      processing_output_path: "/mounts/data/pipelines/HelloWorldPipeline/output",
-      processing_executable_path: "/mounts/data/pipelines/HelloWorldPipeline/src/HelloWorld.py",
-      driver_path: "/mounts/data/pipelines/HelloWorldPipeline/input",
-      driver_file_name: "#{Date.today.strftime("%Y-%m-%d")}_hello_world_driver.csv"
+      cbf_series_des: ["NOT DIAGNOSTIC: (Transit corrected CBF) UW eASL", "CBF"],
+#      t1_series_des: ["Accelerated Sagittal IR-FSPGR MSV21", "mADNI3_T1"],
+      #                series_des: ["NOT DIAGNOSTIC: (Transit corrected CBF) UW eASL"],
+      #                sp_whitelist: [77],
+      #                raw_data_path: "/mounts/data/raw",
+      visits: ["carlsson.brave.visit1","carlsson.brave.visit5","carlsson.brave.visit8"],
+      processing_output_path: "/mounts/data/pipelines/asl-pipeline/output",
+      processing_executable_path: "/mounts/data/pipelines/asl-pipeline/src",
+      processing_executable_name: "batch_asl",
+      driver_path: "/mounts/data/pipelines/asl-pipeline/input",
+#      driver_file_name: "#{Date.today.strftime("%Y-%m-%d")}_asl_driver.csv"
+      driver_file_name: "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}_asl_driver.csv"
     }
     params.default = ''
     params

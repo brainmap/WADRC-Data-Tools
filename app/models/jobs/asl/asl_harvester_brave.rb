@@ -30,7 +30,7 @@ class Jobs::ASL::ASLHarvesterBrave < Jobs::BaseJob
     params = { schedule_name: 'ASL Pipeline Harvester',
       base_path: '/mounts/data', 
       computer: "thumper",
-      run_by_user: 'ngretzon',
+      run_by_user: 'panda_user',
       destination_table: 'cg_asl_brave',
       processing_scripts_path: "/mounts/data/pipelines/asl-pipeline/src",
       processing_output_path: "/mounts/data/pipelines/asl-pipeline/output",
