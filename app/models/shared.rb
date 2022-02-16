@@ -18084,23 +18084,24 @@ puts "v_analyses_path="+v_analyses_path
                                   v_dir_array.select{|entry| entry =~ /.html/}.each do |first_html|
                                     #we need to track these as well.
                                     trfile = Trfile.where("trtype_id in (?)",v_fsl_first_trtype_id).where("subjectid in (?)",dir_name_array[0]+v_visit_number).first
+                                    if !trfile.nil?
+                                      if trfile.trfileimages.select{|image| processed = Processedimage.where(:id => image.image_id).first; image.image_category == 'html' and !processed.nil? and processed.file_path == "#{v_subjectid_first}/#{first_html}"}.count == 0
 
-                                    if trfile.trfileimages.select{|image| processed = Processedimage.where(:id => image.image_id).first; image.image_category == 'html' and !processed.nil? and processed.file_path == "#{v_subjectid_first}/#{first_html}"}.count == 0
+                                        image = Processedimage.new
+                                        image.file_type = "html"
+                                        image.file_name = first_html
+                                        image.file_path = "#{v_subjectid_first}/#{first_html}"
+                                        image.scan_procedure_id = sp.id
+                                        image.enrollment_id = trfile.enrollment_id
+                                        image.save
 
-                                      image = Processedimage.new
-                                      image.file_type = "html"
-                                      image.file_name = first_html
-                                      image.file_path = "#{v_subjectid_first}/#{first_html}"
-                                      image.scan_procedure_id = sp.id
-                                      image.enrollment_id = trfile.enrollment_id
-                                      image.save
-
-                                      trimg = Trfileimage.new
-                                      trimg.trfile_id = trfile.id
-                                      trimg.image_id = image.id
-                                      trimg.image_category = "html"
-                                      trimg.save
-                                      
+                                        trimg = Trfileimage.new
+                                        trimg.trfile_id = trfile.id
+                                        trimg.image_id = image.id
+                                        trimg.image_category = "html"
+                                        trimg.save
+                                        
+                                      end
                                     end
 
                                   end
