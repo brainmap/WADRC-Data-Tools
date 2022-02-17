@@ -54,7 +54,7 @@ class Jobs::HippocampalFslHarvester < Jobs::BaseJob
 	def harvest(params)
 		#loop over any results, and collect them in a _new table
 
-		protocol_dirs = Dir.entries(params[:base_path]).select{|entry| entry =~ /^[^.]/ and !params[:scan_procedure_blacklist].include? entry}
+		protocol_dirs = Dir.entries(params[:base_path]).select{|entry| entry =~ /^[^.]/ and !params[:scan_procedure_blacklist].include? entry and File.directory?("#{params[:base_path]}/#{entry}")}
 		protocol_dirs.each do |protocol|
 			sp = ScanProcedure.where(:codename => protocol).first
 			protocol_path = "#{params[:base_path]}/#{protocol}"
