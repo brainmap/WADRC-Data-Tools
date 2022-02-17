@@ -91,8 +91,10 @@ class Jobs::HippocampalFslHarvester < Jobs::BaseJob
 
 								#Is there a QC tracker for this object?
 								existing_tracked_image = Processedimage.where("file_path like ?","%#{html_path}%")
+								trfile_images = Trfileimage.where(:image_id => existing_tracked_image.map{|item| item.id}, :image_category => 'html')
+								trfiles = Trfile.where(:id => trfile_images.map{|item| item.trfile_id})
 
-					            if existing_tracked_image.count > 0
+					            if existing_tracked_image.count > 0 and trfile_images.count > 0 and trfiles.count > 0 and trfiles.all?{|item| item.trtype_id == params[:tracker_id]}
 					            	#this files has been QC tracked, so if it's passed, we should add it to the searchable table
 
 					            	tracker = Trfileimage.where(:image_id => existing_tracked_image.first.id, :image_category => 'html')
