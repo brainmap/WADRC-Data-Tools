@@ -65,15 +65,29 @@ class Jobs::HippocampalFslHarvester < Jobs::BaseJob
 					subject_dirs.each do |subject|
 						enrollment = Enrollment.where(:enumber => subject).first
 
+						if enrollment.nil?
+							# is this a 'b'-type 2ndary scan?
+							if subject =~ /b$/ or subject =~ /\.2$/ 
+								enrollment = Enrollment.where(:enumber => subject.gsub(/b$/,'').gsub(/\.2$/,'')).first
+
+								if enrollment.nil?
+									self.error_log <<  {"message" => "Can;t handle the way this subject is named.", "subject" => subject, "protocol" => sp.codename}
+									next
+								end
+							end
+						end
+
 						first_dir = "#{protocol_path}/#{subject}/first"
 
 						if File.exists?(first_dir) and File.directory?(first_dir)
 							filenames = Dir.entries(first_dir)
-							csv_candidates = filenames.select{|entry| entry =~ /_lstlpa.csv$/}
+							csv_candidates = filenames.select{|entry| entry =~ /_first_roi_vol.csv$/}
 							html_candidates = filenames.select{|entry| entry =~ /.html$/}
+							nii_candidates = filenames.select{|entry| entry =~ /.nii$/ and File.symlink?("#{first_dir}/#{entry}")}
+
 
 							if html_candidates.length > 0 and csv_candidates.length == 1
-								html_path = "#{code_version_dir}/#{html_candidates.first}"
+								html_path = "#{first_dir}/#{html_candidates.first}"
 
 								#Is there a QC tracker for this object?
 								existing_tracked_image = Processedimage.where("file_path like ?","%#{html_path}%")
@@ -86,14 +100,16 @@ class Jobs::HippocampalFslHarvester < Jobs::BaseJob
 
 					                if qc_value == 'Pass'
 					                	# create an insert from the csv
-					                	csv = CSV.open("#{code_version_dir}/#{csv_candidates.first}",:headers => true)
+					                	csv = CSV.open("#{first_dir}/#{csv_candidates.first}",:headers => true)
 
-									    new_form = LstLpaForm.from_csv(csv)
+					                	# We need a new table for these values, rather than the LSTLPA tables.
 
-									    if new_form.valid?
-						                	sql = new_form.to_sql_insert("#{params[:destination_table]}_new")
-											@connection.execute(sql)
-										end
+									 #    new_form = LstLpaForm.from_csv(csv)
+
+									 #    if new_form.valid?
+						   			 #             	sql = new_form.to_sql_insert("#{params[:destination_table]}_new")
+										# 	@connection.execute(sql)
+										# end
 					                end
 
 					            else
@@ -112,11 +128,29 @@ class Jobs::HippocampalFslHarvester < Jobs::BaseJob
 				                       trfile.save
 				                    end
 
+				                    nii_candidates.each do |nii|
+				                    	ref_path = File.readlink("#{first_dir}/#{nii}")
+
+						            	image = Processedimage.new
+				                        image.file_type = "nii"
+				                        image.file_name = nii
+				                        image.file_path = "#{ref_path}"
+				                        image.scan_procedure_id = sp.id
+				                        image.enrollment_id = enrollment.id
+				                        image.save
+
+					                    trimg = Trfileimage.new
+				                        trimg.trfile_id = trfile.id
+				                        trimg.image_id = image.id
+				                        trimg.image_category = "nii"
+				                        trimg.save
+				                    end
+
 									html_candidates.each do |candidate|
 						            	image = Processedimage.new
 				                        image.file_type = "html"
 				                        image.file_name = candidate
-				                        image.file_path = "#{code_version_dir}/#{candidate}"
+				                        image.file_path = "#{first_dir}/#{candidate}"
 				                        image.scan_procedure_id = sp.id
 				                        image.enrollment_id = enrollment.id
 				                        image.save
