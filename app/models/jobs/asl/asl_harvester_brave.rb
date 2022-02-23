@@ -153,7 +153,7 @@ class Jobs::ASL::ASLHarvesterBrave < Jobs::BaseJob
     #end
     #protocol_dirs = Dir.glob("*.visit*",:base=>params[:processing_output_path])
     #protocol_dirs.each do |protocol|
-    params[:processing_output_path].each do |protocol|
+    params[:protocols].each do |protocol|
       sp = ScanProcedure.where(:codename => protocol).first #first just in case mult entries??
       protocol_path = "#{params[:processing_output_path]}/#{protocol}"
       #subject_dirs = Dir.glob("[!.]*",:base=>protocol_path)

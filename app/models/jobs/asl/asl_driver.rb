@@ -2,7 +2,6 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
 
   attr_accessor :selected
   attr_accessor :driver
-  attr_accessor :test_logs
 
   # These Job classes are designed around a "service object" pattern that's useful for 
   # jobs we run regularly. Service objects tend to be organized so that you can tell 
@@ -24,17 +23,22 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
       parallel_jobs: 10,
       dry_run: false,
       run_by_user: 'ngretzon',
-      cbf_series_des: ["NOT DIAGNOSTIC: (Transit corrected CBF) UW eASL", "CBF"],
-#      t1_series_des: ["Accelerated Sagittal IR-FSPGR MSV21", "mADNI3_T1"],
-      #                series_des: ["NOT DIAGNOSTIC: (Transit corrected CBF) UW eASL"],
+      cbf_series_des: ["CBF"],
+      t1_globs: ['/mounts/data/preprocessed/visits/#{scan_procedure.codename}/#{enrollment.enumber}/unknown/o#{enrollment.enumber}*.nii'],
+      use_preproc_nii: ["carlsson.brave.visit1","carlsson.brave.visit5","carlsson.brave.visit8"],
+      cbf_globs: ['/mounts/data/preprocessed/visits/#{scan_procedure.codename}/#{enrollment.enumber}/unknown/#{enrollment.enumber}*CBF*.nii'], #specific to only carlsson.brave.visit; others use DCM's
+      dcm_globs: ['/mounts/data/raw/#{scan_procedure.codename}/mri/#{participant_scan}*/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm.bz2',
+                 '/mounts/data/raw/#{scan_procedure.codename}/mri/#{participant_scan}*/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm',
+                 '/mounts/data/raw/#{scan_procedure.codename}/#{participant_scan}*/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm.bz2',
+                 '/mounts/data/raw/#{scan_procedure.codename}/#{participant_scan}*/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm'],
+      processed_check_globs: ["cg_mri*_CBF.nii","wcg_mri*_CBF.nii","native_space_perfusion.json","/mri/neuromorphometrics*.csv"],
       #                sp_whitelist: [77],
-      #                raw_data_path: "/mounts/data/raw",
+      #visits: ["carlsson.brave.visit1","carlsson.brave.visit5","carlsson.brave.visit8"],
       visits: ["carlsson.brave.visit1","carlsson.brave.visit5","carlsson.brave.visit8"],
       processing_output_path: "/mounts/data/development/asl-pipeline/output",
       processing_executable_path: "/mounts/data/development/asl-pipeline/src",
       processing_executable_name: "batch_asl",
       driver_path: "/mounts/data/development/asl-pipeline/input",
-#      driver_file_name: "#{Date.today.strftime("%Y-%m-%d")}_asl_driver.csv"
       driver_file_name: "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}_asl_driver.csv"
     }
     params.default = ''
@@ -47,21 +51,50 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
       parallel_jobs: 10,
       dry_run: false,
       run_by_user: 'panda_user',
-      cbf_series_des: ["NOT DIAGNOSTIC: (Transit corrected CBF) UW eASL", "CBF"],
-#      t1_series_des: ["Accelerated Sagittal IR-FSPGR MSV21", "mADNI3_T1"],
-      #                series_des: ["NOT DIAGNOSTIC: (Transit corrected CBF) UW eASL"],
-      #                sp_whitelist: [77],
-      #                raw_data_path: "/mounts/data/raw",
+      cbf_series_des: ["CBF"],
+      t1_globs: ['/mounts/data/preprocessed/visits/#{scan_procedure.codename}/#{enrollment.enumber}/unknown/o#{enrollment.enumber}*.nii'],
+      use_preproc_nii: ["carlsson.brave.visit1","carlsson.brave.visit5","carlsson.brave.visit8"],
+      cbf_globs: ['/mounts/data/preprocessed/visits/#{scan_procedure.codename}/#{enrollment.enumber}/unknown/#{enrollment.enumber}*CBF*.nii'], #specific to only carlsson.brave.visit; others use DCM's
+      dcm_globs: ['/mounts/data/raw/#{scan_procedure.codename}/mri/#{participant_scan}/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm.bz2',
+                 '/mounts/data/raw/#{scan_procedure.codename}/mri/#{participant_scan}/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm',
+                 '/mounts/data/raw/#{scan_procedure.codename}/#{participant_scan}/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm.bz2',
+                 '/mounts/data/raw/#{scan_procedure.codename}/#{participant_scan}/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm'],
+      processed_check_globs: ["cg_mri*_CBF.nii","wcg_mri*_CBF.nii","native_space_perfusion.json","/mri/neuromorphometrics*.csv"],
       visits: ["carlsson.brave.visit1","carlsson.brave.visit5","carlsson.brave.visit8"],
       processing_output_path: "/mounts/data/pipelines/asl-pipeline/output",
       processing_executable_path: "/mounts/data/pipelines/asl-pipeline/src",
       processing_executable_name: "batch_asl",
       driver_path: "/mounts/data/pipelines/asl-pipeline/input",
-#      driver_file_name: "#{Date.today.strftime("%Y-%m-%d")}_asl_driver.csv"
       driver_file_name: "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}_asl_driver.csv"
     }
     params.default = ''
     params
+  end
+
+  def copy_file_from_glob(search_glob,pt_out,file_suffix=".nii",mk_file_dir=true)
+    #Use mk_file_dir=true to create new dir for CBF files; T1 files should be kept in pt_out 
+    files_out = []
+    files_found = []
+    
+    files_found.concat(Dir.glob(search_glob))
+    
+    if !files_found.empty?
+      files_found.each do |file|
+        file_name = file.split('/').last.split('.').first
+        if mk_file_dir == true
+          file_dir = "#{pt_out}/#{cbf_name}"
+          if !Dir.exist?(file_dir)
+            Dir.mkdir(file_dir)
+          end
+        else
+          file_dir = pt_out
+        end
+        file_copy = "#{file_dir}/#{file_name}#{file_suffix}"
+        `cp #{file} #{file_copy}`
+        files_out.push(file_copy)
+      end
+    end
+    return files_out
   end
 
   def run(params)
@@ -140,7 +173,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
     ##Get file paths for entire vgroup then search for each visit's path
     ##file_path = Dir.glob("#{vgroup.related_scan_procedure}", :base => params[:raw_data_path])
     @selected.sample(10).each do |vgroup|
-#    @selected.each do |vgroup|
+      #    @selected.each do |vgroup|
       #initalize vars for this vgroup
       t1_file_path = nil
       nii_output = nil
@@ -166,264 +199,187 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
         next
       end
 
-      # we also need the reggie_id for this person, so let's get the participant
-      participant = nil
-      if !enrollment.participant_id.nil? and !enrollment.participant_id.blank?
-        participant = Participant.where(:id => enrollment.participant_id).first
-      else
-        self.exclusions << {:class => vgroup.class, :id => vgroup.id, :message => "vgroup's primary enrollment has a broken participant link"}
-        next
-      end
-
-      #Create tmp log path in case output dir is not made for this participant
-      filter_log_path = "#{params[:processing_output_path]}/#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}_filter_log.txt"
-
       #Get Visit to get file paths to DICOMS
       #Make visit dir if not already made for another pt
       visit_output = "#{params[:processing_output_path]}/#{scan_procedure.codename}/"
-      if !Dir.exist?("#{visit_output}")
-        Dir.mkdir("#{visit_output}")
+      if !Dir.exist?(visit_output)
+        Dir.mkdir(visit_output)
       end
       visits = vgroup.appointments.map(&:visits).flatten
       visits.each do |visit|
         #For each instance of Visit, get corresponding ImageDataset instances
         #scans = visits.map(&:image_datasets).flatten #typo of "visits" instead of "visit" may have had unforeseen consequences
-        scans = visit.image_datasets
-        #For each instance of ImageDataset, check if series description matches strings in params array of desired series
-        scans.each do |image|
-          #If not a tc_CBF then skip scan
-          #Selection method only takes vgroups that have a CBF scan; visits then gets all scans for those vgroups so we must skip non-CBF scans
-          if !params[:cbf_series_des].include?(image.series_description)
+
+        participant_output = "#{visit_output}/#{enrollment.enumber}"
+        #make dir for this participant scan
+        if !Dir.exist?("#{participant_output}")
+          Dir.mkdir("#{participant_output}")
+        end
+        #begin log
+        filter_log << "SCAN_NUMBER: #{visit.scan_number}.\n"
+        pt_logs = "#{participant_output}/logs"
+        filter_log_path = "#{pt_logs}/#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}_filter_log.txt"
+        if !Dir.exist?(pt_logs)
+          Dir.mkdir(pt_logs)
+        end
+        
+        ###Copy T1 for this visit to output for processing
+        t1_pre_check = Dir.glob("#{participant_output}/*_T1.nii")
+        if t1_pre_check.empty?
+          t1_paths = []
+          params[:t1_globs].each do |glob|
+            t1_found_paths = find_file_from_glob(search_glob=glob,pt_out=participant_output,
+                                                 file_suffix="_T1.nii",mk_file_dir=false)
+            t1_paths.concat(t1_founds_paths)
+          end #params[:t1_globs].each do |glob|
+          if t1_paths.empty?
+            self.log << {:file => "#{enrollment.enumber}", :message => "NIFTI for T1 not found!."}
+            self.error_log << {:file => "#{enrollment.enumber}", :message => "NIFTI for T1 not found!."}
+            filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nT1: NOT FOUND FOR #{enrollment.enumber}!\n"
+            File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
             next
-          end
-          participant_output = "#{params[:processing_output_path]}/#{scan_procedure.codename}/#{enrollment.enumber}"
-          #make dir for this participant scan
-          if !Dir.exist?("#{participant_output}")
-            Dir.mkdir("#{participant_output}")
-          end
-          #begin log
-          filter_log << "SCAN: #{image.path}.\n"
-          pt_logs = "#{participant_output}/logs"
-          filter_log_path = "#{pt_logs}/#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}_filter_log.txt"
-          if !Dir.exist?("#{pt_logs}")
-            Dir.mkdir("#{pt_logs}")
-          end
-          #before logs included timestamps we had to not overwrite old logs
-          #if File.exist?("#{filter_log_path}")
-          #  old_logs = Dir.glob("#{pt_logs}/#{Date.today.strftime("%Y-%m-%d")}_filter_log*.txt")
-          #  filter_log_path = "#{pt_logs}/#{Date.today.strftime("%Y-%m-%d")}_filter_log_#{old_logs.count}.txt"
-         #  filter_log << "LOGS: Old logs found. New log renamed to: #{filter_log_path}.\n"
-         #end
-
-          ###Copy T1 for this visit to output for processing
-          t1_pre_check = Dir.glob("#{participant_output}/o#{enrollment.enumber}*.nii")
-          if t1_pre_check.empty?
-            t1_pre_path = Dir.glob("/mounts/data/preprocessed/visits/#{scan_procedure.codename}/#{enrollment.enumber}/unknown/o#{enrollment.enumber}*.nii")[0] #find T1 in preprocessed
-            `cp #{t1_pre_path} #{participant_output}`
-            t1_file_path = Dir.glob("#{participant_output}/o#{enrollment.enumber}*.nii")[0]
-            self.log << {:t1_copy_log => "Copied: #{t1_file_path}"}
-            #used system() and captured return value
-            #t1_copy_return = system( "cp #{t1_pre_path} #{participant_output}" )
-            #t1_file_path = Dir.glob("#{participant_output}/o#{enrollment.enumber}*.nii")[0]
-            #self.log << {:t1_copy_log => t1_copy_return, :t1_file => "#{t1_file_path}"}
-            filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nT1: #{t1_file_path} copied to ouptut.\n"
           else
-            self.log << {:file => "#{t1_pre_check[0]}", :message => "NIFTI for T1 already exists."}
-            filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nT1: #{t1_pre_check[0]} already in ouptut.\n"
-            #Set path for driver to pre-exisiting T1
-            t1_file_path = t1_pre_check[0]
-          end
-
-          #check if tc_CBF.nii already exists before moving onto creating tc_CBF.nii
-          pt_path = image.path.split('/')
-          participant_scan = pt_path.filter{|name| name.match?("#{enrollment.enumber}")}[0]
-          nii_output = "#{participant_output}/#{participant_scan}_tcCBF.nii" #file path for output nifti
-
-          ###Copy BZ2 DCM's for tcCBF, extract copies, export NIFTI, and create tar ball of DCM's.
-          if !File.exist?("#{nii_output}")
-            need_extraction = true
-            tcCBF_bz2 = []
-
-            ###Create NIFTIs for CBF scan
-            #if scan is CBF then create copy of .bz2 DICOMS and create NIFTI from copies
-            if pt_path.include?("scan_archives") && pt_path.include?("tcCBF_DICOMs")
-              #Search for scan_archives folder with DICOMS to be exported to NII
-              tcCBF_bz2 = Dir.glob("#{image.path}/*.dcm.bz2")
-              if tcCBF_bz2.empty?
-                tcCBF_bz2 = Dir.glob("#{image.path}/*.dcm") 
+            t1_file_path = t1_paths.first
+            if t1_paths.count > 1
+              self.log << {:file => "#{t1_paths}", :message => "Multiple T1's found. #{t1_paths.first} selected and added to driver for processing.\n"}
+              filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nT1: Multiple T1's found. #{t1_paths.first} selected and added to driver for processing.\n"
+              #Remove other T1's
+              t1_paths.drop(1).each do |path|
+                `rm -fv #{path}`
               end
-              filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nBZ2: #{tcCBF_bz2}\nThese BZ2 found.\n"
-            else #if path from Panda is not for scan_archives then try and find the right path
-             # tcCBF_bz2 = []
-              #catch cases where DICOMs are unzipped already Ex. asthana.adrc-clinical-core.visit1/adrc01098_6764_06062019
-              #catch cases with /mri/ dir inside of scan_procedure dir
-              tcCBF_bz2_mri = Dir.glob("/mounts/data/raw/#{scan_procedure.codename}/mri/#{participant_scan}/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm.bz2")
-              tcCBF_bz2_mri_dcm = Dir.glob("/mounts/data/raw/#{scan_procedure.codename}/mri/#{participant_scan}/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm")
-              tcCBF_bz2_no_mri = Dir.glob("/mounts/data/raw/#{scan_procedure.codename}/#{participant_scan}/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm.bz2")
-              tcCBF_bz2_no_mri_dcm = Dir.glob("/mounts/data/raw/#{scan_procedure.codename}/#{participant_scan}/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm")
-              
-              tcCBF_searches = {:tcCBF_bz2_mri => tcCBF_bz2_mri, 
-                :tcCBF_bz2_mri_dcm => tcCBF_bz2_mri_dcm,
-                :tcCBF_bz2_no_mri => tcCBF_bz2_no_mri,
-                :tcCBF_bz2_no_mri_dcm => tcCBF_bz2_no_mri_dcm}
-              tcCBF_searches.each do |key, glob|
-                if !glob.empty?
-                  tcCBF_bz2 = glob
-                  if key.to_s = "tcCBF_bz2_mri_dcm" || key.to_s = "tcCBF_bz2_no_mri_dcm"
-                    need_extraction = false
-                  end
+            end
+          end
+        else
+          self.log << {:file => "#{t1_pre_check.first}", :message => "NIFTI for T1 already exists."}
+          filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nT1: #{t1_pre_check.first} already in ouptut.\n"
+          #Set path for driver to pre-exisiting T1
+          t1_file_path = t1_pre_check[0]
+        end
+
+
+        #Check if CBF NIFTI, otherwise find DCM's and create NIFTI   
+        if params[:use_preproc_nii].include?(scan_procedure.codename)
+          cbf_paths = []
+          params[:cbf_globs].each do |glob|
+            glob_full = glob.gsub(/\\/,"") #globs are input as string literals so #{} have backspaces before them; this removes the backspaces so the variables can be expanded
+            cbf_copied_paths = copy_file_from_glob(search_glob=glob_full,pt_out=participant_output,
+                                                   file_suffix="_CBF.nii",mk_file_dir=true)
+            cbf_paths.concat(cbf_copied_paths)
+          end #params[:cbf_globs].each do |glob|
+
+          if cbf_paths.empty?
+            self.log << {:file => "#{enrollment.enumber}", :message => "NIFTI for CBF not found!."}
+            self.error_log << {:file => "#{enrollment.enumber}", :message => "NIFTI for CBF not found!."}
+            filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: NOT FOUND FOR #{enrollment.enumber}!\n"
+            File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
+            next
+          else
+            cbf_paths.each do |cbf|
+              cbf_dir = cbf.split('/').tap(&:pop).join('/')
+              #Run check on each of params[:processed_check_globs] using cbf_dir; Add each cbf to driver with T1 path
+              #Check if already processed before adding to driver
+              processed_found = []
+              params[:processed_check_globs].each do |glob|
+                check_out = Dir.glob("#{cbf_dir}/#{glob}")
+                if !check_out.empty?
+                  processed_found.concat(check_out)
                 end
               end
-              if tcCBF_bz2.empty?
-                self.exclusions << {:class => vgroup.class, :id => vgroup.id, :message => "bz2 files not found in raw data dir", :participant_scan => participant_scan}
-                filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nBZ2: No BZ2 found! SKIPPED SCAN!\n"
+              if processed_found.count == params[:processed_check_globs].count
+                self.log << {:file => "#{enrollment.enumber}: #{visit}", :message => "Processing files already present!."}
+                filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: #{visit} already processed. Skipping!\n"
                 File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
-                break #skip the rest of the scans for this visit and this visit if cannot get tcCBF.nii
-              end
-              filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nBZ2: Path from Panda not for scan_archives. Found these in scan_archives:\n#{tcCBF_bz2}\n.Copied to ouptut.\n"
-            end
-            
-            #if .dcm.bz2 files found then copy them, unzip them, create NIFTI, tar unzipped .dcm into one tar ball file; delete tmp dir after???
-            #Copy bz and make nii
-            #tmp_dir = "#{tcCBF_dir}/tmp" #dont have permission to add to preprocessed
-            tmp_dir = "#{participant_output}/tmp"
-            if !Dir.exist?("#{tmp_dir}")
-              Dir.mkdir("#{tmp_dir}")
-            elsif Dir.exist?("#{tmp_dir}")
-              `rm -rf #{tmp_dir}`
-              #tmp_rm_return = system("rm -rf #{tmp_dir}")
-              filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nTMP DIR: Old tmp dir removed and new one created.\n"
-              filter_log << "TMP: Old tmp dir removed and #{tmp_dir} created.\n"
-              Dir.mkdir("#{tmp_dir}")
-            end
-
-
-            #unzip each bz into tmp dir and save cmd outputs
-            tcCBF_bz2.each do |bz|
-              bz_filename = bz.split('/').last
-              bz_name = bz_filename.split('.')[0]
-              if File.exist?("#{tmp_dir}/#{bz_name}.dcm")
-                filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nBZ2: #{tmp_dir}/#{bz_name}.dcm already exists. Skipping extracting #{tmp_dir}/#{bz_filename}.\n"
-                #break #stop checking individual bz2.dcms
                 next
+              elsif !processed_found.empty? #Remove strays if not all of processed globs found
+                processed_found.each do |path|
+                  `rm -fv #{path}`
+                end
               end
-              if File.exist?("#{tmp_dir}/#{bz_filename}") 
-                filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nBZ2: #{tmp_dir}/#{bz_filename} already exists. Skipping copying...\n"
-#                next #move onto next bz2.dcm
-              else
-                `cp #{bz} #{tmp_dir}`
-                cp_log = "cp #{bz} #{tmp_dir}/"
-                #cp_return = system( "cp #{bz} #{tmp_dir}" ) #false if error
-                #cp_log = "cp #{bz} #{tmp_dir}/ >> #{cp_return}"
-                self.log << {:cp_log => cp_log, :bz_file => bz_filename}
-                filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nBZ2: #{bz} copied to output.\n"
-              end
-
-              
-              
-              if need_extraction == true 
-                `bzip2 -d #{tmp_dir}/#{bz_filename}`
-                bzip_log = "bzip2 -d #{bz} #{t1_file_path}"
-                #bzip_return = system( "bzip2 -d #{tmp_bz}" ) #false if error
-                #bzip_log = "bzip2 -d #{bz} #{t1_file_path} >> #{bzip_return}"
-                self.log << {:bzip_log => bzip_log, :bz_file => bz_name}
-                filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nBZ2: #{bz_name} unzipped to output.\n"
-              end
-            end
-
-            #Check if as many dcm exist as there were bz2
-            tcCBF_dcms = Dir.glob("#{tmp_dir}/*.dcm")
-            filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nBZ2: BZ2 DCM's Found in Output:\n#{tcCBF_dcms}.\n"
-            if !(tcCBF_bz2.count == tcCBF_dcms.count)
-              self.exclusions << {:class => vgroup.class, :id => vgroup.id, :message => "bz2 dcms and unzipped dcms not equal in count so visit skipped", :participant_scan => participant_scan}
-              filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nBZ2: NOT ALL BZ2 FOUND IN OUTPUT! SKIPPED SCAN!\n"
+              #Add scan to driver
+              @driver << {:cbf_file_path => cbf, :t1_file_path => t1_file_path, :enumber => enrollment.enumber, :protocol => scan_procedure.codename}
+              self.log << {:scan => cbf_name, :message => "Added to driver to be processed."}
+              filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nSUCCESS: #{cbf_name} added to driver to be processed.\n"
               File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
-              break #if we do not get all DCM slices then will not get a good NIFTI for a tc_CBF of a visit so skip visit
-            end
-
-
-            #Create nii file from unzipped DICOMs named enumber_tcCBF.nii in asl-pipeline/output/protocol_visit/enumber
-            ###TODO### figure out path for dcm2niix on machine this will run on 
-            `/apps/mricrogl/dcm2niix -f #{participant_scan}_tcCBF -o #{participant_output} #{tmp_dir}`
-            #dcm2niix_return = system( "/apps/mricrogl/dcm2niix -f #{participant_scan}_tcCBF -o #{participant_output} #{tmp_dir}" )
-            if !File.exist?("#{participant_output}/#{participant_scan}_tcCBF.nii")
-              self.exclusions << {:class => vgroup.class, :id => vgroup.id, :message => "tcCBF.nii not successfully created"}
-              filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: tcCBF.nii not successfully created. SKIPPED SCAN!\n"
-              File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
-              next
-            end
-            self.log << {:dcm2niix_log => "#{participant_output}/#{participant_scan}_tcCBF.nii", :message => "tcCBF.nii created."}
-            filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: #{participant_scan}_tcCBF.nii created in output.\n"
-
-            #Create tar ball of DICOMs
-            `tar -czf #{participant_output}/#{participant_scan}.tgz #{tmp_dir}/*dcm`
-            #tar_return = system( "tar -czf #{participant_output}/#{participant_scan}.tgz #{tmp_dir}/*dcm" )
-            filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nTAR: #{participant_scan}.tgz created in output.\n"
-            self.log << {:tar_log => "Tar created: #{participant_output}/#{participant_scan}.tgz"}
-            #remove tmp after export nii; Consider checking for nii and trying again before deleteing
-            `rm -rf #{tmp_dir}`
-            #tmp_rm_return = system("rm -rf #{tmp_dir}")
-            self.log << {:tmp_dir => "Tmp dir removed: #{tmp_dir}"}
-            filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nTMP: #{tmp_dir} removed. \n"
-
-          elsif File.exist?("#{nii_output}")
-            self.log << {:class => vgroup.class, :id => vgroup.id, :message => "tcCBF.nii already exists in output.", :participant_scan => participant_scan}
-            #next
-            #t1_file_path = Dir.glob("#{participant_output}/o#{enrollment.enumber}*.nii")[0]
-            filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: tcCBF.nii already exists in output: #{t1_file_path}\n"
+            end #cbf_paths.empty?
           end
-
-          #Create array to be written to CSV; Do not add to driver if MATLAB outputs already exist
-          #Remove any exisiting QC/processed files if not all are found
-          check_globs = {
-            :qc_coreg_cbf_120_png => "#{participant_output}/qc_asl/coreg_cbf_120_qc.png",
-            :qc_coreg_cbf_128_png => "#{participant_output}/qc_asl/coreg_cbf_128_qc.png",
-            :qc_coreg_cbf_140_png => "#{participant_output}/qc_asl/coreg_cbf_140_qc.png",
-            :wcg_tcCBF => "#{participant_output}/wcg_mri#{participant_scan}_tcCBF.nii",
-            :cg_tcCBF => "#{participant_output}/cg_mri#{participant_scan}_tcCBF.nii",
-            :tcCBF_nii => "#{participant_output}/#{participant_scan}_tcCBF.nii",
-            :tcCBF_json => "#{participant_output}/#{participant_scan}_tcCBF.json"
-          }
-          found = {}
-          missing = []
-          check_globs.each do |key, glob|
-            glob_out = Dir.glob(glob)
-            if glob_out.empty?
-              missing << key.to_s
-            else
-              found.store(key,glob)
+        else
+          ###Copy CBF for this visit to output for processing
+          dcms_paths = {}
+          #Find DCM's for CBF and create CBF NIFTI
+          params[:dcm_globs].each do |glob|
+            glob_full = glob.gsub(/\\/,"") #globs are input as string literals so #{} have backspaces before them; this removes the backspaces so the variables can be expanded
+            dcms_found = Dir.glob(glob_full)
+            if !dcms_found.empty?
+              dcm_path_parts = dcms_found.first.split('/')
+              dcm_tmp_dir = dcm_path_parts.select{ |part| part.include?('ASL') }
+              dcms_paths.store(dcm_tmp_dir.first, dcms_found)
+              #dcms_paths.concat(dcms_found)
+              #break #prevent two scan session's DCM's from being found by stopping after first
             end
-          end
-          if missing.include?("tcCBF_nii") || missing.include?("tcCBF_json")
-            filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nFILE_CHECK: MISSING: #{missing}\nCannot process this scan. Skipping scan for processing...\n"
-            File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
-            next
-          elsif missing.count != 5
-            filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nFILE_CHECK: Missing some necessary QC files!\nMISSING: #{missing}\nFOUND: #{found.values}\nDeleting QC/processed files found and adding scan to driver to be processed.\n"
-            found.each do |key, value| 
-              if !["tcCBF_nii", "tcCBF_json"].include?(key.to_s)
-                `rm -v #{value}`
-                filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nFILE_CHECK: Deleted: #{value}\n"
+          end #params[:dcm_globs].each
+          if dcms_paths.empty?
+            self.log << {:file => "#{enrollment.enumber}", :message => "DICOM's for CBF not found!."}
+            filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: DICOM's NOT FOUND FOR #{enrollment.enumber}!\n"
+            #        elsif dcms_paths.length > 1
+          else #Just treat cases of multiple or single CBF scans the same 
+            dcms_paths.each_pair do |key, array|
+              
+              #Create dir for each CBF NIFTI
+              cbf_dir = "#{participant_output}/#{key}"
+              if !Dir.exist?(cbf_dir)
+                Dir.mkdir(cbf_dir)
               end
-            end
-          else
-            filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nFILE_CHECK: All necessary QC files found. Skipping scan for processing...\n"
-            File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
-            next
-          end
+              #Create tmp dir for DCM's; delete after dcm2niix
+              tmp_dir = "#{cbf_dir}/tmp"
+              if !Dir.exist?(tmp_dir)
+                Dir.mkdir(tmp_dir)
+              end
+              array.each do |path|
+                `cp #{path} #{tmp_dir}`
+                if path.split('.').last == "bz"
+                  `bzip2 -d #{tmp_dir}/#{path.split('/').last}`
+                end
+              end
 
-          #Add scan to driver
-          @driver << {:cbf_file_path => nii_output, :t1_file_path => t1_file_path, :enumber => enrollment.enumber, :protocol => scan_procedure.codename, :reggie_id => participant.reggieid}
-          self.log << {:scan => participant_scan, :message => "Added to driver to be processed."}
-          filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nSUCCESS: #{participant_scan} added to driver to be processed.\n"
-          File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
-        end
-      end
-      at_exit do
-        File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
-      end
-    end
-  end
+              #Check if already processed
+              processed_found = []
+              params[:processed_check_globs].each do |glob|
+                check_out = Dir.glob("#{participant_output}/#{key}/#{glob}")
+                if !check_out.empty?
+                  processed_found.concat(check_out)
+                end
+              end
+              if processed_found.count == params[:processed_check_globs].count
+                self.log << {:file => "#{enrollment.enumber}: #{visit}", :message => "Processing files already present!."}
+                filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: #{visit} already processed. Skipping!\n"
+                File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
+                next
+              elsif !processed_found.empty? #Remove strays if not all of processed globs found
+                processed_found.each do |path|
+                  `rm -fv #{path}`
+                end
+              end
+              
+              #dcm2niix
+              cbf_name_nii = "#{enrollment.enumber}_#{key}_CBF.nii"
+              `/apps/mricrogl/dcm2niix -f #{cbf_name_nii} -o #{cbf_dir} #{tmp_dir}`
+              #rm tmp dir with dicoms
+              `rm -rf #{tmp_dir}`
+              #Add scan to driver
+              @driver << {:cbf_file_path => cbf, :t1_file_path => t1_file_path, :enumber => enrollment.enumber, :protocol => scan_procedure.codename}
+              self.log << {:scan => cbf_name, :message => "Added to driver to be processed."}
+              filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nSUCCESS: #{cbf_name} added to driver to be processed.\n"
+              File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
+            end
+            #        elsif dcms_paths.length == "1"
+          end
+        end #if use_preproc_nii
+      end #visits.each 
+      #at_exit do
+      #  File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
+      #end
+    end # @selected.each
+  end #def filter
 
   def write_driver(params)
 
@@ -433,11 +389,11 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
     # for this visit, and the reggie_id associated with the visit's participant.
 
     csv = CSV.open("#{params[:driver_path]}/#{params[:driver_file_name]}",'wb')
-    csv << ['protocol','enumber','reggie_id','cbf_file_path', 't1_file_path']
+    csv << ['protocol','enumber','cbf_file_path', 't1_file_path']
 
     @driver.each do |row|
 
-      csv << [row[:protocol],row[:enumber],row[:reggie_id],row[:cbf_file_path],row[:t1_file_path]]
+      csv << [row[:protocol],row[:enumber],row[:cbf_file_path],row[:t1_file_path]]
 
     end
 
@@ -472,31 +428,35 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
       # Then we call the processing script, with a path to the driver we wrote down
       # in the previous step.
       matlab_template = "export MATLABPATH=$MATLABPATH:#{params[:processing_executable_path]}" + " && matlab -nodesktop -nosplash -r \\\"try %{command}; catch exception; display(getReport(exception)); pause(1); end; exit;\\\""
-      matlab_command = matlab_template % {command: "#{params[:processing_executable_name]}('#{params[:driver_path]}/#{params[:driver_file_name]}',#{params[:parallel_jobs]})"}
+      matlab_command = matlab_template % {command: "#{params[:processing_executable_name]}('#{params[:driver_path]}/#{params[:driver_file_name]}','#{params[:processing_executable_path]}',#{params[:parallel_jobs]})"}
       processing_call = "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"#{matlab_command}\""
 
 
       self.log << {:message => processing_call}
-      # self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
+      self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
 
       # All of the STDOUT output from the processing script gets captured and logged, and
       # after the processing script is complete, we save everything and update the overall
       # status of the job.
 
       begin
-        stdin, stdout, stderr, wait_thr = Open3.popen3(processing_call)
+        #stdin, stdout, stderr, wait_thr = Open3.popen3(processing_call)
+        stdin, stdout, stderr = Open3.popen3(processing_call)
 
         while !stdout.eof?
           v_output = stdout.read 1024  
           # puts v_output
           self.log << {:message => v_output.to_s}
         end
+        
+        stdin.close
+        stdout.close
+        stderr.close
 
       rescue => msg  
         self.log << {:message => msg.to_s}
       end
-      # self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
-      self.close(params)
+      self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
     end
   end
 end

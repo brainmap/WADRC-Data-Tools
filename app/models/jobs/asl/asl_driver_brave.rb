@@ -43,7 +43,7 @@ class Jobs::ASL::ASLDriverBrave < Jobs::BaseJob
       computer: "thumper",
       parallel_jobs: 10,
       dry_run: false,
-      run_by_user: 'panda_user',
+      run_by_user: 'ngretzon',
       cbf_series_des: ["CBF"],
       visits: ["carlsson.brave.visit1"],
       processing_output_path: "/mounts/data/pipelines/asl-pipeline/output",
@@ -331,7 +331,7 @@ class Jobs::ASL::ASLDriverBrave < Jobs::BaseJob
 
 
       self.log << {:message => processing_call}
-      # self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
+      self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
 
       # All of the STDOUT output from the processing script gets captured and logged, and
       # after the processing script is complete, we save everything and update the overall
@@ -354,8 +354,7 @@ class Jobs::ASL::ASLDriverBrave < Jobs::BaseJob
       rescue => msg  
         self.log << {:message => msg.to_s}
       end
-      # self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
-      self.close(params)
+      self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
     end
   end
 end
