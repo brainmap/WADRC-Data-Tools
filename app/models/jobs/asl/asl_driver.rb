@@ -24,13 +24,13 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
       dry_run: false,
       run_by_user: 'ngretzon',
       cbf_series_des: ["CBF"],
-      t1_globs: ['/mounts/data/preprocessed/visits/#{scan_procedure.codename}/#{enrollment.enumber}/unknown/o#{enrollment.enumber}*.nii'],
+      t1_globs: ['unknown/o*.nii'],
       use_preproc_nii: ["carlsson.brave.visit1","carlsson.brave.visit5","carlsson.brave.visit8"],
-      cbf_globs: ['/mounts/data/preprocessed/visits/#{scan_procedure.codename}/#{enrollment.enumber}/unknown/#{enrollment.enumber}*CBF*.nii'], #specific to only carlsson.brave.visit; others use DCM's
-      dcm_globs: ['/mounts/data/raw/#{scan_procedure.codename}/mri/#{participant_scan}*/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm.bz2',
-                 '/mounts/data/raw/#{scan_procedure.codename}/mri/#{participant_scan}*/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm',
-                 '/mounts/data/raw/#{scan_procedure.codename}/#{participant_scan}*/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm.bz2',
-                 '/mounts/data/raw/#{scan_procedure.codename}/#{participant_scan}*/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm'],
+      cbf_globs: ['unknown/*CBF*.nii'], #specific to only carlsson.brave.visit; others use DCM's
+      dcm_globs: ['scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm.bz2',
+                 'scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm',
+                 'scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm.bz2',
+                 'scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm'],
       processed_check_globs: ["cg_mri*_CBF.nii","wcg_mri*_CBF.nii","native_space_perfusion.json","/mri/neuromorphometrics*.csv"],
       #                sp_whitelist: [77],
       #visits: ["carlsson.brave.visit1","carlsson.brave.visit5","carlsson.brave.visit8"],
@@ -228,9 +228,11 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
         if t1_pre_check.empty?
           t1_paths = []
           params[:t1_globs].each do |glob|
-            t1_found_paths = find_file_from_glob(search_glob=glob,pt_out=participant_output,
+            #glob_full = glob.gsub(/\\/,"") #globs are input as string literals so #{} have backspaces before them; this removes the backspaces so the variables can be expanded
+            glob_full = "/mounts/data/preprocessed/visits/#{scan_procedure.codename}/#{enrollment.enumber}/#{glob}"
+            t1_found_paths = copy_file_from_glob(search_glob=glob_full,pt_out=participant_output,
                                                  file_suffix="_T1.nii",mk_file_dir=false)
-            t1_paths.concat(t1_founds_paths)
+            t1_paths.concat(t1_found_paths)
           end #params[:t1_globs].each do |glob|
           if t1_paths.empty?
             self.log << {:file => "#{enrollment.enumber}", :message => "NIFTI for T1 not found!."}
@@ -261,7 +263,8 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
         if params[:use_preproc_nii].include?(scan_procedure.codename)
           cbf_paths = []
           params[:cbf_globs].each do |glob|
-            glob_full = glob.gsub(/\\/,"") #globs are input as string literals so #{} have backspaces before them; this removes the backspaces so the variables can be expanded
+            #glob_full = glob.gsub(/\\/,"") #globs are input as string literals so #{} have backspaces before them; this removes the backspaces so the variables can be expanded
+            glob_full = "/mounts/data/preprocessed/visits/#{scan_procedure.codename}/#{enrollment.enumber}/#{glob}"
             cbf_copied_paths = copy_file_from_glob(search_glob=glob_full,pt_out=participant_output,
                                                    file_suffix="_CBF.nii",mk_file_dir=true)
             cbf_paths.concat(cbf_copied_paths)
@@ -307,7 +310,8 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
           dcms_paths = {}
           #Find DCM's for CBF and create CBF NIFTI
           params[:dcm_globs].each do |glob|
-            glob_full = glob.gsub(/\\/,"") #globs are input as string literals so #{} have backspaces before them; this removes the backspaces so the variables can be expanded
+            #glob_full = glob.gsub(/\\/,"") #globs are input as string literals so #{} have backspaces before them; this removes the backspaces so the variables can be expanded
+            glob_full = "/mounts/data/raw/#{scan_procedure.codename}/**/#{participant_scan}*/#{glob}"
             dcms_found = Dir.glob(glob_full)
             if !dcms_found.empty?
               dcm_path_parts = dcms_found.first.split('/')
