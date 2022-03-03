@@ -715,6 +715,8 @@ class PetscansController < ApplicationController
                                  v_dicom_tracer_id = 11
                              elsif v_dicom_tracer.include?("UCB-J") # MK6240
                                  v_dicom_tracer_id = 12 
+                             elsif v_dicom_tracer.include?("SDM-8") # SDM-8
+                                 v_dicom_tracer_id = 13
                              end
                              v_dicom_timezone_offset = @petfile_header['0008,0201'][:value].to_s
                              #0008,0201 Timezone Offset From UTC  -0600

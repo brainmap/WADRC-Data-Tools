@@ -33,8 +33,8 @@ class Jobs::ASL::ASLHarvester < Jobs::BaseJob
       destination_table: 'cg_asl',
       processing_scripts_path: "/mounts/data/pipelines/asl-pipeline/src",
       processing_output_path: "/mounts/data/pipelines/asl-pipeline/output",
-      protocols: ["carlsson.brave.visit1"],
-#      protocols: ["carlsson.brave.visit1","carlsson.brave.visit5","carlsson.brave.visit8"],
+#      protocols: ["carlsson.brave.visit1"],
+      protocols: ["carlsson.brave.visit1","carlsson.brave.visit5","carlsson.brave.visit8"],
       tracker_id: 37
     }
     params.default = ''
@@ -144,13 +144,6 @@ class Jobs::ASL::ASLHarvester < Jobs::BaseJob
   end
 	
   def harvest(params)
-    #loop over any results, create qc html, and collect outputs in a _new table
-    #protocol_dirs = []
-    #params[:protocols].each do |glob| #specific to brave dirs only
-      #protocol_dirs = protocol_dirs + Dir.glob(glob,:base=>params[:processing_output_path])
-    #end
-    #protocol_dirs = Dir.glob("*.visit*",:base=>params[:processing_output_path])
-    #protocol_dirs.each do |protocol|
     params[:protocols].each do |protocol|
       sp = ScanProcedure.where(:codename => protocol).first #first just in case mult entries??
       protocol_path = "#{params[:processing_output_path]}/#{protocol}"
@@ -158,6 +151,7 @@ class Jobs::ASL::ASLHarvester < Jobs::BaseJob
       subject_dirs = []
       Dir.glob("#{protocol_path}/[!.]*").each { |full| subject_dirs.push(full.split('/').last) } #get array of subject dirs
       subject_dirs.each do |subject|
+        enrollment = Enrollment.where(:enumber => subject).first
         subject_dir = "#{protocol_path}/#{subject}"
         #log actions for each participant in their output dir
         harvest_log = ""
@@ -170,7 +164,7 @@ class Jobs::ASL::ASLHarvester < Jobs::BaseJob
         harvest_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nSUBJECT: #{subject}\nPROTOCOL: #{protocol}\n"
 
        # cbf_names = Dir.glob("#{subject}*CBF*",:base=>subject_dir)
-        cbf_paths = Dir.glob("#{subject_dir}/#{subject}/**/*_CBF.nii")
+        cbf_paths = Dir.glob("#{subject_dir}/#{subject}**/cg_mri*_CBF.nii")
         if cbf_paths.empty?
           self.error_log << {"message" => "Missing _CBF.nii.", "subject" => "#{subject}"}
           harvest_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nFILE_CHECK: Missing _CBF.nii!\nMISSING: Subject: #{subject}\nSCAN SKIPPED!\n"
@@ -178,7 +172,7 @@ class Jobs::ASL::ASLHarvester < Jobs::BaseJob
           next
         end
         cbf_paths.each do |cbf_nii|
-          cbf_dir_path = cbf_niisplit('/').tap(&:pop).join('/')
+          cbf_dir_path = cbf_nii.split('/').tap(&:pop).join('/')
 
           #check if all expected files needed for QC exist
           check_globs = {
@@ -189,11 +183,10 @@ class Jobs::ASL::ASLHarvester < Jobs::BaseJob
           checks_out = check_globs.select {|key, glob| Dir.glob(glob).empty? }
           if !checks_out.empty?
             self.error_log << {"message" => "Missing necessary QC files.", "missing_files" => "#{checks_out.values}"}
-            harvest_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nFILE_CHECK: Missing necessary QC files!\nMISSING: #{checks_out.keys}\nSCAN SKIPPED!\n"
-            File.open("#{harvest_log_path}", "a") {|f| f.write("#{harvest_log}") }
+            harvest_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nFILE_CHECK: #{cbf_dir_path} missing necessary QC files!\nMISSING: #{checks_out.keys}\nSCAN SKIPPED!\n"
             next
           else
-            harvest_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nFILE_CHECK: All necessary QC files found.\n"
+            harvest_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nFILE_CHECK: All necessary QC files found in #{cbf_dir_path}.\n"
           end
 
           #Use create_tr_cg() from create_tr_cg.rb to create tracking or cg table entries for each file

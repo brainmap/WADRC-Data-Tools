@@ -31,7 +31,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
                  'scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm',
                  'scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm.bz2',
                  'scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm'],
-      processed_check_globs: ["cg_mri*_CBF.nii","wcg_mri*_CBF.nii","native_space_perfusion.json","/mri/neuromorphometrics*.csv"],
+      processed_check_globs: ["cg_mri*_CBF.nii","wcg_mri*_CBF.nii","native_space_perfusion.json","mri/neuromorphometrics*.csv"],
       #                sp_whitelist: [77],
       #visits: ["carlsson.brave.visit1","carlsson.brave.visit5","carlsson.brave.visit8"],
       visits: ["carlsson.brave.visit1","carlsson.brave.visit5","carlsson.brave.visit8"],
@@ -52,13 +52,13 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
       dry_run: false,
       run_by_user: 'panda_user',
       cbf_series_des: ["CBF"],
-      t1_globs: ['/mounts/data/preprocessed/visits/#{scan_procedure.codename}/#{enrollment.enumber}/unknown/o#{enrollment.enumber}*.nii'],
+      t1_globs: ['unknown/o*.nii'],
       use_preproc_nii: ["carlsson.brave.visit1","carlsson.brave.visit5","carlsson.brave.visit8"],
-      cbf_globs: ['/mounts/data/preprocessed/visits/#{scan_procedure.codename}/#{enrollment.enumber}/unknown/#{enrollment.enumber}*CBF*.nii'], #specific to only carlsson.brave.visit; others use DCM's
-      dcm_globs: ['/mounts/data/raw/#{scan_procedure.codename}/mri/#{participant_scan}/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm.bz2',
-                 '/mounts/data/raw/#{scan_procedure.codename}/mri/#{participant_scan}/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm',
-                 '/mounts/data/raw/#{scan_procedure.codename}/#{participant_scan}/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm.bz2',
-                 '/mounts/data/raw/#{scan_procedure.codename}/#{participant_scan}/scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm'],
+      cbf_globs: ['unknown/*CBF*.nii'], #specific to only carlsson.brave.visit; others use DCM's
+      dcm_globs: ['scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm.bz2',
+                 'scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm',
+                 'scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm.bz2',
+                 'scan_archives/*/*_eASL/processed_data/DICOM/DICOM/Standard_label/tcCBF_DICOMs/*.dcm'],
       processed_check_globs: ["cg_mri*_CBF.nii","wcg_mri*_CBF.nii","native_space_perfusion.json","/mri/neuromorphometrics*.csv"],
       visits: ["carlsson.brave.visit1","carlsson.brave.visit5","carlsson.brave.visit8"],
       processing_output_path: "/mounts/data/pipelines/asl-pipeline/output",
@@ -82,7 +82,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
       files_found.each do |file|
         file_name = file.split('/').last.split('.').first
         if mk_file_dir == true
-          file_dir = "#{pt_out}/#{cbf_name}"
+          file_dir = "#{pt_out}/#{file_name}"
           if !Dir.exist?(file_dir)
             Dir.mkdir(file_dir)
           end
@@ -201,7 +201,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
 
       #Get Visit to get file paths to DICOMS
       #Make visit dir if not already made for another pt
-      visit_output = "#{params[:processing_output_path]}/#{scan_procedure.codename}/"
+      visit_output = "#{params[:processing_output_path]}/#{scan_procedure.codename}"
       if !Dir.exist?(visit_output)
         Dir.mkdir(visit_output)
       end
@@ -249,10 +249,11 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
               t1_paths.drop(1).each do |path|
                 `rm -fv #{path}`
               end
+	    else
+		filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nT1: #{t1_paths.first} selected and added to driver for processing.\n"
             end
           end
         else
-          self.log << {:file => "#{t1_pre_check.first}", :message => "NIFTI for T1 already exists."}
           filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nT1: #{t1_pre_check.first} already in ouptut.\n"
           #Set path for driver to pre-exisiting T1
           t1_file_path = t1_pre_check[0]
@@ -260,6 +261,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
 
 
         #Check if CBF NIFTI, otherwise find DCM's and create NIFTI   
+	use_dcms = true
         if params[:use_preproc_nii].include?(scan_procedure.codename)
           cbf_paths = []
           params[:cbf_globs].each do |glob|
@@ -272,11 +274,24 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
 
           if cbf_paths.empty?
             self.log << {:file => "#{enrollment.enumber}", :message => "NIFTI for CBF not found!."}
-            self.error_log << {:file => "#{enrollment.enumber}", :message => "NIFTI for CBF not found!."}
+            #self.error_log << {:file => "#{enrollment.enumber}", :message => "NIFTI for CBF not found!."}
             filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: NOT FOUND FOR #{enrollment.enumber}!\n"
-            File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
+            #File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
             next
           else
+	    #Check if scans were inappropriately made into two niftis
+	    split_niis = cbf_paths.map{ |item| item.split('_').last }
+	    duplicated = split_niis.select{ |item| split_niis.count(item) > 1}
+	    if !duplicated.empty?
+              self.log << {:file => "#{enrollment.enumber}", :message => "NIFTI for CBF was erroneously split. Trying to Process from DICOM's!"}
+              #self.error_log << {:file => "#{enrollment.enumber}", :message => "NIFTI for CBF was erroneously split. Trying to Process from DICOM's!"}
+              filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: NIFTI for CBF was erroneously split. Trying to Process from DICOM's! #{enrollment.enumber}!\n"
+              #File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
+              #next
+	      break
+	    end	
+
+
             cbf_paths.each do |cbf|
               cbf_dir = cbf.split('/').tap(&:pop).join('/')
               #Run check on each of params[:processed_check_globs] using cbf_dir; Add each cbf to driver with T1 path
@@ -292,7 +307,8 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
                 self.log << {:file => "#{enrollment.enumber}: #{visit}", :message => "Processing files already present!."}
                 filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: #{visit} already processed. Skipping!\n"
                 File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
-                next
+                #next
+		break
               elsif !processed_found.empty? #Remove strays if not all of processed globs found
                 processed_found.each do |path|
                   `rm -fv #{path}`
@@ -300,12 +316,16 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
               end
               #Add scan to driver
               @driver << {:cbf_file_path => cbf, :t1_file_path => t1_file_path, :enumber => enrollment.enumber, :protocol => scan_procedure.codename}
-              self.log << {:scan => cbf_name, :message => "Added to driver to be processed."}
-              filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nSUCCESS: #{cbf_name} added to driver to be processed.\n"
+              self.log << {:scan => cbf, :message => "Added to driver to be processed."}
+              filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nSUCCESS: #{cbf} added to driver to be processed.\n"
               File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
+	      #If added nifti to driver then do not try to use DCM's to create nifti
+	      use_dcms = false
             end #cbf_paths.empty?
           end
-        else
+	end
+
+        if use_dcms == true
           ###Copy CBF for this visit to output for processing
           dcms_paths = {}
           #Find DCM's for CBF and create CBF NIFTI
@@ -366,13 +386,13 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
               
               #dcm2niix
               cbf_name_nii = "#{enrollment.enumber}_#{key}_CBF.nii"
-              `/apps/mricrogl/dcm2niix -f #{cbf_name_nii} -o #{cbf_dir} #{tmp_dir}`
+              `/apps/mricrogl/dcm2niix -m y -f #{cbf_name_nii} -o #{cbf_dir} #{tmp_dir}`
               #rm tmp dir with dicoms
               `rm -rf #{tmp_dir}`
               #Add scan to driver
               @driver << {:cbf_file_path => cbf, :t1_file_path => t1_file_path, :enumber => enrollment.enumber, :protocol => scan_procedure.codename}
-              self.log << {:scan => cbf_name, :message => "Added to driver to be processed."}
-              filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nSUCCESS: #{cbf_name} added to driver to be processed.\n"
+              self.log << {:scan => cbf_name_nii, :message => "Added to driver to be processed."}
+              filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nSUCCESS: #{cbf_name_nii} added to driver to be processed.\n"
               File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
             end
             #        elsif dcms_paths.length == "1"
@@ -437,7 +457,8 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
 
 
       self.log << {:message => processing_call}
-      self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
+      
+      #self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
 
       # All of the STDOUT output from the processing script gets captured and logged, and
       # after the processing script is complete, we save everything and update the overall
@@ -460,7 +481,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
       rescue => msg  
         self.log << {:message => msg.to_s}
       end
-      self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
+      #self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
     end
   end
 end
