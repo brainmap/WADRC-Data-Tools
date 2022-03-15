@@ -65,6 +65,7 @@ WADRCDataTools::Application.configure do
   config.adrc_neuropathology_token = begin IO.read("/Users/panda_user/.neuropathology").gsub(/\n/,'') rescue "" end
   config.wrap_neuropathology_token = begin IO.read("/Users/panda_user/.wrap_neuropathology").gsub(/\n/,'') rescue "" end
   config.redcap_adrc_token = begin IO.read("/Users/panda_user/.redcap_adrc").gsub(/\n/,'') rescue "" end
+  config.redcap_wrap_token = begin IO.read("/Users/panda_user/.redcap_wrap").gsub(/\n/,'') rescue "" end
     
 end
 
