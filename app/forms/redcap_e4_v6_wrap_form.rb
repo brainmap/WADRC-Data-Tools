@@ -26,9 +26,11 @@ class RedcapE4V6WrapForm
 
 		out.lumbarpuncture_fields["completedlpfast"] = case row["lpfast_e4_v6"].to_i
 		when 1
-			'yes'
+			1
 		when 0
-			'no'
+			0
+		when 9
+			2
 		else
 			nil
 		end
