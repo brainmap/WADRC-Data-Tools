@@ -138,8 +138,32 @@ class Jobs::ScanUploads::ScanHarvester < Jobs::BaseJob
 				else
 					@success_log << {:message => 'a case that isnt tracked yet', :scan_procedure => vgroup.scan_procedures.map(&:codename).join(','), :enrollment => vgroup.enrollments.map(&:enumber).join(',')}
 
+
 					enrollment = vgroup.enrollments.first
 					scan_procedure = vgroup.scan_procedures.select{|item| params[:scan_relevant_whitelist].include? item.id}.first
+
+					# 2022-03-28 wbbevis -- I'm adding a stanza in here that will copy the raw DICOMs to a directory in 
+					# panda_user's analyses dir, decompress them, and remove the .json, essentially readying them for 
+					# upload, and taking a little time burden off of the students.
+
+					if !Dir.exists? "/mounts/data/analyses/panda_user/SCAN_uploads/#{scan_procedure.codename}"
+						Dir.mkdir "/mounts/data/analyses/panda_user/SCAN_uploads/#{scan_procedure.codename}"
+					end
+					if !Dir.exists? "/mounts/data/analyses/panda_user/SCAN_uploads/#{scan_procedure.codename}/#{enrollment.enumber}/"
+						Dir.mkdir "/mounts/data/analyses/panda_user/SCAN_uploads/#{scan_procedure.codename}/#{enrollment.enumber}/"
+					end
+
+					expanded_dir = "/mounts/data/analyses/panda_user/SCAN_uploads/#{scan_procedure.codename}/#{enrollment.enumber}/"
+
+					# ir_fspgr
+					dirname = ir_fspgr.first.path.split("/").last
+					result = `cp -r #{ir_fspgr.first.path} #{expanded_dir}`
+					result = `cd #{expanded_dir}/#{dirname}; find . -type f -path '*.bz2' -exec bzip2 -d {} \\; ; find . -type f -path '*.json' -exec rm {} \\;`
+
+					# sag_3d_flair
+					dirname = sag_3d_flair.first.path.split("/").last
+					result = `cp -r #{sag_3d_flair.first.path} #{expanded_dir}`
+					result = `cd #{expanded_dir}/#{dirname}; find . -type f -path '*.bz2' -exec bzip2 -d {} \\; ; find . -type f -path '*.json' -exec rm {} \\;`
 
 			        #then create a trfile and add the images to it.
 			        trfile = Trfile.new
