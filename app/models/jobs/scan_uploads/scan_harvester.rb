@@ -159,11 +159,13 @@ class Jobs::ScanUploads::ScanHarvester < Jobs::BaseJob
 					dirname = ir_fspgr.first.path.split("/").last
 					result = `cp -r #{ir_fspgr.first.path} #{expanded_dir}`
 					result = `cd #{expanded_dir}/#{dirname}; find . -type f -path '*.bz2' -exec bzip2 -d {} \\; ; find . -type f -path '*.json' -exec rm {} \\;`
+					ir_fspgr_path = "#{expanded_dir}/#{dirname}"
 
 					# sag_3d_flair
 					dirname = sag_3d_flair.first.path.split("/").last
 					result = `cp -r #{sag_3d_flair.first.path} #{expanded_dir}`
 					result = `cd #{expanded_dir}/#{dirname}; find . -type f -path '*.bz2' -exec bzip2 -d {} \\; ; find . -type f -path '*.json' -exec rm {} \\;`
+					sag_3d_flair_path = "#{expanded_dir}/#{dirname}"
 
 			        #then create a trfile and add the images to it.
 			        trfile = Trfile.new
@@ -174,19 +176,51 @@ class Jobs::ScanUploads::ScanHarvester < Jobs::BaseJob
 		            trfile.qc_value = "New Record"
 			        trfile.save
 			        
-			        # ir_fspgr
-			        trimg = Trfileimage.new
-		            trimg.trfile_id = trfile.id
-		            trimg.image_id = ir_fspgr.first.id
-		            trimg.image_category = "image_dataset"
-			        trimg.save
+			        # 2022-03-30 wbbevis -- Also, Christian wants these to be links directly to the uncompressed dirs, 
+			        # so I'm doing something that should accomplish that.
 
-			        # sag_3d_flair
-			        trimg = Trfileimage.new
-		            trimg.trfile_id = trfile.id
-		            trimg.image_id = sag_3d_flair.first.id
-		            trimg.image_category = "image_dataset"
-			        trimg.save
+			        ir_fspgr_image = Processedimage.new
+				    ir_fspgr_image.file_type = "command"
+				    ir_fspgr_image.file_name = ir_fspgr_path
+			        ir_fspgr_image.file_path = ir_fspgr_path
+			        ir_fspgr_image.scan_procedure_id = scan_procedure.id
+			        ir_fspgr_image.enrollment_id = enrollment.id
+				    ir_fspgr_image.save
+
+					trimg = Trfileimage.new
+				    trimg.trfile_id = trfile.id
+				    trimg.image_id = ir_fspgr_image.id
+				    trimg.image_category = "command"
+				    trimg.save
+
+
+			        sag_3d_flair_image = Processedimage.new
+				    sag_3d_flair_image.file_type = "command"
+				    sag_3d_flair_image.file_name = sag_3d_flair_path
+			        sag_3d_flair_image.file_path = sag_3d_flair_path
+			        sag_3d_flair_image.scan_procedure_id = scan_procedure.id
+			        sag_3d_flair_image.enrollment_id = enrollment.id
+				    sag_3d_flair_image.save
+
+					trimg = Trfileimage.new
+				    trimg.trfile_id = trfile.id
+				    trimg.image_id = sag_3d_flair_image.id
+				    trimg.image_category = "command"
+				    trimg.save
+
+			        # # ir_fspgr
+			        # trimg = Trfileimage.new
+		         #    trimg.trfile_id = trfile.id
+		         #    trimg.image_id = ir_fspgr.first.id
+		         #    trimg.image_category = "image_dataset"
+			        # trimg.save
+
+			        # # sag_3d_flair
+			        # trimg = Trfileimage.new
+		         #    trimg.trfile_id = trfile.id
+		         #    trimg.image_id = sag_3d_flair.first.id
+		         #    trimg.image_category = "image_dataset"
+			        # trimg.save
 			            
 					tredit = Tredit.new
 		            tredit.trfile_id = trfile.id
