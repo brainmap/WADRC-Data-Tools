@@ -15,7 +15,7 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
                 code_ver: '009',
                 older_versions: ['007','008','009'],
                 processing_output_path: "/mounts/data/development/atrophy/output",
-                tracker_id: 29
+                tracker_id: 38
     		}
         params.default = ''
         params
@@ -31,7 +31,7 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
                 code_ver: '009',
                 older_versions: ['009'],
                 processing_output_path: "/mounts/data/pipelines/atrophy/output",
-                tracker_id: 29
+                tracker_id: 38
     		}
         params.default = ''
         params
