@@ -159,13 +159,13 @@ class Jobs::ScanUploads::ScanHarvester < Jobs::BaseJob
 					dirname = ir_fspgr.first.path.split("/").last
 					result = `cp -r #{ir_fspgr.first.path} #{expanded_dir}`
 					result = `cd #{expanded_dir}/#{dirname}; find . -type f -path '*.bz2' -exec bzip2 -d {} \\; ; find . -type f -path '*.json' -exec rm {} \\;`
-					ir_fspgr_path = "#{expanded_dir}/#{dirname}"
+					ir_fspgr_path = "#{expanded_dir}#{dirname}"
 
 					# sag_3d_flair
 					dirname = sag_3d_flair.first.path.split("/").last
 					result = `cp -r #{sag_3d_flair.first.path} #{expanded_dir}`
 					result = `cd #{expanded_dir}/#{dirname}; find . -type f -path '*.bz2' -exec bzip2 -d {} \\; ; find . -type f -path '*.json' -exec rm {} \\;`
-					sag_3d_flair_path = "#{expanded_dir}/#{dirname}"
+					sag_3d_flair_path = "#{expanded_dir}#{dirname}"
 
 			        #then create a trfile and add the images to it.
 			        trfile = Trfile.new
