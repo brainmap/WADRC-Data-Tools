@@ -12,8 +12,9 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
                 run_by_user: 'panda_user',
                 destination_table: 'cg_atrophy',
                 roi_destination_table: 'cg_atrophy_roi',
+                roi_thickness_destination_table: 'cg_atrophy_roi_thickness',
                 code_ver: '009',
-                older_versions: ['007','008','009'],
+                older_versions: ['007','008','009','016'],
                 processing_output_path: "/mounts/data/development/atrophy/output",
                 tracker_id: 38
     		}
@@ -28,8 +29,9 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
                 run_by_user: 'panda_user',
                 destination_table: 'cg_atrophy',
                 roi_destination_table: 'cg_atrophy_roi',
+                roi_thickness_destination_table: 'cg_atrophy_roi_thickness',
                 code_ver: '009',
-                older_versions: ['009'],
+                older_versions: ['009','016'],
                 processing_output_path: "/mounts/data/pipelines/atrophy/output",
                 tracker_id: 38
     		}
@@ -127,7 +129,7 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 							# 	pdf_candidates = filenames.select{|entry| (entry =~ /\.pdf$/)}
 							# end
 
-							if csv_candidates.length != 2
+							if csv_candidates.length != 3
 								next
 							else
 
@@ -140,6 +142,9 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 
 								summary_csv = csv_candidates.select{|entry| entry =~ /summary/}
 								roi_csv = csv_candidates.select{|entry| entry =~ /roiVolumes/}
+
+								# 2022-04-07 wbbevis -- adding thickness stats
+								thickness_csv = csv_candidates.select{|entry| entry =~ /roiSurfaces/}
 
 								# csv report
 			                    csv_path = "#{code_version_dir}/#{summary_csv.first}"
@@ -179,6 +184,20 @@ class Jobs::Atrophy::AtrophyHarvester < Jobs::BaseJob
 										    if new_form.valid?
 								               	sql = new_form.to_sql_insert("#{params[:destination_table]}_new")
 												@connection.execute(sql)
+											end
+
+											# thickness
+								        	thickness_roi = CSV.open("#{code_version_dir}/#{thickness_csv.first}",:headers => true)
+
+								        	thickness_roi.each do |roi_row|
+
+												new_roi_thickness_form = AtrophyRoiThicknessForm.from_csv(roi_row,subject,sp.codename)
+
+											    if new_roi_thickness_form.valid?
+										           	
+										           	sql = new_roi_thickness_form.to_sql_insert("#{params[:roi_thickness_destination_table]}")
+													connection.execute(sql)
+												end
 											end
 
 											#ROIs
