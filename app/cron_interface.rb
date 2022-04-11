@@ -453,6 +453,13 @@ v_user = v_user.gsub("\n","")
 
     job.run(params)
 
+  elsif v_value_1 == "WRAP REDCap LP Request"
+
+    params = Jobs::RemoteRequest::WrapLpRequest.default_params
+    job = Jobs::RemoteRequest::WrapLpRequest.new(params)
+
+    job.run(params)
+
   elsif v_value_1 == "xnat_curated_upload"
 
       xnat = SharedUpload::XnatCuratedUpload.new
