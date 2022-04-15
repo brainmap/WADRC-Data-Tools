@@ -17879,7 +17879,8 @@ puts "v_analyses_path="+v_analyses_path
           @schedulerun.save
           v_computer = "kanga"
           v_comment = ""
-          v_fsl_first_trtype_id = 12 #PFirst - ROI (FSL)
+          v_fsl_first_trtype_id = 18 # 2022-04-15 wbbevis -- this needs to change to "Hippocampal Volume Quality" (id: 18)
+                                      # and get spun down and into a Job class ASAP
     ####    begin   # catch all exception and put error in comment    
             connection = ActiveRecord::Base.connection();        
             sql = "truncate table cg_first_calculated_volumes_new"
@@ -18045,7 +18046,7 @@ puts "v_analyses_path="+v_analyses_path
                                              if !v_tractiontypes.nil?
                                                v_tractiontypes.each do |tat|
                                                   v_tredit_action = TreditAction.where("tredit_id in (?)",v_tredit_id).where("tractiontype_id in (?)", tat.id)
-                                                  if tat.id == 227 # ### v_qc_hippocampus_roi_value
+                                                  if tat.id == 353 # ### v_qc_hippocampus_roi_value
                                                      @lookup_refs = LookupRef.where("label in (?) and ref_value in (?)",v_label,v_tredit_action[0].value)
                                                      if !@lookup_refs.nil? and @lookup_refs.count> 0
                                                        v_qc_hippocampus_roi_value = (@lookup_refs.first).description
