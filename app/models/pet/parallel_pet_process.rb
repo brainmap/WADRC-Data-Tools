@@ -69,7 +69,7 @@ class Pet::ParallelPetProcess < Pet::PetBase
                  method: "suvr",
                  exclude_sp_pet_array: [-1,80,115,100], # excluding adcp
                  uptake_duration_check: true,
-                 uptake_duration_lower_bound: 45,
+                 uptake_duration_lower_bound: 0,
                  uptake_duration_upper_bound: 55
                 }
 
@@ -92,23 +92,6 @@ class Pet::ParallelPetProcess < Pet::PetBase
                 }
       params
     end
-    def self.neuraceq_dvr_params
-      # - set up params
-      params = { schedule_name: 'parallel_pet_neuraceq_dvr_process',
-                 base_path: Shared.get_base_path(), 
-                 computer: "cruella",
-                 comment: [],
-                 dry_run: true,
-                 tracer_id: "10",
-                 comment_warning: "",
-                 method: "dvr",
-                 exclude_sp_pet_array: [-1,80,115,100, 79,129, 104, 145, 157],
-                 uptake_duration_check: false,
-                 uptake_duration_lower_bound: 85,
-                 uptake_duration_upper_bound: 95
-                }
-      params
-    end
     def self.neuraceq_suvr_params
       # - set up params
       params = { schedule_name: 'parallel_pet_neuraceq_suvr_process',
@@ -123,23 +106,6 @@ class Pet::ParallelPetProcess < Pet::PetBase
                  uptake_duration_check: true,
                  uptake_duration_lower_bound: 85,
                  uptake_duration_upper_bound: 95
-                }
-      params
-    end
-    def self.fdg_dvr_params
-      # - set up params
-      params = { schedule_name: 'parallel_pet_fdg_dvr_process',
-                 base_path: Shared.get_base_path(), 
-                 computer: "cruella",
-                 comment: [],
-                 dry_run: false,
-                 tracer_id: "2",
-                 comment_warning: "",
-                 method: "dvr",
-                 exclude_sp_pet_array: [-1,100],
-                 uptake_duration_check: false,
-                 uptake_duration_lower_bound: 20,
-                 uptake_duration_upper_bound: 40
                 }
       params
     end
