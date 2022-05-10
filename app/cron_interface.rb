@@ -460,13 +460,6 @@ v_user = v_user.gsub("\n","")
 
     job.run(params)
 
-  elsif v_value_1 == "adrc_lp_harvest"
-
-    params = Jobs::RemoteRequest::AdrcLpRequest.default_params
-    job = Jobs::RemoteRequest::AdrcLpRequest.new(params)
-
-    job.run(params)
-
   elsif v_value_1 == "xnat_curated_upload"
 
       xnat = SharedUpload::XnatCuratedUpload.new
