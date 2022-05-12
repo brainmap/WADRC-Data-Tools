@@ -194,17 +194,17 @@ class Jobs::ASL::ASLDriverBrave < Jobs::BaseJob
             else
               t1_file_path = t1_file_glob.first
             end
-            self.log << {:t1_copy_log => "Copied: #{t1_pre_path.first} to #{t1_file_path}"}
+            @log.info(@params[:schedule_name]) { JSON.generate({:t1_copy_log => "Copied: #{t1_pre_path.first} to #{t1_file_path}"})}
             filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nT1: #{t1_pre_path.first} copied to #{t1_file_path}.\n"
           else
-            self.log << {:file => "#{enrollment.enumber}", :message => "NIFTI for T1 not found!."}
+            @log.info(@params[:schedule_name]) { JSON.generate({:file => "#{enrollment.enumber}", :message => "NIFTI for T1 not found!."})}
             self.error_log << {:file => "#{enrollment.enumber}", :message => "NIFTI for T1 not found!."}
             filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nT1: NOT FOUND FOR #{enrollment.enumber}!\n"
             File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
             next
           end
         else
-          self.log << {:file => "#{t1_pre_check.first}", :message => "NIFTI for T1 already exists."}
+          @log.info(@params[:schedule_name]) { JSON.generate({:file => "#{t1_pre_check.first}", :message => "NIFTI for T1 already exists."})}
           filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nT1: #{t1_pre_check.first} already in ouptut.\n"
           #Set path for driver to pre-exisiting T1
           t1_file_path = t1_pre_check[0]
@@ -226,7 +226,7 @@ class Jobs::ASL::ASLDriverBrave < Jobs::BaseJob
             else
               cur_nii_path = cur_nii_glob.first
             end
-            self.log << {:nii_copy_log => "Copied: #{cur_nii_path}"}
+            @log.info(@params[:schedule_name]) { JSON.generate({:nii_copy_log => "Copied: #{cur_nii_path}"})}
             filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: #{cur_nii_path} copied to ouptut.\n"
             
             #Create array to be written to CSV; Do not add to driver if MATLAB outputs already exist
@@ -263,7 +263,7 @@ class Jobs::ASL::ASLDriverBrave < Jobs::BaseJob
 
             #Add scan to driver
             @driver << {:cbf_file_path => cur_nii_path, :t1_file_path => t1_file_path, :enumber => enrollment.enumber, :protocol => scan_procedure.codename}
-            self.log << {:scan => cbf_name, :message => "Added to driver to be processed."}
+            @log.info(@params[:schedule_name]) { JSON.generate({:scan => cbf_name, :message => "Added to driver to be processed."})}
             filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nSUCCESS: #{cbf_name} added to driver to be processed.\n"
             File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
           end
@@ -330,8 +330,8 @@ class Jobs::ASL::ASLDriverBrave < Jobs::BaseJob
       processing_call = "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"#{matlab_command}\""
 
 
-      self.log << {:message => processing_call}
-      self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
+      @log.info(@params[:schedule_name]) { JSON.generate({:message => processing_call})}
+      # self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
 
       # All of the STDOUT output from the processing script gets captured and logged, and
       # after the processing script is complete, we save everything and update the overall
@@ -344,7 +344,7 @@ class Jobs::ASL::ASLDriverBrave < Jobs::BaseJob
         while !stdout.eof?
           v_output = stdout.read 1024  
           # puts v_output
-          self.log << {:message => v_output.to_s}
+          @log.info(@params[:schedule_name]) { JSON.generate({:message => v_output.to_s})}
         end
         
         stdin.close
@@ -352,9 +352,9 @@ class Jobs::ASL::ASLDriverBrave < Jobs::BaseJob
         stderr.close
 
       rescue => msg  
-        self.log << {:message => msg.to_s}
+        @log.info(@params[:schedule_name]) { JSON.generate({:message => msg.to_s})}
       end
-      self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
+      # self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
     end
   end
 end

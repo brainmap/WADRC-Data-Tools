@@ -333,7 +333,7 @@ class Jobs::Pet::ParallelPetPibSuvr < Jobs::Pet::PetBase
         v_computer = params[:computer]
         v_call =  "ssh panda_user@#{v_computer}.dom.wisc.edu \"#{matlab_command}\""
 
-        self.log << v_call
+        # self.log << v_call
         # self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
 
         begin
@@ -346,7 +346,7 @@ class Jobs::Pet::ParallelPetPibSuvr < Jobs::Pet::PetBase
           v_output = stdout.read 1024 
           #  v_comment = v_comment + v_output  
           puts v_output
-          self.log << v_output
+          # self.log << v_output
           
         end
 

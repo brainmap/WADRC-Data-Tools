@@ -235,7 +235,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
             t1_paths.concat(t1_found_paths)
           end #params[:t1_globs].each do |glob|
           if t1_paths.empty?
-            self.log << {:file => "#{enrollment.enumber}", :message => "NIFTI for T1 not found!."}
+            @log.info(@params[:schedule_name]) { JSON.generate({:file => "#{enrollment.enumber}", :message => "NIFTI for T1 not found!."})}
             self.error_log << {:file => "#{enrollment.enumber}", :message => "NIFTI for T1 not found!."}
             filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nT1: NOT FOUND FOR #{enrollment.enumber}!\n"
             File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
@@ -243,7 +243,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
           else
             t1_file_path = t1_paths.first
             if t1_paths.count > 1
-              self.log << {:file => "#{t1_paths}", :message => "Multiple T1's found. #{t1_paths.first} selected and added to driver for processing.\n"}
+              @log.info(@params[:schedule_name]) { JSON.generate({:file => "#{t1_paths}", :message => "Multiple T1's found. #{t1_paths.first} selected and added to driver for processing.\n"})}
               filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nT1: Multiple T1's found. #{t1_paths.first} selected and added to driver for processing.\n"
               #Remove other T1's
               t1_paths.drop(1).each do |path|
@@ -273,7 +273,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
           end #params[:cbf_globs].each do |glob|
 
           if cbf_paths.empty?
-            self.log << {:file => "#{enrollment.enumber}", :message => "NIFTI for CBF not found!."}
+            @log.info(@params[:schedule_name]) { JSON.generate({:file => "#{enrollment.enumber}", :message => "NIFTI for CBF not found!."})}
             #self.error_log << {:file => "#{enrollment.enumber}", :message => "NIFTI for CBF not found!."}
             filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: NOT FOUND FOR #{enrollment.enumber}!\n"
             #File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
@@ -283,7 +283,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
 	    split_niis = cbf_paths.map{ |item| item.split('_').last }
 	    duplicated = split_niis.select{ |item| split_niis.count(item) > 1}
 	    if !duplicated.empty?
-              self.log << {:file => "#{enrollment.enumber}", :message => "NIFTI for CBF was erroneously split. Trying to Process from DICOM's!"}
+              @log.info(@params[:schedule_name]) { JSON.generate({:file => "#{enrollment.enumber}", :message => "NIFTI for CBF was erroneously split. Trying to Process from DICOM's!"})}
               #self.error_log << {:file => "#{enrollment.enumber}", :message => "NIFTI for CBF was erroneously split. Trying to Process from DICOM's!"}
               filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: NIFTI for CBF was erroneously split. Trying to Process from DICOM's! #{enrollment.enumber}!\n"
               #File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
@@ -304,7 +304,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
                 end
               end
               if processed_found.count == params[:processed_check_globs].count
-                self.log << {:file => "#{enrollment.enumber}: #{visit}", :message => "Processing files already present!."}
+                @log.info(@params[:schedule_name]) { JSON.generate({:file => "#{enrollment.enumber}: #{visit}", :message => "Processing files already present!."})}
                 filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: #{visit} already processed. Skipping!\n"
                 File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
                 #next
@@ -316,7 +316,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
               end
               #Add scan to driver
               @driver << {:cbf_file_path => cbf, :t1_file_path => t1_file_path, :enumber => enrollment.enumber, :protocol => scan_procedure.codename}
-              self.log << {:scan => cbf, :message => "Added to driver to be processed."}
+              @log.info(@params[:schedule_name]) { JSON.generate({:scan => cbf, :message => "Added to driver to be processed."})}
               filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nSUCCESS: #{cbf} added to driver to be processed.\n"
               File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
 	      #If added nifti to driver then do not try to use DCM's to create nifti
@@ -342,7 +342,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
             end
           end #params[:dcm_globs].each
           if dcms_paths.empty?
-            self.log << {:file => "#{enrollment.enumber}", :message => "DICOM's for CBF not found!."}
+            @log.info(@params[:schedule_name]) { JSON.generate({:file => "#{enrollment.enumber}", :message => "DICOM's for CBF not found!."})}
             filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: DICOM's NOT FOUND FOR #{enrollment.enumber}!\n"
             #        elsif dcms_paths.length > 1
           else #Just treat cases of multiple or single CBF scans the same 
@@ -374,7 +374,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
                 end
               end
               if processed_found.count == params[:processed_check_globs].count
-                self.log << {:file => "#{enrollment.enumber}: #{visit}", :message => "Processing files already present!."}
+                @log.info(@params[:schedule_name]) { JSON.generate({:file => "#{enrollment.enumber}: #{visit}", :message => "Processing files already present!."})}
                 filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nCBF: #{visit} already processed. Skipping!\n"
                 File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
                 next
@@ -391,7 +391,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
               `rm -rf #{tmp_dir}`
               #Add scan to driver
               @driver << {:cbf_file_path => cbf, :t1_file_path => t1_file_path, :enumber => enrollment.enumber, :protocol => scan_procedure.codename}
-              self.log << {:scan => cbf_name_nii, :message => "Added to driver to be processed."}
+              @log.info(@params[:schedule_name]) { JSON.generate({:scan => cbf_name_nii, :message => "Added to driver to be processed."})}
               filter_log << "#{Time.now.strftime("%Y-%m-%d_%H:%M:%S")}\nSUCCESS: #{cbf_name_nii} added to driver to be processed.\n"
               File.open("#{filter_log_path}", "w") {|f| f.write("#{filter_log}") }
             end
@@ -456,7 +456,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
       processing_call = "ssh #{params[:run_by_user]}@#{params[:computer]}.dom.wisc.edu \"#{matlab_command}\""
 
 
-      self.log << {:message => processing_call}
+      @log.info(@params[:schedule_name]) { JSON.generate({:message => processing_call})}
       
       #self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
 
@@ -471,7 +471,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
         while !stdout.eof?
           v_output = stdout.read 1024  
           # puts v_output
-          self.log << {:message => v_output.to_s}
+          @log.info(@params[:schedule_name]) { JSON.generate({:message => v_output.to_s})}
         end
         
         stdin.close
@@ -479,7 +479,7 @@ class Jobs::ASL::ASLDriver < Jobs::BaseJob
         stderr.close
 
       rescue => msg  
-        self.log << {:message => msg.to_s}
+        @log.info(@params[:schedule_name]) { JSON.generate({:message => msg.to_s})}
       end
       #self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
     end

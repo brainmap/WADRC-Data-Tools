@@ -47,7 +47,7 @@ class Jobs::RadiologyRequest < Jobs::BaseJob
 		self.response = @response
 
 		# we may not even need this anymore.
-		self.log << "Response was #{@response.code}, with cookie '#{@response["Set-Cookie"]}'"
+		@log.info(@params[:schedule_name]) { "Response was #{@response.code}, with cookie '#{@response["Set-Cookie"]}'"}
 
 		if !@response["Set-Cookie"].nil?
 			@cookie = @response["Set-Cookie"].split(";")[0..2].join(";")
@@ -67,10 +67,10 @@ class Jobs::RadiologyRequest < Jobs::BaseJob
 		self.response = @response
 
 		# we may not even need this anymore.
-		self.log << "Response was #{@response.code}'"
+		@log.info(@params[:schedule_name]) { "Response was #{@response.code}'"}
 
 		if @response.code == "200"
-			self.log << "looking good!"
+			@log.info(@params[:schedule_name]) { "looking good!"}
 		else
 			self.error_log << "there was some problem (response code was #{@response.code}}"
 			return
@@ -84,14 +84,14 @@ class Jobs::RadiologyRequest < Jobs::BaseJob
 		@filtered_rad_reads = rad_reads.select{|rad| visit_rmrs.include? rad['subjID'].upcase}
 
 		self.filtered_rad_reads = @filtered_rad_reads
-		self.log << "We got #{@filtered_rad_reads.count} overreads."
+		@log.info(@params[:schedule_name]) { "We got #{@filtered_rad_reads.count} overreads."}
 	end
 
 
 	def record(params)
 		#we need visits to associate these with, and we need to validate these inputs before we save them.
 
-		self.log << "Starting to record the overreads."
+		@log.info(@params[:schedule_name]) { "Starting to record the overreads."}
 
 		@filtered_rad_reads.each do |json|
 			#we should validate this JSON
@@ -111,9 +111,9 @@ class Jobs::RadiologyRequest < Jobs::BaseJob
 							rad_read.visit_id = visit.id
 
 							rad_read.save
-							self.log << "New overread created for visit(id:#{visit.id})."
+							@log.info(@params[:schedule_name]) { "New overread created for visit(id:#{visit.id})."}
 						else
-							self.log << "An overread already exists for visit(id:#{visit.id}), skipping."
+							@log.info(@params[:schedule_name]) { "An overread already exists for visit(id:#{visit.id}), skipping."}
 						end
 					else
 						#record this one as unmatched.
@@ -124,6 +124,6 @@ class Jobs::RadiologyRequest < Jobs::BaseJob
 			end
 		end
 
-		self.log << "Storing is complete!"
+		@log.info(@params[:schedule_name]) { "Storing is complete!"}
 	end
 end

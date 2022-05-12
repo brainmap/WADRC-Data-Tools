@@ -267,13 +267,13 @@ class Jobs::Pet::PopulateShareable < Jobs::BaseJob
 	        v_computer = params[:computer]
 	        v_call =  "ssh panda_user@#{v_computer}.dom.wisc.edu \"#{matlab_command}\""
 
-	        self.log << {:message => "calling #{v_call}"}
+	        # self.log << {:message => "calling #{v_call}"}
 	        begin
 	        	stdin, stdout, stderr = Open3.popen3(v_call)
 		        while !stdout.eof?
 		        	v_output = stdout.read 1024 
 		        	#  v_comment = v_comment + v_output  
-		        	self.log << v_output  
+		        	# self.log << v_output  
 		        end
 	        rescue => msg
 	        	self.error_log << {:message => "error #{msg.to_s}"}

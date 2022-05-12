@@ -64,7 +64,7 @@ class Jobs::ASL::ASLHarvester < Jobs::BaseJob
                              );"
     #@connection.execute(create_new)
     ActiveRecord::Base.connection.execute(create_new)
-    self.log << {"#{table_name}" => "Table Created."}
+    @log.info(@params[:schedule_name]) { JSON.generate({"#{table_name}" => "Table Created."})}
   end
 
   def track_file(params)
@@ -229,14 +229,14 @@ class Jobs::ASL::ASLHarvester < Jobs::BaseJob
       sql_insert = "INSERT INTO #{params[:destination_table]}_old SELECT * FROM #{params[:destination_table]};"
       #@connection.execute(sql_insert)
       ActiveRecord::Base.connection.execute(sql_insert)
-      self.log << {:message => "#{params[:destination_table]} moved to #{params[:destination_table]}_old"}
+      @log.info(@params[:schedule_name]) { JSON.generate({:message => "#{params[:destination_table]} moved to #{params[:destination_table]}_old"})}
       sql_trunc = "TRUNCATE TABLE #{params[:destination_table]};"
       #@connection.execute(sql_trunc)
       ActiveRecord::Base.connection.execute(sql_trunc)
-      self.log << {:message => "#{params[:destination_table]} truncated."}
+      @log.info(@params[:schedule_name]) { JSON.generate({:message => "#{params[:destination_table]} truncated."})}
     else
       create_cg_table("#{params[:destination_table]}")
-      self.log << {:message => "#{params[:destination_table]} created."}
+      @log.info(@params[:schedule_name]) { JSON.generate({:message => "#{params[:destination_table]} created."})}
     end
 
 

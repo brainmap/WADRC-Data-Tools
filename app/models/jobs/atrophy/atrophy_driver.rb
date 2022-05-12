@@ -212,7 +212,7 @@ class Jobs::Atrophy::AtrophyDriver < Jobs::BaseJob
       
       processing_call =  "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"#{command}\""
 
-      self.log << {:message => processing_call}
+      @log.info(@params[:schedule_name]) { JSON.generate({:message => processing_call})}
       # We don't have the "save_with_logs" on old Panda. :(
       # self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
 
@@ -222,12 +222,12 @@ class Jobs::Atrophy::AtrophyDriver < Jobs::BaseJob
         while !stdout.eof?
           v_output = stdout.read 1024  
           # puts v_output
-          self.log << {:message => v_output.to_s}
+          @log.info(@params[:schedule_name]) { JSON.generate({:message => v_output.to_s})}
             
         end
 
       rescue => msg  
-        self.log << {:message => msg.to_s}
+        @log.info(@params[:schedule_name]) { JSON.generate({:message => msg.to_s})}
       end
 
     end

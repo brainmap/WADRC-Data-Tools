@@ -41,7 +41,7 @@ class Jobs::RemoteRequest::AdrcLpRequest < Jobs::RemoteRequest::RemoteRequestBas
 		@response = http.post("https://redcap.medicine.wisc.edu/api/",@base_args)
 
 		@records = JSON.parse(@response.body)
-		@log << {'message' => "Response was #{@response.code}"}
+		@log.info(@params[:schedule_name]) { "Response was #{@response.code}"}
 
 		e4_populated = @records.select{|item| item["lpdt_e4_v6"] != ""}
 
@@ -77,18 +77,18 @@ class Jobs::RemoteRequest::AdrcLpRequest < Jobs::RemoteRequest::RemoteRequestBas
 				# too many vgroups match this LP!
 				message = "There were too many vgroups for #{row['ptid']} on #{row['lpdt_e4_v6']}"
 				puts message
-				@log << {'message' => message}
+				@log.info(@params[:schedule_name]) { JSON.generate({'message' => message})}
 			else
 				# no vgroups match this LP!
 				message = "There weren't enough vgroups for #{row['ptid']} on #{row['lpdt_e4_v6']}"
 				puts message
-				@log << {'message' => message}
+				@log.info(@params[:schedule_name]) { JSON.generate({'message' => message})}
 			end
 		
 		end
 
 
-		@log << {'message' => "Storing is complete!"}
+		@@log.info(@params[:schedule_name]) { "Storing is complete!"}
 	end
 
 

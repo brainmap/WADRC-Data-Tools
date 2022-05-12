@@ -42,7 +42,7 @@ class Jobs::RemoteRequest::WrapLpRequest < Jobs::RemoteRequest::RemoteRequestBas
 		@response = http.post("https://redcap.medicine.wisc.edu/api/",@base_args)
 
 		@records = JSON.parse(@response.body)
-		@log << {'message' => "Response was #{@response.code}"}
+		@log.info(@params[:schedule_name]) { "Response was #{@response.code}"}
 
 		# 2022-03-15 wbbevis -- Beware the Ides of March. Apparently the WRAP REDCap project has been 
 		# set up in a subtly different way from the ADRC project, such that the date of the LP event
@@ -112,12 +112,12 @@ class Jobs::RemoteRequest::WrapLpRequest < Jobs::RemoteRequest::RemoteRequestBas
 				# too many vgroups match this LP!
 				message = "There were too many vgroups for #{row['ptid']} on #{row['lpdt_ev_v6']}"
 				puts message
-				@log << {'message' => message}
+				@log.info(@params[:schedule_name]) { message}
 			else
 				# no vgroups match this LP!
 				message = "There weren't enough vgroups for #{row['ptid']} on #{row['lpdt_ev_v6']}. We're going to create one."
 				puts message
-				@log << {'message' => message}
+				@log.info(@params[:schedule_name]) { message}
 
 				enr = Enrollment.where(:enumber => "wrap#{row["ptid"].rjust(4,'0')}").first
 
@@ -156,7 +156,7 @@ class Jobs::RemoteRequest::WrapLpRequest < Jobs::RemoteRequest::RemoteRequestBas
 		end
 
 
-		@log << {'message' => "Storing is complete!"}
+		@log.info(@params[:schedule_name]) { "Storing is complete!"}
 	end
 
 	def merge_records(a,b)

@@ -120,7 +120,7 @@ class Jobs::Pet::CentiloidsHarvester < Jobs::BaseJob
 
 						        	centiloid_file_name = centiloid_log
 						            print "*"
-							        self.log << "centiloid.csv is #{centiloid_file_name}"
+							        # self.log << "centiloid.csv is #{centiloid_file_name}"
 							        csv = CSV.open(centiloid_file_name,:headers => true)
 							        centiloid_form = CentiloidForm.from_csv(csv, params[:method], centiloid_file_name, pet_appt)
 
@@ -151,7 +151,7 @@ class Jobs::Pet::CentiloidsHarvester < Jobs::BaseJob
 				        if centiloids_errors.count > 0
 				        	centiloid_error_file_name = centiloids_errors.first
 				            print "_"
-					        self.log << "centiloid.csv.error is #{centiloid_error_file_name}"
+					        # self.log << "centiloid.csv.error is #{centiloid_error_file_name}"
 
 					        error_csv = CSV.open(centiloid_error_file_name,:headers => true)
 					        error_values = {}

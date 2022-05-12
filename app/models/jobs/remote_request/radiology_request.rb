@@ -36,11 +36,11 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 			}
 		}
 
-		@log << {:message => "Requesting from /a/authentication/loginProcess.php"}
+		@log.info(@params[:schedule_name]) { "Requesting from /a/authentication/loginProcess.php"}
 		@response = @http.post('https://www.radiology.wisc.edu/a/authentication/loginProcess.php',login)
 
 		# we may not even need this anymore.
-		@log << {:message => "Response was #{@response.code}, with cookie '#{@response.headers["Set-Cookie"]}'"}
+		@log.info(@params[:schedule_name]) { "Response was #{@response.code}, with cookie '#{@response.headers["Set-Cookie"]}'"}
 
 		if !@response.headers["Set-Cookie"].nil?
 			@cookie = @response.headers["Set-Cookie"].split(";")[0..2].join(";")
@@ -65,7 +65,7 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 		visit_rmrs = Visit.all().map(&:rmr).map{|item| item.upcase}
 
 		@filtered_rad_reads = rad_reads.select{|rad| visit_rmrs.include? rad['subjID'].upcase}
-		@log << {:message => "We got #{@filtered_rad_reads.count} overreads."}
+		@log.info(@params[:schedule_name]) { "We got #{@filtered_rad_reads.count} overreads."}
 	end
 
 	def abs_sort(a,b)
@@ -88,7 +88,7 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
       	# 'A-F' => 'abnormal, needs follow up' / 'abnormalFollow'
       	abnormal_needs_follow_up = []
 
-		@log << {:message => "Starting to record the overreads."}
+		@log.info(@params[:schedule_name]) { "Starting to record the overreads."}
 		@filtered_rad_reads.each do |rad|
 			#we should validate this JSON
 			rad_read_form = RadiologyOverreadForm.from_json(rad)
@@ -124,7 +124,7 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 
 						rad_read.save
 
-						@log << {:message => "New overread created for visit(id:#{visit.id})."}
+						@log.info(@params[:schedule_name]) { "New overread created for visit(id:#{visit.id})."}
 					else
 						
 						if visit.date > (Date.today - 5.weeks)
@@ -133,10 +133,10 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 							rad_read.from_form(rad_read_form)
 							rad_read.save
 
-							@log << {:message => "An overread already exists for visit(id:#{visit.id}), but it's new enough to update."}
+							@log.info(@params[:schedule_name]) { "An overread already exists for visit(id:#{visit.id}), but it's new enough to update."}
 						else
 
-							@log << {:message => "An overread already exists for visit(id:#{visit.id}), skipping."}
+							@log.info(@params[:schedule_name]) { "An overread already exists for visit(id:#{visit.id}), skipping."}
 						end
 					end
 				else
@@ -147,9 +147,9 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 			end
 		end
 
-		@log << {:message => "Storing is complete!"}
+		@log.info(@params[:schedule_name]) { "Storing is complete!"}
 
-		@log << {:message => "updating visits"}
+		@log.info(@params[:schedule_name]) { "updating visits"}
 
 		Visit.where(:id => normal_visit_ids).each do |visit|
 			visit.radiology_outcome = 'Nm'
@@ -164,7 +164,7 @@ class Jobs::RemoteRequest::RadiologyRequest < Jobs::RemoteRequest::RemoteRequest
 			visit.save
 		end
 
-		@log << {:message => "updating visits complete"}
+		@log.info(@params[:schedule_name]) { "updating visits complete"}
 
 	end
 

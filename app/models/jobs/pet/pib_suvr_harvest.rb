@@ -390,7 +390,7 @@ class Jobs::Pet::PibSuvrHarvest < Jobs::Pet::PetHarvestBase
 
 
       @scan_procedures.each do |sp|
-        self.log << "start "+sp.codename
+        # self.log << "start "+sp.codename
         v_visit_number = sp.visit_abbr
         v_codename_hyphen =  sp.codename.gsub(".","-")
 
@@ -413,7 +413,7 @@ class Jobs::Pet::PibSuvrHarvest < Jobs::Pet::PetHarvestBase
                               .uniq
 
           enrollments.each do |enrollment|
-            self.log << "starting #{enrollment.enumber}"
+            # self.log << "starting #{enrollment.enumber}"
 
             v_subjectid_path = v_preprocessed_full_path+"/"+enrollment.enumber
             v_subjectid_v_num = enrollment.enumber + v_visit_number
@@ -435,7 +435,7 @@ class Jobs::Pet::PibSuvrHarvest < Jobs::Pet::PetHarvestBase
                     end
                 end
             rescue => msg  
-                self.log << "IN RESCUE ERROR: #{msg}"
+                # self.log << "IN RESCUE ERROR: #{msg}"
             end
             v_subjectid_array = v_subjectid_array.uniq
 
@@ -453,13 +453,13 @@ class Jobs::Pet::PibSuvrHarvest < Jobs::Pet::PetHarvestBase
                 v_dir_array = Dir.entries(v_subjectid_pet_tracer_path)
 
                 roi_file_name = Dir.glob(v_subjectid_pet_tracer_path + "/*roi-summary*.csv").first
-                self.log << "roi_summary.csv is #{roi_file_name}"
+                # self.log << "roi_summary.csv is #{roi_file_name}"
 
                 log_file_name = Dir.glob(v_subjectid_pet_tracer_path + "/*panda-log*.csv").first
-                self.log << "panda_log.csv is #{log_file_name}"
+                # self.log << "panda_log.csv is #{log_file_name}"
 
                 tacs_file_name = Dir.glob(v_subjectid_pet_tracer_path + "/*_tacs_*.csv").first
-                self.log << "tacs.csv is #{tacs_file_name}"
+                # self.log << "tacs.csv is #{tacs_file_name}"
                   
                 product_file_path = Dir.glob(v_subjectid_pet_tracer_path + "/w*.nii").first
                 product_file_name = nil
@@ -467,7 +467,7 @@ class Jobs::Pet::PibSuvrHarvest < Jobs::Pet::PetHarvestBase
                   product_file_name = product_file_path.split("/").last
                 end
 
-                self.log << "product file is #{product_file_name}"
+                # self.log << "product file is #{product_file_name}"
 
                 if !roi_file_name.blank? and !log_file_name.blank? and !product_file_name.blank?
 
@@ -768,7 +768,7 @@ class Jobs::Pet::PibSuvrHarvest < Jobs::Pet::PetHarvestBase
                     header = File.open(roi_file_name) {|f| f.readline.strip }
                     v_return_flag,v_return_comment  = compare_file_header(header,@roi_file_cn_array.join(","))
                     if v_return_flag == "N" 
-                      self.log << "ROI header didn't match: #{roi_file_name}=>#{v_return_comment}"
+                      # self.log << "ROI header didn't match: #{roi_file_name}=>#{v_return_comment}"
                     else
 
                       roi_summary_data = CSV.read(roi_file_name, :headers => true)
@@ -778,7 +778,7 @@ class Jobs::Pet::PibSuvrHarvest < Jobs::Pet::PetHarvestBase
                         atlas = atlas_map[row["Atlas"]]
 
                         if atlas.nil?
-                          self.log << "UNEXPECTED ATLAS #{row["Atlas"]};"
+                          # self.log << "UNEXPECTED ATLAS #{row["Atlas"]};"
                         else
 
                           # self.log << "#{atlas}"
@@ -794,7 +794,7 @@ class Jobs::Pet::PibSuvrHarvest < Jobs::Pet::PetHarvestBase
 
                   else
                     #report a missing roi file
-                    self.log << "ERROR: missing ROI file, enumber: #{enrollment.id}, scan_procedure: #{sp.codename}" 
+                    # self.log << "ERROR: missing ROI file, enumber: #{enrollment.id}, scan_procedure: #{sp.codename}" 
                   end
 
 
@@ -863,30 +863,30 @@ class Jobs::Pet::PibSuvrHarvest < Jobs::Pet::PetHarvestBase
                 # for atlas in ['_atlas_tjb_mni_v1','_atlas_homic_mni_v1','_atlas_morimod_mni_v1','_atlas_na','_']
                 # table name = "cg_pet_#{tracer_name}_roi#{atlas}_new"
                 preamble_fields = %w"file_name subjectid enrollment_id scan_procedure_id secondary_key pet_processing_date mri_processing_date pet_code_version original_t1_mri_file_name bias_corrected_t1_mri_file mni_space_t1_mri multispectral_file pet_log_file coregistration_reference_file processed_4d_pet_file processed_sum_pet_file processed_suvr_pet_file mni_space_suvr_pet_file pet_analysis_log_file ecat_file_name atlas age_at_appointment general_comment pet_date_mri_date_diff_days"
-                self.log << "file name => #{roi_file_name.split("/").last.to_s}"
-                self.log << "subjectid => #{v_subjectid_v_num}"
-                self.log << "enrollment_id => #{enrollment.id.to_s}"
-                self.log << "scan_procedure_id => #{sp.id.to_s}"
-                self.log << "secondary_key => #{v_secondary_key.to_s}"
-                self.log << "pet_processing_date => #{pet_date.to_s}"
-                self.log << "mri_processing_date => #{mri_date.to_s}"
-                self.log << "pet_code_version => #{log_file_data["PET code version"]}"
-                self.log << "original_t1_mri_file_name => #{log_file_data["original t1 MRI file"].to_s}"
-                self.log << "bias_corrected_t1_mri_file => #{log_file_data["Bias Corrected T1 MRI file"]}"
-                self.log << "mni_space_t1_mri => #{log_file_data["MNI space T1 MRI"]}"
-                self.log << "multispectral_file => #{log_file_data["multispectral file"]}"
-                self.log << "pet_log_file => #{log_file_data["PET log file"]}"
-                self.log << "coregistration_reference_file => #{log_file_data["coregistration reference file"]}"
-                self.log << "processed_4d_pet_file => #{log_file_data["processed 4D PET file"]}"
-                self.log << "processed_sum_pet_file => #{log_file_data["processed SUM PET file"]}"
-                self.log << "processed_suvr_pet_file => #{log_file_data["processed SUVR PET file"]}"
-                self.log << "mni_space_suvr_pet_file => #{log_file_data["MNI space SUVR PET file"]}"
-                self.log << "pet_analysis_log_file => #{log_file_data["PET analysis log file"]}"
-                self.log << "ecat_file_name => #{ecat_file.to_s}"
-                self.log << "atlas => %{atlas_name}"
-                self.log << "age_at_appointment => #{v_age_at_appointment}"
-                self.log << "general_comment => #{v_qc_value}"
-                self.log << "pet_date_mri_date_diff_days => #{pet_date_mri_date_diff_days}"
+                # self.log << "file name => #{roi_file_name.split("/").last.to_s}"
+                # self.log << "subjectid => #{v_subjectid_v_num}"
+                # self.log << "enrollment_id => #{enrollment.id.to_s}"
+                # self.log << "scan_procedure_id => #{sp.id.to_s}"
+                # self.log << "secondary_key => #{v_secondary_key.to_s}"
+                # self.log << "pet_processing_date => #{pet_date.to_s}"
+                # self.log << "mri_processing_date => #{mri_date.to_s}"
+                # self.log << "pet_code_version => #{log_file_data["PET code version"]}"
+                # self.log << "original_t1_mri_file_name => #{log_file_data["original t1 MRI file"].to_s}"
+                # self.log << "bias_corrected_t1_mri_file => #{log_file_data["Bias Corrected T1 MRI file"]}"
+                # self.log << "mni_space_t1_mri => #{log_file_data["MNI space T1 MRI"]}"
+                # self.log << "multispectral_file => #{log_file_data["multispectral file"]}"
+                # self.log << "pet_log_file => #{log_file_data["PET log file"]}"
+                # self.log << "coregistration_reference_file => #{log_file_data["coregistration reference file"]}"
+                # self.log << "processed_4d_pet_file => #{log_file_data["processed 4D PET file"]}"
+                # self.log << "processed_sum_pet_file => #{log_file_data["processed SUM PET file"]}"
+                # self.log << "processed_suvr_pet_file => #{log_file_data["processed SUVR PET file"]}"
+                # self.log << "mni_space_suvr_pet_file => #{log_file_data["MNI space SUVR PET file"]}"
+                # self.log << "pet_analysis_log_file => #{log_file_data["PET analysis log file"]}"
+                # self.log << "ecat_file_name => #{ecat_file.to_s}"
+                # self.log << "atlas => %{atlas_name}"
+                # self.log << "age_at_appointment => #{v_age_at_appointment}"
+                # self.log << "general_comment => #{v_qc_value}"
+                # self.log << "pet_date_mri_date_diff_days => #{pet_date_mri_date_diff_days}"
                 preamble_values = "'" + roi_file_name.split("/").last.to_s+"','"+v_subjectid_v_num+"',"+enrollment.id.to_s+","+sp.id.to_s+",'"+v_secondary_key.to_s+"','"+pet_date.to_s+"','"+mri_date.to_s+"','"+log_file_data["PET code version"]+"','"+log_file_data["original t1 MRI file"].to_s+"','"+log_file_data["Bias Corrected T1 MRI file"]+"','"+log_file_data["MNI space T1 MRI"]+"','"+log_file_data["multispectral file"]+"','"+log_file_data["PET log file"]+"','"+log_file_data["coregistration reference file"]+"','"+log_file_data["processed 4D PET file"]+"','"+log_file_data["processed SUM PET file"]+"','"+log_file_data["processed SUVR PET file"]+"','"+log_file_data["MNI space SUVR PET file"]+"','"+log_file_data["PET analysis log file"]+"','"+ecat_file.to_s+"','%{atlas_name}','"+v_age_at_appointment+"','"+v_qc_value+"','"+pet_date_mri_date_diff_days+"'"
 
                 @atlas_map.values.each do |atlas|
