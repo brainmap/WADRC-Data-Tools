@@ -84,9 +84,9 @@ class Jobs::RemoteRequest::NeuropathologyRequest < Jobs::RemoteRequest::RemoteRe
 		@response = http.post("https://redcap.medicine.wisc.edu/api/",wrap_options)
 
 		@records += JSON.parse(@response.body)
-		self.log << {'message' => "Response was #{@response.code}"}
+		@log.info(@params[:schedule_name]) { "Response was #{@response.code}"}
 
-		self.log << {'message' => "WRAP -- Starting to record the neuropath data."}
+		@log.info(@params[:schedule_name]) { "WRAP -- Starting to record the neuropath data."}
 		wrap_v10_subjects = @records.select{|res| res['wrap_neuropathology_data_form_v10_complete'] == "2"}
 
 		wrap_v10_subjects.each do |subj|
@@ -119,7 +119,7 @@ class Jobs::RemoteRequest::NeuropathologyRequest < Jobs::RemoteRequest::RemoteRe
 ('adrc00251','5749','2768','adrc00251','9','5','2013',NULL,'2','87','5','23','2013','.','.',NULL,'.','.','.','.','.','.','.','3','.',NULL,'.','6E10','.',NULL,'.',NULL,'.','.','.','.','.',NULL,'.','2','2','.','1','1','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','3','.','.','1','.','.','.','.','.','.','.','.','.','.','.',NULL,'.','.','.','.','.','.','.','.','.','2','.','2','2','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.',NULL,'.',NULL,'.',NULL,'.','.','.','.','.','.','.','.',NULL,NULL,NULL,NULL,87.93);"
 		result = @connection.execute(sql)
 
-		self.log << {'message' => "Storing is complete!"}
+		@log.info(@params[:schedule_name]) { "Storing is complete!"}
 	end
 
 

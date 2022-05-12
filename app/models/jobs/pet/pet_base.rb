@@ -1,4 +1,4 @@
-class Jobs::Pet::PetBase < Jobs::BaseJob
+gclass Jobs::Pet::PetBase < Jobs::BaseJob
 
   	def self.default_params
 		params = { schedule_name: 'parallel_pet_process',
