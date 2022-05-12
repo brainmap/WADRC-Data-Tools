@@ -5,8 +5,13 @@ class Jobs::BaseJob
     attr_accessor :exclusions
     attr_accessor :outputs
     attr_accessor :error_log
+    attr_accessor :connection
 
-    # This is a backport of the jobs code in the new version of the panda
+    # The thinking here is that anything that's used as an input should be recoded in inputs. 
+    # I.e. when doing PET processing, we'll take a list of subjects as the input, then
+    # some of those people will be excluded because they don't meet criteria for processing.
+    # If an item is represented in inputs, it should also be represented in either outputs
+    # (successful products), or exclusions (inputs that didn't meet criteria).
 
     attr_accessor :job_run
 
@@ -16,36 +21,31 @@ class Jobs::BaseJob
         params
     end
 
-	def initialize(params=nil)
+	def initialize(params = nil)
         if params.nil?
             @params = self.class.default_params
         else
             @params = params
         end
 
-    	# job_category = Jobs::JobCategory.find_or_create_by(:name => "%{schedule_name}" % @params)
+    	job_category = Jobs::JobCategory.find_or_create_by(:name => "%{schedule_name}" % @params)
+        @job_run = Jobs::JobRun.new
+        @job_run.job_category = job_category
+        @job_run.params = @params
+        @job_run.status_flag = "started"
+        @job_run.created_by_user = User.find_by(:username => @params[:run_by_user])
 
-        schedule = Schedule.where(:name => @params[:schedule_name]).first
-        self.job_run = Schedulerun.new
-        self.job_run.schedule_id = schedule.id
-        self.job_run.comment ="starting #{@params[:schedule_name]}"
-        self.job_run.save
-        self.job_run.start_time = self.job_run.created_at
-        self.job_run.save
 
-        # self.job_run.params = @params
-        # self.job_run.status_flag = "started"
-        # self.job_run.created_by_user = User.find_by(:username => @params[:run_by_user])
+        @log = Logger.new("#{Rails.root}/log/pipelines.log")
+        @log.info(@params[:schedule_name]) { "starting" }
 
-        self.log = []
-        self.log << "starting #{@params[:schedule_name]}"
+        @inputs = []
+        @outputs = []
+        @exclusions = []
+        @error_log = Jobs::JobLog.new()
 
-        self.inputs = []
-        self.outputs = []
-        self.exclusions = []
-        self.error_log = []
-
-        # self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
+        @job_run.start_time = DateTime.now()
+        @job_run.save
         	
         @connection = ActiveRecord::Base.connection();
 
@@ -53,44 +53,39 @@ class Jobs::BaseJob
 
     def close (params)
 
-        self.log << "closing down"
-        self.log << "successful finish %{schedule_name}" % params
+        @log.info(@params[:schedule_name]) { "closing down" }
+        @log.info(@params[:schedule_name]) { "successful finish" }
     	
-        self.job_run.comment = self.log.join("\n")[0..64000]
-        self.job_run.status_flag = "Y"
+        @job_run.status_flag = "complete"
 
-    	self.job_run.end_time = DateTime.now()
-        self.job_run.save
-    	# self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
+    	@job_run.end_time = DateTime.now()
+    	@job_run.save
 
     end
 
     def close_fail (params, err)
 
-        self.log << "failed %{schedule_name} with errors " % params
-        self.error_log << "Error: #{err.message}, #{err.backtrace}"
+        @log.error(@params[:schedule_name]) { "failed with errors" }
+        @log.error(@params[:schedule_name]) { "Error: #{err.message}, #{err.backtrace}" }
+        @error_log << {:message => "Error: #{err.message}, #{err.backtrace}"}
         
-        self.job_run.comment = self.log.join("\n")[0..64000]
-        self.job_run.status_flag = "N"
+        @job_run.status_flag = "failed"
 
-        self.job_run.end_time = DateTime.now()
-        self.job_run.save
-        # self.job_run.save_with_logs(self.log, self.inputs, self.outputs, self.exclusions, self.error_log)
+        @job_run.end_time = DateTime.now()
+        @job_run.save
         
     end
 
     protected
     def r_call (cmd)
-        output = ''
         begin
         	stdin, stdout, stderr = Open3.popen3(cmd)
-        while !stdout.eof?  
-        	output += stdout.read 1024    
+        while !stdout.eof?
+        	puts stdout.read 1024    
         end
         stdin.close
         stdout.close
         stderr.close
-        return output
         rescue => msg
         end
     end
