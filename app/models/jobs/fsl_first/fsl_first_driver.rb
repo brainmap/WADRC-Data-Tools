@@ -195,19 +195,58 @@ class Jobs::FslFirst::FslFirstDriver < Jobs::BaseJob
       require 'open3'
 
       # the processing script expects the directories to already be built
+
+      # 2022-05-13 wbbevis -- I was trying to do this with Dir.mkdir from panda.dom.wisc.edu (Panda), but the
+      # user id for panda_user here (505) is != to panda_user elsewhere on the network (22972). When I make
+      # these here, the directories won't have the same permissions that they do from the processing machine
+      # (Cruella). But the fix is easy enough: just ssh over and do it from Cruella.
       @driver.each do |row|
           proto_dir = "#{params[:processing_output_path]}/#{row[:protocol]}"
           if !File.directory?(proto_dir)
 
-            @log.info(@params[:schedule_name]) { "mkdir #{proto_dir}" }
-            Dir.mkdir(proto_dir)
+            mkdir_call =  "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"mkdir #{proto_dir}\""
+
+            @log.info(@params[:schedule_name]) { mkdir_call }
+
+            begin
+              stdin, stdout, stderr = Open3.popen3(mkdir_call)
+
+              while !stdout.eof?
+                v_output = stdout.read 1024  
+                # puts v_output
+                @log.info(@params[:schedule_name]) { v_output.to_s}
+                  
+              end
+
+            rescue => msg  
+              @log.error(@params[:schedule_name]) { msg.to_s }
+              @error_log << msg.to_s
+            end
           end
 
           visit_dir = "#{params[:processing_output_path]}/#{row[:protocol]}/#{row[:enumber]}"
           if !File.directory?(visit_dir)
 
-            @log.info(@params[:schedule_name]) { "mkdir #{visit_dir}" }
-            Dir.mkdir(visit_dir)
+            mkdir_call =  "ssh panda_user@#{params[:computer]}.dom.wisc.edu \"mkdir #{visit_dir}\""
+
+            @log.info(@params[:schedule_name]) { mkdir_call }
+
+            begin
+              stdin, stdout, stderr = Open3.popen3(mkdir_call)
+
+              while !stdout.eof?
+                v_output = stdout.read 1024  
+                # puts v_output
+                @log.info(@params[:schedule_name]) { v_output.to_s}
+                  
+              end
+
+            rescue => msg  
+              @log.error(@params[:schedule_name]) { msg.to_s }
+              @error_log << msg.to_s
+            end
+
+
           end
       end
 
