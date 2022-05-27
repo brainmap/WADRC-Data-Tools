@@ -272,11 +272,11 @@ v_user = v_user.gsub("\n","")
      job = Jobs::Pet::ParallelPetNeuraceqSuvr.new(params)
      job.run(params)
 
-    elsif v_value_1 == "neuraceq_harvest"
+   elsif v_value_1 == "pet_neuraceq_suvr_harvest"
 
-      job = Pcvipr::PcviprIcaHarvest.new
-      params = Pcvipr::PcviprIcaHarvest.default_params
-      job.run(params)
+     params = Jobs::Pet::NeuraceqSuvrHarvest.production_params
+     job = Jobs::Pet::NeuraceqSuvrHarvest.new(params)
+     job.run(params)
 
    elsif v_value_1 == "parallel_pet_mk6240_process"
      job = Pet::ParallelPetProcess.new
